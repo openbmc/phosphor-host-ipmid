@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
     loop = g_main_loop_new (NULL, FALSE);
 
     // Proxy to use GDbus for OpenBMC channel.
-    proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+    proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SYSTEM,
                                            G_DBUS_PROXY_FLAGS_NONE,
                                            NULL, /* GDBusInterfaceInfo */
                                            DBUS_NAME,
