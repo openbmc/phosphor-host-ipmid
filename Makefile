@@ -4,6 +4,7 @@ DAEMON = ipmid
 DAEMON_OBJ  = $(DAEMON).o
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
+              storagehandler.o \
 
 LIB_APP     = libapphandler.so
 
