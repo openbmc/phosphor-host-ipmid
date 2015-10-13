@@ -343,13 +343,14 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
         num_handlers = scandir(ipmi_lib_path, &handler_list, handler_select, alphasort);
         while(num_handlers--)
         {
-            printf("Registering handler:[%s]\n",handler_list[num_handlers]->d_name);
-
+            handler_fqdn = ipmi_lib_path;
             handler_fqdn += handler_list[num_handlers]->d_name;
+            printf("Registering handler:[%s]\n",handler_fqdn.c_str());
+
             lib_handler = dlopen(handler_fqdn.c_str(), RTLD_NOW);
             if(lib_handler == NULL)
             {
-                fprintf(stderr,"ERROR opening:[%s]\n",handler_list[num_handlers]->d_name);
+                fprintf(stderr,"ERROR opening:[%s]\n",handler_fqdn.c_str());
                 dlerror();
             }
             // Wipe the memory allocated for this particular entry.
