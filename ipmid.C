@@ -181,8 +181,8 @@ static int send_ipmi_message(unsigned char seq, unsigned char netfn, unsigned ch
     }
 
 
-    // Needed to see what we get back from the handlers.
-    data_len = msg_length;
+    // Responses in IPMI require a bit set.  So there ya go...
+    netfn |= 0x04;
 
 
     // Add the bytes needed for the methods to be called
