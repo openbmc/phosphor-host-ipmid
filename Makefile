@@ -5,7 +5,8 @@ DAEMON_OBJ  = $(DAEMON).o
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
               storagehandler.o \
-              dcmihandler.o
+              dcmihandler.o    \
+              ipmisensor.o
 
 LIB_APP     = libapphandler.so
 INSTALLED_LIBS += $(LIB_APP)
