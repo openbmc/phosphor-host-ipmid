@@ -10,6 +10,10 @@ ipmi_ret_t ipmi_netfn_router(const ipmi_netfn_t, const ipmi_cmd_t, ipmi_request_
 
 // Plugin libraries need to _end_ with .so
 #define IPMI_PLUGIN_EXTN ".so"
-#define MAX_IPMI_BUFFER 255
+
+// The BT FIFO in the AST2400 can only handle 64 bytes.  
+// Can only allow 63 because the BT interface still 
+// needs 1 byte for the length field. 
+#define MAX_IPMI_BUFFER 63
 
 #endif

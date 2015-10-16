@@ -85,6 +85,7 @@ enum ipmi_netfn_wild_card_cmd
 enum ipmi_return_codes
 {
     IPMI_CC_OK = 0x00,
+    IPMI_DCMI_CC_NO_ACTIVE_POWER_LIMIT = 0x80,
     IPMI_CC_INVALID = 0xC1
 };
 

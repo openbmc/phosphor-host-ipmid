@@ -1,24 +1,37 @@
 CXX ?= $(CROSS_COMPILE)g++
 
-DAEMON = ipmid
-DAEMON_OBJ = $(DAEMON).o
-LIB_OBJ = apphandler.o
-LIBS = libapphandler.so
+TESTER = testit
 
-INC_FLAG += $(shell pkg-config --cflags glib-2.0 gio-unix-2.0) -I. -O2 --std=gnu++11
-LIB_FLAG += $(shell pkg-config --libs glib-2.0 gio-unix-2.0) -rdynamic
+DAEMON = ipmid
+DAEMON_OBJ  = $(DAEMON).o
+LIB_APP_OBJ = apphandler.o     \
+              sensorhandler.o  \
+              storagehandler.o \
+              dcmihandler.o    \
+
+
+TESTER_OBJ = ipmisensor.o 	   \
+			 testit.o
+
+LIB_APP     = libapphandler.so
+
+INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2 --std=gnu++11
+LIB_FLAG += $(shell pkg-config  --libs libsystemd) -rdynamic
 IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" 
 
-all: $(DAEMON) $(LIBS)
+all: $(DAEMON) $(LIB_APP) $(TESTER)
 
 %.o: %.C
 	$(CXX) -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
 
-$(LIBS): $(LIB_OBJ)
+$(LIB_APP): $(LIB_APP_OBJ)
 	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@
 
 $(DAEMON): $(DAEMON_OBJ)
 	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
 
+$(TESTER): $(TESTER_OBJ)
+	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
+
 clean:
-	rm -f $(DAEMON) *.o *.so
+	rm -f $(DAEMON) $(TESTER) *.o *.so
