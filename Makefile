@@ -8,6 +8,7 @@ LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
               storagehandler.o \
               dcmihandler.o    \
+              ipmisensor.o     \
 
 
 TESTER_OBJ = ipmisensor.o 	   \

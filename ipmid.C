@@ -547,3 +547,47 @@ int set_sensor_dbus_state(uint8_t number, const char *method, const char *value)
 
 
 }
+
+int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
+
+
+    dbus_interface_t a;
+    int r;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL, *m=NULL;
+
+    printf("Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of %s\n",
+        number, method, value);
+
+    r = find_openbmc_path("SENSOR", number, &a);
+
+    printf("**********************\n");
+    printf("%s\n", a.bus);
+    printf("%s\n", a.path);
+    printf("%s\n", a.interface);
+
+
+    r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+    }
+
+    r = sd_bus_message_append(m, "v", "s", value);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+    }
+
+
+    // Call the IPMI responder on the bus so the message can be sent to the CEC
+    r = sd_bus_call(bus, m, 0, &error, NULL);
+    if (r < 0) {
+        fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
+    }
+
+
+
+    sd_bus_error_free(&error);
+    sd_bus_message_unref(m);
+
+    return 0;
+}
