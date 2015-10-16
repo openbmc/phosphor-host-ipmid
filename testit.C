@@ -120,6 +120,12 @@ unsigned char findSensor(char sensor_number) {
 }
 
 
+int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
+    printf("Attempting to log Variant Sensor 0x%02x via %s with a value of %s\n", 
+        number, method, value);
+
+}
+
 int set_sensor_dbus_state(uint8_t number, const char *method, const char *value) {
 
 	printf("Attempting to log Sensor 0x%02x via %s with a value of %s\n", 
@@ -130,8 +136,6 @@ int set_sensor_dbus_state(uint8_t number, const char *method, const char *value)
 
 
 extern int updateSensorRecordFromSSRAESC(const void *record);
-
-
 
 
 
