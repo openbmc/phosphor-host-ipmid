@@ -11,9 +11,9 @@ LIB_APP     = libapphandler.so
 
 INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2 --std=gnu++11
 LIB_FLAG += $(shell pkg-config  --libs libsystemd) -rdynamic
-IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" 
+IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
 
-all: $(DAEMON) $(LIB_APP) 
+all: $(DAEMON) $(LIB_APP)
 
 %.o: %.C
 	$(CXX) -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
