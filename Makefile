@@ -8,10 +8,17 @@ LIB_APP_OBJ = apphandler.o     \
               dcmihandler.o
 
 LIB_APP     = libapphandler.so
+INSTALLED_LIBS += $(LIB_APP)
+INSTALLED_HEADERS = ipmid-api.h
 
 INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2 --std=gnu++11
 LIB_FLAG += $(shell pkg-config  --libs libsystemd) -rdynamic
 IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
+
+DESTDIR ?= /
+SBINDIR ?= /usr/sbin
+INCLUDEDIR ?= /usr/include
+LIBDIR ?= /usr/lib
 
 all: $(DAEMON) $(LIB_APP)
 
@@ -26,3 +33,12 @@ $(DAEMON): $(DAEMON_OBJ)
 
 clean:
 	rm -f $(DAEMON) *.o *.so
+
+install:
+		install -m 0755 -d $(DESTDIR)$(SBINDIR)
+		install -m 0755 ipmid $(DESTDIR)$(SBINDIR)
+		install -m 0755 -d $(DESTDIR)$(LIBDIR)/host-ipmid
+		install -m 0755 $(INSTALLED_LIBS) $(DESTDIR)$(LIBDIR)/host-ipmid
+		install -m 0755 -d $(DESTDIR)$(INCLUDEDIR)/host-ipmid
+		install -m 0644 $(INSTALLED_HEADERS) $(DESTDIR)$(INCLUDEDIR)/host-ipmid
+
