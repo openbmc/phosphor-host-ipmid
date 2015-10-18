@@ -7,7 +7,6 @@ extern unsigned char findSensor(char);
 extern int set_sensor_dbus_state_v(uint8_t , const char *, char *);
 
 
-
 struct sensorRES_t {
 	uint8_t sensor_number;
 	uint8_t operation;
@@ -93,7 +92,7 @@ char *getfw02string(uint8_t b) {
 		i++;
 	} while ((p+i)->data != 0xFF);
 
-	return p->text;
+	return (p+i)->text;
 }
 //  The fw progress sensor contains some additional information that needs to be processed
 //  prior to calling the dbus code.  
@@ -108,8 +107,19 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pT
 					break;
 		case 0x01 : sprintf(valuestring, "FW Hang, 0x%02x", pRec->event_data2);
 					break;
-		case 0x02 : sprintf(valuestring, "FW Progress, 0x%02x", getfw02string(pRec->event_data2));
+		case 0x02 : sprintf(valuestring, "FW Progress, %s", getfw02string(pRec->event_data2));
 	}
+
+	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, pStr);
+}
+
+// Handling this special OEM sensor by coping what is in byte 4.  I also think that is odd
+// considering byte 3 is for sensor reading.  This seems like a misuse of the IPMI spec
+int set_sensor_dbus_state_osboot(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
+	char valuestring[32];
+	char* pStr = valuestring;
+
+	sprintf(valuestring, "%d", pRec->assert_state7_0);
 
 	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, pStr);
 }
@@ -127,6 +137,10 @@ lookup_t g_ipmidbuslookup[] = {
 	{0x0F, 0x02, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x01, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x00, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
+	{0xC7, 0x01, set_sensor_dbus_state_simple, "setFault", "True", "False"},
+	{0x07, 0x00, set_sensor_dbus_state_simple, "setPresent", "False", "False"}, // OCC Inactive 0
+	{0x07, 0x01, set_sensor_dbus_state_simple, "setPresent", "True", "True"},   // OCC Active 1 
+	{0xc3, 0x00, set_sensor_dbus_state_osboot, "setValue", "" ,""},
 
 	{0xFF, 0xFF, NULL, "", "", ""}
 };
@@ -161,10 +175,19 @@ int findindex(const uint8_t sensor_type, int offset, int *index) {
 	return rc;
 }
 
+void debug_print_ok_to_dont_care(uint8_t stype, int offset)
+{
+	printf("Sensor should not be reported:  Type 0x%02x, Offset 0x%02x\n",
+		stype, offset);
+}
+
 bool shouldReport(uint8_t sensorType, int offset, int *index) {
 
 	bool rc = false;
+
 	if (findindex(sensorType, offset, index)) { rc = true;	}
+
+	if (rc==false) { debug_print_ok_to_dont_care(sensorType, offset); }
 
 	return rc;
 }
@@ -176,7 +199,6 @@ int updateSensorRecordFromSSRAESC(const void *record) {
 	unsigned char stype;
 	int index, i=0;
 	stype = findSensor(pRec->sensor_number);
-
 
 	// Scroll through each bit position .  Determine 
 	// if any bit is either asserted or Deasserted.
