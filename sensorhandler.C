@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdint.h>
 
+extern int updateSensorRecordFromSSRAESC(const void *);
 
 void register_netfn_sen_functions()   __attribute__((constructor));
 
@@ -166,19 +167,21 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     unsigned short rlen;
 
-    rlen = (unsigned short) *data_len - 1;
+    rlen = (unsigned short) *data_len;
 
     sprintf(string, "%s%02x", "/tmp/sen", reqptr->sennum);
 
     printf("IPMI SET_SENSOR [%s]\n",string);
 
     if ((fp = fopen(string, "wb")) != NULL) {
-        fwrite(reqptr+1,rlen,1,fp);
+        fwrite(reqptr,rlen,1,fp);
         fclose(fp);
     } else {
         fprintf(stderr, "Error trying to write to sensor file %s\n",string);
         ipmi_ret_t rc = IPMI_CC_INVALID;        
     }
+
+    updateSensorRecordFromSSRAESC(reqptr);
 
     *data_len=0;
 
@@ -209,5 +212,6 @@ void register_netfn_sen_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_SET_SENSOR);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR, NULL, ipmi_sen_set_sensor);
+
     return;
 }
