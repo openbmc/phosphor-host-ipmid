@@ -98,16 +98,16 @@ char *getfw02string(uint8_t b) {
 //  prior to calling the dbus code.  
 int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 
-	char valuestring[32];
+	char valuestring[48];
 	char* pStr = valuestring;
 
 	switch (pTable->offset) {
 
-		case 0x00 : sprintf(valuestring, "POST Error, 0x%02x", pRec->event_data2);
+		case 0x00 : snprintf(valuestring, sizeof(valuestring), "POST Error, 0x%02x", pRec->event_data2);
 					break;
-		case 0x01 : sprintf(valuestring, "FW Hang, 0x%02x", pRec->event_data2);
+		case 0x01 : snprintf(valuestring, sizeof(valuestring), "FW Hang, 0x%02x", pRec->event_data2);
 					break;
-		case 0x02 : sprintf(valuestring, "FW Progress, %s", getfw02string(pRec->event_data2));
+		case 0x02 : snprintf(valuestring, sizeof(valuestring), "FW Progress, %s", getfw02string(pRec->event_data2));
 	}
 
 	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, pStr);
