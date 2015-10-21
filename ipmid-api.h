@@ -70,7 +70,8 @@ enum ipmi_net_fns
     NETFUN_STORAGE  =   (0x0a << 2),
     NETFUN_TRANPORT =   (0x0c << 2),
     NETFUN_GRPEXT   =   (0x2c << 2),
-    NETFUN_NONE     =   (0x30 << 2)
+    NETFUN_NONE     =   (0x30 << 2),
+    NETFUN_OEM      =   (0x32 << 2)
 };
 
 // IPMI commands for net functions. Since this is to be used both by the ipmi
