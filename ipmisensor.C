@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-extern unsigned char findSensor(char);
+extern uint8_t find_sensor(uint8_t sensor_number) ;
 extern int set_sensor_dbus_state_v(uint8_t , const char *, char *);
 
 
@@ -82,24 +82,20 @@ event_data_t g_fwprogress02h[] = {
 
 char *getfw02string(uint8_t b) {
 
-	int i = 0;
 	event_data_t *p = g_fwprogress02h;
 
-	do {
-
-		if ((p+i)->data == b)
+	while(p->data != 0xFF) {
+		if (p->data == b)
 			break;
-		i++;
-	} while ((p+i)->data != 0xFF);
+	}
 
-	return (p+i)->text;
+	return p->text;
 }
 //  The fw progress sensor contains some additional information that needs to be processed
 //  prior to calling the dbus code.  
 int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 
-	char valuestring[48];
-	char* pStr = valuestring;
+	char valuestring[128];
 
 	switch (pTable->offset) {
 
@@ -110,7 +106,7 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pT
 		case 0x02 : snprintf(valuestring, sizeof(valuestring), "FW Progress, %s", getfw02string(pRec->event_data2));
 	}
 
-	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, pStr);
+	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, valuestring);
 }
 
 // Handling this special OEM sensor by coping what is in byte 4.  I also think that is odd
@@ -196,9 +192,9 @@ bool shouldReport(uint8_t sensorType, int offset, int *index) {
 int updateSensorRecordFromSSRAESC(const void *record) {
 
 	sensorRES_t *pRec = (sensorRES_t *) record;
-	unsigned char stype;
+	uint8_t stype;
 	int index, i=0;
-	stype = findSensor(pRec->sensor_number);
+	stype = find_sensor(pRec->sensor_number);
 
 	// Scroll through each bit position .  Determine 
 	// if any bit is either asserted or Deasserted.
