@@ -97,15 +97,10 @@ unsigned char g_sensortype [][2] = {
 {0xff,0xff}
 };
 
-unsigned char findSensor(char sensor_number) {
+unsigned char find_sensor(uint8_t  sensor_number) {
 
     int i=0;
 
-    // TODO : This function should actually call
-    // a dbus object and have it return the data
-    // it is not ready yet so use a Palmetto 
-    // based lookup table for now.  The g_sensortype
-    // can be removed once the dbus method exists
     while (g_sensortype[i][0] != 0xff) {
         if (g_sensortype[i][1] == sensor_number) {
             break;
