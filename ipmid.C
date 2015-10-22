@@ -11,6 +11,7 @@
 #include "ipmid.H"
 #include <sys/time.h>
 #include <errno.h>
+#include "sensorhandler.h"
 
 
 sd_bus *bus = NULL;
@@ -427,18 +428,54 @@ finish:
 
 }
 
+// Use a lookup table to find the interface name of a specific sensor
+// This will be used until an alternative is found.  this is the first
+// step for mapping IPMI
+int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) {
 
-#define MAX_DBUS_PATH 128
-struct dbus_interface_t {
-    uint8_t  sensornumber;
-    uint8_t  sensortype;
-
-    char  bus[MAX_DBUS_PATH];
-    char  path[MAX_DBUS_PATH];
-    char  interface[MAX_DBUS_PATH];
-};
+    char  *str1, *str2, *str3;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL, *m=NULL;
 
 
+    int r;
+
+
+    r = sd_bus_message_new_method_call(bus,&m,interface->bus,interface->path,"org.freedesktop.DBus.Properties","Get");
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
+                interface->bus, interface->path, interface->interface);
+    }
+
+    r = sd_bus_message_append(m, "ss", "org.openbmc.InventoryItem", property_name);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
+                interface->bus, interface->path, interface->interface);
+    }
+
+    r = sd_bus_call(bus, m, 0, &error, &reply);
+    if (r < 0) {
+        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
+        goto final;
+    }
+
+    r = sd_bus_message_read(reply, "v",  "s", &str1) ;
+    if (r < 0) {
+        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
+        goto final;
+    }
+
+    strcpy(property_value, str1);
+
+final:
+
+    sd_bus_error_free(&error);
+    sd_bus_message_unref(m);
+
+    return r;
+}
 
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
@@ -485,6 +522,8 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
 
     interface->sensornumber = num;
 
+    printf("%s\n", str2);
+
 
 final:
 
@@ -516,12 +555,6 @@ int set_sensor_dbus_state(uint8_t number, const char *method, const char *value)
 
     r = find_openbmc_path("SENSOR", number, &a);
 
-    printf("**********************\n");
-    printf("%s\n", a.bus);
-    printf("%s\n", a.path);
-    printf("%s\n", a.interface);
-
-
     r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
@@ -532,20 +565,15 @@ int set_sensor_dbus_state(uint8_t number, const char *method, const char *value)
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
     }
 
-    // Call the IPMI responder on the bus so the message can be sent to the CEC
     r = sd_bus_call(bus, m, 0, &error, &reply);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s", strerror(-r));
     }
 
-
-
     sd_bus_error_free(&error);
     sd_bus_message_unref(m);
 
     return 0;
-
-
 }
 
 int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
@@ -561,12 +589,6 @@ int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
 
     r = find_openbmc_path("SENSOR", number, &a);
 
-    printf("**********************\n");
-    printf("%s\n", a.bus);
-    printf("%s\n", a.path);
-    printf("%s\n", a.interface);
-
-
     r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
@@ -578,12 +600,10 @@ int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
     }
 
 
-    // Call the IPMI responder on the bus so the message can be sent to the CEC
     r = sd_bus_call(bus, m, 0, &error, NULL);
     if (r < 0) {
         fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
     }
-
 
 
     sd_bus_error_free(&error);
