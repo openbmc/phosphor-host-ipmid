@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-extern unsigned char findSensor(char);
+extern uint8_t find_sensor(uint8_t);
 extern int set_sensor_dbus_state_v(uint8_t , const char *, char *);
 
 
@@ -82,13 +82,12 @@ event_data_t g_fwprogress02h[] = {
 
 char *getfw02string(uint8_t b) {
 
-	int i = 0;
 	event_data_t *p = g_fwprogress02h;
 
 	while(p->data != 0xFF) {
 		if (p->data == b) {
 			break;
-		} 
+		}
 		p++;
 	}
 
@@ -98,19 +97,20 @@ char *getfw02string(uint8_t b) {
 //  prior to calling the dbus code.  
 int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 
-	char valuestring[48];
-	char* pStr = valuestring;
+	char valuestring[64];
+	char* p = valuestring;
 
 	switch (pTable->offset) {
 
-		case 0x00 : snprintf(valuestring, sizeof(valuestring), "POST Error, 0x%02x", pRec->event_data2);
+		case 0x00 : snprintf(p, sizeof(valuestring), "POST Error, 0x%02x", pRec->event_data2);
 					break;
-		case 0x01 : snprintf(valuestring, sizeof(valuestring), "FW Hang, 0x%02x", pRec->event_data2);
+		case 0x01 : snprintf(p, sizeof(valuestring), "FW Hang, 0x%02x", pRec->event_data2);
 					break;
-		case 0x02 : snprintf(valuestring, sizeof(valuestring), "FW Progress, %s", getfw02string(pRec->event_data2));
+		case 0x02 : snprintf(p, sizeof(valuestring), "FW Progress, %s", getfw02string(pRec->event_data2));
+					break;
 	}
 
-	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, pStr);
+	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, p);
 }
 
 // Handling this special OEM sensor by coping what is in byte 4.  I also think that is odd
@@ -126,10 +126,12 @@ int set_sensor_dbus_state_osboot(const sensorRES_t *pRec, const lookup_t *pTable
 
 
 //  This table lists only senors we care about telling dbus about.
-//  Offset definition cab be found in section 42.2 of the IPMI 2.0 
+//  Offset definition cab be found in section 42.2 of the IPMI 2.0
 //  spec.  Add more if/when there are more items of interest.
 lookup_t g_ipmidbuslookup[] = {
 
+	{0x07, 0x00, set_sensor_dbus_state_simple, "setPresent", "False", "False"}, // OCC Inactive 0
+	{0x07, 0x01, set_sensor_dbus_state_simple, "setPresent", "True", "True"},   // OCC Active 1 
 	{0x07, 0x07, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
 	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", "False"},
 	{0x0C, 0x06, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
@@ -138,8 +140,6 @@ lookup_t g_ipmidbuslookup[] = {
 	{0x0F, 0x01, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x00, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0xC7, 0x01, set_sensor_dbus_state_simple, "setFault", "True", "False"},
-	{0x07, 0x00, set_sensor_dbus_state_simple, "setPresent", "False", "False"}, // OCC Inactive 0
-	{0x07, 0x01, set_sensor_dbus_state_simple, "setPresent", "True", "True"},   // OCC Active 1 
 	{0xc3, 0x00, set_sensor_dbus_state_osboot, "setValue", "" ,""},
 
 	{0xFF, 0xFF, NULL, "", "", ""}
@@ -177,7 +177,7 @@ int findindex(const uint8_t sensor_type, int offset, int *index) {
 
 void debug_print_ok_to_dont_care(uint8_t stype, int offset)
 {
-	printf("Sensor should not be reported:  Type 0x%02x, Offset 0x%02x\n",
+	printf("LOOKATME: Sensor should not be reported:  Type 0x%02x, Offset 0x%02x\n",
 		stype, offset);
 }
 
@@ -196,34 +196,47 @@ bool shouldReport(uint8_t sensorType, int offset, int *index) {
 int updateSensorRecordFromSSRAESC(const void *record) {
 
 	sensorRES_t *pRec = (sensorRES_t *) record;
-	unsigned char stype;
+	uint8_t stype;
 	int index, i=0;
-	stype = findSensor(pRec->sensor_number);
+	stype = find_sensor(pRec->sensor_number);
 
-	// Scroll through each bit position .  Determine 
-	// if any bit is either asserted or Deasserted.
-	for(i=0;i<8;i++) {
-		if ((ISBITSET(pRec->assert_state7_0,i))  &&
-			(shouldReport(stype, i, &index)))
-		{
-			reportSensorEventAssert(pRec, index);
+
+	// 0xC3 types use the assertion7_0 for the value to be set
+	// so skip the reseach and call the correct event reporting
+	// function
+	if (stype == 0xC3) {
+
+		shouldReport(stype, 0x00, &index);
+		reportSensorEventAssert(pRec, index);
+
+	} else {
+		// Scroll through each bit position .  Determine
+		// if any bit is either asserted or Deasserted.
+		for(i=0;i<8;i++) {
+			if ((ISBITSET(pRec->assert_state7_0,i))  &&
+				(shouldReport(stype, i, &index)))
+			{
+				reportSensorEventAssert(pRec, index);
+			}
+			if ((ISBITSET(pRec->assert_state14_8,i))  &&
+				(shouldReport(stype, i+8, &index)))
+			{
+				reportSensorEventAssert(pRec, index);
+			}
+			if ((ISBITSET(pRec->deassert_state7_0,i))  &&
+				(shouldReport(stype, i, &index)))
+			{
+				reportSensorEventDeassert(pRec, index);
+			}
+			if ((ISBITSET(pRec->deassert_state14_8,i))  &&
+				(shouldReport(stype, i+8, &index)))
+			{
+				reportSensorEventDeassert(pRec, index);
+			}
 		}
-		if ((ISBITSET(pRec->assert_state14_8,i+8))  &&
-			(shouldReport(stype, i+8, &index)))
-		{
-			reportSensorEventAssert(pRec, index);
-		}
-		if ((ISBITSET(pRec->deassert_state7_0,i))  &&
-			(shouldReport(stype, i, &index)))
-		{
-			reportSensorEventDeassert(pRec, index);
-		}
-		if ((ISBITSET(pRec->deassert_state14_8,i+8))  &&
-			(shouldReport(stype, i+8, &index)))
-		{
-			reportSensorEventDeassert(pRec, index);
-		}
+
 	}
+
 
 	return 0;
 }

@@ -5,131 +5,55 @@
 
 
 unsigned char g_sensortype [][2] = {
-    {0xc7, 58},
-{0x01, 113},
-{0xc7, 56},
-{0x01, 114},
-{0xc6, 54},
-{0x07, 40},
-{0xC1, 121},
-{0xC2, 137},
-{0x07, 36},
-{0x07, 43},
-{0xC1, 122},
-{0xC1, 119},
-{0x01, 12},
-{0x01, 111},
-{0x01, 116},
-{0xC1, 127},
-{0xC2, 134},
-{0xC2, 130},
-{0xc, 33},
-{0xC1, 125},
-{0x01, 115},
-{0x22, 4},
-{0xC2, 138},
-{0x01, 108},
-{0x01, 102},
-{0xc, 46},
-{0x7, 11},
-{0xC1, 120},
-{0x07, 39},
-{0x07, 42},
-{0x5, 21},
-{0xC2, 131},
-{0xc1, 48},
-{0x12, 53},
-{0xC1, 124},
-{0x01, 117},
-{0xC1, 126},
-{0xf, 5},
-{0x23, 0},
-{0xC2, 139},
-{0x07, 34},
-{0x09, 146},
-{0x02, 178},
-{0xC2, 140},
-{0xC1, 118},
-{0xC2, 133},
-{0x07, 38},
-{0xC2, 143},
-{0x01, 101},
-{0xc3, 9},
-{0x7, 10},
-{0xc2, 51},
-{0x01, 109},
-{0xc, 32},
-{0x7, 8},
-{0xC1, 129},
-{0x01, 112},
-{0x01, 107},
-{0x07, 37},
-{0x07, 44},
-{0x1f, 50},
-{0xC2, 144},
-{0xc7, 52},
-{0xC2, 141},
-{0x01, 106},
-{0x01, 110},
-{0x01, 103},
-{0x9, 28},
-{0x07, 35},
-{0xc7, 55},
-{0x03, 179},
-{0x07, 41},
-{0xc, 30},
-{0x01, 100},
-{0xC1, 128},
-{0xC2, 135},
-{0x01, 105},
-{0x7, 47},
-{0xC2, 145},
-{0xc7, 57},
-{0x01, 104},
-{0x07, 45},
-{0xC2, 132},
-{0xc4, 49},
-{0xC1, 123},
-{0xC2, 142},
-{0x01, 13},
-{0xC2, 136},
-{0xc, 31},
-{0xff,0xff}
+    {0xC3, 0x01},
+    {0x07, 0x02},
+    {0x0F, 0x05},
+    {0x0c, 0x1F},
+    {0xFF ,0xff}
 };
 
-unsigned char findSensor(char sensor_number) {
+uint8_t find_sensor(uint8_t sensor_number) {
 
     int i=0;
+    uint8_t rc; 
 
-    // TODO : This function should actually call
-    // a dbus object and have it return the data
-    // it is not ready yet so use a Palmetto 
-    // based lookup table for now.  The g_sensortype
-    // can be removed once the dbus method exists
     while (g_sensortype[i][0] != 0xff) {
         if (g_sensortype[i][1] == sensor_number) {
             break;
         } else {
             i++;
         }
-
     }
 
-    return g_sensortype[i][0];
+    rc = g_sensortype[i][0];
 
+    if (rc == 0xFF)  {
+        rc = 0;
+    }
+    return rc;
 }
+
+char g_results_method[64];
+char g_results_value[64];
 
 
 int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
-    printf("Attempting to log Variant Sensor 0x%02x via %s with a value of %s\n", 
+    printf("Attempting to log Variant Sensor 0x%02x via %s with a value of %s\n",
         number, method, value);
 
+    strcpy(g_results_method, method);
+    strcpy(g_results_value, value);
+
+    return 0;
 }
 
 int set_sensor_dbus_state(uint8_t number, const char *method, const char *value) {
 
-	printf("Attempting to log Sensor 0x%02x via %s with a value of %s\n", 
+	printf("Attempting to log Sensor 0x%02x via %s with a value of %s\n",
 		number, method, value);
+
+    strcpy(g_results_method, method);
+    strcpy(g_results_value, value);
 
 	return 0;
 }
@@ -139,28 +63,52 @@ extern int updateSensorRecordFromSSRAESC(const void *record);
 
 
 
-uint8_t testrec_boot1[] = {0x05, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x14, 0x00};
-uint8_t testrec_boot2[] = {0x05, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00};
-uint8_t testrec_boot3[] = {0x05, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00};
-uint8_t testrec_boot4[] = {0x05, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x13, 0x00};                       
-
-
-
 // DIMM Present
-uint8_t testrec_sensor1[] {0x1F, 0xa9, 0x00, 0x40, 0x00, 0x10, 0x00, 0x00};
+uint8_t testrec_sensor1[]      = {0x1F, 0xa9, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 // DIMM Not present
-uint8_t testrec_sensor2[] {0x1F, 0xa9, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00};
+uint8_t testrec_sensor2[]      = {0x1F, 0xa9, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00};
+
+// DIMM Not present
+uint8_t testrec_procfailed[]   = {0x02, 0xa9, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
+
+// Virtual Sensor 5, setting a Value of 0h
+uint8_t testrec_bootprogress[] = {0x05, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x0E, 0x00};
+
+// Virtual Sensor setting a boot count 
+uint8_t testrec_bootcount[]    = {0x01, 0x09, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+// Invalid sensor number
+uint8_t testrec_invalidnumber[]= {0x35, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00};
 
 
-uint8_t testrec_bootprogress[]  = {05, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x14, 0x00 };
+int check_results(int rc, const char *method, const char *value) {
+    if (strcmp(g_results_method, method)) { 
+        printf("ERROR: Method Failed, expect %s found %s\n", method, g_results_method);
+        return -1;
+    }
+    if (strcmp(g_results_value, value)) {
+        printf("ERROR: Value failed, expected %s found %s\n", value, g_results_value);
+        return -2;
+    }
+
+    return 0;
+}
+
+void testprep(void) {
+    memset(g_results_method, 0, sizeof(g_results_method));
+    memset(g_results_value, 0, sizeof(g_results_value));
+}
+
 
 int main() {
 
-	updateSensorRecordFromSSRAESC(testrec_bootprogress);
-	updateSensorRecordFromSSRAESC(testrec_sensor1);
-	updateSensorRecordFromSSRAESC(testrec_sensor2);
-
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootprogress), "setValue", "FW Progress, Docking station attachment");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor1), "setPresent", "True");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor2), "setPresent", "False");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_procfailed), "setFault", "False");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootcount), "setValue", "3");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_invalidnumber), "", "");
 
 	return 0;
 }
