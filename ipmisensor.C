@@ -85,14 +85,14 @@ char *getfw02string(uint8_t b) {
 	int i = 0;
 	event_data_t *p = g_fwprogress02h;
 
-	do {
-
-		if ((p+i)->data == b)
+	while(p->data != 0xFF) {
+		if (p->data == b) {
 			break;
-		i++;
-	} while ((p+i)->data != 0xFF);
+		} 
+		p++;
+	}
 
-	return (p+i)->text;
+	return p->text;
 }
 //  The fw progress sensor contains some additional information that needs to be processed
 //  prior to calling the dbus code.  
