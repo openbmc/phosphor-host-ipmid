@@ -134,8 +134,8 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return -1;
     }
 
-    // Start watchdog
-    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"start");
+    // Stop the current watchdog if any
+    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"stop");
     if (r < 0) {
         fprintf(stderr, "Failed to add the start method object: %s\n", strerror(-r));
         return -1;
@@ -144,6 +144,21 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (r < 0) {
         fprintf(stderr, "Failed to call the start method: %s\n", strerror(-r));
         return -1;
+    }
+
+    // Start the watchdog if requested
+    if (reqptr->t_use & 0x40)
+    {
+        r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"start");
+        if (r < 0) {
+            fprintf(stderr, "Failed to add the start method object: %s\n", strerror(-r));
+            return -1;
+        }
+        r = sd_bus_call(bus, m, 0, &error, &reply);
+        if (r < 0) {
+            fprintf(stderr, "Failed to call the start method: %s\n", strerror(-r));
+            return -1;
+        }
     }
 
     sd_bus_error_free(&error);
