@@ -2,17 +2,23 @@ CXX ?= $(CROSS_COMPILE)g++
 
 TESTER = testit
 
+TESTADDSEL = testaddsel
+
 DAEMON = ipmid
 DAEMON_OBJ  = $(DAEMON).o
+
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
               storagehandler.o \
               dcmihandler.o    \
               ipmisensor.o     \
+              storageaddsel.o  \
 
+TESTADDSEL_OBJ = $(TESTADDSEL).o \
+				 storageaddsel.o
 
 TESTER_OBJ = ipmisensor.o 	   \
-			 testit.o
+	     testit.o
 
 LIB_APP     = libapphandler.so
 INSTALLED_LIBS += $(LIB_APP)
@@ -44,6 +50,9 @@ $(TESTER): $(TESTER_OBJ)
 clean:
 	rm -f $(DAEMON) $(TESTER) *.o *.so
 
+$(TESTADDSEL): $(TESTADDSEL_OBJ)
+	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
+		
 install:
 		install -m 0755 -d $(DESTDIR)$(SBINDIR)
 		install -m 0755 ipmid $(DESTDIR)$(SBINDIR)

@@ -15,6 +15,7 @@
 
 
 sd_bus *bus = NULL;
+FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
 // Channel that is used for OpenBMC Barreleye
 const char * DBUS_NAME = "org.openbmc.HostIpmi";
@@ -440,7 +441,6 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
 
     int r;
 
-
     r = sd_bus_message_new_method_call(bus,&m,interface->bus,interface->path,"org.freedesktop.DBus.Properties","Get");
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
@@ -476,6 +476,7 @@ final:
 
     return r;
 }
+
 
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
@@ -521,9 +522,6 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
     strncpy(interface->interface, str3, MAX_DBUS_PATH);
 
     interface->sensornumber = num;
-
-    printf("%s\n", str2);
-
 
 final:
 
