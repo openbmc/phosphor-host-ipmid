@@ -2,23 +2,31 @@ CXX ?= $(CROSS_COMPILE)g++
 
 TESTER = testit
 
+TESTADDSEL = testaddsel
+
 DAEMON = ipmid
 DAEMON_OBJ  = $(DAEMON).o
+
+
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
               storagehandler.o \
               dcmihandler.o    \
               ipmisensor.o     \
+              storageaddsel.o  \
 
+
+TESTADDSEL_OBJ = $(TESTADDSEL).o \
+                 storageaddsel.o
 
 TESTER_OBJ = ipmisensor.o 	   \
-			 testit.o
+	     testit.o
 
 LIB_APP     = libapphandler.so
 INSTALLED_LIBS += $(LIB_APP)
 INSTALLED_HEADERS = ipmid-api.h
 
-INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2 --std=gnu++11
+INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2 
 LIB_FLAG += $(shell pkg-config  --libs libsystemd) -rdynamic
 IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
 
@@ -30,7 +38,7 @@ LIBDIR ?= /usr/lib
 all: $(DAEMON) $(LIB_APP) $(TESTER)
 
 %.o: %.C
-	$(CXX) -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
+	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
 
 $(LIB_APP): $(LIB_APP_OBJ)
 	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@
@@ -44,6 +52,9 @@ $(TESTER): $(TESTER_OBJ)
 clean:
 	rm -f $(DAEMON) $(TESTER) *.o *.so
 
+$(TESTADDSEL): $(TESTADDSEL_OBJ)
+	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
+		
 install:
 		install -m 0755 -d $(DESTDIR)$(SBINDIR)
 		install -m 0755 ipmid $(DESTDIR)$(SBINDIR)

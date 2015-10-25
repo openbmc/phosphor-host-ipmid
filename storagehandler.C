@@ -1,10 +1,12 @@
-#include "storagehandler.h"
-#include "ipmid-api.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
 #include <arpa/inet.h>
+
+#include "storagehandler.h"
+#include "storageaddsel.h"
+#include "ipmid-api.h"
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -162,6 +164,7 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("IPMI Handling RESERVE-SEL 0x%04x\n", g_sel_reserve);
 
+
     *data_len = sizeof(g_sel_reserve);
 
     // Pack the actual response
@@ -170,30 +173,27 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-
 ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
 
     ipmi_ret_t rc = IPMI_CC_OK;
+    ipmi_add_sel_request_t *p = (ipmi_add_sel_request_t*) request;
+    uint16_t recordid;
 
-    printf("IPMI Handling ADD-SEL \n");
+    recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
+
+    printf("IPMI Handling ADD-SEL for record 0x%04x\n", recordid);
 
     *data_len = sizeof(g_sel_reserve);
 
     // Pack the actual response
-    memcpy(response, &g_sel_reserve, *data_len);
+    memcpy(response, &recordid, 2);
 
     // TODO This code should grab the completed partial esel located in
     // the /tmp/esel0100 file and commit it to the error log handler.
-
-
-    // TODO I advanced the sel reservation number so next time HB asks
-    // for a reservation they get a new number.  This tech may change
-    // based on how the HB team currently uses sel reservations but
-    // for now provide the ability to get new reservations
-    g_sel_reserve++;
+    send_esel(recordid);
 
     return rc;
 }
