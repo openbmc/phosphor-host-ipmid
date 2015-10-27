@@ -62,16 +62,16 @@ extern "C" void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
 // Note: these are also shifted left to make room for the LUN.
 enum ipmi_net_fns
 {
-    NETFUN_CHASSIS  =   (0x00 << 2),
-    NETFUN_BRIDGE   =   (0x02 << 2),
-    NETFUN_SENSOR   =   (0x04 << 2),
-    NETFUN_APP      =   (0x06 << 2),
-    NETFUN_FIRMWARE =   (0x08 << 2),
-    NETFUN_STORAGE  =   (0x0a << 2),
-    NETFUN_TRANPORT =   (0x0c << 2),
-    NETFUN_GRPEXT   =   (0x2c << 2),
-    NETFUN_NONE     =   (0x30 << 2),
-    NETFUN_OEM      =   (0x32 << 2)
+    NETFUN_CHASSIS  =   0x00,
+    NETFUN_BRIDGE   =   0x02,
+    NETFUN_SENSOR   =   0x04,
+    NETFUN_APP      =   0x06,
+    NETFUN_FIRMWARE =   0x08,
+    NETFUN_STORAGE  =   0x0a,
+    NETFUN_TRANPORT =   0x0c,
+    NETFUN_GRPEXT   =   0x2c,
+    NETFUN_NONE     =   0x30,
+    NETFUN_OEM      =   0x32
 };
 
 // IPMI commands for net functions. Since this is to be used both by the ipmi

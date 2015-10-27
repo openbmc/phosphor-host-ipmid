@@ -174,7 +174,7 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
 
 
 
-static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned char netfn, unsigned char cmd, unsigned char *buf, unsigned char len) {
+static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned char netfn, unsigned char lun, unsigned char cmd, unsigned char cc, unsigned char *buf, unsigned char len) {
 
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *reply = NULL, *m=NULL;
@@ -192,11 +192,11 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
 
 
     // Responses in IPMI require a bit set.  So there ya go...
-    netfn |= 0x04;
+    netfn |= 0x01;
 
 
     // Add the bytes needed for the methods to be called
-    r = sd_bus_message_append(m, "yyy", seq, netfn, cmd);
+    r = sd_bus_message_append(m, "yyyyy", seq, netfn, lun, cmd, cc);
     if (r < 0) {
         fprintf(stderr, "Failed add the netfn and others : %s\n", strerror(-r));
         return -1;
@@ -234,7 +234,7 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
                          *ret_error) {
     int r = 0;
     const char *msg = NULL;
-    char sequence, netfn, cmd;
+    unsigned char sequence, netfn, lun, cmd;
     const void *request;
     size_t sz;
     size_t resplen =MAX_IPMI_BUFFER;
@@ -242,7 +242,7 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
 
     memset(response, 0, MAX_IPMI_BUFFER);
 
-    r = sd_bus_message_read(m, "yyy",  &sequence, &netfn, &cmd);
+    r = sd_bus_message_read(m, "yyyy",  &sequence, &netfn, &lun, &cmd);
     if (r < 0) {
         fprintf(stderr, "Failed to parse signal message: %s\n", strerror(-r));
         return -1;
@@ -273,7 +273,8 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     hexdump(ipmiio,  (void*)response, resplen);
 
     // Send the response buffer from the ipmi command
-    r = send_ipmi_message(m, sequence, netfn, cmd, response, resplen);
+    r = send_ipmi_message(m, sequence, netfn, lun, cmd, response[0],
+		    ((unsigned char *)response) + 1, resplen - 1);
     if (r < 0) {
         fprintf(stderr, "Failed to send the response message\n");
         return -1;
