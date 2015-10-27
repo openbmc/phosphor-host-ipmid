@@ -341,6 +341,9 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
         handler_fqdn += "/";
 
         num_handlers = scandir(ipmi_lib_path, &handler_list, handler_select, alphasort);
+	if (num_handlers < 0)
+		return;
+
         while(num_handlers--)
         {
             handler_fqdn = ipmi_lib_path;
