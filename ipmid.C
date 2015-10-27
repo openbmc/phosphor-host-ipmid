@@ -27,11 +27,9 @@ void print_usage(void) {
 
 
 
-// Channel that is used for OpenBMC Barreleye
-const char * DBUS_NAME = "org.openbmc.HostIpmi";
-const char * OBJ_NAME = "/org/openbmc/HostIpmi/1";
+const char * DBUS_INTF = "org.openbmc.HostIpmi";
 
-const char * FILTER = "type='signal',sender='org.openbmc.HostIpmi',member='ReceivedMessage'";
+const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
 
 
 typedef std::pair<ipmi_netfn_t, ipmi_cmd_t> ipmi_fn_cmd_t;
@@ -176,17 +174,17 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
 
 
 
-static int send_ipmi_message(unsigned char seq, unsigned char netfn, unsigned char cmd, unsigned char *buf, unsigned char len) {
+static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned char netfn, unsigned char cmd, unsigned char *buf, unsigned char len) {
 
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *reply = NULL, *m=NULL;
-
-
-    const char *path;
+    const char *dest, *path;
     int r, pty;
 
+    dest = sd_bus_message_get_sender(req);
+    path = sd_bus_message_get_path(req);
 
-    r = sd_bus_message_new_method_call(bus,&m,DBUS_NAME,OBJ_NAME,DBUS_NAME,"sendMessage");
+    r = sd_bus_message_new_method_call(bus,&m,dest,path,DBUS_INTF,"sendMessage");
     if (r < 0) {
         fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));
         return -1;
@@ -275,7 +273,7 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     hexdump(ipmiio,  (void*)response, resplen);
 
     // Send the response buffer from the ipmi command
-    r = send_ipmi_message(sequence, netfn, cmd, response, resplen);
+    r = send_ipmi_message(m, sequence, netfn, cmd, response, resplen);
     if (r < 0) {
         fprintf(stderr, "Failed to send the response message\n");
         return -1;
