@@ -11,6 +11,7 @@ DAEMON_OBJ  = $(DAEMON).o
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
               storagehandler.o \
+              chassishandler.o \
               dcmihandler.o    \
               ipmisensor.o     \
               storageaddsel.o  \
