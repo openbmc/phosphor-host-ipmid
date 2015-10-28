@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <time.h>
+#include <arpa/inet.h>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -10,8 +12,8 @@ void register_netfn_storage_functions() __attribute__((constructor));
 unsigned int   g_sel_time    = 0xFFFFFFFF;
 unsigned short g_sel_reserve = 0x1;
 
-ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
     printf("Handling STORAGE WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
@@ -21,9 +23,31 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
+                              ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    time_t currtime;
+    ipmi_ret_t rc = IPMI_CC_OK;
 
-ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+    // Get current time in seconds since jan 1 1970
+    time(&currtime);
+    uint32_t resp = (uint32_t)currtime;
+    resp = htole32(resp);
+
+    printf("IPMI Handling GET-SEL-TIME\n");
+
+    // From the IPMI Spec 2.0, response should be a 32-bit value
+    *data_len = sizeof(resp);
+
+    // Pack the actual response
+    memcpy(response, &resp, *data_len);
+
+    return rc;
+}
+
+ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
     unsigned int *bufftype = (unsigned int *) request;
@@ -45,8 +69,8 @@ struct write_fru_data_t {
     uint8_t  data;
 } __attribute__ ((packed)) ;
 
-ipmi_ret_t ipmi_storage_write_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_storage_write_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
     write_fru_data_t *reqptr = (write_fru_data_t*) request;
@@ -67,14 +91,14 @@ ipmi_ret_t ipmi_storage_write_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // the data (so didn't need to worry about word/byte boundaries)
     // hence the -1...
     rlen = ((uint16_t)*data_len) - (sizeof(write_fru_data_t)-1);
-    
+
 
     printf("IPMI WRITE-FRU-DATA for %s  Offset = %d Length = %d\n",
         string, offset, rlen);
 
 
     // I was thinking "ab+" but it appears it doesn't
-    // do what fseek asks.  Modify to rb+ and fseek 
+    // do what fseek asks.  Modify to rb+ and fseek
     // works great...
     if (offset == 0) {
         strcpy(iocmd, "wb");
@@ -88,24 +112,24 @@ ipmi_ret_t ipmi_storage_write_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         fclose(fp);
     } else {
         fprintf(stderr, "Error trying to write to fru file %s\n",string);
-        ipmi_ret_t rc = IPMI_CC_INVALID;        
+        ipmi_ret_t rc = IPMI_CC_INVALID;
     }
-    
 
-    // TODO : Here is where some validation code could determine if the 
+
+    // TODO : Here is where some validation code could determine if the
     // fru data is a legitimate FRU record (not just a partial).  Once
     // the record is valid the code should call a parser routine to call
-    // the various methods updating interesting properties.  Perhaps 
+    // the various methods updating interesting properties.  Perhaps
     // thinigs like Model#, Serial#, DIMM Size, etc
-    
+
 
     *data_len = 0;
-    
+
     return rc;
 }
 
-ipmi_ret_t ipmi_storage_get_sel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_storage_get_sel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
 
@@ -129,8 +153,8 @@ ipmi_ret_t ipmi_storage_get_sel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 
 
-ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
 
@@ -147,8 +171,8 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 
-ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
 
@@ -161,14 +185,14 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &g_sel_reserve, *data_len);
 
-    // TODO This code should grab the completed partial esel located in 
-    // the /tmp/esel0100 file and commit it to the error log handler.  
+    // TODO This code should grab the completed partial esel located in
+    // the /tmp/esel0100 file and commit it to the error log handler.
 
 
     // TODO I advanced the sel reservation number so next time HB asks
-    // for a reservation they get a new number.  This tech may change 
+    // for a reservation they get a new number.  This tech may change
     // based on how the HB team currently uses sel reservations but
-    // for now provide the ability to get new reservations 
+    // for now provide the ability to get new reservations
     g_sel_reserve++;
 
     return rc;
@@ -180,6 +204,9 @@ void register_netfn_storage_functions()
 {
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL, ipmi_storage_wildcard);
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL, ipmi_storage_get_sel_time);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL, ipmi_storage_set_sel_time);
