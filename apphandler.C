@@ -41,13 +41,10 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    // TODO GET REAL VALUES HERE....  I made these ones up because
-    // we are in bringup mode.  Version Major and Minor can be what we
-    // want like v1.03  but the IANA really should be something that
-    // we own.  I would suggest getting the IANA from Hostboot as
-    // long as IBM owns it then no problem.  If some other company
-    // gave us the IANA to use then use the one we have from the
-    // FSP ipmi code.
+    // TODO:
+    // This value is the IANA number assigned to "IBM Platform Firmware
+    // Division", which is also used by our service processor.  We may want
+    // a different number or at least a different version?
     uint8_t str[] = {0x00, 0, 1, 1,2, 0xD, 0x41, 0xA7, 0x00, 0x43, 0x40};
 
     // Data length
