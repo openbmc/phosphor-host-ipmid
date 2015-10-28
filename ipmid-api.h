@@ -82,14 +82,15 @@ enum ipmi_netfn_wild_card_cmd
     IPMI_CMD_WILDCARD       = 0xFF,
 };
 
-// Return codes from a IPMI operation as needed by IPMI V2.0 spec.
+// Return (completion) codes from a IPMI operation as needed by IPMI V2.0 spec.
 enum ipmi_return_codes
 {
     IPMI_CC_OK = 0x00,
     IPMI_DCMI_CC_NO_ACTIVE_POWER_LIMIT = 0x80,
     IPMI_CC_INVALID = 0xC1,
-    IPMI_CC_SENSOR_INVALID = 0xCB
-
+    IPMI_CC_SENSOR_INVALID = 0xCB,
+    IPMI_CC_RESPONSE_ERROR = 0xCE,
+    IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
 #endif
