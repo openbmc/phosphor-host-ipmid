@@ -182,7 +182,7 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     const char  *busname = "org.openbmc.watchdog.Host";
-    const char  *objname = "/org/openbmc/watchdog/HostWatchdog_0";
+    const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
     sd_bus_message *reply = NULL, *m = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -259,7 +259,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     const char  *busname = "org.openbmc.watchdog.Host";
-    const char  *objname = "/org/openbmc/watchdog/HostWatchdog_0";
+    const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
     sd_bus_message *reply = NULL, *m = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
