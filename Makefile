@@ -14,6 +14,7 @@ LIB_APP_OBJ = apphandler.o     \
               dcmihandler.o    \
               ipmisensor.o     \
               storageaddsel.o  \
+              transporthandler.o  \
 
 
 TESTADDSEL_OBJ = $(TESTADDSEL).o \
