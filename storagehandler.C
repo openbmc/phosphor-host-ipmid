@@ -182,7 +182,7 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_add_sel_request_t *p = (ipmi_add_sel_request_t*) request;
     uint16_t recordid;
 
-    recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
+    recordid = ((uint16_t)p->eventdata[2] << 8) | p->eventdata[1];
 
     printf("IPMI Handling ADD-SEL for record 0x%04x\n", recordid);
 
