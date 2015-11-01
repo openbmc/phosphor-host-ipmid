@@ -131,15 +131,15 @@ int set_sensor_dbus_state_osboot(const sensorRES_t *pRec, const lookup_t *pTable
 lookup_t g_ipmidbuslookup[] = {
 
 	{0x07, 0x00, set_sensor_dbus_state_simple, "setPresent", "False", "False"}, // OCC Inactive 0
-	{0x07, 0x01, set_sensor_dbus_state_simple, "setPresent", "True", "True"},   // OCC Active 1 
+	{0x07, 0x01, set_sensor_dbus_state_simple, "setPresent", "True", "True"},   // OCC Active 1
 	{0x07, 0x07, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
-	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", "False"},
+	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", ""},
 	{0x0C, 0x06, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
-	{0x0C, 0x04, set_sensor_dbus_state_simple, "setFault",   "True", "False"},
+	{0x0C, 0x04, set_sensor_dbus_state_simple, "setFault",   "True", ""},
 	{0x0F, 0x02, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x01, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x00, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
-	{0xC7, 0x01, set_sensor_dbus_state_simple, "setFault", "True", "False"},
+	{0xC7, 0x01, set_sensor_dbus_state_simple, "setFault", "True", ""},
 	{0xc3, 0x00, set_sensor_dbus_state_osboot, "setValue", "" ,""},
 
 	{0xFF, 0xFF, NULL, "", "", ""}
