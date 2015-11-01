@@ -64,72 +64,6 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-struct write_fru_data_t {
-    uint8_t  frunum;
-    uint8_t  offsetls;
-    uint8_t  offsetms;
-    uint8_t  data;
-} __attribute__ ((packed)) ;
-
-ipmi_ret_t ipmi_storage_write_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
-{
-    write_fru_data_t *reqptr = (write_fru_data_t*) request;
-    FILE *fp;
-    char string[16];
-    short offset = 0;
-    uint16_t rlen;
-    ipmi_ret_t rc = IPMI_CC_OK;
-    char iocmd[4];
-
-    sprintf(string, "%s%02x", "/tmp/fru", reqptr->frunum);
-
-    offset = ((uint16_t)reqptr->offsetms) << 8 | reqptr->offsetls;
-
-
-    // Length is the number of request bytes minus the header itself.
-    // The header contains an extra byte to indicate the start of
-    // the data (so didn't need to worry about word/byte boundaries)
-    // hence the -1...
-    rlen = ((uint16_t)*data_len) - (sizeof(write_fru_data_t)-1);
-
-
-    printf("IPMI WRITE-FRU-DATA for %s  Offset = %d Length = %d\n",
-        string, offset, rlen);
-
-
-    // I was thinking "ab+" but it appears it doesn't
-    // do what fseek asks.  Modify to rb+ and fseek
-    // works great...
-    if (offset == 0) {
-        strcpy(iocmd, "wb");
-    } else {
-        strcpy(iocmd, "rb+");
-    }
-
-    if ((fp = fopen(string, iocmd)) != NULL) {
-        fseek(fp, offset, SEEK_SET);
-        fwrite(&reqptr->data,rlen,1,fp);
-        fclose(fp);
-    } else {
-        fprintf(stderr, "Error trying to write to fru file %s\n",string);
-        ipmi_ret_t rc = IPMI_CC_INVALID;
-    }
-
-
-    // TODO : Here is where some validation code could determine if the
-    // fru data is a legitimate FRU record (not just a partial).  Once
-    // the record is valid the code should call a parser routine to call
-    // the various methods updating interesting properties.  Perhaps
-    // thinigs like Model#, Serial#, DIMM Size, etc
-
-
-    *data_len = 0;
-
-    return rc;
-}
-
 ipmi_ret_t ipmi_storage_get_sel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
@@ -210,9 +144,6 @@ void register_netfn_storage_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL, ipmi_storage_set_sel_time);
-
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_WRITE_FRU_DATA);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WRITE_FRU_DATA, NULL, ipmi_storage_write_fru_data);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, ipmi_storage_get_sel_info);
