@@ -61,7 +61,8 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     const char  *busname = "org.openbmc.control.Chassis";
     const char  *objname = "/org/openbmc/control/chassis0";
-    const char  *iface = "org.openbmc.control.Chassis";
+    const char  *iface = "org.freedesktop.DBus.Properties";
+    const char  *chassis_iface = "org.openbmc.control.Chassis";
     sd_bus_message *reply = NULL, *m = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
@@ -73,17 +74,23 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("IPMI GET DEVICE GUID\n");
 
-    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"getID");
+    // Call Get properties method with the interface and property name
+    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"Get");
     if (r < 0) {
-        fprintf(stderr, "Failed to add the start method object: %s\n", strerror(-r));
+        fprintf(stderr, "Failed to add the Get method object: %s\n", strerror(-r));
         return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    r = sd_bus_message_append(m, "ss", chassis_iface, "uuid");
+    if (r < 0) {
+        fprintf(stderr, "Failed to append arguments: %s\n", strerror(-r));
+        return -1;
     }
     r = sd_bus_call(bus, m, 0, &error, &reply);
     if (r < 0) {
-        fprintf(stderr, "Failed to call the start method: %s\n", strerror(-r));
+        fprintf(stderr, "Failed to call the Get method: %s\n", strerror(-r));
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    r = sd_bus_message_read(reply, "s", &uuid);
+    r = sd_bus_message_read(reply, "v", "s", &uuid);
     if (r < 0) {
         fprintf(stderr, "Failed to get a response: %s", strerror(-r));
         return IPMI_CC_RESPONSE_ERROR;
