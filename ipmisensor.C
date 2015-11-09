@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <malloc.h>
 
 
 extern uint8_t find_sensor(uint8_t);
@@ -30,8 +31,8 @@ struct lookup_t {
 	uint8_t offset;
 	int (*func)(const sensorRES_t *, const lookup_t *, const char *);
 	char    method[16];
-	char    assertion[16];
-	char    deassertion[16];
+	char    assertion[64];
+	char    deassertion[64];
 };
 
 
@@ -46,7 +47,7 @@ int set_sensor_dbus_state_simple(const sensorRES_t *pRec, const lookup_t *pTable
 
 struct event_data_t {
 	uint8_t data;
-	char    text[32];
+	char    text[64];
 };
 
 event_data_t g_fwprogress02h[] = {
@@ -79,10 +80,26 @@ event_data_t g_fwprogress02h[] = {
 	{0xFF, "Unknown"}
 };
 
+event_data_t g_fwprogress00h[] = {
+	{0x00, "Unspecified."},
+	{0x01, "No system memory detected"},
+	{0x02, "No usable system memory"},
+	{0x03, "Unrecoverable hard-disk/ATAPI/IDE"},
+	{0x04, "Unrecoverable system-board"},
+	{0x05, "Unrecoverable diskette"},
+	{0x06, "Unrecoverable hard-disk controller"},
+	{0x07, "Unrecoverable PS/2 or USB keyboard"},
+	{0x08, "Removable boot media not found"},
+	{0x09, "Unrecoverable video controller"},
+	{0x0A, "No video device detected"},
+	{0x0B, "Firmware ROM corruption detected"},
+	{0x0C, "CPU voltage mismatch"},
+	{0x0D, "CPU speed matching"},
+	{0xFF, "unknown"},
+};
 
-char *getfw02string(uint8_t b) {
 
-	event_data_t *p = g_fwprogress02h;
+char *event_data_lookup(event_data_t *p, uint8_t b) {
 
 	while(p->data != 0xFF) {
 		if (p->data == b) {
@@ -93,20 +110,24 @@ char *getfw02string(uint8_t b) {
 
 	return p->text;
 }
+
+
+
 //  The fw progress sensor contains some additional information that needs to be processed
 //  prior to calling the dbus code.  
 int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 
-	char valuestring[64];
+	char valuestring[128];
 	char* p = valuestring;
 
 	switch (pTable->offset) {
 
-		case 0x00 : snprintf(p, sizeof(valuestring), "POST Error, 0x%02x", pRec->event_data2);
+		case 0x00 : snprintf(p, sizeof(valuestring), "POST Error, %s", event_data_lookup(g_fwprogress00h, pRec->event_data2));
 					break;
-		case 0x01 : snprintf(p, sizeof(valuestring), "FW Hang, 0x%02x", pRec->event_data2);
+		case 0x01 : /* Using g_fwprogress02h for 0x01 because thats what the ipmi spec says to do */
+					snprintf(p, sizeof(valuestring), "FW Hang, %s", event_data_lookup(g_fwprogress02h, pRec->event_data2));
 					break;
-		case 0x02 : snprintf(p, sizeof(valuestring), "FW Progress, %s", getfw02string(pRec->event_data2));
+		case 0x02 : snprintf(p, sizeof(valuestring), "FW Progress, %s", event_data_lookup(g_fwprogress02h, pRec->event_data2));
 					break;
 	}
 
@@ -115,7 +136,7 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pT
 
 // Handling this special OEM sensor by coping what is in byte 4.  I also think that is odd
 // considering byte 3 is for sensor reading.  This seems like a misuse of the IPMI spec
-int set_sensor_dbus_state_osboot(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
+int set_sensor_dbus_state_osbootcount(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 	char valuestring[32];
 	char* pStr = valuestring;
 
@@ -125,13 +146,14 @@ int set_sensor_dbus_state_osboot(const sensorRES_t *pRec, const lookup_t *pTable
 }
 
 
+
 //  This table lists only senors we care about telling dbus about.
 //  Offset definition cab be found in section 42.2 of the IPMI 2.0
 //  spec.  Add more if/when there are more items of interest.
 lookup_t g_ipmidbuslookup[] = {
 
-	{0x07, 0x00, set_sensor_dbus_state_simple, "setPresent", "False", "False"}, // OCC Inactive 0
-	{0x07, 0x01, set_sensor_dbus_state_simple, "setPresent", "True", "True"},   // OCC Active 1
+	{0xe9, 0x00, set_sensor_dbus_state_simple, "setValue", "Disabled", ""}, // OCC Inactive 0
+	{0xe9, 0x01, set_sensor_dbus_state_simple, "setValue", "Enabled", ""},   // OCC Active 1
 	{0x07, 0x07, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
 	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", ""},
 	{0x0C, 0x06, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
@@ -140,11 +162,17 @@ lookup_t g_ipmidbuslookup[] = {
 	{0x0F, 0x01, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x00, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0xC7, 0x01, set_sensor_dbus_state_simple, "setFault", "True", ""},
-	{0xc3, 0x00, set_sensor_dbus_state_osboot, "setValue", "" ,""},
+	{0xc3, 0x00, set_sensor_dbus_state_osbootcount, "setValue", "" ,""},
+	{0x1F, 0x00, set_sensor_dbus_state_simple, "setValue", "Boot completed (00)", ""},
+	{0x1F, 0x01, set_sensor_dbus_state_simple, "setValue", "Boot completed (01)", ""},
+	{0x1F, 0x02, set_sensor_dbus_state_simple, "setValue", "PXE boot completed", ""},
+	{0x1F, 0x03, set_sensor_dbus_state_simple, "setValue", "Diagnostic boot completed", ""},
+	{0x1F, 0x04, set_sensor_dbus_state_simple, "setValue", "CD-ROM boot completed", ""},
+	{0x1F, 0x05, set_sensor_dbus_state_simple, "setValue", "ROM boot completed", ""},
+	{0x1F, 0x06, set_sensor_dbus_state_simple, "setValue", "Boot completed (06)", ""},
 
 	{0xFF, 0xFF, NULL, "", "", ""}
 };
-
 
 
 void reportSensorEventAssert(sensorRES_t *pRec, int index) {
@@ -198,8 +226,8 @@ int updateSensorRecordFromSSRAESC(const void *record) {
 	sensorRES_t *pRec = (sensorRES_t *) record;
 	uint8_t stype;
 	int index, i=0;
-	stype = find_sensor(pRec->sensor_number);
 
+	stype = find_sensor(pRec->sensor_number);
 
 	// 0xC3 types use the assertion7_0 for the value to be set
 	// so skip the reseach and call the correct event reporting
@@ -213,6 +241,7 @@ int updateSensorRecordFromSSRAESC(const void *record) {
 		// Scroll through each bit position .  Determine
 		// if any bit is either asserted or Deasserted.
 		for(i=0;i<8;i++) {
+
 			if ((ISBITSET(pRec->assert_state7_0,i))  &&
 				(shouldReport(stype, i, &index)))
 			{

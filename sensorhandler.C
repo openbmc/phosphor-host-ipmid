@@ -12,22 +12,24 @@ void register_netfn_sen_functions()   __attribute__((constructor));
 
 struct sensorTypemap_t {
     uint8_t number;
+    uint8_t typecode;
     char dbusname[32];
 } ;
 
 
 sensorTypemap_t g_SensorTypeMap[] = {
 
-    {0x01, "Temp"},
-    {0x0C, "DIMM"},
-    {0x0C, "MEMORY_BUFFER"},
-    {0x07, "PROC"},
-    {0x07, "CORE"},
-    {0x07, "CPU"},
-    {0x0F, "BootProgress"},
-    {0xC3, "OccStatus"},
-    {0xC3, "BootCount"},
-    {0xFF, ""}
+    {0x01, 0x6F, "Temp"},
+    {0x0C, 0x6F, "DIMM"},
+    {0x0C, 0x6F, "MEMORY_BUFFER"},
+    {0x07, 0x6F, "PROC"},
+    {0x07, 0x6F, "CORE"},
+    {0x07, 0x6F, "CPU"},
+    {0x0F, 0x6F, "BootProgress"},
+    {0xe9, 0x09, "OccStatus"},  // E9 is an internal mapping to handle sensor type code os 0x09
+    {0xC3, 0x6F, "BootCount"},
+    {0x1F, 0x6F, "OperatingSystemStatus"},
+    {0xFF, 0x00, ""},
 };
 
 
@@ -49,6 +51,7 @@ uint8_t dbus_to_sensor_type(char *p) {
         }
         s++;
     }
+
 
     if (s->number == 0xFF)
         printf("Failed to find Sensor Type %s\n", p);
@@ -84,7 +87,7 @@ uint8_t find_sensor(uint8_t sensor_number) {
     // This is where sensors that do not exist in dbus but do
     // exist in the host code stop.  This should indicate it
     // is not a supported sensor
-    if (a.bus[0] == 0) { return 0;}
+    if (a.interface[0] == 0) { return 0;}
 
     if (strstr(a.interface, "InventoryItem")) {
         // InventoryItems are real frus.  So need to get the
