@@ -123,7 +123,7 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = sizeof(g_sel_reserve);
 
     // Pack the actual response
-    memcpy(response, &recordid, 2);
+    memcpy(response, &p->eventdata[1], 2);
 
     // TODO This code should grab the completed partial esel located in
     // the /tmp/esel0100 file and commit it to the error log handler.

@@ -199,7 +199,9 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
 
     r = sd_bus_message_read(reply, "q", &pty);
     if (r < 0) {
-       fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
+        fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
+    } else {
+        r = *pty;
     }
 
 finish:
@@ -217,8 +219,9 @@ void send_esel(uint16_t recordid) {
 	char *desc, *assoc, *ascii;
 	const char *sev;
 	uint8_t *buffer = NULL;
-	char *path;
+	char *path, *pathsent;
 	size_t sz;
+	int r;
 
 	uint8_t hack[] = {0x30, 0x32, 0x34};
 
@@ -242,14 +245,20 @@ void send_esel(uint16_t recordid) {
 
 	// TODO until ISSUE https://github.com/openbmc/rest-dbus/issues/2
 	// I cant send extended ascii chars.  So 0,2,4 for now...
-	send_esel_to_dbus(desc, sev, assoc, hack, 3);
+	r = send_esel_to_dbus(desc, sev, assoc, hack, 3);
 
+	asprintf(&pathsent,"%s_%d", path, r);
+
+
+	rename(path, pathsent);
 
 	free(path);
+	free(pathsent);
 	free(assoc);
 	free(desc);
 
 	delete[] buffer;
+
 
 	return;
 }
