@@ -1,6 +1,7 @@
 #ifndef __HOST_IPMID_IPMI_COMMON_H__
 #define __HOST_IPMID_IPMI_COMMON_H__
 #include <stdlib.h>
+#include <systemd/sd-bus.h>
 
 // length of Completion Code and its ALWAYS _1_
 #define IPMI_CC_LEN 1
@@ -32,7 +33,13 @@ typedef void*           ipmi_response_t;
 // fill in whatever needed that will be of help during the actual handling of
 // command. IPMID will just pass the netfn, cmd and also this data to plugins
 // during the command handler invocation.
-typedef void*           ipmi_context_t;
+struct _ipmi_context_t {
+    void   *user;
+    sd_bus *bus;
+    unsigned long  flags;
+};
+
+typedef _ipmi_context_t *ipmi_context_t;
 
 // Length of request / response buffer depending on whether the data is a
 // request or a response from a plugin handler.
