@@ -159,15 +159,8 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     uint16_t *pty;
     int r;
 
+    mbus = ipmid_get_sd_bus_connection();
 
-
-    /* Connect to system bus */
-    r = sd_bus_open_system(&mbus);
-    if (r < 0) {
-        fprintf(stderr, "Failed to connect to system bus: %s\n",
-                strerror(-r));
-        goto finish;
-    }
     r = sd_bus_message_new_method_call(mbus,&m,
     									"org.openbmc.records.events",
     									"/org/openbmc/records/events",
@@ -208,10 +201,8 @@ finish:
     sd_bus_error_free(&error);
     sd_bus_message_unref(m);
     sd_bus_message_unref(reply);
-    sd_bus_unref(mbus);
 
     return r;
-
 }
 
 

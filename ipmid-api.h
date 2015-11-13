@@ -1,6 +1,7 @@
 #ifndef __HOST_IPMID_IPMI_COMMON_H__
 #define __HOST_IPMID_IPMI_COMMON_H__
 #include <stdlib.h>
+#include <systemd/sd-bus.h>
 
 // length of Completion Code and its ALWAYS _1_
 #define IPMI_CC_LEN 1
@@ -93,4 +94,5 @@ enum ipmi_return_codes
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
+sd_bus *ipmid_get_sd_bus_connection(void);
 #endif

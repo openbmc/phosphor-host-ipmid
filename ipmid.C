@@ -15,6 +15,7 @@
 
 
 sd_bus *bus = NULL;
+
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
 void print_usage(void) {
@@ -367,6 +368,10 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
     return;
 }
 
+sd_bus *ipmid_get_sd_bus_connection(void) {
+    return bus;
+}
+
 int main(int argc, char *argv[])
 {
     sd_bus_slot *slot = NULL;
@@ -402,9 +407,6 @@ int main(int argc, char *argv[])
         }
 
 
-    // Register all the handlers that provider implementation to IPMI commands.
-    ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
-
     /* Connect to system bus */
     r = sd_bus_open_system(&bus);
     if (r < 0) {
@@ -412,6 +414,9 @@ int main(int argc, char *argv[])
                 strerror(-r));
         goto finish;
     }
+
+    // Register all the handlers that provider implementation to IPMI commands.
+    ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
 
     r = sd_bus_add_match(bus, &slot, FILTER, handle_ipmi_command, NULL);
     if (r < 0) {
