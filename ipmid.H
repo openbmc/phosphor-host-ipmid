@@ -2,6 +2,7 @@
 #define __HOST_IPMID_IPMI_H__
 #include "ipmid-api.h"
 #include <stdio.h>
+#include "host-services.h"
 
 // When the requester sends in a netfn and a command along with data, this
 // function will look for registered handlers that will handle that [netfn,cmd]

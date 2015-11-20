@@ -53,7 +53,7 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 // information of netfn, cmd, callback handler pointer and context data.
 // Making this a extern "C" so that plugin libraries written in C can also use
 // it.
-extern "C" void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t, 
+extern "C" void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
                                        ipmi_context_t, ipmid_callback_t);
 
 // These are the command network functions, the response
