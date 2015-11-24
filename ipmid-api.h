@@ -94,5 +94,5 @@ enum ipmi_return_codes
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
-sd_bus *ipmid_get_sd_bus_connection(void);
+extern "C" sd_bus *ipmid_get_sd_bus_connection(void);
 #endif
