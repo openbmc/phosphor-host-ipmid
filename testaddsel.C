@@ -6,7 +6,6 @@
 #include <systemd/sd-bus.h>
 #include "sensorhandler.h"
 
-
 extern void send_esel(uint16_t recordid);
 
 sd_bus *bus = NULL;

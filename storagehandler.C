@@ -7,7 +7,7 @@
 
 #include "storagehandler.h"
 #include "storageaddsel.h"
-#include "ipmid-api.h"
+#include "host-ipmid/ipmid-api.h"
 
 void register_netfn_storage_functions() __attribute__((constructor));
 

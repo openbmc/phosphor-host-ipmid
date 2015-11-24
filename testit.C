@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "ipmisensor.C"
 
 unsigned char g_sensortype [][2] = {
     {0xC3, 0x01},

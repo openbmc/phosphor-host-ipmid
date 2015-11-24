@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "ipmid-api.h"
+#include "host-ipmid/ipmid-api.h"
 #include "ipmid.H"
 #include "transporthandler.h"
 
