@@ -40,7 +40,6 @@ typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
 std::map<ipmi_fn_cmd_t, ipmi_fn_context_t> g_ipmid_router_map;
 
 
-
 #ifndef HEXDUMP_COLS
 #define HEXDUMP_COLS 16
 #endif
@@ -418,6 +417,10 @@ int main(int argc, char *argv[])
     // Register all the handlers that provider implementation to IPMI commands.
     ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
 
+	// Start the Host Services Dbus Objects
+	start_host_service(bus, slot);
+
+	// Watch for BT messages
     r = sd_bus_add_match(bus, &slot, FILTER, handle_ipmi_command, NULL);
     if (r < 0) {
         fprintf(stderr, "Failed: sd_bus_add_match: %s : %s\n", strerror(-r), FILTER);
@@ -427,7 +430,6 @@ int main(int argc, char *argv[])
 
     for (;;) {
         /* Process requests */
-
         r = sd_bus_process(bus, NULL);
         if (r < 0) {
             fprintf(stderr, "Failed to process bus: %s\n", strerror(-r));

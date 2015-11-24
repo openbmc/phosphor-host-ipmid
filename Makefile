@@ -5,8 +5,7 @@ TESTER = testit
 TESTADDSEL = testaddsel
 
 DAEMON = ipmid
-DAEMON_OBJ  = $(DAEMON).o
-
+DAEMON_OBJ  = ipmid.o host-services.o
 
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
@@ -28,7 +27,7 @@ LIB_APP     = libapphandler.so
 INSTALLED_LIBS += $(LIB_APP)
 INSTALLED_HEADERS = ipmid-api.h
 
-INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2 
+INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2
 LIB_FLAG += $(shell pkg-config  --libs libsystemd) -rdynamic
 IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
 
