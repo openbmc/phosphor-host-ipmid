@@ -136,7 +136,6 @@ int create_esel_description(const uint8_t *buffer, const char *sev, char **messa
 
 
 	ipmi_add_sel_request_t *p;
-	int r;
 	char *m;
 
 	p =  ( ipmi_add_sel_request_t *) buffer;
@@ -197,7 +196,6 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
         r = *pty;
     }
 
-finish:
     sd_bus_error_free(&error);
     sd_bus_message_unref(m);
     sd_bus_message_unref(reply);
@@ -207,7 +205,7 @@ finish:
 
 
 void send_esel(uint16_t recordid) {
-	char *desc, *assoc, *ascii;
+	char *desc, *assoc;
 	const char *sev;
 	uint8_t *buffer = NULL;
 	char *path, *pathsent;
