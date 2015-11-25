@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <systemd/sd-bus.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // length of Completion Code and its ALWAYS _1_
 #define IPMI_CC_LEN 1
 
@@ -51,9 +55,7 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 // This is the constructor function that is called into by each plugin handlers.
 // When ipmi sets up the callback handlers, a call is made to this with
 // information of netfn, cmd, callback handler pointer and context data.
-// Making this a extern "C" so that plugin libraries written in C can also use
-// it.
-extern "C" void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
+void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
                                        ipmi_context_t, ipmid_callback_t);
 
 // These are the command network functions, the response
@@ -94,5 +96,10 @@ enum ipmi_return_codes
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
-extern "C" sd_bus *ipmid_get_sd_bus_connection(void);
+sd_bus *ipmid_get_sd_bus_connection(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
