@@ -145,9 +145,6 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     sensor_data_t *reqptr = (sensor_data_t*)request;
     ipmi_ret_t rc = IPMI_CC_OK;
-    unsigned short rlen;
-
-    rlen = (unsigned short) *data_len;
 
     printf("IPMI SET_SENSOR [0x%02x]\n",reqptr->sennum);
 
