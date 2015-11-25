@@ -3,6 +3,8 @@
 #include <errno.h>
 #include <systemd/sd-bus.h>
 
+#include "ipmid-api.h"
+
 // OpenBMC Host IPMI dbus framework
 const char  *bus_name      =  "org.openbmc.HostIpmi";
 const char  *object_name   =  "/org/openbmc/HostIpmi/1";
@@ -38,7 +40,7 @@ static int soft_power_off(sd_bus_message *m, void *userdata, sd_bus_error *ret_e
     sd_bus_error bus_error = SD_BUS_ERROR_NULL;
 
 	// Gets a hook onto either a SYSTEM or SESSION bus
-	sd_bus *bus = (sd_bus *)ipmid_get_sd_bus_connection();
+	sd_bus *bus = ipmid_get_sd_bus_connection();
 
 	rc = sd_bus_call_method(bus,        // On the System Bus
 							bus_name,        // Service to contact
