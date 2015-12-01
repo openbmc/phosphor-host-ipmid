@@ -27,6 +27,9 @@ LIB_APP     = libapphandler.so
 INSTALLED_LIBS += $(LIB_APP)
 INSTALLED_HEADERS = ipmid-api.h
 
+CXXFLAGS += -Wall -Wno-unused-result
+CFLAGS += -Wall -Wno-unused-result
+
 INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2
 LIB_FLAG += $(shell pkg-config  --libs libsystemd) -rdynamic
 IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"

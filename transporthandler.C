@@ -31,8 +31,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
-
-    int i = 0;
     char syscmd[128];
 
     printf("IPMI SET_LAN\n");

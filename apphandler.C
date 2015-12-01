@@ -184,8 +184,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         for(i = 0; i < tmp_size; i++)
         {
-            char tmp_array[3]; // Holder of the 2 chars that will become a byte
-            tmp_array[3] = '\0';
+            char tmp_array[3] = {0}; // Holder of the 2 chars that will become a byte
             strncpy(tmp_array, id_octet, 2); // 2 chars at a time
 
             int resp_byte = strtoul(tmp_array, NULL, 16); // Convert to hex byte

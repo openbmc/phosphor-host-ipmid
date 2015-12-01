@@ -233,7 +233,6 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
 static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
                          *ret_error) {
     int r = 0;
-    const char *msg = NULL;
     unsigned char sequence, netfn, lun, cmd;
     const void *request;
     size_t sz;
@@ -375,7 +374,6 @@ int main(int argc, char *argv[])
 {
     sd_bus_slot *slot = NULL;
     int r;
-    char *mode = NULL;
     unsigned long tvalue;
     int c;
 
@@ -458,7 +456,7 @@ finish:
 // step for mapping IPMI
 int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) {
 
-    char  *str1, *str2, *str3;
+    char  *str1;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *reply = NULL, *m=NULL;
 
@@ -604,7 +602,7 @@ int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
     dbus_interface_t a;
     int r;
     sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *reply = NULL, *m=NULL;
+    sd_bus_message *m=NULL;
 
     fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of %s\n",
         number, method, value);
