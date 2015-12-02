@@ -26,10 +26,7 @@ void print_usage(void) {
   fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
-
-
 const char * DBUS_INTF = "org.openbmc.HostIpmi";
-
 const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
 
 
