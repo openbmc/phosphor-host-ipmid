@@ -129,6 +129,8 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pT
 					break;
 		case 0x02 : snprintf(p, sizeof(valuestring), "FW Progress, %s", event_data_lookup(g_fwprogress02h, pRec->event_data2));
 					break;
+		default : snprintf(p, sizeof(valuestring), "Internal warning, fw_progres offset unknown (0x%02x)", pTable->offset);
+					break;
 	}
 
 	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, p);
@@ -145,6 +147,28 @@ int set_sensor_dbus_state_osbootcount(const sensorRES_t *pRec, const lookup_t *p
 	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, pStr);
 }
 
+int set_sensor_dbus_state_system_event(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
+	char valuestring[128];
+	char* p = valuestring;
+
+	switch (pTable->offset) {
+
+		case 0x00 : snprintf(p, sizeof(valuestring), "System Reconfigured");
+					break;
+		case 0x01 : snprintf(p, sizeof(valuestring), "OEM Boot Event");
+					break;
+		case 0x02 : snprintf(p, sizeof(valuestring), "Undetermine System Hardware Failure");
+					break;
+		case 0x03 : snprintf(p, sizeof(valuestring), "System Failure see error log for more details (0x%02x)", pRec->event_data2);
+					break;
+		case 0x04 : snprintf(p, sizeof(valuestring), "System Failure see PEF error log for more details (0x%02x)", pRec->event_data2);
+					break;
+		default : snprintf(p, sizeof(valuestring), "Internal warning, system_event offset unknown (0x%02x)", pTable->offset);
+					break;
+	}
+
+	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, p);
+}
 
 
 //  This table lists only senors we care about telling dbus about.
@@ -155,13 +179,13 @@ lookup_t g_ipmidbuslookup[] = {
 	{0xe9, 0x00, set_sensor_dbus_state_simple, "setValue", "Disabled", ""}, // OCC Inactive 0
 	{0xe9, 0x01, set_sensor_dbus_state_simple, "setValue", "Enabled", ""},   // OCC Active 1
 	{0x07, 0x07, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
-	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", ""},
+	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", "False"},
 	{0x0C, 0x06, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
-	{0x0C, 0x04, set_sensor_dbus_state_simple, "setFault",   "True", ""},
+	{0x0C, 0x04, set_sensor_dbus_state_simple, "setFault",   "True", "False"},
 	{0x0F, 0x02, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x01, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
 	{0x0F, 0x00, set_sensor_dbus_state_fwprogress, "setValue", "True", "False"},
-	{0xC7, 0x01, set_sensor_dbus_state_simple, "setFault", "True", ""},
+	{0xC7, 0x01, set_sensor_dbus_state_simple, "setFault", "True", "False"},
 	{0xc3, 0x00, set_sensor_dbus_state_osbootcount, "setValue", "" ,""},
 	{0x1F, 0x00, set_sensor_dbus_state_simple, "setValue", "Boot completed (00)", ""},
 	{0x1F, 0x01, set_sensor_dbus_state_simple, "setValue", "Boot completed (01)", ""},
@@ -170,6 +194,11 @@ lookup_t g_ipmidbuslookup[] = {
 	{0x1F, 0x04, set_sensor_dbus_state_simple, "setValue", "CD-ROM boot completed", ""},
 	{0x1F, 0x05, set_sensor_dbus_state_simple, "setValue", "ROM boot completed", ""},
 	{0x1F, 0x06, set_sensor_dbus_state_simple, "setValue", "Boot completed (06)", ""},
+	{0x12, 0x00, set_sensor_dbus_state_system_event, "setValue", "", ""},
+	{0x12, 0x01, set_sensor_dbus_state_system_event, "setValue", "", ""},
+	{0x12, 0x02, set_sensor_dbus_state_system_event, "setValue", "", ""},
+	{0x12, 0x03, set_sensor_dbus_state_system_event, "setValue", "", ""},
+	{0x12, 0x04, set_sensor_dbus_state_system_event, "setValue", "", ""},
 
 	{0xFF, 0xFF, NULL, "", "", ""}
 };
