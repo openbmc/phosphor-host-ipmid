@@ -199,13 +199,13 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     r = sd_bus_message_append(m, "yyyyy", seq, netfn, lun, cmd, cc);
     if (r < 0) {
         fprintf(stderr, "Failed add the netfn and others : %s\n", strerror(-r));
-        return -1;
+        goto final;
     }
 
     r = sd_bus_message_append_array(m, 'y', buf, len);
     if (r < 0) {
         fprintf(stderr, "Failed to add the string of response bytes: %s\n", strerror(-r));
-        return -1;
+        goto final;
     }
 
 
@@ -213,18 +213,19 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     // Call the IPMI responder on the bus so the message can be sent to the CEC
     r = sd_bus_call(bus, m, 0, &error, &reply);
     if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
-        return -1;
+        fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
+        goto final;
     }
 
     r = sd_bus_message_read(reply, "x", &pty);
     if (r < 0) {
        fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
-
     }
 
+final:
     sd_bus_error_free(&error);
     sd_bus_message_unref(m);
+    sd_bus_message_unref(reply);
 
 
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;

@@ -155,7 +155,7 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
 	sd_bus *mbus = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *reply = NULL, *m=NULL;
-    uint16_t *pty;
+    uint16_t x;
     int r;
 
     mbus = ipmid_get_sd_bus_connection();
@@ -167,39 +167,35 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     									"acceptHostMessage");
     if (r < 0) {
         fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));
-        return -1;
+        goto finish;
     }
 
     r = sd_bus_message_append(m, "sss", desc, sev, details);
     if (r < 0) {
         fprintf(stderr, "Failed add the message strings : %s\n", strerror(-r));
-        return -1;
+        goto finish;
     }
 
     r = sd_bus_message_append_array(m, 'y', debug, debuglen);
     if (r < 0) {
         fprintf(stderr, "Failed to add the raw array of bytes: %s\n", strerror(-r));
-        return -1;
+        goto finish;
     }
-
     // Call the IPMI responder on the bus so the message can be sent to the CEC
     r = sd_bus_call(mbus, m, 0, &error, &reply);
     if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
-        return -1;
+        fprintf(stderr, "Failed to call the method: %s %s\n", __FUNCTION__, strerror(-r));
+        goto finish;
     }
-
-    r = sd_bus_message_read(reply, "q", &pty);
+    r = sd_bus_message_read(reply, "q", &x);
     if (r < 0) {
         fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
-    } else {
-        r = *pty;
     }
 
+finish:
     sd_bus_error_free(&error);
     sd_bus_message_unref(m);
     sd_bus_message_unref(reply);
-
     return r;
 }
 
@@ -208,46 +204,30 @@ void send_esel(uint16_t recordid) {
 	char *desc, *assoc;
 	const char *sev;
 	uint8_t *buffer = NULL;
-	char *path, *pathsent;
+	char *path;
 	size_t sz;
-	int r;
 
 	uint8_t hack[] = {0x30, 0x32, 0x34};
-
 	asprintf(&path,"%s%04x", "/tmp/esel", recordid);
-
 	sz = getfilestream(path, &buffer);
-
 	if (sz == 0) {
 		printf("Error file does not exist %d\n",__LINE__);
 		free(path);
 		return;
 	}
 
-
 	sev = create_esel_severity(buffer);
-
 	create_esel_association(buffer, &assoc);
-
 	create_esel_description(buffer, sev, &desc);
-
 
 	// TODO until ISSUE https://github.com/openbmc/rest-dbus/issues/2
 	// I cant send extended ascii chars.  So 0,2,4 for now...
-	r = send_esel_to_dbus(desc, sev, assoc, hack, 3);
-
-	asprintf(&pathsent,"%s_%d", path, r);
-
-
-	rename(path, pathsent);
+	send_esel_to_dbus(desc, sev, assoc, hack, 3);
 
 	free(path);
-	free(pathsent);
 	free(assoc);
 	free(desc);
-
 	delete[] buffer;
-
 
 	return;
 }
