@@ -31,7 +31,7 @@ ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 //------------------------------------------------------------
 // Calls into Chassis Control Dbus object to do the power off
 //------------------------------------------------------------
-int ipmi_chassis_power_off()
+int ipmi_chassis_power_control(const char *method)
 {
 	// sd_bus error
 	int rc = 0;
@@ -50,7 +50,7 @@ int ipmi_chassis_power_off()
 							chassis_bus_name,        // Service to contact
 							chassis_object_name,     // Object path 
 							chassis_intf_name,       // Interface name
-							"powerOff",      		 // Method to be called
+							method,      		 // Method to be called
 							&bus_error,      		 // object to return error
 							&response,		 		 // Response buffer if any
 							NULL);			 		 // No input arguments
@@ -68,6 +68,7 @@ int ipmi_chassis_power_off()
 
 	return rc;
 }
+
 
 //----------------------------------------------------------------------
 // Chassis Control commands
@@ -89,11 +90,11 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 	switch(chassis_ctrl_cmd)
 	{
 		case CMD_POWER_OFF:
-		case CMD_HARD_RESET:
-		{
-			rc = ipmi_chassis_power_off();
+			rc = ipmi_chassis_power_control("powerOff");
 			break;
-		}
+		case CMD_HARD_RESET:
+			rc = ipmi_chassis_power_control("reboot");
+			break;
 		default:
 		{
 			fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
