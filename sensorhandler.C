@@ -29,9 +29,11 @@ sensorTypemap_t g_SensorTypeMap[] = {
     {0xe9, 0x09, "OccStatus"},  // E9 is an internal mapping to handle sensor type code os 0x09
     {0xC3, 0x6F, "BootCount"},
     {0x1F, 0x6F, "OperatingSystemStatus"},
+    {0x12, 0x6F, "SYSTEM_EVENT"},
+    {0xC7, 0x03, "SYSTEM"},
+    {0xC7, 0x03, "MAIN_PLANAR"},
     {0xFF, 0x00, ""},
 };
-
 
 
 struct sensor_data_t {
@@ -119,15 +121,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // HACK UNTIL Dbus gets updated or we find a better way
     if (buf[0] == 0) {
-
-        switch(reqptr->sennum) {
-            case 0x35 : buf[0] = 0x12; buf[1] = 0x6F; break;
-            case 0x37 : buf[0] = 0xC7; buf[1] = 0x03; break;
-            case 0x38 : buf[0] = 0xC7; buf[1] = 0x03; break;
-            case 0x39 : buf[0] = 0xC7; buf[1] = 0x03; break;
-            case 0x3A : buf[0] = 0xC7; buf[1] = 0x03; break;
-            default: rc = IPMI_CC_SENSOR_INVALID;
-        }
+        rc = IPMI_CC_SENSOR_INVALID;
     }
 
 
