@@ -13,8 +13,8 @@
 #include <errno.h>
 #include "sensorhandler.h"
 
-
 sd_bus *bus = NULL;
+sd_bus_slot *ipmid_slot = NULL;
 
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
@@ -371,9 +371,12 @@ sd_bus *ipmid_get_sd_bus_connection(void) {
     return bus;
 }
 
+sd_bus_slot *ipmid_get_sd_bus_slot(void) {
+    return ipmid_slot;
+}
+
 int main(int argc, char *argv[])
 {
-    sd_bus_slot *slot = NULL;
     int r;
     unsigned long tvalue;
     int c;
@@ -416,11 +419,8 @@ int main(int argc, char *argv[])
     // Register all the handlers that provider implementation to IPMI commands.
     ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
 
-	// Start the Host Services Dbus Objects
-	start_host_service(bus, slot);
-
 	// Watch for BT messages
-    r = sd_bus_add_match(bus, &slot, FILTER, handle_ipmi_command, NULL);
+    r = sd_bus_add_match(bus, &ipmid_slot, FILTER, handle_ipmi_command, NULL);
     if (r < 0) {
         fprintf(stderr, "Failed: sd_bus_add_match: %s : %s\n", strerror(-r), FILTER);
         goto finish;
@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
     }
 
 finish:
-    sd_bus_slot_unref(slot);
+    sd_bus_slot_unref(ipmid_slot);
     sd_bus_unref(bus);
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 
