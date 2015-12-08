@@ -14,6 +14,7 @@
 #include "sensorhandler.h"
 
 
+
 sd_bus *bus = NULL;
 
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
@@ -214,6 +215,7 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     r = sd_bus_call(bus, m, 0, &error, &reply);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
+        fprintf(stderr, "Dest: %s, Path: %s\n", dest, path);
         goto final;
     }
 
