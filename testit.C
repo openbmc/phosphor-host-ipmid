@@ -37,25 +37,31 @@ char g_results_method[64];
 char g_results_value[64];
 
 
-int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
-    printf("Attempting to log Variant Sensor 0x%02x via %s with a value of %s\n",
-        number, method, value);
+int set_sensor_dbus_state_s(unsigned char number, const char *member, const char *value) {
+    printf("Attempting to log 0x%02x via %s with a value of %s\n",
+        number, member, value);
 
-    strcpy(g_results_method, method);
+    strcpy(g_results_method, member);
     strcpy(g_results_value, value);
 
     return 0;
 }
 
-int set_sensor_dbus_state(uint8_t number, const char *method, const char *value) {
+int set_sensor_dbus_state_y(unsigned char number, char const* member, uint8_t value) {
+    
+    char val[2];
 
-	printf("Attempting to log Sensor 0x%02x via %s with a value of %s\n",
-		number, method, value);
 
-    strcpy(g_results_method, method);
-    strcpy(g_results_value, value);
+    printf("Attempting to log Variant Sensor 0x%02x via %s with a value of 0x%02x\n",
+        number, member, value);
 
-	return 0;
+
+    snprintf(val, 2, "%d", value);
+
+    strcpy(g_results_method, member);
+    strcpy(g_results_value, val);
+
+    return 0;
 }
 
 
@@ -103,11 +109,11 @@ void testprep(void) {
 
 int main() {
 
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootprogress), "setValue", "FW Progress, Docking station attachment");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor1), "setPresent", "True");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor2), "setPresent", "False");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_procfailed), "setFault", "False");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootcount), "setValue", "3");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootprogress), "value", "FW Progress, Docking station attachment");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor1), "present", "True");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor2), "present", "False");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_procfailed), "fault", "False");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootcount), "value", "3");
     testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_invalidnumber), "", "");
 
 	return 0;
