@@ -109,11 +109,11 @@ void testprep(void) {
 
 int main() {
 
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootprogress), "value", "FW Progress, Docking station attachment");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor1), "present", "True");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor2), "present", "False");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_procfailed), "fault", "False");
-    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootcount), "value", "3");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootprogress), "setValue", "FW Progress, Docking station attachment");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor1), "setPresent", "True");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_sensor2), "setPresent", "False");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_procfailed), "setFault", "False");
+    testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_bootcount), "setValue", "3");
     testprep(); check_results(updateSensorRecordFromSSRAESC(testrec_invalidnumber), "", "");
 
 	return 0;
