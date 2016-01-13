@@ -5,7 +5,7 @@ TESTER = testit
 TESTADDSEL = testaddsel
 
 DAEMON = ipmid
-DAEMON_OBJ  = ipmid.o host-services.o
+DAEMON_OBJ  = ipmid.o
 
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
@@ -16,6 +16,7 @@ LIB_APP_OBJ = apphandler.o     \
               storageaddsel.o  \
               transporthandler.o  \
 
+LIB_HOST_SRV_OBJ = host-services.o
 
 TESTADDSEL_OBJ = $(TESTADDSEL).o \
                  storageaddsel.o
@@ -24,7 +25,9 @@ TESTER_OBJ = ipmisensor.o 	   \
 	     testit.o
 
 LIB_APP     = libapphandler.so
-INSTALLED_LIBS += $(LIB_APP)
+LIB_HOST_SRV = libhostservice.so
+
+INSTALLED_LIBS += $(LIB_APP) $(LIB_HOST_SRV)
 INSTALLED_HEADERS = ipmid-api.h
 
 CXXFLAGS += -Wall -Wno-unused-result
@@ -39,12 +42,15 @@ SBINDIR ?= /usr/sbin
 INCLUDEDIR ?= /usr/include
 LIBDIR ?= /usr/lib
 
-all: $(DAEMON) $(LIB_APP) $(TESTER)
+all: $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
 
 %.o: %.C
 	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
 
 $(LIB_APP): $(LIB_APP_OBJ)
+	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@
+
+$(LIB_HOST_SRV): $(LIB_HOST_SRV_OBJ)
 	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@
 
 $(DAEMON): $(DAEMON_OBJ)
