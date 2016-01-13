@@ -97,6 +97,7 @@ enum ipmi_return_codes
 };
 
 sd_bus *ipmid_get_sd_bus_connection(void);
+sd_bus_slot *ipmid_get_sd_bus_slot(void);
 
 #ifdef __cplusplus
 }
