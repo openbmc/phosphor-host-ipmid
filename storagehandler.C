@@ -60,6 +60,7 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     struct timeval sel_time;
     sel_time.tv_sec = le32toh(*secs);
+    sel_time.tv_usec = 0;
     ipmi_ret_t rc = IPMI_CC_OK;
     int rct = settimeofday(&sel_time, NULL);
 
