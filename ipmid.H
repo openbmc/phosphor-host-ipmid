@@ -20,4 +20,6 @@ ipmi_ret_t ipmi_netfn_router(const ipmi_netfn_t, const ipmi_cmd_t, ipmi_request_
 
 extern FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
+int set_sensor_dbus_state_s(uint8_t , const char *, const char *);
+int set_sensor_dbus_state_y(uint8_t , const char *, const uint8_t);
 #endif

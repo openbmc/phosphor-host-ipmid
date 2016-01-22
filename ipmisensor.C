@@ -2,10 +2,10 @@
 #include <string.h>
 #include <stdint.h>
 #include <malloc.h>
-
+#include <ipmid.H>
+#include "sensorhandler.h"
 
 extern uint8_t find_sensor(uint8_t);
-extern int set_sensor_dbus_state_v(uint8_t , const char *, char *);
 
 
 struct sensorRES_t {
@@ -30,19 +30,20 @@ struct lookup_t {
 	uint8_t sensor_type;
 	uint8_t offset;
 	int (*func)(const sensorRES_t *, const lookup_t *, const char *);
-	char    method[16];
+	char    member[16];
 	char    assertion[64];
 	char    deassertion[64];
 };
 
-
-extern int updateDbusInterface(uint8_t , const char *, const char *) ;
-extern int set_sensor_dbus_state(uint8_t ,const char *, const char *);
+extern int updateDbusInterface(uint8_t , const char *, const char *);
+extern int find_openbmc_path(const char *, const uint8_t , dbus_interface_t *) ;
 
 
 int set_sensor_dbus_state_simple(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 
-	return set_sensor_dbus_state(pRec->sensor_number, pTable->method, value);
+	return set_sensor_dbus_state_s(pRec->sensor_number,
+                                   pTable->member,
+                                   value);
 }
 
 struct event_data_t {
@@ -133,18 +134,17 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pT
 					break;
 	}
 
-	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, p);
+	return set_sensor_dbus_state_s(pRec->sensor_number,
+                                   pTable->member,
+                                   p);
 }
 
 // Handling this special OEM sensor by coping what is in byte 4.  I also think that is odd
 // considering byte 3 is for sensor reading.  This seems like a misuse of the IPMI spec
 int set_sensor_dbus_state_osbootcount(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
-	char valuestring[32];
-	char* pStr = valuestring;
-
-	sprintf(valuestring, "%d", pRec->assert_state7_0);
-
-	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, pStr);
+	return set_sensor_dbus_state_y(pRec->sensor_number,
+                                   "setValue",
+                                   pRec->assert_state7_0);
 }
 
 int set_sensor_dbus_state_system_event(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
@@ -167,7 +167,9 @@ int set_sensor_dbus_state_system_event(const sensorRES_t *pRec, const lookup_t *
 					break;
 	}
 
-	return set_sensor_dbus_state_v(pRec->sensor_number, pTable->method, p);
+	return set_sensor_dbus_state_s(pRec->sensor_number,
+                                   pTable->member,
+                                   p);
 }
 
 

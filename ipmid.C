@@ -561,44 +561,7 @@ final:
 // Routines used by ipmi commands wanting to interact on the dbus
 //
 /////////////////////////////////////////////////////////////////////
-
-
-// Simple set routine because some methods are standard.
-int set_sensor_dbus_state(uint8_t number, const char *method, const char *value) {
-
-
-    dbus_interface_t a;
-    int r;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *reply = NULL, *m=NULL;
-
-    fprintf(ipmidbus, "Attempting to set a dbus Sensor 0x%02x via %s with a value of %s\n",
-        number, method, value);
-
-    r = find_openbmc_path("SENSOR", number, &a);
-
-    r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
-    if (r < 0) {
-        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
-    }
-
-    r = sd_bus_message_append(m, "s", value);
-    if (r < 0) {
-        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
-    }
-
-    r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
-    }
-
-    sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
-
-    return 0;
-}
-
-int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
+int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *value) {
 
 
     dbus_interface_t a;
@@ -617,6 +580,41 @@ int set_sensor_dbus_state_v(uint8_t number, const char *method, char *value) {
     }
 
     r = sd_bus_message_append(m, "v", "s", value);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+    }
+
+
+    r = sd_bus_call(bus, m, 0, &error, NULL);
+    if (r < 0) {
+        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
+    }
+
+
+    sd_bus_error_free(&error);
+    sd_bus_message_unref(m);
+
+    return 0;
+}
+int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t value) {
+
+
+    dbus_interface_t a;
+    int r;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *m=NULL;
+
+    fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of 0x%02x\n",
+        number, method, value);
+
+    r = find_openbmc_path("SENSOR", number, &a);
+
+    r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+    }
+
+    r = sd_bus_message_append(m, "v", "y", value);
     if (r < 0) {
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
     }

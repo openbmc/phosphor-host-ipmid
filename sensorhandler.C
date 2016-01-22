@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <systemd/sd-bus.h>
 
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) ;
@@ -32,6 +33,7 @@ sensorTypemap_t g_SensorTypeMap[] = {
     {0x12, 0x6F, "SYSTEM_EVENT"},
     {0xC7, 0x03, "SYSTEM"},
     {0xC7, 0x03, "MAIN_PLANAR"},
+    {0xC2, 0x6F, "PowerCap"},
     {0xFF, 0x00, ""},
 };
 
@@ -40,6 +42,11 @@ struct sensor_data_t {
     uint8_t sennum;
 }  __attribute__ ((packed)) ;
 
+struct sensorreadingresp_t {
+    uint8_t value;
+    uint8_t operation;
+    uint8_t indication[2];
+}  __attribute__ ((packed)) ;
 
 uint8_t dbus_to_sensor_type(char *p) {
 
@@ -104,6 +111,10 @@ uint8_t find_sensor(uint8_t sensor_number) {
     return r;
  }
 
+
+
+
+
 ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
@@ -149,6 +160,72 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+
+ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    sensor_data_t *reqptr = (sensor_data_t*)request;
+    ipmi_ret_t rc = IPMI_CC_SENSOR_INVALID;
+    uint8_t type;
+    sensorreadingresp_t *resp = (sensorreadingresp_t*) response;
+    int r;
+    dbus_interface_t a;
+    sd_bus *bus = ipmid_get_sd_bus_connection();
+    sd_bus_message *reply = NULL;
+    uint8_t reading;
+
+
+    printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
+
+    r = find_openbmc_path("SENSOR", reqptr->sennum, &a);
+
+    type = find_sensor(reqptr->sennum);
+
+    fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n", a.bus, a.path, a.interface);
+
+    *data_len=0;
+
+    switch(type) {
+        case 0xC3:
+        case 0xC2:
+            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "y");
+            if (r < 0) {
+                fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
+                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
+                        a.bus, a.path, a.interface);
+                break;
+            }
+
+            r = sd_bus_message_read(reply, "y", &reading);
+            if (r < 0) {
+                fprintf(stderr, "Failed to read byte: %s\n", strerror(-r));
+                break;
+            }
+
+            printf("Contents of a 0x%02x is 0x%02x\n", type, reading);
+
+            rc = IPMI_CC_OK;
+            *data_len=sizeof(sensorreadingresp_t);
+
+            resp->value         = reading;
+            resp->operation     = 0;
+            resp->indication[0] = 0;
+            resp->indication[1] = 0;
+            break;
+
+        default:
+            *data_len=0;
+            rc = IPMI_CC_SENSOR_INVALID;
+            break;
+    }
+
+
+    sd_bus_message_unref(reply);
+
+    return rc;
+}
+
 ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
@@ -172,6 +249,9 @@ void register_netfn_sen_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_SET_SENSOR);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR, NULL, ipmi_sen_set_sensor);
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, NULL, ipmi_sen_get_sensor_reading);
 
     return;
 }
