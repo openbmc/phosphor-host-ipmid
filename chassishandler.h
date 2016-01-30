@@ -9,13 +9,22 @@ enum ipmi_netfn_app_cmds
 	// Chassis Control
 	IPMI_CMD_CHASSIS_CONTROL	  = 0x02,
     // Get capability bits
+    IPMI_CMD_SET_SYS_BOOT_OPTIONS = 0x08,
     IPMI_CMD_GET_SYS_BOOT_OPTIONS = 0x09,
 };
 
 // Command specific completion codes
 enum ipmi_chassis_return_codes
 {
+    IPMI_OK = 0x0,
     IPMI_CC_PARM_NOT_SUPPORTED = 0x80,
+};
+
+// Generic completion codes,
+// see IPMI doc section 5.2
+enum ipmi_generic_return_codes
+{
+    IPMI_OUT_OF_SPACE = 0xC4,
 };
 
 // Various Chassis operations under a single command.
