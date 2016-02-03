@@ -14,6 +14,7 @@
 #endif
 
 // OpenBMC System Manager dbus framework
+extern sd_bus *bus;
 const char  *app   =  "org.openbmc.NetworkManager";
 const char  *obj   =  "/org/openbmc/NetworkManager/Interface";
 const char  *ifc   =  "org.openbmc.NetworkManager";
@@ -63,6 +64,37 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (reqptr->parameter == 3) // IP
     {
         sprintf(new_ipaddr, "%d.%d.%d.%d", reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
+    }
+    else if (reqptr->parameter == 5) // MAC
+    {
+        char                mac[18];
+        sd_bus_message *reply = NULL, *m = NULL;
+        sd_bus_error error = SD_BUS_ERROR_NULL;
+        int r = 0;
+
+        sprintf(mac, "%x:%x:%x:%x:%x:%x",
+                reqptr->data[0],
+                reqptr->data[1],
+                reqptr->data[2],
+                reqptr->data[3],
+                reqptr->data[4],
+                reqptr->data[5]);
+
+        r = sd_bus_message_new_method_call(bus,&m,app,obj,ifc,"SetHwAddress");
+        if (r < 0) {
+            fprintf(stderr, "Failed to add method object: %s\n", strerror(-r));
+            return -1;
+        }
+        r = sd_bus_message_append(m, "s", mac);
+        if (r < 0) {
+            fprintf(stderr, "Failed to append message data: %s\n", strerror(-r));
+            return -1;
+        }
+        r = sd_bus_call(bus, m, 0, &error, &reply);
+        if (r < 0) {
+            fprintf(stderr, "Failed to call method: %s\n", strerror(-r));
+            return -1;
+        }
     }
     else if (reqptr->parameter == 6) // Subnet
     {
