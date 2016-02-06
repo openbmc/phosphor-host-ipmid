@@ -15,7 +15,8 @@ LIB_APP_OBJ = apphandler.o     \
               ipmisensor.o     \
               storageaddsel.o  \
               transporthandler.o  \
-              globalhandler.o  
+              globalhandler.o  \
+              groupext.o
 
 LIB_HOST_SRV_OBJ = host-services.o
 
