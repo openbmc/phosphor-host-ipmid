@@ -199,7 +199,9 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
-    sd_bus_error err    = SD_BUS_ERROR_NULL; /* fixme */
+    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    int r = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
 
     int                 family;
@@ -209,6 +211,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     char                saddr [128];
     char                gateway [128];
     uint8_t             buf[11];
+    int                 i = 0;
 
     printf("IPMI GET_LAN\n");
 
@@ -311,44 +314,53 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         //string to parse: link/ether xx:xx:xx:xx:xx:xx
 
         const char*         device             = "eth0";
-        char                eaddr [12];
         uint8_t             buf[7];
+        char *eaddr1 = NULL;
 
-        sd_bus_message *res = NULL;
-        sd_bus *bus         = NULL;
-        sd_bus_error err    = SD_BUS_ERROR_NULL;
-
-        rc = sd_bus_open_system(&bus);
-        if(rc < 0)
-        {
-            fprintf(stderr,"ERROR: Getting a SYSTEM bus hook\n");
+        r = sd_bus_message_new_method_call(bus,&m,app,obj,ifc,"GetHwAddress");
+        if (r < 0) {
+            fprintf(stderr, "Failed to add method object: %s\n", strerror(-r));
             return -1;
         }
-
-        rc = sd_bus_call_method(bus,            // On the System Bus
-                                app,            // Service to contact
-                                obj,            // Object path 
-                                ifc,            // Interface name
-                                "GetHwAddress",  // Method to be called
-                                &err,           // object to return error
-                                &res,           // Response message on success
-                                "s",         // input message (dev,ip,nm,gw)
-                                device);
-        if(rc < 0)
-        {
-            fprintf(stderr, "Failed to Get HW address of device : %s\n", device);
+        r = sd_bus_message_append(m, "s", device);
+        if (r < 0) {
+            fprintf(stderr, "Failed to append message data: %s\n", strerror(-r));
             return -1;
         }
-
-        rc = sd_bus_message_read (res, "s", &eaddr);
-        if(rc < 0)
-        {
-            fprintf(stderr, "Failed to parse gateway from response message:[%s]\n", strerror(-rc));
+        r = sd_bus_call(bus, m, 0, &error, &reply);
+        if (r < 0) {
+            fprintf(stderr, "Failed to call method: %s\n", strerror(-r));
             return -1;
+        }
+        r = sd_bus_message_read(reply, "s", &eaddr1);
+        if (r < 0) {
+            fprintf(stderr, "Failed to get a response: %s", strerror(-r));
+            return IPMI_CC_RESPONSE_ERROR;
+        }
+        if (eaddr1 == NULL)
+        {
+            fprintf(stderr, "Failed to get a valid response: %s", strerror(-r));
+            return IPMI_CC_RESPONSE_ERROR;
         }
 
         memcpy((void*)&buf[0], &current_revision, 1);
-        sscanf (eaddr, "%x:%x:%x:%x:%x:%x", &buf[1], &buf[2], &buf[3], &buf[4], &buf[5], &buf[6]);
+
+        char *tokptr = NULL;
+        char* digit = strtok_r(eaddr1, ":", &tokptr);
+        if (digit == NULL)
+        {
+            fprintf(stderr, "Unexpected MAC format: %s", eaddr1);
+            return IPMI_CC_RESPONSE_ERROR;
+        }
+
+        i=0;
+        while (digit != NULL)
+        {
+            int resp_byte = strtoul(digit, NULL, 16);
+            memcpy((void*)&buf[i+1], &resp_byte, 1);
+            i++;
+            digit = strtok_r(NULL, ":", &tokptr);
+        }
 
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
