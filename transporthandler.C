@@ -14,10 +14,12 @@
 #endif
 
 // OpenBMC System Manager dbus framework
-extern sd_bus *bus;
 const char  *app   =  "org.openbmc.NetworkManager";
 const char  *obj   =  "/org/openbmc/NetworkManager/Interface";
 const char  *ifc   =  "org.openbmc.NetworkManager";
+
+const int SIZE_MAC = 18; //xx:xx:xx:xx:xx:xx
+const int SIZE_LAN_PARM = 16; //xxx.xxx.xxx.xxx
 
 char cur_ipaddr  [16] = "";
 char cur_netmask [16] = "";
@@ -52,6 +54,10 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
+    sd_bus *bus = ipmid_get_sd_bus_connection();
+    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    int r = 0;
 
     printf("IPMI SET_LAN\n");
 
@@ -61,18 +67,16 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // TODO Add the rest of the parameters like setting auth type
     // TODO Add error handling
 
-    if (reqptr->parameter == 3) // IP
+    if (reqptr->parameter == LAN_PARM_IP)
     {
-        sprintf(new_ipaddr, "%d.%d.%d.%d", reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
+        snprintf(new_ipaddr, SIZE_LAN_PARM, "%d.%d.%d.%d",
+            reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
     }
-    else if (reqptr->parameter == 5) // MAC
+    else if (reqptr->parameter == LAN_PARM_MAC)
     {
-        char                mac[18];
-        sd_bus_message *reply = NULL, *m = NULL;
-        sd_bus_error error = SD_BUS_ERROR_NULL;
-        int r = 0;
+        char                mac[SIZE_MAC];
 
-        sprintf(mac, "%x:%x:%x:%x:%x:%x",
+        snprintf(mac, SIZE_MAC, "%02x:%02x:%02x:%02x:%02x:%02x",
                 reqptr->data[0],
                 reqptr->data[1],
                 reqptr->data[2],
@@ -96,20 +100,22 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             return -1;
         }
     }
-    else if (reqptr->parameter == 6) // Subnet
+    else if (reqptr->parameter == LAN_PARM_SUBNET)
     {
-        sprintf(new_netmask, "%d.%d.%d.%d", reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
+        snprintf(new_netmask, SIZE_LAN_PARM, "%d.%d.%d.%d",
+            reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
     }
-    else if (reqptr->parameter == 12) // Gateway
+    else if (reqptr->parameter == LAN_PARM_GATEWAY)
     {
-        sprintf(new_gateway, "%d.%d.%d.%d", reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
+        snprintf(new_gateway, SIZE_LAN_PARM, "%d.%d.%d.%d",
+            reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
     }
-    else if (reqptr->parameter == 0) // Apply config
+    else if (reqptr->parameter == LAN_PARM_INPROGRESS) // Apply config
     {
         int rc = 0;
         sd_bus_message *req = NULL;
         sd_bus_message *res = NULL;
-        sd_bus *bus         = NULL;
+        sd_bus *bus1        = NULL;
         sd_bus_error err    = SD_BUS_ERROR_NULL;
         
         if (!strcmp(new_ipaddr, "") || !strcmp (new_netmask, "") || !strcmp (new_gateway, ""))
@@ -118,7 +124,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             return -1;
         }
             
-        rc = sd_bus_open_system(&bus);
+        rc = sd_bus_open_system(&bus1);
         if(rc < 0)
         {
             fprintf(stderr,"ERROR: Getting a SYSTEM bus hook\n");
@@ -131,7 +137,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             sd_bus_message_unref(req);
             sd_bus_message_unref(res);
 
-            rc = sd_bus_call_method(bus,            // On the System Bus
+            rc = sd_bus_call_method(bus1,            // On the System Bus
                                     app,            // Service to contact
                                     obj,            // Object path 
                                     ifc,            // Interface name
@@ -155,7 +161,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         sd_bus_message_unref(req);
         sd_bus_message_unref(res);
 
-        rc = sd_bus_call_method(bus,            // On the System Bus
+        rc = sd_bus_call_method(bus1,            // On the System Bus
                                 app,            // Service to contact
                                 obj,            // Object path 
                                 ifc,            // Interface name
@@ -199,7 +205,10 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
-    sd_bus_error err    = SD_BUS_ERROR_NULL; /* fixme */
+    sd_bus *bus = ipmid_get_sd_bus_connection();
+    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    int r = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
 
     int                 family;
@@ -209,6 +218,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     char                saddr [128];
     char                gateway [128];
     uint8_t             buf[11];
+    int                 i = 0;
 
     printf("IPMI GET_LAN\n");
 
@@ -225,43 +235,43 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // TODO Use dbus interface once available. For now use ip cmd.
     // TODO Add the rest of the parameters, like gateway
 
-    if (reqptr->parameter == 0) // In progress
+    if (reqptr->parameter == LAN_PARM_INPROGRESS)
     {
         uint8_t buf[] = {current_revision,0};
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
         return IPMI_CC_OK;
     }
-    else if (reqptr->parameter == 1) // Authentication support
+    else if (reqptr->parameter == LAN_PARM_AUTHSUPPORT)
     {
         uint8_t buf[] = {current_revision,0x04};
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
         return IPMI_CC_OK;
     }
-    else if (reqptr->parameter == 2) // Authentication enables
+    else if (reqptr->parameter == LAN_PARM_AUTHENABLES)
     {
         uint8_t buf[] = {current_revision,0x04,0x04,0x04,0x04,0x04};
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
         return IPMI_CC_OK;
     }
-    else if (reqptr->parameter == 3) // IP
+    else if (reqptr->parameter == LAN_PARM_IP)
     {
         const char*         device             = "eth0";
 
         sd_bus_message *res = NULL;
-        sd_bus *bus         = NULL;
+        sd_bus *bus1        = NULL;
         sd_bus_error err    = SD_BUS_ERROR_NULL;
 
-        rc = sd_bus_open_system(&bus);
+        rc = sd_bus_open_system(&bus1);
         if(rc < 0)
         {
             fprintf(stderr,"ERROR: Getting a SYSTEM bus hook\n");
             return -1;
         }
 
-        rc = sd_bus_call_method(bus,            // On the System Bus
+        rc = sd_bus_call_method(bus1,            // On the System Bus
                                 app,            // Service to contact
                                 obj,            // Object path 
                                 ifc,            // Interface name
@@ -306,49 +316,58 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         return IPMI_CC_OK;
     }
-    else if (reqptr->parameter == 5) // MAC
+    else if (reqptr->parameter == LAN_PARM_MAC)
     {
         //string to parse: link/ether xx:xx:xx:xx:xx:xx
 
         const char*         device             = "eth0";
-        char                eaddr [12];
         uint8_t             buf[7];
+        char *eaddr1 = NULL;
 
-        sd_bus_message *res = NULL;
-        sd_bus *bus         = NULL;
-        sd_bus_error err    = SD_BUS_ERROR_NULL;
-
-        rc = sd_bus_open_system(&bus);
-        if(rc < 0)
-        {
-            fprintf(stderr,"ERROR: Getting a SYSTEM bus hook\n");
+        r = sd_bus_message_new_method_call(bus,&m,app,obj,ifc,"GetHwAddress");
+        if (r < 0) {
+            fprintf(stderr, "Failed to add method object: %s\n", strerror(-r));
             return -1;
         }
-
-        rc = sd_bus_call_method(bus,            // On the System Bus
-                                app,            // Service to contact
-                                obj,            // Object path 
-                                ifc,            // Interface name
-                                "GetHwAddress",  // Method to be called
-                                &err,           // object to return error
-                                &res,           // Response message on success
-                                "s",         // input message (dev,ip,nm,gw)
-                                device);
-        if(rc < 0)
-        {
-            fprintf(stderr, "Failed to Get HW address of device : %s\n", device);
+        r = sd_bus_message_append(m, "s", device);
+        if (r < 0) {
+            fprintf(stderr, "Failed to append message data: %s\n", strerror(-r));
             return -1;
         }
-
-        rc = sd_bus_message_read (res, "s", &eaddr);
-        if(rc < 0)
-        {
-            fprintf(stderr, "Failed to parse gateway from response message:[%s]\n", strerror(-rc));
+        r = sd_bus_call(bus, m, 0, &error, &reply);
+        if (r < 0) {
+            fprintf(stderr, "Failed to call method: %s\n", strerror(-r));
             return -1;
+        }
+        r = sd_bus_message_read(reply, "s", &eaddr1);
+        if (r < 0) {
+            fprintf(stderr, "Failed to get a response: %s", strerror(-r));
+            return IPMI_CC_RESPONSE_ERROR;
+        }
+        if (eaddr1 == NULL)
+        {
+            fprintf(stderr, "Failed to get a valid response: %s", strerror(-r));
+            return IPMI_CC_RESPONSE_ERROR;
         }
 
         memcpy((void*)&buf[0], &current_revision, 1);
-        sscanf (eaddr, "%x:%x:%x:%x:%x:%x", &buf[1], &buf[2], &buf[3], &buf[4], &buf[5], &buf[6]);
+
+        char *tokptr = NULL;
+        char* digit = strtok_r(eaddr1, ":", &tokptr);
+        if (digit == NULL)
+        {
+            fprintf(stderr, "Unexpected MAC format: %s", eaddr1);
+            return IPMI_CC_RESPONSE_ERROR;
+        }
+
+        i=0;
+        while (digit != NULL)
+        {
+            int resp_byte = strtoul(digit, NULL, 16);
+            memcpy((void*)&buf[i+1], &resp_byte, 1);
+            i++;
+            digit = strtok_r(NULL, ":", &tokptr);
+        }
 
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
