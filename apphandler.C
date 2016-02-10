@@ -351,6 +351,44 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+// ATTENTION: This ipmi function is very hardcoded on purpose
+// OpenBMC does not fully support IPMI.  This command is useful
+// to have around because it enables testing of interfaces with
+// the IPMI tool.
+#define GET_CHANNEL_INFO_CHANNEL_OFFSET 0
+// IPMI Table 6-2
+#define IPMI_CHANNEL_TYPE_IPMB 1
+// IPMI Table 6-3
+#define IPMI_CHANNEL_MEDIUM_TYPE_OTHER 6
+
+ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+    uint8_t resp[] = {
+        1,
+        IPMI_CHANNEL_MEDIUM_TYPE_OTHER,
+        IPMI_CHANNEL_TYPE_IPMB,
+        1,0x41,0xA7,0x00,0,0};
+    uint8_t *p = (uint8_t*) request;
+
+    printf("IPMI APP GET CHANNEL INFO\n");
+
+    // I"m only supporting channel 1.  0xE is the 'default channel'
+    if (*p == 0xe || *p == 1) {
+
+        *data_len = sizeof(resp);
+        memcpy(response, resp, *data_len);
+
+    } else {
+        rc = IPMI_CC_PARM_OUT_OF_RANGE;
+        *data_len = 0;
+    }
+
+    return rc;
+}
+
 ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
@@ -416,6 +454,12 @@ void register_netfn_app_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags);
+
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CHAN_INFO);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info);
+
+
 
     return;
 }
