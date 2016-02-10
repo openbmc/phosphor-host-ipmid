@@ -215,9 +215,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     unsigned char       prefixlen;
     unsigned char       scope;
     unsigned int        flags;
-    char                saddr [128];
-    char                gateway [128];
-    uint8_t             buf[11];
+    char               *saddr = NULL;
     int                 i = 0;
 
     printf("IPMI GET_LAN\n");
@@ -259,57 +257,56 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     else if (reqptr->parameter == LAN_PARM_IP)
     {
         const char*         device             = "eth0";
+        uint8_t buf[5]; // Size of expected IPMI response msg
 
-        sd_bus_message *res = NULL;
-        sd_bus *bus1        = NULL;
-        sd_bus_error err    = SD_BUS_ERROR_NULL;
-
-        rc = sd_bus_open_system(&bus1);
-        if(rc < 0)
-        {
-            fprintf(stderr,"ERROR: Getting a SYSTEM bus hook\n");
+        r = sd_bus_message_new_method_call(bus,&m,app,obj,ifc,"GetAddress4");
+        if (r < 0) {
+            fprintf(stderr, "Failed to add method object: %s\n", strerror(-r));
             return -1;
         }
-
-        rc = sd_bus_call_method(bus1,            // On the System Bus
-                                app,            // Service to contact
-                                obj,            // Object path 
-                                ifc,            // Interface name
-                                "GetAddress4",  // Method to be called
-                                &err,           // object to return error
-                                &res,           // Response message on success
-                                "s",         // input message (dev,ip,nm,gw)
-                                "eth0");
-        if(rc < 0)
-        {
-            fprintf(stderr, "Failed to Get IP on interface : %s\n", device);
+        r = sd_bus_message_append(m, "s", device);
+        if (r < 0) {
+            fprintf(stderr, "Failed to append message data: %s\n", strerror(-r));
             return -1;
         }
-
-        /* rc = sd_bus_message_read(res, "a(iyyus)s", ...); */
-        rc = sd_bus_message_enter_container (res, 'a', "(iyyus)");
+        r = sd_bus_call(bus, m, 0, &error, &reply);
+        if (r < 0) {
+            fprintf(stderr, "Failed to call method: %s\n", strerror(-r));
+            return -1;
+        }
+        rc = sd_bus_message_enter_container (reply, 'a', "(iyyus)");
         if(rc < 0)
         {
             fprintf(stderr, "Failed to parse response message:[%s]\n", strerror(-rc));
             return -1;
         }
-
-        while ((rc = sd_bus_message_read(res, "(iyyus)", &family, &prefixlen, &scope, &flags, &saddr)) > 0) {
-                printf("%s:%d:%d:%d:%s\n", family==AF_INET?"IPv4":"IPv6", prefixlen, scope, flags, saddr);
-        }
-
-        rc = sd_bus_message_read (res, "s", &gateway);
-        if(rc < 0)
+        rc = sd_bus_message_read(reply, "(iyyus)", &family, &prefixlen, &scope, &flags, &saddr);
+        if (rc < 0)
         {
-            fprintf(stderr, "Failed to parse gateway from response message:[%s]\n", strerror(-rc));
+            fprintf(stderr, "Failed to receive response: %s\n", strerror(-r));
             return -1;
         }
 
+        printf("%s:%d:%d:%d:%s\n", family==AF_INET?"IPv4":"IPv6", prefixlen, scope, flags, saddr);
+
         memcpy((void*)&buf[0], &current_revision, 1);
-        sscanf (saddr, "%c.%c.%c.%c", &buf[1], &buf[2], &buf[3], &buf[4]);
-        buf[5] = family;
-        buf[6] = prefixlen;
-        sscanf (gateway, "%c.%c.%c.%c", &buf[7], &buf[8], &buf[9], &buf[10]);
+
+        // Parse IP address
+        char *tokptr = NULL;
+        char* digit = strtok_r(saddr, ".", &tokptr);
+        if (digit == NULL)
+        {
+            fprintf(stderr, "Unexpected IP format: %s", saddr);
+            return IPMI_CC_RESPONSE_ERROR;
+        }
+        i = 0;
+        while (digit != NULL)
+        {
+            int resp_byte = strtoul(digit, NULL, 10);
+            memcpy((void*)&buf[i+1], &resp_byte, 1);
+            i++;
+            digit = strtok_r(NULL, ".", &tokptr);
+        }
 
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
