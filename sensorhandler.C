@@ -221,7 +221,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
 
-    sd_bus_message_unref(reply);
+    reply = sd_bus_message_unref(reply);
 
     return rc;
 }

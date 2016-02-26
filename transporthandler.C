@@ -55,7 +55,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
     sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
@@ -84,20 +84,10 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 reqptr->data[4],
                 reqptr->data[5]);
 
-        r = sd_bus_message_new_method_call(bus,&m,app,obj,ifc,"SetHwAddress");
-        if (r < 0) {
-            fprintf(stderr, "Failed to add method object: %s\n", strerror(-r));
-            return -1;
-        }
-        r = sd_bus_message_append(m, "s", mac);
-        if (r < 0) {
-            fprintf(stderr, "Failed to append message data: %s\n", strerror(-r));
-            return -1;
-        }
-        r = sd_bus_call(bus, m, 0, &error, &reply);
+        r = sd_bus_call_method(bus,app,obj,ifc,"SetHwAddress",
+                               &error, &reply, "s", mac);
         if (r < 0) {
             fprintf(stderr, "Failed to call method: %s\n", strerror(-r));
-            return -1;
         }
     }
     else if (reqptr->parameter == LAN_PARM_SUBNET)
@@ -112,84 +102,72 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     else if (reqptr->parameter == LAN_PARM_INPROGRESS) // Apply config
     {
-        int rc = 0;
-        sd_bus_message *req = NULL;
-        sd_bus_message *res = NULL;
-        sd_bus *bus1        = NULL;
-        sd_bus_error err    = SD_BUS_ERROR_NULL;
-        
         if (!strcmp(new_ipaddr, "") || !strcmp (new_netmask, "") || !strcmp (new_gateway, ""))
         {
             fprintf(stderr,"ERROR: Incomplete LAN Parameters\n");
             return -1;
         }
-            
-        rc = sd_bus_open_system(&bus1);
-        if(rc < 0)
-        {
-            fprintf(stderr,"ERROR: Getting a SYSTEM bus hook\n");
-            return -1;
-        }
 
         if (strcmp(cur_ipaddr, ""))
         {
-            sd_bus_error_free(&err);
-            sd_bus_message_unref(req);
-            sd_bus_message_unref(res);
-
-            rc = sd_bus_call_method(bus1,            // On the System Bus
-                                    app,            // Service to contact
-                                    obj,            // Object path 
-                                    ifc,            // Interface name
-                                    "DelAddress4",  // Method to be called
-                                    &err,           // object to return error
-                                    &res,           // Response message on success
-                                    "ssss",         // input message (dev,ip,nm,gw)
-                                    "eth0",
-                                    cur_ipaddr,
-                                    cur_netmask,
-                                    cur_gateway);
+            r = sd_bus_call_method(bus,           // On the System Bus
+                                   app,            // Service to contact
+                                   obj,            // Object path
+                                   ifc,            // Interface name
+                                   "DelAddress4",  // Method to be called
+                                   &error,         // object to return error
+                                   &reply,         // Response message on success
+                                   "ssss",         // input message (dev,ip,nm,gw)
+                                   "eth0",
+                                   cur_ipaddr,
+                                   cur_netmask,
+                                   cur_gateway);
         }
 
-        if(rc < 0)
+        if(r < 0)
         {
-            fprintf(stderr, "Failed to remove existing IP %s: %s\n", cur_ipaddr, err.message);
-            return -1;
+            fprintf(stderr, "Failed to remove existing IP %s: %s\n", cur_ipaddr, error.message);
+            goto finish;
         }
 
-        sd_bus_error_free(&err);
-        sd_bus_message_unref(req);
-        sd_bus_message_unref(res);
+        sd_bus_error_free(&error);
+        reply = sd_bus_message_unref(reply);
 
-        rc = sd_bus_call_method(bus1,            // On the System Bus
-                                app,            // Service to contact
-                                obj,            // Object path 
-                                ifc,            // Interface name
-                                "AddAddress4",  // Method to be called
-                                &err,           // object to return error
-                                &res,           // Response message on success
-                                "ssss",         // input message (dev,ip,nm,gw)
-                                "eth0",
-                                new_ipaddr,
-                                new_netmask,
-                                new_gateway);
-        if(rc < 0)
+        r = sd_bus_call_method(bus,            // On the System Bus
+                               app,            // Service to contact
+                               obj,            // Object path
+                               ifc,            // Interface name
+                               "AddAddress4",  // Method to be called
+                               &error,         // object to return error
+                               &reply,         // Response message on success
+                               "ssss",         // input message (dev,ip,nm,gw)
+                               "eth0",
+                               new_ipaddr,
+                               new_netmask,
+                               new_gateway);
+        if(r < 0)
         {
-            fprintf(stderr, "Failed to set IP %s: %s\n", new_ipaddr, err.message);
-            return -1;
+            fprintf(stderr, "Failed to set IP %s: %s\n", new_ipaddr, error.message);
         }
-
-        strcpy (cur_ipaddr, new_ipaddr);
-        strcpy (cur_netmask, new_netmask);
-        strcpy (cur_gateway, new_gateway);
+        else
+        {
+            strcpy (cur_ipaddr, new_ipaddr);
+            strcpy (cur_netmask, new_netmask);
+            strcpy (cur_gateway, new_gateway);
+        }
     }
     else
     {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
-        return IPMI_CC_PARM_NOT_SUPPORTED;
+        rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
 
-    return rc;
+finish:
+    // Clenaup the resources allocated reply and error
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+
+    return (r < 0) ? -1 : rc;
 }
 
 struct get_lan_t {
@@ -206,7 +184,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
     sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
@@ -259,32 +237,27 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         const char*         device             = "eth0";
         uint8_t buf[5]; // Size of expected IPMI response msg
 
-        r = sd_bus_message_new_method_call(bus,&m,app,obj,ifc,"GetAddress4");
-        if (r < 0) {
-            fprintf(stderr, "Failed to add method object: %s\n", strerror(-r));
-            return -1;
-        }
-        r = sd_bus_message_append(m, "s", device);
-        if (r < 0) {
-            fprintf(stderr, "Failed to append message data: %s\n", strerror(-r));
-            return -1;
-        }
-        r = sd_bus_call(bus, m, 0, &error, &reply);
-        if (r < 0) {
+        r = sd_bus_call_method(bus,app,obj,ifc,"GetAddress4",
+                               &error, &reply, "s", device);
+        if (r < 0)
+        {
             fprintf(stderr, "Failed to call method: %s\n", strerror(-r));
-            return -1;
+            rc = -1;
+            goto finish;
         }
-        rc = sd_bus_message_enter_container (reply, 'a', "(iyyus)");
-        if(rc < 0)
+        r = sd_bus_message_enter_container (reply, 'a', "(iyyus)");
+        if(r < 0)
         {
             fprintf(stderr, "Failed to parse response message:[%s]\n", strerror(-rc));
-            return -1;
+            rc = -1;
+            goto finish;
         }
-        rc = sd_bus_message_read(reply, "(iyyus)", &family, &prefixlen, &scope, &flags, &saddr);
-        if (rc < 0)
+        r = sd_bus_message_read(reply, "(iyyus)", &family, &prefixlen, &scope, &flags, &saddr);
+        if (r < 0)
         {
             fprintf(stderr, "Failed to receive response: %s\n", strerror(-r));
-            return -1;
+            rc = -1;
+            goto finish;
         }
 
         printf("%s:%d:%d:%d:%s\n", family==AF_INET?"IPv4":"IPv6", prefixlen, scope, flags, saddr);
@@ -297,7 +270,8 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (digit == NULL)
         {
             fprintf(stderr, "Unexpected IP format: %s", saddr);
-            return IPMI_CC_RESPONSE_ERROR;
+            rc = IPMI_CC_RESPONSE_ERROR;
+            goto finish;
         }
         i = 0;
         while (digit != NULL)
@@ -311,7 +285,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
 
-        return IPMI_CC_OK;
+        rc = IPMI_CC_OK;
     }
     else if (reqptr->parameter == LAN_PARM_MAC)
     {
@@ -321,30 +295,26 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         uint8_t             buf[7];
         char *eaddr1 = NULL;
 
-        r = sd_bus_message_new_method_call(bus,&m,app,obj,ifc,"GetHwAddress");
-        if (r < 0) {
-            fprintf(stderr, "Failed to add method object: %s\n", strerror(-r));
-            return -1;
-        }
-        r = sd_bus_message_append(m, "s", device);
-        if (r < 0) {
-            fprintf(stderr, "Failed to append message data: %s\n", strerror(-r));
-            return -1;
-        }
-        r = sd_bus_call(bus, m, 0, &error, &reply);
-        if (r < 0) {
-            fprintf(stderr, "Failed to call method: %s\n", strerror(-r));
-            return -1;
+        r = sd_bus_call_method(bus,app,obj,ifc,"GetHwAddress",
+                               &error, &reply, "s", device);
+        if (r < 0)
+        {
+            fprintf(stderr, "Failed to call GetHwAddress: %s\n", strerror(-r));
+            rc = -1;
+            goto finish;
         }
         r = sd_bus_message_read(reply, "s", &eaddr1);
-        if (r < 0) {
+        if (r < 0)
+        {
             fprintf(stderr, "Failed to get a response: %s", strerror(-r));
-            return IPMI_CC_RESPONSE_ERROR;
+            rc = IPMI_CC_RESPONSE_ERROR;
+            goto finish;
         }
         if (eaddr1 == NULL)
         {
             fprintf(stderr, "Failed to get a valid response: %s", strerror(-r));
-            return IPMI_CC_RESPONSE_ERROR;
+            rc = IPMI_CC_RESPONSE_ERROR;
+            goto finish;
         }
 
         memcpy((void*)&buf[0], &current_revision, 1);
@@ -354,7 +324,8 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (digit == NULL)
         {
             fprintf(stderr, "Unexpected MAC format: %s", eaddr1);
-            return IPMI_CC_RESPONSE_ERROR;
+            rc = IPMI_CC_RESPONSE_ERROR;
+            goto finish;
         }
 
         i=0;
@@ -369,13 +340,17 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
 
-        return IPMI_CC_OK;
+        rc = IPMI_CC_OK;
     }
     else
     {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
-        return IPMI_CC_PARM_NOT_SUPPORTED;
+        rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
+
+finish:
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
 
     return rc;
 }
