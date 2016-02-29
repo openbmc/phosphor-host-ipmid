@@ -87,8 +87,6 @@ size_t getfilestream(const char *fn, uint8_t **buffer) {
 		size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 
-		size = 0x100;
-
 		*buffer = new uint8_t [size];
 
 		fread(*buffer, 1, size, fp);
@@ -120,9 +118,10 @@ int create_esel_association(const uint8_t *buffer, char **m) {
 
 	find_openbmc_path("SENSOR", sensor, &dbusint);
 
+	// Simply no associations if the sensor can not be found
 	if (strlen(dbusint.path) < 1) {
-		printf("Sensor not found\n");
-		snprintf(dbusint.path, sizeof(dbusint.path), "0x%x", sensor);
+		printf("Sensor 0x%x not found\n", sensor);
+		memset(dbusint.path,0,sizeof(dbusint.path));
 	}
 
 	asprintf(m, "%s", dbusint.path);
@@ -204,15 +203,12 @@ void send_esel(uint16_t recordid) {
 	char *desc, *assoc;
 	const char *sev;
 	uint8_t *buffer = NULL;
-	char *path;
+	const char *path = "/tmp/esel";
 	size_t sz;
 
-	uint8_t hack[] = {0x30, 0x32, 0x34};
-	asprintf(&path,"%s%04x", "/tmp/esel", recordid);
 	sz = getfilestream(path, &buffer);
 	if (sz == 0) {
 		printf("Error file does not exist %d\n",__LINE__);
-		free(path);
 		return;
 	}
 
@@ -220,11 +216,8 @@ void send_esel(uint16_t recordid) {
 	create_esel_association(buffer, &assoc);
 	create_esel_description(buffer, sev, &desc);
 
-	// TODO until ISSUE https://github.com/openbmc/rest-dbus/issues/2
-	// I cant send extended ascii chars.  So 0,2,4 for now...
-	send_esel_to_dbus(desc, sev, assoc, hack, 3);
+	send_esel_to_dbus(desc, sev, assoc, buffer, sz);
 
-	free(path);
 	free(assoc);
 	free(desc);
 	delete[] buffer;
