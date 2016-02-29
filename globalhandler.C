@@ -142,22 +142,6 @@ ipmi_ret_t ipmi_global_warm_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_global_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
-{
-    printf("Handling WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
-
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    *data_len = strlen("THIS IS WILDCARD");
-
-    // Now pack actual response
-    memcpy(response, "THIS IS WILDCARD", *data_len);
-
-    return rc;
-}
 
 void register_netfn_global_functions()
 {
