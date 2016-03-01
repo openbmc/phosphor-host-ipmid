@@ -614,7 +614,7 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
     }
 
-    r = sd_bus_message_append(m, "v", "y", value);
+    r = sd_bus_message_append(m, "v", "i", value);
     if (r < 0) {
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
     }
