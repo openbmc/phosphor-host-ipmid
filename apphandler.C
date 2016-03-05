@@ -119,43 +119,10 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     const char  *objname = "/org/openbmc/control/chassis0";
     const char  *iface = "org.freedesktop.DBus.Properties";
     const char  *chassis_iface = "org.openbmc.control.Chassis";
-    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
     char *uuid = NULL;
-
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-    *data_len = 0;
-
-    printf("IPMI GET DEVICE GUID\n");
-
-    // Call Get properties method with the interface and property name
-    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"Get");
-    if (r < 0) {
-        fprintf(stderr, "Failed to add the Get method object: %s\n", strerror(-r));
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-    r = sd_bus_message_append(m, "ss", chassis_iface, "uuid");
-    if (r < 0) {
-        fprintf(stderr, "Failed to append arguments: %s\n", strerror(-r));
-        return -1;
-    }
-    r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the Get method: %s\n", strerror(-r));
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-    r = sd_bus_message_read(reply, "v", "s", &uuid);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
-        return IPMI_CC_RESPONSE_ERROR;
-    }
-    if (uuid == NULL)
-    {
-        fprintf(stderr, "Failed to get a valid response: %s", strerror(-r));
-        return IPMI_CC_RESPONSE_ERROR;
-    }
 
     // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
     // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte order
@@ -166,14 +133,42 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     int resp_loc = resp_size-1; // Point resp end of array to save in reverse order
     int i = 0;
     char *tokptr = NULL;
+    char *id_octet = NULL;
+
+    // Status code.
+    ipmi_ret_t rc = IPMI_CC_OK;
+    *data_len = 0;
+
+    printf("IPMI GET DEVICE GUID\n");
+
+    // Call Get properties method with the interface and property name
+    r = sd_bus_call_method(bus,busname,objname,iface,
+                           "Get",&error, &reply, "ss",
+                           chassis_iface, "uuid");
+    if (r < 0)
+    {
+        fprintf(stderr, "Failed to call Get Method: %s\n", strerror(-r));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    r = sd_bus_message_read(reply, "v", "s", &uuid);
+    if (r < 0 || uuid == NULL)
+    {
+        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
+        rc = IPMI_CC_RESPONSE_ERROR;
+        goto finish;
+    }
 
     // Traverse the UUID
-    char* id_octet = strtok_r(uuid, "-", &tokptr); // Get the UUID octects separated by dash
+    id_octet = strtok_r(uuid, "-", &tokptr); // Get the UUID octects separated by dash
 
     if (id_octet == NULL)
-    { // Error
+    {
+        // Error
         fprintf(stderr, "Unexpected UUID format: %s", uuid);
-        return IPMI_CC_RESPONSE_ERROR;
+        rc = IPMI_CC_RESPONSE_ERROR;
+        goto finish;
     }
 
     while (id_octet != NULL)
@@ -201,8 +196,9 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &resp_uuid, *data_len);
 
+finish:
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
 
     return rc;
 }
@@ -246,15 +242,13 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     const char  *busname = "org.openbmc.watchdog.Host";
     const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
-    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
     set_wd_data_t *reqptr = (set_wd_data_t*) request;
     uint16_t timer = 0;
     uint32_t timer_ms = 0;
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
 
     *data_len = 0;
 
@@ -266,53 +260,45 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     printf("WATCHDOG SET Timer:[0x%X] 100ms intervals\n",timer);
 
     // Set watchdog timer
-    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"set");
-    if (r < 0) {
-        fprintf(stderr, "Failed to add the set method object: %s\n", strerror(-r));
-        return -1;
-    }
-    r = sd_bus_message_append(m, "i", timer_ms);
-    if (r < 0) {
-        fprintf(stderr, "Failed to add timer value: %s\n", strerror(-r));
-        return -1;
-    }
-    r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the set method: %s\n", strerror(-r));
-        return -1;
-    }
-
-    // Stop the current watchdog if any
-    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"stop");
-    if (r < 0) {
-        fprintf(stderr, "Failed to add the start method object: %s\n", strerror(-r));
-        return -1;
-    }
-    r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the start method: %s\n", strerror(-r));
-        return -1;
-    }
-
-    // Start the watchdog if requested
-    if (reqptr->t_use & 0x40)
+    r = sd_bus_call_method(bus, busname, objname, iface,
+                           "set", &error, &reply, "i", timer_ms);
+    if(r < 0)
     {
-        r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"start");
-        if (r < 0) {
-            fprintf(stderr, "Failed to add the start method object: %s\n", strerror(-r));
-            return -1;
-        }
-        r = sd_bus_call(bus, m, 0, &error, &reply);
-        if (r < 0) {
-            fprintf(stderr, "Failed to call the start method: %s\n", strerror(-r));
-            return -1;
-        }
+        fprintf(stderr, "Failed to call the SET method: %s\n", strerror(-r));
+        goto finish;
     }
 
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
 
-    return rc;
+    // Stop the current watchdog if any
+    r = sd_bus_call_method(bus, busname, objname, iface,
+                           "stop", &error, &reply, NULL);
+    if(r < 0)
+    {
+        fprintf(stderr, "Failed to call the STOP method: %s\n", strerror(-r));
+        goto finish;
+    }
+
+    if (reqptr->t_use & 0x40)
+    {
+        sd_bus_error_free(&error);
+        reply = sd_bus_message_unref(reply);
+
+        // Start the watchdog if requested
+        r = sd_bus_call_method(bus, busname, objname, iface,
+                               "start", &error, &reply, NULL);
+        if(r < 0)
+        {
+            fprintf(stderr, "Failed to call the START method: %s\n", strerror(-r));
+        }
+    }
+
+finish:
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+
+    return (r < 0) ? -1 : IPMI_CC_OK;
 }
 
 
@@ -323,7 +309,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     const char  *busname = "org.openbmc.watchdog.Host";
     const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
-    sd_bus_message *reply = NULL, *m = NULL;
+    sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
@@ -334,19 +320,15 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     printf("WATCHDOG RESET\n");
 
     // Refresh watchdog
-    r = sd_bus_message_new_method_call(bus,&m,busname,objname,iface,"poke");
+    r = sd_bus_call_method(bus, busname, objname, iface,
+                           "poke", &error, &reply, NULL);
     if (r < 0) {
-        fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));
-        return -1;
-    }
-    r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
-        return -1;
+        fprintf(stderr, "Failed to add reset  watchdog: %s\n", strerror(-r));
+        rc = -1;
     }
 
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
 
     return rc;
 }

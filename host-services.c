@@ -68,7 +68,7 @@ static int soft_power_off(sd_bus_message *m, void *userdata, sd_bus_error *ret_e
 
 finish:
     sd_bus_error_free(&bus_error);
-    sd_bus_message_unref(response);
+    response = sd_bus_message_unref(response);
 
     if(rc < 0)
     {

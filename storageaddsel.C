@@ -193,8 +193,8 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
 
 finish:
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
-    sd_bus_message_unref(reply);
+    m = sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
     return r;
 }
 

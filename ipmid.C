@@ -225,9 +225,8 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
 
 final:
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
-    sd_bus_message_unref(reply);
-
+    m = sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
 
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
@@ -268,6 +267,7 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     if(r != 0)
     {
         fprintf(stderr,"ERROR:[0x%X] handling NetFn:[0x%X], Cmd:[0x%X]\n",r, netfn, cmd);
+        return -1;
     }
 
     fprintf(ipmiio, "IPMI Response:\n");
@@ -470,6 +470,7 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
                 interface->bus, interface->path, interface->interface);
+        goto final;
     }
 
     r = sd_bus_message_append(m, "ss", "org.openbmc.InventoryItem", property_name);
@@ -477,6 +478,7 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
         fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
                 interface->bus, interface->path, interface->interface);
+        goto final;
     }
 
     r = sd_bus_call(bus, m, 0, &error, &reply);
@@ -496,7 +498,8 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
 final:
 
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
+    m = sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
 
     return r;
 }
@@ -512,28 +515,17 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
 
     char  *str1, *str2, *str3;
     sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *reply = NULL, *m=NULL;
+    sd_bus_message *reply = NULL;
 
 
     int r;
 
-    r = sd_bus_message_new_method_call(bus,&m,busname,objname,busname,"getObjectFromByteId");
+    r = sd_bus_call_method(bus,busname,objname,busname, "getObjectFromByteId",
+                           &error, &reply, "sy", type, num);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
-    }
-
-    r = sd_bus_message_append(m, "sy", type, num);
-    if (r < 0) {
-        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
-    }
-
-    // Call the IPMI responder on the bus so the message can be sent to the CEC
-    r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
         goto final;
     }
-
 
     r = sd_bus_message_read(reply, "(sss)", &str1, &str2, &str3);
     if (r < 0) {
@@ -550,7 +542,7 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
 final:
 
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
 
     return r;
 }
@@ -577,11 +569,13 @@ int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *valu
     r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        goto final;
     }
 
     r = sd_bus_message_append(m, "v", "s", value);
     if (r < 0) {
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        goto final;
     }
 
 
@@ -590,9 +584,9 @@ int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *valu
         fprintf(stderr, "Failed to call the method: %s", strerror(-r));
     }
 
-
+final:
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
+    m = sd_bus_message_unref(m);
 
     return 0;
 }
@@ -612,11 +606,13 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
     r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        goto final;
     }
 
     r = sd_bus_message_append(m, "v", "y", value);
     if (r < 0) {
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        goto final;
     }
 
 
@@ -625,9 +621,9 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
         fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
     }
 
-
+final:
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
+    m = sd_bus_message_unref(m);
 
     return 0;
 }
