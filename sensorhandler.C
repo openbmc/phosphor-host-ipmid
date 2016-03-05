@@ -173,7 +173,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     dbus_interface_t a;
     sd_bus *bus = ipmid_get_sd_bus_connection();
     sd_bus_message *reply = NULL;
-    uint8_t reading;
+    int reading = 0;
 
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
@@ -189,7 +189,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     switch(type) {
         case 0xC3:
         case 0xC2:
-            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "y");
+            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
             if (r < 0) {
                 fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
                 fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
@@ -197,9 +197,9 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 break;
             }
 
-            r = sd_bus_message_read(reply, "y", &reading);
+            r = sd_bus_message_read(reply, "i", &reading);
             if (r < 0) {
-                fprintf(stderr, "Failed to read byte: %s\n", strerror(-r));
+                fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
                 break;
             }
 
@@ -208,7 +208,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_OK;
             *data_len=sizeof(sensorreadingresp_t);
 
-            resp->value         = reading;
+            resp->value         = (uint8_t)reading;
             resp->operation     = 0;
             resp->indication[0] = 0;
             resp->indication[1] = 0;
