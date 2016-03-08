@@ -11,7 +11,7 @@ ipmi_ret_t ipmi_dcmi_get_power_limit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response, 
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    ipmi_ret_t rc = IPMI_DCMI_CC_NO_ACTIVE_POWER_LIMIT;
+    ipmi_ret_t rc = 0;
 
     // dcmi-v1-5-rev-spec.pdf 6.6.2.   
     // This is good enough for OpenBMC support for OpenPOWER based systems
@@ -37,4 +37,3 @@ void register_netfn_dcmi_functions()
     ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER, NULL, ipmi_dcmi_get_power_limit);
     return;
 }
-// 956379
