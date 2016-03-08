@@ -358,7 +358,7 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     printf("IPMI APP GET CHANNEL INFO\n");
 
     // I"m only supporting channel 1.  0xE is the 'default channel'
-    if (*p == 0xe || *p == 1) {
+    if (*p == 0xe || *p == 1 || *p == 8) {
 
         *data_len = sizeof(resp);
         memcpy(response, resp, *data_len);
