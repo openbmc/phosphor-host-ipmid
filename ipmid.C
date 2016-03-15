@@ -176,9 +176,9 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
 
 static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned char netfn, unsigned char lun, unsigned char cmd, unsigned char cc, unsigned char *buf, unsigned char len) {
 
-    sd_bus_message *reply = NULL, *m=NULL;
+    sd_bus_message *m=NULL;
     const char *dest, *path;
-    int r, pty;
+    int r;
 
     dest = sd_bus_message_get_sender(req);
     path = sd_bus_message_get_path(req);
@@ -210,21 +210,15 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
 
 
     // Call the IPMI responder on the bus so the message can be sent to the CEC
-    r = sd_bus_call(bus, m, 0, NULL, &reply);
+    r = sd_bus_call(bus, m, 0, NULL, NULL);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
         fprintf(stderr, "Dest: %s, Path: %s\n", dest, path);
         goto final;
     }
 
-    r = sd_bus_message_read(reply, "x", &pty);
-    if (r < 0) {
-       fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
-    }
-
 final:
     sd_bus_message_unref(m);
-    sd_bus_message_unref(reply);
 
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
