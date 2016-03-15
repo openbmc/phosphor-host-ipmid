@@ -79,7 +79,6 @@ finish:
 int dbus_warm_reset()
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *m = NULL;
     sd_bus *bus = NULL;
     char* temp_buf = NULL;
     uint8_t* get_value = NULL;
@@ -109,7 +108,7 @@ int dbus_warm_reset()
             control_intf_name,                         /* interface name */
             "warmReset",                               /* method name */
             &error,                                    /* object to return error in */
-            &m,                                        /* return message on success */
+            NULL,                                      /* reply unused */
             NULL,
             NULL
             );
@@ -121,7 +120,6 @@ int dbus_warm_reset()
 
 finish:
     sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
     free(connection);
 
     return r;

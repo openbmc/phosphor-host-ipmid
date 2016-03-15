@@ -45,7 +45,6 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
 {
     sd_bus *bus = ipmid_get_sd_bus_connection();
     sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     int family;
     unsigned char prefixlen;
     char* ipaddr = NULL;
@@ -54,7 +53,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
     int r = 0;
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    r = sd_bus_call_method(bus, app, obj, ifc, "GetAddress4", &error,
+    r = sd_bus_call_method(bus, app, obj, ifc, "GetAddress4", NULL,
                             &reply, "s", nwinterface);
     if(r < 0)
     {
@@ -116,8 +115,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
     }
 
 cleanup:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
+    sd_bus_message_unref(reply);
 
     return rc;
 }
@@ -146,7 +144,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
     sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
@@ -176,7 +173,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 reqptr->data[5]);
 
         r = sd_bus_call_method(bus, app, obj, ifc, "SetHwAddress", &error,
-                                &reply, "ss", nwinterface, mac);
+                               NULL, "ss", nwinterface, mac);
         if(r < 0)
         {
             fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
@@ -212,7 +209,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                         ifc,            // Interface name
                                         "SetAddress4",  // Method to be called
                                         &error,         // object to return error
-                                        &reply,         // Response message on success
+                                        NULL,           // No response required
                                         "ssss",         // input message (Interface, IP Address, Netmask, Gateway)
                                         nwinterface,    // eth0
                                         new_ipaddr,
@@ -240,7 +237,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
 
     return rc;
 }
@@ -260,7 +256,6 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = 0;
     sd_bus *bus = ipmid_get_sd_bus_connection();
     sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
     int i = 0;
@@ -321,7 +316,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         uint8_t buf[7];
         char *eaddr1 = NULL;
 
-        r = sd_bus_call_method(bus, app, obj, ifc, "GetHwAddress", &error,
+        r = sd_bus_call_method(bus, app, obj, ifc, "GetHwAddress", NULL,
                                 &reply, "s", nwinterface);
         if(r < 0)
         {
@@ -374,8 +369,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
 cleanup:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
+    sd_bus_message_unref(reply);
 
     return rc;
 }
