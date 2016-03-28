@@ -12,9 +12,14 @@
 #include <sys/time.h>
 #include <errno.h>
 #include "sensorhandler.h"
+#include <fstream>
+#include <set>
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
+
+// Initialise restricted mode to true
+bool restricted_mode = true;
 
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
@@ -26,16 +31,25 @@ void print_usage(void) {
   fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
+// Host settings in DBUS
+const char *settings_host_bus = "org.openbmc.settings.Host";
+const char *settings_host_object = "/org/openbmc/settings/host0";
+const char *settings_host_intf = "org.freedesktop.DBus.Properties";
+
 const char * DBUS_INTF = "org.openbmc.HostIpmi";
 
 const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
-
+const char * RESTRICTED_MODE_FILTER = "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/openbmc/settings/host0'";
 
 typedef std::pair<ipmi_netfn_t, ipmi_cmd_t> ipmi_fn_cmd_t;
 typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
 
 // Global data structure that contains the IPMI command handler's registrations.
 std::map<ipmi_fn_cmd_t, ipmi_fn_context_t> g_ipmid_router_map;
+
+// Global data structure that contains the list of IPMI commands that are whitelisted.
+std::set<ipmi_fn_cmd_t> g_ipmi_whitelist;
+
 
 // IPMI Spec, shared Reservation ID.
 unsigned short g_sel_reserve = 0xFFFF;
@@ -157,6 +171,21 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
     // Extract the map data onto appropriate containers
     auto handler_and_context = iter->second;
 
+    // If restricted mode is true and command is not whitelisted, don't
+    // execute the command
+    if(restricted_mode)
+    {
+        auto iter = g_ipmi_whitelist.find(std::make_pair(netfn, cmd));
+        if(iter == g_ipmi_whitelist.end())
+        {
+            printf("Net function:[0x%X], Command:[0x%X] is not whitelisted\n", netfn, cmd);
+            rc = IPMI_CC_INSUFFICIENT_PRIVILEGE;
+            memcpy(response, &rc, IPMI_CC_LEN);
+            *data_len = IPMI_CC_LEN;
+            return rc;
+        }
+    }
+
     // Creating a pointer type casted to char* to make sure we advance 1 byte
     // when we advance pointer to next's address. advancing void * would not
     // make sense.
@@ -235,6 +264,81 @@ final:
 
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
+
+void cache_restricted_mode()
+{
+    sd_bus *bus = ipmid_get_sd_bus_connection();
+    sd_bus_message *reply = NULL;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    int rc = 0;
+
+    rc = sd_bus_call_method(bus,
+                            settings_host_bus,
+                            settings_host_object,
+                            settings_host_intf,
+                            "Get",
+                            &error,
+                            &reply,
+                            "ss",
+                            settings_host_bus,
+                            "restricted_mode");
+    if(rc < 0)
+    {
+        fprintf(stderr, "Failed sd_bus_call_method method for "
+                        "restricted_mode: %s\n", strerror(-rc));
+        goto cleanup;
+    }
+
+    rc = sd_bus_message_read(reply, "v", "b", &restricted_mode);
+    if(rc < 0)
+    {
+        fprintf(stderr, "Failed to parse response message for"
+                " restricted_mode: %s\n", strerror(-rc));
+        // Fail-safe to restricted mode
+        restricted_mode = true;
+    }
+
+cleanup:
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+}
+
+static int handle_restricted_mode_change(sd_bus_message *m, void *user_data,
+                                                    sd_bus_error *ret_error)
+{
+    cache_restricted_mode();
+    return 0;
+}
+
+void ipmi_populate_whitelist()
+{
+    std::ifstream file(IPMI_WHITELIST_CONF);
+    std::string str;
+    std::string str_netfn;
+    std::string str_cmd;
+    ipmi_netfn_t netfn;
+    ipmi_cmd_t cmd;
+    size_t pos = std::string::npos;
+
+    // Read the whitelist.conf file and insert the NetFn and Command pair.
+    // Each entry in the conf file looks like this 0x01:0x02
+    // ':' character is the separator between NetFn and Command.
+    while(std::getline(file, str))
+    {
+        pos = str.find(':');
+        if(pos != std::string::npos)
+        {
+            str_netfn.assign(str.substr(pos-2,pos-1));
+            str_cmd.assign(str.substr(pos+3,pos+4));
+
+            netfn = strtoul(str_netfn.c_str(), NULL, 16);
+            cmd = strtoul(str_cmd.c_str(), NULL, 16);
+
+            g_ipmi_whitelist.emplace(std::make_pair(netfn, cmd));
+        }
+    }
+}
+
 
 static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
                          *ret_error) {
@@ -437,6 +541,18 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
+    // Wait for changes on Restricted mode
+    r = sd_bus_add_match(bus, &ipmid_slot, RESTRICTED_MODE_FILTER, handle_restricted_mode_change, NULL);
+    if (r < 0) {
+        fprintf(stderr, "Failed: sd_bus_add_match: %s : %s\n", strerror(-r), RESTRICTED_MODE_FILTER);
+        goto finish;
+    }
+
+    // Initialise restricted mode
+    cache_restricted_mode();
+
+    // Populate the IPMI whitelisted commands from conf file
+    ipmi_populate_whitelist();
 
     for (;;) {
         /* Process requests */

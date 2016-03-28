@@ -38,6 +38,7 @@ CFLAGS += -Wall -Wno-unused-result
 INC_FLAG += $(shell pkg-config --cflags --libs libsystemd) -I. -O2
 LIB_FLAG += $(shell pkg-config  --libs libsystemd) -rdynamic
 IPMID_PATH ?= -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
+WHITELIST_PATH?= -DIPMI_WHITELIST_CONF=\"/usr/share/host-ipmid/whitelist.conf\"
 
 DESTDIR ?= /
 SBINDIR ?= /usr/sbin
@@ -47,7 +48,7 @@ LIBDIR ?= /usr/lib
 all: $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
 
 %.o: %.C
-	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
+	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) $(WHITELIST_PATH) -o $@
 
 $(LIB_APP): $(LIB_APP_OBJ)
 	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@
