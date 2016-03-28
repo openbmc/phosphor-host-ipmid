@@ -35,8 +35,6 @@ const uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
 // Status of Set-In-Progress Parameter (# 0)
 uint8_t lan_set_in_progress = SET_COMPLETE;
 
-
-
 void register_netfn_transport_functions() __attribute__((constructor));
 
 // Helper Function to get IP Address/NetMask/Gateway from Network Manager or Cache
@@ -130,6 +128,12 @@ ipmi_ret_t ipmi_transport_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
+
+    if(restricted_mode)
+    {
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
+    }
+
     return rc;
 }
 
@@ -151,6 +155,11 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     int r = 0;
 
     printf("IPMI SET_LAN\n");
+
+    if(restricted_mode)
+    {
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
+    }
 
     set_lan_t *reqptr = (set_lan_t*) request;
 

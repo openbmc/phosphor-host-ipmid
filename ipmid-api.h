@@ -94,11 +94,15 @@ enum ipmi_return_codes
     IPMI_CC_PARM_OUT_OF_RANGE = 0xC9,
     IPMI_CC_SENSOR_INVALID = 0xCB,
     IPMI_CC_RESPONSE_ERROR = 0xCE,
+    IPMI_CC_INSUFFICIENT_PRIVILEGE = 0xD4,
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
 sd_bus *ipmid_get_sd_bus_connection(void);
 sd_bus_slot *ipmid_get_sd_bus_slot(void);
+
+// If restricted_mode is true, then only IPMI whitelisted commands are executed
+extern uint8_t restricted_mode;
 
 #ifdef __cplusplus
 }

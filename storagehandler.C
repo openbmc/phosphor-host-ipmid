@@ -23,6 +23,11 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
+
+    if(restricted_mode)
+    {
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
+    }
     return rc;
 }
 

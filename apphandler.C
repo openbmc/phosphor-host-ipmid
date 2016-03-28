@@ -88,6 +88,12 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = 0;
 
     printf("IPMI SET ACPI STATE Ignoring for now\n");
+
+    if(restricted_mode)
+    {
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
+    }
+
     return rc;
 }
 
@@ -394,6 +400,12 @@ ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
+
+    if(restricted_mode)
+    {
+        *data_len = 0;
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
+    }
 
     *data_len = strlen("THIS IS WILDCARD");
 
