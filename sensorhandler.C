@@ -8,6 +8,7 @@
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) ;
 extern int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) ;
+extern bool restricted_mode;
 
 void register_netfn_sen_functions()   __attribute__((constructor));
 
@@ -234,6 +235,11 @@ ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("IPMI S/E Wildcard Netfn:[0x%X], Cmd:[0x%X]\n",netfn,cmd);
     *data_len = 0;
+
+    if(restricted_mode)
+    {
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
+    }
 
     return rc;
 }

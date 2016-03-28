@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdint.h>
 
+extern bool restricted_mode;
+
 const char  *control_object_name  =  "/org/openbmc/control/bmc0";
 const char  *control_intf_name    =  "org.openbmc.control.Bmc";
 
@@ -131,14 +133,19 @@ ipmi_ret_t ipmi_global_warm_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    *data_len = 0;
     printf("Handling GLOBAL warmReset Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
+
+    if(restricted_mode)
+    {
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
+    }
 
     // TODO: call the correct dbus method for warmReset.
     dbus_warm_reset();
 
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
-    *data_len = 0;
     return rc;
 }
 

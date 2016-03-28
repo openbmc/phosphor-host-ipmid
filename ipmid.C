@@ -15,6 +15,8 @@
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
+// If restricted_mode is true, then only IPMI whitelisted commands are executed
+bool restricted_mode = false;
 
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
@@ -26,12 +28,15 @@ void print_usage(void) {
   fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
-
+// Host settings in DBUS
+const char *settings_host_app = "org.openbmc.settings.Host";
+const char *settings_host_object = "/org/openbmc/settings/host0";
+const char *settings_host_intf = "org.freedesktop.DBus.Properties";
 
 const char * DBUS_INTF = "org.openbmc.HostIpmi";
 
 const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
-
+const char * RESTRICTED_MODE_FILTER = "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/openbmc/settings/host0'";
 
 typedef std::pair<ipmi_netfn_t, ipmi_cmd_t> ipmi_fn_cmd_t;
 typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
@@ -231,6 +236,39 @@ final:
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
+void cache_restricted_mode()
+{
+    sd_bus *bus = ipmid_get_sd_bus_connection();
+    sd_bus_message *reply = NULL;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    int rc = 0;
+
+    rc = sd_bus_call_method(bus, settings_host_app, settings_host_object, settings_host_intf,
+                               "Get", &error, &reply, "ss", settings_host_app, "restricted_mode");
+    if(rc < 0)
+    {
+        fprintf(stderr, "Failed to issue call method: %s\n", strerror(-rc));
+        goto cleanup;
+    }
+
+    rc = sd_bus_message_read(reply, "v", "b", &restricted_mode);
+    if(rc < 0)
+    {
+        fprintf(stderr, "Failed to parse response message: %s\n", strerror(-rc));
+        goto cleanup;
+    }
+
+cleanup:
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+}
+
+static int handle_restricted_mode_change(sd_bus_message *m, void *user_data, sd_bus_error *ret_error)
+{
+    cache_restricted_mode();
+    return 0;
+}
+
 static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
                          *ret_error) {
     int r = 0;
@@ -426,6 +464,15 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
+    // Wait for changes on Restricted mode
+    r = sd_bus_add_match(bus, &ipmid_slot, RESTRICTED_MODE_FILTER, handle_restricted_mode_change, NULL);
+    if (r < 0) {
+        fprintf(stderr, "Failed: sd_bus_add_match: %s : %s\n", strerror(-r), RESTRICTED_MODE_FILTER);
+        goto finish;
+    }
+
+    // Read restricted mode
+    cache_restricted_mode();
 
     for (;;) {
         /* Process requests */
