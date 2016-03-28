@@ -54,9 +54,10 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 
 // This is the constructor function that is called into by each plugin handlers.
 // When ipmi sets up the callback handlers, a call is made to this with
-// information of netfn, cmd, callback handler pointer and context data.
+// information of netfn, cmd, callback handler pointer ,context data and command
+// flag mentioning whether the command is whitelisted.
 void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
-                                       ipmi_context_t, ipmid_callback_t);
+                                       ipmi_context_t, ipmid_callback_t, int);
 
 // These are the command network functions, the response
 // network functions are the function + 1. So to determine
@@ -94,11 +95,19 @@ enum ipmi_return_codes
     IPMI_CC_PARM_OUT_OF_RANGE = 0xC9,
     IPMI_CC_SENSOR_INVALID = 0xCB,
     IPMI_CC_RESPONSE_ERROR = 0xCE,
+    IPMI_CC_INSUFFICIENT_PRIVILEGE = 0xD4,
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
 sd_bus *ipmid_get_sd_bus_connection(void);
 sd_bus_slot *ipmid_get_sd_bus_slot(void);
+
+// In restricted mode only whitelisted commands are executed.
+enum ipmi_command_flag
+{
+    IPMI_WHITELISTED_COMMAND = 0x00,
+    IPMI_BLACKLISTED_COMMAND = 0x01,
+};
 
 #ifdef __cplusplus
 }

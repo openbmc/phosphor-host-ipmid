@@ -25,7 +25,7 @@ ipmi_ret_t ipmi_groupext(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_groupext_functions()
 {
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, GRPEXT_GET_GROUP_CMD);
-    ipmi_register_callback(NETFUN_GRPEXT, GRPEXT_GET_GROUP_CMD, NULL, ipmi_groupext);
+    ipmi_register_callback(NETFUN_GRPEXT, GRPEXT_GET_GROUP_CMD, NULL, ipmi_groupext, IPMI_WHITELISTED_COMMAND);
 
     return;
 }

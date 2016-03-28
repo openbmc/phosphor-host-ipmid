@@ -15,6 +15,8 @@
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
+// Initialise to restricted mode
+uint8_t restricted_mode = true;
 
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
@@ -26,15 +28,18 @@ void print_usage(void) {
   fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
-
+// Host settings in DBUS
+const char *settings_host_app = "org.openbmc.settings.Host";
+const char *settings_host_object = "/org/openbmc/settings/host0";
+const char *settings_host_intf = "org.freedesktop.DBus.Properties";
 
 const char * DBUS_INTF = "org.openbmc.HostIpmi";
 
 const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
-
+const char * RESTRICTED_MODE_FILTER = "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/openbmc/settings/host0'";
 
 typedef std::pair<ipmi_netfn_t, ipmi_cmd_t> ipmi_fn_cmd_t;
-typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
+typedef std::tuple<ipmid_callback_t, ipmi_context_t, int> ipmi_fn_context_t;
 
 // Global data structure that contains the IPMI command handler's registrations.
 std::map<ipmi_fn_cmd_t, ipmi_fn_context_t> g_ipmid_router_map;
@@ -92,13 +97,13 @@ void hexdump(FILE *s, void *mem, size_t len)
 
 // Method that gets called by shared libraries to get their command handlers registered
 void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                       ipmi_context_t context, ipmid_callback_t handler)
+                       ipmi_context_t context, ipmid_callback_t handler, int restricted_mode)
 {
     // Pack NetFn and Command in one.
     auto netfn_and_cmd = std::make_pair(netfn, cmd);
 
     // Pack Function handler and Data in another.
-    auto handler_and_context = std::make_pair(handler, context);
+    auto handler_and_context = std::make_tuple(handler, context, restricted_mode);
 
     // Check if the registration has already been made..
     auto iter = g_ipmid_router_map.find(netfn_and_cmd);
@@ -152,14 +157,24 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
     // Extract the map data onto appropriate containers
     auto handler_and_context = iter->second;
 
+    // If restricted mode is true and command is not whitelisted, don't
+    // execute the command
+    if(restricted_mode && std::get<2>(handler_and_context))
+    {
+        rc = IPMI_CC_INSUFFICIENT_PRIVILEGE;
+        memcpy(response, &rc, IPMI_CC_LEN);
+        *data_len = IPMI_CC_LEN;
+        return rc;
+    }
+
     // Creating a pointer type casted to char* to make sure we advance 1 byte
     // when we advance pointer to next's address. advancing void * would not
     // make sense.
     char *respo = &((char *)response)[IPMI_CC_LEN];
 
     // Response message from the plugin goes into a byte post the base response
-    rc = (handler_and_context.first) (netfn, cmd, request, respo,
-                                      data_len, handler_and_context.second);
+    rc = (std::get<0>(handler_and_context)) (netfn, cmd, request, respo,
+                                      data_len, std::get<1>(handler_and_context));
 
     // Now copy the return code that we got from handler and pack it in first
     // byte.
@@ -229,6 +244,41 @@ final:
     reply = sd_bus_message_unref(reply);
 
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+}
+
+void cache_restricted_mode()
+{
+    sd_bus *bus = ipmid_get_sd_bus_connection();
+    sd_bus_message *reply = NULL;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    int rc = 0;
+
+    rc = sd_bus_call_method(bus, settings_host_app, settings_host_object, settings_host_intf,
+                               "Get", &error, &reply, "ss", settings_host_app, "restricted_mode");
+    if(rc < 0)
+    {
+        fprintf(stderr, "Failed to issue call method: %s\n", strerror(-rc));
+        goto cleanup;
+    }
+
+    rc = sd_bus_message_read(reply, "v", "b", &restricted_mode);
+    if(rc < 0)
+    {
+        fprintf(stderr, "Failed to parse response message: %s\n", strerror(-rc));
+        // Fail-safe to restricted mode
+        restricted_mode = true;
+        goto cleanup;
+    }
+
+cleanup:
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+}
+
+static int handle_restricted_mode_change(sd_bus_message *m, void *user_data, sd_bus_error *ret_error)
+{
+    cache_restricted_mode();
+    return 0;
 }
 
 static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
@@ -426,6 +476,15 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
+    // Wait for changes on Restricted mode
+    r = sd_bus_add_match(bus, &ipmid_slot, RESTRICTED_MODE_FILTER, handle_restricted_mode_change, NULL);
+    if (r < 0) {
+        fprintf(stderr, "Failed: sd_bus_add_match: %s : %s\n", strerror(-r), RESTRICTED_MODE_FILTER);
+        goto finish;
+    }
+
+    // Read restricted mode
+    cache_restricted_mode();
 
     for (;;) {
         /* Process requests */

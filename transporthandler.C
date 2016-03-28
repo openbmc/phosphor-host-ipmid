@@ -35,8 +35,6 @@ const uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
 // Status of Set-In-Progress Parameter (# 0)
 uint8_t lan_set_in_progress = SET_COMPLETE;
 
-
-
 void register_netfn_transport_functions() __attribute__((constructor));
 
 // Helper Function to get IP Address/NetMask/Gateway from Network Manager or Cache
@@ -130,6 +128,7 @@ ipmi_ret_t ipmi_transport_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
+
     return rc;
 }
 
@@ -383,13 +382,13 @@ cleanup:
 void register_netfn_transport_functions()
 {
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_WILDCARD);
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL, ipmi_transport_wildcard);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL, ipmi_transport_wildcard, IPMI_BLACKLISTED_COMMAND);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_SET_LAN);
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_LAN, NULL, ipmi_transport_set_lan);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_LAN, NULL, ipmi_transport_set_lan, IPMI_BLACKLISTED_COMMAND);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_GET_LAN);
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL, ipmi_transport_get_lan);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL, ipmi_transport_get_lan, IPMI_WHITELISTED_COMMAND);
 
     return;
 }
