@@ -5,7 +5,8 @@ TESTER = testit
 TESTADDSEL = testaddsel
 
 DAEMON = ipmid
-DAEMON_OBJ  = ipmid.o
+DAEMON_OBJ  =  ipmid.o   \
+               ipmiwhitelist.o
 
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
