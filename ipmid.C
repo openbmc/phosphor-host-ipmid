@@ -26,8 +26,6 @@ void print_usage(void) {
   fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
-
-
 const char * DBUS_INTF = "org.openbmc.HostIpmi";
 
 const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
@@ -39,6 +37,13 @@ typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
 // Global data structure that contains the IPMI command handler's registrations.
 std::map<ipmi_fn_cmd_t, ipmi_fn_context_t> g_ipmid_router_map;
 
+// IPMI Spec, shared Reservation ID.
+unsigned short g_sel_reserve = 0xFFFF;
+
+unsigned short get_sel_reserve_id(void)
+{
+    return g_sel_reserve;
+}
 
 #ifndef HEXDUMP_COLS
 #define HEXDUMP_COLS 16
@@ -319,6 +324,8 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
     struct dirent **handler_list;
     int num_handlers = 0;
 
+    unsigned int i = 0;
+
     // This is used to check and abort if someone tries to register a bad one.
     void *lib_handler = NULL;
 
@@ -341,8 +348,8 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
         handler_fqdn += "/";
 
         num_handlers = scandir(ipmi_lib_path, &handler_list, handler_select, alphasort);
-	if (num_handlers < 0)
-		return;
+        if (num_handlers < 0)
+            return;
 
         while(num_handlers--)
         {
@@ -351,6 +358,7 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
             printf("Registering handler:[%s]\n",handler_fqdn.c_str());
 
             lib_handler = dlopen(handler_fqdn.c_str(), RTLD_NOW);
+
             if(lib_handler == NULL)
             {
                 fprintf(stderr,"ERROR opening [%s]: %s\n",
@@ -359,6 +367,7 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
             // Wipe the memory allocated for this particular entry.
             free(handler_list[num_handlers]);
         }
+
         // Done with all registration.
         free(handler_list);
     }

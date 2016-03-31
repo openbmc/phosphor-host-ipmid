@@ -13,7 +13,7 @@ void register_netfn_storage_functions() __attribute__((constructor));
 
 
 unsigned int   g_sel_time    = 0xFFFFFFFF;
-unsigned short g_sel_reserve = 0x1;
+extern unsigned short g_sel_reserve;
 
 ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
@@ -100,17 +100,19 @@ ipmi_ret_t ipmi_storage_get_sel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-
-
 ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    unsigned short res_id;
 
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    printf("IPMI Handling RESERVE-SEL 0x%04x\n", g_sel_reserve);
+    // IPMI spec, Reservation ID, the value simply increases against each execution of reserve_sel command.
+    if( ++g_sel_reserve == 0)
+        g_sel_reserve = 1;
 
+    printf("IPMI Handling RESERVE-SEL 0x%04x\n", g_sel_reserve);
 
     *data_len = sizeof(g_sel_reserve);
 
