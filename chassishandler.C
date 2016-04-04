@@ -92,7 +92,7 @@ finish:
     return r;
 }
 
-int dbus_get_property(char **buf)
+int dbus_get_property(const char *name,char **buf)
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *m = NULL;
@@ -128,7 +128,7 @@ int dbus_get_property(char **buf)
                            &m,                                         /* return message on success */
                            "ss",                                       /* input signature */
                            host_intf_name,                             /* first argument */
-                           "boot_flags");                              /* second argument */
+                           name);                                      /* second argument */
 
     if (r < 0) {
         fprintf(stderr, "Failed to issue method call: %s\n", error.message);
@@ -161,7 +161,7 @@ finish:
     return r;
 }
 
-int dbus_set_property(const char *buf)
+int dbus_set_property(const char * name,const char *value)
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *m = NULL;
@@ -196,16 +196,16 @@ int dbus_set_property(const char *buf)
                            &m,                                         /* return message on success */
                            "ssv",                                      /* input signature */
                            host_intf_name,                             /* first argument */
-                           "boot_flags",                               /* second argument */
+                           name,                                       /* second argument */
                            "s",                                        /* third argument */
-                           buf);                                       /* fourth argument */
+                           value);                                       /* fourth argument */
 
     if (r < 0) {
         fprintf(stderr, "Failed to issue method call: %s\n", error.message);
         goto finish;
     }
 
-    printf("IPMID boot option property set: {%s}.\n", buf);
+    printf("IPMID boot option property set: {%s}.\n", value);
 
 finish:
     sd_bus_error_free(&error);
@@ -374,7 +374,8 @@ char* get_boot_option_by_ipmi(uint8_t p) {
 }
 
 #define SET_PARM_VERSION 1
-#define SET_PARM_BOOT_FLAGS_VALID   0x80
+#define SET_PARM_BOOT_FLAGS_VALID_ONE_TIME   0x80
+#define SET_PARM_BOOT_FLAGS_VALID_PERMANENT  0xC0
 
 ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
                               ipmi_request_t request, ipmi_response_t response, 
@@ -391,7 +392,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     memset(resp,0,sizeof(*resp));
     resp->version   = SET_PARM_VERSION;
     resp->parm      = 5;
-    resp->data[0]   = SET_PARM_BOOT_FLAGS_VALID;
+    resp->data[0]   = SET_PARM_BOOT_FLAGS_VALID_ONE_TIME;
 
     *data_len = sizeof(*resp);
 
@@ -401,10 +402,11 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      */
     if (reqptr->parameter == 5) {
 
-        int r = dbus_get_property(&p);
+        /* Get the boot device */
+        int r = dbus_get_property("boot_flags",&p);
 
         if (r < 0) {
-            fprintf(stderr, "Dbus get property failed for get_sys_boot_options.\n");
+            fprintf(stderr, "Dbus get property(boot_flags) failed for get_sys_boot_options.\n");
             rc = IPMI_CC_UNSPECIFIED_ERROR;
 
         } else {
@@ -412,7 +414,30 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             s = get_ipmi_boot_option(p);
             resp->data[1] = (s << 2);
             rc = IPMI_CC_OK;
+
         }
+
+        if (p)
+        {
+          free(p);
+          p = NULL;
+        }
+
+        /* Get the boot policy */
+        r = dbus_get_property("boot_policy",&p);
+
+        if (r < 0) {
+            fprintf(stderr, "Dbus get property(boot_policy) failed for get_sys_boot_options.\n");
+            rc = IPMI_CC_UNSPECIFIED_ERROR;
+
+        } else {
+
+            printf("BootPolicy is[%s]", p); 
+            resp->data[0] = (strcmp(p,"ONETIME")==0)?SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
+            rc = IPMI_CC_OK;
+
+        }
+
 
     } else {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
@@ -455,13 +480,23 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         } else {
 
-            int r = dbus_set_property(s);
+            int r = dbus_set_property("boot_flags",s);
 
             if (r < 0) {
-                fprintf(stderr, "Dbus set property failed for set_sys_boot_options.\n");
+                fprintf(stderr, "Dbus set property(boot_flags) failed for set_sys_boot_options.\n");
                 rc = IPMI_CC_UNSPECIFIED_ERROR;
             }
         }
+      
+        /* setting the boot policy */
+        s= (char *)(((reqptr->data[0] & 0x40) == 0x40) ?"PERMANENT":"ONETIME");
+        printf ( "\nBoot Policy is %s",s); 
+        int r = dbus_set_property("boot_policy",s);
+
+        if (r < 0) {
+            fprintf(stderr, "Dbus set property(boot_policy) failed for set_sys_boot_options.\n");
+            rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
 
     } else {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
