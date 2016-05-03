@@ -100,7 +100,7 @@ typedef struct
 {
     char major;
     char minor;
-    uint8_t d[4];
+    uint16_t d[2];
 } rev_t;
 
 
@@ -119,6 +119,7 @@ int convert_version(const char *p, rev_t *rev)
     char *s, *token;
     char hexbyte[5];
     int l;
+    uint16_t commits;
 
     if (*p != 'v')
         return -1;
@@ -135,23 +136,23 @@ int convert_version(const char *p, rev_t *rev)
     // Capture the number of commits on top of the minor tag.
     // I'm using BE format like the ipmi spec asked for
     token = strtok(NULL,".-");
-    l = strlen(token);
-    if (l > 4)
-        l = 4;
 
-    memset(hexbyte,'0', 4);
-    memcpy(&hexbyte[4-l], token, l);
-    sscanf(&hexbyte[0], "%2hhX", &rev->d[0]);
-    sscanf(&hexbyte[2], "%2hhX", &rev->d[1]);
+    if (token) {
+        commits = (int16_t) atoi(token);
+        rev->d[0] = (commits>>8) | (commits<<8);
 
-    rev->d[2] = 0;
+        // commit number we skip
+        token = strtok(NULL,".-");
 
-    // commit number we skip
-    token = strtok(NULL,".-");
+    } else {
+        rev->d[0] = 0;
+    }
 
     // Any value of the optional parameter forces it to 1
-    token = strtok(NULL,".-");
-        rev->d[3] = (token != NULL) ? 1 : 0;
+    if (token)
+        token = strtok(NULL,".-");
+
+    rev->d[1] = (token != NULL) ? 1 : 0;
 
     free(s);
     return 0;
