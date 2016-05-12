@@ -180,6 +180,13 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     r = find_openbmc_path("SENSOR", reqptr->sennum, &a);
 
+    if (r < 0) {
+        fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
+        *data_len=0;
+        rc = IPMI_CC_SENSOR_INVALID;
+        goto final;
+    }
+
     type = find_sensor(reqptr->sennum);
 
     fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n", a.bus, a.path, a.interface);
@@ -220,6 +227,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             break;
     }
 
+final:
 
     reply = sd_bus_message_unref(reply);
 
