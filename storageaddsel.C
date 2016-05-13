@@ -80,16 +80,39 @@ size_t getfilestream(const char *fn, uint8_t **buffer) {
 
 	FILE *fp;
 	size_t size = 0;
+	int r;
 
 	if ((fp = fopen(fn, "rb")) != NULL) {
 
-		fseek(fp, 0, SEEK_END);
+		r = fseek(fp, 0, SEEK_END);
+		if (r) {
+			fprintf(stderr,"Fseek failed\n");
+			goto fclose_fp;
+		}
+
 		size = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
+		if (size == -1L) {
+			fprintf(stderr,"Ftell failed for %s\n", strerror(errno));
+			size = 0;
+			goto fclose_fp;
+		}
+
+		r = fseek(fp, 0, SEEK_SET);
+		if (r) {
+			fprintf(stderr,"Fseek failed\n");
+			size = 0;
+			goto fclose_fp;
+		}
 
 		*buffer = new uint8_t [size];
 
-		fread(*buffer, 1, size, fp);
+		r = fread(*buffer, 1, size, fp);
+		if ( r != size) {
+			size = 0;
+			fprintf(stderr,"Fread failed\n");
+		}
+
+fclose_fp:
 		fclose(fp);
 	}
 
@@ -205,6 +228,7 @@ void send_esel(uint16_t recordid) {
 	uint8_t *buffer = NULL;
 	const char *path = "/tmp/esel";
 	size_t sz;
+	int r;
 
 	sz = getfilestream(path, &buffer);
 	if (sz == 0) {
@@ -216,7 +240,10 @@ void send_esel(uint16_t recordid) {
 	create_esel_association(buffer, &assoc);
 	create_esel_description(buffer, sev, &desc);
 
-	send_esel_to_dbus(desc, sev, assoc, buffer, sz);
+	r = send_esel_to_dbus(desc, sev, assoc, buffer, sz);
+	if (r < 0) {
+		fprintf(stderr, "Failed to send esel to dbus\n");
+	}
 
 	free(assoc);
 	free(desc);
