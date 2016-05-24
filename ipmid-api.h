@@ -58,6 +58,8 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
                                        ipmi_context_t, ipmid_callback_t);
 
+unsigned short get_sel_reserve_id(void);
+
 // These are the command network functions, the response
 // network functions are the function + 1. So to determine
 // the proper network function which issued the command
@@ -91,6 +93,7 @@ enum ipmi_return_codes
     IPMI_CC_OK = 0x00,
     IPMI_DCMI_CC_NO_ACTIVE_POWER_LIMIT = 0x80,
     IPMI_CC_INVALID = 0xC1,
+    IPMI_CC_INVALID_RESERVATION_ID = 0xC5,
     IPMI_CC_PARM_OUT_OF_RANGE = 0xC9,
     IPMI_CC_SENSOR_INVALID = 0xCB,
     IPMI_CC_RESPONSE_ERROR = 0xCE,
