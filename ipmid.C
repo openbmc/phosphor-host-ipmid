@@ -565,6 +565,11 @@ int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *valu
 
     r = find_openbmc_path("SENSOR", number, &a);
 
+    if (r < 0) {
+        fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
+        return 0;
+    }
+
     r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
@@ -601,6 +606,11 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
         number, method, value);
 
     r = find_openbmc_path("SENSOR", number, &a);
+
+    if (r < 0) {
+        fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
+        return 0;
+    }
 
     r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
