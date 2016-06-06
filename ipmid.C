@@ -272,6 +272,10 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     if(r != 0)
     {
         fprintf(stderr,"ERROR:[0x%X] handling NetFn:[0x%X], Cmd:[0x%X]\n",r, netfn, cmd);
+
+        if(r == -1) {
+           response[0] = IPMI_CC_UNSPECIFIED_ERROR;
+        }
     }
 
     fprintf(ipmiio, "IPMI Response:\n");
