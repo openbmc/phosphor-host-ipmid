@@ -7,9 +7,9 @@
 const char  *control_object_name  =  "/org/openbmc/control/bmc0";
 const char  *control_intf_name    =  "org.openbmc.control.Bmc";
 
-const char  *objectmapper_service_name =  "org.openbmc.objectmapper";
-const char  *objectmapper_object_name  =  "/org/openbmc/objectmapper/objectmapper";
-const char  *objectmapper_intf_name    =  "org.openbmc.objectmapper.ObjectMapper";
+const char  *objectmapper_service_name =  "org.openbmc.ObjectMapper";
+const char  *objectmapper_object_name  =  "/org/openbmc/ObjectMapper";
+const char  *objectmapper_intf_name    =  "org.openbmc.ObjectMapper";
 
 void register_netfn_global_functions() __attribute__((constructor));
 
