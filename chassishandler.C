@@ -27,9 +27,9 @@ const char *settings_object_name  =  "/org/openbmc/settings/host0";
 const char *settings_intf_name    =  "org.freedesktop.DBus.Properties";
 const char *host_intf_name        =  "org.openbmc.settings.Host";
 
-const char *objmapper_service_name =  "org.openbmc.objectmapper";
-const char *objmapper_object_name  =  "/org/openbmc/objectmapper/objectmapper";
-const char *objmapper_intf_name    =  "org.openbmc.objectmapper.ObjectMapper";
+const char *objmapper_service_name =  "org.openbmc.ObjectMapper";
+const char *objmapper_object_name  =  "/org/openbmc/ObjectMapper";
+const char *objmapper_intf_name    =  "org.openbmc.ObjectMapper";
 
 int object_mapper_get_connection(char **buf, const char *obj_path)
 {
