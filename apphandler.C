@@ -187,7 +187,9 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if( r >= 0 ) {
             // bit7 identifies state of SDR repository, hence the mask
             dev_id[DEVICE_FW1] |= 0x7F & rev.major;
-            dev_id[DEVICE_FW2] = rev.minor;
+
+            rev.minor = (rev.minor > 99 ? 99 : rev.minor);
+            dev_id[DEVICE_FW2] = rev.minor % 10 + (rev.minor / 10) * 16;
             memcpy(&dev_id[DEVICE_AUX], rev.d, 4);
         }
     }
