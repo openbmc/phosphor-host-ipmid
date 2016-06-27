@@ -443,7 +443,9 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("IPMI APP GET CHANNEL INFO\n");
 
-    // I"m only supporting channel 1.  0xE is the 'default channel'
+    // The supported channels numbers are 1 and 8.
+    // Channel Number E is used as way to identify the current channel
+    // that the command is being is received from.
     if (*p == 0xe || *p == 1 || *p == 8) {
 
         *data_len = sizeof(resp);
