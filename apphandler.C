@@ -208,7 +208,6 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     const char  *iface = "org.freedesktop.DBus.Properties";
     const char  *chassis_iface = "org.openbmc.control.Chassis";
     sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
     char *uuid = NULL;
 
@@ -231,7 +230,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Call Get properties method with the interface and property name
     r = sd_bus_call_method(bus,busname,objname,iface,
-                           "Get",&error, &reply, "ss",
+                           "Get", NULL, &reply, "ss",
                            chassis_iface, "uuid");
     if (r < 0)
     {
@@ -285,8 +284,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     memcpy(response, &resp_uuid, *data_len);
 
 finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
+    sd_bus_message_unref(reply);
 
     return rc;
 }
@@ -330,8 +328,6 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     const char  *busname = "org.openbmc.watchdog.Host";
     const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
     set_wd_data_t *reqptr = (set_wd_data_t*) request;
@@ -349,19 +345,16 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Set watchdog timer
     r = sd_bus_call_method(bus, busname, objname, iface,
-                           "set", &error, &reply, "i", timer_ms);
+                           "set", NULL, NULL, "i", timer_ms);
     if(r < 0)
     {
         fprintf(stderr, "Failed to call the SET method: %s\n", strerror(-r));
         goto finish;
     }
 
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-
     // Stop the current watchdog if any
     r = sd_bus_call_method(bus, busname, objname, iface,
-                           "stop", &error, &reply, NULL);
+                           "stop", NULL, NULL, NULL);
     if(r < 0)
     {
         fprintf(stderr, "Failed to call the STOP method: %s\n", strerror(-r));
@@ -370,12 +363,9 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (reqptr->t_use & 0x40)
     {
-        sd_bus_error_free(&error);
-        reply = sd_bus_message_unref(reply);
-
         // Start the watchdog if requested
         r = sd_bus_call_method(bus, busname, objname, iface,
-                               "start", &error, &reply, NULL);
+                               "start", NULL, NULL, NULL);
         if(r < 0)
         {
             fprintf(stderr, "Failed to call the START method: %s\n", strerror(-r));
@@ -383,9 +373,6 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
 finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-
     return (r < 0) ? -1 : IPMI_CC_OK;
 }
 
@@ -397,8 +384,6 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     const char  *busname = "org.openbmc.watchdog.Host";
     const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
     // Status code.
@@ -409,14 +394,11 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Refresh watchdog
     r = sd_bus_call_method(bus, busname, objname, iface,
-                           "poke", &error, &reply, NULL);
+                           "poke", NULL, NULL, NULL);
     if (r < 0) {
         fprintf(stderr, "Failed to add reset  watchdog: %s\n", strerror(-r));
         rc = -1;
     }
-
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
 
     return rc;
 }

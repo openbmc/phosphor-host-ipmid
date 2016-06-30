@@ -181,10 +181,9 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
 
 static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned char netfn, unsigned char lun, unsigned char cmd, unsigned char cc, unsigned char *buf, unsigned char len) {
 
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *reply = NULL, *m=NULL;
+    sd_bus_message *m=NULL;
     const char *dest, *path;
-    int r, pty;
+    int r;
 
     dest = sd_bus_message_get_sender(req);
     path = sd_bus_message_get_path(req);
@@ -216,22 +215,15 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
 
 
     // Call the IPMI responder on the bus so the message can be sent to the CEC
-    r = sd_bus_call(bus, m, 0, &error, &reply);
+    r = sd_bus_call(bus, m, 0, NULL, NULL);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
         fprintf(stderr, "Dest: %s, Path: %s\n", dest, path);
         goto final;
     }
 
-    r = sd_bus_message_read(reply, "x", &pty);
-    if (r < 0) {
-       fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
-    }
-
 final:
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
-    reply = sd_bus_message_unref(reply);
+    sd_bus_message_unref(m);
 
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
@@ -469,7 +461,6 @@ finish:
 int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) {
 
     char  *str1;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *reply = NULL, *m=NULL;
 
 
@@ -491,7 +482,7 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
         goto final;
     }
 
-    r = sd_bus_call(bus, m, 0, &error, &reply);
+    r = sd_bus_call(bus, m, 0, NULL, &reply);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s", strerror(-r));
         goto final;
@@ -507,9 +498,8 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
 
 final:
 
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
-    reply = sd_bus_message_unref(reply);
+    sd_bus_message_unref(m);
+    sd_bus_message_unref(reply);
 
     return r;
 }
@@ -524,14 +514,13 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
     const char  *objname = "/org/openbmc/managers/System";
 
     char  *str1, *str2, *str3;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *reply = NULL;
 
 
     int r;
 
     r = sd_bus_call_method(bus,busname,objname,busname, "getObjectFromByteId",
-                           &error, &reply, "sy", type, num);
+                           NULL, &reply, "sy", type, num);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         goto final;
@@ -551,8 +540,7 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
 
 final:
 
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
+    sd_bus_message_unref(reply);
 
     return r;
 }
@@ -568,7 +556,6 @@ int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *valu
 
     dbus_interface_t a;
     int r;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *m=NULL;
 
     fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of %s\n",
@@ -594,14 +581,13 @@ int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *valu
     }
 
 
-    r = sd_bus_call(bus, m, 0, &error, NULL);
+    r = sd_bus_call(bus, m, 0, NULL, NULL);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s", strerror(-r));
     }
 
 final:
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
+    sd_bus_message_unref(m);
 
     return 0;
 }
@@ -610,7 +596,6 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
 
     dbus_interface_t a;
     int r;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *m=NULL;
 
     fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of 0x%02x\n",
@@ -636,14 +621,13 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
     }
 
 
-    r = sd_bus_call(bus, m, 0, &error, NULL);
+    r = sd_bus_call(bus, m, 0, NULL, NULL);
     if (r < 0) {
         fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
     }
 
 final:
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
+    sd_bus_message_unref(m);
 
     return 0;
 }
