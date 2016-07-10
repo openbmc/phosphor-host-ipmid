@@ -305,8 +305,14 @@ int handler_select(const struct dirent *entry)
     char dname_copy[4] = {0};
 
     // We want to avoid checking for everything and isolate to the ones having
-    // .so in them.
-    if(strstr(entry->d_name, IPMI_PLUGIN_EXTN))
+    // .so.* or .so in them.
+    // Check for versioned libraries .so.*
+    if(strstr(entry->d_name, IPMI_PLUGIN_SONAME_EXTN))
+    {
+        return 1;
+    }
+    // Check for non versioned libraries .so
+    else if(strstr(entry->d_name, IPMI_PLUGIN_EXTN))
     {
         // It is possible that .so could be anywhere in the string but unlikely
         // But being careful here. Get the base address of the string, move
