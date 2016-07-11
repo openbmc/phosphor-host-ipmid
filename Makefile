@@ -5,7 +5,8 @@ TESTER = testit
 TESTADDSEL = testaddsel
 
 DAEMON = ipmid
-DAEMON_OBJ  = ipmid.o
+DAEMON_OBJ  =  ipmid.o \
+               ipmiwhitelist.o
 
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
@@ -44,7 +45,13 @@ SBINDIR ?= /usr/sbin
 INCLUDEDIR ?= /usr/include
 LIBDIR ?= /usr/lib
 
-all: $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
+WHITELIST_SRC = ipmiwhitelist.C
+WHITELIST_CONF ?= host-ipmid-whitelist.conf
+
+all: $(WHITELIST_SRC) $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
+
+$(WHITELIST_SRC) : $(WHITELIST_CONF)
+	./generate_whitelist.sh $< > $@
 
 %.o: %.C
 	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
@@ -62,11 +69,11 @@ $(TESTER): $(TESTER_OBJ)
 	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
 
 clean:
-	rm -f $(DAEMON) $(TESTER) *.o *.so
+	rm -f $(DAEMON) $(TESTER) *.o *.so $(WHITELIST_SRC)
 
 $(TESTADDSEL): $(TESTADDSEL_OBJ)
 	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
-		
+
 install:
 		install -m 0755 -d $(DESTDIR)$(SBINDIR)
 		install -m 0755 ipmid $(DESTDIR)$(SBINDIR)
@@ -74,4 +81,5 @@ install:
 		install -m 0755 $(INSTALLED_LIBS) $(DESTDIR)$(LIBDIR)/host-ipmid
 		install -m 0755 -d $(DESTDIR)$(INCLUDEDIR)/host-ipmid
 		install -m 0644 $(INSTALLED_HEADERS) $(DESTDIR)$(INCLUDEDIR)/host-ipmid
+
 
