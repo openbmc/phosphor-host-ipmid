@@ -10,8 +10,15 @@ extern sd_bus *bus;
 
 void register_netfn_app_functions() __attribute__((constructor));
 
+// Offset in get device id command.
+#define DEVICE_ID 0
+#define DEVICE_REVISION 1
 #define DEVICE_FW1 2
 #define DEVICE_FW2 3
+#define DEVICE_IPMI_VER 4
+#define DEVICE_ADDITIONAL_DEV_SUPPORT 5
+#define DEVICE_MANUFACTURER_ID 6
+#define DEVICE_PRODUCT_ID 9
 #define DEVICE_AUX 11
 
 //---------------------------------------------------------------------
@@ -169,30 +176,56 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     char *ver = NULL;
     int r;
     rev_t rev = {0};
-
-    // TODO:
-    // This value is the IANA number assigned to "IBM Platform Firmware
-    // Division", which is also used by our service processor.  We may want
-    // a different number or at least a different version?
-    uint8_t dev_id[] = {0, 0, 0, 0, 2, 0xD, 0x41, 0xA7, 0x00, 0x43, 0x40, 0, 0, 0, 0};
+    uint8_t dev_id[15] = {0};
 
     // Data length
     *data_len = sizeof(dev_id);
 
+    // From IPMI spec, controller that have different application commands, or different
+    // definitions of OEM fields, are expected to have different Device ID values.
+    // Set to 0 now.
+    dev_id[DEVICE_ID] = 0;
+
+    // Device Revision is set to 0 now.
+    // Bit7 identifies if device provide Device SDRs, obmc don't have SDR, we use ipmi to
+    // simulate SDR, hence the value:
+    dev_id[DEVICE_REVISION] = 0;
+
+    // Firmware revision is already implemented, so get it from appropriate position.
     r = sd_bus_get_property_string(bus,busname,objname,iface,"version", NULL, &ver);
     if ( r < 0 ) {
         fprintf(stderr, "Failed to obtain version property: %s\n", strerror(-r));
     } else {
         r = convert_version(ver, &rev);
         if( r >= 0 ) {
-            // bit7 identifies state of SDR repository, hence the mask
-            dev_id[DEVICE_FW1] |= 0x7F & rev.major;
+            // bit7 identifies if the device is available, 0=normal operation,
+            // 1=device firmware, SDR update or self-initialization in progress.
+            // our SDR is normal working condition, so mask:
+            dev_id[DEVICE_FW1] = 0x7F & rev.major;
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             dev_id[DEVICE_FW2] = rev.minor % 10 + (rev.minor / 10) * 16;
             memcpy(&dev_id[DEVICE_AUX], rev.d, 4);
         }
     }
+
+    // IPMI Spec verison 2.0
+    dev_id[DEVICE_IPMI_VER] = 2;
+
+    // For we support FRU/SEL/Sensor now.
+    dev_id[DEVICE_ADDITIONAL_DEV_SUPPORT] = 0xD;
+
+    // This value is the IANA number assigned to "IBM Platform Firmware
+    // Division", which is also used by our service processor.  We may want
+    // a different number or at least a different version?
+    dev_id[DEVICE_MANUFACTURER_ID] = 0x41;
+    dev_id[DEVICE_MANUFACTURER_ID + 1] = 0xA7;
+    dev_id[DEVICE_MANUFACTURER_ID + 2] = 0x00;
+
+    // Product ID is 0x3201 from Legacy in FSP. And it is 0x4340 from former source code.
+    // We need to implement an unique product id that could be read.
+    dev_id[DEVICE_PRODUCT_ID] = 0x32;
+    dev_id[DEVICE_PRODUCT_ID + 1] =0x01;
 
     // Pack the actual response
     memcpy(response, &dev_id, *data_len);
