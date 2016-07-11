@@ -5,7 +5,7 @@ TESTER = testit
 TESTADDSEL = testaddsel
 
 DAEMON = ipmid
-DAEMON_OBJ  = ipmid.o
+DAEMON_OBJ  =  ipmid.o   
 
 LIB_APP_OBJ = apphandler.o     \
               sensorhandler.o  \
@@ -44,7 +44,11 @@ SBINDIR ?= /usr/sbin
 INCLUDEDIR ?= /usr/include
 LIBDIR ?= /usr/lib
 
-all: $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
+WHITELIST_SRC = ipmiwhitelist.C
+WHITELIST_CONF = host-ipmid-whitelist.conf
+GEN_WHITELIST = $(shell ./generate_whitelist.sh $(WHITELIST_CONF) > $(WHITELIST_SRC))
+
+all: $(GEN_WHITELIST) $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
 
 %.o: %.C
 	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
