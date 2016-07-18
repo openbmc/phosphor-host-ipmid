@@ -37,5 +37,9 @@ enum ipmi_chassis_control_cmds : uint8_t
 	CMD_PULSE_DIAGNOSTIC_INTR  = 0x04,
 	CMD_SOFT_OFF_VIA_OVER_TEMP = 0x05,
 };
-
+enum class BootOptionParameterTypes
+{
+    PARAM_5          = 0x5,
+    PARAM_61         = 0x61
+};
 #endif
