@@ -11,6 +11,7 @@
 #include "ipmid.H"
 #include <sys/time.h>
 #include <errno.h>
+#include <mapper.h>
 #include "sensorhandler.h"
 
 sd_bus *bus = NULL;
@@ -525,27 +526,37 @@ final:
 // This will be used until an alternative is found.  this is the first
 // step for mapping IPMI
 int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
-
-    const char  *busname = "org.openbmc.managers.System";
+    const char  *busname = NULL;
+    const char  *iface = "org.openbmc.managers.System";
     const char  *objname = "/org/openbmc/managers/System";
-
-    char  *str1, *str2, *str3;
+    const char  *str1 = NULL, *str2, *str3;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *reply = NULL;
 
 
     int r;
+    r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get system manager busname: %s\n", strerror(-r));
+        goto final;
+    }
 
-    r = sd_bus_call_method(bus,busname,objname,busname, "getObjectFromByteId",
+    r = sd_bus_call_method(bus,busname,objname,iface, "getObjectFromByteId",
                            &error, &reply, "sy", type, num);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         goto final;
     }
 
-    r = sd_bus_message_read(reply, "(sss)", &str1, &str2, &str3);
+    r = sd_bus_message_read(reply, "(ss)", &str2, &str3);
     if (r < 0) {
         fprintf(stderr, "Failed to get a response: %s", strerror(-r));
+        goto final;
+    }
+
+    r = mapper_get_service(bus, str2, &str1);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get item busname: %s\n", strerror(-r));
         goto final;
     }
 
@@ -559,6 +570,8 @@ final:
 
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free((char *)busname);
+    free((char *)str1);
 
     return r;
 }

@@ -50,13 +50,13 @@ all: $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
 	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
 
 $(LIB_APP): $(LIB_APP_OBJ)
-	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@
+	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@ -lmapper
 
 $(LIB_HOST_SRV): $(LIB_HOST_SRV_OBJ)
 	$(CXX) $^ -shared $(LDFLAGS) $(LIB_FLAG) -o $@
 
 $(DAEMON): $(DAEMON_OBJ)
-	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
+	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -lmapper -ldl
 
 $(TESTER): $(TESTER_OBJ)
 	$(CXX) $^ $(LDFLAGS) $(LIB_FLAG) -o $@ -ldl
