@@ -37,5 +37,16 @@ enum ipmi_chassis_control_cmds : uint8_t
 	CMD_PULSE_DIAGNOSTIC_INTR  = 0x04,
 	CMD_SOFT_OFF_VIA_OVER_TEMP = 0x05,
 };
+enum class BootOptionParameter : uint8_t
+{
+    BOOT_FLAGS                    = 0x5,
+    OPAL_NETWORK_SETTINGS         = 0x61
+};
+
+enum class BootOptionResponseSize : uint8_t
+{
+    BOOT_FLAGS                    = 0x5,
+    OPAL_NETWORK_SETTINGS         = 0x1A 
+};
 
 #endif
