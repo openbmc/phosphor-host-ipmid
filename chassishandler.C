@@ -1,18 +1,37 @@
 #include "chassishandler.h"
 #include "ipmid-api.h"
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <mapper.h>
-
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <limits.h>
+#include <string.h>
+#include <endian.h>
+#include <sstream>
+#include <array>
 
 //Defines
-#define SET_PARM_VERSION 1
-#define SET_PARM_BOOT_FLAGS_PERMANENT 0x40 //boot flags data1 7th bit on
+#define SET_PARM_VERSION                     0x01
+#define SET_PARM_BOOT_FLAGS_PERMANENT        0x40 //boot flags data1 7th bit on
 #define SET_PARM_BOOT_FLAGS_VALID_ONE_TIME   0x80 //boot flags data1 8th bit on
-#define SET_PARM_BOOT_FLAGS_VALID_PERMANENT  0xC0 //boot flags data1 7 & 8 bit on 
+#define SET_PARM_BOOT_FLAGS_VALID_PERMANENT  0xC0 //boot flags data1 7 & 8 bit on
 
-
+constexpr size_t SIZE_MAC  = 18;
+constexpr size_t SIZE_BOOT_OPTION = (uint8_t)BootOptionResponseSize::
+                                             OPAL_NETWORK_SETTINGS;//Maximum size of the boot option parametrs
+constexpr size_t SIZE_PREFIX = 7;
+constexpr size_t MAX_PREFIX_VALUE = 32;
+constexpr size_t SIZE_COOKIE = 4;
+constexpr size_t SIZE_VERSION = 2;
+constexpr auto   MAC_ADDRESS_FORMAT = "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx";
+constexpr auto   IP_ADDRESS_FORMAT = "%d.%d.%d.%d";
+constexpr auto   PREFIX_FORMAT = "%d";
+constexpr auto   ADDR_TYPE_FORMAT = "%hhx";
+//PetiBoot-Specific
+static constexpr uint8_t net_conf_initial_bytes[] = {0x80,0x21, 0x70 ,0x62 ,0x21,
+                                  0x00 ,0x01 ,0x06 ,0x04};
 
 // OpenBMC Chassis Manager dbus framework
 const char  *chassis_bus_name      =  "org.openbmc.control.Chassis";
@@ -154,13 +173,319 @@ struct get_sys_boot_options_t {
 struct get_sys_boot_options_response_t {
     uint8_t version;
     uint8_t parm;
-    uint8_t data[5];
+    uint8_t data[SIZE_BOOT_OPTION];
 }  __attribute__ ((packed));
 
 struct set_sys_boot_options_t {
     uint8_t parameter;
-    uint8_t data[8];
+    uint8_t data[SIZE_BOOT_OPTION];
 }  __attribute__ ((packed));
+
+struct host_network_config_t {
+    std::string ipaddress;
+    std::string prefix;
+    std::string gateway;
+    std::string macaddress;
+    std::string addrType;
+
+    host_network_config_t()=default;
+};
+
+void fillNetworkConfig( host_network_config_t & host_config ,
+                        const std::string& conf_str ) {
+
+    constexpr auto COMMA_DELIMITER = ",";
+    constexpr auto EQUAL_DELIMITER = "=";
+    size_t  commaDelimtrPos = 0;
+    size_t  equalDelimtrPos = 0,commaDelimtrPrevPos = 0;
+    std::string value;
+    while ( commaDelimtrPos < conf_str.length() ) {
+
+        commaDelimtrPos = conf_str.find(COMMA_DELIMITER,commaDelimtrPos);
+        //This condition is to extract the last
+        //Substring as we will not be having the delimeter
+        //at end. std::string::npos is -1
+
+        if ( commaDelimtrPos == std::string::npos ) {
+            commaDelimtrPos = conf_str.length();
+        }
+
+        equalDelimtrPos = conf_str.find (EQUAL_DELIMITER,commaDelimtrPrevPos);
+
+        //foo,ipaddress=1234
+        if ( equalDelimtrPos == std::string::npos ) {
+
+            commaDelimtrPos++;
+            commaDelimtrPrevPos= commaDelimtrPos;
+            continue;
+        }
+
+        value = conf_str.substr((equalDelimtrPos+1),
+                commaDelimtrPos-(equalDelimtrPos+1));
+
+#ifdef _IPMI_DEBUG_
+        printf ("Name=[%s],Value=[%s],commaDelimtrPos=[%d],\
+                commaDelimtrPrevPos=[%d],equalDelimtrPos=[%d]\n",
+                name.c_str(),value.c_str(),commaDelimtrPos,
+                commaDelimtrPrevPos,equalDelimtrPos);
+#endif
+
+        if ( 0 == conf_str.compare(commaDelimtrPrevPos,
+                    equalDelimtrPos-commaDelimtrPrevPos,"ipaddress" )) {
+
+           host_config.ipaddress = std::move(value);
+        }
+        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
+                    equalDelimtrPos-commaDelimtrPrevPos,"prefix" )) {
+
+           host_config.prefix = std::move(value);
+        }
+        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
+                    equalDelimtrPos-commaDelimtrPrevPos, "gateway" )) {
+            host_config.gateway = std::move(value);
+        }
+        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
+                    equalDelimtrPos-commaDelimtrPrevPos, "mac" )) {
+            host_config.macaddress = std::move(value);
+        }
+        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
+                    equalDelimtrPos-commaDelimtrPrevPos, "addr_type" )) {
+            host_config.addrType = std::move(value);
+        }
+
+        commaDelimtrPos++;
+        commaDelimtrPrevPos= commaDelimtrPos;
+    }
+}
+
+int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
+{
+
+    char *prop = nullptr;
+    int rc = dbus_get_property("network_config",&prop);
+
+    if ( rc < 0 ) {
+        fprintf(stderr, "Dbus get property(boot_flags) failed\
+                for get_sys_boot_options.\n");
+        return rc;
+    }
+
+    std::string conf_str(prop);
+
+    if ( prop ) {
+
+        free(prop);
+        prop = nullptr;
+    }
+
+    /* network_config property Value would be in the form of
+     * ipaddress=1.1.1.1,prefix=16,gateway=2.2.2.2,mac=11:22:33:44:55:66,dhcp=0
+     */
+
+    /* Parsing the string and fill the hostconfig structure with the
+     * values */
+
+    printf ("Configuration String[%s]\n ",conf_str.c_str());
+
+    host_network_config_t host_config;
+
+    // Fill the host_config from the configuration string
+    fillNetworkConfig(host_config,conf_str);
+
+    //Assigning the index as intialByteLength as it is fixed and prefilled.
+    size_t index = sizeof(net_conf_initial_bytes);
+    printf ("host_config.macaddress.c_str()=[%s]\n",host_config.macaddress.c_str());
+    do{
+
+        rc = sscanf(host_config.macaddress.c_str(),MAC_ADDRESS_FORMAT,
+             (respptr->data+index), (respptr->data+index+1),
+             (respptr->data+index+2),(respptr->data+index+3),
+             (respptr->data+index+4), (respptr->data+index+5));
+
+
+        if ( rc < 6 ){
+            fprintf(stderr, "sscanf Failed in extracting mac address.\n");
+            rc = -1;
+            break;
+        }
+
+        index+=6;
+
+        //Conevrt the dhcp,ipaddress,mask and gateway as hex number
+        respptr->data[index]=0x00;
+        index++;
+
+        rc = sscanf(host_config.addrType.c_str(),ADDR_TYPE_FORMAT,
+                   (respptr->data+index));
+        index++;
+
+
+        if ( rc <= 0 ) {
+            fprintf(stderr, "sscanf Failed in extracting address type.\n");
+            rc = -1;
+            break;
+        }
+
+        //ipaddress and gateway would be in IPv4 format
+        rc = inet_pton(AF_INET,host_config.ipaddress.c_str(),
+                      (respptr->data+index));
+
+        if ( rc <= 0 ) {
+            fprintf(stderr, "inet_pton failed during ipaddress coneversion\n");
+            rc = -1;
+            break;
+        }
+        index+=4;
+
+        rc = sscanf(host_config.prefix.c_str(),PREFIX_FORMAT,
+                                               (respptr->data+index));
+
+        index++;
+
+        if ( rc <= 0 ) {
+            fprintf(stderr, "sscanf failed during prefix extraction.\n");
+            rc = -1;
+            break;
+        }
+
+        rc = inet_pton(AF_INET,host_config.gateway.c_str(),
+                      (respptr->data+index));
+
+        if ( rc <= 0 ) {
+            fprintf(stderr, "inet_pton failed during gateway conversion.\n");
+            rc = -1;
+            break;
+        }
+        index+=4;
+
+
+    }while (0);
+
+    if ( rc ) {
+
+        //PetiBoot-Specific
+        //If sucess then copy the first 9 bytes to the data
+        //else set the respptr to 0
+
+       memcpy(respptr->data,net_conf_initial_bytes,
+              sizeof(net_conf_initial_bytes));
+
+#ifdef _IPMI_DEBUG_
+       printf ("\n===Printing the IPMI Formatted Data========\n");
+
+       for ( uint8_t pos = 0; pos<index; pos++ )
+           printf("%02x ", respptr->data[pos]);
+#endif
+
+    }else {
+
+        memset(respptr->data,0,SIZE_BOOT_OPTION);
+    }
+
+    return rc;
+}
+
+int setHostNetworkData(set_sys_boot_options_t * reqptr)
+{
+    std::string host_network_config;
+    char mac[SIZE_MAC] = {0};
+    char ipAddress[INET_ADDRSTRLEN] = {0};
+    char gateway[INET_ADDRSTRLEN] = {0};
+    char dhcp[SIZE_PREFIX] = {0};
+    char prefix[SIZE_PREFIX] = {0};
+    char cookie[SIZE_COOKIE] = {0};
+    char version[SIZE_VERSION] = {0};
+    int rc = 0;
+    uint32_t cookie_int=0;
+
+    //cookie starts from second byte
+    // version starts from sixth byte
+
+    memcpy(&cookie,&(reqptr->data[1]),sizeof(cookie));
+    memcpy(&version,&(reqptr->data[5]),sizeof(version));
+
+    size_t index = sizeof(net_conf_initial_bytes);
+
+    do {
+
+        // cookie ==  0x21 0x70 0x62 0x21
+        if ( memcmp(&cookie,(net_conf_initial_bytes+1),
+                    sizeof(cookie)) == 0 ) {
+
+            // vesion == 0x00 0x01
+            if ( memcmp(version,(net_conf_initial_bytes+5),sizeof(version)) != 0 ) {
+
+                fprintf(stderr, "Invalid Version\n");
+                rc = -1;
+                break;
+            }
+
+            snprintf(mac, SIZE_MAC, MAC_ADDRESS_FORMAT,
+                    reqptr->data[index],
+                    reqptr->data[index+1],
+                    reqptr->data[index+2],
+                    reqptr->data[index+3],
+                    reqptr->data[index+4],
+                    reqptr->data[index+5]);
+
+            snprintf(dhcp,SIZE_PREFIX, ADDR_TYPE_FORMAT, reqptr->data[index+7]);
+            //Validating the address  type which could be
+            //either static or dynamic
+            if( *(reqptr->data+index+7) > 1 ) {
+
+                fprintf(stderr, "Invalid Address Type\n");
+                rc = -1;
+                break;
+
+            }
+
+            snprintf(ipAddress, INET_ADDRSTRLEN, IP_ADDRESS_FORMAT,
+                    reqptr->data[index+8], reqptr->data[index+9], 
+                    reqptr->data[index+10], reqptr->data[index+11]);
+
+            //validating prefix
+            if ( *(reqptr->data+index+12) > (uint8_t)MAX_PREFIX_VALUE ) {
+
+                fprintf(stderr, "Invalid Prefix\n");
+                rc = -1;
+                break;
+            }
+
+            snprintf(prefix,SIZE_PREFIX,PREFIX_FORMAT, reqptr->data[index+12]);
+
+            snprintf(gateway, INET_ADDRSTRLEN,IP_ADDRESS_FORMAT,
+                    reqptr->data[index+13], reqptr->data[index+14], 
+                    reqptr->data[index+15], reqptr->data[index+16]);
+
+
+        } else if ( memcmp(&cookie,&cookie_int,sizeof(cookie))!= 0) {//Not a valid cookie and not 0
+
+            fprintf(stderr, "Invalid Cookie\n");
+            rc = -1;
+        }
+
+    }while(0);
+
+    if( !rc )
+    {
+        //Cookie == 0 or it is a valid cookie
+        host_network_config += "ipaddress="+std::string(ipAddress)+",prefix="+ 
+            std::string(prefix)+",gateway="+std::string(gateway)+
+            ",mac="+std::string(mac)+",addr_type="+std::string(dhcp);
+
+        printf ("Network configuration changed: %s\n",host_network_config.c_str());
+
+        rc = dbus_set_property("network_config",host_network_config.c_str());
+
+        if ( rc < 0 ) {
+            fprintf(stderr, "Dbus set property(network_config)\
+                             failed for set_sys_boot_options.\n");
+            rc = -1;
+        }
+
+    }
+    return rc;
+}
 
 ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
                               ipmi_request_t request, ipmi_response_t response, 
@@ -320,14 +645,15 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     resp->parm      = 5;
     resp->data[0]   = SET_PARM_BOOT_FLAGS_VALID_ONE_TIME;
 
-    *data_len = sizeof(*resp);
 
     /*
      * Parameter #5 means boot flags. Please refer to 28.13 of ipmi doc.
      * This is the only parameter used by petitboot.
      */
-    if (reqptr->parameter == 5) {
+    if ( reqptr->parameter == static_cast<uint8_t>
+       ( BootOptionParameter::BOOT_FLAGS )) {
 
+        *data_len = static_cast<uint8_t>(BootOptionResponseSize::BOOT_FLAGS);
         /* Get the boot device */
         int r = dbus_get_property("boot_flags",&p);
 
@@ -358,7 +684,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         } else {
 
-            printf("BootPolicy is[%s]", p); 
+            printf("BootPolicy is[%s]", p);
             resp->data[0] = (strncmp(p,"ONETIME",strlen("ONETIME"))==0) ? 
                             SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:
                             SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
@@ -367,12 +693,35 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
 
-    } else {
+    } else if ( reqptr->parameter == static_cast<uint8_t>
+              ( BootOptionParameter::OPAL_NETWORK_SETTINGS )) {
+
+       *data_len = static_cast<uint8_t>(BootOptionResponseSize::OPAL_NETWORK_SETTINGS);
+
+       resp->parm = static_cast<uint8_t>(BootOptionParameter::OPAL_NETWORK_SETTINGS);
+
+       int ret = getHostNetworkData(resp);
+
+       if (ret < 0) {
+
+           fprintf(stderr, "getHostNetworkData failed for get_sys_boot_options.\n");
+           rc = IPMI_CC_UNSPECIFIED_ERROR;
+
+       }else
+          rc = IPMI_CC_OK;
+    }
+
+    else {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
     }
 
     if (p)
         free(p);
+
+    if (rc == IPMI_CC_OK)
+    {
+        *data_len += 2;
+    }
 
     return rc;
 }
@@ -385,10 +734,9 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     char *s;
-
-    printf("IPMI SET_SYS_BOOT_OPTIONS\n");
-
     set_sys_boot_options_t *reqptr = (set_sys_boot_options_t *) request;
+
+    printf("IPMI SET_SYS_BOOT_OPTIONS reqptr->parameter =[%d]\n",reqptr->parameter);
 
     // This IPMI command does not have any resposne data
     *data_len = 0;
@@ -397,7 +745,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      * Parameter #5 means boot flags. Please refer to 28.13 of ipmi doc.
      * This is the only parameter used by petitboot.
      */
-    if (reqptr->parameter == 5) {
+
+    if (reqptr->parameter == (uint8_t)BootOptionParameter::BOOT_FLAGS) {
 
         s = get_boot_option_by_ipmi(((reqptr->data[1] & 0x3C) >> 2));
 
@@ -415,12 +764,12 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 rc = IPMI_CC_UNSPECIFIED_ERROR;
             }
         }
-      
+
         /* setting the boot policy */
         s = (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) == 
-                       SET_PARM_BOOT_FLAGS_PERMANENT) ?"PERMANENT":"ONETIME");
+                    SET_PARM_BOOT_FLAGS_PERMANENT) ?"PERMANENT":"ONETIME");
 
-        printf ( "\nBoot Policy is %s",s); 
+        printf ( "\nBoot Policy is %s",s);
         int r = dbus_set_property("boot_policy",s);
 
         if (r < 0) {
@@ -428,7 +777,16 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
 
-    } else {
+    } else if (reqptr->parameter == 
+               (uint8_t)BootOptionParameter::OPAL_NETWORK_SETTINGS) {
+
+        int ret = setHostNetworkData(reqptr);
+        if (ret < 0) {
+            fprintf(stderr, "setHostNetworkData failed for set_sys_boot_options.\n");
+            rc = IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+    else {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
         rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
