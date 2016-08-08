@@ -53,7 +53,7 @@ all: $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
 $(WHITELIST_SRC) : generate_whitelist.sh $(WHITELIST_CONF)
 	./$^ > $@
 
-%.o: %.C
+%.o: %.cpp
 	$(CXX) -std=c++14 -fpic -c $< $(CXXFLAGS) $(INC_FLAG) $(IPMID_PATH) -o $@
 
 $(LIB_APP): $(LIB_APP_OBJ)
