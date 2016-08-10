@@ -45,7 +45,7 @@ SBINDIR ?= /usr/sbin
 INCLUDEDIR ?= /usr/include
 LIBDIR ?= /usr/lib
 
-WHITELIST_SRC = ipmiwhitelist.C
+WHITELIST_SRC = ipmiwhitelist.cpp
 WHITELIST_CONF ?= host-ipmid-whitelist.conf
 
 all: $(DAEMON) $(LIB_APP) $(LIB_HOST_SRV) $(TESTER)
