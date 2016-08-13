@@ -16,7 +16,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
-#include <ipmiwhitelist.H>
+#include <ipmiwhitelist.hpp>
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
