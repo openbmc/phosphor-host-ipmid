@@ -5,7 +5,7 @@
 #include <string>
 
 #include "ipmid-api.h"
-#include "ipmid.H"
+#include "ipmid.hpp"
 #include "transporthandler.h"
 
 #define SYSTEMD_NETWORKD_DBUS 1

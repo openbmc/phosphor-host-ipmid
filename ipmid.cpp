@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <map>
-#include "ipmid.H"
+#include "ipmid.hpp"
 #include <sys/time.h>
 #include <errno.h>
 #include <mapper.h>

@@ -1,5 +1,5 @@
 #include "ipmid-api.h"
-#include "ipmid.H"
+#include "ipmid.hpp"
 #include <stdio.h>
 #include <stdint.h>
 
