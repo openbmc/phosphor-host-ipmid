@@ -1,6 +1,6 @@
 #include "apphandler.h"
 #include "ipmid-api.h"
-#include "ipmid.H"
+#include "ipmid.hpp"
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -26,7 +26,7 @@ typedef struct
 }__attribute__((packed)) ipmi_device_id_t;
 
 //---------------------------------------------------------------------
-// Called by Host on seeing a SMS_ATN bit set. Return a hardcoded 
+// Called by Host on seeing a SMS_ATN bit set. Return a hardcoded
 // value of 0x2 indicating we need Host read some data.
 //-------------------------------------------------------------------
 ipmi_ret_t ipmi_app_get_msg_flags(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -39,8 +39,8 @@ ipmi_ret_t ipmi_app_get_msg_flags(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     printf("IPMI APP GET MSG FLAGS returning with [bit:2] set\n");
 
 	// From IPMI spec V2.0 for Get Message Flags Command :
-	// bit:[1] from LSB : 1b = Event Message Buffer Full. 
-	// Return as 0 if Event Message Buffer is not supported, 
+	// bit:[1] from LSB : 1b = Event Message Buffer Full.
+	// Return as 0 if Event Message Buffer is not supported,
 	// or when the Event Message buffer is disabled.
 	// TODO. For now. assume its not disabled and send "0x2" anyway:
 

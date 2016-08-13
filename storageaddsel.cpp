@@ -8,7 +8,7 @@
 #include <memory>
 #include <systemd/sd-bus.h>
 #include <mapper.h>
-#include "ipmid.H"
+#include "ipmid.hpp"
 #include "storagehandler.h"
 #include "sensorhandler.h"
 

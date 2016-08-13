@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <malloc.h>
-#include <ipmid.H>
+#include <ipmid.hpp>
 #include "sensorhandler.h"
 
 extern uint8_t find_sensor(uint8_t);
