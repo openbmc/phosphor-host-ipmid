@@ -1,7 +1,0 @@
-To build this package, do the following steps:
-
-1.) autoreconf -i
-
-2.) ./configure ${CONFIGURE_FLAGS}
-
-3.) make
