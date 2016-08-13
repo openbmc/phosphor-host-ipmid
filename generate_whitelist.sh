@@ -7,7 +7,7 @@ if [ "x$*" == "x" ]; then
 fi
 
 cat << EOF
-#include <ipmiwhitelist.H>
+#include <ipmiwhitelist.hpp>
 
 const std::vector<netfncmd_pair> whitelist = {
 
