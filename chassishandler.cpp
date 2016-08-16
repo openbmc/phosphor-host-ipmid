@@ -55,6 +55,16 @@ const char *settings_object_name  =  "/org/openbmc/settings/host0";
 const char *settings_intf_name    =  "org.freedesktop.DBus.Properties";
 const char *host_intf_name        =  "org.openbmc.settings.Host";
 
+typedef struct
+{
+    uint8_t cap_flags;
+    uint8_t fru_info_dev_addr;
+    uint8_t sdr_dev_addr;
+    uint8_t sel_dev_addr;
+    uint8_t system_management_dev_addr;
+    uint8_t bridge_dev_addr;
+}__attribute__((packed)) ipmi_chassis_cap_t;
+
 int dbus_get_property(const char *name, char **buf)
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -496,6 +506,52 @@ ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    // sd_bus error
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    ipmi_chassis_cap_t chassis_cap{};
+
+    *data_len = sizeof(ipmi_chassis_cap_t);
+
+    // TODO: need future work. Get those flag from MRW.
+
+    // capabilities flags
+    // [7..4] - reserved
+    // [3] – 1b = provides power interlock  (IPM 1.5)
+    // [2] – 1b = provides Diagnostic Interrupt (FP NMI)
+    // [1] – 1b = provides “Front Panel Lockout” (indicates that the chassis has capabilities
+    //            to lock out external power control and reset button or front panel interfaces
+    //            and/or detect tampering with those interfaces).
+    // [0] -1b = Chassis provides intrusion (physical security) sensor.
+    // set to default value 0x0.
+    chassis_cap.cap_flags = 0x0;
+
+    // Since we do not have a separate SDR Device/SEL Device/ FRU repository.
+    // The 20h was given as those 5 device addresses.
+    // Chassis FRU info Device Address
+    chassis_cap.fru_info_dev_addr = 0x20;
+
+    // Chassis SDR Device Address
+    chassis_cap.sdr_dev_addr = 0x20;
+
+    // Chassis SEL Device Address
+    chassis_cap.sel_dev_addr = 0x20;
+
+    // Chassis System Management Device Address
+    chassis_cap.system_management_dev_addr = 0x20;
+
+    // Chassis Bridge Device Address.
+    chassis_cap.bridge_dev_addr = 0x20;
+
+    memcpy(response, &chassis_cap, *data_len);
+
+    return rc;
+}
+
 //------------------------------------------------------------
 // Calls into Chassis Control Dbus object to do the power off
 //------------------------------------------------------------
@@ -803,6 +859,9 @@ void register_netfn_chassis_functions()
 {
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_WILDCARD, NULL, ipmi_chassis_wildcard);
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP, NULL, ipmi_get_chassis_cap);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL, ipmi_chassis_get_sys_boot_options);
