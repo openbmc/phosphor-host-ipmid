@@ -76,7 +76,8 @@ finish:
     return r;
 }
 
-int dbus_warm_reset()
+
+int dbus_reset(const char *method)
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *m = NULL;
@@ -100,12 +101,12 @@ int dbus_warm_reset()
      * the method.
      * Signatures and input arguments are provided by the arguments at the
      * end.
-	 */
+     */
     r = sd_bus_call_method(bus,
             connection,                                /* service to contact */
             control_object_name,                       /* object path */
             control_intf_name,                         /* interface name */
-            "warmReset",                               /* method name */
+            method,                               /* method name */
             &error,                                    /* object to return error in */
             &m,                                        /* return message on success */
             NULL,
@@ -132,7 +133,7 @@ ipmi_ret_t ipmi_global_warm_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     printf("Handling GLOBAL warmReset Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
 
     // TODO: call the correct dbus method for warmReset.
-    dbus_warm_reset();
+    dbus_reset("warmReset");
 
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -140,9 +141,26 @@ ipmi_ret_t ipmi_global_warm_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_global_cold_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
+                              ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    printf("Handling GLOBAL coldReset Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
+
+    // TODO: call the correct dbus method for coldReset.
+    dbus_reset("coldReset");
+
+    // Status code.
+    ipmi_ret_t rc = IPMI_CC_OK;
+    *data_len = 0;
+    return rc;
+}
 
 void register_netfn_global_functions()
 {
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_COLD_RESET);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_COLD_RESET, NULL, ipmi_global_cold_reset);
+
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_WARM_RESET);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_WARM_RESET, NULL, ipmi_global_warm_reset);
 
