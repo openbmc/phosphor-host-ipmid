@@ -15,7 +15,6 @@
 
 
 // OpenBMC Chassis Manager dbus framework
-const char  *chassis_bus_name      =  "org.openbmc.control.Chassis";
 const char  *chassis_object_name   =  "/org/openbmc/control/chassis0";
 const char  *chassis_intf_name     =  "org.openbmc.control.Chassis";
 
@@ -42,7 +41,7 @@ int dbus_get_property(const char *name, char **buf)
 
     r = mapper_get_service(bus, settings_object_name, &connection);
     if (r < 0) {
-        fprintf(stderr, "Failed to get connection, return value: %d.\n", r);
+        fprintf(stderr, "Failed to get connection, return value: %s.\n", strerror(-r));
         goto finish;
     }
 
@@ -107,7 +106,7 @@ int dbus_set_property(const char * name, const char *value)
 
     r = mapper_get_service(bus, settings_object_name, &connection);
     if (r < 0) {
-        fprintf(stderr, "Failed to get connection, return value: %d.\n", r);
+        fprintf(stderr, "Failed to get connection, return value: %s.\n", strerror(-r));
         goto finish;
     }
 
@@ -180,9 +179,10 @@ int ipmi_chassis_power_control(const char *method)
 {
 	// sd_bus error
 	int rc = 0;
+	char  *busname = NULL;
 
-    // SD Bus error report mechanism.
-    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+	// SD Bus error report mechanism.
+	sd_bus_error bus_error = SD_BUS_ERROR_NULL;
 
 	// Response from the call. Although there is no response for this call,
 	// obligated to mention this to make compiler happy.
@@ -190,9 +190,13 @@ int ipmi_chassis_power_control(const char *method)
 
 	// Gets a hook onto either a SYSTEM or SESSION bus
 	sd_bus *bus_type = ipmid_get_sd_bus_connection();
-
+	rc = mapper_get_service(bus_type, chassis_object_name, &busname);
+	if (rc < 0) {
+		fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-rc));
+	goto finish;
+	}
 	rc = sd_bus_call_method(bus_type,        		 // On the System Bus
-							chassis_bus_name,        // Service to contact
+							busname,        // Service to contact
 							chassis_object_name,     // Object path 
 							chassis_intf_name,       // Interface name
 							method,      		 // Method to be called
@@ -208,10 +212,12 @@ int ipmi_chassis_power_control(const char *method)
 		printf("Chassis Power Off initiated successfully\n");
 	}
 
+finish:
     sd_bus_error_free(&bus_error);
     sd_bus_message_unref(response);
+    free(busname);
 
-	return rc;
+    return rc;
 }
 
 

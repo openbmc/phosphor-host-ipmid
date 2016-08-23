@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <systemd/sd-bus.h>
+#include <mapper.h>
 #include <array>
 
 extern sd_bus *bus;
@@ -173,10 +174,10 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    const char  *busname = "org.openbmc.Inventory";
     const char  *objname = "/org/openbmc/inventory/system/chassis/motherboard/bmc";
     const char  *iface   = "org.openbmc.InventoryItem";
     char *ver = NULL;
+    char *busname = NULL;
     int r;
     rev_t rev = {0};
     ipmi_device_id_t dev_id{};
@@ -194,6 +195,11 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     dev_id.revision = 0x80;
 
     // Firmware revision is already implemented, so get it from appropriate position.
+    r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        goto finish;
+    }
     r = sd_bus_get_property_string(bus,busname,objname,iface,"version", NULL, &ver);
     if ( r < 0 ) {
         fprintf(stderr, "Failed to obtain version property: %s\n", strerror(-r));
@@ -242,6 +248,8 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Pack the actual response
     memcpy(response, &dev_id, *data_len);
+finish:
+    free(busname);
     return rc;
 }
 
@@ -249,7 +257,6 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    const char  *busname = "org.openbmc.control.Chassis";
     const char  *objname = "/org/openbmc/control/chassis0";
     const char  *iface = "org.freedesktop.DBus.Properties";
     const char  *chassis_iface = "org.openbmc.control.Chassis";
@@ -257,6 +264,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
     char *uuid = NULL;
+    char *busname = NULL;
 
     // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
     // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte order
@@ -276,6 +284,11 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     printf("IPMI GET DEVICE GUID\n");
 
     // Call Get properties method with the interface and property name
+    r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        goto finish;
+    }
     r = sd_bus_call_method(bus,busname,objname,iface,
                            "Get",&error, &reply, "ss",
                            chassis_iface, "uuid");
@@ -333,6 +346,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 finish:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free(busname);
 
     return rc;
 }
@@ -373,7 +387,6 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    const char  *busname = "org.openbmc.watchdog.Host";
     const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
     sd_bus_message *reply = NULL;
@@ -383,7 +396,7 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     set_wd_data_t *reqptr = (set_wd_data_t*) request;
     uint16_t timer = 0;
     uint32_t timer_ms = 0;
-
+    char *busname = NULL;
     *data_len = 0;
 
     // Get number of 100ms intervals
@@ -393,6 +406,12 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("WATCHDOG SET Timer:[0x%X] 100ms intervals\n",timer);
 
+    // Get bus name
+    r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        goto finish;
+    }
     // Set watchdog timer
     r = sd_bus_call_method(bus, busname, objname, iface,
                            "set", &error, &reply, "i", timer_ms);
@@ -431,6 +450,7 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 finish:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free(busname);
 
     return (r < 0) ? -1 : IPMI_CC_OK;
 }
@@ -440,19 +460,24 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    const char  *busname = "org.openbmc.watchdog.Host";
     const char  *objname = "/org/openbmc/watchdog/host0";
     const char  *iface = "org.openbmc.Watchdog";
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
+    char *busname = NULL;
 
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
     printf("WATCHDOG RESET\n");
-
+    // Get bus name
+    r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        goto finish;
+    }
     // Refresh watchdog
     r = sd_bus_call_method(bus, busname, objname, iface,
                            "poke", &error, &reply, NULL);
@@ -461,8 +486,10 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         rc = -1;
     }
 
+finish:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free(busname);
 
     return rc;
 }
