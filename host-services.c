@@ -2,13 +2,12 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <systemd/sd-bus.h>
-
+#include <mapper.h>
 #include "ipmid-api.h"
 
 void register_host_services() __attribute__((constructor));
 
 // OpenBMC Host IPMI dbus framework
-const char  *bus_name      =  "org.openbmc.HostIpmi";
 const char  *object_name   =  "/org/openbmc/HostIpmi/1";
 const char  *intf_name     =  "org.openbmc.HostIpmi";
 
@@ -19,6 +18,7 @@ static int soft_power_off(sd_bus_message *m, void *userdata, sd_bus_error *ret_e
 {
     int64_t bt_resp = -1;
     int rc = 0;
+    char *bus_name = NULL;
 
     // Steps to be taken when we get this.
     //  1: Send a SMS_ATN to the Host
@@ -43,7 +43,11 @@ static int soft_power_off(sd_bus_message *m, void *userdata, sd_bus_error *ret_e
 
     // Gets a hook onto either a SYSTEM or SESSION bus
     sd_bus *bus = ipmid_get_sd_bus_connection();
-
+    rc = mapper_get_service(bus, object_name, &bus_name);
+    if (rc < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %d.\n", rc);
+        goto finish;
+    }
     rc = sd_bus_call_method(bus,             // In the System Bus
                             bus_name,        // Service to contact
                             object_name,     // Object path
@@ -69,6 +73,7 @@ static int soft_power_off(sd_bus_message *m, void *userdata, sd_bus_error *ret_e
 finish:
     sd_bus_error_free(&bus_error);
     response = sd_bus_message_unref(response);
+    free(bus_name);
 
     if(rc < 0)
     {

@@ -271,9 +271,16 @@ void cache_restricted_mode()
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int rc = 0;
+    char  *busname = NULL;
+	
+    rc = mapper_get_service(bus, settings_host_object, &busname);
+    if (rc < 0) {
+        fprintf(stderr, "Failed to get HOST busname: %s\n", strerror(-rc));
+        goto cleanup;
+    }
 
     rc = sd_bus_call_method(bus,
-                            settings_host_bus,
+                            busname,
                             settings_host_object,
                             settings_host_intf,
                             "Get",
@@ -303,6 +310,7 @@ void cache_restricted_mode()
 cleanup:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free(busname);
 }
 
 static int handle_restricted_mode_change(sd_bus_message *m, void *user_data,

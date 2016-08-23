@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 #include <systemd/sd-bus.h>
-
+#include <mapper.h>
 #include "ipmid.H"
 #include "storagehandler.h"
 #include "sensorhandler.h"
@@ -179,12 +179,18 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     sd_bus_message *reply = NULL, *m=NULL;
     uint16_t x;
     int r;
+    const char *object_name  =  "/org/openbmc/records/events";
+    char *bus_name = NULL;
 
     mbus = ipmid_get_sd_bus_connection();
-
+    r = mapper_get_service(mbus, object_name, &bus_name);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get connection, return value: %d.\n", r);
+        goto finish;
+    }
     r = sd_bus_message_new_method_call(mbus,&m,
-    									"org.openbmc.records.events",
-    									"/org/openbmc/records/events",
+    									bus_name,
+    									object_name,
     									"org.openbmc.recordlog",
     									"acceptHostMessage");
     if (r < 0) {
@@ -218,6 +224,7 @@ finish:
     sd_bus_error_free(&error);
     m = sd_bus_message_unref(m);
     reply = sd_bus_message_unref(reply);
+    free (bus_name);
     return r;
 }
 

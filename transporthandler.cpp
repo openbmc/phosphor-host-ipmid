@@ -12,10 +12,10 @@
 
 #ifdef SYSTEMD_NETWORKD_DBUS
 #include <systemd/sd-bus.h>
+#include <mapper.h>
 #endif
 
 // OpenBMC System Manager dbus framework
-const char  *app   =  "org.openbmc.NetworkManager";
 const char  *obj   =  "/org/openbmc/NetworkManager/Interface";
 const char  *ifc   =  "org.openbmc.NetworkManager";
 
@@ -53,7 +53,13 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
     char* gateway = NULL;
     int r = 0;
     ipmi_ret_t rc = IPMI_CC_OK;
+    char *app = NULL;
 
+    r = mapper_get_service(bus, obj, &app);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %d.\n", r);
+        goto cleanup;
+    }
     r = sd_bus_call_method(bus, app, obj, ifc, "GetAddress4", &error,
                             &reply, "s", nwinterface);
     if(r < 0)
@@ -118,6 +124,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
 cleanup:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free(app);
 
     return rc;
 }
@@ -149,6 +156,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
+    char *app = NULL;
 
     printf("IPMI SET_LAN\n");
 
@@ -174,7 +182,12 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 reqptr->data[3],
                 reqptr->data[4],
                 reqptr->data[5]);
-
+        
+        r = mapper_get_service(bus, obj, &app);
+        if (r < 0) {
+            fprintf(stderr, "Failed to get bus name, return value: %d.\n", r);
+            goto finish;
+        }
         r = sd_bus_call_method(bus, app, obj, ifc, "SetHwAddress", &error,
                                 &reply, "ss", nwinterface, mac);
         if(r < 0)
@@ -239,8 +252,10 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
 
+finish:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free(app);
 
     return rc;
 }
@@ -264,6 +279,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     int r = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
     int i = 0;
+    char *app = NULL;
 
     printf("IPMI GET_LAN\n");
 
@@ -321,6 +337,11 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         uint8_t buf[7];
         char *eaddr1 = NULL;
 
+        r = mapper_get_service(bus, obj, &app);
+        if (r < 0) {
+            fprintf(stderr, "Failed to get bus name, return value: %d.\n", r);
+            goto cleanup;
+        }
         r = sd_bus_call_method(bus, app, obj, ifc, "GetHwAddress", &error,
                                 &reply, "s", nwinterface);
         if(r < 0)
@@ -376,6 +397,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 cleanup:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
+    free(app);
 
     return rc;
 }
