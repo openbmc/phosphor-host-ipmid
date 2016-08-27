@@ -28,6 +28,15 @@ const char *settings_object_name  =  "/org/openbmc/settings/host0";
 const char *settings_intf_name    =  "org.freedesktop.DBus.Properties";
 const char *host_intf_name        =  "org.openbmc.settings.Host";
 
+// Offset in Get Chassis Status command.
+typedef struct
+{
+   uint8_t cur_power_state;
+   uint8_t last_power_event;
+   uint8_t misc_power_state;
+   uint8_t front_panel_button_cap_status;
+}__attribute__((packed)) ipmi_get_chassis_status_t;
+
 int dbus_get_property(const char *name, char **buf)
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -214,6 +223,77 @@ int ipmi_chassis_power_control(const char *method)
 	return rc;
 }
 
+//----------------------------------------------------------------------
+// Get Chassis Status commands
+//----------------------------------------------------------------------
+ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                        ipmi_request_t request, ipmi_response_t response,
+                        ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    ipmi_get_chassis_status_t chassis_status{};
+
+    *data_len = 4;
+
+    // Current Power State
+    // [7] reserved
+    // [6..5] power restore policy
+    //          00b = chassis stays powered off after AC/mains returns
+    //          01b = after AC returns, power is restored to the state that was
+    //          in effect when AC/mains was lost.
+    //          10b = chassis always powers up after AC/mains returns
+    //          11b = unknow
+    // [4] power control fault
+    //       1b = controller attempted to turn system power on or off, but
+    //       system did not enter desired state.
+    // [3] power fault
+    //       1b = fault detected in main power subsystem.
+    // [2] 1b = interlock (chassis is presently shut down because a chassis
+    //       panel interlock switch is active). (IPMI 1.5)
+    // [1] power overload
+    //      1b = system shutdown because of power overload condition.
+    // [0] power is on
+    //       1b = system power is on
+    //       0b = system power is off(soft-off S4/S5, or mechanical off)
+    chassis_status.cur_power_state = 0;
+
+    // Last Power Event
+    // [7..5] – reserved
+    // [4] – 1b = last ‘Power is on’ state was entered via IPMI command
+    // [3] – 1b = last power down caused by power fault
+    // [2] – 1b = last power down caused by a power interlock being activated
+    // [1] – 1b = last power down caused by a Power overload
+    // [0] – 1b = AC failed
+    chassis_status.last_power_event = 0;
+
+    // Misc. Chassis State
+    // [7] – reserved
+    // [6] – 1b = Chassis Identify command and state info supported (Optional)
+    //       0b = Chassis Identify command support unspecified via this command.
+    //       (The Get Command Support command , if implemented, would still
+    //       indicate support for the Chassis Identify command)
+    // [5..4] – Chassis Identify State. Mandatory when bit[6] =1b, reserved (return
+    //          as 00b) otherwise. Returns the present chassis identify state.
+    //           Refer to the Chassis Identify command for more info.
+    //         00b = chassis identify state = Off
+    //         01b = chassis identify state = Temporary(timed) On
+    //         10b = chassis identify state = Indefinite On
+    //         11b = reserved
+    // [3] – 1b = Cooling/fan fault detected
+    // [2] – 1b = Drive Fault
+    // [1] – 1b = Front Panel Lockout active (power off and reset via chassis
+    //       push-buttons disabled.)
+    // [0] – 1b = Chassis Intrusion active
+    chassis_status.misc_power_state = 0;
+
+    //  Front Panel Button Capabilities and disable/enable status(Optional)
+    chassis_status.front_panel_button_cap_status = 0;
+
+    // Pack the actual response
+    memcpy(response, &chassis_status, *data_len);
+    return rc;
+}
 
 //----------------------------------------------------------------------
 // Chassis Control commands
@@ -443,6 +523,9 @@ void register_netfn_chassis_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL, ipmi_chassis_get_sys_boot_options);
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS, NULL, ipmi_get_chassis_status);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL, ipmi_chassis_control);

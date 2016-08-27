@@ -6,6 +6,8 @@
 // IPMI commands for Chassis net functions.
 enum ipmi_netfn_app_cmds
 {
+    // Chassis Status
+    IPMI_CMD_CHASSIS_STATUS       = 0x01,
 	// Chassis Control
 	IPMI_CMD_CHASSIS_CONTROL	  = 0x02,
     // Get capability bits
