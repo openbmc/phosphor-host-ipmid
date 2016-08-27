@@ -65,6 +65,14 @@ typedef struct
     uint8_t bridge_dev_addr;
 }__attribute__((packed)) ipmi_chassis_cap_t;
 
+typedef struct
+{
+   uint8_t cur_power_state;
+   uint8_t last_power_event;
+   uint8_t misc_power_state;
+   uint8_t front_panel_button_cap_status;
+}__attribute__((packed)) ipmi_get_chassis_status_t;
+
 int dbus_get_property(const char *name, char **buf)
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -603,6 +611,185 @@ finish:
     return rc;
 }
 
+struct hostPowerPolicyTypeMap_t {
+    uint8_t policyNum;
+    char    policyName[19];
+};
+
+#define INVALID_STRING "Invalid"
+// dbus supports this list of boot devices.
+hostPowerPolicyTypeMap_t g_hostPowerPolicyTypeMap_t[] = {
+
+    {0x00, "LEAVE_OFF"},
+    {0x01, "RESTORE_LAST_STATE"},
+    {0x02, "ALWAYS_POWER_ON"},
+    {0x03, "UNKNOWN"}
+};
+
+uint8_t get_host_power_policy(char *p) {
+
+    hostPowerPolicyTypeMap_t *s = g_hostPowerPolicyTypeMap_t;
+
+    while (s->policyNum != 0x03) {
+        if (!strcmp(s->policyName,p))
+            break;
+        s++;
+    }
+
+/*    if (!s->ipmibootflag)
+        printf("Failed to find Sensor Type %s\n", p);
+*/
+    return s->policyNum;
+}
+
+//----------------------------------------------------------------------
+// Get Chassis Status commands
+//----------------------------------------------------------------------
+ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                        ipmi_request_t request, ipmi_response_t response,
+                        ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    const char  *objname = "/org/openbmc/control/power0";
+    const char  *intf = "org.openbmc.control.Power";
+
+    sd_bus *bus = NULL;
+    sd_bus_message *reply = NULL;
+    int r = 0;
+    int pgood = 0;
+    char *busname = NULL;
+    ipmi_ret_t rc = IPMI_CC_OK;
+    ipmi_get_chassis_status_t chassis_status{};
+
+    char *p = NULL;
+    uint8_t s = 0;
+/*
+    char *connection = NULL;
+   const char  *settings_obj = "/org/openbmc/settings/host0";
+    const char  *settings_intf = "org.openbmc.settings.Host"
+*/
+    // Get the system bus where most system services are provided.
+    bus = ipmid_get_sd_bus_connection();
+
+    *data_len = 4;
+
+    r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+    }
+
+    r = sd_bus_get_property(bus, busname, objname, intf, "pgood", NULL, &reply, "i");
+    if (r < 0) {
+        fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
+        fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
+                busname, objname, intf);
+    }
+
+    r = sd_bus_message_read(reply, "i", &pgood);
+    if (r < 0) {
+        fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
+    }
+
+    printf("pgood is 0x%02x\n", pgood);
+
+    // Get Power Policy
+    r = dbus_get_property("power_policy",&p);
+
+    if (r < 0) {
+        fprintf(stderr, "Dbus get property(power_policy) failed for get_sys_boot_options.\n");
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+
+    } else {
+
+        s = get_host_power_policy(p);
+//        resp->data[1] = (s << 2);
+//        rc = IPMI_CC_OK;
+
+    }
+
+    if (p)
+    {
+      free(p);
+      p = NULL;
+    }
+
+    // Current Power State
+    // [7] reserved
+    // [6..5] power restore policy
+    //          00b = chassis stays powered off after AC/mains returns
+    //          01b = after AC returns, power is restored to the state that was
+    //          in effect when AC/mains was lost.
+    //          10b = chassis always powers up after AC/mains returns
+    //          11b = unknow
+    //        Set to 00b, by observing the hardware behavior.
+    //        Do we need to define a dbus property to identify the restore policy?
+
+    // [4] power control fault
+    //       1b = controller attempted to turn system power on or off, but
+    //       system did not enter desired state.
+    //       Set to 0b, since We don't support it..
+
+    // [3] power fault
+    //       1b = fault detected in main power subsystem.
+    //       set to 0b. for we don't support it.
+
+    // [2] 1b = interlock (chassis is presently shut down because a chassis
+    //       panel interlock switch is active). (IPMI 1.5)
+    //       set to 0b,  for we don't support it.
+
+    // [1] power overload
+    //      1b = system shutdown because of power overload condition.
+    //       set to 0b,  for we don't support it.
+
+    // [0] power is on
+    //       1b = system power is on
+    //       0b = system power is off(soft-off S4/S5, or mechanical off)
+
+    chassis_status.cur_power_state = ((s & 0x3)<<5) | (pgood & 0x1);
+
+    // Last Power Event
+    // [7..5] – reserved
+    // [4] – 1b = last ‘Power is on’ state was entered via IPMI command
+    // [3] – 1b = last power down caused by power fault
+    // [2] – 1b = last power down caused by a power interlock being activated
+    // [1] – 1b = last power down caused by a Power overload
+    // [0] – 1b = AC failed
+    // set to 0x0,  for we don't support these fields.
+
+    chassis_status.last_power_event = 0;
+
+    // Misc. Chassis State
+    // [7] – reserved
+    // [6] – 1b = Chassis Identify command and state info supported (Optional)
+    //       0b = Chassis Identify command support unspecified via this command.
+    //       (The Get Command Support command , if implemented, would still
+    //       indicate support for the Chassis Identify command)
+    // [5..4] – Chassis Identify State. Mandatory when bit[6] =1b, reserved (return
+    //          as 00b) otherwise. Returns the present chassis identify state.
+    //           Refer to the Chassis Identify command for more info.
+    //         00b = chassis identify state = Off
+    //         01b = chassis identify state = Temporary(timed) On
+    //         10b = chassis identify state = Indefinite On
+    //         11b = reserved
+    // [3] – 1b = Cooling/fan fault detected
+    // [2] – 1b = Drive Fault
+    // [1] – 1b = Front Panel Lockout active (power off and reset via chassis
+    //       push-buttons disabled.)
+    // [0] – 1b = Chassis Intrusion active
+    //  set to 0,  for we don't support them.
+    chassis_status.misc_power_state = 0;
+
+    //  Front Panel Button Capabilities and disable/enable status(Optional)
+    //  set to 0,  for we don't support them.
+    chassis_status.front_panel_button_cap_status = 0;
+
+    // Pack the actual response
+    memcpy(response, &chassis_status, *data_len);
+
+    free(busname);
+    reply = sd_bus_message_unref(reply);
+
+    return rc;
+}
 
 //----------------------------------------------------------------------
 // Chassis Control commands
@@ -868,6 +1055,9 @@ void register_netfn_chassis_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL, ipmi_chassis_get_sys_boot_options);
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS, NULL, ipmi_get_chassis_status);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL, ipmi_chassis_control);
