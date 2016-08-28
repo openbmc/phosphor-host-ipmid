@@ -529,7 +529,7 @@ ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     printf("Handling WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
 
     // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
+    ipmi_ret_t rc = IPMI_CC_INVALID;
 
     *data_len = strlen("THIS IS WILDCARD");
 
