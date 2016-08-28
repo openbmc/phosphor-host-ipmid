@@ -128,7 +128,7 @@ ipmi_ret_t ipmi_transport_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     printf("Handling TRANSPORT WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
     // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
+    ipmi_ret_t rc = IPMI_CC_INVALID;
     *data_len = 0;
     return rc;
 }
