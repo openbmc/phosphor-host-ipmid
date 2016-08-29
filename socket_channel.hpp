@@ -24,7 +24,7 @@ class Channel
             union
             {
                 sockaddr sockAddr;
-                sockaddr_in inAddr;
+                sockaddr_in6 inAddr;
             };
             size_t addrSize;
         };
@@ -65,7 +65,7 @@ class Channel
          */
         auto getPort() const
         {
-            return address.inAddr.sin_port;
+            return address.inAddr.sin6_port;
         }
 
         /**

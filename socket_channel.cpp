@@ -15,7 +15,7 @@ namespace udpsocket
 std::string Channel::getRemoteAddress() const
 {
     char tmp[INET_ADDRSTRLEN] = { 0 };
-    inet_ntop(AF_INET, &address.inAddr.sin_addr, tmp, sizeof(tmp));
+    inet_ntop(AF_INET6, &address.inAddr.sin6_addr, tmp, sizeof(tmp));
     return std::string(tmp);
 }
 
