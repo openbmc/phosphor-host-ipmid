@@ -1,10 +1,9 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <time.h>
-#include <sys/time.h>
+#include <cstdio>
+#include <string>
 #include <arpa/inet.h>
-
+#include <systemd/sd-bus.h>
+#include <mapper.h>
+#include <chrono>
 #include "storagehandler.h"
 #include "storageaddsel.h"
 #include "host-ipmid/ipmid-api.h"
@@ -14,6 +13,9 @@ void register_netfn_storage_functions() __attribute__((constructor));
 
 unsigned int   g_sel_time    = 0xFFFFFFFF;
 extern unsigned short g_sel_reserve;
+
+constexpr auto time_manager_intf = "org.openbmc.TimeManager";
+constexpr auto time_manager_obj = "/org/openbmc/TimeManager";
 
 ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
@@ -30,15 +32,58 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    time_t currtime;
+    using namespace std::chrono;
+
+    char *time_provider = nullptr;
+    const char* time_in_str = nullptr;
+    uint64_t host_time_usec = 0;
+    uint32_t resp = 0;
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    // Get current time in seconds since jan 1 1970
-    time(&currtime);
-    uint32_t resp = (uint32_t)currtime;
-    resp = htole32(resp);
+    sd_bus_message *reply = nullptr;
+    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
 
     printf("IPMI Handling GET-SEL-TIME\n");
+
+    auto bus = ipmid_get_sd_bus_connection();
+
+    auto rct = mapper_get_service(bus, time_manager_obj, &time_provider);
+    if (rct < 0) {
+        printf("Error [%s] getting bus name for time provider\n",
+            strerror(-rct));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    rct = sd_bus_call_method(bus,
+                    time_provider,
+                    time_manager_obj,
+                    time_manager_intf,
+                    "GetTime",
+                    &bus_error,
+                    &reply,
+                    "s",
+                    "host");
+    if (rct < 0) {
+        printf("Error [%s] getting time\n", strerror(-rct));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    rct = sd_bus_message_read(reply, "sx", &time_in_str, &host_time_usec);
+    if (rct < 0) {
+        fprintf(stderr, "Error [%s] parsing get-time response\n",
+                strerror(-rct));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    // Time is really long int but IPMI wants just uint32. This works okay until
+    // the number of seconds since 1970 overflows uint32 size.. Still a whole
+    // lot of time here to even think about that.
+    resp = duration_cast<seconds>(microseconds(host_time_usec)).count();
+    resp = htole32(resp);
+    printf("Host Time read:[%s] :: [%d]\n", time_in_str, resp);
 
     // From the IPMI Spec 2.0, response should be a 32-bit value
     *data_len = sizeof(resp);
@@ -46,6 +91,10 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &resp, *data_len);
 
+finish:
+    sd_bus_error_free(&bus_error);
+    reply = sd_bus_message_unref(reply);
+    free(time_provider);
     return rc;
 }
 
@@ -53,27 +102,63 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    char *time_provider = nullptr;
+    int time_rc = 0;
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    sd_bus_message *reply = nullptr;
+    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+
     uint32_t* secs = (uint32_t*)request;
+    *data_len = 0;
 
     printf("Handling Set-SEL-Time:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
     printf("Data: 0x%X]\n",*secs);
 
-    struct timeval sel_time;
-    sel_time.tv_sec = le32toh(*secs);
-    sel_time.tv_usec = 0;
-    ipmi_ret_t rc = IPMI_CC_OK;
-    int rct = settimeofday(&sel_time, NULL);
+    auto bus = ipmid_get_sd_bus_connection();
 
-    if(rct == 0)
-    {
-	system("hwclock -w");
+    auto rct = mapper_get_service(bus, time_manager_obj, &time_provider);
+    if (rct < 0) {
+        printf("Error [%s] getting bus name for time provider\n",
+            strerror(-rct));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
     }
-    else
-    {
-        printf("settimeofday() failed\n");
+
+    rct = sd_bus_call_method(bus,
+            time_provider,
+            time_manager_obj,
+            time_manager_intf,
+            "SetTime",
+            &bus_error,
+            &reply,
+            "ss",
+            "host",
+            std::to_string(le32toh(*secs)).c_str());
+
+    if (rct < 0) {
+        printf("Error [%s] setting time\n", strerror(-rct));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    rct = sd_bus_message_read(reply, "i", &time_rc);
+    if (rct < 0) {
+        fprintf(stderr, "Error [%s] parsing set-time response\n",
+                strerror(-rct));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    if (time_rc < 0) {
+        printf("Error setting time.");
         rc = IPMI_CC_UNSPECIFIED_ERROR;
     }
-    *data_len = 0;
+
+finish:
+    sd_bus_error_free(&bus_error);
+    reply = sd_bus_message_unref(reply);
+    free(time_provider);
     return rc;
 }
 
@@ -148,22 +233,22 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_storage_functions()
 {
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_WILDCARD);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL, ipmi_storage_wildcard);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, nullptr, ipmi_storage_wildcard);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL, ipmi_storage_get_sel_time);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, nullptr, ipmi_storage_get_sel_time);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL, ipmi_storage_set_sel_time);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, nullptr, ipmi_storage_set_sel_time);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, ipmi_storage_get_sel_info);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, nullptr, ipmi_storage_get_sel_info);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL, ipmi_storage_reserve_sel);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, nullptr, ipmi_storage_reserve_sel);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL, ipmi_storage_add_sel);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, nullptr, ipmi_storage_add_sel);
     return;
 }
 
