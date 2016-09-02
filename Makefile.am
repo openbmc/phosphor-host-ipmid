@@ -1,14 +1,7 @@
 AM_DEFAULT_SOURCE_EXT = .cpp
 
-testit_SOURCES = \
-	ipmisensor.cpp \
-	testit.cpp
-testit_LDFLAGS = $(SYSTEMD_LIBS) $(LIBADD_DLOPEN)
-
-#testaddsel_SOURCES = \
-#	testaddsel.cpp \
-#	storageaddsel.cpp
-#testaddsel_LDFLAGS = $(SYSTEMD_CFLAGS) $(SYSTEMD_LIBS) $(LIBADD_DLOPEN)
+sbin_PROGRAMS = \
+	ipmid
 
 ipmid_SOURCES = \
 	ipmid.cpp
@@ -16,12 +9,17 @@ ipmid_SOURCES = \
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 BUILT_SOURCES = ipmiwhitelist.cpp
 CLEANFILES = ipmiwhitelist.cpp
-WHITELIST_CONF ?= ${srcdir}/host-ipmid-whitelist.conf
-ipmiwhitelist.cpp: ${srcdir}/generate_whitelist.sh $(WHITELIST_CONF)
-	${srcdir}/$^ > $@
+
 #TODO - Make this path a configure option (bitbake parameter)
 ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
 ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynamic
+# TODO: Rather than use -export-dynamic, we should use -export-symbol to have a
+#       selective list of symbols.
+
+WHITELIST_CONF ?= ${srcdir}/host-ipmid-whitelist.conf
+ipmiwhitelist.cpp: ${srcdir}/generate_whitelist.sh $(WHITELIST_CONF)
+	${srcdir}/$^ > $@
+
 
 libapphandlerdir = /usr/lib/host-ipmid
 libapphandler_LTLIBRARIES = libapphandler.la
@@ -46,16 +44,22 @@ libhostservice_la_SOURCES = \
 libhostservice_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
 libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 
-libdir = /usr/lib/host-ipmid
 includedir = /usr/include/host-ipmid
 
 include_HEADERS = \
 	ipmid-api.h
 
-#default sbin dir
-sbin_PROGRAMS = \
-	ipmid
-
 check_PROGRAMS = \
 	testit
 #	testaddsel
+
+testit_SOURCES = \
+	ipmisensor.cpp \
+	testit.cpp
+testit_LDFLAGS = $(SYSTEMD_LIBS) $(LIBADD_DLOPEN)
+
+#testaddsel_SOURCES = \
+#	testaddsel.cpp \
+#	storageaddsel.cpp
+#testaddsel_LDFLAGS = $(SYSTEMD_CFLAGS) $(SYSTEMD_LIBS) $(LIBADD_DLOPEN)
+
