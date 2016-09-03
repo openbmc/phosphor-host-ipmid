@@ -18,10 +18,10 @@ ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynam
 
 WHITELIST_CONF ?= ${srcdir}/host-ipmid-whitelist.conf
 ipmiwhitelist.cpp: ${srcdir}/generate_whitelist.sh $(WHITELIST_CONF)
-	${srcdir}/$^ > $@
+	$^ > $@
 
 
-libapphandlerdir = /usr/lib/host-ipmid
+libapphandlerdir = ${libdir}/host-ipmid
 libapphandler_LTLIBRARIES = libapphandler.la
 libapphandler_la_SOURCES = \
 	apphandler.cpp \
@@ -37,17 +37,15 @@ libapphandler_la_SOURCES = \
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 
-libhostservicedir = /usr/lib/host-ipmid
+libhostservicedir = ${libdir}/host-ipmid
 libhostservice_LTLIBRARIES = libhostservice.la
 libhostservice_la_SOURCES = \
 	host-services.c
 libhostservice_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
 libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 
-includedir = /usr/include/host-ipmid
-
-include_HEADERS = \
-	ipmid-api.h
+nobase_include_HEADERS = \
+	host-ipmid/ipmid-api.h
 
 check_PROGRAMS = \
 	testit

@@ -1,4 +1,4 @@
-#include "ipmid-api.h"
+#include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
 #include <stdio.h>
 #include <stdint.h>
