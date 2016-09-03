@@ -1,5 +1,5 @@
 #include "chassishandler.h"
-#include "ipmid-api.h"
+#include "host-ipmid/ipmid-api.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

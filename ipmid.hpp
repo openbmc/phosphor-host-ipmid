@@ -1,6 +1,6 @@
 #ifndef __HOST_IPMID_IPMI_H__
 #define __HOST_IPMID_IPMI_H__
-#include "ipmid-api.h"
+#include "host-ipmid/ipmid-api.h"
 #include <stdio.h>
 #include "host-services.h"
 

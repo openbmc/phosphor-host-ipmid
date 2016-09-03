@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <string>
 
-#include "ipmid-api.h"
+#include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
 #include "transporthandler.h"
 
