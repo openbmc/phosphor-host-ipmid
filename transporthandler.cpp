@@ -404,14 +404,29 @@ cleanup:
 
 void register_netfn_transport_functions()
 {
+    ipmi_cmd_data_t command_data;
+    command_data.canExecuteSessionless = false;
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_ANY;
+    command_data.supportedChannels = IPMI_CHANNEL_ANY;
+    command_data.commandSupportMask = IPMI_COMMAND_SUPPORT_NO_DISABLE;
+
+    // <Wildcard Command>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_WILDCARD);
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL, ipmi_transport_wildcard);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL, ipmi_transport_wildcard,
+                           command_data);
 
+    // <Set LAN Configuration Parameters>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_ADMIN;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_SET_LAN);
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_LAN, NULL, ipmi_transport_set_lan);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_LAN, NULL, ipmi_transport_set_lan,
+                           command_data);
 
+    // <Get LAN Configuration Parameters>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_OPERATOR;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_GET_LAN);
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL, ipmi_transport_get_lan);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL, ipmi_transport_get_lan,
+                           command_data);
 
     return;
 }

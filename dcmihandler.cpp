@@ -33,8 +33,17 @@ ipmi_ret_t ipmi_dcmi_get_power_limit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_dcmi_functions()
 {
+    ipmi_cmd_data_t command_data;
+    command_data.canExecuteSessionless = false;
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_ANY;
+    command_data.supportedChannels = IPMI_CHANNEL_ANY;
+    command_data.commandSupportMask = IPMI_COMMAND_SUPPORT_NO_DISABLE;
+
+    // <Get Power Limit>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER);
-    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER, NULL, ipmi_dcmi_get_power_limit);
+    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER, NULL, ipmi_dcmi_get_power_limit,
+                           command_data);
     return;
 }
 // 956379

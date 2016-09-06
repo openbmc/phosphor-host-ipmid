@@ -801,16 +801,34 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_chassis_functions()
 {
+    ipmi_cmd_data_t command_data;
+    command_data.canExecuteSessionless = false;
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_ANY;
+    command_data.supportedChannels = IPMI_CHANNEL_ANY;
+    command_data.commandSupportMask = IPMI_COMMAND_SUPPORT_NO_DISABLE;
+
+    // <Wildcard Command>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_WILDCARD);
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_WILDCARD, NULL, ipmi_chassis_wildcard);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_WILDCARD, NULL, ipmi_chassis_wildcard,
+                           command_data);
 
+    // <Get System Boot Options>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_OPERATOR;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS);
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL, ipmi_chassis_get_sys_boot_options);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL,
+                           ipmi_chassis_get_sys_boot_options, command_data);
 
+    // <Chassis Control>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_OPERATOR;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL);
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL, ipmi_chassis_control);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL, ipmi_chassis_control,
+                           command_data);
 
+    // <Set System Boot Options>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_OPERATOR;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS);
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL, ipmi_chassis_set_sys_boot_options);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL,
+                           ipmi_chassis_set_sys_boot_options, command_data);
 }
 
