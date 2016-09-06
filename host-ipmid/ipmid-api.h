@@ -7,6 +7,21 @@
 extern "C" {
 #endif
 
+/*
+ * Specifies the minimum privilege level required to execute the command
+ * This means the command can be executed at a given privilege level or higher
+ * privilege level. Those commands which can be executed via system interface
+ * only should use SYSTEM_INTERFACE
+ */
+enum CommandPrivilege {
+  PRIVILEGE_CALLBACK = 0x01,
+  PRIVILEGE_USER,
+  PRIVILEGE_OPERATOR,
+  PRIVILEGE_ADMIN,
+  PRIVILEGE_OEM,
+  SYSTEM_INTERFACE   = 0xFF,
+};
+
 // length of Completion Code and its ALWAYS _1_
 #define IPMI_CC_LEN 1
 
@@ -46,6 +61,8 @@ typedef size_t*   ipmi_data_len_t;
 // Plugin function return the status code
 typedef unsigned char ipmi_ret_t;
 
+typedef enum CommandPrivilege ipmi_cmd_privilege_t;
+
 // This is the callback handler that the plugin registers with IPMID. IPMI
 // function router will then make a call to this callback handler with the
 // necessary arguments of netfn, cmd, request, response, size and context.
@@ -55,8 +72,9 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 // This is the constructor function that is called into by each plugin handlers.
 // When ipmi sets up the callback handlers, a call is made to this with
 // information of netfn, cmd, callback handler pointer and context data.
-void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
-                                       ipmi_context_t, ipmid_callback_t);
+void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t, ipmi_context_t, ipmid_callback_t,
+                            ipmi_cmd_privilege_t);
+
 
 unsigned short get_sel_reserve_id(void);
 
