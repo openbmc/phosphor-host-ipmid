@@ -93,17 +93,19 @@ void register_netfn_app_functions()
 
     // <Read Event Message Buffer>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_READ_EVENT);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_READ_EVENT, NULL, ipmi_app_read_event);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_READ_EVENT, NULL, ipmi_app_read_event,
+                           SYSTEM_INTERFACE);
 
     // <Set BMC Global Enables>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP,
                                             IPMI_CMD_SET_BMC_GLOBAL_ENABLES);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_BMC_GLOBAL_ENABLES, NULL,
-                           ipmi_app_set_bmc_global_enables);
+                           ipmi_app_set_bmc_global_enables, SYSTEM_INTERFACE);
 
     // <Get Message Flags>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags,
+                           SYSTEM_INTERFACE);
 
     return;
 }
