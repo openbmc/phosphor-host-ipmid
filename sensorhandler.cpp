@@ -49,7 +49,6 @@ struct sensorreadingresp_t {
     uint8_t indication[2];
 }  __attribute__ ((packed)) ;
 
-
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
 // step for mapping IPMI
@@ -248,7 +247,6 @@ final:
 
     return 0;
 }
-
 
 uint8_t dbus_to_sensor_type(char *p) {
 
@@ -453,17 +451,25 @@ ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_sen_functions()
 {
+    // <Wildcard Command>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_WILDCARD);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_WILDCARD, NULL, ipmi_sen_wildcard);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_WILDCARD, NULL, ipmi_sen_wildcard,
+                           PRIVILEGE_USER);
 
+    // <Get Sensor Type>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE, NULL, ipmi_sen_get_sensor_type);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE, NULL, ipmi_sen_get_sensor_type,
+                           PRIVILEGE_USER);
 
+    // <Set Sensor Reading and Event Status>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_SET_SENSOR);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR, NULL, ipmi_sen_set_sensor);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR, NULL, ipmi_sen_set_sensor,
+                           PRIVILEGE_OPERATOR);
 
+    // <Get Sensor Reading>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, NULL, ipmi_sen_get_sensor_reading);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, NULL,
+                           ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
 
     return;
 }
