@@ -568,43 +568,81 @@ ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_app_functions()
 {
+    ipmi_cmd_data_t command_data;
+    command_data.canExecuteSessionless = false;
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_ANY;
+    command_data.supportedChannels = IPMI_CHANNEL_ANY;
+    command_data.commandSupportMask = IPMI_COMMAND_SUPPORT_NO_DISABLE;
+
+    // <Get BT Interface Capabilities>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CAP_BIT);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CAP_BIT, NULL, ipmi_app_get_bt_capabilities);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CAP_BIT, NULL, ipmi_app_get_bt_capabilities,
+                           command_data);
 
+    // <Wildcard Command>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_WILDCARD);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_WILDCARD, NULL, ipmi_app_wildcard_handler);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_WILDCARD, NULL, ipmi_app_wildcard_handler,
+                           command_data);
 
+    // <Reset Watchdog Timer>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_OPERATOR;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_RESET_WD);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_RESET_WD, NULL, ipmi_app_reset_watchdog);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_RESET_WD, NULL, ipmi_app_reset_watchdog,
+                           command_data);
 
+    // <Set Watchdog Timer>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_OPERATOR;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_SET_WD);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL, ipmi_app_set_watchdog);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL, ipmi_app_set_watchdog, command_data);
 
+    // <Get Device ID>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_ID);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_ID, NULL, ipmi_app_get_device_id);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_ID, NULL, ipmi_app_get_device_id,
+                           command_data);
 
+    // <Get Device GUID>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL, ipmi_app_get_device_guid);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL, ipmi_app_get_device_guid,
+                           command_data);
 
+    // <Set ACPI Power State>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_ADMIN;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_SET_ACPI);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL, ipmi_app_set_acpi_power_state);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL, ipmi_app_set_acpi_power_state,
+                           command_data);
 
+    // <Read Event Message Buffer>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_NONE;
+    command_data.supportedChannels = IPMI_CHANNEL_SYSTEM_INTERFACE_ONLY;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_READ_EVENT);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_READ_EVENT, NULL, ipmi_app_read_event);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_READ_EVENT, NULL, ipmi_app_read_event,
+                           command_data);
 
+    // <Set BMC Global Enables>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_NONE;
+    command_data.supportedChannels = IPMI_CHANNEL_SYSTEM_INTERFACE_ONLY;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP,
                                             IPMI_CMD_SET_BMC_GLOBAL_ENABLES);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_BMC_GLOBAL_ENABLES, NULL,
-                                            ipmi_app_set_bmc_global_enables);
+                           ipmi_app_set_bmc_global_enables, command_data);
 
+    // <Get Message Flags>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_NONE;
+    command_data.supportedChannels = IPMI_CHANNEL_SYSTEM_INTERFACE_ONLY;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags,
+                           command_data);
 
-
+    // <Get Channel Info Command>
+    command_data.privilegeMask = IPMI_SESSION_PRIVILEGE_USER;
+    command_data.supportedChannels = IPMI_CHANNEL_ANY;
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CHAN_INFO);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info);
-
-
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info,
+                           command_data);
 
     return;
 }

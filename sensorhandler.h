@@ -20,4 +20,5 @@ struct dbus_interface_t {
     char  path[MAX_DBUS_PATH];
     char  interface[MAX_DBUS_PATH];
 };
+
 #endif
