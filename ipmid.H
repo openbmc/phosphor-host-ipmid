@@ -8,7 +8,7 @@
 // function will look for registered handlers that will handle that [netfn,cmd]
 // and will make a call to that plugin implementation and send back the response.
 ipmi_ret_t ipmi_netfn_router(const ipmi_netfn_t, const ipmi_cmd_t, ipmi_request_t,
-                             ipmi_response_t, unsigned int *data_len);
+                             ipmi_response_t, unsigned int *data_len, ipmi_cmd_data_t data);
 
 // Plugin libraries need to _end_ with .so
 #define IPMI_PLUGIN_EXTN ".so"

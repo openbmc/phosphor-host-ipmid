@@ -3,8 +3,6 @@
 #include <errno.h>
 #include <systemd/sd-bus.h>
 
-#include "ipmid-api.h"
-
 void register_host_services() __attribute__((constructor));
 
 // OpenBMC Host IPMI dbus framework
