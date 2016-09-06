@@ -108,8 +108,8 @@ void hexdump(FILE *s, void *mem, size_t len)
 
 
 // Method that gets called by shared libraries to get their command handlers registered
-void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                       ipmi_context_t context, ipmid_callback_t handler)
+void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_context_t context,
+                            ipmid_callback_t handler, ipmi_cmd_privilege priv)
 {
     // Pack NetFn and Command in one.
     auto netfn_and_cmd = std::make_pair(netfn, cmd);
