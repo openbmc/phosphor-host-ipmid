@@ -7,6 +7,44 @@
 extern "C" {
 #endif
 
+enum IpmiSessionPrivileges {
+  IPMI_SESSION_PRIVILEGE_ANY      = 0x00000000,
+  IPMI_SESSION_PRIVILEGE_CALLBACK = 0x01,
+  IPMI_SESSION_PRIVILEGE_USER     = 0x02,
+  IPMI_SESSION_PRIVILEGE_OPERATOR = 0x03,
+  IPMI_SESSION_PRIVILEGE_ADMIN    = 0x04,
+  IPMI_SESSION_PRIVILEGE_OEM      = 0x05,
+  IPMI_SESSION_PRIVILEGE_NONE     = 0xFFFFFFFF,
+};
+
+enum IpmiChannels {
+  IPMI_CHANNEL_ANY                    = 0x00000000,
+  IPMI_CHANNEL_SYSTEM_INTERFACE_ONLY  = 0x00000001,
+  IPMI_CHANNEL_LOCAL_INTERFACES_ONLY  = 0x00000002,
+};
+
+enum IpmiCommandSupportMask {
+  IPMI_COMMAND_SUPPORT_DEFAULT    = 0x00000000, //Supported by default and can be configured
+                                                //(enabled/disabled)
+  IPMI_COMMAND_SUPPORT_NO_DISABLE = 0x00000001, //Supported and cannot be
+                                                //configured (enable/disable)
+  IPMI_COMMAND_SUPPORT_NO_DEFAULT = 0x00000002, //Disabled but can be configured
+  IPMI_COMMAND_SUPPORT_DISABLED   = 0x10000000, //Support has been disabled
+};
+
+struct IpmiCommandData {
+  bool canExecuteSessionless; // Note: When true, command works at any privilege level,can
+                              // be sent prior to a session being established
+  IpmiSessionPrivileges privilegeMask; // Specifies the minimum privilege level required to
+                                       // execute this command.Note: Command is supported at given
+                                       //privilege level or higher
+  IpmiChannels supportedChannels;  // Specifies the channels this command can be requested on.
+                                   // Note: This can be used with "Get NetFn Support" command.
+  IpmiCommandSupportMask commandSupportMask; //Used to derive the values for the firmware firewall.
+};
+
+
+
 // length of Completion Code and its ALWAYS _1_
 #define IPMI_CC_LEN 1
 
@@ -46,6 +84,8 @@ typedef size_t*   ipmi_data_len_t;
 // Plugin function return the status code
 typedef unsigned char ipmi_ret_t;
 
+typedef struct IpmiCommandData ipmi_cmd_data_t;
+
 // This is the callback handler that the plugin registers with IPMID. IPMI
 // function router will then make a call to this callback handler with the
 // necessary arguments of netfn, cmd, request, response, size and context.
@@ -55,8 +95,9 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 // This is the constructor function that is called into by each plugin handlers.
 // When ipmi sets up the callback handlers, a call is made to this with
 // information of netfn, cmd, callback handler pointer and context data.
-void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t,
-                                       ipmi_context_t, ipmid_callback_t);
+void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t, ipmi_context_t, ipmid_callback_t,
+                            ipmi_cmd_data_t);
+
 
 unsigned short get_sel_reserve_id(void);
 

@@ -3,7 +3,6 @@
 #include <errno.h>
 #include <systemd/sd-bus.h>
 #include <mapper.h>
-#include "host-ipmid/ipmid-api.h"
 
 void register_host_services() __attribute__((constructor));
 
