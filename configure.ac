@@ -25,5 +25,9 @@ AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.
 LT_INIT([dlopen disable-static shared])
 LT_LIB_DLLOAD
 
-AC_CONFIG_FILES([Makefile])
+# Check/set gtest specific funcitons
+AX_PTHREAD([GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=1"],[GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=0"])
+AC_SUBST(GTEST_CPPFLAGS)
+
+AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
