@@ -47,14 +47,16 @@ libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
 
-check_PROGRAMS = \
-	testit
+SUBDIRS = test
+
+#check_PROGRAMS = \
+#	testit
 #	testaddsel
 
-testit_SOURCES = \
-	ipmisensor.cpp \
-	testit.cpp
-testit_LDFLAGS = $(SYSTEMD_LIBS) $(LIBADD_DLOPEN)
+#testit_SOURCES = \
+#	ipmisensor.cpp \
+#	testit.cpp
+#testit_LDFLAGS = $(SYSTEMD_LIBS) $(LIBADD_DLOPEN)
 
 #testaddsel_SOURCES = \
 #	testaddsel.cpp \
