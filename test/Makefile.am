@@ -16,7 +16,7 @@ sample_unittest_CPPFLAGS = -Igtest $(GTEST_CPPFLAGS)
 #	$(AM_CPPFLAGS)
 sample_unittest_CXXFLAGS = $(PTHREAD_CFLAGS)
 #	$(AM_CXXFLAGS)
-sample_unittest_LDFLAGS = -lgtest_main -lgtest $(PTHREAD_LIBS)
+sample_unittest_LDFLAGS = -lgtest_main -lgtest $(PTHREAD_LIBS) $(OESDK_TESTCASE_FLAGS)
 #	$(AM_LDFLAGS)
 sample_unittest_SOURCES = sample_unittest.cpp
 sample_unittest_LDADD = $(top_builddir)/sample.o
