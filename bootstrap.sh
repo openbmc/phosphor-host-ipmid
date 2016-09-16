@@ -1,13 +1,14 @@
 #!/bin/sh
 
 AUTOCONF_FILES="Makefile.in aclocal.m4 ar-lib autom4te.cache compile config.* \
-        configure depcomp install-sh ltmain.sh missing *libtool"
+        configure depcomp install-sh ltmain.sh missing *libtool test-driver"
 
 case $1 in
     clean)
         test -f Makefile && make maintainer-clean
-        rm -rf ${AUTOCONF_FILES}
-        
+        for file in ${AUTOCONF_FILES}; do
+            find -name "$file" | xargs -r rm -rf
+        done
         exit 0
         ;;
 esac
