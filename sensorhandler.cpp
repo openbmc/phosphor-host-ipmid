@@ -1,13 +1,14 @@
 #include "sensorhandler.h"
 #include "host-ipmid/ipmid-api.h"
+#include <mapper.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <systemd/sd-bus.h>
+#include "ipmid.hpp"
 
 extern int updateSensorRecordFromSSRAESC(const void *);
-extern int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) ;
-extern int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) ;
+extern sd_bus *bus;
 
 void register_netfn_sen_functions()   __attribute__((constructor));
 
@@ -47,6 +48,205 @@ struct sensorreadingresp_t {
     uint8_t operation;
     uint8_t indication[2];
 }  __attribute__ ((packed)) ;
+
+
+// Use a lookup table to find the interface name of a specific sensor
+// This will be used until an alternative is found.  this is the first
+// step for mapping IPMI
+int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) {
+
+    char  *str1;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL, *m=NULL;
+
+
+    int r;
+
+    r = sd_bus_message_new_method_call(bus,&m,interface->bus,interface->path,"org.freedesktop.DBus.Properties","Get");
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
+                interface->bus, interface->path, interface->interface);
+        goto final;
+    }
+
+    r = sd_bus_message_append(m, "ss", "org.openbmc.InventoryItem", property_name);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
+                interface->bus, interface->path, interface->interface);
+        goto final;
+    }
+
+    r = sd_bus_call(bus, m, 0, &error, &reply);
+    if (r < 0) {
+        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
+        goto final;
+    }
+
+    r = sd_bus_message_read(reply, "v",  "s", &str1) ;
+    if (r < 0) {
+        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
+        goto final;
+    }
+
+    strcpy(property_value, str1);
+
+final:
+
+    sd_bus_error_free(&error);
+    m = sd_bus_message_unref(m);
+    reply = sd_bus_message_unref(reply);
+
+    return r;
+}
+
+
+// Use a lookup table to find the interface name of a specific sensor
+// This will be used until an alternative is found.  this is the first
+// step for mapping IPMI
+int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
+    char  *busname = NULL;
+    const char  *iface = "org.openbmc.managers.System";
+    const char  *objname = "/org/openbmc/managers/System";
+    char  *str1 = NULL, *str2, *str3;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL;
+
+
+    int r;
+    r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get system manager busname: %s\n", strerror(-r));
+        goto final;
+    }
+
+    r = sd_bus_call_method(bus,busname,objname,iface, "getObjectFromByteId",
+                           &error, &reply, "sy", type, num);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        goto final;
+    }
+
+    r = sd_bus_message_read(reply, "(ss)", &str2, &str3);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
+        goto final;
+    }
+
+    r = mapper_get_service(bus, str2, &str1);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get item busname: %s\n", strerror(-r));
+        goto final;
+    }
+
+    strncpy(interface->bus, str1, MAX_DBUS_PATH);
+    strncpy(interface->path, str2, MAX_DBUS_PATH);
+    strncpy(interface->interface, str3, MAX_DBUS_PATH);
+
+    interface->sensornumber = num;
+
+final:
+
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+    free(busname);
+    free(str1);
+
+    return r;
+}
+
+
+/////////////////////////////////////////////////////////////////////
+//
+// Routines used by ipmi commands wanting to interact on the dbus
+//
+/////////////////////////////////////////////////////////////////////
+int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *value) {
+
+
+    dbus_interface_t a;
+    int r;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *m=NULL;
+
+    fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of %s\n",
+        number, method, value);
+
+    r = find_openbmc_path("SENSOR", number, &a);
+
+    if (r < 0) {
+        fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
+        return 0;
+    }
+
+    r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        goto final;
+    }
+
+    r = sd_bus_message_append(m, "v", "s", value);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        goto final;
+    }
+
+
+    r = sd_bus_call(bus, m, 0, &error, NULL);
+    if (r < 0) {
+        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
+    }
+
+final:
+    sd_bus_error_free(&error);
+    m = sd_bus_message_unref(m);
+
+    return 0;
+}
+int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t value) {
+
+
+    dbus_interface_t a;
+    int r;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *m=NULL;
+
+    fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of 0x%02x\n",
+        number, method, value);
+
+    r = find_openbmc_path("SENSOR", number, &a);
+
+    if (r < 0) {
+        fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
+        return 0;
+    }
+
+    r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        goto final;
+    }
+
+    r = sd_bus_message_append(m, "v", "i", value);
+    if (r < 0) {
+        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        goto final;
+    }
+
+
+    r = sd_bus_call(bus, m, 0, &error, NULL);
+    if (r < 0) {
+        fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
+    }
+
+final:
+    sd_bus_error_free(&error);
+    m = sd_bus_message_unref(m);
+
+    return 0;
+}
+
 
 uint8_t dbus_to_sensor_type(char *p) {
 

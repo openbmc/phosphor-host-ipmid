@@ -8,14 +8,12 @@
 #include <memory>
 #include <systemd/sd-bus.h>
 #include <mapper.h>
-#include "ipmid.hpp"
-#include "storagehandler.h"
+#include "host-ipmid/ipmid-api.h"
 #include "sensorhandler.h"
+#include "storagehandler.h"
+
 
 using namespace std;
-
-extern int find_openbmc_path(const char *, const uint8_t , dbus_interface_t *);
-
 
 //////////////////////////
 struct esel_section_headers_t {

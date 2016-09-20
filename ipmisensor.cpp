@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <malloc.h>
-#include <ipmid.hpp>
 #include "sensorhandler.h"
 
 extern uint8_t find_sensor(uint8_t);
@@ -36,8 +35,6 @@ struct lookup_t {
 };
 
 extern int updateDbusInterface(uint8_t , const char *, const char *);
-extern int find_openbmc_path(const char *, const uint8_t , dbus_interface_t *) ;
-
 
 int set_sensor_dbus_state_simple(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 
