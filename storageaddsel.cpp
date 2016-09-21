@@ -79,7 +79,7 @@ int find_sensor_type_string(uint8_t sensor_number, char **s) {
 size_t getfilestream(const char *fn, uint8_t **buffer) {
 
 	FILE *fp;
-	size_t size = 0;
+	ssize_t size = 0;
 	int r;
 
 	if ((fp = fopen(fn, "rb")) != NULL) {
@@ -116,7 +116,7 @@ fclose_fp:
 		fclose(fp);
 	}
 
-	return size;
+	return static_cast<size_t>(size);
 }
 
 
@@ -234,7 +234,7 @@ void send_esel(uint16_t recordid) {
 	const char *sev;
 	uint8_t *buffer = NULL;
 	const char *path = "/tmp/esel";
-	size_t sz;
+	ssize_t sz;
 	int r;
 
 	sz = getfilestream(path, &buffer);

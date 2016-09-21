@@ -27,7 +27,7 @@ constexpr size_t SIZE_COOKIE = 4;
 constexpr size_t SIZE_VERSION = 2;
 constexpr auto   MAC_ADDRESS_FORMAT = "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx";
 constexpr auto   IP_ADDRESS_FORMAT = "%d.%d.%d.%d";
-constexpr auto   PREFIX_FORMAT = "%d";
+constexpr auto   PREFIX_FORMAT = "%hhd";
 constexpr auto   ADDR_TYPE_FORMAT = "%hhx";
 //PetiBoot-Specific
 static constexpr uint8_t net_conf_initial_bytes[] = {0x80,0x21, 0x70 ,0x62 ,0x21,

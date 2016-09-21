@@ -81,10 +81,8 @@ int dbus_warm_reset()
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message *m = NULL;
     sd_bus *bus = NULL;
-    char* temp_buf = NULL;
-    uint8_t* get_value = NULL;
     char* connection = NULL;
-    int r, i;
+    int r;
 
     r = obj_mapper_get_connection(&connection, control_object_name);
     if (r < 0) {
