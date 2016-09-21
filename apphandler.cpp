@@ -128,8 +128,6 @@ typedef struct
 int convert_version(const char *p, rev_t *rev)
 {
     char *s, *token;
-    char hexbyte[5];
-    int l;
     uint16_t commits;
 
     if (*p != 'v')

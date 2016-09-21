@@ -104,8 +104,6 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    unsigned short res_id;
-
     ipmi_ret_t rc = IPMI_CC_OK;
 
     // IPMI spec, Reservation ID, the value simply increases against each execution of reserve_sel command.
