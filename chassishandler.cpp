@@ -79,7 +79,8 @@ int dbus_get_property(const char *name, char **buf)
 
     r = mapper_get_service(bus, settings_object_name, &connection);
     if (r < 0) {
-        fprintf(stderr, "Failed to get connection, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s connection: %s\n",
+                settings_object_name, strerror(-r));
         goto finish;
     }
 
@@ -144,7 +145,8 @@ int dbus_set_property(const char * name, const char *value)
 
     r = mapper_get_service(bus, settings_object_name, &connection);
     if (r < 0) {
-        fprintf(stderr, "Failed to get connection, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s connection: %s\n",
+                settings_object_name, strerror(-r));
         goto finish;
     }
 
@@ -572,7 +574,8 @@ int ipmi_chassis_power_control(const char *method)
 	sd_bus *bus_type = ipmid_get_sd_bus_connection();
 	rc = mapper_get_service(bus_type, chassis_object_name, &busname);
 	if (rc < 0) {
-		fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-rc));
+		fprintf(stderr, "Failed to get %s bus name: %s\n",
+				chassis_object_name, strerror(-rc));
 	goto finish;
 	}
 	rc = sd_bus_call_method(bus_type,        		 // On the System Bus
