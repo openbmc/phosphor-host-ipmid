@@ -117,7 +117,8 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
     int r;
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
-        fprintf(stderr, "Failed to get system manager busname: %s\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s busname: %s\n",
+                objname, strerror(-r));
         goto final;
     }
 
@@ -136,7 +137,8 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
 
     r = mapper_get_service(bus, str2, &str1);
     if (r < 0) {
-        fprintf(stderr, "Failed to get item busname: %s\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s busname: %s\n",
+                        str2, strerror(-r));
         goto final;
     }
 

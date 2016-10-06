@@ -183,7 +183,8 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     mbus = ipmid_get_sd_bus_connection();
     r = mapper_get_service(mbus, object_name, &bus_name);
     if (r < 0) {
-        fprintf(stderr, "Failed to get connection, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s connection: %s\n",
+                object_name, strerror(-r));
         goto finish;
     }
     r = sd_bus_message_new_method_call(mbus,&m,

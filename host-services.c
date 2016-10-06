@@ -45,7 +45,8 @@ static int soft_power_off(sd_bus_message *m, void *userdata, sd_bus_error *ret_e
     sd_bus *bus = ipmid_get_sd_bus_connection();
     rc = mapper_get_service(bus, object_name, &bus_name);
     if (rc < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-rc));
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+                object_name, strerror(-rc));
         goto finish;
     }
     rc = sd_bus_call_method(bus,             // In the System Bus
