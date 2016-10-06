@@ -274,7 +274,8 @@ void cache_restricted_mode()
 
     rc = mapper_get_service(bus, settings_host_object, &busname);
     if (rc < 0) {
-        fprintf(stderr, "Failed to get HOST busname: %s\n", strerror(-rc));
+        fprintf(stderr, "Failed to get %s busname: %s\n",
+			settings_host_object, strerror(-rc));
         goto cleanup;
     }
     rc = sd_bus_call_method(bus,

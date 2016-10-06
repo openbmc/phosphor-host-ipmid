@@ -57,7 +57,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
 
     r = mapper_get_service(bus, obj, &app);
     if (r < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+			obj, strerror(-r));
         goto cleanup;
     }
     r = sd_bus_call_method(bus, app, obj, ifc, "GetAddress4", &error,
@@ -185,7 +186,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         r = mapper_get_service(bus, obj, &app);
         if (r < 0) {
-            fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+            fprintf(stderr, "Failed to get %s bus name: %s\n",
+			    obj, strerror(-r));
             goto finish;
         }
         r = sd_bus_call_method(bus, app, obj, ifc, "SetHwAddress", &error,
@@ -339,7 +341,8 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         r = mapper_get_service(bus, obj, &app);
         if (r < 0) {
-            fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+            fprintf(stderr, "Failed to get %s bus name: %s\n",
+			    obj, strerror(-r));
             goto cleanup;
         }
         r = sd_bus_call_method(bus, app, obj, ifc, "GetHwAddress", &error,

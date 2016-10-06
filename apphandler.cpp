@@ -195,7 +195,8 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Firmware revision is already implemented, so get it from appropriate position.
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+			objname, strerror(-r));
         goto finish;
     }
     r = sd_bus_get_property_string(bus,busname,objname,iface,"version", NULL, &ver);
@@ -284,7 +285,8 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Call Get properties method with the interface and property name
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+			objname, strerror(-r));
         goto finish;
     }
     r = sd_bus_call_method(bus,busname,objname,iface,
@@ -407,7 +409,8 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Get bus name
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+                        objname, strerror(-r));
         goto finish;
     }
     // Set watchdog timer
@@ -473,7 +476,8 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Get bus name
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+                        objname, strerror(-r));
         goto finish;
     }
     // Refresh watchdog
