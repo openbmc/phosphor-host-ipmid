@@ -289,7 +289,8 @@ uint8_t find_sensor(uint8_t sensor_number) {
 
     dbus_interface_t a;
     char *p;
-    char r;
+    int r;
+    uint8_t type;
 
     r = find_openbmc_path("SENSOR", sensor_number, &a);
 
@@ -303,14 +304,14 @@ uint8_t find_sensor(uint8_t sensor_number) {
     if (strstr(a.interface, "InventoryItem")) {
         // InventoryItems are real frus.  So need to get the
         // fru_type property
-        r = dbus_to_sensor_type_from_dbus(&a);
+        type = dbus_to_sensor_type_from_dbus(&a);
     } else {
         // Non InventoryItems
         p = strrchr (a.path, '/');
-        r = dbus_to_sensor_type(p+1);
+        type = dbus_to_sensor_type(p+1);
     }
 
-    return r;
+    return type;
  }
 
 
@@ -388,6 +389,10 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     type = find_sensor(reqptr->sennum);
+    if(type == 0) {
+        fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
+        return IPMI_CC_SENSOR_INVALID;
+    }
 
     fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n", a.bus, a.path, a.interface);
 
