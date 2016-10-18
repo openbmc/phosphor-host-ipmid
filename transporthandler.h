@@ -24,4 +24,10 @@ static const int LAN_PARM_MAC         = 5;
 static const int LAN_PARM_SUBNET      = 6;
 static const int LAN_PARM_GATEWAY     = 12;
 
+struct channel_config_t {
+    char new_ipaddr  [INET_ADDRSTRLEN];
+    char new_netmask [INET_ADDRSTRLEN];
+    char new_gateway [INET_ADDRSTRLEN];
+}  __attribute__ ((packed));
+
 #endif
