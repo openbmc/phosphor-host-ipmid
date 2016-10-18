@@ -1,11 +1,14 @@
 #ifndef __HOST_IPMID_IPMI_COMMON_H__
 #define __HOST_IPMID_IPMI_COMMON_H__
 #include <stdlib.h>
-#include <systemd/sd-bus.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct sd_bus_message sd_bus_message;
+typedef struct sd_bus sd_bus;
+typedef struct sd_bus_slot sd_bus_slot;
 
 // length of Completion Code and its ALWAYS _1_
 #define IPMI_CC_LEN 1

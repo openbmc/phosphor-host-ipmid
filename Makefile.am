@@ -4,6 +4,7 @@ sbin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
+	ipmid-router.cpp \
 	ipmid.cpp
 	ipmiwhitelist.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
@@ -12,7 +13,7 @@ CLEANFILES = ipmiwhitelist.cpp
 
 #TODO - Make this path a configure option (bitbake parameter)
 ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
-ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynamic
+ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynamic -lglog
 # TODO: Rather than use -export-dynamic, we should use -export-symbol to have a
 #       selective list of symbols.
 
