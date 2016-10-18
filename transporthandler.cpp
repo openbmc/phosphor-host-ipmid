@@ -59,6 +59,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
     if (r < 0) {
         fprintf(stderr, "Failed to get %s bus name: %s\n",
                 obj, strerror(-r));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
         goto cleanup;
     }
     r = sd_bus_call_method(bus, app, obj, ifc, "GetAddress4", &error,
@@ -158,22 +159,19 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
     char *app = NULL;
+    int family;
+    unsigned char prefixlen;
+    char* ipaddr = NULL;
+    char* gateway = NULL;
 
     printf("IPMI SET_LAN\n");
 
     set_lan_t *reqptr = (set_lan_t*) request;
 
-    // TODO Use dbus interface once available. For now use cmd line.
-    // TODO Add the rest of the parameters like setting auth type
-    // TODO Add error handling
-
-    if (reqptr->parameter == LAN_PARM_IP)
-    {
+    if (reqptr->parameter == LAN_PARM_IP) {
         snprintf(new_ipaddr, INET_ADDRSTRLEN, "%d.%d.%d.%d",
             reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-    }
-    else if (reqptr->parameter == LAN_PARM_MAC)
-    {
+    } else if (reqptr->parameter == LAN_PARM_MAC) {
         char mac[SIZE_MAC];
 
         snprintf(mac, SIZE_MAC, "%02x:%02x:%02x:%02x:%02x:%02x",
@@ -192,63 +190,53 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         r = sd_bus_call_method(bus, app, obj, ifc, "SetHwAddress", &error,
                                 &reply, "ss", nwinterface, mac);
-        if(r < 0)
-        {
+        if(r < 0){
             fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
-    }
-    else if (reqptr->parameter == LAN_PARM_SUBNET)
+    } else if (reqptr->parameter == LAN_PARM_SUBNET)
     {
         snprintf(new_netmask, INET_ADDRSTRLEN, "%d.%d.%d.%d",
             reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-    }
-    else if (reqptr->parameter == LAN_PARM_GATEWAY)
+    } else if (reqptr->parameter == LAN_PARM_GATEWAY)
     {
         snprintf(new_gateway, INET_ADDRSTRLEN, "%d.%d.%d.%d",
             reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-    }
-    else if (reqptr->parameter == LAN_PARM_INPROGRESS)
+    } else if (reqptr->parameter == LAN_PARM_INPROGRESS)
     {
-        if(reqptr->data[0] == SET_COMPLETE) // Set Complete
-        {
+        if(reqptr->data[0] == SET_COMPLETE) {
             lan_set_in_progress = SET_COMPLETE;
-            // Apply the IP settings once IP Address, Netmask and Gateway  is set
-            if (!strcmp(new_ipaddr, "") || !strcmp (new_netmask, "") || !strcmp (new_gateway, ""))
-            {
-                printf("ERROR: Incomplete LAN Parameters\n");
-            }
-            else
-            {
 
-                r = sd_bus_call_method(bus,            // On the System Bus
-                                        app,            // Service to contact
-                                        obj,            // Object path
-                                        ifc,            // Interface name
-                                        "SetAddress4",  // Method to be called
-                                        &error,         // object to return error
-                                        &reply,         // Response message on success
-                                        "ssss",         // input message (Interface, IP Address, Netmask, Gateway)
-                                        nwinterface,    // eth0
-                                        new_ipaddr,
-                                        new_netmask,
-                                        new_gateway);
-                if(r < 0)
-                {
-                    fprintf(stderr, "Failed to set network data %s:%s:%s %s\n", new_ipaddr, new_netmask, new_gateway, error.message);
-                    rc = IPMI_CC_UNSPECIFIED_ERROR;
-                }
-                memset(new_ipaddr, 0, INET_ADDRSTRLEN);
-                memset(new_netmask, 0, INET_ADDRSTRLEN);
-                memset(new_gateway, 0, INET_ADDRSTRLEN);
+            r = mapper_get_service(bus, obj, &app);
+            if (r < 0) {
+                fprintf(stderr, "Failed to get %s bus name: %s\n",
+                        obj, strerror(-r));
+                rc = IPMI_CC_RESPONSE_ERROR;
+                goto finish;
             }
-        }
-        else if(reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
+            r = sd_bus_call_method(bus, app, obj, ifc, "GetAddress4", &error,
+                                    &reply, "s", nwinterface);
+            if(r < 0) {
+                fprintf(stderr, "Failed to call Get Method: %s\n", strerror(-r));
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+                goto finish;
+            }
+
+            r = sd_bus_message_read(reply, "iyss", &family, &prefixlen, &ipaddr, &gateway);
+            if(r < 0) {
+                fprintf(stderr, "Failed to get a response: %s\n", strerror(-rc));
+                rc = IPMI_CC_RESPONSE_ERROR;
+                goto finish;
+            }
+
+            printf("N/W data from Cache: %s:%s:%s\n", new_ipaddr, new_netmask, new_gateway);
+            printf("Use Set Chassis Access command to apply them\n");
+
+        } else if(reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
         {
             lan_set_in_progress = SET_IN_PROGRESS;
         }
-    }
-    else
+    } else
     {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
         rc = IPMI_CC_PARM_NOT_SUPPORTED;
