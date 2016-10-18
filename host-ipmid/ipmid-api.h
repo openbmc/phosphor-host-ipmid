@@ -105,7 +105,10 @@ enum ipmi_return_codes
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
+// DEPRECATED: Please use IpmidServer or DBus.
 sd_bus *ipmid_get_sd_bus_connection(void);
+
+// DEPRECATED: Please use IpmidServer or DBus.
 sd_bus_slot *ipmid_get_sd_bus_slot(void);
 
 #ifdef __cplusplus
