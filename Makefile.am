@@ -5,6 +5,7 @@ sbin_PROGRAMS = \
 
 ipmid_SOURCES = \
 	ipmid-router.cpp \
+	ipmid-server.cpp \
 	dbus.cpp \
 	ipmid.cpp
 	ipmiwhitelist.cpp

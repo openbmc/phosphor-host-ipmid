@@ -19,7 +19,9 @@ ipmid_unittest_SOURCES = \
 	test-main.cpp \
 	ipmid-test-utils.cpp \
 	ipmid-router-test.cpp \
-	dbus-test.cpp
+	dbus-test.cpp \
+	ipmid-server-test.cpp
 ipmid_unittest_LDADD = \
 	$(top_builddir)/ipmid-router.o \
-	$(top_builddir)/dbus.o
+	$(top_builddir)/dbus.o \
+	$(top_builddir)/ipmid-server.o
