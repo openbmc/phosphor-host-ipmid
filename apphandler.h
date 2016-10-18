@@ -27,6 +27,7 @@ enum ipmi_netfn_app_cmds
     IPMI_CMD_GET_MSG_FLAGS          = 0x31,
     IPMI_CMD_READ_EVENT             = 0x35,
     IPMI_CMD_GET_CAP_BIT            = 0x36,
+    IPMI_CMD_SET_CHAN_ACCESS        = 0x40,
     IPMI_CMD_GET_CHAN_INFO          = 0x42,
 
 };

@@ -7,8 +7,14 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <array>
+#include <arpa/inet.h>
 
 extern sd_bus *bus;
+
+const char  *app_obj   =  "/org/openbmc/NetworkManager/Interface";
+const char  *app_ifc   =  "org.openbmc.NetworkManager";
+
+const char *app_nwinterface = "eth0";
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -496,6 +502,129 @@ finish:
     return rc;
 }
 
+
+bool CheckeEmpty( const char *data, char Len )
+{
+    while(Len--)
+    {
+        if( data[(unsigned char)Len] != 0 )
+            return 1;
+    }
+    return 0;
+}
+
+struct channel_access_data_t {
+    uint8_t channel;
+    uint8_t access_cfg;
+    uint8_t privilege_cfg;
+}  __attribute__ ((packed));
+
+// Support only channel 1 here.
+struct channel_access_data_t channel_access;
+
+extern char new_ipaddr  [];
+extern char new_netmask [];
+extern char new_gateway [];
+
+ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    sd_bus *bus = ipmid_get_sd_bus_connection();
+    sd_bus_message *reply = NULL;
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    int r = 0;
+    char *app = NULL;
+    int family;
+    unsigned char prefixlen;
+    char* ipaddr = NULL;
+    unsigned long mask = 0xFFFFFFFF;
+    char* gateway = NULL;
+
+    printf("IPMI SET CHANNEL ACCESS\n");
+
+    memcpy( &channel_access, request, *data_len);
+
+// Using Set Channel cmd to apply changes of Set Lan Cmd.
+
+    r = mapper_get_service(bus, app_obj, &app);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+                app_obj, strerror(-r));
+        goto finish;
+    }
+    r = sd_bus_call_method(bus, app, app_obj, app_ifc, "GetAddress4", &error,
+                            &reply, "s", app_nwinterface);
+    if(r < 0)
+    {
+        fprintf(stderr, "Failed to call Get Method: %s\n", strerror(-r));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    r = sd_bus_message_read(reply, "iyss", &family, &prefixlen, &ipaddr, &gateway);
+    if(r < 0)
+    {
+        fprintf(stderr, "Failed to get a response: %s\n", strerror(-rc));
+        rc = IPMI_CC_RESPONSE_ERROR;
+        goto finish;
+    }
+
+    printf("N/W data from HW %s:%d:%s:%s\n", family==AF_INET?"IPv4":"IPv6", prefixlen, ipaddr,gateway);
+    printf("N/W data from Cache: %s:%s:%s\n", new_ipaddr, new_netmask, new_gateway);
+
+    if( !strcmp(new_ipaddr, "") || !CheckeEmpty( (const char *)new_ipaddr, (char)INET_ADDRSTRLEN) )
+    {
+        memcpy(new_ipaddr, ipaddr, INET_ADDRSTRLEN);
+    }
+    if( !strcmp(new_netmask, "") || !CheckeEmpty( (const char *)new_netmask, (char)INET_ADDRSTRLEN) )
+    {
+        mask = htonl(mask<<(32-prefixlen));
+
+        uint8_t *p = (uint8_t *)&mask;
+
+        snprintf(new_netmask, INET_ADDRSTRLEN, "%d.%d.%d.%d",
+            *p, *(p+1), *(p+2), *(p+3));
+    }
+    if( !strcmp(new_gateway, "") || !CheckeEmpty( (const char *)new_gateway, (char)INET_ADDRSTRLEN) )
+    {
+        memcpy(new_gateway, gateway, INET_ADDRSTRLEN);
+    }
+
+    printf("N/W data from HW %s:%d:%s:%s\n", family==AF_INET?"IPv4":"IPv6", prefixlen, ipaddr,gateway);
+    printf("N/W data from Cache: %s:%s:%s\n", new_ipaddr, new_netmask, new_gateway);
+
+    r = sd_bus_call_method(bus,            // On the System Bus
+                            app,            // Service to contact
+                            app_obj,            // Object path
+                            app_ifc,            // Interface name
+                            "SetAddress4",  // Method to be called
+                            &error,         // object to return error
+                            &reply,         // Response message on success
+                            "ssss",         // input message (Interface, IP Address, Netmask, Gateway)
+                            app_nwinterface,    // eth0
+                            new_ipaddr,
+                            new_netmask,
+                            new_gateway);
+    if(r < 0)
+    {
+        fprintf(stderr, "Failed to set network data %s:%s:%s %s\n", new_ipaddr, new_netmask, new_gateway, error.message);
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    memset(new_ipaddr, 0, INET_ADDRSTRLEN);
+    memset(new_netmask, 0, INET_ADDRSTRLEN);
+    memset(new_gateway, 0, INET_ADDRSTRLEN);
+
+finish:
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+    free(app);
+
+    return rc;
+}
+
 // ATTENTION: This ipmi function is very hardcoded on purpose
 // OpenBMC does not fully support IPMI.  This command is useful
 // to have around because it enables testing of interfaces with
@@ -602,6 +731,8 @@ void register_netfn_app_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags);
 
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS, NULL, ipmi_set_channel_access);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CHAN_INFO);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info);
