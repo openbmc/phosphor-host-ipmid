@@ -36,6 +36,12 @@ libapphandler_la_SOURCES = \
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 
+libsysintfcmdsdir = ${libdir}/host-ipmid
+libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
+libsysintfcmds_la_SOURCES = \
+	systemintfcmds.cpp
+libsysintfcmds_la_LDFLAGS = -version-info 0:0:0 -shared
+
 libhostservicedir = ${libdir}/host-ipmid
 libhostservice_LTLIBRARIES = libhostservice.la
 libhostservice_la_SOURCES = \
