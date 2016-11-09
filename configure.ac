@@ -13,7 +13,7 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
-AC_CHECK_LIB([mapper], [mapper_get_service])
+AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
 PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221])
 
 # Checks for header files.
