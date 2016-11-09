@@ -5,7 +5,6 @@ sbin_PROGRAMS = \
 
 ipmid_SOURCES = \
 	ipmid.cpp
-	ipmiwhitelist.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 BUILT_SOURCES = ipmiwhitelist.cpp
 CLEANFILES = ipmiwhitelist.cpp
