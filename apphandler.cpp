@@ -252,6 +252,89 @@ finish:
     return rc;
 }
 
+ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    constexpr auto *fan_objname = "/org/openbmc/inventory/system/chassis/motherboard/fan2";
+    constexpr auto *fan_intf    = "org.openbmc.InventoryItem";
+
+    sd_bus *bus = nullptr;
+    sd_bus_message *reply = nullptr;
+    int r = 0;
+    char *busname = nullptr;
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    char faultvalue[64] = {0};//size?
+    // Byte 2:
+    //  55h - No error.
+    //  56h - Self Test funciton not implemented in this controller.
+    //  57h - Corrupted or inaccesssible data or devices.
+    //  58h - Fatal hardware error.
+    //  FFh - reserved.
+    //  all other: Device-specific 'internal failure'.
+    //  Byte 3:
+    //      For byte 2 = 55h, 56h, FFh:     00h
+    //      For byte 2 = 58h, all other:    Device-specific
+    //      For byte 2 = 57h:   self-test error bitfield.
+    //      Note: returning 57h does not imply that all test were run.
+    //      [7] 1b = Cannot access SEL device.
+    //      [6] 1b = Cannot access SDR Repository.
+    //      [5] 1b = Cannot access BMC FRU device.
+    //      [4] 1b = IPMB signal lines do not respond.
+    //      [3] 1b = SDR Repository empty.
+    //      [2] 1b = Internal Use Area of BMC FRU corrupted.
+    //      [1] 1b = controller update 'boot block' firmware corrupted.
+    //      [0] 1b = controller operational firmware corrupted.
+
+    char selftestresults[2] = {0};
+
+    bus = ipmid_get_sd_bus_connection();
+
+    *data_len = 2;
+
+    r = mapper_get_service(bus, fan_objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    r = sd_bus_get_property(bus, busname, fan_objname, fan_intf, "fault", NULL, &reply, "s");
+    if (r < 0) {
+        fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
+        fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
+                busname, fan_objname, fan_intf);
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    r = sd_bus_message_read(reply, "s", faultvalue);
+    if (r < 0) {
+        fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    printf("%s",faultvalue);
+
+    if( !strcmp(faultvalue, "False") ) {
+        selftestresults[0] = 0x55;
+    } else {
+        selftestresults[0] = 0x58;
+    }
+
+    selftestresults[1] = 0;
+
+    memcpy(response, selftestresults, *data_len);
+
+finish:
+    free(busname);
+    reply = sd_bus_message_unref(reply);
+
+    return rc;
+}
+
 ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
@@ -584,6 +667,9 @@ void register_netfn_app_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_ID);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_ID, NULL, ipmi_app_get_device_id);
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS, NULL, ipmi_app_get_self_test_results);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL, ipmi_app_get_device_guid);

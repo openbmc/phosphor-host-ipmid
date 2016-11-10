@@ -19,6 +19,7 @@ enum ipmi_netfn_app_cmds
 {
     // Get capability bits
     IPMI_CMD_GET_DEVICE_ID          = 0x01,
+    IPMI_CMD_GET_SELF_TEST_RESULTS  = 0x04,
     IPMI_CMD_SET_ACPI               = 0x06,
     IPMI_CMD_GET_DEVICE_GUID        = 0x08,
     IPMI_CMD_RESET_WD               = 0x22,
