@@ -252,6 +252,45 @@ finish:
     return rc;
 }
 
+ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    // Byte 2:
+    //  55h - No error.
+    //  56h - Self Test funciton not implemented in this controller.
+    //  57h - Corrupted or inaccesssible data or devices.
+    //  58h - Fatal hardware error.
+    //  FFh - reserved.
+    //  all other: Device-specific 'internal failure'.
+    //  Byte 3:
+    //      For byte 2 = 55h, 56h, FFh:     00h
+    //      For byte 2 = 58h, all other:    Device-specific
+    //      For byte 2 = 57h:   self-test error bitfield.
+    //      Note: returning 57h does not imply that all test were run.
+    //      [7] 1b = Cannot access SEL device.
+    //      [6] 1b = Cannot access SDR Repository.
+    //      [5] 1b = Cannot access BMC FRU device.
+    //      [4] 1b = IPMB signal lines do not respond.
+    //      [3] 1b = SDR Repository empty.
+    //      [2] 1b = Internal Use Area of BMC FRU corrupted.
+    //      [1] 1b = controller update 'boot block' firmware corrupted.
+    //      [0] 1b = controller operational firmware corrupted.
+
+    char selftestresults[2] = {0};
+
+    *data_len = 2;
+
+    selftestresults[0] = 0x56;
+    selftestresults[1] = 0;
+
+    memcpy(response, selftestresults, *data_len);
+
+    return rc;
+}
+
 ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
@@ -584,6 +623,9 @@ void register_netfn_app_functions()
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_ID);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_ID, NULL, ipmi_app_get_device_id);
+
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS, NULL, ipmi_app_get_self_test_results);
 
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL, ipmi_app_get_device_guid);
