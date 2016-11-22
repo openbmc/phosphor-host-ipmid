@@ -20,8 +20,7 @@ WHITELIST_CONF ?= ${srcdir}/host-ipmid-whitelist.conf
 ipmiwhitelist.cpp: ${srcdir}/generate_whitelist.sh $(WHITELIST_CONF)
 	$(SHELL) $^ > $@
 
-
-libapphandlerdir = ${libdir}/host-ipmid
+libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
 libapphandler_la_SOURCES = \
 	apphandler.cpp \
@@ -37,13 +36,14 @@ libapphandler_la_SOURCES = \
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 
-libsysintfcmdsdir = ${libdir}/host-ipmid
+libsysintfcmdsdir = ${libdir}/ipmid-providers
 libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
 libsysintfcmds_la_SOURCES = \
 	systemintfcmds.cpp
-libsysintfcmds_la_LDFLAGS = -version-info 0:0:0 -shared
+libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
+libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 
-libhostservicedir = ${libdir}/host-ipmid
+libhostservicedir = ${libdir}/ipmid-providers
 libhostservice_LTLIBRARIES = libhostservice.la
 libhostservice_la_SOURCES = \
 	host-services.c
@@ -54,3 +54,13 @@ nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
 
 SUBDIRS = test
+
+install-exec-hook:
+	$(MKDIR_P) $(DESTDIR)/$(libdir)/host-ipmid
+	$(MKDIR_P) $(DESTDIR)/$(libdir)/net-ipmid
+	cd $(DESTDIR)/$(libdir)/host-ipmid && \
+	$(LN_S) ../ipmid-providers/libapphandler.so.0 libapphandler.so.0 && \
+	$(LN_S) ../ipmid-providers/libsysintfcmds.so.0 libsysintfcmds.so.0 && \
+	$(LN_S) ../ipmid-providers/libhostservice.so.0 libhostservice.so.0
+	cd $(DESTDIR)/$(libdir)/net-ipmid && \
+	$(LN_S) ../ipmid-providers/libapphandler.so.0 libapphandler.so.0
