@@ -123,6 +123,11 @@ enum ipmi_return_codes
 sd_bus *ipmid_get_sd_bus_connection(void);
 sd_bus_slot *ipmid_get_sd_bus_slot(void);
 
+// The BT FIFO in the AST2400 can only handle 64 bytes.
+// Can only allow 63 because the BT interface still
+// needs 1 byte for the length field.
+#define MAX_IPMI_BUFFER 64
+
 #ifdef __cplusplus
 }
 #endif
