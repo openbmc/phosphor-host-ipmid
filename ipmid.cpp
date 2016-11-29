@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <iterator>
 #include <ipmiwhitelist.hpp>
+#include "host-ipmid/ipmid-api.h"
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
