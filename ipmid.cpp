@@ -8,15 +8,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <map>
-#include "ipmid.hpp"
 #include <sys/time.h>
 #include <errno.h>
 #include <mapper.h>
-#include "sensorhandler.h"
 #include <vector>
 #include <algorithm>
 #include <iterator>
 #include <ipmiwhitelist.hpp>
+#include "ipmid.hpp"
+#include "sensorhandler.h"
+#include "host-ipmid/ipmid-api.h"
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
