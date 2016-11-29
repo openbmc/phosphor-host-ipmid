@@ -17,6 +17,7 @@ constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
 constexpr auto app_ifc = "org.openbmc.NetworkManager";
 constexpr auto app_nwinterface = "eth0";
 
+___ CHANGED FOR TEST_222222222222222222222222222
 void register_netfn_app_functions() __attribute__((constructor));
 
 // Offset in get device id command.

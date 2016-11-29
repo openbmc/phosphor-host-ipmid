@@ -18,6 +18,7 @@ enum ipmi_netfn_app_cmds
     IPMI_CMD_GET_SYS_BOOT_OPTIONS = 0x09,
 };
 
+__11111111111111111111111111____
 // Command specific completion codes
 enum ipmi_chassis_return_codes
 {
