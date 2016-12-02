@@ -26,6 +26,9 @@ command::Table table;
 std::tuple<session::Manager&, command::Table&> singletonPool(manager, table);
 
 sd_bus* bus = nullptr;
+FILE* ipmidbus = nullptr;
+unsigned short g_sel_reserve = 0xFFFF;
+sd_bus_slot* ipmid_slot = nullptr;
 
 /*
  * @brief Required by apphandler IPMI Provider Library
@@ -33,6 +36,14 @@ sd_bus* bus = nullptr;
 sd_bus* ipmid_get_sd_bus_connection()
 {
     return bus;
+}
+
+/*
+ * @brief Required by apphandler IPMI Provider Library
+ */
+unsigned short get_sel_reserve_id()
+{
+    return g_sel_reserve;
 }
 
 /*
@@ -72,7 +83,7 @@ static int io_handler(sd_event_source* es, int fd, uint32_t revents,
     }
 
     // Execute the Command
-    auto outMessage = msgHandler.executeCommand(*inMessage.get());
+    auto outMessage = msgHandler.executeCommand(*(inMessage.get()));
     if (outMessage == nullptr)
     {
         std::cerr << "Execution of IPMI command failed\n";
@@ -80,7 +91,7 @@ static int io_handler(sd_event_source* es, int fd, uint32_t revents,
     }
 
     // Send the response IPMI Message
-    msgHandler.send(*outMessage.get());
+    msgHandler.send(*(outMessage.get()));
 
     return 0;
 }
@@ -173,6 +184,12 @@ finish:
 
 int main(int i_argc, char* i_argv[])
 {
+
+    /*
+     * Required by apphandler IPMI Provider Library for logging.
+     */
+    ipmidbus =  fopen("/dev/null", "w");
+
     // Connect to system bus
     auto rc = sd_bus_open_system(&bus);
     if (rc < 0)
