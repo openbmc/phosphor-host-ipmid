@@ -16,6 +16,7 @@
 #include "command_table.hpp"
 #include "message.hpp"
 #include "message_handler.hpp"
+#include "provider_registration.hpp"
 #include "sessions_manager.hpp"
 #include "socket_channel.hpp"
 
@@ -179,6 +180,9 @@ int main(int i_argc, char* i_argv[])
         std::cerr << "Failed to connect to system bus:" << strerror(-rc) <<"\n";
         goto finish;
     }
+
+    // Register all the IPMI provider libraries applicable for net-ipmid
+    provider::registerCallbackHandlers(NET_IPMID_LIB_PATH);
 
     // Register the phosphor-net-ipmid session setup commands
     command::sessionSetupCommands();
