@@ -77,4 +77,29 @@ std::vector<uint8_t> NetIpmidEntry::executeCommand(
     return functor(commandData, handler);
 }
 
+std::vector<uint8_t> ProviderIpmidEntry::executeCommand(
+        std::vector<uint8_t>& commandData,
+        const message::Handler& handler)
+{
+
+    std::vector<uint8_t> response(MAX_IPMI_BUFFER);
+    size_t respSize {};
+
+    ipmi_ret_t ipmiRC = functor(0, 0,
+                                reinterpret_cast<void*>(commandData.data()),
+                                reinterpret_cast<void*>(response.data() + 1),
+                                &respSize, NULL);
+
+    /*
+     * respSize gets you the size of the response data for the IPMI command. The
+     * first byte in a response to the IPMI command is the Completion Code.
+     * So we are inserting completion code as the first byte and incrementing
+     * the response payload size by the size of the completion code.
+     */
+    response[0] = ipmiRC;
+    response.resize(respSize + sizeof(ipmi_ret_t));
+
+    return response;
+}
+
 } // namespace command

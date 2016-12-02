@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 
+#include <host-ipmid/ipmid-api.h>
 #include "message_handler.hpp"
 
 namespace command
@@ -194,6 +195,46 @@ class NetIpmidEntry final: public Entry
         CommandFunctor functor;
 
         bool sessionless;
+};
+
+/*
+ * @class ProviderIpmidEntry
+ *
+ * ProviderIpmidEntry is used to register commands to the Command Table, that
+ * are registered by IPMI provider libraries.
+ *
+ */
+class ProviderIpmidEntry final: public Entry
+{
+    public:
+        ProviderIpmidEntry(CommandID command,
+                           ipmid_callback_t functor,
+                           session::Privilege privilege):
+            Entry(command, privilege),
+            functor(functor) {}
+
+        /**
+         * @brief Execute the command
+         *
+         * Execute the callback handler
+         *
+         * @param[in] commandData - Request Data for the command
+         * @param[in] handler - Reference to the Message Handler
+         *
+         * @return Response data for the command
+         */
+        std::vector<uint8_t> executeCommand(std::vector<uint8_t>& commandData,
+                                            const message::Handler& handler)
+                                            override;
+
+        virtual ~ProviderIpmidEntry() = default;
+        ProviderIpmidEntry(const ProviderIpmidEntry&) = default;
+        ProviderIpmidEntry& operator=(const ProviderIpmidEntry&) = default;
+        ProviderIpmidEntry(ProviderIpmidEntry&&) = default;
+        ProviderIpmidEntry& operator=(ProviderIpmidEntry&&) = default;
+
+    private:
+        ipmid_callback_t functor;
 };
 
 /*
