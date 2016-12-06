@@ -97,16 +97,17 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
     return getSession(sessionID);
 }
 
-void Manager::stopSession(SessionID bmcSessionID)
+bool Manager::stopSession(SessionID bmcSessionID)
 {
-    // If the session is valid and not session zero
-    if(bmcSessionID != SESSION_ZERO)
+    auto iter = sessionsMap.find(bmcSessionID);
+    if (iter != sessionsMap.end())
     {
-        auto iter = sessionsMap.find(bmcSessionID);
-        if (iter != sessionsMap.end())
-        {
-            iter->second->state = State::TEAR_DOWN_IN_PROGRESS;
-        }
+        iter->second->state = State::TEAR_DOWN_IN_PROGRESS;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

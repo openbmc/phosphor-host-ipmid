@@ -60,8 +60,10 @@ class Manager
          *
          * @param[in] bmcSessionID - BMC Session ID
          *
+         * @return true on success and failure if session ID is invalid
+         *
          */
-        void stopSession(SessionID bmcSessionID);
+        bool stopSession(SessionID bmcSessionID);
 
         /*
          * @brief Get Session Handle
