@@ -405,7 +405,9 @@ ipmi_ret_t ipmi_app_get_bt_capabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    uint8_t str[] = {0x01, MAX_IPMI_BUFFER, MAX_IPMI_BUFFER, 0x0A, 0x01};
+    // Per IPMI 2.0 spec, the input and output buffer size must be the max
+    // buffer size minus one byte to allocate space for the length byte.
+    uint8_t str[] = {0x01, MAX_IPMI_BUFFER-1, MAX_IPMI_BUFFER-1, 0x0A, 0x01};
 
     // Data length
     *data_len = sizeof(str);
