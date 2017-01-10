@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "auth_algo.hpp"
+#include "integrity_algo.hpp"
 #include "endian.hpp"
 #include "socket_channel.hpp"
 
@@ -142,6 +143,35 @@ class Session
             authAlgoInterface = std::move(inAuthAlgo);
         }
 
+        /*
+         * @brief Get Session's Integrity Algorithm
+         *
+         * @return pointer to the integrity algorithm
+         */
+        auto getIntegrityAlgo() const
+        {
+            if(integrityAlgoInterface)
+            {
+                return integrityAlgoInterface.get();
+            }
+            else
+            {
+                throw std::runtime_error("Integrity Algorithm Empty");
+            }
+        }
+
+        /*
+         * @brief Set Session's Integrity Algorithm
+         *
+         * @param[in] integrityAlgo - unique pointer to integrity algorithm
+         *                              instance
+         */
+        void setIntegrityAlgo(
+                std::unique_ptr<cipher::integrity::Interface>&& integrityAlgo)
+        {
+            integrityAlgoInterface = std::move(integrityAlgo);
+        }
+
         void updateLastTransactionTime()
         {
             lastTime = std::chrono::steady_clock::now();
@@ -177,6 +207,10 @@ class Session
 
         // Authentication Algorithm Interface for the Session
         std::unique_ptr<cipher::rakp_auth::Interface> authAlgoInterface;
+
+        // Integrity Algorithm Interface for the Session
+        std::unique_ptr<cipher::integrity::Interface> integrityAlgoInterface =
+                                                                        nullptr;
 
         // Last Transaction Time
         decltype(std::chrono::steady_clock::now()) lastTime;
