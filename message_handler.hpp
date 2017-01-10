@@ -87,7 +87,6 @@ class Handler
                                                 Message& inMessage)
         {
             auto outMessage = std::make_unique<Message>();
-            outMessage->rcSessionID = inMessage.rcSessionID;
             outMessage->payloadType = T;
             outMessage->payload = output;
             return outMessage;

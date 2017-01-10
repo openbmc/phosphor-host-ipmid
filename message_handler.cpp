@@ -35,7 +35,6 @@ std::unique_ptr<Message> Handler::receive()
     std::unique_ptr<Message> message;
     std::tie(message, sessionHeader) = parser::unflatten(packet);
 
-
     auto session = (std::get<session::Manager&>(singletonPool).getSession(
                    message->bmcSessionID)).lock();
 
@@ -51,8 +50,6 @@ std::unique_ptr<Message> Handler::createResponse<PayloadType::IPMI>(
         std::vector<uint8_t>& output, Message& inMessage)
 {
     auto outMessage = std::make_unique<Message>();
-    outMessage->rcSessionID = inMessage.rcSessionID;
-
     outMessage->payloadType = PayloadType::IPMI;
 
     outMessage->payload.resize(sizeof(LAN::header::Response) +
@@ -137,8 +134,12 @@ std::unique_ptr<Message> Handler::executeCommand(Message& inMessage)
             break;
         default:
             break;
-
     }
+
+    outMessage->isPacketEncrypted = inMessage.isPacketEncrypted;
+    outMessage->isPacketAuthenticated = inMessage.isPacketAuthenticated;
+    outMessage->rcSessionID = inMessage.rcSessionID;
+    outMessage->bmcSessionID = inMessage.bmcSessionID;
 
     return outMessage;
 }
