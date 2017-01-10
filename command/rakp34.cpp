@@ -208,6 +208,19 @@ std::vector<uint8_t> RAKP34(std::vector<uint8_t>& inPayload,
     // Insert the HMAC output into the payload
     outPayload.insert(outPayload.end(), icv.begin(), icv.end());
 
+    // Set the Authentication Algorithm to RAKP_HMAC_SHA1
+    switch (authAlgo->intAlgo)
+    {
+        case cipher::integrity::Algorithms::HMAC_SHA1_96:
+        {
+            session->setIntegrityAlgo(
+                    std::make_unique<cipher::integrity::AlgoSHA1>(sikOutput));
+            break;
+        }
+        default:
+            break;
+    }
+
     session->state = session::State::ACTIVE;
 
     std::cout << "<< RAKP34\n";
