@@ -19,6 +19,9 @@ constexpr size_t RMCP_SEQ = 0xFF;
 // RMCP Message Class 7h is for IPMI
 constexpr size_t RMCP_MESSAGE_CLASS_IPMI = 7;
 
+// RMCP Session Header Size
+constexpr size_t RMCP_SESSION_HEADER_SIZE = 4;
+
 enum class SessionHeader
 {
     IPMI15 = 0x00,
@@ -165,6 +168,26 @@ namespace internal
  *
  */
 void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session);
+
+/*
+ * @brief Verify the integrity data of the incoming IPMI packet
+ *
+ * @param[in] packet - Incoming IPMI packet
+ * @param[in] inMessage - IPMI Message populated from the incoming packet
+ *
+ */
+bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
+                           const Message& message);
+
+/*
+ * @brief Add Integrity data to the outgoing IPMI packet
+ *
+ * @param[in] packet - Outgoing IPMI packet
+ * @param[in] message - IPMI Message populated from the incoming packet
+ *
+ */
+void addIntegrityData(std::vector<uint8_t>& packet, const Message& message);
+
 
 } // namespace internal
 

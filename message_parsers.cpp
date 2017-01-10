@@ -169,6 +169,14 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
                             inPacket.begin() + sizeof(SessionHeader_t) +
                             payloadLen);
 
+    if(message->isPacketAuthenticated)
+    {
+        if(!(internal::verifyPacketIntegrity(inPacket,*(message.get()))))
+        {
+            throw std::runtime_error("Packet Integrity check failed");
+        }
+    }
+
     return message;
 }
 
@@ -195,6 +203,11 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     packet.insert(packet.end(), outMessage.payload.begin(),
                   outMessage.payload.end());
 
+    if(outMessage.isPacketAuthenticated)
+    {
+        internal::addIntegrityData(packet, outMessage);
+    }
+
     return packet;
 }
 
@@ -214,6 +227,84 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session)
         auto seqNum = session.sequenceNums.increment();
         header->sessSeqNum = endian::to_ipmi(seqNum);
     }
+}
+
+bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
+                           const Message& message)
+{
+    auto payloadLen = message.payload.size();
+
+    /*
+     * Padding bytes are added to cause the number of bytes in the data range
+     * covered by the AuthCode(Integrity Data) field to be a multiple of 4 bytes
+     * .If present each integrity Pad byte is set to FFh. The following logic
+     * calculates the number of padding bytes added in the IPMI packet.
+     */
+    auto paddingLen = (4 - ((payloadLen + 2) & 3)) & 3;
+
+    auto sessTrailerPos = sizeof(SessionHeader_t) + payloadLen + paddingLen;
+
+    auto trailer = reinterpret_cast<const SessionTrailer_t*>
+                                (packet.data() + sessTrailerPos);
+
+    // Check trailer->padLength against paddingLen, both should match up,
+    // return false if the lengths don't match
+    if(trailer->padLength != paddingLen)
+    {
+        return false;
+    }
+
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+        message.bmcSessionID)).lock();
+
+    auto integrityAlgo = session->getIntegrityAlgo();
+
+    // Check if Integrity data length is as expected, check integrity data
+    // length is same as the length expected for the Integrity Algorithm that
+    // was negotiated during the session open process.
+    if((packet.size() - sessTrailerPos - sizeof(SessionTrailer_t)) !=
+                    integrityAlgo->authCodeLength)
+    {
+        return false;
+    }
+
+    auto integrityIter = packet.cbegin();
+    std::advance(integrityIter, sessTrailerPos + sizeof(SessionTrailer_t));
+
+    // The integrity data is calculated from the AuthType/Format field up to and
+    // including the field that immediately precedes the AuthCode field itself.
+    size_t length = packet.size() - integrityAlgo->authCodeLength -
+                    message::parser::RMCP_SESSION_HEADER_SIZE;
+
+    return integrityAlgo->verifyIntegrityData(packet, length, integrityIter);
+}
+
+void addIntegrityData(std::vector<uint8_t>& packet,
+                      const Message& message)
+{
+    auto payloadLen = message.payload.size();
+
+    // The following logic calculates the number of padding bytes to be added to
+    // IPMI packet. If needed each integrity Pad byte is set to FFh.
+    auto paddingLen = (4 - ((payloadLen + 2) & 3)) & 3;
+    packet.insert(packet.end(), paddingLen, 0xFF);
+
+    packet.resize(packet.size() + sizeof(SessionTrailer_t));
+
+    auto trailer = reinterpret_cast<SessionTrailer_t*>
+                                (packet.data() + packet.size() -
+                                 sizeof(SessionTrailer_t));
+
+    trailer->padLength = paddingLen;
+    trailer->nextHeader = parser::RMCP_MESSAGE_CLASS_IPMI;
+
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+        message.bmcSessionID)).lock();
+
+    auto integrityData = session->getIntegrityAlgo()->
+                                  generateIntegrityData(packet);
+
+    packet.insert(packet.end(), integrityData.begin(), integrityData.end());
 }
 
 } // namespace internal
