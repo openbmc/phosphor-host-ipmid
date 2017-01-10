@@ -19,9 +19,6 @@ constexpr size_t RMCP_SEQ = 0xFF;
 // RMCP Message Class 7h is for IPMI
 constexpr size_t RMCP_MESSAGE_CLASS_IPMI = 7;
 
-// Maximum packet size that we'll handle
-constexpr uint32_t MESSAGE_MAX_PACKET_LENGTH = 512;
-
 enum class SessionHeader
 {
     IPMI15 = 0x00,
@@ -136,8 +133,6 @@ struct SessionTrailer_t
     // Integrity Pad
     uint8_t padLength;
     uint8_t nextHeader;
-    // AuthCode (Integrity Data)
-    uint8_t authCode[MAX_INTEGRITY_DATA_LENGTH];
 } __attribute__((packed));
 
 /*

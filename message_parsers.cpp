@@ -94,8 +94,8 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     auto header = reinterpret_cast<SessionHeader_t*>(inPacket.data());
 
     message->payloadType = PayloadType::IPMI;
-    message->bmcSessionID = endian::from_ipmi<>(header->sessId);
-    message->sessionSeqNum = endian::from_ipmi<>(header->sessSeqNum);
+    message->bmcSessionID = endian::from_ipmi(header->sessId);
+    message->sessionSeqNum = endian::from_ipmi(header->sessSeqNum);
     message->isPacketEncrypted = false;
     message->isPacketAuthenticated = false;
 
@@ -121,7 +121,7 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     header->base.format.formatType =
         static_cast<uint8_t>(parser::SessionHeader::IPMI15);
     header->sessSeqNum = 0;
-    header->sessId = endian::to_ipmi<>(outMessage.rcSessionID);
+    header->sessId = endian::to_ipmi(outMessage.rcSessionID);
 
     header->payloadLength = static_cast<uint8_t>(outMessage.payload.size());
 
@@ -157,14 +157,14 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 
     message->payloadType = static_cast<PayloadType>
                            (header->payloadType & 0x3F);
-    message->bmcSessionID = endian::from_ipmi<>(header->sessId);
-    message->sessionSeqNum = endian::from_ipmi<>(header->sessSeqNum);
+    message->bmcSessionID = endian::from_ipmi(header->sessId);
+    message->sessionSeqNum = endian::from_ipmi(header->sessSeqNum);
     message->isPacketEncrypted =
         ((header->payloadType & PAYLOAD_ENCRYPT_MASK) ? true : false);
     message->isPacketAuthenticated =
         ((header->payloadType & PAYLOAD_AUTH_MASK) ? true : false);
 
-    auto payloadLen = endian::from_ipmi<>(header->payloadLength);
+    auto payloadLen = endian::from_ipmi(header->payloadLength);
     message->payload.assign(inPacket.begin() + sizeof(SessionHeader_t),
                             inPacket.begin() + sizeof(SessionHeader_t) +
                             payloadLen);
@@ -184,13 +184,13 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     header->base.format.formatType =
         static_cast<uint8_t>(parser::SessionHeader::IPMI20);
     header->payloadType = static_cast<uint8_t>(outMessage.payloadType);
-    header->sessId = endian::to_ipmi<>(outMessage.rcSessionID);
+    header->sessId = endian::to_ipmi(outMessage.rcSessionID);
 
     // Add session sequence number
     internal::addSequenceNumber(packet, session);
 
     // Add Payload
-    header->payloadLength = endian::to_ipmi<>(outMessage.payload.size());
+    header->payloadLength = endian::to_ipmi(outMessage.payload.size());
     // Insert the Payload into the Packet
     packet.insert(packet.end(), outMessage.payload.begin(),
                   outMessage.payload.end());
@@ -212,7 +212,7 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session)
     else
     {
         auto seqNum = session.sequenceNums.increment();
-        header->sessSeqNum = endian::to_ipmi<>(seqNum);
+        header->sessSeqNum = endian::to_ipmi(seqNum);
     }
 }
 
