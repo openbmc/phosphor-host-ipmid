@@ -115,6 +115,76 @@ class Interface
         Key K1;
 };
 
+/*
+ * @class AlgoSHA1
+ *
+ * @brief Implementation of the HMAC-SHA1-96 Integrity algorithm
+ *
+ * HMAC-SHA1-96 take the Session Integrity Key and use it to generate K1. K1 is
+ * then used as the key for use in HMAC to produce the AuthCode field.
+ * For “one-key” logins, the user’s key (password) is used in the creation of
+ * the Session Integrity Key. When the HMAC-SHA1-96 Integrity Algorithm is used
+ * the resulting AuthCode field is 12 bytes (96 bits).
+ */
+class AlgoSHA1 final : public Interface
+{
+    public:
+        static constexpr size_t SHA1_96_AUTHCODE_LENGTH = 12;
+
+        /*
+         * @brief Constructor for AlgoSHA1
+         *
+         * @param[in] - Session Integrity Key
+         */
+        explicit AlgoSHA1(const Buffer& sik) :
+            Interface(sik, const1, SHA1_96_AUTHCODE_LENGTH) {}
+
+        AlgoSHA1() = delete;
+        ~AlgoSHA1() = default;
+        AlgoSHA1(const AlgoSHA1&) = default;
+        AlgoSHA1& operator=(const AlgoSHA1&) = default;
+        AlgoSHA1(AlgoSHA1&&) = default;
+        AlgoSHA1& operator=(AlgoSHA1&&) = default;
+
+        /*
+         * @brief Verify the integrity data of the packet
+         *
+         * @param[in] packet - Incoming IPMI packet
+         * @param[in] length - Length of the data in the packet to calculate
+         *                     the integrity data
+         * @param[in] integrityData - Iterator to the authCode in the packet
+         *
+         * @return true if authcode in the packet is equal to one generated
+         *         using integrity algorithm on the packet data, false otherwise
+         */
+        bool verifyIntegrityData(
+                const Buffer& packet,
+                const size_t length,
+                Buffer::const_iterator integrityData) const override;
+
+        /*
+         * @brief Generate integrity data for the outgoing IPMI packet
+         *
+         * @param[in] input - Outgoing IPMI packet
+         *
+         * @return on success return the integrity data for the outgoing IPMI
+         *         packet
+         */
+        Buffer generateIntegrityData(const Buffer& packet) const override;
+
+    private:
+        /*
+         * @brief Generate HMAC based on HMAC-SHA1-96 algorithm
+         *
+         * @param[in] input - pointer to the message
+         * @param[in] length - length of the message
+         *
+         * @return on success returns the message authentication code
+         *
+         */
+        Buffer generateHMAC(const uint8_t* input, const size_t len) const;
+};
+
 }// namespace integrity
 
 }// namespace cipher
