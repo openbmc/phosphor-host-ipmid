@@ -28,7 +28,10 @@ std::vector<uint8_t> openSession(std::vector<uint8_t>& inPayload,
     }
 
     // Check for valid Integrity Algorithms
-    if (request->intAlgo != 0)
+    if ((request->intAlgo !=
+         static_cast<uint8_t>(cipher::integrity::Algorithms::NONE)) &&
+        (request->intAlgo !=
+         static_cast<uint8_t>(cipher::integrity::Algorithms::HMAC_SHA1_96)))
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_INTEGRITY_ALGO);
@@ -50,7 +53,8 @@ std::vector<uint8_t> openSession(std::vector<uint8_t>& inPayload,
         session = (std::get<session::Manager&>(singletonPool).startSession(
                   endian::from_ipmi<>(request->remoteConsoleSessionID),
                   static_cast<session::Privilege>(request->maxPrivLevel),
-                  static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo)
+                  static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo),
+                  static_cast<cipher::integrity::Algorithms>(request->intAlgo)
                   )).lock();
     }
     catch (std::exception& e)
