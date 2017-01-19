@@ -12,6 +12,27 @@
 namespace command
 {
 
+void applyIntegrityAlgo(const uint32_t bmcSessionID)
+{
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+            bmcSessionID)).lock();
+
+    auto authAlgo = session->getAuthAlgo();
+
+    switch (authAlgo->intAlgo)
+    {
+        case cipher::integrity::Algorithms::HMAC_SHA1_96:
+        {
+            session->setIntegrityAlgo(
+                    std::make_unique<cipher::integrity::AlgoSHA1>(
+                        authAlgo->sessionIntegrityKey));
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 std::vector<uint8_t> RAKP34(std::vector<uint8_t>& inPayload,
                             const message::Handler& handler)
 {
@@ -208,18 +229,8 @@ std::vector<uint8_t> RAKP34(std::vector<uint8_t>& inPayload,
     // Insert the HMAC output into the payload
     outPayload.insert(outPayload.end(), icv.begin(), icv.end());
 
-    // Set the Authentication Algorithm to RAKP_HMAC_SHA1
-    switch (authAlgo->intAlgo)
-    {
-        case cipher::integrity::Algorithms::HMAC_SHA1_96:
-        {
-            session->setIntegrityAlgo(
-                    std::make_unique<cipher::integrity::AlgoSHA1>(sikOutput));
-            break;
-        }
-        default:
-            break;
-    }
+    // Set the Integrity Algorithm
+    applyIntegrityAlgo(session->getBMCSessionID());
 
     session->state = session::State::ACTIVE;
 
