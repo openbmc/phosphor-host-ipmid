@@ -210,7 +210,7 @@ class Session
 
         // Integrity Algorithm Interface for the Session
         std::unique_ptr<cipher::integrity::Interface> integrityAlgoInterface =
-                                                                        nullptr;
+                nullptr;
 
         // Last Transaction Time
         decltype(std::chrono::steady_clock::now()) lastTime;
