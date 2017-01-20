@@ -169,9 +169,9 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
                             inPacket.begin() + sizeof(SessionHeader_t) +
                             payloadLen);
 
-    if(message->isPacketAuthenticated)
+    if (message->isPacketAuthenticated)
     {
-        if(!(internal::verifyPacketIntegrity(inPacket,*(message.get()))))
+        if (!(internal::verifyPacketIntegrity(inPacket,*(message.get()))))
         {
             throw std::runtime_error("Packet Integrity check failed");
         }
@@ -203,7 +203,7 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     packet.insert(packet.end(), outMessage.payload.begin(),
                   outMessage.payload.end());
 
-    if(outMessage.isPacketAuthenticated)
+    if (outMessage.isPacketAuthenticated)
     {
         internal::addIntegrityData(packet, outMessage);
     }
@@ -249,7 +249,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
 
     // Check trailer->padLength against paddingLen, both should match up,
     // return false if the lengths don't match
-    if(trailer->padLength != paddingLen)
+    if (trailer->padLength != paddingLen)
     {
         return false;
     }
@@ -262,8 +262,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
     // Check if Integrity data length is as expected, check integrity data
     // length is same as the length expected for the Integrity Algorithm that
     // was negotiated during the session open process.
-    if((packet.size() - sessTrailerPos - sizeof(SessionTrailer_t)) !=
-                    integrityAlgo->authCodeLength)
+    if ((packet.size() - sessTrailerPos - sizeof(SessionTrailer_t)) !=
+            integrityAlgo->authCodeLength)
     {
         return false;
     }
