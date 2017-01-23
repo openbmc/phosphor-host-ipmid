@@ -124,7 +124,7 @@ int dbus_get_property(const char *name, char **buf)
         goto finish;
     }
 
-    asprintf(buf, "%s", temp_buf);
+    *buf = strdup(temp_buf);
 /*    *buf = (char*) malloc(strlen(temp_buf));
     if (*buf) {
         strcpy(*buf, temp_buf);
@@ -1070,4 +1070,3 @@ void register_netfn_chassis_functions()
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL,
                            ipmi_chassis_set_sys_boot_options, PRIVILEGE_OPERATOR);
 }
-
