@@ -53,21 +53,21 @@ int find_sensor_type_string(uint8_t sensor_number, char **s) {
 
 	dbus_interface_t a;
 	const char *p;
-	char r;
+	int r;
 
 	r = find_openbmc_path("SENSOR", sensor_number, &a);
 
 	if ((r < 0) || (a.bus[0] == 0)) {
 		// Just make a generic message for errors that
 		// occur on sensors that dont exist
-		asprintf(s, "Unknown Sensor (0x%02x)", sensor_number);
+		r = asprintf(s, "Unknown Sensor (0x%02x)", sensor_number);
 	} else {
 
 		if ((p = strrchr (a.path, '/')) == NULL) {
 			p = "/Unknown Sensor";
 		}
 
-		asprintf(s, "%s", p+1);
+		*s = strdup(p+1);
 	}
 
 	return 0;
@@ -145,7 +145,7 @@ int create_esel_association(const uint8_t *buffer, char **m) {
 		memset(dbusint.path,0,sizeof(dbusint.path));
 	}
 
-	asprintf(m, "%s", dbusint.path);
+	*m = strdup(dbusint.path);
 
 	return 0;
 }
@@ -157,12 +157,16 @@ int create_esel_description(const uint8_t *buffer, const char *sev, char **messa
 
 	ipmi_add_sel_request_t *p;
 	char *m;
+	int r;
 
 	p =  ( ipmi_add_sel_request_t *) buffer;
 
 	find_sensor_type_string(p->sensornumber,&m);
 
-	asprintf(message, "A %s has experienced a %s", m, sev );
+	r = asprintf(message, "A %s has experienced a %s", m, sev );
+	if (r == -1) {
+		fprintf(stderr, "Failed to allocate memory for ESEL description\n");
+	}
 
 	free(m);
 
