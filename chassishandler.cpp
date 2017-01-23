@@ -124,7 +124,7 @@ int dbus_get_property(const char *name, char **buf)
         goto finish;
     }
 
-    asprintf(buf, "%s", temp_buf);
+    r = asprintf(buf, "%s", temp_buf);
 /*    *buf = (char*) malloc(strlen(temp_buf));
     if (*buf) {
         strcpy(*buf, temp_buf);
@@ -487,7 +487,7 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
     if( !rc )
     {
         //Cookie == 0 or it is a valid cookie
-        host_network_config += "ipaddress="+std::string(ipAddress)+",prefix="+ 
+        host_network_config += "ipaddress="+std::string(ipAddress)+",prefix="+
             std::string(prefix)+",gateway="+std::string(gateway)+
             ",mac="+std::string(mac)+",addr_type="+std::string(dhcp);
 
@@ -505,8 +505,8 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
     return rc;
 }
 
-ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
     printf("Handling CHASSIS WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
@@ -588,7 +588,7 @@ int ipmi_chassis_power_control(const char *method)
 	}
 	rc = sd_bus_call_method(bus_type,        		 // On the System Bus
 							busname,        // Service to contact
-							chassis_object_name,     // Object path 
+							chassis_object_name,     // Object path
 							chassis_intf_name,       // Interface name
 							method,      		 // Method to be called
 							&bus_error,      		 // object to return error
@@ -787,8 +787,8 @@ finish:
 //----------------------------------------------------------------------
 // Chassis Control commands
 //----------------------------------------------------------------------
-ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                        ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                        ipmi_request_t request, ipmi_response_t response,
                         ipmi_data_len_t data_len, ipmi_context_t context)
 {
 	// Error from power off.
@@ -872,8 +872,8 @@ char* get_boot_option_by_ipmi(uint8_t p) {
     return s->dbusname;
 }
 
-ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_PARM_NOT_SUPPORTED;
@@ -929,7 +929,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         } else {
 
             printf("BootPolicy is[%s]", p);
-            resp->data[0] = (strncmp(p,"ONETIME",strlen("ONETIME"))==0) ? 
+            resp->data[0] = (strncmp(p,"ONETIME",strlen("ONETIME"))==0) ?
                             SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:
                             SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
             rc = IPMI_CC_OK;
@@ -1010,7 +1010,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
         /* setting the boot policy */
-        s = (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) == 
+        s = (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) ==
                     SET_PARM_BOOT_FLAGS_PERMANENT) ?"PERMANENT":"ONETIME");
 
         printf ( "\nBoot Policy is %s",s);
@@ -1021,7 +1021,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
 
-    } else if (reqptr->parameter == 
+    } else if (reqptr->parameter ==
                (uint8_t)BootOptionParameter::OPAL_NETWORK_SETTINGS) {
 
         int ret = setHostNetworkData(reqptr);
@@ -1058,4 +1058,3 @@ void register_netfn_chassis_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL, ipmi_chassis_set_sys_boot_options);
 }
-
