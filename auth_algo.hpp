@@ -2,6 +2,7 @@
 
 #include <array>
 #include <vector>
+#include "crypt_algo.hpp"
 #include "integrity_algo.hpp"
 
 namespace cipher
@@ -46,7 +47,11 @@ enum class Algorithms : uint8_t
 class Interface
 {
     public:
-        explicit Interface(integrity::Algorithms intAlgo) : intAlgo(intAlgo) {}
+        explicit Interface(integrity::Algorithms intAlgo,
+                           crypt::Algorithms cryptAlgo) :
+                intAlgo(intAlgo),
+                cryptAlgo(cryptAlgo) {}
+
         Interface() = delete;
         virtual ~Interface() = default;
         Interface(const Interface&) = default;
@@ -104,10 +109,19 @@ class Interface
          * Integrity Algorithm is activated and set in the session data only
          * once the session setup is succeeded in the RAKP34 command. But the
          * integrity algorithm is negotiated in the Open Session Request command
-         * . So the authentication algorithm successfully negotiated is stored
-         * in the authentication algorithm.
+         * . So the integrity algorithm successfully negotiated is stored
+         * in the authentication algorithm's instance.
          */
         integrity::Algorithms intAlgo;
+
+        /*
+         * Confidentiality Algorithm is activated and set in the session data
+         * only once the session setup is succeeded in the RAKP34 command. But
+         * the confidentiality algorithm is negotiated in the Open Session
+         * Request command. So the confidentiality algorithm successfully
+         * negotiated is stored in the authentication algorithm's instance.
+         */
+        crypt::Algorithms cryptAlgo;
 };
 
 /*
@@ -123,7 +137,10 @@ class Interface
 class AlgoSHA1 : public Interface
 {
     public:
-        explicit AlgoSHA1(integrity::Algorithms intAlgo) : Interface(intAlgo) {}
+        explicit AlgoSHA1(integrity::Algorithms intAlgo,
+                          crypt::Algorithms cryptAlgo) :
+                Interface(intAlgo, cryptAlgo) {}
+
         AlgoSHA1() = delete;
         ~AlgoSHA1() = default;
         AlgoSHA1(const AlgoSHA1&) = default;

@@ -26,7 +26,8 @@ Manager::Manager()
 
 std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
         Privilege priv, cipher::rakp_auth::Algorithms authAlgo,
-        cipher::integrity::Algorithms intAlgo)
+        cipher::integrity::Algorithms intAlgo,
+        cipher::crypt::Algorithms cryptAlgo)
 {
     std::shared_ptr<Session> session = nullptr;
     SessionID sessionID = 0;
@@ -69,7 +70,8 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
             case cipher::rakp_auth::Algorithms::RAKP_HMAC_SHA1:
             {
                 session->setAuthAlgo(
-                        std::make_unique<cipher::rakp_auth::AlgoSHA1>(intAlgo));
+                        std::make_unique<cipher::rakp_auth::AlgoSHA1>(intAlgo,
+                        cryptAlgo));
                 break;
             }
             default:

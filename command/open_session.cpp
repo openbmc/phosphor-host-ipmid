@@ -54,7 +54,8 @@ std::vector<uint8_t> openSession(std::vector<uint8_t>& inPayload,
                   endian::from_ipmi<>(request->remoteConsoleSessionID),
                   static_cast<session::Privilege>(request->maxPrivLevel),
                   static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo),
-                  static_cast<cipher::integrity::Algorithms>(request->intAlgo)
+                  static_cast<cipher::integrity::Algorithms>(request->intAlgo),
+                  static_cast<cipher::crypt::Algorithms>(request->confAlgo)
                   )).lock();
     }
     catch (std::exception& e)

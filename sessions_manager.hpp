@@ -49,13 +49,15 @@ class Manager
          * @param[in] priv - Privilege level requested
          * @param[in] authAlgo - Authentication Algorithm
          * @param[in] intAlgo - Integrity Algorithm
+         * @param[in] cryptAlgo - Confidentiality Algorithm
          *
          * @return session handle on success and nullptr on failure
          *
          */
         std::weak_ptr<Session> startSession(SessionID remoteConsoleSessID,
                 Privilege priv, cipher::rakp_auth::Algorithms authAlgo,
-                cipher::integrity::Algorithms intAlgo);
+                cipher::integrity::Algorithms intAlgo,
+                cipher::crypt::Algorithms cryptAlgo);
 
         /*
          * @brief Stop IPMI Session
