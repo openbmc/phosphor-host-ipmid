@@ -33,6 +33,26 @@ void applyIntegrityAlgo(const uint32_t bmcSessionID)
     }
 }
 
+void applyCryptAlgo(const uint32_t bmcSessionID)
+{
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+            bmcSessionID)).lock();
+
+    auto authAlgo = session->getAuthAlgo();
+
+    switch (authAlgo->cryptAlgo)
+    {
+        case cipher::crypt::Algorithms::AES_CBC_128:
+        {
+            session->setCryptAlgo(std::make_unique<cipher::crypt::AlgoAES128>(
+                                 authAlgo->sessionIntegrityKey));
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 std::vector<uint8_t> RAKP34(std::vector<uint8_t>& inPayload,
                             const message::Handler& handler)
 {
@@ -231,6 +251,9 @@ std::vector<uint8_t> RAKP34(std::vector<uint8_t>& inPayload,
 
     // Set the Integrity Algorithm
     applyIntegrityAlgo(session->getBMCSessionID());
+
+    // Set the Confidentiality Algorithm
+    applyCryptAlgo(session->getBMCSessionID());
 
     session->state = session::State::ACTIVE;
 
