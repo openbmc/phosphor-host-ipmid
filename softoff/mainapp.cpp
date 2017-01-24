@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <phosphor-logging/log.hpp>
 #include "softoff.hpp"
 #include "config.h"
+
+using namespace phosphor::logging;
 
 int main(int argc, char** argv)
 {
@@ -25,7 +28,11 @@ int main(int argc, char** argv)
     sdbusplus::server::manager::manager(bus, SOFTOFF_OBJPATH);
 
     // Create the SoftPowerOff object.
-    phosphor::ipmi::SoftPowerOff obj(bus, SOFTOFF_OBJPATH);
+    phosphor::ipmi::SoftPowerOff object(bus, SOFTOFF_OBJPATH);
+
+    // The whole purpose of this application is to send SMS_ATTN
+    // and watch for the soft power off to go through.
+    object.sendSMSAttn();
 
     /** @brief Claim the bus */
     bus.request_name(SOFTOFF_BUSNAME);
