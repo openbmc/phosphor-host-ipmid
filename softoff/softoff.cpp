@@ -13,10 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "softoff.hpp"
 namespace phosphor
 {
 namespace ipmi
 {
-    // Will be populated in the next patchset.
+
+// Need this to send SMS_ATTN
+constexpr auto HOST_IPMI_BUS  = "org.openbmc.HostIpmi";
+constexpr auto HOST_IPMI_OBJ  = "/org/openbmc/HostIpmi/1";
+constexpr auto HOST_IPMI_INTF = "org.openbmc.HostIpmi";
+
+// Handy alias for a long enough string.
+using base = sdbusplus::xyz::openbmc_project::Ipmi::Internal
+                                     ::server::SoftPowerOff;
+
+/** @brief Send the SMS_ATN to host if value is set */
+bool SoftPowerOff::initiate(bool value)
+{
+    // If Value is 'true', then set the SMS attention. There is nothing called
+    // 'undo SMS_ATTN' and hence nothing to be done for value of 'false'.
+    if(!value || (value == base::initiate()))
+    {
+        return base::initiate();
+    }
+    auto method = bus.new_method_call(HOST_IPMI_BUS,
+                                    HOST_IPMI_OBJ,
+                                    HOST_IPMI_INTF,
+                                    "setAttention");
+
+    // If there is any exception, would be thrown here.
+    bus.call(method);
+
+    // We have done our job
+    return base::initiate(value);
+}
+
+/** @brief Handles response from Host */
+auto SoftPowerOff::responseReceived(HostResponse value) -> HostResponse
+{
+    // Will be populated as part of using watchdog.
+    return base::responseReceived();
+}
 } // namespace ipmi
 } // namespace phosphor
