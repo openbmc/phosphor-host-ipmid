@@ -12,13 +12,29 @@ AM_PROG_AR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+# softoff dir specific ones
+AC_ARG_ENABLE([softoff],
+    AS_HELP_STRING([--enable-softoff], [Builds soft power off])
+)
+AS_IF([test "x$enable_softoff" != "xno"],
+    [AC_PROG_MKDIR_P]
+    [AC_CHECK_PROG([DIRNAME], dirname, dirname)]
+)
+
 # Checks for libraries.
 AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
-PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221])
+PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221], [], [AC_MSG_ERROR(["systemd required and not found"])])
 PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging],, [AC_MSG_ERROR([Could not find phosphor-logging...openbmc/phosphor-logging package required])])
 
-# Checks for header files.
-AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd developement package required])])
+AS_IF([test "x$enable_softoff" != "xno"],
+    # Check for sdbusplus
+    PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],, [AC_MSG_ERROR(["sdbusplus packaged required and not found"])])
+
+    # Check for sdbus++ tool
+    [AC_PATH_PROG([SDBUSPLUSPLUS], [sdbus++])]
+    AS_IF([test "x$SDBUSPLUSPLUS" == "x"],
+          AC_MSG_ERROR([Cannot find sdbus++]))
+)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AX_CXX_COMPILE_STDCXX_14([noext])
@@ -56,6 +72,21 @@ if test -z "$WHITELIST_CONF"; then
         WHITELIST_CONF=${srcdir}/host-ipmid-whitelist.conf
 fi
 
+# Soft Power off related.
+AS_IF([test "x$enable_softoff" != "xno"],
+    # Dbus service name
+    [AC_ARG_VAR(BUSNAME, [The Dbus busname to own])]
+    AS_IF([test "x$BUSNAME" == "x"],
+          [BUSNAME="xyz.openbmc_project.Ipmi.SoftPowerOff"])
+    [AC_DEFINE_UNQUOTED([BUSNAME], ["$BUSNAME"], [The Dbus busname to own])]
+
+    # Service dbus root
+    [AC_ARG_VAR(OBJPATH, [The SoftPowerOff Dbus root])]
+    AS_IF([test "x$OBJPATH" == "x"],
+          [OBJPATH="/xyz/openbmc_project/ipmi/softpoweroff"])
+    [AC_DEFINE_UNQUOTED([OBJPATH], ["$OBJPATH"], [The SoftPowerOff Dbus root])]
+)
+
 # Create configured output
-AC_CONFIG_FILES([Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile])
 AC_OUTPUT
