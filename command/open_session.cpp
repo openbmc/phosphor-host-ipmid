@@ -39,7 +39,8 @@ std::vector<uint8_t> openSession(std::vector<uint8_t>& inPayload,
     }
 
     // Check for valid Confidentiality Algorithms
-    if (request->confAlgo != 0)
+    if(!cipher::crypt::Interface::isAlgorithmSupported(static_cast
+                    <cipher::crypt::Algorithms>(request->confAlgo)))
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_CONF_ALGO);

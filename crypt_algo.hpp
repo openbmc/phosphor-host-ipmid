@@ -80,6 +80,26 @@ class Interface
          */
         virtual buffer encryptPayload(buffer& payload) const = 0;
 
+        /**
+         * @brief Check if the Confidentiality algorithm is supported
+         *
+         * @param[in] algo - confidentiality algorithm
+         *
+         * @return true if algorithm is supported else false
+         *
+         */
+        static bool isAlgorithmSupported(Algorithms algo)
+        {
+            if (algo == Algorithms::NONE || algo == Algorithms::AES_CBC_128)
+            {
+               return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
     protected:
 
         /**
