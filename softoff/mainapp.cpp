@@ -26,7 +26,11 @@ int main(int argc, char** argv)
     sdbusplus::server::manager::manager(bus, OBJPATH);
 
     // Create the SoftPowerOff object.
-    phosphor::ipmi::SoftPowerOff obj(bus, OBJPATH);
+    phosphor::ipmi::SoftPowerOff object(bus, OBJPATH);
+
+    // The whole purpose of this application is to send SMS_ATTN
+    // and watch for the soft power off to go through.
+    object.sendSmsAttn();
 
     /** @brief Claim the bus */
     bus.request_name(BUSNAME);
