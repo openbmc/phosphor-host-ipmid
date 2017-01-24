@@ -52,4 +52,5 @@ libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
 
-SUBDIRS = test
+# Forcing the build of self and then subdir
+SUBDIRS = . test softoff
