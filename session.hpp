@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "auth_algo.hpp"
+#include "crypt_algo.hpp"
 #include "integrity_algo.hpp"
 #include "endian.hpp"
 #include "socket_channel.hpp"
@@ -172,6 +173,35 @@ class Session
             integrityAlgoInterface = std::move(integrityAlgo);
         }
 
+        /*
+         * @brief Get Session's Confidentiality Algorithm
+         *
+         * @return pointer to the confidentiality algorithm
+         */
+        auto getCryptAlgo() const
+        {
+            if(cryptAlgoInterface)
+            {
+                return cryptAlgoInterface.get();
+            }
+            else
+            {
+                throw std::runtime_error("Confidentiality Algorithm Empty");
+            }
+        }
+
+        /*
+         * @brief Set Session's Confidentiality Algorithm
+         *
+         * @param[in] confAlgo - unique pointer to confidentiality algorithm
+         *                       instance
+         */
+        void setCryptAlgo(
+                std::unique_ptr<cipher::crypt::Interface>&& cryptAlgo)
+        {
+            cryptAlgoInterface = std::move(cryptAlgo);
+        }
+
         void updateLastTransactionTime()
         {
             lastTime = std::chrono::steady_clock::now();
@@ -210,6 +240,10 @@ class Session
 
         // Integrity Algorithm Interface for the Session
         std::unique_ptr<cipher::integrity::Interface> integrityAlgoInterface =
+                nullptr;
+
+        // Confidentiality Algorithm Interface for the Session
+        std::unique_ptr<cipher::crypt::Interface> cryptAlgoInterface =
                 nullptr;
 
         // Last Transaction Time
