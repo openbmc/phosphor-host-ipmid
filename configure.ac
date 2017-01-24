@@ -50,6 +50,12 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
     AC_SUBST([OESDK_TESTCASE_FLAGS], [$testcase_flags])
 )
 
+# Run configure in this subdirectory. There are many usecase specific variables
+# for softoff and hence they don't make sense to be here.
+if test -d "${srcdir}/softoff"; then
+    AC_CONFIG_SUBDIRS([softoff])
+fi
+
 # Create configured output
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
