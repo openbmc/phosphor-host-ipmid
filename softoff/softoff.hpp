@@ -3,6 +3,8 @@
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/server/object.hpp>
 #include <xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.hpp>
+#include "timer.hpp"
+
 namespace phosphor
 {
 namespace ipmi
@@ -18,15 +20,19 @@ class SoftPowerOff : public sdbusplus::server::object::object<
         /** @brief Constructs SoftPowerOff object.
          *
          *  @param[in] bus       - system dbus handler
-         *  @param[in] objPath   - The Dbus path that hosts SoftPowerOff function
+         *  @param[in] objPath   - The Dbus path hosting SoftPowerOff function
+         *  @param[in] timer     - sd_event timer object
          */
         SoftPowerOff(sdbusplus::bus::bus& bus,
-                     const char* objPath) :
+                     const char* objPath,
+                     const Timer& timer) :
             sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Ipmi::Internal
                                                ::server::SoftPowerOff>(
                                                bus, objPath),
-            bus(bus)
+                bus(bus),
+                timer(timer),
+                completed(false)
         {
             // Nothing to do here
         }
@@ -46,9 +52,49 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         int64_t sendSmsAttn();
 
+        /** @brief Tells if the objective of this application is completed */
+        inline auto isCompleted()
+        {
+            return completed;
+        }
+
+        /** @brief Tells if the referenced timer is expired or not */
+        inline auto isTimerExpired()
+        {
+            return timer.expired;
+        }
+
+        /** @brief Callback function when timer goes off
+         *
+         *  On getting the signal, initiate the hard power off request
+         *
+         *  @param[in] eventSource - Source of the event
+         *  @param[in] usec        - time in micro seconds
+         *  @param[in] userData    - User data pointer
+         *
+         */
+        static int timeoutHandler(sd_event_source* eventSource,
+                                  uint64_t usec, void* userData);
+
     private:
+        // Need this to send SMS_ATTN
+        // TODO : Switch over to using mapper service in a different patch
+        static constexpr auto HOST_IPMI_BUS  = "org.openbmc.HostIpmi";
+        static constexpr auto HOST_IPMI_OBJ  = "/org/openbmc/HostIpmi/1";
+        static constexpr auto HOST_IPMI_INTF = "org.openbmc.HostIpmi";
+
         /* @brief sdbusplus handle */
         sdbusplus::bus::bus& bus;
+
+        /** @brief Reference to Timer object */
+        const Timer& timer;
+
+        /** @brief Marks the end of life of this application.
+         *
+         *  This is set to true if host gives appropriate responses
+         *  for the sequence of commands.
+         */
+        bool completed;
 };
 } // namespace ipmi
 } // namespace phosphor
