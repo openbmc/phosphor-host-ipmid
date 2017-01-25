@@ -9,6 +9,22 @@ namespace phosphor
 {
 namespace ipmi
 {
+namespace wdog
+{
+// TODO Need to put correct interface once we finalize on wdog design
+constexpr auto MATCH_TIMEOUT =
+    "type='signal',interface='xyz.openbmc_project.State.Watchdog',"
+    "path='/xyz/openbmc_project/State/Watchdog/Host',member='Timeout'";
+
+// TODO. Need to put a different patchset to move over to using mapper
+constexpr auto CHASSIS_SERVICE = "xyz.openbmc_project.State.Chassis";
+constexpr auto CHASSIS_OBJ     = "/xyz/openbmc_project/state/chassis0";
+constexpr auto CHASSIS_INTF    = "xyz.openbmc_project.State.Chassis";
+
+// Property and the desired value
+constexpr auto CHASSIS_OFF   = "xyz.openbmc_project.State.Chassis.Transition.Off";
+constexpr auto PROPERTY_INTF = "org.freedesktop.DBus.Properties";
+} // namespace wdog
 
 /** @class SoftPowerOff
  *  @brief Responsible for coordinating Host SoftPowerOff operation
@@ -35,7 +51,8 @@ class SoftPowerOff : public sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Ipmi::Internal
                                                ::server::SoftPowerOff>(
                                                bus, objPath),
-            bus(bus)
+            bus(bus),
+            wdogTimeOut(bus, wdog::MATCH_TIMEOUT, handleTimeOut, this)
         {
             // Nothing to do here
         }
@@ -69,9 +86,28 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         HostResponse responseReceived(HostResponse value) override;
 
+        /** @brief When set to true, this application can terminate. */
+        static bool completed;
+
     private:
+        /** @brief Callback function on watchdog timeout
+         *
+         *  On getting the signal, initiate the hard power off request
+         *
+         *  @param[in] msg        - Data associated with subscribed signal
+         *  @param[in] userData   - Pointer to this object instance
+         *  @param[in] retError   - Return error data if any
+         *
+         */
+        static int handleTimeOut(sd_bus_message* msg,
+                                 void* userData,
+                                 sd_bus_error* retError);
+
         /* @brief sdbusplus handle */
         sdbusplus::bus::bus& bus;
+
+        /** @brief Used to subscribe to watchdog timeout events */
+        sdbusplus::server::match::match wdogTimeOut;
 };
 } // namespace ipmi
 } // namespace phosphor
