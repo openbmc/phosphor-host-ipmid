@@ -50,7 +50,7 @@ int Timer::timeoutHandler(sd_event_source* eventSource,
     auto timer = static_cast<Timer*>(userData);
     timer->expired = true;
 
-    log<level::INFO>("Timer expired");
+    log<level::INFO>("Timer Expired");
     return 0;
 }
 
