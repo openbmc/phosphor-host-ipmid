@@ -784,6 +784,46 @@ finish:
     return rc;
 }
 
+//-------------------------------------------------------------
+// Send a command to SoftPowerOff application to stop any timer
+//-------------------------------------------------------------
+int stop_soft_off_timer()
+{
+    constexpr auto objname          = "/xyz/openbmc_project/ipmi/internal/"
+                                      "softpoweroff";
+    constexpr auto iface            = "org.freedesktop.DBus.Properties";
+    constexpr auto soft_off_iface   = "xyz.openbmc_project.Ipmi.Internal."
+                                      "SoftPowerOff";
+
+    constexpr auto property         = "ResponseReceived";
+    constexpr auto value            = "xyz.openbmc_project.Ipmi.Internal."
+                                      "SoftPowerOff.HostResponse.HostShutdown";
+    char *busname = nullptr;
+
+    // Get the system bus where most system services are provided.
+    auto bus = ipmid_get_sd_bus_connection();
+
+    // Get the service name
+    auto r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+                objname, strerror(-r));
+        return r;
+    }
+
+    // No error object or reply expected.
+    int rc = sd_bus_call_method(bus, busname, objname, iface,
+                           "Set", nullptr, nullptr, "ssv",
+                           soft_off_iface, property, "s", value);
+    if (rc < 0)
+    {
+        fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
+                strerror(-rc));
+    }
+    free(busname);
+    return rc;
+}
+
 //----------------------------------------------------------------------
 // Chassis Control commands
 //----------------------------------------------------------------------
@@ -807,8 +847,18 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 			rc = ipmi_chassis_power_control("powerOn");
 			break;
 		case CMD_POWER_OFF:
+			// Need to Nudge SoftPowerOff application that it needs to stop the
+			// watchdog timer if running.
+			rc = stop_soft_off_timer();
+			if (!rc)
+			{
+				fprintf(stderr, "Error stopping watchdog timer");
+			}
+			// Does not matter if we are able to stop the timer,
+			// just get going and do the hard power off
 			rc = ipmi_chassis_power_control("powerOff");
 			break;
+
 		case CMD_HARD_RESET:
 		case CMD_POWER_CYCLE:
 			// SPEC has a section that says certain implementations can trigger
