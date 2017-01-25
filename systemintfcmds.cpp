@@ -2,6 +2,7 @@
 #include "host-ipmid/ipmid-api.h"
 
 #include <stdio.h>
+#include <mapper.h>
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -13,14 +14,51 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+
     printf("IPMI APP READ EVENT command received\n");
 
     // TODO : For now, this is catering only to the Soft Power Off via OEM SEL
     //        mechanism. If we need to make this generically used for some
     //        other conditions, then we can take advantage of context pointer.
 
+    constexpr auto objname        = "/xyz/openbmc_project/ipmi/internal/"
+                                    "softpoweroff";
+    constexpr auto iface          = "org.freedesktop.DBus.Properties";
+    constexpr auto soft_off_iface = "xyz.openbmc_project.Ipmi.Internal."
+                                    "SoftPowerOff";
+
+    constexpr auto property       = "ResponseReceived";
+    constexpr auto value          = "xyz.openbmc_project.Ipmi.Internal."
+                                    "SoftPowerOff.HostResponse.SoftOffReceived";
+    char *busname = nullptr;
+
     struct oem_sel_timestamped soft_off = {0};
     *data_len = sizeof(struct oem_sel_timestamped);
+
+    // Get the system bus where most system services are provided.
+    auto bus = ipmid_get_sd_bus_connection();
+
+    // Nudge the SoftPowerOff application that it needs to stop the
+    // initial watchdog timer. If we have some errors talking to Soft Off
+    // object, get going and do our regular job
+    mapper_get_service(bus, objname, &busname);
+    if (busname)
+    {
+        // No error object or reply expected.
+        auto r = sd_bus_call_method(bus, busname, objname, iface,
+                                 "Set", nullptr, nullptr, "ssv",
+                                 soft_off_iface, property, "s", value);
+        if (r < 0)
+        {
+            fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
+                    strerror(-r));
+        }
+        free (busname);
+    }
+    else
+    {
+            printf("Soft Power Off object is not available. Ignoring watchdog refresh");
+    }
 
     // either id[0] -or- id[1] can be filled in. We will use id[0]
     soft_off.id[0]   = SEL_OEM_ID_0;
