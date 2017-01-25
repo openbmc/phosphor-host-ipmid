@@ -2,6 +2,7 @@
 #include "host-ipmid/ipmid-api.h"
 
 #include <stdio.h>
+#include <mapper.h>
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -19,8 +20,43 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     //        mechanism. If we need to make this generically used for some
     //        other conditions, then we can take advantage of context pointer.
 
+    constexpr auto objname          = "/xyz/openbmc_project/ipmi/softpoweroff";
+    constexpr auto iface            = "org.freedesktop.DBus.Properties";
+    constexpr auto soft_off_iface   = "xyz.openbmc_project.Ipmi.Internal.SoftPowerOff";
+
+    constexpr auto property         = "ResponseReceived";
+    constexpr auto value            = "xyz.openbmc_project.Ipmi.Internal.SoftPowerOff.\
+                                       HostResponse.SoftOffReceived";
+    char *busname = nullptr;
+
     struct oem_sel_timestamped soft_off = {0};
     *data_len = sizeof(struct oem_sel_timestamped);
+
+    // Get the system bus where most system services are provided.
+    auto bus = ipmid_get_sd_bus_connection();
+
+    // Nudge the SoftPowerOff application that it needs to stop the
+    // initial watchdog timer.
+    auto r = mapper_get_service(bus, objname, &busname);
+    if (r < 0) {
+        fprintf(stderr, "Failed to get %s bus name: %s\n",
+                objname, strerror(-r));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
+
+    // No error object or reply expected.
+    // TODO : Do this only if the SoftPowerOff object is alive
+    r = sd_bus_call_method(bus, busname, objname, iface,
+                           "Set", nullptr, nullptr, "sss",
+                            soft_off_iface, property, value);
+    if (r < 0)
+    {
+        fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
+                strerror(-r));
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        goto finish;
+    }
 
     // either id[0] -or- id[1] can be filled in. We will use id[0]
     soft_off.id[0]   = SEL_OEM_ID_0;
@@ -44,6 +80,8 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Pack the actual response
     memcpy(response, &soft_off, *data_len);
+finish:
+    free (busname);
     return rc;
 }
 
