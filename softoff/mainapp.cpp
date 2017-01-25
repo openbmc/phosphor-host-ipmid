@@ -14,33 +14,70 @@
  * limitations under the License.
  */
 #include <iostream>
+#include <string.h>
+#include <systemd/sd-event.h>
+#include <log.hpp>
 #include "softoff.hpp"
+#include "timer.hpp"
 #include "config.h"
+
+using namespace phosphor::logging;
 
 int main(int argc, char** argv)
 {
+    // systemd event handler
+    sd_event* events = nullptr;
+
     // Get a handle to system dbus.
     auto bus = sdbusplus::bus::new_default();
 
     // Add systemd object manager.
     sdbusplus::server::manager::manager(bus, OBJPATH);
 
+    // sd_event object
+    auto r = sd_event_default(&events);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to create sd_event handler",
+                entry("ERROR=%s", strerror(-r)));
+        return -1;
+    }
+
+    // Create the Timer object
+    phosphor::ipmi::Timer timer(bus, events);
+
+    // Initialize the timer object
+    r = timer.initialize();
+    if (r < 0)
+    {
+        log<level::ERR>("Failure initializing the timer object",
+                entry("ERROR=%s", strerror(-r)));
+        return -1;
+    }
+
     // Create the SoftPowerOff object.
-    phosphor::ipmi::SoftPowerOff object(bus, OBJPATH);
+    phosphor::ipmi::SoftPowerOff powerObj(bus, OBJPATH, timer);
 
     // The whole purpose of this application is to send SMS_ATTN
     // and watch for the soft power off to go through.
-    object.sendSmsAttn();
+    powerObj.sendSmsAttn();
 
     /** @brief Claim the bus */
     bus.request_name(BUSNAME);
 
-    /** @brief Wait for client requests */
-    while(true)
+    /** @brief Wait for client requests until this application has processed
+     *         atleast one successful SoftPowerOff
+     */
+    while(!powerObj.isCompleted() && !timer.isExpired())
     {
-        // Handle dbus message / signals discarding unhandled
-        bus.process_discard();
-        bus.wait();
+        // -1 denotes wait for ever
+        r = sd_event_run(events, (uint64_t)-1);
+        if (r < 0)
+        {
+            log<level::ERR>("Failure in processing request",
+                    entry("ERROR=%s", strerror(-r)));
+            return -1;
+        }
     }
     return 0;
 }
