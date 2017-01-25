@@ -19,11 +19,6 @@ namespace phosphor
 namespace ipmi
 {
 
-// Need this to send SMS_ATTN
-constexpr auto HOST_IPMI_BUS  = "org.openbmc.HostIpmi";
-constexpr auto HOST_IPMI_OBJ  = "/org/openbmc/HostIpmi/1";
-constexpr auto HOST_IPMI_INTF = "org.openbmc.HostIpmi";
-
 /** @brief Send the SMS_ATN to host if value is set */
 int64_t SoftPowerOff::sendSmsAttn()
 {
@@ -31,9 +26,9 @@ int64_t SoftPowerOff::sendSmsAttn()
     int64_t btResp {};
 
     auto method = bus.new_method_call(HOST_IPMI_BUS,
-                                    HOST_IPMI_OBJ,
-                                    HOST_IPMI_INTF,
-                                    "setAttention");
+                                      HOST_IPMI_OBJ,
+                                      HOST_IPMI_INTF,
+                                      "setAttention");
 
     // If there is any exception, would be thrown here.
     auto reply = bus.call(method);
@@ -44,5 +39,14 @@ int64_t SoftPowerOff::sendSmsAttn()
 
     return btResp;
 }
+
+/** @brief callback handler on timeout */
+int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
+                                 uint64_t usec, void* userData)
+{
+    // Will be filled with actual code
+    return 0;
+}
+
 } // namespace ipmi
 } // namespace phosphor
