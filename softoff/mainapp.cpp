@@ -32,8 +32,10 @@ int main(int argc, char** argv)
     /** @brief Claim the bus */
     bus.request_name(BUSNAME);
 
-    /** @brief Wait for client requests */
-    while(true)
+    /** @brief Wait for client requests until this application has processed
+     *         atleast one successful SoftPowerOff
+     */
+    while(!phosphor::ipmi::SoftPowerOff::completed)
     {
         // Handle dbus message / signals discarding unhandled
         bus.process_discard();
