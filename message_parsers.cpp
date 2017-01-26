@@ -213,12 +213,27 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
 
     size_t payloadLen = 0;
 
-    header->payloadLength = endian::to_ipmi<uint16_t>(
-             outMessage.payload.size());
-    payloadLen = outMessage.payload.size();
-    // Insert the Payload into the Packet
-    packet.insert(packet.end(), outMessage.payload.begin(),
-                  outMessage.payload.end());
+    // Encrypt the payload if needed
+    if (outMessage.isPacketEncrypted)
+    {
+        header->payloadType |= PAYLOAD_ENCRYPT_MASK;
+        auto cipherPayload = internal::encryptPayload(outMessage);
+        payloadLen = cipherPayload.size();
+        header->payloadLength = endian::to_ipmi<uint16_t>(cipherPayload.size());
+
+        // Insert the encrypted payload into the outgoing IPMI packet
+        packet.insert(packet.end(), cipherPayload.begin(), cipherPayload.end());
+    }
+    else
+    {
+        header->payloadLength = endian::to_ipmi<uint16_t>(
+                outMessage.payload.size());
+        payloadLen = outMessage.payload.size();
+
+        // Insert the Payload into the Packet
+        packet.insert(packet.end(), outMessage.payload.begin(),
+                      outMessage.payload.end());
+    }
 
     if (outMessage.isPacketAuthenticated)
     {
@@ -332,6 +347,14 @@ std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
     return session->getCryptAlgo()->decryptPayload(packet,
                                                   sizeof(SessionHeader_t),
                                                   payloadLen);
+}
+
+std::vector<uint8_t> encryptPayload(Message& message)
+{
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+                        message.bmcSessionID)).lock();
+
+    return session->getCryptAlgo()->encryptPayload(message.payload);
 }
 
 } // namespace internal

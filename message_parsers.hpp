@@ -208,6 +208,15 @@ std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
                                     const Message& message,
                                     size_t payloadLen);
 
+/*
+ * @brief Encrypt the plain text payload for the outgoing IPMI packet
+ *
+ * @param[in] message - IPMI Message populated for the outgoing packet
+ *
+ * @return on successful completion, return the encrypted payload
+ */
+std::vector<uint8_t> encryptPayload(Message& message);
+
 } // namespace internal
 
 } // namespace ipmi20parser
