@@ -171,7 +171,9 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 
     if (message->isPacketAuthenticated)
     {
-        if (!(internal::verifyPacketIntegrity(inPacket,*(message.get()))))
+        if (!(internal::verifyPacketIntegrity(inPacket,
+                                              *(message.get()),
+                                              payloadLen)))
         {
             throw std::runtime_error("Packet Integrity check failed");
         }
@@ -230,10 +232,9 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session)
 }
 
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
-                           const Message& message)
+                           const Message& message,
+                           size_t payloadLen)
 {
-    auto payloadLen = message.payload.size();
-
     /*
      * Padding bytes are added to cause the number of bytes in the data range
      * covered by the AuthCode(Integrity Data) field to be a multiple of 4 bytes
