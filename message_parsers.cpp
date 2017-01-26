@@ -165,9 +165,6 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         ((header->payloadType & PAYLOAD_AUTH_MASK) ? true : false);
 
     auto payloadLen = endian::from_ipmi(header->payloadLength);
-    message->payload.assign(inPacket.begin() + sizeof(SessionHeader_t),
-                            inPacket.begin() + sizeof(SessionHeader_t) +
-                            payloadLen);
 
     if (message->isPacketAuthenticated)
     {
@@ -177,6 +174,21 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         {
             throw std::runtime_error("Packet Integrity check failed");
         }
+    }
+
+    // Decrypt the payload if the payload is encrypted
+    if (message->isPacketEncrypted)
+    {
+        // Assign the decrypted payload to the IPMI Message
+        message->payload = internal::decryptPayload(inPacket,
+                                                    *(message.get()),
+                                                    payloadLen);
+    }
+    else
+    {
+        message->payload.assign(inPacket.begin() + sizeof(SessionHeader_t),
+                                inPacket.begin() + sizeof(SessionHeader_t) +
+                                payloadLen);
     }
 
     return message;
@@ -308,6 +320,18 @@ void addIntegrityData(std::vector<uint8_t>& packet,
                                   generateIntegrityData(packet);
 
     packet.insert(packet.end(), integrityData.begin(), integrityData.end());
+}
+
+std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
+                                    const Message& message,
+                                    size_t payloadLen)
+{
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+                        message.bmcSessionID)).lock();
+
+    return session->getCryptAlgo()->decryptPayload(packet,
+                                                  sizeof(SessionHeader_t),
+                                                  payloadLen);
 }
 
 } // namespace internal

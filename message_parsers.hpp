@@ -195,6 +195,19 @@ void addIntegrityData(std::vector<uint8_t>& packet,
                       const Message& message,
                       size_t payloadLen);
 
+/*
+ * @brief Decrypt the encrypted payload in the incoming IPMI packet
+ *
+ * @param[in] packet - Incoming IPMI packet
+ * @param[in] message - IPMI Message populated from the incoming packet
+ * @param[in] payloadLen - Length of encrypted IPMI payload
+ *
+ * @return on successful completion, return the plain text payload
+ */
+std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
+                                    const Message& message,
+                                    size_t payloadLen);
+
 } // namespace internal
 
 } // namespace ipmi20parser
