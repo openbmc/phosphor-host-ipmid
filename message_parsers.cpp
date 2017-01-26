@@ -199,15 +199,18 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     // Add session sequence number
     internal::addSequenceNumber(packet, session);
 
-    // Add Payload
-    header->payloadLength = endian::to_ipmi<uint16_t>(outMessage.payload.size());
+    size_t payloadLen = 0;
+
+    header->payloadLength = endian::to_ipmi<uint16_t>(
+             outMessage.payload.size());
+    payloadLen = outMessage.payload.size();
     // Insert the Payload into the Packet
     packet.insert(packet.end(), outMessage.payload.begin(),
                   outMessage.payload.end());
 
     if (outMessage.isPacketAuthenticated)
     {
-        internal::addIntegrityData(packet, outMessage);
+        internal::addIntegrityData(packet, outMessage, payloadLen);
     }
 
     return packet;
@@ -281,10 +284,9 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
 }
 
 void addIntegrityData(std::vector<uint8_t>& packet,
-                      const Message& message)
+                      const Message& message,
+                      size_t payloadLen)
 {
-    auto payloadLen = message.payload.size();
-
     // The following logic calculates the number of padding bytes to be added to
     // IPMI packet. If needed each integrity Pad byte is set to FFh.
     auto paddingLen = 4 - ((payloadLen + 2) & 3);

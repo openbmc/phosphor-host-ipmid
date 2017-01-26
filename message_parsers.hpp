@@ -188,10 +188,12 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
  * @brief Add Integrity data to the outgoing IPMI packet
  *
  * @param[in] packet - Outgoing IPMI packet
- * @param[in] message - IPMI Message populated from the incoming packet
- *
+ * @param[in] message - IPMI Message populated for the outgoing packet
+ * @param[in] payloadLen - Length of the IPMI payload
  */
-void addIntegrityData(std::vector<uint8_t>& packet, const Message& message);
+void addIntegrityData(std::vector<uint8_t>& packet,
+                      const Message& message,
+                      size_t payloadLen);
 
 } // namespace internal
 
