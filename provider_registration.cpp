@@ -79,11 +79,11 @@ void registerCallbackHandlers(const char* providerLibPath)
  * @param[in] cmd - Command
  * @param[in] context - User specific data
  * @param[in] handler - The callback routine for the command
- * @param[in] priv - IPMI Command Prvilege
+ * @param[in] priv - IPMI Command Privilege
  */
 void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             ipmi_context_t context,
-                            ipmid_callback_t handler, ipmi_cmd_privilege priv)
+                            ipmid_callback_t handler, ipmi_cmd_privilege_t priv)
 {
     uint16_t netFn = netfn << 10;
 
