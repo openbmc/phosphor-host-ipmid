@@ -98,8 +98,6 @@ static int io_handler(sd_event_source* es, int fd, uint32_t revents,
 
 int startEventLoop()
 {
-    struct sockaddr_in6 in {};
-
     sd_event_source* event_source = nullptr;
     sd_event* event = nullptr;
     int fd = -1, r;
@@ -139,21 +137,13 @@ int startEventLoop()
         goto finish;
     }
 
-    fd = socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
-    if (fd < 0)
+    if (sd_listen_fds(0) != 1)
     {
-        r = -errno;
+        fprintf(stderr, "No or too many file descriptors received.\n");
         goto finish;
     }
 
-    in.sin6_family = AF_INET6;
-    in.sin6_port = htons(IPMI_STD_PORT);
-
-    if (bind(fd, (struct sockaddr*)&in, sizeof(in)) < 0)
-    {
-        r = -errno;
-        goto finish;
-    }
+    fd = SD_LISTEN_FDS_START;
 
     r = sd_event_add_io(event, &event_source, fd, EPOLLIN, io_handler, nullptr);
     if (r < 0)
