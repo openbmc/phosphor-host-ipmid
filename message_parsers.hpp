@@ -22,6 +22,9 @@ constexpr size_t RMCP_MESSAGE_CLASS_IPMI = 7;
 // RMCP Session Header Size
 constexpr size_t RMCP_SESSION_HEADER_SIZE = 4;
 
+// Maximum payload size
+constexpr size_t MAX_PAYLOAD_SIZE = 255;
+
 enum class SessionHeader
 {
     IPMI15 = 0x00,

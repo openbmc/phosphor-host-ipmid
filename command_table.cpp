@@ -3,8 +3,8 @@
 #include <iomanip>
 #include <iostream>
 
-#include <host-ipmid/ipmid-api.h>
 #include "message_handler.hpp"
+#include "message_parsers.hpp"
 #include "sessions_manager.hpp"
 
 namespace command
@@ -81,8 +81,7 @@ std::vector<uint8_t> ProviderIpmidEntry::executeCommand(
         std::vector<uint8_t>& commandData,
         const message::Handler& handler)
 {
-
-    std::vector<uint8_t> response(MAX_IPMI_BUFFER);
+    std::vector<uint8_t> response(message::parser::MAX_PAYLOAD_SIZE - 1);
     size_t respSize {};
 
     ipmi_ret_t ipmiRC = functor(0, 0,
