@@ -59,6 +59,15 @@ class Timer
             return expired;
         }
 
+        /** @brief Gets the clock from a particular base */
+        uint64_t getTime(clockid_t);
+
+        /** @brief Starts the timer with specified expiration value */
+        int startTimer(uint64_t usec);
+
+        /** @brief Enables / disables the timer */
+        int setTimer(int action);
+
         /** @brief Reference to passed in bus handler */
         sdbusplus::bus::bus& bus;
 
