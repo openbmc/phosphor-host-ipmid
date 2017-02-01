@@ -47,6 +47,20 @@ class Timer
         }
 
     private:
+        /** @brief Chassis dbus constructs to do a hard power off */
+        // TODO : Need to move over to using mapper to get service name
+        static constexpr auto CHASSIS_SERVICE = "xyz.openbmc_project.\
+                                                 State.Chassis";
+        static constexpr auto CHASSIS_OBJ     = "/xyz/openbmc_project/\
+                                                 state/chassis0";
+        static constexpr auto CHASSIS_INTF    = "xyz.openbmc_project.\
+                                                 State.Chassis";
+
+        // Property and the desired value
+        static constexpr auto CHASSIS_OFF   = "xyz.openbmc_project.State.\
+                                               Chassis.Transition.Off";
+        static constexpr auto PROPERTY_INTF = "org.freedesktop.DBus.Properties";
+
         /** @brief Reference to passed in bus handler */
         sdbusplus::bus::bus& bus;
 
