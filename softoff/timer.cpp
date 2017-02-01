@@ -38,7 +38,27 @@ int Timer::initialize()
 int Timer::timeoutHandler(sd_event_source* eventSource,
                           uint64_t usec, void* userData)
 {
-    // Stub function for this commit
+    // Get the handle to this object that was bound during registration
+    auto thisObject = static_cast<Timer*>(userData);
+
+    // The only thing that is to be done here is to make a call
+    // to Chassis object to do Hard Power Off.
+    auto method = thisObject->bus.new_method_call(CHASSIS_SERVICE,
+                                                  CHASSIS_OBJ,
+                                                  PROPERTY_INTF,
+                                                  "Set");
+
+    // Fill the Interface, property name and its value.
+    method.append(CHASSIS_INTF,
+                  "RequestedPowerTransition",
+                  CHASSIS_OFF);
+
+    // Set the property.
+    thisObject->bus.call(method);
+
+    // The timer is now considerd 'expired` !!
+    thisObject->expired = true;
+
     return 0;
 }
 
