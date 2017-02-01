@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <chrono>
 #include <systemd/sd-event.h>
 #include <log.hpp>
 #include "softoff.hpp"
 #include "timer.hpp"
 #include "config.h"
 
-using namespace phosphor::logging;
-
 int main(int argc, char** argv)
 {
+    using namespace phosphor::logging;
+    using namespace std::chrono;
+
     // systemd event handler
     sd_event* events = nullptr;
     sd_event_source* eventSource = nullptr;
@@ -58,6 +60,12 @@ int main(int argc, char** argv)
     // Create the SoftPowerOff object.
     phosphor::ipmi::SoftPowerOff powerObj(bus, OBJPATH, timer);
 
+    /** @brief Claim the bus. Delaying it until sending SMS_ATN may result
+     *  in a race condition between this available and IPMI trying to send
+     *  message as a reponse to ack from host.
+     */
+    bus.request_name(BUSNAME);
+
     // The whole purpose of this application is to send SMS_ATTN
     // and watch for the soft power off to go through.
     int64_t resp = powerObj.sendSmsAttn();
@@ -68,8 +76,16 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    /** @brief Claim the bus */
-    bus.request_name(BUSNAME);
+    // Start the initial timer for host to ack the SMS_ATN
+    auto time = duration_cast<microseconds>(
+            seconds(IPMI_SMS_ATN_ACK_TIMEOUT));
+    r = timer.startTimer(time.count());
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to start the 45 seconds timer",
+                entry("ERROR=%s", strerror(-r)));
+        return -1;
+    }
 
     /** @brief Wait for client requests until this application has processed
      *         at least one successful SoftPowerOff
