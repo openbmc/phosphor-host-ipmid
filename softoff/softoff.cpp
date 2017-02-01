@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <phosphor-logging/log.hpp>
 #include "softoff.hpp"
 namespace phosphor
 {
@@ -38,7 +39,17 @@ void SoftPowerOff::sendSMSAttn()
 int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
                                  uint64_t usec, void* userData)
 {
-    // Will be filled with actual code
+    using namespace phosphor::logging;
+
+    // Get the handle to this object that was bound during registration
+    auto softOff = static_cast<SoftPowerOff*>(userData);
+
+    log<level::ERR>("SoftOff Watchdog timer expired");
+
+    // The timer is now considerd 'expired` !!
+    softOff->timer.expired = true;
+
+    // Nothing more needs to be done here.
     return 0;
 }
 
