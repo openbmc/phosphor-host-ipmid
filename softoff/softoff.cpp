@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <chrono>
+#include <log.hpp>
 #include "softoff.hpp"
 namespace phosphor
 {
@@ -76,6 +78,48 @@ int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
     //thisObject->timer->expired = true;
 
     return 0;
+}
+
+/** @brief Host Response handler */
+auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
+{
+    using namespace std::chrono;
+    using namespace phosphor::logging;
+
+    if (response == HostResponse::SoftOffReceived)
+    {
+        // Need to stop the running timer and then start a new timer of 45
+        // minutes expiration time.
+        auto time = duration_cast<nanoseconds>(minutes(45));
+        auto r = timer.startTimer(time.count());
+        if (r < 0)
+        {
+            log<level::ERR>("Failure to START the 45 minutes timer",
+                    entry("ERROR=%s", strerror(-r)));
+
+            return sdbusplus::xyz::openbmc_project::Ipmi::Internal
+                    ::server::SoftPowerOff::responseReceived();
+        }
+    }
+    else if (response == HostResponse::HostShutdown)
+    {
+        // Disable the timer since Host has sent the hard power off request
+        auto r = timer.setTimer(SD_EVENT_OFF);
+        if (r < 0)
+        {
+            log<level::ERR>("Failure to STOP the timer",
+                    entry("ERROR=%s", strerror(-r)));
+
+            return sdbusplus::xyz::openbmc_project::Ipmi::Internal
+                    ::server::SoftPowerOff::responseReceived();
+        }
+
+        // This marks the completion of soft power off sequence.
+        completed = true;
+    }
+
+    return sdbusplus::xyz::openbmc_project::Ipmi::Internal
+              ::server::SoftPowerOff::responseReceived(response);
 }
 
 } // namespace ipmi
