@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <log.hpp>
 #include "softoff.hpp"
 namespace phosphor
 {
 namespace ipmi
 {
 
-/** @brief Send the SMS_ATN to host if value is set */
+/** @brief Sends the SMS_ATN to host if value is set */
 int64_t SoftPowerOff::sendSmsAttn()
 {
     // Response from BT
@@ -44,7 +45,17 @@ int64_t SoftPowerOff::sendSmsAttn()
 int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
                                  uint64_t usec, void* userData)
 {
-    // Will be filled with actual code
+    using namespace phosphor::logging;
+
+    // Get the handle to this object that was bound during registration
+    auto timer = static_cast<Timer*>(userData);
+
+    log<level::ERR>("SoftOff Watchdog timer expired");
+
+    // The timer is now considerd 'expired` !!
+    timer->expired = true;
+
+    // Nothing more needs to be done here.
     return 0;
 }
 
