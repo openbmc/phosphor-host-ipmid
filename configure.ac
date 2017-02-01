@@ -86,6 +86,13 @@ AS_IF([test "x$enable_softoff" != "xno"],
     AS_IF([test "x$SOFTOFF_OBJPATH" == "x"],
           [SOFTOFF_OBJPATH="/xyz/openbmc_project/ipmi/internal/softpoweroff"])
     [AC_DEFINE_UNQUOTED([SOFTOFF_OBJPATH], ["$SOFTOFF_OBJPATH"], [The SoftPowerOff Dbus root])]
+
+    # Timeouts in SECONDS for SoftPowerOff protocol
+    [AC_ARG_VAR(IPMI_SMS_ATN_ACK_TIMEOUT_SECS, [Initial timeout for host to ack SMS_ATN from BMC])]
+    [AC_DEFINE_UNQUOTED([IPMI_SMS_ATN_ACK_TIMEOUT_SECS], [3], [Initial timeout for host to ack SMS_ATN from BMC])]
+
+    [AC_ARG_VAR(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS, [Wait time until Host can quiesce])]
+    [AC_DEFINE_UNQUOTED([IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS], [45*60], [Wait time until Host can quiesce])]
 )
 
 # Create configured output

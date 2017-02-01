@@ -48,7 +48,7 @@ class Timer
         /** @brief Starts the timer with specified expiration value.
          *  input is an offset from the current steady_clock
          */
-        int startTimer(uint64_t usec) const;
+        int startTimer(const std::chrono::microseconds& usec) const;
 
         /** @brief Enables / disables the timer */
         int setTimer(int action) const;
@@ -70,7 +70,7 @@ class Timer
         sd_event_time_handler_t timeoutHandler;
 
         /** @brief Gets the current time from steady clock */
-        uint64_t getTime() const;
+        std::chrono::microseconds getTime() const;
 };
 
 } // namespace ipmi

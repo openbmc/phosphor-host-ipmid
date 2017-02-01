@@ -59,6 +59,14 @@ class SoftPowerOff : public sdbusplus::server::object::object<
             return timer.expired;
         }
 
+        /** @brief overloaded property setter function
+         *
+         *  @param[in] value - One of SoftOffReceived / HostShutdown
+         *
+         *  @return Success or exception thrown
+         */
+        HostResponse responseReceived(HostResponse value) override;
+
     private:
         // Need this to send SMS_ATTN
         // TODO : Switch over to using mapper service in a different patch
