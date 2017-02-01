@@ -59,10 +59,10 @@ class Timer
          */
         bool expired;
 
-    private:
         /** @brief Reference to passed in bus handler */
         sdbusplus::bus::bus& bus;
 
+    private:
         /** @brief the sd_event structure */
         sd_event* timeEvent;
 
