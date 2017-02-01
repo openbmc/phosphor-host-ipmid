@@ -41,9 +41,7 @@ class Timer
             bus.detach_event();
         }
 
-        /** @brief Initializes the timer object with infinite
-         *         expiration time
-         */
+        /** @brief Initializes the timer object with infinite expiration */
         int initialize();
 
         /** @brief Returns if the timer is currently expired or not */
