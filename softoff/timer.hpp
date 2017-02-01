@@ -38,10 +38,18 @@ class Timer
             }
         }
 
-        inline auto isExpired()
+        inline auto isExpired() const
         {
             return expired;
         }
+
+        /** @brief Starts the timer with specified expiration value.
+         *  input is an offset from the current steady_clock
+         */
+        int startTimer(std::chrono::microseconds usec);
+
+        /** @brief Enables / disables the timer */
+        int setTimer(int action);
 
     private:
         /** @brief the sd_event structure */
@@ -76,6 +84,9 @@ class Timer
          */
         static int timeoutHandler(sd_event_source* eventSource,
                                   uint64_t usec, void* userData);
+
+        /** @brief Gets the current time from steady clock */
+        static std::chrono::microseconds getTime();
 };
 
 } // namespace ipmi
