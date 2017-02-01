@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <chrono>
 #include <phosphor-logging/log.hpp>
 #include "softoff.hpp"
+#include "config.h"
 namespace phosphor
 {
 namespace ipmi
@@ -23,6 +25,7 @@ namespace ipmi
 /** @brief Send the SMS_ATN to host if value is set */
 void SoftPowerOff::sendSMSAttn()
 {
+    using namespace std::chrono;
     auto method = bus.new_method_call(HOST_IPMI_BUS,
                                       HOST_IPMI_OBJ,
                                       HOST_IPMI_INTF,
@@ -32,6 +35,14 @@ void SoftPowerOff::sendSMSAttn()
     // BT returns '0' on success and bus_error on failure.
     bus.call_noreply(method);
 
+    // Start the timer
+    auto time = duration_cast<microseconds>(
+            seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
+    auto r = timer.startTimer(time);
+    if (r < 0)
+    {
+        throw std::runtime_error("Error starting timer");
+    }
     return;
 }
 
