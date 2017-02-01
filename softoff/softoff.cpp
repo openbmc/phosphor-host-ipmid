@@ -73,7 +73,7 @@ int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
     timer->bus.call(method);
 
     // The timer is now considerd 'expired` !!
-    //thisObject->timer->expired = true;
+    timer->expired = true;
 
     return 0;
 }
