@@ -1,3 +1,4 @@
+#include <chrono>
 #include <phosphor-logging/log.hpp>
 #include "timer.hpp"
 namespace phosphor
@@ -13,7 +14,7 @@ void Timer::initialize(void* userData)
     // Add infinite expiration time
     auto r = sd_event_add_time(timeEvent, &eventSource,
                                CLOCK_MONOTONIC, // Time base
-                               UINT64_MAX,      // Expire time - way long enough time
+                               UINT64_MAX,      // Expire time - way long time
                                0,               // Use default event accuracy
                                timeoutHandler,  // Callback handler on timeout
                                userData);       // User data
@@ -26,15 +27,58 @@ void Timer::initialize(void* userData)
     }
 
     // Disable the timer for now
-    r = sd_event_source_set_enabled(eventSource, SD_EVENT_OFF);
+    r = setTimer(SD_EVENT_OFF);
     if (r < 0)
     {
         log<level::ERR>("Failure to disable timer",
                 entry("ERROR=%s", strerror(-r)));
 
-        throw std::runtime_error("Setting initial timer value failed");
+        throw std::runtime_error("Disabling the timer failed");
     }
     return;
+}
+
+// Gets the time from steady_clock
+uint64_t Timer::getTime() const
+{
+    using namespace std::chrono;
+    auto usec = steady_clock::now().time_since_epoch();
+    return duration_cast<microseconds>(usec).count();
+}
+
+// Enables or disables the timer
+int Timer::setTimer(int action) const
+{
+    return sd_event_source_set_enabled(eventSource, action);
+}
+
+// Sets the time and arms the timer
+int Timer::startTimer(uint64_t timeValue) const
+{
+    // Disable the timer
+    setTimer(SD_EVENT_OFF);
+
+    // Get the current MONOTONIC time and add the delta
+    auto expireTime = getTime() + timeValue;
+
+    // Set the time
+    auto r = sd_event_source_set_time(eventSource, expireTime);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to set timer",
+                entry("ERROR=%s", strerror(-r)));
+        return r;
+    }
+
+    // A ONESHOT timer means that when the timer goes off,
+    // its moves to disabled state.
+    r = setTimer(SD_EVENT_ONESHOT);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to start timer",
+                entry("ERROR=%s", strerror(-r)));
+    }
+    return r;
 }
 
 } // namespace ipmi

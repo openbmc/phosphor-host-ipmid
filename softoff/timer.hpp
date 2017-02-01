@@ -45,6 +45,14 @@ class Timer
          */
         void initialize(void* userData);
 
+        /** @brief Starts the timer with specified expiration value.
+         *  input is an offset from the current steady_clock
+         */
+        int startTimer(uint64_t usec) const;
+
+        /** @brief Enables / disables the timer */
+        int setTimer(int action) const;
+
         /** @brief Returns if the associated timer is expired
          *
          *  This is set to true when the timeoutHandler is called into
@@ -60,6 +68,9 @@ class Timer
 
         /** @brief Callback handler on timeout */
         sd_event_time_handler_t timeoutHandler;
+
+        /** @brief Gets the current time from steady clock */
+        uint64_t getTime() const;
 };
 
 } // namespace ipmi
