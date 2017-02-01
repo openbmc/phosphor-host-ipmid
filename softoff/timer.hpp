@@ -30,8 +30,8 @@ class Timer
         Timer(sdbusplus::bus::bus& bus, sd_event* events,
               sd_event_source* eventSource,
               sd_event_time_handler_t handler)
-            : expired(false),
-              bus(bus),
+            : bus(bus),
+              expired(false),
               timeEvent(events),
               eventSource(eventSource),
               timeoutHandler(handler)
@@ -53,14 +53,23 @@ class Timer
          */
         int initialize();
 
+        /** @brief Gets the clock from a particular base */
+        uint64_t getTime(clockid_t);
+
+        /** @brief Starts the timer with specified expiration value */
+        int startTimer(uint64_t usec);
+
+        /** @brief Enables / disables the timer */
+        int setTimer(int action);
+
+        /** @brief Reference to passed in bus handler */
+        sdbusplus::bus::bus& bus;
+
         /** @brief Returns if the associated timer is expired
          *
          *  This is set to true when the timeoutHandler is called into
          */
         bool expired;
-
-        /** @brief Reference to passed in bus handler */
-        sdbusplus::bus::bus& bus;
 
     private:
         /** @brief the sd_event structure */
