@@ -39,11 +39,11 @@ void Timer::initialize(void* userData)
 }
 
 // Gets the time from steady_clock
-uint64_t Timer::getTime() const
+std::chrono::microseconds Timer::getTime() const
 {
     using namespace std::chrono;
     auto usec = steady_clock::now().time_since_epoch();
-    return duration_cast<microseconds>(usec).count();
+    return duration_cast<microseconds>(usec);
 }
 
 // Enables or disables the timer
@@ -53,7 +53,7 @@ int Timer::setTimer(int action) const
 }
 
 // Sets the time and arms the timer
-int Timer::startTimer(uint64_t timeValue) const
+int Timer::startTimer(const std::chrono::microseconds& timeValue) const
 {
     // Disable the timer
     setTimer(SD_EVENT_OFF);
@@ -62,7 +62,7 @@ int Timer::startTimer(uint64_t timeValue) const
     auto expireTime = getTime() + timeValue;
 
     // Set the time
-    auto r = sd_event_source_set_time(eventSource, expireTime);
+    auto r = sd_event_source_set_time(eventSource, expireTime.count());
     if (r < 0)
     {
         log<level::ERR>("Failure to set timer",
