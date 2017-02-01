@@ -1,3 +1,4 @@
+#include <chrono>
 #include <phosphor-logging/log.hpp>
 #include "timer.hpp"
 namespace phosphor
@@ -25,10 +26,54 @@ int Timer::initialize()
     }
 
     // Disable the timer for now
-    r = sd_event_source_set_enabled(eventSource, SD_EVENT_OFF);
+    r = setTimer(SD_EVENT_OFF);
     if (r < 0)
     {
         log<level::ERR>("Failure to disable timer",
+                entry("ERROR=%s", strerror(-r)));
+    }
+    return r;
+}
+
+// Gets the time from specified type, could be
+// CLOCK_MONOTONIC, CLOCK_REALTIME and other allowed ones
+uint64_t Timer::getTime(clockid_t clockId)
+{
+    using namespace std::chrono;
+    auto usec = steady_clock::now().time_since_epoch();
+    return duration_cast<microseconds>(usec).count();
+}
+
+// Enables or disables the timer
+int Timer::setTimer(int action)
+{
+    return sd_event_source_set_enabled(eventSource, action);
+}
+
+// Sets the time and arms the timer
+int Timer::startTimer(uint64_t timeValue)
+{
+    // Disable the timer
+    setTimer(SD_EVENT_OFF);
+
+    // Get the current MONOTONIC time and add the delta
+    auto expireTime = getTime(CLOCK_MONOTONIC) + timeValue;
+
+    // Set the time
+    auto r = sd_event_source_set_time(eventSource, expireTime);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to set timer",
+                entry("ERROR=%s", strerror(-r)));
+        return r;
+    }
+
+    // A ONESHOT timer means that when the timer goes off,
+    // its moves to disabled state.
+    r = setTimer(SD_EVENT_ONESHOT);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to start timer",
                 entry("ERROR=%s", strerror(-r)));
     }
     return r;
