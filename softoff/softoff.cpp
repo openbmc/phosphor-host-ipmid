@@ -46,5 +46,42 @@ void SoftPowerOff::sendSMSAttn()
     return;
 }
 
+/** @brief Host Response handler */
+auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
+{
+    using namespace std::chrono;
+    using namespace phosphor::logging;
+
+    if (response == HostResponse::SoftOffReceived)
+    {
+        // Need to stop the running timer and then start a new timer
+        auto time = duration_cast<microseconds>(
+                seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
+        auto r = timer.startTimer(time);
+        if (r < 0)
+        {
+            log<level::ERR>("Failure to start HostQuiesce wait timer",
+                    entry("ERROR=%s", strerror(-r)));
+        }
+    }
+    else if (response == HostResponse::HostShutdown)
+    {
+        // Disable the timer since Host has quiesced and we are
+        // done with soft power off part
+        auto r = timer.setTimer(SD_EVENT_OFF);
+        if (r < 0)
+        {
+            log<level::ERR>("Failure to STOP the timer",
+                    entry("ERROR=%s", strerror(-r)));
+        }
+
+        // This marks the completion of soft power off sequence.
+        completed = true;
+    }
+
+    return sdbusplus::xyz::openbmc_project::Ipmi::Internal
+              ::server::SoftPowerOff::responseReceived(response);
+}
+
 } // namespace ipmi
 } // namespace phosphor
