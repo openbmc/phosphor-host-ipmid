@@ -240,7 +240,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
      * .If present each integrity Pad byte is set to FFh. The following logic
      * calculates the number of padding bytes added in the IPMI packet.
      */
-    auto paddingLen = (4 - ((payloadLen + 2) & 3)) & 3;
+    auto paddingLen = 4 - ((payloadLen + 2) & 3);
 
     auto sessTrailerPos = sizeof(SessionHeader_t) + payloadLen + paddingLen;
 
@@ -286,7 +286,7 @@ void addIntegrityData(std::vector<uint8_t>& packet,
 
     // The following logic calculates the number of padding bytes to be added to
     // IPMI packet. If needed each integrity Pad byte is set to FFh.
-    auto paddingLen = (4 - ((payloadLen + 2) & 3)) & 3;
+    auto paddingLen = 4 - ((payloadLen + 2) & 3);
     packet.insert(packet.end(), paddingLen, 0xFF);
 
     packet.resize(packet.size() + sizeof(SessionTrailer_t));
