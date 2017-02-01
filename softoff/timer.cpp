@@ -1,5 +1,5 @@
-#include "timer.hpp"
 #include <log.hpp>
+#include "timer.hpp"
 namespace phosphor
 {
 namespace ipmi
@@ -7,7 +7,7 @@ namespace ipmi
 
 using namespace phosphor::logging;
 
-// Initializes the timer object
+/** @brief Initializes the timer object */
 int Timer::initialize()
 {
     // Add infinite expiration time
@@ -34,8 +34,9 @@ int Timer::initialize()
     return r;
 }
 
-// Gets the time from specified type, could be
-// CLOCK_MONOTONIC, CLOCK_REALTIME and other allowed ones
+/** @brief Gets the time from specified type, could be
+ *  CLOCK_MONOTONIC, CLOCK_REALTIME and other allowed ones
+ */
 uint64_t Timer::getTime(clockid_t clockId)
 {
     uint64_t usec {};
@@ -49,13 +50,13 @@ uint64_t Timer::getTime(clockid_t clockId)
     return usec;
 }
 
-// Enables or disables the timer
+/** @brief Enables or disables the timer */
 int Timer::setTimer(int action)
 {
     return sd_event_source_set_enabled(eventSource, action);
 }
 
-// Sets the time and arms the timer
+/** @brief Sets the time and arms the timer */
 int Timer::startTimer(uint64_t timeValue)
 {
     // Disable the timer
