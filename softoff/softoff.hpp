@@ -25,7 +25,7 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         SoftPowerOff(sdbusplus::bus::bus& bus,
                      const char* objPath,
-                     const Timer& timer) :
+                     Timer& timer) :
             sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Ipmi::Internal
                                                ::server::SoftPowerOff>(
@@ -56,6 +56,14 @@ class SoftPowerOff : public sdbusplus::server::object::object<
             return completed;
         }
 
+        /** @brief overloaded property setter function
+         *
+         *  @param[in] value - One of SoftOffReceived / HostShutdown
+         *
+         *  @return Success or exception thrown
+         */
+        HostResponse responseReceived(HostResponse value) override;
+
     private:
         // Need this to send SMS_ATTN
         // TODO : Switch over to using mapper service in a different patch
@@ -67,7 +75,7 @@ class SoftPowerOff : public sdbusplus::server::object::object<
         sdbusplus::bus::bus& bus;
 
         /** @brief Reference to Timer object */
-        const Timer& timer;
+        Timer& timer;
 
         /** @brief Marks the end of life of this application.
          *

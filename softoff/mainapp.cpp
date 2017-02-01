@@ -15,16 +15,18 @@
  */
 #include <iostream>
 #include <string.h>
+#include <chrono>
 #include <systemd/sd-event.h>
 #include <log.hpp>
 #include "softoff.hpp"
 #include "timer.hpp"
 #include "config.h"
 
-using namespace phosphor::logging;
-
 int main(int argc, char** argv)
 {
+    using namespace phosphor::logging;
+    using namespace std::chrono;
+
     // systemd event handler
     sd_event* events = nullptr;
 
@@ -61,6 +63,16 @@ int main(int argc, char** argv)
     // The whole purpose of this application is to send SMS_ATTN
     // and watch for the soft power off to go through.
     powerObj.sendSmsAttn();
+
+    // Start the initial 45 seconds timer
+    auto time = duration_cast<nanoseconds>(seconds(45));
+    r = timer.startTimer(time.count());
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to start the 45 seconds timer",
+                entry("ERROR=%s", strerror(-r)));
+        return -1;
+    }
 
     /** @brief Claim the bus */
     bus.request_name(BUSNAME);
