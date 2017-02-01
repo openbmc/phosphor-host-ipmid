@@ -52,6 +52,15 @@ class Timer
             return expired;
         }
 
+        /** @brief Gets the clock from a particular base */
+        uint64_t getTime(clockid_t);
+
+        /** @brief Starts the timer with specified expiration value */
+        int startTimer(uint64_t usec);
+
+        /** @brief Enables / disables the timer */
+        int armTimer(int action);
+
     private:
         /** @brief Chassis dbus constructs to do a hard power off */
         // TODO : Need to move over to using mapper to get service name
@@ -62,7 +71,7 @@ class Timer
         static constexpr auto CHASSIS_INTF    = "xyz.openbmc_project.\
                                                  State.Chassis";
 
-        // Property and the desired value
+        /** @brief Property and the desired value */
         static constexpr auto CHASSIS_OFF   = "xyz.openbmc_project.State.\
                                                Chassis.Transition.Off";
         static constexpr auto PROPERTY_INTF = "org.freedesktop.DBus.Properties";
