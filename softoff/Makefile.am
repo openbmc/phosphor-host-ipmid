@@ -15,3 +15,5 @@ phosphor_softpoweroff_LDFLAGS = $(SYSTEMD_LIBS) $(SDBUSPLUS_LIBS)
 phosphor_softpoweroff_CXXFLAGS = $(SYSTEMD_CFLAGS) $(SDBUSPLUS_CFLAGS)
 
 -include Makefile.interfaces
+
+SUBDIRS = test
