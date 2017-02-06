@@ -96,5 +96,5 @@ AS_IF([test "x$enable_softoff" != "xno"],
 )
 
 # Create configured output
-AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile softoff/test/Makefile])
 AC_OUTPUT
