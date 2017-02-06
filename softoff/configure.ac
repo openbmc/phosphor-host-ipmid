@@ -25,6 +25,27 @@ PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221])
 
 LT_INIT # Removes WARNING: unrecognized options: --with-libtool-sysroot
 
+# Check/set gtest specific functions.
+AX_PTHREAD([GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=1"],[GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=0"])
+AC_SUBST(GTEST_CPPFLAGS)
+AC_ARG_ENABLE([oe-sdk],
+    AS_HELP_STRING([--enable-oe-sdk], [Link testcases absolutely against OE SDK so they can be ran within it.])
+)
+AC_ARG_VAR(OECORE_TARGET_SYSROOT,
+    [Path to the OE SDK SYSROOT])
+AS_IF([test "x$enable_oe_sdk" == "xyes"],
+    AS_IF([test "x$OECORE_TARGET_SYSROOT" == "x"],
+          AC_MSG_ERROR([OECORE_TARGET_SYSROOT must be set with --enable-oe-sdk])
+    )
+    AC_MSG_NOTICE([Enabling OE-SDK at $OECORE_TARGET_SYSROOT])
+    [
+        testcase_flags="-Wl,-rpath,\${OECORE_TARGET_SYSROOT}/lib"
+        testcase_flags="${testcase_flags} -Wl,-rpath,\${OECORE_TARGET_SYSROOT}/usr/lib"
+        testcase_flags="${testcase_flags} -Wl,-dynamic-linker,`find \${OECORE_TARGET_SYSROOT}/lib/ld-*.so | sort -r -n | head -n1`"
+    ]
+    AC_SUBST([OESDK_TESTCASE_FLAGS], [$testcase_flags])
+)
+
 # Checks for header files.
 AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd developement package required])])
 AC_CHECK_HEADER(sdbusplus/server.hpp, ,[AC_MSG_ERROR([Could not find sdbusplus/server.hpp...openbmc/sdbusplus package required])])
@@ -47,5 +68,5 @@ AC_ARG_VAR(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS, [Wait time until Host can q
 AC_DEFINE_UNQUOTED([IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS], [45*60], [Wait time until Host can quiesce])
 
 # Create configured output
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
