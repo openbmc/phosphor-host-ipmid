@@ -13,3 +13,5 @@ CLEANFILES = server_dbus.cpp
 phosphor_softpoweroff_LDFLAGS = $(SYSTEMD_LIBS)
 
 -include Makefile.interfaces
+
+SUBDIRS = test
