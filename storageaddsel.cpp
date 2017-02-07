@@ -8,12 +8,15 @@
 #include <memory>
 #include <systemd/sd-bus.h>
 #include <mapper.h>
+#include <elog.hpp>
+#include <elog-gen.hpp>
 #include "host-ipmid/ipmid-api.h"
 #include "sensorhandler.h"
 #include "storagehandler.h"
 
 
 using namespace std;
+using namespace phosphor::logging;
 
 //////////////////////////
 struct esel_section_headers_t {
@@ -179,6 +182,27 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     int r;
     const char *object_name  =  "/org/openbmc/records/events";
     char *bus_name = NULL;
+
+    // Allocate enough space to represent the data in hex separated by spaces,
+    // to mimic how IPMI would display the data.
+    char *selData = new char[debuglen*3];
+    uint32_t i = 0;
+    for(i = 0; i < debuglen; i++)
+    {
+        sprintf(&selData[i*3], "%02x ", 0xFF & ((char*)debug)[i]);
+    }
+    log<level::INFO>("Received Host SEL", entry("SEL=%s", selData));
+    delete [] selData;
+
+    try
+    {
+        elog<xyz::openbmc_project::Error::Host::Event>(
+            prev_entry<xyz::openbmc_project::Error::Host::Event::SEL>());
+    }
+    catch (elogException<xyz::openbmc_project::Error::Host::Event>& e)
+    {
+        commit<xyz::openbmc_project::Error::Host::Event>(e.what());
+    }
 
     mbus = ipmid_get_sd_bus_connection();
     r = mapper_get_service(mbus, object_name, &bus_name);
