@@ -32,8 +32,8 @@ libapphandler_la_SOURCES = \
 	transporthandler.cpp \
 	globalhandler.cpp \
 	groupext.cpp
-libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
-libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
+libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) -version-info 0:0:0 -shared
+libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS)
 
 libsysintfcmdsdir = ${libdir}/ipmid-providers
 libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
