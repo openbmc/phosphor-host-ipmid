@@ -40,7 +40,8 @@ netipmid_SOURCES = \
 	provider_registration.cpp \
 	crypt_algo.hpp \
 	crypt_algo.cpp \
-	sol/console_buffer.hpp
+	sol/console_buffer.hpp \
+	sd_event_loop.hpp
 
 netipmid_CPPFLAGS = -DNET_IPMID_LIB_PATH=\"/usr/lib/net-ipmid/\"
 netipmid_LDFLAGS = $(SYSTEMD_LIBS) $(CRYPTO_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynamic
