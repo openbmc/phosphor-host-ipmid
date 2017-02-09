@@ -198,7 +198,7 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     internal::addSequenceNumber(packet, session);
 
     // Add Payload
-    header->payloadLength = endian::to_ipmi(outMessage.payload.size());
+    header->payloadLength = endian::to_ipmi<uint16_t>(outMessage.payload.size());
     // Insert the Payload into the Packet
     packet.insert(packet.end(), outMessage.payload.begin(),
                   outMessage.payload.end());

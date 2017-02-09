@@ -37,7 +37,7 @@ std::tuple<int, buffer> Channel::read()
     auto bufferSize = outBuffer.size();
     auto outputPtr = outBuffer.data();
 
-    address.addrSize = sizeof(address.inAddr);
+    address.addrSize = static_cast<socklen_t>(sizeof(address.inAddr));
 
     do
     {
@@ -98,7 +98,8 @@ int Channel::write(buffer& inBuffer)
         {
             if (FD_ISSET(sockfd, &writeSet))
             {
-                address.addrSize = sizeof(address.inAddr);
+                address.addrSize =
+                        static_cast<socklen_t>(sizeof(address.inAddr));
                 do
                 {
                     writeDataLen = sendto(sockfd,           // File Descriptor

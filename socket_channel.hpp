@@ -26,7 +26,7 @@ class Channel
                 sockaddr sockAddr;
                 sockaddr_in6 inAddr;
             };
-            size_t addrSize;
+            socklen_t addrSize;
         };
 
         /**
