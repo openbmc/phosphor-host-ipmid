@@ -15,6 +15,10 @@ AC_PROG_MAKE_SET
 # Checks for libraries.
 AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
 PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221])
+PKG_CHECK_MODULES(
+      [PHOSPHOR_LOGGING],
+      [phosphor-logging],,
+      [AC_MSG_ERROR([Could not find phosphor-logging...openbmc/phosphor-logging package required])])
 
 # Checks for header files.
 AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd developement package required])])
