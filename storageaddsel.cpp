@@ -180,14 +180,6 @@ int create_esel_description(const uint8_t *buffer, const char *sev, char **messa
 
 int send_esel_to_dbus(const char *desc, const char *sev, const char *details, uint8_t *debug, size_t debuglen) {
 
-	sd_bus *mbus = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *reply = NULL, *m=NULL;
-    uint16_t x;
-    int r;
-    const char *object_name  =  "/org/openbmc/records/events";
-    char *bus_name = NULL;
-
     // Allocate enough space to represent the data in hex separated by spaces,
     // to mimic how IPMI would display the data.
     unique_ptr<char[]> selData(new char[debuglen*3]());
@@ -208,51 +200,7 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
         commit(e.name());
     }
 
-    mbus = ipmid_get_sd_bus_connection();
-    r = mapper_get_service(mbus, object_name, &bus_name);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s connection: %s\n",
-                object_name, strerror(-r));
-        goto finish;
-    }
-    r = sd_bus_message_new_method_call(mbus,&m,
-    									bus_name,
-    									object_name,
-    									"org.openbmc.recordlog",
-    									"acceptHostMessage");
-    if (r < 0) {
-        fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));
-        goto finish;
-    }
-
-    r = sd_bus_message_append(m, "sss", desc, sev, details);
-    if (r < 0) {
-        fprintf(stderr, "Failed add the message strings : %s\n", strerror(-r));
-        goto finish;
-    }
-
-    r = sd_bus_message_append_array(m, 'y', debug, debuglen);
-    if (r < 0) {
-        fprintf(stderr, "Failed to add the raw array of bytes: %s\n", strerror(-r));
-        goto finish;
-    }
-    // Call the IPMI responder on the bus so the message can be sent to the CEC
-    r = sd_bus_call(mbus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s %s\n", __FUNCTION__, strerror(-r));
-        goto finish;
-    }
-    r = sd_bus_message_read(reply, "q", &x);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
-    }
-
-finish:
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
-    reply = sd_bus_message_unref(reply);
-    free (bus_name);
-    return r;
+    return 0;
 }
 
 
