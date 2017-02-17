@@ -21,8 +21,8 @@
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
 
-// Initialise restricted mode to true
-bool restricted_mode = true;
+// Initialise restricted mode to false
+bool restricted_mode = false;
 
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
