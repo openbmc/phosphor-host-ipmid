@@ -8,8 +8,8 @@
 #include <memory>
 #include <systemd/sd-bus.h>
 #include <mapper.h>
-#include <elog.hpp>
-#include <elog-errors-HostEvent.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/elog-errors-HostEvent.hpp>
 #include "host-ipmid/ipmid-api.h"
 #include "sensorhandler.h"
 #include "storagehandler.h"
