@@ -15,7 +15,6 @@ ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynam
 # TODO: Rather than use -export-dynamic, we should use -export-symbol to have a
 #       selective list of symbols.
 
-WHITELIST_CONF ?= ${srcdir}/host-ipmid-whitelist.conf
 ipmiwhitelist.cpp: ${srcdir}/generate_whitelist.sh $(WHITELIST_CONF)
 	$(SHELL) $^ > $@
 
