@@ -15,7 +15,9 @@
  */
 #include <chrono>
 #include <systemd/sd-event.h>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/State/Host/error.hpp>
 #include "softoff.hpp"
 #include "config.h"
 #include "timer.hpp"
@@ -47,13 +49,13 @@ int main(int argc, char** argv)
     // Attach the bus to sd_event to service user requests
     bus.attach_event(events, SD_EVENT_PRIORITY_NORMAL);
 
-    // Create the SoftPowerOff object.
-    phosphor::ipmi::SoftPowerOff powerObj(bus, events, SOFTOFF_OBJPATH);
-
     // Claim the bus. Delaying it until sending SMS_ATN may result
     // in a race condition between this available and IPMI trying to send
     // message as a reponse to ack from host.
     bus.request_name(SOFTOFF_BUSNAME);
+
+    // Create the SoftPowerOff object.
+    phosphor::ipmi::SoftPowerOff powerObj(bus, events, SOFTOFF_OBJPATH);
 
     // Wait for client requests until this application has processed
     // at least one successful SoftPowerOff or we timed out
@@ -66,6 +68,25 @@ int main(int argc, char** argv)
             log<level::ERR>("Failure in processing request",
                     entry("ERROR=%s", strerror(-r)));
             break;
+        }
+    }
+
+    // Log an error if we timed out after getting Ack for SMS_ATN and before
+    // getting the Host Shutdown response
+    if(powerObj.isTimerExpired() && (powerObj.responseReceived() ==
+            phosphor::ipmi::Base::SoftPowerOff::HostResponse::SoftOffReceived))
+    {
+        try
+        {
+            elog<sdbusplus::xyz::openbmc_project::State
+                    ::Host::Error::SoftOffTimeout>(
+                 prev_entry<xyz::openbmc_project::State
+                    ::Host::SoftOffTimeout::TIMEOUT_IN_MSEC>());
+        }
+        catch (sdbusplus::xyz::openbmc_project::State::Host::Error
+                    ::SoftOffTimeout& elog)
+        {
+            commit(elog.name());
         }
     }
 
