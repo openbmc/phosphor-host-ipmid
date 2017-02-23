@@ -15,8 +15,8 @@ nodist_include_HEADERS = xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.h
 CLEANFILES = xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp \
              xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.hpp
 
-phosphor_softpoweroff_LDFLAGS = $(SYSTEMD_LIBS) $(SDBUSPLUS_LIBS)
-phosphor_softpoweroff_CXXFLAGS = $(SYSTEMD_CFLAGS) $(SDBUSPLUS_CFLAGS)
+phosphor_softpoweroff_LDFLAGS = $(SYSTEMD_LIBS) $(SDBUSPLUS_LIBS) $(PHOSPHOR_LOGGING_LIBS)
+phosphor_softpoweroff_CXXFLAGS = $(SYSTEMD_CFLAGS) $(SDBUSPLUS_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS)
 
 xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp: ${top_srcdir}/xyz/openbmc_project/Ipmi/Internal/SoftPowerOff.interface.yaml
 	@mkdir -p `dirname $@`
