@@ -1,5 +1,5 @@
 #include <chrono>
-#include <log.hpp>
+#include <phosphor-logging/log.hpp>
 #include "timer.hpp"
 namespace phosphor
 {
