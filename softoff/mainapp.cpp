@@ -15,7 +15,7 @@
  */
 #include <chrono>
 #include <systemd/sd-event.h>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
 #include "softoff.hpp"
 #include "config.h"
 #include "timer.hpp"
@@ -47,29 +47,27 @@ int main(int argc, char** argv)
     // Attach the bus to sd_event to service user requests
     bus.attach_event(events, SD_EVENT_PRIORITY_NORMAL);
 
-    // Create the SoftPowerOff object.
-    phosphor::ipmi::SoftPowerOff powerObj(bus, events, SOFTOFF_OBJPATH);
-
     // Claim the bus. Delaying it until sending SMS_ATN may result
     // in a race condition between this available and IPMI trying to send
     // message as a reponse to ack from host.
     bus.request_name(SOFTOFF_BUSNAME);
 
-/*
-    // THIS IS FIXED in the next set.
+    // Create the SoftPowerOff object.
+    phosphor::ipmi::SoftPowerOff powerObj(bus, events, SOFTOFF_OBJPATH);
+
+    // By now, SMS attention would have been sent as part of the powerObj
+    // construction.
     // Start the initial timer for host to ack the SMS_ATN
     auto time = duration_cast<microseconds>(
             seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
-    r = powerObj.startTimer(time.count());
+    r = powerObj.startTimer(time);
     if (r < 0)
     {
         log<level::ERR>("Failure to start the SMS_ATN response timer",
                 entry("ERROR=%s", strerror(-r)));
-        // This application always needs to return success so that the
-        // remaining part of power off can continue
         return 0;
     }
-*/
+
     // Wait for client requests until this application has processed
     // at least one successful SoftPowerOff or we timed out
     while(!powerObj.isCompleted() && !powerObj.isTimerExpired())
@@ -83,5 +81,23 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    // Log an error if we timed out after getting Ack for SMS_ATN and before
+    // getting the Host Shutdown response
+    if(powerObj.isTimerExpired() && (powerObj.responseReceived() ==
+             phosphor::ipmi::Base::SoftPowerOff::HostResponse::SoftOffReceived))
+    {
+        try
+        {
+            elog<xyz::openbmc_project::Error::Host::SoftOff>(
+                    prev_entry<xyz::openbmc_project::Error::Host::SoftOff::
+                    SHUTDOWN_TIME_OUT_SECONDS>());
+        }
+        catch (elogException<xyz::openbmc_project::Error::Host::SoftOff>& elog)
+        {
+            commit(elog.name());
+        }
+    }
+
     return 0;
 }

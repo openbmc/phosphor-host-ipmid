@@ -67,6 +67,17 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         HostResponse responseReceived(HostResponse value) override;
 
+        /** @brief Using the base class's getter method */
+        using Base::SoftPowerOff::responseReceived;
+
+        /** @brief Calls to start a timer
+         *
+         *  @param[in] usec - Time in microseconds
+         *
+         *  @return Success or exception thrown
+         */
+        int startTimer(const std::chrono::microseconds& usec);
+
     private:
         // Need this to send SMS_ATTN
         // TODO : Switch over to using mapper service in a different patch
