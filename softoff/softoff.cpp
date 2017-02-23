@@ -23,7 +23,7 @@ namespace phosphor
 namespace ipmi
 {
 
-/** @brief Send the SMS_ATN to host if value is set */
+// Sends the SMS_ATN to host if value is set
 void SoftPowerOff::sendSMSAttn()
 {
     using namespace std::chrono;
@@ -37,15 +37,10 @@ void SoftPowerOff::sendSMSAttn()
     // BT returns '0' on success and bus_error on failure.
     bus.call_noreply(method);
 
-    // Start the timer
-    auto time = duration_cast<microseconds>(
-            seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
-    timer.startTimer(time);
-
     return;
 }
 
-/** @brief callback handler on timeout */
+// Callback handler on timeout
 int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
                                  uint64_t usec, void* userData)
 {
@@ -63,7 +58,13 @@ int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
     return 0;
 }
 
-/** @brief Host Response handler */
+// Starts a timer
+int SoftPowerOff::startTimer(const std::chrono::microseconds& usec)
+{
+    return timer.startTimer(usec);
+}
+
+// Host Response handler
 auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
 {
     using namespace std::chrono;
@@ -74,11 +75,17 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
         // Need to stop the running timer and then start a new timer
         auto time = duration_cast<microseconds>(
                 seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
-        auto r = timer.startTimer(time);
+        auto r = startTimer(time);
         if (r < 0)
         {
-            log<level::ERR>("Failure to start HostQuiesce wait timer",
+            log<level::ERR>("Failure to start Host shutdown wait timer",
                     entry("ERROR=%s", strerror(-r)));
+        }
+        else
+        {
+            log<level::INFO>("Timer started waiting for host to shutdown",
+                    entry("SHUTDOWN_TIME_OUT_SECONDS=%d",
+                        IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
         }
     }
     else if (response == HostResponse::HostShutdown)
