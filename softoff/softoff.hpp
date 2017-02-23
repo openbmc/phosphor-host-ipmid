@@ -17,6 +17,13 @@ class SoftPowerOff : public sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Ipmi::Internal::server::SoftPowerOff>
 {
     public:
+        /** @enum Conditions on which a timer is started and waited for */
+        enum class timerType
+        {
+            SMS_ATN_ACK,
+            HOST_SHUTDOWN_COMPLETE
+        };
+
         /** @brief Constructs SoftPowerOff object.
          *
          *  @param[in] bus       - system dbus handler
@@ -84,6 +91,20 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         HostResponse responseReceived(HostResponse value) override;
 
+        /** @brief Calls to start a timer
+         *
+         *  @param[in] timeInSeconds - Time in seconds
+         *
+         *  @return Success or exception thrown
+         */
+        int startTimer(uint64_t timeInSeconds);
+
+        /** @brief returns current timer in effect */
+        inline auto getCurrTimer() const
+        {
+            return currTimer;
+        }
+
     private:
         // Need this to send SMS_ATTN
         // TODO : Switch over to using mapper service in a different patch
@@ -103,6 +124,9 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          *  for the sequence of commands.
          */
         bool completed;
+
+        /** @brief Stores current timer in effect */
+        timerType currTimer;
 };
 } // namespace ipmi
 } // namespace phosphor

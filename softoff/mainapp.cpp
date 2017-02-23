@@ -15,7 +15,8 @@
  */
 #include <chrono>
 #include <systemd/sd-event.h>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
+#include "elog-errors-SoftOffHost.hpp"
 #include "softoff.hpp"
 #include "config.h"
 #include "timer.hpp"
@@ -83,7 +84,7 @@ int main(int argc, char** argv)
     // Start the initial timer for host to ack the SMS_ATN
     auto time = duration_cast<microseconds>(
             seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
-    r = timer.startTimer(time.count());
+    r = powerObj.startTimer(time.count());
     if (r < 0)
     {
         log<level::ERR>("Failure to start the SMS_ATN response timer",
@@ -106,5 +107,22 @@ int main(int argc, char** argv)
                     entry("ERROR=%s", strerror(-r)));
         }
     }
+
+    // Log an error if we timed out waiting for host to shutdown
+    if(powerObj.isTimerExpired() && (powerObj.getCurrTimer() == phosphor::ipmi
+                         ::SoftPowerOff::timerType::HOST_SHUTDOWN_COMPLETE))
+    {
+        try
+        {
+            elog<xyz::openbmc_project::Error::SoftOff::Host>(
+                    prev_entry<xyz::openbmc_project::Error::SoftOff
+                    ::Host::SHUTDOWN_TIME_OUT>());
+        }
+        catch (elogException<xyz::openbmc_project::Error::SoftOff::Host>& elog)
+        {
+            commit(elog.name());
+        }
+    }
+
     return 0;
 }
