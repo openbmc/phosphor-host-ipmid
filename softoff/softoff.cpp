@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include <chrono>
-#include <log.hpp>
+#include <phosphor-logging/log.hpp>
 #include "softoff.hpp"
 #include "config.h"
 
@@ -62,6 +62,24 @@ int SoftPowerOff::timeoutHandler(sd_event_source* eventSource,
     return 0;
 }
 
+/** @brief Starts a timer */
+int SoftPowerOff::startTimer(uint64_t timeInSeconds)
+{
+    using namespace phosphor::logging;
+
+    if (timeInSeconds == IPMI_SMS_ATN_ACK_TIMEOUT_SECS)
+    {
+        currTimer = timerType::SMS_ATN_ACK;
+    }
+    else if (timeInSeconds == IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS)
+    {
+        currTimer = timerType::HOST_SHUTDOWN_COMPLETE;
+        log<level::INFO>("Timer started waiting for host to shutdown",
+                entry("SHUTDOWN_TIME_OUT=%llu", IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
+    }
+    return timer.startTimer(timeInSeconds);
+}
+
 /** @brief Host Response handler */
 auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
 {
@@ -73,7 +91,7 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
         // Need to stop the running timer and then start a new timer
         auto time = duration_cast<microseconds>(
                 seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
-        auto r = timer.startTimer(time.count());
+        auto r = startTimer(time.count());
         if (r < 0)
         {
             log<level::ERR>("Failure to start HostQuiesce wait timer",
