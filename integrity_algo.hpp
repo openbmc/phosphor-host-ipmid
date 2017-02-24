@@ -102,6 +102,26 @@ class Interface
          */
         Buffer virtual generateIntegrityData(const Buffer& input) const = 0;
 
+        /**
+         * @brief Check if the Integrity algorithm is supported
+         *
+         * @param[in] algo - integrity algorithm
+         *
+         * @return true if algorithm is supported else false
+         *
+         */
+        static bool isAlgorithmSupported(Algorithms algo)
+        {
+            if (algo == Algorithms::NONE || algo == Algorithms::HMAC_SHA1_96)
+            {
+               return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         /*
          * AuthCode field length varies based on the integrity algorithm, for
          * HMAC-SHA1-96 the authcode field is 12 bytes. For HMAC-SHA256-128 and
