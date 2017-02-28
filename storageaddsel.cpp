@@ -182,12 +182,14 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
 
     // Allocate enough space to represent the data in hex separated by spaces,
     // to mimic how IPMI would display the data.
-    unique_ptr<char[]> selData(new char[debuglen*3]());
+    unique_ptr<char[]> selData(new char[(debuglen*3) + 1]());
     uint32_t i = 0;
     for(i = 0; i < debuglen; i++)
     {
         sprintf(&selData[i*3], "%02x ", 0xFF & ((char*)debug)[i]);
     }
+    selData[debuglen*3] = '\0';
+
     log<level::INFO>("Received Host Event", entry("ESEL=%s", selData.get()));
 
     try
