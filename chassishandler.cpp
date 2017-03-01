@@ -809,6 +809,12 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 		case CMD_HARD_RESET:
 			rc = ipmi_chassis_power_control("reboot");
 			break;
+		case CMD_POWER_CYCLE:
+			// Spec recommends that a D5 error response be sent if
+			// the power is already off. So its not a mandatory thing
+			// and the spec is not hard on how this needs to be implemeted.
+			rc = ipmi_chassis_power_control("powerCycle");
+			break;
 		default:
 		{
 			fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
