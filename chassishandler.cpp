@@ -810,6 +810,10 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 			rc = ipmi_chassis_power_control("powerOff");
 			break;
 		case CMD_HARD_RESET:
+		case CMD_POWER_CYCLE:
+			// SPEC has a section that says certain implementations can trigger
+			// PowerOn if power is Off when a command to power cycle is
+			// requested
 			rc = ipmi_chassis_power_control("reboot");
 			break;
 		default:
