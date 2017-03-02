@@ -94,7 +94,7 @@ class Interface
 
         // User Key is hardcoded to PASSW0RD till the IPMI User account
         // management is in place.
-        std::array<uint8_t, USER_KEY_MAX_LENGTH> userKey = {"PASSW0RD"};
+        std::array<uint8_t, USER_KEY_MAX_LENGTH> userKey = {"0penBmc"};
 
         // Managed System Random Number
         std::array<uint8_t, BMC_RANDOM_NUMBER_LEN> bmcRandomNum;
