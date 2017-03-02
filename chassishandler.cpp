@@ -803,6 +803,9 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 	switch(chassis_ctrl_cmd)
 	{
+		case CMD_POWER_ON:
+			rc = ipmi_chassis_power_control("powerOn");
+			break;
 		case CMD_POWER_OFF:
 			rc = ipmi_chassis_power_control("powerOff");
 			break;
