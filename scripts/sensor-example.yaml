@@ -1,0 +1,68 @@
+0xa6:
+  sensorType: 0x0C
+  path: /system/chassis/motherboard/dimm0
+  sensorReadingType: 0x6F
+  interfaces:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        0x04:
+          type: bool
+          deassert: "true"
+          assert: "false"
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        0x06:
+          type: bool
+          assert: "true"
+          deassert: "false"
+0xa8:
+  sensorType: 0x0C
+  path: /system/chassis/motherboard/dimm1
+  sensorReadingType: 0x6F
+  interfaces:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        0x04:
+          type: bool
+          deassert: "true"
+          assert: "false"
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        0x06:
+          type: bool
+          assert: "true"
+          deassert: "false"
+0xaa:
+  sensorType: 0x0C
+  path: /system/chassis/motherboard/dimm2
+  sensorReadingType: 0x6F
+  interfaces:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        0x04:
+          type: bool
+          deassert: "true"
+          assert: "false"
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        0x06:
+          type: bool
+          assert: "true"
+          deassert: "false"
+0xac:
+  sensorType: 0x0C
+  path: /system/chassis/motherboard/dimm3
+  sensorReadingType: 0x6F
+  interfaces:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        0x04:
+          type: bool
+          deassert: "true"
+          assert: "false"
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        0x06:
+          type: bool
+          assert: "true"
+          deassert: "false"
