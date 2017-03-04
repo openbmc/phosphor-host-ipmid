@@ -6,8 +6,8 @@ sbin_PROGRAMS = \
 ipmid_SOURCES = \
 	ipmid.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
-BUILT_SOURCES = ipmiwhitelist.cpp
-CLEANFILES = ipmiwhitelist.cpp
+BUILT_SOURCES = ipmiwhitelist.cpp sensor-gen.cpp
+CLEANFILES = $(BUILT_SOURCES)
 
 #TODO - Make this path a configure option (bitbake parameter)
 ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
@@ -17,6 +17,9 @@ ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynam
 
 ipmiwhitelist.cpp: ${srcdir}/generate_whitelist.sh $(WHITELIST_CONF)
 	$(SHELL) $^ > $@
+
+sensor-gen.cpp:
+	$(AM_V_GEN)@SENSORGEN@ -o $(top_builddir) generate-cpp
 
 libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
@@ -30,7 +33,9 @@ libapphandler_la_SOURCES = \
 	storageaddsel.cpp \
 	transporthandler.cpp \
 	globalhandler.cpp \
-	groupext.cpp
+	groupext.cpp \
+	sensor-gen.cpp
+
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS)
 
