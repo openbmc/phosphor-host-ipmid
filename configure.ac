@@ -56,6 +56,10 @@ if test -z "$WHITELIST_CONF"; then
         WHITELIST_CONF=${srcdir}/host-ipmid-whitelist.conf
 fi
 
+AS_IF([test "x$SENSOR_YAML_GEN" == "x"], [SENSOR_YAML_GEN="${abs_srcdir}/scripts/sensor-example.yaml"])
+SENSORGEN="$PYTHON $srcdir/scripts/sensor_gen.py -i $SENSOR_YAML_GEN"
+AC_SUBST(SENSORGEN)
+
 # Create configured output
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
