@@ -11,6 +11,8 @@
 #include <endian.h>
 #include <sstream>
 #include <array>
+#include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/State/Host/server.hpp>
 
 //Defines
 #define SET_PARM_VERSION                     0x01
@@ -42,9 +44,6 @@ static constexpr size_t PREFIX_OFFSET = 21;
 static constexpr size_t GATEWAY_OFFSET = 22;
 
 
-// OpenBMC Chassis Manager dbus framework
-const char  *chassis_object_name   =  "/org/openbmc/control/chassis0";
-const char  *chassis_intf_name     =  "org.openbmc.control.Chassis";
 
 
 void register_netfn_chassis_functions() __attribute__((constructor));
@@ -72,6 +71,9 @@ typedef struct
    uint8_t misc_power_state;
    uint8_t front_panel_button_cap_status;
 }__attribute__((packed)) ipmi_get_chassis_status_t;
+
+// Phosphor Host State manager
+namespace State = sdbusplus::xyz::openbmc_project::State::server;
 
 int dbus_get_property(const char *name, char **buf)
 {
@@ -562,11 +564,19 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-//------------------------------------------------------------
-// Calls into Chassis Control Dbus object to do the power off
-//------------------------------------------------------------
-int ipmi_chassis_power_control(const char *method)
+//------------------------------------------
+// Calls into Host State Manager Dbus object
+//------------------------------------------
+int initiate_state_transition(State::Host::Transition transition)
 {
+	using namespace phosphor::logging;
+
+	// OpenBMC Host State Manager dbus framework
+	constexpr auto HOST_STATE_MANAGER_ROOT  = "/xyz/openbmc_project/state/host0";
+	constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
+	constexpr auto DBUS_PROPERTY_IFACE      = "org.freedesktop.DBus.Properties";
+	constexpr auto PROPERTY                 = "RequestedHostTransition";
+
 	// sd_bus error
 	int rc = 0;
 	char  *busname = NULL;
@@ -574,38 +584,42 @@ int ipmi_chassis_power_control(const char *method)
 	// SD Bus error report mechanism.
 	sd_bus_error bus_error = SD_BUS_ERROR_NULL;
 
-	// Response from the call. Although there is no response for this call,
-	// obligated to mention this to make compiler happy.
-	sd_bus_message *response = NULL;
-
 	// Gets a hook onto either a SYSTEM or SESSION bus
 	sd_bus *bus_type = ipmid_get_sd_bus_connection();
-	rc = mapper_get_service(bus_type, chassis_object_name, &busname);
+	rc = mapper_get_service(bus_type, HOST_STATE_MANAGER_ROOT, &busname);
 	if (rc < 0) {
-		fprintf(stderr, "Failed to get %s bus name: %s\n",
-				chassis_object_name, strerror(-rc));
-	goto finish;
+		log<level::ERR>("Failed to get bus name",
+				entry("ERROR=%s, OBJPATH=%s",
+					strerror(-rc), HOST_STATE_MANAGER_ROOT));
+		return rc;
 	}
-	rc = sd_bus_call_method(bus_type,        		 // On the System Bus
-							busname,        // Service to contact
-							chassis_object_name,     // Object path 
-							chassis_intf_name,       // Interface name
-							method,      		 // Method to be called
-							&bus_error,      		 // object to return error
-							&response,		 		 // Response buffer if any
-							NULL);			 		 // No input arguments
+
+	// Convert to string equivalent of the passed in transition enum.
+	auto request = State::convertForMessage(transition).c_str();
+
+	rc = sd_bus_call_method(bus_type,                // On the system bus
+							busname,                 // Service to contact
+							HOST_STATE_MANAGER_ROOT, // Object path
+							DBUS_PROPERTY_IFACE,     // Interface name
+							"Set",                   // Method to be called
+							&bus_error,              // object to return error
+							nullptr,                 // Response buffer if any
+							"ssv",                   // Takes 3 arguments
+							HOST_STATE_MANAGER_IFACE,
+							PROPERTY,
+							"s", request);
 	if(rc < 0)
 	{
-		fprintf(stderr,"ERROR initiating Power Off:[%s]\n",bus_error.message);
+		log<level::ERR>("Failed to initiate transition",
+				entry("ERROR=%s, REQUEST=%s",
+					bus_error.message, request));
 	}
 	else
 	{
-		printf("Chassis Power Off initiated successfully\n");
+		log<level::INFO>("Transition request initiated successfully");
 	}
 
-finish:
     sd_bus_error_free(&bus_error);
-    sd_bus_message_unref(response);
     free(busname);
 
     return rc;
@@ -804,17 +818,17 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 	switch(chassis_ctrl_cmd)
 	{
 		case CMD_POWER_ON:
-			rc = ipmi_chassis_power_control("powerOn");
+			rc = initiate_state_transition(State::Host::Transition::On);
 			break;
 		case CMD_POWER_OFF:
-			rc = ipmi_chassis_power_control("powerOff");
+			rc = initiate_state_transition(State::Host::Transition::Off);
 			break;
 		case CMD_HARD_RESET:
 		case CMD_POWER_CYCLE:
 			// SPEC has a section that says certain implementations can trigger
 			// PowerOn if power is Off when a command to power cycle is
 			// requested
-			rc = ipmi_chassis_power_control("reboot");
+			rc = initiate_state_transition(State::Host::Transition::Reboot);
 			break;
 		default:
 		{
