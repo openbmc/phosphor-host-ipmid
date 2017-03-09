@@ -1,14 +1,18 @@
-#include "sensorhandler.h"
-#include "host-ipmid/ipmid-api.h"
 #include <mapper.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
+#include <bitset>
+#include <iostream>
 #include <systemd/sd-bus.h>
+#include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
+#include "sensorhandler.h"
+#include "types.hpp"
+#include "utils.hpp"
 
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;
+extern const ipmi::sensor::IdInfoMap sensors;
 
 void register_netfn_sen_functions()   __attribute__((constructor));
 
@@ -343,22 +347,123 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t setSensorReading(void *request)
+{
+    auto cmdData = static_cast<SetSensorReadingReq *>(request);
 
+    auto assertionStates =
+            (static_cast<uint16_t>(cmdData->assertOffset8_14)) << 8 |
+            cmdData->assertOffset0_7;
+
+    auto deassertionStates =
+            (static_cast<uint16_t>(cmdData->deassertOffset8_14)) << 8 |
+            cmdData->deassertOffset0_7;
+
+    std::bitset<16> assertionSet(assertionStates);
+    std::bitset<16> deassertionSet(deassertionStates);
+
+    // Check if the Sensor Number is present
+    auto iter = sensors.find(cmdData->number);
+    if (iter == sensors.end())
+    {
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    auto interfaceList = iter->second.sensorInterfaces;
+    if (interfaceList.size() <= 0)
+    {
+        std::cerr << "Interface List empty for this Sensor="
+                  << cmdData->number << "\n";
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    ipmi::sensor::ObjectMap objects;
+    ipmi::sensor::InterfaceMap interfaces;
+    for (auto& interface : interfaceList)
+    {
+        for (auto& property : interface.second)
+        {
+            ipmi::sensor::PropertyMap props;
+            bool valid = false;
+            for (auto& value : property.second)
+            {
+                if (assertionSet.test(value.first))
+                {
+                    props.emplace(property.first, value.second.assert);
+                    assertionSet.reset(value.first);
+                    valid = true;
+                }
+                else if (deassertionSet.test(value.first))
+                {
+                    props.emplace(property.first, value.second.deassert);
+                    deassertionSet.reset(value.first);
+                    valid = true;
+                }
+            }
+            if (valid)
+            {
+                interfaces.emplace(interface.first, props);
+            }
+        }
+    }
+    sdbusplus::message::object_path objectPath = iter->second.sensorPath;
+    objects.emplace(std::move(objectPath), interfaces);
+
+    auto bus = sdbusplus::bus::new_default();
+    using namespace std::string_literals;
+    static const auto intf = "xyz.openbmc_project.Inventory.Manager"s;
+    static const auto path = "/xyz/openbmc_project/inventory"s;
+    std::string service;
+
+    try
+    {
+        service = getService(bus, intf, path);
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr << e.what() << "\n";
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    // Update the inventory manager
+    auto pimMsg = bus.new_method_call(service.c_str(),
+                                      path.c_str(),
+                                      intf.c_str(),
+                                      "Notify");
+    pimMsg.append(std::move(objects));
+    auto inventoryMgrResponseMsg = bus.call(pimMsg);
+    if (inventoryMgrResponseMsg.is_method_error())
+    {
+        std::cerr << "Error in notify call\n";
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    return IPMI_CC_OK;
+}
 
 ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     sensor_data_t *reqptr = (sensor_data_t*)request;
-    ipmi_ret_t rc = IPMI_CC_OK;
 
     printf("IPMI SET_SENSOR [0x%02x]\n",reqptr->sennum);
 
-    updateSensorRecordFromSSRAESC(reqptr);
+    /*
+     * This would support the Set Sensor Reading command for the presence
+     * and functional state of Processor, Core & DIMM. For the remaining
+     * sensors the existing support is invoked.
+     */
+    auto ipmiRC = setSensorReading(request);
+
+    if(ipmiRC == IPMI_CC_SENSOR_INVALID)
+    {
+        updateSensorRecordFromSSRAESC(reqptr);
+        ipmiRC = IPMI_CC_OK;
+    }
 
     *data_len=0;
-
-    return rc;
+    return ipmiRC;
 }
 
 
