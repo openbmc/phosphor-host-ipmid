@@ -44,5 +44,13 @@ struct Info
 using Id = uint8_t;
 using IdInfoMap = std::map<Id,Info>;
 
+using Property = std::string;
+using PropertyMap = std::map<Property, Value>;
+
+using InterfaceMap = std::map<DbusInterface, PropertyMap>;
+
+using Object = sdbusplus::message::object_path;
+using ObjectMap = std::map<Object, InterfaceMap>;
+
 }//namespce sensor
 }//namespace ipmi
