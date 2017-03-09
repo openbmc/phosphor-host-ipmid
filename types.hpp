@@ -41,9 +41,20 @@ struct Info
    DbusInterfaceMap sensorInterfaces;
 };
 
+using Id = uint8_t;
+using IdInfoMap = std::map<Id,Info>;
 
-using id = uint8_t;
-using IDInfoMap = std::map<id,Info>;
+using Path = std::string;
+
+using Property = std::string;
+using Value = sdbusplus::message::variant<bool, int64_t, std::string>;
+using PropertyMap = std::map<Property, Value>;
+
+using Interface = std::string;
+using InterfaceMap = std::map<Interface, PropertyMap>;
+
+using Object = sdbusplus::message::object_path;
+using ObjectMap = std::map<Object, InterfaceMap>;
 
 }//namespce sensor
 }//namespace ipmi
