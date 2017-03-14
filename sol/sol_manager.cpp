@@ -41,4 +41,38 @@ void Manager::initHostConsoleFd()
     }
 }
 
+int Manager::writeConsoleSocket(const Buffer& input) const
+{
+    auto inBuffer = input.data();
+    auto inBufferSize = input.size();
+    size_t pos = 0;
+    ssize_t rc = 0;
+    int errVal = 0;
+    auto& conFD = *(consoleFD.get());
+
+    for (pos = 0; pos < inBufferSize; pos += rc)
+    {
+        rc = write(conFD(), inBuffer + pos, inBufferSize - pos);
+        if (rc <= 0)
+        {
+            if (errno == EINTR)
+            {
+                log<level::INFO>(" Retrying to handle EINTR",
+                        entry("ERRNO=%d", errno));
+                rc = 0;
+                continue;
+            }
+            else
+            {
+                errVal = errno;
+                log<level::ERR>("Failed to write to host console socket",
+                        entry("ERRNO=%d", errno));
+                return -errVal;
+            }
+        }
+    }
+
+    return 0;
+}
+
 } // namespace sol
