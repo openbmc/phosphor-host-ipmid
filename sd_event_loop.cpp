@@ -359,6 +359,45 @@ void EventLoop::startSOLPayloadInstance(uint8_t payloadInst,
     payloadInfo.emplace(instance, std::move(timer));
 }
 
+void EventLoop::stopSOLPayloadInstance(uint8_t payloadInst)
+{
+    auto iter = payloadInfo.find(payloadInst);
+    if (iter == payloadInfo.end())
+    {
+        log<level::ERR>("SOL Payload instance not found",
+                entry("payloadInst=%d", payloadInst));
+        throw std::runtime_error("SOL payload instance not found");
+    }
+
+    int rc = 0;
+
+    /* Destroy the character accumulate timer event source */
+    rc = sd_event_source_set_enabled(
+            (std::get<0>(iter->second.at(Timers::ACCUMULATE))).get(),
+            SD_EVENT_OFF);
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to disable the character accumulate timer",
+                entry("RC=%d", rc));
+        payloadInfo.erase(payloadInst);
+        throw std::runtime_error("Failed to disable accumulate timer");
+    }
+
+    /* Destroy the retry interval timer event source */
+    rc = sd_event_source_set_enabled(
+            (std::get<0>(iter->second.at(Timers::RETRY))).get(),
+            SD_EVENT_OFF);
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to disable the retry timer",
+                entry("RC=%d", rc));
+        payloadInfo.erase(payloadInst);
+        throw std::runtime_error("Failed to disable retry timer");
+    }
+
+    payloadInfo.erase(payloadInst);
+}
+
 void EventLoop::switchTimer(uint8_t payloadInst,
                             Timers type,
                             bool status)
