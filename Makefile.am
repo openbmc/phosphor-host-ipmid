@@ -44,7 +44,8 @@ netipmid_SOURCES = \
 	sd_event_loop.hpp \
 	sol/sol_context.hpp \
 	sol/sol_manager.hpp \
-	sd_event_loop.cpp
+	sd_event_loop.cpp \
+	sol/sol_manager.cpp
 
 netipmid_CPPFLAGS = -DNET_IPMID_LIB_PATH=\"/usr/lib/net-ipmid/\"
 netipmid_LDFLAGS = $(SYSTEMD_LIBS) $(CRYPTO_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(LIBADD_DLOPEN) -export-dynamic
