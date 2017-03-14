@@ -6,6 +6,80 @@
 namespace sol
 {
 
+/** @struct Outbound
+ *
+ *  Operation/Status in an outbound SOL payload format(BMC to Remote Console).
+ */
+struct Outbound
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t testMode: 2;            //!< Not supported.
+    uint8_t breakDetected: 1;       //!< Not supported.
+    uint8_t transmitOverrun: 1;     //!< Not supported.
+    uint8_t SOLDeactivating: 1;     //!< 0 : SOL is active, 1 : SOL deactivated.
+    uint8_t charUnavailable: 1;     //!< 0 : Available, 1 : Unavailable.
+    uint8_t ack: 1;                 //!< 0 : ACK, 1 : NACK.
+    uint8_t reserved: 1;            //!< Reserved.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved: 1;        //!< Reserved.
+    uint8_t ack: 1;             //!< 0 : ACK, 1 : NACK.
+    uint8_t charUnavailable: 1; //!< 0 : Available, 1 : Unavailable.
+    uint8_t SOLDeactivating: 1; //!< 0 : SOL is active, 1 : SOL deactivated.
+    uint8_t transmitOverrun: 1; //!< Not supported.
+    uint8_t breakDetected: 1;   //!< Not supported.
+    uint8_t testMode: 2;        //!< Not supported.
+#endif
+} __attribute__((packed));
+
+/** @struct Inbound
+ *
+ *  Operation/Status in an Inbound SOL Payload format(Remote Console to BMC).
+ */
+struct Inbound
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t flushOut: 1;        //!< Not supported.
+    uint8_t flushIn: 1;         //!< Not supported.
+    uint8_t dcd: 1;             //!< Not supported.
+    uint8_t cts: 1;             //!< Not supported.
+    uint8_t generateBreak: 1;   //!< Not supported.
+    uint8_t ring: 1;            //!< Not supported.
+    uint8_t ack: 1;             //!< 0 : ACK, 1 : NACK.
+    uint8_t reserved: 1;        //!< Reserved.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved: 1;        //!< Reserved.
+    uint8_t ack: 1;             //!< 0 : ACK, 1 : NACK.
+    uint8_t ring: 1;            //!< Not supported.
+    uint8_t generateBreak: 1;   //!< Not supported.
+    uint8_t cts: 1;             //!< Not supported.
+    uint8_t dcd: 1;             //!< Not supported.
+    uint8_t flushIn: 1;         //!< Not supported.
+    uint8_t flushOut: 1;        //!< Not supported.
+#endif
+} __attribute__((packed));
+
+/** @struct Payload
+ *
+ *  SOL Payload Data Format.The following fields make up the SOL payload in an
+ *  RMCP+ packet, followed by the console character data.
+ */
+struct Payload
+{
+    uint8_t packetSeqNum;               //!< Packet sequence number
+    uint8_t packetAckSeqNum;            //!< Packet ACK/NACK sequence number
+    uint8_t acceptedCharCount;          //!< Accepted character count
+    union
+    {
+        uint8_t operation;              //!<Operation/Status
+        struct Outbound outOperation;   //!<BMC to Remote Console
+        struct Inbound inOperation;     //!<Remote Console to BMC
+    };
+} __attribute__((packed));
+
 namespace internal
 {
 
