@@ -197,4 +197,24 @@ void EventLoop::startHostConsole(const sol::CustomFD& fd)
     source=nullptr;
 }
 
+void EventLoop::stopHostConsole()
+{
+    int rc = 0;
+
+    if (hostConsole.get())
+    {
+        // Disable the host console payload
+        rc = sd_event_source_set_enabled(hostConsole.get(), SD_EVENT_OFF);
+        if (rc < 0)
+        {
+            log<level::ERR>("Failed to disable the host console socket",
+                    entry("RC=%d", rc));
+            hostConsole.reset();
+            throw std::runtime_error("Failed to disable socket descriptor");
+        }
+
+        hostConsole.reset();
+    }
+}
+
 } // namespace eventloop
