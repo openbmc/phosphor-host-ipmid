@@ -17,13 +17,16 @@
 #include "message.hpp"
 #include "message_handler.hpp"
 #include "provider_registration.hpp"
-#include "sessions_manager.hpp"
 #include "socket_channel.hpp"
 
 // Tuple of Global Singletons
 session::Manager manager;
 command::Table table;
-std::tuple<session::Manager&, command::Table&> singletonPool(manager, table);
+eventloop::EventLoop loop;
+sol::Manager solManager;
+
+std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
+        sol::Manager&> singletonPool(manager, table, loop, solManager);
 
 sd_bus* bus = nullptr;
 FILE* ipmidbus = nullptr;
