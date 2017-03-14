@@ -97,6 +97,69 @@ static int consoleInputHandler(sd_event_source* es, int fd, uint32_t revents,
     return 0;
 }
 
+static int charAccTimerHandler(sd_event_source* s, uint64_t usec,
+                               void *userdata)
+{
+    // The instance is hardcoded to 1, in the case of supporting multiple
+    // payload instances we would need to populate it from userdata
+    uint8_t instance = 1;
+    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
+
+    try
+    {
+        if(bufferSize > 0)
+        {
+            // Send the SOL payload
+        }
+
+        std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
+                instance, Timers::ACCUMULATE, true);
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(e.what());
+    }
+
+    return 0;
+}
+
+static int retryTimerHandler(sd_event_source* s, uint64_t usec,
+                             void *userdata)
+{
+    // The instance is hardcoded to 1, in the case of supporting multiple
+    // payload instances we would need to populate it from userdata
+    uint8_t instance = 1;
+
+    try
+    {
+        auto& context = std::get<sol::Manager&>(singletonPool).getContext
+                (instance);
+
+        if (context.retryCounter)
+        {
+            --context.retryCounter;
+            std::get<eventloop::EventLoop&>(singletonPool).switchTimer
+                    (instance, Timers::RETRY, true);
+            // Resend the SOL payload
+        }
+        else
+        {
+            context.retryCounter = context.maxRetryCount;
+            // Resend the SOL payload
+            std::get<eventloop::EventLoop&>(singletonPool).switchTimer
+                    (instance, Timers::RETRY, false);
+            std::get<eventloop::EventLoop&>(singletonPool).switchTimer
+                    (instance, Timers::ACCUMULATE, true);
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(e.what());
+    }
+
+    return 0;
+}
+
 int EventLoop::startEventLoop()
 {
     int fd = -1;
@@ -215,6 +278,85 @@ void EventLoop::stopHostConsole()
 
         hostConsole.reset();
     }
+}
+
+void EventLoop::startSOLPayloadInstance(uint8_t payloadInst,
+                                        IntervalType accumulateInterval,
+                                        IntervalType retryInterval)
+{
+    auto instance = payloadInst;
+    sd_event_source* accTimerSource = nullptr;
+    sd_event_source* retryTimerSource = nullptr;
+    int rc = 0;
+    uint64_t currentTime = 0;
+
+    rc = sd_event_now(event, CLOCK_MONOTONIC, &currentTime);
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to get the current timestamp",
+                entry("RC=%d", rc));
+        throw std::runtime_error("Failed to get current timestamp");
+    }
+
+    // Create character accumulate timer
+    rc = sd_event_add_time(event,
+                           &accTimerSource,
+                           CLOCK_MONOTONIC,
+                           currentTime + accumulateInterval.count(),
+                           0,
+                           charAccTimerHandler,
+                           static_cast<void *>(&instance));
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to setup the accumulate timer",
+                entry("RC = %d", rc));
+        throw std::runtime_error("Failed to setup accumulate timer");
+    }
+
+    // Create retry interval timer and add to the event loop
+    rc = sd_event_add_time(event,
+                           &retryTimerSource,
+                           CLOCK_MONOTONIC,
+                           currentTime + retryInterval.count(),
+                           0,
+                           retryTimerHandler,
+                           static_cast<void *>(&instance));
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to setup the retry timer",
+                entry("RC = %d", rc));
+        throw std::runtime_error("Failed to setup retry timer");
+    }
+
+    // Enable the Character Accumulate Timer
+    rc = sd_event_source_set_enabled(accTimerSource, SD_EVENT_ONESHOT);
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to enable the accumulate timer",
+                entry("rc = %d", rc));
+        throw std::runtime_error("Failed to enable accumulate timer");
+    }
+
+    // Disable the Retry Interval Timer
+    rc = sd_event_source_set_enabled(retryTimerSource, SD_EVENT_OFF);
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to disable the retry timer",
+                entry("RC = %d", rc));
+        throw std::runtime_error("Failed to disable retry timer");
+    }
+
+    EventSource accEventSource(accTimerSource);
+    EventSource retryEventSource(retryTimerSource);
+    accTimerSource = nullptr;
+    retryTimerSource = nullptr;
+
+    TimerMap timer;
+    timer.emplace(Timers::ACCUMULATE, std::make_tuple(std::move(accEventSource),
+                                                      accumulateInterval));
+    timer.emplace(Timers::RETRY, std::make_tuple(std::move(retryEventSource),
+                                                 retryInterval));
+    payloadInfo.emplace(instance, std::move(timer));
 }
 
 void EventLoop::switchTimer(uint8_t payloadInst,
