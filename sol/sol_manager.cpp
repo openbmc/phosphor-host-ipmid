@@ -1,5 +1,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <chrono>
 #include <cmath>
 #include <phosphor-logging/log.hpp>
 #include "main.hpp"
@@ -73,6 +74,42 @@ int Manager::writeConsoleSocket(const Buffer& input) const
     }
 
     return 0;
+}
+
+void Manager::startPayloadInstance(uint8_t payloadInstance,
+                                   session::SessionID sessionID)
+{
+    if (payloadMap.empty())
+    {
+        initHostConsoleFd();
+
+        // Register the fd in the sd_event_loop
+        std::get<eventloop::EventLoop&>(singletonPool).startHostConsole(
+            *(consoleFD.get()));
+    }
+
+    // Create the SOL Context data for payload instance
+    auto context = std::make_unique<Context>(
+            accumulateInterval, retryCount, payloadInstance, sessionID);
+
+    /*
+     * Start payload event instance
+     *
+     * Accumulate interval is in 5 ms(milli secs) increments, since
+     * sd_event_add_time takes in micro secs, it is converted to micro secs.
+     * The Retry interval is in 10 ms (milli secs) increments.
+     */
+    using namespace std::chrono_literals;
+
+    auto accInterval = 5ms * accumulateInterval;
+    auto retryInterval = 10ms * retryThreshold;
+
+    std::get<eventloop::EventLoop&>(singletonPool).startSOLPayloadInstance(
+            payloadInstance,
+            std::chrono::duration_cast<eventloop::IntervalType>(accInterval),
+            std::chrono::duration_cast<eventloop::IntervalType>(retryInterval));
+
+    payloadMap.emplace(payloadInstance, std::move(context));
 }
 
 } // namespace sol
