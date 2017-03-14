@@ -150,6 +150,39 @@ void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
     sendPayload(payloadCache);
 }
 
+int Context::sendOutboundPayload()
+{
+    if (payloadCache.size() != 0)
+    {
+        std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
+                payloadInstance, eventloop::Timers::ACCUMULATE, true);
+        return -1;
+    }
+
+    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
+    auto readSize = std::min(bufferSize, MAX_PAYLOAD_SIZE);
+
+    payloadCache.resize(sizeof(Payload) + readSize);
+    auto response = reinterpret_cast<Payload*>(payloadCache.data());
+    response->packetAckSeqNum = 0;
+    response->acceptedCharCount = 0;
+    response->outOperation.ack = false;
+    response->packetSeqNum = seqNums.incOutboundSeqNum();
+
+    auto handle = std::get<sol::Manager&>(singletonPool).dataBuffer.read();
+    std::copy_n(handle, readSize, payloadCache.data() + sizeof(Payload));
+    expectedCharCount = readSize;
+
+    std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
+            payloadInstance, eventloop::Timers::RETRY, true);
+    std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
+            payloadInstance, eventloop::Timers::ACCUMULATE, false);
+
+    sendPayload(payloadCache);
+
+    return 0;
+}
+
 void Context::resendPayload(bool clear)
 {
 

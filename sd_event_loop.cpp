@@ -103,13 +103,22 @@ static int charAccTimerHandler(sd_event_source* s, uint64_t usec,
     // The instance is hardcoded to 1, in the case of supporting multiple
     // payload instances we would need to populate it from userdata
     uint8_t instance = 1;
+    int rc = 0;
     auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
 
     try
     {
         if(bufferSize > 0)
         {
-            // Send the SOL payload
+            auto& context = std::get<sol::Manager&>(singletonPool).getContext
+                    (instance);
+
+            rc = context.sendOutboundPayload();
+
+            if (rc == 0)
+            {
+                return 0;
+            }
         }
 
         std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
