@@ -24,17 +24,16 @@ extern const IdInfoMap sensors = {
                 {"${dbus_property}",{
                 % for offset,values in property_value.iteritems():
                     { ${offset},{
-<%
-                        valueType = values["type"]
-%>
+                        <% valueType = values["type"] %>\
                      % for name,value in values.iteritems():
                         % if name == "type":
-<%
-                              continue
-%>
+                             <% continue %>\
                         % endif
                         % if valueType == "string":
                            std::string("${value}"),
+                        % elif valueType == "bool":
+                           <% value = str(value).lower() %>\
+                           ${value},
                         % else:
                            ${value},
                         % endif
