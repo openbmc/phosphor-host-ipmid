@@ -8,7 +8,7 @@ std::string getService(sdbusplus::bus::bus& bus,
                        const std::string& path)
 {
     auto mapperCall = bus.new_method_call("xyz.openbmc_project.ObjectMapper",
-                                          "/xyz/openbmc_project/ObjectMapper",
+                                          "/xyz/openbmc_project/object_mapper",
                                           "xyz.openbmc_project.ObjectMapper",
                                           "GetObject");
 
