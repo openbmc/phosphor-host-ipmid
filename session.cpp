@@ -20,14 +20,18 @@ bool Session::isSessionActive()
             {
                 return true;
             }
+            break;
         case State::ACTIVE:
             if (elapsedSeconds < SESSION_INACTIVITY_TIMEOUT)
             {
                 return true;
             }
+            break;
         default:
             return false;
     }
+
+    return false;
 }
 
 } // namespace session
