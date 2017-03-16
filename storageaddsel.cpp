@@ -197,9 +197,9 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
         elog<org::open_power::Error::Host::Event>(
             prev_entry<org::open_power::Error::Host::Event::ESEL>());
     }
-    catch (elogException<org::open_power::Error::Host::Event>& e)
+    catch (org::open_power::Error::Host::Event& e)
     {
-        commit(e.name());
+        commit(org::open_power::Error::Host::Event::err_code);
     }
 
     return 0;
