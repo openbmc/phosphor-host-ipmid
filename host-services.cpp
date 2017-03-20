@@ -4,6 +4,7 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include "host-ipmid/ipmid-api.h"
+#include "host-interface.hpp"
 
 void register_host_services() __attribute__((constructor));
 
@@ -14,6 +15,7 @@ const char  *intf_name     =  "org.openbmc.HostIpmi";
 //-------------------------------------------------------------------
 // Gets called by PowerOff handler when a Soft Power off is requested
 //-------------------------------------------------------------------
+#if 0
 static int soft_power_off(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
     int64_t bt_resp = -1;
@@ -96,6 +98,7 @@ static const sd_bus_vtable host_services_vtable[] =
     SD_BUS_METHOD("SoftPowerOff", "", "x", &soft_power_off, SD_BUS_VTABLE_UNPRIVILEGED),
     SD_BUS_VTABLE_END,
 };
+#endif
 
 //------------------------------------------------------
 // Called by IPMID as part of the start up
@@ -103,7 +106,7 @@ static const sd_bus_vtable host_services_vtable[] =
 int start_host_service(sd_bus *bus, sd_bus_slot *slot)
 {
     int rc = 0;
-
+#if 0
     /* Install the object */
     rc = sd_bus_add_object_vtable(bus,
                                  &slot,
@@ -124,7 +127,7 @@ int start_host_service(sd_bus *bus, sd_bus_slot *slot)
             fprintf(stderr, "Failed to acquire service name: %s\n", strerror(-rc));
         }
     }
-
+#endif
     return rc < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
@@ -141,4 +144,18 @@ void register_host_services()
 
     //start_host_service(bus, ipmid_slot);
     start_host_service(bus, ipmid_slot);
+
+    auto sdbus = sdbusplus::bus::bus(sd_bus_ref(bus));
+
+    // Create new xyz.openbmc_project.host object on the bus
+    auto objPathInst = std::string{"/xyz/openbmc_project/control/host"} + '0';
+
+    // Add sdbusplus ObjectManager.
+    sdbusplus::server::manager::manager objManager(sdbus, objPathInst.c_str());
+
+    phosphor::host::Host host(sdbus,
+                              "xyz.openbmc_project.Control.Host",
+                              objPathInst.c_str());
+
+    sdbus.request_name("xyz.openbmc_project.Control.Host");
 }
