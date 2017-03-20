@@ -50,7 +50,7 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 libhostservicedir = ${libdir}/ipmid-providers
 libhostservice_LTLIBRARIES = libhostservice.la
 libhostservice_la_SOURCES = \
-	host-services.c \
+	host-services.cpp \
 	host-interface.cpp
 libhostservice_la_LDFLAGS = $(SYSTEMD_LIBS) \
                             $(libmapper_LIBS) \
