@@ -28,6 +28,12 @@ class Host : public sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Control::server::Host>(
                         bus, objPath)
         {}
+
+        /** @brief Queue input command to be executed
+         *
+         * @param[in] command       - Input command to execute
+         */
+        void execute(Command command) override;
 };
 
 } // namespace host
