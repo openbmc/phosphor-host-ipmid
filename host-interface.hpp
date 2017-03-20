@@ -28,6 +28,15 @@ class Host : public sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Control::server::Host>(
                         bus, objPath)
         {}
+
+        /** @brief Send input command to host
+         *
+         * Note that the command will be queued in a FIFO if other commands
+         * to the host have yet to be run
+         *
+         * @param[in] command       - Input command to execute
+         */
+        void execute(Command command) override;
 };
 
 } // namespace host
