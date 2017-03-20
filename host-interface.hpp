@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sdbusplus/bus.hpp>
-#include "xyz/openbmc_project/Host/server.hpp"
+#include "xyz/openbmc_project/Control/Host/server.hpp"
 
 namespace phosphor
 {
@@ -14,7 +14,7 @@ namespace host
  *  DBus API.
  */
 class Host : public sdbusplus::server::object::object<
-                sdbusplus::xyz::openbmc_project::server::Host>
+                sdbusplus::xyz::openbmc_project::Control::server::Host>
 {
     public:
         /** @brief Constructs Host Interface
@@ -27,9 +27,15 @@ class Host : public sdbusplus::server::object::object<
              const char* busName,
              const char* objPath) :
              sdbusplus::server::object::object<
-                sdbusplus::xyz::openbmc_project::server::Host>(
+                sdbusplus::xyz::openbmc_project::Control::server::Host>(
                         bus, objPath)
         {}
+
+        /** @brief Queue input command to be executed
+         *
+         * @param[in] command       - Input command to execute
+         */
+        void execute(Command command);
 };
 
 } // namespace host
