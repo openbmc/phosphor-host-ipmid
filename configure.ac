@@ -99,6 +99,19 @@ AS_IF([test "x$enable_softoff" != "xno"],
     [AC_DEFINE_UNQUOTED([IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS], [45*60], [Wait time until Host can quiesce])]
 )
 
+# Control Host Interfaces
+# Dbus service name
+AC_ARG_VAR(CONTROL_HOST_BUSNAME, [The Control Host Dbus busname to own])
+AS_IF([test "x$CONTROL_HOST_BUSNAME" == "x"],
+      [CONTROL_HOST_BUSNAME="xyz.openbmc_project.Control.Host"])
+AC_DEFINE_UNQUOTED([CONTROL_HOST_BUSNAME], ["$CONTROL_HOST_BUSNAME"], [The Control Host Dbus busname to own])
+
+# Service dbus root
+AC_ARG_VAR(CONTROL_HOST_OBJPATH, [The Control Host Dbus root])
+AS_IF([test "x$CONTROL_HOST_OBJPATH" == "x"],
+      [CONTROL_HOST_OBJPATH="/xyz/openbmc_project/control/host"])
+AC_DEFINE_UNQUOTED([CONTROL_HOST_OBJPATH], ["$CONTROL_HOST_OBJPATH"], [The Control Host Dbus root])
+
 # Create configured output
 AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile softoff/test/Makefile])
 AC_OUTPUT
