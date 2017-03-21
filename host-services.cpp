@@ -146,7 +146,7 @@ void register_host_services()
     //start_host_service(bus, ipmid_slot);
     //start_host_service(bus, ipmid_slot);
 
-    auto sdbus = sdbusplus::bus::bus(sd_bus_ref(bus));
+    static auto sdbus = sdbusplus::bus::bus(sd_bus_ref(bus));
 
     // Create new xyz.openbmc_project.host object on the bus
     auto objPathInst = std::string{"/xyz/openbmc_project/control/host"} + '0';
