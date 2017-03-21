@@ -1,3 +1,5 @@
+#include <queue>
+#include <phosphor-logging/log.hpp>
 #include "host-interface.hpp"
 
 namespace phosphor
@@ -5,9 +7,19 @@ namespace phosphor
 namespace host
 {
 
-void Host::execute(Command command)
+using namespace phosphor::logging;
+
+// When you see base:: you know we're referencing our base class
+namespace base = sdbusplus::xyz::openbmc_project::Control::server;
+
+std::queue<base::Host::Command> workQueue{};
+
+void Host::execute(base::Host::Command command)
 {
-    // Future commits to build on
+    log<level::INFO>("Pushing cmd on to queue",
+            entry("CONTROL_HOST_CMD=%s",
+                  convertForMessage(command)));
+    workQueue.push(command);
     return;
 }
 
