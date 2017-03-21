@@ -26,7 +26,8 @@ class Host : public sdbusplus::server::object::object<
              const char* objPath) :
              sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Control::server::Host>(
-                        bus, objPath)
+                        bus, objPath),
+             bus(bus)
         {}
 
         /** @brief Queue input command to be executed
@@ -34,6 +35,11 @@ class Host : public sdbusplus::server::object::object<
          * @param[in] command       - Input command to execute
          */
         void execute(Command command) override;
+
+    private:
+
+        /** @brief Persistent sdbusplus DBus bus connection. */
+        sdbusplus::bus::bus& bus;
 };
 
 } // namespace host
