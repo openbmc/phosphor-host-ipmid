@@ -1,7 +1,9 @@
 #pragma once
 
-#include <sdbusplus/bus.hpp>
-#include "xyz/openbmc_project/Control/Host/server.hpp"
+#if __cplusplus
+    #include <sdbusplus/bus.hpp>
+    #include "xyz/openbmc_project/Control/Host/server.hpp"
+#endif
 
 namespace phosphor
 {
