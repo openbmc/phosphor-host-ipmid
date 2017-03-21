@@ -7,6 +7,10 @@ namespace phosphor
 namespace host
 {
 
+constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
+constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
+constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
+
 using namespace phosphor::logging;
 
 // When you see base:: you know we're referencing our base class
@@ -20,6 +24,53 @@ void Host::execute(base::Host::Command command)
             entry("CONTROL_HOST_CMD=%s",
                   convertForMessage(command)));
     workQueue.push(command);
+
+    // If this was the only entry then send the SMS attention
+    if(workQueue.size() == 1)
+    {
+        log<level::INFO>("Asserting SMS Attention");
+
+        std::string HOST_PATH("/org/openbmc/HostIpmi/1");
+        std::string HOST_INTERFACE("org.openbmc.HostIpmi");
+
+        auto mapper = this->bus.new_method_call(MAPPER_BUSNAME,
+                                                MAPPER_PATH,
+                                                MAPPER_INTERFACE,
+                                                "GetObject");
+
+        mapper.append(HOST_PATH, std::vector<std::string>({HOST_INTERFACE}));
+        auto mapperResponseMsg = this->bus.call(mapper);
+
+        if (mapperResponseMsg.is_method_error())
+        {
+            log<level::ERR>("Error in mapper call for HostIpmi interface");
+            return;
+        }
+
+        std::map<std::string, std::vector<std::string>> mapperResponse;
+        mapperResponseMsg.read(mapperResponse);
+        if (mapperResponse.empty())
+        {
+            log<level::ERR>("Error reading mapper response for HostIpmi interface");
+            return;
+        }
+
+        const auto& host = mapperResponse.begin()->first;
+
+        auto method = this->bus.new_method_call(host.c_str(),
+                                                HOST_PATH.c_str(),
+                                                HOST_INTERFACE.c_str(),
+                                                "setAttention");
+        auto reply = this->bus.call(method);
+
+        if (reply.is_method_error())
+        {
+            log<level::ERR>("Error in setting SMS attention");
+            return;
+        }
+        log<level::INFO>("SMS Attention asserted");
+    }
+
     return;
 }
 
