@@ -30,7 +30,8 @@ void register_host_services()
     sdbusplus::server::manager::manager objManager(*sdbus.get(),
                                                    objPathInst.c_str());
 
-    phosphor::host::Host host(*sdbus.get(), objPathInst.c_str());
+    static phosphor::host::Host host(*sdbus.get(), objPathInst.c_str());
 
     (*sdbus.get()).request_name(CONTROL_HOST_BUSNAME);
+
 }
