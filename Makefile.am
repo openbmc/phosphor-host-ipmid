@@ -53,7 +53,7 @@ libhostservice_la_SOURCES = \
 	host-services.cpp \
 	host-interface.cpp
 libhostservice_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) -version-info 0:0:0 -shared
-libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) $(libmapper_CFLAGS)
+libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) $(libmapper_CFLAGS) -Wno-c99-extensions
 
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
