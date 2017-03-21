@@ -40,6 +40,7 @@ sensorTypemap_t g_SensorTypeMap[] = {
     {0xC7, 0x03, "SYSTEM"},
     {0xC7, 0x03, "MAIN_PLANAR"},
     {0xC2, 0x6F, "PowerCap"},
+    {0xD8, 0x03, "PSRedundancy"},
     {0xFF, 0x00, ""},
 };
 
