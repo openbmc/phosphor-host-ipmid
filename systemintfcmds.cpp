@@ -1,25 +1,17 @@
 #include "systemintfcmds.h"
 #include "host-ipmid/ipmid-api.h"
+#include "host-services.hpp"
 
 #include <stdio.h>
 #include <mapper.h>
 
 void register_netfn_app_functions() __attribute__((constructor));
 
-//-------------------------------------------------------------------
-// Called by Host post response from Get_Message_Flags
-//-------------------------------------------------------------------
-ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+using namespace sdbusplus::xyz::openbmc_project::Control::server;
+
+// Notify SofPowerOff application that host is responding to command
+void notifySoftOff()
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    printf("IPMI APP READ EVENT command received\n");
-
-    // TODO : For now, this is catering only to the Soft Power Off via OEM SEL
-    //        mechanism. If we need to make this generically used for some
-    //        other conditions, then we can take advantage of context pointer.
 
     constexpr auto objname        = "/xyz/openbmc_project/ipmi/internal/"
                                     "softpoweroff";
@@ -32,9 +24,6 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                     "SoftPowerOff.HostResponse.SoftOffReceived";
     char *busname = nullptr;
 
-    struct oem_sel_timestamped soft_off = {0};
-    *data_len = sizeof(struct oem_sel_timestamped);
-
     // Get the system bus where most system services are provided.
     auto bus = ipmid_get_sd_bus_connection();
 
@@ -42,12 +31,13 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // initial watchdog timer. If we have some errors talking to Soft Off
     // object, get going and do our regular job
     mapper_get_service(bus, objname, &busname);
+
     if (busname)
     {
         // No error object or reply expected.
         auto r = sd_bus_call_method(bus, busname, objname, iface,
-                                 "Set", nullptr, nullptr, "ssv",
-                                 soft_off_iface, property, "s", value);
+                "Set", nullptr, nullptr, "ssv",
+                soft_off_iface, property, "s", value);
         if (r < 0)
         {
             fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
@@ -57,31 +47,57 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     else
     {
-            printf("Soft Power Off object is not available. Ignoring watchdog refresh");
+        printf("Soft Power Off object is not available. Ignoring watchdog refresh");
     }
+}
+
+//-------------------------------------------------------------------
+// Called by Host post response from Get_Message_Flags
+//-------------------------------------------------------------------
+ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+        ipmi_request_t request, ipmi_response_t response,
+        ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    printf("IPMI APP READ EVENT command received\n");
+
+    struct oem_sel_timestamped oem_sel = {0};
+    *data_len = sizeof(struct oem_sel_timestamped);
 
     // either id[0] -or- id[1] can be filled in. We will use id[0]
-    soft_off.id[0]   = SEL_OEM_ID_0;
-    soft_off.id[1]   = SEL_OEM_ID_0;
-    soft_off.type    = SEL_RECORD_TYPE_OEM;
+    oem_sel.id[0]   = SEL_OEM_ID_0;
+    oem_sel.id[1]   = SEL_OEM_ID_0;
+    oem_sel.type    = SEL_RECORD_TYPE_OEM;
 
     // Following 3 bytes are from IANA Manufactre_Id field. See below
-    soft_off.manuf_id[0]= 0x41;
-    soft_off.manuf_id[1]= 0xA7;
-    soft_off.manuf_id[2]= 0x00;
+    oem_sel.manuf_id[0]= 0x41;
+    oem_sel.manuf_id[1]= 0xA7;
+    oem_sel.manuf_id[2]= 0x00;
 
     // per IPMI spec NetFuntion for OEM
-    soft_off.netfun  = 0x3A;
+    oem_sel.netfun  = 0x3A;
 
-    // Mechanism to kick start soft shutdown.
-    soft_off.cmd     = CMD_POWER;
-    soft_off.data[0] = SOFT_OFF;
+    // Read from the queue to see what our response is here
+    Host::Command hCmd = getNextCmd();
+    switch (hCmd)
+    {
+    case Host::Command::SoftOff:
+        notifySoftOff();
+        oem_sel.cmd     = CMD_POWER;
+        oem_sel.data[0] = SOFT_OFF;
+        break;
+    case Host::Command::Heartbeat:
+        oem_sel.cmd     = CMD_HEARTBEAT;
+        oem_sel.data[0] = 0x00;
+        break;
+    }
 
     // All '0xFF' since unused.
-    memset(&soft_off.data[1], 0xFF, 3);
+    memset(&oem_sel.data[1], 0xFF, 3);
 
     // Pack the actual response
-    memcpy(response, &soft_off, *data_len);
+    memcpy(response, &oem_sel, *data_len);
     return rc;
 }
 
