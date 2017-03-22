@@ -13,8 +13,9 @@ void register_host_services() __attribute__((constructor));
 // Callback register function
 // -----------------------------------------------------
 
-// Global to keep the object alive during process life
+// Globals to keep the object alive during process life
 std::unique_ptr<sdbusplus::bus::bus> sdbus = nullptr;
+std::unique_ptr<phosphor::host::Host> host = nullptr;
 
 void register_host_services()
 {
@@ -30,8 +31,14 @@ void register_host_services()
     sdbusplus::server::manager::manager objManager(*sdbus.get(),
                                                    objPathInst.c_str());
 
-    static phosphor::host::Host host(*sdbus.get(), objPathInst.c_str());
+    host = std::make_unique<phosphor::host::Host>(*sdbus.get(),
+                                                  objPathInst.c_str());
 
     (*sdbus.get()).request_name(CONTROL_HOST_BUSNAME);
 
+}
+
+phosphor::host::Host::Command getNextCmd()
+{
+    return(host.get()->getNextCommand());
 }
