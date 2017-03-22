@@ -52,10 +52,14 @@ class Host : public sdbusplus::server::object::object<
             Command command = this->workQueue.front();
             this->workQueue.pop();
             this->commandComplete(command, Result::Success);
+            this->checkQueue();
             return command;
         }
 
     private:
+
+        /** @brief Check if anything in queue and alert host if so */
+        void checkQueue();
 
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& bus;
