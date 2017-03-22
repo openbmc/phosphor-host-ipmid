@@ -1,4 +1,3 @@
-#include <queue>
 #include <phosphor-logging/log.hpp>
 #include <utils.hpp>
 #include "host-interface.hpp"
@@ -17,17 +16,15 @@ using namespace phosphor::logging;
 // When you see base:: you know we're referencing our base class
 namespace base = sdbusplus::xyz::openbmc_project::Control::server;
 
-std::queue<base::Host::Command> workQueue{};
-
 void Host::execute(base::Host::Command command)
 {
     log<level::INFO>("Pushing cmd on to queue",
             entry("CONTROL_HOST_CMD=%s",
                   convertForMessage(command)));
-    workQueue.push(command);
+    this->workQueue.push(command);
 
     // If this was the only entry then send the SMS attention
-    if(workQueue.size() == 1)
+    if(this->workQueue.size() == 1)
     {
         log<level::INFO>("Asserting SMS Attention");
 

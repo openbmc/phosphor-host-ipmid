@@ -1,12 +1,17 @@
 #pragma once
 
+#include <queue>
 #include <sdbusplus/bus.hpp>
+#include <phosphor-logging/elog.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
+#include "elog-errors.hpp"
 
 namespace phosphor
 {
 namespace host
 {
+
+using namespace phosphor::logging;
 
 /** @class Host
  *  @brief OpenBMC control host interface implementation.
@@ -39,10 +44,33 @@ class Host : public sdbusplus::server::object::object<
          */
         void execute(Command command) override;
 
+        /** @brief Return the next entry in the queue
+         *
+         *  Also signal that the command is complete since the interface
+         *  contract is that we emit this signal once the message has been
+         *  passed to the host (which is required when calling this interface)
+         *
+         */
+        Command getNextCommand()
+        {
+            if(this->workQueue.empty())
+            {
+                log<level::ERR>("Control Host work queue is empty!");
+                elog<xyz::openbmc_project::Control::Internal::Host::QueueEmpty>();
+            }
+            Command command = this->workQueue.front();
+            this->workQueue.pop();
+            this->commandComplete(command, Result::Success);
+            return command;
+        }
+
     private:
 
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& bus;
+
+        /** @brief Queue to store the requested commands */
+        std::queue<Command> workQueue{};
 };
 
 } // namespace host
