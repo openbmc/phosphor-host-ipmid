@@ -43,23 +43,18 @@ libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOG
 libsysintfcmdsdir = ${libdir}/ipmid-providers
 libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
 libsysintfcmds_la_SOURCES = \
-	systemintfcmds.cpp
-libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
-libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
-
-libhostservicedir = ${libdir}/ipmid-providers
-libhostservice_LTLIBRARIES = libhostservice.la
-libhostservice_la_SOURCES = \
-	host-services.cpp \
+	systemintfcmds.cpp \
 	host-interface.cpp \
 	utils.cpp
-libhostservice_la_LDFLAGS = $(SYSTEMD_LIBS) \
+libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) \
                             $(libmapper_LIBS) \
                             $(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+                            $(PHOSPHOR_LOGGING_LIBS) \
                             -version-info 0:0:0 -shared
-libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
+libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
+                             $(libmapper_CFLAGS) \
                              $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-                             $(libmapper_CFLAGS)
+                             $(PHOSPHOR_LOGGING_CFLAGS)
 
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
