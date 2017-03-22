@@ -34,3 +34,8 @@ void register_host_services()
     host = std::make_unique<phosphor::host::Host>(*sdbus,
                                                   objPathInst.c_str());
 }
+
+phosphor::host::Host::Command getNextCmd()
+{
+    return(host->getNextCommand());
+}

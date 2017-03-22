@@ -46,6 +46,7 @@ libsysintfcmds_la_SOURCES = \
 	systemintfcmds.cpp
 libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
+libsysintfcmds_la_LIBADD = ${libhostservice_LTLIBRARIES}
 
 libhostservicedir = ${libdir}/ipmid-providers
 libhostservice_LTLIBRARIES = libhostservice.la
