@@ -1,0 +1,3 @@
+- name: QueueEmpty
+  description: The host response queue is empty and it should not be!
+
