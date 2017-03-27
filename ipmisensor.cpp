@@ -179,6 +179,8 @@ lookup_t g_ipmidbuslookup[] = {
 	{0xe9, 0x01, set_sensor_dbus_state_simple, "setValue", "Enabled", ""},   // OCC Active 1
 	// Turbo Allowed
 	{0xda, 0x00, set_sensor_dbus_state_simple, "setValue", "False", ""},
+	// Power Supply Derating
+	{0xb4, 0x00, set_sensor_dbus_state_simple, "setValue", "", ""},
 	{0x07, 0x07, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
 	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", "False"},
 	{0x0C, 0x06, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
@@ -200,7 +202,7 @@ lookup_t g_ipmidbuslookup[] = {
 	{0x12, 0x02, set_sensor_dbus_state_system_event, "setValue", "", ""},
 	{0x12, 0x03, set_sensor_dbus_state_system_event, "setValue", "", ""},
 	{0x12, 0x04, set_sensor_dbus_state_system_event, "setValue", "", ""},
- 	{0xD8, 0x00, set_sensor_dbus_state_simple,       "setValue", "Disabled", ""},
+	{0xD8, 0x00, set_sensor_dbus_state_simple,       "setValue", "Disabled", ""},
 	{0xFF, 0xFF, NULL, "", "", ""}
 };
 

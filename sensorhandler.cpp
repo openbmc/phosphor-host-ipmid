@@ -42,6 +42,7 @@ sensorTypemap_t g_SensorTypeMap[] = {
     {0xC2, 0x6F, "PowerCap"},
     {0xD8, 0x03, "PowerSupplyRedundancy"},
     {0xDA, 0x03, "TurboAllowed"},
+    {0xB4, 0x6F, "PowerSupplyDerating"},
     {0xFF, 0x00, ""},
 };
 
