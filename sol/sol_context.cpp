@@ -185,7 +185,15 @@ int Context::sendOutboundPayload()
 
 void Context::resendPayload(bool clear)
 {
+    sendPayload(payloadCache);
 
+    if(clear)
+    {
+        payloadCache.clear();
+        expectedCharCount = 0;
+        std::get<sol::Manager&>(singletonPool).dataBuffer.erase(
+                expectedCharCount);
+    }
 }
 
 void Context::sendPayload(const Buffer& out) const

@@ -149,12 +149,12 @@ static int retryTimerHandler(sd_event_source* s, uint64_t usec,
             --context.retryCounter;
             std::get<eventloop::EventLoop&>(singletonPool).switchTimer
                     (instance, Timers::RETRY, true);
-            // Resend the SOL payload
+            context.resendPayload(sol::Context::noClear);
         }
         else
         {
             context.retryCounter = context.maxRetryCount;
-            // Resend the SOL payload
+            context.resendPayload(sol::Context::clear);
             std::get<eventloop::EventLoop&>(singletonPool).switchTimer
                     (instance, Timers::RETRY, false);
             std::get<eventloop::EventLoop&>(singletonPool).switchTimer
