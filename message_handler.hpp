@@ -72,8 +72,7 @@ class Handler
         /** @brief Socket channel for communicating with the remote client.*/
         std::shared_ptr<udpsocket::Channel> channel;
 
-        // IPMI 1.5 or IPMI 2.0 Session Header
-        parser::SessionHeader sessionHeader;
+        parser::SessionHeader sessionHeader  = parser::SessionHeader::IPMI20;
 
         /*
          * @brief Create the response IPMI message
