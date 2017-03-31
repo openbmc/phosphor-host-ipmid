@@ -9,6 +9,7 @@ namespace message
 enum class PayloadType : uint8_t
 {
     IPMI                  = 0x00,
+    SOL                   = 0x01,
     OPEN_SESSION_REQUEST  = 0x10,
     OPEN_SESSION_RESPONSE = 0x11,
     RAKP1                 = 0x12,
