@@ -190,5 +190,22 @@ void Handler::setChannelInSession() const
     session->channelPtr = channel;
 }
 
+void Handler::sendSOLPayload(const sol::Buffer& input)
+{
+    Message outMessage;
+
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+                    sessionID)).lock();
+
+    outMessage.payloadType = PayloadType::SOL;
+    outMessage.payload = input;
+    outMessage.isPacketEncrypted = session->isCryptAlgoEnabled();
+    outMessage.isPacketAuthenticated = session->isIntegrityAlgoEnabled();
+    outMessage.rcSessionID = session->getRCSessionID();
+    outMessage.bmcSessionID = sessionID;
+
+    send(outMessage);
+}
+
 } //namespace message
 
