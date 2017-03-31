@@ -173,6 +173,15 @@ class Session
             integrityAlgoInterface = std::move(integrityAlgo);
         }
 
+        /** @brief Check if integrity algorithm is enabled for this session.
+         *
+         *  @return true if integrity algorithm is enabled else false.
+         */
+        auto isIntegrityAlgoEnabled()
+        {
+            return integrityAlgoInterface ? true : false;
+        }
+
         /*
          * @brief Get Session's Confidentiality Algorithm
          *
