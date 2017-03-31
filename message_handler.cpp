@@ -132,6 +132,9 @@ std::unique_ptr<Message> Handler::executeCommand(Message& inMessage)
         case PayloadType::RAKP3:
             outMessage = createResponse<PayloadType::RAKP4>(output, inMessage);
             break;
+        case PayloadType::SOL:
+            return outMessage;
+            break;
         default:
             break;
     }
