@@ -249,6 +249,9 @@ class Session
         State state = State::INACTIVE; // Session State
         std::vector<char> userName; // User Name
 
+        /** @brief Socket channel for communicating with the remote client.*/
+        std::shared_ptr<udpsocket::Channel> channelPtr;
+
     private:
 
         SessionID bmcSessionID = 0; //BMC Session ID
