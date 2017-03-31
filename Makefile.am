@@ -47,13 +47,6 @@ libsysintfcmds_la_SOURCES = \
 libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
 
-libhostservicedir = ${libdir}/ipmid-providers
-libhostservice_LTLIBRARIES = libhostservice.la
-libhostservice_la_SOURCES = \
-	host-services.c
-libhostservice_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) -version-info 0:0:0 -shared
-libhostservice_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS)
-
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
 
