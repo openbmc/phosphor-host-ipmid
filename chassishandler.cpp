@@ -13,6 +13,7 @@
 #include <array>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
+#include "config.h"
 
 //Defines
 #define SET_PARM_VERSION                     0x01
@@ -803,8 +804,6 @@ finish:
 //-------------------------------------------------------------
 int stop_soft_off_timer()
 {
-    constexpr auto objname          = "/xyz/openbmc_project/ipmi/internal/"
-                                      "softpoweroff";
     constexpr auto iface            = "org.freedesktop.DBus.Properties";
     constexpr auto soft_off_iface   = "xyz.openbmc_project.Ipmi.Internal."
                                       "SoftPowerOff";
@@ -818,15 +817,15 @@ int stop_soft_off_timer()
     auto bus = ipmid_get_sd_bus_connection();
 
     // Get the service name
-    auto r = mapper_get_service(bus, objname, &busname);
+    auto r = mapper_get_service(bus, SOFTOFF_OBJPATH, &busname);
     if (r < 0) {
         fprintf(stderr, "Failed to get %s bus name: %s\n",
-                objname, strerror(-r));
+                SOFTOFF_OBJPATH, strerror(-r));
         return r;
     }
 
     // No error object or reply expected.
-    int rc = sd_bus_call_method(bus, busname, objname, iface,
+    int rc = sd_bus_call_method(bus, busname, SOFTOFF_OBJPATH, iface,
                            "Set", nullptr, nullptr, "ssv",
                            soft_off_iface, property, "s", value);
     if (rc < 0)
