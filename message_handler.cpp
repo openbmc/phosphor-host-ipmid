@@ -207,5 +207,55 @@ void Handler::sendSOLPayload(const sol::Buffer& input)
     send(outMessage);
 }
 
+void Handler::sendUnsolicitedIPMIPayload(uint8_t netfn,
+                                         uint8_t cmd,
+                                         const std::vector<uint8_t>& output)
+{
+    Message outMessage;
+
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+                    sessionID)).lock();
+
+    outMessage.payloadType = PayloadType::IPMI;
+    outMessage.isPacketEncrypted = session->isCryptAlgoEnabled();
+    outMessage.isPacketAuthenticated = session->isIntegrityAlgoEnabled();
+    outMessage.rcSessionID = session->getRCSessionID();
+    outMessage.bmcSessionID = sessionID;
+
+    outMessage.payload.resize(sizeof(LAN::header::Request) +
+                              output.size() +
+                              sizeof(LAN::trailer::Request));
+
+    auto respHeader = reinterpret_cast<LAN::header::Request*>
+                      (outMessage.payload.data());
+
+    // Add IPMI LAN Message Request Header
+    respHeader->rsaddr = LAN::requesterBMCAddress;
+    respHeader->netfn  = (netfn << 0x02);
+    respHeader->cs     = crc8bit(&(respHeader->rsaddr), 2);
+    respHeader->rqaddr = LAN::responderBMCAddress;
+    respHeader->rqseq  = 0;
+    respHeader->cmd    = cmd;
+
+    auto assembledSize = sizeof(LAN::header::Request);
+
+    // Copy the output by the execution of the command
+    std::copy(output.begin(),
+              output.end(),
+              outMessage.payload.begin() + assembledSize);
+    assembledSize += output.size();
+
+    // Add the IPMI LAN Message Trailer
+    auto trailer = reinterpret_cast<LAN::trailer::Request*>
+                   (outMessage.payload.data() + assembledSize);
+
+    // Calculate the checksum for the field rqaddr in the header to the
+    // command data, 3 corresponds to size of the fields before rqaddr( rsaddr,
+    // netfn, cs).
+    trailer->checksum = crc8bit(&respHeader->rqaddr, assembledSize - 3);
+
+    send(outMessage);
+}
+
 } //namespace message
 
