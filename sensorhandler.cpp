@@ -410,7 +410,7 @@ ipmi_ret_t setSensorReading(void *request)
     }
     objects.emplace(iter->second.sensorPath, std::move(interfaces));
 
-    auto bus = sdbusplus::bus::new_default();
+    sdbusplus::bus::bus bus{sd_bus_ref(ipmid_get_sd_bus_connection())};
     using namespace std::string_literals;
     static const auto intf = "xyz.openbmc_project.Inventory.Manager"s;
     static const auto path = "/xyz/openbmc_project/inventory"s;
