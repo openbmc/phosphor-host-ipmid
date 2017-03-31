@@ -804,7 +804,7 @@ finish:
 int stop_soft_off_timer()
 {
     constexpr auto objname          = "/xyz/openbmc_project/ipmi/internal/"
-                                      "softpoweroff";
+                                      "soft_power_off";
     constexpr auto iface            = "org.freedesktop.DBus.Properties";
     constexpr auto soft_off_iface   = "xyz.openbmc_project.Ipmi.Internal."
                                       "SoftPowerOff";
