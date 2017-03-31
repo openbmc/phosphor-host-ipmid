@@ -211,6 +211,16 @@ class Session
             cryptAlgoInterface = std::move(cryptAlgo);
         }
 
+        /** @brief Check if confidentiality algorithm is enabled for this
+         *         session.
+         *
+         *  @return true if confidentiality algorithm is enabled else false.
+         */
+        auto isCryptAlgoEnabled()
+        {
+            return cryptAlgoInterface ? true : false;
+        }
+
         void updateLastTransactionTime()
         {
             lastTime = std::chrono::steady_clock::now();
