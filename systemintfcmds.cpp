@@ -22,7 +22,7 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     //        other conditions, then we can take advantage of context pointer.
 
     constexpr auto objname        = "/xyz/openbmc_project/ipmi/internal/"
-                                    "softpoweroff";
+                                    "soft_power_off";
     constexpr auto iface          = "org.freedesktop.DBus.Properties";
     constexpr auto soft_off_iface = "xyz.openbmc_project.Ipmi.Internal."
                                     "SoftPowerOff";
