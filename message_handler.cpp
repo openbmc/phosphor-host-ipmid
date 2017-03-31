@@ -179,5 +179,13 @@ int Handler::send(Message& outMessage)
     return writeStatus;
 }
 
+void Handler::setChannelInSession() const
+{
+    auto session = (std::get<session::Manager&>(singletonPool).getSession(
+                    sessionID)).lock();
+
+    session->channelPtr = channel;
+}
+
 } //namespace message
 

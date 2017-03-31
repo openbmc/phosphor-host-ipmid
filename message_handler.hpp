@@ -62,11 +62,14 @@ class Handler
          */
         int send(Message& outMessage);
 
+        /** @brief Set socket channel in session object */
+        void setChannelInSession() const;
+
         // BMC Session ID for the Channel
         session::SessionID sessionID;
 
     private:
-        // Socket channel for communicating with the remote client
+        /** @brief Socket channel for communicating with the remote client.*/
         std::shared_ptr<udpsocket::Channel> channel;
 
         // IPMI 1.5 or IPMI 2.0 Session Header
