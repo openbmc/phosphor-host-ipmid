@@ -88,7 +88,7 @@ AS_IF([test "x$enable_softoff" != "xno"],
     # Service dbus root
     [AC_ARG_VAR(SOFTOFF_OBJPATH, [The SoftPowerOff Dbus root])]
     AS_IF([test "x$SOFTOFF_OBJPATH" == "x"],
-          [SOFTOFF_OBJPATH="/xyz/openbmc_project/ipmi/internal/softpoweroff"])
+          [SOFTOFF_OBJPATH="/xyz/openbmc_project/ipmi/internal/soft_power_off"])
     [AC_DEFINE_UNQUOTED([SOFTOFF_OBJPATH], ["$SOFTOFF_OBJPATH"], [The SoftPowerOff Dbus root])]
 
     # Timeouts in SECONDS for SoftPowerOff protocol

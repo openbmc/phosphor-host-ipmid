@@ -1,5 +1,6 @@
 #include "systemintfcmds.h"
 #include "host-ipmid/ipmid-api.h"
+#include "config.h"
 
 #include <stdio.h>
 #include <mapper.h>
@@ -21,8 +22,6 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     //        mechanism. If we need to make this generically used for some
     //        other conditions, then we can take advantage of context pointer.
 
-    constexpr auto objname        = "/xyz/openbmc_project/ipmi/internal/"
-                                    "softpoweroff";
     constexpr auto iface          = "org.freedesktop.DBus.Properties";
     constexpr auto soft_off_iface = "xyz.openbmc_project.Ipmi.Internal."
                                     "SoftPowerOff";
@@ -41,11 +40,11 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Nudge the SoftPowerOff application that it needs to stop the
     // initial watchdog timer. If we have some errors talking to Soft Off
     // object, get going and do our regular job
-    mapper_get_service(bus, objname, &busname);
+    mapper_get_service(bus, SOFTOFF_OBJPATH, &busname);
     if (busname)
     {
         // No error object or reply expected.
-        auto r = sd_bus_call_method(bus, busname, objname, iface,
+        auto r = sd_bus_call_method(bus, busname, SOFTOFF_OBJPATH, iface,
                                  "Set", nullptr, nullptr, "ssv",
                                  soft_off_iface, property, "s", value);
         if (r < 0)
