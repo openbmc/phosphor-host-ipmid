@@ -51,6 +51,12 @@ int Timer::timeoutHandler(sd_event_source* eventSource,
     auto timer = static_cast<Timer*>(userData);
     timer->expired = true;
 
+    // Call optional user call back function if available
+    if(timer->userCallBack)
+    {
+        timer->userCallBack();
+    }
+
     log<level::INFO>("Timer expired");
     return 0;
 }
