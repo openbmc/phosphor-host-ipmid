@@ -10,8 +10,8 @@ BUILT_SOURCES = ipmiwhitelist.cpp sensor-gen.cpp
 CLEANFILES = $(BUILT_SOURCES)
 
 #TODO - Make this path a configure option (bitbake parameter)
-ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\"
-ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) -export-dynamic
+ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" $(PHOSPHOR_LOGGING_CFLAGS)
+ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) $(PHOSPHOR_LOGGING_LIBS) -export-dynamic
 # TODO: Rather than use -export-dynamic, we should use -export-symbol to have a
 #       selective list of symbols.
 

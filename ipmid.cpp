@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <map>
+#include <phosphor-logging/log.hpp>
 #include "ipmid.hpp"
 #include <sys/time.h>
 #include <errno.h>
@@ -18,8 +19,11 @@
 #include <iterator>
 #include <ipmiwhitelist.hpp>
 
+using namespace phosphor::logging;
+
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
+sd_event *events = nullptr;
 
 // Initialise restricted mode to true
 bool restricted_mode = true;
@@ -471,6 +475,10 @@ sd_bus *ipmid_get_sd_bus_connection(void) {
     return bus;
 }
 
+sd_event *ipmid_get_sd_event_connection(void) {
+    return events;
+}
+
 sd_bus_slot *ipmid_get_sd_bus_slot(void) {
     return ipmid_slot;
 }
@@ -516,6 +524,16 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
+    /* Get an sd event handler */
+    r = sd_event_default(&events);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to create sd_event handler",
+                entry("ERROR=%s", strerror(-r)));
+        goto finish;
+    }
+
+
     // Register all the handlers that provider implementation to IPMI commands.
     ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
 
@@ -533,28 +551,26 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
-    // Initialise restricted mode
+    // Attach the bus to sd_event to service user requests
+    sd_bus_attach_event(bus, events, SD_EVENT_PRIORITY_NORMAL);
+
+    // Initialize restricted mode
     cache_restricted_mode();
 
     for (;;) {
         /* Process requests */
-        r = sd_bus_process(bus, NULL);
-        if (r < 0) {
-            fprintf(stderr, "Failed to process bus: %s\n", strerror(-r));
-            goto finish;
-        }
-        if (r > 0) {
-            continue;
-        }
-
-        r = sd_bus_wait(bus, (uint64_t) - 1);
-        if (r < 0) {
-            fprintf(stderr, "Failed to wait on bus: %s\n", strerror(-r));
+        r = sd_event_run(events, (uint64_t)-1);
+        if (r < 0)
+        {
+            log<level::ERR>("Failure in processing request",
+                    entry("ERROR=%s", strerror(-r)));
             goto finish;
         }
     }
 
 finish:
+    sd_event_unref(events);
+    sd_bus_detach_event(bus);
     sd_bus_slot_unref(ipmid_slot);
     sd_bus_unref(bus);
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
