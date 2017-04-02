@@ -209,7 +209,7 @@ int main(int i_argc, char* i_argv[])
     sol::command::registerCommands();
 
     // Start Event Loop
-    return eventloop::startEventLoop();
+    return std::get<eventloop::EventLoop&>(singletonPool).startEventLoop();
 
 finish:
     sd_bus_unref(bus);
