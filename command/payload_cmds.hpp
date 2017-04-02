@@ -173,6 +173,84 @@ struct DeactivatePayloadResponse
 std::vector<uint8_t> deactivatePayload(std::vector<uint8_t>& inPayload,
                                        const message::Handler& handler);
 
+/** @struct GetPayloadStatusRequest
+ *
+ *  IPMI payload for Get Payload Activation Status command request.
+ */
+struct GetPayloadStatusRequest
+{
+    uint8_t payloadType;    //!< Payload type
+} __attribute__((packed));
+
+/** @struct GetPayloadStatusResponse
+ *
+ *  IPMI payload for Get Payload Activation Status command response.
+ */
+struct GetPayloadStatusResponse
+{
+    uint8_t completionCode; //!< Completion code.
+
+    uint8_t capacity;       //!< Instance capacity.
+
+    /* @brief Activation Status. */
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t instance1 : 1;  //!< If true, Instance 1 is activated.
+    uint8_t instance2 : 1;  //!< If true, Instance 2 is activated.
+    uint8_t instance3 : 1;  //!< If true, Instance 3 is activated.
+    uint8_t instance4 : 1;  //!< If true, Instance 4 is activated.
+    uint8_t instance5 : 1;  //!< If true, Instance 5 is activated.
+    uint8_t instance6 : 1;  //!< If true, Instance 6 is activated.
+    uint8_t instance7 : 1;  //!< If true, Instance 7 is activated.
+    uint8_t instance8 : 1;  //!< If true, Instance 8 is activated.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t instance8 : 1;  //!< If true, Instance 8 is activated.
+    uint8_t instance7 : 1;  //!< If true, Instance 7 is activated.
+    uint8_t instance6 : 1;  //!< If true, Instance 6 is activated.
+    uint8_t instance5 : 1;  //!< If true, Instance 5 is activated.
+    uint8_t instance4 : 1;  //!< If true, Instance 4 is activated.
+    uint8_t instance3 : 1;  //!< If true, Instance 3 is activated.
+    uint8_t instance2 : 1;  //!< If true, Instance 2 is activated.
+    uint8_t instance1 : 1;  //!< If true, Instance 1 is activated.
+#endif
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t instance9  : 1; //!< If true, Instance 9 is activated.
+    uint8_t instance10 : 1; //!< If true, Instance 10 is activated.
+    uint8_t instance11 : 1; //!< If true, Instance 11 is activated.
+    uint8_t instance12 : 1; //!< If true, Instance 12 is activated.
+    uint8_t instance13 : 1; //!< If true, Instance 13 is activated.
+    uint8_t instance14 : 1; //!< If true, Instance 14 is activated.
+    uint8_t instance15 : 1; //!< If true, Instance 15 is activated.
+    uint8_t instance16 : 1; //!< If true, Instance 16 is activated.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t instance16 : 1; //!< If true, Instance 16 is activated.
+    uint8_t instance15 : 1; //!< If true, Instance 15 is activated.
+    uint8_t instance14 : 1; //!< If true, Instance 14 is activated.
+    uint8_t instance13 : 1; //!< If true, Instance 13 is activated.
+    uint8_t instance12 : 1; //!< If true, Instance 12 is activated.
+    uint8_t instance11 : 1; //!< If true, Instance 11 is activated.
+    uint8_t instance10 : 1; //!< If true, Instance 10 is activated.
+    uint8_t instance9  : 1; //!< If true, Instance 9 is activated.
+#endif
+} __attribute__((packed));
+
+/** @brief Get Payload Activation Status Command.
+ *
+ *  This command returns how many instances of a given payload type are
+ *  presently activated, and how many total instances can be activated.
+ *
+ *  @param[in] inPayload - Request Data for the command.
+ *  @param[in] handler - Reference to the Message Handler.
+ *
+ *  @return Response data for the command
+ */
+std::vector<uint8_t> getPayloadStatus(std::vector<uint8_t>& inPayload,
+                                      const message::Handler& handler);
+
 } // namespace command
 
 } // namespace sol
