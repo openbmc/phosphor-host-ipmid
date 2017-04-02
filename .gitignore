@@ -36,7 +36,7 @@ Makefile.in
 /texinfo.tex
 
 # Repo Specific Items
-/*.o
+*.o
 /config.h
 /config.h.in~
 /config.log
@@ -46,5 +46,12 @@ Makefile
 /lib*
 /*-libtool
 /ipmid
+/softoff/phosphor-softpoweroff
+/softoff/test/utest
+/softoff/test/*.log
+/softoff/test/*.trs
+/test/sample_unittest
+/test/*.log
+/test/*.trs
 /ipmiwhitelist.cpp
 /sensor-gen.cpp
