@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <systemd/sd-event.h>
 namespace phosphor
 {
@@ -22,9 +23,12 @@ class Timer
         /** @brief Constructs timer object
          *
          *  @param[in] events - sd_event pointer
+         *  @param[in] funcCallBack - optional function callback for timer
+         *                            expirations
          */
-        Timer(sd_event* events)
-            : timeEvent(events)
+        Timer(sd_event* events,
+              std::function<void()> userCallBack = nullptr)
+            : timeEvent(events), userCallBack(userCallBack)
         {
             // Initialize the timer
             initialize();
@@ -87,6 +91,9 @@ class Timer
 
         /** @brief Gets the current time from steady clock */
         static std::chrono::microseconds getTime();
+
+        /** @brief Optional function to call on timer expiration */
+        std::function<void()> userCallBack;
 };
 
 } // namespace ipmi
