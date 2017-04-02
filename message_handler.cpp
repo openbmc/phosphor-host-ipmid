@@ -163,7 +163,7 @@ uint32_t Handler::getCommand(Message& message)
     return command;
 }
 
-int Handler::send(Message& outMessage)
+void Handler::send(Message& outMessage)
 {
     auto session = (std::get<session::Manager&>(singletonPool).getSession(
                     sessionID)).lock();
@@ -171,15 +171,12 @@ int Handler::send(Message& outMessage)
     // Flatten the packet
     auto packet = parser::flatten(outMessage, sessionHeader, *session);
 
-    // Read the packet
+    // Write the packet
     auto writeStatus = channel->write(packet);
     if (writeStatus < 0)
     {
-        std::cerr << "E> Error in writing : " << std::hex << writeStatus
-                  << "\n";
+        throw std::runtime_error("Error in writing to socket");
     }
-
-    return writeStatus;
 }
 
 void Handler::setChannelInSession() const
