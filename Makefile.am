@@ -48,7 +48,9 @@ netipmid_SOURCES = \
 	sol/sol_manager.cpp \
 	sol/sol_context.cpp \
 	command/sol_cmds.hpp \
-	command/sol_cmds.cpp
+	command/sol_cmds.cpp \
+	command/payload_cmds.hpp \
+	command/payload_cmds.cpp
 
 netipmid_CPPFLAGS = -DNET_IPMID_LIB_PATH=\"/usr/lib/net-ipmid/\"
 netipmid_LDFLAGS = $(SYSTEMD_LIBS) $(CRYPTO_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(LIBADD_DLOPEN) -export-dynamic
