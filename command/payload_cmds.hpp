@@ -111,6 +111,68 @@ struct ActivatePayloadResponse
 std::vector<uint8_t> activatePayload(std::vector<uint8_t>& inPayload,
                                      const message::Handler& handler);
 
+constexpr uint8_t IPMI_CC_PAYLOAD_DEACTIVATED = 0x80;
+
+/** @struct DeactivatePayloadRequest
+ *
+ *  IPMI payload for Deactivate Payload command request.
+ */
+struct DeactivatePayloadRequest
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t payloadType : 6;        //!< Payload type.
+    uint8_t reserved1 : 2;          //!< Reserved.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved1 : 2;          //!< Payload type.
+    uint8_t payloadType : 6;        //!< Reserved.
+#endif
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t payloadInstance : 4;    //!< Payload instance.
+    uint8_t reserved2 : 4;          //!< Reserved.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved2 : 4;          //!< Reserved.
+    uint8_t payloadInstance : 4;    //!< Payload instance.
+#endif
+
+    /** @brief No auxiliary data for payload type SOL */
+    uint8_t auxData1;               //!< Auxiliary data 1
+    uint8_t auxData2;               //!< Auxiliary data 2
+    uint8_t auxData3;               //!< Auxiliary data 3
+} __attribute__((packed));
+
+/** @struct DeactivatePayloadResponse
+ *
+ * IPMI payload for Deactivate Payload Command response.
+ */
+struct DeactivatePayloadResponse
+{
+    uint8_t completionCode;         //!< Completion code
+} __attribute__((packed));
+
+/** @brief Deactivate Payload Command.
+ *
+ *  This command is used to terminate use of a given payload on an IPMI session.
+ *  This type of traffic then becomes freed for activation by another session,
+ *  or for possible re-activation under the present session.The Deactivate
+ *  Payload command does not cause the session to be terminated. The Close
+ *  Session command should be used for that purpose. A remote console
+ *  terminating a application does not need to explicitly deactivate payload(s)
+ *  prior to session. When a session terminates all payloads that were active
+ *  under that session are automatically deactivated by the BMC.
+ *
+ * @param[in] inPayload - Request data for the command.
+ * @param[in] handler - Reference to the message handler.
+ *
+ * @return Response data for the command.
+ */
+std::vector<uint8_t> deactivatePayload(std::vector<uint8_t>& inPayload,
+                                       const message::Handler& handler);
+
 } // namespace command
 
 } // namespace sol

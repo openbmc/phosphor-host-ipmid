@@ -81,6 +81,67 @@ std::vector<uint8_t> activatePayload(std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
+std::vector<uint8_t> deactivatePayload(std::vector<uint8_t>& inPayload,
+                                       const message::Handler& handler)
+{
+    std::vector<uint8_t> outPayload(sizeof(DeactivatePayloadResponse));
+    auto request = reinterpret_cast<DeactivatePayloadRequest*>
+            (inPayload.data());
+    auto response = reinterpret_cast<DeactivatePayloadResponse*>
+            (outPayload.data());
+
+    response->completionCode = IPMI_CC_OK;
+
+    // SOL is the payload currently supported for deactivation
+    if (static_cast<uint8_t>(message::PayloadType::SOL) != request->payloadType)
+    {
+        response->completionCode = IPMI_CC_INVALID_FIELD_REQUEST;
+        return outPayload;
+    }
+
+    // Only one instance of SOL is supported
+    if (request->payloadInstance != 1)
+    {
+        response->completionCode = IPMI_CC_INVALID_FIELD_REQUEST;
+        return outPayload;
+    }
+
+    auto status = std::get<sol::Manager&>(singletonPool).isPayloadActive(
+            request->payloadInstance);
+    if (!status)
+    {
+        response->completionCode = IPMI_CC_PAYLOAD_DEACTIVATED;
+        return outPayload;
+    }
+
+    try
+    {
+        auto& context = std::get<sol::Manager&>(singletonPool).getContext
+                (request->payloadInstance);
+        auto sessionID = context.sessionID;
+
+        activating(request->payloadInstance, sessionID);
+        std::get<sol::Manager&>(singletonPool).stopPayloadInstance(
+                request->payloadInstance);
+
+        auto check = std::get<session::Manager&>(singletonPool).stopSession
+                (sessionID);
+        if(!check)
+        {
+            response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(e.what());
+        response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
+        return outPayload;
+    }
+
+    return outPayload;
+}
+
 } // namespace command
 
 } // namespace sol
+
