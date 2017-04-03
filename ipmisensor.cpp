@@ -4,7 +4,7 @@
 #include <malloc.h>
 #include "sensorhandler.h"
 
-extern uint8_t find_sensor(uint8_t);
+extern uint8_t find_type_for_sensor_number(uint8_t);
 
 
 struct sensorRES_t {
@@ -259,7 +259,7 @@ int updateSensorRecordFromSSRAESC(const void *record) {
 	uint8_t stype;
 	int index, i=0;
 
-	stype = find_sensor(pRec->sensor_number);
+	stype = find_type_for_sensor_number(pRec->sensor_number);
 
 	// 0xC3 types use the assertion7_0 for the value to be set
 	// so skip the reseach and call the correct event reporting
