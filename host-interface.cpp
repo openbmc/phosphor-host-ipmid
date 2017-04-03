@@ -1,6 +1,9 @@
+#include <chrono>
 #include <phosphor-logging/log.hpp>
 #include <utils.hpp>
+#include <config.h>
 #include "host-interface.hpp"
+#include "elog-errors.hpp"
 
 namespace phosphor
 {
@@ -16,10 +19,45 @@ using namespace phosphor::logging;
 // When you see base:: you know we're referencing our base class
 namespace base = sdbusplus::xyz::openbmc_project::Control::server;
 
-// TODO - Add timeout function?
-//          - If host does not respond to SMS, need to signal a failure
-//      - Flush queue on power off?  - Timeout would do this for us for free
-//      - Ignore requests when host state not running? - Timeout handles too
+base::Host::Command Host::getNextCommand()
+{
+    // Stop the timer
+    auto r = timer.setTimer(SD_EVENT_OFF);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to STOP the timer",
+                entry("ERROR=%s", strerror(-r)));
+    }
+
+    if(this->workQueue.empty())
+    {
+        log<level::ERR>("Control Host work queue is empty!");
+        elog<xyz::openbmc_project::Control::Internal::Host::QueueEmpty>();
+    }
+
+    // Pop the processed entry off the queue
+    Command command = this->workQueue.front();
+    this->workQueue.pop();
+
+    // Issue command complete signal
+    this->commandComplete(command, Result::Success);
+
+    // Check for another entry in the queue and kick it off
+    this->checkQueue();
+    return command;
+}
+
+void Host::hostTimeout()
+{
+    log<level::ERR>("Host control timeout hit!");
+    // Dequeue all entries and send fail signal
+    while(!this->workQueue.empty())
+    {
+        auto command = this->workQueue.front();
+        this->workQueue.pop();
+        this->commandComplete(command,Result::Failure);
+    }
+}
 
 void Host::checkQueue()
 {
@@ -30,7 +68,17 @@ void Host::checkQueue()
         std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
         std::string IPMI_INTERFACE("org.openbmc.HostIpmi");
 
-        auto host = ipmi::getService(this->bus,IPMI_INTERFACE,IPMI_PATH);
+        auto host = ::ipmi::getService(this->bus,IPMI_INTERFACE,IPMI_PATH);
+
+        // Start the timer for this transaction
+        auto time = std::chrono::duration_cast<std::chrono::microseconds>(
+                        std::chrono::seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
+        auto r = timer.startTimer(time);
+        if (r < 0)
+        {
+            log<level::ERR>("Error starting timer for control host");
+            return;
+        }
 
         auto method = this->bus.new_method_call(host.c_str(),
                                                 IPMI_PATH.c_str(),

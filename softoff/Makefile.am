@@ -2,9 +2,11 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 AM_CPPFLAGS = -I$(top_srcdir)
 sbin_PROGRAMS = phosphor-softpoweroff
 
+# Using ../ instead of $(top_srcdir) due to automake bug in version 1.15.
+#  https://debbugs.gnu.org/cgi/bugreport.cgi?bug=13928
 phosphor_softpoweroff_SOURCES = \
                     softoff.cpp \
-                    timer.cpp   \
+                    ../timer.cpp   \
                     mainapp.cpp \
                     xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp
 
