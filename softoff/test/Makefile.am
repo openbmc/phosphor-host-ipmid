@@ -9,4 +9,4 @@ utest_CPPFLAGS = -Igtest $(GTEST_CPPFLAGS) $(AM_CPPFLAGS)
 utest_CXXFLAGS = $(PTHREAD_CFLAGS)
 utest_LDFLAGS = -lgtest_main -lgtest $(PTHREAD_LIBS) $(OESDK_TESTCASE_FLAGS) $(SYSTEMD_LIBS) ${SDBUSPLUS_LIBS}
 utest_SOURCES = utest.cpp
-utest_LDADD = $(top_builddir)/softoff/timer.o
+utest_LDADD = $(top_builddir)/timer.o

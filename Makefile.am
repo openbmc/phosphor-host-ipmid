@@ -45,7 +45,8 @@ libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
 libsysintfcmds_la_SOURCES = \
 	systemintfcmds.cpp \
 	host-interface.cpp \
-	utils.cpp
+	utils.cpp \
+	timer.cpp
 libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) \
                             $(libmapper_LIBS) \
                             $(PHOSPHOR_DBUS_INTERFACES_LIBS) \
