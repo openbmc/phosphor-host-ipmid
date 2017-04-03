@@ -31,8 +31,13 @@ void register_host_services()
     sdbusplus::server::manager::manager objManager(*sdbus,
                                                    objPathInst.c_str());
 
+    // Get the sd_events pointer
+    auto events = ipmid_get_sd_event_connection();
+
     host = std::make_unique<phosphor::host::Host>(*sdbus,
-                                                  objPathInst.c_str());
+                                                  objPathInst.c_str(),
+												  events);
+
 }
 
 phosphor::host::Host::Command getNextCmd()
