@@ -3,6 +3,7 @@
 #include <queue>
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
+#include <softoff/timer.hpp>
 
 namespace phosphor
 {
@@ -22,13 +23,17 @@ class Host : public sdbusplus::server::object::object<
          *
          * @param[in] bus       - The Dbus bus object
          * @param[in] objPath   - The Dbus object path
+         * @param[in] events    - The sd_event pointer
          */
         Host(sdbusplus::bus::bus& bus,
-             const char* objPath) :
+             const char* objPath,
+             sd_event* events) :
              sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Control::server::Host>(
                         bus, objPath),
-             bus(bus)
+             bus(bus),
+             timer(events,
+                   std::bind(&Host::hostTimeout,this))
         {}
 
         /** @brief Queue input command to be executed
@@ -44,25 +49,24 @@ class Host : public sdbusplus::server::object::object<
          *  passed to the host (which is required when calling this interface)
          *
          */
-        Command getNextQueue()
-        {
-            Command command = this->workQueue.front();
-            this->workQueue.pop();
-            this->commandComplete(command,Result::Success);
-            this->checkQueue();
-            return (command);
-        }
+        Command getNextQueue();
 
     private:
 
         /** @brief Check if anything in queue and alert host if so */
         void checkQueue();
 
+        /** @brief Call back interface on message timeouts to host */
+        void hostTimeout();
+
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& bus;
 
         /** @brief Queue to store the requested commands */
         std::queue<Command> workQueue{};
+
+        /** @brief Timer for commands to host */
+        phosphor::ipmi::Timer timer;
 };
 
 } // namespace host
