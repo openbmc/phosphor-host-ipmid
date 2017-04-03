@@ -4,7 +4,7 @@ sbin_PROGRAMS = phosphor-softpoweroff
 
 phosphor_softpoweroff_SOURCES = \
                     softoff.cpp \
-                    timer.cpp   \
+                    ../timer.cpp   \
                     mainapp.cpp \
                     xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp
 
