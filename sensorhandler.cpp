@@ -287,35 +287,40 @@ uint8_t dbus_to_sensor_type_from_dbus(dbus_interface_t *a) {
     }
 }
 
+uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
 
-uint8_t find_sensor(uint8_t sensor_number) {
-
-    dbus_interface_t a;
     char *p;
-    int r;
     uint8_t type;
-
-    r = find_openbmc_path("SENSOR", sensor_number, &a);
-
-    if (r < 0) { return 0; }
 
     // This is where sensors that do not exist in dbus but do
     // exist in the host code stop.  This should indicate it
     // is not a supported sensor
-    if (a.interface[0] == 0) { return 0;}
+    if (dbus_if.interface[0] == 0) { return 0;}
 
-    if (strstr(a.interface, "InventoryItem")) {
+    if (strstr(dbus_if.interface, "InventoryItem")) {
         // InventoryItems are real frus.  So need to get the
         // fru_type property
-        type = dbus_to_sensor_type_from_dbus(&a);
+        type = dbus_to_sensor_type_from_dbus(&dbus_if);
     } else {
         // Non InventoryItems
-        p = strrchr (a.path, '/');
+        p = strrchr (dbus_if.path, '/');
         type = dbus_to_sensor_type(p+1);
     }
 
     return type;
  }
+
+// Replaces find_sensor
+uint8_t find_type_for_sensor_number(uint8_t num) {
+    int r;
+    dbus_interface_t dbus_if;
+    r = find_openbmc_path("SENSOR", num, &dbus_if);
+    if (r < 0) {
+        fprintf(stderr, "Could not find sensor %d\n", num);
+        return r;
+    }
+    return get_type_from_interface(dbus_if);
+}
 
 
 
@@ -334,7 +339,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // need to ask Hostboot team
     unsigned char buf[] = {0x00,0x6F};
 
-    buf[0] = find_sensor(reqptr->sennum);
+    buf[0] = find_type_for_sensor_number(reqptr->sennum);
 
     // HACK UNTIL Dbus gets updated or we find a better way
     if (buf[0] == 0) {
@@ -489,7 +494,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_SENSOR_INVALID;
     }
 
-    type = find_sensor(reqptr->sennum);
+    type = get_type_from_interface(a);
     if(type == 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
         return IPMI_CC_SENSOR_INVALID;
