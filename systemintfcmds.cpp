@@ -182,8 +182,12 @@ void register_netfn_app_functions()
     sdbusplus::server::manager::manager objManager(*sdbus,
                                                    objPathInst.c_str());
 
+    // Get the sd_events pointer
+    auto events = ipmid_get_sd_event_connection();
+
     host = new phosphor::host::Host(*sdbus,
-                                    objPathInst.c_str());
+                                    objPathInst.c_str(),
+                                    events);
 
     sdbus->request_name(CONTROL_HOST_BUSNAME);
 
