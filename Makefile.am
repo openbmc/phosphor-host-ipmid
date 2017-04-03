@@ -52,7 +52,8 @@ libhostservice_LTLIBRARIES = libhostservice.la
 libhostservice_la_SOURCES = \
 	host-services.cpp \
 	host-interface.cpp \
-	utils.cpp
+	utils.cpp \
+	timer.cpp
 libhostservice_la_LDFLAGS = $(SYSTEMD_LIBS) \
                             $(libmapper_LIBS) \
                             $(PHOSPHOR_DBUS_INTERFACES_LIBS) \
