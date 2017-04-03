@@ -12,7 +12,7 @@ unsigned char g_sensortype [][2] = {
     {0xFF ,0xff}
 };
 
-uint8_t find_sensor(uint8_t sensor_number) {
+uint8_t find_type_for_sensor_number(uint8_t sensor_number) {
 
     int i=0;
     uint8_t rc; 
