@@ -50,7 +50,10 @@ void register_host_services()
     // Add sdbusplus ObjectManager.
     sdbusplus::server::manager::manager objManager(sdbus, objPathInst.c_str());
 
-    host = new phosphor::host::Host(sdbus, objPathInst.c_str());
+    // Get the sd_events pointer
+    auto events = ipmid_get_sd_event_connection();
+
+    host = new phosphor::host::Host(sdbus, objPathInst.c_str(), events);
 
     sdbus.request_name(CONTROL_HOST_BUSNAME);
 
