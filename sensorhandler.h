@@ -11,6 +11,15 @@ enum ipmi_netfn_sen_cmds
     IPMI_CMD_SET_SENSOR      = 0x30,
 };
 
+// Discrete sensor types.
+enum ipmi_sensor_types
+{
+    IPMI_SENSOR_TEMP    = 0x01,
+    IPMI_SENSOR_VOLTAGE = 0x02,
+    IPMI_SENSOR_CURRENT = 0x03,
+    IPMI_SENSOR_FAN     = 0x04,
+};
+
 #define MAX_DBUS_PATH 128
 struct dbus_interface_t {
     uint8_t  sensornumber;
