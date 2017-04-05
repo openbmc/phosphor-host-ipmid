@@ -15,7 +15,7 @@ sd_bus *bus = NULL;
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
 // step for mapping IPMI
-int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
+int find_openbmc_path(const uint8_t num, dbus_interface_t *interface) {
 
     const char  *objname = "/org/openbmc/managers/System";
 
