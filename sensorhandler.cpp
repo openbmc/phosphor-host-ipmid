@@ -659,6 +659,35 @@ ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request, ipmi_response_t response,
+                                 ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    GetSdrInfoReq *req = (GetSdrInfoReq*)&request;
+    GetSdrInfoResp *resp = (GetSdrInfoResp*)response;
+
+    if (req == NULL || req->sdr_count == false)
+    {
+        // Get Sensor Count
+        resp->count = sensors.size();
+    }
+    else
+    {
+        resp->count = 1; // only one SDR
+    }
+
+    // TODO: how to check the LUN from the request? Will the BMC ever have >1?
+    resp->info.lun0_present = !sensors.empty();
+    resp->info.lun1_present = false;
+    resp->info.lun2_present = false;
+    resp->info.lun3_present = false;
+    resp->info.dynamic_population = false;
+
+    *data_len = sizeof(GetSdrInfoResp);
+
+    return IPMI_CC_OK;
+}
+
 
 void register_netfn_sen_functions()
 {
@@ -682,5 +711,9 @@ void register_netfn_sen_functions()
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, NULL,
                            ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
 
+    // <Get SDR Info>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO, NULL,
+                           ipmi_sen_get_sdr_info, PRIVILEGE_USER);
     return;
 }
