@@ -1,4 +1,5 @@
 #include <mapper.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <bitset>
@@ -556,6 +557,9 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     *data_len=0;
 
+    int64_t raw_value, scale;
+    ipmi::sensor::Info sensor;
+
     switch(type) {
         case 0xC3:
         case 0xC2:
@@ -582,6 +586,58 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             resp->operation     = 0;
             resp->indication[0] = 0;
             resp->indication[1] = 0;
+            break;
+
+        case IPMI_SENSOR_TEMP:
+        case IPMI_SENSOR_VOLTAGE:
+        case IPMI_SENSOR_CURRENT:
+        case IPMI_SENSOR_FAN:
+            // Get reading for /xyz/openbmc_project/Sensor/Value.interface
+
+            // Get value
+            r = sd_bus_get_property_trivial(bus,
+                                            a.bus,
+                                            a.path,
+                                            a.interface,
+                                            "Value",
+                                            NULL,
+                                            'x',
+                                            &raw_value);
+            if (r < 0) {
+                fprintf(stderr,
+                        "Failed to call sd_bus_get_property:%d,  %s, 'value'\n",
+                        r,
+                        strerror(-r));
+                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
+                        a.bus, a.path, a.interface);
+                break;
+            }
+
+            // Get scale
+            r = sd_bus_get_property_trivial(bus,
+                                            a.bus,
+                                            a.path,
+                                            a.interface,
+                                            "Scale",
+                                            NULL,
+                                            'x',
+                                            &scale);
+            if (r < 0) {
+                fprintf(stderr,
+                        "Failed to call sd_bus_get_property:%d,  %s (scale)\n",
+                        r,
+                        strerror(-r));
+                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
+                        a.bus, a.path, a.interface);
+                break;
+            }
+
+            resp->value = raw_value * pow(10,scale);
+            resp->operation = 0;
+            resp->indication[0] = 0;
+            resp->indication[1] = 0;
+            rc = IPMI_CC_OK;
+            *data_len=sizeof(sensorreadingresp_t);
             break;
 
         default:
