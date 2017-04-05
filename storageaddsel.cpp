@@ -58,7 +58,7 @@ int find_sensor_type_string(uint8_t sensor_number, char **s) {
 	const char *p;
 	int r;
 
-	r = find_openbmc_path("SENSOR", sensor_number, &a);
+	r = find_openbmc_path(sensor_number, &a);
 
 	if ((r < 0) || (a.bus[0] == 0)) {
 		// Just make a generic message for errors that
@@ -140,7 +140,7 @@ int create_esel_association(const uint8_t *buffer, char **m) {
 
 	sensor = p->sensornumber;
 
-	find_openbmc_path("SENSOR", sensor, &dbusint);
+	find_openbmc_path(sensor, &dbusint);
 
 	// Simply no associations if the sensor can not be found
 	if (strlen(dbusint.path) < 1) {
