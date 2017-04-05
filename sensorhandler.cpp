@@ -105,11 +105,11 @@ final:
     return r;
 }
 
+int get_bus_for_path(const char *path, char **busname) {
+    return mapper_get_service(bus, path, busname);
+}
 
-// Use a lookup table to find the interface name of a specific sensor
-// This will be used until an alternative is found.  this is the first
-// step for mapping IPMI
-int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
+int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
     char  *busname = NULL;
     const char  *iface = "org.openbmc.managers.System";
     const char  *objname = "/org/openbmc/managers/System";
@@ -139,7 +139,7 @@ int find_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *int
         goto final;
     }
 
-    r = mapper_get_service(bus, str2, &str1);
+    r = get_bus_for_path(str2, &str1);
     if (r < 0) {
         fprintf(stderr, "Failed to get %s busname: %s\n",
                 str2, strerror(-r));
@@ -162,6 +162,42 @@ final:
     return r;
 }
 
+// Use a lookup table to find the interface name of a specific sensor
+// This will be used until an alternative is found.  this is the first
+// step for mapping IPMI
+int find_openbmc_path(const uint8_t num, dbus_interface_t *interface) {
+    int rc;
+
+    // When the sensor map does not contain the sensor requested,
+    // fall back to the legacy DBus lookup (deprecated)
+    if (sensors.find(num) == sensors.end())
+    {
+        return legacy_dbus_openbmc_path("SENSOR", num, interface);
+    }
+
+    ipmi::sensor::Info info = sensors.at(num);
+
+    char* busname;
+    rc = get_bus_for_path(info.sensorPath.c_str(), &busname);
+    if (rc < 0) {
+        fprintf(stderr, "Failed to get %s busname: %s\n",
+                info.sensorPath.c_str(),
+                busname);
+        return rc;
+    }
+
+    interface->sensortype = info.sensorType;
+    strcpy(interface->bus, busname);
+    strcpy(interface->path, info.sensorPath.c_str());
+    // Take the interface name from the beginning of the DbusInterfaceMap
+    // I don't really get why we could use multiple interfaces, except for
+    // SetReading.
+    strcpy(interface->interface, info.sensorInterfaces.begin()->first.c_str());
+    interface->sensornumber = num;
+
+    return rc;
+}
+
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -179,7 +215,7 @@ int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *valu
     fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of %s\n",
         number, method, value);
 
-    r = find_openbmc_path("SENSOR", number, &a);
+    r = find_openbmc_path(number, &a);
 
     if (r < 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
@@ -221,7 +257,7 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
     fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of 0x%02x\n",
         number, method, value);
 
-    r = find_openbmc_path("SENSOR", number, &a);
+    r = find_openbmc_path(number, &a);
 
     if (r < 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
@@ -314,7 +350,7 @@ uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
 uint8_t find_type_for_sensor_number(uint8_t num) {
     int r;
     dbus_interface_t dbus_if;
-    r = find_openbmc_path("SENSOR", num, &dbus_if);
+    r = find_openbmc_path(num, &dbus_if);
     if (r < 0) {
         fprintf(stderr, "Could not find sensor %d\n", num);
         return r;
@@ -487,7 +523,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
-    r = find_openbmc_path("SENSOR", reqptr->sennum, &a);
+    r = find_openbmc_path(reqptr->sennum, &a);
 
     if (r < 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
