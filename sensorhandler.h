@@ -23,7 +23,7 @@ struct dbus_interface_t {
 
 int set_sensor_dbus_state_s(uint8_t , const char *, const char *);
 int set_sensor_dbus_state_y(uint8_t , const char *, const uint8_t);
-int find_openbmc_path(const char *, const uint8_t , dbus_interface_t *);
+int find_openbmc_path(uint8_t , dbus_interface_t *);
 
 /**
  * @struct SetSensorReadingReq
