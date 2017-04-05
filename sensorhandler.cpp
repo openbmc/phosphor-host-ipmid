@@ -154,6 +154,9 @@ int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface
     strncpy(interface->interface, str3, MAX_DBUS_PATH);
 
     interface->sensornumber = num;
+    // Make sure we know that the type hasn't been set, as newer codebase will
+    // set it automatically from the YAML at this step.
+    interface->sensortype = 0;
 
 final:
 
@@ -340,7 +343,13 @@ uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
     // is not a supported sensor
     if (dbus_if.interface[0] == 0) { return 0;}
 
-    if (strstr(dbus_if.interface, "InventoryItem")) {
+    // Fetch type from interface itself.
+    if (dbus_if.sensortype != 0)
+    {
+        type = dbus_if.sensortype;
+    }
+    // Legacy codebase does not populate type during initial handling:
+    else if (strstr(dbus_if.interface, "InventoryItem")) {
         // InventoryItems are real frus.  So need to get the
         // fru_type property
         type = dbus_to_sensor_type_from_dbus(&dbus_if);
