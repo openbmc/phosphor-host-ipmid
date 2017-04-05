@@ -6,9 +6,10 @@
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
 {
+    IPMI_CMD_GET_SDR_INFO       = 0x20,
     IPMI_CMD_GET_SENSOR_READING = 0x2D,
-    IPMI_CMD_GET_SENSOR_TYPE = 0x2F,
-    IPMI_CMD_SET_SENSOR      = 0x30,
+    IPMI_CMD_GET_SENSOR_TYPE    = 0x2F,
+    IPMI_CMD_SET_SENSOR         = 0x30,
 };
 
 #define MAX_DBUS_PATH 128
@@ -44,4 +45,26 @@ struct SetSensorReadingReq
     uint8_t eventData3;
 } __attribute__((packed));
 
+struct GetSdrInfoReq
+{
+    bool sdr_count : 1;
+} __attribute__((packed));
+
+struct GetSdrInfoResp
+{
+    uint8_t count;
+    struct {
+        // The first 4 bits indicate whether any sensors are present on the LUN
+        // indicated.
+        bool lun0_present       : 1;
+        bool lun1_present       : 1;
+        bool lun2_present       : 1;
+        bool lun3_present       : 1;
+        // Reserved
+        bool                    : 3;
+        // Indicates whether the sensors on the LUN addressed are populated
+        // dynamically (1) or statically (0)
+        bool dynamic_population : 1;
+    } __attribute__((packed)) info;
+} __attribute__((packed));
 #endif
