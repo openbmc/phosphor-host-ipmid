@@ -6,9 +6,10 @@
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
 {
+    IPMI_CMD_GET_SDR_INFO       = 0x20,
     IPMI_CMD_GET_SENSOR_READING = 0x2D,
-    IPMI_CMD_GET_SENSOR_TYPE = 0x2F,
-    IPMI_CMD_SET_SENSOR      = 0x30,
+    IPMI_CMD_GET_SENSOR_TYPE    = 0x2F,
+    IPMI_CMD_SET_SENSOR         = 0x30,
 };
 
 // Discrete sensor types.
@@ -53,4 +54,48 @@ struct SetSensorReadingReq
     uint8_t eventData3;
 } __attribute__((packed));
 
+/**
+ * Get SDR Info
+ */
+
+namespace get_sdr_info
+{
+namespace request
+{
+// Note: for some reason the ipmi_request_t appears to be the
+// raw value for this call.
+inline bool get_count(void* req)
+{
+    return (bool)((uint64_t)(req) & 1);
+}
+} // namespace request
+
+namespace response
+{
+#define SDR_INFO_RESP_SIZE 2
+inline void set_lun_present(int lun, uint8_t* resp)
+{
+    *resp |= 1 << lun;
+}
+inline void set_lun_not_present(int lun, uint8_t* resp)
+{
+    *resp &= ~(1 << lun);
+}
+inline void set_dynamic_population(uint8_t* resp)
+{
+    *resp |= 1 << 7;
+}
+inline void set_static_population(uint8_t* resp)
+{
+    *resp &= ~(1 << 7);
+}
+} // namespace response
+
+struct GetSdrInfoResp
+{
+    uint8_t count;
+    uint8_t luns_and_dynamic_population;
+};
+
+} // namespace get_sdr_info
 #endif

@@ -664,6 +664,37 @@ ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
+{
+    auto resp = static_cast<get_sdr_info::GetSdrInfoResp*>(response);
+    if (request == nullptr ||
+        get_sdr_info::request::get_count(request) == false)
+    {
+        // Get Sensor Count
+        resp->count = sensors.size();
+    }
+    else
+    {
+        resp->count = 1;
+    }
+
+    // Multiple LUNs not supported.
+    namespace response = get_sdr_info::response;
+    response::set_lun_present(0, &(resp->luns_and_dynamic_population));
+    response::set_lun_not_present(1, &(resp->luns_and_dynamic_population));
+    response::set_lun_not_present(2, &(resp->luns_and_dynamic_population));
+    response::set_lun_not_present(3, &(resp->luns_and_dynamic_population));
+    response::set_static_population(&(resp->luns_and_dynamic_population));
+
+    *data_len = SDR_INFO_RESP_SIZE;
+
+    return IPMI_CC_OK;
+}
+
 
 void register_netfn_sen_functions()
 {
@@ -687,5 +718,9 @@ void register_netfn_sen_functions()
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, NULL,
                            ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
 
+    // <Get SDR Info>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO, NULL,
+                           ipmi_sen_get_sdr_info, PRIVILEGE_USER);
     return;
 }
