@@ -199,7 +199,7 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     }
     catch (org::open_power::Error::Host::Event& e)
     {
-        commit(org::open_power::Error::Host::Event::err_code);
+        commit(org::open_power::Error::Host::Event::errName);
     }
 
     return 0;
