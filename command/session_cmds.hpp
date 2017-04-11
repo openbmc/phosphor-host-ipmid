@@ -71,8 +71,8 @@ struct SetSessionPrivLevelResp
  *
  * @return Response data for the command
  */
-std::vector<uint8_t> setSessionPrivilegeLevel(std::vector<uint8_t>& inPayload,
-                                              const message::Handler& handler);
+std::vector<uint8_t> setSessionPrivilegeLevel(
+        const std::vector<uint8_t>& inPayload, const message::Handler& handler);
 
 constexpr uint8_t IPMI_CC_INVALID_SESSIONID = 0x87;
 
@@ -112,7 +112,7 @@ struct CloseSessionResponse
  *
  * @return Response data for the command
  */
-std::vector<uint8_t> closeSession(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
                                   const message::Handler& handler);
 
 } // namespace command

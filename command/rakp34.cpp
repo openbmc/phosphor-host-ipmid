@@ -53,13 +53,13 @@ void applyCryptAlgo(const uint32_t bmcSessionID)
     }
 }
 
-std::vector<uint8_t> RAKP34(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
                             const message::Handler& handler)
 {
     std::cout << ">> RAKP34\n";
 
     std::vector<uint8_t> outPayload(sizeof(RAKP4response));
-    auto request = reinterpret_cast<RAKP3request*>(inPayload.data());
+    auto request = reinterpret_cast<const RAKP3request*>(inPayload.data());
     auto response = reinterpret_cast<RAKP4response*>(outPayload.data());
 
     // Check if the RAKP3 Payload Length is as expected

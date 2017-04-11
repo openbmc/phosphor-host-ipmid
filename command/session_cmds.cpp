@@ -9,13 +9,14 @@
 namespace command
 {
 
-std::vector<uint8_t> setSessionPrivilegeLevel(std::vector<uint8_t>& inPayload,
-                                              const message::Handler& handler)
+std::vector<uint8_t> setSessionPrivilegeLevel(
+        const std::vector<uint8_t>& inPayload, const message::Handler& handler)
 {
     std::cout << ">> setSessionPrivilegeLevel\n";
 
     std::vector<uint8_t> outPayload(sizeof(SetSessionPrivLevelResp));
-    auto request = reinterpret_cast<SetSessionPrivLevelReq*>(inPayload.data());
+    auto request = reinterpret_cast<const SetSessionPrivLevelReq*>
+                   (inPayload.data());
     auto response = reinterpret_cast<SetSessionPrivLevelResp*>
                     (outPayload.data());
     response->completionCode = IPMI_CC_OK;
@@ -44,13 +45,14 @@ std::vector<uint8_t> setSessionPrivilegeLevel(std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
-std::vector<uint8_t> closeSession(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
                                   const message::Handler& handler)
 {
     std::cout << ">> closeSession\n";
 
     std::vector<uint8_t> outPayload(sizeof(CloseSessionResponse));
-    auto request = reinterpret_cast<CloseSessionRequest*>(inPayload.data());
+    auto request = reinterpret_cast<const CloseSessionRequest*>
+                   (inPayload.data());
     auto response = reinterpret_cast<CloseSessionResponse*>(outPayload.data());
     response->completionCode = IPMI_CC_OK ;
 

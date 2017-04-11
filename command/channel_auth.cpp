@@ -7,8 +7,8 @@
 namespace command
 {
 
-std::vector<uint8_t> GetChannelCapabilities(std::vector<uint8_t>& inPayload,
-                                            const message::Handler& handler)
+std::vector<uint8_t> GetChannelCapabilities(
+        const std::vector<uint8_t>& inPayload, const message::Handler& handler)
 {
     std::cout << ">> GetChannelCapabilities\n";
 

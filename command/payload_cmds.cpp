@@ -13,11 +13,12 @@ namespace command
 
 using namespace phosphor::logging;
 
-std::vector<uint8_t> activatePayload(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
                                      const message::Handler& handler)
 {
     std::vector<uint8_t> outPayload(sizeof(ActivatePayloadResponse));
-    auto request = reinterpret_cast<ActivatePayloadRequest*>(inPayload.data());
+    auto request = reinterpret_cast<const ActivatePayloadRequest*>
+                   (inPayload.data());
     auto response = reinterpret_cast<ActivatePayloadResponse*>
                     (outPayload.data());
 
@@ -81,11 +82,11 @@ std::vector<uint8_t> activatePayload(std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
-std::vector<uint8_t> deactivatePayload(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
                                        const message::Handler& handler)
 {
     std::vector<uint8_t> outPayload(sizeof(DeactivatePayloadResponse));
-    auto request = reinterpret_cast<DeactivatePayloadRequest*>
+    auto request = reinterpret_cast<const DeactivatePayloadRequest*>
             (inPayload.data());
     auto response = reinterpret_cast<DeactivatePayloadResponse*>
             (outPayload.data());
@@ -141,11 +142,12 @@ std::vector<uint8_t> deactivatePayload(std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
-std::vector<uint8_t> getPayloadStatus(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> getPayloadStatus(const std::vector<uint8_t>& inPayload,
                                       const message::Handler& handler)
 {
     std::vector<uint8_t> outPayload(sizeof(GetPayloadStatusResponse));
-    auto request = reinterpret_cast<GetPayloadStatusRequest*>(inPayload.data());
+    auto request = reinterpret_cast<const GetPayloadStatusRequest*>
+                   (inPayload.data());
     auto response = reinterpret_cast<GetPayloadStatusResponse*>
                     (outPayload.data());
 

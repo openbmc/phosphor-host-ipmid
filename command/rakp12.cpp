@@ -14,13 +14,13 @@
 namespace command
 {
 
-std::vector<uint8_t> RAKP12(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
                             const message::Handler& handler)
 {
     std::cout << ">> RAKP12\n";
 
     std::vector<uint8_t> outPayload(sizeof(RAKP2response));
-    auto request = reinterpret_cast<RAKP1request*>(inPayload.data());
+    auto request = reinterpret_cast<const RAKP1request*>(inPayload.data());
     auto response = reinterpret_cast<RAKP2response*>(outPayload.data());
 
     // Session ID zero is reserved for Session Setup
@@ -88,7 +88,7 @@ std::vector<uint8_t> RAKP12(std::vector<uint8_t>& inPayload,
 
     // Copy the Remote Console Random Number from the RAKP1 request to the
     // Authentication Algorithm
-    std::copy_n(reinterpret_cast<uint8_t*>
+    std::copy_n(reinterpret_cast<const uint8_t*>
                 (request->remote_console_random_number),
                 cipher::rakp_auth::REMOTE_CONSOLE_RANDOM_NUMBER_LEN,
                 authAlgo->rcRandomNum.begin());

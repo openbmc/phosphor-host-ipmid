@@ -9,13 +9,13 @@
 namespace command
 {
 
-std::vector<uint8_t> openSession(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
                                  const message::Handler& handler)
 {
     std::cout << ">> openSession\n";
 
     std::vector<uint8_t> outPayload(sizeof(OpenSessionResponse));
-    auto request = reinterpret_cast<OpenSessionRequest*>(inPayload.data());
+    auto request = reinterpret_cast<const OpenSessionRequest*>(inPayload.data());
     auto response = reinterpret_cast<OpenSessionResponse*>(outPayload.data());
 
     // Check for valid Authentication Algorithms

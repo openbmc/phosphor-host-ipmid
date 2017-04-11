@@ -12,11 +12,10 @@ namespace command
 
 using namespace phosphor::logging;
 
-std::vector<uint8_t> payloadHandler(std::vector<uint8_t>& inPayload,
+std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
                                     const message::Handler& handler)
 {
-    auto request = reinterpret_cast<Payload*>(inPayload.data());
-
+    auto request = reinterpret_cast<const Payload*>(inPayload.data());
     auto solDataSize = inPayload.size() - sizeof(Payload);
 
     Buffer charData(solDataSize);
