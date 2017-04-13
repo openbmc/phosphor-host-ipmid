@@ -24,6 +24,7 @@ struct sensorTypemap_t {
     char dbusname[32];
 } ;
 
+std::map<uint16_t, ipmi::sensor::IdInfoMap::const_iterator> reservations;
 
 sensorTypemap_t g_SensorTypeMap[] = {
 
@@ -688,6 +689,21 @@ ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                ipmi_request_t request, ipmi_response_t response,
+                                ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    static uint16_t next_reservation_id = 0;
+    uint16_t *reservation_id = (uint16_t*)response;
+    do {
+        *reservation_id = next_reservation_id++;
+    } while (reservations.find(*reservation_id) != reservations.end());
+    reservations[*reservation_id] = sensors.begin();
+    *data_len = sizeof(uint16_t);
+
+    printf("Created new IPMI SDR reservation ID %d\n", *reservation_id);
+    return IPMI_CC_OK;
+}
 
 void register_netfn_sen_functions()
 {
@@ -710,6 +726,11 @@ void register_netfn_sen_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, NULL,
                            ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
+
+    // <Reserve SDR>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_SENSOR, IPMI_CMD_RESERVE_SDR_REPO);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_RESERVE_SDR_REPO, NULL,
+                           ipmi_sen_reserve_sdr, PRIVILEGE_USER);
 
     // <Get SDR Info>
     printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO);
