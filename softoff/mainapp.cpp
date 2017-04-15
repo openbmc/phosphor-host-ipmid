@@ -74,18 +74,10 @@ int main(int argc, char** argv)
     if(powerObj.isTimerExpired() && (powerObj.responseReceived() ==
             phosphor::ipmi::Base::SoftPowerOff::HostResponse::SoftOffReceived))
     {
-        try
-        {
-            elog<sdbusplus::xyz::openbmc_project::State
-                    ::Host::Error::SoftOffTimeout>(
-                 prev_entry<phosphor::logging::xyz::openbmc_project::State
-                    ::Host::SoftOffTimeout::TIMEOUT_IN_MSEC>());
-        }
-        catch (sdbusplus::xyz::openbmc_project::State::Host::Error
-                    ::SoftOffTimeout& elog)
-        {
-            commit(elog.name());
-        }
+        using error =
+            sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout;
+        using errorMetadata = xyz::openbmc_project::State::Host::SoftOffTimeout;
+        report<error>(prev_entry<errorMetadata::TIMEOUT_IN_MSEC>());
     }
 
     // Cleanup the event handler
