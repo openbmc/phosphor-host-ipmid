@@ -190,17 +190,8 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     }
     selData[debuglen*3] = '\0';
 
-    log<level::INFO>("Received Host Event", entry("ESEL=%s", selData.get()));
-
-    try
-    {
-        elog<org::open_power::Error::Host::Event>(
-            prev_entry<org::open_power::Error::Host::Event::ESEL>());
-    }
-    catch (org::open_power::Error::Host::Event& e)
-    {
-        commit(org::open_power::Error::Host::Event::errName);
-    }
+    using error = org::open_power::Error::Host::Event;
+    report<error>(prev_entry<error::ESEL>());
 
     return 0;
 }
