@@ -181,6 +181,8 @@ lookup_t g_ipmidbuslookup[] = {
 	{0xda, 0x00, set_sensor_dbus_state_simple, "setValue", "False", ""},
 	// Power Supply Derating
 	{0xb4, 0x00, set_sensor_dbus_state_simple, "setValue", "", ""},
+	// Power Cap
+	{0xC2, 0x00, set_sensor_dbus_state_simple, "setValue", "", ""},
 	{0x07, 0x07, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
 	{0x07, 0x08, set_sensor_dbus_state_simple, "setFault",   "True", "False"},
 	{0x0C, 0x06, set_sensor_dbus_state_simple, "setPresent", "True", "False"},
