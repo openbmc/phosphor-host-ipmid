@@ -71,6 +71,12 @@ class EventLoop
          */
         int startEventLoop();
 
+        /** @brief Add host console I/O event source to the event loop.
+         *
+         *  @param[in] fd - File descriptor for host console socket.
+         */
+        void startHostConsole(const sol::CustomFD& fd);
+
         /** @brief Remove host console I/O event source. */
         void stopHostConsole();
 
