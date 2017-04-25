@@ -33,13 +33,7 @@ struct CustomFD
     CustomFD(int fd) :
         fd(fd) {}
 
-    ~CustomFD()
-    {
-        if(fd >=0)
-        {
-            close(fd);
-        }
-    }
+    ~CustomFD();
 
     int operator()() const
     {

@@ -12,6 +12,16 @@ namespace sol
 
 using namespace phosphor::logging;
 
+CustomFD::~CustomFD()
+{
+    if(fd >= 0)
+    {
+        // Remove the host console descriptor from the sd_event_loop
+        std::get<eventloop::EventLoop&>(singletonPool).stopHostConsole();
+        close(fd);
+    }
+}
+
 void Manager::initHostConsoleFd()
 {
     struct sockaddr_un addr;
@@ -127,8 +137,6 @@ void Manager::stopPayloadInstance(uint8_t payloadInstance)
 
     if (payloadMap.empty())
     {
-        // Remove the host console decriptor from the sd_event_loop
-        std::get<eventloop::EventLoop&>(singletonPool).stopHostConsole();
         consoleFD.reset();
     }
 }

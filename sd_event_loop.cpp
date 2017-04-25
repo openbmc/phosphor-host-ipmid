@@ -281,8 +281,6 @@ void EventLoop::stopHostConsole()
         {
             log<level::ERR>("Failed to disable the host console socket",
                     entry("RC=%d", rc));
-            hostConsole.reset();
-            throw std::runtime_error("Failed to disable socket descriptor");
         }
 
         hostConsole.reset();
