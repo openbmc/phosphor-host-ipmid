@@ -100,7 +100,7 @@ void Manager::startPayloadInstance(uint8_t payloadInstance,
 
     // Create the SOL Context data for payload instance
     auto context = std::make_unique<Context>(
-            accumulateInterval, retryCount, payloadInstance, sessionID);
+            retryCount, sendThreshold, payloadInstance, sessionID);
 
     /*
      * Start payload event instance
