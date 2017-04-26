@@ -44,6 +44,7 @@ struct CustomFD
         int fd = -1;
 };
 
+using namespace std::chrono_literals;
 
 /** @class Manager
  *
@@ -70,18 +71,19 @@ class Manager
         /** @brief Host Console Buffer. */
         ConsoleData dataBuffer;
 
-
         /** @brief Character Accumulate Interval
          *
-         *  Character Accumulate Interval in 5 ms increments, 1-based. This sets
-         *  the typical amount of time that the BMC will wait before
+         *  This sets the typical amount of time that the BMC will wait before
          *  transmitting a partial SOL character data packet. (Where a partial
          *  packet is defined as a packet that has fewer characters to transmit
          *  than the number of characters specified by the character send
          *  threshold. This parameter can be modified by the set SOL
-         *  configuration parameters command.
+         *  configuration parameters command. The SOL configuration parameter,
+         *  Character Accumulate Interval is 5 ms increments, 1-based value. The
+         *  parameter value is accumulateInterval/5. The accumulateInterval
+         *  needs to be a multiple of 5.
          */
-        uint8_t accumulateInterval = 20;
+        std::chrono::milliseconds accumulateInterval = 100ms;
 
         /** @brief Character Send Threshold
          *
@@ -108,13 +110,14 @@ class Manager
 
         /** @brief Retry Interval
          *
-         *  Retry Interval, 1-based. Retry Interval in 10 ms increments. Sets
-         *  the time that the BMC will wait before the first retry and the time
-         *  between retries when sending SOL packets to the remote console. 00h
-         *  indicates retries sent back-to-back. This parameter can be modified
-         *  by the set SOL configuration parameters command.
+         *  Sets the time that the BMC will wait before the first retry and the
+         *  time between retries when sending SOL packets to the remote console.
+         *  This parameter can be modified by the set SOL configuration
+         *  parameters command. The SOL configuration parameter Retry Interval
+         *  is 10 ms increments, 1-based value. The parameter value is
+         *  retryInterval/10. The retryInterval needs to be a multiple of 10.
          */
-        uint8_t retryThreshold = 10;
+        std::chrono::milliseconds retryInterval = 100ms;
 
         /** @brief Start a SOL payload instance.
          *

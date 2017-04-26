@@ -102,21 +102,10 @@ void Manager::startPayloadInstance(uint8_t payloadInstance,
     auto context = std::make_unique<Context>(
             retryCount, sendThreshold, payloadInstance, sessionID);
 
-    /*
-     * Start payload event instance
-     *
-     * Accumulate interval is in 5 ms(milli secs) increments, since
-     * sd_event_add_time takes in micro secs, it is converted to micro secs.
-     * The Retry interval is in 10 ms (milli secs) increments.
-     */
-    using namespace std::chrono_literals;
-
-    auto accInterval = 5ms * accumulateInterval;
-    auto retryInterval = 10ms * retryThreshold;
-
     std::get<eventloop::EventLoop&>(singletonPool).startSOLPayloadInstance(
             payloadInstance,
-            std::chrono::duration_cast<eventloop::IntervalType>(accInterval),
+            std::chrono::duration_cast<eventloop::IntervalType>
+                    (accumulateInterval),
             std::chrono::duration_cast<eventloop::IntervalType>(retryInterval));
 
     payloadMap.emplace(payloadInstance, std::move(context));
