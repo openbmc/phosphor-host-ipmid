@@ -31,6 +31,12 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
+    if (!std::get<sol::Manager&>(singletonPool).enable)
+    {
+        response->completionCode = IPMI_CC_PAYLOAD_TYPE_DISABLED;
+        return outPayload;
+    }
+
     // Only one instance of SOL is currently supported.
     if (request->payloadInstance != 1)
     {
