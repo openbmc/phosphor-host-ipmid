@@ -186,6 +186,49 @@ struct SetConfParamsResponse
 std::vector<uint8_t> setConfParams(const std::vector<uint8_t>& inPayload,
                                    const message::Handler& handler);
 
+/** @struct GetConfParamsRequest
+ *
+ *  IPMI payload for Get SOL configuration parameters command request.
+ */
+struct GetConfParamsRequest
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t channelNum : 4;         //!< Channel number.
+    uint8_t reserved : 3;           //!< Reserved.
+    uint8_t getParamRev : 1;        //!< Get parameter or Get parameter revision
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t getParamRev : 1;        //!< Get parameter or Get parameter revision
+    uint8_t reserved : 3;           //!< Reserved.
+    uint8_t channelNum : 4;         //!< Channel number.
+#endif
+
+    uint8_t paramSelector;          //!< Parameter selector.
+    uint8_t setSelector;            //!< Set selector.
+    uint8_t blockSelector;          //!< Block selector.
+} __attribute__((packed));
+
+/** @struct GetConfParamsResponse
+ *
+ *  IPMI payload for Get SOL configuration parameters command response.
+ */
+struct GetConfParamsResponse
+{
+    uint8_t completionCode;          //!< Completion code.
+    uint8_t paramRev;                //!< Parameter revision.
+} __attribute__((packed));
+
+/** @brief Get SOL configuration parameters command.
+ *
+ *  @param[in] inPayload - Request data for the command.
+ *  @param[in] handler - Reference to the message handler.
+ *
+ *  @return Response data for the command.
+ */
+std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
+                                   const message::Handler& handler);
+
 } // namespace command
 
 } // namespace sol
