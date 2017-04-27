@@ -44,6 +44,22 @@ void registerCommands()
             },
             &getPayloadStatus, session::Privilege::USER, false
         },
+        // Set SOL Configuration Parameters
+        {
+            {
+                (static_cast<uint32_t>(message::PayloadType::IPMI) << 16) |
+                static_cast<uint16_t>(::command::NetFns::TRANSPORT) | 0x21
+            },
+            &setConfParams, session::Privilege::ADMIN, false
+        },
+        // Get SOL Configuration Parameters
+        {
+            {
+                (static_cast<uint32_t>(message::PayloadType::IPMI) << 16) |
+                static_cast<uint16_t>(::command::NetFns::TRANSPORT) | 0x22
+            },
+            &getConfParams, session::Privilege::USER, false
+        },
     };
 
     for (const auto& iter : commands)
