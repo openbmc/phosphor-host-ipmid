@@ -17,6 +17,9 @@ constexpr uint8_t MINOR_VERSION = 0x00;
 constexpr char CONSOLE_SOCKET_PATH[] = "\0obmc-console";
 constexpr size_t CONSOLE_SOCKET_PATH_LEN = sizeof(CONSOLE_SOCKET_PATH) - 1;
 
+constexpr uint8_t accIntervalFactor = 5;
+constexpr uint8_t retryIntervalFactor = 10;
+
 using Instance = uint8_t;
 
 /** @struct CustomFD
@@ -70,6 +73,53 @@ class Manager
 
         /** @brief Host Console Buffer. */
         ConsoleData dataBuffer;
+
+        /** @brief Set in Progress.
+         *
+         *  This parameter is used to indicate when any of the SOL parameters
+         *  are being updated, and when the changes are completed. The bit is
+         *  primarily provided to alert software than some other software or
+         *  utility is in the process of making changes to the data. This field
+         *  is initialized to set complete.
+         */
+        uint8_t progress = 0;
+
+        /** @brief SOL enable
+         *
+         *  This controls whether the SOL payload can be activated. By default
+         *  the SOL is enabled.
+         */
+        bool enable = true;
+
+        /** @brief SOL payload encryption.
+         *
+         *  Force encryption: if the cipher suite for the session supports
+         *  encryption, then this setting will force the use of encryption for
+         *  all SOL payload data. Encryption controlled by remote console:
+         *  Whether SOL packets are encrypted or not is selectable by the remote
+         *  console at the time the payload is activated. The default is force
+         *  encryption.
+         */
+        bool forceEncrypt = true;
+
+        /** @brief SOL payload authentication.
+         *
+         *  Force authentication: if the cipher suite for the session supports
+         *  authentication, then this setting will force the use of  for
+         *  authentication for all SOL payload data. Authentication controlled
+         *  by remote console: Note that for the standard Cipher Suites,
+         *  if encryption is used authentication must also be used. Therefore,
+         *  while encryption is being used software will not be able to select
+         *  using unauthenticated payloads.
+         */
+        bool forceAuth = true;
+
+        /** @brief SOL privilege level.
+         *
+         *  Sets the minimum operating privilege level that is required to be
+         *  able to activate SOL using the Activate Payload command.
+         */
+        session::Privilege solMinPrivilege = session::Privilege::USER;
 
         /** @brief Character Accumulate Interval
          *
