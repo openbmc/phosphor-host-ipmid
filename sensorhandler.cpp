@@ -398,6 +398,14 @@ ipmi_ret_t setSensorReading(void *request)
                 }
                 else if (deassertionSet.test(value.first))
                 {
+                    // if presnt bit is deaserted then we don't
+                    // need to update/create the inventory.
+
+                    if (property.first == "Present")
+                    {
+                         return IPMI_CC_OK;
+                    }
+
                     props.emplace(property.first, value.second.deassert);
                     valid = true;
                 }
