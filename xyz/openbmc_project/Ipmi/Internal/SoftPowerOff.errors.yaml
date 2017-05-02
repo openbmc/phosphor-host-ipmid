@@ -1,0 +1,3 @@
+- name: SoftOffFailed
+  description: The SoftOff command to the host control object returned an error
+
