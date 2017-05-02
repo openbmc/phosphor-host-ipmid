@@ -6,7 +6,8 @@ phosphor_softpoweroff_SOURCES = \
                     softoff.cpp \
                     ../timer.cpp   \
                     mainapp.cpp \
-                    xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp
+                    xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp \
+                    ../utils.cpp
 
 BUILT_SOURCES = xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp \
                 xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.hpp
