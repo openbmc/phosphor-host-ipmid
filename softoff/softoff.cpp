@@ -15,33 +15,89 @@
  */
 #include <chrono>
 #include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <xyz/openbmc_project/Control/Host/server.hpp>
+#include <utils.hpp>
 #include "softoff.hpp"
+#include "elog-gen-softoff.hpp"
 #include "config.h"
 namespace phosphor
 {
 namespace ipmi
 {
 
-// Sends the SMS_ATN to host if value is set
-void SoftPowerOff::sendSMSAttn()
+using namespace phosphor::logging;
+using namespace sdbusplus::xyz::openbmc_project::Control::server;
+
+void SoftPowerOff::sendHostShutDownCmd()
 {
-    using namespace std::chrono;
-    auto method = bus.new_method_call(HOST_IPMI_BUS,
-                                      HOST_IPMI_OBJ,
-                                      HOST_IPMI_INTF,
-                                      "setAttention");
+    std::string ctrlHostPath{CONTROL_HOST_OBJPATH};
+    ctrlHostPath += "0";
+    auto host = ::ipmi::getService(this->bus,
+                                   CONTROL_HOST_BUSNAME,
+                                   ctrlHostPath.c_str());
 
-    // If there is any exception, would be thrown here.
-    // BT returns '0' on success and bus_error on failure.
-    bus.call_noreply(method);
+    auto method = bus.new_method_call(host.c_str(),
+                                      ctrlHostPath.c_str(),
+                                      CONTROL_HOST_BUSNAME,
+                                      "Execute");
 
-    // Start the timer
-    auto time = duration_cast<microseconds>(
-            seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
-    auto r = timer.startTimer(time);
-    if (r < 0)
+    method.append(convertForMessage(Host::Command::SoftOff).c_str());
+
+    auto reply = bus.call(method);
+    if (reply.is_method_error())
     {
-        throw std::runtime_error("Error starting timer");
+        log<level::ERR>("Error in call to control host Execute");
+        // TODO openbmc/openbmc#851 - Once available, throw returned error
+        throw std::runtime_error("Error in call to control host Execute");
+    }
+
+    return;
+}
+
+
+// Function called on host control signals
+void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
+{
+    std::string cmdCompleted{};
+    std::string cmdStatus{};
+
+    msg.read(cmdCompleted, cmdStatus);
+
+    log<level::DEBUG>("Host control signal values",
+                      entry("COMMAND=%s",cmdCompleted.c_str()),
+                      entry("STATUS=%s",cmdStatus.c_str()));
+
+    // Verify it's the command this code is interested in and then check status
+    if(Host::convertCommandFromString(cmdCompleted) == Host::Command::SoftOff)
+    {
+        if(Host::convertResultFromString(cmdStatus) == Host::Result::Success)
+        {
+            // Set our internal property indicating we got host attention
+            sdbusplus::xyz::openbmc_project::Ipmi::Internal
+                          ::server::SoftPowerOff::responseReceived(
+                                  HostResponse::SoftOffReceived);
+
+            // Start timer for host shutdown
+            using namespace std::chrono;
+            auto time = duration_cast<microseconds>(
+                            seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
+            auto r = startTimer(time);
+            if (r < 0)
+            {
+                log<level::ERR>("Failure to start Host shutdown wait timer",
+                        entry("ERROR=%s", strerror(-r)));
+            }
+            else
+            {
+                log<level::INFO>("Timer started waiting for host to shutdown",
+                        entry("TIMEOUT_IN_MSEC=%llu",
+                            duration_cast<milliseconds>(seconds
+                                (IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS))));
+            }
+        }
+        log<level::ERR>("Failure returned by host control on SoftOff command");
+        elog<xyz::openbmc_project::SoftPowerOff::Internal::SoftOffFailed>();
     }
     return;
 }
@@ -56,28 +112,8 @@ int SoftPowerOff::startTimer(const std::chrono::microseconds& usec)
 auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
 {
     using namespace std::chrono;
-    using namespace phosphor::logging;
 
-    if (response == HostResponse::SoftOffReceived)
-    {
-        // Need to stop the running timer and then start a new timer
-        auto time = duration_cast<microseconds>(
-                seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
-        auto r = startTimer(time);
-        if (r < 0)
-        {
-            log<level::ERR>("Failure to start Host shutdown wait timer",
-                    entry("ERROR=%s", strerror(-r)));
-        }
-        else
-        {
-            log<level::INFO>("Timer started waiting for host to shutdown",
-                    entry("TIMEOUT_IN_MSEC=%llu",
-                        duration_cast<milliseconds>(seconds
-                            (IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS))));
-        }
-    }
-    else if (response == HostResponse::HostShutdown)
+    if (response == HostResponse::HostShutdown)
     {
         // Disable the timer since Host has quiesced and we are
         // done with soft power off part
