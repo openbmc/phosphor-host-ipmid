@@ -13,46 +13,6 @@ using namespace sdbusplus::xyz::openbmc_project::Control::server;
 // Internal function to get next host command
 Host::Command getNextHostCmd();
 
-// Notify SofPowerOff application that host is responding to command
-void notifySoftOff()
-{
-
-    constexpr auto iface          = "org.freedesktop.DBus.Properties";
-    constexpr auto soft_off_iface = "xyz.openbmc_project.Ipmi.Internal."
-                                    "SoftPowerOff";
-
-    constexpr auto property       = "ResponseReceived";
-    constexpr auto value          = "xyz.openbmc_project.Ipmi.Internal."
-                                    "SoftPowerOff.HostResponse.SoftOffReceived";
-    char *busname = nullptr;
-
-    // Get the system bus where most system services are provided.
-    auto bus = ipmid_get_sd_bus_connection();
-
-    // Nudge the SoftPowerOff application that it needs to stop the
-    // initial watchdog timer. If we have some errors talking to Soft Off
-    // object, get going and do our regular job
-    mapper_get_service(bus, SOFTOFF_OBJPATH, &busname);
-    if (busname)
-    {
-        // No error object or reply expected.
-        auto r = sd_bus_call_method(bus, busname, SOFTOFF_OBJPATH, iface,
-                                 "Set", nullptr, nullptr, "ssv",
-                                 soft_off_iface, property, "s", value);
-        if (r < 0)
-        {
-            fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
-                    strerror(-r));
-        }
-        free (busname);
-    }
-    else
-    {
-        printf("Soft Power Off object is not available. Ignoring watchdog \
-                refresh");
-    }
-}
-
 //-------------------------------------------------------------------
 // Called by Host post response from Get_Message_Flags
 //-------------------------------------------------------------------
@@ -85,7 +45,6 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     switch (hCmd)
     {
     case Host::Command::SoftOff:
-        notifySoftOff();
         oem_sel.cmd     = CMD_POWER;
         oem_sel.data[0] = SOFT_OFF;
         break;
