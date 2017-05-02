@@ -30,17 +30,24 @@ class SoftPowerOff : public sdbusplus::server::object::object<
             sdbusplus::server::object::object<
                 Base::SoftPowerOff>(bus, objPath, false),
                 bus(bus),
-                timer(event)
+                timer(event),
+                hostControlSignal(bus,
+                                  "type='signal',"
+                                  "member='CommandComplete',"
+                                  "path='/xyz/openbmc_project/control/host0',"
+                                  "interface='xyz.openbmc_project.Control.Host'",
+                                  hostControlSignalRcv,
+                                  this)
         {
             // Need to announce since we may get the response
-            // very quickly on SMS_ATN
+            // very quickly on host shutdown command
             emit_object_added();
 
-            // The whole purpose of this application is to send SMS_ATTN
-            // and watch for the soft power off to go through. We need the
-            // interface added signal emitted before we send SMS_ATN just to
-            // attend to lightning fast response from host
-            sendSMSAttn();
+            // The whole purpose of this application is to send a host shutdown
+            // command and watch for the soft power off to go through. We need
+            // the interface added signal emitted before we send the shutdown
+            // command just to attend to lightning fast response from host
+            sendHostShutDownCmd();
         }
 
         /** @brief Tells if the objective of this application is completed */
@@ -94,21 +101,51 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         bool completed = false;
 
-        /** @brief Sends SMS_ATN to host to initiate soft power off process.
+        /** @brief Subscribe to host control signals
          *
-         *  After sending the SMS_ATN, starts a timer for 30
-         *  seconds and expects a initial response from the host.
-         *  After receiving the initial response, starts another
-         *  timer for 30 minutes to let host do a clean shutdown of
-         *  partitions. When the second response is received from the
-         *  host, it indicates that BMC can do a power off.
+         *  Protocol is to send the host power off request to the host
+         *  control interface and then wait for a signal indicating pass/fail
+         **/
+        sdbusplus::server::match::match hostControlSignal;
+
+        /** @brief Sends host control command to tell host to shut down
+         *
+         *  After sending the command, wait for a signal indicating the status
+         *  of the command.
+         *
+         *  After receiving the initial response, start a timer for 30 minutes
+         *  to let host do a clean shutdown of partitions. When the response is
+         *  received from the host, it indicates that BMC can do a power off.
          *  If BMC fails to get any response, then a hard power off would
          *  be forced.
          *
          *  @return - Does not return anything. Error will result in exception
          *            being thrown
          */
-        void sendSMSAttn();
+        void sendHostShutDownCmd();
+
+        /** @brief Callback function on host control signals
+         *
+         * Will just do a call into the appropriate object for processing
+         *
+         * @param[in]  msg       - Data associated with subscribed signal
+         * @param[in]  userData  - Pointer to this object instance
+         * @param[out] retError  - Not used but required with signal API
+         *
+         */
+        static int hostControlSignalRcv(sd_bus_message* msg,
+                void* userData,
+                                        sd_bus_error* retError);
+
+        /** @brief Instance specific interface to handle host control events
+         *
+         * @param[in]  msg       - Data associated with subscribed signal
+         * @param[out] retError  - Not used but required with signal API
+         *
+         */
+        int hostControl(sd_bus_message* msg,
+                        sd_bus_error* retError);
+
 };
 } // namespace ipmi
 } // namespace phosphor
