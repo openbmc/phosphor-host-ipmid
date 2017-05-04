@@ -178,7 +178,7 @@ lookup_t g_ipmidbuslookup[] = {
 	{0xe9, 0x00, set_sensor_dbus_state_simple, "setValue", "Disabled", ""}, // OCC Inactive 0
 	{0xe9, 0x01, set_sensor_dbus_state_simple, "setValue", "Enabled", ""},   // OCC Active 1
 	// Turbo Allowed
-	{0xda, 0x00, set_sensor_dbus_state_simple, "setValue", "False", ""},
+	{0xda, 0x00, set_sensor_dbus_state_simple, "setValue", "True", "False"},
 	// Power Supply Derating
 	{0xb4, 0x00, set_sensor_dbus_state_simple, "setValue", "", ""},
 	// Power Cap
