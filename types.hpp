@@ -51,5 +51,17 @@ using InterfaceMap = std::map<DbusInterface, PropertyMap>;
 using Object = sdbusplus::message::object_path;
 using ObjectMap = std::map<Object, InterfaceMap>;
 
+struct SelData
+{
+   Id sensorID;
+   Type sensorType;
+   ReadingType eventReadingType;
+   Offset eventOffset;
+};
+
+using InventoryPath = std::string;
+
+using InvObjectIDMap = std::map<InventoryPath, SelData>;
+
 }//namespce sensor
 }//namespace ipmi
