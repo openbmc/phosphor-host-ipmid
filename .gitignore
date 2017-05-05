@@ -55,3 +55,4 @@ Makefile
 /test/*.trs
 /ipmiwhitelist.cpp
 /sensor-gen.cpp
+/inventory-sensor-gen.cpp
