@@ -77,6 +77,10 @@ AS_IF([test "x$SENSOR_YAML_GEN" == "x"], [SENSOR_YAML_GEN="sensor-example.yaml"]
 SENSORGEN="$PYTHON ${srcdir}/scripts/sensor_gen.py -i $SENSOR_YAML_GEN"
 AC_SUBST(SENSORGEN)
 
+AS_IF([test "x$INVSENSOR_YAML_GEN" == "x"], [INVSENSOR_YAML_GEN="inventory-sensor-example.yaml"])
+INVSENSORGEN="$PYTHON ${srcdir}/scripts/inventory-sensor.py -i $INVSENSOR_YAML_GEN"
+AC_SUBST(INVSENSORGEN)
+
 # Soft Power off related.
 AS_IF([test "x$enable_softoff" != "xno"],
     # Dbus service name
