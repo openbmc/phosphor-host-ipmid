@@ -48,3 +48,4 @@ Makefile
 /ipmid
 /ipmiwhitelist.cpp
 /sensor-gen.cpp
+/inventory-sensor-gen.cpp
