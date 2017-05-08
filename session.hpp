@@ -42,7 +42,7 @@ constexpr auto SESSION_SETUP_TIMEOUT = 5s;
 // Seconds of inactivity allowed when session is active
 constexpr auto SESSION_INACTIVITY_TIMEOUT = 60s;
 
-/*
+/**
  * @struct SequenceNumbers Session Sequence Numbers
  *
  * IPMI v2.0 RMCP+ Session Sequence Numbers are used for rejecting packets that
@@ -79,7 +79,7 @@ struct SequenceNumbers
         uint32_t in = 0;
         uint32_t out = 0;
 };
-/*
+/**
  * @class Session
  *
  * Encapsulates the data related to an IPMI Session
@@ -102,7 +102,7 @@ class Session
         Session(Session&&) = default;
         Session& operator=(Session&&) = default;
 
-        /*
+        /**
          * @brief Session Constructor
          *
          * This is issued by the Session Manager when a session is started for
@@ -144,7 +144,7 @@ class Session
             authAlgoInterface = std::move(inAuthAlgo);
         }
 
-        /*
+        /**
          * @brief Get Session's Integrity Algorithm
          *
          * @return pointer to the integrity algorithm
@@ -161,7 +161,7 @@ class Session
             }
         }
 
-        /*
+        /**
          * @brief Set Session's Integrity Algorithm
          *
          * @param[in] integrityAlgo - unique pointer to integrity algorithm
@@ -182,7 +182,7 @@ class Session
             return integrityAlgoInterface ? true : false;
         }
 
-        /*
+        /**
          * @brief Get Session's Confidentiality Algorithm
          *
          * @return pointer to the confidentiality algorithm
@@ -199,7 +199,7 @@ class Session
             }
         }
 
-        /*
+        /**
          * @brief Set Session's Confidentiality Algorithm
          *
          * @param[in] confAlgo - unique pointer to confidentiality algorithm
@@ -226,7 +226,7 @@ class Session
             lastTime = std::chrono::steady_clock::now();
         }
 
-        /*
+        /**
          * @brief Session Active Status
          *
          * Session Active status is decided upon the Session State and the last
@@ -235,12 +235,12 @@ class Session
          */
         bool isSessionActive();
 
-        /*
+        /**
          * @brief Session's Current Privilege Level
          */
         Privilege curPrivLevel;
 
-        /*
+        /**
          * @brief Session's Maximum Privilege Level
          */
         Privilege maxPrivLevel = Privilege::CALLBACK;

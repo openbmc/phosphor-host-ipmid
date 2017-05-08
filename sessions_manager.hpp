@@ -19,7 +19,7 @@ constexpr size_t SESSION_ZERO = 0;
 constexpr size_t MAX_SESSIONLESS_COUNT = 1;
 constexpr size_t MAX_SESSION_COUNT = 5;
 
-/*
+/**
  * @class Manager
  *
  * Manager class acts a manager for the IPMI sessions and provides interfaces
@@ -41,7 +41,7 @@ class Manager
         Manager(Manager&&) = default;
         Manager& operator=(Manager&&) = default;
 
-        /*
+        /**
          * @brief Start an IPMI session
          *
          * @param[in] remoteConsoleSessID - Remote Console Session ID mentioned
@@ -59,7 +59,7 @@ class Manager
                 cipher::integrity::Algorithms intAlgo,
                 cipher::crypt::Algorithms cryptAlgo);
 
-        /*
+        /**
          * @brief Stop IPMI Session
          *
          * @param[in] bmcSessionID - BMC Session ID
@@ -69,7 +69,7 @@ class Manager
          */
         bool stopSession(SessionID bmcSessionID);
 
-        /*
+        /**
          * @brief Get Session Handle
          *
          * @param[in] sessionID - Session ID
@@ -85,13 +85,13 @@ class Manager
 
     private:
 
-        /*
+        /**
          * @brief Session Manager keeps the session objects as a sorted
          *        associative container with Session ID as the unique key
          */
         SessionMap sessionsMap;
 
-        /*
+        /**
          * @brief Clean Session Stale Entries
          *
          *  Removes the inactive sessions entries from the Session Map

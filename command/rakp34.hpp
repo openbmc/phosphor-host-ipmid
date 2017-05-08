@@ -8,7 +8,7 @@
 namespace command
 {
 
-/*
+/**
  * @struct RAKP3request
  *
  * IPMI Payload for RAKP Message 3
@@ -22,7 +22,7 @@ struct RAKP3request
     uint8_t keyExchangeAuthCode[20];
 } __attribute__((packed));
 
-/*
+/**
  * @struct RAKP4response
  *
  * IPMI Payload for RAKP Message 4
@@ -35,7 +35,7 @@ struct RAKP4response
     uint32_t remoteConsoleSessionID;
 } __attribute__((packed));
 
-/*
+/**
  * @brief RAKP Message 3, RAKP Message 4
  *
  * The session activation process is completed by the remote console and BMC

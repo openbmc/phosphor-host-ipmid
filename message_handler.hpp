@@ -26,7 +26,7 @@ class Handler
         Handler(Handler&&) = default;
         Handler& operator=(Handler&&) = default;
 
-        /*
+        /**
          * @brief Receive the IPMI packet
          *
          * Read the data on the socket, get the parser based on the Session
@@ -37,7 +37,7 @@ class Handler
          */
         std::unique_ptr<Message> receive();
 
-        /*
+        /**
          * @brief Process the incoming IPMI message
          *
          * The incoming message payload is handled and the command handler for
@@ -93,7 +93,7 @@ class Handler
 
         parser::SessionHeader sessionHeader  = parser::SessionHeader::IPMI20;
 
-        /*
+        /**
          * @brief Create the response IPMI message
          *
          * The IPMI outgoing message is constructed out of payload and the
@@ -116,7 +116,7 @@ class Handler
             return outMessage;
         }
 
-        /*
+        /**
          * @brief Extract the command from the IPMI payload
          *
          * @param[in] message - Incoming message
@@ -125,7 +125,7 @@ class Handler
          */
         uint32_t getCommand(Message& message);
 
-        /*
+        /**
          * @brief Calculate 8 bit 2's complement checksum
          *
          * Initialize checksum to 0. For each byte, checksum = (checksum + byte)

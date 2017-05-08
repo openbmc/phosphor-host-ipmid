@@ -7,8 +7,8 @@
 namespace command
 {
 
-/*
- * @ struct GetChannelCapabilitiesReq
+/**
+ * @struct GetChannelCapabilitiesReq
  *
  * IPMI Request data for Get Channel Authentication Capabilities command
  */
@@ -18,8 +18,8 @@ struct GetChannelCapabilitiesReq
     uint8_t reqMaxPrivLevel;
 } __attribute__((packed));
 
-/*
- * @ struct GetChannelCapabilitiesResp
+/**
+ * @struct GetChannelCapabilitiesResp
  *
  * IPMI Response data for Get Channel Authentication Capabilities command
  */
@@ -101,7 +101,7 @@ struct GetChannelCapabilitiesResp
     uint8_t oemAuxillary;  // Addition OEM specific information..
 } __attribute__((packed));
 
-/*
+/**
  * @brief Get Channel Authentication Capabilities
  *
  * This message exchange provides a way for a remote console to discover what

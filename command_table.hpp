@@ -27,7 +27,7 @@ union CommandID
     uint8_t cmd;
 } __attribute__((packed));
 
-/*
+/**
  * CommandFunctor is the functor register for commands defined in
  * phosphor-net-ipmid. This would take the request part of the command as a
  * vector and a reference to the message handler. The response part of the
@@ -36,7 +36,7 @@ union CommandID
 using CommandFunctor = std::function<std::vector<uint8_t>(
         const std::vector<uint8_t>&, const message::Handler&)>;
 
-/*
+/**
  * @struct CmdDetails
  *
  * Command details is used to register commands supported in phosphor-net-ipmid.
@@ -49,7 +49,7 @@ struct CmdDetails
     bool sessionless;
 };
 
-/*
+/**
  * @enum NetFns
  *
  * A field that identifies the functional class of the message. The Network
@@ -92,7 +92,7 @@ enum class NetFns
     OEM_RESP           = (0x2F << 10),
 };
 
-/*
+/**
  * @class Entry
  *
  * This is the base class for registering IPMI commands. There are two ways of
@@ -148,7 +148,7 @@ class Entry
         session::Privilege privilege;
 };
 
-/*
+/**
  * @class NetIpmidEntry
  *
  * NetIpmidEntry is used to register commands that are consumed only in
@@ -197,7 +197,7 @@ class NetIpmidEntry final: public Entry
         bool sessionless;
 };
 
-/*
+/**
  * @class ProviderIpmidEntry
  *
  * ProviderIpmidEntry is used to register commands to the Command Table, that
@@ -237,7 +237,7 @@ class ProviderIpmidEntry final: public Entry
         ipmid_callback_t functor;
 };
 
-/*
+/**
  * @class Table
  *
  * Table keeps the IPMI command entries as a sorted associative container with

@@ -10,8 +10,8 @@ namespace command
 constexpr uint8_t IPMI_CC_INVALID_PRIV_LEVEL = 0x80;
 constexpr uint8_t IPMI_CC_EXCEEDS_USER_PRIV = 0x81;
 
-/*
- * @ struct SetSessionPrivLevelReq
+/**
+ * @struct SetSessionPrivLevelReq
  *
  * IPMI Request data for Set Session Privilege Level command
  */
@@ -30,8 +30,8 @@ struct SetSessionPrivLevelReq
 
 } __attribute__((packed));
 
-/*
- * @ struct SetSessionPrivLevelResp
+/**
+ * @struct SetSessionPrivLevelResp
  *
  * IPMI Response data for Set Session Privilege Level command
  */
@@ -51,7 +51,7 @@ struct SetSessionPrivLevelResp
 
 } __attribute__((packed));
 
-/*
+/**
  * @brief Set Session Privilege Command
  *
  * This command is sent in authenticated format. When a session is activated,
@@ -76,8 +76,8 @@ std::vector<uint8_t> setSessionPrivilegeLevel(
 
 constexpr uint8_t IPMI_CC_INVALID_SESSIONID = 0x87;
 
-/*
- * @ struct CloseSessionRequest
+/**
+ * @struct CloseSessionRequest
  *
  * IPMI Request data for Close Session command
  */
@@ -87,8 +87,8 @@ struct CloseSessionRequest
     uint8_t sessionHandle;
 } __attribute__((packed));
 
-/*
- * @ struct CloseSessionResponse
+/**
+ * @struct CloseSessionResponse
  *
  * IPMI Response data for Close Session command
  */
@@ -97,7 +97,7 @@ struct CloseSessionResponse
     uint8_t completionCode;
 } __attribute__((packed));
 
-/*
+/**
  * @brief Close Session Command
  *
  * This command is used to immediately terminate a session in progress. It is

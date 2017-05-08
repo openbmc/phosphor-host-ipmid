@@ -10,7 +10,7 @@ namespace command
 
 constexpr size_t BMC_GUID_LEN = 16;
 
-/*
+/**
  * @brief Get System GUID
  *
  * @return If UUID is successfully read from the Chassis DBUS object, then the

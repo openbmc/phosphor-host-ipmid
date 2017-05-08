@@ -19,8 +19,8 @@ enum class PayloadType : uint8_t
     INVALID               = 0xFF,
 };
 
-/*
- * @ struct Message
+/**
+ * @struct Message
  *
  * IPMI message is data encapsulated in an IPMI Session packet. The IPMI
  * Session packets are encapsulated in RMCP packets, which are encapsulated in
@@ -50,12 +50,13 @@ struct Message
     uint32_t bmcSessionID;          // BMC's session ID
     uint32_t sessionSeqNum;         // Session Sequence Number
 
-    /*
-     * “Payloads” are a capability specified for RMCP+ that enable an IPMI
-     * session to carry types of traffic that are in addition to IPMI Messages.
-     * Payloads can be ‘standard’ or ‘OEM’.Standard payload types include IPMI
-     * Messages, messages for session setup under RMCP+, and the payload for the
-     * “Serial Over LAN” capability introduced in IPMI v2.0.
+    /** @brief Message payload
+     *
+     *  “Payloads” are a capability specified for RMCP+ that enable an IPMI
+     *  session to carry types of traffic that are in addition to IPMI Messages.
+     *  Payloads can be ‘standard’ or ‘OEM’.Standard payload types include IPMI
+     *  Messages, messages for session setup under RMCP+, and the payload for
+     *  the “Serial Over LAN” capability introduced in IPMI v2.0.
      */
     std::vector<uint8_t> payload;
 };
@@ -69,7 +70,9 @@ constexpr uint8_t responderBMCAddress = 0x81;
 namespace header
 {
 
-// IPMI LAN Message Request Header
+/**
+ * @struct IPMI LAN Message Request Header
+ */
 struct Request
 {
     uint8_t rsaddr;
@@ -80,7 +83,9 @@ struct Request
     uint8_t cmd;
 } __attribute__((packed));
 
-// IPMI LAN Message Response Header
+/**
+ * @struct IPMI LAN Message Response Header
+ */
 struct Response
 {
     uint8_t rqaddr;
@@ -96,7 +101,9 @@ struct Response
 namespace trailer
 {
 
-// IPMI LAN Message Trailer
+/**
+ * @struct IPMI LAN Message Trailer
+ */
 struct Request
 {
     uint8_t checksum;

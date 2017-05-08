@@ -49,7 +49,7 @@ struct BasicHeader_t
     } format;
 } __attribute__((packed));
 
-/*
+/**
  * @brief Unflatten an incoming packet and prepare the IPMI message
  *
  * @param[in] inPacket - Incoming IPMI packet
@@ -62,7 +62,7 @@ struct BasicHeader_t
 std::tuple<std::unique_ptr<Message>, SessionHeader> unflatten(
         std::vector<uint8_t>& inPacket);
 
-/*
+/**
  * @brief Flatten an IPMI message and generate the IPMI packet with the
  *        session header
  *
@@ -95,7 +95,7 @@ struct SessionTrailer_t
     uint8_t legacyPad;
 } __attribute__((packed));
 
-/*
+/**
  * @brief Unflatten an incoming packet and prepare the IPMI message
  *
  * @param[in] inPacket - Incoming IPMI packet
@@ -104,7 +104,7 @@ struct SessionTrailer_t
  */
 std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
 
-/*
+/**
  * @brief Flatten an IPMI message and generate the IPMI packet with the
  *        session header
  *
@@ -141,7 +141,7 @@ struct SessionTrailer_t
     uint8_t nextHeader;
 } __attribute__((packed));
 
-/*
+/**
  * @brief Unflatten an incoming packet and prepare the IPMI message
  *
  * @param[in] inPacket - Incoming IPMI packet
@@ -150,7 +150,7 @@ struct SessionTrailer_t
  */
 std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
 
-/*
+/**
  * @brief Flatten an IPMI message and generate the IPMI packet with the
  *        session header
  *
@@ -163,7 +163,7 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session);
 namespace internal
 {
 
-/*
+/**
  * @brief Add sequence number to the message
  *
  * @param[in] packet - outgoing packet to which to add sequence number
@@ -172,7 +172,7 @@ namespace internal
  */
 void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session);
 
-/*
+/**
  * @brief Verify the integrity data of the incoming IPMI packet
  *
  * @param[in] packet - Incoming IPMI packet
@@ -184,7 +184,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
                            const Message& message,
                            size_t payloadLen);
 
-/*
+/**
  * @brief Add Integrity data to the outgoing IPMI packet
  *
  * @param[in] packet - Outgoing IPMI packet
@@ -195,7 +195,7 @@ void addIntegrityData(std::vector<uint8_t>& packet,
                       const Message& message,
                       size_t payloadLen);
 
-/*
+/**
  * @brief Decrypt the encrypted payload in the incoming IPMI packet
  *
  * @param[in] packet - Incoming IPMI packet
@@ -208,7 +208,7 @@ std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
                                     const Message& message,
                                     size_t payloadLen);
 
-/*
+/**
  * @brief Encrypt the plain text payload for the outgoing IPMI packet
  *
  * @param[in] message - IPMI Message populated for the outgoing packet

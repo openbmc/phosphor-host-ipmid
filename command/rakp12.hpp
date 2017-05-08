@@ -8,7 +8,7 @@
 namespace command
 {
 
-/*
+/**
  * @struct RAKP1request
  *
  * IPMI Payload for RAKP Message 1
@@ -26,7 +26,7 @@ struct RAKP1request
     char user_name[16];
 } __attribute__((packed));
 
-/*
+/**
  * @struct RAKP2response
  *
  * IPMI Payload for RAKP Message 2
@@ -41,7 +41,7 @@ struct RAKP2response
     uint8_t managed_system_guid[16];
 } __attribute__((packed));
 
-/*
+/**
  * @brief RAKP Message 1, RAKP Message 2
  *
  * These messages are used to exchange random number and identification

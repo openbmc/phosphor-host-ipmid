@@ -14,7 +14,7 @@ constexpr size_t USER_KEY_MAX_LENGTH = 20;
 constexpr size_t BMC_RANDOM_NUMBER_LEN = 16;
 constexpr size_t REMOTE_CONSOLE_RANDOM_NUMBER_LEN = 16;
 
-/*
+/**
  * @enum RAKP Authentication Algorithms
  *
  * RMCP+ Authenticated Key-Exchange Protocol (RAKP)
@@ -35,7 +35,7 @@ enum class Algorithms : uint8_t
     RAKP_HMAC_INVALID = 0xB0
 };
 
-/*
+/**
  * @class Interface
  *
  * Interface is the base class for the Authentication Algorithms.
@@ -59,7 +59,7 @@ class Interface
         Interface(Interface&&) = default;
         Interface& operator=(Interface&&) = default;
 
-        /*
+        /**
          * @brief Generate the Hash Message Authentication Code
          *
          * This API is invoked to generate the Key Exchange Authentication Code
@@ -76,7 +76,7 @@ class Interface
         std::vector<uint8_t> virtual generateHMAC(
             std::vector<uint8_t>& input) const = 0;
 
-        /*
+        /**
          * @brief Generate the Integrity Check Value
          *
          * This API is invoked in the RAKP4 sequence for generating the
@@ -105,7 +105,7 @@ class Interface
         // Session Integrity Key
         std::vector<uint8_t> sessionIntegrityKey;
 
-        /*
+        /**
          * Integrity Algorithm is activated and set in the session data only
          * once the session setup is succeeded in the RAKP34 command. But the
          * integrity algorithm is negotiated in the Open Session Request command
@@ -114,7 +114,7 @@ class Interface
          */
         integrity::Algorithms intAlgo;
 
-        /*
+        /**
          * Confidentiality Algorithm is activated and set in the session data
          * only once the session setup is succeeded in the RAKP34 command. But
          * the confidentiality algorithm is negotiated in the Open Session
@@ -124,7 +124,7 @@ class Interface
         crypt::Algorithms cryptAlgo;
 };
 
-/*
+/**
  * @class AlgoSHA1
  *
  * RAKP-HMAC-SHA1 specifies the use of RAKP messages for the key exchange

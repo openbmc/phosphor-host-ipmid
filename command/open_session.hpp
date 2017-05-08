@@ -7,8 +7,8 @@
 namespace command
 {
 
-/*
- * @ struct OpenSessionRequest
+/**
+ * @struct OpenSessionRequest
  *
  * IPMI Payload for RMCP+ Open Session Request
  */
@@ -82,8 +82,8 @@ struct OpenSessionRequest
     uint16_t reserved14;
 } __attribute__((packed));
 
-/*
- * @ struct OpenSessionResponse
+/**
+ * @struct OpenSessionResponse
  *
  * IPMI Payload for RMCP+ Open Session Response
  */
@@ -159,7 +159,7 @@ struct OpenSessionResponse
     uint16_t reserved14;
 } __attribute__((packed));
 
-/*
+/**
  * @brief RMCP+ Open Session Request, RMCP+ Open Session Response
  *
  * The RMCP+ Open Session request and response messages are used to enable a

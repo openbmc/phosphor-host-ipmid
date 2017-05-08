@@ -30,7 +30,7 @@ constexpr Key const1 = { 0x01, 0x01, 0x01, 0x01, 0x01,
                          0x01, 0x01, 0x01, 0x01, 0x01
                        };
 
-/*
+/**
  * @enum Integrity Algorithms
  *
  * The Integrity Algorithm Number specifies the algorithm used to generate the
@@ -48,7 +48,7 @@ enum class Algorithms : uint8_t
     HMAC_SHA256_128,       // Optional
 };
 
-/*
+/**
  * @class Interface
  *
  * Interface is the base class for the Integrity Algorithms.
@@ -59,7 +59,7 @@ enum class Algorithms : uint8_t
 class Interface
 {
     public:
-        /*
+        /**
          * @brief Constructor for Interface
          *
          * @param[in] - Session Integrity Key to generate K1
@@ -77,7 +77,7 @@ class Interface
         Interface(Interface&&) = default;
         Interface& operator=(Interface&&) = default;
 
-        /*
+        /**
          * @brief Verify the integrity data of the packet
          *
          * @param[in] packet - Incoming IPMI packet
@@ -92,7 +92,7 @@ class Interface
                 const size_t packetLen,
                 Buffer::const_iterator integrityData) const = 0;
 
-        /*
+        /**
          * @brief Generate integrity data for the outgoing IPMI packet
          *
          * @param[in] input - Outgoing IPMI packet
@@ -122,20 +122,21 @@ class Interface
             }
         }
 
-        /*
-         * AuthCode field length varies based on the integrity algorithm, for
-         * HMAC-SHA1-96 the authcode field is 12 bytes. For HMAC-SHA256-128 and
-         * HMAC-MD5-128 the authcode field is 16 bytes.
+        /** @brief Authcode field
+         *
+         *  AuthCode field length varies based on the integrity algorithm, for
+         *  HMAC-SHA1-96 the authcode field is 12 bytes. For HMAC-SHA256-128 and
+         *  HMAC-MD5-128 the authcode field is 16 bytes.
          */
         size_t authCodeLength;
 
     protected:
 
-        // K1 key used to generated the integrity data
+        /** @brief K1 key used to generated the integrity data. */
         Key K1;
 };
 
-/*
+/**
  * @class AlgoSHA1
  *
  * @brief Implementation of the HMAC-SHA1-96 Integrity algorithm
@@ -151,7 +152,7 @@ class AlgoSHA1 final : public Interface
     public:
         static constexpr size_t SHA1_96_AUTHCODE_LENGTH = 12;
 
-        /*
+        /**
          * @brief Constructor for AlgoSHA1
          *
          * @param[in] - Session Integrity Key
@@ -166,7 +167,7 @@ class AlgoSHA1 final : public Interface
         AlgoSHA1(AlgoSHA1&&) = default;
         AlgoSHA1& operator=(AlgoSHA1&&) = default;
 
-        /*
+        /**
          * @brief Verify the integrity data of the packet
          *
          * @param[in] packet - Incoming IPMI packet
@@ -182,7 +183,7 @@ class AlgoSHA1 final : public Interface
                 const size_t length,
                 Buffer::const_iterator integrityData) const override;
 
-        /*
+        /**
          * @brief Generate integrity data for the outgoing IPMI packet
          *
          * @param[in] input - Outgoing IPMI packet
@@ -193,7 +194,7 @@ class AlgoSHA1 final : public Interface
         Buffer generateIntegrityData(const Buffer& packet) const override;
 
     private:
-        /*
+        /**
          * @brief Generate HMAC based on HMAC-SHA1-96 algorithm
          *
          * @param[in] input - pointer to the message
