@@ -630,8 +630,8 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
 
             resp->value = raw_value * pow(10,scale);
-            resp->operation = 0;
-            resp->indication[0] = 0;
+            resp->operation = 1<<6; // scanning enabled
+            resp->indication[0] = 0; // not a threshold sensor. ignore
             resp->indication[1] = 0;
             rc = IPMI_CC_OK;
             *data_len=sizeof(sensorreadingresp_t);
@@ -706,6 +706,132 @@ ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t populate_record_from_dbus(SensorDataFullRecordBody *body,
+                                     const ipmi::sensor::Info *info,
+                                     ipmi_data_len_t data_len)
+{
+    /* Functional sensor case */
+    if (info->sensorInterfaces.begin()->first == "xyz.openbmc_project.Sensor.Value")
+    {
+        // Get bus
+        sd_bus *bus = ipmid_get_sd_bus_connection();
+        dbus_interface_t iface;
+
+        if (0 > find_openbmc_path(body->entity_id, &iface))
+            return IPMI_CC_SENSOR_INVALID;
+
+        body->sensor_units_1 = {0}; // unsigned, no rate, no modifier, not a %
+
+        /* Unit info */
+        char *raw_str;
+        if (0 > sd_bus_get_property_string(bus, iface.bus, iface.path,
+                                            iface.interface, "Unit", NULL,
+                                            &raw_str)) {
+            fprintf(stderr, "Expected to find Unit interface in bus %s, path %s, but it was missing.\n",
+                    iface.bus, iface.path);
+            return IPMI_CC_SENSOR_INVALID;
+        }
+
+        // Unit strings defined in
+        // phosphor-dbus-interfaces/xyz/openbmc_project/Sensor/Value.interface.yaml
+        if (strcmp(raw_str, "xyz.openbmc_project.Sensor.Value.Unit.DegreesC") == 0) {
+            body->sensor_units_2_base = 1;
+        } else if (strcmp(raw_str, "xyz.openbmc_project.Sensor.Value.Unit.RPMS") == 0) {
+            body->sensor_units_2_base = 41; //revolutions
+            body->sensor_units_1.rate_unit = 0b100; // per minute
+        } else if (strcmp(raw_str, "xyz.openbmc_project.Sensor.Value.Unit.Volts") == 0) {
+            body->sensor_units_2_base = 4;
+        } else if (strcmp(raw_str, "xyz.openbmc_project.Sensor.Value.Unit.Meters") == 0) {
+            body->sensor_units_2_base = 34;
+        } else if (strcmp(raw_str, "xyz.openbmc_project.Sensor.Value.Unit.Amperes") == 0) {
+            body->sensor_units_2_base = 5;
+        } else if (strcmp(raw_str, "xyz.openbmc_project.Sensor.Value.Unit.Joules") == 0) {
+            body->sensor_units_2_base = 7;
+        } else {
+            fprintf(stderr, "Unknown value unit type: = %s\n", raw_str);
+        }
+
+        free(raw_str);
+
+        /* Modifiers to reading info */
+        body->b_lsb = 0;
+        body->b_msb_and_accuracy_lsb.b_msb = 0;
+        body->m_lsb = 1;
+        body->m_msb_and_tolerance.m_msb = 0;
+        body->r_b_exponents = {0};
+
+        /* ID string */
+        // TODO: We don't have support for finding the hwmon labels via DBus.
+        std::string id_string = info->sensorPath.substr(
+            info->sensorPath.find_last_of('/')+1, info->sensorPath.length());
+        body->id_string_info.type = 0b00; // 00 = unicode
+        body->id_string_info.length = id_string.length();
+        strncpy(body->id_string, id_string.c_str(), id_string.length());
+    }
+
+    return IPMI_CC_OK;
+};
+
+ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                            ipmi_request_t request, ipmi_response_t response,
+                            ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t ret = IPMI_CC_OK;
+    GetSdrReq *req = (GetSdrReq*)request;
+    GetSdrResp *resp = (GetSdrResp*)response;
+    SensorDataFullRecord record = {0};
+    if (req != NULL)
+    {
+        // Note: we use an iterator so we can provide the next ID at the end of
+        // the call.
+        auto sensor = sensors.begin();
+
+        // At the beginning of a scan, the host side will send us id=0.
+        if (req->record_id != 0)
+        {
+          while (sensor->first != req->record_id) {
+              if(sensor == sensors.end()) return IPMI_CC_SENSOR_INVALID;
+              sensor++;
+          }
+        }
+
+        uint8_t sensor_id = sensor->first;
+
+        /* Header */
+        record.header.record_id = sensor_id;
+        record.header.record_type = SENSOR_DATA_FULL_RECORD;
+        record.header.record_length = sizeof(SensorDataFullRecord);
+        record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
+
+        /* Key */
+        record.key.sensor_number = sensor_id;
+
+        /* Body */
+        record.body.entity_id = sensor_id;
+        record.body.sensor_type = sensor->second.sensorType;
+        record.body.event_reading_type = sensor->second.sensorReadingType;
+
+        // Set the type-specific details given the DBus interface
+        ret = populate_record_from_dbus(&(record.body), &(sensor->second), data_len);
+
+        if (++sensor == sensors.end())
+        {
+            resp->next_record_id = 0xFFFF; // last record
+        }
+        else
+        {
+            resp->next_record_id = sensor->first;
+        }
+
+        *data_len = sizeof(GetSdrResp) - req->offset;
+        memcpy(resp->record_data, (char*)&record + req->offset,
+               sizeof(SensorDataFullRecord) - req->offset);
+    }
+
+    return ret;
+}
+
+
 void register_netfn_sen_functions()
 {
     // <Wildcard Command>
@@ -737,5 +863,11 @@ void register_netfn_sen_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO, NULL,
                            ipmi_sen_get_sdr_info, PRIVILEGE_USER);
+
+    // <Get SDR>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",NETFUN_SENSOR, IPMI_CMD_GET_SDR);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR, NULL,
+                           ipmi_sen_get_sdr, PRIVILEGE_USER);
+
     return;
 }
