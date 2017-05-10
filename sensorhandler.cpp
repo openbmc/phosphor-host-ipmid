@@ -557,7 +557,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     *data_len=0;
 
-    int64_t raw_value, scale;
+    int64_t raw_value;
     ipmi::sensor::Info sensor;
 
     switch(type) {
@@ -593,6 +593,14 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         case IPMI_SENSOR_CURRENT:
         case IPMI_SENSOR_FAN:
             // Get reading for /xyz/openbmc_project/Sensor/Value.interface
+            if(sensors.find(reqptr->sennum) == sensors.end())
+            {
+                fprintf(stderr, "Failed to find config entry for Sensor 0x%02x\n",
+                        reqptr->sennum);
+                return IPMI_CC_SENSOR_INVALID;
+            }
+
+            sensor = sensors.at(reqptr->sennum);
 
             // Get value
             r = sd_bus_get_property_trivial(bus,
@@ -613,26 +621,12 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 break;
             }
 
-            // Get scale
-            r = sd_bus_get_property_trivial(bus,
-                                            a.bus,
-                                            a.path,
-                                            a.interface,
-                                            "Scale",
-                                            NULL,
-                                            'x',
-                                            &scale);
-            if (r < 0) {
-                fprintf(stderr,
-                        "Failed to call sd_bus_get_property:%d,  %s (scale)\n",
-                        r,
-                        strerror(-r));
-                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
-                        a.bus, a.path, a.interface);
-                break;
-            }
+            // Prevent div0
+            if (sensor.coefficientM == 0) {
+                sensor.coefficientM = 1;
+            };
 
-            resp->value = raw_value * pow(10,scale);
+            resp->value = (uint8_t) ((raw_value - sensor.scaledOffset) / sensor.coefficientM);
             resp->operation = 1<<6; // scanning enabled
             resp->indication[0] = 0; // not a threshold sensor. ignore
             resp->indication[1] = 0;
@@ -763,9 +757,26 @@ ipmi_ret_t populate_record_from_dbus(SensorDataFullRecordBody *body,
         free(raw_cstr);
 
         /* Modifiers to reading info */
-        SDR_FULL_BODY_SET_B(0, body);
-        SDR_FULL_BODY_SET_M(1, body);
-        body->r_b_exponents = 0;
+
+        // Get scale
+        int64_t scale;
+        if (0 > sd_bus_get_property_trivial(bus,
+                                        iface.bus,
+                                        iface.path,
+                                        iface.interface,
+                                        "Scale",
+                                        NULL,
+                                        'x',
+                                        &scale)) {
+            fprintf(stderr, "Expected to find Scale interface in bus %s, path %s, but it was missing.\n",
+                    iface.bus, iface.path);
+            return IPMI_CC_SENSOR_INVALID;
+        }
+
+        SDR_FULL_BODY_SET_B(info->coefficientB, body);
+        SDR_FULL_BODY_SET_M(info->coefficientM, body);
+        SDR_FULL_BODY_SET_B_EXP(info->exponentB, body);
+        SDR_FULL_BODY_SET_R_EXP(scale, body);
 
         /* ID string */
         std::string id_string = info->sensorPath.substr(
