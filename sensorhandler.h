@@ -258,7 +258,7 @@ struct SensorDataFullRecordBody
     uint16_t reserved;
     uint8_t oem_reserved;
     uint8_t id_string_info;
-    char id_string[16];
+    char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
 } __attribute__((packed));
 
 namespace body
