@@ -32,12 +32,20 @@ using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
 using InstancePath = std::string;
 using Type = uint8_t;
 using ReadingType = uint8_t;
+using Multiplier = uint16_t;
+using OffsetB = uint16_t;
+using Exponent = uint8_t;
+using ScaledOffset = int64_t;
 
 struct Info
 {
    Type sensorType;
    InstancePath sensorPath;
    ReadingType sensorReadingType;
+   Multiplier coefficientM;
+   OffsetB coefficientB;
+   Exponent exponentB;
+   ScaledOffset scaledOffset;
    DbusInterfaceMap sensorInterfaces;
 };
 
