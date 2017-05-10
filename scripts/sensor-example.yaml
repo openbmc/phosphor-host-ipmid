@@ -2,6 +2,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm0
   sensorReadingType: 0x6F
+  multiplierM: 1
+  offsetB: 0
+  bExp: 0
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -19,6 +22,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm1
   sensorReadingType: 0x6F
+  multiplierM: 1
+  offsetB: 0
+  bExp: 0
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -36,6 +42,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm2
   sensorReadingType: 0x6F
+  multiplierM: 1
+  offsetB: 0
+  bExp: 0
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -53,6 +62,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm3
   sensorReadingType: 0x6F
+  multiplierM: 1
+  offsetB: 0
+  bExp: 0
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
