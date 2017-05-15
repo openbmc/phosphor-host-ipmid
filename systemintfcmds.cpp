@@ -144,11 +144,11 @@ ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-// Globals to keep the object alive during process life
-std::unique_ptr<sdbusplus::bus::bus> sdbus = nullptr;
-// TODO openbmc/openbmc#1581 - unique_ptr causes seg fault
-phosphor::host::Host* host = nullptr;
-
+namespace {
+// Static storage to keep the object alive during process life
+std::unique_ptr<sdbusplus::bus::bus> sdbus __attribute__((init_priority(101)));
+std::unique_ptr<phosphor::host::Host> host __attribute__((init_priority(101)));
+}
 
 #include <unistd.h>
 void register_netfn_app_functions()
@@ -185,9 +185,9 @@ void register_netfn_app_functions()
     // Get the sd_events pointer
     auto events = ipmid_get_sd_event_connection();
 
-    host = new phosphor::host::Host(*sdbus,
-                                    objPathInst.c_str(),
-                                    events);
+    host = std::make_unique<phosphor::host::Host>(*sdbus,
+                                                  objPathInst.c_str(),
+                                                  events);
 
     sdbus->request_name(CONTROL_HOST_BUSNAME);
 
