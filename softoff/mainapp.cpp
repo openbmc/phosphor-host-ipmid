@@ -21,6 +21,8 @@
 #include "config.h"
 #include "timer.hpp"
 
+// Return -1 on any errors to ensure we follow the calling targets OnFailure=
+// path
 int main(int argc, char** argv)
 {
     using namespace phosphor::logging;
@@ -34,14 +36,13 @@ int main(int argc, char** argv)
     // Add systemd object manager.
     sdbusplus::server::manager::manager(bus, SOFTOFF_OBJPATH);
 
-    // sd_event object. StateManager wants that this applicatin return '0'
-    // always.
+    // sd_event object
     auto r = sd_event_default(&events);
     if (r < 0)
     {
         log<level::ERR>("Failure to create sd_event handler",
                 entry("ERROR=%s", strerror(-r)));
-        return 0;
+        return -1;
     }
 
     // Attach the bus to sd_event to service user requests
@@ -65,7 +66,7 @@ int main(int argc, char** argv)
         {
             log<level::ERR>("Failure in processing request",
                     entry("ERROR=%s", strerror(-r)));
-            break;
+            return -1;
         }
     }
 
@@ -78,6 +79,7 @@ int main(int argc, char** argv)
             sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout;
         using errorMetadata = xyz::openbmc_project::State::Host::SoftOffTimeout;
         report<error>(prev_entry<errorMetadata::TIMEOUT_IN_MSEC>());
+        return -1;
     }
 
     // Cleanup the event handler
