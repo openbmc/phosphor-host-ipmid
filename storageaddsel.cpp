@@ -9,7 +9,8 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/elog-errors-HostEvent.hpp>
+#include <xyz/openbmc_project/Host/Event/error.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include "host-ipmid/ipmid-api.h"
 #include "sensorhandler.h"
 #include "storagehandler.h"
@@ -190,8 +191,9 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     }
     selData[debuglen*3] = '\0';
 
-    using error = org::open_power::Error::Host::Event;
-    report<error>(error::ESEL(selData.get()));
+    using error = sdbusplus::xyz::openbmc_project::Host::Event::Error::Event;
+    using metadata = xyz::openbmc_project::Host::Event::Event;
+    report<error>(metadata::ESEL(selData.get()));
 
     return 0;
 }
