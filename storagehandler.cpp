@@ -7,6 +7,8 @@
 #include "storagehandler.h"
 #include "storageaddsel.h"
 #include "host-ipmid/ipmid-api.h"
+#include "types.hpp"
+#include "utils.hpp"
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -16,6 +18,142 @@ extern unsigned short g_sel_reserve;
 
 constexpr auto time_manager_intf = "org.openbmc.TimeManager";
 constexpr auto time_manager_obj = "/org/openbmc/TimeManager";
+extern const ipmi::sensor::InvObjectIDMap invSensors;
+using AssociationList = std::vector<std::tuple<
+                        std::string, std::string, std::string>>;
+
+ipmi_add_sel_request_t prepareSELEntry(
+                const std::string& objPath,
+                ipmi::sensor::InvObjectIDMap::const_iterator iter)
+{
+    struct ipmi_add_sel_request_t record {};
+    using namespace std::string_literals;
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    static const auto intf = "org.freedesktop.DBus.Properties"s;
+    static const auto entryIntf = "xyz.openbmc_project.Logging.Entry"s;
+
+    std::string service;
+
+    service = ipmi::getService(bus, intf, objPath);
+
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                         objPath.c_str(),
+                                         intf.c_str(),
+                                         "Get");
+
+    static const auto idProperty = "Id"s;
+
+    methodCall.append(entryIntf.c_str());
+    methodCall.append(idProperty.c_str());
+
+    auto reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        throw std::runtime_error("ERROR in reading entry interface for ID");
+    }
+
+    uint32_t logId = 0;
+    reply.read(logId);
+
+    methodCall = bus.new_method_call(service.c_str(),
+                                     objPath.c_str(),
+                                     intf.c_str(),
+                                     "Get");
+
+    static const auto timeProperty = "Timestamp"s;
+
+    methodCall.append(entryIntf.c_str());
+    methodCall.append(timeProperty.c_str());
+
+    reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        throw std::runtime_error("ERROR in reading entry interface for time");
+    }
+
+    uint64_t timestamp = 0;
+    reply.read(timestamp);
+
+    constexpr auto systemRecord = 0x02;
+    constexpr auto generator = 0x2000;
+    constexpr auto evmRev = 0x04;
+
+    record.recordid[0] = (logId >> 0) && 0xFF;
+    record.recordid[1] = (logId >> 8) && 0xFF;
+    record.recordtype = systemRecord;
+    record.timestamp[0] = (timestamp >> 0) && 0xFF;
+    record.timestamp[1] = (timestamp >> 8) && 0xFF;
+    record.timestamp[2] = (timestamp >> 16) && 0xFF;
+    record.timestamp[3] = (timestamp >> 24) && 0xFF;
+    record.generatorid[0] = (generator >> 0) && 0xFF;
+    record.generatorid[1] = (generator >> 8) && 0xFF;
+    record.evmrev = evmRev;
+    record.sensortype = iter->second.sensorType;
+    record.sensornumber = iter->second.sensorID;
+    record.eventdir = iter->second.eventReadingType;
+    record.eventdata[0] = iter->second.eventOffset;
+
+    return record;
+}
+
+ipmi_add_sel_request_t convertErrorLogtoSEL(const std::string& objPath)
+{
+    using namespace std::string_literals;
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    static const auto intf = "org.freedesktop.DBus.Properties"s;
+    static const auto assocIntf = "org.openbmc.Association"s;
+    static const auto assocProperty = "association"s;
+    static const auto  systemSensor = "/xyz/openbmc_project/inventory/system"s;
+    static const auto boardSensor =
+            "/xyz/openbmc_project/inventory/system/chassis/motherboard"s;
+    std::string service;
+
+    service = ipmi::getService(bus, intf, objPath);
+
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                         objPath.c_str(),
+                                         intf.c_str(),
+                                         "Get");
+
+    methodCall.append(assocIntf.c_str());
+    methodCall.append(assocProperty.c_str());
+
+    auto reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        throw std::runtime_error("ERROR in reading association interface");
+    }
+
+    sdbusplus::message::variant<AssociationList> list;
+    reply.read(list);
+
+    auto assocs = sdbusplus::message::variant_ns::get<AssociationList>
+         (list);
+    if (assocs.empty())
+    {
+        auto iter = invSensors.find(systemSensor);
+        return prepareSELEntry(objPath, iter);
+    }
+
+    for (const auto& item : assocs)
+    {
+        if (std::get<0>(item).compare("callout") == 0)
+        {
+             // Check if the Sensor Number is present
+             auto iter = invSensors.find(std::get<2>(item));
+             if (iter == invSensors.end())
+             {
+                 iter = invSensors.find(boardSensor);
+             }
+             return prepareSELEntry(objPath, iter);
+        }
+    }
+
+    auto iter = invSensors.find(systemSensor);
+    return prepareSELEntry(objPath, iter);
+}
 
 ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
