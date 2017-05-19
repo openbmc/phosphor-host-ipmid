@@ -6,7 +6,13 @@ sbin_PROGRAMS = \
 ipmid_SOURCES = \
 	ipmid.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
-BUILT_SOURCES = ipmiwhitelist.cpp sensor-gen.cpp inventory-sensor-gen.cpp
+
+BUILT_SOURCES = ipmiwhitelist.cpp \
+                sensor-gen.cpp \
+                inventory-sensor-gen.cpp \
+                xyz/openbmc_project/Host/Event/error.cpp \
+                xyz/openbmc_project/Host/Event/error.hpp
+
 CLEANFILES = $(BUILT_SOURCES)
 
 #TODO - Make this path a configure option (bitbake parameter)
@@ -24,6 +30,15 @@ sensor-gen.cpp:
 inventory-sensor-gen.cpp:
 	$(AM_V_GEN)@INVSENSORGEN@ -o $(top_builddir) generate-cpp
 
+xyz/openbmc_project/Host/Event/error.hpp: ${top_srcdir}/xyz/openbmc_project/Host/Event.errors.yaml
+	@mkdir -p `dirname $@`
+	$(SDBUSPLUSPLUS) -r $(srcdir) error exception-header xyz.openbmc_project.Host.Event > $@
+
+xyz/openbmc_project/Host/Event/error.cpp: ${top_srcdir}/xyz/openbmc_project/Host/Event.errors.yaml
+	@mkdir -p `dirname $@`
+	$(SDBUSPLUSPLUS) -r $(srcdir) error exception-cpp xyz.openbmc_project.Host.Event > $@
+
+
 libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
 libapphandler_la_SOURCES = \
@@ -39,7 +54,8 @@ libapphandler_la_SOURCES = \
 	groupext.cpp \
 	sensor-gen.cpp \
 	utils.cpp \
-	inventory-sensor-gen.cpp
+	inventory-sensor-gen.cpp \
+	xyz/openbmc_project/Host/Event/error.cpp
 
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
@@ -60,9 +76,11 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
                              $(libmapper_CFLAGS) \
                              $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
                              $(PHOSPHOR_LOGGING_CFLAGS)
-
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
+
+nobase_nodist_include_HEADERS = \
+    xyz/openbmc_project/Host/Event/error.hpp
 
 # Forcing the build of self and then subdir
 SUBDIRS = . test softoff
