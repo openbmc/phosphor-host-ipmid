@@ -25,4 +25,5 @@ struct ipmi_add_sel_request_t {
 	uint8_t eventdir;
 	uint8_t eventdata[3];
 };
+
 #endif
