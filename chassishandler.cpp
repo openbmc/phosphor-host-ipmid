@@ -869,7 +869,7 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 			}
 			// Does not matter if we are able to stop the timer,
 			// just get going and do the hard power off
-			rc = initiate_state_transition(State::Host::Transition::Off);
+			rc = initiate_state_transition(State::Host::Transition::HardOff);
 			break;
 
 		case CMD_HARD_RESET:
