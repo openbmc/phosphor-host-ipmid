@@ -6,7 +6,7 @@ sbin_PROGRAMS = \
 ipmid_SOURCES = \
 	ipmid.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
-BUILT_SOURCES = ipmiwhitelist.cpp sensor-gen.cpp inventory-sensor-gen.cpp
+BUILT_SOURCES = ipmiwhitelist.cpp sensor-gen.cpp inventory-sensor-gen.cpp fru-gen.cpp
 CLEANFILES = $(BUILT_SOURCES)
 
 #TODO - Make this path a configure option (bitbake parameter)
@@ -24,6 +24,9 @@ sensor-gen.cpp:
 inventory-sensor-gen.cpp:
 	$(AM_V_GEN)@INVSENSORGEN@ -o $(top_builddir) generate-cpp
 
+fru-gen.cpp:
+	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
+
 libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
 libapphandler_la_SOURCES = \
@@ -39,7 +42,8 @@ libapphandler_la_SOURCES = \
 	groupext.cpp \
 	sensor-gen.cpp \
 	utils.cpp \
-	inventory-sensor-gen.cpp
+	inventory-sensor-gen.cpp \
+	fru-gen.cpp
 
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
