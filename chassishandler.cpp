@@ -23,7 +23,7 @@
 
 constexpr size_t SIZE_MAC  = 18;
 constexpr size_t SIZE_BOOT_OPTION = (uint8_t)BootOptionResponseSize::
-                                             OPAL_NETWORK_SETTINGS;//Maximum size of the boot option parametrs
+        OPAL_NETWORK_SETTINGS;//Maximum size of the boot option parametrs
 constexpr size_t SIZE_PREFIX = 7;
 constexpr size_t MAX_PREFIX_VALUE = 32;
 constexpr size_t SIZE_COOKIE = 4;
@@ -34,7 +34,7 @@ constexpr auto   PREFIX_FORMAT = "%hhd";
 constexpr auto   ADDR_TYPE_FORMAT = "%hhx";
 //PetiBoot-Specific
 static constexpr uint8_t net_conf_initial_bytes[] = {0x80,0x21, 0x70 ,0x62 ,0x21,
-                                  0x00 ,0x01 ,0x06 ,0x04};
+        0x00 ,0x01 ,0x06 ,0x04};
 
 static constexpr size_t COOKIE_OFFSET = 1;
 static constexpr size_t VERSION_OFFSET = 5;
@@ -67,10 +67,10 @@ typedef struct
 
 typedef struct
 {
-   uint8_t cur_power_state;
-   uint8_t last_power_event;
-   uint8_t misc_power_state;
-   uint8_t front_panel_button_cap_status;
+    uint8_t cur_power_state;
+    uint8_t last_power_event;
+    uint8_t misc_power_state;
+    uint8_t front_panel_button_cap_status;
 }__attribute__((packed)) ipmi_get_chassis_status_t;
 
 // Phosphor Host State manager
@@ -128,11 +128,11 @@ int dbus_get_property(const char *name, char **buf)
     }
 
     *buf = strdup(temp_buf);
-/*    *buf = (char*) malloc(strlen(temp_buf));
+    /*    *buf = (char*) malloc(strlen(temp_buf));
     if (*buf) {
         strcpy(*buf, temp_buf);
     }
-*/
+     */
     printf("IPMID boot option property get: {%s}.\n", (char *) temp_buf);
 
 finish:
@@ -187,7 +187,7 @@ int dbus_set_property(const char * name, const char *value)
 
     printf("IPMID boot option property set: {%s}.\n", value);
 
-finish:
+    finish:
     sd_bus_error_free(&error);
     sd_bus_message_unref(m);
     free(connection);
@@ -252,7 +252,7 @@ void fillNetworkConfig( host_network_config_t & host_config ,
         }
 
         value = conf_str.substr((equalDelimtrPos+1),
-                commaDelimtrPos-(equalDelimtrPos+1));
+                                commaDelimtrPos-(equalDelimtrPos+1));
 
 #ifdef _IPMI_DEBUG_
         printf ("Name=[%s],Value=[%s],commaDelimtrPos=[%d],\
@@ -262,25 +262,28 @@ void fillNetworkConfig( host_network_config_t & host_config ,
 #endif
 
         if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                    equalDelimtrPos-commaDelimtrPrevPos,"ipaddress" )) {
-
-           host_config.ipaddress = std::move(value);
+                                   equalDelimtrPos-commaDelimtrPrevPos,
+                                   "ipaddress" )) {
+            host_config.ipaddress = std::move(value);
         }
         else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                    equalDelimtrPos-commaDelimtrPrevPos,"prefix" )) {
-
-           host_config.prefix = std::move(value);
+                                        equalDelimtrPos-commaDelimtrPrevPos,
+                                        "prefix" )) {
+            host_config.prefix = std::move(value);
         }
         else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                    equalDelimtrPos-commaDelimtrPrevPos, "gateway" )) {
+                                        equalDelimtrPos-commaDelimtrPrevPos,
+                                        "gateway" )) {
             host_config.gateway = std::move(value);
         }
         else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                    equalDelimtrPos-commaDelimtrPrevPos, "mac" )) {
+                                        equalDelimtrPos-commaDelimtrPrevPos,
+                                        "mac" )) {
             host_config.macaddress = std::move(value);
         }
         else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                    equalDelimtrPos-commaDelimtrPrevPos, "addr_type" )) {
+                                        equalDelimtrPos-commaDelimtrPrevPos,
+                                        "addr_type" )) {
             host_config.addrType = std::move(value);
         }
 
@@ -328,9 +331,9 @@ int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
     do{
 
         rc = sscanf(host_config.macaddress.c_str(),MAC_ADDRESS_FORMAT,
-             (respptr->data+MAC_OFFSET), (respptr->data+MAC_OFFSET+1),
-             (respptr->data+MAC_OFFSET+2),(respptr->data+MAC_OFFSET+3),
-             (respptr->data+MAC_OFFSET+4), (respptr->data+MAC_OFFSET+5));
+                    (respptr->data+MAC_OFFSET), (respptr->data+MAC_OFFSET+1),
+                    (respptr->data+MAC_OFFSET+2),(respptr->data+MAC_OFFSET+3),
+                    (respptr->data+MAC_OFFSET+4), (respptr->data+MAC_OFFSET+5));
 
 
         if ( rc < 6 ){
@@ -343,7 +346,7 @@ int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
         respptr->data[MAC_OFFSET+6]=0x00;
 
         rc = sscanf(host_config.addrType.c_str(),ADDR_TYPE_FORMAT,
-                   (respptr->data+ADDRTYPE_OFFSET));
+                    (respptr->data+ADDRTYPE_OFFSET));
 
         if ( rc <= 0 ) {
             fprintf(stderr, "sscanf Failed in extracting address type.\n");
@@ -353,7 +356,7 @@ int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
         //ipaddress and gateway would be in IPv4 format
         rc = inet_pton(AF_INET,host_config.ipaddress.c_str(),
-                      (respptr->data+IPADDR_OFFSET));
+                       (respptr->data+IPADDR_OFFSET));
 
         if ( rc <= 0 ) {
             fprintf(stderr, "inet_pton failed during ipaddress coneversion\n");
@@ -362,7 +365,7 @@ int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
         }
 
         rc = sscanf(host_config.prefix.c_str(),PREFIX_FORMAT,
-                                               (respptr->data+PREFIX_OFFSET));
+                    (respptr->data+PREFIX_OFFSET));
 
         if ( rc <= 0 ) {
             fprintf(stderr, "sscanf failed during prefix extraction.\n");
@@ -371,7 +374,7 @@ int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
         }
 
         rc = inet_pton(AF_INET,host_config.gateway.c_str(),
-                      (respptr->data+GATEWAY_OFFSET));
+                       (respptr->data+GATEWAY_OFFSET));
 
         if ( rc <= 0 ) {
             fprintf(stderr, "inet_pton failed during gateway conversion.\n");
@@ -388,7 +391,7 @@ int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
         //else set the respptr to 0
 
         memcpy(respptr->data,net_conf_initial_bytes,
-                sizeof(net_conf_initial_bytes));
+               sizeof(net_conf_initial_bytes));
 
 #ifdef _IPMI_DEBUG_
         printf ("\n===Printing the IPMI Formatted Data========\n");
@@ -427,8 +430,8 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
                     SIZE_COOKIE) != 0 ) {
             //cookie == 0
             if (  memcmp(&(reqptr->data[COOKIE_OFFSET]),
-                        &zeroCookie,
-                        SIZE_COOKIE) == 0 ) {
+                         &zeroCookie,
+                         SIZE_COOKIE) == 0 ) {
                 rc = 0;
                 break;
             }
@@ -448,12 +451,12 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
         }
 
         snprintf(mac, SIZE_MAC, MAC_ADDRESS_FORMAT,
-                reqptr->data[MAC_OFFSET],
-                reqptr->data[MAC_OFFSET+1],
-                reqptr->data[MAC_OFFSET+2],
-                reqptr->data[MAC_OFFSET+3],
-                reqptr->data[MAC_OFFSET+4],
-                reqptr->data[MAC_OFFSET+5]);
+                 reqptr->data[MAC_OFFSET],
+                 reqptr->data[MAC_OFFSET+1],
+                 reqptr->data[MAC_OFFSET+2],
+                 reqptr->data[MAC_OFFSET+3],
+                 reqptr->data[MAC_OFFSET+4],
+                 reqptr->data[MAC_OFFSET+5]);
 
         snprintf(dhcp,SIZE_PREFIX, ADDR_TYPE_FORMAT, reqptr->data[ADDRTYPE_OFFSET]);
         //Validating the address  type which could be
@@ -467,8 +470,8 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
         }
 
         snprintf(ipAddress, INET_ADDRSTRLEN, IP_ADDRESS_FORMAT,
-                reqptr->data[IPADDR_OFFSET], reqptr->data[IPADDR_OFFSET+1],
-                reqptr->data[IPADDR_OFFSET+2], reqptr->data[IPADDR_OFFSET+3]);
+                 reqptr->data[IPADDR_OFFSET], reqptr->data[IPADDR_OFFSET+1],
+                 reqptr->data[IPADDR_OFFSET+2], reqptr->data[IPADDR_OFFSET+3]);
 
         //validating prefix
         if ( *(reqptr->data+PREFIX_OFFSET) > (uint8_t)MAX_PREFIX_VALUE ) {
@@ -481,8 +484,10 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
         snprintf(prefix,SIZE_PREFIX,PREFIX_FORMAT, reqptr->data[PREFIX_OFFSET]);
 
         snprintf(gateway, INET_ADDRSTRLEN,IP_ADDRESS_FORMAT,
-                reqptr->data[GATEWAY_OFFSET], reqptr->data[GATEWAY_OFFSET+1],
-                reqptr->data[GATEWAY_OFFSET+2], reqptr->data[GATEWAY_OFFSET+3]);
+                 reqptr->data[GATEWAY_OFFSET],
+                 reqptr->data[GATEWAY_OFFSET+1],
+                 reqptr->data[GATEWAY_OFFSET+2],
+                 reqptr->data[GATEWAY_OFFSET+3]);
 
 
     }while(0);
@@ -490,9 +495,9 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
     if( !rc )
     {
         //Cookie == 0 or it is a valid cookie
-        host_network_config += "ipaddress="+std::string(ipAddress)+",prefix="+ 
-            std::string(prefix)+",gateway="+std::string(gateway)+
-            ",mac="+std::string(mac)+",addr_type="+std::string(dhcp);
+        host_network_config += "ipaddress="+std::string(ipAddress)+",prefix="+
+                std::string(prefix)+",gateway="+std::string(gateway)+
+                ",mac="+std::string(mac)+",addr_type="+std::string(dhcp);
 
         printf ("Network configuration changed: %s\n",host_network_config.c_str());
 
@@ -508,9 +513,11 @@ int setHostNetworkData(set_sys_boot_options_t * reqptr)
     return rc;
 }
 
-ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
 {
     printf("Handling CHASSIS WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
     // Status code.
@@ -520,8 +527,8 @@ ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+                                ipmi_request_t request, ipmi_response_t response,
+                                ipmi_data_len_t data_len, ipmi_context_t context)
 {
     // sd_bus error
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -570,55 +577,56 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 //------------------------------------------
 int initiate_state_transition(State::Host::Transition transition)
 {
-	using namespace phosphor::logging;
+    using namespace phosphor::logging;
 
-	// OpenBMC Host State Manager dbus framework
-	constexpr auto HOST_STATE_MANAGER_ROOT  = "/xyz/openbmc_project/state/host0";
-	constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
-	constexpr auto DBUS_PROPERTY_IFACE      = "org.freedesktop.DBus.Properties";
-	constexpr auto PROPERTY                 = "RequestedHostTransition";
+    // OpenBMC Host State Manager dbus framework
+    constexpr auto HOST_STATE_MANAGER_ROOT  = "/xyz/openbmc_project/state/host0";
+    constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
+    constexpr auto DBUS_PROPERTY_IFACE      = "org.freedesktop.DBus.Properties";
+    constexpr auto PROPERTY                 = "RequestedHostTransition";
 
-	// sd_bus error
-	int rc = 0;
-	char  *busname = NULL;
+    // sd_bus error
+    int rc = 0;
+    char  *busname = NULL;
 
-	// SD Bus error report mechanism.
-	sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+    // SD Bus error report mechanism.
+    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
 
-	// Gets a hook onto either a SYSTEM or SESSION bus
-	sd_bus *bus_type = ipmid_get_sd_bus_connection();
-	rc = mapper_get_service(bus_type, HOST_STATE_MANAGER_ROOT, &busname);
-	if (rc < 0) {
-		log<level::ERR>("Failed to get bus name",
-				entry("ERROR=%s, OBJPATH=%s",
-					strerror(-rc), HOST_STATE_MANAGER_ROOT));
-		return rc;
-	}
+    // Gets a hook onto either a SYSTEM or SESSION bus
+    sd_bus *bus_type = ipmid_get_sd_bus_connection();
+    rc = mapper_get_service(bus_type, HOST_STATE_MANAGER_ROOT, &busname);
+    if (rc < 0)
+    {
+        log<level::ERR>("Failed to get bus name",
+                        entry("ERROR=%s, OBJPATH=%s",
+                              strerror(-rc), HOST_STATE_MANAGER_ROOT));
+        return rc;
+    }
 
-	// Convert to string equivalent of the passed in transition enum.
-	auto request = State::convertForMessage(transition);
+    // Convert to string equivalent of the passed in transition enum.
+    auto request = State::convertForMessage(transition);
 
-	rc = sd_bus_call_method(bus_type,                // On the system bus
-							busname,                 // Service to contact
-							HOST_STATE_MANAGER_ROOT, // Object path
-							DBUS_PROPERTY_IFACE,     // Interface name
-							"Set",                   // Method to be called
-							&bus_error,              // object to return error
-							nullptr,                 // Response buffer if any
-							"ssv",                   // Takes 3 arguments
-							HOST_STATE_MANAGER_IFACE,
-							PROPERTY,
-							"s", request.c_str());
-	if(rc < 0)
-	{
-		log<level::ERR>("Failed to initiate transition",
-				entry("ERROR=%s, REQUEST=%s",
-					bus_error.message, request.c_str()));
-	}
-	else
-	{
-		log<level::INFO>("Transition request initiated successfully");
-	}
+    rc = sd_bus_call_method(bus_type,                // On the system bus
+                            busname,                 // Service to contact
+                            HOST_STATE_MANAGER_ROOT, // Object path
+                            DBUS_PROPERTY_IFACE,     // Interface name
+                            "Set",                   // Method to be called
+                            &bus_error,              // object to return error
+                            nullptr,                 // Response buffer if any
+                            "ssv",                   // Takes 3 arguments
+                            HOST_STATE_MANAGER_IFACE,
+                            PROPERTY,
+                            "s", request.c_str());
+    if(rc < 0)
+    {
+        log<level::ERR>("Failed to initiate transition",
+                        entry("ERROR=%s, REQUEST=%s",
+                              bus_error.message, request.c_str()));
+    }
+    else
+    {
+        log<level::INFO>("Transition request initiated successfully");
+    }
 
     sd_bus_error_free(&bus_error);
     free(busname);
@@ -626,20 +634,22 @@ int initiate_state_transition(State::Host::Transition transition)
     return rc;
 }
 
-struct hostPowerPolicyTypeMap_t {
+struct hostPowerPolicyTypeMap_t
+{
     uint8_t policyNum;
     char    policyName[19];
 };
 
 hostPowerPolicyTypeMap_t g_hostPowerPolicyTypeMap_t[] = {
 
-    {0x00, "LEAVE_OFF"},
-    {0x01, "RESTORE_LAST_STATE"},
-    {0x02, "ALWAYS_POWER_ON"},
-    {0x03, "UNKNOWN"}
+        {0x00, "LEAVE_OFF"},
+        {0x01, "RESTORE_LAST_STATE"},
+        {0x02, "ALWAYS_POWER_ON"},
+        {0x03, "UNKNOWN"}
 };
 
-uint8_t get_host_power_policy(char *p) {
+uint8_t get_host_power_policy(char *p)
+{
 
     hostPowerPolicyTypeMap_t *s = g_hostPowerPolicyTypeMap_t;
 
@@ -656,8 +666,10 @@ uint8_t get_host_power_policy(char *p) {
 // Get Chassis Status commands
 //----------------------------------------------------------------------
 ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                        ipmi_request_t request, ipmi_response_t response,
-                        ipmi_data_len_t data_len, ipmi_context_t context)
+                                   ipmi_request_t request,
+                                   ipmi_response_t response,
+                                   ipmi_data_len_t data_len,
+                                   ipmi_context_t context)
 {
     const char  *objname = "/org/openbmc/control/power0";
     const char  *intf = "org.openbmc.control.Power";
@@ -715,8 +727,8 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (p)
     {
-      free(p);
-      p = NULL;
+        free(p);
+        p = NULL;
     }
 
     // Current Power State
@@ -806,11 +818,11 @@ int stop_soft_off_timer()
 {
     constexpr auto iface            = "org.freedesktop.DBus.Properties";
     constexpr auto soft_off_iface   = "xyz.openbmc_project.Ipmi.Internal."
-                                      "SoftPowerOff";
+            "SoftPowerOff";
 
     constexpr auto property         = "ResponseReceived";
     constexpr auto value            = "xyz.openbmc_project.Ipmi.Internal."
-                                      "SoftPowerOff.HostResponse.HostShutdown";
+            "SoftPowerOff.HostResponse.HostShutdown";
     char *busname = nullptr;
 
     // Get the system bus where most system services are provided.
@@ -818,7 +830,8 @@ int stop_soft_off_timer()
 
     // Get the service name
     auto r = mapper_get_service(bus, SOFTOFF_OBJPATH, &busname);
-    if (r < 0) {
+    if (r < 0)
+    {
         fprintf(stderr, "Failed to get %s bus name: %s\n",
                 SOFTOFF_OBJPATH, strerror(-r));
         return r;
@@ -826,13 +839,14 @@ int stop_soft_off_timer()
 
     // No error object or reply expected.
     int rc = sd_bus_call_method(bus, busname, SOFTOFF_OBJPATH, iface,
-                           "Set", nullptr, nullptr, "ssv",
-                           soft_off_iface, property, "s", value);
+                                "Set", nullptr, nullptr, "ssv",
+                                soft_off_iface, property, "s", value);
     if (rc < 0)
     {
         fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
                 strerror(-rc));
     }
+
     free(busname);
     return rc;
 }
@@ -840,53 +854,55 @@ int stop_soft_off_timer()
 //----------------------------------------------------------------------
 // Chassis Control commands
 //----------------------------------------------------------------------
-ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                        ipmi_request_t request, ipmi_response_t response, 
-                        ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                ipmi_request_t request,
+                                ipmi_response_t response,
+                                ipmi_data_len_t data_len,
+                                ipmi_context_t context)
 {
-	// Error from power off.
-	int rc = 0;
+    // Error from power off.
+    int rc = 0;
 
-	// No response for this command.
+    // No response for this command.
     *data_len = 0;
 
-	// Catch the actual operaton by peeking into request buffer
-	uint8_t chassis_ctrl_cmd = *(uint8_t *)request;
-	printf("Chassis Control Command: Operation:[0x%X]\n",chassis_ctrl_cmd);
+    // Catch the actual operaton by peeking into request buffer
+    uint8_t chassis_ctrl_cmd = *(uint8_t *)request;
+    printf("Chassis Control Command: Operation:[0x%X]\n",chassis_ctrl_cmd);
 
-	switch(chassis_ctrl_cmd)
-	{
-		case CMD_POWER_ON:
-			rc = initiate_state_transition(State::Host::Transition::On);
-			break;
-		case CMD_POWER_OFF:
-			// Need to Nudge SoftPowerOff application that it needs to stop the
-			// watchdog timer if running.
-			rc = stop_soft_off_timer();
-			if (!rc)
-			{
-				fprintf(stderr, "Error stopping watchdog timer");
-			}
-			// Does not matter if we are able to stop the timer,
-			// just get going and do the hard power off
-			rc = initiate_state_transition(State::Host::Transition::Off);
-			break;
+    switch(chassis_ctrl_cmd)
+    {
+        case CMD_POWER_ON:
+            rc = initiate_state_transition(State::Host::Transition::On);
+            break;
+        case CMD_POWER_OFF:
+            // Need to Nudge SoftPowerOff application that it needs to stop the
+            // watchdog timer if running.
+            rc = stop_soft_off_timer();
+            if (!rc)
+            {
+                fprintf(stderr, "Error stopping watchdog timer");
+            }
+            // Does not matter if we are able to stop the timer,
+            // just get going and do the hard power off
+            rc = initiate_state_transition(State::Host::Transition::Off);
+            break;
 
-		case CMD_HARD_RESET:
-		case CMD_POWER_CYCLE:
-			// SPEC has a section that says certain implementations can trigger
-			// PowerOn if power is Off when a command to power cycle is
-			// requested
-			rc = initiate_state_transition(State::Host::Transition::Reboot);
-			break;
-		default:
-		{
-			fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
-			rc = -1;
-		}
-	}
+        case CMD_HARD_RESET:
+        case CMD_POWER_CYCLE:
+            // SPEC has a section that says certain implementations can trigger
+            // PowerOn if power is Off when a command to power cycle is
+            // requested
+            rc = initiate_state_transition(State::Host::Transition::Reboot);
+            break;
+        default:
+        {
+            fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
+            rc = -1;
+        }
+    }
 
-	return ( (rc < 0) ? IPMI_CC_INVALID : IPMI_CC_OK);
+    return ( (rc < 0) ? IPMI_CC_INVALID : IPMI_CC_OK);
 }
 
 struct bootOptionTypeMap_t {
@@ -898,13 +914,13 @@ struct bootOptionTypeMap_t {
 // dbus supports this list of boot devices.
 bootOptionTypeMap_t g_bootOptionTypeMap_t[] = {
 
-    {0x01, "Network"},
-    {0x02, "Disk"},
-    {0x03, "Safe"},
-    {0x05, "CDROM"},
-    {0x06, "Setup"},
-    {0x00, "Default"},
-    {0xFF, INVALID_STRING}
+        {0x01, "Network"},
+        {0x02, "Disk"},
+        {0x03, "Safe"},
+        {0x05, "CDROM"},
+        {0x06, "Setup"},
+        {0x00, "Default"},
+        {0xFF, INVALID_STRING}
 };
 
 uint8_t get_ipmi_boot_option(char *p) {
@@ -942,9 +958,11 @@ char* get_boot_option_by_ipmi(uint8_t p) {
     return s->dbusname;
 }
 
-ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                             ipmi_request_t request,
+                                             ipmi_response_t response,
+                                             ipmi_data_len_t data_len,
+                                             ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_PARM_NOT_SUPPORTED;
     char *p = NULL;
@@ -965,7 +983,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      * This is the only parameter used by petitboot.
      */
     if ( reqptr->parameter == static_cast<uint8_t>
-       ( BootOptionParameter::BOOT_FLAGS )) {
+    ( BootOptionParameter::BOOT_FLAGS )) {
 
         *data_len = static_cast<uint8_t>(BootOptionResponseSize::BOOT_FLAGS);
         /* Get the boot device */
@@ -985,8 +1003,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         if (p)
         {
-          free(p);
-          p = NULL;
+            free(p);
+            p = NULL;
         }
 
         /* Get the boot policy */
@@ -999,30 +1017,30 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         } else {
 
             printf("BootPolicy is[%s]", p);
-            resp->data[0] = (strncmp(p,"ONETIME",strlen("ONETIME"))==0) ? 
-                            SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:
-                            SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
+            resp->data[0] = (strncmp(p,"ONETIME",strlen("ONETIME"))==0) ?
+                    SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:
+                    SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
             rc = IPMI_CC_OK;
 
         }
 
 
     } else if ( reqptr->parameter == static_cast<uint8_t>
-              ( BootOptionParameter::OPAL_NETWORK_SETTINGS )) {
+    ( BootOptionParameter::OPAL_NETWORK_SETTINGS )) {
 
-       *data_len = static_cast<uint8_t>(BootOptionResponseSize::OPAL_NETWORK_SETTINGS);
+        *data_len = static_cast<uint8_t>(BootOptionResponseSize::OPAL_NETWORK_SETTINGS);
 
-       resp->parm = static_cast<uint8_t>(BootOptionParameter::OPAL_NETWORK_SETTINGS);
+        resp->parm = static_cast<uint8_t>(BootOptionParameter::OPAL_NETWORK_SETTINGS);
 
-       int ret = getHostNetworkData(resp);
+        int ret = getHostNetworkData(resp);
 
-       if (ret < 0) {
+        if (ret < 0) {
 
-           fprintf(stderr, "getHostNetworkData failed for get_sys_boot_options.\n");
-           rc = IPMI_CC_UNSPECIFIED_ERROR;
+            fprintf(stderr, "getHostNetworkData failed for get_sys_boot_options.\n");
+            rc = IPMI_CC_UNSPECIFIED_ERROR;
 
-       }else
-          rc = IPMI_CC_OK;
+        }else
+            rc = IPMI_CC_OK;
     }
 
     else {
@@ -1043,8 +1061,10 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 
 ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+                                             ipmi_request_t request,
+                                             ipmi_response_t response,
+                                             ipmi_data_len_t data_len,
+                                             ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     char *s;
@@ -1080,8 +1100,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
         /* setting the boot policy */
-        s = (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) == 
-                    SET_PARM_BOOT_FLAGS_PERMANENT) ?"PERMANENT":"ONETIME");
+        s = (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) ==
+                SET_PARM_BOOT_FLAGS_PERMANENT) ?"PERMANENT":"ONETIME");
 
         printf ( "\nBoot Policy is %s",s);
         int r = dbus_set_property("boot_policy",s);
@@ -1091,8 +1111,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
 
-    } else if (reqptr->parameter == 
-               (uint8_t)BootOptionParameter::OPAL_NETWORK_SETTINGS) {
+    } else if (reqptr->parameter ==
+            (uint8_t)BootOptionParameter::OPAL_NETWORK_SETTINGS) {
 
         int ret = setHostNetworkData(reqptr);
         if (ret < 0) {
