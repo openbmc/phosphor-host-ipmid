@@ -101,6 +101,14 @@ AS_IF([test "x$enable_softoff" != "xno"],
 
     [AC_ARG_VAR(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS, [Wait time until Host can quiesce])]
     [AC_DEFINE_UNQUOTED([IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS], [45*60], [Wait time until Host can quiesce])]
+    
+    # Indicates an in-band power off or reboot request from the host
+    # This file is used to ensure the soft off service does not run for host
+    # initiated shut down or reboot requests
+    [AC_ARG_VAR(HOST_INBAND_REQUEST_FILE, [Indicates the host has initiated a shutdown or reboot])]
+    AS_IF([test "x$HOST_INBAND_REQUEST_FILE" == "x"],
+        [HOST_INBAND_REQUEST_FILE="/run/openbmc/host@%u-request"])
+    [AC_DEFINE_UNQUOTED([HOST_INBAND_REQUEST_FILE], ["$HOST_INBAND_REQUEST_FILE"], [File to create if host has initiated shutdown or reboot])]
 )
 
 # Control Host Interfaces
