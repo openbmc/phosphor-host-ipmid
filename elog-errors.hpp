@@ -61,7 +61,6 @@ struct QueueEmpty : public sdbusplus::exception_t
 } // namespace openbmc_project
 } // namespace xyz
 
-
 } // namespace logging
 
 } // namespace phosphor
