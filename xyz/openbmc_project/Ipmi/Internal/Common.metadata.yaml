@@ -1,0 +1,8 @@
+- name: MkdirFailed
+  level: ERR
+  meta:
+    - str: DIR=%s
+      type: string
+    - str: ERRNO=%s
+      type: string
+

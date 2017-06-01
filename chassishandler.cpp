@@ -11,8 +11,13 @@
 #include <endian.h>
 #include <sstream>
 #include <array>
+#include <fstream>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
+#include <elog-errors.hpp>
 #include "config.h"
 
 //Defines
@@ -44,7 +49,7 @@ static constexpr size_t IPADDR_OFFSET = 17;
 static constexpr size_t PREFIX_OFFSET = 21;
 static constexpr size_t GATEWAY_OFFSET = 22;
 
-
+using namespace phosphor::logging;
 
 
 void register_netfn_chassis_functions() __attribute__((constructor));
@@ -577,8 +582,6 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 //------------------------------------------
 int initiate_state_transition(State::Host::Transition transition)
 {
-    using namespace phosphor::logging;
-
     // OpenBMC Host State Manager dbus framework
     constexpr auto HOST_STATE_MANAGER_ROOT  = "/xyz/openbmc_project/state/host0";
     constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
@@ -852,6 +855,34 @@ int stop_soft_off_timer()
 }
 
 //----------------------------------------------------------------------
+// Create file to indicate a host initiated power off or reboot request
+//----------------------------------------------------------------------
+void indicate_host_requested_state_change()
+{
+    std::string path{HOST_INBAND_REQUEST_DIR};
+
+    auto rc = mkdir(path.c_str(),S_IRWXU);
+    if(rc)
+    {
+        using namespace xyz::openbmc_project::Ipmi::Internal::Common;
+
+        log<level::ERR>("Failed to create directory for host request file",
+                       entry(MkdirFailed::DIR::str, path.c_str()),
+                       entry(MkdirFailed::ERRNO::str, strerror(errno)));
+
+        elog<MkdirFailed>(prev_entry<MkdirFailed::DIR>(),
+                          prev_entry<MkdirFailed::ERRNO>());
+    }
+    path += HOST_INBAND_REQUEST_FILE;
+    auto size = std::snprintf(nullptr,0,path.c_str(),0);
+    size++; // null
+    std::unique_ptr<char[]> buf(new char[size]);
+    std::snprintf(buf.get(),size,path.c_str(),0);
+    std::ofstream outfile(buf.get());
+    outfile.close();
+}
+
+//----------------------------------------------------------------------
 // Chassis Control commands
 //----------------------------------------------------------------------
 ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -879,13 +910,31 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // Need to Nudge SoftPowerOff application that it needs to stop the
             // watchdog timer if running.
             rc = stop_soft_off_timer();
-            if (!rc)
+            // Only request the Off transition if the soft power off
+            // application is not running
+            if (rc < 0)
             {
-                fprintf(stderr, "Error stopping watchdog timer");
+                log<level::INFO>("Soft off not running so request "
+                                 "Host:Transition:Off");
+
+                // First create a file to indicate to the soft off application
+                // that it should not run since this is a direct user initiated
+                // power off request (i.e. a power off request that is not
+                // originating via a soft power off SMS request)
+                indicate_host_requested_state_change();
+
+                // Now request the shutdown
+                rc = initiate_state_transition(State::Host::Transition::Off);
             }
-            // Does not matter if we are able to stop the timer,
-            // just get going and do the hard power off
-            rc = initiate_state_transition(State::Host::Transition::Off);
+            else
+            {
+                log<level::INFO>("Soft off is running, so let that stop "
+                                 "the host");
+                // reset rc to 0 since the lack of the soft power off app is not
+                // an error
+                rc = 0;
+            }
+
             break;
 
         case CMD_HARD_RESET:
@@ -893,6 +942,13 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // SPEC has a section that says certain implementations can trigger
             // PowerOn if power is Off when a command to power cycle is
             // requested
+
+            // First create a file to indicate to the soft off application
+            // that it should not run since this is a direct user initiated
+            // power reboot request (i.e. a reboot request that is not
+            // originating via a soft power off SMS request)
+            indicate_host_requested_state_change();
+
             rc = initiate_state_transition(State::Host::Transition::Reboot);
             break;
         default:
