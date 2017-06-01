@@ -15,11 +15,9 @@
  */
 #include <chrono>
 #include <phosphor-logging/log.hpp>
-#include <phosphor-logging/elog.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 #include <utils.hpp>
 #include "softoff.hpp"
-#include "elog-gen-softoff.hpp"
 #include "config.h"
 namespace phosphor
 {
@@ -95,7 +93,10 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
     }
     else
     {
-        elog<xyz::openbmc_project::SoftPowerOff::Internal::SoftOffFailed>();
+        // An error on the initial attention is not considered an error, just
+        // exit normally and allow remaining shutdown targets to run
+        log<level::INFO>("Timeout on host attention, continue with power down");
+        completed=true;
     }
     return;
 }
