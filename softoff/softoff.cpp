@@ -15,6 +15,9 @@
  */
 #include <chrono>
 #include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 #include <utils.hpp>
 #include "softoff.hpp"
@@ -129,6 +132,49 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
 
     return sdbusplus::xyz::openbmc_project::Ipmi::Internal
               ::server::SoftPowerOff::responseReceived(response);
+}
+
+void SoftPowerOff::waitForMapper(sd_event* i_events)
+{
+    constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
+    constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
+    constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
+    auto mapper = bus.new_method_call(MAPPER_BUSNAME,
+                                      MAPPER_PATH,
+                                      MAPPER_INTERFACE,
+                                      "GetObject");
+
+    mapper.append(SOFTOFF_OBJPATH,
+                  std::vector<std::string>({SOFTOFF_BUSNAME}));
+
+    // We just need to cycle enough times to allow mapper to register this
+    // object.  Testing has shown this happens within 6-7 loops but a larger
+    // number should not affect anything except in an unexpected error path
+    for(int i=0;i<100;i++)
+    {
+        auto r = sd_event_run(i_events, (uint64_t)-1);
+        if (r < 0)
+        {
+            log<level::ERR>("Failure in sd_event_run waiting for mapper obj",
+                    entry("ERROR=%s", strerror(-r)));
+            elog<sdbusplus::xyz::openbmc_project::Common::Error::
+                InternalFailure>();
+        }
+
+        auto mapperResponseMsg = bus.call(mapper);
+        if (mapperResponseMsg.is_method_error())
+        {
+            log<level::INFO>("Softoff dbus not available yet...waiting");
+        }
+        else
+        {
+            log<level::INFO>("Softoff dbus is available");
+            return;
+        }
+    }
+    log<level::ERR>("Softoff dbus object did not appear in mapper within " \
+                    "allowed time");
+    elog<sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure>();
 }
 
 } // namespace ipmi
