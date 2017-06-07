@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 #include <chrono>
+#include <unistd.h>
 #include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include <mapper.h>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 #include <utils.hpp>
 #include "softoff.hpp"
@@ -129,6 +133,38 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
 
     return sdbusplus::xyz::openbmc_project::Ipmi::Internal
               ::server::SoftPowerOff::responseReceived(response);
+}
+
+void SoftPowerOff::waitForMapper()
+{
+    constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
+    constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
+    constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
+    for(int i=0;i<3;i++)
+    {
+        auto mapper = bus.new_method_call(MAPPER_BUSNAME,
+                                          MAPPER_PATH,
+                                          MAPPER_INTERFACE,
+                                          "GetObject");
+
+        mapper.append(SOFTOFF_OBJPATH,
+                      std::vector<std::string>({SOFTOFF_BUSNAME}));
+        auto mapperResponseMsg = bus.call(mapper);
+
+        if (mapperResponseMsg.is_method_error())
+        {
+            log<level::INFO>("Softoff dbus not available yet...waiting");
+            sleep(1);
+        }
+        else
+        {
+            log<level::INFO>("Softoff dbus is available");
+            return;
+        }
+    }
+    log<level::ERR>("Softoff dbus object did not appear in mapper within" \
+                    "allowed time");
+    elog<sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure>();
 }
 
 } // namespace ipmi

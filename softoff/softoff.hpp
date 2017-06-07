@@ -140,6 +140,16 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         void hostControlEvent(sdbusplus::message::message& msg);
 
+        /** @brief Wait for this objects interface to be registered in mapper
+         *
+         * The communication with the host can be so fast at times, it may
+         * try and call this objects interfaces before mapper has registered
+         * them.  This function will verify this object is registered in mapper
+         * so it can be called prior to issuing commands to the host.
+         *
+         */
+        void waitForMapper();
+
 };
 } // namespace ipmi
 } // namespace phosphor
