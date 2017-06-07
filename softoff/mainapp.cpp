@@ -56,6 +56,12 @@ int main(int argc, char** argv)
     // Create the SoftPowerOff object.
     phosphor::ipmi::SoftPowerOff powerObj(bus, events, SOFTOFF_OBJPATH);
 
+    // Wait for our object to get registered with mapper
+    powerObj.waitForMapper(events);
+
+    // Now start the shutdown
+    powerObj.sendHostShutDownCmd();
+
     // Wait for client requests until this application has processed
     // at least one successful SoftPowerOff or we timed out
     while(!powerObj.isCompleted() && !powerObj.isTimerExpired())

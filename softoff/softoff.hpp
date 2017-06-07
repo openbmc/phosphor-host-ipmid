@@ -51,12 +51,6 @@ class SoftPowerOff : public sdbusplus::server::object::object<
             // Need to announce since we may get the response
             // very quickly on host shutdown command
             emit_object_added();
-
-            // The whole purpose of this application is to send a host shutdown
-            // command and watch for the soft power off to go through. We need
-            // the interface added signal emitted before we send the shutdown
-            // command just to attend to lightning fast response from host
-            sendHostShutDownCmd();
         }
 
         /** @brief Tells if the objective of this application is completed */
@@ -90,6 +84,33 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          */
         int startTimer(const std::chrono::microseconds& usec);
 
+        /** @brief Sends host control command to tell host to shut down
+         *
+         *  After sending the command, wait for a signal indicating the status
+         *  of the command.
+         *
+         *  After receiving the initial response, start a timer for 30 minutes
+         *  to let host do a clean shutdown of partitions. When the response is
+         *  received from the host, it indicates that BMC can do a power off.
+         *  If BMC fails to get any response, then a hard power off would
+         *  be forced.
+         *
+         *  @return - Does not return anything. Error will result in exception
+         *            being thrown
+         */
+        void sendHostShutDownCmd();
+
+        /** @brief Wait for this objects interface to be registered in mapper
+         *
+         * The communication with the host can be so fast at times, it may
+         * try and call this objects interfaces before mapper has registered
+         * them.  This function will verify this object is registered in mapper
+         * so it can be called prior to issuing commands to the host.
+         *
+         *  @param[in] i_events - Events pointer for dbus processing
+         */
+        void waitForMapper(sd_event* i_events);
+
     private:
         // Need this to send SMS_ATTN
         // TODO : Switch over to using mapper service in a different patch
@@ -116,22 +137,6 @@ class SoftPowerOff : public sdbusplus::server::object::object<
          *  control interface and then wait for a signal indicating pass/fail
          **/
         sdbusplus::bus::match_t hostControlSignal;
-
-        /** @brief Sends host control command to tell host to shut down
-         *
-         *  After sending the command, wait for a signal indicating the status
-         *  of the command.
-         *
-         *  After receiving the initial response, start a timer for 30 minutes
-         *  to let host do a clean shutdown of partitions. When the response is
-         *  received from the host, it indicates that BMC can do a power off.
-         *  If BMC fails to get any response, then a hard power off would
-         *  be forced.
-         *
-         *  @return - Does not return anything. Error will result in exception
-         *            being thrown
-         */
-        void sendHostShutDownCmd();
 
         /** @brief Callback function on host control signals
          *
