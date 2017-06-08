@@ -93,6 +93,7 @@ enum ipmi_net_fns
     NETFUN_STORAGE   =   0x0a,
     NETFUN_TRANSPORT =   0x0c,
     NETFUN_GRPEXT    =   0x2c,
+    NETFUN_OEM_GROUP =   0x2e,
     NETFUN_NONE      =   0x30,
     NETFUN_OEM       =   0x32,
     NETFUN_IBM_OEM   =   0x3A
