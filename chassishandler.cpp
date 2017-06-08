@@ -825,22 +825,28 @@ int stop_soft_off_timer()
     constexpr auto property         = "ResponseReceived";
     constexpr auto value            = "xyz.openbmc_project.Ipmi.Internal."
             "SoftPowerOff.HostResponse.HostShutdown";
-    char *busname = nullptr;
 
     // Get the system bus where most system services are provided.
     auto bus = ipmid_get_sd_bus_connection();
 
     // Get the service name
-    auto r = mapper_get_service(bus, SOFTOFF_OBJPATH, &busname);
-    if (r < 0)
-    {
-        fprintf(stderr, "Failed to get %s bus name: %s\n",
-                SOFTOFF_OBJPATH, strerror(-r));
-        return r;
-    }
+    // TODO openbmc/openbmc#1661 - Mapper refactor
+    //
+    // See openbmc/openbmc#1743 for some details but high level summary is that
+    // for now the code will directly call the soft off interface due to a
+    // race condition with mapper usage
+    //
+    //char *busname = nullptr;
+    //auto r = mapper_get_service(bus, SOFTOFF_OBJPATH, &busname);
+    //if (r < 0)
+    //{
+    //    fprintf(stderr, "Failed to get %s bus name: %s\n",
+    //            SOFTOFF_OBJPATH, strerror(-r));
+    //    return r;
+    //}
 
     // No error object or reply expected.
-    int rc = sd_bus_call_method(bus, busname, SOFTOFF_OBJPATH, iface,
+    int rc = sd_bus_call_method(bus, SOFTOFF_BUSNAME, SOFTOFF_OBJPATH, iface,
                                 "Set", nullptr, nullptr, "ssv",
                                 soft_off_iface, property, "s", value);
     if (rc < 0)
@@ -849,7 +855,8 @@ int stop_soft_off_timer()
                 strerror(-rc));
     }
 
-    free(busname);
+    //TODO openbmc/openbmc#1661 - Mapper refactor
+    //free(busname);
     return rc;
 }
 
