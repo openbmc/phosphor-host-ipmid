@@ -29,7 +29,6 @@ PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],, [AC_M
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,\
     AC_MSG_ERROR(["Requires sdbusplus package."]))
 
-
 AS_IF([test "x$enable_softoff" != "xno"],
     # Check for sdbusplus
     PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],, [AC_MSG_ERROR(["sdbusplus packaged required and not found"])])
@@ -50,8 +49,8 @@ LT_INIT([dlopen disable-static shared])
 LT_LIB_DLLOAD
 
 # Check/set gtest specific functions.
-AX_PTHREAD([GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=1"],[GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=0"])
-AC_SUBST(GTEST_CPPFLAGS)
+PKG_CHECK_MODULES([GTEST], [gtest], [], [AC_MSG_NOTICE([gtest not found, tests will not build])])
+PKG_CHECK_MODULES([GTEST_MAIN], [gtest_main], [], [AC_MSG_NOTICE([gtest_main not found, tests will not build])])
 
 AC_ARG_ENABLE([oe-sdk],
     AS_HELP_STRING([--enable-oe-sdk], [Link testcases absolutely against OE SDK so they can be ran within it.])
