@@ -27,6 +27,7 @@
 #include <host-cmd-manager.hpp>
 #include <host-ipmid/ipmid-host-cmd.hpp>
 #include <timer.hpp>
+#include "host-ipmid/oemrouter.hpp"
 
 using namespace phosphor::logging;
 namespace sdbusRule = sdbusplus::bus::match::rules;
@@ -572,6 +573,9 @@ int main(int argc, char *argv[])
     sdbusp = std::make_unique<sdbusplus::bus::bus>(bus);
     cmdManager = std::make_unique<phosphor::host::command::Manager>(
                             *sdbusp, events);
+
+    // Activate OemRouter.
+    ipmid::mutableOemRouter()->activate();
 
     // Register all the handlers that provider implementation to IPMI commands.
     ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);

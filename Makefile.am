@@ -8,7 +8,8 @@ ipmid_SOURCES = \
 	settings.cpp \
 	host-cmd-manager.cpp \
 	timer.cpp \
-	utils.cpp
+	utils.cpp \
+	oemrouter.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 
 BUILT_SOURCES = \
@@ -94,6 +95,8 @@ nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp
+	host-ipmid/oemopenbmc.hpp \
+	host-ipmid/oemrouter.hpp
 
 # Forcing the build of self and then subdir
 SUBDIRS = . test softoff
