@@ -3,7 +3,6 @@
 #include <utils.hpp>
 #include <config.h>
 #include "host-interface.hpp"
-#include "elog-errors.hpp"
 
 namespace phosphor
 {
@@ -31,8 +30,10 @@ base::Host::Command Host::getNextCommand()
 
     if(this->workQueue.empty())
     {
-        log<level::ERR>("Control Host work queue is empty!");
-        elog<xyz::openbmc_project::Control::Internal::Host::QueueEmpty>();
+        // Just return a heartbeat in this case.  A spurious SMS_ATN was
+        // asserted for the host (probably from a previous boot).
+        log<level::INFO>("Control Host work queue is empty!");
+        return (Command::Heartbeat);
     }
 
     // Pop the processed entry off the queue
