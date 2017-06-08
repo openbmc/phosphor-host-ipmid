@@ -16,9 +16,9 @@ extern const IdInfoMap sensors = {
        path = sensor["path"]
        sensorType = sensor["sensorType"]
        readingType = sensor["sensorReadingType"]
-       multiplier = sensor["multiplierM"]
-       offset = sensor["offsetB"]
-       exp = sensor["bExp"]
+       multiplier = sensor.get("multiplierM", 1)
+       offset = sensor.get("offsetB", 0)
+       exp = sensor.get("bExp", 0)
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
         ${offset * pow(10,exp)},{
