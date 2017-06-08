@@ -85,6 +85,7 @@ libipmi20_la_SOURCES = \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
+	oemi2c.cpp \
 	$(libipmi20_BUILT_LIST)
 
 @CODE_COVERAGE_RULES@
