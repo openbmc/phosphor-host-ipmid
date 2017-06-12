@@ -364,15 +364,18 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    const char  *objname = "/org/openbmc/watchdog/host0";
-    const char  *iface = "org.openbmc.Watchdog";
+    const char  *objname = "/xyz/openbmc_project/watchdog/host0";
+    const char  *iface = "xyz.openbmc_project.State.Watchdog";
+    const char  *property_iface = "org.freedesktop.DBus.Properties";
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
     set_wd_data_t *reqptr = (set_wd_data_t*) request;
     uint16_t timer = 0;
-    uint32_t timer_ms = 0;
+
+    // Making this uint64_t to match with provider
+    uint64_t timer_ms = 0;
     char *busname = NULL;
     *data_len = 0;
 
@@ -390,24 +393,14 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 objname, strerror(-r));
         goto finish;
     }
-    // Set watchdog timer
-    r = sd_bus_call_method(bus, busname, objname, iface,
-                           "set", &error, &reply, "i", timer_ms);
-    if(r < 0)
-    {
-        fprintf(stderr, "Failed to call the SET method: %s\n", strerror(-r));
-        goto finish;
-    }
 
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-
-    // Stop the current watchdog if any
-    r = sd_bus_call_method(bus, busname, objname, iface,
-                           "stop", &error, &reply, NULL);
-    if(r < 0)
-    {
-        fprintf(stderr, "Failed to call the STOP method: %s\n", strerror(-r));
+    // Disable watchdog if running
+    r = sd_bus_call_method(bus, busname, objname, property_iface,
+                           "Set", &error, &reply, "ssv",
+                           iface, "Enabled", "b", false);
+    if(r < 0) {
+        fprintf(stderr, "Failed to disable Watchdog: %s\n",
+                    strerror(-r));
         goto finish;
     }
 
@@ -416,12 +409,24 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         sd_bus_error_free(&error);
         reply = sd_bus_message_unref(reply);
 
-        // Start the watchdog if requested
-        r = sd_bus_call_method(bus, busname, objname, iface,
-                               "start", &error, &reply, NULL);
-        if(r < 0)
-        {
-            fprintf(stderr, "Failed to call the START method: %s\n", strerror(-r));
+        // Now Enable Watchdog
+        r = sd_bus_call_method(bus, busname, objname, property_iface,
+                               "Set", &error, &reply, "ssv",
+                               iface, "Enabled", "b", true);
+        if(r < 0) {
+            fprintf(stderr, "Failed to Enable Watchdog: %s\n",
+                    strerror(-r));
+            goto finish;
+        }
+
+        // Set watchdog timer
+        r = sd_bus_call_method(bus, busname, objname, property_iface,
+                               "Set", &error, &reply, "ssv",
+                               iface, "TimeRemaining", "t", timer_ms);
+        if(r < 0) {
+            fprintf(stderr, "Failed to set new expiration time: %s\n",
+                    strerror(-r));
+            goto finish;
         }
     }
 
@@ -438,12 +443,16 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    const char  *objname = "/org/openbmc/watchdog/host0";
-    const char  *iface = "org.openbmc.Watchdog";
+    const char  *objname = "/xyz/openbmc_project/watchdog/host0";
+    const char  *iface = "xyz.openbmc_project.State.Watchdog";
+    const char  *property_iface = "org.freedesktop.DBus.Properties";
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
     char *busname = NULL;
+
+    // Current time interval that is set in watchdog.
+    uint64_t interval = 0;
 
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -457,12 +466,37 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 objname, strerror(-r));
         goto finish;
     }
-    // Refresh watchdog
-    r = sd_bus_call_method(bus, busname, objname, iface,
-                           "poke", &error, &reply, NULL);
+
+    // Get the current interval and set it back.
+    r = sd_bus_call_method(bus, busname, objname, property_iface,
+                           "Get", &error, &reply, "ss",
+                           iface, "Interval");
+
+    if(r < 0) {
+        fprintf(stderr, "Failed to get current Interval msg: %s\n",
+                strerror(-r));
+        goto finish;
+    }
+
+    // Now extract the value
+    r = sd_bus_message_read(reply, "v", "t", &interval);
     if (r < 0) {
-        fprintf(stderr, "Failed to add reset  watchdog: %s\n", strerror(-r));
-        rc = -1;
+        fprintf(stderr, "Failed to read current interval: %s\n",
+                strerror(-r));
+        goto finish;
+    }
+
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
+
+    // Set watchdog timer
+    r = sd_bus_call_method(bus, busname, objname, property_iface,
+                           "Set", &error, &reply, "ssv",
+                           iface, "TimeRemaining", "t", interval);
+    if(r < 0) {
+        fprintf(stderr, "Failed to refresh the timer: %s\n",
+                strerror(-r));
+        goto finish;
     }
 
 finish:
