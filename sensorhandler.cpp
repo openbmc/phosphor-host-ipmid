@@ -185,7 +185,7 @@ int find_openbmc_path(uint8_t num, dbus_interface_t *interface) {
 
     const auto& info = sensor_it->second;
 
-    char* busname;
+    char* busname = nullptr;
     rc = get_bus_for_path(info.sensorPath.c_str(), &busname);
     if (rc < 0) {
         fprintf(stderr, "Failed to get %s busname: %s\n",
