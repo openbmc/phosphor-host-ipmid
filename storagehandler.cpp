@@ -228,7 +228,23 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
+        ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+        ipmi_response_t response, ipmi_data_len_t data_len,
+        ipmi_context_t context)
+{
 
+    ipmi_ret_t rc = IPMI_CC_OK;
+    printf("IPMI Handling GET-FRU-INVENTORY-AREA-INFO \n");
+    printf("IPMI Handling GET-FRU-INVENTORY-AREA-INFO netfn:[0x%X], Cmd:[0x%X]\n", netfn, cmd);
+    unsigned char buf[] = {0x51,0,0,0xff, 0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0x06};
+
+    *data_len = sizeof(buf);
+
+    // Pack the actual response
+    memcpy(response, &buf, *data_len);
+    return rc;
+}
 
 void register_netfn_storage_functions()
 {
@@ -261,6 +277,13 @@ void register_netfn_storage_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL, ipmi_storage_add_sel,
                            PRIVILEGE_OPERATOR);
+
+    // <Get FRU Inventory Area Info>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_STORAGE,
+            IPMI_CMD_GET_FRU_INV_AREA_INFO);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_FRU_INV_AREA_INFO, NULL,
+            ipmi_storage_get_fru_inv_area_info, PRIVILEGE_OPERATOR);
+
     return;
 }
 

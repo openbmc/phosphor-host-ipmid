@@ -5,6 +5,7 @@
 enum ipmi_netfn_storage_cmds
 {
     // Get capability bits
+    IPMI_CMD_GET_FRU_INV_AREA_INFO  = 0x10,
     IPMI_CMD_GET_SEL_INFO   = 0x40,
     IPMI_CMD_RESERVE_SEL    = 0x42,
     IPMI_CMD_ADD_SEL        = 0x44,
