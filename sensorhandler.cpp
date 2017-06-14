@@ -185,7 +185,7 @@ int find_openbmc_path(uint8_t num, dbus_interface_t *interface) {
 
     const auto& info = sensor_it->second;
 
-    char* busname;
+    char* busname = nullptr;
     rc = get_bus_for_path(info.sensorPath.c_str(), &busname);
     if (rc < 0) {
         fprintf(stderr, "Failed to get %s busname: %s\n",
@@ -408,6 +408,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 ipmi_ret_t setSensorReading(void *request)
 {
+    printf("setSensorReading\n");
     auto cmdData = static_cast<SetSensorReadingReq *>(request);
 
     auto assertionStates =
@@ -421,10 +422,18 @@ ipmi_ret_t setSensorReading(void *request)
     std::bitset<16> assertionSet(assertionStates);
     std::bitset<16> deassertionSet(deassertionStates);
 
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
     // Check if the Sensor Number is present
     auto iter = sensors.find(cmdData->number);
     if (iter == sensors.end())
     {
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    if (!(iter->second.mutability & ipmi::sensor::Write)) {
+        // sensor not writable
+        fprintf(stderr, "Sensor %x is not writable\n", iter->first);
         return IPMI_CC_SENSOR_INVALID;
     }
 
@@ -438,62 +447,86 @@ ipmi_ret_t setSensorReading(void *request)
 
     ipmi::sensor::ObjectMap objects;
     ipmi::sensor::InterfaceMap interfaces;
-    for (const auto& interface : interfaceList)
-    {
-        for (const auto& property : interface.second)
-        {
-            ipmi::sensor::PropertyMap props;
-            bool valid = false;
-            for (const auto& value : property.second)
-            {
-                if (assertionSet.test(value.first))
-                {
-                    props.emplace(property.first, value.second.assert);
-                    valid = true;
-                }
-                else if (deassertionSet.test(value.first))
-                {
-                    props.emplace(property.first, value.second.deassert);
-                    valid = true;
-                }
-            }
-            if (valid)
-            {
-                interfaces.emplace(interface.first, std::move(props));
-            }
-        }
-    }
-    objects.emplace(iter->second.sensorPath, std::move(interfaces));
+    bool setReading = false;
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    using namespace std::string_literals;
-    static const auto intf = "xyz.openbmc_project.Inventory.Manager"s;
-    static const auto path = "/xyz/openbmc_project/inventory"s;
-    std::string service;
+    // get info for writing to bus - service, path, interface
+    dbus_interface_t a;
+    int r = find_openbmc_path(cmdData->number, &a);
+    if (r < 0) {
+        fprintf(stderr, "Failed to find Sensor 0x%02x\n", cmdData->number);
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    printf("got the dbus_interface_t; bus: %s, path: %s, interface: %s\n",
+           a.bus, a.path, a.interface);
+
 
     try
     {
-        service = ipmi::getService(bus, intf, path);
-
         // Update the inventory manager
-        auto pimMsg = bus.new_method_call(service.c_str(),
-                                          path.c_str(),
-                                          intf.c_str(),
-                                          "Notify");
-        pimMsg.append(std::move(objects));
+        auto pimMsg = bus.new_method_call(a.bus,
+                                          a.path,
+                                          "org.freedesktop.DBus.Properties",
+                                          "Set");
+        printf("got pimMsg\n");
+
+        for (const auto& interface : interfaceList)
+        {
+            for (const auto& property : interface.second)
+            {
+                printf("property: %s\n", property.first.c_str());
+                ipmi::sensor::PropertyMap props;
+                bool valid = false;
+
+                if(interface.first == "xyz.openbmc_project.Sensor.Value") {
+                    printf("appending %s|%s|%x\n",
+                           interface.first.c_str(),
+                           property.first.c_str(),
+                           cmdData->reading);
+                    pimMsg.append(interface.first);
+                    pimMsg.append(property.first);
+                    pimMsg.append(ipmi::sensor::Value((int64_t)cmdData->reading));
+                }
+                for (const auto& value : property.second)
+                {
+                    if (assertionSet.test(value.first))
+                    {
+                        props.emplace(property.first, value.second.assert);
+                        valid = true;
+                    }
+                    else if (deassertionSet.test(value.first))
+                    {
+                        props.emplace(property.first, value.second.deassert);
+                        valid = true;
+                    }
+                }
+                if (valid)
+                {
+                    interfaces.emplace(interface.first, std::move(props));
+                }
+            }
+        }
+        objects.emplace(iter->second.sensorPath, std::move(interfaces));
+
+        if (!setReading) {
+            pimMsg.append(std::move(objects));
+        }
         auto inventoryMgrResponseMsg = bus.call(pimMsg);
         if (inventoryMgrResponseMsg.is_method_error())
         {
+            printf("error in notify call\n");
             log<level::ERR>("Error in notify call");
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
     }
     catch (const std::runtime_error& e)
     {
+        printf("i got u this exception: %s\n", e.what());
         log<level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
+    printf("returning ok\n");
     return IPMI_CC_OK;
 }
 
@@ -536,7 +569,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus *bus = ipmid_get_sd_bus_connection();
     sd_bus_message *reply = NULL;
     int reading = 0;
-
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
@@ -601,6 +633,13 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
 
             sensor = sensors.at(reqptr->sennum);
+            if (!(sensor.mutability & ipmi::sensor::Mutability::Read)) {
+                fprintf(stderr, "Sensor was not readable.\n");
+                resp->value = 0;
+                resp->operation = 0x20; // events, sensor scanning disabled; state unavailable
+                return IPMI_CC_SENSOR_INVALID;
+            }
+
 
             // Get value
             r = sd_bus_get_property_trivial(bus,
