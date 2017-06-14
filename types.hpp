@@ -32,7 +32,6 @@ namespace sensor
 {
 
 using Offset = uint8_t;
-using Value = ipmi::Value;
 
 struct Values
 {
@@ -42,10 +41,8 @@ struct Values
 
 using OffsetValueMap = std::map<Offset,Values>;
 
-using DbusProperty = ipmi::DbusProperty;
 using DbusPropertyMap = std::map<DbusProperty,OffsetValueMap>;
 
-using DbusInterface = ipmi::DbusInterface;
 using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
 
 using InstancePath = std::string;
@@ -55,6 +52,24 @@ using Multiplier = uint16_t;
 using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
+
+enum class Mutability
+{
+   Read = 1 << 0,
+   Write = 1 << 1,
+};
+
+inline Mutability operator|(Mutability lhs, Mutability rhs)
+{
+  return static_cast<Mutability>(
+      static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+}
+
+inline Mutability operator&(Mutability lhs, Mutability rhs)
+{
+  return static_cast<Mutability>(
+      static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+}
 
 struct Info
 {
@@ -67,6 +82,7 @@ struct Info
    Exponent exponentB;
    ScaledOffset scaledOffset;
    std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
+   Mutability mutability;
    DbusInterfaceMap propertyInterfaces;
 };
 
