@@ -1070,7 +1070,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         } else {
 
-            printf("BootPolicy is[%s]", p);
+            printf("BootPolicy is [%s]\n", p);
             resp->data[0] = (strncmp(p,"ONETIME",strlen("ONETIME"))==0) ?
                     SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:
                     SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
