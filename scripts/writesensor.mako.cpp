@@ -118,9 +118,10 @@ extern const IdInfoMap sensors = {
        exp = sensor.get("bExp", 0)
        valueReadingType = sensor["readingType"]
        updateFunc = funcProps[sensorType]["updateFunc"]
+       mutability = sensor.get("mutability", "Mutability::Read")
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
-        ${offset * pow(10,exp)},${updateFunc},{
+        ${offset * pow(10,exp)},${updateFunc},Mutability(${mutability}),{
     % for interface,properties in interfaces.iteritems():
             {"${interface}",{
             % for dbus_property,property_value in properties.iteritems():
@@ -152,7 +153,7 @@ extern const IdInfoMap sensors = {
             % endfor
             }},
     % endfor
-     }
+     },
 }},
    % endif
 % endfor
