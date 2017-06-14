@@ -697,20 +697,27 @@ void setUnitFieldsForObject(sd_bus *bus,
         "xyz.openbmc_project.Sensor.Value")
     {
         std::string result {};
-        char *raw_cstr = NULL;
-        if (0 > sd_bus_get_property_string(bus, iface.bus, iface.path,
-                                            iface.interface, "Unit", NULL,
-                                            &raw_cstr))
+        if (info->unit.empty())
         {
-            log<level::WARNING>("Unit interface missing.",
-                                entry("BUS=%s", iface.bus),
-                                entry("PATH=%s", iface.path));
+            char *raw_cstr = NULL;
+            if (0 > sd_bus_get_property_string(bus, iface.bus, iface.path,
+                                               iface.interface, "Unit", NULL,
+                                               &raw_cstr))
+            {
+                log<level::WARNING>("Unit interface missing.",
+                                    entry("BUS=%s", iface.bus),
+                                    entry("PATH=%s", iface.path));
+            }
+            else
+            {
+                result = raw_cstr;
+            }
+            free(raw_cstr);
         }
         else
         {
-            result = raw_cstr;
+            result = info->unit;
         }
-        free(raw_cstr);
 
         namespace server = sdbusplus::xyz::openbmc_project::Sensor::server;
         try {
@@ -758,17 +765,24 @@ int64_t getScaleForObject(sd_bus *bus,
     if (info->propertyInterfaces.begin()->first ==
         "xyz.openbmc_project.Sensor.Value")
     {
-        if (0 > sd_bus_get_property_trivial(bus,
-                                        iface.bus,
-                                        iface.path,
-                                        iface.interface,
-                                        "Scale",
-                                        NULL,
-                                        'x',
-                                        &result)) {
-            log<level::WARNING>("Scale interface missing.",
-                                entry("BUS=%s", iface.bus),
-                                entry("PATH=%s", iface.path));
+        if (info->hasScale)
+        {
+            result = info->scale;
+        }
+        else
+        {
+            if (0 > sd_bus_get_property_trivial(bus,
+                                                iface.bus,
+                                                iface.path,
+                                                iface.interface,
+                                                "Scale",
+                                                NULL,
+                                                'x',
+                                                &result)) {
+                log<level::WARNING>("Scale interface missing.",
+                                    entry("BUS=%s", iface.bus),
+                                    entry("PATH=%s", iface.path));
+            }
         }
     }
 
