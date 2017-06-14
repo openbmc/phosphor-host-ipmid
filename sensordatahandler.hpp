@@ -95,6 +95,13 @@ ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
     return updateToDbus(msg);
 }
 
+/** @brief Update d-bus based on a discrete reading
+ *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
+ *  @return an IPMI error code
+ */
+ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
+                       const Info& sensorInfo);
 
 /** @brief Update d-bus based on eventdata type sensor data
  *  @param[in] cmdData - input sensor data

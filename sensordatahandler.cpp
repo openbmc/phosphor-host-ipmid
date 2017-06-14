@@ -185,6 +185,25 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     return updateToDbus(msg);
 }
 
+ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
+                       const Info& sensorInfo)
+{
+    auto msg = makeDbusMsg(
+        "org.freedesktop.DBus.Properties",
+        sensorInfo.sensorPath,
+        "Set",
+        sensorInfo.sensorInterface);
+    const auto& interface = sensorInfo.propertyInterfaces.begin();
+    msg.append(interface->first);
+    for (const auto& property : interface->second)
+    {
+        msg.append(property.first);
+        sdbusplus::message::variant<uint8_t> value = cmdData.reading;
+        msg.append(value);
+    }
+    return updateToDbus(msg);
+}
+
 }//namespace set
 
 namespace notify
