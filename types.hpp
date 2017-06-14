@@ -14,6 +14,8 @@ namespace sensor
 
 using Offset = uint8_t;
 using Value = sdbusplus::message::variant<bool, int64_t, std::string>;
+// Sensor.Value.Value -> x
+using Reading = sdbusplus::message::variant<int64_t>;
 
 struct Values
 {
@@ -37,6 +39,11 @@ using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 
+enum Mutability {
+   Read = 1 << 0,
+   Write = 1 << 1,
+};
+
 struct Info
 {
    Type sensorType;
@@ -46,18 +53,22 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   Mutability mutability;
    DbusInterfaceMap sensorInterfaces;
 };
 
 using Id = uint8_t;
 using IdInfoMap = std::map<Id,Info>;
 
-using PropertyMap = std::map<DbusProperty, Value>;
+using ValuePropertyMap = std::map<DbusProperty, Value>;
+using ValueInterfaceMap = std::map<DbusInterface, ValuePropertyMap>;
 
-using InterfaceMap = std::map<DbusInterface, PropertyMap>;
+using ReadingPropertyMap = std::map<DbusProperty, Reading>;
+using ReadingInterfaceMap = std::map<DbusInterface, ReadingPropertyMap>;
 
 using Object = sdbusplus::message::object_path;
-using ObjectMap = std::map<Object, InterfaceMap>;
+using ValueObjectMap = std::map<Object, ValueInterfaceMap>;
+using ReadingObjectMap = std::map<Object, ReadingInterfaceMap>;
 
 struct SelData
 {
