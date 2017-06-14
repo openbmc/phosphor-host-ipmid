@@ -48,6 +48,19 @@ inline ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
 
 } // namespace sensor_${key}
 
+%elif "readingData" == readingType:
+
+namespace sensor_${key}
+{
+
+inline ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
+                              const Info& sensorInfo)
+{
+    return set::readingData<${type}>(cmdData, sensorInfo);
+}
+
+} // namespace sensor_${key}
+
 %endif
 % endfor
 
@@ -70,12 +83,15 @@ extern const IdInfoMap sensors = {
        updateFunc += sensor["readingType"]
        if "readingAssertion" == valueReadingType:
            updateFunc = "sensor_" + str(key) + "::" + valueReadingType
+       elif "readingData" == valueReadingType:
+           updateFunc = "sensor_" + str(key) + "::" + valueReadingType
        sensorInterface = serviceInterface
        if serviceInterface == "org.freedesktop.DBus.Properties":
            sensorInterface = next(iter(interfaces))
+       mutability = sensor.get("mutability", "Mutability::Read")
 %>
         ${sensorType},"${path}","${sensorInterface}",${readingType},${multiplier},
-        ${offset},${exp},${offset * pow(10,exp)},${updateFunc},{
+        ${offset},${exp},${offset * pow(10,exp)},${updateFunc},Mutability(${mutability}),{
     % for interface,properties in interfaces.items():
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
@@ -107,7 +123,7 @@ extern const IdInfoMap sensors = {
             % endfor
             }},
     % endfor
-     }
+     },
 }},
    % endif
 % endfor
