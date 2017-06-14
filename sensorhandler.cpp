@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <set>
 #include <bitset>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
 #include <systemd/sd-bus.h>
@@ -411,10 +412,34 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+const std::set<std::string> analogSensorInterfaces = {
+    "xyz.openbmc_project.Sensor.Value",
+    };
+
+bool isAnalogSensor(std::string interface) {
+    return (analogSensorInterfaces.end() != analogSensorInterfaces.find(interface));
+}
+
+// Disambiguates between 64b int and 8b int, signed and unsigned
+ipmi::Value formatVariant(uint8_t reading, const std::string& type) {
+    if (type == "int" || type == "int64_t") {
+        return ipmi::Value(static_cast<int64_t>(reading));
+    } else if (type == "uint" || type == "uint64_t") {
+        return ipmi::Value(static_cast<uint64_t>(reading));
+    } else if (type == "byte" || type == "uint8_t" || type == "char") {
+        return ipmi::Value(static_cast<uint8_t>(reading));
+    } else {
+        // bool and std::string can be automatically disambiguated
+        return ipmi::Value(reading);
+    }
+}
+
 ipmi_ret_t setSensorReading(void *request)
 {
     SetSensorReadingReq cmdData =
             *(static_cast<SetSensorReadingReq *>(request));
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
     // Check if the Sensor Number is present
     const auto iter = sensors.find(cmdData.number);
@@ -476,7 +501,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus *bus = ipmid_get_sd_bus_connection();
     sd_bus_message *reply = NULL;
     int reading = 0;
-
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
@@ -541,6 +565,13 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
 
             sensor = sensors.at(reqptr->sennum);
+            if (!(sensor.mutability & ipmi::sensor::Mutability::Read)) {
+                fprintf(stderr, "Sensor was not readable.\n");
+                resp->value = 0;
+                resp->operation = 0x20; // events, sensor scanning disabled; state unavailable
+                return IPMI_CC_SENSOR_INVALID;
+            }
+
 
             // Get value
             r = sd_bus_get_property_trivial(bus,
@@ -644,13 +675,60 @@ ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+std::string getUnitForObject(sd_bus *bus,
+                             const dbus_interface_t &iface,
+                             const ipmi::sensor::Info *info)
+{
+    std::string result = "";
+    if (info->sensorInterfaces.begin()->first == "xyz.openbmc_project.Sensor.Value")
+    {
+        char *raw_cstr;
+        if (0 > sd_bus_get_property_string(bus, iface.bus, iface.path,
+                                            iface.interface, "Unit", NULL,
+                                            &raw_cstr))
+        {
+            fprintf(stderr, "Warning: expected to find Unit interface in bus %s, path %s, but it was missing.\n",
+                    iface.bus, iface.path);
+        }
+        else
+        {
+            result = raw_cstr;
+        }
+        free(raw_cstr);
+    }
+
+    return result;
+}
+
+int64_t getScaleForObject(sd_bus *bus,
+                          const dbus_interface_t& iface,
+                          const ipmi::sensor::Info *info)
+{
+    int64_t result = 0;
+    if (info->sensorInterfaces.begin()->first == "xyz.openbmc_project.Sensor.Value")
+    {
+        if (0 > sd_bus_get_property_trivial(bus,
+                                        iface.bus,
+                                        iface.path,
+                                        iface.interface,
+                                        "Scale",
+                                        NULL,
+                                        'x',
+                                        &result)) {
+            fprintf(stderr, "Warning: expected to find Scale interface in bus %s, path %s, but it was missing.\n",
+                    iface.bus, iface.path);
+        }
+    }
+
+    return result;
+}
+
 ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
                                      const ipmi::sensor::Info *info,
                                      ipmi_data_len_t data_len)
 {
     /* Functional sensor case */
-    if (info->sensorInterfaces.begin()->first ==
-            "xyz.openbmc_project.Sensor.Value")
+    if (isAnalogSensor(info->sensorInterfaces.begin()->first))
     {
         // Get bus
         sd_bus *bus = ipmid_get_sd_bus_connection();
@@ -662,64 +740,48 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
         body->sensor_units_1 = 0; // unsigned, no rate, no modifier, not a %
 
         /* Unit info */
-        char *raw_cstr;
-        if (0 > sd_bus_get_property_string(bus, iface.bus, iface.path,
-                                            iface.interface, "Unit", NULL,
-                                            &raw_cstr)) {
-            fprintf(stderr, "Expected to find Unit interface in bus %s, path %s, but it was missing.\n",
-                    iface.bus, iface.path);
-            return IPMI_CC_SENSOR_INVALID;
-        }
+        std::string raw_str = getUnitForObject(bus, iface, info);
 
-        std::string raw_str(raw_cstr);
         namespace server = sdbusplus::xyz::openbmc_project::Sensor::server;
-        server::Value::Unit unit =
-            server::Value::convertUnitFromString(raw_str);
-
-        // Unit strings defined in
-        // phosphor-dbus-interfaces/xyz/openbmc_project/Sensor/Value.interface.yaml
-        switch (unit)
+        try
         {
-            case server::Value::Unit::DegreesC:
-                body->sensor_units_2_base = get_sdr::SENSOR_UNIT_DEGREES_C;
-                break;
-            case server::Value::Unit::RPMS:
-                body->sensor_units_2_base = get_sdr::SENSOR_UNIT_REVOLUTIONS; // revolutions
-                get_sdr::body::set_rate_unit(0b100, body); // per minute
-                break;
-            case server::Value::Unit::Volts:
-                body->sensor_units_2_base = get_sdr::SENSOR_UNIT_VOLTS;
-                break;
-            case server::Value::Unit::Meters:
-                body->sensor_units_2_base = get_sdr::SENSOR_UNIT_METERS;
-                break;
-            case server::Value::Unit::Amperes:
-                body->sensor_units_2_base = get_sdr::SENSOR_UNIT_AMPERES;
-                break;
-            case server::Value::Unit::Joules:
-                body->sensor_units_2_base = get_sdr::SENSOR_UNIT_JOULES;
-                break;
-            default:
-                fprintf(stderr, "Unknown value unit type: = %s\n", raw_cstr);
+            server::Value::Unit unit = server::Value::convertUnitFromString(raw_str);
+            // Unit strings defined in
+            // phosphor-dbus-interfaces/xyz/openbmc_project/Sensor/Value.interface.yaml
+            switch (unit)
+            {
+                case server::Value::Unit::DegreesC:
+                    body->sensor_units_2_base = get_sdr::SENSOR_UNIT_DEGREES_C;
+                    break;
+                case server::Value::Unit::RPMS:
+                    body->sensor_units_2_base = get_sdr::SENSOR_UNIT_REVOLUTIONS; // revolutions
+                    get_sdr::body::set_rate_unit(0b100, body); // per minute
+                    break;
+                case server::Value::Unit::Volts:
+                    body->sensor_units_2_base = get_sdr::SENSOR_UNIT_VOLTS;
+                    break;
+                case server::Value::Unit::Meters:
+                    body->sensor_units_2_base = get_sdr::SENSOR_UNIT_METERS;
+                    break;
+                case server::Value::Unit::Amperes:
+                    body->sensor_units_2_base = get_sdr::SENSOR_UNIT_AMPERES;
+                    break;
+                case server::Value::Unit::Joules:
+                    body->sensor_units_2_base = get_sdr::SENSOR_UNIT_JOULES;
+                    break;
+                default:
+                    // Cannot be hit.
+                    fprintf(stderr, "Unknown value unit type: = %s\n", raw_str.c_str());
+            }
         }
-
-        free(raw_cstr);
+        catch (sdbusplus::exception::InvalidEnumString e)
+        {
+            fprintf(stderr, "Warning: no unit provided for sensor!\n");
+        }
 
         /* Modifiers to reading info */
         // Get scale
-        int64_t scale;
-        if (0 > sd_bus_get_property_trivial(bus,
-                                        iface.bus,
-                                        iface.path,
-                                        iface.interface,
-                                        "Scale",
-                                        NULL,
-                                        'x',
-                                        &scale)) {
-            fprintf(stderr, "Expected to find Scale interface in bus %s, path %s, but it was missing.\n",
-                    iface.bus, iface.path);
-            return IPMI_CC_SENSOR_INVALID;
-        }
+        int64_t scale = getScaleForObject(bus, iface, info);
 
         get_sdr::body::set_b(info->coefficientB, body);
         get_sdr::body::set_m(info->coefficientM, body);

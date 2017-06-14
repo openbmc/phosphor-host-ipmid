@@ -17,7 +17,7 @@ using DbusInterface = std::string;
 using DbusObjectInfo = std::pair<DbusObjectPath, DbusService>;
 using DbusProperty = std::string;
 using Value = sdbusplus::message::variant<bool, int64_t, uint8_t,
-                            std::string, uint32_t>;
+                            std::string, uint32_t, uint64_t>;
 using PropertyMap = std::map<DbusProperty, Value>;
 using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
@@ -25,20 +25,19 @@ namespace sensor
 {
 
 using Offset = uint8_t;
-using Value = ipmi::Value;
 
 struct Values
 {
+   // TODO: still used?
+   //std::string type;
    Value assert;
    Value deassert;
 };
 
 using OffsetValueMap = std::map<Offset,Values>;
 
-using DbusProperty = ipmi::DbusProperty;
 using DbusPropertyMap = std::map<DbusProperty,OffsetValueMap>;
 
-using DbusInterface = ipmi::DbusInterface;
 using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
 
 using InstancePath = std::string;
@@ -48,6 +47,12 @@ using Multiplier = uint16_t;
 using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
+
+enum Mutability
+{
+   Read = 1 << 0,
+   Write = 1 << 1,
+};
 
 struct Info
 {
@@ -59,6 +64,7 @@ struct Info
    Exponent exponentB;
    ScaledOffset scaledOffset;
    std::function<uint8_t(SetSensorReadingReq&,const Info&)> updateFunc;
+   Mutability mutability;
    DbusInterfaceMap sensorInterfaces;
 };
 
