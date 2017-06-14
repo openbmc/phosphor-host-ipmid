@@ -73,9 +73,10 @@ extern const IdInfoMap sensors = {
        sensorInterface = serviceInterface
        if serviceInterface == "org.freedesktop.DBus.Properties":
            sensorInterface = next(iter(interfaces))
+       mutability = sensor.get("mutability", "Mutability::Read")
 %>
         ${sensorType},"${path}","${sensorInterface}",${readingType},${multiplier},
-        ${offset},${exp},${offset * pow(10,exp)},${updateFunc},{
+        ${offset},${exp},${offset * pow(10,exp)},${updateFunc},Mutability(${mutability}){
     % for interface,properties in interfaces.items():
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
@@ -107,7 +108,7 @@ extern const IdInfoMap sensors = {
             % endfor
             }},
     % endfor
-     }
+     },
 }},
    % endif
 % endfor
