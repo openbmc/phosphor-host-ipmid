@@ -113,6 +113,8 @@ using Multiplier = uint16_t;
 using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
+using Scale = int16_t;
+using Unit = std::string;
 
 enum class Mutability
 {
@@ -142,6 +144,9 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   bool hasScale;
+   Scale scale;
+   Unit unit;
    std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
    std::function<GetSensorResponse(const Info&)> getFunc;
    Mutability mutability;
