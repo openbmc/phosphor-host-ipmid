@@ -19,9 +19,10 @@ extern const IdInfoMap sensors = {
        multiplier = sensor.get("multiplierM", 1)
        offset = sensor.get("offsetB", 0)
        exp = sensor.get("bExp", 0)
+       mutability = sensor.get("mutability", 0)
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
-        ${offset * pow(10,exp)},{
+        ${offset * pow(10,exp)},Mutability(${mutability}),{
     % for interface,properties in interfaces.iteritems():
             {"${interface}",{
             % for dbus_property,property_value in properties.iteritems():
@@ -29,6 +30,7 @@ extern const IdInfoMap sensors = {
                 % for offset,values in property_value.iteritems():
                     { ${offset},{
                         <% valueType = values["type"] %>\
+                        std::string("${valueType}"),
                      % for name,value in values.iteritems():
                         % if name == "type":
                              <% continue %>\
