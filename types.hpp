@@ -37,6 +37,11 @@ using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 
+enum Mutability {
+   Read = 1 << 0,
+   Write = 1 << 1,
+};
+
 struct Info
 {
    Type sensorType;
@@ -46,6 +51,7 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   Mutability mutability;
    DbusInterfaceMap sensorInterfaces;
 };
 
@@ -53,7 +59,6 @@ using Id = uint8_t;
 using IdInfoMap = std::map<Id,Info>;
 
 using PropertyMap = std::map<DbusProperty, Value>;
-
 using InterfaceMap = std::map<DbusInterface, PropertyMap>;
 
 using Object = sdbusplus::message::object_path;
