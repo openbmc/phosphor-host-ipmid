@@ -95,6 +95,42 @@ ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
     return updateToDbus(msg);
 }
 
+/** @brief Update d-bus based on a discrete reading
+ *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
+ *  @return an IPMI error code
+ */
+template<typename T>
+ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
+                       const Info& sensorInfo)
+{
+    auto msg = makeDbusMsg(
+                   "org.freedesktop.DBus.Properties",
+                   sensorInfo.sensorPath,
+                   "Set",
+                   sensorInfo.sensorInterface);
+
+    const auto& interface = sensorInfo.propertyInterfaces.begin();
+    msg.append(interface->first);
+
+    ipmi::sensor::Multiplier m = sensorInfo.coefficientM;
+    if (0 == m)
+    {
+        m = 1;  // Avoid * 0
+    }
+
+    // TODO: Refactor this into a generated function depending on the type
+    // of conversion for the value between IPMI and dbus.
+    T raw_value = (m * cmdData.reading) + sensorInfo.scaledOffset;
+
+    for (const auto& property : interface->second)
+    {
+        msg.append(property.first);
+        sdbusplus::message::variant<T> value = raw_value;
+        msg.append(value);
+    }
+    return updateToDbus(msg);
+}
 
 /** @brief Update d-bus based on eventdata type sensor data
  *  @param[in] cmdData - input sensor data

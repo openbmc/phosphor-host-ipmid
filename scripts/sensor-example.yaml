@@ -74,3 +74,20 @@
   sensorReadingType: 0x6F
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
+
+0xD0:
+  sensorType: 0x01
+  path: /xyz/openbmc_project/sensors/temperature/fleeting0
+  sensorReadingType: 0x01
+  multiplierM: 511
+  offsetB: 0
+  bExp: 0
+  mutability: Mutability::Write|Mutability::Read
+  serviceInterface: org.freedesktop.DBus.Properties
+  readingType: readingData
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        0xFF:
+          type: int64_t
+
