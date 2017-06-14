@@ -246,6 +246,25 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
     return rc;
 }
 
+ipmi_ret_t ipmi_storage_read_fru_data(
+        ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+        ipmi_response_t response, ipmi_data_len_t data_len,
+        ipmi_context_t context)
+{
+
+    ipmi_ret_t rc = IPMI_CC_OK;
+    printf("IPMI Handling GET-FRU-READ-DATA \n");
+    printf("IPMI Handling GET-FRU-READ-DATA netfn:[0x%X], Cmd:[0x%X]\n", netfn, cmd);
+    unsigned char buf[] = {0x51,0,0,0xff, 0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0x06};
+
+    *data_len = sizeof(buf);
+
+    // Pack the actual response
+    memcpy(response, &buf, *data_len);
+
+    return rc;
+}
+
 void register_netfn_storage_functions()
 {
     // <Wildcard Command>
@@ -283,6 +302,13 @@ void register_netfn_storage_functions()
             IPMI_CMD_GET_FRU_INV_AREA_INFO);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_FRU_INV_AREA_INFO, NULL,
             ipmi_storage_get_fru_inv_area_info, PRIVILEGE_OPERATOR);
+
+    // <Add READ FRU Data
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE,
+            IPMI_CMD_READ_FRU_DATA);
+
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
+            ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
 
     return;
 }
