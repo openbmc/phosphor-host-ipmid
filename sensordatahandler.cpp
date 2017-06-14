@@ -185,6 +185,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     return updateToDbus(msg);
 }
 
+
 }//namespace set
 
 namespace notify
