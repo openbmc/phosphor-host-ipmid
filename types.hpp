@@ -15,7 +15,7 @@ using DbusService = std::string;
 using DbusInterface = std::string;
 using DbusObjectInfo = std::pair<DbusObjectPath, DbusService>;
 using DbusProperty = std::string;
-using Value = sdbusplus::message::variant<bool, int64_t, uint8_t, std::string>;
+using Value = sdbusplus::message::variant<bool, int64_t, uint64_t, uint8_t, std::string>;
 using PropertyMap = std::map<DbusProperty, Value>;
 using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
@@ -27,6 +27,7 @@ using Value = ipmi::Value;
 
 struct Values
 {
+   std::string type;
    Value assert;
    Value deassert;
 };
@@ -47,6 +48,12 @@ using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 
+enum Mutability
+{
+   Read = 1 << 0,
+   Write = 1 << 1,
+};
+
 struct Info
 {
    Type sensorType;
@@ -56,6 +63,7 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   Mutability mutability;
    DbusInterfaceMap sensorInterfaces;
 };
 
