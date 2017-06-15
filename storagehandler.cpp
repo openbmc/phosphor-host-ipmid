@@ -25,8 +25,20 @@ void register_netfn_storage_functions() __attribute__((constructor));
 unsigned int   g_sel_time    = 0xFFFFFFFF;
 extern unsigned short g_sel_reserve;
 
-constexpr auto time_manager_intf = "org.openbmc.TimeManager";
-constexpr auto time_manager_obj = "/org/openbmc/TimeManager";
+namespace {
+constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
+constexpr auto HOST_TIME_PATH = "/xyz/openbmc_project/time/host";
+constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
+constexpr auto PROPERTY_ELAPSED= "Elapsed";
+
+const char* getTimeString(const uint64_t& usecSinceEpoch)
+{
+    using namespace std::chrono;
+    system_clock::time_point tp{microseconds(usecSinceEpoch)};
+    auto t = system_clock::to_time_t(tp);
+    return std::ctime(&t);
+}
+}
 
 namespace cache
 {
@@ -416,57 +428,54 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
     using namespace std::chrono;
-
-    char *time_provider = nullptr;
-    const char* time_in_str = nullptr;
     uint64_t host_time_usec = 0;
     uint32_t resp = 0;
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    sd_bus_message *reply = nullptr;
-    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
 
     printf("IPMI Handling GET-SEL-TIME\n");
 
-    auto bus = ipmid_get_sd_bus_connection();
+    try
+    {
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        auto service = ipmi::getService(bus, TIME_INTERFACE, HOST_TIME_PATH);
+        sdbusplus::message::variant<uint64_t> value;
 
-    auto rct = mapper_get_service(bus, time_manager_obj, &time_provider);
-    if (rct < 0) {
-        printf("Error [%s] getting bus name for time provider\n",
-            strerror(-rct));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+        // Get host time
+        auto method = bus.new_method_call(service.c_str(),
+                                          HOST_TIME_PATH,
+                                          DBUS_PROPERTIES,
+                                          "Get");
+
+        method.append(TIME_INTERFACE, PROPERTY_ELAPSED);
+        auto reply = bus.call(method);
+        if (reply.is_method_error())
+        {
+            log<level::ERR>("Error getting time",
+                            entry("SERVICE=%s", service.c_str()),
+                            entry("PATH=%s", HOST_TIME_PATH));
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+        reply.read(value);
+        host_time_usec = value.get<uint64_t>();
+    }
+    catch (InternalFailure& e)
+    {
+        log<level::ERR>(e.what());
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    rct = sd_bus_call_method(bus,
-                    time_provider,
-                    time_manager_obj,
-                    time_manager_intf,
-                    "GetTime",
-                    &bus_error,
-                    &reply,
-                    "s",
-                    "host");
-    if (rct < 0) {
-        printf("Error [%s] getting time\n", strerror(-rct));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
-
-    rct = sd_bus_message_read(reply, "sx", &time_in_str, &host_time_usec);
-    if (rct < 0) {
-        fprintf(stderr, "Error [%s] parsing get-time response\n",
-                strerror(-rct));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
+    printf("Host time: %" PRIu64 ", %s",
+           host_time_usec, getTimeString(host_time_usec));
 
     // Time is really long int but IPMI wants just uint32. This works okay until
     // the number of seconds since 1970 overflows uint32 size.. Still a whole
     // lot of time here to even think about that.
     resp = duration_cast<seconds>(microseconds(host_time_usec)).count();
     resp = htole32(resp);
-    printf("Host Time read:[%s] :: [%d]\n", time_in_str, resp);
 
     // From the IPMI Spec 2.0, response should be a 32-bit value
     *data_len = sizeof(resp);
@@ -474,74 +483,60 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &resp, *data_len);
 
-finish:
-    sd_bus_error_free(&bus_error);
-    reply = sd_bus_message_unref(reply);
-    free(time_provider);
-    return rc;
+    return IPMI_CC_OK;
 }
 
 ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    char *time_provider = nullptr;
-    int time_rc = 0;
+    using namespace std::chrono;
     ipmi_ret_t rc = IPMI_CC_OK;
-
-    sd_bus_message *reply = nullptr;
-    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
-
-    uint32_t* secs = (uint32_t*)request;
+    uint32_t secs = *static_cast<uint32_t*>(request);
     *data_len = 0;
 
-    printf("Handling Set-SEL-Time:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
-    printf("Data: 0x%X]\n",*secs);
+    printf("Handling Set-SEL-Time:[0x%X], Cmd:[0x%X], Data:[0x%X]\n",
+           netfn, cmd, secs);
 
-    auto bus = ipmid_get_sd_bus_connection();
+    secs = le32toh(secs);
+    microseconds usec{seconds(secs)};
 
-    auto rct = mapper_get_service(bus, time_manager_obj, &time_provider);
-    if (rct < 0) {
-        printf("Error [%s] getting bus name for time provider\n",
-            strerror(-rct));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+    printf("To Set host time: %" PRIu64 ", %s",
+           usec.count(), getTimeString(usec.count()));
+
+    try
+    {
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        auto service = ipmi::getService(bus, TIME_INTERFACE, HOST_TIME_PATH);
+        sdbusplus::message::variant<uint64_t> value{usec.count()};
+
+        // Set host time
+        auto method = bus.new_method_call(service.c_str(),
+                                          HOST_TIME_PATH,
+                                          DBUS_PROPERTIES,
+                                          "Set");
+
+        method.append(TIME_INTERFACE, PROPERTY_ELAPSED, value);
+        auto reply = bus.call(method);
+        if (reply.is_method_error())
+        {
+            log<level::ERR>("Error setting time",
+                            entry("SERVICE=%s", service.c_str()),
+                            entry("PATH=%s", HOST_TIME_PATH));
+            rc = IPMI_CC_UNSPECIFIED_ERROR;
+        }
     }
-
-    rct = sd_bus_call_method(bus,
-            time_provider,
-            time_manager_obj,
-            time_manager_intf,
-            "SetTime",
-            &bus_error,
-            &reply,
-            "ss",
-            "host",
-            std::to_string(le32toh(*secs)).c_str());
-
-    if (rct < 0) {
-        printf("Error [%s] setting time\n", strerror(-rct));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
-
-    rct = sd_bus_message_read(reply, "i", &time_rc);
-    if (rct < 0) {
-        fprintf(stderr, "Error [%s] parsing set-time response\n",
-                strerror(-rct));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
-
-    if (time_rc < 0) {
-        printf("Error setting time.");
+    catch (InternalFailure& e)
+    {
+        log<level::ERR>(e.what());
         rc = IPMI_CC_UNSPECIFIED_ERROR;
     }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+    }
 
-finish:
-    sd_bus_error_free(&bus_error);
-    reply = sd_bus_message_unref(reply);
-    free(time_provider);
     return rc;
 }
 
