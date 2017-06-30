@@ -7,9 +7,11 @@
 #include "selutility.hpp"
 #include "storagehandler.h"
 #include "storageaddsel.h"
+#include "utils.hpp"
 #include "host-ipmid/ipmid-api.h"
 #include <sdbusplus/server.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
+#include <phosphor-logging/log.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -21,6 +23,7 @@ constexpr auto time_manager_intf = "org.openbmc.TimeManager";
 constexpr auto time_manager_obj = "/org/openbmc/TimeManager";
 using InternalFailure =
         sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+using namespace phosphor::logging;
 
 ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
@@ -192,6 +195,105 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         memcpy(response, &record, sizeof(record));
         *data_len = sizeof(record);
     }
+
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                          ipmi_request_t request, ipmi_response_t response,
+                          ipmi_data_len_t data_len,ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>
+            (request);
+
+    if (g_sel_reserve != requestData->reservationID)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_RESERVATION_ID;
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(ipmi::sel::mapperBusName,
+                                          ipmi::sel::mapperObjPath,
+                                          ipmi::sel::mapperIntf,
+                                          "GetSubTree");
+    mapperCall.append(ipmi::sel::logBasePath);
+    mapperCall.append(depth);
+    mapperCall.append(std::vector<std::string>({ipmi::sel::logEntryIntf}));
+
+    auto reply = bus.call(mapperCall);
+    if (reply.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    ipmi::sel::ObjectTree objectTree;
+    reply.read(objectTree);
+    if (objectTree.empty())
+    {
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    ipmi::sel::ObjectTree::const_iterator iter;
+    uint16_t delRecordID = 0;
+
+    if (requestData->selRecordID == ipmi::sel::firstEntry)
+    {
+        iter = objectTree.begin();
+        auto n = iter->first.rfind('/');
+        delRecordID = static_cast<uint16_t>(std::stoi(iter->first.substr(n+1)));
+    }
+    else if (requestData->selRecordID == ipmi::sel::lastEntry)
+    {
+        iter = objectTree.find(objectTree.rbegin()->first);
+        auto n = iter->first.rfind('/');
+        delRecordID = static_cast<uint16_t>(std::stoi(iter->first.substr(n+1)));
+    }
+    else
+    {
+        std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
+                              std::to_string(requestData->selRecordID);
+
+        iter = objectTree.find(objPath);
+        if (iter == objectTree.end())
+        {
+            *data_len = 0;
+            return IPMI_CC_SENSOR_INVALID;
+        }
+        delRecordID = requestData->selRecordID;
+    }
+
+    std::string service;
+
+    try
+    {
+        service = ipmi::getService(bus, ipmi::sel::logDeleteIntf, iter->first);
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                          iter->first.c_str(),
+                                          ipmi::sel::logDeleteIntf,
+                                          "Delete");
+    reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    memcpy(response, &delRecordID, sizeof(delRecordID));
+    *data_len = sizeof(delRecordID);
 
     return IPMI_CC_OK;
 }
@@ -406,6 +508,11 @@ void register_netfn_storage_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL, getSELEntry,
                            PRIVILEGE_USER);
+
+    // <Delete SEL Entry>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_DELETE_SEL);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL, deleteSELEntry,
+                           PRIVILEGE_OPERATOR);
 
     // <Add SEL Entry>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
