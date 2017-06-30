@@ -7,6 +7,7 @@
 #include "selutility.hpp"
 #include "storagehandler.h"
 #include "storageaddsel.h"
+#include "utils.hpp"
 #include "host-ipmid/ipmid-api.h"
 #include <experimental/filesystem>
 #include <phosphor-logging/log.hpp>
@@ -212,6 +213,94 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                &record.recordID + requestData->offset, readLength);
         *data_len = sizeof(record.nextRecordID) + readLength;
     }
+
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                          ipmi_request_t request, ipmi_response_t response,
+                          ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    namespace fs = std::experimental::filesystem;
+    auto requestData = reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>
+            (request);
+
+    if (g_sel_reserve != requestData->reservationID)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_RESERVATION_ID;
+    }
+
+    ipmi::sel::readLoggingObjectPaths(objectPathsCache::paths);
+
+    if (objectPathsCache::paths.empty())
+    {
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    ipmi::sel::ObjectPaths::const_iterator iter;
+    uint16_t delRecordID = 0;
+
+    if (requestData->selRecordID == ipmi::sel::firstEntry)
+    {
+        iter = objectPathsCache::paths.begin();
+        fs::path path(*iter);
+        delRecordID = static_cast<uint16_t>
+                (std::stoul(std::string(path.filename().c_str())));
+    }
+    else if (requestData->selRecordID == ipmi::sel::lastEntry)
+    {
+        iter = objectPathsCache::paths.end();
+        fs::path path(*iter);
+        delRecordID = static_cast<uint16_t>
+                (std::stoul(std::string(path.filename().c_str())));
+    }
+    else
+    {
+        std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
+                              std::to_string(requestData->selRecordID);
+
+        iter = std::find(objectPathsCache::paths.begin(),
+                         objectPathsCache::paths.end(),
+                         objPath);
+        if (iter == objectPathsCache::paths.end())
+        {
+            *data_len = 0;
+            return IPMI_CC_SENSOR_INVALID;
+        }
+        delRecordID = requestData->selRecordID;
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    std::string service;
+
+    try
+    {
+        service = ipmi::getService(bus, ipmi::sel::logDeleteIntf, *iter);
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                          (*iter).c_str(),
+                                          ipmi::sel::logDeleteIntf,
+                                          "Delete");
+    auto reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    // Invalidate the cache of dbus entry objects.
+    objectPathsCache::paths.clear();
+    memcpy(response, &delRecordID, sizeof(delRecordID));
+    *data_len = sizeof(delRecordID);
 
     return IPMI_CC_OK;
 }
@@ -426,6 +515,11 @@ void register_netfn_storage_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL, getSELEntry,
                            PRIVILEGE_USER);
+
+    // <Delete SEL Entry>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_DELETE_SEL);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL, deleteSELEntry,
+                           PRIVILEGE_OPERATOR);
 
     // <Add SEL Entry>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
