@@ -22,6 +22,10 @@ static constexpr auto systemRecord = 0x02;
 static constexpr auto generator = 0x2000;
 static constexpr auto evmRev = 0x04;
 
+using AssociationList = std::vector<std::tuple<
+                        std::string, std::string, std::string>>;
+
+
 /** @struct GetSELEntryResponse
  *
  *  IPMI payload for Get SEL Entry command response.
@@ -45,6 +49,8 @@ struct GetSELEntryResponse
 
 uint32_t getEntryTimeStamp(const std::string& service,
                            const std::string& objPath);
+
+GetSELEntryResponse convertErrorLogtoSEL(const std::string& objPath);
 
 } // namespace sel
 
