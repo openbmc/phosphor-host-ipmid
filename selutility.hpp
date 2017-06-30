@@ -23,6 +23,17 @@ static constexpr auto propId = "Id";
 static constexpr auto propResolved = "Resolved";
 static constexpr auto propTimeStamp = "Timestamp";
 
+static constexpr auto assocIntf = "org.openbmc.Associations";
+static constexpr auto assocProp = "associations";
+
+using namespace std::string_literals;
+static const auto  systemSensor = "/xyz/openbmc_project/inventory/system"s;
+static const auto boardSensor =
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard"s;
+
+using AssociationList = std::vector<std::tuple<
+                        std::string, std::string, std::string>>;
+
 static constexpr auto systemEventRecord = 0x02;
 static constexpr auto generatorID = 0x2000;
 static constexpr auto evmRev = 0x04;
@@ -47,6 +58,14 @@ struct GetSELEntryResponse
     uint8_t eventData2;             //!< Event Data 2.
     uint8_t eventData3;             //!< Event Data 3.
 } __attribute__((packed));
+
+/** @brief Convert logging entry to SEL
+ *
+ *  @param[in] objPath - DBUS object path of the logging entry.
+ *
+ *  @return On success return the response of Get SEL entry command.
+ */
+GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath);
 
 } // namespace sel
 
