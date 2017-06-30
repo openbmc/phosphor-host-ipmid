@@ -8,6 +8,7 @@
 #include "storagehandler.h"
 #include "storageaddsel.h"
 #include "host-ipmid/ipmid-api.h"
+#include <experimental/filesystem>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/server.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
@@ -89,6 +90,120 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     memcpy(response, outPayload.data(), outPayload.size());
     *data_len = outPayload.size();
+
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const ipmi::sel::GetSELEntryRequest*>
+                   (request);
+
+    if (requestData->reservationID != 0)
+    {
+        if (g_sel_reserve != requestData->reservationID)
+        {
+            *data_len = 0;
+            return IPMI_CC_INVALID_RESERVATION_ID;
+        }
+    }
+
+    if (cache::paths.empty())
+    {
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    ipmi::sel::ObjectPaths::const_iterator iter;
+
+    // Check for the requested SEL Entry.
+    if (requestData->selRecordID == ipmi::sel::firstEntry)
+    {
+        iter = cache::paths.begin();
+    }
+    else if (requestData->selRecordID == ipmi::sel::lastEntry)
+    {
+        iter = cache::paths.end();
+    }
+    else
+    {
+        std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
+                              std::to_string(requestData->selRecordID);
+
+        iter = std::find(cache::paths.begin(), cache::paths.end(), objPath);
+        if (iter == cache::paths.end())
+        {
+            *data_len = 0;
+            return IPMI_CC_SENSOR_INVALID;
+        }
+    }
+
+    ipmi::sel::GetSELEntryResponse record {};
+
+    // Convert the log entry into SEL record.
+    try
+    {
+        record = ipmi::sel::convertLogEntrytoSEL(*iter);
+    }
+    catch (InternalFailure& e)
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+
+    // Identify the next SEL record ID
+    if(iter != cache::paths.end())
+    {
+        ++iter;
+        if (iter == cache::paths.end())
+        {
+            record.nextRecordID = ipmi::sel::lastEntry;
+        }
+        else
+        {
+            namespace fs = std::experimental::filesystem;
+            fs::path path(*iter);
+            record.nextRecordID = static_cast<uint16_t>
+                     (std::stoul(std::string(path.filename().c_str())));
+        }
+    }
+    else
+    {
+        record.nextRecordID = ipmi::sel::lastEntry;
+    }
+
+    if (requestData->readLength == ipmi::sel::entireRecord)
+    {
+        memcpy(response, &record, sizeof(record));
+        *data_len = sizeof(record);
+    }
+    else
+    {
+        if (requestData->offset >= ipmi::sel::selRecordSize ||
+            requestData->readLength > ipmi::sel::selRecordSize)
+        {
+            *data_len = 0;
+            return IPMI_CC_INVALID_FIELD_REQUEST;
+        }
+
+        auto diff = ipmi::sel::selRecordSize - requestData->offset;
+        auto readLength = std::min(diff,
+                                   static_cast<int>(requestData->readLength));
+
+        memcpy(response, &record.nextRecordID, sizeof(record.nextRecordID));
+        memcpy(static_cast<uint8_t*>(response) + sizeof(record.nextRecordID),
+               &record.recordID + requestData->offset, readLength);
+        *data_len = sizeof(record.nextRecordID) + readLength;
+    }
 
     return IPMI_CC_OK;
 }
@@ -297,6 +412,11 @@ void register_netfn_storage_functions()
     // <Reserve SEL>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL, ipmi_storage_reserve_sel,
+                           PRIVILEGE_USER);
+
+    // <Get SEL Entry>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL, getSELEntry,
                            PRIVILEGE_USER);
 
     // <Add SEL Entry>
