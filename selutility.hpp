@@ -20,8 +20,27 @@ static constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 
+using ObjectPaths = std::vector<std::string>;
 using PropertyType = sdbusplus::message::variant<bool, uint32_t, uint64_t,
                      std::string, std::vector<std::string>>;
+
+static constexpr auto selVersion = 0x51;
+static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
+static constexpr auto operationSupport = 0x0A;
+
+/** @struct GetSELInfoResponse
+ *
+ *  IPMI payload for Get SEL Info command response.
+ */
+struct GetSELInfoResponse
+{
+    uint8_t selVersion;             //!< SEL revision.
+    uint16_t entries;               //!< Number of log entries in SEL.
+    uint16_t freeSpace;             //!< Free Space in bytes.
+    uint32_t addTimeStamp;          //!< Most recent addition timestamp.
+    uint32_t eraseTimeStamp;        //!< Most recent erase timestamp.
+    uint8_t operationSupport;       //!< Operation support.
+} __attribute__((packed));
 
 /** @struct GetSELEntryResponse
  *
