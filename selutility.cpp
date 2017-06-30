@@ -3,6 +3,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include "host-ipmid/ipmid-api.h"
 #include "xyz/openbmc_project/Common/error.hpp"
+#include "config.h"
 #include "selutility.hpp"
 #include "types.hpp"
 #include "utils.hpp"
@@ -113,6 +114,81 @@ GetSELEntryResponse prepareSELEntry(
 }
 
 } // namespace internal
+
+GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
+{
+    using namespace std::string_literals;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    static constexpr auto assocIntf = "org.openbmc.Associations";
+    static constexpr auto assocProp = "associations";
+
+    auto service = ipmi::getService(bus, assocIntf, objPath);
+
+
+    // Read the Associations interface.
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                          objPath.c_str(),
+                                          propIntf,
+                                          "Get");
+    methodCall.append(assocIntf);
+    methodCall.append(assocProp);
+
+    auto reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in reading Associations interface");
+        elog<InternalFailure>();
+    }
+
+    using AssociationList = std::vector<std::tuple<
+                            std::string, std::string, std::string>>;
+
+    sdbusplus::message::variant<AssociationList> list;
+    reply.read(list);
+
+    auto assocs = sdbusplus::message::variant_ns::get<AssociationList>
+         (list);
+
+    static const auto  systemSensor = "/xyz/openbmc_project/inventory/system"s;
+    static const auto boardSensor =
+            "/xyz/openbmc_project/inventory/system/chassis/motherboard"s;
+
+    /*
+     * Check if the log entry has any callout associations, if there is a
+     * callout association try to match the inventory path to the corresponding
+     * IPMI sensor.
+     */
+    for (const auto& item : assocs)
+    {
+        if (std::get<0>(item).compare(CALLOUT_FWD_ASSOCIATION) == 0)
+        {
+             auto iter = invSensors.find(std::get<2>(item));
+             if (iter == invSensors.end())
+             {
+                 iter = invSensors.find(boardSensor);
+                 if (iter == invSensors.end())
+                 {
+                     log<level::ERR>("Motherboard sensor not found");
+                     elog<InternalFailure>();
+                 }
+             }
+
+             return internal::prepareSELEntry(objPath, iter);
+        }
+    }
+
+    // If there are no callout associations link the log entry to system event
+    // sensor
+    auto iter = invSensors.find(systemSensor);
+    if (iter == invSensors.end())
+    {
+        log<level::ERR>("System event sensor not found");
+        elog<InternalFailure>();
+    }
+
+    return internal::prepareSELEntry(objPath, iter);
+}
 
 } // namespace sel
 

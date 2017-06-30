@@ -85,6 +85,8 @@ AS_IF([test "x$FRU_YAML_GEN" == "x"], [FRU_YAML_GEN="example.yaml"])
 FRUGEN="$PYTHON $srcdir/scripts/fru_gen.py -i $FRU_YAML_GEN"
 AC_SUBST(FRUGEN)
 
+AC_DEFINE(CALLOUT_FWD_ASSOCIATION, "callout", [The name of the callout's forward association.])
+
 # Soft Power off related.
 AS_IF([test "x$enable_softoff" != "xno"],
     # Dbus service name

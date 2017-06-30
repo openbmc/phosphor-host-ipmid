@@ -43,6 +43,15 @@ struct GetSELEntryResponse
     uint8_t eventData3;             //!< Event Data 3.
 } __attribute__((packed));
 
+/** @brief Convert logging entry to SEL
+ *
+ *  @param[in] objPath - DBUS object path of the logging entry.
+ *
+ *  @return On success return the response of Get SEL entry command.
+ */
+GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath);
+
+
 namespace internal
 {
 
