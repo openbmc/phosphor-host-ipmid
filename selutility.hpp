@@ -51,6 +51,14 @@ struct GetSELEntryResponse
  */
 GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath);
 
+/** @brief Get the timestamp of the log entry
+ *
+ *  @param[in] objPath - DBUS object path of the logging entry.
+ *
+ *  @return On success return the timestamp of the log entry as number of
+ *          seconds from epoch.
+ */
+std::chrono::seconds getEntryTimeStamp(const std::string& objPath);
 
 namespace internal
 {
@@ -68,7 +76,7 @@ GetSELEntryResponse prepareSELEntry(
         const std::string& objPath,
         ipmi::sensor::InvObjectIDMap::const_iterator iter);
 
-} //internal
+}
 
 } // namespace sel
 
