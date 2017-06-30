@@ -301,6 +301,82 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+                    ipmi_response_t response, ipmi_data_len_t data_len,
+                    ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const ipmi::sel::ClearSELRequest*>
+            (request);
+
+    if (g_sel_reserve != requestData->reservationID)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_RESERVATION_ID;
+    }
+
+    uint8_t eraseProgress = 1;
+
+    if (requestData->eraseOperation == 0)
+    {
+        memcpy(response, &eraseProgress, sizeof(eraseProgress));
+        *data_len = sizeof(eraseProgress);
+        return IPMI_CC_OK;
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(ipmi::sel::mapperBusName,
+                                          ipmi::sel::mapperObjPath,
+                                          ipmi::sel::mapperIface,
+                                          "GetSubTreePaths");
+    mapperCall.append(ipmi::sel::logBasePath);
+    mapperCall.append(depth);
+    mapperCall.append(std::vector<std::string>({ipmi::sel::logEntryIface}));
+
+    auto reply = bus.call(mapperCall);
+    if (reply.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    ipmi::sel::ObjectPaths objectPaths;
+    reply.read(objectPaths);
+    if (objectPaths.empty())
+    {
+        memcpy(response, &eraseProgress, sizeof(eraseProgress));
+        *data_len = sizeof(eraseProgress);
+        return IPMI_CC_OK;
+    }
+
+    std::string service;
+    service = ipmi::getService(bus,
+                               ipmi::sel::logDeleteIface,
+                               objectPaths.front());
+
+    for (const auto& iter : objectPaths)
+    {
+        auto methodCall = bus.new_method_call(service.c_str(),
+                                              iter.c_str(),
+                                              ipmi::sel::logDeleteIface,
+                                              "Delete");
+
+        auto reply = bus.call(methodCall);
+        if (reply.is_method_error())
+        {
+            *data_len = 0;
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+
+    }
+
+    memcpy(response, &eraseProgress, sizeof(eraseProgress));
+    *data_len = sizeof(eraseProgress);
+    return IPMI_CC_OK;
+}
+
+
 ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
@@ -520,6 +596,11 @@ void register_netfn_storage_functions()
     // <Add SEL Entry>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL, ipmi_storage_add_sel,
+                           PRIVILEGE_OPERATOR);
+
+    // <Clear SEL>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL, NULL, clearSEL,
                            PRIVILEGE_OPERATOR);
     return;
 }

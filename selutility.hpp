@@ -85,6 +85,19 @@ struct DeleteSELEntryRequest
     uint16_t selRecordID;           //!< SEL Record ID.
 } __attribute__((packed));
 
+/** @struct ClearSELRequest
+ *
+ *  IPMI payload for Clear SEL command request.
+ */
+struct ClearSELRequest
+{
+    uint16_t reservationID;         //!< Reservation ID.
+    uint8_t charC;                  //!< Char 'C'(0x43h).
+    uint8_t charL;                  //!< Char 'L'(0x4Ch).
+    uint8_t charR;                  //!< Char 'R'(0x52h).
+    uint8_t eraseOperation;         //!< Erase operation.
+} __attribute__((packed));
+
 
 uint32_t getEntryTimeStamp(const std::string& service,
                            const std::string& objPath);
