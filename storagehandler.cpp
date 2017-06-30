@@ -4,9 +4,13 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <chrono>
+#include "selutility.hpp"
 #include "storagehandler.h"
 #include "storageaddsel.h"
 #include "host-ipmid/ipmid-api.h"
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/server.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -17,6 +21,26 @@ extern unsigned short g_sel_reserve;
 constexpr auto time_manager_intf = "org.openbmc.TimeManager";
 constexpr auto time_manager_obj = "/org/openbmc/TimeManager";
 
+namespace cache
+{
+    /*
+     * This cache contains the object paths of the logging entries sorted in the
+     * order of the filename(numeric order). The cache is initialized by
+     * invoking readLoggingObjectPaths with the cache as the parameter. The
+     * cache is invoked in the execution of the Get SEL info and Delete SEL
+     * entry command. The Get SEL Info command is typically invoked before the
+     * Get SEL entry command, so the cache is utilized for responding to Get SEL
+     * entry command. The cache is invalidated by clearing after Delete SEL
+     * entry and Clear SEL command.
+     */
+    ipmi::sel::ObjectPaths paths;
+
+} // namespace objectPathsCache
+
+using InternalFailure =
+        sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+using namespace phosphor::logging;
+
 ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
@@ -26,6 +50,47 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_INVALID;
     *data_len = 0;
     return rc;
+}
+
+ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                      ipmi_request_t request, ipmi_response_t response,
+                      ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    std::vector<uint8_t> outPayload(sizeof(ipmi::sel::GetSELInfoResponse));
+    auto responseData = reinterpret_cast<ipmi::sel::GetSELInfoResponse*>
+            (outPayload.data());
+
+    responseData->selVersion = ipmi::sel::selVersion;
+    // Last erase timestamp is not available from log manager.
+    responseData->eraseTimeStamp = ipmi::sel::invalidTimeStamp;
+    responseData->operationSupport = ipmi::sel::operationSupport;
+
+    ipmi::sel::readLoggingObjectPaths(cache::paths);
+    responseData->entries = 0;
+    responseData->addTimeStamp = ipmi::sel::invalidTimeStamp;
+
+    if (!cache::paths.empty())
+    {
+        responseData->entries = static_cast<uint16_t>(cache::paths.size());
+
+        try
+        {
+            responseData->addTimeStamp = ipmi::sel::getEntryTimeStamp(
+                    cache::paths.back());
+        }
+        catch (InternalFailure& e)
+        {
+        }
+        catch (const std::runtime_error& e)
+        {
+            log<level::ERR>(e.what());
+        }
+    }
+
+    memcpy(response, outPayload.data(), outPayload.size());
+    *data_len = outPayload.size();
+
+    return IPMI_CC_OK;
 }
 
 ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -162,29 +227,6 @@ finish:
     return rc;
 }
 
-ipmi_ret_t ipmi_storage_get_sel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
-{
-
-    ipmi_ret_t rc = IPMI_CC_OK;
-    unsigned char buf[] = {0x51,0,0,0xff, 0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0x06};
-
-    printf("IPMI Handling GET-SEL-INFO\n");
-
-    *data_len = sizeof(buf);
-
-    // TODO There is plently of work here.  The SEL DB needs to hold a bunch
-    // of things in a header.  Items like Time Stamp, number of entries, etc
-    // This is one place where the dbus object with the SEL information could
-    // mimic what IPMI needs.
-
-    // Pack the actual response
-    memcpy(response, &buf, *data_len);
-
-    return rc;
-}
-
 ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
@@ -237,6 +279,11 @@ void register_netfn_storage_functions()
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL, ipmi_storage_wildcard,
                            PRIVILEGE_USER);
 
+    // <Get SEL Info>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, getSELInfo,
+                           PRIVILEGE_USER);
+
     // <Get SEL Time>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL, ipmi_storage_get_sel_time,
@@ -246,11 +293,6 @@ void register_netfn_storage_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL, ipmi_storage_set_sel_time,
                            PRIVILEGE_OPERATOR);
-
-    // <Get SEL Info>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, ipmi_storage_get_sel_info,
-                           PRIVILEGE_USER);
 
     // <Reserve SEL>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL);
