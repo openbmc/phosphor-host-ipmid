@@ -33,6 +33,25 @@ static const auto boardSensor =
 
 using AssociationList = std::vector<std::tuple<
                         std::string, std::string, std::string>>;
+using ObjectPaths = std::vector<std::string>;
+
+static constexpr auto selVersion = 0x51;
+static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
+static constexpr auto operationSupport = 0x0A;
+
+/** @struct GetSELInfoResponse
+ *
+ *  IPMI payload for Get SEL Info command response.
+ */
+struct GetSELInfoResponse
+{
+    uint8_t selVersion;             //!< SEL revision.
+    uint16_t entries;               //!< Number of log entries in SEL.
+    uint16_t freeSpace;             //!< Free Space in bytes.
+    uint32_t addTimeStamp;          //!< Most recent addition timestamp.
+    uint32_t eraseTimeStamp;        //!< Most recent erase timestamp.
+    uint8_t operationSupport;       //!< Operation support.
+} __attribute__((packed));
 
 static constexpr auto systemEventRecord = 0x02;
 static constexpr auto generatorID = 0x2000;
