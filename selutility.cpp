@@ -118,6 +118,71 @@ GetSELEntryResponse prepareSELEntry(
     return record;
 }
 
+GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    std::string service;
+
+    try
+    {
+        service = ipmi::getService(bus, assocIntf, objPath);
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        report<InternalFailure>();
+    }
+
+    // Read the Associations interface.
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                          objPath.c_str(),
+                                          propIntf,
+                                          "Get");
+    methodCall.append(assocIntf);
+    methodCall.append(assocProp);
+
+    auto reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in reading Associations interface");
+        report<InternalFailure>();
+    }
+
+    sdbusplus::message::variant<AssociationList> list;
+    reply.read(list);
+
+    auto assocs = sdbusplus::message::variant_ns::get<AssociationList>
+         (list);
+
+    for (const auto& item : assocs)
+    {
+        if (std::get<0>(item).compare("callout") == 0)
+        {
+             auto iter = invSensors.find(std::get<2>(item));
+             if (iter == invSensors.end())
+             {
+                 iter = invSensors.find(boardSensor);
+                 if (iter == invSensors.end())
+                 {
+                     log<level::ERR>("Motherboard sensor not found");
+                     report<InternalFailure>();
+                 }
+             }
+
+             return prepareSELEntry(objPath, iter);
+        }
+    }
+
+    auto iter = invSensors.find(systemSensor);
+    if (iter == invSensors.end())
+    {
+        log<level::ERR>("System event sensor not found");
+        report<InternalFailure>();
+    }
+
+    return prepareSELEntry(objPath, iter);
+}
+
 } // namespace sel
 
 } // namespace ipmi
