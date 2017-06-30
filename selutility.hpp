@@ -41,6 +41,23 @@ struct GetSELInfoResponse
     uint8_t operationSupport;       //!< Operation support.
 } __attribute__((packed));
 
+static constexpr auto firstEntry = 0x0000;
+static constexpr auto lastEntry = 0xFFFF;
+static constexpr auto entireRecord = 0xFF;
+static constexpr auto selRecordSize = 16;
+
+/** @struct GetSELEntryRequest
+ *
+ *  IPMI payload for Get SEL Entry command request.
+ */
+struct GetSELEntryRequest
+{
+    uint16_t reservationID;         //!< Reservation ID.
+    uint16_t selRecordID;           //!< SEL Record ID.
+    uint8_t offset;                 //!< Offset into record.
+    uint8_t readLength;             //!< Bytes to read.
+} __attribute__((packed));
+
 /** @struct GetSELEntryResponse
  *
  *  IPMI payload for Get SEL Entry command response.
