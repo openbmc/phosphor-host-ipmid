@@ -34,6 +34,8 @@ static const auto boardSensor =
 using AssociationList = std::vector<std::tuple<
                         std::string, std::string, std::string>>;
 using ObjectPaths = std::vector<std::string>;
+using ObjectTree = std::map<std::string, std::map<std::string,
+                            std::vector<std::string>>>;
 
 static constexpr auto selVersion = 0x51;
 static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
@@ -57,6 +59,21 @@ static constexpr auto systemEventRecord = 0x02;
 static constexpr auto generatorID = 0x2000;
 static constexpr auto evmRev = 0x04;
 static constexpr auto deassertEvent = 0x80;
+static constexpr auto firstEntry = 0x0000;
+static constexpr auto lastEntry = 0xFFFF;
+static constexpr auto entireRecord = 0xFF;
+
+/** @struct GetSELEntryRequest
+ *
+ *  IPMI payload for Get SEL Entry command request.
+ */
+struct GetSELEntryRequest
+{
+    uint16_t reservationID;         //!< Reservation ID.
+    uint16_t selRecordID;           //!< SEL Record ID.
+    uint8_t offset;                 //!< Offset into record.
+    uint8_t readLength;             //!< Bytes to read.
+} __attribute__((packed));
 
 /** @struct GetSELEntryResponse
  *
