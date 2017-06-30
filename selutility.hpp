@@ -67,6 +67,14 @@ struct GetSELEntryResponse
  */
 GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath);
 
+/** @brief Get the timestamp of the log entry
+ *
+ *  @param[in] objPath - DBUS object path of the logging entry.
+ *
+ *  @return On success return the timestamp of the log entry.
+ */
+uint32_t getEntryTimeStamp(const std::string& objPath);;
+
 } // namespace sel
 
 } // namespace ipmi

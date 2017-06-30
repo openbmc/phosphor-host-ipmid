@@ -183,6 +183,45 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     return prepareSELEntry(objPath, iter);
 }
 
+uint32_t getEntryTimeStamp(const std::string& objPath)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    std::string service;
+
+    try
+    {
+        service = ipmi::getService(bus, logEntryIntf, objPath);
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        report<InternalFailure>();
+    }
+
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                          objPath.c_str(),
+                                          propIntf,
+                                          "Get");
+    methodCall.append(logEntryIntf);
+    methodCall.append(propTimeStamp);
+
+    auto reply = bus.call(methodCall);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in reading Timestamp from Entry interface");
+        report<InternalFailure>();
+    }
+
+    sdbusplus::message::variant<uint64_t> timeStamp;
+    reply.read(timeStamp);
+
+    std::chrono::milliseconds chronoTimeStamp(
+            sdbusplus::message::variant_ns::get<uint64_t>(timeStamp));
+
+    return static_cast<uint32_t>(std::chrono::duration_cast<
+            std::chrono::seconds>(chronoTimeStamp).count());
+}
+
 } // namespace sel
 
 } // namespace ipmi
