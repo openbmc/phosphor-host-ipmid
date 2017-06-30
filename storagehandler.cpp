@@ -92,6 +92,118 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t data_len,ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const ipmi::sel::GetSELEntryRequest*>
+                   (request);
+
+    if (requestData->reservationID != 0)
+    {
+        if (g_sel_reserve != requestData->reservationID)
+        {
+            *data_len = 0;
+            return IPMI_CC_INVALID_RESERVATION_ID;
+        }
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
+    constexpr auto MAPPER_OBJ_PATH = "/xyz/openbmc_project/object_mapper";
+    constexpr auto MAPPER_IFACE = "xyz.openbmc_project.ObjectMapper";
+    constexpr auto LOG_PATH = "/xyz/openbmc_project/logging/entry";
+    constexpr auto LOG_ENTRY_IFACE = "xyz.openbmc_project.Logging.Entry";
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(MAPPER_BUSNAME, MAPPER_OBJ_PATH,
+                                          MAPPER_IFACE, "GetSubTree");
+    mapperCall.append(LOG_PATH);
+    mapperCall.append(depth);
+    mapperCall.append(std::vector<std::string>({LOG_ENTRY_IFACE}));
+
+    auto reply = bus.call(mapperCall);
+    if (reply.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    // Response by mapper in the case of success
+    std::map<std::string, std::map<std::string,
+             std::vector<std::string>>> objectTree;
+
+    reply.read(objectTree);
+
+    if (objectTree.empty())
+    {
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    ipmi::sel::ObjectTree::const_iterator iter;
+
+    if (requestData->selRecordID == 0x0000)
+    {
+        iter = objectTree.begin();
+    }
+    else if(requestData->selRecordID == 0xFFFF)
+    {
+        iter = objectTree.find(objectTree.rbegin()->first);
+    }
+    else
+    {
+        std::string objPath = std::string(LOG_PATH) + "/" +
+                              std::to_string(requestData->selRecordID);
+
+        printf("objPath = %s\n", objPath.c_str());
+        iter = objectTree.find(objPath);
+        if (iter == objectTree.end())
+        {
+            *data_len = 0;
+            return IPMI_CC_SENSOR_INVALID;
+        }
+    }
+
+    ipmi::sel::GetSELEntryResponse record {};
+
+    try
+    {
+        record = ipmi::sel::convertErrorLogtoSEL(iter->first);
+    }
+    catch (const std::runtime_error& e)
+    {
+        printf("Error = %s \n", e.what());
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    if(iter != objectTree.end())
+    {
+        ++iter;
+        if (iter == objectTree.end())
+        {
+            record.nextRecordID = 0xFFFF;
+        }
+        else
+        {
+            auto n = iter->first.rfind('/');
+            printf("nPath = %s\n", iter->first.substr(n+1).c_str());
+            record.nextRecordID = static_cast<uint16_t>(std::stoi(iter->first.substr(n+1)));
+        }
+    }
+    else
+    {
+        record.nextRecordID = 0xFFFF;
+    }
+
+
+    memcpy(response, &record, sizeof(record));
+    *data_len = sizeof(record);
+
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
@@ -296,6 +408,11 @@ void register_netfn_storage_functions()
     // <Reserve SEL>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL, ipmi_storage_reserve_sel,
+                           PRIVILEGE_USER);
+
+    // <Get SEL Entry>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL, getSELEntry,
                            PRIVILEGE_USER);
 
     // <Add SEL Entry>

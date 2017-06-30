@@ -22,6 +22,10 @@ static constexpr auto systemRecord = 0x02;
 static constexpr auto generator = 0x2000;
 static constexpr auto evmRev = 0x04;
 
+using ObjectTree = std::map<std::string, std::map<std::string,
+                            std::vector<std::string>>>;
+using ObjectPaths = std::vector<std::string>;
+
 using AssociationList = std::vector<std::tuple<
                         std::string, std::string, std::string>>;
 
@@ -37,6 +41,18 @@ struct GetSELInfoResponse
     uint32_t addTimeStamp;          //!< Most recent addition timestamp.
     uint32_t eraseTimeStamp;        //!< Most recent erase timestamp.
     uint8_t operationSupport;       //!< Operation support.
+} __attribute__((packed));
+
+/** @struct GetSELEntryRequest
+ *
+ *  IPMI payload for Get SEL Entry command request.
+ */
+struct GetSELEntryRequest
+{
+    uint16_t reservationID;         //!< Reservation ID.
+    uint16_t selRecordID;           //!< SEL Record ID.
+    uint8_t offset;                 //!< Offset into record.
+    uint8_t readLength;             //!< Bytes to read.
 } __attribute__((packed));
 
 /** @struct GetSELEntryResponse
