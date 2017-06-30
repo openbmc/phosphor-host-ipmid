@@ -9,6 +9,7 @@ enum ipmi_netfn_storage_cmds
     IPMI_CMD_RESERVE_SEL    = 0x42,
     IPMI_CMD_GET_SEL_ENTRY  = 0x43,
     IPMI_CMD_ADD_SEL        = 0x44,
+    IPMI_CMD_DELETE_SEL     = 0x46,
     IPMI_CMD_GET_SEL_TIME   = 0x48,
     IPMI_CMD_SET_SEL_TIME   = 0x49,
 
