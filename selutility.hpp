@@ -75,6 +75,16 @@ struct GetSELEntryResponse
     uint8_t eventData3;             //!< Event Data 3.
 } __attribute__((packed));
 
+/** @struct DeleteSELEntryRequest
+ *
+ *  IPMI payload for Delete SEL Entry command request.
+ */
+struct DeleteSELEntryRequest
+{
+    uint16_t reservationID;         //!< Reservation ID.
+    uint16_t selRecordID;           //!< SEL Record ID.
+} __attribute__((packed));
+
 
 uint32_t getEntryTimeStamp(const std::string& service,
                            const std::string& objPath);

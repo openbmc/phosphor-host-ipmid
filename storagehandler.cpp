@@ -7,6 +7,7 @@
 #include "selutility.hpp"
 #include "storagehandler.h"
 #include "storageaddsel.h"
+#include "utils.hpp"
 #include "host-ipmid/ipmid-api.h"
 #include <sdbusplus/server.hpp>
 
@@ -200,6 +201,102 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     memcpy(response, &record, sizeof(record));
     *data_len = sizeof(record);
+
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                          ipmi_request_t request, ipmi_response_t response,
+                          ipmi_data_len_t data_len,ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>
+            (request);
+
+    if (g_sel_reserve != requestData->reservationID)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_RESERVATION_ID;
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(ipmi::sel::mapperBusName,
+                                          ipmi::sel::mapperObjPath,
+                                          ipmi::sel::mapperIface,
+                                          "GetSubTree");
+    mapperCall.append(ipmi::sel::logBasePath);
+    mapperCall.append(depth);
+    mapperCall.append(std::vector<std::string>({ipmi::sel::logEntryIface}));
+
+    auto reply = bus.call(mapperCall);
+    if (reply.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    ipmi::sel::ObjectTree objectTree;
+
+    reply.read(objectTree);
+    if (objectTree.empty())
+    {
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    ipmi::sel::ObjectTree::const_iterator iter;
+    uint16_t delRecordID = 0;
+
+    if (requestData->selRecordID == 0x0000)
+    {
+        iter = objectTree.begin();
+        auto n = iter->first.rfind('/');
+        delRecordID = static_cast<uint16_t>(std::stoi(iter->first.substr(n+1)));
+    }
+    else if(requestData->selRecordID == 0xFFFF)
+    {
+        iter = objectTree.find(objectTree.rbegin()->first);
+        auto n = iter->first.rfind('/');
+        delRecordID = static_cast<uint16_t>(std::stoi(iter->first.substr(n+1)));
+    }
+    else
+    {
+        std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
+                              std::to_string(requestData->selRecordID);
+
+        printf("objPath = %s\n", objPath.c_str());
+        iter = objectTree.find(objPath);
+        if (iter == objectTree.end())
+        {
+            *data_len = 0;
+            return IPMI_CC_SENSOR_INVALID;
+        }
+        delRecordID = requestData->selRecordID;
+    }
+
+    using namespace std::string_literals;
+    static const auto deleteIntf = "xyz.openbmc_project.Object.Delete"s;
+
+    std::string service;
+
+    service = ipmi::getService(bus, deleteIntf, iter->first);
+
+    auto methodCall = bus.new_method_call(service.c_str(),
+                                          iter->first.c_str(),
+                                          deleteIntf.c_str(),
+                                         "Delete");
+
+    auto reply1 = bus.call(methodCall);
+    if (reply1.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+
+    memcpy(response, &delRecordID, sizeof(delRecordID));
+    *data_len = sizeof(delRecordID);
 
     return IPMI_CC_OK;
 }
@@ -414,6 +511,11 @@ void register_netfn_storage_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL, getSELEntry,
                            PRIVILEGE_USER);
+
+    // <Delete SEL Entry>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_DELETE_SEL);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL, deleteSELEntry,
+                           PRIVILEGE_OPERATOR);
 
     // <Add SEL Entry>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
