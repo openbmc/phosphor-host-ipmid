@@ -25,6 +25,19 @@ static constexpr auto evmRev = 0x04;
 using AssociationList = std::vector<std::tuple<
                         std::string, std::string, std::string>>;
 
+/** @struct GetSELInfoResponse
+ *
+ *  IPMI payload for Get SEL Info command response.
+ */
+struct GetSELInfoResponse
+{
+    uint8_t selVersion;             //!< SEL revision.
+    uint16_t entries;               //!< Number of log entries in SEL.
+    uint16_t freeSpace;             //!< Free Space in bytes.
+    uint32_t addTimeStamp;          //!< Most recent addition timestamp.
+    uint32_t eraseTimeStamp;        //!< Most recent erase timestamp.
+    uint8_t operationSupport;       //!< Operation support.
+} __attribute__((packed));
 
 /** @struct GetSELEntryResponse
  *

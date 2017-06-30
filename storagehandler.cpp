@@ -4,9 +4,11 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <chrono>
+#include "selutility.hpp"
 #include "storagehandler.h"
 #include "storageaddsel.h"
 #include "host-ipmid/ipmid-api.h"
+#include <sdbusplus/server.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -26,6 +28,68 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_INVALID;
     *data_len = 0;
     return rc;
+}
+
+ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                      ipmi_request_t request, ipmi_response_t response,
+                      ipmi_data_len_t data_len,ipmi_context_t context)
+{
+    std::vector<uint8_t> outPayload(sizeof(ipmi::sel::GetSELInfoResponse));
+    auto responseData = reinterpret_cast<ipmi::sel::GetSELInfoResponse*>
+                    (outPayload.data());
+
+    responseData->selVersion = 0x51;
+    responseData->eraseTimeStamp = 0xFFFFFFFF;
+    responseData->operationSupport = 0x0A;
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
+    constexpr auto MAPPER_OBJ_PATH = "/xyz/openbmc_project/object_mapper";
+    constexpr auto MAPPER_IFACE = "xyz.openbmc_project.ObjectMapper";
+    constexpr auto LOG_PATH = "/xyz/openbmc_project/logging/entry";
+    constexpr auto LOG_ENTRY_IFACE = "xyz.openbmc_project.Logging.Entry";
+
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(MAPPER_BUSNAME, MAPPER_OBJ_PATH,
+                                          MAPPER_IFACE, "GetSubTree");
+    mapperCall.append(LOG_PATH);
+    mapperCall.append(depth);
+    mapperCall.append(std::vector<std::string>({LOG_ENTRY_IFACE}));
+
+    auto reply = bus.call(mapperCall);
+    if (reply.is_method_error())
+    {
+        responseData->entries = 0;
+        responseData->addTimeStamp = 0xFFFFFFFF;
+    }
+    else
+    {
+        // Response by mapper in the case of success
+        std::map<std::string, std::map<std::string,
+                 std::vector<std::string>>> objectTree;
+
+        reply.read(objectTree);
+
+        if (objectTree.empty())
+        {
+            responseData->entries = 0;
+            responseData->addTimeStamp = 0xFFFFFFFF;
+        }
+        else
+        {
+            responseData->entries = objectTree.size();
+            responseData->addTimeStamp = ipmi::sel::getEntryTimeStamp(
+                            objectTree.rbegin()->second.begin()->first,
+                            objectTree.rbegin()->first);
+        }
+    }
+
+    memcpy(response, outPayload.data(), outPayload.size());
+    *data_len = outPayload.size();
+
+    return IPMI_CC_OK;
 }
 
 ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -162,29 +226,6 @@ finish:
     return rc;
 }
 
-ipmi_ret_t ipmi_storage_get_sel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
-{
-
-    ipmi_ret_t rc = IPMI_CC_OK;
-    unsigned char buf[] = {0x51,0,0,0xff, 0xff,0xff,0xff,0xff,0xff, 0xff,0xff,0xff,0xff,0x06};
-
-    printf("IPMI Handling GET-SEL-INFO\n");
-
-    *data_len = sizeof(buf);
-
-    // TODO There is plently of work here.  The SEL DB needs to hold a bunch
-    // of things in a header.  Items like Time Stamp, number of entries, etc
-    // This is one place where the dbus object with the SEL information could
-    // mimic what IPMI needs.
-
-    // Pack the actual response
-    memcpy(response, &buf, *data_len);
-
-    return rc;
-}
-
 ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
@@ -237,6 +278,11 @@ void register_netfn_storage_functions()
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL, ipmi_storage_wildcard,
                            PRIVILEGE_USER);
 
+    // <Get SEL Info>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, getSELInfo,
+                           PRIVILEGE_USER);
+
     // <Get SEL Time>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL, ipmi_storage_get_sel_time,
@@ -246,11 +292,6 @@ void register_netfn_storage_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL, ipmi_storage_set_sel_time,
                            PRIVILEGE_OPERATOR);
-
-    // <Get SEL Info>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO);
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, ipmi_storage_get_sel_info,
-                           PRIVILEGE_USER);
 
     // <Reserve SEL>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL);
