@@ -48,7 +48,8 @@ libapphandler_la_SOURCES = \
 	sensor-gen.cpp \
 	utils.cpp \
 	inventory-sensor-gen.cpp \
-	fru-read-gen.cpp
+	fru-read-gen.cpp \
+	ipmi_fru_info_area.cpp
 
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
