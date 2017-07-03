@@ -4,11 +4,16 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <chrono>
+#include <algorithm>
 #include "storagehandler.h"
 #include "storageaddsel.h"
 #include "host-ipmid/ipmid-api.h"
+#include "read_fru_data.hpp"
 
 void register_netfn_storage_functions() __attribute__((constructor));
+
+// Static storage to keep the object alive during process life
+std::unique_ptr<phosphor::hostipmi::ReadFruData> readfru __attribute__((init_priority(101)));
 
 
 unsigned int   g_sel_time    = 0xFFFFFFFF;
@@ -235,6 +240,23 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
         ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+    fru_inv_area_info_request_t *p = (fru_inv_area_info_request_t*) request;
+    printf("IPMI Handling GET-FRU-INVENTORY-AREA-INFO fruiod=0x%x \n", p->frunum);
+    printf("IPMI Handling GET-FRU-INVENTORY-AREA-INFO netfn:[0x%X], Cmd:[0x%X]\n", netfn, cmd);
+    
+    phosphor::hostipmi::FruAreaData fruArea = readfru->getFruAreaData(p->frunum);
+    uint16_t size = fruArea.size();
+    fru_inv_area_info_response_t resp;
+    resp.sizems = size >> 8;
+    resp.sizels = size;
+    resp.access = 0x00;
+
+    // From the IPMI Spec 2.0, response should be a 32-bit value
+    *data_len = sizeof(resp);
+
+    // Pack the actual response
+    memcpy(response, &resp, *data_len);
+    
     return rc;
 }
 
@@ -245,13 +267,41 @@ ipmi_ret_t ipmi_storage_read_fru_data(
         ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+    read_fru_data_request_t *reqptr = (read_fru_data_request_t*)request;
+    uint16_t offset = ((uint16_t)reqptr->offsetms) << 8 | reqptr->offsetls;
+    constexpr auto commonHeaderFormatSize = 0x8;
+
+    // Length is the number of request bytes minus the header itself.
+    // The header contains an extra byte to indicate the start of
+    // the data (so didn't need to worry about word/byte boundaries)
+    // hence the -1
+    uint16_t count = reqptr->count;
+
+    printf("IPMI Handling GET-FRU-READ-DATA netfn:[0x%X], Cmd:[0x%X]\n", netfn, cmd);
+    printf("IPMI Handling GET-FRU-READ-DATA offset:[0x%X], count[0x%X]\n", offset, count);
+    phosphor::hostipmi::FruAreaData fruArea = readfru->getFruAreaData(reqptr->frunum);
+    uint16_t size = fruArea.size();
+    unsigned char buffer[size];
+    if( (size < commonHeaderFormatSize) && 
+        ((offset + count) > (size-commonHeaderFormatSize) ))
+    {
+        rc = IPMI_CC_INVALID;
+        goto finish;
+    }
+    
+    std::copy(fruArea.begin(), fruArea.end(), buffer);
+    *data_len = count;
+    memcpy(response, (&buffer+offset+commonHeaderFormatSize), count);
+
+finish:    
     return rc;
 }
 
 
-
 void register_netfn_storage_functions()
 {
+    readfru = std::make_unique<phosphor::hostipmi::ReadFruData>();
+
     // <Wildcard Command>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL, ipmi_storage_wildcard,
@@ -290,7 +340,6 @@ void register_netfn_storage_functions()
     // <Add READ FRU Data
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_STORAGE,
             IPMI_CMD_READ_FRU_DATA);
-
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
             ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
     return;
