@@ -5,6 +5,8 @@
 enum ipmi_netfn_storage_cmds
 {
     // Get capability bits
+    IPMI_CMD_GET_FRU_INV_AREA_INFO  = 0x10,
+    IPMI_CMD_READ_FRU_DATA  = 0x11,
     IPMI_CMD_GET_SEL_INFO   = 0x40,
     IPMI_CMD_RESERVE_SEL    = 0x42,
     IPMI_CMD_GET_SEL_ENTRY  = 0x43,
@@ -28,4 +30,36 @@ struct ipmi_add_sel_request_t {
 	uint8_t eventdir;
 	uint8_t eventdata[3];
 };
+
+/**
+ * @struct Read FRU Data command request data
+ */
+struct ReadFruDataRequest
+{
+    uint8_t  fruID; ///< FRU Device ID. FFh = reserved
+    uint8_t  offsetLS; ///< FRU Inventory Offset to read, LS Byte
+    uint8_t  offsetMS; ///< FRU Inventory Offset ro read, MS Byte
+    uint8_t  count; ///< Count to read
+}__attribute__ ((packed));
+
+/**
+ * @struct Get FRU inventory area info command request data
+ */
+struct FruInvenAreaInfoRequest
+{
+    uint8_t fruID; ///< FRU Device ID. FFH = reserved.
+}__attribute__ ((packed));
+
+
+/**
+ * @struct Get FRU inventory area info command response
+ */
+struct FruInvenAreaInfoResponse
+{
+    uint8_t  completionCode;  ///< Completion code
+    uint8_t  sizels;          ///< Fru Inventory area size in bytes, LS Byte
+    uint8_t  sizems;          ///< Fru Inventory are size in bytes, MS Byte
+    uint8_t  access;    ///< 0b Devices is accessed by bytes, 1b - by words
+}__attribute__ ((packed));
+
 #endif

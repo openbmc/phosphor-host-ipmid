@@ -61,3 +61,7 @@ Makefile
 /ipmiwhitelist.cpp
 /sensor-gen.cpp
 /inventory-sensor-gen.cpp
+/fru-read-gen.cpp
+/phosphor-host-ipmid-1.0.tar.gz
+/phosphor-host-ipmid-1.0.tar.xz
+/softoff/xyz/
