@@ -27,4 +27,36 @@ struct ipmi_add_sel_request_t {
 	uint8_t eventdir;
 	uint8_t eventdata[3];
 };
+
+/**
+ * @struct Read FRU Data command request data
+ */
+typedef struct
+{
+    uint8_t  fruID; ///< FRU Device ID. FFh = reserved
+    uint8_t  offsetLS; ///< FRU Inventory Offset to read, LS Byte
+    uint8_t  offsetMS; ///< FRU Inventory Offset ro read, MS Byte
+    uint8_t  count; ///< Count to read
+}__attribute__ ((packed)) ReadFruDataRequest_t;
+
+/**
+ * @struct Get FRU inventory area info command request data
+ */
+typedef struct
+{
+    uint8_t fruID; ///< FRU Device ID. FFH = reserved.
+}__attribute__ ((packed)) FruInvenAreaInfoRequest_t;
+
+
+/**
+ * @struct Get FRU inventory area info command response
+ */
+typedef struct
+{
+    uint8_t  completionCode;  ///< Completion code
+    uint8_t  sizels;          ///< Fru Inventory area size in bytes, LS Byte
+    uint8_t  sizems;          ///< Fru Inventory are size in bytes, MS Byte
+    uint8_t  access;    ///< 0b Devices is accessed by bytes, 1b - by words
+}__attribute__ ((packed)) FruInvenAreaInfoResponse_t;
+
 #endif
