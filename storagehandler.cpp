@@ -228,6 +228,26 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+//Read FRU info area
+ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
+        ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+        ipmi_response_t response, ipmi_data_len_t data_len,
+        ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+    return rc;
+}
+
+//Read FRU data
+ipmi_ret_t ipmi_storage_read_fru_data(
+        ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+        ipmi_response_t response, ipmi_data_len_t data_len,
+        ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+    return rc;
+}
+
 
 
 void register_netfn_storage_functions()
@@ -261,6 +281,18 @@ void register_netfn_storage_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL, ipmi_storage_add_sel,
                            PRIVILEGE_OPERATOR);
+    // <Get FRU Inventory Area Info>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_STORAGE,
+            IPMI_CMD_GET_FRU_INV_AREA_INFO);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_FRU_INV_AREA_INFO, NULL,
+            ipmi_storage_get_fru_inv_area_info, PRIVILEGE_OPERATOR);
+
+    // <Add READ FRU Data
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_STORAGE,
+            IPMI_CMD_READ_FRU_DATA);
+
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
+            ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
     return;
 }
 
