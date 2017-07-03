@@ -61,3 +61,4 @@ Makefile
 /ipmiwhitelist.cpp
 /sensor-gen.cpp
 /inventory-sensor-gen.cpp
+/fru-read-gen.cpp
