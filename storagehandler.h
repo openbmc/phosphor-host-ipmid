@@ -27,4 +27,27 @@ struct ipmi_add_sel_request_t {
 	uint8_t eventdir;
 	uint8_t eventdata[3];
 };
+
+// Format of read fru data command
+struct read_fru_data_request_t
+{
+    uint8_t  frunum;
+    uint8_t  offsetls;
+    uint8_t  offsetms;
+    uint8_t  count;
+}__attribute__ ((packed));
+
+struct fru_inv_area_info_request_t
+{
+    uint8_t frunum;
+}__attribute__ ((packed));
+
+struct fru_inv_area_info_response_t
+{
+    uint8_t  completionCode;
+    uint8_t  sizels;
+    uint8_t  sizems;
+    uint8_t  access;
+}__attribute__ ((packed));
+
 #endif
