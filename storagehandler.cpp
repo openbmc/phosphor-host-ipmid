@@ -4,18 +4,28 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <chrono>
+#include <algorithm>
 #include "storagehandler.h"
 #include "storageaddsel.h"
 #include "host-ipmid/ipmid-api.h"
+#include "read_fru_data.hpp"
+#include "xyz/openbmc_project/Common/error.hpp"
+#include <phosphor-logging/elog-errors.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
-
 unsigned int   g_sel_time    = 0xFFFFFFFF;
 extern unsigned short g_sel_reserve;
+phosphor::hostipmi::FrusAreaMap gfrusMap;
 
 constexpr auto time_manager_intf = "org.openbmc.TimeManager";
 constexpr auto time_manager_obj = "/org/openbmc/TimeManager";
+
+using namespace phosphor::logging;
+using namespace phosphor::hostipmi;
+
+using InternalFailure =
+        sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
@@ -235,6 +245,29 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
         ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+    fru_inv_area_info_request_t *reqptr = (fru_inv_area_info_request_t*) request;
+    try
+    {
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        FruAreaData fruArea = getFruAreaData(bus, reqptr->frunum);
+        uint16_t size = fruArea.size();
+        fru_inv_area_info_response_t resp;
+        resp.sizems = size >> 8;
+        resp.sizels = size;
+        resp.access = 0x00;
+
+        // From the IPMI Spec 2.0, response should be a 32-bit value
+        *data_len = sizeof(resp);
+
+        // Pack the actual response
+        memcpy(response, &resp, *data_len);
+    }
+    catch (std::exception& e)
+    {
+        rc = IPMI_CC_INVALID;
+        log<level::ERR>(e.what());
+        report<InternalFailure>();
+    }
     return rc;
 }
 
@@ -245,9 +278,35 @@ ipmi_ret_t ipmi_storage_read_fru_data(
         ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+    read_fru_data_request_t *reqptr = (read_fru_data_request_t*)request;
+    uint16_t offset = ((uint16_t)reqptr->offsetms) << 8 | reqptr->offsetls;
+    uint16_t count = reqptr->count;
+    try
+    {
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        FruAreaData fruArea = getFruAreaData(bus, reqptr->frunum);
+        uint16_t size = fruArea.size();
+        unsigned char buffer[size];
+        if(((offset + count) > (size) ))
+        {
+            std::copy(fruArea.begin(), fruArea.end(), buffer);
+            *data_len = count;
+            memcpy(response, (&buffer+offset), count);
+        }
+        else
+        {
+            log<level::ERR>("Invalid offset and size. Out of range");
+            elog<InternalFailure>();
+        }
+    }
+    catch (std::exception& e)
+    {
+        rc = IPMI_CC_INVALID;
+        log<level::ERR>(e.what());
+        report<InternalFailure>();
+    }
     return rc;
 }
-
 
 
 void register_netfn_storage_functions()
@@ -290,7 +349,6 @@ void register_netfn_storage_functions()
     // <Add READ FRU Data
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_STORAGE,
             IPMI_CMD_READ_FRU_DATA);
-
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
             ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
     return;
