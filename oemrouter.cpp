@@ -51,10 +51,7 @@ ipmi_ret_t OemRouterImpl::routeMsg(ipmi_cmd_t cmd, const Byte* reqBuf,
     {
         fprintf(stderr, "NetFn:[0x2E], OEM:[%zu bytes?], Cmd:[%#04X]\n",
                 *dataLen, cmd);
-        if (*dataLen)
-        {
-            memcpy(replyBuf, reqBuf, *dataLen);
-        }
+        memcpy(replyBuf, reqBuf, *dataLen);
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
 
