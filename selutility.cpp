@@ -1,5 +1,6 @@
 #include <chrono>
 #include <vector>
+#include <experimental/filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include "host-ipmid/ipmid-api.h"
 #include "xyz/openbmc_project/Common/error.hpp"
@@ -212,6 +213,43 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
             sdbusplus::message::variant_ns::get<uint64_t>(timeStamp));
 
     return std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp);
+}
+
+void readLoggingObjectPaths(ObjectPaths& paths)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto depth = 0;
+    paths.clear();
+
+    auto mapperCall = bus.new_method_call(mapperBusName,
+                                          mapperObjPath,
+                                          mapperIntf,
+                                          "GetSubTreePaths");
+    mapperCall.append(logBasePath);
+    mapperCall.append(depth);
+    mapperCall.append(ObjectPaths({logEntryIntf}));
+
+    auto reply = bus.call(mapperCall);
+    if (reply.is_method_error())
+    {
+        log<level::INFO>("Error in reading logging entry object paths");
+    }
+    else
+    {
+        reply.read(paths);
+
+        std::sort(paths.begin(), paths.end(), [](const std::string& a,
+                                                 const std::string& b)
+        {
+            namespace fs = std::experimental::filesystem;
+            fs::path pathA(a);
+            fs::path pathB(b);
+            auto idA = std::stoul(pathA.filename().string());
+            auto idB = std::stoul(pathB.filename().string());
+
+            return idA < idB;
+        });
+    }
 }
 
 } // namespace sel
