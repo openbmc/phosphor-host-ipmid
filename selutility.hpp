@@ -20,6 +20,7 @@ static constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 
+using ObjectPaths = std::vector<std::string>;
 using PropertyType = sdbusplus::message::variant<bool, uint32_t, uint64_t,
                      std::string, std::vector<std::string>>;
 
@@ -58,6 +59,21 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath);
  *  @return On success return the timestamp of the log entry.
  */
 uint32_t getEntryTimeStamp(const std::string& objPath);
+
+/** @brief Read the logging entry object paths
+ *
+ *  This API would read the logging dbus logging entry object paths and sorting
+ *  the filename in the numeric order. The paths is cleared before populating
+ *  the object paths.
+ *
+ *  @param[in,out] paths - sorted list of logging entry object paths.
+ *
+ *  @note This function is invoked when the Get SEL Info command or the Delete
+ *        SEL entry command is invoked. The Get SEL Entry command is preceded
+ *        typically by Get SEL Info command, so readLoggingObjectPaths is not
+ *        invoked before each Get SEL entry command.
+ */
+void readLoggingObjectPaths(ObjectPaths& paths);
 
 namespace internal
 {
