@@ -18,5 +18,11 @@ using FRUAreaMap = std::map<FRUId, FruAreaData>;
  */
 FruAreaData& getFruAreaData(const FRUId& fruNum);
 
+/**
+ * @brief Register callback handlers
+ *
+ * @return negative value on failure
+ */
+int registerCallbackHandler();
 } //fru
 } //ipmi
