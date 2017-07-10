@@ -21,6 +21,7 @@ static constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 
 using ObjectPaths = std::vector<std::string>;
+using PropertyName = std::string;
 using PropertyType = sdbusplus::message::variant<bool, uint32_t, uint64_t,
                      std::string, std::vector<std::string>>;
 
