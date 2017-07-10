@@ -46,7 +46,7 @@ GetSELEntryResponse prepareSELEntry(
         elog<InternalFailure>();
     }
 
-    std::map<std::string, PropertyType> entryData;
+    std::map<PropertyName, PropertyType> entryData;
     reply.read(entryData);
 
     // Read Id from the log entry.
