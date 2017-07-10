@@ -18,5 +18,11 @@ using FRUAreaMap = std::map<FRUId, FruAreaData>;
  */
 const FruAreaData& getFruAreaData(const FRUId& fruNum);
 
+/**
+ * @brief Register callback handler into DBUS for PropertyChange events
+ *
+ * @return negative value on failure
+ */
+int registerCallbackHandler();
 } //fru
 } //ipmi

@@ -7,7 +7,6 @@
 #include "utils.hpp"
 
 extern const FruMap frus;
-
 namespace ipmi
 {
 namespace fru
@@ -15,6 +14,7 @@ namespace fru
 using namespace phosphor::logging;
 using InternalFailure =
         sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+std::unique_ptr<sdbusplus::bus::match_t> matchPtr(nullptr);
 
 static constexpr auto INV_INTF  = "xyz.openbmc_project.Inventory.Manager";
 static constexpr auto OBJ_PATH  = "/xyz/openbmc_project/inventory";
@@ -64,6 +64,58 @@ std::string readProperty(const std::string& intf,
     std::string value =
         sdbusplus::message::variant_ns::get<std::string>(property);
     return value;
+}
+
+void processFruPropChange(sdbusplus::message::message& msg)
+{
+    if(cache::fruMap.empty())
+    {
+        return;
+    }
+    std::string path = msg.get_path();
+    //trim the object base path
+    std::size_t found = path.find(OBJ_PATH);
+    if (found != std::string::npos)
+    {
+        path.erase(found, strlen(OBJ_PATH));
+    }
+    for (auto& fru : frus)
+    {
+        bool found = false;
+        auto& fruId = fru.first;
+        auto& instanceList = fru.second;
+        for (auto& instance : instanceList)
+        {
+            if(instance.first == path)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+        {
+            cache::fruMap.erase(fruId);
+            break;
+        }
+    }
+}
+
+//register for fru property change
+int registerCallbackHandler()
+{
+    if(matchPtr == nullptr)
+    {
+        using namespace sdbusplus::bus::match::rules;
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        matchPtr = std::make_unique<sdbusplus::bus::match_t>(
+            bus,
+            path_namespace(OBJ_PATH) +
+            type::signal() +
+            member("PropertiesChanged") +
+            interface(PROP_INTF),
+            std::bind(processFruPropChange, std::placeholders::_1));
+    }
+    return 0;
 }
 
 /**
