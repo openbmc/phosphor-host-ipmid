@@ -1,5 +1,7 @@
 #include "chassishandler.h"
 #include "host-ipmid/ipmid-api.h"
+#include "types.hpp"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -13,8 +15,16 @@
 #include <array>
 #include <fstream>
 #include <experimental/filesystem>
+#include <string>
+
 #include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
+
+#include <sdbusplus/bus.hpp>
+#include <sdbusplus/server/object.hpp>
+
 #include "config.h"
 
 //Defines
@@ -46,8 +56,6 @@ static constexpr size_t IPADDR_OFFSET = 17;
 static constexpr size_t PREFIX_OFFSET = 21;
 static constexpr size_t GATEWAY_OFFSET = 22;
 
-using namespace phosphor::logging;
-
 
 void register_netfn_chassis_functions() __attribute__((constructor));
 
@@ -56,6 +64,21 @@ void register_netfn_chassis_functions() __attribute__((constructor));
 const char *settings_object_name  =  "/org/openbmc/settings/host0";
 const char *settings_intf_name    =  "org.freedesktop.DBus.Properties";
 const char *host_intf_name        =  "org.openbmc.settings.Host";
+
+constexpr auto HOST_NETWORK_IP_OBJECT =
+    "/xyz/openbmc_project/network/host0/eth0/ipv4/abc123";
+
+constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
+
+constexpr auto HOST_NETWORK_MAC_OBJECT =
+    "/xyz/openbmc_project/network/host0/eth0";
+constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
+
+constexpr auto SETTINGS_SERVICE = "xyz.openbmc_project.Settings";
+
+constexpr auto METHOD_GET = "Get";
+constexpr auto METHOD_GET_ALL = "GetAll";
+constexpr auto METHOD_SET = "Set";
 
 typedef struct
 {
@@ -80,6 +103,94 @@ namespace State = sdbusplus::xyz::openbmc_project::State::server;
 
 namespace fs = std::experimental::filesystem;
 
+using namespace phosphor::logging;
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+
+std::string getDbusProperty(const std::string& objectPath,
+                            const std::string& interface,
+                            const std::string& property)
+{
+    sdbusplus::message::variant<std::string> name;
+    auto bus = sdbusplus::bus::new_default();
+    auto method = bus.new_method_call(
+                      SETTINGS_SERVICE,
+                      objectPath.c_str(),
+                      settings_intf_name,
+                      METHOD_GET);
+
+    method.append(interface, property);
+
+    auto reply = bus.call(method);
+
+    if (reply)
+    {
+        reply.read(name);
+    }
+    else
+    {
+        log<level::ERR>("Failed to get property",
+                        entry("PROPERTY=%s", property.c_str()));
+        elog<InternalFailure>();
+    }
+    return name.get<std::string>();
+}
+
+ipmi::PropertyMap getAllDbusProperties(const std::string& objectPath,
+                                       const std::string& interface)
+{
+    ipmi::PropertyMap properties;
+    auto bus = sdbusplus::bus::new_default();
+    auto method = bus.new_method_call(
+                      SETTINGS_SERVICE,
+                      objectPath.c_str(),
+                      settings_intf_name,
+                      METHOD_GET_ALL);
+
+    method.append(interface);
+
+    auto reply = bus.call(method);
+
+    if (reply)
+    {
+        reply.read(properties);
+    }
+    else
+    {
+        log<level::ERR>("Failed to get all properties",
+                        entry("INTERFACE=%s", interface.c_str()));
+        elog<InternalFailure>();
+    }
+    return properties;
+}
+
+void setDbusProperty(const std::string& objectPath,
+                     const std::string& interface,
+                     const std::string& property,
+                     const ipmi::Value& value)
+{
+    auto bus = sdbusplus::bus::new_default();
+    auto method = bus.new_method_call(
+                      SETTINGS_SERVICE,
+                      objectPath.c_str(),
+                      settings_intf_name,
+                      METHOD_SET);
+
+    method.append(interface);
+    method.append(property, value);
+
+    if (!bus.call(method))
+    {
+        log<level::ERR>("Failed to set property",
+                        entry("PROPERTY=%s", property.c_str()));
+        elog<InternalFailure>();
+    }
+
+}
+
+//TODO : Can remove the below function as we have
+//       new functions which uses sdbusplus.
+//
+//       openbmc/openbmc#1489
 int dbus_get_property(const char *name, char **buf)
 {
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -146,6 +257,11 @@ finish:
 
     return r;
 }
+
+//TODO : Can remove the below function as we have
+//       new functions which uses sdbusplus.
+//
+//       openbmc/openbmc#1489
 
 int dbus_set_property(const char * name, const char *value)
 {
@@ -216,305 +332,175 @@ struct set_sys_boot_options_t {
     uint8_t data[SIZE_BOOT_OPTION];
 }  __attribute__ ((packed));
 
-struct host_network_config_t {
-    std::string ipaddress;
-    std::string prefix;
-    std::string gateway;
-    std::string macaddress;
-    std::string addrType;
 
-    host_network_config_t()=default;
-};
-
-void fillNetworkConfig( host_network_config_t & host_config ,
-                        const std::string& conf_str ) {
-
-    constexpr auto COMMA_DELIMITER = ",";
-    constexpr auto EQUAL_DELIMITER = "=";
-    size_t  commaDelimtrPos = 0;
-    size_t  equalDelimtrPos = 0,commaDelimtrPrevPos = 0;
-    std::string value;
-    while ( commaDelimtrPos < conf_str.length() ) {
-
-        commaDelimtrPos = conf_str.find(COMMA_DELIMITER,commaDelimtrPos);
-        //This condition is to extract the last
-        //Substring as we will not be having the delimeter
-        //at end. std::string::npos is -1
-
-        if ( commaDelimtrPos == std::string::npos ) {
-            commaDelimtrPos = conf_str.length();
-        }
-
-        equalDelimtrPos = conf_str.find (EQUAL_DELIMITER,commaDelimtrPrevPos);
-
-        //foo,ipaddress=1234
-        if ( equalDelimtrPos == std::string::npos ) {
-
-            commaDelimtrPos++;
-            commaDelimtrPrevPos= commaDelimtrPos;
-            continue;
-        }
-
-        value = conf_str.substr((equalDelimtrPos+1),
-                                commaDelimtrPos-(equalDelimtrPos+1));
-
-#ifdef _IPMI_DEBUG_
-        printf ("Name=[%s],Value=[%s],commaDelimtrPos=[%d],\
-                commaDelimtrPrevPos=[%d],equalDelimtrPos=[%d]\n",
-                name.c_str(),value.c_str(),commaDelimtrPos,
-                commaDelimtrPrevPos,equalDelimtrPos);
-#endif
-
-        if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                                   equalDelimtrPos-commaDelimtrPrevPos,
-                                   "ipaddress" )) {
-            host_config.ipaddress = std::move(value);
-        }
-        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                                        equalDelimtrPos-commaDelimtrPrevPos,
-                                        "prefix" )) {
-            host_config.prefix = std::move(value);
-        }
-        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                                        equalDelimtrPos-commaDelimtrPrevPos,
-                                        "gateway" )) {
-            host_config.gateway = std::move(value);
-        }
-        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                                        equalDelimtrPos-commaDelimtrPrevPos,
-                                        "mac" )) {
-            host_config.macaddress = std::move(value);
-        }
-        else if ( 0 == conf_str.compare(commaDelimtrPrevPos,
-                                        equalDelimtrPos-commaDelimtrPrevPos,
-                                        "addr_type" )) {
-            host_config.addrType = std::move(value);
-        }
-
-        commaDelimtrPos++;
-        commaDelimtrPrevPos= commaDelimtrPos;
-    }
-}
-
-int  getHostNetworkData(get_sys_boot_options_response_t* respptr)
+int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 {
+    ipmi::PropertyMap properties;
+    int rc = 0;
 
-    char *prop = nullptr;
-    int rc = dbus_get_property("network_config",&prop);
+    try
+    {
+        properties  = getAllDbusProperties(HOST_NETWORK_IP_OBJECT, IP_INTERFACE);
+        auto MACAddress =
+            getDbusProperty(HOST_NETWORK_MAC_OBJECT, MAC_INTERFACE, "MACAddress");
 
-    if ( rc < 0 ) {
-        fprintf(stderr, "Dbus get property(boot_flags) failed\
-                for get_sys_boot_options.\n");
+        sscanf(MACAddress.c_str(), MAC_ADDRESS_FORMAT,
+               (respptr->data + MAC_OFFSET), (respptr->data + MAC_OFFSET + 1),
+               (respptr->data + MAC_OFFSET + 2), (respptr->data + MAC_OFFSET + 3),
+               (respptr->data + MAC_OFFSET + 4), (respptr->data + MAC_OFFSET + 5));
+
+
+        respptr->data[MAC_OFFSET + 6] = 0x00;
+
+        uint8_t addrType = (properties["Type"].get<std::string>() ==
+                            std::string("xyz.openbmc_project.Network.IP.AddressOrigin.Static") ? 0 : 1);
+
+        memcpy(respptr->data + ADDRTYPE_OFFSET, &addrType, sizeof(addrType));
+
+        // ipaddress and gateway would be in IPv4 format
+
+        inet_pton(AF_INET, properties["Address"].get<std::string>().c_str(),
+                  (respptr->data + IPADDR_OFFSET));
+
+        uint8_t prefix = properties["PrefixLength"].get<uint8_t>();
+        memcpy(respptr->data + PREFIX_OFFSET, &prefix, sizeof(prefix));
+
+        inet_pton(AF_INET, properties["Gateway"].get<std::string>().c_str(),
+                  (respptr->data + GATEWAY_OFFSET));
+
+    }
+    catch (InternalFailure& e)
+    {
+        commit<InternalFailure>();
+        memset(respptr->data, 0, SIZE_BOOT_OPTION);
+        rc = -1;
         return rc;
     }
 
-    std::string conf_str(prop);
+    //PetiBoot-Specific
+    //If sucess then copy the first 9 bytes to the data
+    //else set the respptr to 0
 
-    if ( prop ) {
-
-        free(prop);
-        prop = nullptr;
-    }
-
-    /* network_config property Value would be in the form of
-     * ipaddress=1.1.1.1,prefix=16,gateway=2.2.2.2,mac=11:22:33:44:55:66,dhcp=0
-     */
-
-    /* Parsing the string and fill the hostconfig structure with the
-     * values */
-
-    printf ("Configuration String[%s]\n ",conf_str.c_str());
-
-    host_network_config_t host_config;
-
-    // Fill the host_config from the configuration string
-    fillNetworkConfig(host_config,conf_str);
-
-    //Assigning the index as intialByteLength as it is fixed and prefilled.
-    printf ("host_config.macaddress.c_str()=[%s]\n",host_config.macaddress.c_str());
-    do{
-
-        rc = sscanf(host_config.macaddress.c_str(),MAC_ADDRESS_FORMAT,
-                    (respptr->data+MAC_OFFSET), (respptr->data+MAC_OFFSET+1),
-                    (respptr->data+MAC_OFFSET+2),(respptr->data+MAC_OFFSET+3),
-                    (respptr->data+MAC_OFFSET+4), (respptr->data+MAC_OFFSET+5));
-
-
-        if ( rc < 6 ){
-            fprintf(stderr, "sscanf Failed in extracting mac address.\n");
-            rc = -1;
-            break;
-        }
-
-        //Conevrt the dhcp,ipaddress,mask and gateway as hex number
-        respptr->data[MAC_OFFSET+6]=0x00;
-
-        rc = sscanf(host_config.addrType.c_str(),ADDR_TYPE_FORMAT,
-                    (respptr->data+ADDRTYPE_OFFSET));
-
-        if ( rc <= 0 ) {
-            fprintf(stderr, "sscanf Failed in extracting address type.\n");
-            rc = -1;
-            break;
-        }
-
-        //ipaddress and gateway would be in IPv4 format
-        rc = inet_pton(AF_INET,host_config.ipaddress.c_str(),
-                       (respptr->data+IPADDR_OFFSET));
-
-        if ( rc <= 0 ) {
-            fprintf(stderr, "inet_pton failed during ipaddress coneversion\n");
-            rc = -1;
-            break;
-        }
-
-        rc = sscanf(host_config.prefix.c_str(),PREFIX_FORMAT,
-                    (respptr->data+PREFIX_OFFSET));
-
-        if ( rc <= 0 ) {
-            fprintf(stderr, "sscanf failed during prefix extraction.\n");
-            rc = -1;
-            break;
-        }
-
-        rc = inet_pton(AF_INET,host_config.gateway.c_str(),
-                       (respptr->data+GATEWAY_OFFSET));
-
-        if ( rc <= 0 ) {
-            fprintf(stderr, "inet_pton failed during gateway conversion.\n");
-            rc = -1;
-            break;
-        }
-
-    }while (0);
-
-    if ( rc ) {
-
-        //PetiBoot-Specific
-        //If sucess then copy the first 9 bytes to the data
-        //else set the respptr to 0
-
-        memcpy(respptr->data,net_conf_initial_bytes,
-               sizeof(net_conf_initial_bytes));
+    memcpy(respptr->data, net_conf_initial_bytes,
+           sizeof(net_conf_initial_bytes));
 
 #ifdef _IPMI_DEBUG_
-        printf ("\n===Printing the IPMI Formatted Data========\n");
+    printf("\n===Printing the IPMI Formatted Data========\n");
 
-        for ( uint8_t pos = 0; pos<index; pos++ )
-            printf("%02x ", respptr->data[pos]);
+    for (uint8_t pos = 0; pos < index; pos++)
+    {
+        printf("%02x ", respptr->data[pos]);
+    }
 #endif
 
-    }else {
-
-        memset(respptr->data,0,SIZE_BOOT_OPTION);
-    }
 
     return rc;
 }
 
-int setHostNetworkData(set_sys_boot_options_t * reqptr)
+int setHostNetworkData(set_sys_boot_options_t* reqptr)
 {
+    using namespace std::string_literals;
     std::string host_network_config;
     char mac[SIZE_MAC] = {0};
     char ipAddress[INET_ADDRSTRLEN] = {0};
     char gateway[INET_ADDRSTRLEN] = {0};
-    char dhcp[SIZE_PREFIX] = {0};
-    char prefix[SIZE_PREFIX] = {0};
-    int rc = 0;
-    uint32_t zeroCookie=0;
+    char dhcp {0};
+    std::string addressOrigin =
+        "xyz.openbmc_project.Network.IP.AddressOrigin.Static";
+    uint8_t prefix {0};
+    uint32_t zeroCookie = 0;
 
     //cookie starts from second byte
     // version starts from sixth byte
 
-    do {
-
-        // cookie ==  0x21 0x70 0x62 0x21
-        if ( memcmp(&(reqptr->data[COOKIE_OFFSET]),
-                    (net_conf_initial_bytes+COOKIE_OFFSET),
-                    SIZE_COOKIE) != 0 ) {
-            //cookie == 0
-            if (  memcmp(&(reqptr->data[COOKIE_OFFSET]),
-                         &zeroCookie,
-                         SIZE_COOKIE) == 0 ) {
-                rc = 0;
-                break;
-            }
-            //Invalid cookie
-            fprintf(stderr, "Invalid Cookie\n");
-            rc = -1;
-            break;
-        }
-        // vesion == 0x00 0x01
-        if ( memcmp(&(reqptr->data[VERSION_OFFSET]),
-                    (net_conf_initial_bytes+VERSION_OFFSET),
-                    SIZE_VERSION) != 0 ) {
-
-            fprintf(stderr, "Invalid Version\n");
-            rc = -1;
-            break;
-        }
-
-        snprintf(mac, SIZE_MAC, MAC_ADDRESS_FORMAT,
-                 reqptr->data[MAC_OFFSET],
-                 reqptr->data[MAC_OFFSET+1],
-                 reqptr->data[MAC_OFFSET+2],
-                 reqptr->data[MAC_OFFSET+3],
-                 reqptr->data[MAC_OFFSET+4],
-                 reqptr->data[MAC_OFFSET+5]);
-
-        snprintf(dhcp,SIZE_PREFIX, ADDR_TYPE_FORMAT, reqptr->data[ADDRTYPE_OFFSET]);
-        //Validating the address  type which could be
-        //either static or dynamic
-        if( *(reqptr->data+ADDRTYPE_OFFSET) > 1 ) {
-
-            fprintf(stderr, "Invalid Address Type\n");
-            rc = -1;
-            break;
-
-        }
-
-        snprintf(ipAddress, INET_ADDRSTRLEN, IP_ADDRESS_FORMAT,
-                 reqptr->data[IPADDR_OFFSET], reqptr->data[IPADDR_OFFSET+1],
-                 reqptr->data[IPADDR_OFFSET+2], reqptr->data[IPADDR_OFFSET+3]);
-
-        //validating prefix
-        if ( *(reqptr->data+PREFIX_OFFSET) > (uint8_t)MAX_PREFIX_VALUE ) {
-
-            fprintf(stderr, "Invalid Prefix\n");
-            rc = -1;
-            break;
-        }
-
-        snprintf(prefix,SIZE_PREFIX,PREFIX_FORMAT, reqptr->data[PREFIX_OFFSET]);
-
-        snprintf(gateway, INET_ADDRSTRLEN,IP_ADDRESS_FORMAT,
-                 reqptr->data[GATEWAY_OFFSET],
-                 reqptr->data[GATEWAY_OFFSET+1],
-                 reqptr->data[GATEWAY_OFFSET+2],
-                 reqptr->data[GATEWAY_OFFSET+3]);
-
-
-    }while(0);
-
-    if( !rc )
+    try
     {
+        do
+        {
+            // cookie ==  0x21 0x70 0x62 0x21
+            if (memcmp(&(reqptr->data[COOKIE_OFFSET]),
+                        (net_conf_initial_bytes + COOKIE_OFFSET),
+                        SIZE_COOKIE) != 0)
+            {
+                //cookie == 0
+                if (memcmp(&(reqptr->data[COOKIE_OFFSET]),
+                            &zeroCookie,
+                            SIZE_COOKIE) == 0)
+                {
+                    // need to zero out the network settings.
+                    break;
+                }
+
+                log<level::ERR>("Invalid Cookie");
+                elog<InternalFailure>();
+            }
+
+            // vesion == 0x00 0x01
+            if (memcmp(&(reqptr->data[VERSION_OFFSET]),
+                        (net_conf_initial_bytes + VERSION_OFFSET),
+                        SIZE_VERSION) != 0)
+            {
+
+                log<level::ERR>("Invalid Version");
+                elog<InternalFailure>();
+            }
+
+            snprintf(mac, SIZE_MAC, MAC_ADDRESS_FORMAT,
+                    reqptr->data[MAC_OFFSET],
+                    reqptr->data[MAC_OFFSET + 1],
+                    reqptr->data[MAC_OFFSET + 2],
+                    reqptr->data[MAC_OFFSET + 3],
+                    reqptr->data[MAC_OFFSET + 4],
+                    reqptr->data[MAC_OFFSET + 5]);
+
+            memcpy(&dhcp, &(reqptr->data[ADDRTYPE_OFFSET]), sizeof(decltype(dhcp)));
+            if (dhcp)
+            {
+                addressOrigin = "xyz.openbmc_project.Network.IP.AddressOrigin.DHCP";
+            }
+
+            snprintf(ipAddress, INET_ADDRSTRLEN, IP_ADDRESS_FORMAT,
+                    reqptr->data[IPADDR_OFFSET], reqptr->data[IPADDR_OFFSET + 1],
+                    reqptr->data[IPADDR_OFFSET + 2], reqptr->data[IPADDR_OFFSET + 3]);
+
+
+            memcpy(&prefix, &(reqptr->data[PREFIX_OFFSET]), sizeof(decltype(prefix)));
+
+            snprintf(gateway, INET_ADDRSTRLEN, IP_ADDRESS_FORMAT,
+                    reqptr->data[GATEWAY_OFFSET], reqptr->data[GATEWAY_OFFSET + 1],
+                    reqptr->data[GATEWAY_OFFSET + 2], reqptr->data[GATEWAY_OFFSET + 3]);
+        } while(0);
+
         //Cookie == 0 or it is a valid cookie
-        host_network_config += "ipaddress="+std::string(ipAddress)+",prefix="+
-                std::string(prefix)+",gateway="+std::string(gateway)+
-                ",mac="+std::string(mac)+",addr_type="+std::string(dhcp);
+        host_network_config += "ipaddress="s + ipAddress +
+            ",prefix="s + std::to_string(prefix) + ",gateway="s + gateway +
+            ",mac="s + mac + ",addressOrigin="s + addressOrigin;
 
-        printf ("Network configuration changed: %s\n",host_network_config.c_str());
+        log<level::DEBUG>("Network configuration changed",
+                entry("NETWORKCONFIG=%s", host_network_config.c_str()));
 
-        rc = dbus_set_property("network_config",host_network_config.c_str());
-
-        if ( rc < 0 ) {
-            fprintf(stderr, "Dbus set property(network_config)\
-                    failed for set_sys_boot_options.\n");
-            rc = -1;
-        }
+        // set the dbus property
+        setDbusProperty(HOST_NETWORK_IP_OBJECT, IP_INTERFACE,
+                "Address", std::string(ipAddress));
+        setDbusProperty(HOST_NETWORK_IP_OBJECT, IP_INTERFACE,
+                "PrefixLength", prefix);
+        setDbusProperty(HOST_NETWORK_IP_OBJECT, IP_INTERFACE,
+                "Origin", addressOrigin);
+        setDbusProperty(HOST_NETWORK_IP_OBJECT, IP_INTERFACE,
+                "Gateway", std::string(gateway));
+        setDbusProperty(HOST_NETWORK_IP_OBJECT, IP_INTERFACE, "Type",
+                std::string("xyz.openbmc_project.Network.IP.Protocol.IPv4"));
+        setDbusProperty(HOST_NETWORK_MAC_OBJECT, MAC_INTERFACE,
+                "MACAddress", std::string(mac));
 
     }
-    return rc;
+    catch (InternalFailure& e)
+    {
+        commit<InternalFailure>();
+        return -1;
+    }
+
+    return 0;
 }
 
 ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
