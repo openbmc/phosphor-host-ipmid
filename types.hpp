@@ -9,11 +9,21 @@
 
 namespace ipmi
 {
+
+using DbusObjectPath = std::string;
+using DbusService = std::string;
+using DbusInterface = std::string;
+using DbusObjectInfo = std::pair<DbusObjectPath, DbusService>;
+using DbusProperty = std::string;
+using Value = sdbusplus::message::variant<bool, int64_t, uint8_t, std::string>;
+using PropertyMap = std::map<DbusProperty, Value>;
+using ObjectTree = std::map<DbusObjectPath,
+                            std::map<DbusService, std::vector<DbusInterface>>>;
 namespace sensor
 {
 
 using Offset = uint8_t;
-using Value = sdbusplus::message::variant<bool, int64_t, std::string>;
+using Value = ipmi::Value;
 
 struct Values
 {
@@ -23,10 +33,10 @@ struct Values
 
 using OffsetValueMap = std::map<Offset,Values>;
 
-using DbusProperty = std::string;
+using DbusProperty = ipmi::DbusProperty;
 using DbusPropertyMap = std::map<DbusProperty,OffsetValueMap>;
 
-using DbusInterface = std::string;
+using DbusInterface = ipmi::DbusInterface;
 using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
 
 using InstancePath = std::string;
@@ -44,7 +54,7 @@ struct Info
 using Id = uint8_t;
 using IdInfoMap = std::map<Id,Info>;
 
-using PropertyMap = std::map<DbusProperty, Value>;
+using PropertyMap = ipmi::PropertyMap;
 
 using InterfaceMap = std::map<DbusInterface, PropertyMap>;
 
