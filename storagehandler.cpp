@@ -357,6 +357,7 @@ void register_netfn_storage_functions()
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
             ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
 
+    ipmi::fru::registerCallbackHandler();
     return;
 }
 

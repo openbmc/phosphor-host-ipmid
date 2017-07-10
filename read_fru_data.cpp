@@ -1,4 +1,3 @@
-#include <iostream>
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
@@ -7,10 +6,12 @@
 #include "host-ipmid/ipmid-api.h"
 #include "utils.hpp"
 
+
 extern const FruMap frus;
 using namespace phosphor::logging;
 using InternalFailure =
         sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+using namespace sdbusplus::bus::match::rules;
 
 namespace ipmi
 {
@@ -19,6 +20,11 @@ namespace fru
 static constexpr auto INV_INTF  = "xyz.openbmc_project.Inventory.Manager";
 static constexpr auto OBJ_PATH  = "/xyz/openbmc_project/inventory";
 static constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
+
+constexpr auto INVENTORY_SETTINGS_CHANGE =
+        "type='signal',interface='org.freedesktop.DBus.Properties',"
+        "path_namespace='/xyz/openbmc_project/inventory',"
+        "member='PropertiesChanged'";
 
 namespace cache
 {
@@ -62,6 +68,56 @@ std::string readProperty(const std::string& intf,
     std::string value =
         sdbusplus::message::variant_ns::get<std::string>(property);
     return std::move(value);
+}
+
+//process fru property change signal
+int processFruPropChange(sd_bus_message* m, void* userdata, sd_bus_error* ret)
+{
+    if(cache::frusMap.size() <= 0)
+    {
+        return 0;
+    }
+    std::string path = sd_bus_message_get_path(m);
+    //trim the object base path
+    std::size_t found = path.find(OBJ_PATH);
+    if (found != std::string::npos)
+    {
+        path.erase(found, strlen(OBJ_PATH));
+    }
+    for (auto& fru : frus)
+    {
+        bool found = false;
+        auto& fruId = fru.first;
+        auto& instanceList = fru.second;
+        for (auto& instance : instanceList)
+        {
+            if(instance.first == path)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+        {
+            cache::frusMap.erase(fruId);
+            break;
+        }
+    }
+    return 0;
+}
+
+//register for fru property change
+int registerCallbackHandler()
+{
+    int r(0);
+    auto bus = ipmid_get_sd_bus_connection();
+    r = sd_bus_add_match(
+        bus, NULL, INVENTORY_SETTINGS_CHANGE, processFruPropChange, NULL);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure in adding property change listener");
+    }
+    return r;
 }
 
 /**
