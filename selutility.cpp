@@ -27,7 +27,7 @@ GetSELEntryResponse prepareSELEntry(
         const std::string& objPath,
         ipmi::sensor::InvObjectIDMap::const_iterator iter)
 {
-    ipmi::sel::GetSELEntryResponse record {};
+    GetSELEntryResponse record {};
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     auto service = ipmi::getService(bus, logEntryIntf, objPath);
@@ -46,7 +46,7 @@ GetSELEntryResponse prepareSELEntry(
         elog<InternalFailure>();
     }
 
-    std::map<std::string, PropertyType> entryData;
+    std::map<PropertyName, PropertyType> entryData;
     reply.read(entryData);
 
     // Read Id from the log entry.
