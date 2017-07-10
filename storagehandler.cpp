@@ -16,13 +16,13 @@ void register_netfn_storage_functions() __attribute__((constructor));
 
 unsigned int   g_sel_time    = 0xFFFFFFFF;
 extern unsigned short g_sel_reserve;
-phosphor::hostipmi::FrusAreaMap gfrusMap;
+ipmi::fru::FrusAreaMap gfrusMap;
 
 constexpr auto time_manager_intf = "org.openbmc.TimeManager";
 constexpr auto time_manager_obj = "/org/openbmc/TimeManager";
 
 using namespace phosphor::logging;
-using namespace phosphor::hostipmi;
+using namespace ipmi::fru;
 
 /**
  * @enum Device access mode
@@ -357,6 +357,8 @@ void register_netfn_storage_functions()
             IPMI_CMD_READ_FRU_DATA);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
             ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
+
+    ipmi::fru::registerFruPropertyChangeHandle();
     return;
 }
 
