@@ -17,5 +17,11 @@ using FrusAreaMap = std::map<uint8_t, FruAreaData>;
  */
 FruAreaData getFruAreaData(sdbusplus::bus::bus& bus, const uint8_t& fruNum );
 
+/**
+ * @brief Register for change in Inventory propertie signal
+ *
+ * @return negative value on failure
+ */
+int registerFruPropertyChangeHandle();
 } //hostipmi
 } //phosphor
