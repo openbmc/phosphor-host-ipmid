@@ -21,8 +21,14 @@ static constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 
 using ObjectPaths = std::vector<std::string>;
-using PropertyType = sdbusplus::message::variant<bool, uint32_t, uint64_t,
-                     std::string, std::vector<std::string>>;
+using PropertyName = std::string;
+using Resolved = bool;
+using Id = uint32_t;
+using Timestamp = uint64_t;
+using Message = std::string;
+using AdditionalData = std::vector<std::string>;
+using PropertyType = sdbusplus::message::variant<Resolved, Id, Timestamp,
+                     Message, AdditionalData>;
 
 static constexpr auto selVersion = 0x51;
 static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
