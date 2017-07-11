@@ -4,7 +4,10 @@ sbin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
-	ipmid.cpp
+	ipmid.cpp \
+	host-cmd-manager.cpp \
+	timer.cpp \
+	utils.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 BUILT_SOURCES = \
                ipmiwhitelist.cpp \
