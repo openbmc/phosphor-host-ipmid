@@ -4,7 +4,10 @@ sbin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
-	ipmid.cpp
+	ipmid.cpp \
+	host-cmd-manager.cpp \
+	timer.cpp \
+	utils.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 BUILT_SOURCES = \
                ipmiwhitelist.cpp \
@@ -15,8 +18,14 @@ BUILT_SOURCES = \
 CLEANFILES = $(BUILT_SOURCES)
 
 #TODO - Make this path a configure option (bitbake parameter)
-ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" $(PHOSPHOR_LOGGING_CFLAGS)
-ipmid_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(LIBADD_DLOPEN) $(PHOSPHOR_LOGGING_LIBS) -export-dynamic
+ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" \
+				 $(PHOSPHOR_LOGGING_CFLAGS) \
+				 $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+ipmid_LDFLAGS = $(SYSTEMD_LIBS) \
+				$(libmapper_LIBS) \
+				$(LIBADD_DLOPEN) \
+				$(PHOSPHOR_LOGGING_LIBS) \
+				$(PHOSPHOR_DBUS_INTERFACES_LIBS) -export-dynamic
 # TODO: Rather than use -export-dynamic, we should use -export-symbol to have a
 #       selective list of symbols.
 
