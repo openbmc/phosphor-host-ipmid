@@ -438,6 +438,25 @@ ipmi_ret_t setSensorReading(void *request)
 
     ipmi::sensor::ObjectMap objects;
     ipmi::sensor::InterfaceMap interfaces;
+    auto& path = iter->second.updatePath;
+    auto& intf = iter->second.updateInterface;
+    std::string command;
+
+    if(intf.compare("xyz.openbmc_project.Inventory.Manager"))
+    {
+        command = "Notify";
+    }
+    else if(intf.compare("org.freedesktop.DBus.Properties"))
+    {
+        command = "Set";
+    }
+    else
+    {
+        log<level::ERR>("Unsupported interface");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    
     for (const auto& interface : interfaceList)
     {
         for (const auto& property : interface.second)
@@ -463,26 +482,49 @@ ipmi_ret_t setSensorReading(void *request)
             }
         }
     }
-    objects.emplace(iter->second.sensorPath, std::move(interfaces));
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     using namespace std::string_literals;
-    static const auto intf = "xyz.openbmc_project.Inventory.Manager"s;
-    static const auto path = "/xyz/openbmc_project/inventory"s;
     std::string service;
 
     try
     {
         service = ipmi::getService(bus, intf, path);
+    }
+    catch ( const std::runtime_error& e )
+    {
+        log<level::ERR>(e.what());
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
 
-        // Update the inventory manager
-        auto pimMsg = bus.new_method_call(service.c_str(),
-                                          path.c_str(),
-                                          intf.c_str(),
-                                          "Notify");
-        pimMsg.append(std::move(objects));
-        auto inventoryMgrResponseMsg = bus.call(pimMsg);
-        if (inventoryMgrResponseMsg.is_method_error())
+    // Update the value to the respective service
+    auto updMsg = bus.new_method_call(service.c_str(),
+                                      path.c_str(),
+                                      intf.c_str(),
+                                      command.c_str());
+    if( command.compare( "Notify" ) == 0 )
+    {
+        objects.emplace(iter->second.sensorPath, std::move(interfaces));
+        updMsg.append(std::move(objects));
+    }
+    else
+    {
+
+        for( const auto& interface: interfaces )
+        {
+            updMsg.append(interface.first);
+            for(const auto& val: interface.second)
+            {
+                updMsg.append(val.first);
+                updMsg.append(val.second);
+            }
+        }
+    }
+
+    try
+    {
+        auto serviceResponseMsg = bus.call(updMsg);
+        if (serviceResponseMsg.is_method_error())
         {
             log<level::ERR>("Error in notify call");
             return IPMI_CC_UNSPECIFIED_ERROR;
