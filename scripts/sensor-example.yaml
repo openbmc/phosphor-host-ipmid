@@ -1,12 +1,33 @@
+#sample yaml with documentation
+#Sensor Number
 0xa6:
+  #Sensor Type
   sensorType: 0x0C
+  #There are two types of updates one with Notify and other with Set
+  #for inventory updates, which uses Notify the path should be inventory path
+  #for other interfaces it should be dbus object path
   path: /system/chassis/motherboard/dimm0
+  #event reading type
   sensorReadingType: 0x6F
+  #Dbus interface to make a bus call
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  #command data has three fields, sensor reading value, assertion and
+  #deassertion bits and event data, this indicates which data field should
+  #be used. possible values assertion, reading or event
+  readingType: assertion
+  #This indicates which byte in event data should be taken.
+  byteOffset: 0x00
+  #List of dbus interfaces associated with the interested properties.
   interfaces:
+    #Dbus interface implementing the interested property.
     xyz.openbmc_project.State.Decorator.OperationalStatus:
+      #DBus property
       Functional:
+        #Offset
         0x04:
+          #type of the property
           type: bool
+          #mapping from event offset bit in the command to the property value.
           deassert: "true"
           assert: "false"
     xyz.openbmc_project.Inventory.Item:
@@ -15,10 +36,25 @@
           type: bool
           assert: "true"
           deassert: "false"
+0x07:
+  sensorType: 0xC3
+  path: /xyz/openbmc_project/control/host0/reboot_attempts
+  sensorReadingType: 0x6F
+  serviceInterface: org.freedesktop.DBus.Properties
+  readingType: reading
+  interfaces:
+    xyz.openbmc_project.Control.Boot.RebootAttempts:
+      AttemptsLeft:
+          0xFF:
+            type: string
+            set: set
 0xa8:
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm1
   sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -36,6 +72,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm2
   sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -53,6 +92,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm3
   sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
