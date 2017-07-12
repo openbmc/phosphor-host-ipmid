@@ -456,27 +456,69 @@ ipmi_ret_t setSensorReading(void *request)
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    
-    for (const auto& interface : interfaceList)
+    auto& rtype = iter->second.valueReadingType;
+    auto  byteOffset = iter->second.byteOffset;
+
+    uint8_t setVal = 0;
+
+    //Get the event data to setVal for using with
+    //event data or reading data.
+    if (rtype.compare ( "reading" ) == 0 )
     {
-        for (const auto& property : interface.second)
+        if ( byteOffset == 0x1 )
+        {
+            setVal = cmdData->eventData1;
+        }
+        else if ( byteOffset == 0x2 )
+        {
+            setVal = cmdData->eventData2;
+        }
+        else if ( byteOffset == 0x03 )
+        {
+            setVal = cmdData->eventData3;
+        }
+    }
+
+    //for each interface in the list
+    for ( const auto& interface : interfaceList )
+    {
+        for ( const auto& property : interface.second )
         {
             ipmi::sensor::PropertyMap props;
             bool valid = false;
-            for (const auto& value : property.second)
+
+            for ( const auto& value : property.second )
             {
-                if (assertionSet.test(value.first))
+                //for assertion type check whether bit is set.
+                if ( rtype.compare("assertion") == 0 )
                 {
-                    props.emplace(property.first, value.second.assert);
-                    valid = true;
+                    if ( assertionSet.test(value.first) )
+                    {
+                        props.emplace(property.first, value.second.assert);
+                        valid = true;
+                    }
+                    else if (deassertionSet.test(value.first))
+                    {
+                        props.emplace(property.first, value.second.deassert);
+                        valid = true;
+                    }
                 }
-                else if (deassertionSet.test(value.first))
+                else if ( rtype.compare("reading") == 0 )
                 {
-                    props.emplace(property.first, value.second.deassert);
-                    valid = true;
+                    //if offset is FF then it is reading type
+                    if ( 0xFF == value.first )
+                    {
+                        props.emplace(property.first, cmdData->reading);
+                    }
+                    // for event type if the value at offset match with
+                    // key then get the mapped value.
+                    else if ( setVal == value.first )
+                    {
+                        props.emplace(property.first, value.second.assert);
+                    }
                 }
             }
-            if (valid)
+            if ( valid )
             {
                 interfaces.emplace(interface.first, std::move(props));
             }
@@ -502,18 +544,17 @@ ipmi_ret_t setSensorReading(void *request)
                                       path.c_str(),
                                       intf.c_str(),
                                       command.c_str());
-    if( command.compare( "Notify" ) == 0 )
+    if ( command.compare( "Notify" ) == 0 )
     {
         objects.emplace(iter->second.sensorPath, std::move(interfaces));
         updMsg.append(std::move(objects));
     }
     else
     {
-
-        for( const auto& interface: interfaces )
+        for ( const auto& interface: interfaces )
         {
             updMsg.append(interface.first);
-            for(const auto& val: interface.second)
+            for ( const auto& val: interface.second )
             {
                 updMsg.append(val.first);
                 updMsg.append(val.second);
@@ -530,7 +571,7 @@ ipmi_ret_t setSensorReading(void *request)
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
     }
-    catch (const std::runtime_error& e)
+    catch ( const std::runtime_error& e )
     {
         log<level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
