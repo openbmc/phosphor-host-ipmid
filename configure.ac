@@ -133,11 +133,17 @@ AS_IF([test "x$CONTROL_HOST_BUSNAME" == "x"],
       [CONTROL_HOST_BUSNAME="xyz.openbmc_project.Control.Host"])
 AC_DEFINE_UNQUOTED([CONTROL_HOST_BUSNAME], ["$CONTROL_HOST_BUSNAME"], [The Control Host Dbus busname to own])
 
-# Service dbus root
-AC_ARG_VAR(CONTROL_HOST_OBJPATH, [The Control Host Dbus root])
-AS_IF([test "x$CONTROL_HOST_OBJPATH" == "x"],
-      [CONTROL_HOST_OBJPATH="/xyz/openbmc_project/control/host"])
-AC_DEFINE_UNQUOTED([CONTROL_HOST_OBJPATH], ["$CONTROL_HOST_OBJPATH"], [The Control Host Dbus root])
+# Host object name in the D-Bus
+AC_ARG_VAR(HOST_NAME, [The Host name in the object path])
+AS_IF([test "x$HOST_NAME" == "x"],
+      [HOST_NAME="host"])
+AC_DEFINE_UNQUOTED([HOST_NAME], ["$HOST_NAME"], [The Host name in the object path])
+
+# Service dbus object manager
+AC_ARG_VAR(CONTROL_HOST_OBJ_MGR, [The Control Host D-Bus Object Manager])
+AS_IF([test "x$CONTROL_HOST_OBJ_MGR" == "x"],
+      [CONTROL_HOST_OBJ_MGR="/xyz/openbmc_project/control"])
+AC_DEFINE_UNQUOTED([CONTROL_HOST_OBJ_MGR], ["$CONTROL_HOST_OBJ_MGR"], [The Control Host D-Bus Object Manager])
 
 # Create configured output
 AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile softoff/test/Makefile])

@@ -29,8 +29,8 @@ using namespace sdbusplus::xyz::openbmc_project::Control::server;
 
 void SoftPowerOff::sendHostShutDownCmd()
 {
-    std::string ctrlHostPath{CONTROL_HOST_OBJPATH};
-    ctrlHostPath += "0";
+    auto ctrlHostPath = std::string{CONTROL_HOST_OBJ_MGR} + '/' +
+                        HOST_NAME + '0';
     auto host = ::ipmi::getService(this->bus,
                                    CONTROL_HOST_BUSNAME,
                                    ctrlHostPath.c_str());

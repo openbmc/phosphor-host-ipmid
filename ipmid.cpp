@@ -25,6 +25,8 @@
 #include "sensorhandler.h"
 #include "ipmid.hpp"
 #include "settings.hpp"
+#include <host-cmd-manager.hpp>
+#include <ipmid-host-cmd.hpp>
 
 using namespace phosphor::logging;
 namespace sdbusRule = sdbusplus::bus::match::rules;
@@ -32,6 +34,17 @@ namespace sdbusRule = sdbusplus::bus::match::rules;
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
 sd_event *events = nullptr;
+
+// Need this to use new sdbusplus compatible interfaces
+sdbusPtr sdbusp;
+
+// Global Host Bound Command manager
+using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
+cmdManagerPtr cmdManager;
+
+// Command and handler tuple. Used when clients ask the command to be put
+// into host message queue
+using CommandHandler = phosphor::host::command::CommandHandler;
 
 // Initialise restricted mode to true
 bool restricted_mode = true;
@@ -238,7 +251,9 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     dest = sd_bus_message_get_sender(req);
     path = sd_bus_message_get_path(req);
 
-    r = sd_bus_message_new_method_call(bus,&m,dest,path,DBUS_INTF,"sendMessage");
+    r = sd_bus_message_new_method_call(bus,&m,dest,path,
+                                       DBUS_INTF,
+                                       "sendMessage");
     if (r < 0) {
         fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));
         return -1;
@@ -486,6 +501,19 @@ sd_bus_slot *ipmid_get_sd_bus_slot(void) {
     return ipmid_slot;
 }
 
+// Calls host command manager to do the right thing for the command
+void ipmid_send_cmd_to_host(CommandHandler&& cmd) {
+     return cmdManager->execute(std::move(cmd));
+}
+
+cmdManagerPtr& ipmid_get_host_cmd_manager() {
+     return cmdManager;
+}
+
+sdbusPtr& ipmid_get_sdbus_plus_handler() {
+     return sdbusp;
+}
+
 int main(int argc, char *argv[])
 {
     int r;
@@ -536,6 +564,11 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
+    // Now create the Host Bound Command manager. Need sdbusplus
+    // to use the generated bindings
+    sdbusp = std::make_unique<sdbusplus::bus::bus>(bus);
+    cmdManager = std::make_unique<phosphor::host::command::Manager>(
+                            *sdbusp, events);
 
     // Register all the handlers that provider implementation to IPMI commands.
     ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
