@@ -1,12 +1,35 @@
+#sample yaml with documentation
+#Sensor Number
 0xa6:
+  #Sensor Type
   sensorType: 0x0C
+  #There are two types of updates one with Set method and other with
+  #Notify method for inventory updates. The path indicates Inventory path for
+  #the Notify method and Dbus object path for Set method.
   path: /system/chassis/motherboard/dimm0
+  #event reading type
   sensorReadingType: 0x6F
+  #Dbus service interface to make a bus call to update or request value of a
+  #property
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  #command data has three fields, sensor reading value, assertion and
+  #deassertion bits and event data, this indicates which data field should
+  #be used. Possible value to be updated.
+  readingType: assertion
+  #List of dbus interfaces associated with the interested properties.
   interfaces:
+    #Dbus interface implementing the interested property.
     xyz.openbmc_project.State.Decorator.OperationalStatus:
+      #DBus property
       Functional:
+        #Offset, for assertion it should be a bit mask to indicate which bit
+        #indicates the property is true or false, in event or reading types
+        #the value will get mapped to a Dbus enum, 0xFF need to give if the
+        #reading or event value need to be updated as it is.
         0x04:
+          #type of the property
           type: bool
+          #mapping from event offset bit in the command to the property value.
           deassert: "true"
           assert: "false"
     xyz.openbmc_project.Inventory.Item:
@@ -15,10 +38,27 @@
           type: bool
           assert: "true"
           deassert: "false"
+0x07:
+  sensorType: 0xC3
+  path: /xyz/openbmc_project/control/host0
+  sensorReadingType: 0x6F
+  serviceInterface: org.freedesktop.DBus.Properties
+  readingType: reading
+  interfaces:
+    xyz.openbmc_project.Control.Boot.RebootAttempts:
+      AttemptsLeft:
+          #A 0xFF indicates the value need to be send to dbus
+          0xFF:
+            type: uint32_t
+            #value is a place holder for set which comes from input
+            set: value
 0xa8:
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm1
   sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -36,6 +76,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm2
   sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -53,6 +96,9 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm3
   sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
