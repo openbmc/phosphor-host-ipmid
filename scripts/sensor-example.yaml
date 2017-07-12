@@ -11,6 +11,12 @@
   sensorReadingType: 0x6F
   #Dbus interface to make a bus call
   updateInterface: xyz.openbmc_project.Inventory.Manager
+  #command data has three fields, sensor reading value, assertion and
+  #deassertion bits and event data, this indicates which data field should
+  #be used. possible values assertion, reading or event
+  readingType: assertion
+  #This indicates which byte in event data should be taken.
+  byteOffset: 0x00
   #List of dbus interfaces associated with the interested properties.
   interfaces:
     #Dbus interface implementing the interested property.
@@ -30,11 +36,25 @@
           type: bool
           assert: "true"
           deassert: "false"
+0x07:
+  sensorType: 0xC3
+  path: /xyz/openbmc_project/control/host0/reboot_attempts
+  sensorReadingType: 0x6F
+  updateInterface: org.freedesktop.DBus.Properties
+  readingType: reading
+  interfaces:
+    xyz.openbmc_project.Control.Boot.RebootAttempts:
+      AttemptsLeft:
+          0xFF:
+            type: string
+            set: set
 0xa8:
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm1
   sensorReadingType: 0x6F
   updateInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -53,6 +73,8 @@
   path: /system/chassis/motherboard/dimm2
   sensorReadingType: 0x6F
   updateInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -71,6 +93,8 @@
   path: /system/chassis/motherboard/dimm3
   sensorReadingType: 0x6F
   updateInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
