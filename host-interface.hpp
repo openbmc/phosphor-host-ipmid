@@ -1,17 +1,14 @@
 #pragma once
 
-#include <queue>
 #include <sdbusplus/bus.hpp>
-#include <phosphor-logging/elog.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
-#include <timer.hpp>
-
+#include <host-cmd-manager.hpp>
 namespace phosphor
 {
 namespace host
 {
-
-using namespace phosphor::logging;
+namespace command
+{
 
 /** @class Host
  *  @brief OpenBMC control host interface implementation.
@@ -24,56 +21,58 @@ class Host : public sdbusplus::server::object::object<
     public:
         /** @brief Constructs Host Control Interface
          *
-         * @param[in] bus       - The Dbus bus object
-         * @param[in] objPath   - The Dbus object path
-         * @param[in] events    - The sd_event pointer
+         *  @param[in] bus     - The Dbus bus object
+         *  @param[in] objPath - The Dbus object path
          */
         Host(sdbusplus::bus::bus& bus,
-             const char* objPath,
-             sd_event* events) :
+             const char* objPath) :
              sdbusplus::server::object::object<
                 sdbusplus::xyz::openbmc_project::Control::server::Host>(
                         bus, objPath),
-             bus(bus),
-             timer(events,
-                   std::bind(&Host::hostTimeout, this))
-        {}
+             bus(bus)
+        {
+            // Nothing to do
+        }
 
         /** @brief Send input command to host
+         *         Note that the command will be queued in a FIFO if
+         *         other commands to the host have yet to be run
          *
-         * Note that the command will be queued in a FIFO if other commands
-         * to the host have yet to be run
-         *
-         * @param[in] command       - Input command to execute
+         *  @param[in] command - Input command to execute
          */
         void execute(Command command) override;
 
-        /** @brief Return the next entry in the queue
-         *
-         *  Also signal that the command is complete since the interface
-         *  contract is that we emit this signal once the message has been
-         *  passed to the host (which is required when calling this interface)
-         *
-         */
-        Command getNextCommand();
-
     private:
-
-        /** @brief Check if anything in queue and alert host if so */
-        void checkQueue();
-
-        /** @brief Call back interface on message timeouts to host */
-        void hostTimeout();
-
-        /** @brief Persistent sdbusplus DBus bus connection. */
+        /** @brief sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& bus;
 
-        /** @brief Queue to store the requested commands */
-        std::queue<Command> workQueue{};
+        /** @brief Map of IPMI OEM command TO it's equivalent
+         *         interface command. This is needed to send
+         *         implementation specific Command execution
+         *         status message. Could be Success or Failure
+         */
+        static const std::map<uint8_t, Command> intfCommand;
 
-        /** @brief Timer for commands to host */
-        phosphor::ipmi::Timer timer;
+        /** @brief Map of Interface command TO its corresponding
+         *         IPMI OEM command. This is needed when pushing
+         *         IPMI commands to command manager's queue. The
+         *         same pair will be returned when IPMI asks us
+         *         why a SMS_ATN was sent
+         */
+        static const std::map<Command, IpmiCmdData> ipmiCommand;
+
+        /** @brief Callback function to be invoked by command manager
+         *         conveying the status of the last Host bound command.
+         *         Depending on the status,  a CommandComplete or
+         *         CommandFailure signals would be sent
+         *
+         *  @param[in] cmd    - IPMI command and data sent to Host
+         *  @param[in] status - Success or Failure
+         *
+         */
+        void commandStatusHandler(IpmiCmdData cmd, bool status);
 };
 
+} // namespace command
 } // namespace host
 } // namespace phosphor

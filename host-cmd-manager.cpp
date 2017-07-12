@@ -1,9 +1,9 @@
 #include <chrono>
 #include <phosphor-logging/log.hpp>
+#include <systemintfcmds.h>
 #include <utils.hpp>
 #include <config.h>
 #include <host-cmd-manager.hpp>
-
 namespace phosphor
 {
 namespace host
@@ -28,7 +28,15 @@ IpmiCmdData Manager::getNextCommand()
                 entry("ERROR=%s", strerror(-r)));
     }
 
-    // TODO: Queue being empty is handled in a followup commit
+    if(this->workQueue.empty())
+    {
+        // Just return a heartbeat in this case.  A spurious SMS_ATN was
+        // asserted for the host (probably from a previous boot).
+        log<level::INFO>("Control Host work queue is empty!");
+
+        // FIXME !. Somehow can make it clean
+        return std::make_pair(CMD_HEARTBEAT, 0x00);
+    }
 
     // Pop the processed entry off the queue
     auto command = this->workQueue.front();
@@ -84,6 +92,7 @@ void Manager::checkQueueAndAlertHost()
         // Start the timer for this transaction
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
                         std::chrono::seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
+
         auto r = timer.startTimer(time);
         if (r < 0)
         {
@@ -111,6 +120,7 @@ void Manager::execute(CommandHandler command)
 {
     log<level::INFO>("Pushing cmd on to queue",
             entry("COMMAND=%d", std::get<0>(command).first));
+
     this->workQueue.emplace(command);
 
     // Alert host if this is only command in queue otherwise host will
