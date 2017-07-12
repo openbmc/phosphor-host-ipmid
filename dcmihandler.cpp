@@ -70,11 +70,92 @@ std::string readAssetTag()
     return sdbusplus::message::variant_ns::get<std::string>(assetTag);
 }
 
+ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const dcmi::GetAssetTagRequest*>
+                   (request);
+    std::vector<uint8_t> outPayload(sizeof(dcmi::GetAssetTagResponse));
+    auto responseData = reinterpret_cast<dcmi::GetAssetTagResponse*>
+            (outPayload.data());
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    // Verify offset to read and number of bytes to read are not exceeding the
+    // range.
+    if ((requestData->offset > dcmi::tagMaxOffset) ||
+        (requestData->bytes > dcmi::tagMaxBytesRead) ||
+        ((requestData->offset + requestData->bytes) > dcmi::tagMaxOffset + 1))
+    {
+        *data_len = 0;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    std::string assetTag;
+
+    try
+    {
+        assetTag = readAssetTag();
+    }
+    catch (InternalFailure& e)
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+    }
+
+    // If the asset tag is longer than 63 bytes, restrict it to 63 bytes to suit
+    // Get Asset Tag command.
+    assetTag.resize(dcmi::tagMaxOffset + 1);
+
+    responseData->groupID = dcmi::groupExtId;
+
+    // Return if the asset tag is not populated.
+    if (!assetTag.size())
+    {
+        responseData->tagLength = 0;
+        memcpy(response, outPayload.data(), outPayload.size());
+        *data_len = outPayload.size();
+        return IPMI_CC_OK;
+    }
+
+    // If the requested offset is beyond the asset tag size.
+    if (requestData->offset >= assetTag.size())
+    {
+        *data_len = 0;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    auto returnData = assetTag.substr(requestData->offset, requestData->bytes);
+
+    responseData->tagLength = assetTag.size();
+
+    memcpy(response, outPayload.data(), outPayload.size());
+    memcpy(static_cast<uint8_t*>(response) + outPayload.size(),
+           returnData.data(), returnData.size());
+    *data_len = outPayload.size() + returnData.size();
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER);
     ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER, NULL, ipmi_dcmi_get_power_limit,
+                           PRIVILEGE_USER);
+
+    // <Get Asset Tag>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_ASSET_TAG);
+    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_ASSET_TAG, NULL, getAssetTag,
                            PRIVILEGE_USER);
     return;
 }
