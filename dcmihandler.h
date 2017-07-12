@@ -9,4 +9,15 @@ enum ipmi_netfn_sen_cmds
     
 };
 
+namespace dcmi
+{
+
+static constexpr auto assetTagPath = "/xyz/openbmc_project/inventory/system";
+static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
+static constexpr auto assetTagIntf =
+        "xyz.openbmc_project.Inventory.Decorator.AssetTag";
+static constexpr auto assetTagProp = "AssetTag";
+
+} // namespace dcmi
+
 #endif

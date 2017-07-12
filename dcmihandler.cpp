@@ -1,8 +1,15 @@
 #include "dcmihandler.h"
 #include "host-ipmid/ipmid-api.h"
+#include <phosphor-logging/elog-errors.hpp>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include "utils.hpp"
+#include "xyz/openbmc_project/Common/error.hpp"
+
+using namespace phosphor::logging;
+using InternalFailure =
+        sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 void register_netfn_dcmi_functions() __attribute__((constructor));
 
@@ -30,6 +37,38 @@ ipmi_ret_t ipmi_dcmi_get_power_limit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+/** @brief Read the asset tag of the server
+ *
+ *  @return On success return the asset tag and throw exception in case of
+ *          error.
+ */
+std::string readAssetTag()
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    auto service = ipmi::getService(bus,
+                                    dcmi::assetTagIntf,
+                                    dcmi::assetTagPath);
+
+    auto method = bus.new_method_call(service.c_str(),
+                                      dcmi::assetTagPath,
+                                      dcmi::propIntf,
+                                      "Get");
+    method.append(dcmi::assetTagIntf);
+    method.append(dcmi::assetTagProp);
+
+    auto reply = bus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in reading asset tag");
+        elog<InternalFailure>();
+    }
+
+    sdbusplus::message::variant<std::string> assetTag;
+    reply.read(assetTag);
+
+    return sdbusplus::message::variant_ns::get<std::string>(assetTag);
+}
 
 void register_netfn_dcmi_functions()
 {
