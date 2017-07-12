@@ -33,11 +33,18 @@ using InstancePath = std::string;
 using Type = uint8_t;
 using ReadingType = uint8_t;
 
+using UpdateInterface = std::string;
+using UpdatePath = std::string;
+using UpdateCommand = std::string;
+
 struct Info
 {
    Type sensorType;
    InstancePath sensorPath;
    ReadingType sensorReadingType;
+   UpdatePath  updatePath;
+   UpdateInterface updateInterface;
+   UpdateCommand updateCommand;
    DbusInterfaceMap sensorInterfaces;
 };
 
