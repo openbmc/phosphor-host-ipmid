@@ -13,7 +13,7 @@ namespace sensor
 {
 
 using Offset = uint8_t;
-using Value = sdbusplus::message::variant<bool, int64_t, std::string>;
+using Value = sdbusplus::message::variant<bool, int64_t, uint8_t, std::string>;
 
 struct Values
 {
@@ -39,6 +39,8 @@ using ScaledOffset = int64_t;
 
 using UpdateInterface = std::string;
 using UpdatePath = std::string;
+using ValueReadingType = std::string;
+using ByteOffset = uint8_t;
 
 struct Info
 {
@@ -51,6 +53,8 @@ struct Info
    ScaledOffset scaledOffset;
    UpdatePath  updatePath;
    UpdateInterface updateInterface;
+   ValueReadingType valueReadingType;
+   ByteOffset byteOffset;
    DbusInterfaceMap sensorInterfaces;
 };
 
