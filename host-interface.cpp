@@ -1,122 +1,71 @@
-#include <chrono>
-#include <phosphor-logging/log.hpp>
+#include <functional>
+#include <systemintfcmds.h>
+#include <host-ipmid/ipmid-host-cmd.hpp>
 #include <utils.hpp>
+#include <phosphor-logging/log.hpp>
 #include <config.h>
-#include "host-interface.hpp"
-
+#include <host-interface.hpp>
 namespace phosphor
 {
 namespace host
 {
-
-constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
-constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
-constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
-
-using namespace phosphor::logging;
-
-// When you see base:: you know we're referencing our base class
-namespace base = sdbusplus::xyz::openbmc_project::Control::server;
-
-base::Host::Command Host::getNextCommand()
+namespace command
 {
-    // Stop the timer
-    auto r = timer.setTimer(SD_EVENT_OFF);
-    if (r < 0)
+
+// When you see Base:: you know we're referencing our base class
+namespace Base = sdbusplus::xyz::openbmc_project::Control::server;
+
+// Maps IPMI command to it's counterpart in interface
+const std::map<uint8_t, Host::Command> Host::intfCommand = {
     {
-        log<level::ERR>("Failure to STOP the timer",
-                entry("ERROR=%s", strerror(-r)));
-    }
-
-    if(this->workQueue.empty())
+        CMD_HEARTBEAT,
+            Base::Host::Command::Heartbeat
+    },
     {
-        // Just return a heartbeat in this case.  A spurious SMS_ATN was
-        // asserted for the host (probably from a previous boot).
-        log<level::INFO>("Control Host work queue is empty!");
-        return (Command::Heartbeat);
+        CMD_POWER,
+            Base::Host::Command::SoftOff
     }
+};
 
-    // Pop the processed entry off the queue
-    Command command = this->workQueue.front();
-    this->workQueue.pop();
+// Maps Interface command to it's counterpart per IPMI
+const std::map<Host::Command, IpmiCmdData> Host::ipmiCommand = {
+    {
+        Base::Host::Command::Heartbeat,
+            std::make_pair(CMD_HEARTBEAT, 0x00)
+    },
+    {
+        Base::Host::Command::SoftOff,
+            std::make_pair(CMD_POWER, SOFT_OFF)
+    }
+};
 
-    // Issue command complete signal
-    this->commandComplete(command, Result::Success);
-
-    // Check for another entry in the queue and kick it off
-    this->checkQueue();
-    return command;
-}
-
-void Host::hostTimeout()
+// Called at user request
+void Host::execute(Base::Host::Command command)
 {
-    log<level::ERR>("Host control timeout hit!");
-    // Dequeue all entries and send fail signal
-    while(!this->workQueue.empty())
-    {
-        auto command = this->workQueue.front();
-        this->workQueue.pop();
-        this->commandComplete(command,Result::Failure);
-    }
-}
+    using namespace phosphor::logging;
 
-void Host::checkQueue()
-{
-    if (this->workQueue.size() >= 1)
-    {
-        log<level::INFO>("Asserting SMS Attention");
-
-        std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
-        std::string IPMI_INTERFACE("org.openbmc.HostIpmi");
-
-        auto host = ::ipmi::getService(this->bus,IPMI_INTERFACE,IPMI_PATH);
-
-        // Start the timer for this transaction
-        auto time = std::chrono::duration_cast<std::chrono::microseconds>(
-                        std::chrono::seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
-        auto r = timer.startTimer(time);
-        if (r < 0)
-        {
-            log<level::ERR>("Error starting timer for control host");
-            return;
-        }
-
-        auto method = this->bus.new_method_call(host.c_str(),
-                                                IPMI_PATH.c_str(),
-                                                IPMI_INTERFACE.c_str(),
-                                                "setAttention");
-        auto reply = this->bus.call(method);
-
-        if (reply.is_method_error())
-        {
-            log<level::ERR>("Error in setting SMS attention");
-            throw std::runtime_error("ERROR in call to setAttention");
-        }
-        log<level::INFO>("SMS Attention asserted");
-    }
-}
-
-void Host::execute(base::Host::Command command)
-{
     log<level::INFO>("Pushing cmd on to queue",
             entry("CONTROL_HOST_CMD=%s",
                   convertForMessage(command)));
 
-    this->workQueue.push(command);
+    auto cmd = std::make_tuple(ipmiCommand.at(command),
+                        std::bind(&Host::commandStatusHandler,
+                            this, std::placeholders::_1,
+                                std::placeholders::_2));
 
-    // Alert host if this is only command in queue otherwise host will
-    // be notified of next message after processing the current one
-    if (this->workQueue.size() == 1)
-    {
-        this->checkQueue();
-    }
-    else
-    {
-        log<level::INFO>("Command in process, no attention");
-    }
-
-    return;
+    return ipmid_get_host_cmd_manager()->execute(cmd);
 }
 
+// Called into by Command Manager
+void Host::commandStatusHandler(IpmiCmdData cmd, bool status)
+{
+    // Need to convert <cmd> to the equivalent one mentioned in spec
+    auto value = status ? Result::Success : Result::Failure;
+
+    // Fire a signal
+    this->commandComplete(intfCommand.at(std::get<0>(cmd)), value);
+}
+
+} // namespace command
 } // namespace host
 } // namepsace phosphor
