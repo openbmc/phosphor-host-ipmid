@@ -74,18 +74,18 @@ libsysintfcmdsdir = ${libdir}/ipmid-providers
 libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
 libsysintfcmds_la_SOURCES = \
 	systemintfcmds.cpp \
-	host-interface.cpp \
-	utils.cpp \
-	timer.cpp
+	host-interface.cpp
 libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) \
                             $(libmapper_LIBS) \
                             $(PHOSPHOR_DBUS_INTERFACES_LIBS) \
                             $(PHOSPHOR_LOGGING_LIBS) \
+                            $(SDBUSPLUS_LIBS) \
                             -version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
                              $(libmapper_CFLAGS) \
                              $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-                             $(PHOSPHOR_LOGGING_CFLAGS)
+                             $(PHOSPHOR_LOGGING_CFLAGS) \
+                             $(SDBUSPLUS_CFLAGS)
 
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h
