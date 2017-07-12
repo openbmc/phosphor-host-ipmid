@@ -2,6 +2,8 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm0
   sensorReadingType: 0x6F
+  updateInterface: xyz.openbmc_project.Inventory.Manager
+  updateCommand: Notify
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -19,6 +21,8 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm1
   sensorReadingType: 0x6F
+  updateInterface: xyz.openbmc_project.Inventory.Manager
+  updateCommand: Notify
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -36,6 +40,8 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm2
   sensorReadingType: 0x6F
+  updateInterface: xyz.openbmc_project.Inventory.Manager
+  updateCommand: Notify
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -53,6 +59,8 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm3
   sensorReadingType: 0x6F
+  updateInterface: xyz.openbmc_project.Inventory.Manager
+  updateCommand: Notify
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:

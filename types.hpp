@@ -7,6 +7,25 @@
 
 #include <sdbusplus/server.hpp>
 
+/**
+ * @struct SetSensorReadingReq
+ *
+ * IPMI Request data for Set Sensor Reading and Event Status Command
+ */
+struct SetSensorReadingReq
+{
+    uint8_t number;
+    uint8_t operation;
+    uint8_t reading;
+    uint8_t assertOffset0_7;
+    uint8_t assertOffset8_14;
+    uint8_t deassertOffset0_7;
+    uint8_t deassertOffset8_14;
+    uint8_t eventData1;
+    uint8_t eventData2;
+    uint8_t eventData3;
+} __attribute__((packed));
+
 namespace ipmi
 {
 namespace sensor
@@ -37,6 +56,8 @@ using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 
+using UpdateInterface = std::string;
+
 struct Info
 {
    Type sensorType;
@@ -46,6 +67,8 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   UpdateInterface updateInterface;
+   std::function<uint8_t(SetSensorReadingReq*,Info)> updateFunc;
    DbusInterfaceMap sensorInterfaces;
 };
 
