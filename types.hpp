@@ -6,7 +6,28 @@
 #include <string>
 
 #include <sdbusplus/server.hpp>
+#include "sensorhandler.h"
 
+/**
+ * @struct SetSensorReadingReq
+ *
+ * IPMI Request data for Set Sensor Reading and Event Status Command
+ */
+/*
+struct SetSensorReadingReq
+{
+    uint8_t number;
+    uint8_t operation;
+    uint8_t reading;
+    uint8_t assertOffset0_7;
+    uint8_t assertOffset8_14;
+    uint8_t deassertOffset0_7;
+    uint8_t deassertOffset8_14;
+    uint8_t eventData1;
+    uint8_t eventData2;
+    uint8_t eventData3;
+} __attribute__((packed));
+*/
 namespace ipmi
 {
 
@@ -21,6 +42,19 @@ using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
 namespace sensor
 {
+
+/**
+ * @enum ValueReadingType
+ *
+ * IPMI data types in request
+ */
+enum ValueReadingType{
+   IPMI_TYPE_ASSERTION,
+   IPMI_TYPE_READING,
+   IPMI_TYPE_EVENT1,
+   IPMI_TYPE_EVENT2,
+   IPMI_TYPE_EVENT3,
+};
 
 using Offset = uint8_t;
 using Value = ipmi::Value;
@@ -47,6 +81,8 @@ using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 
+using UpdateInterface = std::string;
+
 struct Info
 {
    Type sensorType;
@@ -56,6 +92,9 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   ValueReadingType valueReadingType;
+   std::function<uint8_t(SetSensorReadingReq*,Info)> updateFunc;
+   std::function<uint8_t(SetSensorReadingReq*)> getSensorValue;
    DbusInterfaceMap sensorInterfaces;
 };
 
