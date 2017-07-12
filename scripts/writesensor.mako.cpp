@@ -19,8 +19,10 @@ extern const IdInfoMap sensors = {
        updatePath = sensor["updatePath"]
        updateInterface = sensor["updateInterface"]
        updateCommand = sensor["updateCommand"]
+       valueReadingType = sensor["readingType"]
+       byteOffset = sensor["byteOffset"]
 %>
-        ${sensorType},"${path}",${readingType},"${updatePath}","${updateInterface}","${updateCommand}",{
+        ${sensorType},"${path}",${readingType},"${updatePath}","${updateInterface}","${updateCommand}","${valueReadingType}",${byteOffset},{
     % for interface,properties in interfaces.iteritems():
             {"${interface}",{
             % for dbus_property,property_value in properties.iteritems():
