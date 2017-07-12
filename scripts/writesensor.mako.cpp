@@ -17,8 +17,9 @@ constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
 constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
 
 using namespace phosphor::logging;
-using DbusInfo = std::pair<std::string,std::string>;
-DbusInfo getDbusInfo(sdbusplus::bus::bus& bus,std::string interface)
+using DbusInfo = std::pair<std::string, std::string>;
+
+DbusInfo getDbusInfo(sdbusplus::bus::bus& bus, std::string interface)
 {
     auto depth = 0;
     auto mapperCall = bus.new_method_call(MAPPER_BUSNAME,
@@ -44,24 +45,56 @@ DbusInfo getDbusInfo(sdbusplus::bus::bus& bus,std::string interface)
         throw std::runtime_error("Invalid response from mapper");
     }
 
-    auto path = mapperResponse.begin()->first;
-    auto service = mapperResponse.begin()->second.begin()->first;
-    return std::make_pair(path,service);
+    return std::make_pair(mapperResponse.begin()->first,
+        mapperResponse.begin()->second.begin()->first);
 }
 
-uint8_t setPropertySensorReading(SetSensorReadingReq *cmdData,
-                                   Info sensorInfo)
+uint8_t getValue(uint8_t offset, SetSensorReadingReq *cmd)
 {
-    auto assertionStates =
+    if (offset == 0x0)
+    {
+        return 0;
+    }
+    if(offset == 0x1)
+    {
+        return cmd->eventData1;
+    }
+    if(offset == 0x2)
+    {
+        return cmd->eventData2;
+    }
+    if (offset == 0x3)
+    {
+        return cmd->eventData3;
+    }
+    if (offset == 0xFF)
+    {
+        return cmd->reading;
+    }
+    return 0;
+}
+using AssertionSet = std::pair<uint16_t, uint16_t>;
+
+AssertionSet getAssertionSet(SetSensorReadingReq *cmdData)
+{
+
+    uint16_t assertionStates =
             (static_cast<uint16_t>(cmdData->assertOffset8_14)) << 8 |
             cmdData->assertOffset0_7;
 
-    auto deassertionStates =
+    uint16_t deassertionStates =
             (static_cast<uint16_t>(cmdData->deassertOffset8_14)) << 8 |
-            cmdData->deassertOffset0_7;
+            cmdData->deassertOffset0_7; 
+    return std::make_pair(assertionStates,deassertionStates);
+}
+uint8_t setPropertySensorReading(SetSensorReadingReq *cmdData,
+                                 Info sensorInfo)
+{
+    std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
+    std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
 
-    std::bitset<16> assertionSet(assertionStates);
-    std::bitset<16> deassertionSet(deassertionStates);
+    uint8_t setVal = sensorInfo.getSensorValue(cmdData);
+    auto& rtype = sensorInfo.valueReadingType;
 
     auto& interfaceList = sensorInfo.sensorInterfaces;
     if (interfaceList.empty())
@@ -76,15 +109,15 @@ uint8_t setPropertySensorReading(SetSensorReadingReq *cmdData,
     std::string service;
 
     //for each interface in the list
-    for ( const auto& interface : interfaceList )
+    for (const auto& interface : interfaceList)
     {
         DbusInfo service;
 
         try
         {
-            service = getDbusInfo(bus,interface.first);
+            service = getDbusInfo(bus, interface.first);
         }
-        catch ( const std::runtime_error& e )
+        catch (const std::runtime_error& e)
         {
             log<level::ERR>(e.what());
             return IPMI_CC_UNSPECIFIED_ERROR;
@@ -98,18 +131,34 @@ uint8_t setPropertySensorReading(SetSensorReadingReq *cmdData,
 
         updMsg.append(interface.first);
 
-        for ( const auto& property : interface.second )
+        for (const auto& property : interface.second)
         {
             updMsg.append(property.first);
-            for ( const auto& value : property.second )
+            if (rtype == IPMI_TYPE_READING)
             {
-                if ( assertionSet.test(value.first) )
+                updMsg.append(setVal);
+                break;
+            }
+            for (const auto& value : property.second)
+            {
+                //for assertion type check whether bit is set.
+                if (rtype == IPMI_TYPE_ASSERTION)
                 {
-                    updMsg.append(value.second.assert);
+                    if (assertionSet.test(value.first))
+                    {
+                        updMsg.append(value.second.assert);
+                    }
+                    if (deassertionSet.test(value.first))
+                    {
+                        updMsg.append(value.second.deassert);
+                    }
                 }
-                else if (deassertionSet.test(value.first))
+                else if (rtype == IPMI_TYPE_EVENT)
                 {
-                    updMsg.append(value.second.deassert);
+                    if (setVal == value.first)
+                    {
+                        updMsg.append(value.second.assert);
+                    }
                 }
             }
         }
@@ -123,7 +172,7 @@ uint8_t setPropertySensorReading(SetSensorReadingReq *cmdData,
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
         }
-        catch ( const std::runtime_error& e )
+        catch (const std::runtime_error& e)
         {
             log<level::ERR>(e.what());
             return IPMI_CC_UNSPECIFIED_ERROR;
@@ -135,17 +184,8 @@ uint8_t setPropertySensorReading(SetSensorReadingReq *cmdData,
 uint8_t setInventorySensorReading(SetSensorReadingReq *cmdData,
                                      Info sensorInfo)
 {
-
-    auto assertionStates =
-            (static_cast<uint16_t>(cmdData->assertOffset8_14)) << 8 |
-            cmdData->assertOffset0_7;
-
-    auto deassertionStates =
-            (static_cast<uint16_t>(cmdData->deassertOffset8_14)) << 8 |
-            cmdData->deassertOffset0_7;
-
-    std::bitset<16> assertionSet(assertionStates);
-    std::bitset<16> deassertionSet(deassertionStates);
+    std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
+    std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
     auto& interfaceList = sensorInfo.sensorInterfaces;
     if (interfaceList.empty())
     {
@@ -227,6 +267,8 @@ extern const IdInfoMap sensors = {
        offset = sensor.get("offsetB", 0)
        exp = sensor.get("bExp", 0)
        updateInterface = sensor["updateInterface"]
+       valueReadingType = sensor["readingType"]
+       byteOffset = sensor["byteOffset"]
        if updateInterface == "org.freedesktop.DBus.Properties":
            updateFunc = "setPropertySensorReading"
        elif updateInterface == "xyz.openbmc_project.Inventory.Manager":
@@ -234,9 +276,21 @@ extern const IdInfoMap sensors = {
        else:
            assert "Un-supported interface"
        endif
+
+       if valueReadingType == "reading":
+           valueReadingType = "IPMI_TYPE_READING"
+       elif valueReadingType == "assertion":
+           valueReadingType = "IPMI_TYPE_ASSERTION"
+       else:
+           assert "Unknown reading type"
+       endif
+
+       getValFunc = "std::bind(getValue," + str(byteOffset) + ", std::placeholders::_1)"
+
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
-        ${offset * pow(10,exp)},"${updateInterface}",${updateFunc},{
+        ${offset * pow(10,exp)},"${updateInterface}",
+        ${valueReadingType},${updateFunc},${getValFunc},{
     % for interface,properties in interfaces.iteritems():
             {"${interface}",{
             % for dbus_property,property_value in properties.iteritems():
