@@ -11,6 +11,7 @@
 #include "sensorhandler.h"
 #include "types.hpp"
 #include "utils.hpp"
+#include "sensorhandlerex.hpp"
 
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;
@@ -410,17 +411,6 @@ ipmi_ret_t setSensorReading(void *request)
 {
     auto cmdData = static_cast<SetSensorReadingReq *>(request);
 
-    auto assertionStates =
-            (static_cast<uint16_t>(cmdData->assertOffset8_14)) << 8 |
-            cmdData->assertOffset0_7;
-
-    auto deassertionStates =
-            (static_cast<uint16_t>(cmdData->deassertOffset8_14)) << 8 |
-            cmdData->deassertOffset0_7;
-
-    std::bitset<16> assertionSet(assertionStates);
-    std::bitset<16> deassertionSet(deassertionStates);
-
     // Check if the Sensor Number is present
     auto iter = sensors.find(cmdData->number);
     if (iter == sensors.end())
@@ -428,116 +418,8 @@ ipmi_ret_t setSensorReading(void *request)
         return IPMI_CC_SENSOR_INVALID;
     }
 
-    auto& interfaceList = iter->second.sensorInterfaces;
-    if (interfaceList.empty())
-    {
-        log<level::ERR>("Interface List empty for the sensor",
-                entry("Sensor Number = %d", cmdData->number));
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    ipmi::sensor::ObjectMap objects;
-    ipmi::sensor::InterfaceMap interfaces;
-    auto& path = iter->second.updatePath;
-    auto& intf = iter->second.updateInterface;
-    std::string command;
-
-    if(intf.compare("xyz.openbmc_project.Inventory.Manager"))
-    {
-        command = "Notify";
-    }
-    else if(intf.compare("org.freedesktop.DBus.Properties"))
-    {
-        command = "Set";
-    }
-    else
-    {
-        log<level::ERR>("Unsupported interface");
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    for (const auto& interface : interfaceList)
-    {
-        for (const auto& property : interface.second)
-        {
-            ipmi::sensor::PropertyMap props;
-            bool valid = false;
-            for (const auto& value : property.second)
-            {
-                if (assertionSet.test(value.first))
-                {
-                    props.emplace(property.first, value.second.assert);
-                    valid = true;
-                }
-                else if (deassertionSet.test(value.first))
-                {
-                    props.emplace(property.first, value.second.deassert);
-                    valid = true;
-                }
-            }
-            if (valid)
-            {
-                interfaces.emplace(interface.first, std::move(props));
-            }
-        }
-    }
-
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    using namespace std::string_literals;
-    std::string service;
-
-    try
-    {
-        service = ipmi::getService(bus, intf, path);
-    }
-    catch ( const std::runtime_error& e )
-    {
-        log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    // Update the value to the respective service
-    auto updMsg = bus.new_method_call(service.c_str(),
-                                      path.c_str(),
-                                      intf.c_str(),
-                                      command.c_str());
-    //TODO add a mako template for update function
-    //in the next commit
-    if( command.compare( "Notify" ) == 0 )
-    {
-        objects.emplace(iter->second.sensorPath, std::move(interfaces));
-        updMsg.append(std::move(objects));
-    }
-    else
-    {
-
-        for( const auto& interface: interfaces )
-        {
-            updMsg.append(interface.first);
-            for(const auto& val: interface.second)
-            {
-                updMsg.append(val.first);
-                updMsg.append(val.second);
-            }
-        }
-    }
-
-    try
-    {
-        auto serviceResponseMsg = bus.call(updMsg);
-        if (serviceResponseMsg.is_method_error())
-        {
-            log<level::ERR>("Error in notify call");
-            return IPMI_CC_UNSPECIFIED_ERROR;
-        }
-    }
-    catch (const std::runtime_error& e)
-    {
-        log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    return IPMI_CC_OK;
+    return IPMI_CC_SENSOR_INVALID;
+    //return iter->second.updateFunc(cmdData,iter->second);
 }
 
 ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,

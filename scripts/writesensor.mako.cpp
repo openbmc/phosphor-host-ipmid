@@ -4,6 +4,7 @@
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
 
 #include "types.hpp"
+#include "sensorhandlerex.hpp"
 using namespace ipmi::sensor;
 
 extern const IdInfoMap sensors = {
@@ -21,9 +22,31 @@ extern const IdInfoMap sensors = {
        exp = sensor.get("bExp", 0)
        updatePath = sensor["updatePath"]
        updateInterface = sensor["updateInterface"]
+       valueReadingType = sensor["readingType"]
+       byteOffset = sensor["byteOffset"]
+
+       if updateInterface == "org.freedesktop.DBus.Properties":
+           updateFunc = "setPropertySensorReading"
+       elif updateInterface == "xyz.openbmc_project.Inventory.Manager":
+           updateFunc = "setInventorySensorReading"
+       else:
+           assert "Un-supported interface"
+       endif
+
+       if valueReadingType == "reading":
+           valueReadingType = "IPMI_TYPE_READING"
+       elif valueReadingType == "assertion":
+           valueReadingType = "IPMI_TYPE_ASSERTION"
+       else:
+           assert "Unknown reading type"
+       endif
+
+       getValFunc = "std::bind(ipmi::sensor::getValue," + str(byteOffset) + ", std::placeholders::_1)"
+
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
-        ${offset * pow(10,exp)},"${updatePath}","${updateInterface}",{
+        ${offset * pow(10,exp)},"${updatePath}","${updateInterface}",
+        ${valueReadingType},${updateFunc},${getValFunc},{
     % for interface,properties in interfaces.iteritems():
             {"${interface}",{
             % for dbus_property,property_value in properties.iteritems():
