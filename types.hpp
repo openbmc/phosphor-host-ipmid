@@ -6,6 +6,7 @@
 #include <string>
 
 #include <sdbusplus/server.hpp>
+#include "sensorhandler.h"
 
 namespace ipmi
 {
@@ -15,12 +16,26 @@ using DbusService = std::string;
 using DbusInterface = std::string;
 using DbusObjectInfo = std::pair<DbusObjectPath, DbusService>;
 using DbusProperty = std::string;
-using Value = sdbusplus::message::variant<bool, int64_t, uint8_t, std::string>;
+using Value = sdbusplus::message::variant<bool, int64_t, uint8_t,
+                            std::string, uint32_t>;
 using PropertyMap = std::map<DbusProperty, Value>;
 using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
 namespace sensor
 {
+
+/**
+ * @enum ValueReadingType
+ *
+ * IPMI data types in request
+ */
+enum ValueReadingType{
+   IPMI_TYPE_ASSERTION,
+   IPMI_TYPE_READING,
+   IPMI_TYPE_EVENT1,
+   IPMI_TYPE_EVENT2,
+   IPMI_TYPE_EVENT3,
+};
 
 using Offset = uint8_t;
 using Value = ipmi::Value;
@@ -47,6 +62,8 @@ using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 
+using UpdateInterface = std::string;
+
 struct Info
 {
    Type sensorType;
@@ -56,6 +73,7 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   std::function<uint8_t(SetSensorReadingReq*,Info)> updateFunc;
    DbusInterfaceMap sensorInterfaces;
 };
 
@@ -68,6 +86,8 @@ using InterfaceMap = std::map<DbusInterface, PropertyMap>;
 
 using Object = sdbusplus::message::object_path;
 using ObjectMap = std::map<Object, InterfaceMap>;
+
+using IPMIUpdateData = sdbusplus::message::message;
 
 struct SelData
 {
