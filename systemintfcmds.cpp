@@ -1,6 +1,8 @@
 #include "systemintfcmds.h"
 #include "host-ipmid/ipmid-api.h"
+#include "ipmid-host-cmd.hpp"
 #include "config.h"
+#include "host-cmd-manager.hpp"
 #include "host-interface.hpp"
 
 #include <stdio.h>
@@ -10,8 +12,9 @@ void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace sdbusplus::xyz::openbmc_project::Control::server;
 
-// Internal function to get next host command
-Host::Command getNextHostCmd();
+// For accessing Host command manager
+using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
+extern cmdManagerPtr& ipmid_get_host_cmd_manager();
 
 //-------------------------------------------------------------------
 // Called by Host post response from Get_Message_Flags
@@ -40,19 +43,11 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // per IPMI spec NetFuntion for OEM
     oem_sel.netfun  = 0x3A;
 
-    // Read from the queue to see what our response is here
-    Host::Command hCmd = getNextHostCmd();
-    switch (hCmd)
-    {
-    case Host::Command::SoftOff:
-        oem_sel.cmd     = CMD_POWER;
-        oem_sel.data[0] = SOFT_OFF;
-        break;
-    case Host::Command::Heartbeat:
-        oem_sel.cmd     = CMD_HEARTBEAT;
-        oem_sel.data[0] = 0x00;
-        break;
-    }
+    // Read from the Command Manager queue. What gets returned is a
+    // pair of <command, data> that can be directly used here
+    auto hostCmd    = ipmid_get_host_cmd_manager()->getNextCommand();
+    oem_sel.cmd     = hostCmd.first;
+    oem_sel.data[0] = hostCmd.second;
 
     // All '0xFF' since unused.
     memset(&oem_sel.data[1], 0xFF, 3);
@@ -105,8 +100,10 @@ ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 namespace {
 // Static storage to keep the object alive during process life
-std::unique_ptr<sdbusplus::bus::bus> sdbus __attribute__((init_priority(101)));
-std::unique_ptr<phosphor::host::Host> host __attribute__((init_priority(101)));
+std::unique_ptr<phosphor::host::command::Host> host
+                __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::server::manager::manager> objManager
+                __attribute__((init_priority(101)));
 }
 
 #include <unistd.h>
@@ -129,31 +126,18 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags,
                            SYSTEM_INTERFACE);
 
-    // Gets a hook onto SYSTEM bus used by host-ipmid
-    sd_bus *bus = ipmid_get_sd_bus_connection();
-
-    sdbus = std::make_unique<sdbusplus::bus::bus>(bus);
-
     // Create new xyz.openbmc_project.host object on the bus
-    auto objPathInst = std::string{CONTROL_HOST_OBJPATH} + '0';
+    auto objPath = std::string{CONTROL_HOST_OBJ_MGR} + '/' + HOST_NAME + '0';
 
     // Add sdbusplus ObjectManager.
-    sdbusplus::server::manager::manager objManager(*sdbus,
-                                                   objPathInst.c_str());
+    auto& sdbusPlusHandler = ipmid_get_sdbus_plus_handler();
+    objManager = std::make_unique<sdbusplus::server::manager::manager>(
+                        *sdbusPlusHandler,
+                         CONTROL_HOST_OBJ_MGR);
 
-    // Get the sd_events pointer
-    auto events = ipmid_get_sd_event_connection();
-
-    host = std::make_unique<phosphor::host::Host>(*sdbus,
-                                                  objPathInst.c_str(),
-                                                  events);
-
-    sdbus->request_name(CONTROL_HOST_BUSNAME);
+    host = std::make_unique<phosphor::host::command::Host>(
+                            *sdbusPlusHandler, objPath.c_str());
+    sdbusPlusHandler->request_name(CONTROL_HOST_BUSNAME);
 
     return;
-}
-
-Host::Command getNextHostCmd()
-{
-    return(host->getNextCommand());
 }
