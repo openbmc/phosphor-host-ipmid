@@ -18,12 +18,20 @@
 #include <algorithm>
 #include <iterator>
 #include <ipmiwhitelist.hpp>
+#include <host-cmd-manager.hpp>
+#include <host-ipmid/ipmid-host-cmd.hpp>
 
 using namespace phosphor::logging;
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
 sd_event *events = nullptr;
+
+// Need this to use new sdbusplus compatible interfaces
+sdbusPtr sdbusp;
+
+// Global Host Bound Command manager
+cmdManagerPtr cmdManager;
 
 // Initialise restricted mode to true
 bool restricted_mode = true;
@@ -221,7 +229,7 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     dest = sd_bus_message_get_sender(req);
     path = sd_bus_message_get_path(req);
 
-    r = sd_bus_message_new_method_call(bus,&m,dest,path,DBUS_INTF,"sendMessage");
+    r = sd_bus_message_new_method_call(bus,&m,dest,path,"org.openbmc.HostIpmi","sendMessage");
     if (r < 0) {
         fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));
         return -1;
@@ -483,6 +491,14 @@ sd_bus_slot *ipmid_get_sd_bus_slot(void) {
     return ipmid_slot;
 }
 
+cmdManagerPtr& ipmid_get_host_cmd_manager() {
+     return cmdManager;
+}
+
+sdbusPtr& ipmid_get_sdbus_plus_handler() {
+     return sdbusp;
+}
+
 int main(int argc, char *argv[])
 {
     int r;
@@ -533,6 +549,11 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
+    // Now create the Host Bound Command manager. Need sdbusplus
+    // to use the generated bindings
+    sdbusp = std::make_unique<sdbusplus::bus::bus>(bus);
+    cmdManager = std::make_unique<phosphor::host::command::Manager>(
+                            *sdbusp, events);
 
     // Register all the handlers that provider implementation to IPMI commands.
     ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
