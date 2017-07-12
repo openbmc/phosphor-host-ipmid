@@ -19,9 +19,11 @@ extern const IdInfoMap sensors = {
        multiplier = sensor.get("multiplierM", 1)
        offset = sensor.get("offsetB", 0)
        exp = sensor.get("bExp", 0)
+       updatePath = sensor["updatePath"]
+       updateInterface = sensor["updateInterface"]
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
-        ${offset * pow(10,exp)},{
+        ${offset * pow(10,exp)},"${updatePath}","${updateInterface}",{
     % for interface,properties in interfaces.iteritems():
             {"${interface}",{
             % for dbus_property,property_value in properties.iteritems():

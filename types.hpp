@@ -37,6 +37,9 @@ using OffsetB = uint16_t;
 using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 
+using UpdateInterface = std::string;
+using UpdatePath = std::string;
+
 struct Info
 {
    Type sensorType;
@@ -46,6 +49,8 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   UpdatePath  updatePath;
+   UpdateInterface updateInterface;
    DbusInterfaceMap sensorInterfaces;
 };
 
