@@ -146,6 +146,99 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const dcmi::SetAssetTagRequest*>
+                   (request);
+    std::vector<uint8_t> outPayload(sizeof(dcmi::SetAssetTagResponse));
+    auto responseData = reinterpret_cast<dcmi::SetAssetTagResponse*>
+            (outPayload.data());
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    // Verify offset to read and number of bytes to read are not exceeding the
+    // range.
+    if ((requestData->offset > dcmi::tagMaxOffset) ||
+        (requestData->bytes > dcmi::tagMaxBytesRead) ||
+        ((requestData->offset + requestData->bytes) > dcmi::tagMaxOffset + 1))
+    {
+        *data_len = 0;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    std::string assetTag;
+
+    try
+    {
+        assetTag = readAssetTag();
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    if (requestData->offset > assetTag.size())
+    {
+        *data_len = 0;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    assetTag.replace(requestData->offset,
+                     requestData->bytes,
+                     static_cast<const char*>(request) +
+                     sizeof(dcmi::SetAssetTagRequest),
+                     requestData->bytes);
+
+    // If there is data in the asset tag beyond, the offset + bytes written,
+    // clear the remaining data.
+    assetTag.resize(requestData->offset + requestData->bytes);
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    std::string service;
+
+    try
+    {
+        service = ipmi::getService(bus, dcmi::assetTagIntf, dcmi::assetTagPath);
+    }
+    catch (const std::runtime_error& e)
+    {
+        log<level::ERR>(e.what());
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    auto method = bus.new_method_call(service.c_str(),
+                                      dcmi::assetTagPath,
+                                      dcmi::propIntf,
+                                      "Set");
+
+    method.append(dcmi::assetTagIntf);
+    method.append(dcmi::assetTagProp);
+    method.append(sdbusplus::message::variant<std::string>(assetTag));
+
+    auto reply = bus.call(method);
+    if (reply.is_method_error())
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    responseData->groupID = dcmi::groupExtId;
+    responseData->tagLength = assetTag.size();
+    memcpy(response, outPayload.data(), outPayload.size());
+    *data_len = outPayload.size();
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -157,6 +250,11 @@ void register_netfn_dcmi_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_ASSET_TAG);
     ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_ASSET_TAG, NULL, getAssetTag,
                            PRIVILEGE_USER);
+
+    // <Set Asset Tag>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_ASSET_TAG);
+    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_ASSET_TAG, NULL, setAssetTag,
+                           PRIVILEGE_OPERATOR);
     return;
 }
 // 956379
