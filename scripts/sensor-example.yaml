@@ -1,12 +1,27 @@
+#sample yaml with documentation
+#Sensor Number
 0xa6:
+  #Sensor Type
   sensorType: 0x0C
+  #There are two types of updates one with Notify and other with Set
+  #for inventory updates, which uses Notify the path should be instance path
+  #for other interfaces it should be dbus object path
   path: /system/chassis/motherboard/dimm0
+  #event reading type
   sensorReadingType: 0x6F
+  #Dbus interface to make a bus call
+  updateInterface: xyz.openbmc_project.Inventory.Manager
+  #List of dbus interfaces associated with the interested properties.
   interfaces:
+    #Dbus interface implementing the interested property.
     xyz.openbmc_project.State.Decorator.OperationalStatus:
+      #DBus property
       Functional:
+        #Offset
         0x04:
+          #type of the property
           type: bool
+          #mapping from event offset bit in the command to the property value.
           deassert: "true"
           assert: "false"
     xyz.openbmc_project.Inventory.Item:
@@ -19,6 +34,7 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm1
   sensorReadingType: 0x6F
+  updateInterface: xyz.openbmc_project.Inventory.Manager
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -36,6 +52,7 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm2
   sensorReadingType: 0x6F
+  updateInterface: xyz.openbmc_project.Inventory.Manager
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -53,6 +70,7 @@
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm3
   sensorReadingType: 0x6F
+  updateInterface: xyz.openbmc_project.Inventory.Manager
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
