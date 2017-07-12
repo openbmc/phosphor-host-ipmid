@@ -6,7 +6,6 @@
 #include <utils.hpp>
 #include <config.h>
 #include <host-cmd-manager.hpp>
-
 namespace phosphor
 {
 namespace host
