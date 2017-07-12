@@ -41,6 +41,19 @@ using ObjectTree = std::map<DbusObjectPath,
 namespace sensor
 {
 
+/**
+ * @enum ValueReadingType
+ *
+ * IPMI data types in request
+ */
+enum ValueReadingType{
+   IPMI_TYPE_ASSERTION,
+   IPMI_TYPE_READING,
+   IPMI_TYPE_EVENT1,
+   IPMI_TYPE_EVENT2,
+   IPMI_TYPE_EVENT3,
+};
+
 using Offset = uint8_t;
 using Value = ipmi::Value;
 
@@ -78,7 +91,9 @@ struct Info
    Exponent exponentB;
    ScaledOffset scaledOffset;
    UpdateInterface updateInterface;
+   ValueReadingType valueReadingType;
    std::function<uint8_t(SetSensorReadingReq*,Info)> updateFunc;
+   std::function<uint8_t(SetSensorReadingReq*)> getSensorValue;
    DbusInterfaceMap sensorInterfaces;
 };
 
