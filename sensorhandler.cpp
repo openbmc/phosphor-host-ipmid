@@ -11,6 +11,7 @@
 #include "sensorhandler.h"
 #include "types.hpp"
 #include "utils.hpp"
+#include "sensorhandlerex.hpp"
 
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;
