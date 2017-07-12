@@ -11,6 +11,7 @@ enum ipmi_netfn_sen_cmds
     // Get capability bits
     IPMI_CMD_DCMI_GET_POWER = 0x03,
     IPMI_CMD_DCMI_GET_ASSET_TAG = 0x06,
+    IPMI_CMD_DCMI_SET_ASSET_TAG = 0x08,
 };
 
 namespace dcmi
@@ -53,6 +54,27 @@ struct GetAssetTagRequest
  *  DCMI payload for Get Asset Tag command response.
  */
 struct GetAssetTagResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t tagLength;          //!< Total asset tag length.
+} __attribute__((packed));
+
+/** @struct SetAssetTagRequest
+ *
+ *  DCMI payload for Set Asset Tag command request.
+ */
+struct SetAssetTagRequest
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t offset;             //!< Offset to write.
+    uint8_t bytes;              //!< Number of bytes to write.
+} __attribute__((packed));
+
+/** @struct SetAssetTagResponse
+ *
+ *  DCMI payload for Set Asset Tag command response.
+ */
+struct SetAssetTagResponse
 {
     uint8_t groupID;            //!< Group extension identification.
     uint8_t tagLength;          //!< Total asset tag length.
