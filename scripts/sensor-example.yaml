@@ -4,6 +4,8 @@
   sensorReadingType: 0x6F
   updateInterface: xyz.openbmc_project.Inventory.Manager
   updateCommand: Notify
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -23,6 +25,8 @@
   sensorReadingType: 0x6F
   updateInterface: xyz.openbmc_project.Inventory.Manager
   updateCommand: Notify
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -42,6 +46,8 @@
   sensorReadingType: 0x6F
   updateInterface: xyz.openbmc_project.Inventory.Manager
   updateCommand: Notify
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -61,6 +67,8 @@
   sensorReadingType: 0x6F
   updateInterface: xyz.openbmc_project.Inventory.Manager
   updateCommand: Notify
+  readingType: assertion
+  byteOffset: 0x00
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:

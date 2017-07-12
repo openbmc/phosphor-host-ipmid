@@ -49,6 +49,31 @@ DbusInfo getDbusInfo(sdbusplus::bus::bus& bus,std::string interface)
     return std::make_pair(path,service);
 }
 
+uint8_t getValue(uint8_t offset,SetSensorReadingReq *cmd)
+{
+    if (offset == 0x0)
+    {
+        return 0;
+    }
+    if(offset == 0x1)
+    {
+        return cmd->eventData1;
+    }
+    if(offset == 0x2)
+    {
+        return cmd->eventData2;
+    }
+    if (offset == 0x3)
+    {
+        return cmd->eventData3;
+    }
+    if (offset == 0xFF)
+    {
+        return cmd->reading;
+    }
+    return 0;
+}
+
 uint8_t setPropertySensorReading(SetSensorReadingReq *cmdData,
                                    Info sensorInfo)
 {
@@ -227,6 +252,8 @@ extern const IdInfoMap sensors = {
        offset = sensor.get("offsetB", 0)
        exp = sensor.get("bExp", 0)
        updateInterface = sensor["updateInterface"]
+       valueReadingType = sensor["readingType"]
+       byteOffset = sensor["byteOffset"]
        if updateInterface == "org.freedesktop.DBus.Properties":
            updateFunc = "setPropertySensorReading"
        elif updateInterface == "xyz.openbmc_project.Inventory.Manager":
@@ -234,9 +261,21 @@ extern const IdInfoMap sensors = {
        else:
            assert "Un-supported interface"
        endif
+
+       if valueReadingType == "reading":
+           valueReadingType = "IPMI_TYPE_READING"
+       elif valueReadingType == "assertion":
+           valueReadingType = "IPMI_TYPE_ASSERTION"
+       else:
+           assert "Unknown reading type"
+       endif
+
+       getValFunc = "std::bind(getValue," + str(byteOffset) + ", std::placeholders::_1)"
+
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
-        ${offset * pow(10,exp)},"${updateInterface}",${updateFunc},{
+        ${offset * pow(10,exp)},"${updateInterface}",
+        ${valueReadingType},${updateFunc},${getValFunc},{
     % for interface,properties in interfaces.iteritems():
             {"${interface}",{
             % for dbus_property,property_value in properties.iteritems():

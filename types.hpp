@@ -31,8 +31,13 @@ namespace ipmi
 namespace sensor
 {
 
+enum ValueReadingType{
+   IPMI_TYPE_ASSERTION,
+   IPMI_TYPE_READING,
+};
+ 
 using Offset = uint8_t;
-using Value = sdbusplus::message::variant<bool, int64_t, std::string>;
+using Value = sdbusplus::message::variant<bool, int64_t, uint8_t, std::string>;
 
 struct Values
 {
@@ -58,6 +63,8 @@ using ScaledOffset = int64_t;
 
 using UpdateInterface = std::string;
 
+struct Info;
+
 struct Info
 {
    Type sensorType;
@@ -68,7 +75,9 @@ struct Info
    Exponent exponentB;
    ScaledOffset scaledOffset;
    UpdateInterface updateInterface;
+   ValueReadingType valueReadingType;
    std::function<uint8_t(SetSensorReadingReq*,Info)> updateFunc;
+   std::function<uint8_t(SetSensorReadingReq*)> getSensorValue;
    DbusInterfaceMap sensorInterfaces;
 };
 
