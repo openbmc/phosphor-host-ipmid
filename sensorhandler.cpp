@@ -441,23 +441,57 @@ ipmi_ret_t setSensorReading(void *request)
     auto& path = iter->second.updatePath;
     auto& intf = iter->second.updateInterface;
     auto& command = iter->second.updateCommand;
+    auto& rtype = iter->second.valueReadingType;
+    auto  byteOffset = iter->second.byteOffset;
+
+    uint8_t setVal = 0;
+    if(rtype.compare("reading") == 0)
+    {
+        if(byteOffset == 0x1)
+        {
+            setVal = cmdData->eventData1;
+        }
+        else if(byteOffset == 0x2)
+        {
+            setVal = cmdData->eventData2;
+        }
+        else if(byteOffset == 0x03)
+        {
+            setVal = cmdData->eventData3;
+        }
+    }
     for (const auto& interface : interfaceList)
     {
         for (const auto& property : interface.second)
         {
             ipmi::sensor::PropertyMap props;
             bool valid = false;
+
             for (const auto& value : property.second)
             {
-                if (assertionSet.test(value.first))
+                if(rtype.compare("reading") == 0)
                 {
-                    props.emplace(property.first, value.second.assert);
-                    valid = true;
+                    if (assertionSet.test(value.first))
+                    {
+                        props.emplace(property.first, value.second.assert);
+                        valid = true;
+                    }
+                    else if (deassertionSet.test(value.first))
+                    {
+                        props.emplace(property.first, value.second.deassert);
+                        valid = true;
+                    }
                 }
-                else if (deassertionSet.test(value.first))
+                else if(rtype.compare("reading") == 0)
                 {
-                    props.emplace(property.first, value.second.deassert);
-                    valid = true;
+                    if(0xFF == value.first)
+                    {
+                        props.emplace(property.first, setVal);
+                    }
+                    else if(setVal == value.first)
+                    {
+                        props.emplace(property.first, value.second.assert);
+                    }
                 }
             }
             if (valid)
