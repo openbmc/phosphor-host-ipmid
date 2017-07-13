@@ -16,7 +16,7 @@
 #include <chrono>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
-#include <utils.hpp>
+#include <host-ipmid/utils.hpp>
 #include "softoff.hpp"
 #include "config.h"
 namespace phosphor

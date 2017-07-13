@@ -3,7 +3,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
-#include "utils.hpp"
+#include "host-ipmid/utils.hpp"
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>

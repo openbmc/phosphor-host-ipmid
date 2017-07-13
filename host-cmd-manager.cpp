@@ -1,9 +1,9 @@
 #include <chrono>
 #include <phosphor-logging/log.hpp>
 #include <systemintfcmds.h>
-#include <utils.hpp>
+#include <host-ipmid/utils.hpp>
 #include <config.h>
-#include <host-cmd-manager.hpp>
+#include <host-ipmid/host-cmd-manager.hpp>
 namespace phosphor
 {
 namespace host

@@ -8,7 +8,7 @@
 #include <algorithm>
 #include "storagehandler.h"
 #include "storageaddsel.h"
-#include "utils.hpp"
+#include "host-ipmid/utils.hpp"
 #include "host-ipmid/ipmid-api.h"
 #include <experimental/filesystem>
 #include <phosphor-logging/log.hpp>
