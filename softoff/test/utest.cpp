@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <gtest/gtest.h>
-#include "timer.hpp"
+#include "host-ipmid/timer.hpp"
 
 using namespace phosphor::ipmi;
 
