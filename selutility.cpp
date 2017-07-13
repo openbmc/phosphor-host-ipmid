@@ -6,7 +6,7 @@
 #include "config.h"
 #include "selutility.hpp"
 #include "types.hpp"
-#include "utils.hpp"
+#include "host-ipmid/utils.hpp"
 
 extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;

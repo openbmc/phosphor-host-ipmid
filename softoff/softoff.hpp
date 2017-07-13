@@ -5,7 +5,7 @@
 #include <functional>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 #include <xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.hpp>
-#include "timer.hpp"
+#include "host-ipmid/timer.hpp"
 #include "config.h"
 namespace phosphor
 {

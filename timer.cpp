@@ -1,6 +1,6 @@
 #include <chrono>
 #include <phosphor-logging/log.hpp>
-#include "timer.hpp"
+#include "host-ipmid/timer.hpp"
 namespace phosphor
 {
 namespace ipmi
