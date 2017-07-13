@@ -3,9 +3,11 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <systemintfcmds.h>
-#include <utils.hpp>
+#include <host-ipmid/utils.hpp>
 #include <config.h>
-#include <host-cmd-manager.hpp>
+#include <host-ipmid/host-cmd-manager.hpp>
+#include <timer.hpp>
+
 namespace phosphor
 {
 namespace host
@@ -21,6 +23,13 @@ constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
 using namespace phosphor::logging;
 using InternalFailure = sdbusplus::xyz::openbmc_project::Common::
                             Error::InternalFailure;
+
+Manager(sdbusplus::bus::bus& bus, sd_event* event) :
+    bus(bus),
+    timer(event, std::bind(&Manager::hostTimeout, this))
+{
+    // Nothing to do here.
+}
 
 // Called as part of READ_MSG_DATA command
 IpmiCmdData Manager::getNextCommand()

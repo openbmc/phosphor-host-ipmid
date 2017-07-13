@@ -2,7 +2,7 @@
 
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
-#include <host-cmd-manager.hpp>
+#include <host-ipmid/host-cmd-manager.hpp>
 namespace phosphor
 {
 namespace host

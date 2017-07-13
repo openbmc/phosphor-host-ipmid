@@ -3,10 +3,16 @@
 #include <tuple>
 #include <queue>
 #include <sdbusplus/bus.hpp>
-#include <timer.hpp>
 
 namespace phosphor
 {
+
+namespace ipmi
+{
+    // Forward declare to save exporting timer.hpp
+    class Timer;
+}
+
 namespace host
 {
 namespace command
@@ -64,12 +70,7 @@ class Manager
          *  @param[in] bus   - dbus handler
          *  @param[in] event - pointer to sd_event
          */
-        Manager(sdbusplus::bus::bus& bus, sd_event* event) :
-            bus(bus),
-            timer(event, std::bind(&Manager::hostTimeout, this))
-        {
-            // Nothing to do here.
-        }
+        Manager(sdbusplus::bus::bus& bus, sd_event* event);
 
         /** @brief Extracts the next entry in the queue and returns
          *         Command and data part of it.

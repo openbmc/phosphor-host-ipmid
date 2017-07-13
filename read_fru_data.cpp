@@ -4,7 +4,7 @@
 #include "read_fru_data.hpp"
 #include "fruread.hpp"
 #include "host-ipmid/ipmid-api.h"
-#include "utils.hpp"
+#include "host-ipmid/utils.hpp"
 
 extern const FruMap frus;
 namespace ipmi
