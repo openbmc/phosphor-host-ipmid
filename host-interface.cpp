@@ -1,6 +1,7 @@
 #include <functional>
 #include <systemintfcmds.h>
-#include <ipmid-host-cmd.hpp>
+#include <host-ipmid/ipmid-host-cmd.hpp>
+#include <host-ipmid/ipmid-host-cmd-utils.hpp>
 #include <utils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <config.h>
