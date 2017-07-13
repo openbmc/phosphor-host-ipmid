@@ -26,7 +26,8 @@
 #include "ipmid.hpp"
 #include "settings.hpp"
 #include <host-cmd-manager.hpp>
-#include <ipmid-host-cmd.hpp>
+#include <host-ipmid/ipmid-host-cmd.hpp>
+#include <timer.hpp>
 
 using namespace phosphor::logging;
 namespace sdbusRule = sdbusplus::bus::match::rules;
