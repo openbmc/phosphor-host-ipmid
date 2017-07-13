@@ -10,7 +10,7 @@
 #include "ipmid.hpp"
 #include "sensorhandler.h"
 #include "types.hpp"
-#include "utils.hpp"
+#include "host-ipmid/utils.hpp"
 
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;

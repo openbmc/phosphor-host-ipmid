@@ -3,7 +3,7 @@
 #include <tuple>
 #include <queue>
 #include <sdbusplus/bus.hpp>
-#include <timer.hpp>
+#include "timer.hpp"
 
 namespace phosphor
 {

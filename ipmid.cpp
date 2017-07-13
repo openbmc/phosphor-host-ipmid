@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <iterator>
 #include <ipmiwhitelist.hpp>
-#include <host-cmd-manager.hpp>
+#include <host-ipmid/host-cmd-manager.hpp>
 #include <host-ipmid/ipmid-host-cmd.hpp>
 
 using namespace phosphor::logging;
