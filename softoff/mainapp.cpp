@@ -19,7 +19,7 @@
 #include <xyz/openbmc_project/State/Host/error.hpp>
 #include "softoff.hpp"
 #include "config.h"
-#include "timer.hpp"
+#include "host-ipmid/timer.hpp"
 
 // Return -1 on any errors to ensure we follow the calling targets OnFailure=
 // path
