@@ -88,7 +88,9 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
                              $(SDBUSPLUS_CFLAGS)
 
 nobase_include_HEADERS = \
-	host-ipmid/ipmid-api.h
+	host-ipmid/ipmid-api.h \
+	host-ipmid/ipmid-host-cmd.hpp \
+	host-ipmid/ipmid-host-cmd-utils.hpp
 
 # Forcing the build of self and then subdir
 SUBDIRS = . test softoff
