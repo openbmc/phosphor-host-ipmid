@@ -30,6 +30,7 @@ std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
         sol::Manager&> singletonPool(manager, table, loop, solManager);
 
 sd_bus* bus = nullptr;
+
 FILE* ipmidbus = nullptr;
 unsigned short g_sel_reserve = 0xFFFF;
 sd_bus_slot* ipmid_slot = nullptr;

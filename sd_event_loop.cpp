@@ -175,8 +175,16 @@ int EventLoop::startEventLoop()
     int r = 0;
     sigset_t ss;
     sd_event_source* source = nullptr;
+    auto bus = ipmid_get_sd_bus_connection();
 
     r = sd_event_default(&event);
+    if (r < 0)
+    {
+        goto finish;
+    }
+
+    // Attach the bus to sd_event to service user requests
+    r = sd_bus_attach_event(bus, event, SD_EVENT_PRIORITY_NORMAL);
     if (r < 0)
     {
         goto finish;
