@@ -4,7 +4,7 @@
 #include <queue>
 #include <sdbusplus/bus.hpp>
 #include <timer.hpp>
-#include <host-cmd-utils.hpp>
+#include <host-ipmid/ipmid-host-cmd-utils.hpp>
 
 namespace phosphor
 {
@@ -31,12 +31,7 @@ class Manager
          *  @param[in] bus   - dbus handler
          *  @param[in] event - pointer to sd_event
          */
-        Manager(sdbusplus::bus::bus& bus, sd_event* event) :
-            bus(bus),
-            timer(event, std::bind(&Manager::hostTimeout, this))
-        {
-            // Nothing to do here.
-        }
+        Manager(sdbusplus::bus::bus& bus, sd_event* event);
 
         /** @brief  Extracts the next entry in the queue and returns
          *          Command and data part of it.
