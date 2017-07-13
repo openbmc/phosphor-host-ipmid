@@ -26,7 +26,8 @@
 #include "ipmid.hpp"
 #include "settings.hpp"
 #include <host-cmd-manager.hpp>
-#include <ipmid-host-cmd.hpp>
+#include <host-ipmid/ipmid-host-cmd.hpp>
+#include <timer.hpp>
 
 using namespace phosphor::logging;
 namespace sdbusRule = sdbusplus::bus::match::rules;
@@ -252,7 +253,7 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     path = sd_bus_message_get_path(req);
 
     r = sd_bus_message_new_method_call(bus,&m,dest,path,
-                                       DBUS_INTF,
+                                       "org.openbmc.HostIpmi",
                                        "sendMessage");
     if (r < 0) {
         fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));

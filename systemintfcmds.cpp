@@ -1,12 +1,13 @@
 #include "systemintfcmds.h"
 #include "host-ipmid/ipmid-api.h"
-#include "ipmid-host-cmd.hpp"
+#include "host-ipmid/ipmid-host-cmd.hpp"
 #include "config.h"
 #include "host-cmd-manager.hpp"
 #include "host-interface.hpp"
 
 #include <stdio.h>
 #include <mapper.h>
+#include <timer.hpp>
 
 void register_netfn_app_functions() __attribute__((constructor));
 
