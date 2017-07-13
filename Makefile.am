@@ -49,6 +49,7 @@ libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
 libapphandler_la_SOURCES = \
 	apphandler.cpp \
+	sdbuswrapper.cpp \
 	sensorhandler.cpp \
 	storagehandler.cpp \
 	chassishandler.cpp \

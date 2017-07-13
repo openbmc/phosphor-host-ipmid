@@ -2,6 +2,8 @@
 #define __HOST_IPMI_SEN_HANDLER_H__
 
 #include <stdint.h>
+#include "host-ipmid/ipmid-api.h"
+#include "sdbuswrapper.h"
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
@@ -33,9 +35,56 @@ struct dbus_interface_t {
     char  interface[MAX_DBUS_PATH];
 };
 
+struct sensorreadingresp_t {
+    uint8_t value;
+    uint8_t operation;
+    uint8_t indication[2];
+}  __attribute__ ((packed)) ;
+
+struct sensor_data_t {
+    uint8_t sennum;
+}  __attribute__ ((packed)) ;
+
 int set_sensor_dbus_state_s(uint8_t , const char *, const char *);
 int set_sensor_dbus_state_y(uint8_t , const char *, const uint8_t);
 int find_openbmc_path(uint8_t , dbus_interface_t *);
+
+/**
+ * Injectable IPMI callbacks for testing
+ */
+ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                ipmi_request_t request,
+                                ipmi_response_t response,
+                                ipmi_data_len_t data_len,
+                                ipmi_context_t context, SdBusWrapper *wrapper);
+
+ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                       ipmi_request_t request,
+                                       ipmi_response_t response,
+                                       ipmi_data_len_t data_len,
+                                       ipmi_context_t context,
+                                       SdBusWrapper *wrapper);
+
+ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                       ipmi_request_t request,
+                                       ipmi_response_t response,
+                                       ipmi_data_len_t data_len,
+                                       ipmi_context_t context,
+                                       SdBusWrapper *wrapper);
+
+ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context,
+                                 SdBusWrapper *wrapper);
+
+ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                            ipmi_request_t request,
+                            ipmi_response_t response,
+                            ipmi_data_len_t data_len,
+                            ipmi_context_t context,
+                            SdBusWrapper *wrapper);
 
 /**
  * @struct SetSensorReadingReq
@@ -401,7 +450,7 @@ inline void set_analog_data_format(uint8_t format,
     body->sensor_units_1 |= (format & 0x3)<<6;
 };
 
-inline void set_m(uint8_t m, SensorDataFullRecordBody* body)
+inline void set_m(uint16_t m, SensorDataFullRecordBody* body)
 {
     body->m_lsb = m & 0xff;
     body->m_msb_and_tolerance &= ~(3<<6);
@@ -413,20 +462,20 @@ inline void set_tolerance(uint8_t tol, SensorDataFullRecordBody* body)
     body->m_msb_and_tolerance |= tol & 0x3f;
 };
 
-inline void set_b(uint8_t b, SensorDataFullRecordBody* body)
+inline void set_b(uint16_t b, SensorDataFullRecordBody* body)
 {
     body->b_lsb = b & 0xff;
     body->b_msb_and_accuracy_lsb &= ~(3<<6);
     body->b_msb_and_accuracy_lsb |= ((b & (3<<8)) >> 2);
 };
-inline void set_accuracy(uint8_t acc, SensorDataFullRecordBody* body)
+inline void set_accuracy(uint16_t acc, SensorDataFullRecordBody* body)
 {
     body->b_msb_and_accuracy_lsb &= ~0x3f;
     body->b_msb_and_accuracy_lsb |= acc & 0x3f;
     body->accuracy_and_sensor_direction &= 0x0f;
     body->accuracy_and_sensor_direction |= (acc & 0xf) << 4;
 };
-inline void set_accuracy_exp(uint8_t exp, SensorDataFullRecordBody* body)
+inline void set_accuracy_exp(uint16_t exp, SensorDataFullRecordBody* body)
 {
     body->accuracy_and_sensor_direction &= ~(3<<2);
     body->accuracy_and_sensor_direction |= (exp & 3)<<2;

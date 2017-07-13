@@ -4,11 +4,11 @@
 #include <string.h>
 #include <bitset>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
-#include <systemd/sd-bus.h>
 #include "host-ipmid/ipmid-api.h"
 #include <phosphor-logging/log.hpp>
 #include "ipmid.hpp"
 #include "sensorhandler.h"
+#include "sdbuswrapper.h"
 #include "types.hpp"
 #include "utils.hpp"
 
@@ -48,20 +48,13 @@ sensorTypemap_t g_SensorTypeMap[] = {
 };
 
 
-struct sensor_data_t {
-    uint8_t sennum;
-}  __attribute__ ((packed)) ;
-
-struct sensorreadingresp_t {
-    uint8_t value;
-    uint8_t operation;
-    uint8_t indication[2];
-}  __attribute__ ((packed)) ;
-
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
 // step for mapping IPMI
-int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) {
+int find_interface_property_fru_type(dbus_interface_t *interface,
+                                     const char *property_name,
+                                     char *property_value, SdBusWrapper *wrapper)
+{
 
     char  *str1;
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -70,7 +63,7 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
 
     int r;
 
-    r = sd_bus_message_new_method_call(bus,&m,interface->bus,interface->path,"org.freedesktop.DBus.Properties","Get");
+    r = wrapper->sd_bus_message_new_method_call(bus,&m,interface->bus,interface->path,"org.freedesktop.DBus.Properties","Get");
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
@@ -78,7 +71,7 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
         goto final;
     }
 
-    r = sd_bus_message_append(m, "ss", "org.openbmc.InventoryItem", property_name);
+    r = wrapper->sd_bus_message_append(m, "ss", "org.openbmc.InventoryItem", property_name);
     if (r < 0) {
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
         fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
@@ -86,13 +79,13 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
         goto final;
     }
 
-    r = sd_bus_call(bus, m, 0, &error, &reply);
+    r = wrapper->sd_bus_call(bus, m, 0, &error, &reply);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s", strerror(-r));
         goto final;
     }
 
-    r = sd_bus_message_read(reply, "v",  "s", &str1) ;
+    r = wrapper->sd_bus_message_read(reply, "v",  "s", &str1) ;
     if (r < 0) {
         fprintf(stderr, "Failed to get a response: %s", strerror(-r));
         goto final;
@@ -102,9 +95,9 @@ int find_interface_property_fru_type(dbus_interface_t *interface, const char *pr
 
 final:
 
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
-    reply = sd_bus_message_unref(reply);
+    wrapper->sd_bus_error_free(&error);
+    m = wrapper->sd_bus_message_unref(m);
+    reply = wrapper->sd_bus_message_unref(reply);
 
     return r;
 }
@@ -113,7 +106,9 @@ int get_bus_for_path(const char *path, char **busname) {
     return mapper_get_service(bus, path, busname);
 }
 
-int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
+int legacy_dbus_openbmc_path(const char *type, const uint8_t num,
+                             dbus_interface_t *interface, SdBusWrapper *wrapper)
+{
     char  *busname = NULL;
     const char  *iface = "org.openbmc.managers.System";
     const char  *objname = "/org/openbmc/managers/System";
@@ -130,14 +125,14 @@ int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface
         goto final;
     }
 
-    r = sd_bus_call_method(bus,busname,objname,iface, "getObjectFromByteId",
+    r = wrapper->sd_bus_call_method(bus,busname,objname,iface, "getObjectFromByteId",
                            &error, &reply, "sy", type, num);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         goto final;
     }
 
-    r = sd_bus_message_read(reply, "(ss)", &str2, &str3);
+    r = wrapper->sd_bus_message_read(reply, "(ss)", &str2, &str3);
     if (r < 0) {
         fprintf(stderr, "Failed to get a response: %s", strerror(-r));
         goto final;
@@ -161,18 +156,20 @@ int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface
 
 final:
 
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
+    wrapper->sd_bus_error_free(&error);
+    reply = wrapper->sd_bus_message_unref(reply);
     free(busname);
     free(str1);
 
     return r;
 }
 
-// Use a lookup table to find the interface name of a specific sensor
+
 // This will be used until an alternative is found.  this is the first
 // step for mapping IPMI
-int find_openbmc_path(uint8_t num, dbus_interface_t *interface) {
+int find_openbmc_path(uint8_t num, dbus_interface_t *interface,
+                      SdBusWrapper *wrapper)
+{
     int rc;
 
     // When the sensor map does not contain the sensor requested,
@@ -180,7 +177,7 @@ int find_openbmc_path(uint8_t num, dbus_interface_t *interface) {
     const auto& sensor_it = sensors.find(num);
     if (sensor_it == sensors.end())
     {
-        return legacy_dbus_openbmc_path("SENSOR", num, interface);
+        return legacy_dbus_openbmc_path("SENSOR", num, interface, wrapper);
     }
 
     const auto& info = sensor_it->second;
@@ -215,7 +212,9 @@ final:
 // Routines used by ipmi commands wanting to interact on the dbus
 //
 /////////////////////////////////////////////////////////////////////
-int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *value) {
+int set_sensor_dbus_state_s(uint8_t number, const char *method,
+                            const char *value, SdBusWrapper *wrapper)
+{
 
 
     dbus_interface_t a;
@@ -226,38 +225,39 @@ int set_sensor_dbus_state_s(uint8_t number, const char *method, const char *valu
     fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of %s\n",
         number, method, value);
 
-    r = find_openbmc_path(number, &a);
+    r = find_openbmc_path(number, &a, wrapper);
 
     if (r < 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
         return 0;
     }
 
-    r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
+    r = wrapper->sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         goto final;
     }
 
-    r = sd_bus_message_append(m, "v", "s", value);
+    r = wrapper->sd_bus_message_append(m, "v", "s", value);
     if (r < 0) {
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
         goto final;
     }
 
 
-    r = sd_bus_call(bus, m, 0, &error, NULL);
+    r = wrapper->sd_bus_call(bus, m, 0, &error, NULL);
     if (r < 0) {
         fprintf(stderr, "Failed to call the method: %s", strerror(-r));
     }
 
 final:
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
+    wrapper->sd_bus_error_free(&error);
+    m = wrapper->sd_bus_message_unref(m);
 
     return 0;
 }
-int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t value) {
+int set_sensor_dbus_state_y(uint8_t number, const char *method,
+                            const uint8_t value, SdBusWrapper *wrapper) {
 
 
     dbus_interface_t a;
@@ -268,34 +268,34 @@ int set_sensor_dbus_state_y(uint8_t number, const char *method, const uint8_t va
     fprintf(ipmidbus, "Attempting to set a dbus Variant Sensor 0x%02x via %s with a value of 0x%02x\n",
         number, method, value);
 
-    r = find_openbmc_path(number, &a);
+    r = find_openbmc_path(number, &a, wrapper);
 
     if (r < 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
         return 0;
     }
 
-    r = sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
+    r = wrapper->sd_bus_message_new_method_call(bus,&m,a.bus,a.path,a.interface,method);
     if (r < 0) {
         fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         goto final;
     }
 
-    r = sd_bus_message_append(m, "v", "i", value);
+    r = wrapper->sd_bus_message_append(m, "v", "i", value);
     if (r < 0) {
         fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
         goto final;
     }
 
 
-    r = sd_bus_call(bus, m, 0, &error, NULL);
+    r = wrapper->sd_bus_call(bus, m, 0, &error, NULL);
     if (r < 0) {
         fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
     }
 
 final:
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
+    wrapper->sd_bus_error_free(&error);
+    m = wrapper->sd_bus_message_unref(m);
 
     return 0;
 }
@@ -321,11 +321,12 @@ uint8_t dbus_to_sensor_type(char *p) {
 }
 
 
-uint8_t dbus_to_sensor_type_from_dbus(dbus_interface_t *a) {
+uint8_t dbus_to_sensor_type_from_dbus(dbus_interface_t *a, SdBusWrapper *wrapper)
+{
     char fru_type_name[64];
     int r= 0;
 
-    r = find_interface_property_fru_type(a, "fru_type", fru_type_name);
+    r = find_interface_property_fru_type(a, "fru_type", fru_type_name, wrapper);
     if (r<0) {
         fprintf(stderr, "Failed to get a fru type: %s", strerror(-r));
         return -1;
@@ -334,7 +335,8 @@ uint8_t dbus_to_sensor_type_from_dbus(dbus_interface_t *a) {
     }
 }
 
-uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
+uint8_t get_type_from_interface(dbus_interface_t dbus_if, SdBusWrapper *wrapper)
+{
 
     char *p;
     uint8_t type;
@@ -353,7 +355,7 @@ uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
     else if (strstr(dbus_if.interface, "InventoryItem")) {
         // InventoryItems are real frus.  So need to get the
         // fru_type property
-        type = dbus_to_sensor_type_from_dbus(&dbus_if);
+        type = dbus_to_sensor_type_from_dbus(&dbus_if, wrapper);
     } else {
         // Non InventoryItems
         p = strrchr (dbus_if.path, '/');
@@ -364,15 +366,15 @@ uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
  }
 
 // Replaces find_sensor
-uint8_t find_type_for_sensor_number(uint8_t num) {
+uint8_t find_type_for_sensor_number(uint8_t num, SdBusWrapper *wrapper) {
     int r;
     dbus_interface_t dbus_if;
-    r = find_openbmc_path(num, &dbus_if);
+    r = find_openbmc_path(num, &dbus_if, wrapper);
     if (r < 0) {
         fprintf(stderr, "Could not find sensor %d\n", num);
         return r;
     }
-    return get_type_from_interface(dbus_if);
+    return get_type_from_interface(dbus_if, wrapper);
 }
 
 
@@ -381,7 +383,8 @@ uint8_t find_type_for_sensor_number(uint8_t num) {
 
 ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+                             ipmi_data_len_t data_len, ipmi_context_t context,
+                             SdBusWrapper *wrapper)
 {
     sensor_data_t *reqptr = (sensor_data_t*)request;
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -392,7 +395,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // need to ask Hostboot team
     unsigned char buf[] = {0x00,0x6F};
 
-    buf[0] = find_type_for_sensor_number(reqptr->sennum);
+    buf[0] = find_type_for_sensor_number(reqptr->sennum, wrapper);
 
     // HACK UNTIL Dbus gets updated or we find a better way
     if (buf[0] == 0) {
@@ -405,8 +408,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     return rc;
 }
-
-ipmi_ret_t setSensorReading(void *request)
+ipmi_ret_t setSensorReading(void *request, SdBusWrapper *wrapper)
 {
     auto cmdData = static_cast<SetSensorReadingReq *>(request);
 
@@ -499,7 +501,8 @@ ipmi_ret_t setSensorReading(void *request)
 
 ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+                             ipmi_data_len_t data_len, ipmi_context_t context,
+                             SdBusWrapper *wrapper)
 {
     sensor_data_t *reqptr = (sensor_data_t*)request;
 
@@ -510,7 +513,7 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      * and functional state of Processor, Core & DIMM. For the remaining
      * sensors the existing support is invoked.
      */
-    auto ipmiRC = setSensorReading(request);
+    auto ipmiRC = setSensorReading(request, wrapper);
 
     if(ipmiRC == IPMI_CC_SENSOR_INVALID)
     {
@@ -522,10 +525,10 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ipmiRC;
 }
 
-
 ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+                             ipmi_data_len_t data_len, ipmi_context_t context,
+                             SdBusWrapper *wrapper)
 {
     sensor_data_t *reqptr = (sensor_data_t*)request;
     ipmi_ret_t rc = IPMI_CC_SENSOR_INVALID;
@@ -540,14 +543,14 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
-    r = find_openbmc_path(reqptr->sennum, &a);
+    r = find_openbmc_path(reqptr->sennum, &a, wrapper);
 
     if (r < 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
         return IPMI_CC_SENSOR_INVALID;
     }
 
-    type = get_type_from_interface(a);
+    type = get_type_from_interface(a, wrapper);
     if(type == 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
         return IPMI_CC_SENSOR_INVALID;
@@ -563,7 +566,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     switch(type) {
         case 0xC3:
         case 0xC2:
-            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
+            r = wrapper->sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
             if (r < 0) {
                 fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
                 fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
@@ -571,7 +574,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 break;
             }
 
-            r = sd_bus_message_read(reply, "i", &reading);
+            r = wrapper->sd_bus_message_read(reply, "i", &reading);
             if (r < 0) {
                 fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
                 break;
@@ -603,7 +606,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             sensor = sensors.at(reqptr->sennum);
 
             // Get value
-            r = sd_bus_get_property_trivial(bus,
+            r = wrapper->sd_bus_get_property_trivial(bus,
                                             a.bus,
                                             a.path,
                                             a.interface,
@@ -642,7 +645,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
 
-    reply = sd_bus_message_unref(reply);
+    reply = wrapper->sd_bus_message_unref(reply);
 
     return rc;
 }
@@ -663,7 +666,7 @@ ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                  ipmi_request_t request,
                                  ipmi_response_t response,
                                  ipmi_data_len_t data_len,
-                                 ipmi_context_t context)
+                                 ipmi_context_t context, SdBusWrapper *wrapper)
 {
     auto resp = static_cast<get_sdr_info::GetSdrInfoResp*>(response);
     if (request == nullptr ||
@@ -694,11 +697,12 @@ ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_request_t request,
                                 ipmi_response_t response,
                                 ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+                                ipmi_context_t context, SdBusWrapper *wrapper)
 {
     // A constant reservation ID is okay until we implement add/remove SDR.
     const uint16_t reservation_id = 1;
     *(uint16_t*)response = reservation_id;
+    *data_len = sizeof(uint16_t);
 
     printf("Created new IPMI SDR reservation ID %d\n", *(uint16_t*)response);
     return IPMI_CC_OK;
@@ -706,7 +710,8 @@ ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
                                      const ipmi::sensor::Info *info,
-                                     ipmi_data_len_t data_len)
+                                     ipmi_data_len_t data_len,
+                                     SdBusWrapper *wrapper)
 {
     /* Functional sensor case */
     if (info->sensorInterfaces.begin()->first ==
@@ -716,14 +721,14 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
         sd_bus *bus = ipmid_get_sd_bus_connection();
         dbus_interface_t iface;
 
-        if (0 > find_openbmc_path(body->entity_id, &iface))
+        if (0 > find_openbmc_path(body->entity_id, &iface, wrapper))
             return IPMI_CC_SENSOR_INVALID;
 
         body->sensor_units_1 = 0; // unsigned, no rate, no modifier, not a %
 
         /* Unit info */
         char *raw_cstr;
-        if (0 > sd_bus_get_property_string(bus, iface.bus, iface.path,
+        if (0 > wrapper->sd_bus_get_property_string(bus, iface.bus, iface.path,
                                             iface.interface, "Unit", NULL,
                                             &raw_cstr)) {
             fprintf(stderr, "Expected to find Unit interface in bus %s, path %s, but it was missing.\n",
@@ -768,7 +773,7 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
         /* Modifiers to reading info */
         // Get scale
         int64_t scale;
-        if (0 > sd_bus_get_property_trivial(bus,
+        if (0 > wrapper->sd_bus_get_property_trivial(bus,
                                         iface.bus,
                                         iface.path,
                                         iface.interface,
@@ -807,7 +812,8 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
 
 ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             ipmi_request_t request, ipmi_response_t response,
-                            ipmi_data_len_t data_len, ipmi_context_t context)
+                            ipmi_data_len_t data_len, ipmi_context_t context,
+                            SdBusWrapper *wrapper)
 {
     ipmi_ret_t ret = IPMI_CC_OK;
     get_sdr::GetSdrReq *req = (get_sdr::GetSdrReq*)request;
@@ -846,7 +852,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         // Set the type-specific details given the DBus interface
         ret = populate_record_from_dbus(&(record.body), &(sensor->second),
-                                        data_len);
+                                        data_len, wrapper);
 
         if (++sensor == sensors.end())
         {
@@ -865,6 +871,60 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ret;
 }
 
+#ifndef UNITTEST
+SdBusWrapperImpl g_wrapper;
+
+ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    return ipmi_sen_get_sensor_type(netfn, cmd, request, response, data_len,
+                                       context, &g_wrapper);
+}
+
+ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    return ipmi_sen_set_sensor(netfn, cmd, request, response, data_len,
+                                       context, &g_wrapper);
+}
+
+ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    return ipmi_sen_get_sensor_reading(netfn, cmd, request, response, data_len,
+                                       context, &g_wrapper);
+}
+
+ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                ipmi_request_t request,
+                                ipmi_response_t response,
+                                ipmi_data_len_t data_len,
+                                ipmi_context_t context)
+{
+    return ipmi_sen_get_sdr_info(netfn, cmd, request, response, data_len,
+                                context, &g_wrapper);
+}
+
+ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                ipmi_request_t request,
+                                ipmi_response_t response,
+                                ipmi_data_len_t data_len,
+                                ipmi_context_t context)
+{
+    return ipmi_sen_reserve_sdr(netfn, cmd, request, response, data_len,
+                                context, &g_wrapper);
+}
+
+ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                            ipmi_request_t request, ipmi_response_t response,
+                            ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    return ipmi_sen_get_sdr(netfn, cmd, request, response, data_len, context,
+                            &g_wrapper);
+}
 
 void register_netfn_sen_functions()
 {
@@ -919,3 +979,6 @@ void register_netfn_sen_functions()
 
     return;
 }
+
+#endif
+

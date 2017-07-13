@@ -22,7 +22,7 @@ AS_IF([test "x$enable_softoff" != "xno"],
 )
 
 # Checks for libraries.
-AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
+AC_CHECK_LIB([mapper], [mapper_get_service], [libmapper_LIBS=-lmapper],[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
 PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221], [], [AC_MSG_ERROR(["systemd required and not found"])])
 PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging],, [AC_MSG_ERROR([Could not find phosphor-logging...openbmc/phosphor-logging package required])])
 PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],, [AC_MSG_ERROR([Could not find phosphor-dbus-interfaces...openbmc/phosphor-dbus-interfaces package required])])
@@ -49,8 +49,8 @@ LT_INIT([dlopen disable-static shared])
 LT_LIB_DLLOAD
 
 # Check/set gtest specific functions.
-AX_PTHREAD([GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=1"],[GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=0"])
-AC_SUBST(GTEST_CPPFLAGS)
+PKG_CHECK_MODULES([GTEST], [gmock], [], [AC_MSG_NOTICE([gtest not found, tests will not build])])
+AX_PTHREAD([GTEST_CFLAGS+="-DGTEST_HAS_PTHREAD=1"],[GTEST_CFLAGS+="-DGTEST_HAS_PTHREAD=0"])
 
 AC_ARG_ENABLE([oe-sdk],
     AS_HELP_STRING([--enable-oe-sdk], [Link testcases absolutely against OE SDK so they can be ran within it.])
