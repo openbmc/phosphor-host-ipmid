@@ -3,9 +3,9 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <systemintfcmds.h>
-#include <utils.hpp>
+#include <host-ipmid/utils.hpp>
 #include <config.h>
-#include <host-cmd-manager.hpp>
+#include <host-ipmid/host-cmd-manager.hpp>
 namespace phosphor
 {
 namespace host
