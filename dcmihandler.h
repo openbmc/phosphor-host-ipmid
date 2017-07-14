@@ -64,6 +64,12 @@ struct GetAssetTagResponse
  */
 std::string readAssetTag();
 
+/** @brief Write the asset tag to the asset tag DBUS property
+ *
+ *  @param[in] assetTag - Asset Tag to be written to the property.
+ */
+void writeAssetTag(const std::string& assetTag);
+
 } // namespace dcmi
 
 #endif
