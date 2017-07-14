@@ -91,6 +91,53 @@ std::string readAssetTag()
     return assetTag.get<std::string>();
 }
 
+void writeAssetTag(const std::string& assetTag)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(dcmi::mapperBusName,
+                                          dcmi::mapperObjPath,
+                                          dcmi::mapperIface,
+                                          "GetSubTree");
+
+    mapperCall.append(dcmi::inventoryRoot);
+    mapperCall.append(depth);
+    mapperCall.append(std::vector<std::string>({dcmi::assetTagIntf}));
+
+    auto mapperReply = bus.call(mapperCall);
+    if (mapperReply.is_method_error())
+    {
+        log<level::ERR>("Error in mapper call in writeAssetTag");
+        elog<InternalFailure>();
+    }
+
+    dcmi::ObjectTree objectTree;
+    mapperReply.read(objectTree);
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("AssetTag property is not populated");
+        elog<InternalFailure>();
+    }
+
+    auto method = bus.new_method_call(
+            (objectTree.begin()->second.begin()->first).c_str(),
+            (objectTree.begin()->first).c_str(),
+            dcmi::propIntf,
+            "Set");
+    method.append(dcmi::assetTagIntf);
+    method.append(dcmi::assetTagProp);
+    method.append(sdbusplus::message::variant<std::string>(assetTag));
+
+    auto reply = bus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in writing asset tag");
+        elog<InternalFailure>();
+    }
+}
+
 } // namespace dcmi
 
 ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
