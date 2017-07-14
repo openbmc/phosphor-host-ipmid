@@ -105,6 +105,32 @@ std::string readAssetTag()
     return assetTag.get<std::string>();
 }
 
+void writeAssetTag(const std::string& assetTag)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    dcmi::assettag::ObjectTree objectTree;
+
+    // Read the object tree with the inventory root to figure out the object
+    // that has implemented the Asset tag interface.
+    readAssetTagObjectTree(objectTree);
+
+    auto method = bus.new_method_call(
+            (objectTree.begin()->second.begin()->first).c_str(),
+            (objectTree.begin()->first).c_str(),
+            dcmi::propIntf,
+            "Set");
+    method.append(dcmi::assetTagIntf);
+    method.append(dcmi::assetTagProp);
+    method.append(sdbusplus::message::variant<std::string>(assetTag));
+
+    auto reply = bus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in writing asset tag");
+        elog<InternalFailure>();
+    }
+}
+
 } // namespace dcmi
 
 ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
