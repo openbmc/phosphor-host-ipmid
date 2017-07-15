@@ -50,7 +50,7 @@ enum class BootOptionParameter : size_t
 enum class BootOptionResponseSize : size_t
 {
     BOOT_FLAGS                    = 5,
-    OPAL_NETWORK_SETTINGS         = 26 
+    OPAL_NETWORK_SETTINGS         = 50
 };
 
 #endif

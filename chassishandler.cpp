@@ -44,17 +44,19 @@ constexpr auto   MAC_ADDRESS_FORMAT = "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx";
 constexpr auto   IP_ADDRESS_FORMAT = "%d.%d.%d.%d";
 constexpr auto   PREFIX_FORMAT = "%hhd";
 constexpr auto   ADDR_TYPE_FORMAT = "%hhx";
+constexpr auto   IPV4_ADDRESS_SIZE_BYTE = 4;
+constexpr auto   IPV6_ADDRESS_SIZE_BYTE = 16;
+
 //PetiBoot-Specific
-static constexpr uint8_t net_conf_initial_bytes[] = {0x80,0x21, 0x70 ,0x62 ,0x21,
-        0x00 ,0x01 ,0x06 ,0x04};
+static constexpr uint8_t net_conf_initial_bytes[] = {0x80, 0x21, 0x70, 0x62,
+        0x21, 0x00, 0x01, 0x06};
 
 static constexpr size_t COOKIE_OFFSET = 1;
 static constexpr size_t VERSION_OFFSET = 5;
+static constexpr size_t ADDR_SIZE_OFFSET = 8;
 static constexpr size_t MAC_OFFSET = 9;
 static constexpr size_t ADDRTYPE_OFFSET = 16;
 static constexpr size_t IPADDR_OFFSET = 17;
-static constexpr size_t PREFIX_OFFSET = 21;
-static constexpr size_t GATEWAY_OFFSET = 22;
 
 
 void register_netfn_chassis_functions() __attribute__((constructor));
@@ -64,7 +66,6 @@ void register_netfn_chassis_functions() __attribute__((constructor));
 const char *settings_object_name  =  "/org/openbmc/settings/host0";
 const char *settings_intf_name    =  "org.freedesktop.DBus.Properties";
 const char *host_intf_name        =  "org.openbmc.settings.Host";
-
 
 constexpr auto MAPPER_BUS_NAME = "xyz.openbmc_project.ObjectMapper";
 constexpr auto MAPPER_OBJ = "/xyz/openbmc_project/object_mapper";
@@ -452,6 +453,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 {
     ipmi::PropertyMap properties;
     int rc = 0;
+    uint8_t addrSize = IPV4_ADDRESS_SIZE_BYTE;
 
     try
     {
@@ -485,21 +487,36 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
         respptr->data[MAC_OFFSET + 6] = 0x00;
 
-        uint8_t addrType = (properties["Origin"].get<std::string>() ==
+        uint8_t addrOrigin = (properties["Origin"].get<std::string>() ==
             "xyz.openbmc_project.Network.IP.AddressOrigin.Static") ? 1 : 0;
 
-        memcpy(respptr->data + ADDRTYPE_OFFSET, &addrType, sizeof(addrType));
+        memcpy(respptr->data + ADDRTYPE_OFFSET, &addrOrigin,
+               sizeof(addrOrigin));
+
+        uint8_t addressFamily = (properties["Type"].get<std::string>() ==
+            "xyz.openbmc_project.Network.IP.Protocol.IPv4") ?
+                AF_INET : AF_INET6;
+
+        addrSize = (addressFamily == AF_INET) ? IPV4_ADDRESS_SIZE_BYTE :
+                                                IPV6_ADDRESS_SIZE_BYTE;
 
         // ipaddress and gateway would be in IPv4 format
 
-        inet_pton(AF_INET, properties["Address"].get<std::string>().c_str(),
+        inet_pton(addressFamily,
+                  properties["Address"].get<std::string>().c_str(),
                   (respptr->data + IPADDR_OFFSET));
 
         uint8_t prefix = properties["PrefixLength"].get<uint8_t>();
-        memcpy(respptr->data + PREFIX_OFFSET, &prefix, sizeof(prefix));
 
-        inet_pton(AF_INET, properties["Gateway"].get<std::string>().c_str(),
-                  (respptr->data + GATEWAY_OFFSET));
+        uint8_t prefixOffset = IPADDR_OFFSET + addrSize;
+
+        memcpy(respptr->data + prefixOffset, &prefix, sizeof(prefix));
+
+        uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
+
+        inet_pton(addressFamily,
+                  properties["Gateway"].get<std::string>().c_str(),
+                  (respptr->data + gatewayOffset));
 
     }
     catch (InternalFailure& e)
@@ -512,10 +529,10 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
     //PetiBoot-Specific
     //If sucess then copy the first 9 bytes to the data
-    //else set the respptr to 0
-
     memcpy(respptr->data, net_conf_initial_bytes,
            sizeof(net_conf_initial_bytes));
+
+    memcpy(respptr->data + ADDR_SIZE_OFFSET, &addrSize, sizeof(addrSize));
 
 #ifdef _IPMI_DEBUG_
     printf("\n===Printing the IPMI Formatted Data========\n");
@@ -526,8 +543,51 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
     }
 #endif
 
-
     return rc;
+}
+
+/** @brief convert IPv4 and IPv6 addresses from binary to text form.
+ *  @param[in] family - IPv4/Ipv6
+ *  @param[in] data - req data pointer.
+ *  @param[in] offset - offset in the data.
+ *  @param[in] addrSize - size of the data which needs to be read from offset.
+ *  @returns address in text form.
+ */
+
+std::string getAddrStr(uint8_t family, uint8_t* data,
+                       uint8_t offset, uint8_t addrSize)
+{
+    char ipAddr[INET6_ADDRSTRLEN] = {};
+
+    switch(family)
+    {
+        case AF_INET:
+        {
+            struct sockaddr_in addr4 {};
+            memcpy(&addr4.sin_addr.s_addr, &data[offset], addrSize);
+
+            inet_ntop(AF_INET, &addr4.sin_addr,
+                      ipAddr, INET_ADDRSTRLEN);
+
+            break;
+        }
+        case AF_INET6:
+        {
+            struct sockaddr_in6 addr6 {};
+            memcpy(&addr6.sin6_addr.s6_addr, &data[offset], addrSize);
+
+            inet_ntop(AF_INET6, &addr6.sin6_addr,
+                      ipAddr, INET6_ADDRSTRLEN);
+
+            break;
+        }
+        default:
+        {
+            return {};
+        }
+    }
+
+    return ipAddr;
 }
 
 int setHostNetworkData(set_sys_boot_options_t* reqptr)
@@ -535,13 +595,16 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
     using namespace std::string_literals;
     std::string host_network_config;
     char mac[SIZE_MAC] = {0};
-    char ipAddress[INET_ADDRSTRLEN] = {0};
-    char gateway[INET_ADDRSTRLEN] = {0};
-    char dhcp {0};
+    std::string ipAddress, gateway;
+    char addrOrigin {0};
+    uint8_t addrSize {0};
     std::string addressOrigin =
-        "xyz.openbmc_project.Network.IP.AddressOrigin.Static";
+        "xyz.openbmc_project.Network.IP.AddressOrigin.DHCP";
+    std::string addressType =
+        "xyz.openbmc_project.Network.IP.Protocol.IPv4";
     uint8_t prefix {0};
     uint32_t zeroCookie = 0;
+    uint8_t family = AF_INET;
 
     //cookie starts from second byte
     // version starts from sixth byte
@@ -586,30 +649,33 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
                      reqptr->data[MAC_OFFSET + 4],
                      reqptr->data[MAC_OFFSET + 5]);
 
-            memcpy(&dhcp, &(reqptr->data[ADDRTYPE_OFFSET]),
-                   sizeof(decltype(dhcp)));
+            memcpy(&addrOrigin, &(reqptr->data[ADDRTYPE_OFFSET]),
+                   sizeof(decltype(addrOrigin)));
 
-            if (dhcp)
+            if (addrOrigin)
             {
                 addressOrigin =
-                    "xyz.openbmc_project.Network.IP.AddressOrigin.DHCP";
+                    "xyz.openbmc_project.Network.IP.AddressOrigin.Static";
             }
 
-            snprintf(ipAddress, INET_ADDRSTRLEN, IP_ADDRESS_FORMAT,
-                     reqptr->data[IPADDR_OFFSET],
-                     reqptr->data[IPADDR_OFFSET + 1],
-                     reqptr->data[IPADDR_OFFSET + 2],
-                     reqptr->data[IPADDR_OFFSET + 3]);
+            // Get the address size
+            memcpy(&addrSize ,&reqptr->data[ADDR_SIZE_OFFSET], sizeof(addrSize));
 
+            uint8_t prefixOffset = IPADDR_OFFSET + addrSize;
 
-            memcpy(&prefix, &(reqptr->data[PREFIX_OFFSET]),
-                   sizeof(decltype(prefix)));
+            memcpy(&prefix, &(reqptr->data[prefixOffset]), sizeof(decltype(prefix)));
 
-            snprintf(gateway, INET_ADDRSTRLEN, IP_ADDRESS_FORMAT,
-                     reqptr->data[GATEWAY_OFFSET],
-                     reqptr->data[GATEWAY_OFFSET + 1],
-                     reqptr->data[GATEWAY_OFFSET + 2],
-                     reqptr->data[GATEWAY_OFFSET + 3]);
+            uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
+
+            if (addrSize != IPV4_ADDRESS_SIZE_BYTE)
+            {
+                addressType = "xyz.openbmc_project.Network.IP.Protocol.IPv6";
+                family = AF_INET6;
+            }
+
+            ipAddress = getAddrStr(family, reqptr->data, IPADDR_OFFSET, addrSize);
+            gateway = getAddrStr(family, reqptr->data, gatewayOffset, addrSize);
+
         } while(0);
 
         //Cookie == 0 or it is a valid cookie
