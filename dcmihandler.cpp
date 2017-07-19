@@ -15,7 +15,6 @@ using InternalFailure =
 
 void register_netfn_dcmi_functions() __attribute__((constructor));
 
-constexpr auto PCAP_SETTINGS_SERVICE = "xyz.openbmc_project.Settings";
 constexpr auto PCAP_PATH    = "/xyz/openbmc_project/control/host0/power_cap";
 constexpr auto PCAP_INTERFACE = "xyz.openbmc_project.Control.Power.Cap";
 
@@ -27,7 +26,7 @@ using namespace phosphor::logging;
 uint32_t getPcap(sdbusplus::bus::bus& bus)
 {
     auto settingService = ipmi::getService(bus,
-                                           PCAP_PATH,PCAP_SETTINGS_SERVICE);
+                                           PCAP_INTERFACE,PCAP_PATH);
 
     auto method = bus.new_method_call(settingService.c_str(),
                                       PCAP_PATH,
@@ -53,7 +52,7 @@ uint32_t getPcap(sdbusplus::bus::bus& bus)
 bool getPcapEnabled(sdbusplus::bus::bus& bus)
 {
     auto settingService = ipmi::getService(bus,
-                                           PCAP_PATH,PCAP_SETTINGS_SERVICE);
+                                           PCAP_INTERFACE,PCAP_PATH);
 
     auto method = bus.new_method_call(settingService.c_str(),
                                       PCAP_PATH,
@@ -76,8 +75,8 @@ bool getPcapEnabled(sdbusplus::bus::bus& bus)
     return sdbusplus::message::variant_ns::get<bool>(pcapEnabled);
 }
 
-ipmi_ret_t ipmi_dcmi_get_power_limit(ipmi_netfn_t netfn, ipmi_cmd_t cmd, 
-                              ipmi_request_t request, ipmi_response_t response, 
+ipmi_ret_t ipmi_dcmi_get_power_limit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                              ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
     // Default to no power cap enabled
