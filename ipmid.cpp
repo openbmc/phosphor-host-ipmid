@@ -9,21 +9,25 @@
 #include <stdlib.h>
 #include <map>
 #include <phosphor-logging/log.hpp>
-#include "ipmid.hpp"
 #include <sys/time.h>
 #include <errno.h>
 #include <mapper.h>
-#include "sensorhandler.h"
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <ipmiwhitelist.hpp>
+#include <sdbusplus/bus.hpp>
+#include "sensorhandler.h"
+#include "ipmid.hpp"
+#include "settings.hpp"
 
 using namespace phosphor::logging;
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
 sd_event *events = nullptr;
+std::unique_ptr<settings::Objects> allSettings = nullptr;
 
 // Initialise restricted mode to true
 bool restricted_mode = true;
@@ -483,6 +487,11 @@ sd_bus_slot *ipmid_get_sd_bus_slot(void) {
     return ipmid_slot;
 }
 
+const settings::Objects& getSettings()
+{
+    return *allSettings;
+};
+
 int main(int argc, char *argv[])
 {
     int r;
@@ -554,17 +563,21 @@ int main(int argc, char *argv[])
     // Attach the bus to sd_event to service user requests
     sd_bus_attach_event(bus, events, SD_EVENT_PRIORITY_NORMAL);
 
-    // Initialize restricted mode
-    cache_restricted_mode();
+    {
+        sdbusplus::bus::bus dbus{bus};
+        allSettings = std::make_unique<settings::Objects>(dbus);
+        // Initialize restricted mode
+        cache_restricted_mode();
 
-    for (;;) {
-        /* Process requests */
-        r = sd_event_run(events, (uint64_t)-1);
-        if (r < 0)
-        {
-            log<level::ERR>("Failure in processing request",
-                    entry("ERROR=%s", strerror(-r)));
-            goto finish;
+        for (;;) {
+            /* Process requests */
+            r = sd_event_run(events, (uint64_t)-1);
+            if (r < 0)
+            {
+                log<level::ERR>("Failure in processing request",
+                        entry("ERROR=%s", strerror(-r)));
+                goto finish;
+            }
         }
     }
 
