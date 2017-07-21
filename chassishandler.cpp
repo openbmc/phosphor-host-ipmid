@@ -1,6 +1,8 @@
 #include "chassishandler.h"
 #include "host-ipmid/ipmid-api.h"
 #include "types.hpp"
+#include "ipmid.hpp"
+#include "settings.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +18,7 @@
 #include <fstream>
 #include <experimental/filesystem>
 #include <string>
+#include <map>
 
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
@@ -24,6 +27,8 @@
 
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/server/object.hpp>
+#include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
 
 #include "config.h"
 
@@ -1157,58 +1162,40 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ( (rc < 0) ? IPMI_CC_INVALID : IPMI_CC_OK);
 }
 
-struct bootOptionTypeMap_t {
-    uint8_t ipmibootflag;
-    char    dbusname[8];
+namespace boot_options
+{
+
+using namespace sdbusplus::xyz::openbmc_project::Control::Boot::server;
+using IpmiValue = uint8_t;
+using DbusValue = uint8_t;
+constexpr auto ipmiDefault = 0;
+
+std::map<IpmiValue, Source::Sources> sourceIpmiToDbus =
+{
+    {0x01, Source::Sources::Network},
+    {0x02, Source::Sources::Disk},
+    {0x05, Source::Sources::ExternalMedia},
+    {ipmiDefault, Source::Sources::Default}
 };
 
-#define INVALID_STRING "Invalid"
-// dbus supports this list of boot devices.
-bootOptionTypeMap_t g_bootOptionTypeMap_t[] = {
-
-        {0x01, "Network"},
-        {0x02, "Disk"},
-        {0x03, "Safe"},
-        {0x05, "CDROM"},
-        {0x06, "Setup"},
-        {0x00, "Default"},
-        {0xFF, INVALID_STRING}
+std::map<IpmiValue, Mode::Modes> modeIpmiToDbus =
+{
+    {0x03, Mode::Modes::Safe},
+    {0x06, Mode::Modes::Setup},
+    {ipmiDefault, Mode::Modes::Regular}
 };
 
-uint8_t get_ipmi_boot_option(char *p) {
+std::map<DbusValue, IpmiValue> dbusToIpmi =
+{
+    {static_cast<uint8_t>(Source::Sources::Network), 0x01},
+    {static_cast<uint8_t>(Source::Sources::Disk), 0x02},
+    {static_cast<uint8_t>(Mode::Modes::Safe), 0x03},
+    {static_cast<uint8_t>(Source::Sources::ExternalMedia), 0x05},
+    {static_cast<uint8_t>(Mode::Modes::Setup), 0x06},
+    {static_cast<uint8_t>(Source::Sources::Default), ipmiDefault}
+};
 
-    bootOptionTypeMap_t *s = g_bootOptionTypeMap_t;
-
-    while (s->ipmibootflag != 0xFF) {
-        if (!strcmp(s->dbusname,p))
-            break;
-        s++;
-    }
-
-    if (!s->ipmibootflag)
-        printf("Failed to find Sensor Type %s\n", p);
-
-    return s->ipmibootflag;
-}
-
-char* get_boot_option_by_ipmi(uint8_t p) {
-
-    bootOptionTypeMap_t *s = g_bootOptionTypeMap_t;
-
-    while (s->ipmibootflag != 0xFF) {
-
-        if (s->ipmibootflag == p)
-            break;
-
-        s++;
-    }
-
-
-    if (!s->ipmibootflag)
-        printf("Failed to find Sensor Type 0x%x\n", p);
-
-    return s->dbusname;
-}
+} // namespace boot_options
 
 ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                              ipmi_request_t request,
@@ -1216,11 +1203,12 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                              ipmi_data_len_t data_len,
                                              ipmi_context_t context)
 {
+    using namespace boot_options;
     ipmi_ret_t rc = IPMI_CC_PARM_NOT_SUPPORTED;
     char *p = NULL;
     get_sys_boot_options_response_t *resp = (get_sys_boot_options_response_t *) response;
     get_sys_boot_options_t *reqptr = (get_sys_boot_options_t*) request;
-    uint8_t s;
+    IpmiValue bootOption = ipmiDefault;
 
     printf("IPMI GET_SYS_BOOT_OPTIONS\n");
 
@@ -1238,29 +1226,64 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ( BootOptionParameter::BOOT_FLAGS )) {
 
         *data_len = static_cast<uint8_t>(BootOptionResponseSize::BOOT_FLAGS);
-        /* Get the boot device */
-        int r = dbus_get_property("boot_flags",&p);
+        using namespace settings;
+        const auto& settings = getSettings();
+        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        if (r < 0) {
-            fprintf(stderr, "Dbus get property(boot_flags) failed for get_sys_boot_options.\n");
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-
-        } else {
-
-            s = get_ipmi_boot_option(p);
-            resp->data[1] = (s << 2);
-            rc = IPMI_CC_OK;
-
-        }
-
-        if (p)
+        const auto& bootSourceSetting = settings.map.at(bootSourceIntf);
+        auto method =
+            bus.new_method_call(
+                settings.service(bootSourceSetting, bootSourceIntf).c_str(),
+                bootSourceSetting.c_str(),
+                PROP_INTF,
+                "Get");
+        method.append(bootSourceIntf, "BootSource");
+        auto reply = bus.call(method);
+        if (reply.is_method_error())
         {
-            free(p);
-            p = NULL;
+            log<level::ERR>("Error in BootSource Get");
+            report<InternalFailure>();
+            *data_len = 0;
+            return IPMI_CC_UNSPECIFIED_ERROR;
         }
+        sdbusplus::message::variant<std::string> result;
+        reply.read(result);
+        auto bootSource =
+            Source::convertSourcesFromString(result.get<std::string>());
+
+        const auto& bootModeSetting = settings.map.at(bootModeIntf);
+        method = bus.new_method_call(
+                     settings.service(bootModeSetting, bootModeIntf).c_str(),
+                     bootModeSetting.c_str(),
+                     PROP_INTF,
+                      "Get");
+        method.append(bootModeIntf, "BootMode");
+        reply = bus.call(method);
+        if (reply.is_method_error())
+        {
+            log<level::ERR>("Error in BootMode Get");
+            report<InternalFailure>();
+            *data_len = 0;
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+        reply.read(result);
+        auto bootMode = Mode::convertModesFromString(result.get<std::string>());
+
+        bootOption = dbusToIpmi.at(static_cast<uint8_t>(bootSource));
+        if ((Mode::Modes::Regular == bootMode) &&
+            (Source::Sources::Default == bootSource))
+        {
+            bootOption = ipmiDefault;
+        }
+        else if (Source::Sources::Default == bootSource)
+        {
+            bootOption = dbusToIpmi.at(static_cast<uint8_t>(bootMode));
+        }
+        resp->data[1] = (bootOption << 2);
+        rc = IPMI_CC_OK;
 
         /* Get the boot policy */
-        r = dbus_get_property("boot_policy",&p);
+        int r = dbus_get_property("boot_policy",&p);
 
         if (r < 0) {
             fprintf(stderr, "Dbus get property(boot_policy) failed for get_sys_boot_options.\n");
@@ -1318,8 +1341,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                              ipmi_data_len_t data_len,
                                              ipmi_context_t context)
 {
+    using namespace boot_options;
     ipmi_ret_t rc = IPMI_CC_OK;
-    char *s;
     set_sys_boot_options_t *reqptr = (set_sys_boot_options_t *) request;
 
     printf("IPMI SET_SYS_BOOT_OPTIONS reqptr->parameter =[%d]\n",reqptr->parameter);
@@ -1332,31 +1355,68 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      * This is the only parameter used by petitboot.
      */
 
-    if (reqptr->parameter == (uint8_t)BootOptionParameter::BOOT_FLAGS) {
+    if (reqptr->parameter == (uint8_t)BootOptionParameter::BOOT_FLAGS)
+    {
+        IpmiValue bootOption = ((reqptr->data[1] & 0x3C) >> 2);
+        using namespace settings;
+        const auto& settings = getSettings();
+        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        s = get_boot_option_by_ipmi(((reqptr->data[1] & 0x3C) >> 2));
-
-        printf("%d: %s\n", __LINE__, s);
-        if (!strcmp(s,INVALID_STRING)) {
-
-            rc = IPMI_CC_PARM_NOT_SUPPORTED;
-
-        } else {
-
-            int r = dbus_set_property("boot_flags",s);
-
-            if (r < 0) {
-                fprintf(stderr, "Dbus set property(boot_flags) failed for set_sys_boot_options.\n");
-                rc = IPMI_CC_UNSPECIFIED_ERROR;
+        auto modeItr = modeIpmiToDbus.find(bootOption);
+        auto sourceItr = sourceIpmiToDbus.find(bootOption);
+        if ((ipmiDefault == bootOption) ||
+            (sourceIpmiToDbus.end() != sourceItr))
+        {
+            sdbusplus::message::variant<std::string> property =
+                convertForMessage(sourceItr->second);
+            const auto& bootSourceSetting =
+                settings.map.at(bootSourceIntf);
+            auto method =
+                bus.new_method_call(
+                    settings.service(bootSourceSetting, bootSourceIntf).c_str(),
+                    bootSourceSetting.c_str(),
+                    PROP_INTF,
+                    "Set");
+            method.append(bootSourceIntf, "BootSource", property);
+            auto reply = bus.call(method);
+            if (reply.is_method_error())
+            {
+                log<level::ERR>("Error in BootSource Set");
+                report<InternalFailure>();
+                *data_len = 0;
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+        }
+        if ((ipmiDefault == bootOption) ||
+            (modeIpmiToDbus.end() != modeItr))
+        {
+            sdbusplus::message::variant<std::string> property =
+                convertForMessage(modeItr->second);
+            const auto& bootModeSetting = settings.map.at(bootModeIntf);
+            auto method =
+                bus.new_method_call(
+                    settings.service(bootModeSetting, bootModeIntf).c_str(),
+                    bootModeSetting.c_str(),
+                    PROP_INTF,
+                    "Set");
+            method.append(bootModeIntf, "BootMode", property);
+            auto reply = bus.call(method);
+            if (reply.is_method_error())
+            {
+                log<level::ERR>("Error in BootMode Set");
+                report<InternalFailure>();
+                *data_len = 0;
+                return IPMI_CC_UNSPECIFIED_ERROR;
             }
         }
 
         /* setting the boot policy */
-        s = (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) ==
+        std::string value =
+            (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) ==
                 SET_PARM_BOOT_FLAGS_PERMANENT) ?"PERMANENT":"ONETIME");
 
-        printf ( "\nBoot Policy is %s",s);
-        int r = dbus_set_property("boot_policy",s);
+        printf ( "\nBoot Policy is %s",value.c_str());
+        int r = dbus_set_property("boot_policy",value.c_str());
 
         if (r < 0) {
             fprintf(stderr, "Dbus set property(boot_policy) failed for set_sys_boot_options.\n");
