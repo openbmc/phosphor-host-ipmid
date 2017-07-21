@@ -185,6 +185,7 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     memcpy(response, &dev_id, *data_len);
 finish:
     free(busname);
+    free(ver);
     return rc;
 }
 
