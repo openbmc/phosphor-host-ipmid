@@ -407,12 +407,12 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-const std::set<std::string> setReadingInterfaces = {
+const std::set<std::string> sensorInterfaces = {
     "xyz.openbmc_project.Sensor.Value",
     };
 
 bool shouldSetReading(std::string interface) {
-    return (setReadingInterfaces.end() != setReadingInterfaces.find(interface));
+    return (sensorInterfaces.end() != sensorInterfaces.find(interface));
 }
 
 // Disambiguates between 64b int and 8b int, signed and unsigned
@@ -777,8 +777,7 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
                                      ipmi_data_len_t data_len)
 {
     /* Functional sensor case */
-    if (info->sensorInterfaces.begin()->first ==
-            "xyz.openbmc_project.Sensor.Value")
+    if (shouldSetReading(info->sensorInterfaces.begin()->first))
     {
         // Get bus
         sd_bus *bus = ipmid_get_sd_bus_connection();
