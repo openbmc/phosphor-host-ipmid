@@ -29,6 +29,7 @@
 #include <sdbusplus/server/object.hpp>
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
+#include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
 
 #include "config.h"
 
@@ -839,33 +840,21 @@ int initiate_state_transition(State::Host::Transition transition)
     return rc;
 }
 
-struct hostPowerPolicyTypeMap_t
-{
-    uint8_t policyNum;
-    char    policyName[19];
-};
-
-hostPowerPolicyTypeMap_t g_hostPowerPolicyTypeMap_t[] = {
-
-        {0x00, "LEAVE_OFF"},
-        {0x01, "RESTORE_LAST_STATE"},
-        {0x02, "ALWAYS_POWER_ON"},
-        {0x03, "UNKNOWN"}
-};
-
-uint8_t get_host_power_policy(char *p)
+namespace power_policy
 {
 
-    hostPowerPolicyTypeMap_t *s = g_hostPowerPolicyTypeMap_t;
+using namespace sdbusplus::xyz::openbmc_project::Control::Power::server;
+using IpmiValue = uint8_t;
+using DbusValue = RestorePolicy::Policy;
 
-    while (s->policyNum != 0x03) {
-        if (!strcmp(s->policyName,p))
-            break;
-        s++;
-    }
+std::map<DbusValue, IpmiValue> dbusToIpmi =
+{
+    {RestorePolicy::Policy::AlwaysOff, 0x00},
+    {RestorePolicy::Policy::Restore, 0x01},
+    {RestorePolicy::Policy::AlwaysOn, 0x02}
+};
 
-    return s->policyNum;
-}
+} // namespace power_policy
 
 //----------------------------------------------------------------------
 // Get Chassis Status commands
@@ -887,11 +876,34 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     ipmi_get_chassis_status_t chassis_status{};
 
-    char *p = NULL;
     uint8_t s = 0;
 
     // Get the system bus where most system services are provided.
     bus = ipmid_get_sd_bus_connection();
+    sdbusplus::bus::bus dbus(bus);
+    using namespace settings;
+    using namespace power_policy;
+    const auto& settings = getSettings();
+
+    const auto& powerRestoreSetting = settings.map.at(powerRestoreIntf);
+    auto method =
+        dbus.new_method_call(
+             settings.service(powerRestoreSetting, powerRestoreIntf).c_str(),
+             powerRestoreSetting.c_str(),
+             PROP_INTF,
+             "Get");
+    method.append(powerRestoreIntf, "PowerRestorePolicy");
+    auto resp = dbus.call(method);
+    if (resp.is_method_error())
+    {
+        log<level::ERR>("Error in PowerRestorePolicy Get");
+        report<InternalFailure>();
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    sdbusplus::message::variant<std::string> result;
+    resp.read(result);
+    auto powerRestore =
+        RestorePolicy::convertPolicyFromString(result.get<std::string>());
 
     *data_len = 4;
 
@@ -920,21 +932,7 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     printf("pgood is 0x%02x\n", pgood);
 
-    // Get Power Policy
-    r = dbus_get_property("power_policy",&p);
-
-    if (r < 0) {
-        fprintf(stderr, "Dbus get property(power_policy) failed for get_sys_boot_options.\n");
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-    } else {
-        s = get_host_power_policy(p);
-    }
-
-    if (p)
-    {
-        free(p);
-        p = NULL;
-    }
+    s = dbusToIpmi.at(powerRestore);
 
     // Current Power State
     // [7] reserved
