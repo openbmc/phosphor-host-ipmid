@@ -1,6 +1,7 @@
 #ifndef __HOST_IPMID_IPMI_H__
 #define __HOST_IPMID_IPMI_H__
 #include "host-ipmid/ipmid-api.h"
+#include "settings.hpp"
 #include <stdio.h>
 
 // When the requester sends in a netfn and a command along with data, this
@@ -20,5 +21,11 @@ ipmi_ret_t ipmi_netfn_router(const ipmi_netfn_t, const ipmi_cmd_t, ipmi_request_
 #define MAX_IPMI_BUFFER 64
 
 extern FILE *ipmiio, *ipmidbus, *ipmicmddetails;
+
+/** @brief Get settings objects
+ *
+ * @return const reference to object composing settings
+ */
+const settings::Objects& getSettings();
 
 #endif
