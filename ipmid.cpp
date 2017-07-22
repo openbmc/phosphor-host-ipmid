@@ -18,11 +18,14 @@
 #include <memory>
 #include <ipmiwhitelist.hpp>
 #include <sdbusplus/bus.hpp>
+#include <sdbusplus/bus/match.hpp>
+#include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
 #include "sensorhandler.h"
 #include "ipmid.hpp"
 #include "settings.hpp"
 
 using namespace phosphor::logging;
+namespace sdbusRule = sdbusplus::bus::match::rules;
 
 sd_bus *bus = NULL;
 sd_bus_slot *ipmid_slot = NULL;
@@ -42,14 +45,9 @@ void print_usage(void) {
   fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
-// Host settings in DBUS
-constexpr char settings_host_object[] = "/org/openbmc/settings/host0";
-constexpr char settings_host_intf[] = "org.freedesktop.DBus.Properties";
-
 const char * DBUS_INTF = "org.openbmc.HostIpmi";
 
 const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
-constexpr char RESTRICTED_MODE_FILTER[] = "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/openbmc/settings/host0'";
 
 typedef std::pair<ipmi_netfn_t, ipmi_cmd_t> ipmi_fn_cmd_t;
 typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
@@ -274,50 +272,34 @@ final:
 
 void cache_restricted_mode()
 {
-    sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int rc = 0;
-    char  *busname = NULL;
-
-    rc = mapper_get_service(bus, settings_host_object, &busname);
-    if (rc < 0) {
-        fprintf(stderr, "Failed to get %s busname: %s\n",
-                settings_host_object, strerror(-rc));
-        goto cleanup;
-    }
-    rc = sd_bus_call_method(bus,
-                            busname,
-                            settings_host_object,
-                            settings_host_intf,
-                            "Get",
-                            &error,
-                            &reply,
-                            "ss",
-                            "org.openbmc.settings.Host",
-                            "restricted_mode");
-    if(rc < 0)
+    restricted_mode = false;
+    using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
+    sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
+    const auto& restrictionModeSetting =
+        allSettings->map.at(settings::restrictionModeIntf);
+    auto method = dbus.new_method_call(
+                      allSettings->service(restrictionModeSetting,
+                          settings::restrictionModeIntf).c_str(),
+                      restrictionModeSetting.c_str(),
+                      "org.freedesktop.DBus.Properties",
+                      "Get");
+    method.append(settings::restrictionModeIntf, "RestrictionMode");
+    auto resp = dbus.call(method);
+    if (resp.is_method_error())
     {
-        fprintf(stderr, "Failed sd_bus_call_method method for restricted mode: %s\n",
-                        strerror(-rc));
-        goto cleanup;
+        log<level::ERR>("Error in RestrictionMode Get");
+        // Fail-safe to true.
+        restricted_mode = true;
+        return;
     }
-
-    rc = sd_bus_message_read(reply, "v", "b", &restricted_mode);
-    if(rc < 0)
+    sdbusplus::message::variant<std::string> result;
+    resp.read(result);
+    auto restrictionMode =
+        RestrictionMode::convertModesFromString(result.get<std::string>());
+    if(RestrictionMode::Modes::Whitelist == restrictionMode)
     {
-        fprintf(stderr, "Failed to parse response message for restricted mode: %s\n",
-                       strerror(-rc));
-        // Fail-safe to restricted mode
         restricted_mode = true;
     }
-
-    printf("Restricted mode = %d\n", restricted_mode);
-
-cleanup:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
 }
 
 static int handle_restricted_mode_change(sd_bus_message *m, void *user_data,
@@ -553,13 +535,6 @@ int main(int argc, char *argv[])
         goto finish;
     }
 
-    // Wait for changes on Restricted mode
-    r = sd_bus_add_match(bus, &ipmid_slot, RESTRICTED_MODE_FILTER, handle_restricted_mode_change, NULL);
-    if (r < 0) {
-        fprintf(stderr, "Failed: sd_bus_add_match: %s : %s\n", strerror(-r), RESTRICTED_MODE_FILTER);
-        goto finish;
-    }
-
     // Attach the bus to sd_event to service user requests
     sd_bus_attach_event(bus, events, SD_EVENT_PRIORITY_NORMAL);
 
@@ -568,6 +543,15 @@ int main(int argc, char *argv[])
         allSettings = std::make_unique<settings::Objects>(dbus);
         // Initialize restricted mode
         cache_restricted_mode();
+        // Wait for changes on Restricted mode
+        sdbusplus::bus::match_t restrictedModeMatch(
+            dbus,
+            sdbusRule::type::signal() +
+            sdbusRule::interface("org.freedesktop.DBus.Properties") +
+            sdbusRule::path(
+                allSettings->map.at(
+                    settings::restrictionModeIntf).c_str()),
+            handle_restricted_mode_change);
 
         for (;;) {
             /* Process requests */
