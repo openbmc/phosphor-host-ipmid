@@ -117,3 +117,36 @@
       Manufacturer:
         IPMIFruProperty: Manufacturer
         IPMIFruSection: Board
+
+5:
+  /system/chassis/motherboard/fan1:
+    xyz.openbmc_project.Inventory.Item:
+      PrettyName:
+        IPMIFruProperty: Product Name
+        IPMIFruSection: Board
+
+6:
+  /system/chassis/motherboard/boxelder/bmc:
+    xyz.openbmc_project.Inventory.Item:
+      PrettyName:
+        IPMIFruProperty: Product Name
+        IPMIFruSection: Board
+    xyz.openbmc_project.Inventory.Decorator.Asset:
+      BuildDate:
+        IPMIFruProperty: Mfg Date
+        IPMIFruSection: Board
+      SerialNumber:
+        IPMIFruProperty: Serial Number
+        IPMIFruSection: Board
+      PartNumber:
+        IPMIFruProperty: Part Number
+        IPMIFruSection: Board
+      Manufacturer:
+        IPMIFruProperty: Manufacturer
+        IPMIFruSection: Board
+7:
+  /system/chassis/motherboard/boxelder/bmc/ethernet:
+    xyz.openbmc_project.Inventory.Item:
+      PrettyName:
+        IPMIFruProperty: Product Name
+        IPMIFruSection: Board
