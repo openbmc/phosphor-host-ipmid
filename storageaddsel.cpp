@@ -9,14 +9,17 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/elog-errors-HostEvent.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include "host-ipmid/ipmid-api.h"
+#include "error-HostEvent.hpp"
 #include "sensorhandler.h"
 #include "storagehandler.h"
+#include "types.hpp"
 
 
 using namespace std;
 using namespace phosphor::logging;
+extern const ipmi::sensor::InvObjectIDMap invSensors;
 
 //////////////////////////
 struct esel_section_headers_t {
@@ -130,25 +133,28 @@ const char *create_esel_severity(const uint8_t *buffer) {
 	return sev_lookup(severity);
 }
 
-int create_esel_association(const uint8_t *buffer, char **m) {
-
+int create_esel_association(const uint8_t *buffer, std::string& invPath)
+{
 	ipmi_add_sel_request_t *p;
-	dbus_interface_t dbusint;
 	uint8_t sensor;
 
 	p = ( ipmi_add_sel_request_t *) buffer;
 
 	sensor = p->sensornumber;
 
-	find_openbmc_path(sensor, &dbusint);
+	invPath = "";
 
-	// Simply no associations if the sensor can not be found
-	if (strlen(dbusint.path) < 1) {
-		printf("Sensor 0x%x not found\n", sensor);
-		memset(dbusint.path,0,sizeof(dbusint.path));
-	}
-
-	*m = strdup(dbusint.path);
+    /*
+     * Search the sensor number to inventory path mapping to figure out the
+     * inventory associated with the ESEL.
+     */
+	for (auto const &iter : invSensors)
+    {
+        if (iter.second.sensorID == sensor)
+        {
+            invPath = iter.first;
+        }
+    }
 
 	return 0;
 }
@@ -178,7 +184,12 @@ int create_esel_description(const uint8_t *buffer, const char *sev, char **messa
 }
 
 
-int send_esel_to_dbus(const char *desc, const char *sev, const char *details, uint8_t *debug, size_t debuglen) {
+int send_esel_to_dbus(const char *desc,
+                      const char *sev,
+                      const std::string& invPath,
+                      uint8_t *debug,
+                      size_t debuglen)
+{
 
     // Allocate enough space to represent the data in hex separated by spaces,
     // to mimic how IPMI would display the data.
@@ -190,20 +201,24 @@ int send_esel_to_dbus(const char *desc, const char *sev, const char *details, ui
     }
     selData[debuglen*3] = '\0';
 
-    using error = org::open_power::Error::Host::Event;
-    report<error>(error::ESEL(selData.get()));
+    using error =  sdbusplus::org::open_power::Host::Event::Error::Event;
+
+    report<error>(org::open_power::Host::Event::Event::ESEL(selData.get()),
+                  org::open_power::Host::Event::Event::CALLOUT_INVENTORY_PATH(
+                      invPath.c_str()));
 
     return 0;
 }
 
 
 void send_esel(uint16_t recordid) {
-	char *desc, *assoc;
+	char *desc;
 	const char *sev;
 	uint8_t *buffer = NULL;
 	const char *path = "/tmp/esel";
 	ssize_t sz;
 	int r;
+	std::string invPath;
 
 	sz = getfilestream(path, &buffer);
 	if (sz == 0) {
@@ -212,15 +227,14 @@ void send_esel(uint16_t recordid) {
 	}
 
 	sev = create_esel_severity(buffer);
-	create_esel_association(buffer, &assoc);
+	create_esel_association(buffer, invPath);
 	create_esel_description(buffer, sev, &desc);
 
-	r = send_esel_to_dbus(desc, sev, assoc, buffer, sz);
+	r = send_esel_to_dbus(desc, sev, invPath, buffer, sz);
 	if (r < 0) {
 		fprintf(stderr, "Failed to send esel to dbus\n");
 	}
 
-	free(assoc);
 	free(desc);
 	delete[] buffer;
 
