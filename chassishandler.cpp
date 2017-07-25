@@ -3,6 +3,7 @@
 #include "types.hpp"
 #include "ipmid.hpp"
 #include "settings.hpp"
+#include "utils.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,20 +76,12 @@ const char *settings_object_name  =  "/org/openbmc/settings/host0";
 const char *settings_intf_name    =  "org.freedesktop.DBus.Properties";
 const char *host_intf_name        =  "org.openbmc.settings.Host";
 
-constexpr auto MAPPER_BUS_NAME = "xyz.openbmc_project.ObjectMapper";
-constexpr auto MAPPER_OBJ = "/xyz/openbmc_project/object_mapper";
-constexpr auto MAPPER_INTF = "xyz.openbmc_project.ObjectMapper";
-
 constexpr auto SETTINGS_ROOT = "/";
 constexpr auto SETTINGS_MATCH = "host0";
-constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
 
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 
-constexpr auto METHOD_GET = "Get";
-constexpr auto METHOD_GET_ALL = "GetAll";
-constexpr auto METHOD_SET = "Set";
 
 typedef struct
 {
@@ -136,201 +129,6 @@ settings::Objects objects(dbus,
 } // namespace cache
 } // namespace internal
 } // namespace chassis
-
-/** @brief Gets the dbus object info implementing the given interface
- *         from the given subtree.
- *  @param[in] interface - Dbus interface.
- *  @param[in] serviceRoot - subtree from where the search should start.
- *  @param[in] match - identifier for object.
- *  @return On success returns the object having objectpath and servicename.
- */
-
-//TODO There may be cases where an interface is implemented by multiple
-//  objects,to handle such cases we are interested on that object
-//  which are on interested busname.
-//  Currently mapper doesn't give the readable busname(gives busid) so we can't
-//  use busname to find the object,will do later once the support is there.
-
-ipmi::DbusObjectInfo getDbusObject(const std::string& interface,
-                                   const std::string& serviceRoot = SETTINGS_ROOT,
-                                   const std::string& match = "")
-{
-    std::vector<std::string>interfaces;
-    interfaces.emplace_back(interface);
-
-    auto bus = sdbusplus::bus::new_default();
-    auto depth = 0;
-
-    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME,
-                                          MAPPER_OBJ,
-                                          MAPPER_INTF,
-                                          "GetSubTree");
-
-    mapperCall.append(serviceRoot);
-    mapperCall.append(depth);
-    mapperCall.append(interfaces);
-
-    auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
-    {
-        log<level::ERR>("Error in mapper call");
-        elog<InternalFailure>();
-    }
-
-    ipmi::ObjectTree objectTree;
-    mapperReply.read(objectTree);
-
-    if (objectTree.empty())
-    {
-        log<level::ERR>("No Object have impelmented the interface",
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-
-    ipmi::DbusObjectInfo objectInfo;
-
-    // if match is empty then return the first object
-    if(match == "")
-    {
-        objectInfo =  make_pair(objectTree.begin()->first,
-            objectTree.begin()->second.begin()->first);
-        return objectInfo;
-    }
-
-    // else search the match string in the object path
-    auto objectFound = false;
-    for (auto& object : objectTree)
-    {
-        if(object.first.find(match)!= std::string::npos)
-        {
-            objectFound = true;
-            objectInfo = make_pair(object.first, object.second.begin()->first);
-            break;
-        }
-    }
-
-    if(!objectFound)
-    {
-        log<level::ERR>("Failed to find object which matches",
-                        entry("MATCH=%s",match.c_str()));
-        elog<InternalFailure>();
-    }
-    return objectInfo;
-
-}
-
-/** @brief Gets the value associated with the given object
- *         and the interface.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] interface - Dbus interface.
- *  @param[in] property - name of the property.
- *  @return On success returns the value of the property.
- */
-std::string getDbusProperty(const std::string& service,
-                            const std::string& objPath,
-                            const std::string& interface,
-                            const std::string& property)
-{
-
-    sdbusplus::message::variant<std::string> name;
-
-    auto bus = sdbusplus::bus::new_default();
-
-    auto method = bus.new_method_call(
-                      service.c_str(),
-                      objPath.c_str(),
-                      PROP_INTF,
-                      METHOD_GET);
-
-    method.append(interface, property);
-
-    auto reply = bus.call(method);
-
-    if (reply.is_method_error())
-    {
-         log<level::ERR>("Failed to get property",
-                        entry("PROPERTY=%s", property.c_str()),
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-
-    reply.read(name);
-
-    return name.get<std::string>();
-}
-
-/** @brief Gets all the properties associated with the given object
- *         and the interface.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] interface - Dbus interface.
- *  @return On success returns the map of name value pair.
- */
-ipmi::PropertyMap getAllDbusProperties(const std::string& service,
-                                       const std::string& objPath,
-                                       const std::string& interface)
-{
-    ipmi::PropertyMap properties;
-    auto bus = sdbusplus::bus::new_default();
-
-    auto method = bus.new_method_call(
-                      service.c_str(),
-                      objPath.c_str(),
-                      PROP_INTF,
-                      METHOD_GET_ALL);
-
-    method.append(interface);
-
-    auto reply = bus.call(method);
-
-    if (reply.is_method_error())
-    {
-         log<level::ERR>("Failed to get all properties",
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-
-    reply.read(properties);
-    return properties;
-}
-
-/** @brief Sets the property value of the given object.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] interface - Dbus interface.
- *  @param[in] property - name of the property.
- *  @param[in] value - value which needs to be set.
- */
-void setDbusProperty(const std::string& service,
-                     const std::string& objPath,
-                     const std::string& interface,
-                     const std::string& property,
-                     const ipmi::Value& value)
-{
-    auto bus = sdbusplus::bus::new_default();
-
-    auto method = bus.new_method_call(
-                      service.c_str(),
-                      objPath.c_str(),
-                      PROP_INTF,
-                      METHOD_SET);
-
-    method.append(interface);
-    method.append(property, value);
-
-    if (!bus.call(method))
-    {
-        log<level::ERR>("Failed to set property",
-                        entry("PROPERTY=%s", property.c_str()),
-                        entry("PATH=%s",objPath.c_str()),
-                        entry("INTERFACE=%s",interface.c_str()));
-        elog<InternalFailure>();
-    }
-
-}
 
 //TODO : Can remove the below function as we have
 //       new functions which uses sdbusplus.
@@ -494,16 +292,16 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         //  as SETTINGS_MATCH.
         //  Later SETTINGS_MATCH will be replaced with busname.
 
-        auto ipObjectInfo = getDbusObject(IP_INTERFACE, SETTINGS_ROOT,
-                                          SETTINGS_MATCH);
-        auto macObjectInfo = getDbusObject(MAC_INTERFACE, SETTINGS_ROOT,
-                                           SETTINGS_MATCH);
+        auto ipObjectInfo = ipmi::getDbusObject(IP_INTERFACE, SETTINGS_ROOT,
+                                                SETTINGS_MATCH);
+        auto macObjectInfo = ipmi::getDbusObject(MAC_INTERFACE, SETTINGS_ROOT,
+                                                 SETTINGS_MATCH);
 
-        properties  = getAllDbusProperties(ipObjectInfo.second,
-                                           ipObjectInfo.first, IP_INTERFACE);
-        auto MACAddress =
-            getDbusProperty(macObjectInfo.second, macObjectInfo.first,
-                            MAC_INTERFACE, "MACAddress");
+        properties  = ipmi::getAllDbusProperties(ipObjectInfo.second,
+                                         ipObjectInfo.first, IP_INTERFACE);
+        auto variant =
+            ipmi::getDbusProperty(macObjectInfo.second, macObjectInfo.first,
+                                  MAC_INTERFACE, "MACAddress");
 
         auto ipAddress = properties["Address"].get<std::string>();
 
@@ -514,6 +312,8 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         uint8_t isStatic = (properties["Origin"].get<std::string>() ==
             "xyz.openbmc_project.Network.IP.AddressOrigin.Static")
                 ? 1 : 0;
+
+        auto MACAddress = variant.get<std::string>();
 
         // it is expected here that we should get the valid data
         // but we may also get the default values.
@@ -742,23 +542,23 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
             ",mac="s + mac + ",addressOrigin="s + addressOrigin;
 
 
-        auto ipObjectInfo = getDbusObject(IP_INTERFACE, SETTINGS_ROOT,
+        auto ipObjectInfo = ipmi::getDbusObject(IP_INTERFACE, SETTINGS_ROOT,
                                           SETTINGS_MATCH);
-        auto macObjectInfo = getDbusObject(MAC_INTERFACE, SETTINGS_ROOT,
+        auto macObjectInfo = ipmi::getDbusObject(MAC_INTERFACE, SETTINGS_ROOT,
                                            SETTINGS_MATCH);
         // set the dbus property
-        setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Address", std::string(ipAddress));
-        setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "PrefixLength", prefix);
-        setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Origin", addressOrigin);
-        setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Gateway", std::string(gateway));
-        setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Type",
                 std::string("xyz.openbmc_project.Network.IP.Protocol.IPv4"));
-        setDbusProperty(macObjectInfo.second, macObjectInfo.first,
+        ipmi::setDbusProperty(macObjectInfo.second, macObjectInfo.first,
                 MAC_INTERFACE,"MACAddress", std::string(mac));
 
         log<level::DEBUG>("Network configuration changed",
@@ -940,7 +740,7 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         dbus.new_method_call(
             objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
             powerRestoreSetting.c_str(),
-            PROP_INTF,
+            ipmi::PROP_INTF,
             "Get");
     method.append(powerRestoreIntf, "PowerRestorePolicy");
     auto resp = dbus.call(method);
@@ -1287,7 +1087,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             dbus.new_method_call(
                  objects.service(bootSourceSetting, bootSourceIntf).c_str(),
                  bootSourceSetting.c_str(),
-                 PROP_INTF,
+                 ipmi::PROP_INTF,
                  "Get");
         method.append(bootSourceIntf, "BootSource");
         auto reply = dbus.call(method);
@@ -1307,7 +1107,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         method = dbus.new_method_call(
                       objects.service(bootModeSetting, bootModeIntf).c_str(),
                       bootModeSetting.c_str(),
-                      PROP_INTF,
+                      ipmi::PROP_INTF,
                       "Get");
         method.append(bootModeIntf, "BootMode");
         reply = dbus.call(method);
@@ -1426,7 +1226,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 dbus.new_method_call(
                      objects.service(bootSourceSetting, bootSourceIntf).c_str(),
                      bootSourceSetting.c_str(),
-                     PROP_INTF,
+                     ipmi::PROP_INTF,
                      "Set");
             method.append(bootSourceIntf, "BootSource", property);
             auto reply = dbus.call(method);
@@ -1448,7 +1248,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 dbus.new_method_call(
                      objects.service(bootModeSetting, bootModeIntf).c_str(),
                      bootModeSetting.c_str(),
-                     PROP_INTF,
+                     ipmi::PROP_INTF,
                      "Set");
             method.append(bootModeIntf, "BootMode", property);
             auto reply = dbus.call(method);
