@@ -4,12 +4,13 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <sdbusplus/bus.hpp>
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
 {
     // Get capability bits
-    IPMI_CMD_DCMI_GET_POWER = 0x03,
+    IPMI_CMD_DCMI_GET_POWER_LIMIT = 0x03,
     IPMI_CMD_DCMI_GET_ASSET_TAG = 0x06,
     IPMI_CMD_DCMI_SET_ASSET_TAG = 0x08,
 };
@@ -101,6 +102,48 @@ std::string readAssetTag();
  *  @param[in] assetTag - Asset Tag to be written to the property.
  */
 void writeAssetTag(const std::string& assetTag);
+
+/** @brief Read the current power cap value
+ *
+ *  @param[in] bus - dbus connection
+ *
+ *  @return On success return the power cap value.
+ */
+uint32_t getPcap(sdbusplus::bus::bus& bus);
+
+/** @brief Check if the power capping is enabled
+ *
+ *  @param[in] bus - dbus connection
+ *
+ *  @return true if the powerCap is enabled and false if the powercap
+ *          is disabled.
+ */
+bool getPcapEnabled(sdbusplus::bus::bus& bus);
+
+/** @struct GetPowerLimitRequest
+ *
+ *  DCMI payload for Get Power Limit command request.
+ */
+struct GetPowerLimitRequest
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint16_t reserved;          //!< Reserved
+} __attribute__((packed));
+
+/** @struct GetPowerLimitResponse
+ *
+ *  DCMI payload for Get Power Limit command response.
+ */
+struct GetPowerLimitResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint16_t reserved;          //!< Reserved.
+    uint8_t exceptionAction;    //!< Exception action.
+    uint16_t powerLimit;        //!< Power limit requested in watts.
+    uint32_t correctionTime;    //!< Correction time limit in milliseconds.
+    uint16_t reserved1;         //!< Reserved.
+    uint16_t samplingPeriod;    //!< Statistics sampling period in seconds.
+} __attribute__((packed));
 
 } // namespace dcmi
 
