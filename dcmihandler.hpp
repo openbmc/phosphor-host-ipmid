@@ -11,6 +11,7 @@ enum ipmi_netfn_sen_cmds
 {
     // Get capability bits
     IPMI_CMD_DCMI_GET_POWER_LIMIT = 0x03,
+    IPMI_CMD_DCMI_SET_POWER_LIMIT = 0x04,
     IPMI_CMD_DCMI_GET_ASSET_TAG = 0x06,
     IPMI_CMD_DCMI_SET_ASSET_TAG = 0x08,
 };
@@ -143,6 +144,38 @@ struct GetPowerLimitResponse
     uint32_t correctionTime;    //!< Correction time limit in milliseconds.
     uint16_t reserved1;         //!< Reserved.
     uint16_t samplingPeriod;    //!< Statistics sampling period in seconds.
+} __attribute__((packed));
+
+/** @brief Set the power cap value
+ *
+ *  @param[in] bus - dbus connection
+ *  @param[in] powerCap - power cap value
+ */
+void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap);
+
+/** @struct SetPowerLimitRequest
+ *
+ *  DCMI payload for Set Power Limit command request.
+ */
+struct SetPowerLimitRequest
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint16_t reserved;          //!< Reserved
+    uint8_t reserved1;          //!< Reserved
+    uint8_t exceptionAction;    //!< Exception action.
+    uint16_t powerLimit;        //!< Power limit requested in watts.
+    uint32_t correctionTime;    //!< Correction time limit in milliseconds.
+    uint16_t reserved2;         //!< Reserved.
+    uint16_t samplingPeriod;    //!< Statistics sampling period in seconds.
+} __attribute__((packed));
+
+/** @struct SetPowerLimitResponse
+ *
+ *  DCMI payload for Set Power Limit command response.
+ */
+struct SetPowerLimitResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
 } __attribute__((packed));
 
 } // namespace dcmi
