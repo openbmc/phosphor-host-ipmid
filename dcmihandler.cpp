@@ -74,6 +74,27 @@ bool getPcapEnabled(sdbusplus::bus::bus& bus)
     return sdbusplus::message::variant_ns::get<bool>(pcapEnabled);
 }
 
+void setPcap(sdbusplus::bus::bus& bus, uint32_t powerCap)
+{
+    auto service = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
+
+    auto method = bus.new_method_call(service.c_str(),
+                                      PCAP_PATH,
+                                      "org.freedesktop.DBus.Properties",
+                                      "Set");
+
+    method.append(PCAP_INTERFACE, POWER_CAP_PROP);
+    method.append(sdbusplus::message::variant<uint32_t>(powerCap));
+
+    auto reply = bus.call(method);
+
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in setPcap property");
+        elog<InternalFailure>();
+    }
+}
+
 void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree)
 {
     static constexpr auto mapperBusName = "xyz.openbmc_project.ObjectMapper";
@@ -228,6 +249,45 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 }
 
+ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                         ipmi_request_t request, ipmi_response_t response,
+                         ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const dcmi::SetPowerLimitRequest*>
+                   (request);
+    std::vector<uint8_t> outPayload(sizeof(dcmi::SetPowerLimitResponse));
+    auto responseData = reinterpret_cast<dcmi::SetPowerLimitResponse*>
+            (outPayload.data());
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    sdbusplus::bus::bus sdbus {ipmid_get_sd_bus_connection()};
+
+    // Only process the power limit requested in watts.
+    try
+    {
+        dcmi::setPcap(sdbus, requestData->powerLimit);
+    }
+    catch (InternalFailure& e)
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    log<level::INFO>("Set Power Cap",
+                     entry("PowerCap=%u", requestData->powerLimit));
+
+    responseData->groupID = dcmi::groupExtId;
+    memcpy(response, outPayload.data(), outPayload.size());
+    *data_len = outPayload.size();
+
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
@@ -369,6 +429,11 @@ void register_netfn_dcmi_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER_LIMIT);
     ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER_LIMIT, NULL, getPowerLimit,
                            PRIVILEGE_USER);
+
+    // <Set Power Limit>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_POWER_LIMIT);
+    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_POWER_LIMIT, NULL, setPowerLimit,
+                           PRIVILEGE_OPERATOR);
 
     // <Get Asset Tag>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_ASSET_TAG);
