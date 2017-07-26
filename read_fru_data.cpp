@@ -5,6 +5,7 @@
 #include "fruread.hpp"
 #include "host-ipmid/ipmid-api.h"
 #include "utils.hpp"
+#include "types.hpp"
 
 extern const FruMap frus;
 
@@ -30,7 +31,8 @@ namespace cache
     FRUAreaMap fruMap;
 }
 /**
- * @brief Read the property value from Inventory
+ * @brief Read all the property value for the specified interface
+ *  from Inventory.
  *
  * @param[in] bus dbus
  * @param[in] intf Interface
@@ -38,32 +40,29 @@ namespace cache
  * @param[in] path Object path
  * @return property value
  */
-std::string readProperty(const std::string& intf,
-                         const std::string& propertyName,
-                         const std::string& path)
+ipmi::PropertyMap readAllProperty(const std::string& intf,
+                            const std::string& path)
 {
+    ipmi::PropertyMap properties;
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     auto service = ipmi::getService(bus, INV_INTF, OBJ_PATH);
     std::string objPath = OBJ_PATH + path;
     auto method = bus.new_method_call(service.c_str(),
                                       objPath.c_str(),
                                       PROP_INTF,
-                                      "Get");
-    method.append(intf, propertyName);
+                                      "GetAll");
+    method.append(intf);
     auto reply = bus.call(method);
     if (reply.is_method_error())
     {
         //If property is not found simply return empty value
-        log<level::INFO>("Property value not set",
-            entry("Property=%s", propertyName),
+        log<level::ERR>("Error in reading property values from inventory",
+            entry("Interface=%s", intf),
             entry("Path=%s", objPath));
-        return {};
+        return properties;
     }
-    sdbusplus::message::variant<std::string> property;
-    reply.read(property);
-    std::string value =
-        sdbusplus::message::variant_ns::get<std::string>(property);
-    return value;
+    reply.read(properties);
+    return properties;
 }
 
 /**
@@ -85,15 +84,18 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     auto& instanceList = iter->second;
     for (auto& instance : instanceList)
     {
-        for (auto& interfaceList : instance.second)
+        for (auto& intf : instance.second)
         {
-            for (auto& properties : interfaceList.second)
+            ipmi::PropertyMap allProp = readAllProperty(
+                    intf.first, instance.first);
+            for (auto& properties : intf.second)
             {
-                decltype(auto) pdata = properties.second;
-                auto value = readProperty(
-                        interfaceList.first, properties.first,
-                        instance.first);
-                data[pdata.section].emplace(properties.first, value);
+                auto iter = allProp.find(properties.first);
+                if (iter != allProp.end())
+                {
+                    data[properties.second.section].emplace(properties.first,
+                        allProp[properties.first].get<std::string>());
+                }
             }
         }
     }
