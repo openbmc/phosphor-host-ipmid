@@ -12,6 +12,7 @@ enum ipmi_netfn_sen_cmds
     // Get capability bits
     IPMI_CMD_DCMI_GET_POWER_LIMIT = 0x03,
     IPMI_CMD_DCMI_SET_POWER_LIMIT = 0x04,
+    IPMI_CMD_DCMI_APPLY_POWER_LIMIT = 0x05,
     IPMI_CMD_DCMI_GET_ASSET_TAG = 0x06,
     IPMI_CMD_DCMI_SET_ASSET_TAG = 0x08,
 };
@@ -174,6 +175,33 @@ struct SetPowerLimitRequest
  *  DCMI payload for Set Power Limit command response.
  */
 struct SetPowerLimitResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
+} __attribute__((packed));
+
+/** @brief Enable or disable the power capping
+ *
+ *  @param[in] bus - dbus connection
+ *  @param[in] enabled - enable/disable
+ */
+void setPcapEnable(sdbusplus::bus::bus& bus, bool enabled);
+
+/** @struct ApplyPowerLimitRequest
+ *
+ *  DCMI payload for Activate/Deactivate Power Limit command request.
+ */
+struct ApplyPowerLimitRequest
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t powerLimitAction;   //!< Power limit activation
+    uint16_t reserved;          //!< Reserved
+} __attribute__((packed));
+
+/** @struct ApplyPowerLimitResponse
+ *
+ *  DCMI payload for Acticate/Deactivate Power Limit command response.
+ */
+struct ApplyPowerLimitResponse
 {
     uint8_t groupID;            //!< Group extension identification.
 } __attribute__((packed));
