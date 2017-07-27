@@ -21,6 +21,7 @@ using Value = sdbusplus::message::variant<bool, uint8_t, int16_t,
                                           int64_t, uint64_t, std::string>;
 
 using PropertyMap = std::map<DbusProperty, Value>;
+
 using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
 namespace sensor
