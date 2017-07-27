@@ -1,6 +1,9 @@
 #include "apphandler.h"
 #include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
+#include "types.hpp"
+#include "utils.hpp"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -10,13 +13,22 @@
 #include <arpa/inet.h>
 #include "transporthandler.h"
 
+#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
+
+
 extern sd_bus *bus;
 
 constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
 constexpr auto app_ifc = "org.openbmc.NetworkManager";
 constexpr auto app_nwinterface = "eth0";
+constexpr auto NETWORK_MATCH = "eth0/ipv4";
 
 void register_netfn_app_functions() __attribute__((constructor));
+
+using namespace phosphor::logging;
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
 // Offset in get device id command.
 typedef struct
@@ -508,7 +520,7 @@ finish:
     return rc;
 }
 
-extern struct channel_config_t channel_config;
+extern struct ChannelConfig_t channelConfig;
 
 ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
@@ -516,105 +528,77 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = nullptr;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
-    char *app = nullptr;
-    int family = 0;
-    unsigned char prefixlen = 0;
-    char* ipaddr = nullptr;
     uint32_t mask = 0xFFFFFFFF;
-    char* gateway = nullptr;
-    char tmp_netmask[INET_ADDRSTRLEN];
+    char netmask[INET_ADDRSTRLEN];
 
     // Todo: parse the request data if needed.
 
     // Using Set Channel cmd to apply changes of Set Lan Cmd.
+    try
+    {
 
-    r = mapper_get_service(bus, app_obj, &app);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s bus name: %s\n",
-                app_obj, strerror(-r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+        ipmi::PropertyMap properties, systemProperties;
+
+        auto ipObjectInfo = ipmi::getDbusObject(ipmi::IP_INTERFACE,
+                                                ipmi::NETWORK_ROOT,
+                                                NETWORK_MATCH);
+
+        auto systemObject = ipmi::getDbusObject(ipmi::SYSTEMCONFIG_INTERFACE,
+                                                ipmi::NETWORK_ROOT);
+
+        properties  = ipmi::getAllDbusProperties(ipObjectInfo.second,
+                ipObjectInfo.first, ipmi::IP_INTERFACE);
+
+        systemProperties  = ipmi::getAllDbusProperties(systemObject.second,
+                systemObject.first,
+                ipmi::SYSTEMCONFIG_INTERFACE);
+
+        auto ipaddress = properties["Address"].get<std::string>();
+        auto prefix = properties["PrefixLength"].get<uint8_t>();
+        auto gateway = systemProperties["DefaultGateway"].get<std::string>();
+
+        log<level::INFO>("Network data from Cache",
+                          entry("PREFIX=%s", channelConfig.netmask.c_str()),
+                          entry("ADDRESS=%s", channelConfig.ipaddr.c_str()),
+                          entry("GATEWAY=%s", channelConfig.gateway.c_str()));
+
+        if(channelConfig.ipaddr.empty())
+        {
+            channelConfig.ipaddr.assign(ipaddress);
+        }
+
+        if(channelConfig.netmask.empty())
+        {
+            mask = htonl(mask << (32 - prefix));
+            uint8_t* p = (uint8_t*)&mask;
+
+            snprintf(netmask, INET_ADDRSTRLEN, "%d.%d.%d.%d",
+                    *p, *(p+1), *(p+2), *(p+3));
+            channelConfig.netmask.assign(netmask);
+        }
+
+        if(channelConfig.gateway.empty()) {
+            channelConfig.gateway.assign(gateway);
+        }
+
+        log<level::INFO>("Network data from HW",
+                          entry("PREFIX=%d", prefix),
+                          entry("ADDRESS=%s", ipaddress.c_str()),
+                          entry("GATEWAY=%s", gateway.c_str()));
+
     }
-
-    r = sd_bus_call_method(bus, app, app_obj, app_ifc, "GetAddress4", &error,
-                            &reply, "s", app_nwinterface);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call Get Method: %s\n", strerror(-r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
-
-    r = sd_bus_message_read(reply, "iyss",
-                            &family, &prefixlen, &ipaddr, &gateway);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get a response: %s\n", strerror(-r));
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto finish;
-    }
-
-    printf("N/W data from Cache: %s:%s:%s\n",
-            channel_config.new_ipaddr.c_str(),
-            channel_config.new_netmask.c_str(),
-            channel_config.new_gateway.c_str());
-
-    if(channel_config.new_ipaddr.empty()) {
-        channel_config.new_ipaddr.assign(ipaddr);
-    }
-
-    if(channel_config.new_netmask.empty()) {
-        mask = htonl(mask<<(32-prefixlen));
-        uint8_t* p = (uint8_t*)&mask;
-
-        snprintf(tmp_netmask, INET_ADDRSTRLEN, "%d.%d.%d.%d",
-            *p, *(p+1), *(p+2), *(p+3));
-        channel_config.new_netmask.assign(tmp_netmask);
-    }
-
-    if(channel_config.new_gateway.empty()) {
-        channel_config.new_gateway.assign(gateway);
-    }
-
-    printf("N/W data from HW %s:%d:%s:%s\n",
-            family==AF_INET?"IPv4":"IPv6", prefixlen, ipaddr,gateway);
-    printf("N/W data from Cache: %s:%s:%s\n",
-            channel_config.new_ipaddr.c_str(),
-            channel_config.new_netmask.c_str(),
-            channel_config.new_gateway.c_str());
-
-    r = sd_bus_call_method(bus,            // On the System Bus
-                            app,            // Service to contact
-                            app_obj,            // Object path
-                            app_ifc,            // Interface name
-                            "SetAddress4",  // Method to be called
-                            &error,         // object to return error
-                            &reply,         // Response message on success
-                            "ssss",         // input message (Interface,
-                                            // IP Address, Netmask, Gateway)
-                            app_nwinterface,    // eth0
-                            channel_config.new_ipaddr.c_str(),
-                            channel_config.new_netmask.c_str(),
-                            channel_config.new_gateway.c_str());
-    if(r < 0) {
-        fprintf(stderr, "Failed to set network data %s:%s:%s %s\n",
-                channel_config.new_ipaddr.c_str(),
-                channel_config.new_netmask.c_str(),
-                channel_config.new_gateway.c_str(),
-                error.message);
+    catch (InternalFailure& e)
+    {
+        log<level::ERR>("Failed to set network data",
+                          entry("PREFIX=%s", channelConfig.netmask.c_str()),
+                          entry("ADDRESS=%s", channelConfig.ipaddr.c_str()),
+                          entry("GATEWAY=%s", channelConfig.gateway.c_str()));
+        commit<InternalFailure>();
         rc = IPMI_CC_UNSPECIFIED_ERROR;
     }
-
-    channel_config.new_ipaddr.clear();
-    channel_config.new_netmask.clear();
-    channel_config.new_gateway.clear();
-
-finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(app);
+    channelConfig.ipaddr.clear();
+    channelConfig.netmask.clear();
+    channelConfig.gateway.clear();
 
     return rc;
 }
