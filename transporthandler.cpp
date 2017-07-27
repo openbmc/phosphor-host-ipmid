@@ -6,7 +6,12 @@
 
 #include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
-#include "transporthandler.h"
+#include "transporthandler.hpp"
+#include "utils.hpp"
+
+#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
 
 #define SYSTEMD_NETWORKD_DBUS 1
 
@@ -23,7 +28,7 @@ const char *nwinterface = "eth0";
 
 const int SIZE_MAC = 18; //xx:xx:xx:xx:xx:xx
 
-struct channel_config_t channel_config;
+struct ChannelConfig_t channelConfig;
 
 const uint8_t SET_COMPLETE = 0;
 const uint8_t SET_IN_PROGRESS = 1;
@@ -33,104 +38,158 @@ const uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
 // Status of Set-In-Progress Parameter (# 0)
 uint8_t lan_set_in_progress = SET_COMPLETE;
 
-
+using namespace phosphor::logging;
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
 void register_netfn_transport_functions() __attribute__((constructor));
 
-// Helper Function to get IP Address/NetMask/Gateway from Network Manager or
+// Helper Function to get IP Address/NetMask/Gateway/MAC Address from Network Manager or
 // Cache based on Set-In-Progress State
-ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t * data)
+ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
 {
-    sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int family;
-    unsigned char prefixlen;
-    char* ipaddr = NULL;
-    unsigned long mask = 0xFFFFFFFF;
-    char* gateway = NULL;
-    int r = 0;
     ipmi_ret_t rc = IPMI_CC_OK;
-    char *app = NULL;
-
-    r = mapper_get_service(bus, obj, &app);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s bus name: %s\n",
-                obj, strerror(-r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto cleanup;
-    }
-    r = sd_bus_call_method(bus, app, obj, ifc, "GetAddress4", &error,
-                            &reply, "s", nwinterface);
-    if(r < 0)
+    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+    try
     {
-        fprintf(stderr, "Failed to call Get Method: %s\n", strerror(-r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto cleanup;
-    }
-
-    r = sd_bus_message_read(reply, "iyss",
-                            &family, &prefixlen, &ipaddr, &gateway);
-    if(r < 0)
-    {
-        fprintf(stderr, "Failed to get a response: %s\n", strerror(-rc));
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto cleanup;
-    }
-
-    printf("N/W data from HW %s:%d:%s:%s\n",
-            family==AF_INET?"IPv4":"IPv6", prefixlen, ipaddr,gateway);
-    printf("N/W data from Cache: %s:%s:%s\n",
-            channel_config.new_ipaddr.c_str(),
-            channel_config.new_netmask.c_str(),
-            channel_config.new_gateway.c_str());
-
-    if(lan_param == LAN_PARM_IP)
-    {
-        if(lan_set_in_progress == SET_COMPLETE)
+        switch (lan_param)
         {
-            std::string ipaddrstr(ipaddr);
-            inet_pton(AF_INET, ipaddrstr.c_str(),(void *)data);
-        }
-        else if(lan_set_in_progress == SET_IN_PROGRESS)
-        {
-            inet_pton(AF_INET, channel_config.new_ipaddr.c_str(), (void *)data);
-        }
-    }
-    else if(lan_param == LAN_PARM_SUBNET)
-    {
-        if(lan_set_in_progress == SET_COMPLETE)
-         {
-            mask = htonl(mask<<(32-prefixlen));
-            memcpy(data, &mask, 4);
-         }
-         else if(lan_set_in_progress == SET_IN_PROGRESS)
-         {
-             inet_pton(AF_INET, channel_config.new_netmask.c_str(), (void *)data);
-         }
-    }
-    else if(lan_param == LAN_PARM_GATEWAY)
-    {
-        if(lan_set_in_progress == SET_COMPLETE)
-         {
-            std::string gatewaystr(gateway);
-            inet_pton(AF_INET, gatewaystr.c_str(), (void *)data);
-         }
-         else if(lan_set_in_progress == SET_IN_PROGRESS)
-         {
-             inet_pton(AF_INET, channel_config.new_gateway.c_str(),(void *)data);
-         }
-    }
-    else
-    {
-        rc = IPMI_CC_PARM_OUT_OF_RANGE;
-    }
+            case LAN_PARM_IP:
+            {
+                std::string ipaddress;
+                if (lan_set_in_progress == SET_COMPLETE)
+                {
+                    auto ipObjectInfo = ipmi::getDbusObject(
+                                            bus,
+                                            ipmi::network::IP_INTERFACE,
+                                            ipmi::network::ROOT,
+                                            ipmi::network::IP_TYPE);
 
-cleanup:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(app);
+                    auto properties = ipmi::getAllDbusProperties(
+                                         bus,
+                                         ipObjectInfo.second,
+                                         ipObjectInfo.first,
+                                         ipmi::network::IP_INTERFACE);
 
+                    ipaddress = properties["Address"].get<std::string>();
+                }
+                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                {
+                    ipaddress = channelConfig.ipaddr;
+                }
+
+                inet_pton(AF_INET, ipaddress.c_str(),
+                          reinterpret_cast<void*>(data));
+            }
+            break;
+
+            case LAN_PARM_SUBNET:
+            {
+                if (lan_set_in_progress == SET_COMPLETE)
+                {
+                    auto ipObjectInfo = ipmi::getDbusObject(
+                                            bus,
+                                            ipmi::network::IP_INTERFACE,
+                                            ipmi::network::ROOT,
+                                            ipmi::network::IP_TYPE);
+
+                    auto properties = ipmi::getAllDbusProperties(
+                                         bus,
+                                         ipObjectInfo.second,
+                                         ipObjectInfo.first,
+                                         ipmi::network::IP_INTERFACE);
+
+                    auto prefix = properties["PrefixLength"].get<uint8_t>();
+                    unsigned long mask = ipmi::network::MASK_32_BIT;
+                    mask = htonl(mask << (ipmi::network::BITS_32 - prefix));
+                    memcpy(data, &mask, ipmi::network::IPV4_ADDRESS_SIZE_BYTE);
+                }
+                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                {
+                    inet_pton(AF_INET, channelConfig.netmask.c_str(),
+                              reinterpret_cast<void*>(data));
+
+                }
+
+            }
+            break;
+
+            case LAN_PARM_GATEWAY:
+            {
+                std::string gateway;
+
+                if (lan_set_in_progress == SET_COMPLETE)
+                {
+                    auto systemObject = ipmi::getDbusObject(
+                            bus,
+                            ipmi::network::SYSTEMCONFIG_INTERFACE,
+                            ipmi::network::ROOT);
+
+                    auto systemProperties = ipmi::getAllDbusProperties(
+                            bus,
+                            systemObject.second,
+                            systemObject.first,
+                            ipmi::network::SYSTEMCONFIG_INTERFACE);
+
+                    gateway = systemProperties["DefaultGateway"].get<
+                                 std::string>();
+
+                }
+                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                {
+                    gateway = channelConfig.gateway;
+                }
+
+                inet_pton(AF_INET, gateway.c_str(),
+                          reinterpret_cast<void*>(data));
+
+            }
+            break;
+
+            case LAN_PARM_MAC:
+            {
+                std::string macAddress;
+                if (lan_set_in_progress == SET_COMPLETE)
+                {
+                    auto macObjectInfo = ipmi::getDbusObject(
+                                             bus,
+                                             ipmi::network::MAC_INTERFACE,
+                                             ipmi::network::ROOT);
+
+                    auto variant = ipmi::getDbusProperty(
+                                     bus,
+                                     macObjectInfo.second,
+                                     macObjectInfo.first,
+                                     ipmi::network::MAC_INTERFACE,
+                                     "MACAddress");
+
+                    macAddress = variant.get<std::string>();
+
+                }
+                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                {
+                    macAddress = channelConfig.macAddress;
+                }
+
+                sscanf(macAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
+                       (data),
+                       (data + 1),
+                       (data + 2),
+                       (data + 3),
+                       (data + 4),
+                       (data + 5));
+            }
+            break;
+
+            default:
+                rc = IPMI_CC_PARM_OUT_OF_RANGE;
+        }
+    }
+    catch (InternalFailure& e)
+    {
+        commit<InternalFailure>();
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        return rc;
+    }
     return rc;
 }
 
@@ -145,120 +204,144 @@ ipmi_ret_t ipmi_transport_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-struct set_lan_t {
+struct set_lan_t
+{
     uint8_t channel;
     uint8_t parameter;
     uint8_t data[8]; // Per IPMI spec, not expecting more than this size
-}  __attribute__ ((packed));
+}  __attribute__((packed));
 
-ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
+                                  ipmi_cmd_t cmd,
+                                  ipmi_request_t request,
+                                  ipmi_response_t response,
+                                  ipmi_data_len_t data_len,
+                                  ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
-    sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = nullptr;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
-    char *app = nullptr;
 
-    char tmp_ipaddr[INET_ADDRSTRLEN];
-    char tmp_netmask[INET_ADDRSTRLEN];
-    char tmp_gateway[INET_ADDRSTRLEN];
+    char ipaddr[INET_ADDRSTRLEN];
+    char netmask[INET_ADDRSTRLEN];
+    char gateway[INET_ADDRSTRLEN];
 
-    printf("IPMI SET_LAN\n");
+    auto reqptr = reinterpret_cast<const set_lan_t*>(request);
+    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-    set_lan_t *reqptr = (set_lan_t*) request;
-
-    if (reqptr->parameter == LAN_PARM_IP) {
-        snprintf(tmp_ipaddr, INET_ADDRSTRLEN, "%d.%d.%d.%d",
-            reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-        channel_config.new_ipaddr.assign(tmp_ipaddr);
-    } else if (reqptr->parameter == LAN_PARM_MAC) {
-        char mac[SIZE_MAC];
-
-        snprintf(mac, SIZE_MAC, "%02x:%02x:%02x:%02x:%02x:%02x",
-                reqptr->data[0],
-                reqptr->data[1],
-                reqptr->data[2],
-                reqptr->data[3],
-                reqptr->data[4],
-                reqptr->data[5]);
-
-        r = mapper_get_service(bus, obj, &app);
-        if (r < 0) {
-            fprintf(stderr, "Failed to get %s bus name: %s\n",
-                    obj, strerror(-r));
-            goto finish;
-        }
-        r = sd_bus_call_method(bus, app, obj, ifc, "SetHwAddress", &error,
-                                &reply, "ss", nwinterface, mac);
-        if (r < 0) {
-            fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-        }
-    } else if (reqptr->parameter == LAN_PARM_SUBNET)
+    switch (reqptr->parameter)
     {
-        snprintf(tmp_netmask, INET_ADDRSTRLEN, "%d.%d.%d.%d",
-            reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-        channel_config.new_netmask.assign(tmp_netmask);
-    } else if (reqptr->parameter == LAN_PARM_GATEWAY)
-    {
-        snprintf(tmp_gateway, INET_ADDRSTRLEN, "%d.%d.%d.%d",
-            reqptr->data[0], reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-        channel_config.new_gateway.assign(tmp_gateway);
-    } else if (reqptr->parameter == LAN_PARM_INPROGRESS)
-    {
-        if(reqptr->data[0] == SET_COMPLETE) {
-            lan_set_in_progress = SET_COMPLETE;
-
-            printf("N/W data from Cache: %s:%s:%s\n",
-                    channel_config.new_ipaddr.c_str(),
-                    channel_config.new_netmask.c_str(),
-                    channel_config.new_gateway.c_str());
-            printf("Use Set Channel Access command to apply them\n");
-
-        } else if(reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
+        case LAN_PARM_IP:
         {
-            lan_set_in_progress = SET_IN_PROGRESS;
-        }
-    } else
-    {
-        fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
-        rc = IPMI_CC_PARM_NOT_SUPPORTED;
-    }
+            snprintf(ipaddr, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
+                     reqptr->data[0], reqptr->data[1],
+                     reqptr->data[2], reqptr->data[3]);
 
-finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(app);
+            channelConfig.ipaddr.assign(ipaddr);
+
+        }
+        break;
+
+        case LAN_PARM_MAC:
+        {
+            char mac[SIZE_MAC];
+
+            snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
+                     reqptr->data[0],
+                     reqptr->data[1],
+                     reqptr->data[2],
+                     reqptr->data[3],
+                     reqptr->data[4],
+                     reqptr->data[5]);
+
+            auto macObjectInfo = ipmi::getDbusObject(
+                                     bus,
+                                     ipmi::network::MAC_INTERFACE,
+                                     ipmi::network::ROOT,
+                                     ipmi::network::INTERFACE);
+
+            ipmi::setDbusProperty(bus,
+                                  macObjectInfo.second,
+                                  macObjectInfo.first,
+                                  ipmi::network::MAC_INTERFACE,
+                                  "MACAddress",
+                                  std::string(mac));
+
+            channelConfig.macAddress = mac;
+
+        }
+        break;
+
+        case LAN_PARM_SUBNET:
+        {
+            snprintf(netmask, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
+                     reqptr->data[0], reqptr->data[1],
+                     reqptr->data[2], reqptr->data[3]);
+            channelConfig.netmask.assign(netmask);
+        }
+        break;
+
+        case LAN_PARM_GATEWAY:
+        {
+            snprintf(gateway, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
+                     reqptr->data[0], reqptr->data[1],
+                     reqptr->data[2], reqptr->data[3]);
+            channelConfig.gateway.assign(gateway);
+
+        }
+        break;
+
+        case LAN_PARM_INPROGRESS:
+        {
+            if (reqptr->data[0] == SET_COMPLETE)
+            {
+                lan_set_in_progress = SET_COMPLETE;
+
+                log<level::INFO>("Network data from Cache",
+                                 entry("PREFIX=%s", channelConfig.netmask.c_str()),
+                                 entry("ADDRESS=%s", channelConfig.ipaddr.c_str()),
+                                 entry("GATEWAY=%s", channelConfig.gateway.c_str()));
+
+                log<level::INFO>("Use Set Channel Access command to apply");
+
+            }
+            else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
+            {
+                lan_set_in_progress = SET_IN_PROGRESS;
+            }
+
+        }
+        break;
+
+        default:
+        {
+            log<level::ERR>("Unsupported parameter",
+                            entry("PARAMETER=0x%x", reqptr->parameter));
+            rc = IPMI_CC_PARM_NOT_SUPPORTED;
+        }
+
+    }
 
     return rc;
 }
 
-struct get_lan_t {
+struct get_lan_t
+{
     uint8_t rev_channel;
     uint8_t parameter;
     uint8_t parameter_set;
     uint8_t parameter_block;
-}  __attribute__ ((packed));
+}  __attribute__((packed));
 
-ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
+                                  ipmi_cmd_t cmd,
+                                  ipmi_request_t request,
+                                  ipmi_response_t response,
+                                  ipmi_data_len_t data_len,
+                                  ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
-    sd_bus *bus = ipmid_get_sd_bus_connection();
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
-    int i = 0;
-    char *app = NULL;
-
-    printf("IPMI GET_LAN\n");
 
     get_lan_t *reqptr = (get_lan_t*) request;
 
@@ -269,9 +352,6 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         memcpy(response, &current_revision, *data_len);
         return IPMI_CC_OK;
     }
-
-    // TODO Use dbus interface once available. For now use ip cmd.
-    // TODO Add the rest of the parameters, like gateway
 
     if (reqptr->parameter == LAN_PARM_INPROGRESS)
     {
@@ -291,16 +371,26 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
     }
-    else if ((reqptr->parameter == LAN_PARM_IP) || (reqptr->parameter == LAN_PARM_SUBNET) || (reqptr->parameter == LAN_PARM_GATEWAY))
+    else if ((reqptr->parameter == LAN_PARM_IP) ||
+             (reqptr->parameter == LAN_PARM_SUBNET) ||
+             (reqptr->parameter == LAN_PARM_GATEWAY) ||
+             (reqptr->parameter == LAN_PARM_MAC))
     {
-        uint8_t buf[5];
+        uint8_t buf[ipmi::network::MAC_ADDRESS_SIZE_BYTE + 1];
 
         *data_len = sizeof(current_revision);
         memcpy(buf, &current_revision, *data_len);
 
-        if(getNetworkData(reqptr->parameter, &buf[1]) == IPMI_CC_OK)
+        if (getNetworkData(reqptr->parameter, &buf[1]) == IPMI_CC_OK)
         {
-            *data_len = sizeof(buf);
+            if (reqptr->parameter == LAN_PARM_MAC)
+            {
+                *data_len = sizeof(buf);
+            }
+            else
+            {
+                *data_len = ipmi::network::IPV4_ADDRESS_SIZE_BYTE + 1;
+            }
             memcpy(response, &buf, *data_len);
         }
         else
@@ -308,74 +398,12 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
     }
-    else if (reqptr->parameter == LAN_PARM_MAC)
-    {
-        //string to parse: link/ether xx:xx:xx:xx:xx:xx
-        uint8_t buf[7];
-        char *eaddr1 = NULL;
-
-        r = mapper_get_service(bus, obj, &app);
-        if (r < 0) {
-            fprintf(stderr, "Failed to get %s bus name: %s\n",
-                    obj, strerror(-r));
-            goto cleanup;
-        }
-        r = sd_bus_call_method(bus, app, obj, ifc, "GetHwAddress", &error,
-                                &reply, "s", nwinterface);
-        if(r < 0)
-        {
-            fprintf(stderr, "Failed to call Get Method: %s\n", strerror(-r));
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-            goto cleanup;
-        }
-
-        r = sd_bus_message_read(reply, "s", &eaddr1);
-        if (r < 0)
-        {
-            fprintf(stderr, "Failed to get a response: %s", strerror(-r));
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-            goto cleanup;
-        }
-        if (eaddr1 == NULL)
-        {
-            fprintf(stderr, "Failed to get a valid response: %s", strerror(-r));
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-            goto cleanup;
-        }
-
-        memcpy((void*)&buf[0], &current_revision, 1);
-
-        char *tokptr = NULL;
-        char* digit = strtok_r(eaddr1, ":", &tokptr);
-        if (digit == NULL)
-        {
-            fprintf(stderr, "Unexpected MAC format: %s", eaddr1);
-            rc = IPMI_CC_RESPONSE_ERROR;
-            goto cleanup;
-        }
-
-        i=0;
-        while (digit != NULL)
-        {
-            int resp_byte = strtoul(digit, NULL, 16);
-            memcpy((void*)&buf[i+1], &resp_byte, 1);
-            i++;
-            digit = strtok_r(NULL, ":", &tokptr);
-        }
-
-        *data_len = sizeof(buf);
-        memcpy(response, &buf, *data_len);
-    }
     else
     {
-        fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
+        log<level::ERR>("Unsupported parameter",
+                        entry("PARAMETER=0x%x", reqptr->parameter));
         rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
-
-cleanup:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(app);
 
     return rc;
 }

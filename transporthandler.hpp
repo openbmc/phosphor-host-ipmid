@@ -1,5 +1,6 @@
-#ifndef __HOST_IPMI_TRANSPORT_HANDLER_H__
-#define __HOST_IPMI_TRANSPORT_HANDLER_H__
+#pragma once
+
+#include <string>
 
 // IPMI commands for Transport net functions.
 enum ipmi_netfn_storage_cmds
@@ -24,10 +25,17 @@ static const int LAN_PARM_MAC         = 5;
 static const int LAN_PARM_SUBNET      = 6;
 static const int LAN_PARM_GATEWAY     = 12;
 
-struct channel_config_t {
-    std::string new_ipaddr;
-    std::string new_netmask;
-    std::string new_gateway;
+struct ChannelConfig_t
+{
+    std::string ipaddr;
+    std::string netmask;
+    std::string gateway;
+    std::string macAddress;
+    void clear()
+    {
+        ipaddr.clear();
+        netmask.clear();
+        gateway.clear();
+        macAddress.clear();
+    }
 };
-
-#endif

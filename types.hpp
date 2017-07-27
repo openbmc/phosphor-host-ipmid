@@ -22,6 +22,7 @@ using Value = sdbusplus::message::variant<bool, uint8_t, int16_t,
                                           int64_t, uint64_t, std::string>;
 
 using PropertyMap = std::map<DbusProperty, Value>;
+
 using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
 
@@ -105,6 +106,10 @@ constexpr auto IPV6_ADDRESS_SIZE_BYTE = 16;
 
 constexpr auto DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
 constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
+
+constexpr auto MAC_ADDRESS_SIZE_BYTE = 6;
+constexpr auto BITS_32 = 32;
+constexpr auto MASK_32_BIT = 0xFFFFFFFF;
 
 }//namespace network
 }//namespace ipmi
