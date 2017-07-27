@@ -1,8 +1,11 @@
 #include "utils.hpp"
-#include "host-ipmid/ipmid-api.h"
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
+
+#include <arpa/inet.h>
+#include <dirent.h>
+#include <net/if.h>
 
 namespace ipmi
 {
@@ -203,6 +206,165 @@ std::string getService(sdbusplus::bus::bus& bus,
     return mapperResponse.begin()->first;
 }
 
+ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus::bus& bus,
+                                   const std::string& serviceRoot,
+                                   const std::string& interface,
+                                   const std::string& match)
+{
+    std::vector<std::string> interfaces;
+    interfaces.emplace_back(interface);
+
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME,
+                                          MAPPER_OBJ,
+                                          MAPPER_INTF,
+                                          "GetSubTree");
+
+    mapperCall.append(serviceRoot, depth, interfaces);
+
+    auto mapperReply = bus.call(mapperCall);
+    if (mapperReply.is_method_error())
+    {
+        log<level::ERR>("Error in mapper call",
+                        entry("SERVICEROOT=%s",serviceRoot.c_str()),
+                        entry("INTERFACE=%s", interface.c_str()));
+
+        elog<InternalFailure>();
+    }
+
+    ObjectTree objectTree;
+    mapperReply.read(objectTree);
+
+    for (auto it = objectTree.begin(); it != objectTree.end();)
+    {
+        if (it->first.find(match) == std::string::npos)
+        {
+            it = objectTree.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    return objectTree;
+}
+
+void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
+                          const std::string& serviceRoot,
+                          const std::string& interface,
+                          const std::string& match)
+{
+    try
+    {
+        auto objectTree =  getAllDbusObjects(bus, serviceRoot, interface, match);
+
+        for (auto& object : objectTree)
+        {
+            method_no_args::callDbusMethod(bus,
+                                           object.second.begin()->first,
+                                           object.first,
+                                           DELETE_INTERFACE, "Delete");
+        }
+    }
+    catch (InternalFailure& e)
+    {
+        log<level::INFO>("Unable to delete the objects having",
+                         entry("INTERFACE=%s", interface.c_str()),
+                         entry("SERVICE=%s", serviceRoot.c_str()));
+    }
+}
+
+void createIP(sdbusplus::bus::bus& bus,
+              const std::string& service,
+              const std::string& objPath,
+              const std::string& protocolType,
+              const std::string& ipaddress,
+              uint8_t prefix)
+{
+    std::string gateway = "";
+
+    auto busMethod = bus.new_method_call(
+                         service.c_str(),
+                         objPath.c_str(),
+                         IP_CREATE_INTERFACE,
+                         "IP");
+
+    busMethod.append(protocolType, ipaddress, prefix, gateway);
+
+    auto reply = bus.call(busMethod);
+
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Failed to excute method",
+                        entry("METHOD=%s", "IP"),
+                        entry("PATH=%s", objPath.c_str()));
+        elog<InternalFailure>();
+    }
+
+}
+
+uint8_t toPrefix(int addressFamily, const std::string& subnetMask)
+{
+    if (addressFamily == AF_INET6)
+    {
+        return 0;
+    }
+
+    uint32_t buff {};
+
+    auto rc = inet_pton(addressFamily, subnetMask.c_str(), &buff);
+    if (rc <= 0)
+    {
+        log<level::ERR>("inet_pton failed:",
+                        entry("SUBNETMASK=%s", subnetMask));
+        return 0;
+    }
+
+    buff = be32toh(buff);
+    // total no of bits - total no of leading zero == total no of ones
+    if (((sizeof(buff) * 8) - (__builtin_ctz(buff))) == __builtin_popcount(buff))
+    {
+        return __builtin_popcount(buff);
+    }
+    else
+    {
+        log<level::ERR>("Invalid Mask",
+                        entry("SUBNETMASK=%s", subnetMask));
+        return 0;
+    }
+}
+
+namespace method_no_args
+{
+
+void callDbusMethod(sdbusplus::bus::bus& bus,
+                    const std::string& service,
+                    const std::string& objPath,
+                    const std::string& interface,
+                    const std::string& method)
+
+{
+    auto busMethod = bus.new_method_call(
+                         service.c_str(),
+                         objPath.c_str(),
+                         interface.c_str(),
+                         method.c_str());
+
+    auto reply = bus.call(busMethod);
+
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Failed to execute method",
+                        entry("METHOD=%s", method.c_str()),
+                        entry("PATH=%s", objPath.c_str()),
+                        entry("INTERFACE=%s", interface.c_str()));
+        elog<InternalFailure>();
+    }
+}
+
+}// namespace method_no_args
 
 } // namespace ipmi
 
