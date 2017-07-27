@@ -23,11 +23,15 @@ static const int LAN_PARM_IP          = 3;
 static const int LAN_PARM_MAC         = 5;
 static const int LAN_PARM_SUBNET      = 6;
 static const int LAN_PARM_GATEWAY     = 12;
+static const int LAN_PARM_VLAN        = 20;
 
-struct channel_config_t {
-    std::string new_ipaddr;
-    std::string new_netmask;
-    std::string new_gateway;
+struct ChannelConfig_t
+{
+    std::string ipaddr;
+    std::string netmask;
+    std::string gateway;
+    std::string macAddress;
+    uint32_t vlanID;
 };
 
 #endif
