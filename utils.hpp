@@ -11,11 +11,13 @@ constexpr auto MAPPER_OBJ = "/xyz/openbmc_project/object_mapper";
 constexpr auto MAPPER_INTF = "xyz.openbmc_project.ObjectMapper";
 
 constexpr auto SETTINGS_ROOT = "/";
+constexpr auto NETWORK_ROOT = "/xyz/openbmc_project/network/";
 constexpr auto SETTINGS_MATCH = "host0";
 constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
 
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
+constexpr auto SYSTEMCONFIG_INTERFACE = "xyz.openbmc_project.Network.SystemConfiguration";
 
 constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
