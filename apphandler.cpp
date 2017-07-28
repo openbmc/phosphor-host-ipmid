@@ -39,6 +39,8 @@
 #include <xyz/openbmc_project/Software/Version/server.hpp>
 #include <xyz/openbmc_project/State/BMC/server.hpp>
 
+#include "google_version.h"
+
 extern sd_bus* bus;
 
 constexpr auto bmc_state_interface = "xyz.openbmc_project.State.BMC";
@@ -554,6 +556,40 @@ int convertVersion(std::string s, Revision& rev)
     return 0;
 }
 
+static int gbmc_convert_version(VersionReader& version_reader, Revision& rev)
+{
+    int major = 0;
+    int minor = 0;
+    int point = 0;
+    int subpoint = 0;
+    if (!version_reader.ReadVersion(&major, &minor, &point, &subpoint))
+    {
+        return -1;
+    }
+    if (major > 0x7F)
+    {
+        printf("major version %d unrepresentable in IPMI device ID\n", major);
+    }
+    if (minor > 99)
+    {
+        printf("minor version %d unrepresentable in IPMI device ID\n", minor);
+    }
+    if (point > 0xFFFF)
+    {
+        printf("point version %d unrepresentable in IPMI device ID\n", point);
+    }
+    if (subpoint > 0xFFFF)
+    {
+        printf("subpoint version %d unrepresentable in IPMI device ID\n",
+               subpoint);
+    }
+    rev.major = major;
+    rev.minor = minor;
+    rev.d[0] = htole16(point);
+    rev.d[1] = htole16(subpoint);
+    return 0;
+}
+
 /* @brief: Implement the Get Device ID IPMI command per the IPMI spec
  *  @param[in] ctx - shared_ptr to an IPMI context struct
  *
@@ -592,7 +628,7 @@ ipmi::RspType<uint8_t,  // Device ID
         uint24_t manufId;
         uint16_t prodId;
         uint32_t aux;
-    } devId;
+    } devId{};
     static bool dev_id_initialized = false;
     static bool defaultActivationSetting = true;
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
@@ -601,32 +637,31 @@ ipmi::RspType<uint8_t,  // Device ID
 
     if (!dev_id_initialized)
     {
-        try
-        {
-            auto version = getActiveSoftwareVersionInfo(ctx);
-            r = convertVersion(version, rev);
-        }
-        catch (const std::exception& e)
-        {
-            log<level::ERR>(e.what());
-        }
+        // For Google: read the revision directly from /etc/os-release.
+        OsReleaseReader osReleaseReader;
+        GoogleVersionReader versionReader(&osReleaseReader);
+        printf("Parsing release info as gBMC\n");
+        r = gbmc_convert_version(versionReader, rev);
 
+        // "IANA Enterprise Number for Google, Inc."
+        devId.manufId = 0x002B79;
+
+        devId.revision = 0x80;
         if (r >= 0)
         {
-            // bit7 identifies if the device is available
-            // 0=normal operation
-            // 1=device firmware, SDR update,
-            // or self-initialization in progress.
-            // The availability may change in run time, so mask here
-            // and initialize later.
-            devId.fw[0] = rev.major & ipmiDevIdFw1Mask;
-
-            rev.minor = (rev.minor > 99 ? 99 : rev.minor);
+            if (rev.major > 0x7F)
+            {
+                rev.major = 0x7F;
+            }
+            devId.fw[0] = 0x7F & rev.major;
+            if (rev.minor > 99)
+            {
+                rev.minor = 99;
+            }
             devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
             std::memcpy(&devId.aux, rev.d, 4);
         }
 
-        // IPMI Spec version 2.0
         devId.ipmiVer = 2;
 
         std::ifstream devIdFile(filename);
@@ -635,16 +670,8 @@ ipmi::RspType<uint8_t,  // Device ID
             auto data = nlohmann::json::parse(devIdFile, nullptr, false);
             if (!data.is_discarded())
             {
-                devId.id = data.value("id", 0);
-                devId.revision = data.value("revision", 0);
-                devId.addnDevSupport = data.value("addn_dev_support", 0);
-                devId.manufId = data.value("manuf_id", 0);
+                devId.revision |= data.value("revision", 0);
                 devId.prodId = data.value("prod_id", 0);
-                devId.aux = data.value("aux", 0);
-
-                // Set the availablitity of the BMC.
-                defaultActivationSetting = data.value("availability", true);
-
                 // Don't read the file every time if successful
                 dev_id_initialized = true;
             }
@@ -659,6 +686,8 @@ ipmi::RspType<uint8_t,  // Device ID
             log<level::ERR>("Device ID file not found");
             return ipmi::responseUnspecifiedError();
         }
+
+        devId.addnDevSupport = 0x8D;
     }
 
     // Set availability to the actual current BMC state

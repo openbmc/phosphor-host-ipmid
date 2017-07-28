@@ -106,6 +106,7 @@ libipmi20_la_SOURCES = \
 	storageaddsel.cpp \
 	transporthandler.cpp \
 	globalhandler.cpp \
+	google_version.cpp \
 	groupext.cpp \
 	selutility.cpp \
 	ipmi_fru_info_area.cpp \
