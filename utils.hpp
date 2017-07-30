@@ -22,10 +22,13 @@ constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 constexpr auto SYSTEMCONFIG_INTERFACE = "xyz.openbmc_project.Network.SystemConfiguration";
+constexpr auto VLAN_INTERFACE = "xyz.openbmc_project.Network.VLAN";
 constexpr auto DELETE_INTERFACE = "xyz.openbmc_project.Object.Delete";
 constexpr auto ETHERNET_INTERFACE = "xyz.openbmc_project.Network.EthernetInterface";
 
 constexpr auto IP_CREATE_INTERFACE = "xyz.openbmc_project.Network.IP.Create";
+constexpr auto VLAN_CREATE_INTERFACE = "xyz.openbmc_project.Network.VLAN.Create";
+
 constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
@@ -142,6 +145,21 @@ void deleteAllDbusObject(const std::string& serviceRoot,
                          const std::string& interface,
                          const std::string& match = "");
 
+/** @brief Creates the VLAN on the given interface.
+ *  @param[in] service - Dbus service name.
+ *  @param[in] objPath - Dbus object path.
+ *  @param[in] interface - EthernetInterface.
+ *  @param[in] vlanID - Vlan ID.
+ */
+void createVLAN(const std::string& service,
+                const std::string& objPath,
+                const std::string& interface,
+                uint16_t vlanID);
+
+/** @brief Gets the vlan id from the given object path.
+ *  @param[in] path - Dbus objcet path.
+ */
+uint16_t getVLAN(const std::string& path);
 } // namespace ipmi
 
 

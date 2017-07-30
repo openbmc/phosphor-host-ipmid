@@ -391,6 +391,36 @@ void createIP(const std::string& service,
 
 }
 
+void createVLAN(const std::string& service,
+                const std::string& objPath,
+                const std::string& interfaceName,
+                uint16_t vlanID)
+{
+    auto bus = sdbusplus::bus::new_default();
+
+
+    auto busMethod = bus.new_method_call(
+                         service.c_str(),
+                         objPath.c_str(),
+                         ipmi::VLAN_CREATE_INTERFACE,
+                         "VLAN");
+
+    busMethod.append(interfaceName);
+    busMethod.append(vlanID);
+
+    auto reply = bus.call(busMethod);
+
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Failed to excute method",
+                        entry("METHOD=%s", "VLAN"),
+                        entry("PATH=%s", objPath.c_str()));
+        elog<InternalFailure>();
+    }
+
+}
+
+
 uint8_t toCidr(int addressFamily, const std::string& subnetMask)
 {
     if (addressFamily == AF_INET6)
@@ -420,6 +450,23 @@ uint8_t toCidr(int addressFamily, const std::string& subnetMask)
                         entry("SUBNETMASK=%s", subnetMask));
         return 0;
     }
+}
+
+uint16_t getVLAN(const std::string& path)
+{
+    auto intfObjectPath = path.substr(0,
+                                path.find(ipmi::IP_TYPE) -1);
+
+    auto intfName = intfObjectPath.substr(intfObjectPath.rfind("/") + 1);
+
+    auto index = intfName.find("_");
+    uint16_t vlanID = 0;
+    if (index != std::string::npos)
+    {
+        auto str = intfName.substr(index + 1);
+        vlanID = atoi(str.c_str());
+    }
+    return vlanID;
 }
 
 } // namespace ipmi
