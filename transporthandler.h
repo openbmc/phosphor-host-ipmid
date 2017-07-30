@@ -23,6 +23,7 @@ static const int LAN_PARM_IP          = 3;
 static const int LAN_PARM_MAC         = 5;
 static const int LAN_PARM_SUBNET      = 6;
 static const int LAN_PARM_GATEWAY     = 12;
+static const int LAN_PARM_VLAN        = 20;
 
 struct ChannelConfig_t
 {
@@ -30,6 +31,10 @@ struct ChannelConfig_t
     std::string netmask;
     std::string gateway;
     std::string macAddress;
+    // IPMI stores the vlan info in 16 bits,32 bits is to aligned
+    // with phosphor-dbus interfaces.
+    // vlan id is in 12 bits and the 16th bit is for enable mask.
+    uint32_t vlanID;
 };
 
 #endif
