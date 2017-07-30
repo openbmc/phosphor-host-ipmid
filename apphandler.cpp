@@ -24,6 +24,11 @@ constexpr auto app_ifc = "org.openbmc.NetworkManager";
 constexpr auto app_nwinterface = "eth0";
 
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
+/*
+ * This value is defined in the dbus interface, but only in a private member.
+ */
+static constexpr uint64_t DEFAULT_TIMEOUT = 30000;
+static uint64_t configured_timeout = DEFAULT_TIMEOUT;
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -397,6 +402,7 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Get timer value in ms
     timer_ms = timer * 100;
 
+    configured_timeout = timer_ms;
     printf("WATCHDOG SET Timer:[0x%X] 100ms intervals\n",timer);
 
     // Get bus name
@@ -490,27 +496,13 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         goto finish;
     }
 
-    // Get the current interval and set it back.
-    r = sd_bus_call_method(bus, busname, objname, property_iface,
-                           "Get", &error, &reply, "ss",
-                           iface, "Interval");
-
-    if(r < 0) {
-        fprintf(stderr, "Failed to get current Interval msg: %s\n",
-                strerror(-r));
-        goto finish;
-    }
-
-    // Now extract the value
-    r = sd_bus_message_read(reply, "v", "t", &interval);
-    if (r < 0) {
-        fprintf(stderr, "Failed to read current interval: %s\n",
-                strerror(-r));
-        goto finish;
-    }
-
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
+    /*
+     * Once the host has set the interval it should be respected.
+     *
+     * In phosphor-watchdog setting the TimeRemaining sets the Interval, 
+     * instead of managing them separately.
+     */
+    interval = configured_timeout;
 
     // Set watchdog timer
     r = sd_bus_call_method(bus, busname, objname, property_iface,
