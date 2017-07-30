@@ -305,6 +305,32 @@ void createIP(sdbusplus::bus::bus& bus,
 
 }
 
+void createVLAN(sdbusplus::bus::bus& bus,
+                const std::string& service,
+                const std::string& objPath,
+                const std::string& interfaceName,
+                uint16_t vlanID)
+{
+    auto busMethod = bus.new_method_call(
+                         service.c_str(),
+                         objPath.c_str(),
+                         ipmi::VLAN_CREATE_INTERFACE,
+                         "VLAN");
+
+    busMethod.append(interfaceName, vlanID);
+
+    auto reply = bus.call(busMethod);
+
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Failed to excute method",
+                        entry("METHOD=%s", "VLAN"),
+                        entry("PATH=%s", objPath.c_str()));
+        elog<InternalFailure>();
+    }
+
+}
+
 uint8_t toPrefix(int addressFamily, const std::string& subnetMask)
 {
     if (addressFamily == AF_INET6)
@@ -365,6 +391,36 @@ void callDbusMethod(sdbusplus::bus::bus& bus,
 }
 
 }// namespace method_no_args
+
+uint32_t getVLAN(const std::string& path)
+{
+    // Path would be look like
+    // /xyz/openbmc_project/network/eth0_443/ipv4
+
+    uint32_t vlanID = 0;
+    try
+    {
+        auto intfObjectPath = path.substr(0,
+                path.find(ipmi::IP_TYPE) - 1);
+
+        auto intfName = intfObjectPath.substr(intfObjectPath.rfind("/") + 1);
+
+        auto index = intfName.find("_");
+        if (index != std::string::npos)
+        {
+            auto str = intfName.substr(index + 1);
+            vlanID = std::stoul(str, nullptr, 10);
+            vlanID = atoi(str.c_str());
+        }
+    }
+    catch (std::exception & e)
+    {
+        log<level::ERR>("Exception occured during getVLAN",
+                        entry("PATH=%s",path.c_str()),
+                        entry("EXCEPTIOn=%s", e.what()));
+    }
+    return vlanID;
+}
 
 } // namespace ipmi
 
