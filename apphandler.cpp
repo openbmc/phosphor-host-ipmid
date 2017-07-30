@@ -405,6 +405,16 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         goto finish;
     }
 
+    /*
+     * If the action is 0, it means, do nothing.  Multiple actions on timer
+     * expiration aren't supported by phosphor-watchdog yet, so when the
+     * action set is "none", we should just leave the timer disabled.
+     */
+    if (0 == reqptr->t_action)
+    {
+        goto finish;
+    }
+
     if (reqptr->t_use & 0x40)
     {
         sd_bus_error_free(&error);
