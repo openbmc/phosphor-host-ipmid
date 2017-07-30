@@ -24,6 +24,8 @@ constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
 constexpr auto app_ifc = "org.openbmc.NetworkManager";
 constexpr auto app_nwinterface = "eth0";
 
+constexpr auto vlanIDMask = 0x00000FFF;
+
 void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace phosphor::logging;
@@ -538,6 +540,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
 
         std::string ipaddress;
         std::string gateway;
+        uint16_t vlanID {};
         uint8_t prefix {};
 
         // gets the network data from the system as user has
@@ -561,6 +564,8 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
 
             ipaddress = properties["Address"].get<std::string>();
             prefix = properties["PrefixLength"].get<uint8_t>();
+
+            vlanID = ipmi::getVLAN(ipObjectInfo.first);
         }
         catch (InternalFailure& e)
         {
@@ -603,6 +608,10 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
         {
             channelConfig.gateway = gateway;
         }
+        if (channelConfig.vlanID != 0)
+        {
+            vlanID = channelConfig.vlanID & vlanIDMask;
+        }
 
         log<level::INFO>("Network data from HW",
                          entry("PREFIX=%d", prefix),
@@ -610,13 +619,23 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                          entry("GATEWAY=%s", gateway.c_str()));
 
         // Currently network manager doesn't support purge of all the
-        // ipaddresses from the parent interface,
+        // ipaddresses and the vlan interfaces from the parent interface,
         // TODO once the support is there, will make the change here.
 
+        //delete all the vlan interfaces
         //delete all the ipv4  addresses
 
+        ipmi::deleteAllDbusObject(ipmi::NETWORK_ROOT, ipmi::VLAN_INTERFACE);
         ipmi::deleteAllDbusObject(ipmi::NETWORK_ROOT, ipmi::IP_INTERFACE,
                                   ipmi::IP_TYPE);
+        if (vlanID)
+        {
+            ipmi::createVLAN(ipmi::NETWORK_SERVICE, ipmi::NETWORK_ROOT,
+                             ipmi::INTERFACE, vlanID);
+
+            networkInterfaceObject = ipmi::getDbusObject(ipmi::VLAN_INTERFACE,
+                                                         ipmi::NETWORK_ROOT);
+        }
 
         auto protocolType = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
         ipmi::createIP(networkInterfaceObject.second,
@@ -642,9 +661,10 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
     channelConfig.ipaddr.clear();
     channelConfig.netmask.clear();
     channelConfig.gateway.clear();
-
+    channelConfig.vlanID = 0;
     return rc;
 }
+
 
 // ATTENTION: This ipmi function is very hardcoded on purpose
 // OpenBMC does not fully support IPMI.  This command is useful
