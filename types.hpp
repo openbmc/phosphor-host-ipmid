@@ -108,8 +108,11 @@ constexpr auto DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
 constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
 
 constexpr auto MAC_ADDRESS_SIZE_BYTE = 6;
+constexpr auto VLAN_SIZE_BYTE = 2;
 constexpr auto BITS_32 = 32;
 constexpr auto MASK_32_BIT = 0xFFFFFFFF;
+constexpr auto VLAN_ID_MASK = 0x00000FFF;
+constexpr auto VLAN_ENABLE_MASK = 0x8000;
 
 }//namespace network
 }//namespace ipmi
