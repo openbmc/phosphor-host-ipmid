@@ -44,6 +44,10 @@ constexpr auto SIZE_MAC_ADDRESS = 6;
 constexpr auto SIZE_IP_ADDRESS = 4;
 constexpr auto BITS_32 = 32;
 constexpr auto MASK_32_BIT = 0xFFFFFFFF;
+constexpr auto SIZE_VLAN = 2;
+
+constexpr auto vlanIDMask = 0x00000FFF;
+constexpr auto vlanEnableMask = 0x8000;
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
@@ -56,6 +60,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
     try
     {
         switch (lan_param)
@@ -183,6 +188,34 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                        (data + 5));
             }
             break;
+            case LAN_PARM_VLAN:
+            {
+                if (lan_set_in_progress == SET_COMPLETE)
+                {
+                    auto ipObjectInfo = ipmi::getDbusObject(
+                                            bus,
+                                            ipmi::IP_INTERFACE,
+                                            ipmi::NETWORK_ROOT,
+                                            ipmi::IP_TYPE);
+
+                    auto vlanID = static_cast<uint16_t>(
+                            ipmi::getVLAN(ipObjectInfo.first));
+
+                    vlanID = htole16(vlanID);
+                    if (vlanID)
+                    {
+                        //Enable the 16th bit
+                        vlanID |= vlanEnableMask;
+                    }
+                    memcpy(data, &vlanID, sizeof(vlanID));
+                }
+                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                {
+                    memcpy(data, &(channelConfig.vlanID),
+                           sizeof(SIZE_VLAN));
+                }
+            }
+            break;
             default:
                 rc = IPMI_CC_PARM_OUT_OF_RANGE;
         }
@@ -289,6 +322,15 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
 
         }
         break;
+        case LAN_PARM_VLAN:
+        {
+            uint16_t vlan {};
+            memcpy(&vlan, reqptr->data, sizeof(vlan));
+
+            vlan = le16toh(vlan);
+            channelConfig.vlanID = vlan;
+        }
+        break;
         case LAN_PARM_INPROGRESS:
         {
             if (reqptr->data[0] == SET_COMPLETE)
@@ -298,7 +340,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
                 log<level::INFO>("Network data from Cache",
                                  entry("PREFIX=%s", channelConfig.netmask.c_str()),
                                  entry("ADDRESS=%s", channelConfig.ipaddr.c_str()),
-                                 entry("GATEWAY=%s", channelConfig.gateway.c_str()));
+                                 entry("GATEWAY=%s", channelConfig.gateway.c_str()),
+                                 entry("VLAN=%d", channelConfig.vlanID));
 
                 log<level::INFO>("Use Set Channel Access command to apply");
 
@@ -394,6 +437,18 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
         else
         {
             rc = IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+    else if (reqptr->parameter == LAN_PARM_VLAN)
+    {
+        uint8_t buf[SIZE_VLAN + 1];
+
+        *data_len = sizeof(current_revision);
+        memcpy(buf, &current_revision, *data_len);
+        if (getNetworkData(reqptr->parameter, &buf[1]) == IPMI_CC_OK)
+        {
+            *data_len = sizeof(buf);
+            memcpy(response, &buf, *data_len);
         }
     }
     else
