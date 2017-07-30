@@ -135,7 +135,7 @@ namespace network
 {
 
 constexpr auto ROOT = "/xyz/openbmc_project/network";
-constexpr auto NETWORK_SERVICE = "xyz.openbmc_project.Network";
+constexpr auto SERVICE = "xyz.openbmc_project.Network";
 constexpr auto INTERFACE = "eth0";
 constexpr auto IP_TYPE = "ipv4";
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
@@ -143,6 +143,8 @@ constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 constexpr auto SYSTEMCONFIG_INTERFACE = "xyz.openbmc_project.Network.SystemConfiguration";
 constexpr auto ETHERNET_INTERFACE = "xyz.openbmc_project.Network.EthernetInterface";
 constexpr auto IP_CREATE_INTERFACE = "xyz.openbmc_project.Network.IP.Create";
+constexpr auto VLAN_CREATE_INTERFACE = "xyz.openbmc_project.Network.VLAN.Create";
+constexpr auto VLAN_INTERFACE = "xyz.openbmc_project.Network.VLAN";
 
 /* @brief converts the given subnet into prefix notation.
  * @param[in] addressFamily - IP address family(AF_INET/AF_INET6).
@@ -167,8 +169,25 @@ void createIP(sdbusplus::bus::bus& bus,
               const std::string& ipaddress,
               uint8_t prefix);
 
-}//namespace network
+/** @brief Creates the VLAN on the given interface.
+ *  @param[in] bus - DBUS Bus Object.
+ *  @param[in] service - Dbus service name.
+ *  @param[in] objPath - Dbus object path.
+ *  @param[in] interface - EthernetInterface.
+ *  @param[in] vlanID - Vlan ID.
+ */
+void createVLAN(sdbusplus::bus::bus& bus,
+                const std::string& service,
+                const std::string& objPath,
+                const std::string& interface,
+                uint32_t vlanID);
 
+/** @brief Gets the vlan id from the given object path.
+ *  @param[in] path - Dbus object path.
+ */
+uint32_t getVLAN(const std::string& path);
+
+} //namespace network
 } // namespace ipmi
 
 
