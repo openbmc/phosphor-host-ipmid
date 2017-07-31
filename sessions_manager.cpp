@@ -126,6 +126,7 @@ std::weak_ptr<Session> Manager::getSession(SessionID sessionID,
             {
                 return iter->second;
             }
+            break;
         }
         case RetrieveOption::RC_SESSION_ID:
         {
@@ -142,6 +143,7 @@ std::weak_ptr<Session> Manager::getSession(SessionID sessionID,
             {
                 return iter->second;
             }
+            break;
         }
         default:
             throw std::runtime_error("Invalid retrieval option");
