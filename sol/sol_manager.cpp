@@ -127,6 +127,8 @@ void Manager::stopPayloadInstance(uint8_t payloadInstance)
     if (payloadMap.empty())
     {
         consoleFD.reset();
+
+        dataBuffer.erase(dataBuffer.size());
     }
 }
 
