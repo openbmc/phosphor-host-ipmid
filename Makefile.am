@@ -52,11 +52,27 @@ netipmid_SOURCES = \
 	command/payload_cmds.hpp \
 	command/payload_cmds.cpp \
 	sol_module.hpp \
-	sol_module.cpp
+	sol_module.cpp \
+	settings.hpp \
+	settings.cpp
 
 netipmid_CPPFLAGS = -DNET_IPMID_LIB_PATH=\"/usr/lib/net-ipmid/\"
-netipmid_LDFLAGS = $(SYSTEMD_LIBS) $(CRYPTO_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(LIBADD_DLOPEN) -export-dynamic
-netipmid_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS)
+
+
+netipmid_LDFLAGS = \
+	$(SYSTEMD_LIBS) \
+	$(CRYPTO_LIBS) \
+	$(libmapper_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	$(LIBADD_DLOPEN) \
+	-export-dynamic
+
+netipmid_CXXFLAGS = \
+	$(SYSTEMD_CFLAGS) \
+	$(libmapper_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 
 SUBDIRS = test
 
