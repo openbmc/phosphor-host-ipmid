@@ -109,14 +109,22 @@ buffer AlgoAES128::decryptData(const uint8_t* iv,
     // Initializes Cipher context
     EVP_CIPHER_CTX_init(&ctx);
 
+    auto cleanupFunc = [](EVP_CIPHER_CTX* ctx)
+    {
+        EVP_CIPHER_CTX_cleanup(ctx);
+    };
+
+    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)>
+            ctxPtr(&ctx, cleanupFunc);
+
     /*
      * EVP_DecryptInit_ex sets up cipher context ctx for encryption with type
      * AES-CBC-128. ctx must be initialized before calling this function. K2 is
      * the symmetric key used and iv is the initialization vector used.
      */
-    if (!EVP_DecryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, k2.data(), iv))
+    if (!EVP_DecryptInit_ex(ctxPtr.get(), EVP_aes_128_cbc(), NULL, k2.data(),
+                            iv))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
         throw std::runtime_error("EVP_DecryptInit_ex failed for type "
                                  "AES-CBC-128");
     }
@@ -126,7 +134,7 @@ buffer AlgoAES128::decryptData(const uint8_t* iv,
      * parameter is zero then no padding is performed. This function always
      * returns 1.
      */
-    EVP_CIPHER_CTX_set_padding(&ctx, 0);
+    EVP_CIPHER_CTX_set_padding(ctxPtr.get(), 0);
 
     buffer output(inputLen + AESCBC128BlockSize);
 
@@ -140,14 +148,13 @@ buffer AlgoAES128::decryptData(const uint8_t* iv,
      * ensures that payload is a multiple of block size, we are not making the
      * call to  EVP_DecryptFinal_ex().
      */
-    if (!EVP_DecryptUpdate(&ctx, output.data(), &outputLen, input, inputLen))
+    if (!EVP_DecryptUpdate(ctxPtr.get(), output.data(), &outputLen, input,
+                           inputLen))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
         throw std::runtime_error("EVP_DecryptUpdate failed");
     }
 
     output.resize(outputLen);
-    EVP_CIPHER_CTX_cleanup(&ctx);
 
     return output;
 }
@@ -167,15 +174,22 @@ buffer AlgoAES128::encryptData(const uint8_t* input, const int inputLen) const
     // Initializes Cipher context
     EVP_CIPHER_CTX_init(&ctx);
 
+    auto cleanupFunc = [](EVP_CIPHER_CTX* ctx)
+    {
+        EVP_CIPHER_CTX_cleanup(ctx);
+    };
+
+    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)>
+            ctxPtr(&ctx, cleanupFunc);
+
     /*
      * EVP_EncryptInit_ex sets up cipher context ctx for encryption with type
      * AES-CBC-128. ctx must be initialized before calling this function. K2 is
      * the symmetric key used and iv is the initialization vector used.
      */
-    if (!EVP_EncryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, k2.data(),
+    if (!EVP_EncryptInit_ex(ctxPtr.get(), EVP_aes_128_cbc(), NULL, k2.data(),
                             output.data()))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
         throw std::runtime_error("EVP_EncryptInit_ex failed for type "
                                  "AES-CBC-128");
     }
@@ -185,7 +199,7 @@ buffer AlgoAES128::encryptData(const uint8_t* input, const int inputLen) const
      * parameter is zero then no padding is performed. This function always
      * returns 1.
      */
-    EVP_CIPHER_CTX_set_padding(&ctx, 0);
+    EVP_CIPHER_CTX_set_padding(ctxPtr.get(), 0);
 
     int outputLen = 0;
 
@@ -197,18 +211,16 @@ buffer AlgoAES128::encryptData(const uint8_t* input, const int inputLen) const
      * multiple of block size, we are not making the call to
      * EVP_DecryptFinal_ex()
      */
-    if (!EVP_EncryptUpdate(&ctx,
+    if (!EVP_EncryptUpdate(ctxPtr.get(),
                            output.data() + AESCBC128ConfHeader,
                            &outputLen,
                            input, inputLen))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
         throw std::runtime_error("EVP_EncryptUpdate failed for type "
                                  "AES-CBC-128");
     }
 
     output.resize(AESCBC128ConfHeader + outputLen);
-    EVP_CIPHER_CTX_cleanup(&ctx);
 
     return output;
 }
