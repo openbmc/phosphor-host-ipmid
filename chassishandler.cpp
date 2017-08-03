@@ -46,12 +46,16 @@ constexpr size_t SIZE_PREFIX = 7;
 constexpr size_t MAX_PREFIX_VALUE = 32;
 constexpr size_t SIZE_COOKIE = 4;
 constexpr size_t SIZE_VERSION = 2;
-constexpr auto   MAC_ADDRESS_FORMAT = "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx";
-constexpr auto   IP_ADDRESS_FORMAT = "%d.%d.%d.%d";
+
+constexpr auto MAC_ADDRESS_FORMAT = "%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX";
+constexpr auto IP_ADDRESS_FORMAT = "%d.%d.%d.%d";
+
 constexpr auto   PREFIX_FORMAT = "%hhd";
 constexpr auto   ADDR_TYPE_FORMAT = "%hhx";
 constexpr auto   IPV4_ADDRESS_SIZE_BYTE = 4;
 constexpr auto   IPV6_ADDRESS_SIZE_BYTE = 16;
+constexpr auto   DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
+constexpr auto   DEFAULT_ADDRESS = "0.0.0.0";
 
 //PetiBoot-Specific
 static constexpr uint8_t net_conf_initial_bytes[] = {0x80, 0x21, 0x70, 0x62,
@@ -503,6 +507,29 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
             getDbusProperty(macObjectInfo.second, macObjectInfo.first,
                             MAC_INTERFACE, "MACAddress");
 
+        auto ipAddress = properties["Address"].get<std::string>();
+
+        auto gateway = properties["Gateway"].get<std::string>();
+
+        uint8_t prefix = properties["PrefixLength"].get<uint8_t>();
+
+        // it is expected here that we should get the valid data
+        // but we may also get the default values.
+        // Validation of the data is done by settings.
+        //
+        // if mac/ipaddr/gateway is having default values then
+        // don't send the blank override.
+
+        if ((MACAddress == DEFAULT_MAC_ADDRESS) ||
+           (ipAddress == DEFAULT_ADDRESS) ||
+           (gateway == DEFAULT_ADDRESS) ||
+           (!prefix))
+        {
+            memset(respptr->data, 0, SIZE_BOOT_OPTION);
+            rc = -1;
+            return rc;
+        }
+
         sscanf(MACAddress.c_str(), MAC_ADDRESS_FORMAT,
                (respptr->data + MAC_OFFSET),
                (respptr->data + MAC_OFFSET + 1),
@@ -510,7 +537,6 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
                (respptr->data + MAC_OFFSET + 3),
                (respptr->data + MAC_OFFSET + 4),
                (respptr->data + MAC_OFFSET + 5));
-
 
         respptr->data[MAC_OFFSET + 6] = 0x00;
 
@@ -528,12 +554,8 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
                                                 IPV6_ADDRESS_SIZE_BYTE;
 
         // ipaddress and gateway would be in IPv4 format
-
-        inet_pton(addressFamily,
-                  properties["Address"].get<std::string>().c_str(),
-                  (respptr->data + IPADDR_OFFSET));
-
-        uint8_t prefix = properties["PrefixLength"].get<uint8_t>();
+        inet_pton(addressFamily, ipAddress.c_str(),
+                 (respptr->data + IPADDR_OFFSET));
 
         uint8_t prefixOffset = IPADDR_OFFSET + addrSize;
 
@@ -541,9 +563,8 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
         uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
 
-        inet_pton(addressFamily,
-                  properties["Gateway"].get<std::string>().c_str(),
-                  (respptr->data + gatewayOffset));
+        inet_pton(addressFamily, gateway.c_str(),
+                 (respptr->data + gatewayOffset));
 
     }
     catch (InternalFailure& e)
@@ -621,8 +642,13 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
 {
     using namespace std::string_literals;
     std::string host_network_config;
-    char mac[SIZE_MAC] = {0};
-    std::string ipAddress, gateway;
+
+    std::string mac(DEFAULT_MAC_ADDRESS);
+    mac.reserve(SIZE_MAC);
+
+    std::string ipAddress;
+    std::string gateway;
+
     char addrOrigin {0};
     uint8_t addrSize {0};
     std::string addressOrigin =
@@ -668,7 +694,8 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
                 elog<InternalFailure>();
             }
 
-            snprintf(mac, SIZE_MAC, MAC_ADDRESS_FORMAT,
+            snprintf(const_cast<char*>(mac.c_str()), SIZE_MAC,
+                     MAC_ADDRESS_FORMAT,
                      reqptr->data[MAC_OFFSET],
                      reqptr->data[MAC_OFFSET + 1],
                      reqptr->data[MAC_OFFSET + 2],
@@ -690,7 +717,8 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
 
             uint8_t prefixOffset = IPADDR_OFFSET + addrSize;
 
-            memcpy(&prefix, &(reqptr->data[prefixOffset]), sizeof(decltype(prefix)));
+            memcpy(&prefix, &(reqptr->data[prefixOffset]),
+                   sizeof(decltype(prefix)));
 
             uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
 
@@ -700,8 +728,11 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
                 family = AF_INET6;
             }
 
-            ipAddress = getAddrStr(family, reqptr->data, IPADDR_OFFSET, addrSize);
-            gateway = getAddrStr(family, reqptr->data, gatewayOffset, addrSize);
+            ipAddress = getAddrStr(family, reqptr->data,
+                                   IPADDR_OFFSET, addrSize);
+
+            gateway = getAddrStr(family, reqptr->data,
+                                 gatewayOffset, addrSize);
 
         } while(0);
 
@@ -710,8 +741,6 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
             ",prefix="s + std::to_string(prefix) + ",gateway="s + gateway +
             ",mac="s + mac + ",addressOrigin="s + addressOrigin;
 
-        log<level::DEBUG>("Network configuration changed",
-                entry("NETWORKCONFIG=%s", host_network_config.c_str()));
 
         auto ipObjectInfo = getDbusObject(IP_INTERFACE, SETTINGS_ROOT,
                                           SETTINGS_MATCH);
@@ -730,7 +759,10 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
                 IP_INTERFACE, "Type",
                 std::string("xyz.openbmc_project.Network.IP.Protocol.IPv4"));
         setDbusProperty(macObjectInfo.second, macObjectInfo.first,
-                MAC_INTERFACE,"MACAddress", std::string(mac));
+                MAC_INTERFACE,"MACAddress", mac);
+
+        log<level::DEBUG>("Network configuration changed",
+                entry("NETWORKCONFIG=%s", host_network_config.c_str()));
 
     }
     catch (InternalFailure& e)
