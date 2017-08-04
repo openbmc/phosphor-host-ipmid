@@ -3,6 +3,7 @@
 #include "types.hpp"
 #include "ipmid.hpp"
 #include "settings.hpp"
+#include "utils.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,7 @@
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
+#include <xyz/openbmc_project/Control/Host/server.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <sdbusplus/bus.hpp>
@@ -861,6 +863,43 @@ int initiate_state_transition(State::Host::Transition transition)
     return rc;
 }
 
+//-----------------------------
+// Initiates the Soft Power Off
+//-----------------------------
+int initiateSoftPowerOff()
+{
+    using namespace sdbusplus::xyz::openbmc_project::Control::server;
+
+    // Get the bus and its sdbusplus variant
+    auto bus = ipmid_get_sd_bus_connection();
+    auto sdbus = std::make_unique<sdbusplus::bus::bus>(bus);
+
+    auto ctrlHostPath = std::string{CONTROL_HOST_OBJPATH} + '0';
+    auto service = ::ipmi::getService(*sdbus,
+                                      CONTROL_HOST_BUSNAME,
+                                      ctrlHostPath);
+    if (service.empty())
+    {
+        log<level::ERR>("Error in finding Host Control Service");
+        return -1;
+    }
+
+    auto method = sdbus->new_method_call(service.c_str(),
+                                      CONTROL_HOST_OBJPATH,
+                                      CONTROL_HOST_BUSNAME,
+                                      "Execute");
+
+    method.append(convertForMessage(Host::Command::SoftOff).c_str());
+
+    auto reply = sdbus->call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in requesting Soft Power Off");
+        return -1;
+    }
+    return 0;
+}
+
 namespace power_policy
 {
 
@@ -1128,20 +1167,31 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = initiate_state_transition(State::Host::Transition::On);
             break;
         case CMD_POWER_OFF:
-            // Need to Nudge SoftPowerOff application that it needs to stop the
-            // watchdog timer if running.
+            // This path would be hit in 2 conditions.
+            // 1: When user asks for power off using ipmi chassis command 0x04
+            // 2: Host asking for power off post shutting down.
+
+            // If it's a host requested power off, then need to nudge Softoff
+            // application that it needs to stop the watchdog timer if running.
+            // If it is a user requested power off, then this is not really
+            // needed. But then we need to differentiate between user and host
+            // calling this same command
+
+            // TODO: Create a file during soft power off and check for that
+            // here  ?? -OR-
+            // Check for the existence of soft off service and only then stop it
+            // ??. But this would result in 2 calls in the case of Actual Soft
+            // Off.
             rc = stop_soft_off_timer();
+
             // Only request the Off transition if the soft power off
             // application is not running
             if (rc < 0)
             {
-                log<level::INFO>("Did not find soft off service so request "
-                                 "Host:Transition:Off");
-
                 // First create a file to indicate to the soft off application
-                // that it should not run since this is a direct user initiated
-                // power off request (i.e. a power off request that is not
-                // originating via a soft power off SMS request)
+                // that it should not run. Not doing this will result in State
+                // manager doing a default soft power off when asked for power
+                // off.
                 indicate_no_softoff_needed();
 
                 // Now request the shutdown
@@ -1149,10 +1199,9 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             else
             {
-                log<level::INFO>("Soft off is running, so let that stop "
-                                 "the host");
+                log<level::INFO>("Soft off is running, so let shutdown target "
+                                 "stop the host");
             }
-
             break;
 
         case CMD_HARD_RESET:
@@ -1169,6 +1218,13 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             rc = initiate_state_transition(State::Host::Transition::Reboot);
             break;
+
+        case CMD_SOFT_OFF_VIA_OVER_TEMP:
+            // Request to do a soft power off. Make a call to Host Control
+            // service to send a SMS_ATN to host.
+            rc = initiateSoftPowerOff();
+            break;
+
         default:
         {
             fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
