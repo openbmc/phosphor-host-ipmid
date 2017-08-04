@@ -7,6 +7,7 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <array>
+#include <vector>
 #include <arpa/inet.h>
 #include "transporthandler.h"
 
@@ -619,6 +620,51 @@ finish:
     return rc;
 }
 
+ipmi_ret_t getChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                            ipmi_request_t request, ipmi_response_t response,
+                            ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const GetChannelAccessRequest*>
+                   (request);
+    std::vector<uint8_t> outPayload(sizeof(GetChannelAccessResponse));
+    auto responseData = reinterpret_cast<GetChannelAccessResponse*>
+            (outPayload.data());
+
+    // Channel 1 is arbitrarily assigned to ETH0 channel
+    constexpr auto channelOne = 0x01;
+
+    /*
+     * The value Eh is used as a way to identify the current channel that
+     * the command is being received from.
+     */
+    constexpr auto channelE = 0x0E;
+
+    if (requestData->channelNumber != channelOne &&
+        requestData->channelNumber != channelE)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    /*
+     * [7:6] - reserved
+     * [5]   - 1b = Alerting disabled
+     * [4]   - 1b = per message authentication disabled
+     * [3]   - 0b = User level authentication enabled
+     * [2:0] - 2h = always available
+     */
+    constexpr auto channelSetting = 0x32;
+
+    responseData->settings = channelSetting;
+    //Defaulting the channel privilege to administrator level.
+    responseData->privilegeLimit = PRIVILEGE_ADMIN;
+
+    *data_len = outPayload.size();
+    memcpy(response, outPayload.data(), *data_len);
+
+    return IPMI_CC_OK;
+}
+
 // ATTENTION: This ipmi function is very hardcoded on purpose
 // OpenBMC does not fully support IPMI.  This command is useful
 // to have around because it enables testing of interfaces with
@@ -723,6 +769,11 @@ void register_netfn_app_functions()
                                             IPMI_CMD_SET_CHAN_ACCESS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS, NULL,
                                     ipmi_set_channel_access, PRIVILEGE_ADMIN);
+
+    // <Get Channel Access>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
+                           getChannelAccess, PRIVILEGE_USER);
 
     // <Get Channel Info Command>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CHAN_INFO);
