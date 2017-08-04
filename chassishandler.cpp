@@ -961,20 +961,28 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = initiate_state_transition(State::Host::Transition::On);
             break;
         case CMD_POWER_OFF:
-            // Need to Nudge SoftPowerOff application that it needs to stop the
-            // watchdog timer if running.
+            // This path would be hit in 2 conditions.
+            // 1: When user asks for power off using ipmi chassis command 0x04
+            // 2: Host asking for power off post shutting down.
+
+            // If it's a host requested power off, then need to nudge Softoff
+            // application that it needs to stop the watchdog timer if running.
+            // If it is a user requested power off, then this is not really
+            // needed. But then we need to differentiate between user and host
+            // calling this same command
+
+            // For now, we are going ahead with trying to nudge the soft off and
+            // interpret the failure to do so as a non softoff case
             rc = stop_soft_off_timer();
+
             // Only request the Off transition if the soft power off
             // application is not running
             if (rc < 0)
             {
-                log<level::INFO>("Did not find soft off service so request "
-                                 "Host:Transition:Off");
-
                 // First create a file to indicate to the soft off application
-                // that it should not run since this is a direct user initiated
-                // power off request (i.e. a power off request that is not
-                // originating via a soft power off SMS request)
+                // that it should not run. Not doing this will result in State
+                // manager doing a default soft power off when asked for power
+                // off.
                 indicate_no_softoff_needed();
 
                 // Now request the shutdown
@@ -982,10 +990,9 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             else
             {
-                log<level::INFO>("Soft off is running, so let that stop "
-                                 "the host");
+                log<level::INFO>("Soft off is running, so let shutdown target "
+                                 "stop the host");
             }
-
             break;
 
         case CMD_HARD_RESET:
@@ -1002,6 +1009,12 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             rc = initiate_state_transition(State::Host::Transition::Reboot);
             break;
+
+        case CMD_SOFT_OFF_VIA_OVER_TEMP:
+            // Request Host State Manager to do a soft power off
+            rc = initiate_state_transition(State::Host::Transition::Off);
+            break;
+
         default:
         {
             fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
