@@ -15,7 +15,28 @@ enum ipmi_netfn_app_cmds
     IPMI_CMD_SET_WD                 = 0x24,
     IPMI_CMD_GET_CAP_BIT            = 0x36,
     IPMI_CMD_SET_CHAN_ACCESS        = 0x40,
+    IPMI_CMD_GET_CHANNEL_ACCESS     = 0x41,
     IPMI_CMD_GET_CHAN_INFO          = 0x42,
 };
+
+/** @struct GetChannelAccessRequest
+ *
+ *  IPMI payload for Get Channel access command request.
+ */
+struct GetChannelAccessRequest
+{
+    uint8_t channelNumber;      //!< Channel number.
+    uint8_t volatileSetting;    //!< Get non-volatile or the volatile setting.
+} __attribute__((packed));
+
+/** @struct GetChannelAccessResponse
+ *
+ *  IPMI payload for Get Channel access command response.
+ */
+struct GetChannelAccessResponse
+{
+    uint8_t settings;          //!< Channel settings.
+    uint8_t privilegeLimit;    //!< Channel privilege level limit.
+} __attribute__((packed));
 
 #endif
