@@ -3,6 +3,7 @@
 #include "types.hpp"
 #include "ipmid.hpp"
 #include "settings.hpp"
+#include "utils.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,7 @@
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
+#include <xyz/openbmc_project/Control/Host/server.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <sdbusplus/bus.hpp>
@@ -801,64 +803,85 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-//------------------------------------------
-// Calls into Host State Manager Dbus object
-//------------------------------------------
-int initiate_state_transition(State::Host::Transition transition)
+//-----------------------------------
+// Initiates the requested transition
+//-----------------------------------
+int initiateStateTransition(const std::string& objPath,
+                            const std::string& interface,
+                            const std::string& property,
+                            const std::string& value)
 {
-    // OpenBMC Host State Manager dbus framework
-    constexpr auto HOST_STATE_MANAGER_ROOT  = "/xyz/openbmc_project/state/host0";
-    constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
-    constexpr auto DBUS_PROPERTY_IFACE      = "org.freedesktop.DBus.Properties";
-    constexpr auto PROPERTY                 = "RequestedHostTransition";
+    constexpr auto DBUS_PROPERTY_IFACE  = "org.freedesktop.DBus.Properties";
 
-    // sd_bus error
-    int rc = 0;
-    char  *busname = NULL;
+    // Get the bus and its sdbusplus variant
+    auto bus = ipmid_get_sd_bus_connection();
+    auto sdbus = std::make_unique<sdbusplus::bus::bus>(bus);
 
-    // SD Bus error report mechanism.
-    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
-
-    // Gets a hook onto either a SYSTEM or SESSION bus
-    sd_bus *bus_type = ipmid_get_sd_bus_connection();
-    rc = mapper_get_service(bus_type, HOST_STATE_MANAGER_ROOT, &busname);
-    if (rc < 0)
+    auto service = ::ipmi::getService(*sdbus, interface, objPath);
+    if (service.empty())
     {
-        log<level::ERR>("Failed to get bus name",
-                        entry("ERROR=%s, OBJPATH=%s",
-                              strerror(-rc), HOST_STATE_MANAGER_ROOT));
-        return rc;
+        log<level::ERR>("Error in finding Service name",
+                entry("OBJPATH=%s",objPath.c_str()),
+                entry("INTERFACE=%s",interface.c_str()));
+        return -1;
     }
 
-    // Convert to string equivalent of the passed in transition enum.
-    auto request = State::convertForMessage(transition);
+    auto method = sdbus->new_method_call(service.c_str(),
+                                         objPath.c_str(),
+                                         DBUS_PROPERTY_IFACE,
+                                         "Set");
+    method.append(interface);
+    method.append(property, value);
 
-    rc = sd_bus_call_method(bus_type,                // On the system bus
-                            busname,                 // Service to contact
-                            HOST_STATE_MANAGER_ROOT, // Object path
-                            DBUS_PROPERTY_IFACE,     // Interface name
-                            "Set",                   // Method to be called
-                            &bus_error,              // object to return error
-                            nullptr,                 // Response buffer if any
-                            "ssv",                   // Takes 3 arguments
-                            HOST_STATE_MANAGER_IFACE,
-                            PROPERTY,
-                            "s", request.c_str());
-    if(rc < 0)
+    auto reply = sdbus->call(method);
+    if (reply.is_method_error())
     {
-        log<level::ERR>("Failed to initiate transition",
-                        entry("ERROR=%s, REQUEST=%s",
-                              bus_error.message, request.c_str()));
+        log<level::ERR>("Error in requesting transition",
+                entry("REQUEST=%s",value.c_str()));
+        return -1;
     }
     else
     {
         log<level::INFO>("Transition request initiated successfully");
     }
+    return 0;
+}
 
-    sd_bus_error_free(&bus_error);
-    free(busname);
+//-----------------------------
+// Initiates the Soft Power Off
+//-----------------------------
+int initiateSoftPowerOff()
+{
+    using namespace sdbusplus::xyz::openbmc_project::Control::server;
 
-    return rc;
+    // Get the bus and its sdbusplus variant
+    auto bus = ipmid_get_sd_bus_connection();
+    auto sdbus = std::make_unique<sdbusplus::bus::bus>(bus);
+
+    auto ctrlHostPath = std::string{CONTROL_HOST_OBJPATH} + '0';
+    auto service = ::ipmi::getService(*sdbus,
+                                      CONTROL_HOST_BUSNAME,
+                                      ctrlHostPath);
+    if (service.empty())
+    {
+        log<level::ERR>("Error in finding Host Control Service");
+        return -1;
+    }
+
+    auto method = sdbus->new_method_call(service.c_str(),
+                                      CONTROL_HOST_OBJPATH,
+                                      CONTROL_HOST_BUSNAME,
+                                      "Execute");
+
+    method.append(convertForMessage(Host::Command::SoftOff).c_str());
+
+    auto reply = sdbus->call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in requesting Soft Power Off");
+        return -1;
+    }
+    return 0;
 }
 
 namespace power_policy
@@ -1112,6 +1135,11 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_data_len_t data_len,
                                 ipmi_context_t context)
 {
+    // OpenBMC State Manager dbus framework. Need Chassis interface for Hard
+    // Power off and Host for others.
+    constexpr auto HOST_STATE_MANAGER_ROOT = "/xyz/openbmc_project/state/host0";
+    constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
+
     // Error from power off.
     int rc = 0;
 
@@ -1125,34 +1153,53 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     switch(chassis_ctrl_cmd)
     {
         case CMD_POWER_ON:
-            rc = initiate_state_transition(State::Host::Transition::On);
+            rc = initiateStateTransition(HOST_STATE_MANAGER_ROOT,
+                                         HOST_STATE_MANAGER_IFACE,
+                                         "RequestedHostTransition",
+                                         State::convertForMessage(
+                                            State::Host::Transition::On));
             break;
+
         case CMD_POWER_OFF:
-            // Need to Nudge SoftPowerOff application that it needs to stop the
-            // watchdog timer if running.
+            // This path would be hit in 2 conditions.
+            // 1: When user asks for power off using ipmi chassis command 0x04
+            // 2: Host asking for power off post shutting down.
+
+            // If it's a host requested power off, then need to nudge Softoff
+            // application that it needs to stop the watchdog timer if running.
+            // If it is a user requested power off, then this is not really
+            // needed. But then we need to differentiate between user and host
+            // calling this same command
+
+            // TODO: Create a file during soft power off and check for that
+            // here  ?? -OR-
+            // Check for the existence of soft off service and only then stop it
+            // ??. But this would result in 2 calls in the case of Actual Soft
+            // Off.
             rc = stop_soft_off_timer();
+
             // Only request the Off transition if the soft power off
             // application is not running
             if (rc < 0)
             {
-                log<level::INFO>("Did not find soft off service so request "
-                                 "Host:Transition:Off");
-
                 // First create a file to indicate to the soft off application
-                // that it should not run since this is a direct user initiated
-                // power off request (i.e. a power off request that is not
-                // originating via a soft power off SMS request)
+                // that it should not run. Not doing this will result in State
+                // manager doing a default soft power off when asked for power
+                // off.
                 indicate_no_softoff_needed();
 
                 // Now request the shutdown
-                rc = initiate_state_transition(State::Host::Transition::Off);
+                rc = initiateStateTransition(HOST_STATE_MANAGER_ROOT,
+                                             HOST_STATE_MANAGER_IFACE,
+                                             "RequestedHostTransition",
+                                             State::convertForMessage(
+                                                State::Host::Transition::Off));
             }
             else
             {
-                log<level::INFO>("Soft off is running, so let that stop "
-                                 "the host");
+                log<level::INFO>("Soft off is running, so let shutdown target "
+                                 "stop the host");
             }
-
             break;
 
         case CMD_HARD_RESET:
@@ -1167,8 +1214,19 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // originating via a soft power off SMS request)
             indicate_no_softoff_needed();
 
-            rc = initiate_state_transition(State::Host::Transition::Reboot);
+            rc = initiateStateTransition(HOST_STATE_MANAGER_ROOT,
+                                         HOST_STATE_MANAGER_IFACE,
+                                         "RequestedHostTransition",
+                                         State::convertForMessage(
+                                            State::Host::Transition::Reboot));
             break;
+
+        case CMD_SOFT_OFF_VIA_OVER_TEMP:
+            // Request to do a soft power off. Make a call to Host Control
+            // service to send a SMS_ATN to host.
+            rc = initiateSoftPowerOff();
+            break;
+
         default:
         {
             fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
