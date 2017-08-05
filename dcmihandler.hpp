@@ -6,19 +6,19 @@
 #include <vector>
 #include <sdbusplus/bus.hpp>
 
-// IPMI commands for net functions.
-enum ipmi_netfn_sen_cmds
-{
-    // Get capability bits
-    IPMI_CMD_DCMI_GET_POWER_LIMIT = 0x03,
-    IPMI_CMD_DCMI_SET_POWER_LIMIT = 0x04,
-    IPMI_CMD_DCMI_APPLY_POWER_LIMIT = 0x05,
-    IPMI_CMD_DCMI_GET_ASSET_TAG = 0x06,
-    IPMI_CMD_DCMI_SET_ASSET_TAG = 0x08,
-};
-
 namespace dcmi
 {
+
+enum Commands
+{
+    // Get capability bits
+    GET_POWER_LIMIT = 0x03,
+    SET_POWER_LIMIT = 0x04,
+    APPLY_POWER_LIMIT = 0x05,
+    GET_ASSET_TAG = 0x06,
+    SET_ASSET_TAG = 0x08,
+};
+
 
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 static constexpr auto assetTagIntf =
