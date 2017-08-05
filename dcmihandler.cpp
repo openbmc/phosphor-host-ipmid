@@ -486,28 +486,28 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER_LIMIT);
-    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_POWER_LIMIT, NULL, getPowerLimit,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_GET_POWER_LIMIT);
+    ipmi_register_callback(NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_GET_POWER_LIMIT, NULL, getPowerLimit,
                            PRIVILEGE_USER);
 
     // <Set Power Limit>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_POWER_LIMIT);
-    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_POWER_LIMIT, NULL, setPowerLimit,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_SET_POWER_LIMIT);
+    ipmi_register_callback(NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_SET_POWER_LIMIT, NULL, setPowerLimit,
                            PRIVILEGE_OPERATOR);
 
     // <Activate/Deactivate Power Limit>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_APPLY_POWER_LIMIT);
-    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_APPLY_POWER_LIMIT, NULL, applyPowerLimit,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_APPLY_POWER_LIMIT);
+    ipmi_register_callback(NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_APPLY_POWER_LIMIT, NULL, applyPowerLimit,
                            PRIVILEGE_OPERATOR);
 
     // <Get Asset Tag>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_ASSET_TAG);
-    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_GET_ASSET_TAG, NULL, getAssetTag,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_GET_ASSET_TAG);
+    ipmi_register_callback(NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_GET_ASSET_TAG, NULL, getAssetTag,
                            PRIVILEGE_USER);
 
     // <Set Asset Tag>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_ASSET_TAG);
-    ipmi_register_callback(NETFUN_GRPEXT, IPMI_CMD_DCMI_SET_ASSET_TAG, NULL, setAssetTag,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_SET_ASSET_TAG);
+    ipmi_register_callback(NETFUN_GRPEXT, ipmi::IPMI_CMD_DCMI_SET_ASSET_TAG, NULL, setAssetTag,
                            PRIVILEGE_OPERATOR);
     return;
 }

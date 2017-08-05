@@ -6,6 +6,9 @@
 #include <vector>
 #include <sdbusplus/bus.hpp>
 
+namespace ipmi
+{
+
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
 {
@@ -16,6 +19,8 @@ enum ipmi_netfn_sen_cmds
     IPMI_CMD_DCMI_GET_ASSET_TAG = 0x06,
     IPMI_CMD_DCMI_SET_ASSET_TAG = 0x08,
 };
+
+} //namespace ipmi
 
 namespace dcmi
 {
