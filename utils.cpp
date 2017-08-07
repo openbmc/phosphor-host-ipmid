@@ -10,13 +10,6 @@ namespace ipmi
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
-/** @brief Gets the dbus object info implementing the given interface
- *         from the given subtree.
- *  @param[in] interface - Dbus interface.
- *  @param[in] serviceRoot - subtree from where the search should start.
- *  @param[in] match - identifier for object.
- *  @return On success returns the object having objectpath and servicename.
- */
 
 //TODO There may be cases where an interface is implemented by multiple
 //  objects,to handle such cases we are interested on that object
@@ -24,14 +17,14 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 //  Currently mapper doesn't give the readable busname(gives busid) so we can't
 //  use busname to find the object,will do later once the support is there.
 
-DbusObjectInfo getDbusObject(const std::string& interface,
+DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
+                             const std::string& interface,
                              const std::string& serviceRoot,
                              const std::string& match)
 {
     std::vector<DbusInterface> interfaces;
     interfaces.emplace_back(interface);
 
-    auto bus = sdbusplus::bus::new_default();
     auto depth = 0;
 
     auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME,
@@ -91,23 +84,14 @@ DbusObjectInfo getDbusObject(const std::string& interface,
 
 }
 
-/** @brief Gets the value associated with the given object
- *         and the interface.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] interface - Dbus interface.
- *  @param[in] property - name of the property.
- *  @return On success returns the value of the property.
- */
-Value getDbusProperty(const std::string& service,
+Value getDbusProperty(sdbusplus::bus::bus& bus,
+                      const std::string& service,
                       const std::string& objPath,
                       const std::string& interface,
                       const std::string& property)
 {
 
     Value value;
-
-    auto bus = sdbusplus::bus::new_default();
 
     auto method = bus.new_method_call(
                       service.c_str(),
@@ -133,19 +117,12 @@ Value getDbusProperty(const std::string& service,
     return value;
 }
 
-/** @brief Gets all the properties associated with the given object
- *         and the interface.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] interface - Dbus interface.
- *  @return On success returns the map of name value pair.
- */
-PropertyMap getAllDbusProperties(const std::string& service,
+PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
+                                 const std::string& service,
                                  const std::string& objPath,
                                  const std::string& interface)
 {
     PropertyMap properties;
-    auto bus = sdbusplus::bus::new_default();
 
     auto method = bus.new_method_call(
                       service.c_str(),
@@ -169,21 +146,13 @@ PropertyMap getAllDbusProperties(const std::string& service,
     return properties;
 }
 
-/** @brief Sets the property value of the given object.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] interface - Dbus interface.
- *  @param[in] property - name of the property.
- *  @param[in] value - value which needs to be set.
- */
-void setDbusProperty(const std::string& service,
+void setDbusProperty(sdbusplus::bus::bus& bus,
+                     const std::string& service,
                      const std::string& objPath,
                      const std::string& interface,
                      const std::string& property,
                      const Value& value)
 {
-    auto bus = sdbusplus::bus::new_default();
-
     auto method = bus.new_method_call(
                       service.c_str(),
                       objPath.c_str(),
