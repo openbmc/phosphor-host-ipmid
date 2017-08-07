@@ -292,18 +292,22 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         //  as SETTINGS_MATCH.
         //  Later SETTINGS_MATCH will be replaced with busname.
 
-        auto ipObjectInfo = ipmi::getDbusObject(IP_INTERFACE, SETTINGS_ROOT,
-                                                SETTINGS_MATCH);
-        auto macObjectInfo = ipmi::getDbusObject(MAC_INTERFACE, SETTINGS_ROOT,
-                                                 SETTINGS_MATCH);
+        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        properties  = ipmi::getAllDbusProperties(ipObjectInfo.second,
-                                         ipObjectInfo.first, IP_INTERFACE);
+        auto ipObjectInfo = ipmi::getDbusObject(bus, IP_INTERFACE,
+                                                SETTINGS_ROOT, SETTINGS_MATCH);
+
+        auto macObjectInfo = ipmi::getDbusObject(bus, MAC_INTERFACE,
+                                                 SETTINGS_ROOT, SETTINGS_MATCH);
+
+        properties  = ipmi::getAllDbusProperties(bus, ipObjectInfo.second,
+                                            ipObjectInfo.first, IP_INTERFACE);
         auto variant =
-            ipmi::getDbusProperty(macObjectInfo.second, macObjectInfo.first,
+            ipmi::getDbusProperty(bus, macObjectInfo.second,
+                                  macObjectInfo.first,
                                   MAC_INTERFACE, "MACAddress");
 
-        auto ipAddress = properties["Address"].get<std::string>();
+       auto ipAddress = properties["Address"].get<std::string>();
 
         auto gateway = properties["Gateway"].get<std::string>();
 
@@ -542,23 +546,25 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
             ",mac="s + mac + ",addressOrigin="s + addressOrigin;
 
 
-        auto ipObjectInfo = ipmi::getDbusObject(IP_INTERFACE, SETTINGS_ROOT,
-                                          SETTINGS_MATCH);
-        auto macObjectInfo = ipmi::getDbusObject(MAC_INTERFACE, SETTINGS_ROOT,
-                                           SETTINGS_MATCH);
+        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+        auto ipObjectInfo = ipmi::getDbusObject(bus, IP_INTERFACE,
+                                                SETTINGS_ROOT, SETTINGS_MATCH);
+        auto macObjectInfo = ipmi::getDbusObject(bus, MAC_INTERFACE,
+                                                 SETTINGS_ROOT, SETTINGS_MATCH);
         // set the dbus property
-        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Address", std::string(ipAddress));
-        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "PrefixLength", prefix);
-        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Origin", addressOrigin);
-        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Gateway", std::string(gateway));
-        ipmi::setDbusProperty(ipObjectInfo.second, ipObjectInfo.first,
+        ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
                 IP_INTERFACE, "Type",
                 std::string("xyz.openbmc_project.Network.IP.Protocol.IPv4"));
-        ipmi::setDbusProperty(macObjectInfo.second, macObjectInfo.first,
+        ipmi::setDbusProperty(bus, macObjectInfo.second, macObjectInfo.first,
                 MAC_INTERFACE,"MACAddress", std::string(mac));
 
         log<level::DEBUG>("Network configuration changed",
