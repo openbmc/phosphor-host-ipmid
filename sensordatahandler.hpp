@@ -40,7 +40,7 @@ AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData);
  *  @param[in] msg - message to send
  *  @return failure status in IPMI error code
  */
-ipmi_ret_t updateToDbus(const IpmiUpdateData& msg);
+ipmi_ret_t updateToDbus(IpmiUpdateData& msg);
 
 namespace set
 {
