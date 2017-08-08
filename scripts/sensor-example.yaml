@@ -38,6 +38,8 @@
           type: bool
           assert: "true"
           deassert: "false"
+  #Whether update should be skipped in any cases
+  skipupdate: none 
 0x07:
   sensorType: 0xC3
   path: /xyz/openbmc_project/control/host0
@@ -50,6 +52,7 @@
           #A 0xFF indicates the value need to be send to dbus
           0xFF:
             type: uint32_t
+  skipupdate: none
 0xa8:
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm1
@@ -64,12 +67,17 @@
           type: bool
           deassert: "true"
           assert: "false"
+        0x06:
+          type: bool
+          assert: "true"
+          deassert: "false"
     xyz.openbmc_project.Inventory.Item:
       Present:
         0x06:
           type: bool
           assert: "true"
           deassert: "false"
+  skipupdate: none
 0xaa:
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm2
@@ -84,12 +92,17 @@
           type: bool
           deassert: "true"
           assert: "false"
+        0x06:
+          type: bool
+          assert: "true"
+          deassert: "false"
     xyz.openbmc_project.Inventory.Item:
       Present:
         0x06:
           type: bool
           assert: "true"
           deassert: "false"
+  skipupdate: none
 0xac:
   sensorType: 0x0C
   path: /system/chassis/motherboard/dimm3
@@ -104,9 +117,14 @@
           type: bool
           deassert: "true"
           assert: "false"
+        0x06:
+          type: bool
+          assert: "true"
+          deassert: "false"
     xyz.openbmc_project.Inventory.Item:
       Present:
         0x06:
           type: bool
           assert: "true"
           deassert: "false"
+  skipupdate: none
