@@ -410,7 +410,7 @@ ipmi_ret_t setSensorReading(void *request)
 {
     SetSensorReadingReq cmdData =
             *(static_cast<SetSensorReadingReq *>(request));
-
+    
     // Check if the Sensor Number is present
     const auto iter = sensors.find(cmdData.number);
     if (iter == sensors.end())
