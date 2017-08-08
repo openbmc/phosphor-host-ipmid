@@ -20,6 +20,10 @@ using Interfaces = std::vector<Interface>;
 
 using MapperResponseType = std::map<Path, std::map<Service, Interfaces>>;
 
+using Action = std::string;
+using SkipUpdateMap = std::map<Offset, Action>;
+using SkipUpdateMaps = std::map<Id, SkipUpdateMap>; 
+
 /** @brief get the D-Bus service and service path
  *  @param[in] bus - The Dbus bus object
  *  @param[in] interface - interface to the service
@@ -89,6 +93,12 @@ ipmi_ret_t appendReadingData(IpmiUpdateData& msg,
                              const DbusInterfaceMap& interfaceMap,
                              const Value& data);
 
+inline bool skipUpdate(const SkipUpdateMap& skipMap,
+                const SetSensorReadingReq& cmdData)
+{
+    return IPMI_CC_OK;
+}
+
 }//namespace set
 
 namespace notify
@@ -144,6 +154,9 @@ ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
                            const DbusInterfaceMap& interfaceMap,
                            const std::string& sensorPath,
                            const SetSensorReadingReq& cmdData);
+
+bool skipUpdate(const SkipUpdateMap& skipMap,
+                const SetSensorReadingReq& cmdData);
 
 }//namespace notify
 }//namespace sensor

@@ -10,6 +10,7 @@ readingTypes = { 'reading': 'cmdData.reading',
                  'eventdata2': 'cmdData.eventData2',
                  'eventdata3': 'cmdData.eventData3'}
 funcProps = {}
+sensorProps = {}
 %>\
 %for key in sensorDict.iterkeys():
 <%
@@ -34,6 +35,9 @@ funcProps = {}
     funcProps[sensorType].update({"readingType" : readingType})
     funcProps[sensorType].update({"source" : readingTypes[readingType]})
     funcProps[sensorType].update({"interfaces" : sensor["interfaces"]})
+    if sensor["skipupdate"] != "none":
+        sensorProps[key] = {}
+        sensorProps[key].update({"actions" : sensor["skipupdate"]})
     if command == "Set":
         for interface, props in funcProps[sensorType]["interfaces"].items():
             sensorInterface = interface
@@ -53,6 +57,17 @@ namespace ipmi
 namespace sensor
 {
 
+SkipUpdateMaps skipUpdateMaps = {\
+% for k, props in sensorProps.iteritems():
+{${k},{\
+%for a, s in props.iteritems():
+%for o, v in s.iteritems():
+{${o},"${v}"},\
+%endfor
+%endfor
+}},
+% endfor
+};
 
 namespace sensor_set
 {
@@ -86,6 +101,14 @@ ipmi_ret_t update(const SetSensorReadingReq& cmdData,
         % endfor
     % endfor
 % endfor
+
+    auto iter = skipUpdateMaps.find(cmdData.number);
+    if((iter != skipUpdateMaps.end()) &&
+        (${(funcProp["command"]).lower()}::skipUpdate(iter->second, cmdData)))
+    {
+        return IPMI_CC_OK;
+    }
+
     auto result = ${(funcProp["command"]).lower()}::${funcName}(msg,
                         interfaceList,
                         ${param});
@@ -157,4 +180,3 @@ extern const IdInfoMap sensors = {
    % endif
 % endfor
 };
-
