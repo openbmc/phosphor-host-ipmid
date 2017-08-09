@@ -7,15 +7,20 @@
 #include <systemd/sd-bus.h>
 #include "host-ipmid/ipmid-api.h"
 #include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include "ipmid.hpp"
 #include "sensorhandler.h"
 #include "types.hpp"
 #include "utils.hpp"
+#include "xyz/openbmc_project/Common/error.hpp"
+
 
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;
 extern const ipmi::sensor::IdInfoMap sensors;
 using namespace phosphor::logging;
+using InternalFailure =
+    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 void register_netfn_sen_functions()   __attribute__((constructor));
 
@@ -418,7 +423,18 @@ ipmi_ret_t setSensorReading(void *request)
         return IPMI_CC_SENSOR_INVALID;
     }
 
-    return iter->second.updateFunc(cmdData, iter->second);
+    try
+    {
+        return iter->second.updateFunc(cmdData, iter->second);
+    }
+    catch (InternalFailure& e)
+    {
+         log<level::ERR>("Set sensor failed",
+                         entry("SENSOR_NUM=%d", cmdData.number));
+         commit<InternalFailure>();
+    }
+
+    return IPMI_CC_UNSPECIFIED_ERROR;
 }
 
 ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
