@@ -69,6 +69,7 @@ libipmi20_la_SOURCES = \
 	app/watchdog.cpp \
 	app/watchdog_service.cpp \
 	apphandler.cpp \
+	sys_info_param.cpp \
 	sensorhandler.cpp \
 	storagehandler.cpp \
 	chassishandler.cpp \
