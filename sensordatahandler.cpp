@@ -66,9 +66,10 @@ ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
     const auto& iter = mapperResponse.find(path);
     if (iter == mapperResponse.end())
     {
-        std::string err = "Error in finding sensor dbus"
+        std::string err = "Error in finding Dbus service for sensor "
                           "Command: GetSubTree "
-                          "Interface:" + interface;
+                          "Interface:" + interface +
+                          "Path:" + path;
         log<level::ERR>(err.c_str());
         elog<InternalFailure>();
     }
