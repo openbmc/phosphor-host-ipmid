@@ -5,7 +5,7 @@
 <%
 from collections import defaultdict
 readingTypes = { 'reading': 'cmdData.reading',
-                 'assertion': '0',
+                 'assertion': '((cmdData.assertOffset8_14 << 8)|cmdData.assertOffset0_7)',
                  'eventdata1': 'cmdData.eventData1',
                  'eventdata2': 'cmdData.eventData2',
                  'eventdata3': 'cmdData.eventData3'}

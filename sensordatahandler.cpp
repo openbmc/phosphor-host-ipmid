@@ -40,9 +40,9 @@ ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
     auto mapperResponseMsg = bus.call(mapperCall);
     if (mapperResponseMsg.is_method_error())
     {
-        std::string err = "Error in mapper GetSubTree "
-                          "Interface: " + interface;
-        log<level::ERR>(err.c_str());
+        log<level::ERR>("Mapper GetSubTree failed",
+                        entry("PATH=%s", path),
+                        entry("INTERFACE=%s", interface));
         elog<InternalFailure>();
     }
 
@@ -50,10 +50,9 @@ ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
     mapperResponseMsg.read(mapperResponse);
     if (mapperResponse.empty())
     {
-        std::string err = "Invalid response from mapper "
-                          "Command: GetSubTree "
-                          "Interface:" + interface;
-        log<level::ERR>(err.c_str());
+        log<level::ERR>("Invalid mapper response",
+                        entry("PATH=%s", path),
+                        entry("INTERFACE=%s", interface));
         elog<InternalFailure>();
     }
 
@@ -66,10 +65,9 @@ ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
     const auto& iter = mapperResponse.find(path);
     if (iter == mapperResponse.end())
     {
-        std::string err = "Error in finding sensor dbus"
-                          "Command: GetSubTree "
-                          "Interface:" + interface;
-        log<level::ERR>(err.c_str());
+        log<level::ERR>("Coudn't find d-bus path",
+                        entry("PATH=%s", path),
+                        entry("INTERFACE=%s", interface));
         elog<InternalFailure>();
     }
     return std::make_pair(iter->first, iter->second.begin()->first);
