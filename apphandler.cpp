@@ -19,6 +19,8 @@ namespace std {
 #  error filesystem not available
 #endif
 #include <fstream>
+#include <memory>
+#include <algorithm>
 #include <stdio.h>
 #include <stdint.h>
 #include <systemd/sd-bus.h>
@@ -36,6 +38,7 @@ namespace std {
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "xyz/openbmc_project/Software/Version/server.hpp"
 #include "xyz/openbmc_project/Software/Activation/server.hpp"
+#include "sys_info_param.hpp"
 
 extern sd_bus *bus;
 
@@ -585,6 +588,143 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
+
+ipmi_ret_t ipmi_app_set_system_info(
+        ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+        ipmi_response_t response, ipmi_data_len_t dataLen,
+        ipmi_context_t context)
+{
+    printf("Handling IPMI_CMD_SET_SYSTEM_INFO Netfn:[0x%X], Cmd:[0x%X]\n",
+           netfn, cmd);
+    printf("Setting parameters is not implemented.\n");
+    return IPMI_CC_INVALID;
+}
+
+typedef struct
+{
+    uint8_t paramRevision;
+    uint8_t setSelector;
+    union
+    {
+      struct
+      {
+          uint8_t encoding;
+          uint8_t stringLen;
+          uint8_t stringData0[14];
+      } __attribute__((packed));
+      uint8_t stringDataN[16];
+      uint8_t byteData;
+    };
+} __attribute__((packed)) ipmi_sys_info_resp_t;
+
+// Split a string into (up to) 16-byte chunks as expected in response for get
+// system info parameter.
+// Args:
+//   fullString: Input string to be split
+//   chunkIndex: Index of the chunk to be written out
+//   chunk: Output data buffer; must have 14 byte capacity if chunk_index = 0
+//          and 16-byte capacity otherwise
+// Returns the number of bytes written into the output buffer, or -EINVAL for
+// invalid arguments.
+static int splitStringParam(const std::string& fullString, int chunkIndex,
+        uint8_t* chunk)
+{
+    constexpr int maxChunk = 255;
+    if (chunkIndex > maxChunk || chunk == nullptr)
+    {
+        return -EINVAL;
+    }
+    const size_t fullLength = fullString.length();
+    // Index to the beginning of the chunk data in full_string, after clamping
+    // to its length.
+    const size_t chunkStart = std::min(fullLength,
+            static_cast<size_t>(std::max(0, chunkIndex * 16 - 2)));
+    const size_t chunkLength = chunkIndex == 0 ? 14 : 16;
+    const size_t chunkEnd = std::min(fullLength, chunkStart + chunkLength);
+
+    // Does nothing if chunk_start = chunk_end.
+    std::copy(&fullString[chunkStart], &fullString[chunkEnd], chunk);
+    const size_t bytesWritten = chunkEnd - chunkStart;
+    std::fill(&chunk[bytesWritten], &chunk[16], 0);
+    return bytesWritten;
+}
+
+static int packGetSysInfoResp(const std::string& param_string,
+        uint8_t set_selector, ipmi_sys_info_resp_t* resp) {
+    uint8_t* data_buffer = resp->stringDataN;
+    resp->setSelector = set_selector;
+    if (resp->setSelector == 0)  // First chunk has only 14 bytes.
+    {
+        resp->encoding = 0;
+        resp->stringLen = param_string.length();
+        data_buffer = resp->stringData0;
+    }
+    return splitStringParam(param_string, resp->setSelector, data_buffer);
+}
+
+ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t dataLen, ipmi_context_t context)
+{
+    ipmi_sys_info_resp_t resp = {};
+    size_t respLen = 0;
+    uint8_t* const reqData = static_cast<uint8_t*>(request);
+    printf("Handling IPMI_CMD_GET_SYSTEM_INFO Netfn:[0x%X], Cmd:[0x%X]\n",
+           netfn, cmd);
+    const uint8_t paramRequested = reqData[1];
+    std::string paramString;
+
+    if (*dataLen < 4)
+    {
+        fprintf(stderr, "command is too short (length %zu)\n", *dataLen);
+        return IPMI_CC_INVALID;
+    }
+
+    // Parameters revision as of IPMI spec v2.0 rev. 1.1 (Feb 11, 2014 E6)
+    resp.paramRevision = 0x11;
+    if (reqData[0] & 0x80)  // Get parameter revision only
+    {
+        respLen = 1;
+        goto writeResponse;
+    }
+
+    printf("Get System Info Parameter %x, set %u\n", paramRequested,
+           resp.setSelector);
+
+    // The "Set In Progress" parameter can be used for rollback of parameter
+    // data and is not implemented.
+    if (paramRequested == 0)
+    {
+        resp.byteData = 0;
+        respLen = 2;
+        goto writeResponse;
+    }
+
+    if (sysInfoParamStore == nullptr)
+    {
+        sysInfoParamStore = std::make_unique<SysInfoParamStore>();
+    }
+
+    // Parameters other than Set In Progress are assumed to be strings.
+    if (!sysInfoParamStore->lookup(paramRequested, &paramString))
+    {
+        return IPMI_CC_SYSTEM_INFO_PARAMETER_NOT_SUPPORTED;
+    }
+    // TODO: Cache each parameter across multiple calls, until the whole string
+    // has been read out. Otherwise, it's possible for a parameter to change
+    // between requests for its chunks, returning chunks incoherent with each
+    // other. For now, the parameter store is simply required to have only
+    // idempotent callbacks.
+    packGetSysInfoResp(paramString, reqData[2], &resp);
+    respLen = sizeof(resp);  // Write entire string data chunk in response.
+
+writeResponse:
+    memcpy(response, &resp, sizeof(resp));
+    *dataLen = respLen;
+    return IPMI_CC_OK;
+}
+
 void register_netfn_app_functions()
 {
     // <Get BT Interface Capabilities>
@@ -677,6 +817,20 @@ void register_netfn_app_functions()
                            NULL,
                            getChannelCipherSuites,
                            PRIVILEGE_CALLBACK);
+
+    // <Set System Info Command>
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_SET_SYSTEM_INFO,
+                           NULL,
+                           ipmi_app_set_system_info,
+                           PRIVILEGE_ADMIN);
+
+    // <Get System Info Command>
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_SYSTEM_INFO,
+                           NULL,
+                           ipmi_app_get_system_info,
+                           PRIVILEGE_USER);
     return;
 }
 
