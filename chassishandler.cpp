@@ -958,6 +958,8 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     *data_len = 4;
 
+    bus = ipmid_get_sd_bus_connection();
+
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
         fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
