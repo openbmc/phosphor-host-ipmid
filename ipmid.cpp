@@ -10,7 +10,6 @@
 #include <map>
 #include <memory>
 #include <phosphor-logging/log.hpp>
-#include "ipmid.hpp"
 #include <sys/time.h>
 #include <errno.h>
 #include <mapper.h>
