@@ -25,19 +25,21 @@ funcProps = {}
         assert "Un-supported interface: serviceInterface"
     endif
     sensorInterface = serviceInterface
-    updateFunc = "sensor_set::sensor_type_" + str(sensorType) + "::update"
-    funcProps[sensorType] = {}
-    funcProps[sensorType].update({"command" : command})
-    funcProps[sensorType].update({"path" : sensor["path"]})
-    funcProps[sensorType].update({"serviceInterface" : serviceInterface})
-    funcProps[sensorType].update({"updateFunc" : updateFunc})
-    funcProps[sensorType].update({"readingType" : readingType})
-    funcProps[sensorType].update({"source" : readingTypes[readingType]})
-    funcProps[sensorType].update({"interfaces" : sensor["interfaces"]})
-    if command == "Set":
-        for interface, props in funcProps[sensorType]["interfaces"].items():
-            sensorInterface = interface
-    funcProps[sensorType].update({"sensorInterface" : sensorInterface})
+    for interface in sensor["interfaces"]:
+       updateFunc = "sensor_set::interface_" + interface.replace('.','') + "::update"
+       funcProps[interface] = {}
+       funcProps[interface].update({"command" : command})
+       funcProps[interface].update({"path" : sensor["path"]})
+       funcProps[interface].update({"serviceInterface" : serviceInterface})
+       funcProps[interface].update({"updateFunc" : updateFunc})
+       funcProps[interface].update({"readingType" : readingType})
+       funcProps[interface].update({"source" : readingTypes[readingType]})
+       funcProps[interface].update({"interfaces" : sensor["interfaces"]})
+       if command == "Set":
+           for interface, props in funcProps[interface]["interfaces"].items():
+               sensorInterface = interface
+       funcProps[interface].update({"sensorInterface" : sensorInterface})
+    endfor
 %>\
 % endfor
 #include <bitset>
@@ -56,8 +58,8 @@ namespace sensor
 
 namespace sensor_set
 {
-% for sensorType, funcProp in funcProps.iteritems():
-namespace sensor_type_${sensorType}
+% for interface, funcProp in funcProps.iteritems():
+namespace interface_${interface.replace('.','')}
 {
 
 ipmi_ret_t update(const SetSensorReadingReq& cmdData,
@@ -87,7 +89,8 @@ ipmi_ret_t update(const SetSensorReadingReq& cmdData,
     % endfor
 % endfor
     auto result = ${(funcProp["command"]).lower()}::${funcName}(msg,
-                        interfaceList,
+                        "${interface}",
+                        interfaceList.at("${interface}"),
                         ${param});
     if (result != IPMI_CC_OK)
     {
@@ -117,7 +120,9 @@ extern const IdInfoMap sensors = {
        offset = sensor.get("offsetB", 0)
        exp = sensor.get("bExp", 0)
        valueReadingType = sensor["readingType"]
-       updateFunc = funcProps[sensorType]["updateFunc"]
+%>\
+<%
+       updateFunc = funcProps[next(iter(interfaces))]["updateFunc"]
 %>
         ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
         ${offset * pow(10,exp)},${updateFunc},{
