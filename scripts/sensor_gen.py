@@ -4,6 +4,7 @@ import os
 import sys
 import yaml
 import argparse
+from mako import exceptions
 from mako.template import Template
 
 
@@ -21,7 +22,10 @@ def generate_cpp(sensor_yaml, output_dir):
 
         output_cpp = os.path.join(output_dir, "sensor-gen.cpp")
         with open(output_cpp, 'w') as fd:
-            fd.write(t.render(sensorDict=ifile))
+            try:
+                fd.write(t.render(sensorDict=ifile))
+            except:
+                fd.write(exceptions.text_error_template().render())
 
 
 def main():

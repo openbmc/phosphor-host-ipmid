@@ -128,12 +128,12 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
 }
 
 ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
-                                    const DbusInterfaceMap& interfaceMap,
+                                    const DbusInterface& interface,
+                                    const DbusPropertyMap& propertyMap,
                                     uint8_t data)
 {
-    const auto& interface = interfaceMap.begin();
-    msg.append(interface->first);
-    for (const auto& property : interface->second)
+    msg.append(interface);
+    for (const auto& property : propertyMap)
     {
         msg.append(property.first);
         const auto& iter = property.second.find(data);
@@ -148,12 +148,12 @@ ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
 }
 
 ipmi_ret_t appendReadingData(IpmiUpdateData& msg,
-                             const DbusInterfaceMap& interfaceMap,
+                             const DbusInterface& interface,
+                             const DbusPropertyMap& propertyMap,
                              const Value &data)
 {
-    const auto& interface = interfaceMap.begin();
-    msg.append(interface->first);
-    for (const auto& property : interface->second)
+    msg.append(interface);
+    for (const auto& property : propertyMap)
     {
         msg.append(property.first);
         msg.append(data);
@@ -162,16 +162,16 @@ ipmi_ret_t appendReadingData(IpmiUpdateData& msg,
 }
 
 ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
-                           const DbusInterfaceMap& interfaceMap,
+                           const DbusInterface& interface,
+                           const DbusPropertyMap& propertyMap,
                            const std::string& sensorPath,
                            const SetSensorReadingReq& cmdData)
 {
     std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
     std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
 
-    const auto& interface = interfaceMap.begin();
-    msg.append(interface->first);
-    for (const auto& property : interface->second)
+    msg.append(interface);
+    for (const auto& property : propertyMap)
     {
         msg.append(property.first);
         for (const auto& value : property.second)

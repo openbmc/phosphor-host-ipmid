@@ -65,7 +65,8 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
  *  @return a IPMI error code
  */
 ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
-                           const DbusInterfaceMap& interfaceMap,
+                           const DbusInterface& interface,
+                           const DbusPropertyMap& propertyMap,
                            const std::string& sensorPath,
                            const SetSensorReadingReq& cmdData);
 
@@ -76,7 +77,8 @@ ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
  *  @return a IPMI error code
  */
 ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
-                                    const DbusInterfaceMap& interfaceMap,
+                                    const DbusInterface& interface,
+                                    const DbusPropertyMap& propertyMap,
                                     uint8_t data);
 
 /** @brief Create a message for reading data
@@ -86,7 +88,8 @@ ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
  *  @return a IPMI error code
  */
 ipmi_ret_t appendReadingData(IpmiUpdateData& msg,
-                             const DbusInterfaceMap& interfaceMap,
+                             const DbusInterface& interface,
+                             const DbusPropertyMap& propertyMap,
                              const Value& data);
 
 }//namespace set
