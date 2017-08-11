@@ -17,7 +17,7 @@ using DbusInterface = std::string;
 using DbusObjectInfo = std::pair<DbusObjectPath, DbusService>;
 using DbusProperty = std::string;
 using Value = sdbusplus::message::variant<bool, int64_t, uint8_t,
-                            std::string, uint32_t>;
+                            std::string, uint32_t, int>;
 using PropertyMap = std::map<DbusProperty, Value>;
 using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
