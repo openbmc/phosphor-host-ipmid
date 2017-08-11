@@ -10,10 +10,12 @@
 #include "utils.hpp"
 
 #include <arpa/inet.h>
+#include <limits.h>
 #include <mapper.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <systemd/sd-bus.h>
+#include <unistd.h>
 
 #include "host-ipmid/ipmid-api.h"
 
@@ -635,6 +637,17 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
+static std::string sysInfoReadSystemName()
+{
+    // Use the BMC hostname as the "System Name."
+    char hostname[HOST_NAME_MAX + 1] = {};
+    if (gethostname(hostname, HOST_NAME_MAX) != 0)
+    {
+        perror("System info parameter: system name");
+    }
+    return hostname;
+}
+
 struct IpmiSysInfoResp
 {
     uint8_t paramRevision;
@@ -764,6 +777,8 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (sysInfoParamStore == nullptr)
     {
         sysInfoParamStore = std::make_unique<SysInfoParamStore>();
+        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_NAME,
+                                  sysInfoReadSystemName);
     }
 
     // Parameters other than Set In Progress are assumed to be strings.
