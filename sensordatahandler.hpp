@@ -1,3 +1,5 @@
+#pragma once
+
 #include "types.hpp"
 #include "host-ipmid/ipmid-api.h"
 
@@ -57,37 +59,84 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                            const std::string& command,
                            const std::string& sensorInterface);
 
-/** @brief Create a message for IPMI assertion
- *  @param[in] msg - Message to add the values
- *  @param[in] interface - sensor interface
- *  @param[in] sensorPath - Path of the sensor
+/** @brief Update d-bus based on assertion type sensor data
  *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
-                           const DbusInterfaceMap& interfaceMap,
-                           const std::string& sensorPath,
-                           const SetSensorReadingReq& cmdData);
+ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
+                     const Info& sensorInfo);
 
-/** @brief Create a message for discrete signal
- *  @param[in] msg - Message to add the values
- *  @param[in] interface - sensor interface
- *  @param[in] data - input discrete sensor data
+/** @brief Update d-bus based on a reading assertion
+ *  @tparam T - type of d-bus property mapping this sensor
+ *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
-                                    const DbusInterfaceMap& interfaceMap,
-                                    uint8_t data);
+template<typename T>
+ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
+                            const Info& sensorInfo)
+{
+    auto msg = makeDbusMsg(
+                   "org.freedesktop.DBus.Properties",
+                   sensorInfo.sensorPath,
+                   "Set",
+                   sensorInfo.sensorInterface);
 
-/** @brief Create a message for reading data
- *  @param[in] msg - Message to add the values
- *  @param[in] interface - sensor interface
- *  @param[in] data - input sensor data
+    const auto& interface = sensorInfo.propertyInterfaces.begin();
+    msg.append(interface->first);
+    for (const auto& property : interface->second)
+    {
+        msg.append(property.first);
+        sdbusplus::message::variant<T> value =
+            (cmdData.assertOffset8_14 << 8) | cmdData.assertOffset0_7;
+        msg.append(value);
+    }
+    return updateToDbus(msg);
+}
+
+
+/** @brief Update d-bus based on eventdata type sensor data
+ *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-ipmi_ret_t appendReadingData(IpmiUpdateData& msg,
-                             const DbusInterfaceMap& interfaceMap,
-                             const Value& data);
+ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData,
+                     const Info& sensorInfo,
+                     uint8_t data);
+
+/** @brief Update d-bus based on eventdata1 type sensor data
+ *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
+ *  @return a IPMI error code
+ */
+inline ipmi_ret_t eventdata1(const SetSensorReadingReq& cmdData,
+                             const Info& sensorInfo)
+{
+    return eventdata(cmdData, sensorInfo, cmdData.eventData1);
+}
+
+/** @brief Update d-bus based on eventdata2 type sensor data
+ *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
+ *  @return a IPMI error code
+ */
+inline ipmi_ret_t eventdata2(const SetSensorReadingReq& cmdData,
+                             const Info& sensorInfo)
+{
+    return eventdata(cmdData, sensorInfo, cmdData.eventData2);
+}
+
+/** @brief Update d-bus based on eventdata3 type sensor data
+ *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
+ *  @return a IPMI error code
+ */
+inline ipmi_ret_t eventdata3(const SetSensorReadingReq& cmdData,
+                             const Info& sensorInfo)
+{
+    return eventdata(cmdData, sensorInfo, cmdData.eventData3);
+}
 
 }//namespace set
 
@@ -106,44 +155,14 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                            const std::string& command,
                            const std::string& sensorInterface);
 
-/** @brief Create a message for IPMI discrete signal
- *  @param[in] msg - Message to add the values
+/** @brief Update d-bus based on assertion type sensor data
  *  @param[in] interfaceMap - sensor interface
- *  @param[in] sensorPath - Path of the sensor
  *  @param[in] cmdData - input sensor data
+ *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-inline ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
-        const DbusInterfaceMap& interfaceMap,
-        uint8_t data)
-{
-    return IPMI_CC_OK;
-}
-
-/** @brief Create a message for reading data
- *  @param[in] msg - Message to add the values
- *  @param[in] interfaceMap - sensor interface
- *  @param[in] data - input sensor data
- *  @return a IPMI error code
- */
-inline ipmi_ret_t appendReadingData(IpmiUpdateData& msg,
-                                    const DbusInterfaceMap& interfaceMap,
-                                    const Value &data)
-{
-    return IPMI_CC_OK;
-}
-
-/** @brief Create a message for IPMI asserting
- *  @param[in] msg - Message to add the values
- *  @param[in] interfaceMap - sensor interface
- *  @param[in] sensorPath - Path of the sensor
- *  @param[in] cmdData - input sensor data
- *  @return a IPMI error code
- */
-ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
-                           const DbusInterfaceMap& interfaceMap,
-                           const std::string& sensorPath,
-                           const SetSensorReadingReq& cmdData);
+ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
+                     const Info& sensorInfo);
 
 }//namespace notify
 }//namespace sensor
