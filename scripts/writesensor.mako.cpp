@@ -1,108 +1,56 @@
 ## This file is a template.  The comment below is emitted
 ## into the rendered file; feel free to edit this file.
-
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
 <%
-from collections import defaultdict
-readingTypes = { 'reading': 'cmdData.reading',
-                 'assertion': '((cmdData.assertOffset8_14 << 8)|cmdData.assertOffset0_7)',
-                 'eventdata1': 'cmdData.eventData1',
-                 'eventdata2': 'cmdData.eventData2',
-                 'eventdata3': 'cmdData.eventData3'}
-funcProps = {}
+interfaceDict = {}
 %>\
 %for key in sensorDict.iterkeys():
 <%
     sensor = sensorDict[key]
-    sensorType = sensor["sensorType"]
     serviceInterface = sensor["serviceInterface"]
-    readingType = sensor["readingType"]
     if serviceInterface == "org.freedesktop.DBus.Properties":
-        command = "Set"
+        updateFunc = "set::"
     elif serviceInterface == "xyz.openbmc_project.Inventory.Manager":
-        command = "Notify"
+        updateFunc = "notify::"
     else:
-        assert "Un-supported interface: serviceInterface"
+        assert "Un-supported interface: " + serviceInterface
     endif
-    sensorInterface = serviceInterface
-    updateFunc = "sensor_set::sensor_type_" + str(sensorType) + "::update"
-    funcProps[sensorType] = {}
-    funcProps[sensorType].update({"command" : command})
-    funcProps[sensorType].update({"path" : sensor["path"]})
-    funcProps[sensorType].update({"serviceInterface" : serviceInterface})
-    funcProps[sensorType].update({"updateFunc" : updateFunc})
-    funcProps[sensorType].update({"readingType" : readingType})
-    funcProps[sensorType].update({"source" : readingTypes[readingType]})
-    funcProps[sensorType].update({"interfaces" : sensor["interfaces"]})
-    if command == "Set":
-        for interface, props in funcProps[sensorType]["interfaces"].items():
-            sensorInterface = interface
-    funcProps[sensorType].update({"sensorInterface" : sensorInterface})
+    if serviceInterface not in interfaceDict:
+        interfaceDict[serviceInterface] = {}
+        interfaceDict[serviceInterface]["updateFunc"] = updateFunc
 %>\
 % endfor
-#include <bitset>
+
 #include "types.hpp"
-#include "host-ipmid/ipmid-api.h"
-#include <phosphor-logging/elog-errors.hpp>
-#include "xyz/openbmc_project/Common/error.hpp"
-#include <phosphor-logging/log.hpp>
 #include "sensordatahandler.hpp"
 
-namespace ipmi
-{
-namespace sensor
-{
-
-
-namespace sensor_set
-{
-% for sensorType, funcProp in funcProps.iteritems():
-namespace sensor_type_${sensorType}
-{
-
-ipmi_ret_t update(const SetSensorReadingReq& cmdData,
-                  const Info& sensorInfo)
-{
-    auto msg = ${(funcProp["command"]).lower()}::makeDbusMsg(
-                    "${funcProp['serviceInterface']}",
-                     sensorInfo.sensorPath,
-                    "${funcProp['command']}",
-                    "${funcProp['sensorInterface']}");
-
-    auto interfaceList = sensorInfo.sensorInterfaces;
-% for interface, properties in funcProp["interfaces"].iteritems():
-    % for dbus_property, property_value in properties.iteritems():
-        % for offset, values in property_value.iteritems():
-            % if offset == 0xFF:
-<%                funcName = "appendReadingData"%>\
-<%                param = "static_cast<"+values["type"]+">("+funcProp["source"]+")"%>\
-            %  elif funcProp["readingType"] == "assertion":
-<%                funcName = "appendAssertion"%>\
-<%                param = "sensorInfo.sensorPath, cmdData"%>\
-            % else:
-<%                funcName = "appendDiscreteSignalData"%>\
-<%                param = funcProp["source"]%>\
-            % endif
-        % endfor
-    % endfor
-% endfor
-    auto result = ${(funcProp["command"]).lower()}::${funcName}(msg,
-                        interfaceList,
-                        ${param});
-    if (result != IPMI_CC_OK)
-    {
-        return result;
-    }
-    return updateToDbus(msg);
-}
-}//namespace sensor_type_${sensorType}
-
-% endfor
-}//namespace sensor_get
-}//namespace sensor
-}//namespace ipmi
-
 using namespace ipmi::sensor;
+
+%for key in sensorDict.iterkeys():
+<%
+    sensor = sensorDict[key]
+    readingType = sensor["readingType"]
+    interfaces = sensor["interfaces"]
+    for interface, properties in interfaces.items():
+        for property, values in properties.items():
+            for offset, attributes in values.items():
+                type = attributes["type"]
+%>\
+%if "readingAssertion" == readingType:
+namespace sensor_${key}
+{
+
+inline ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
+                            const Info& sensorInfo)
+{
+    return set::readingAssertion<${type}>(cmdData, sensorInfo);
+}
+
+} // namespace sensor_${key}
+
+%endif
+% endfor
+
 extern const IdInfoMap sensors = {
 % for key in sensorDict.iterkeys():
    % if key:
@@ -111,28 +59,35 @@ extern const IdInfoMap sensors = {
        sensor = sensorDict[key]
        interfaces = sensor["interfaces"]
        path = sensor["path"]
+       serviceInterface = sensor["serviceInterface"]
        sensorType = sensor["sensorType"]
        readingType = sensor["sensorReadingType"]
        multiplier = sensor.get("multiplierM", 1)
        offset = sensor.get("offsetB", 0)
        exp = sensor.get("bExp", 0)
        valueReadingType = sensor["readingType"]
-       updateFunc = funcProps[sensorType]["updateFunc"]
+       updateFunc = interfaceDict[serviceInterface]["updateFunc"]
+       updateFunc += sensor["readingType"]
+       if "readingAssertion" == valueReadingType:
+           updateFunc = "sensor_" + str(key) + "::" + valueReadingType
+       sensorInterface = serviceInterface
+       if serviceInterface == "org.freedesktop.DBus.Properties":
+           sensorInterface = next(iter(interfaces))
 %>
-        ${sensorType},"${path}",${readingType},${multiplier},${offset},${exp},
-        ${offset * pow(10,exp)},${updateFunc},{
-    % for interface,properties in interfaces.iteritems():
+        ${sensorType},"${path}","${sensorInterface}",${readingType},${multiplier},
+        ${offset},${exp},${offset * pow(10,exp)},${updateFunc},{
+    % for interface,properties in interfaces.items():
             {"${interface}",{
-            % for dbus_property,property_value in properties.iteritems():
+            % for dbus_property,property_value in properties.items():
                 {"${dbus_property}",{
-                % for offset,values in property_value.iteritems():
+                % for offset,values in property_value.items():
                     { ${offset},{
                         % if offset == 0xFF:
                             }},
 <%                          continue %>\
                         % endif
 <%                          valueType = values["type"] %>\
-                    % for name,value in values.iteritems():
+                    % for name,value in values.items():
                         % if name == "type":
 <%                          continue %>\
                         % endif

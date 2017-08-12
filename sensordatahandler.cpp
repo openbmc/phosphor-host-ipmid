@@ -127,11 +127,17 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                                command.c_str());
 }
 
-ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
-                                    const DbusInterfaceMap& interfaceMap,
-                                    uint8_t data)
+ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData,
+                     const Info& sensorInfo,
+                     uint8_t data)
 {
-    const auto& interface = interfaceMap.begin();
+    auto msg = makeDbusMsg(
+                   "org.freedesktop.DBus.Properties",
+                   sensorInfo.sensorPath,
+                   "Set",
+                   sensorInfo.sensorInterface);
+
+    const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);
     for (const auto& property : interface->second)
     {
@@ -144,32 +150,22 @@ ipmi_ret_t appendDiscreteSignalData(IpmiUpdateData& msg,
         }
         msg.append(iter->second.assert);
     }
-    return IPMI_CC_OK;
+    return updateToDbus(msg);
 }
 
-ipmi_ret_t appendReadingData(IpmiUpdateData& msg,
-                             const DbusInterfaceMap& interfaceMap,
-                             const Value &data)
+ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
+                     const Info& sensorInfo)
 {
-    const auto& interface = interfaceMap.begin();
-    msg.append(interface->first);
-    for (const auto& property : interface->second)
-    {
-        msg.append(property.first);
-        msg.append(data);
-    }
-    return IPMI_CC_OK;
-}
+    auto msg = makeDbusMsg(
+                   "org.freedesktop.DBus.Properties",
+                   sensorInfo.sensorPath,
+                   "Set",
+                   sensorInfo.sensorInterface);
 
-ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
-                           const DbusInterfaceMap& interfaceMap,
-                           const std::string& sensorPath,
-                           const SetSensorReadingReq& cmdData)
-{
     std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
     std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
 
-    const auto& interface = interfaceMap.begin();
+    const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);
     for (const auto& property : interface->second)
     {
@@ -186,8 +182,9 @@ ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
             }
         }
     }
-    return IPMI_CC_OK;
+    return updateToDbus(msg);
 }
+
 }//namespace set
 
 namespace notify
@@ -213,16 +210,20 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                                command.c_str());
 }
 
-ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
-                           const DbusInterfaceMap& interfaceMap,
-                           const std::string& sensorPath,
-                           const SetSensorReadingReq& cmdData)
+ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
+                     const Info& sensorInfo)
 {
+    auto msg = makeDbusMsg(
+                   sensorInfo.sensorInterface,
+                   sensorInfo.sensorPath,
+                   "Notify",
+                   sensorInfo.sensorInterface);
+
     std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
     std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
     ipmi::sensor::ObjectMap objects;
     ipmi::sensor::InterfaceMap interfaces;
-    for (const auto& interface : interfaceMap)
+    for (const auto& interface : sensorInfo.propertyInterfaces)
     {
         for (const auto& property : interface.second)
         {
@@ -247,9 +248,9 @@ ipmi_ret_t appendAssertion(IpmiUpdateData& msg,
             }
         }
     }
-    objects.emplace(sensorPath, std::move(interfaces));
+    objects.emplace(sensorInfo.sensorPath, std::move(interfaces));
     msg.append(std::move(objects));
-    return IPMI_CC_OK;
+    return updateToDbus(msg);
 }
 }//namespace notify
 }//namespace sensor
