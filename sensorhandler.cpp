@@ -206,7 +206,7 @@ int find_openbmc_path(uint8_t num, dbus_interface_t *interface) {
     // works for the Value interface but may not suffice for more complex
     // sensors.
     // tracked https://github.com/openbmc/phosphor-host-ipmid/issues/103
-    strcpy(interface->interface, info.sensorInterfaces.begin()->first.c_str());
+    strcpy(interface->interface, info.propertyInterfaces.begin()->first.c_str());
     interface->sensornumber = num;
 
 final:
@@ -649,7 +649,7 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
                                      ipmi_data_len_t data_len)
 {
     /* Functional sensor case */
-    if (info->sensorInterfaces.begin()->first ==
+    if (info->propertyInterfaces.begin()->first ==
             "xyz.openbmc_project.Sensor.Value")
     {
         // Get bus
