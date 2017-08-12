@@ -56,13 +56,14 @@ struct Info
 {
    Type sensorType;
    InstancePath sensorPath;
+   DbusInterface sensorInterface;
    ReadingType sensorReadingType;
    Multiplier coefficientM;
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
-   std::function<uint8_t(SetSensorReadingReq&,const Info&)> updateFunc;
-   DbusInterfaceMap sensorInterfaces;
+   std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
+   DbusInterfaceMap propertyInterfaces;
 };
 
 using Id = uint8_t;
