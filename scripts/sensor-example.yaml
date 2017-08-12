@@ -1,112 +1,76 @@
-#sample yaml with documentation
-#Sensor Number
-0xa6:
-  #Sensor Type
-  sensorType: 0x0C
-  #There are two types of updates one with Set method and other with
-  #Notify method for inventory updates. The path indicates Inventory path for
-  #the Notify method and Dbus object path for Set method.
-  path: /system/chassis/motherboard/dimm0
-  #event reading type
+# Sensor id is the key
+0x60:
+  sensorType: 0x07
   sensorReadingType: 0x6F
-  #Dbus service interface to make a bus call to update or request value of a
-  #property
-  serviceInterface: xyz.openbmc_project.Inventory.Manager
-  #command data has three fields, sensor reading value, assertion and
-  #deassertion bits and event data, this indicates which data field should
-  #be used. Possible value to be updated.
+  # A "set" operation on this sensor should update this d-bus path.
+  # If the path is not specified, an MRW parser will try to determine the path
+  # based on the sensor id, on MRW based systems.  This typically happens for
+  # inventory items.
+  path: /org/open_power/control/occ0
+  # The interface that exposes method(s) to update the path above.
+  serviceInterface: org.freedesktop.DBus.Properties
+  # Where the sensor value is represented - assertion bits/reading/event data
   readingType: assertion
-  #List of dbus interfaces associated with the interested properties.
+  eventType: 0x6F
+  # All the d-bus interfaces : properties that must be updated for this path
   interfaces:
-    #Dbus interface implementing the interested property.
-    xyz.openbmc_project.State.Decorator.OperationalStatus:
-      #DBus property
-      Functional:
-        #Offset, for assertion it should be a bit mask to indicate which bit
-        #indicates the property is true or false, in event or reading types
-        #the value will get mapped to a Dbus enum, 0xFF need to give if the
-        #reading or event value need to be updated as it is.
-        0x04:
-          #type of the property
-          type: bool
-          #mapping from event offset bit in the command to the property value.
-          deassert: "true"
+    # One or more interface dict entries
+    org.open_power.OCC.Status:
+      OccActive:
+        # Sensor type specific offset
+        0x06:
+          # OccActive is a boolean
+          type: "bool"
+          # If offset 0x06 is asserted, set OccActive as false.
           assert: "false"
+          deassert: "true"
+
+0x61:
+  sensorType: 0x04
+  sensorReadingType: 0x6F
+  # Inventory paths intentionally leave out the inventory root,
+  # /xyz/openbmc_project/inventory, because phosphor-inventory-manager
+  # adds that.
+  path: /system/chassis/motherboard/dimm1
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  interfaces:
     xyz.openbmc_project.Inventory.Item:
       Present:
-        0x06:
+        6:
+          assert: true
+          deassert: false
           type: bool
-          assert: "true"
-          deassert: "false"
-0x07:
-  sensorType: 0xC3
-  path: /xyz/openbmc_project/control/host0
-  sensorReadingType: 0x6F
-  serviceInterface: org.freedesktop.DBus.Properties
-  readingType: reading
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        4:
+          assert: false
+          deassert: true
+          type: bool
+
+0x63:
   interfaces:
     xyz.openbmc_project.Control.Boot.RebootAttempts:
       AttemptsLeft:
-          #A 0xFF indicates the value need to be send to dbus
-          0xFF:
-            type: uint32_t
-0xa8:
-  sensorType: 0x0C
-  path: /system/chassis/motherboard/dimm1
+        0xFF:
+          type: uint32_t
+  path: /xyz/openbmc_project/state/host0
+  # A special case of assertion, where the entire assert bitfield
+  # serves as the value, or reading. Hence, the offset above is intentionally
+  # 0xFF, to indicate not to check any specific bits in the assertion.
+  readingType: readingAssertion
   sensorReadingType: 0x6F
-  serviceInterface: xyz.openbmc_project.Inventory.Manager
-  readingType: assertion
-  byteOffset: 0x00
+  sensorType: 0xC3
+  serviceInterface: org.freedesktop.DBus.Properties
+
+0x62:
   interfaces:
-    xyz.openbmc_project.State.Decorator.OperationalStatus:
-      Functional:
-        0x04:
-          type: bool
-          deassert: "true"
-          assert: "false"
-    xyz.openbmc_project.Inventory.Item:
-      Present:
-        0x06:
-          type: bool
-          assert: "true"
-          deassert: "false"
-0xaa:
-  sensorType: 0x0C
-  path: /system/chassis/motherboard/dimm2
+    xyz.openbmc_project.Control.Boot.RebootAttempts:
+      AttemptsLeft:
+        0xFF:
+          type: uint32_t
+  path: /xyz/openbmc_project/state/host1
+  readingType: readingAssertion
   sensorReadingType: 0x6F
-  serviceInterface: xyz.openbmc_project.Inventory.Manager
-  readingType: assertion
-  byteOffset: 0x00
-  interfaces:
-    xyz.openbmc_project.State.Decorator.OperationalStatus:
-      Functional:
-        0x04:
-          type: bool
-          deassert: "true"
-          assert: "false"
-    xyz.openbmc_project.Inventory.Item:
-      Present:
-        0x06:
-          type: bool
-          assert: "true"
-          deassert: "false"
-0xac:
-  sensorType: 0x0C
-  path: /system/chassis/motherboard/dimm3
-  sensorReadingType: 0x6F
-  serviceInterface: xyz.openbmc_project.Inventory.Manager
-  readingType: assertion
-  byteOffset: 0x00
-  interfaces:
-    xyz.openbmc_project.State.Decorator.OperationalStatus:
-      Functional:
-        0x04:
-          type: bool
-          deassert: "true"
-          assert: "false"
-    xyz.openbmc_project.Inventory.Item:
-      Present:
-        0x06:
-          type: bool
-          assert: "true"
-          deassert: "false"
+  sensorType: 0xC3
+  serviceInterface: org.freedesktop.DBus.Properties
