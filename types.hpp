@@ -24,6 +24,7 @@ using Value = sdbusplus::message::variant<bool, uint8_t, int16_t,
 using PropertyMap = std::map<DbusProperty, Value>;
 using ObjectTree = std::map<DbusObjectPath,
                             std::map<DbusService, std::vector<DbusInterface>>>;
+
 namespace sensor
 {
 
@@ -89,5 +90,21 @@ using InventoryPath = std::string;
 
 using InvObjectIDMap = std::map<InventoryPath, SelData>;
 
-}//namespce sensor
+}// namespace sensor
+
+namespace network
+{
+
+constexpr auto MAC_ADDRESS_FORMAT = "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx";
+constexpr auto IP_ADDRESS_FORMAT = "%u.%u.%u.%u";
+constexpr auto PREFIX_FORMAT = "%hhd";
+constexpr auto ADDR_TYPE_FORMAT = "%hhx";
+
+constexpr auto IPV4_ADDRESS_SIZE_BYTE = 4;
+constexpr auto IPV6_ADDRESS_SIZE_BYTE = 16;
+
+constexpr auto DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
+constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
+
+}//namespace network
 }//namespace ipmi

@@ -47,14 +47,6 @@ constexpr size_t SIZE_PREFIX = 7;
 constexpr size_t MAX_PREFIX_VALUE = 32;
 constexpr size_t SIZE_COOKIE = 4;
 constexpr size_t SIZE_VERSION = 2;
-constexpr auto MAC_ADDRESS_FORMAT = "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx";
-constexpr auto IP_ADDRESS_FORMAT = "%u.%u.%u.%u";
-constexpr auto   PREFIX_FORMAT = "%hhd";
-constexpr auto   ADDR_TYPE_FORMAT = "%hhx";
-constexpr auto   IPV4_ADDRESS_SIZE_BYTE = 4;
-constexpr auto   IPV6_ADDRESS_SIZE_BYTE = 16;
-constexpr auto   DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
-constexpr auto   DEFAULT_ADDRESS = "0.0.0.0";
 
 //PetiBoot-Specific
 static constexpr uint8_t net_conf_initial_bytes[] = {0x80, 0x21, 0x70, 0x62,
@@ -280,7 +272,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 {
     ipmi::PropertyMap properties;
     int rc = 0;
-    uint8_t addrSize = IPV4_ADDRESS_SIZE_BYTE;
+    uint8_t addrSize = ipmi::network::IPV4_ADDRESS_SIZE_BYTE;
 
     try
     {
@@ -325,7 +317,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         //
         // if mac address is default mac address then
         // don't send blank override.
-        if ((MACAddress == DEFAULT_MAC_ADDRESS))
+        if ((MACAddress == ipmi::network::DEFAULT_MAC_ADDRESS))
         {
             memset(respptr->data, 0, SIZE_BOOT_OPTION);
             rc = -1;
@@ -335,8 +327,8 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         // should not be default one,don't send blank override.
         if (isStatic)
         {
-            if((ipAddress == DEFAULT_ADDRESS) ||
-               (gateway == DEFAULT_ADDRESS) ||
+            if((ipAddress == ipmi::network::DEFAULT_ADDRESS) ||
+               (gateway == ipmi::network::DEFAULT_ADDRESS) ||
                (!prefix))
             {
                 memset(respptr->data, 0, SIZE_BOOT_OPTION);
@@ -345,7 +337,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
             }
         }
 
-        sscanf(MACAddress.c_str(), MAC_ADDRESS_FORMAT,
+        sscanf(MACAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
                (respptr->data + MAC_OFFSET),
                (respptr->data + MAC_OFFSET + 1),
                (respptr->data + MAC_OFFSET + 2),
@@ -362,8 +354,9 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
             "xyz.openbmc_project.Network.IP.Protocol.IPv4") ?
                 AF_INET : AF_INET6;
 
-        addrSize = (addressFamily == AF_INET) ? IPV4_ADDRESS_SIZE_BYTE :
-                                                IPV6_ADDRESS_SIZE_BYTE;
+        addrSize = (addressFamily == AF_INET) ?
+                       ipmi::network::IPV4_ADDRESS_SIZE_BYTE :
+                       ipmi::network::IPV6_ADDRESS_SIZE_BYTE;
 
         // ipaddress and gateway would be in IPv4 format
         inet_pton(addressFamily, ipAddress.c_str(),
@@ -501,7 +494,7 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
                 elog<InternalFailure>();
             }
 
-            snprintf(mac, SIZE_MAC, MAC_ADDRESS_FORMAT,
+            snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
                      reqptr->data[MAC_OFFSET],
                      reqptr->data[MAC_OFFSET + 1],
                      reqptr->data[MAC_OFFSET + 2],
@@ -528,7 +521,7 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
 
             uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
 
-            if (addrSize != IPV4_ADDRESS_SIZE_BYTE)
+            if (addrSize != ipmi::network::IPV4_ADDRESS_SIZE_BYTE)
             {
                 addressType = "xyz.openbmc_project.Network.IP.Protocol.IPv6";
                 family = AF_INET6;
