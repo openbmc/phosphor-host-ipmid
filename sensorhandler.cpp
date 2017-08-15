@@ -639,6 +639,7 @@ ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // A constant reservation ID is okay until we implement add/remove SDR.
     const uint16_t reservation_id = 1;
     *(uint16_t*)response = reservation_id;
+    *data_len = sizeof(uint16_t);
 
     printf("Created new IPMI SDR reservation ID %d\n", *(uint16_t*)response);
     return IPMI_CC_OK;
