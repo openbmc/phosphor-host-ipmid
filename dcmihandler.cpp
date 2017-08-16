@@ -21,6 +21,13 @@ constexpr auto PCAP_INTERFACE = "xyz.openbmc_project.Control.Power.Cap";
 constexpr auto POWER_CAP_PROP = "PowerCap";
 constexpr auto POWER_CAP_ENABLE_PROP = "PowerCapEnable";
 
+static const auto net_service_name = "xyz.openbmc_project.Network";
+static const auto net_config_obj_path =
+    "/xyz/openbmc_project/network/config";
+static const auto net_config_obj_iface =
+    "xyz.openbmc_project.Network.SystemConfiguration";
+static const auto host_name_property = "HostName";
+
 using namespace phosphor::logging;
 
 namespace dcmi
@@ -205,6 +212,22 @@ void writeAssetTag(const std::string& assetTag)
         log<level::ERR>("Error in writing asset tag");
         elog<InternalFailure>();
     }
+}
+
+std::string getHostName(void)
+{
+    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+    auto value = ipmi::getDbusProperty(bus, net_service_name,
+        net_config_obj_path, net_config_obj_iface, host_name_property);
+
+    return value.get<std::string>();
+}
+
+void setHostName(const std::string& host_name)
+{
+    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+    ipmi::setDbusProperty(bus, net_service_name, net_config_obj_path,
+        net_config_obj_iface, host_name_property, host_name);
 }
 
 } // namespace dcmi
@@ -483,6 +506,107 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 }
 
+ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+    ipmi_request_t request, ipmi_response_t response,
+    ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const dcmi::GetMgmntCtrlIdStrRequest *>
+        (request);
+    auto responseData = reinterpret_cast<dcmi::GetMgmntCtrlIdStrResponse *>
+        (response);
+    std::string hostName;
+    std::string resp_str;
+
+    if (requestData->groupID != dcmi::groupExtId ||
+        requestData->bytes > dcmi::maxBytes ||
+        requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    try
+    {
+        hostName = dcmi::getHostName();
+    }
+    catch (InternalFailure& e)
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    if (requestData->offset > hostName.length())
+    {
+        *data_len = 0;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    resp_str = hostName.substr(requestData->offset, requestData->bytes);
+    size_t resp_str_len = std::min(static_cast<std::size_t>(requestData->bytes),
+        resp_str.length() + 1);
+    responseData->groupID = dcmi::groupExtId;
+    responseData->strLen = hostName.length();
+    std::copy(begin(resp_str), end(resp_str), responseData->data);
+
+    *data_len = sizeof(*responseData) + resp_str_len;
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+    ipmi_request_t request, ipmi_response_t response,
+    ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    static std::array<char, dcmi::maxCtrlIdStrLen + 1> newCtrlIdStr;
+
+    auto requestData = reinterpret_cast<const dcmi::SetMgmntCtrlIdStrRequest *>
+        (request);
+    auto responseData = reinterpret_cast<dcmi::SetMgmntCtrlIdStrResponse *>
+        (response);
+
+    if (requestData->groupID != dcmi::groupExtId ||
+        requestData->bytes > dcmi::maxBytes ||
+        requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen + 1 ||
+        (requestData->offset + requestData->bytes == dcmi::maxCtrlIdStrLen + 1 &&
+            requestData->data[requestData->bytes - 1] != '\0'))
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    try
+    {
+        /* if there is no old value and offset is not 0 */
+        if (newCtrlIdStr[0] == '\0' && requestData->offset != 0)
+        {
+            /* read old ctrlIdStr */
+            auto hostName = dcmi::getHostName();
+            hostName.resize(dcmi::maxCtrlIdStrLen);
+            std::copy(begin(hostName), end(hostName), begin(newCtrlIdStr));
+            newCtrlIdStr[hostName.length()] = '\0';
+        }
+
+        /* replace part of string */
+        std::copy(requestData->data, requestData->data + requestData->bytes,
+            begin(newCtrlIdStr) + requestData->offset);
+
+        auto it = std::find(requestData->data,
+            requestData->data + requestData->bytes, '\0');
+        if (it != requestData->data + requestData->bytes)
+        {
+            dcmi::setHostName(newCtrlIdStr.data());
+        }
+    }
+    catch (InternalFailure& e)
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    responseData->groupID = dcmi::groupExtId;
+    responseData->offset = requestData->offset + requestData->bytes;
+    *data_len = sizeof(*responseData);
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -519,6 +643,20 @@ void register_netfn_dcmi_functions()
 
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_ASSET_TAG,
                            NULL, setAssetTag, PRIVILEGE_OPERATOR);
+
+    // <Get Managment Controller Identifier String>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+        NETFUN_GRPEXT, dcmi::Commands::GET_MGMNT_CTRL_ID_STR);
+
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_MGMNT_CTRL_ID_STR,
+        NULL, getMgmntCtrlIdStr, PRIVILEGE_USER);
+
+    // <Set Management Controller Identifier String>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+        NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR,
+        NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
+
     return;
 }
 // 956379
