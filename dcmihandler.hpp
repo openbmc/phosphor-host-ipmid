@@ -17,13 +17,20 @@ enum Commands
     APPLY_POWER_LIMIT = 0x05,
     GET_ASSET_TAG = 0x06,
     SET_ASSET_TAG = 0x08,
+    GET_MGMNT_CTRL_ID_STR = 0x09,
+    SET_MGMNT_CTRL_ID_STR = 0x0A,
 };
-
 
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 static constexpr auto assetTagIntf =
         "xyz.openbmc_project.Inventory.Decorator.AssetTag";
 static constexpr auto assetTagProp = "AssetTag";
+static constexpr auto networkServiceName = "xyz.openbmc_project.Network";
+static constexpr auto networkConfigObj =
+        "/xyz/openbmc_project/network/config";
+static constexpr auto networkConfigIntf =
+        "xyz.openbmc_project.Network.SystemConfiguration";
+static constexpr auto hostNameProp = "HostName";
 
 namespace assettag
 {
@@ -40,6 +47,7 @@ static constexpr auto groupExtId = 0xDC;
 static constexpr auto assetTagMaxOffset = 62;
 static constexpr auto assetTagMaxSize = 63;
 static constexpr auto maxBytes = 16;
+static constexpr size_t maxCtrlIdStrLen = 63;
 
 /** @struct GetAssetTagRequest
  *
@@ -204,6 +212,50 @@ struct ApplyPowerLimitRequest
 struct ApplyPowerLimitResponse
 {
     uint8_t groupID;            //!< Group extension identification.
+} __attribute__((packed));
+
+/** @struct GetMgmntCtrlIdStrRequest
+ *
+ *  DCMI payload for Get Management Controller Identifier String cmd request.
+ */
+struct GetMgmntCtrlIdStrRequest
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t offset;             //!< Offset to read.
+    uint8_t bytes;              //!< Number of bytes to read.
+} __attribute__((packed));
+
+/** @struct GetMgmntCtrlIdStrResponse
+ *
+ *  DCMI payload for Get Management Controller Identifier String cmd response.
+ */
+struct GetMgmntCtrlIdStrResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t strLen;             //!< ID string length.
+    char data[];                //!< ID string
+} __attribute__((packed));
+
+/** @struct SetMgmntCtrlIdStrRequest
+ *
+ *  DCMI payload for Set Management Controller Identifier String cmd request.
+ */
+struct SetMgmntCtrlIdStrRequest
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t offset;             //!< Offset to write.
+    uint8_t bytes;              //!< Number of bytes to read.
+    char data[];                //!< ID string
+} __attribute__((packed));
+
+/** @struct GetMgmntCtrlIdStrResponse
+ *
+ *  DCMI payload for Get Management Controller Identifier String cmd response.
+ */
+struct SetMgmntCtrlIdStrResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t offset;             //!< Last Offset Written.
 } __attribute__((packed));
 
 } // namespace dcmi
