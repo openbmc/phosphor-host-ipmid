@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdint.h>
 #include "xyz/openbmc_project/Common/error.hpp"
+#include <stdexcept>
+#include <algorithm>
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -483,6 +485,76 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 }
 
+static std::string getHostName(void)
+{
+    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+    auto getHostNameCall = bus.new_method_call("xyz.openbmc_project.Network",
+        "/xyz/openbmc_project/network/config",
+        "org.freedesktop.DBus.Properties", "Get");
+    getHostNameCall.append("xyz.openbmc_project.Network.SystemConfiguration",
+        "HostName");
+    auto reply = bus.call(getHostNameCall);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in getHostName property");
+        elog<InternalFailure>();
+    }
+
+    sdbusplus::message::variant<std::string> hostName;
+    reply.read(hostName);
+
+    return hostName.get<std::string>();
+}
+
+ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+    ipmi_request_t request, ipmi_response_t response,
+    ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const dcmi::GetMgmntCtrlIdStrRequest*>
+        (request);
+    auto responseData = reinterpret_cast<dcmi::GetMgmntCtrlIdStrResponse*>
+        (response);
+    std::string hostName;
+    std::string resp_str;
+
+    if (requestData->groupID != dcmi::groupExtId ||
+        requestData->bytes > dcmi::maxBytes ||
+        requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    try
+    {
+        hostName = getHostName();
+    }
+    catch (InternalFailure& e)
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    try
+    {
+        resp_str = hostName.substr(requestData->offset, requestData->bytes);
+    }
+    catch (std::out_of_range&)
+    {
+        *data_len = 0;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    size_t resp_str_len = std::min((size_t)requestData->bytes,
+        resp_str.length() + 1);
+    responseData->groupID = dcmi::groupExtId;
+    responseData->strLen = hostName.length();
+    memcpy(responseData->data, resp_str.c_str(), resp_str_len);
+
+    *data_len = sizeof(*responseData) + resp_str_len;
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -519,6 +591,14 @@ void register_netfn_dcmi_functions()
 
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_ASSET_TAG,
                            NULL, setAssetTag, PRIVILEGE_OPERATOR);
+
+    // <Get Managment Controller Identifier String>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+        NETFUN_GRPEXT, dcmi::Commands::GET_MGMNT_CTRL_ID_STR);
+
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_MGMNT_CTRL_ID_STR,
+        NULL, getMgmntCtrlIdStr, PRIVILEGE_USER);
+
     return;
 }
 // 956379
