@@ -433,22 +433,22 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         sd_bus_error_free(&error);
         reply = sd_bus_message_unref(reply);
 
+        // Set the Interval for the Watchdog
+        r = sd_bus_call_method(bus, busname, objname, property_iface,
+                               "Set", &error, &reply, "ssv",
+                               iface, "Interval", "t", timer_ms);
+        if(r < 0) {
+            fprintf(stderr, "Failed to set new expiration time: %s\n",
+                    strerror(-r));
+            goto finish;
+        }
+
         // Now Enable Watchdog
         r = sd_bus_call_method(bus, busname, objname, property_iface,
                                "Set", &error, &reply, "ssv",
                                iface, "Enabled", "b", true);
         if(r < 0) {
             fprintf(stderr, "Failed to Enable Watchdog: %s\n",
-                    strerror(-r));
-            goto finish;
-        }
-
-        // Set watchdog timer
-        r = sd_bus_call_method(bus, busname, objname, property_iface,
-                               "Set", &error, &reply, "ssv",
-                               iface, "TimeRemaining", "t", timer_ms);
-        if(r < 0) {
-            fprintf(stderr, "Failed to set new expiration time: %s\n",
                     strerror(-r));
             goto finish;
         }
