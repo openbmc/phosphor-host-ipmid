@@ -14,7 +14,6 @@
 #include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
-
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;
 extern const ipmi::sensor::IdInfoMap sensors;
@@ -477,7 +476,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus_message *reply = NULL;
     int reading = 0;
 
-
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
     r = find_openbmc_path(reqptr->sennum, &a);
@@ -574,13 +572,81 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_OK;
             *data_len=sizeof(sensorreadingresp_t);
             break;
+        case IPMI_SENSOR_TPM:
+        {
+            auto iter = sensors.find(reqptr->sennum);
+            if (iter == sensors.end())
+            {
+                return IPMI_CC_SENSOR_INVALID;
+            }
 
+            auto& interfaceList = iter->second.propertyInterfaces;
+            if (interfaceList.empty())
+            {
+                log<level::ERR>("Interface List empty for the sensor",
+                        entry("SENSOR_NUMBER=%d", reqptr->sennum));
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+
+            /* For the TPM sensor there is no reading value and sensor scanning
+             * is disabled. This is a discrete sensor and only the
+             * corresponding state is asserted.
+             */
+            resp->value = 0;
+            resp->operation = 0;
+            resp->indication[0] = 0;
+            resp->indication[1] = 0;
+
+            try
+            {
+                for (const auto& interface : interfaceList)
+                {
+                    for (const auto& property : interface.second)
+                    {
+                        sdbusplus::bus::bus dbus{ipmid_get_sd_bus_connection()};
+
+                        auto service = ipmi::getService(
+                                       dbus,
+                                       interface.first,
+                                       iter->second.sensorPath);
+
+                        auto propValue = ipmi::getDbusProperty(
+                                dbus, service, iter->second.sensorPath,
+                                interface.first, property.first);
+
+                        auto tpmStatus = propValue.get<bool>();
+
+                        for (const auto& value : property.second)
+                        {
+                            if (tpmStatus == (value.second.assert).get<bool>())
+                            {
+                                /*
+                                 * The discrete sensors support upto 14 states.
+                                 * The assertion states for discrete sensors are
+                                 * stored in 2 bytes, 0-7 in Byte 4 of the
+                                 * response and 8-14 in Byte 5 of the response.
+                                 */
+                                 resp->indication[0] |= 1 << (value.first);
+                                 break;
+                            }
+                        }
+                    }
+                }
+
+                rc = IPMI_CC_OK;
+                *data_len = sizeof(sensorreadingresp_t);
+            }
+            catch (InternalFailure& e)
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            break;
+        }
         default:
             *data_len=0;
             rc = IPMI_CC_SENSOR_INVALID;
             break;
     }
-
 
     reply = sd_bus_message_unref(reply);
 
