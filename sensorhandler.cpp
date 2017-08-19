@@ -412,6 +412,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 const std::set<std::string> analogSensorInterfaces =
 {
     "xyz.openbmc_project.Sensor.Value",
+    "xyz.openbmc_project.Control.FanPwm",
 };
 
 bool isAnalogSensor(const std::string& interface)
