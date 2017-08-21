@@ -12,10 +12,11 @@ extern const FruMap frus = {
          {"${object}",{
          % for interface,properties in interfaces.items():
              {"${interface}",{
-            % for dbus_property,property_value in properties.items():
-                 {"${dbus_property}",{
-                     "${property_value.get("IPMIFruSection", "")}",
-                     "${property_value.get("IPMIFruProperty", "")}",\
+            % if type(properties) is dict:
+                % for dbus_property,property_value in properties.items():
+                    {"${dbus_property}",{
+                        "${property_value.get("IPMIFruSection", "")}",
+                        "${property_value.get("IPMIFruProperty", "")}", \
 <%
     delimiter = property_value.get("IPMIFruValueDelimiter")
     if not delimiter:
@@ -25,7 +26,8 @@ extern const FruMap frus = {
 %>
                      "${delimiter}"
                  }},
-            % endfor
+                % endfor
+            %endif
              }},
          % endfor
         }},
