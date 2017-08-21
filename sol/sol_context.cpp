@@ -95,6 +95,14 @@ void Context::processInboundPayload(uint8_t seqNum,
             acceptedCount = input.size();
         }
     }
+    /*
+     * SOL payload with no character data and valid sequence number can be used
+     * as method to keep the SOL session active.
+     */
+    else if (input.empty() && seqNum)
+    {
+        respAckSeqNum = seqNum;
+    }
 
     if (seqNum != 0)
     {
