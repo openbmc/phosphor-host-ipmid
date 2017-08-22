@@ -73,8 +73,21 @@ extern const IdInfoMap sensors = {
 <%                          continue %>\
                         % endif
 <%                          valueType = values["type"] %>\
+<%
+try:
+    skip = values["skipOn"]
+    if skip == "assert":
+         skipVal = "SkipAssertion::ASSERT"
+    elif skip == "deassert":
+         skipVal = "SkipAssertion::DEASSERT"
+    else:
+         assert "Unknown skip value " + str(skip)
+except KeyError, e:
+    skipVal = "SkipAssertion::NONE"
+%>\
+                            ${skipVal},
                     % for name,value in values.items():
-                        % if name == "type":
+                        % if name == "type" or name == "skipOn":
 <%                          continue %>\
                         % endif
                         % if valueType == "string":
