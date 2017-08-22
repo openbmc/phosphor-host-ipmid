@@ -32,8 +32,33 @@ namespace sensor
 
 using Offset = uint8_t;
 
+/**
+ * @enum SkipAssertion
+ * Matching value for skipping the update
+ */
+enum class SkipAssertion
+{
+    NONE,
+    TRUE,
+    FALSE,
+};
+
+/**
+ * @enum PreReqValues
+ * Pre-req conditios for a property.
+ */
+struct PreReqValues
+{
+    Value assert;
+    Value deassert;
+};
+
+using PreReqOffsetValueMap = std::map<Offset,PreReqValues>;
+
+
 struct Values
 {
+   SkipAssertion skip;
    Value assert;
    Value deassert;
 };
@@ -76,7 +101,13 @@ using GetSensorResponse = std::array<uint8_t, sizeof(GetReadingResponse)>;
 
 using OffsetValueMap = std::map<Offset,Values>;
 
-using DbusPropertyMap = std::map<DbusProperty,OffsetValueMap>;
+struct DbusPropertyValues
+{
+    PreReqOffsetValueMap preReqOffsetValueMap;
+    OffsetValueMap offsetValueMap;
+};
+
+using DbusPropertyMap = std::map<DbusProperty,DbusPropertyValues>;
 
 using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
 
