@@ -164,6 +164,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                      const Info& sensorInfo);
 
+
 }//namespace notify
 }//namespace sensor
 }//namespace ipmi

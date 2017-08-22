@@ -36,6 +36,7 @@ struct Values
 {
    Value assert;
    Value deassert;
+   Value skip;
 };
 
 using OffsetValueMap = std::map<Offset,Values>;

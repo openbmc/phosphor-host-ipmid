@@ -91,7 +91,9 @@ extern const IdInfoMap sensors = {
                         % if name == "type":
 <%                          continue %>\
                         % endif
-                        % if valueType == "string":
+                        % if name == "skipOn":
+                            std::string("${value}"),
+                        % elif valueType == "string":
                            std::string("${value}"),
                         % elif valueType == "bool":
 <%                         value = str(value).lower() %>\
@@ -106,8 +108,8 @@ extern const IdInfoMap sensors = {
                 }},
             % endfor
             }},
-    % endfor
-     }
+      % endfor
+      }
 }},
    % endif
 % endfor

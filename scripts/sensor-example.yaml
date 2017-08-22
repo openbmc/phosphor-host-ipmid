@@ -47,6 +47,10 @@
           assert: false
           deassert: true
           type: bool
+        6:
+          assert: true
+          deassert: false
+          type: bool
 
 0x63:
   interfaces:
@@ -74,3 +78,28 @@
   sensorReadingType: 0x6F
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
+0x54:
+  sensorType: 7
+  path: /system/chassis/motherboard/cpu0/core22
+  sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  interfaces:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+          7:
+            assert: true
+            deassert: false
+            #Skip this update if this value is false
+            skipOn: false
+            type: bool
