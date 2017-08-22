@@ -52,7 +52,8 @@ extern const IdInfoMap sensors = {
            for interface,properties in interfaces.items():
                for dbus_property,property_value in properties.items():
                    for offset,values in property_value.items():
-                       valueType = values["type"]
+                       if offset != "prereq":
+                           valueType = values["type"]
            updateFunc = "set::" + valueReadingType + "<" + valueType + ">"
            getFunc = "get::" + valueReadingType + "<" + valueType + ">"
        sensorInterface = serviceInterface
@@ -66,15 +67,52 @@ extern const IdInfoMap sensors = {
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
                 {"${dbus_property}",{
+<%
+try:
+    preReq = property_value["prereq"]
+except KeyError, e:
+    preReq = dict()
+%>\
+                {
+                % for preOffset,preValues in preReq.items():
+                    { ${preOffset},{
+                        % for name,value in preValues.items():
+                            % if name == "type":
+<%                              continue %>\
+                            % endif
+<%                          value = str(value).lower() %>\
+                            ${value},
+                        % endfor
+                        }
+                     },
+                % endfor
+                },
+                {
                 % for offset,values in property_value.items():
+                    % if offset == "prereq":
+<%                      continue %>\
+                    % endif
                     { ${offset},{
                         % if offset == 0xFF:
                             }},
 <%                          continue %>\
                         % endif
-<%                          valueType = values["type"] %>\
+<%                      valueType = values["type"] %>\
+<%
+try:
+    skip = values["skipOn"]
+    if skip == False:
+         skipVal = "SkipAssertion::FALSE"
+    elif skip == True:
+         skipVal = "SkipAssertion::TRUE"
+    else:
+         assert "Unknown skip value " + str(skip)
+except KeyError, e:
+    skipVal = "SkipAssertion::NONE"
+%>\
+                            ${skipVal},
                     % for name,value in values.items():
-                        % if name == "type":
+                        % if name == "type" or name == "skipOn":
 <%                          continue %>\
                         % endif
                         % if valueType == "string":
@@ -89,11 +127,11 @@ extern const IdInfoMap sensors = {
                         }
                     },
                 % endfor
-                }},
+                }}},
             % endfor
             }},
-    % endfor
-     },
+      % endfor
+      }
 }},
    % endif
 % endfor
