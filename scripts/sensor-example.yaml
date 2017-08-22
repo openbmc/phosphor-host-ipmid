@@ -41,12 +41,19 @@
           assert: true
           deassert: false
           type: bool
-    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      #A unit is marked as functional only if that is present
+      #ie offset 7 needs to be asserted in this case.
       Functional:
-        4:
-          assert: false
-          deassert: true
-          type: bool
+          #Pre req conditions for this property is true
+          prereq:
+            6:
+              assert: true
+              deassert: false
+              type: bool
+          4:
+            assert: false
+            deassert: true
+            type: bool
 
 0x63:
   interfaces:
@@ -91,3 +98,34 @@
         0xFF:
           type: int64_t
 
+0x54:
+  sensorType: 7
+  path: /system/chassis/motherboard/cpu0/core22
+  sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  interfaces:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      #A unit is marked as functional only if that is present
+      #ie offset 7 needs to be asserted in this case.
+      Functional:
+          #Pre req conditions for this property is true
+          prereq:
+            7:
+              assert: true
+              deassert: false
+              type: bool
+          8:
+            assert: false
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+          7:
+            assert: true
+            deassert: false
+            #The update will be skipped based on the value of skipOn
+            #and assert or deassert, in this case if offset 7 is deasserted
+            #the update will be skipped.
+            skipOn: false
+            type: bool
