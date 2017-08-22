@@ -34,7 +34,8 @@ using namespace ipmi::sensor;
     for interface, properties in interfaces.items():
         for property, values in properties.items():
             for offset, attributes in values.items():
-                type = attributes["type"]
+                if offset != "prereq":
+                    type = attributes["type"]
 %>\
 %if "readingAssertion" == readingType:
 namespace sensor_${key}
@@ -80,18 +81,57 @@ extern const IdInfoMap sensors = {
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
                 {"${dbus_property}",{
+<%
+try:
+    preReq = property_value["prereq"]
+except KeyError, e:
+    preReq = dict()
+%>\
+                {
+                % for preOffset,preValues in preReq.items():
+                    { ${preOffset},{
+                        % for name,value in preValues.items():
+                            % if name == "type":
+<%                              continue %>\
+                            % endif
+<%                          value = str(value).lower() %>\
+                            ${value},
+                        % endfor
+                        }
+                     },
+                % endfor
+                },
+                {
                 % for offset,values in property_value.items():
+                    % if offset == "prereq":
+<%                      continue %>\
+                    % endif
                     { ${offset},{
                         % if offset == 0xFF:
                             }},
 <%                          continue %>\
                         % endif
-<%                          valueType = values["type"] %>\
+<%                      valueType = values["type"] %>\
+<%                      
+try:
+    skip = values["skipOn"]
+    if skip == "false":
+         skipVal = "FALSE"
+    elif skip == "true":
+         skipVal = "TRUE"
+    else:
+         assert "Unknown skip value " + str(skip)
+except KeyError, e:
+    skipVal = "NONE"
+%>\
+                            ${skipVal},
                     % for name,value in values.items():
-                        % if name == "type":
+                        % if name == "type" or name == "skipOn":
 <%                          continue %>\
                         % endif
-                        % if valueType == "string":
+                        % if name == "skipOn":
+                            std::string("${value}"),
+                        % elif valueType == "string":
                            std::string("${value}"),
                         % elif valueType == "bool":
 <%                         value = str(value).lower() %>\
@@ -103,11 +143,11 @@ extern const IdInfoMap sensors = {
                         }
                     },
                 % endfor
-                }},
+                }}},
             % endfor
             }},
-    % endfor
-     }
+      % endfor
+      }
 }},
    % endif
 % endfor

@@ -32,16 +32,39 @@ namespace sensor
 using Offset = uint8_t;
 using Value = ipmi::Value;
 
+enum SkipAssertion
+{
+    NONE,
+    TRUE,
+    FALSE,
+};
+
+struct PreReqValues
+{
+    Value assert;
+    Value deassert;
+};
+
+using PreReqOffsetValueMap = std::map<Offset,PreReqValues>;
+
+
 struct Values
 {
+   SkipAssertion skip;
    Value assert;
    Value deassert;
 };
 
 using OffsetValueMap = std::map<Offset,Values>;
 
+struct DbusPropertyValues
+{
+    PreReqOffsetValueMap preReqOffsetValueMap;
+    OffsetValueMap offsetValueMap;
+};
+
 using DbusProperty = ipmi::DbusProperty;
-using DbusPropertyMap = std::map<DbusProperty,OffsetValueMap>;
+using DbusPropertyMap = std::map<DbusProperty,DbusPropertyValues>;
 
 using DbusInterface = ipmi::DbusInterface;
 using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
