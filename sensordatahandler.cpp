@@ -229,28 +229,63 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
         {
             ipmi::sensor::PropertyMap props;
             bool valid = false;
+            bool result = true;
             for (const auto& value : property.second)
             {
                 if (assertionSet.test(value.first))
                 {
-                    props.emplace(property.first, value.second.assert);
+                    result = result && value.second.assert.get<bool>();
                     valid = true;
                 }
                 else if (deassertionSet.test(value.first))
                 {
-                    props.emplace(property.first, value.second.deassert);
+                    result = result && value.second.deassert.get<bool>();
                     valid = true;
                 }
             }
             if (valid)
             {
+                props.emplace(property.first, result);
                 interfaces.emplace(interface.first, std::move(props));
             }
         }
     }
+
+    if(skipUpdate(sensorInfo.skipUpdateMap, cmdData))
+    {
+        return IPMI_CC_OK;
+    }
+
     objects.emplace(sensorInfo.sensorPath, std::move(interfaces));
     msg.append(std::move(objects));
     return updateToDbus(msg);
+}
+
+bool skipUpdate(const SkipUpdateMap& skipMap,
+                const SetSensorReadingReq& cmdData)
+{
+    if(skipMap.empty())
+    {
+        return false;
+    }
+
+    std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
+    std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
+
+    bool result = false;
+    for (const auto& items : skipMap)
+    {
+        if (items.second)
+        {
+            result = result || assertionSet.test(items.first);
+        }
+        else
+        {
+            result = result || deassertionSet.test(items.first);
+        }
+    }
+
+    return result;
 }
 }//namespace notify
 }//namespace sensor

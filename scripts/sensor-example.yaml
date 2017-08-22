@@ -47,6 +47,10 @@
           assert: false
           deassert: true
           type: bool
+        6:
+          assert: true
+          deassert: false
+          type: bool
 
 0x63:
   interfaces:
