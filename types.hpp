@@ -46,6 +46,9 @@ using DbusPropertyMap = std::map<DbusProperty,OffsetValueMap>;
 using DbusInterface = ipmi::DbusInterface;
 using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
 
+using Assert = bool;
+using SkipUpdateMap = std::map<Offset,Assert>;
+
 using InstancePath = std::string;
 using Type = uint8_t;
 using ReadingType = uint8_t;
@@ -66,6 +69,7 @@ struct Info
    ScaledOffset scaledOffset;
    std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
    DbusInterfaceMap propertyInterfaces;
+   SkipUpdateMap skipUpdateMap;
 };
 
 using Id = uint8_t;
