@@ -164,6 +164,14 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                      const Info& sensorInfo);
 
+/** @brief check whether the action to be skipped
+ *  @param[in] skipMap - a set of conditions
+ *  @param[in] cmdData - input sensor data
+ *  @return true of action to be skipped
+ */
+bool skipUpdate(const SkipUpdateMap& skipMap,
+                const SetSensorReadingReq& cmdData);
+
 }//namespace notify
 }//namespace sensor
 }//namespace ipmi

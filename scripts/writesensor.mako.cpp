@@ -58,6 +58,10 @@ extern const IdInfoMap sensors = {
 <%
        sensor = sensorDict[key]
        interfaces = sensor["interfaces"]
+       try:
+           skipupdate = sensor["skipupdate"]
+       except KeyError,e:
+           skipupdate = ""
        path = sensor["path"]
        serviceInterface = sensor["serviceInterface"]
        sensorType = sensor["sensorType"]
@@ -106,8 +110,21 @@ extern const IdInfoMap sensors = {
                 }},
             % endfor
             }},
-    % endfor
-     }
+      % endfor
+      },
+      {
+      % if skipupdate != "":
+      % for offset,action in skipupdate.items():
+      {${offset},\
+        % if action == "assert": 
+            true,\
+        % elif action == "deassert":
+            false,\
+        % endif
+       },
+      % endfor
+      % endif
+      },
 }},
    % endif
 % endfor
