@@ -318,11 +318,21 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
             {
                 if (assertionSet.test(value.first))
                 {
+                    //Skip update if skipOn is ASSERT
+                    if (SkipAssertion::ASSERT == value.second.skip)
+                    {
+                        return IPMI_CC_OK;
+                    }
                     props.emplace(property.first, value.second.assert);
                     valid = true;
                 }
                 else if (deassertionSet.test(value.first))
                 {
+                    //Skip update if skipOn is DEASSERT
+                    if (SkipAssertion::DEASSERT == value.second.skip)
+                    {
+                        return IPMI_CC_OK;
+                    }
                     props.emplace(property.first, value.second.deassert);
                     valid = true;
                 }
@@ -333,6 +343,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
             }
         }
     }
+
     objects.emplace(sensorInfo.sensorPath, std::move(interfaces));
     msg.append(std::move(objects));
     return updateToDbus(msg);

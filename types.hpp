@@ -32,8 +32,20 @@ namespace sensor
 
 using Offset = uint8_t;
 
+/**
+ * @enum SkipAssertion
+ * Matching value for skipping the update
+ */
+enum class SkipAssertion
+{
+    NONE, //No skip defined
+    ASSERT, //Skip on Assert
+    DEASSERT, //Skip on Deassert
+};
+
 struct Values
 {
+   SkipAssertion skip;
    Value assert;
    Value deassert;
 };
