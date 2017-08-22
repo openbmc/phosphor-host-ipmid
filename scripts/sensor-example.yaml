@@ -37,16 +37,15 @@
   interfaces:
     xyz.openbmc_project.Inventory.Item:
       Present:
-        6:
+        0x06:
           assert: true
           deassert: false
           type: bool
-    xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
-        4:
-          assert: false
-          deassert: true
-          type: bool
+          0x04:
+            assert: false
+            deassert: true
+            type: bool
 
 0x63:
   interfaces:
@@ -91,3 +90,26 @@
         0xFF:
           type: int64_t
 
+0x54:
+  sensorType: 0x07
+  path: /system/chassis/motherboard/cpu0/core22
+  sensorReadingType: 0x6F
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  interfaces:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+          0x08:
+            assert: false
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+          0x07:
+            assert: true
+            deassert: false
+            #The update will be skipped based on the value of skipOn
+            #in this case if offset 0x07 is deasserted
+            #the update will be skipped.
+            skipOn: deassert
+            type: bool

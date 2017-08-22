@@ -52,7 +52,7 @@ extern const IdInfoMap sensors = {
            for interface,properties in interfaces.items():
                for dbus_property,property_value in properties.items():
                    for offset,values in property_value.items():
-                       valueType = values["type"]
+                        valueType = values["type"]
            updateFunc = "set::" + valueReadingType + "<" + valueType + ">"
            getFunc = "get::" + valueReadingType + "<" + valueType + ">"
        sensorInterface = serviceInterface
@@ -62,7 +62,7 @@ extern const IdInfoMap sensors = {
 %>
         ${sensorType},"${path}","${sensorInterface}",${readingType},${multiplier},
         ${offsetB},${exp},${offsetB * pow(10,exp)},${updateFunc},${getFunc},Mutability(${mutability}),{
-    % for interface,properties in interfaces.items():
+        % for interface,properties in interfaces.items():
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
                 {"${dbus_property}",{
@@ -73,8 +73,21 @@ extern const IdInfoMap sensors = {
 <%                          continue %>\
                         % endif
 <%                          valueType = values["type"] %>\
+<%
+try:
+    skip = values["skipOn"]
+    if skip == "assert":
+         skipVal = "SkipAssertion::ASSERT"
+    elif skip == "deassert":
+         skipVal = "SkipAssertion::DEASSERT"
+    else:
+         assert "Unknown skip value " + str(skip)
+except KeyError, e:
+    skipVal = "SkipAssertion::NONE"
+%>\
+                            ${skipVal},
                     % for name,value in values.items():
-                        % if name == "type":
+                        % if name == "type" or name == "skipOn":
 <%                          continue %>\
                         % endif
                         % if valueType == "string":
@@ -98,4 +111,3 @@ extern const IdInfoMap sensors = {
    % endif
 % endfor
 };
-
