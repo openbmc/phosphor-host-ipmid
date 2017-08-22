@@ -32,8 +32,16 @@ namespace sensor
 using Offset = uint8_t;
 using Value = ipmi::Value;
 
+enum SkipAssertion
+{
+    NONE,
+    TRUE,
+    FALSE,
+};
+
 struct Values
 {
+   SkipAssertion skip;
    Value assert;
    Value deassert;
 };

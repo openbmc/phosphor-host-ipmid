@@ -86,12 +86,27 @@ extern const IdInfoMap sensors = {
                             }},
 <%                          continue %>\
                         % endif
-<%                          valueType = values["type"] %>\
+<%                      valueType = values["type"] %>\
+<%                      
+try:
+    skip = values["skipOn"]
+    if skip == "false":
+         skipVal = "FALSE"
+    elif skip == "true":
+         skipVal = "TRUE"
+    else:
+         assert "Unknown skip value " + str(skip)
+except KeyError, e:
+    skipVal = "NONE"
+%>
+                            ${skipVal},
                     % for name,value in values.items():
-                        % if name == "type":
+                        % if name == "type" or name == "skipOn":
 <%                          continue %>\
                         % endif
-                        % if valueType == "string":
+                        % if name == "skipOn":
+                            std::string("${value}"),
+                        % elif valueType == "string":
                            std::string("${value}"),
                         % elif valueType == "bool":
 <%                         value = str(value).lower() %>\
@@ -106,8 +121,8 @@ extern const IdInfoMap sensors = {
                 }},
             % endfor
             }},
-    % endfor
-     }
+      % endfor
+      }
 }},
    % endif
 % endfor

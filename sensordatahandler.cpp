@@ -225,33 +225,52 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     ipmi::sensor::InterfaceMap interfaces;
     for (const auto& interface : sensorInfo.propertyInterfaces)
     {
+        SkipAssertion skip = NONE;
+        //For a property like functional state the result will be
+        //calculated based on the true value of all conditions.
         for (const auto& property : interface.second)
         {
             ipmi::sensor::PropertyMap props;
             bool valid = false;
+            auto result = true;
             for (const auto& value : property.second)
             {
                 if (assertionSet.test(value.first))
                 {
-                    props.emplace(property.first, value.second.assert);
+                    result = result && value.second.assert.get<bool>();
                     valid = true;
                 }
                 else if (deassertionSet.test(value.first))
                 {
-                    props.emplace(property.first, value.second.deassert);
+                    result = result && value.second.deassert.get<bool>();
                     valid = true;
+                }
+                if (value.second.skip != NONE)
+                {
+                    skip = value.second.skip;
                 }
             }
             if (valid)
             {
+                //check whether update need to be skipped, based on
+                //the value of skip and result.
+                if ((skip != NONE) &&(
+                    ((skip == FALSE)&&(result == false))||
+                    ((skip == TRUE)&&(result == true))))
+                {
+                    return IPMI_CC_OK;
+                }
+                props.emplace(property.first, result);
                 interfaces.emplace(interface.first, std::move(props));
             }
         }
     }
+
     objects.emplace(sensorInfo.sensorPath, std::move(interfaces));
     msg.append(std::move(objects));
     return updateToDbus(msg);
 }
+
 }//namespace notify
 }//namespace sensor
 }//namespace ipmi
