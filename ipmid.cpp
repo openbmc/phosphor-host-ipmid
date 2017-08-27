@@ -308,7 +308,7 @@ void cache_restricted_mode()
     using namespace internal::cache;
     sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
     const auto& restrictionModeSetting =
-        objects->map.at(restrictionModeIntf);
+        objects->map.at(restrictionModeIntf).front();
     auto method = dbus.new_method_call(
                       objects->service(restrictionModeSetting,
                           restrictionModeIntf).c_str(),
@@ -596,7 +596,8 @@ int main(int argc, char *argv[])
         sdbusplus::bus::match_t restrictedModeMatch(
             dbus,
             sdbusRule::propertiesChanged(
-                objects->map.at(restrictionModeIntf), restrictionModeIntf),
+                objects->map.at(restrictionModeIntf).front(),
+                restrictionModeIntf),
             handle_restricted_mode_change);
 
         for (;;) {
