@@ -734,7 +734,7 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     using namespace chassis::internal::cache;
     using namespace power_policy;
 
-    const auto& powerRestoreSetting = objects.map.at(powerRestoreIntf);
+    const auto& powerRestoreSetting = objects.map.at(powerRestoreIntf).front();
     auto method =
         dbus.new_method_call(
             objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
@@ -1096,7 +1096,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
 
-        const auto& bootSourceSetting = objects.map.at(bootSourceIntf);
+        const auto& bootSourceSetting = objects.map.at(bootSourceIntf).front();
         auto method =
             dbus.new_method_call(
                  objects.service(bootSourceSetting, bootSourceIntf).c_str(),
@@ -1117,7 +1117,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto bootSource =
             Source::convertSourcesFromString(result.get<std::string>());
 
-        const auto& bootModeSetting = objects.map.at(bootModeIntf);
+        const auto& bootModeSetting = objects.map.at(bootModeIntf).front();
         method = dbus.new_method_call(
                       objects.service(bootModeSetting, bootModeIntf).c_str(),
                       bootModeSetting.c_str(),
@@ -1235,7 +1235,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             sdbusplus::message::variant<std::string> property =
                 convertForMessage(sourceItr->second);
             const auto& bootSourceSetting =
-                objects.map.at(bootSourceIntf);
+                objects.map.at(bootSourceIntf).front();
             auto method =
                 dbus.new_method_call(
                      objects.service(bootSourceSetting, bootSourceIntf).c_str(),
@@ -1257,7 +1257,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             sdbusplus::message::variant<std::string> property =
                 convertForMessage(modeItr->second);
-            const auto& bootModeSetting = objects.map.at(bootModeIntf);
+            const auto& bootModeSetting = objects.map.at(bootModeIntf).front();
             auto method =
                 dbus.new_method_call(
                      objects.service(bootModeSetting, bootModeIntf).c_str(),

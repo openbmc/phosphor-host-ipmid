@@ -46,8 +46,19 @@ Objects::Objects(sdbusplus::bus::bus& bus,
     for (auto& iter : result)
     {
         const auto& path = iter.first;
-        auto& interface = iter.second.begin()->second[0];
-        map.emplace(std::move(interface), path);
+        for (auto& interface : iter.second.begin()->second)
+        {
+            auto found = map.find(interface);
+            if (map.end() != found)
+            {
+                auto& paths = found->second;
+                paths.push_back(path);
+            }
+            else
+            {
+                map.emplace(std::move(interface), std::vector<Path>({path}));
+            }
+        }
     }
 }
 

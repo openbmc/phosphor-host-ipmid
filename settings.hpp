@@ -42,12 +42,8 @@ struct Objects
          */
         Service service(const Path& path, const Interface& interface) const;
 
-        // TODO openbmc/openbmc#2058 - This will break when multiple settings,
-        // or in general multiple objects implement a single setting interface.
-        // For instance this will break for a 2-blade server, because we'd have
-        // 2 sets of settings objects. Need to revisit and fix this.
         /** @brief map of settings objects */
-        std::map<Interface, Path> map;
+        std::map<Interface, std::vector<Path>> map;
 
         /** @brief The Dbus bus object */
         sdbusplus::bus::bus& bus;
