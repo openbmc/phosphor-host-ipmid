@@ -1095,8 +1095,10 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         *data_len = static_cast<uint8_t>(BootOptionResponseSize::BOOT_FLAGS);
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
+        bool oneTimeEnabled = false;
 
-        const auto& bootSourceSetting = objects.map.at(bootSourceIntf).front();
+        const auto& bootSourceSetting =
+            settings::bootSetting(objects, bootSourceIntf, oneTimeEnabled);
         auto method =
             dbus.new_method_call(
                  objects.service(bootSourceSetting, bootSourceIntf).c_str(),
@@ -1117,7 +1119,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto bootSource =
             Source::convertSourcesFromString(result.get<std::string>());
 
-        const auto& bootModeSetting = objects.map.at(bootModeIntf).front();
+        const auto& bootModeSetting =
+            settings::bootSetting(objects, bootModeIntf, oneTimeEnabled);
         method = dbus.new_method_call(
                       objects.service(bootModeSetting, bootModeIntf).c_str(),
                       bootModeSetting.c_str(),
@@ -1146,26 +1149,12 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             bootOption = modeDbusToIpmi.at(bootMode);
         }
         resp->data[1] = (bootOption << 2);
+
+        resp->data[0] = oneTimeEnabled ?
+            SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:
+            SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
+
         rc = IPMI_CC_OK;
-
-        /* Get the boot policy */
-        int r = dbus_get_property("boot_policy",&p);
-
-        if (r < 0) {
-            fprintf(stderr, "Dbus get property(boot_policy) failed for get_sys_boot_options.\n");
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-
-        } else {
-
-            printf("BootPolicy is [%s]\n", p);
-            resp->data[0] = (strncmp(p,"ONETIME",strlen("ONETIME"))==0) ?
-                    SET_PARM_BOOT_FLAGS_VALID_ONE_TIME:
-                    SET_PARM_BOOT_FLAGS_VALID_PERMANENT;
-            rc = IPMI_CC_OK;
-
-        }
-
-
     } else if ( reqptr->parameter == static_cast<uint8_t>
     ( BootOptionParameter::OPAL_NETWORK_SETTINGS )) {
 
@@ -1226,16 +1215,21 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         IpmiValue bootOption = ((reqptr->data[1] & 0x3C) >> 2);
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
+        bool oneTimeEnabled = false;
+        constexpr auto enabledIntf = "xyz.openbmc_project.Common.Enablement";
+
+        bool permanent =
+            (reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) ==
+            SET_PARM_BOOT_FLAGS_PERMANENT;
 
         auto modeItr = modeIpmiToDbus.find(bootOption);
         auto sourceItr = sourceIpmiToDbus.find(bootOption);
-        if ((ipmiDefault == bootOption) ||
-            (sourceIpmiToDbus.end() != sourceItr))
+        if (sourceIpmiToDbus.end() != sourceItr)
         {
             sdbusplus::message::variant<std::string> property =
                 convertForMessage(sourceItr->second);
             const auto& bootSourceSetting =
-                objects.map.at(bootSourceIntf).front();
+                settings::bootSetting(objects, bootSourceIntf, oneTimeEnabled);
             auto method =
                 dbus.new_method_call(
                      objects.service(bootSourceSetting, bootSourceIntf).c_str(),
@@ -1251,13 +1245,36 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 *data_len = 0;
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
+
+            if (permanent && oneTimeEnabled)
+            {
+                sdbusplus::message::variant<bool> enabled = false;
+                method =
+                    objects.bus.new_method_call(
+                        objects.service(bootSourceSetting,
+                                        bootSourceIntf).c_str(),
+                        bootSourceSetting.c_str(),
+                        ipmi::PROP_INTF,
+                        "Set");
+                method.append(enabledIntf, "Enabled", enabled);
+                auto reply = objects.bus.call(method);
+                if (reply.is_method_error())
+                {
+                    log<level::ERR>("Error in setting enabled property",
+                                    entry("OBJECT=%s",
+                                          bootSourceSetting.c_str()));
+                    report<InternalFailure>();
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+            }
         }
-        if ((ipmiDefault == bootOption) ||
-            (modeIpmiToDbus.end() != modeItr))
+        if (modeIpmiToDbus.end() != modeItr)
         {
             sdbusplus::message::variant<std::string> property =
                 convertForMessage(modeItr->second);
-            const auto& bootModeSetting = objects.map.at(bootModeIntf).front();
+            const auto& bootModeSetting =
+                settings::bootSetting(objects, bootModeIntf, oneTimeEnabled);
             auto method =
                 dbus.new_method_call(
                      objects.service(bootModeSetting, bootModeIntf).c_str(),
@@ -1273,21 +1290,29 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 *data_len = 0;
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
+
+            if (permanent && oneTimeEnabled)
+            {
+                sdbusplus::message::variant<bool> enabled = false;
+                method =
+                    objects.bus.new_method_call(
+                        objects.service(bootModeSetting, bootModeIntf).c_str(),
+                        bootModeSetting.c_str(),
+                        ipmi::PROP_INTF,
+                        "Set");
+                method.append(enabledIntf, "Enabled", enabled);
+                auto reply = objects.bus.call(method);
+                if (reply.is_method_error())
+                {
+                    log<level::ERR>("Error in setting enabled property",
+                                    entry("OBJECT=%s",
+                                          bootModeSetting.c_str()));
+                    report<InternalFailure>();
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+            }
         }
-
-        /* setting the boot policy */
-        std::string value =
-            (char *)(((reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) ==
-                SET_PARM_BOOT_FLAGS_PERMANENT) ?"PERMANENT":"ONETIME");
-
-        printf ( "\nBoot Policy is %s",value.c_str());
-        int r = dbus_set_property("boot_policy",value.c_str());
-
-        if (r < 0) {
-            fprintf(stderr, "Dbus set property(boot_policy) failed for set_sys_boot_options.\n");
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-        }
-
     } else if (reqptr->parameter ==
             (uint8_t)BootOptionParameter::OPAL_NETWORK_SETTINGS) {
 

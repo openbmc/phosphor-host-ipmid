@@ -2,6 +2,7 @@
 #include <phosphor-logging/log.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "settings.hpp"
+#include "utils.hpp"
 
 namespace settings
 {
@@ -88,6 +89,53 @@ Service Objects::service(const Path& path, const Interface& interface) const
     }
 
     return result.begin()->first;
+}
+
+const Path& bootSetting(const Objects& objects, const Interface& iface,
+                        bool& oneTimeEnabled)
+{
+    constexpr auto bootObjCount = 2;
+    constexpr auto oneTime = "one_time";
+    constexpr auto enabledIntf = "xyz.openbmc_project.Common.Enablement";
+
+    const std::vector<Path>& paths = objects.map.at(iface);
+    size_t count = paths.size();
+    if (count != bootObjCount)
+    {
+        log<level::ERR>("Exactly two objects expected",
+                        entry("INTERFACE=%s", iface.c_str()),
+                        entry("COUNT=%d", count));
+        elog<InternalFailure>();
+    }
+    size_t index = 0;
+    if (std::string::npos == paths[0].rfind(oneTime))
+    {
+        index = 1;
+    }
+    const Path& oneTimeSetting = paths[index];
+    const Path& regularSetting = paths[!index];
+
+    auto method =
+        objects.bus.new_method_call(
+            objects.service(oneTimeSetting, iface).c_str(),
+            oneTimeSetting.c_str(),
+            ipmi::PROP_INTF,
+            "Get");
+    method.append(enabledIntf, "Enabled");
+    auto reply = objects.bus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in getting Enabled property",
+                        entry("OBJECT=%s", oneTimeSetting.c_str()),
+                        entry("INTERFACE=%s", iface.c_str()));
+        elog<InternalFailure>();
+    }
+
+    sdbusplus::message::variant<bool> enabled;
+    reply.read(enabled);
+    oneTimeEnabled = enabled.get<bool>();
+    const Path& setting = oneTimeEnabled ? oneTimeSetting : regularSetting;
+    return setting;
 }
 
 } // namespace settings

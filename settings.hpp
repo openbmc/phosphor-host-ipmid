@@ -49,4 +49,17 @@ struct Objects
         sdbusplus::bus::bus& bus;
 };
 
+/** @brief Return the one-time boot setting object if enabled, otherwise the
+ *         regular boot setting object.
+ *
+ * @param[in] objects - const reference to an object of type Objects
+ * @param[in] iface - boot setting interface
+ * @param[out] oneTimeEnabled - true if the one-time boot setting object is
+ *             returned
+ *
+ * @return boot setting object
+ */
+const Path& bootSetting(const Objects& objects, const Interface& iface,
+                        bool& oneTimeEnabled);
+
 } // namespace settings
