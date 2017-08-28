@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <tuple>
 #include <sdbusplus/bus.hpp>
 
 namespace settings
@@ -48,5 +49,24 @@ struct Objects
         /** @brief The Dbus bus object */
         sdbusplus::bus::bus& bus;
 };
+
+namespace boot
+{
+
+using OneTimeEnabled = bool;
+
+/** @brief Return the one-time boot setting object path if enabled, otherwise
+ *         the regular boot setting object path.
+ *
+ * @param[in] objects - const reference to an object of type Objects
+ * @param[in] iface - boot setting interface
+ *
+ * @return A tuple - boot setting object path, a bool indicating whether the
+ *                   returned path corresponds to the one time boot setting.
+ */
+std::tuple<Path, OneTimeEnabled> setting(const Objects& objects,
+                                         const Interface& iface);
+
+} // namespace boot
 
 } // namespace settings
