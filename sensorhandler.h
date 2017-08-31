@@ -402,7 +402,7 @@ inline void set_analog_data_format(uint8_t format,
     body->sensor_units_1 |= (format & 0x3)<<6;
 };
 
-inline void set_m(uint8_t m, SensorDataFullRecordBody* body)
+inline void set_m(uint16_t m, SensorDataFullRecordBody* body)
 {
     body->m_lsb = m & 0xff;
     body->m_msb_and_tolerance &= ~(3<<6);
@@ -414,18 +414,20 @@ inline void set_tolerance(uint8_t tol, SensorDataFullRecordBody* body)
     body->m_msb_and_tolerance |= tol & 0x3f;
 };
 
-inline void set_b(uint8_t b, SensorDataFullRecordBody* body)
+inline void set_b(uint16_t b, SensorDataFullRecordBody* body)
 {
     body->b_lsb = b & 0xff;
     body->b_msb_and_accuracy_lsb &= ~(3<<6);
     body->b_msb_and_accuracy_lsb |= ((b & (3<<8)) >> 2);
 };
-inline void set_accuracy(uint8_t acc, SensorDataFullRecordBody* body)
+inline void set_accuracy(uint16_t acc, SensorDataFullRecordBody* body)
 {
+    // bottom 6 bits
     body->b_msb_and_accuracy_lsb &= ~0x3f;
     body->b_msb_and_accuracy_lsb |= acc & 0x3f;
+    // top 4 bits
     body->accuracy_and_sensor_direction &= 0x0f;
-    body->accuracy_and_sensor_direction |= (acc & 0xf) << 4;
+    body->accuracy_and_sensor_direction |= ((acc >> 6) & 0xf) << 4;
 };
 inline void set_accuracy_exp(uint8_t exp, SensorDataFullRecordBody* body)
 {
