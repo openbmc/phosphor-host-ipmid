@@ -45,9 +45,9 @@ sensorTypemap_t g_SensorTypeMap[] = {
     {0xC7, 0x03, "SYSTEM"},
     {0xC7, 0x03, "MAIN_PLANAR"},
     {0xC2, 0x6F, "PowerCap"},
-    {0xD8, 0x03, "PowerSupplyRedundancy"},
+    {0x0b, 0xCA, "PowerSupplyRedundancy"},
     {0xDA, 0x03, "TurboAllowed"},
-    {0xB4, 0x6F, "PowerSupplyDerating"},
+    {0xD8, 0xC8, "PowerSupplyDerating"},
     {0xFF, 0x00, ""},
 };
 
@@ -308,15 +308,13 @@ uint8_t dbus_to_sensor_type(char *p) {
 
     sensorTypemap_t *s = g_SensorTypeMap;
     char r=0;
-
     while (s->number != 0xFF) {
         if (!strcmp(s->dbusname,p)) {
-            r = s->number;
+            r = s->typecode;
              break;
         }
         s++;
     }
-
 
     if (s->number == 0xFF)
         printf("Failed to find Sensor Type %s\n", p);
@@ -501,6 +499,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     switch(type) {
         case 0xC3:
         case 0xC2:
+        case 0xC8:
             r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
             if (r < 0) {
                 fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
