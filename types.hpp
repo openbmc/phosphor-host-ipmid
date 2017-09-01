@@ -110,10 +110,19 @@ constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
 
 constexpr auto MAC_ADDRESS_SIZE_BYTE = 6;
 constexpr auto VLAN_SIZE_BYTE = 2;
+constexpr auto IPSRC_SIZE_BYTE = 1;
 constexpr auto BITS_32 = 32;
 constexpr auto MASK_32_BIT = 0xFFFFFFFF;
 constexpr auto VLAN_ID_MASK = 0x00000FFF;
 constexpr auto VLAN_ENABLE_MASK = 0x8000;
+
+enum class IPOrigin: uint8_t
+{
+    UNSPECIFIED = 0,
+    STATIC = 1,
+    DHCP = 2,
+};
+
 
 }//namespace network
 }//namespace ipmi
