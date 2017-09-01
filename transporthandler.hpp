@@ -21,6 +21,7 @@ static const int LAN_PARM_INPROGRESS  = 0;
 static const int LAN_PARM_AUTHSUPPORT = 1;
 static const int LAN_PARM_AUTHENABLES = 2;
 static const int LAN_PARM_IP          = 3;
+static const int LAN_PARM_IPSRC       = 4;
 static const int LAN_PARM_MAC         = 5;
 static const int LAN_PARM_SUBNET      = 6;
 static const int LAN_PARM_GATEWAY     = 12;
@@ -29,6 +30,7 @@ static const int LAN_PARM_VLAN        = 20;
 struct ChannelConfig_t
 {
     std::string ipaddr;
+    ipmi::network::IPOrigin ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
     std::string netmask;
     std::string gateway;
     std::string macAddress;
@@ -44,5 +46,6 @@ struct ChannelConfig_t
         gateway.clear();
         macAddress.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
+        ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
     }
 };

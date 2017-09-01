@@ -276,6 +276,51 @@ void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
     }
 }
 
+ObjectTree getAllAncestors(sdbusplus::bus::bus& bus,
+                           const std::string& path,
+                           const InterfaceList& interfaces)
+{
+    auto convertTostring = [](const InterfaceList& interfaces) -> std::string
+    {
+        std::string intfStr;
+        for (auto& intf : interfaces)
+        {
+            intfStr += "," + intf;
+        }
+        return intfStr;
+    };
+
+    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME,
+                                          MAPPER_OBJ,
+                                          MAPPER_INTF,
+                                          "GetAncestors");
+    mapperCall.append(path, interfaces);
+
+    auto mapperReply = bus.call(mapperCall);
+    if (mapperReply.is_method_error())
+    {
+        log<level::ERR>("Error in mapper call",
+                        entry("PATH=%s", path.c_str()),
+                        entry("INTERFACES=%s",
+                            convertTostring(interfaces).c_str()));
+
+        elog<InternalFailure>();
+    }
+
+    ObjectTree objectTree;
+    mapperReply.read(objectTree);
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("No Object has impelmented the interface",
+                        entry("PATH=%s", path.c_str()),
+                        entry("INTERFACES=%s",
+                            convertTostring(interfaces).c_str()));
+        elog<InternalFailure>();
+    }
+
+    return objectTree;
+}
 
 namespace method_no_args
 {
