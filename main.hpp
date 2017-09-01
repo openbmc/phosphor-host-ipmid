@@ -3,6 +3,7 @@
 #include <tuple>
 
 #include <command_table.hpp>
+#include "command/guid.hpp"
 #include <sessions_manager.hpp>
 #include "sol/sol_manager.hpp"
 #include "sd_event_loop.hpp"

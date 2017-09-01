@@ -12,6 +12,7 @@
 #include <systemd/sd-event.h>
 
 #include <host-ipmid/ipmid-api.h>
+#include "command/guid.hpp"
 #include "comm_module.hpp"
 #include "command_table.hpp"
 #include "message.hpp"
@@ -65,6 +66,11 @@ int main(int i_argc, char* i_argv[])
         std::cerr << "Failed to connect to system bus:" << strerror(-rc) <<"\n";
         goto finish;
     }
+
+    // Register callback to update cache for a GUID change and cache the GUID
+    command::registerGUIDChangeCallback();
+    cache::guid = command::getSystemGUID();
+
 
     // Register all the IPMI provider libraries applicable for net-ipmid
     provider::registerCallbackHandlers(NET_IPMID_LIB_PATH);

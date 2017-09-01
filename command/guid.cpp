@@ -7,21 +7,28 @@
 #include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
 
+namespace cache
+{
+
+command::Guid guid;
+
+} // namespace cache
+
 namespace command
 {
 
-std::array<uint8_t, BMC_GUID_LEN> getSystemGUID()
+std::unique_ptr<sdbusplus::bus::match_t> matchPtr(nullptr);
+
+static constexpr auto guidObjPath = "/org/openbmc/control/chassis0";
+static constexpr auto propInterface = "org.freedesktop.DBus.Properties";
+
+Guid getSystemGUID()
 {
     // Canned System GUID for QEMU where the Chassis DBUS object is not
     // populated
-    std::array<uint8_t, BMC_GUID_LEN> guid = { 0x01, 0x02, 0x03, 0x04,
-                                               0x05, 0x06, 0x07, 0x08,
-                                               0x09, 0x0A, 0x0B, 0x0C,
-                                               0x0D, 0x0E, 0x0F, 0x10
-                                             };
+    Guid guid = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                  0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
 
-    constexpr auto objname = "/org/openbmc/control/chassis0";
-    constexpr auto interface = "org.freedesktop.DBus.Properties";
     constexpr auto chassisIntf = "org.openbmc.control.Chassis";
 
     sd_bus_message* reply = nullptr;
@@ -33,16 +40,16 @@ std::array<uint8_t, BMC_GUID_LEN> getSystemGUID()
 
     do
     {
-        rc = mapper_get_service(bus, objname, &busname);
+        rc = mapper_get_service(bus, guidObjPath, &busname);
         if (rc < 0)
         {
-            std::cerr << "Failed to get " << objname << " bus name: "
+            std::cerr << "Failed to get " << guidObjPath << " bus name: "
                       << strerror(-rc) << "\n";
             break;
         }
 
-        rc = sd_bus_call_method(bus, busname, objname, interface, "Get", &error,
-                                &reply, "ss", chassisIntf, "uuid");
+        rc = sd_bus_call_method(bus, busname, guidObjPath, propInterface, "Get",
+                                &error, &reply, "ss", chassisIntf, "uuid");
         if (rc < 0)
         {
             std::cerr << "Failed to call Get Method:" << strerror(-rc) << "\n";
@@ -74,6 +81,23 @@ std::array<uint8_t, BMC_GUID_LEN> getSystemGUID()
     free(busname);
 
     return guid;
+}
+
+void registerGUIDChangeCallback()
+{
+    if(matchPtr == nullptr)
+    {
+        using namespace sdbusplus::bus::match::rules;
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+        matchPtr = std::make_unique<sdbusplus::bus::match_t>(
+            bus,
+            path_namespace(guidObjPath) +
+            type::signal() +
+            member("PropertiesChanged") +
+            interface(propInterface),
+            [](sdbusplus::message::message&){cache::guid = getSystemGUID();});
+    }
 }
 
 } // namespace command

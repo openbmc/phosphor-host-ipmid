@@ -113,8 +113,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     std::advance(iter, cipher::rakp_auth::BMC_RANDOM_NUMBER_LEN);
 
     // Managed System GUID
-    auto guid = getSystemGUID();
-    std::copy_n(guid.data(), guid.size(), iter);
+    std::copy_n(cache::guid.data(), cache::guid.size(), iter);
     std::advance(iter, BMC_GUID_LEN);
 
     // Requested Privilege Level
@@ -144,7 +143,9 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
               response->managed_system_random_number);
 
     // Copy System GUID to the Response
-    std::copy_n(guid.data(), guid.size(), response->managed_system_guid);
+    std::copy_n(cache::guid.data(),
+                cache::guid.size(),
+                response->managed_system_guid);
 
     // Insert the HMAC output into the payload
     outPayload.insert(outPayload.end(), output.begin(), output.end());
