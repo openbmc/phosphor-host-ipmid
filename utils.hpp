@@ -113,6 +113,17 @@ void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
                           const std::string& interface,
                           const std::string& match = {});
 
+/** @brief Gets the ancestor objects of the given object
+           which implements the given interface.
+ *  @param[in] bus - Dbus bus object.
+ *  @param[in] path - Child Dbus object path.
+ *  @param[in] interfaces - Dbus interface list.
+ *  @return map of object path and service info.
+ */
+ObjectTree getAllAncestors(sdbusplus::bus::bus& bus,
+                           const std::string& path,
+                           InterfaceList&& interfaces);
+
 namespace method_no_args
 {
 
