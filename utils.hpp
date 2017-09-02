@@ -145,6 +145,7 @@ constexpr auto ETHERNET_INTERFACE = "xyz.openbmc_project.Network.EthernetInterfa
 constexpr auto IP_CREATE_INTERFACE = "xyz.openbmc_project.Network.IP.Create";
 constexpr auto VLAN_CREATE_INTERFACE = "xyz.openbmc_project.Network.VLAN.Create";
 constexpr auto VLAN_INTERFACE = "xyz.openbmc_project.Network.VLAN";
+constexpr auto FACTORY_RESET_INTERFACE = "xyz.openbmc_project.Common.FactoryReset";
 
 /* @brief converts the given subnet into prefix notation.
  * @param[in] addressFamily - IP address family(AF_INET/AF_INET6).
