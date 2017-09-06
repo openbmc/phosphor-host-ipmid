@@ -663,9 +663,28 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             break;
         }
         default:
-            *data_len=0;
-            rc = IPMI_CC_SENSOR_INVALID;
-            break;
+        {
+            const auto iter = sensors.find(reqptr->sennum);
+            if (iter == sensors.end())
+            {
+                return IPMI_CC_SENSOR_INVALID;
+            }
+
+            try
+            {
+                auto getResponse =  iter->second.getFunc(iter->second);
+                *data_len = getResponse.size();
+                memcpy(resp, getResponse.data(), *data_len);
+                return IPMI_CC_OK;
+            }
+            catch (InternalFailure& e)
+            {
+                 log<level::ERR>("Get sensor failed",
+                                 entry("SENSOR_NUM=%d", reqptr->sennum));
+                 commit<InternalFailure>();
+                 return IPMI_CC_SENSOR_INVALID;
+            }
+        }
     }
 
     reply = sd_bus_message_unref(reply);
