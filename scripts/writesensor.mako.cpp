@@ -10,14 +10,17 @@ interfaceDict = {}
     serviceInterface = sensor["serviceInterface"]
     if serviceInterface == "org.freedesktop.DBus.Properties":
         updateFunc = "set::"
+        getFunc = "get::"
     elif serviceInterface == "xyz.openbmc_project.Inventory.Manager":
         updateFunc = "notify::"
+        getFunc = "inventory::get::"
     else:
         assert "Un-supported interface: " + serviceInterface
     endif
     if serviceInterface not in interfaceDict:
         interfaceDict[serviceInterface] = {}
         interfaceDict[serviceInterface]["updateFunc"] = updateFunc
+        interfaceDict[serviceInterface]["getFunc"] = getFunc
 %>\
 % endfor
 
@@ -46,6 +49,17 @@ inline ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
     return set::readingAssertion<${type}>(cmdData, sensorInfo);
 }
 
+namespace get
+{
+
+inline GetSensorResponse readingAssertion(uint8_t sensorNum,
+                                          const Info& sensorInfo)
+{
+    return ipmi::sensor::get::readingAssertion<${type}>(sensorNum, sensorInfo);
+}
+
+} //namespace get
+
 } // namespace sensor_${key}
 
 %endif
@@ -68,14 +82,17 @@ extern const IdInfoMap sensors = {
        valueReadingType = sensor["readingType"]
        updateFunc = interfaceDict[serviceInterface]["updateFunc"]
        updateFunc += sensor["readingType"]
+       getFunc = interfaceDict[serviceInterface]["getFunc"]
+       getFunc += sensor["readingType"]
        if "readingAssertion" == valueReadingType:
            updateFunc = "sensor_" + str(key) + "::" + valueReadingType
+           getFunc = "sensor_" + str(key) + "::get::" + valueReadingType
        sensorInterface = serviceInterface
        if serviceInterface == "org.freedesktop.DBus.Properties":
            sensorInterface = next(iter(interfaces))
 %>
         ${sensorType},"${path}","${sensorInterface}",${readingType},${multiplier},
-        ${offset},${exp},${offset * pow(10,exp)},${updateFunc},{
+        ${offset},${exp},${offset * pow(10,exp)},${updateFunc},${getFunc},{
     % for interface,properties in interfaces.items():
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
