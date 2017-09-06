@@ -115,6 +115,43 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
     return response;
 }
 
+/** @brief Map the Dbus info to the reading field in the Get sensor reading
+ *         command response
+ *
+ *  @tparam T - type of the dbus property related to sensor.
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return Response for get sensor reading command.
+ */
+template<typename T>
+GetSensorResponse readingData(const Info& sensorInfo)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    GetSensorResponse response {};
+    auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
+
+    enableScanning(responseData);
+
+    auto service = ipmi::getService(bus,
+                                    sensorInfo.sensorInterface,
+                                    sensorInfo.sensorPath);
+
+    auto propValue = ipmi::getDbusProperty(
+            bus,
+            service,
+            sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+
+    auto value = static_cast<uint8_t>(
+            (propValue.get<T>() - sensorInfo.scaledOffset) /
+            (sensorInfo.coefficientM ? sensorInfo.coefficientM : 1));
+
+    setReading(value, responseData);
+
+    return response;
+}
+
 } //namespace get
 
 namespace set

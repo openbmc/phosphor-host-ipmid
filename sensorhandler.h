@@ -524,6 +524,16 @@ inline void setAssertionBytes(uint16_t value,
     resp->assertOffset8_14 = static_cast<uint8_t>(value >> 8);
 }
 
+/**
+ * @brief Set the scanning enabled bit in the response.
+ *
+ * @param[in/out] resp - get sensor reading response.
+ */
+inline void enableScanning(ipmi::sensor::GetReadingResponse* resp)
+{
+    resp->operation = 1 << 6;
+}
+
 } // namespace sensor
 
 } // namespace ipmi
