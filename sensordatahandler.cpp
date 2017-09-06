@@ -167,6 +167,40 @@ GetSensorResponse assertion(const Info& sensorInfo)
                               sensorInfo.sensorInterface);
 }
 
+GetSensorResponse eventdata2(const Info& sensorInfo)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    GetSensorResponse response {};
+
+    auto service = ipmi::getService(bus,
+                                    sensorInfo.sensorInterface,
+                                    sensorInfo.sensorPath);
+
+    const auto& interfaceList = sensorInfo.propertyInterfaces;
+
+    for (const auto& interface : interfaceList)
+    {
+        for (const auto& property : interface.second)
+        {
+            auto propValue = ipmi::getDbusProperty(bus,
+                                                   service,
+                                                   sensorInfo.sensorPath,
+                                                   interface.first,
+                                                   property.first);
+
+            for (const auto& value : property.second)
+            {
+                if (propValue == value.second.assert)
+                {
+                    response[0] = value.first;
+                }
+            }
+        }
+    }
+
+    return response;
+}
+
 } //namespace get
 
 namespace set
