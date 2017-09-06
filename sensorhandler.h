@@ -517,6 +517,17 @@ inline GetSensorResponse setAssertionBytes(uint16_t value)
     return response;
 }
 
+/**
+ * @brief Set the scanning enabled bit in the response.
+ *
+ * @param[in/out] response - get sensor reading command response.
+ *
+ */
+inline void enableScanning(GetSensorResponse& response)
+{
+    response[1] = 1 << 6;
+}
+
 } // namespace sensor
 
 } // namespace ipmi
