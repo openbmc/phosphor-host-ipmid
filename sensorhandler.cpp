@@ -502,7 +502,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi::sensor::Info sensor;
 
     switch(type) {
-        case 0xC3:
         case 0xC2:
             r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
             if (r < 0) {
@@ -575,76 +574,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_OK;
             *data_len=sizeof(sensorreadingresp_t);
             break;
-        case IPMI_SENSOR_TPM:
-        {
-            auto iter = sensors.find(reqptr->sennum);
-            if (iter == sensors.end())
-            {
-                return IPMI_CC_SENSOR_INVALID;
-            }
-
-            auto& interfaceList = iter->second.propertyInterfaces;
-            if (interfaceList.empty())
-            {
-                log<level::ERR>("Interface List empty for the sensor",
-                        entry("SENSOR_NUMBER=%d", reqptr->sennum));
-                return IPMI_CC_UNSPECIFIED_ERROR;
-            }
-
-            /* For the TPM sensor there is no reading value and sensor scanning
-             * is disabled. This is a discrete sensor and only the
-             * corresponding state is asserted.
-             */
-            resp->value = 0;
-            resp->operation = 0;
-            resp->indication[0] = 0;
-            resp->indication[1] = 0;
-
-            try
-            {
-                for (const auto& interface : interfaceList)
-                {
-                    for (const auto& property : interface.second)
-                    {
-                        sdbusplus::bus::bus dbus{ipmid_get_sd_bus_connection()};
-
-                        auto service = ipmi::getService(
-                                       dbus,
-                                       interface.first,
-                                       iter->second.sensorPath);
-
-                        auto propValue = ipmi::getDbusProperty(
-                                dbus, service, iter->second.sensorPath,
-                                interface.first, property.first);
-
-                        auto tpmStatus = propValue.get<bool>();
-
-                        for (const auto& value : property.second)
-                        {
-                            if (tpmStatus == (value.second.assert).get<bool>())
-                            {
-                                /*
-                                 * The discrete sensors support upto 14 states.
-                                 * The assertion states for discrete sensors are
-                                 * stored in 2 bytes, 0-7 in Byte 4 of the
-                                 * response and 8-14 in Byte 5 of the response.
-                                 */
-                                 resp->indication[0] |= 1 << (value.first);
-                                 break;
-                            }
-                        }
-                    }
-                }
-
-                rc = IPMI_CC_OK;
-                *data_len = sizeof(sensorreadingresp_t);
-            }
-            catch (InternalFailure& e)
-            {
-                return IPMI_CC_UNSPECIFIED_ERROR;
-            }
-            break;
-        }
         default:
         {
             const auto iter = sensors.find(reqptr->sennum);
