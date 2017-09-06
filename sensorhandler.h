@@ -499,6 +499,17 @@ inline void setOffset(uint8_t offset, ipmi::sensor::GetReadingResponse* resp)
     }
 }
 
+/**
+ * @brief Set the reading field in the response.
+ *
+ * @param[in] offset - offset number.
+ * @param[in/out] resp - get sensor reading response.
+ */
+inline void setReading(uint8_t value, ipmi::sensor::GetReadingResponse* resp)
+{
+    resp->reading = value;
+}
+
 } // namespace sensor
 
 } // namespace ipmi
