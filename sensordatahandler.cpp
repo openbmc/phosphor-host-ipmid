@@ -1,9 +1,12 @@
 #include <bitset>
+#include <experimental/filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "types.hpp"
+#include "sensorhandler.h"
 #include "sensordatahandler.hpp"
+#include "utils.hpp"
 
 namespace ipmi
 {
@@ -103,6 +106,55 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
     }
     return IPMI_CC_OK;
 }
+
+namespace get
+{
+
+GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
+                                     const InstancePath& path,
+                                     const DbusInterface& interface)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    GetSensorResponse response {};
+    auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
+
+    auto service = ipmi::getService(bus, interface, path);
+
+    const auto& interfaceList = sensorInfo.propertyInterfaces;
+
+    for (const auto& interface : interfaceList)
+    {
+        for (const auto& property : interface.second)
+        {
+            auto propValue = ipmi::getDbusProperty(bus,
+                                                   service,
+                                                   path,
+                                                   interface.first,
+                                                   property.first);
+
+            for (const auto& value : property.second)
+            {
+                if (propValue == value.second.assert)
+                {
+                    setOffset(value.first, responseData);
+                    break;
+                }
+
+            }
+        }
+    }
+
+    return response;
+}
+
+GetSensorResponse assertion(const Info& sensorInfo)
+{
+    return mapDbusToAssertion(sensorInfo,
+                              sensorInfo.sensorPath,
+                              sensorInfo.sensorInterface);
+}
+
+} //namespace get
 
 namespace set
 {
@@ -252,6 +304,30 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     msg.append(std::move(objects));
     return updateToDbus(msg);
 }
+
 }//namespace notify
+
+namespace inventory
+{
+
+namespace get
+{
+
+GetSensorResponse assertion(const Info& sensorInfo)
+{
+    namespace fs = std::experimental::filesystem;
+
+    fs::path path{ipmi::sensor::inventoryRoot};
+    path += sensorInfo.sensorPath;
+
+    return ipmi::sensor::get::mapDbusToAssertion(
+            sensorInfo,
+            path.string(),
+            sensorInfo.propertyInterfaces.begin()->first);
+}
+
+} //namespace get
+
+} // namespace inventory
 }//namespace sensor
 }//namespace ipmi

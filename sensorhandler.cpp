@@ -421,8 +421,8 @@ bool isAnalogSensor(const std::string& interface)
 
 ipmi_ret_t setSensorReading(void *request)
 {
-    SetSensorReadingReq cmdData =
-            *(static_cast<SetSensorReadingReq *>(request));
+    ipmi::sensor::SetSensorReadingReq cmdData =
+            *(static_cast<ipmi::sensor::SetSensorReadingReq *>(request));
 
     // Check if the Sensor Number is present
     const auto iter = sensors.find(cmdData.number);
