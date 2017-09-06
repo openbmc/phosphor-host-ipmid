@@ -74,6 +74,17 @@ GetSensorResponse mapDbusToAssertion(uint8_t sensorNum,
  */
 GetSensorResponse assertion(uint8_t sensorNum, const Info& sensorInfo);
 
+/**
+ *  @brief Maps the Dbus info to the reading field in the Get sensor reading
+ *         command response.
+ *
+ *  @param[in] sensorNum - Sensor number.
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return Response for get sensor reading command.
+ */
+GetSensorResponse eventdata2(uint8_t sensorNum, const Info& sensorInfo);
+
 } //namespace get
 
 namespace set
