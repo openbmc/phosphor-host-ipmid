@@ -510,6 +510,20 @@ inline void setReading(uint8_t value, ipmi::sensor::GetReadingResponse* resp)
     resp->reading = value;
 }
 
+/**
+ * @brief Map the value to the assertion bytes. The assertion states are stored
+ *        in 2 bytes.
+ *
+ * @param[in] value - value to mapped to the assertion byte.
+ * @param[in/out] resp - get sensor reading response.
+ */
+inline void setAssertionBytes(uint16_t value,
+                              ipmi::sensor::GetReadingResponse* resp)
+{
+    resp->assertOffset0_7 = static_cast<uint8_t>(value & 0x00FF);
+    resp->assertOffset8_14 = static_cast<uint8_t>(value >> 8);
+}
+
 } // namespace sensor
 
 } // namespace ipmi
