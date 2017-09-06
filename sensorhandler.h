@@ -489,4 +489,35 @@ struct SensorDataFullRecord
 } __attribute__((packed));
 
 } // get_sdr
+
+namespace ipmi
+{
+
+namespace sensor
+{
+
+/**
+ * @brief Map offset to the corresponding bit in the assertion byte.
+ *
+ * The discrete sensors support upto 14 states. 0-7 offsets are stored in one
+ * byte and offsets 8-14 in the second byte.
+ *
+ * @param[in] offset - offset number
+ *
+ * @return the assertion byte
+ */
+inline uint8_t mapOffsetToResp(uint8_t offset)
+{
+    if (offset > 7)
+    {
+        return 1 << (offset -8);
+    }
+    else
+    {
+        return 1 << offset;
+    }
+}
+
+}
+}
 #endif
