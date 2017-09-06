@@ -265,6 +265,9 @@ inline ipmi_ret_t eventdata3(const SetSensorReadingReq& cmdData,
 namespace notify
 {
 
+namespace set
+{
+
 /** @brief Make a DBus message for a Dbus call
  *  @param[in] updateInterface - Interface name
  *  @param[in] sensorPath - Path of the sensor
@@ -285,6 +288,8 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
  */
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                      const Info& sensorInfo);
+
+} //namespace set
 
 namespace get
 {

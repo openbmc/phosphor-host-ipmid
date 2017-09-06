@@ -12,7 +12,7 @@ interfaceDict = {}
         updateFunc = "set::"
         getFunc = "get::"
     elif serviceInterface == "xyz.openbmc_project.Inventory.Manager":
-        updateFunc = "notify::"
+        updateFunc = "notify::set::"
         getFunc = "notify::get::"
     else:
         assert "Un-supported interface: " + serviceInterface
@@ -43,11 +43,16 @@ using namespace ipmi::sensor;
 namespace sensor_${key}
 {
 
+namespace set
+{
+
 inline ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
                                    const Info& sensorInfo)
 {
-    return set::readingAssertion<${type}>(cmdData, sensorInfo);
+    return ipmi::sensor::set::readingAssertion<${type}>(cmdData, sensorInfo);
 }
+
+} //namespace set
 
 namespace get
 {
@@ -85,7 +90,7 @@ extern const IdInfoMap sensors = {
        getFunc = interfaceDict[serviceInterface]["getFunc"]
        getFunc += sensor["readingType"]
        if "readingAssertion" == valueReadingType:
-           updateFunc = "sensor_" + str(key) + "::" + valueReadingType
+           updateFunc = "sensor_" + str(key) + "::set::" + valueReadingType
            getFunc = "sensor_" + str(key) + "::get::" + valueReadingType
        sensorInterface = serviceInterface
        if serviceInterface == "org.freedesktop.DBus.Properties":
