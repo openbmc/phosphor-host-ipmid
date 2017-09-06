@@ -117,6 +117,7 @@ struct Info
    Exponent exponentB;
    ScaledOffset scaledOffset;
    std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
+   std::function<GetSensorResponse(const Info&)> getFunc;
    Mutability mutability;
    DbusInterfaceMap propertyInterfaces;
 };
