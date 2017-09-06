@@ -371,8 +371,8 @@ GetSensorResponse assertion(uint8_t sensorNum, const Info& sensorInfo)
             sensorInfo.propertyInterfaces.begin()->first);
 }
 
-} //namespace inventory
+} //namespace get
 
-} // namespace get
+} // namespace inventory
 }//namespace sensor
 }//namespace ipmi
