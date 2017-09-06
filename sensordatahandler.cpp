@@ -288,6 +288,9 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
 namespace notify
 {
 
+namespace set
+{
+
 IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                            const std::string& sensorPath,
                            const std::string& command,
@@ -350,6 +353,8 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     msg.append(std::move(objects));
     return updateToDbus(msg);
 }
+
+} //namespace set
 
 namespace get
 {
