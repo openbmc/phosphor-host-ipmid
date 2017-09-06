@@ -44,6 +44,38 @@ AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData);
  */
 ipmi_ret_t updateToDbus(IpmiUpdateData& msg);
 
+namespace get
+{
+
+/**
+ *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
+ *         reading command response.
+ *
+ *  @param[in] sensorNum - Sensor number.
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *  @param[in] path - Dbus object path.
+ *  @param[in] interface - Dbus interface.
+ *
+ *  @return Response for get sensor reading command.
+ */
+GetSensorResponse mapDbusToAssertion(uint8_t sensorNum,
+                                     const Info& sensorInfo,
+                                     const InstancePath& path,
+                                     const DbusInterface& interface);
+
+/**
+ *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
+ *         reading command response.
+ *
+ *  @param[in] sensorNum - Sensor number.
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return Response for get sensor reading command.
+ */
+GetSensorResponse assertion(uint8_t sensorNum, const Info& sensorInfo);
+
+} //namespace get
+
 namespace set
 {
 
@@ -163,6 +195,22 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
  */
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                      const Info& sensorInfo);
+
+namespace get
+{
+
+/**
+ *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
+ *         reading command response.
+ *
+ *  @param[in] sensorNum - Sensor number.
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return Response for get sensor reading command.
+ */
+GetSensorResponse assertion(uint8_t sensorNum, const Info& sensorInfo);
+
+} // namespace get
 
 }//namespace notify
 }//namespace sensor

@@ -1,9 +1,11 @@
 #include <bitset>
+#include <experimental/filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "types.hpp"
 #include "sensordatahandler.hpp"
+#include "utils.hpp"
 
 namespace ipmi
 {
@@ -103,6 +105,68 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
     }
     return IPMI_CC_OK;
 }
+
+namespace get
+{
+
+GetSensorResponse mapDbusToAssertion(uint8_t sensorNum,
+                                     const Info& sensorInfo,
+                                     const InstancePath& path,
+                                     const DbusInterface& interface)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    GetSensorResponse response {};
+
+    auto service = ipmi::getService(bus, interface, path);
+
+    const auto& interfaceList = sensorInfo.propertyInterfaces;
+
+    for (const auto& interface : interfaceList)
+    {
+        for (const auto& property : interface.second)
+        {
+            auto propValue = ipmi::getDbusProperty(bus,
+                                                   service,
+                                                   path,
+                                                   interface.first,
+                                                   property.first);
+
+            for (const auto& value : property.second)
+            {
+                if (propValue == value.second.assert)
+                {
+                    /*
+                     * The discrete sensors support upto 14 states.
+                     * The assertion states for discrete sensors are
+                     * stored in 2 bytes, 0-7 in Byte 4 of the
+                     * response and 8-14 in Byte 5 of the response.
+                     */
+                    if (value.first > 7)
+                    {
+                        response[3] |= 1<< (value.first -8);
+                    }
+                    else
+                    {
+                        response[2] |= 1 << (value.first);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    return response;
+}
+
+GetSensorResponse assertion(uint8_t sensorNum, const Info& sensorInfo)
+{
+    return mapDbusToAssertion(sensorNum,
+                              sensorInfo,
+                              sensorInfo.sensorPath,
+                              sensorInfo.sensorInterface);
+}
+
+} //namespace get
 
 namespace set
 {
@@ -252,6 +316,24 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     msg.append(std::move(objects));
     return updateToDbus(msg);
 }
+
+namespace get
+{
+
+GetSensorResponse assertion(uint8_t sensorNum, const Info& sensorInfo)
+{
+    namespace fs = std::experimental::filesystem;
+
+    fs::path path{ipmi::sensor::inventoryRoot};
+    path += sensorInfo.sensorPath;
+
+    return ipmi::sensor::get::mapDbusToAssertion(
+            sensorNum, sensorInfo, path.string(),
+            sensorInfo.propertyInterfaces.begin()->first);
+}
+
+} // namespace get
+
 }//namespace notify
 }//namespace sensor
 }//namespace ipmi

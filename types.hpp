@@ -38,6 +38,18 @@ struct Values
    Value deassert;
 };
 
+constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory";
+/**
+ * @brief Get Sensor Reading Response
+ *
+ * Byte 0 - Sensor reading.
+ * Byte 1 - Sensor scanning status / reading state availability.
+ * Byte 2 - Threshold comparison status / Discrete sensor assertion status.
+ * Byte 3 - Discrete sensor assertion status.
+ */
+constexpr size_t responseSize = 4;
+using GetSensorResponse = std::array<uint8_t, responseSize>;
+
 using OffsetValueMap = std::map<Offset,Values>;
 
 using DbusProperty = ipmi::DbusProperty;
