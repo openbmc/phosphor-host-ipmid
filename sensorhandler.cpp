@@ -412,8 +412,8 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 ipmi_ret_t setSensorReading(void *request)
 {
-    SetSensorReadingReq cmdData =
-            *(static_cast<SetSensorReadingReq *>(request));
+    ipmi::sensor::SetSensorReadingReq cmdData =
+            *(static_cast<ipmi::sensor::SetSensorReadingReq *>(request));
 
     // Check if the Sensor Number is present
     const auto iter = sensors.find(cmdData.number);

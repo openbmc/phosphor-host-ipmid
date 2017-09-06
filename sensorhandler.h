@@ -2,6 +2,7 @@
 #define __HOST_IPMI_SEN_HANDLER_H__
 
 #include <stdint.h>
+#include "types.hpp"
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
@@ -37,25 +38,6 @@ struct dbus_interface_t {
 int set_sensor_dbus_state_s(uint8_t , const char *, const char *);
 int set_sensor_dbus_state_y(uint8_t , const char *, const uint8_t);
 int find_openbmc_path(uint8_t , dbus_interface_t *);
-
-/**
- * @struct SetSensorReadingReq
- *
- * IPMI Request data for Set Sensor Reading and Event Status Command
- */
-struct SetSensorReadingReq
-{
-    uint8_t number;
-    uint8_t operation;
-    uint8_t reading;
-    uint8_t assertOffset0_7;
-    uint8_t assertOffset8_14;
-    uint8_t deassertOffset0_7;
-    uint8_t deassertOffset8_14;
-    uint8_t eventData1;
-    uint8_t eventData2;
-    uint8_t eventData3;
-} __attribute__((packed));
 
 /**
  * Get SDR Info
@@ -518,6 +500,24 @@ inline uint8_t mapOffsetToResp(uint8_t offset)
     }
 }
 
+/**
+ * @brief Map the value to the assertion bytes.
+ *
+ * @param[in] value - value to mapped to the assertion byte.
+ *
+ * @return Response for get sensor reading command.
+ */
+inline GetSensorResponse setAssertionBytes(uint16_t value)
+{
+    GetSensorResponse response {};
+
+    response[2] = static_cast<uint8_t>(value & 0x00FF);
+    response[3] = static_cast<uint8_t>(value >> 8);
+
+    return response;
 }
-}
+
+} // namespace sensor
+
+} // namespace ipmi
 #endif

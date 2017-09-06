@@ -6,7 +6,6 @@
 #include <string>
 
 #include <sdbusplus/server.hpp>
-#include "sensorhandler.h"
 
 namespace ipmi
 {
@@ -37,6 +36,25 @@ struct Values
    Value assert;
    Value deassert;
 };
+
+/**
+ * @struct SetSensorReadingReq
+ *
+ * IPMI Request data for Set Sensor Reading and Event Status Command
+ */
+struct SetSensorReadingReq
+{
+    uint8_t number;
+    uint8_t operation;
+    uint8_t reading;
+    uint8_t assertOffset0_7;
+    uint8_t assertOffset8_14;
+    uint8_t deassertOffset0_7;
+    uint8_t deassertOffset8_14;
+    uint8_t eventData1;
+    uint8_t eventData2;
+    uint8_t eventData3;
+} __attribute__((packed));
 
 constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory";
 /**

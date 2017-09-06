@@ -1,6 +1,8 @@
 #pragma once
 
+#include "sensorhandler.h"
 #include "types.hpp"
+#include "utils.hpp"
 #include "host-ipmid/ipmid-api.h"
 
 namespace ipmi
@@ -80,6 +82,36 @@ GetSensorResponse assertion(const Info& sensorInfo);
  *  @return Response for get sensor reading command.
  */
 GetSensorResponse eventdata2(const Info& sensorInfo);
+
+/**
+ *  @brief readingAssertion is a case where the entire assertion state field
+ *         serves as the sensor value.
+ *
+ *  @tparam T - type of the dbus property related to sensor.
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return Response for get sensor reading command.
+ */
+template<typename T>
+GetSensorResponse readingAssertion(const Info& sensorInfo)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+
+    auto service = ipmi::getService(bus,
+                                    sensorInfo.sensorInterface,
+                                    sensorInfo.sensorPath);
+
+    auto propValue = ipmi::getDbusProperty(
+            bus,
+            service,
+            sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+
+    return ipmi::sensor::setAssertionBytes(
+            static_cast<uint16_t>(propValue.get<T>()));
+}
 
 } //namespace get
 
