@@ -482,7 +482,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (r < 0) {
         fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
-        return IPMI_CC_SENSOR_INVALID;
     }
 
     type = get_type_from_interface(a);
