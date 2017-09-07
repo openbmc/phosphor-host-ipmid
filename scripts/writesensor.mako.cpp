@@ -29,64 +29,6 @@ interfaceDict = {}
 
 using namespace ipmi::sensor;
 
-%for key in sensorDict.iterkeys():
-<%
-    sensor = sensorDict[key]
-    readingType = sensor["readingType"]
-    interfaces = sensor["interfaces"]
-    for interface, properties in interfaces.items():
-        for property, values in properties.items():
-            for offset, attributes in values.items():
-                type = attributes["type"]
-%>\
-%if "readingAssertion" == readingType:
-namespace sensor_${key}
-{
-
-inline ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
-                                   const Info& sensorInfo)
-{
-    return set::readingAssertion<${type}>(cmdData, sensorInfo);
-}
-
-namespace get
-{
-
-inline GetSensorResponse readingAssertion(const Info& sensorInfo)
-{
-    return ipmi::sensor::get::readingAssertion<${type}>(sensorInfo);
-}
-
-} //namespace get
-
-} // namespace sensor_${key}
-
-%elif "readingData" == readingType:
-
-namespace sensor_${key}
-{
-
-inline ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
-                              const Info& sensorInfo)
-{
-    return set::readingData<${type}>(cmdData, sensorInfo);
-}
-
-namespace get
-{
-
-inline GetSensorResponse readingData(const Info& sensorInfo)
-{
-    return ipmi::sensor::get::readingData<${type}>(sensorInfo);
-}
-
-} //namespace get
-
-} // namespace sensor_${key}
-
-%endif
-% endfor
-
 extern const IdInfoMap sensors = {
 % for key in sensorDict.iterkeys():
    % if key:
@@ -106,12 +48,13 @@ extern const IdInfoMap sensors = {
        updateFunc += sensor["readingType"]
        getFunc = interfaceDict[serviceInterface]["getFunc"]
        getFunc += sensor["readingType"]
-       if "readingAssertion" == valueReadingType:
-           updateFunc = "sensor_" + str(key) + "::" + valueReadingType
-           getFunc = "sensor_" + str(key) + "::get::" + valueReadingType
-       elif "readingData" == valueReadingType:
-           updateFunc = "sensor_" + str(key) + "::" + valueReadingType
-           getFunc = "sensor_" + str(key) + "::get::" + valueReadingType
+       if "readingAssertion" == valueReadingType or "readingData" == valueReadingType:
+           for interface,properties in interfaces.items():
+               for dbus_property,property_value in properties.items():
+                   for offset,values in property_value.items():
+                       valueType = values["type"]
+           updateFunc = "set::" + valueReadingType + "<" + valueType + ">"
+           getFunc = "get::" + valueReadingType + "<" + valueType + ">"
        sensorInterface = serviceInterface
        if serviceInterface == "org.freedesktop.DBus.Properties":
            sensorInterface = next(iter(interfaces))
