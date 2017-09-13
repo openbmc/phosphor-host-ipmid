@@ -90,4 +90,57 @@ Service Objects::service(const Path& path, const Interface& interface) const
     return result.begin()->first;
 }
 
+namespace boot
+{
+
+std::tuple<Path, OneTimeEnabled> setting(const Objects& objects,
+                                         const Interface& iface)
+{
+    constexpr auto bootObjCount = 2;
+    constexpr auto oneTime = "one_time";
+    constexpr auto enabledIntf = "xyz.openbmc_project.Object.Enable";
+    constexpr auto propIntf = "org.freedesktop.DBus.Properties";
+
+    const std::vector<Path>& paths = objects.map.at(iface);
+    auto count = paths.size();
+    if (count != bootObjCount)
+    {
+        log<level::ERR>("Exactly two objects expected",
+                        entry("INTERFACE=%s", iface.c_str()),
+                        entry("COUNT=%d", count));
+        elog<InternalFailure>();
+    }
+    size_t index = 0;
+    if (std::string::npos == paths[0].rfind(oneTime))
+    {
+        index = 1;
+    }
+    const Path& oneTimeSetting = paths[index];
+    const Path& regularSetting = paths[!index];
+
+    auto method =
+        objects.bus.new_method_call(
+            objects.service(oneTimeSetting, iface).c_str(),
+            oneTimeSetting.c_str(),
+            propIntf,
+            "Get");
+    method.append(enabledIntf, "Enabled");
+    auto reply = objects.bus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in getting Enabled property",
+                        entry("OBJECT=%s", oneTimeSetting.c_str()),
+                        entry("INTERFACE=%s", iface.c_str()));
+        elog<InternalFailure>();
+    }
+
+    sdbusplus::message::variant<bool> enabled;
+    reply.read(enabled);
+    auto oneTimeEnabled = enabled.get<bool>();
+    const Path& setting = oneTimeEnabled ? oneTimeSetting : regularSetting;
+    return std::make_tuple(setting, oneTimeEnabled);
+}
+
+} // namespace boot
+
 } // namespace settings
