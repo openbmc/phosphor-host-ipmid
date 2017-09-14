@@ -286,11 +286,8 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     using namespace std::string_literals;
 
-    std::string dbusService;
-    std::string dbusPath;
-
-    std::tie(dbusPath, dbusService) = getServiceAndPath(bus,
-                                      updateInterface);
+    static const auto dbusPath = "/xyz/openbmc_project/inventory"s;
+    std::string dbusService = ipmi::getService(bus, updateInterface, dbusPath);
 
     return bus.new_method_call(dbusService.c_str(),
                                dbusPath.c_str(),
