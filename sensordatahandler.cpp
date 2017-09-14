@@ -90,12 +90,7 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     try
     {
-        auto serviceResponseMsg = bus.call(msg);
-        if (serviceResponseMsg.is_method_error())
-        {
-            log<level::ERR>("Error in D-Bus call");
-            return IPMI_CC_UNSPECIFIED_ERROR;
-        }
+        bus.call_noreply(msg);
     }
     catch (InternalFailure& e)
     {
