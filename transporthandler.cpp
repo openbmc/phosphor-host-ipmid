@@ -63,19 +63,10 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getDbusObject(
-                                bus,
-                                ipmi::network::IP_INTERFACE,
+                        ipaddress = ipmi::getIPAddress(bus,
                                 ipmi::network::ROOT,
                                 ipmi::network::IP_TYPE);
 
-                        auto properties = ipmi::getAllDbusProperties(
-                                bus,
-                                ipObjectInfo.second,
-                                ipObjectInfo.first,
-                                ipmi::network::IP_INTERFACE);
-
-                        ipaddress = properties["Address"].get<std::string>();
                     }
                     // ignore the exception, as it is a valid condtion that
                     // system is not confiured with any ip.
@@ -386,7 +377,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
                      reqptr->data[2], reqptr->data[3]);
 
             channelConfig.ipaddr.assign(ipaddr);
-
         }
         break;
 
