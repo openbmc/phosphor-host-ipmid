@@ -87,6 +87,77 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
 
 }
 
+
+std::string getIPAddress(sdbusplus::bus::bus& bus,
+                             const std::string& serviceRoot,
+                             const std::string& match)
+{
+    std::vector<DbusInterface> interfaces;
+    const std::string& interface = ipmi::network::IP_INTERFACE;
+    interfaces.emplace_back(ipmi::network::IP_INTERFACE);
+    auto depth = 0;
+
+    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME,
+                                          MAPPER_OBJ,
+                                          MAPPER_INTF,
+                                          "GetSubTree");
+
+    mapperCall.append(serviceRoot, depth, interfaces);
+
+    auto mapperReply = bus.call(mapperCall);
+    if (mapperReply.is_method_error())
+    {
+        log<level::ERR>("Error in mapper call");
+        elog<InternalFailure>();
+    }
+
+    ObjectTree objectTree;
+    mapperReply.read(objectTree);
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("No Object has implemented the IP interface",
+                        entry("INTERFACE=%s", interface.c_str()));
+        elog<InternalFailure>();
+    }
+    auto objectFound = false;
+    std::string ipaddress;
+    for (auto& object : objectTree)
+    {
+        if(object.first.find(match) != std::string::npos)
+        {
+            objectFound = true;
+            auto variant = ipmi::getDbusProperty(
+                               bus,
+                               object.second.begin()->first,
+                               object.first,
+                               ipmi::network::IP_INTERFACE,
+                               "Address");
+
+            ipaddress = variant.get<std::string>();
+            if (ipmi::network::isLinkLocalIP(ipaddress, match))
+            {
+                continue;
+            }
+            else
+            {
+                break;
+            }
+
+            break;
+        }
+    }
+
+    if(!objectFound)
+    {
+        log<level::ERR>("Failed to find object which matches",
+                        entry("MATCH=%s", match.c_str()));
+        elog<InternalFailure>();
+    }
+    return ipaddress;
+
+}
+
 Value getDbusProperty(sdbusplus::bus::bus& bus,
                       const std::string& service,
                       const std::string& objPath,
@@ -354,6 +425,25 @@ void callDbusMethod(sdbusplus::bus::bus& bus,
 
 namespace network
 {
+
+bool isLinkLocalIP(const std::string ipaddress,
+                   const std::string& match)
+{
+    constexpr auto ipv4LinkLocalPrefix("169.254");
+    constexpr auto ipv6LinkLocalPrefix("fe80::");
+    auto ipLinkLocalPrefix = (match == "ipv4") ?
+                             ipv4LinkLocalPrefix : ipv6LinkLocalPrefix;
+
+    if (ipaddress.find(ipLinkLocalPrefix) != std::string::npos)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}
 
 void createIP(sdbusplus::bus::bus& bus,
               const std::string& service,
