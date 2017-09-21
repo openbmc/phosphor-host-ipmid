@@ -20,6 +20,7 @@
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #endif
+#include <regex>
 
 // OpenBMC System Manager dbus framework
 const char  *obj   =  "/org/openbmc/NetworkManager/Interface";
@@ -63,19 +64,35 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getDbusObject(
+                        auto ObjectTree = ipmi::getAllDbusObjects (
                                 bus,
-                                ipmi::network::IP_INTERFACE,
                                 ipmi::network::ROOT,
+                                ipmi::network::IP_INTERFACE,
                                 ipmi::network::IP_TYPE);
 
-                        auto properties = ipmi::getAllDbusProperties(
-                                bus,
-                                ipObjectInfo.second,
-                                ipObjectInfo.first,
-                                ipmi::network::IP_INTERFACE);
+                        constexpr auto  ipLinkLocalPrefix("169.254");
+                        std::regex pattern("(\\d{1,3}(\\.\\d{1,3}))");
+                        std::smatch smatch;
+                        for (auto& object : ObjectTree)
+                        {
+                            auto variant = ipmi::getDbusProperty(
+                                               bus,
+                                               object.second.begin()->first,
+                                               object.first,
+                                               ipmi::network::IP_INTERFACE,
+                                               "Address");
 
-                        ipaddress = properties["Address"].get<std::string>();
+                            ipaddress = variant.get<std::string>();
+                            std::regex_search(ipaddress, smatch, pattern);
+                            if (smatch[1] == ipLinkLocalPrefix)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
                     }
                     // ignore the exception, as it is a valid condtion that
                     // system is not confiured with any ip.
