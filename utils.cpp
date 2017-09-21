@@ -355,6 +355,18 @@ void callDbusMethod(sdbusplus::bus::bus& bus,
 namespace network
 {
 
+bool isItLinkLocalIp(const std::string ipaddress)
+{
+    constexpr auto  ipLinkLocalPrefix("169.254");
+    if(ipaddress.find(ipLinkLocalPrefix) != std::string::npos)
+    {
+        return true;
+    }
+
+    return false;
+
+}
+
 void createIP(sdbusplus::bus::bus& bus,
               const std::string& service,
               const std::string& objPath,

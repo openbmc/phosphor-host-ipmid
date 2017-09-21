@@ -63,19 +63,31 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getDbusObject(
+                        auto ObjectTree = ipmi::getAllDbusObjects(
                                 bus,
-                                ipmi::network::IP_INTERFACE,
                                 ipmi::network::ROOT,
+                                ipmi::network::IP_INTERFACE,
                                 ipmi::network::IP_TYPE);
 
-                        auto properties = ipmi::getAllDbusProperties(
-                                bus,
-                                ipObjectInfo.second,
-                                ipObjectInfo.first,
-                                ipmi::network::IP_INTERFACE);
+                        for (const auto& object : ObjectTree)
+                        {
+                            auto variant = ipmi::getDbusProperty(
+                                               bus,
+                                               object.second.begin()->first,
+                                               object.first,
+                                               ipmi::network::IP_INTERFACE,
+                                               "Address");
 
-                        ipaddress = properties["Address"].get<std::string>();
+                            ipaddress = variant.get<std::string>();
+                            if (ipmi::network::isItLinkLocalIp(ipaddress))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
                     }
                     // ignore the exception, as it is a valid condtion that
                     // system is not confiured with any ip.
@@ -384,8 +396,14 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             snprintf(ipaddr, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
                      reqptr->data[0], reqptr->data[1],
                      reqptr->data[2], reqptr->data[3]);
-
-            channelConfig.ipaddr.assign(ipaddr);
+            if (!ipmi::network::isItLinkLocalIp(ipaddr))
+            {
+                channelConfig.ipaddr.assign(ipaddr);
+            }
+            else
+            {
+                rc = IPMI_CC_PARM_NOT_SUPPORTED;
+            }
 
         }
         break;
