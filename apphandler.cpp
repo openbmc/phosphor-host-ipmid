@@ -703,6 +703,9 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                         ipmi::network::toPrefix(AF_INET,
                                 channelConfig.netmask);
 
+                    gateway = channelConfig.gateway.empty() ?
+                        properties["Gateway"].get<std::string>() :
+                        channelConfig.gateway;
                 }
                 catch (InternalFailure& e)
                 {
