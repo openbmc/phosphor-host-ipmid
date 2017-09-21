@@ -87,6 +87,58 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
 
 }
 
+std::string getIPAddress(sdbusplus::bus::bus& bus,
+                         const std::string& serviceRoot,
+                         const std::string& match)
+{
+    const std::string& interface = ipmi::network::IP_INTERFACE;
+
+    auto objectTree =  getAllDbusObjects(bus, serviceRoot, interface, match);
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("No Object has implemented the IP interface",
+                        entry("INTERFACE=%s", interface.c_str()));
+        elog<InternalFailure>();
+    }
+
+    auto objectFound = false;
+    std::string ipaddress;
+
+    for (auto& object : objectTree)
+    {
+        objectFound = true;
+        auto variant = ipmi::getDbusProperty(
+                           bus,
+                           object.second.begin()->first,
+                           object.first,
+                           ipmi::network::IP_INTERFACE,
+                           "Address");
+
+        ipaddress = variant.get<std::string>();
+
+        // if LinkLocalIP found look for Non-LinkLocalIP
+        if (ipmi::network::isLinkLocalIP(ipaddress))
+        {
+            continue;
+        }
+        else
+        {
+            break;
+        }
+
+    }
+
+    if (!objectFound)
+    {
+        log<level::ERR>("Failed to find object which matches",
+                        entry("MATCH=%s", match.c_str()));
+        elog<InternalFailure>();
+    }
+    return ipaddress;
+
+}
+
 Value getDbusProperty(sdbusplus::bus::bus& bus,
                       const std::string& service,
                       const std::string& objPath,
@@ -354,6 +406,19 @@ void callDbusMethod(sdbusplus::bus::bus& bus,
 
 namespace network
 {
+
+bool isLinkLocalIP(const std::string& address)
+{
+    if (address.find("169.254") == 0 || address.find("fe80") == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}
 
 void createIP(sdbusplus::bus::bus& bus,
               const std::string& service,
