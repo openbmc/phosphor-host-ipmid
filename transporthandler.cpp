@@ -384,8 +384,14 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             snprintf(ipaddr, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
                      reqptr->data[0], reqptr->data[1],
                      reqptr->data[2], reqptr->data[3]);
-
-            channelConfig.ipaddr.assign(ipaddr);
+            if (!ipmi::network::isItLinkLocalIp(ipaddr))
+            {
+                channelConfig.ipaddr.assign(ipaddr);
+            }
+            else
+            {
+                rc = IPMI_CC_PARM_NOT_SUPPORTED;
+            }
 
         }
         break;

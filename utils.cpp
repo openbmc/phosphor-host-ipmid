@@ -66,6 +66,7 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
 
     // else search the match string in the object path
     auto objectFound = false;
+    std::string ipaddress;
     for (auto& object : objectTree)
     {
         if(object.first.find(match) != std::string::npos)
@@ -73,6 +74,27 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
             objectFound = true;
             objectInfo = make_pair(object.first,
                             std::move(object.second.begin()->first));
+            if(interface == ipmi::network::IP_INTERFACE)
+            {
+                 auto variant = ipmi::getDbusProperty(
+                                    bus,
+                                    object.second.begin()->first,
+                                    object.first,
+                                    ipmi::network::IP_INTERFACE,
+                                    "Address");
+
+                 ipaddress = variant.get<std::string>();
+                 if (ipmi::network::isItLinkLocalIp(ipaddress,match))
+                 {
+                     continue;
+                 }
+                 else
+                 {
+                     break;
+                 }
+
+            }
+
             break;
         }
     }
@@ -354,6 +376,22 @@ void callDbusMethod(sdbusplus::bus::bus& bus,
 
 namespace network
 {
+
+bool isItLinkLocalIp(const std::string ipaddress,
+                    const std::string& match)
+{
+    constexpr auto  ipv4LinkLocalPrefix("169.254");
+    constexpr auto  ipv6LinkLocalPrefix("fe80::");
+    auto  ipLinkLocalPrefix = (match == "ipv4") ? ipv4LinkLocalPrefix : ipv6LinkLocalPrefix;
+
+    if(ipaddress.find(ipLinkLocalPrefix) != std::string::npos)
+    {
+        return true;
+    }
+
+    return false;
+
+}
 
 void createIP(sdbusplus::bus::bus& bus,
               const std::string& service,

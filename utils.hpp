@@ -198,6 +198,13 @@ void createVLAN(sdbusplus::bus::bus& bus,
  */
 uint32_t getVLAN(const std::string& path);
 
+/** @brief checks the if the given ip is Link Local Ip or not.
+ *  @param[in] ipaddress - Ipaddress.
+ *  @param[in] match     - Ip type.
+ */
+bool isItLinkLocalIp(const std::string ipaddress,
+                     const std::string& match="ipv4");
+
 } //namespace network
 } // namespace ipmi
 
