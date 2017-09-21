@@ -45,6 +45,18 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
                              const std::string& subtreePath = ROOT,
                              const std::string& match = {});
 
+/** @brief Gets the iAddres of first dbus IP object of Non-LinkLocalIPAddress
+ *         type from the given subtree, if not avalable gets IP object of
+ *         LinkLocalIPAddress type.
+ *  @param[in] bus - DBUS Bus Object.
+ *  @param[in] subtreePath - subtree from where the search should start.
+ *  @param[in] match - identifier for object.
+ *  @return On success returns the object having objectpath and servicename.
+ */
+std::string getIPAddress(sdbusplus::bus::bus& bus,
+                             const std::string& subtreePath = ROOT,
+                             const std::string& match = "ipv4");
+
 /** @brief Gets the value associated with the given object
  *         and the interface.
  *  @param[in] bus - DBUS Bus Object.
@@ -197,6 +209,13 @@ void createVLAN(sdbusplus::bus::bus& bus,
  *  @param[in] path - Dbus object path.
  */
 uint32_t getVLAN(const std::string& path);
+
+/** @brief checks if the given ip is Link Local Ip or not.
+ *  @param[in] ipaddress - IPAddress.
+ *  @param[in] ipType    - IP type.
+ */
+bool isLinkLocalIP(const std::string& ipaddress,
+                   const std::string& ipType = "ipv4");
 
 } //namespace network
 } // namespace ipmi
