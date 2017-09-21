@@ -695,8 +695,11 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                             ipmi::network::IP_INTERFACE);
 
                     ipaddress = channelConfig.ipaddr.empty() ?
-                        properties["Address"].get<std::string>() :
-                        channelConfig.ipaddr;
+                                ipmi::getIPAddress(bus,
+                                                   ipmi::network::IP_INTERFACE,
+                                                   ipmi::network::ROOT,
+                                                   ipmi::network::IP_TYPE) :
+                                channelConfig.ipaddr;
 
                     prefix = channelConfig.netmask.empty() ?
                         properties["PrefixLength"].get<uint8_t>() :

@@ -45,6 +45,20 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
                              const std::string& subtreePath = ROOT,
                              const std::string& match = {});
 
+/** @brief Gets the ipAddres of first dbus IP object of Non-LinkLocalIPAddress
+ *         type from the given subtree, if not avalable gets IP object of
+ *         LinkLocalIPAddress type.
+ *  @param[in] bus - DBUS Bus Object.
+ *  @param[in] interface - Dbus interface.
+ *  @param[in] subtreePath - subtree from where the search should start.
+ *  @param[in] match - identifier for object.
+ *  @return On success returns the ipAddress.
+ */
+std::string getIPAddress(sdbusplus::bus::bus& bus,
+                         const std::string& interface,
+                         const std::string& subtreePath,
+                         const std::string& match);
+
 /** @brief Gets the value associated with the given object
  *         and the interface.
  *  @param[in] bus - DBUS Bus Object.
@@ -149,6 +163,8 @@ constexpr auto ROOT = "/xyz/openbmc_project/network";
 constexpr auto SERVICE = "xyz.openbmc_project.Network";
 constexpr auto INTERFACE = "eth0";
 constexpr auto IP_TYPE = "ipv4";
+constexpr auto IPV4_PREFIX = "169.254";
+constexpr auto IPV6_PREFIX = "fe80";
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 constexpr auto SYSTEMCONFIG_INTERFACE = "xyz.openbmc_project.Network.SystemConfiguration";
