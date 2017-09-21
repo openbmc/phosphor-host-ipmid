@@ -13,6 +13,15 @@ namespace ipmi
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
+namespace network
+{
+
+/** @brief checks if the given ip is Link Local Ip or not.
+  *  @param[in] ipaddress - IPAddress.
+  */
+bool isLinkLocalIP(const std::string& ipaddress);
+
+}
 
 //TODO There may be cases where an interface is implemented by multiple
 //  objects,to handle such cases we are interested on that object
@@ -84,6 +93,49 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
         elog<InternalFailure>();
     }
     return objectInfo;
+
+}
+
+std::string getIPAddress(sdbusplus::bus::bus& bus,
+                         const std::string& interface,
+                         const std::string& serviceRoot,
+                         const std::string& match)
+{
+    auto objectTree = getAllDbusObjects(bus, serviceRoot, interface, match);
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("No Object has implemented the IP interface",
+                        entry("INTERFACE=%s", interface.c_str()));
+        elog<InternalFailure>();
+    }
+
+    std::string ipaddress;
+
+    for (auto& object : objectTree)
+    {
+        auto variant = ipmi::getDbusProperty(
+                           bus,
+                           object.second.begin()->first,
+                           object.first,
+                           ipmi::network::IP_INTERFACE,
+                           "Address");
+
+        ipaddress = std::move(variant.get<std::string>());
+
+        // if LinkLocalIP found look for Non-LinkLocalIP
+        if (ipmi::network::isLinkLocalIP(ipaddress))
+        {
+            continue;
+        }
+        else
+        {
+            break;
+        }
+
+    }
+
+    return ipaddress;
 
 }
 
@@ -354,6 +406,11 @@ void callDbusMethod(sdbusplus::bus::bus& bus,
 
 namespace network
 {
+
+bool isLinkLocalIP(const std::string& address)
+{
+    return address.find(IPV4_PREFIX) == 0 || address.find(IPV6_PREFIX) == 0;
+}
 
 void createIP(sdbusplus::bus::bus& bus,
               const std::string& service,
