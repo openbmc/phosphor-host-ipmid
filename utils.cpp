@@ -49,7 +49,7 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
 
     if (objectTree.empty())
     {
-        log<level::ERR>("No Object has impelmented the interface",
+        log<level::ERR>("No Object has implemented the interface",
                         entry("INTERFACE=%s", interface.c_str()));
         elog<InternalFailure>();
     }
@@ -312,7 +312,7 @@ ObjectTree getAllAncestors(sdbusplus::bus::bus& bus,
 
     if (objectTree.empty())
     {
-        log<level::ERR>("No Object has impelmented the interface",
+        log<level::ERR>("No Object has implemented the interface",
                         entry("PATH=%s", path.c_str()),
                         entry("INTERFACES=%s",
                             convertToString(interfaces).c_str()));
