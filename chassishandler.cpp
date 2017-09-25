@@ -1334,8 +1334,15 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             fprintf(stderr, "setHostNetworkData failed for set_sys_boot_options.\n");
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
-    }
-    else {
+    } else if (reqptr->parameter ==
+             static_cast<uint8_t>(BootOptionParameter::BOOT_INFO)) {
+        // Handle parameter #4 and return command completed normally
+        // (IPMI_CC_OK). There is no implementation in OpenBMC for this
+        // parameter. This is added to support the ipmitool command `chassis
+        // bootdev` which sends set on parameter #4, before setting the boot
+        // flags.
+        rc = IPMI_CC_OK;
+    } else {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
         rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
