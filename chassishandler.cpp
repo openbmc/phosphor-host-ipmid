@@ -1343,6 +1343,13 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
     }
+    else if (reqptr->parameter ==
+             static_cast<uint8_t>(BootOptionParameter::BOOT_INFO))
+    {
+        // Support parameter #4, so that ipmitool "chassis bootdev" commands
+        // can be supported. There is no implementation on OpenBMC for this
+        // parameter.
+    }
     else {
         fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
         rc = IPMI_CC_PARM_NOT_SUPPORTED;
