@@ -43,6 +43,7 @@ enum ipmi_chassis_control_cmds : uint8_t
 };
 enum class BootOptionParameter : size_t
 {
+    BOOT_INFO                     = 0x4,
     BOOT_FLAGS                    = 0x5,
     OPAL_NETWORK_SETTINGS         = 0x61
 };
