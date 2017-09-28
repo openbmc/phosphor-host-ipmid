@@ -612,6 +612,11 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                  commit<InternalFailure>();
                  return IPMI_CC_SENSOR_INVALID;
             }
+            catch (const std::runtime_error& e)
+            {
+                log<level::ERR>(e.what());
+                return IPMI_CC_SENSOR_INVALID;
+            }
         }
     }
 
