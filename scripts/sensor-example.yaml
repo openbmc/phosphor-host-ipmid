@@ -17,13 +17,14 @@
     # One or more interface dict entries
     org.open_power.OCC.Status:
       OccActive:
-        # Sensor type specific offset
-        0x06:
-          # OccActive is a boolean
-          type: "bool"
-          # If offset 0x06 is asserted, set OccActive as false.
-          assert: "false"
-          deassert: "true"
+        Offsets:
+          # Sensor type specific offset
+          0x06:
+            # OccActive is a boolean
+            type: "bool"
+            # If offset 0x06 is asserted, set OccActive as false.
+            assert: "false"
+            deassert: "true"
 
 0x61:
   sensorType: 0x04
@@ -35,14 +36,23 @@
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
   interfaces:
-    xyz.openbmc_project.Inventory.Item:
-      Present:
-        0x06:
-          assert: true
-          deassert: false
-          type: bool
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
+        #Offsets contain the offsets in the sensor data.
+        Offsets:
+          0x06:
+            assert: true
+            deassert: false
+            type: bool
+        #Prereqs are pre-requisites for this property value to be true.
+        Prereqs:
+          0x04:
+            assert: false
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
           0x04:
             assert: false
             deassert: true
@@ -52,8 +62,9 @@
   interfaces:
     xyz.openbmc_project.Control.Boot.RebootAttempts:
       AttemptsLeft:
-        0xFF:
-          type: uint32_t
+        Offsets:
+          0xFF:
+            type: uint32_t
   path: /xyz/openbmc_project/state/host0
   # A special case of assertion, where the entire assert bitfield
   # serves as the value, or reading. Hence, the offset above is intentionally
@@ -67,8 +78,9 @@
   interfaces:
     xyz.openbmc_project.Control.Boot.RebootAttempts:
       AttemptsLeft:
-        0xFF:
-          type: uint32_t
+        Offsets:
+          0xFF:
+            type: uint32_t
   path: /xyz/openbmc_project/state/host1
   readingType: readingAssertion
   sensorReadingType: 0x6F
@@ -88,8 +100,9 @@
   interfaces:
     xyz.openbmc_project.Sensor.Value:
       Value:
-        0xFF:
-          type: int64_t
+        Offsets:
+          0xFF:
+            type: int64_t
 
 0x54:
   sensorType: 0x07
@@ -100,12 +113,18 @@
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
+        Offsets:
           0x08:
             assert: false
             deassert: true
             type: bool
+        Prereqs:
+          0x07:
+            assert: true
+            deassert: false
     xyz.openbmc_project.Inventory.Item:
       Present:
+        Offsets:
           0x07:
             assert: true
             deassert: false
