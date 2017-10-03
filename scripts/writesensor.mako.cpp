@@ -51,7 +51,7 @@ extern const IdInfoMap sensors = {
        if "readingAssertion" == valueReadingType or "readingData" == valueReadingType:
            for interface,properties in interfaces.items():
                for dbus_property,property_value in properties.items():
-                   for offset,values in property_value.items():
+                   for offset,values in property_value["Offsets"].items():
                        valueType = values["type"]
            updateFunc = "set::" + valueReadingType + "<" + valueType + ">"
            getFunc = "get::" + valueReadingType + "<" + valueType + ">"
@@ -66,7 +66,28 @@ extern const IdInfoMap sensors = {
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
                 {"${dbus_property}",{
-                % for offset,values in property_value.items():
+<%
+try:
+    preReq = property_value["Prereqs"]
+except KeyError, e:
+    preReq = dict()
+%>\
+                {
+                    % for preOffset,preValues in preReq.items():
+                    { ${preOffset},{
+                        % for name,value in preValues.items():
+                            % if name == "type":
+<%                              continue %>\
+                            % endif
+<%                          value = str(value).lower() %>\
+                            ${value},
+                        % endfor
+                        }
+                    },
+                    % endfor
+                },
+                {
+                % for offset,values in property_value["Offsets"].items():
                     { ${offset},{
                         % if offset == 0xFF:
                             }},
@@ -102,11 +123,11 @@ except KeyError, e:
                         }
                     },
                 % endfor
-                }},
+                }}},
             % endfor
             }},
     % endfor
-     },
+     }
 }},
    % endif
 % endfor
