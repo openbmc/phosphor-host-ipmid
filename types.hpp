@@ -51,6 +51,18 @@ struct Values
 };
 
 /**
+ * @enum PreReqValues
+ * Pre-req conditios for a property.
+ */
+struct PreReqValues
+{
+    Value assert;
+    Value deassert;
+};
+
+using PreReqOffsetValueMap = std::map<Offset, PreReqValues>;
+
+/**
  * @struct SetSensorReadingReq
  *
  * IPMI Request data for Set Sensor Reading and Event Status Command
@@ -88,9 +100,11 @@ using GetSensorResponse = std::array<uint8_t, sizeof(GetReadingResponse)>;
 
 using OffsetValueMap = std::map<Offset,Values>;
 
-using DbusPropertyMap = std::map<DbusProperty,OffsetValueMap>;
+using DbusPropertyValues = std::tuple<PreReqOffsetValueMap, OffsetValueMap>;
 
-using DbusInterfaceMap = std::map<DbusInterface,DbusPropertyMap>;
+using DbusPropertyMap = std::map<DbusProperty, DbusPropertyValues>;
+
+using DbusInterfaceMap = std::map<DbusInterface, DbusPropertyMap>;
 
 using InstancePath = std::string;
 using Type = uint8_t;

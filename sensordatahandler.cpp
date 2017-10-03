@@ -132,7 +132,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
                                                    interface.first,
                                                    property.first);
 
-            for (const auto& value : property.second)
+            for (const auto& value : std::get<OffsetValueMap>(property.second))
             {
                 if (propValue == value.second.assert)
                 {
@@ -176,7 +176,7 @@ GetSensorResponse eventdata2(const Info& sensorInfo)
                                                    interface.first,
                                                    property.first);
 
-            for (const auto& value : property.second)
+            for (const auto& value : std::get<OffsetValueMap>(property.second))
             {
                 if (propValue == value.second.assert)
                 {
@@ -230,8 +230,8 @@ ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData,
     for (const auto& property : interface->second)
     {
         msg.append(property.first);
-        const auto& iter = property.second.find(data);
-        if (iter == property.second.end())
+        const auto& iter = std::get<OffsetValueMap>(property.second).find(data);
+        if (iter == std::get<OffsetValueMap>(property.second).end())
         {
             log<level::ERR>("Invalid event data");
             return IPMI_CC_PARM_OUT_OF_RANGE;
@@ -258,7 +258,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     for (const auto& property : interface->second)
     {
         msg.append(property.first);
-        for (const auto& value : property.second)
+        for (const auto& value : std::get<OffsetValueMap>(property.second))
         {
             if (assertionSet.test(value.first))
             {
@@ -313,11 +313,14 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     ipmi::sensor::InterfaceMap interfaces;
     for (const auto& interface : sensorInfo.propertyInterfaces)
     {
+        //For a property like functional state the result will be
+        //calculated based on the true value of all conditions.
         for (const auto& property : interface.second)
         {
             ipmi::sensor::PropertyMap props;
             bool valid = false;
-            for (const auto& value : property.second)
+            auto result = true;
+            for (const auto& value : std::get<OffsetValueMap>(property.second))
             {
                 if (assertionSet.test(value.first))
                 {
@@ -326,7 +329,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                     {
                         return IPMI_CC_OK;
                     }
-                    props.emplace(property.first, value.second.assert);
+                    result = result && value.second.assert.get<bool>();
                     valid = true;
                 }
                 else if (deassertionSet.test(value.first))
@@ -336,12 +339,24 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                     {
                         return IPMI_CC_OK;
                     }
-                    props.emplace(property.first, value.second.deassert);
+                    result = result && value.second.deassert.get<bool>();
                     valid = true;
+                }
+            }
+            for (const auto& value : std::get<PreReqOffsetValueMap>(property.second))
+            {
+                if (assertionSet.test(value.first))
+                {
+                    result = result && value.second.assert.get<bool>();
+                }
+                else if (deassertionSet.test(value.first))
+                {
+                    result = result && value.second.deassert.get<bool>();
                 }
             }
             if (valid)
             {
+                props.emplace(property.first, result);
                 interfaces.emplace(interface.first, std::move(props));
             }
         }
