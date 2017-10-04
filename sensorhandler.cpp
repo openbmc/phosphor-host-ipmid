@@ -516,6 +516,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     switch(type) {
         case 0xC2:
+        case 0xC8:
             r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
             if (r < 0) {
                 fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
