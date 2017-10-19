@@ -55,8 +55,8 @@ ipmi::PropertyMap readAllProperties(const std::string& intf,
     {
         //If property is not found simply return empty value
         log<level::ERR>("Error in reading property values from inventory",
-            entry("Interface=%s", intf),
-            entry("Path=%s", objPath));
+                        entry("INTERFACE=%s", intf),
+                        entry("PATH=%s", objPath));
         return properties;
     }
     reply.read(properties);

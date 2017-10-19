@@ -703,7 +703,8 @@ void setUnitFieldsForObject(sd_bus *bus,
                                             &raw_cstr))
         {
             log<level::WARNING>("Unit interface missing.",
-                            entry("bus=%s, path=%s", iface.bus, iface.path));
+                                entry("BUS=%s", iface.bus),
+                                entry("PATH=%s", iface.path));
         }
         else
         {
@@ -766,7 +767,8 @@ int64_t getScaleForObject(sd_bus *bus,
                                         'x',
                                         &result)) {
             log<level::WARNING>("Scale interface missing.",
-                            entry("bus=%s, path=%s", iface.bus, iface.path));
+                                entry("BUS=%s", iface.bus),
+                                entry("PATH=%s", iface.path));
         }
     }
 

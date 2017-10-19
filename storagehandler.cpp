@@ -634,8 +634,9 @@ ipmi_ret_t ipmi_storage_read_fru_data(
         if ((offset + reqptr->count) > size)
         {
             log<level::ERR>("Invalid offset and count",
-                entry("Offset=%d Count=%d SizeOfFruArea=%d",
-                offset, reqptr->count, size));
+                            entry("OFFSET=%s", offset),
+                            entry("COUNT=%s", reqptr->count),
+                            entry("SIZE_OF_FRU_AREA=%s", size));
             return IPMI_CC_INVALID;
         }
         std::copy((fruArea.begin() + offset), (fruArea.begin() + reqptr->count),
