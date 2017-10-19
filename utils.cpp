@@ -161,9 +161,9 @@ Value getDbusProperty(sdbusplus::bus::bus& bus,
     if (reply.is_method_error())
     {
          log<level::ERR>("Failed to get property",
-                        entry("PROPERTY=%s", property.c_str()),
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+                         entry("PROPERTY=%s", property.c_str()),
+                         entry("PATH=%s", objPath.c_str()),
+                         entry("INTERFACE=%s", interface.c_str()));
         elog<InternalFailure>();
     }
 
@@ -192,8 +192,8 @@ PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
     if (reply.is_method_error())
     {
          log<level::ERR>("Failed to get all properties",
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+                         entry("PATH=%s", objPath.c_str()),
+                         entry("INTERFACE=%s", interface.c_str()));
          elog<InternalFailure>();
     }
 
@@ -354,7 +354,7 @@ ObjectTree getAllAncestors(sdbusplus::bus::bus& bus,
         log<level::ERR>("Error in mapper call",
                         entry("PATH=%s", path.c_str()),
                         entry("INTERFACES=%s",
-                            convertToString(interfaces).c_str()));
+                              convertToString(interfaces).c_str()));
 
         elog<InternalFailure>();
     }
@@ -367,7 +367,7 @@ ObjectTree getAllAncestors(sdbusplus::bus::bus& bus,
         log<level::ERR>("No Object has implemented the interface",
                         entry("PATH=%s", path.c_str()),
                         entry("INTERFACES=%s",
-                            convertToString(interfaces).c_str()));
+                              convertToString(interfaces).c_str()));
         elog<InternalFailure>();
     }
 
@@ -522,7 +522,7 @@ uint32_t getVLAN(const std::string& path)
     {
         log<level::ERR>("Exception occured during getVLAN",
                         entry("PATH=%s",path.c_str()),
-                        entry("EXCEPTIOn=%s", e.what()));
+                        entry("EXCEPTION=%s", e.what()));
     }
     return vlanID;
 }
