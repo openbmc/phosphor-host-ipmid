@@ -37,13 +37,10 @@ namespace open_power
 {
 namespace Host
 {
-namespace Event
-{
 namespace Error
 {
     struct Event;
 } // namespace Error
-} // namespace Event
 } // namespace Host
 } // namespace open_power
 } // namespace org
@@ -1199,8 +1196,6 @@ namespace open_power
 {
 namespace Host
 {
-namespace Event
-{
 namespace _Event
 {
 
@@ -1224,7 +1219,6 @@ struct Event
 
 };
 
-} // namespace Event
 } // namespace Host
 } // namespace open_power
 } // namespace org
@@ -1234,9 +1228,9 @@ namespace details
 {
 
 template <>
-struct map_exception_type<sdbusplus::org::open_power::Host::Event::Error::Event>
+struct map_exception_type<sdbusplus::org::open_power::Host::Error::Event>
 {
-    using type = org::open_power::Host::Event::Event;
+    using type = org::open_power::Host::Event;
 };
 
 }
