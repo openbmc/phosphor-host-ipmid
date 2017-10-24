@@ -94,7 +94,8 @@ enum ipmi_net_fns
     NETFUN_TRANSPORT =   0x0c,
     NETFUN_GRPEXT    =   0x2c,
     NETFUN_NONE      =   0x30,
-    NETFUN_OEM       =   0x32
+    NETFUN_OEM       =   0x32,
+    NETFUN_IBM_OEM   =   0x3A
 };
 
 // IPMI commands for net functions. Since this is to be used both by the ipmi
