@@ -202,8 +202,8 @@ int send_esel_to_dbus(const char *desc,
     }
     selData[debuglen*3] = '\0';
 
-    using error =  sdbusplus::org::open_power::Host::Event::Error::Event;
-    using metadata = org::open_power::Host::Event::Event;
+    using error =  sdbusplus::org::open_power::Host::Error::Event;
+    using metadata = org::open_power::Host::Event;
 
     report<error>(metadata::ESEL(selData.get()),
                   metadata::CALLOUT_INVENTORY_PATH(inventoryPath.c_str()));
