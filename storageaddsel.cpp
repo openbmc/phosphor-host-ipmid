@@ -65,7 +65,7 @@ int find_sensor_type_string(uint8_t sensor_number, char **s) {
 
 	if ((r < 0) || (a.bus[0] == 0)) {
 		// Just make a generic message for errors that
-		// occur on sensors that dont exist
+		// occur on sensors that don't exist
 		r = asprintf(s, "Unknown Sensor (0x%02x)", sensor_number);
 	} else {
 

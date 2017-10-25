@@ -204,7 +204,7 @@ TEST_F(TimerTest, updateTimerAndNeverExpire)
     }
     EXPECT_EQ(false, timer.isExpired());
 
-    // 2 becase of one more count that happens prior to exiting
+    // 2 because of one more count that happens prior to exiting
     EXPECT_EQ(2, count);
 }
 

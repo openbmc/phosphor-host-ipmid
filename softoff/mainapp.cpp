@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 
     // Claim the bus. Delaying it until sending SMS_ATN may result
     // in a race condition between this available and IPMI trying to send
-    // message as a reponse to ack from host.
+    // message as a response to ack from host.
     bus.request_name(SOFTOFF_BUSNAME);
 
     // Create the SoftPowerOff object.

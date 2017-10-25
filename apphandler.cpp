@@ -168,7 +168,7 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    // IPMI Spec verison 2.0
+    // IPMI Spec version 2.0
     dev_id.ipmi_ver = 2;
 
     // Additional device Support.
@@ -213,7 +213,7 @@ ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Byte 2:
     //  55h - No error.
-    //  56h - Self Test funciton not implemented in this controller.
+    //  56h - Self Test function not implemented in this controller.
     //  57h - Corrupted or inaccesssible data or devices.
     //  58h - Fatal hardware error.
     //  FFh - reserved.

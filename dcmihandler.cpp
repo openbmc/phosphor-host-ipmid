@@ -640,7 +640,7 @@ void register_netfn_dcmi_functions()
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_ASSET_TAG,
                            NULL, setAssetTag, PRIVILEGE_OPERATOR);
 
-    // <Get Managment Controller Identifier String>
+    // <Get Management Controller Identifier String>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
         NETFUN_GRPEXT, dcmi::Commands::GET_MGMNT_CTRL_ID_STR);
 
