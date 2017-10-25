@@ -11,7 +11,7 @@ AM_PROG_AR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
-# Surpress the --with-libtool-sysroot error
+# Suppress the --with-libtool-sysroot error
 LT_INIT
 
 # Check/set gtest specific functions.
@@ -48,7 +48,7 @@ PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],, [AC_M
 AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
 
 # Checks for header files.
-AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd developement package required])])
+AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd development package required])])
 AC_CHECK_HEADER(host-ipmid/ipmid-api.h, ,[AC_MSG_ERROR([Could not find host-ipmid/ipmid-api.h...openbmc/phosphor-host-ipmid package required])])
 
 # Checks for library functions.

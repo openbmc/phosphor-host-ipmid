@@ -19,7 +19,7 @@ std::vector<uint8_t> GetChannelCapabilities(
     // A canned response, since there is no user and channel management.
     response->completionCode = IPMI_CC_OK ;
 
-    // Channel Number 1 is arbitarily applied to primary LAN channel;
+    // Channel Number 1 is arbitrarily applied to primary LAN channel;
     response->channelNumber = 1;
 
     response->ipmiVersion = 1 ;     //IPMI v2.0 extended capabilities available.
