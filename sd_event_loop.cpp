@@ -63,7 +63,7 @@ static int consoleInputHandler(sd_event_source* es, int fd, uint32_t revents,
         if (ioctl(fd, FIONREAD, &readSize) < 0)
         {
             log<level::ERR>("ioctl failed for FIONREAD:",
-                    entry("errno = %d", errno));
+                    entry("ERRNO=%d", errno));
             return 0;
         }
 
@@ -324,7 +324,7 @@ void EventLoop::startSOLPayloadInstance(uint8_t payloadInst,
     if (rc < 0)
     {
         log<level::ERR>("Failed to setup the accumulate timer",
-                entry("RC = %d", rc));
+                entry("RC=%d", rc));
         throw std::runtime_error("Failed to setup accumulate timer");
     }
 
@@ -339,7 +339,7 @@ void EventLoop::startSOLPayloadInstance(uint8_t payloadInst,
     if (rc < 0)
     {
         log<level::ERR>("Failed to setup the retry timer",
-                entry("RC = %d", rc));
+                entry("RC=%d", rc));
         throw std::runtime_error("Failed to setup retry timer");
     }
 
@@ -348,7 +348,7 @@ void EventLoop::startSOLPayloadInstance(uint8_t payloadInst,
     if (rc < 0)
     {
         log<level::ERR>("Failed to enable the accumulate timer",
-                entry("rc = %d", rc));
+                entry("RC=%d", rc));
         throw std::runtime_error("Failed to enable accumulate timer");
     }
 
@@ -357,7 +357,7 @@ void EventLoop::startSOLPayloadInstance(uint8_t payloadInst,
     if (rc < 0)
     {
         log<level::ERR>("Failed to disable the retry timer",
-                entry("RC = %d", rc));
+                entry("RC=%d", rc));
         throw std::runtime_error("Failed to disable retry timer");
     }
 
@@ -380,7 +380,7 @@ void EventLoop::stopSOLPayloadInstance(uint8_t payloadInst)
     if (iter == payloadInfo.end())
     {
         log<level::ERR>("SOL Payload instance not found",
-                entry("payloadInst=%d", payloadInst));
+                entry("PAYLOADINST=%d", payloadInst));
         throw std::runtime_error("SOL payload instance not found");
     }
 
@@ -421,7 +421,7 @@ void EventLoop::switchTimer(uint8_t payloadInst,
     if (iter == payloadInfo.end())
     {
         log<level::ERR>("SOL Payload instance not found",
-                entry("payloadInst=%d", payloadInst));
+                entry("PAYLOADINST=%d", payloadInst));
         throw std::runtime_error("SOL Payload instance not found");
     }
 
