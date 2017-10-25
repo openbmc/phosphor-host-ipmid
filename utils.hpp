@@ -46,7 +46,7 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
                              const std::string& match = {});
 
 /** @brief Gets the ipAddres of first dbus IP object of Non-LinkLocalIPAddress
- *         type from the given subtree, if not avalable gets IP object of
+ *         type from the given subtree, if not available gets IP object of
  *         LinkLocalIPAddress type.
  *  @param[in] bus - DBUS Bus Object.
  *  @param[in] interface - Dbus interface.

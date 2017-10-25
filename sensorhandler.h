@@ -481,7 +481,7 @@ namespace sensor
 /**
  * @brief Map offset to the corresponding bit in the assertion byte.
  *
- * The discrete sensors support upto 14 states. 0-7 offsets are stored in one
+ * The discrete sensors support up to 14 states. 0-7 offsets are stored in one
  * byte and offsets 8-14 in the second byte.
  *
  * @param[in] offset - offset number.

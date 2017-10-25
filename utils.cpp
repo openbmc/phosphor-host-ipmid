@@ -520,7 +520,7 @@ uint32_t getVLAN(const std::string& path)
     }
     catch (std::exception & e)
     {
-        log<level::ERR>("Exception occured during getVLAN",
+        log<level::ERR>("Exception occurred during getVLAN",
                         entry("PATH=%s",path.c_str()),
                         entry("EXCEPTION=%s", e.what()));
     }

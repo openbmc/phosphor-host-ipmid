@@ -11,7 +11,7 @@ namespace command
 {
     /** @detail After sending SMS_ATN to the Host, Host comes down and
      *          asks why an 'SMS_ATN` was sent.
-     *          BMC then sends 'There is a Message to be Read` as reponse.
+     *          BMC then sends 'There is a Message to be Read` as response.
      *          Host then comes down asks for Message and the specified
      *          commands and data would go as data conforming to IPMI spec.
      *

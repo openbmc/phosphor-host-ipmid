@@ -381,7 +381,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
     }
 
     //PetiBoot-Specific
-    //If sucess then copy the first 9 bytes to the data
+    //If success then copy the first 9 bytes to the data
     memcpy(respptr->data, net_conf_initial_bytes,
            sizeof(net_conf_initial_bytes));
 
