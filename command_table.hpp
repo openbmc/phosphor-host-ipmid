@@ -269,8 +269,8 @@ class Table
          *
          * @return: None
          *
-         * @note Registering an already registered command will overwrite the
-         *       existing entry with the new one.
+         * @note: Duplicate registrations will be rejected.
+         *
          */
         void registerCommand(CommandID inCommand,
                              std::unique_ptr<Entry>&& entry);
