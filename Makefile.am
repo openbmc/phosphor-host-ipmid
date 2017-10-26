@@ -49,6 +49,7 @@ fru-read-gen.cpp:
 libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
 libapphandler_la_SOURCES = \
+	app/channel.cpp \
 	app/watchdog.cpp \
 	apphandler.cpp \
 	sensorhandler.cpp \
