@@ -1,33 +1,57 @@
 #include "watchdog.hpp"
+#include "utils.hpp"
 
+#include <map>
 #include <systemd/sd-bus.h>
+
 #include <mapper.h>
+#include <sdbusplus/bus.hpp>
 
 extern sd_bus *bus;
 
 struct set_wd_data_t {
-    uint8_t t_use;
-    uint8_t t_action;
+    uint8_t timer_use;
+    uint8_t timer_action;
     uint8_t preset;
     uint8_t flags;
     uint8_t ls;
     uint8_t ms;
 }  __attribute__ ((packed));
 
+struct get_wd_data_t {
+    struct set_wd_data_t config;
+    uint8_t remains_ls;
+    uint8_t remains_ms;
+}  __attribute__ ((packed));
 
+static struct set_wd_data_t watchdogState = {0, 0, 0, 0, 0, 0};
 
-ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+static constexpr auto objname = "/xyz/openbmc_project/watchdog/host0";
+static constexpr auto iface = "xyz.openbmc_project.State.Watchdog";
+static constexpr auto property_iface = "org.freedesktop.DBus.Properties";
+
+static constexpr auto WATCHDOG_PATH = "/xyz/openbmc_project/watchdog/host0";
+static constexpr auto WATCHDOG_INTF = "xyz.openbmc_project.State.Watchdog";
+static constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
+
+using PropertyMap = std::map<std::string, sdbusplus::message::variant<uint64_t, bool>>;
+
+ipmi_ret_t ipmi_app_set_watchdog(
+        ipmi_netfn_t netfn,
+        ipmi_cmd_t cmd,
+        ipmi_request_t request,
+        ipmi_response_t response,
+        ipmi_data_len_t data_len,
+        ipmi_context_t context)
 {
-    const char  *objname = "/xyz/openbmc_project/watchdog/host0";
-    const char  *iface = "xyz.openbmc_project.State.Watchdog";
-    const char  *property_iface = "org.freedesktop.DBus.Properties";
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
     set_wd_data_t *reqptr = (set_wd_data_t*) request;
+
+    // Store the configuration.
+    memcpy(&watchdogState, reqptr, sizeof(watchdogState));
     uint16_t timer = 0;
 
     // Making this uint64_t to match with provider
@@ -65,12 +89,12 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      * expiration aren't supported by phosphor-watchdog yet, so when the
      * action set is "none", we should just leave the timer disabled.
      */
-    if (0 == reqptr->t_action)
+    if (0 == reqptr->timer_action)
     {
         goto finish;
     }
 
-    if (reqptr->t_use & 0x40)
+    if (reqptr->timer_use & 0x40)
     {
         sd_bus_error_free(&error);
         reply = sd_bus_message_unref(reply);
@@ -104,14 +128,90 @@ finish:
     return (r < 0) ? -1 : IPMI_CC_OK;
 }
 
-
-ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_app_get_watchdog(
+        ipmi_netfn_t netfn,
+        ipmi_cmd_t cmd,
+        ipmi_request_t request,
+        ipmi_response_t response,
+        ipmi_data_len_t data_len,
+        ipmi_context_t context)
 {
-    const char  *objname = "/xyz/openbmc_project/watchdog/host0";
-    const char  *iface = "xyz.openbmc_project.State.Watchdog";
-    const char  *property_iface = "org.freedesktop.DBus.Properties";
+    struct get_wd_data_t data;
+    // Start with the configuration.  However, the values aren't guaranteed
+    // to remain unmodified.
+    memcpy(&data.config, &watchdogState, sizeof(watchdogState));
+
+    // Default to failure.
+    *data_len = 0;
+
+    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+    // Get the service (just in case it's not what we expect)
+    std::string watchdogService = ipmi::getService(bus, WATCHDOG_INTF, WATCHDOG_PATH);
+
+    // Get the current state for the action field
+    auto pMsg = bus.new_method_call(watchdogService.c_str(),
+                                    WATCHDOG_PATH,
+                                    PROP_INTF,
+                                    "GetAll");
+    pMsg.append(WATCHDOG_INTF);
+    auto responseMsg = bus.call(pMsg);
+    if (responseMsg.is_method_error())
+    {
+        fprintf(stderr, "Failed to get properties of watchdog\n");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    PropertyMap propMap;
+    responseMsg.read(propMap);
+
+    // We expect at least three properties.
+    if (propMap.size() < 3)
+    {
+        fprintf(stderr, "Failed to get properties of watchdog\n");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    bool enabled = sdbusplus::message::variant_ns::get<bool>(propMap["Enabled"]);
+    uint64_t timeRemaining = sdbusplus::message::variant_ns::get<uint64_t>(propMap["TimeRemaining"]);
+    uint64_t interval = sdbusplus::message::variant_ns::get<uint64_t>(propMap["Interval"]);
+
+    // timer_use we'll leave to whatever it was set via IPMI.
+
+    // If enabled, timer_action are set accordingly.
+    if (enabled)
+    {
+        // If phosphor-watchdog allows specifying a target based on the action,
+        // then conceivably there could be a variation in the action field.
+        // https://github.com/openbmc/openbmc/issues/2522
+        data.config.timer_action = 1;
+    }
+
+    // The other code seems to assume the BMC is of one endianness.
+    // So for now I'd like to leave it undetermined.
+
+    // Set Interval
+    interval /= 100;
+    data.config.ls = (uint8_t)interval;
+    data.config.ms = (uint8_t)(interval >> 8);
+
+    // Set TimeRemaining
+    timeRemaining /= 100;
+    data.remains_ls = (uint8_t)timeRemaining;
+    data.remains_ms = (uint8_t)(timeRemaining >> 8);
+
+    *data_len = sizeof(data);
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmi_app_reset_watchdog(
+        ipmi_netfn_t netfn,
+        ipmi_cmd_t cmd,
+        ipmi_request_t request,
+        ipmi_response_t response,
+        ipmi_data_len_t data_len,
+        ipmi_context_t context)
+{
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
