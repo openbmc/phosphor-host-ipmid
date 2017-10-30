@@ -39,4 +39,14 @@ struct GetChannelAccessResponse
     uint8_t privilegeLimit;    //!< Channel privilege level limit.
 } __attribute__((packed));
 
+struct InvDevIdInfo
+{
+    uint8_t SystemId;
+    uint8_t SysRevisionId;
+    uint8_t IpmiVersion;
+    uint8_t AddnDevSupport;
+    uint32_t ManufId;
+    uint16_t ProductId;
+};
+
 #endif
