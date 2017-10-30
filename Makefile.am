@@ -15,7 +15,8 @@ BUILT_SOURCES = \
                ipmiwhitelist.cpp \
                sensor-gen.cpp \
                inventory-sensor-gen.cpp \
-               fru-read-gen.cpp
+               fru-read-gen.cpp \
+               deviceid.cpp
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -46,6 +47,9 @@ inventory-sensor-gen.cpp:
 fru-read-gen.cpp:
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
 
+deviceid.cpp:
+	$(AM_V_GEN)@DEVGEN@ -o $(top_builddir)/$@
+
 libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
 libapphandler_la_SOURCES = \
@@ -68,7 +72,8 @@ libapphandler_la_SOURCES = \
 	selutility.cpp \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \
-	sensordatahandler.cpp
+	sensordatahandler.cpp \
+	deviceid.cpp
 
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)

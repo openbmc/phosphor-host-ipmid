@@ -1,0 +1,9 @@
+# These are system specific fields of the Get Device ID command.
+
+System_Id: 0x0
+SysRevision_Id: 0x00
+IpmiVersion: 0x00
+Addn_Dev_Support: 0x00
+Manufacturer_Id: 0x000000
+Product_Id: 0x0000
+
