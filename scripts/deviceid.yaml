@@ -1,0 +1,10 @@
+# These are hard coded values are part of IPMI Device ID string.
+
+deviceid_data:
+    System_Id: 0x0
+    SysRevision_Id: 0x80
+    IpmiVersion: 0x2
+    Addn_Dev_Support: 0x8D
+    Manufacturer_Id: 0x00A741
+    Product_Id: 0x424F
+
