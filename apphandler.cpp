@@ -35,6 +35,8 @@ using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 namespace fs = std::experimental::filesystem;
 
+extern const ipmi::fru::InvDevIdInfo devidinfo;
+
 // Offset in get device id command.
 typedef struct
 {
@@ -165,7 +167,7 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            memcpy(&dev_id.aux, rev.d, 4);
+            std::copy(rev.d, rev.d+2, dev_id.aux);
         }
     }
 
@@ -189,14 +191,10 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // This value is the IANA number assigned to "IBM Platform Firmware
     // Division", which is also used by our service processor.  We may want
     // a different number or at least a different version?
-    dev_id.manuf_id[0] = 0x41;
-    dev_id.manuf_id[1] = 0xA7;
-    dev_id.manuf_id[2] = 0x00;
+    memcpy(&dev_id.manuf_id, &devidinfo.Manufacturer_Id, 3); 
 
     // Witherspoon's product ID is hardcoded to 4F42(ASCII 'OB').
-    // TODO: openbmc/openbmc#495
-    dev_id.prod_id[0] = 0x4F;
-    dev_id.prod_id[1] = 0x42;
+    memcpy(&dev_id.prod_id, &devidinfo.Product_Id, 2);
 
     // Pack the actual response
     memcpy(response, &dev_id, *data_len);
