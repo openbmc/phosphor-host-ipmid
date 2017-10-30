@@ -22,6 +22,9 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 
+#define DEVID_MANUFID_SIZE 3
+#define DEVID_PRODID_SIZE 2
+
 extern sd_bus *bus;
 
 constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
@@ -33,6 +36,8 @@ void register_netfn_app_functions() __attribute__((constructor));
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 namespace fs = std::experimental::filesystem;
+
+extern const IpmiDevIdInfo devIdInfo;
 
 // Offset in get device id command.
 typedef struct
@@ -137,12 +142,11 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // From IPMI spec, controller that have different application commands, or different
     // definitions of OEM fields, are expected to have different Device ID values.
-    // Set to 0 now.
-
+    dev_id.id = devIdInfo.systemId;
     // Device Revision is set to 0 now.
     // Bit7 identifies if device provide Device SDRs,  obmc don't have SDR,we use ipmi to
     // simulate SDR, hence the value:
-    dev_id.revision = 0x80;
+    dev_id.revision = devIdInfo.sysRevisionId;
 
     // Firmware revision is already implemented, so get it from appropriate position.
     r = mapper_get_service(bus, objname, &busname);
@@ -164,12 +168,12 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            memcpy(&dev_id.aux, rev.d, 4);
+            memcpy(&dev_id.aux, &rev.d, 4);
         }
     }
 
     // IPMI Spec version 2.0
-    dev_id.ipmi_ver = 2;
+    dev_id.ipmi_ver = devIdInfo.ipmiVersion;
 
     // Additional device Support.
     // List the 'logical device' commands and functions that the controller supports
@@ -183,19 +187,15 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // [1] SDR Repository Device
     // [0] Sensor Device
     // We support FRU/SEL/Sensor now:
-    dev_id.addn_dev_support = 0x8D;
+    dev_id.addn_dev_support = devIdInfo.addnDevSupport;
 
     // This value is the IANA number assigned to "IBM Platform Firmware
     // Division", which is also used by our service processor.  We may want
     // a different number or at least a different version?
-    dev_id.manuf_id[0] = 0x41;
-    dev_id.manuf_id[1] = 0xA7;
-    dev_id.manuf_id[2] = 0x00;
+    memcpy(&dev_id.manuf_id, &devIdInfo.manufId, DEVID_MANUFID_SIZE);
 
     // Witherspoon's product ID is hardcoded to 4F42(ASCII 'OB').
-    // TODO: openbmc/openbmc#495
-    dev_id.prod_id[0] = 0x4F;
-    dev_id.prod_id[1] = 0x42;
+    memcpy(&dev_id.prod_id, &devIdInfo.productId, DEVID_PRODID_SIZE);
 
     // Pack the actual response
     memcpy(response, &dev_id, *data_len);
