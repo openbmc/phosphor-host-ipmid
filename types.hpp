@@ -205,4 +205,20 @@ enum class IPOrigin: uint8_t
 
 
 }//namespace network
+
+namespace fru
+{
+
+using Revision_id = uint8_t;
+using Manuf_id = uint32_t;
+using Prod_id = uint16_t;
+
+struct InvDevIdInfo
+{
+    Revision_id Revision;
+    Manuf_id Manufacturer_Id;
+    Prod_id Product_Id;
+};
+
+}//namespace fru
 }//namespace ipmi
