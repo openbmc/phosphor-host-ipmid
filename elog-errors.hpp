@@ -128,6 +128,26 @@ namespace Error
 
 namespace sdbusplus
 {
+namespace org
+{
+namespace open_power
+{
+namespace Common
+{
+namespace Callout
+{
+namespace Error
+{
+    struct Procedure;
+} // namespace Error
+} // namespace Callout
+} // namespace Common
+} // namespace open_power
+} // namespace org
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
 namespace xyz
 {
 namespace openbmc_project
@@ -431,6 +451,22 @@ namespace Error
 } // namespace org
 } // namespace sdbusplus
 
+namespace sdbusplus
+{
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace Error
+{
+    struct MaintenanceProcedure;
+} // namespace Error
+} // namespace Host
+} // namespace open_power
+} // namespace org
+} // namespace sdbusplus
 
 namespace phosphor
 {
@@ -691,6 +727,53 @@ template <>
 struct map_exception_type<sdbusplus::xyz::openbmc_project::Common::Callout::Error::IPMISensor>
 {
     using type = xyz::openbmc_project::Common::Callout::IPMISensor;
+};
+
+}
+
+namespace org
+{
+namespace open_power
+{
+namespace Common
+{
+namespace Callout
+{
+namespace _Procedure
+{
+
+struct PROCEDURE
+{
+    static constexpr auto str = "PROCEDURE=%u";
+    static constexpr auto str_short = "PROCEDURE";
+    using type = std::tuple<std::decay_t<decltype(str)>,uint32_t>;
+    explicit constexpr PROCEDURE(uint32_t a) : _entry(entry(str, a)) {};
+    type _entry;
+};
+
+}  // namespace _Procedure
+
+struct Procedure
+{
+    static constexpr auto L = level::ERR;
+    using PROCEDURE = _Procedure::PROCEDURE;
+    using metadata_types = std::tuple<PROCEDURE>;
+
+};
+
+} // namespace Callout
+} // namespace Common
+} // namespace open_power
+} // namespace org
+
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::org::open_power::Common::Callout::Error::Procedure>
+{
+    using type = org::open_power::Common::Callout::Procedure;
 };
 
 }
@@ -1231,6 +1314,51 @@ template <>
 struct map_exception_type<sdbusplus::org::open_power::Host::Error::Event>
 {
     using type = org::open_power::Host::Event;
+};
+
+}
+
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace _MaintenanceProcedure
+{
+
+struct ESEL
+{
+    static constexpr auto str = "ESEL=%s";
+    static constexpr auto str_short = "ESEL";
+    using type = std::tuple<std::decay_t<decltype(str)>,const char*>;
+    explicit constexpr ESEL(const char* a) : _entry(entry(str, a)) {};
+    type _entry;
+};
+
+}  // namespace _MaintenanceProcedure
+
+struct MaintenanceProcedure
+{
+    static constexpr auto L = level::ERR;
+    using ESEL = _MaintenanceProcedure::ESEL;
+    using PROCEDURE = org::open_power::Common::Callout::Procedure::PROCEDURE;
+    using metadata_types = std::tuple<ESEL, PROCEDURE>;
+
+};
+
+} // namespace Host
+} // namespace open_power
+} // namespace org
+
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::org::open_power::Host::Error::MaintenanceProcedure>
+{
+    using type = org::open_power::Host::MaintenanceProcedure;
 };
 
 }

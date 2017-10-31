@@ -578,7 +578,19 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &p->eventdata[1], 2);
 
-    send_esel(recordid);
+    // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
+    // a maintenance procedure associated with eSEL record.
+    static constexpr auto procedureType = 0xDE;
+    if (p->recordtype == procedureType)
+    {
+        // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
+        // procedure number.
+        createProcedureLogEntry(p->sensortype);
+    }
+    else
+    {
+        send_esel(recordid);
+    }
 
     return rc;
 }
