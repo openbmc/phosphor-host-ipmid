@@ -241,3 +241,53 @@ void send_esel(uint16_t recordid) {
 
 	return;
 }
+
+std::string readESEL(const char* fileName)
+{
+    std::string content {};
+    std::ifstream handle(fileName);
+
+    if (handle.fail())
+    {
+        log<level::ERR>("Failed to open eSEL", entry("FILENAME=%s", fileName));
+        return content;
+    }
+
+    handle.seekg(0, std::ios::end);
+    content.resize(handle.tellg());
+    handle.seekg(0, std::ios::beg);
+    handle.read(&content[0], content.size());
+    handle.close();
+
+    return content;
+}
+
+void createProcedureLogEntry(uint8_t procedureNum)
+{
+    // Read the eSEL data from the file.
+    constexpr auto eSELFile = "/tmp/esel";
+    auto eSELData = readESEL(eSELFile);
+
+    // Each byte in eSEL is formatted as %02x with a space between bytes and
+    // insert '/0' at the end of the character array.
+    constexpr auto byteSeperator = 3;
+    std::unique_ptr<char[]> data(new char[
+        (eSELData.size() * byteSeperator) + 1]());
+
+    for (size_t i = 0; i < eSELData.size(); i++)
+    {
+        sprintf(&data[i * byteSeperator], "%02x ", eSELData[i]);
+    }
+    data[eSELData.size() * byteSeperator] = '\0';
+
+    // The procedure number is represented as hexadecimal, for example if the
+    // hexadecimal value is 55, the procedure number is 55.
+    char buffer[3] {};
+    std::sprintf(buffer, "%x", procedureNum);
+    auto procedure = std::atoi(buffer);
+
+    using error =  sdbusplus::org::open_power::Host::Error::MaintenanceProcedure;
+    using metadata = org::open_power::Host::MaintenanceProcedure;
+
+    report<error>(metadata::ESEL(data.get()), metadata::PROCEDURE(procedure));
+}

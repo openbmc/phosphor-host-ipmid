@@ -578,7 +578,19 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &p->eventdata[1], 2);
 
-    send_esel(recordid);
+    // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
+    // a maintenance procedure associated with eSEL record.
+    constexpr auto procedureType = 0xDE;
+    if (p->recordtype == procedureType)
+    {
+        // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
+        // procedure number.
+        createProcedureLogEntry(p->sensortype);
+    }
+    else
+    {
+        send_esel(recordid);
+    }
 
     return rc;
 }
@@ -634,8 +646,9 @@ ipmi_ret_t ipmi_storage_read_fru_data(
         if ((offset + reqptr->count) > size)
         {
             log<level::ERR>("Invalid offset and count",
-                entry("Offset=%d Count=%d SizeOfFruArea=%d",
-                offset, reqptr->count, size));
+                            entry("OFFSET=%s", offset),
+                            entry("COUNT=%s", reqptr->count),
+                            entry("SIZE_OF_FRU_AREA=%s", size));
             return IPMI_CC_INVALID;
         }
         std::copy((fruArea.begin() + offset), (fruArea.begin() + reqptr->count),
