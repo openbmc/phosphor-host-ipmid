@@ -54,6 +54,25 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
     ipmi::DbusObjectInfo ipObject;
     ipmi::DbusObjectInfo systemObject;
 
+    if (*data_len == sizeof(SetChannelAccessRequest))
+    {
+        auto requestData = reinterpret_cast<const SetChannelAccessRequest*>
+                       (request);
+
+        // Set channel access command is invoked to apply the network settings.
+        // With the ipmitool command option "ipmitool lan set 1 access on",
+        // set channel access command is issued twice, once for applying the
+        // non-volatile settings and again for volatile settings. We need to
+        // apply the network settings once, so we apply network settings only if
+        // the settings requested is non-volatile.
+        static constexpr auto nonVolatileSetting = 0x40;
+        if (!(requestData->settings & nonVolatileSetting))
+        {
+            *data_len = 0;
+            return IPMI_CC_OK;
+        }
+    }
+
     // Todo: parse the request data if needed.
     // Using Set Channel cmd to apply changes of Set Lan Cmd.
     try
