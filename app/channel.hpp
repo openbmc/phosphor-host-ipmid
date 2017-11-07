@@ -1,5 +1,16 @@
 #include "ipmid.hpp"
 
+/** @struct SetChannelAccessRequest
+ *
+ *  IPMI payload for Set Channel Access command request.
+ */
+struct SetChannelAccessRequest
+{
+    uint8_t channelNumber;      //!< Channel number.
+    uint8_t settings;           //!< Channel access settings.
+    uint8_t channelPrivilege;   //!< Channel privilege level limit.
+} __attribute__((packed));
+
 /** @brief The set channel access IPMI command.
  *
  *  @param[in] netfn
