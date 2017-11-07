@@ -164,7 +164,8 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            memcpy(&dev_id.aux, rev.d, 4);
+            //memcpy(&dev_id.aux, rev.d, 4);
+            std::copy(rev.d, rev.d+2, dev_id.aux);
         }
     }
 
