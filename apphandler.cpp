@@ -7,12 +7,13 @@
 #include "utils.hpp"
 
 #include <stdio.h>
-#include <string.h>
 #include <stdint.h>
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <array>
 #include <vector>
+#include <string>
+#include <cstddef>
 #include <experimental/filesystem>
 
 #include <arpa/inet.h>
@@ -66,56 +67,89 @@ typedef struct
     uint16_t d[2];
 } rev_t;
 
-
-/* Currently only supports the vx.x-x-[-x] format Will return -1 if not in  */
-/* the format this routine knows how to parse                               */
+/* Currently supports the vx.x-x-[-x] and v1.x.x-x-[-x] format. It will     */
+/* return -1 if not in those formats, this routine knows how to parse       */
 /* version = v0.6-19-gf363f61-dirty                                         */
 /*            ^ ^ ^^          ^                                             */
 /*            | |  |----------|-- additional details                        */
 /*            | |---------------- Minor                                     */
 /*            |------------------ Major                                     */
+/* and version = v1.99.10-113-g65edf7d-r3-0-g9e4f715                        */
+/*                ^ ^  ^^ ^                                                 */
+/*                | |  |--|---------- additional details                    */
+/*                | |---------------- Minor                                 */
+/*                |------------------ Major                                 */
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
-int convert_version(const char *p, rev_t *rev)
+int convert_version(const char * p, rev_t *rev)
 {
-    char *s, *token;
+    std::string s(p);
+    std::string token;
     uint16_t commits;
 
-    if (*p != 'v')
-        return -1;
-    p++;
-
-    s = strdup(p);
-    token = strtok(s,".-");
-
-    rev->major = (int8_t) atoi(token);
-
-    token = strtok(NULL, ".-");
-    rev->minor = (int8_t) atoi(token);
-
-    // Capture the number of commits on top of the minor tag.
-    // I'm using BE format like the ipmi spec asked for
-    token = strtok(NULL,".-");
-
-    if (token) {
-        commits = (int16_t) atoi(token);
-        rev->d[0] = (commits>>8) | (commits<<8);
-
-        // commit number we skip
-        token = strtok(NULL,".-");
-
-    } else {
-        rev->d[0] = 0;
+    auto location  = s.find_first_of('v');
+    if (location != std::string::npos)
+    {
+        s = s.substr(location+1);
     }
 
-    // Any value of the optional parameter forces it to 1
-    if (token)
-        token = strtok(NULL,".-");
+    if (!s.empty())
+    {
+        location = s.find_first_of(".");
+        if (location != std::string::npos)
+        {
+            rev->major = static_cast<char>(std::stoi(s.substr(0, location), 0, 16));
+            token = s.substr(location+1);
+        }
 
-    rev->d[1] = (token != NULL) ? 1 : 0;
+        if (!token.empty())
+        {
+            location = token.find_first_of(".-");
+            if (location != std::string::npos)
+            {
+                rev->minor = static_cast<char>(std::stoi(token.substr(0, location), 0, 16));
+                token = token.substr(location+1);
+            }
+        }
 
-    free(s);
+        // Capture the number of commits on top of the minor tag.
+        // I'm using BE format like the ipmi spec asked for
+        location = token.find_first_of(".-");
+        if (!token.empty())
+        {
+            commits = std::stoi(token.substr(0, location), 0, 16);
+            rev->d[0] = (commits>>8) | (commits<<8);
+
+            // commit number we skip
+            location = token.find_first_of(".-");
+            if (location != std::string::npos)
+            {
+                token = token.substr(location+1);
+            }
+        }
+        else {
+            rev->d[0] = 0;
+        }
+
+        if (location != std::string::npos)
+        {
+            token = token.substr(location+1);
+        }
+
+        // Any value of the optional parameter forces it to 1
+        location = token.find_first_of(".-");
+        if (location != std::string::npos)
+        {
+            token = token.substr(location+1);
+        }
+        commits = (!token.empty()) ? 1 : 0;
+
+        //We do this operation to get this displayed in least significant bytes
+        //of ipmitool device id command.
+        rev->d[1] = (commits>>8) | (commits<<8);
+    }
+
     return 0;
 }
 
