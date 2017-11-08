@@ -77,16 +77,17 @@ typedef struct
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
-int convert_version(const char *p, rev_t *rev)
+int convert_version(char *p, rev_t *rev)
 {
     char *s, *token;
     uint16_t commits;
 
-    if (*p != 'v')
-        return -1;
-    p++;
-
-    s = strdup(p);
+    s = strchr(p, 'v');
+    s++;
+    
+    if(s == NULL)
+         return -1;
+ 
     token = strtok(s,".-");
 
     rev->major = (int8_t) atoi(token);
@@ -99,7 +100,7 @@ int convert_version(const char *p, rev_t *rev)
     token = strtok(NULL,".-");
 
     if (token) {
-        commits = (int16_t) atoi(token);
+        commits = (uint16_t)strtol(token, NULL, 16);
         rev->d[0] = (commits>>8) | (commits<<8);
 
         // commit number we skip
@@ -115,7 +116,6 @@ int convert_version(const char *p, rev_t *rev)
 
     rev->d[1] = (token != NULL) ? 1 : 0;
 
-    free(s);
     return 0;
 }
 
