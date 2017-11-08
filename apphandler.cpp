@@ -7,12 +7,13 @@
 #include "utils.hpp"
 
 #include <stdio.h>
-#include <string.h>
 #include <stdint.h>
 #include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <array>
 #include <vector>
+#include <string>
+#include <cstddef>
 #include <experimental/filesystem>
 
 #include <arpa/inet.h>
@@ -66,56 +67,72 @@ typedef struct
     uint16_t d[2];
 } rev_t;
 
-
-/* Currently only supports the vx.x-x-[-x] format Will return -1 if not in  */
-/* the format this routine knows how to parse                               */
+/* Currently it supports the vx.x-x-[-x] and v1.x.x-x-[-x] format. It will  */
+/* return -1 if not in those formats, this routine knows how to parse       */
 /* version = v0.6-19-gf363f61-dirty                                         */
 /*            ^ ^ ^^          ^                                             */
 /*            | |  |----------|-- additional details                        */
 /*            | |---------------- Minor                                     */
 /*            |------------------ Major                                     */
+/* and version = v1.99.10-113-g65edf7d-r3-0-g9e4f715                        */
+/*                ^ ^  ^^ ^                                                 */
+/*                | |  |--|---------- additional details                    */
+/*                | |---------------- Minor                                 */
+/*                |------------------ Major                                 */
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
-int convert_version(const char *p, rev_t *rev)
+int convert_version(const char * p, rev_t *rev)
 {
-    char *s, *token;
-    uint16_t commits;
+    std::string s(p);
+    std::string token;
+    uint16_t commits, temp=0;
+    std::size_t location = 0;
 
-    if (*p != 'v')
-        return -1;
-    p++;
+    location  = s.find_first_of('v');
+    s = s.substr(location+1);
 
-    s = strdup(p);
-    token = strtok(s,".-");
+    if(!s.empty())
+    {
+        location = s.find_first_of(".-");
+        rev->major = (int8_t) std::stoi(s.substr(0,location), 0, 16);
+        token = s.substr(location+1);
 
-    rev->major = (int8_t) atoi(token);
+        location = token.find_first_of(".-");
+        if(!token.empty())
+        {
+            temp = (int8_t) std::stoi(token.substr(0,location), 0, 16);
+            rev->minor = (temp%10) + ((temp/10)<<4);
+        }
+        token = token.substr(location+1);
 
-    token = strtok(NULL, ".-");
-    rev->minor = (int8_t) atoi(token);
+        // Capture the number of commits on top of the minor tag.
+        // I'm using BE format like the ipmi spec asked for
+        location = token.find_first_of(".-");
+        if(!token.empty())
+        {
+            commits = std::stoi(token.substr(0,location), 0, 16);
+            rev->d[0] = (commits>>8) | (commits<<8);
 
-    // Capture the number of commits on top of the minor tag.
-    // I'm using BE format like the ipmi spec asked for
-    token = strtok(NULL,".-");
+            // commit number we skip
+            location = token.find_first_of(".-");
+            token = token.substr(location+1);
 
-    if (token) {
-        commits = (int16_t) atoi(token);
-        rev->d[0] = (commits>>8) | (commits<<8);
+        } else {
+            rev->d[0] = 0;
+        }
+        token = token.substr(location+1);
 
-        // commit number we skip
-        token = strtok(NULL,".-");
+        // Any value of the optional parameter forces it to 1
+        location = token.find_first_of(".-");
+        token = token.substr(location+1);
+        commits = (!token.empty()) ? 1 : 0;
 
-    } else {
-        rev->d[0] = 0;
+        //We do this operation to get this displayed in least significant bytes
+        //of ipmitool device id command.
+        rev->d[1] = (commits>>8) | (commits<<8);
     }
 
-    // Any value of the optional parameter forces it to 1
-    if (token)
-        token = strtok(NULL,".-");
-
-    rev->d[1] = (token != NULL) ? 1 : 0;
-
-    free(s);
     return 0;
 }
 
