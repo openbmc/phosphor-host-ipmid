@@ -66,27 +66,33 @@ typedef struct
     uint16_t d[2];
 } rev_t;
 
-
-/* Currently only supports the vx.x-x-[-x] format Will return -1 if not in  */
-/* the format this routine knows how to parse                               */
+/* Currently it supports the vx.x-x-[-x] and v1.x.x-x-[-x] format. It Will  */
+/* return -1 if not in those formats, this routine knows how to parse       */
 /* version = v0.6-19-gf363f61-dirty                                         */
 /*            ^ ^ ^^          ^                                             */
 /*            | |  |----------|-- additional details                        */
 /*            | |---------------- Minor                                     */
 /*            |------------------ Major                                     */
+/* and version = v1.99.10-113-g65edf7d-r3-0-g9e4f715                        */
+/*                ^ ^  ^^          ^                                        */
+/*                | |  |-----------|-- additional details                   */
+/*                | |---------------- Minor                                 */
+/*                |------------------ Major                                 */
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
-int convert_version(const char *p, rev_t *rev)
+int convert_version(char *p, rev_t *rev)
 {
     char *s, *token;
     uint16_t commits;
 
-    if (*p != 'v')
-        return -1;
-    p++;
+    s = strchr(p, 'v');
+    s++;
 
-    s = strdup(p);
+    if (s == NULL){
+        return -1;
+    }
+
     token = strtok(s,".-");
 
     rev->major = (int8_t) atoi(token);
@@ -99,7 +105,7 @@ int convert_version(const char *p, rev_t *rev)
     token = strtok(NULL,".-");
 
     if (token) {
-        commits = (int16_t) atoi(token);
+        commits = static_cast<uint16_t>(strtol(token, NULL, 16));
         rev->d[0] = (commits>>8) | (commits<<8);
 
         // commit number we skip
@@ -113,9 +119,9 @@ int convert_version(const char *p, rev_t *rev)
     if (token)
         token = strtok(NULL,".-");
 
-    rev->d[1] = (token != NULL) ? 1 : 0;
+    commits = (token != NULL) ? 1 : 0;
+    rev->d[1] = (commits>>8) | (commits<<8);
 
-    free(s);
     return 0;
 }
 
