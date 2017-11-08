@@ -66,40 +66,48 @@ typedef struct
     uint16_t d[2];
 } rev_t;
 
-
-/* Currently only supports the vx.x-x-[-x] format Will return -1 if not in  */
-/* the format this routine knows how to parse                               */
+/* Currently it supports the vx.x-x-[-x] and v1.x.x-x-[-x] format. It will  */
+/* return -1 if not in those formats, this routine knows how to parse       */
 /* version = v0.6-19-gf363f61-dirty                                         */
 /*            ^ ^ ^^          ^                                             */
 /*            | |  |----------|-- additional details                        */
 /*            | |---------------- Minor                                     */
 /*            |------------------ Major                                     */
+/* and version = v1.99.10-113-g65edf7d-r3-0-g9e4f715                        */
+/*                ^ ^  ^^ ^                                                 */
+/*                | |  |--|---------- additional details                    */
+/*                | |---------------- Minor                                 */
+/*                |------------------ Major                                 */
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
 int convert_version(const char *p, rev_t *rev)
 {
     char *s, *token;
-    uint16_t commits;
+    uint16_t commits, temp=0;
 
-    if (*p != 'v')
+    s = strchr((char *)p, 'v');
+    if (s != NULL)
+    {
+        s++;
+    }
+    else {
         return -1;
-    p++;
+    }
 
-    s = strdup(p);
     token = strtok(s,".-");
 
     rev->major = (int8_t) atoi(token);
 
     token = strtok(NULL, ".-");
-    rev->minor = (int8_t) atoi(token);
-
+    temp = (int8_t) atoi(token);
+    rev->minor = (temp%10) + ((temp/10)<<4);
     // Capture the number of commits on top of the minor tag.
     // I'm using BE format like the ipmi spec asked for
     token = strtok(NULL,".-");
 
     if (token) {
-        commits = (int16_t) atoi(token);
+        commits = std::strtol(token, NULL, 16);
         rev->d[0] = (commits>>8) | (commits<<8);
 
         // commit number we skip
@@ -113,9 +121,12 @@ int convert_version(const char *p, rev_t *rev)
     if (token)
         token = strtok(NULL,".-");
 
-    rev->d[1] = (token != NULL) ? 1 : 0;
+    commits = (token != NULL) ? 1 : 0;
 
-    free(s);
+    //We do this operation to get this displayed in least significant bytes
+    //of ipmitool device id command.
+    rev->d[1] = (commits>>8) | (commits<<8);
+
     return 0;
 }
 
