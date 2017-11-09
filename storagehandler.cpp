@@ -34,14 +34,6 @@ constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
 constexpr auto HOST_TIME_PATH = "/xyz/openbmc_project/time/host";
 constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
 constexpr auto PROPERTY_ELAPSED= "Elapsed";
-
-const char* getTimeString(const uint64_t& usecSinceEpoch)
-{
-    using namespace std::chrono;
-    system_clock::time_point tp{microseconds(usecSinceEpoch)};
-    auto t = system_clock::to_time_t(tp);
-    return std::ctime(&t);
-}
 }
 
 namespace cache
@@ -79,7 +71,6 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    printf("Handling STORAGE WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
     // Status code.
     ipmi_ret_t rc = IPMI_CC_INVALID;
     *data_len = 0;
@@ -435,8 +426,6 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     uint64_t host_time_usec = 0;
     uint32_t resp = 0;
 
-    printf("IPMI Handling GET-SEL-TIME\n");
-
     try
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
@@ -472,9 +461,6 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    printf("Host time: %" PRIu64 ", %s",
-           host_time_usec, getTimeString(host_time_usec));
-
     // Time is really long int but IPMI wants just uint32. This works okay until
     // the number of seconds since 1970 overflows uint32 size.. Still a whole
     // lot of time here to even think about that.
@@ -499,14 +485,8 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     uint32_t secs = *static_cast<uint32_t*>(request);
     *data_len = 0;
 
-    printf("Handling Set-SEL-Time:[0x%X], Cmd:[0x%X], Data:[0x%X]\n",
-           netfn, cmd, secs);
-
     secs = le32toh(secs);
     microseconds usec{seconds(secs)};
-
-    printf("To Set host time: %" PRIu64 ", %s",
-           usec.count(), getTimeString(usec.count()));
 
     try
     {
@@ -554,8 +534,6 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if( ++g_sel_reserve == 0)
         g_sel_reserve = 1;
 
-    printf("IPMI Handling RESERVE-SEL 0x%04x\n", g_sel_reserve);
-
     *data_len = sizeof(g_sel_reserve);
 
     // Pack the actual response
@@ -574,8 +552,6 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     uint16_t recordid;
 
     recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
-
-    printf("IPMI Handling ADD-SEL for record 0x%04x\n", recordid);
 
     *data_len = sizeof(g_sel_reserve);
 
@@ -703,57 +679,44 @@ ipmi_ret_t ipmi_get_repository_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_storage_functions()
 {
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL, ipmi_storage_wildcard,
                            PRIVILEGE_USER);
 
     // <Get SEL Info>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, getSELInfo,
                            PRIVILEGE_USER);
 
     // <Get SEL Time>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL, ipmi_storage_get_sel_time,
                            PRIVILEGE_USER);
 
     // <Set SEL Time>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL, ipmi_storage_set_sel_time,
                            PRIVILEGE_OPERATOR);
 
     // <Reserve SEL>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL, ipmi_storage_reserve_sel,
                            PRIVILEGE_USER);
 
     // <Get SEL Entry>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL, getSELEntry,
                            PRIVILEGE_USER);
 
     // <Delete SEL Entry>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_DELETE_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL, deleteSELEntry,
                            PRIVILEGE_OPERATOR);
 
     // <Add SEL Entry>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_ADD_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL, ipmi_storage_add_sel,
                            PRIVILEGE_OPERATOR);
     // <Clear SEL>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL, NULL, clearSEL,
                            PRIVILEGE_OPERATOR);
     // <Get FRU Inventory Area Info>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_STORAGE,
-            IPMI_CMD_GET_FRU_INV_AREA_INFO);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_FRU_INV_AREA_INFO, NULL,
             ipmi_storage_get_fru_inv_area_info, PRIVILEGE_OPERATOR);
 
     // <Add READ FRU Data
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_STORAGE,
-            IPMI_CMD_READ_FRU_DATA);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
             ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
 
