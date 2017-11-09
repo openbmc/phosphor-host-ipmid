@@ -124,7 +124,6 @@ ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
-    printf("WATCHDOG RESET\n");
     // Get bus name
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
