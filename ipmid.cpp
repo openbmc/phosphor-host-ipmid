@@ -158,7 +158,9 @@ void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_context_t c
     auto iter = g_ipmid_router_map.find(netfn_and_cmd);
     if(iter != g_ipmid_router_map.end())
     {
-        fprintf(stderr,"ERROR : Duplicate registration for NetFn [0x%X], Cmd:[0x%X]\n",netfn, cmd);
+        log<level::ERR>("Duplicate registration",
+                        entry("NETFN=0x%X", netfn),
+                        entry("CMD=0x%X", cmd));
     }
     else
     {
@@ -183,8 +185,9 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
         if (!std::binary_search(whitelist.cbegin(), whitelist.cend(),
                                         std::make_pair(netfn, cmd)))
         {
-            printf("Net function:[0x%X], Command:[0x%X] is not whitelisted\n",
-                                         netfn, cmd);
+            log<level::ERR>("Net function not whitelisted",
+                            entry("NETFN=0x%X", netfn),
+                            entry("CMD=0x%X", cmd));
             rc = IPMI_CC_INSUFFICIENT_PRIVILEGE;
             memcpy(response, &rc, IPMI_CC_LEN);
             *data_len = IPMI_CC_LEN;
@@ -199,8 +202,10 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
     {
         /* By default should only print on failure to find wildcard command. */
 #ifdef __IPMI_DEBUG__
-        fprintf(stderr, "No registered handlers for NetFn:[0x%X], Cmd:[0x%X]"
-               " trying Wilcard implementation \n",netfn, cmd);
+        log<level::ERR>(
+              "No registered handlers for NetFn, trying Wilcard implementation",
+              entry("NET_FUN=0x%X", netfn)
+              entry("CMD=0x%X", IPMI_CMD_WILDCARD));
 #endif
 
         // Now that we did not find any specific [NetFn,Cmd], tuple, check for
@@ -208,7 +213,9 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
         iter = g_ipmid_router_map.find(std::make_pair(netfn, IPMI_CMD_WILDCARD));
         if(iter == g_ipmid_router_map.end())
         {
-            fprintf(stderr, "No Registered handlers for NetFn:[0x%X],Cmd:[0x%X]\n",netfn, IPMI_CMD_WILDCARD);
+            log<level::ERR>("No Registered handlers for NetFn",
+                            entry("NET_FUN=0x%X", netfn),
+                            entry("CMD=0x%X", IPMI_CMD_WILDCARD));
 
             // Respond with a 0xC1
             memcpy(response, &rc, IPMI_CC_LEN);
@@ -219,7 +226,9 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
 
 #ifdef __IPMI_DEBUG__
     // We have either a perfect match -OR- a wild card atleast,
-    printf("Calling Net function:[0x%X], Command:[0x%X]\n", netfn, cmd);
+    log<level::ERR>("Calling Net function",
+                    entry("NET_FUN=0x%X", netfn)
+                    entry("CMD=0x%X", cmd));
 #endif
 
     // Extract the map data onto appropriate containers
@@ -261,7 +270,8 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
                                        DBUS_INTF,
                                        "sendMessage");
     if (r < 0) {
-        fprintf(stderr, "Failed to add the method object: %s\n", strerror(-r));
+        log<level::ERR>("Failed to add the method object",
+                        entry("ERRNO=0x%X", -r));
         return -1;
     }
 
@@ -273,13 +283,15 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     // Add the bytes needed for the methods to be called
     r = sd_bus_message_append(m, "yyyyy", seq, netfn, lun, cmd, cc);
     if (r < 0) {
-        fprintf(stderr, "Failed add the netfn and others : %s\n", strerror(-r));
+        log<level::ERR>("Failed add the netfn and others",
+                        entry("ERRNO=0x%X", -r));
         goto final;
     }
 
     r = sd_bus_message_append_array(m, 'y', buf, len);
     if (r < 0) {
-        fprintf(stderr, "Failed to add the string of response bytes: %s\n", strerror(-r));
+        log<level::ERR>("Failed to add the string of response bytes",
+                        entry("ERRNO=0x%X", -r));
         goto final;
     }
 
@@ -288,14 +300,17 @@ static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned ch
     // Call the IPMI responder on the bus so the message can be sent to the CEC
     r = sd_bus_call(bus, m, 0, &error, &reply);
     if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s\n", strerror(-r));
-        fprintf(stderr, "Dest: %s, Path: %s\n", dest, path);
+        log<level::ERR>("Failed to call the method",
+                        entry("DEST=%s", dest),
+                        entry("PATH=%s", path),
+                        entry("ERRNO=0x%X", -r));
         goto final;
     }
 
     r = sd_bus_message_read(reply, "x", &pty);
     if (r < 0) {
-       fprintf(stderr, "Failed to get a rc from the method: %s\n", strerror(-r));
+       log<level::ERR>("Failed to get a reply from the method",
+                        entry("ERRNO=0x%X", -r));
     }
 
 final:
@@ -360,13 +375,15 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
 
     r = sd_bus_message_read(m, "yyyy",  &sequence, &netfn, &lun, &cmd);
     if (r < 0) {
-        fprintf(stderr, "Failed to parse signal message: %s\n", strerror(-r));
+        log<level::ERR>("Failed to parse signal message",
+                        entry("ERRNO=0x%X", -r));
         return -1;
     }
 
     r = sd_bus_message_read_array(m, 'y',  &request, &sz );
     if (r < 0) {
-        fprintf(stderr, "Failed to parse signal message: %s\n", strerror(-r));
+        log<level::ERR>("Failed to parse signal message",
+                        entry("ERRNO=0x%X", -r));
         return -1;
     }
 
@@ -382,7 +399,12 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     r = ipmi_netfn_router(netfn, cmd, (void *)request, (void *)response, &resplen);
     if(r != 0)
     {
-        fprintf(stderr,"ERROR:[0x%X] handling NetFn:[0x%X], Cmd:[0x%X]\n",r, netfn, cmd);
+#ifdef __IPMI_DEBUG__
+        log<level::ERR>("ERROR in handling NetFn",
+                        entry("ERRNO=0x%X", -r),
+                        entry("NET_FUN=0x%X", netfn),
+                        entry("CMD=0x%X", cmd));
+#endif
         resplen = 0;
     }
     else
@@ -397,7 +419,7 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     r = send_ipmi_message(m, sequence, netfn, lun, cmd, response[0],
 		    ((unsigned char *)response) + 1, resplen);
     if (r < 0) {
-        fprintf(stderr, "Failed to send the response message\n");
+        log<level::ERR>("Failed to send the response message");
         return -1;
     }
 
@@ -451,7 +473,7 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
 
     if(ipmi_lib_path == NULL)
     {
-        fprintf(stderr,"ERROR; No handlers to be registered for ipmi.. Aborting\n");
+        log<level::ERR>("No handlers to be registered for ipmi.. Aborting");
         assert(0);
     }
     else
@@ -475,14 +497,18 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
         {
             handler_fqdn = ipmi_lib_path;
             handler_fqdn += handler_list[num_handlers]->d_name;
-            printf("Registering handler:[%s]\n",handler_fqdn.c_str());
+#ifdef __IPMI_DEBUG__
+            log<level::DEBUG>("Registering handler",
+                              entry("HANDLER=%s", handler_fqdn.c_str()));
+#endif
 
             lib_handler = dlopen(handler_fqdn.c_str(), RTLD_NOW);
 
             if(lib_handler == NULL)
             {
-                fprintf(stderr,"ERROR opening [%s]: %s\n",
-                        handler_fqdn.c_str(), dlerror());
+                log<level::ERR>("ERROR opening",
+                                entry("HANDLER=%s", handler_fqdn.c_str()),
+                                entry("ERRNO=0x%X", dlerror()));
             }
             // Wipe the memory allocated for this particular entry.
             free(handler_list[num_handlers]);
@@ -557,8 +583,8 @@ int main(int argc, char *argv[])
     /* Connect to system bus */
     r = sd_bus_open_system(&bus);
     if (r < 0) {
-        fprintf(stderr, "Failed to connect to system bus: %s\n",
-                strerror(-r));
+        log<level::ERR>("Failed to connect to system bus",
+                        entry("ERRNO=0x%X", -r));
         goto finish;
     }
 
@@ -567,7 +593,7 @@ int main(int argc, char *argv[])
     if (r < 0)
     {
         log<level::ERR>("Failure to create sd_event handler",
-                entry("ERROR=%s", strerror(-r)));
+                        entry("ERRNO=0x%X", -r));
         goto finish;
     }
 
@@ -583,7 +609,9 @@ int main(int argc, char *argv[])
 	// Watch for BT messages
     r = sd_bus_add_match(bus, &ipmid_slot, FILTER, handle_ipmi_command, NULL);
     if (r < 0) {
-        fprintf(stderr, "Failed: sd_bus_add_match: %s : %s\n", strerror(-r), FILTER);
+        log<level::ERR>("Failed: sd_bus_add_match",
+                        entry("FILTER=%s", FILTER),
+                        entry("ERRNO=0x%X", -r));
         goto finish;
     }
 
@@ -613,7 +641,7 @@ int main(int argc, char *argv[])
             if (r < 0)
             {
                 log<level::ERR>("Failure in processing request",
-                        entry("ERROR=%s", strerror(-r)));
+                                entry("ERRNO=0x%X", -r));
                 goto finish;
             }
         }
