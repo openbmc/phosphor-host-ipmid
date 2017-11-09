@@ -47,8 +47,6 @@ ipmi_ret_t ipmi_app_set_watchdog(
     // Get timer value in ms
     timer_ms = timer * 100;
 
-    printf("WATCHDOG SET Timer:[0x%X] 100ms intervals\n",timer);
-
     // Get bus name
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
@@ -131,7 +129,6 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
-    printf("WATCHDOG RESET\n");
     // Get bus name
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {

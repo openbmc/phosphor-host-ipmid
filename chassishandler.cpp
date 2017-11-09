@@ -774,8 +774,7 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     r = sd_bus_get_property(bus, busname, objname, intf, "pgood", NULL, &reply, "i");
     if (r < 0) {
         fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
-        fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
-                busname, objname, intf);
+        fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n", busname, objname, intf);
         rc = IPMI_CC_UNSPECIFIED_ERROR;
         goto finish;
     }
@@ -1463,37 +1462,30 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_chassis_functions()
 {
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_WILDCARD, NULL, ipmi_chassis_wildcard,
                            PRIVILEGE_USER);
 
     // Get Chassis Capabilities
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP, NULL, ipmi_get_chassis_cap,
                            PRIVILEGE_USER);
 
     // <Get System Boot Options>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL,
                            ipmi_chassis_get_sys_boot_options, PRIVILEGE_OPERATOR);
 
     // <Get Chassis Status>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS, NULL, ipmi_get_chassis_status,
                            PRIVILEGE_USER);
 
     // <Chassis Control>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL, ipmi_chassis_control,
                            PRIVILEGE_OPERATOR);
 
     // <Chassis Identify>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_IDENTIFY);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_IDENTIFY, NULL,
                            ipmi_chassis_identify, PRIVILEGE_OPERATOR);
 
     // <Set System Boot Options>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL,
                            ipmi_chassis_set_sys_boot_options, PRIVILEGE_OPERATOR);
 }

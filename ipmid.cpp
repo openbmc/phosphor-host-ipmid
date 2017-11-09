@@ -205,8 +205,6 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
         iter = g_ipmid_router_map.find(std::make_pair(netfn, IPMI_CMD_WILDCARD));
         if(iter == g_ipmid_router_map.end())
         {
-            fprintf(stderr, "No Registered handlers for NetFn:[0x%X],Cmd:[0x%X]\n",netfn, IPMI_CMD_WILDCARD);
-
             // Respond with a 0xC1
             memcpy(response, &rc, IPMI_CC_LEN);
             *data_len = IPMI_CC_LEN;
@@ -379,7 +377,9 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     r = ipmi_netfn_router(netfn, cmd, (void *)request, (void *)response, &resplen);
     if(r != 0)
     {
+#ifdef __IPMI_DEBUG__
         fprintf(stderr,"ERROR:[0x%X] handling NetFn:[0x%X], Cmd:[0x%X]\n",r, netfn, cmd);
+#endif
 
         if(r < 0) {
            response[0] = IPMI_CC_UNSPECIFIED_ERROR;
@@ -471,7 +471,6 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
         {
             handler_fqdn = ipmi_lib_path;
             handler_fqdn += handler_list[num_handlers]->d_name;
-            printf("Registering handler:[%s]\n",handler_fqdn.c_str());
 
             lib_handler = dlopen(handler_fqdn.c_str(), RTLD_NOW);
 

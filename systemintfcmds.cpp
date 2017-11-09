@@ -25,8 +25,6 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    printf("IPMI APP READ EVENT command received\n");
-
     struct oem_sel_timestamped oem_sel = {0};
     *data_len = sizeof(struct oem_sel_timestamped);
 
@@ -93,8 +91,6 @@ ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = 0;
 
     // Event and message logging enabled by default so return for now
-    printf("IPMI APP SET BMC GLOBAL ENABLES Ignoring for now\n");
-
     return rc;
 }
 
@@ -111,18 +107,14 @@ void register_netfn_app_functions()
 {
 
     // <Read Event Message Buffer>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_READ_EVENT);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_READ_EVENT, NULL, ipmi_app_read_event,
                            SYSTEM_INTERFACE);
 
     // <Set BMC Global Enables>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP,
-                                            IPMI_CMD_SET_BMC_GLOBAL_ENABLES);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_BMC_GLOBAL_ENABLES, NULL,
                            ipmi_app_set_bmc_global_enables, SYSTEM_INTERFACE);
 
     // <Get Message Flags>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL, ipmi_app_get_msg_flags,
                            SYSTEM_INTERFACE);
 

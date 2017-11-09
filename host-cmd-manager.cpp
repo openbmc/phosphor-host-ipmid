@@ -46,8 +46,6 @@ IpmiCmdData Manager::getNextCommand()
     {
         // Just return a heartbeat in this case.  A spurious SMS_ATN was
         // asserted for the host (probably from a previous boot).
-        log<level::INFO>("Control Host work queue is empty!");
-
         return std::make_pair(CMD_HEARTBEAT, 0x00);
     }
 
@@ -95,7 +93,7 @@ void Manager::checkQueueAndAlertHost()
 {
     if (this->workQueue.size() >= 1)
     {
-        log<level::INFO>("Asserting SMS Attention");
+        log<level::DEBUG>("Asserting SMS Attention");
 
         std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
         std::string IPMI_INTERFACE("org.openbmc.HostIpmi");
@@ -124,7 +122,7 @@ void Manager::checkQueueAndAlertHost()
             log<level::ERR>("Error in setting SMS attention");
             elog<InternalFailure>();
         }
-        log<level::INFO>("SMS Attention asserted");
+        log<level::DEBUG>("SMS Attention asserted");
     }
 }
 
