@@ -37,4 +37,3 @@ ipmi_ret_t ipmi_app_reset_watchdog(
         ipmi_response_t response,
         ipmi_data_len_t data_len,
         ipmi_context_t context);
-
