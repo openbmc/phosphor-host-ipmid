@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     if (r < 0)
     {
         log<level::ERR>("Failure to create sd_event handler",
-                entry("ERROR=%s", strerror(-r)));
+                entry("ERRNO=0x%X", -r));
         return -1;
     }
 
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
         if (r < 0)
         {
             log<level::ERR>("Failure in processing request",
-                    entry("ERROR=%s", strerror(-r)));
+                    entry("ERRNO=0x%X", -r));
             return -1;
         }
     }

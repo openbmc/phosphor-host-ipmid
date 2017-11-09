@@ -104,8 +104,6 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     int channel = (*p) & CHANNEL_MASK;
     std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
 
-    printf("IPMI APP GET CHANNEL INFO\n");
-
     // The supported channels numbers are those which are configured.
     // Channel Number E is used as way to identify the current channel
     // that the command is being is received from.
