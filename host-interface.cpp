@@ -55,7 +55,7 @@ void Host::execute(Base::Host::Command command)
 {
     using namespace phosphor::logging;
 
-    log<level::INFO>("Pushing cmd on to queue",
+    log<level::DEBUG>("Pushing cmd on to queue",
             entry("CONTROL_HOST_CMD=%s",
                   convertForMessage(command)));
 

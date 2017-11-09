@@ -988,29 +988,21 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_sen_functions()
 {
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_WILDCARD,
                            nullptr, ipmi_sen_wildcard,
                            PRIVILEGE_USER);
 
     // <Get Sensor Type>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE,
                            nullptr, ipmi_sen_get_sensor_type,
                            PRIVILEGE_USER);
 
     // <Set Sensor Reading and Event Status>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_SET_SENSOR);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR,
                            nullptr, ipmi_sen_set_sensor,
                            PRIVILEGE_OPERATOR);
 
     // <Get Sensor Reading>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING,
                            nullptr, ipmi_sen_get_sensor_reading,
                            PRIVILEGE_USER);

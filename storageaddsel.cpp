@@ -90,20 +90,21 @@ size_t getfilestream(const char *fn, uint8_t **buffer) {
 
 		r = fseek(fp, 0, SEEK_END);
 		if (r) {
-			fprintf(stderr,"Fseek failed\n");
+            log<level::ERR>("Fseek failed");
 			goto fclose_fp;
 		}
 
 		size = ftell(fp);
 		if (size == -1L) {
-			fprintf(stderr,"Ftell failed for %s\n", strerror(errno));
+            log<level::ERR>("Ftell failed",
+                            entry("ERROR=%s", strerror(errno)));
 			size = 0;
 			goto fclose_fp;
 		}
 
 		r = fseek(fp, 0, SEEK_SET);
 		if (r) {
-			fprintf(stderr,"Fseek failed\n");
+            log<level::ERR>("Fseek failed");
 			size = 0;
 			goto fclose_fp;
 		}
@@ -113,7 +114,7 @@ size_t getfilestream(const char *fn, uint8_t **buffer) {
 		r = fread(*buffer, 1, size, fp);
 		if ( r != size) {
 			size = 0;
-			fprintf(stderr,"Fread failed\n");
+			log<level::ERR>("Fread failed\n");
 		}
 
 fclose_fp:
@@ -175,8 +176,7 @@ int create_esel_description(const uint8_t *buffer, const char *sev, char **messa
 
 	r = asprintf(message, "A %s has experienced a %s", m, sev );
 	if (r == -1) {
-		fprintf(stderr,
-			"Failed to allocate memory for ESEL description\n");
+        log<level::ERR>("Failed to allocate memory for ESEL description");
 	}
 
 	free(m);
@@ -233,7 +233,7 @@ void send_esel(uint16_t recordid) {
 
 	r = send_esel_to_dbus(desc, sev, inventoryPath, buffer, sz);
 	if (r < 0) {
-		fprintf(stderr, "Failed to send esel to dbus\n");
+        log<level::ERR>("Failed to send esel to dbus");
 	}
 
 	free(desc);

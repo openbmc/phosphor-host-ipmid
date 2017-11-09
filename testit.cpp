@@ -38,9 +38,6 @@ char g_results_value[64];
 
 
 int set_sensor_dbus_state_s(unsigned char number, const char *member, const char *value) {
-    printf("Attempting to log 0x%02x via %s with a value of %s\n",
-        number, member, value);
-
     strcpy(g_results_method, member);
     strcpy(g_results_value, value);
 
@@ -50,10 +47,6 @@ int set_sensor_dbus_state_s(unsigned char number, const char *member, const char
 int set_sensor_dbus_state_y(unsigned char number, char const* member, uint8_t value) {
     
     char val[2];
-
-
-    printf("Attempting to log Variant Sensor 0x%02x via %s with a value of 0x%02x\n",
-        number, member, value);
 
 
     snprintf(val, 2, "%d", value);
@@ -89,12 +82,16 @@ uint8_t testrec_invalidnumber[]= {0x35, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00
 
 
 int check_results(int rc, const char *method, const char *value) {
-    if (strcmp(g_results_method, method)) { 
-        printf("ERROR: Method Failed, expect %s found %s\n", method, g_results_method);
+    if (strcmp(g_results_method, method)) {
+        log<level::ERR>("Method Failed",
+                        entry("EXPECT=%s", method),
+                        entry("GOT=%s", g_results_method));
         return -1;
     }
     if (strcmp(g_results_value, value)) {
-        printf("ERROR: Value failed, expected %s found %s\n", value, g_results_value);
+        log<level::ERR>("Value failed",
+                        entry("EXPECT=%s", value),
+                        entry("GOT=%s", g_results_method));
         return -2;
     }
 
