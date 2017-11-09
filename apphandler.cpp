@@ -147,7 +147,6 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
-    printf("IPMI SET ACPI STATE Ignoring for now\n");
     return rc;
 }
 
@@ -476,8 +475,6 @@ ipmi_ret_t ipmi_app_get_bt_capabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    printf("Handling Netfn:[0x%X], Cmd:[0x%X]\n",netfn,cmd);
-
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
 

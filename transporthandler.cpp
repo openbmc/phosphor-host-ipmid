@@ -623,17 +623,14 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
 void register_netfn_transport_functions()
 {
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL, ipmi_transport_wildcard,
                            PRIVILEGE_USER);
 
     // <Set LAN Configuration Parameters>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_SET_LAN);
     ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_LAN, NULL, ipmi_transport_set_lan,
                            PRIVILEGE_ADMIN);
 
     // <Get LAN Configuration Parameters>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_GET_LAN);
     ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL, ipmi_transport_get_lan,
                            PRIVILEGE_OPERATOR);
 

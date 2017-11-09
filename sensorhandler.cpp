@@ -446,9 +446,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
             return IPMI_CC_SENSOR_INVALID;
         }
-
-        fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n", a.bus, a.path,
-                        a.interface);
     }
 
     *data_len=0;
@@ -459,8 +456,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
             if (r < 0) {
                 fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
-                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
-                        a.bus, a.path, a.interface);
                 break;
             }
 
@@ -469,8 +464,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
                 break;
             }
-
-            printf("Contents of a 0x%02x is 0x%02x\n", type, reading);
 
             rc = IPMI_CC_OK;
             *data_len=sizeof(sensorreadingresp_t);
@@ -985,29 +978,21 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_sen_functions()
 {
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_WILDCARD,
                            nullptr, ipmi_sen_wildcard,
                            PRIVILEGE_USER);
 
     // <Get Sensor Type>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE,
                            nullptr, ipmi_sen_get_sensor_type,
                            PRIVILEGE_USER);
 
     // <Set Sensor Reading and Event Status>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_SET_SENSOR);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR,
                            nullptr, ipmi_sen_set_sensor,
                            PRIVILEGE_OPERATOR);
 
     // <Get Sensor Reading>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING,
                            nullptr, ipmi_sen_get_sensor_reading,
                            PRIVILEGE_USER);
