@@ -147,7 +147,7 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
-    printf("IPMI SET ACPI STATE Ignoring for now\n");
+    log<level::DEBUG>("IPMI SET ACPI STATE Ignoring for now\n");
     return rc;
 }
 
@@ -476,7 +476,8 @@ ipmi_ret_t ipmi_app_get_bt_capabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    printf("Handling Netfn:[0x%X], Cmd:[0x%X]\n",netfn,cmd);
+    log<level::DEBUG>("Handling ",entry("Netfn:[0x%X], Cmd:[0x%X]\n ",
+                                        netfn,cmd));
 
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -579,9 +580,6 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_app_functions()
 {
     // <Get BT Interface Capabilities>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_GET_CAP_BIT);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_CAP_BIT,
                            NULL,
@@ -589,9 +587,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
 
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_WILDCARD,
                            NULL,
@@ -599,9 +594,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
 
     // <Reset Watchdog Timer>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_RESET_WD);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_RESET_WD,
                            NULL,
@@ -609,9 +601,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_OPERATOR);
 
     // <Set Watchdog Timer>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_SET_WD);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_SET_WD,
                            NULL,
@@ -626,9 +615,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_OPERATOR);
 
     // <Get Device ID>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_GET_DEVICE_ID);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_DEVICE_ID,
                            NULL,
@@ -636,9 +622,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
 
     // <Get Self Test Results>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_GET_SELF_TEST_RESULTS);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_SELF_TEST_RESULTS,
                            NULL,
@@ -646,9 +629,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
 
     // <Get Device GUID>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_GET_DEVICE_GUID);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_DEVICE_GUID,
                            NULL,
@@ -656,9 +636,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
 
     // <Set ACPI Power State>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_SET_ACPI);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_SET_ACPI,
                            NULL,
@@ -666,9 +643,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_ADMIN);
 
     // <Get Channel Access>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_GET_CHANNEL_ACCESS);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_CHANNEL_ACCESS,
                            NULL,
@@ -676,9 +650,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
 
     // <Get Channel Info Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_GET_CHAN_INFO);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_CHAN_INFO,
                            NULL,
@@ -686,9 +657,6 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
 
     // <Get System GUID Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_GET_SYS_GUID);
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_SYS_GUID,
                            NULL,
