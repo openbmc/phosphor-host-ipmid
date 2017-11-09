@@ -1,33 +1,40 @@
 #include "watchdog.hpp"
+#include "utils.hpp"
 
 #include <systemd/sd-bus.h>
+
 #include <mapper.h>
+#include <sdbusplus/bus.hpp>
 
 extern sd_bus *bus;
 
 struct set_wd_data_t {
-    uint8_t t_use;
-    uint8_t t_action;
+    uint8_t timer_use;
+    uint8_t timer_action;
     uint8_t preset;
     uint8_t flags;
     uint8_t ls;
     uint8_t ms;
 }  __attribute__ ((packed));
 
+static constexpr auto objname = "/xyz/openbmc_project/watchdog/host0";
+static constexpr auto iface = "xyz.openbmc_project.State.Watchdog";
+static constexpr auto property_iface = "org.freedesktop.DBus.Properties";
 
-
-ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_app_set_watchdog(
+        ipmi_netfn_t netfn,
+        ipmi_cmd_t cmd,
+        ipmi_request_t request,
+        ipmi_response_t response,
+        ipmi_data_len_t data_len,
+        ipmi_context_t context)
 {
-    const char  *objname = "/xyz/openbmc_project/watchdog/host0";
-    const char  *iface = "xyz.openbmc_project.State.Watchdog";
-    const char  *property_iface = "org.freedesktop.DBus.Properties";
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
 
     set_wd_data_t *reqptr = (set_wd_data_t*) request;
+
     uint16_t timer = 0;
 
     // Making this uint64_t to match with provider
@@ -65,12 +72,12 @@ ipmi_ret_t ipmi_app_set_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      * expiration aren't supported by phosphor-watchdog yet, so when the
      * action set is "none", we should just leave the timer disabled.
      */
-    if (0 == reqptr->t_action)
+    if (0 == reqptr->timer_action)
     {
         goto finish;
     }
 
-    if (reqptr->t_use & 0x40)
+    if (reqptr->timer_use & 0x40)
     {
         sd_bus_error_free(&error);
         reply = sd_bus_message_unref(reply);
@@ -104,14 +111,14 @@ finish:
     return (r < 0) ? -1 : IPMI_CC_OK;
 }
 
-
-ipmi_ret_t ipmi_app_reset_watchdog(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_app_reset_watchdog(
+        ipmi_netfn_t netfn,
+        ipmi_cmd_t cmd,
+        ipmi_request_t request,
+        ipmi_response_t response,
+        ipmi_data_len_t data_len,
+        ipmi_context_t context)
 {
-    const char  *objname = "/xyz/openbmc_project/watchdog/host0";
-    const char  *iface = "xyz.openbmc_project.State.Watchdog";
-    const char  *property_iface = "org.freedesktop.DBus.Properties";
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
