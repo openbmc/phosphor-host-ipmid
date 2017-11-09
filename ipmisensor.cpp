@@ -238,19 +238,18 @@ int findindex(const uint8_t sensor_type, int offset, int *index) {
 	return rc;
 }
 
-void debug_print_ok_to_dont_care(uint8_t stype, int offset)
-{
-	printf("LOOKATME: Sensor should not be reported:  Type 0x%02x, Offset 0x%02x\n",
-		stype, offset);
-}
-
 bool shouldReport(uint8_t sensorType, int offset, int *index) {
 
 	bool rc = false;
 
 	if (findindex(sensorType, offset, index)) { rc = true;	}
-
-	if (rc==false) { debug_print_ok_to_dont_care(sensorType, offset); }
+    if (rc == false) {
+#ifdef __IPMI_DEBUG__
+        log<level::DEBUG>("LOOKATME: Sensor should not be reported",
+                        entry("SENSORTYPE=0x%02x", sensorType),
+                        entry("OFFSET=0x%02x", offset));
+#endif
+        }
 
 	return rc;
 }
