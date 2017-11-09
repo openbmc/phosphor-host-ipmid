@@ -81,7 +81,7 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
         if (r < 0)
         {
             log<level::ERR>("Failure to start Host shutdown wait timer",
-                    entry("ERROR=%s", strerror(-r)));
+                    entry("ERRNO=0x%X", -r));
         }
         else
         {
@@ -120,7 +120,7 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
         if (r < 0)
         {
             log<level::ERR>("Failure to STOP the timer",
-                    entry("ERROR=%s", strerror(-r)));
+                    entry("ERRNO=0x%X", -r));
         }
 
         // This marks the completion of soft power off sequence.
