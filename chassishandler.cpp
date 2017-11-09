@@ -145,8 +145,9 @@ int dbus_get_property(const char *name, char **buf)
 
     r = mapper_get_service(bus, settings_object_name, &connection);
     if (r < 0) {
-        fprintf(stderr, "Failed to get %s connection: %s\n",
-                settings_object_name, strerror(-r));
+    log<level::ERR>("Failed to get connection",
+                    entry("OBJ_NAME=%s", settings_object_name),
+                    entry("ERROR=%s", strerror(-r)));
         goto finish;
     }
 
@@ -168,7 +169,8 @@ int dbus_get_property(const char *name, char **buf)
                            name);                                      /* second argument */
 
     if (r < 0) {
-        fprintf(stderr, "Failed to issue method call: %s\n", error.message);
+        log<level::ERR>("Failed to issue method call",
+                        entry("ERROR=%s", error.message));
         goto finish;
     }
 
@@ -178,7 +180,8 @@ int dbus_get_property(const char *name, char **buf)
      */
     r = sd_bus_message_read(m, "v", "s", &temp_buf);
     if (r < 0) {
-        fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
+        log<level::ERR>("Failed to parse response message",
+                        entry("ERROR=%s", strerror(-r)));
         goto finish;
     }
 
@@ -188,7 +191,7 @@ int dbus_get_property(const char *name, char **buf)
         strcpy(*buf, temp_buf);
     }
      */
-    printf("IPMID boot option property get: {%s}.\n", (char *) temp_buf);
+
 
 finish:
     sd_bus_error_free(&error);
@@ -216,8 +219,11 @@ int dbus_set_property(const char * name, const char *value)
 
     r = mapper_get_service(bus, settings_object_name, &connection);
     if (r < 0) {
-        fprintf(stderr, "Failed to get %s connection: %s\n",
-                settings_object_name, strerror(-r));
+        log<level::ERR>("Failed to get connection",
+                        entry("OBJ_NAME=%s", settings_object_name),
+                        entry("ERROR=%s", strerror(-r)));
+        log<level::ERR>("Failed to parse response message",
+                        entry("ERROR=%s", strerror(-r)));
         goto finish;
     }
 
@@ -241,11 +247,10 @@ int dbus_set_property(const char * name, const char *value)
                            value);                                     /* fourth argument */
 
     if (r < 0) {
-        fprintf(stderr, "Failed to issue method call: %s\n", error.message);
+        log<level::ERR>("Failed to issue method call", entry(
+            "ERROR=%s", error.message));
         goto finish;
     }
-
-    printf("IPMID boot option property set: {%s}.\n", value);
 
     finish:
     sd_bus_error_free(&error);
@@ -584,7 +589,6 @@ ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                  ipmi_data_len_t data_len,
                                  ipmi_context_t context)
 {
-    printf("Handling CHASSIS WILDCARD Netfn:[0x%X], Cmd:[0x%X]\n",netfn, cmd);
     // Status code.
     ipmi_ret_t rc = IPMI_CC_INVALID;
     *data_len = 0;
@@ -766,28 +770,31 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     r = mapper_get_service(bus, objname, &busname);
     if (r < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
+        log<level::ERR>("Failed to get bus name",
+                        entry("ERROR=%s", strerror(-r)));
         rc = IPMI_CC_UNSPECIFIED_ERROR;
         goto finish;
     }
 
     r = sd_bus_get_property(bus, busname, objname, intf, "pgood", NULL, &reply, "i");
     if (r < 0) {
-        fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
-        fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
-                busname, objname, intf);
+        log<level::ERR>("Failed to call sd_bus_get_property",
+                        entry("PROPERTY=%d", r),
+                        entry("ERROR=%s", strerror(-r)),
+                        entry("BUS=%s", busname),
+                        entry("PATH=%s", objname),
+                        entry("INTERF=%s", intf));
         rc = IPMI_CC_UNSPECIFIED_ERROR;
         goto finish;
     }
 
     r = sd_bus_message_read(reply, "i", &pgood);
     if (r < 0) {
-        fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
+        log<level::ERR>("Failed to read sensor:",
+                        entry("ERROR=%s", strerror(-r)));
         rc = IPMI_CC_UNSPECIFIED_ERROR;
         goto finish;
     }
-
-    printf("pgood is 0x%02x\n", pgood);
 
     s = dbusToIpmi.at(powerRestore);
 
@@ -909,8 +916,8 @@ int stop_soft_off_timer()
                                 soft_off_iface, property, "s", value);
     if (rc < 0)
     {
-        fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
-                strerror(-rc));
+        log<level::ERR>("Failed to set property in SoftPowerOff object",
+                        entry("ERROR=%s", strerror(-rc)));
     }
 
     //TODO openbmc/openbmc#1661 - Mapper refactor
@@ -958,7 +965,6 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Catch the actual operaton by peeking into request buffer
     uint8_t chassis_ctrl_cmd = *(uint8_t *)request;
-    printf("Chassis Control Command: Operation:[0x%X]\n",chassis_ctrl_cmd);
 
     switch(chassis_ctrl_cmd)
     {
@@ -1022,7 +1028,8 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         default:
         {
-            fprintf(stderr, "Invalid Chassis Control command:[0x%X] received\n",chassis_ctrl_cmd);
+            log<level::ERR>("Invalid Chassis Control command",
+                            entry("CMD=0x%X", chassis_ctrl_cmd));
             rc = -1;
         }
     }
@@ -1187,8 +1194,6 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     get_sys_boot_options_t *reqptr = (get_sys_boot_options_t*) request;
     IpmiValue bootOption = ipmiDefault;
 
-    printf("IPMI GET_SYS_BOOT_OPTIONS\n");
-
     memset(resp,0,sizeof(*resp));
     resp->version   = SET_PARM_VERSION;
     resp->parm      = 5;
@@ -1289,7 +1294,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         if (ret < 0) {
 
-            fprintf(stderr, "getHostNetworkData failed for get_sys_boot_options.\n");
+            log<level::ERR>(
+                        "getHostNetworkData failed for get_sys_boot_options.");
             rc = IPMI_CC_UNSPECIFIED_ERROR;
 
         }else
@@ -1297,7 +1303,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     else {
-        fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
+        log<level::ERR>("Unsupported parameter", entry(
+                        "PARAM=0x%x", reqptr->parameter));
     }
 
     if (p)
@@ -1441,7 +1448,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         int ret = setHostNetworkData(reqptr);
         if (ret < 0) {
-            fprintf(stderr, "setHostNetworkData failed for set_sys_boot_options.\n");
+            log<level::ERR>(
+                        "setHostNetworkData failed for set_sys_boot_options");
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
     } else if (reqptr->parameter ==
@@ -1453,7 +1461,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // flags.
         rc = IPMI_CC_OK;
     } else {
-        fprintf(stderr, "Unsupported parameter 0x%x\n", reqptr->parameter);
+        log<level::ERR>("Unsupported parameter", entry(
+            "PARAM=0x%x", reqptr->parameter));
         rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
 
@@ -1463,37 +1472,30 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_chassis_functions()
 {
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_WILDCARD, NULL, ipmi_chassis_wildcard,
                            PRIVILEGE_USER);
 
     // Get Chassis Capabilities
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP, NULL, ipmi_get_chassis_cap,
                            PRIVILEGE_USER);
 
     // <Get System Boot Options>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL,
                            ipmi_chassis_get_sys_boot_options, PRIVILEGE_OPERATOR);
 
     // <Get Chassis Status>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS, NULL, ipmi_get_chassis_status,
                            PRIVILEGE_USER);
 
     // <Chassis Control>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL, ipmi_chassis_control,
                            PRIVILEGE_OPERATOR);
 
     // <Chassis Identify>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_IDENTIFY);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_IDENTIFY, NULL,
                            ipmi_chassis_identify, PRIVILEGE_OPERATOR);
 
     // <Set System Boot Options>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL,
                            ipmi_chassis_set_sys_boot_options, PRIVILEGE_OPERATOR);
 }
