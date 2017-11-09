@@ -518,6 +518,16 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL, ipmi_app_set_watchdog,
                            PRIVILEGE_OPERATOR);
 
+    // <Get Watchdog Timer>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_WD);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_WD,
+                           NULL,
+                           ipmi_app_get_watchdog,
+                           PRIVILEGE_USER);
+
     // <Get Device ID>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_ID);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_ID, NULL, ipmi_app_get_device_id,
