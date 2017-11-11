@@ -9,6 +9,7 @@
 #include "host-ipmid/ipmid-api.h"
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
+#include "config.h"
 #include "fruread.hpp"
 #include "ipmid.hpp"
 #include "sensorhandler.h"
@@ -560,6 +561,12 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                         a.bus, a.path, a.interface);
                 break;
             }
+// If value <0 from phosphor-hwmon, then there was a read failure.
+#ifdef NEGATIVE_ERRNO_ON_FAIL
+            if (raw_value < 0) {
+                return IPMI_CC_SENSOR_INVALID;
+            }
+#endif
 
             r = sd_bus_message_read(reply, "s", &assertion);
             if (r < 0) {
