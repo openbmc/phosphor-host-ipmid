@@ -92,6 +92,19 @@ AC_DEFINE(CALLOUT_FWD_ASSOCIATION, "callout", [The name of the callout's forward
 AC_DEFINE(BOARD_SENSOR, "/xyz/openbmc_project/inventory/system/chassis/motherboard", [The inventory path to the motherboard fault sensor.])
 AC_DEFINE(SYSTEM_SENSOR, "/xyz/openbmc_project/inventory/system", [The inventory path to the system event sensor.])
 
+# When a sensor read fails, set the Value on dbus with -errno.
+# Incompatible with remove-from-dbus-on-fail.
+AC_ARG_ENABLE([negative-errno-on-fail],
+    AS_HELP_STRING([--enable-negative-errno-on-fail], [Set sensor value to -errno on read failures])
+)
+
+AC_ARG_VAR(NEGATIVE_ERRNO_ON_FAIL, [Set sensor value to -errno on read failures])
+
+AS_IF([test "x$enable_negative_errno_on_fail" == "xyes"],
+      [NEGATIVE_ERRNO_ON_FAIL="yes"]
+      AC_DEFINE_UNQUOTED([NEGATIVE_ERRNO_ON_FAIL], ["$NEGATIVE_ERRNO_ON_FAIL"], [Set sensor value to -errno on read failures])
+)
+
 # Soft Power off related.
 AS_IF([test "x$enable_softoff" != "xno"],
     # Dbus service name
