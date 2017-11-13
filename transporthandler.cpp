@@ -21,12 +21,6 @@
 #include <mapper.h>
 #endif
 
-// OpenBMC System Manager dbus framework
-const char  *obj   =  "/org/openbmc/NetworkManager/Interface";
-const char  *ifc   =  "org.openbmc.NetworkManager";
-
-const char *nwinterface = "eth0";
-
 const int SIZE_MAC = 18; //xx:xx:xx:xx:xx:xx
 
 struct ChannelConfig_t channelConfig;
