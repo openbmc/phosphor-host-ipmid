@@ -1,4 +1,6 @@
+#include <netinet/in.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
 #include <systemd/sd-daemon.h>
 #include <phosphor-logging/log.hpp>
 #include "main.hpp"
@@ -173,6 +175,7 @@ int EventLoop::startEventLoop()
 {
     int fd = -1;
     int r = 0;
+    int listen_fd;
     sigset_t ss;
     sd_event_source* source = nullptr;
     auto bus = ipmid_get_sd_bus_connection();
@@ -218,13 +221,38 @@ int EventLoop::startEventLoop()
         goto finish;
     }
 
-    if (sd_listen_fds(0) != 1)
+    //Create our own socket if SysD did not supply one.
+    listen_fd = sd_listen_fds(0);
+    if (listen_fd == 1)
     {
-        log<level::ERR>("No or too many file descriptors received");
+        fd = SD_LISTEN_FDS_START;
+    }
+    else if (listen_fd > 1)
+    {
+        log<level::ERR>("Too many file descriptors received");
         goto finish;
     }
+    else
+    {
+        struct sockaddr_in address;
+        if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == 0)
+        {
+            r = -errno;
+            log<level::ERR>("Unable to manually open socket");
+            goto finish;
+        }
 
-    fd = SD_LISTEN_FDS_START;
+        address.sin_family = AF_INET;
+        address.sin_addr.s_addr = INADDR_ANY;
+        address.sin_port = htons(IPMI_STD_PORT);
+
+        if (bind(fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+        {
+            r = -errno;
+            log<level::ERR>("Unable to bind socket");
+            goto finish;
+        }
+    }
 
     r = sd_event_add_io(event, &source, fd, EPOLLIN, udp623Handler, nullptr);
     if (r < 0)
