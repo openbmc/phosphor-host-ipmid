@@ -1,7 +1,9 @@
 #pragma once
 
 #include "types.hpp"
+#include <memory>
 #include <string>
+
 // IPMI commands for Transport net functions.
 enum ipmi_netfn_storage_cmds
 {
@@ -32,6 +34,9 @@ const uint8_t SET_IN_PROGRESS = 1;
 const uint8_t SET_COMMIT_WRITE = 2; //Optional
 const uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
 
+const int CHANNEL_MASK = 0x0f;
+const int NUM_CHANNELS = 0x0f;
+
 struct ChannelConfig_t
 {
     std::string ipaddr;
@@ -56,3 +61,10 @@ struct ChannelConfig_t
         lan_set_in_progress = SET_COMPLETE;
     }
 };
+
+// Given a channel, get the corresponding configuration,
+// or allocate it first.
+//
+// @param[in] channel the channel
+// @return the ChannelConfig_t pointer.
+struct ChannelConfig_t* getChannelConfig(int channel);

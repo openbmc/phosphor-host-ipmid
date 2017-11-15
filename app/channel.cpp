@@ -2,6 +2,7 @@
 #include "types.hpp"
 #include "transporthandler.hpp"
 #include "utils.hpp"
+#include "net.hpp"
 
 #include <string>
 #include <arpa/inet.h>
@@ -10,12 +11,21 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 
-extern struct ChannelConfig_t channelConfig;
-
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+
+/** @struct SetChannelAccessRequest
+ *
+ * IPMI payload for Set Channel access command request.
+ */
+struct SetChannelAccessRequest
+{
+    uint8_t channelNumber;       //!< Channel number.
+    uint8_t setting;             //!< The setting values.
+    uint8_t privilegeLevelLimit; //!< The Privilege Level Limit
+} __attribute__((packed));
 
 /** @struct GetChannelAccessRequest
  *
@@ -54,6 +64,22 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
     ipmi::DbusObjectInfo ipObject;
     ipmi::DbusObjectInfo systemObject;
 
+    if (*data_len < sizeof(SetChannelAccessRequest))
+    {
+        return IPMI_CC_INVALID;
+    }
+
+    auto requestData = reinterpret_cast<const SetChannelAccessRequest*>
+                   (request);
+    int channel = requestData->channelNumber & CHANNEL_MASK;
+    std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    if (ethdevice.empty())
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    std::string ethIp = ethdevice + "/" + ipmi::network::IP_TYPE;
+    auto channelConf = getChannelConfig(channel);
+
     // Todo: parse the request data if needed.
     // Using Set Channel cmd to apply changes of Set Lan Cmd.
     try
@@ -61,23 +87,23 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
         log<level::INFO>("Network data from Cache",
-                         entry("PREFIX=%s", channelConfig.netmask.c_str()),
-                         entry("ADDRESS=%s", channelConfig.ipaddr.c_str()),
-                         entry("GATEWAY=%s", channelConfig.gateway.c_str()),
-                         entry("VLAN=%d", channelConfig.vlanID),
-                         entry("IPSRC=%d", channelConfig.ipsrc));
+                         entry("PREFIX=%s", channelConf->netmask.c_str()),
+                         entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
+                         entry("GATEWAY=%s", channelConf->gateway.c_str()),
+                         entry("VLAN=%d", channelConf->vlanID),
+                         entry("IPSRC=%d", channelConf->ipsrc));
 
-        if (channelConfig.vlanID != ipmi::network::VLAN_ID_MASK)
+        if (channelConf->vlanID != ipmi::network::VLAN_ID_MASK)
         {
             //get the first twelve bits which is vlan id
             //not interested in rest of the bits.
-            channelConfig.vlanID = le32toh(channelConfig.vlanID);
-            vlanID = channelConfig.vlanID & ipmi::network::VLAN_ID_MASK;
+            channelConf->vlanID = le32toh(channelConf->vlanID);
+            vlanID = channelConf->vlanID & ipmi::network::VLAN_ID_MASK;
         }
 
         // if the asked ip src is DHCP then not interested in
         // any given data except vlan.
-        if (channelConfig.ipsrc != ipmi::network::IPOrigin::DHCP)
+        if (channelConf->ipsrc != ipmi::network::IPOrigin::DHCP)
         {
             // always get the system object
             systemObject = ipmi::getDbusObject(
@@ -100,7 +126,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                 ipObject = ipmi::getDbusObject(bus,
                                                ipmi::network::IP_INTERFACE,
                                                ipmi::network::ROOT,
-                                               ipmi::network::IP_TYPE);
+                                               ethIp);
 
                 // Get the parent interface of the IP object.
                 try
@@ -119,7 +145,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                                           ipmi::network::ETHERNET_INTERFACE));
                     commit<InternalFailure>();
                     rc = IPMI_CC_UNSPECIFIED_ERROR;
-                    channelConfig.clear();
+                    channelConf->clear();
                     return rc;
                 }
 
@@ -137,7 +163,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                         bus,
                         ipmi::network::ETHERNET_INTERFACE,
                         ipmi::network::ROOT,
-                        ipmi::network::INTERFACE);
+                        ethdevice);
 
                 networkInterfacePath = std::move(networkInterfaceObject.first);
             }
@@ -153,21 +179,21 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
             // check whether user has given all the data
             // or the configured system interface is dhcp enabled,
             // in both of the cases get the values from the cache.
-            if ((!channelConfig.ipaddr.empty() &&
-                 !channelConfig.netmask.empty() &&
-                 !channelConfig.gateway.empty()) ||
+            if ((!channelConf->ipaddr.empty() &&
+                 !channelConf->netmask.empty() &&
+                 !channelConf->gateway.empty()) ||
                 (enableDHCP)) // configured system interface mode = DHCP
             {
                 //convert mask into prefix
-                ipaddress = channelConfig.ipaddr;
-                prefix = ipmi::network::toPrefix(AF_INET, channelConfig.netmask);
-                gateway = channelConfig.gateway;
-                if (channelConfig.vlanID != ipmi::network::VLAN_ID_MASK)
+                ipaddress = channelConf->ipaddr;
+                prefix = ipmi::network::toPrefix(AF_INET, channelConf->netmask);
+                gateway = channelConf->gateway;
+                if (channelConf->vlanID != ipmi::network::VLAN_ID_MASK)
                 {
                     //get the first twelve bits which is vlan id
                     //not interested in rest of the bits.
-                    channelConfig.vlanID = le32toh(channelConfig.vlanID);
-                    vlanID = channelConfig.vlanID & ipmi::network::VLAN_ID_MASK;
+                    channelConf->vlanID = le32toh(channelConf->vlanID);
+                    vlanID = channelConf->vlanID & ipmi::network::VLAN_ID_MASK;
                 }
                 else
                 {
@@ -195,24 +221,23 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                             ipObject.first,
                             ipmi::network::IP_INTERFACE);
 
-                    ipaddress = channelConfig.ipaddr.empty() ?
+                    ipaddress = channelConf->ipaddr.empty() ?
                                 ipmi::getIPAddress(bus,
                                                    ipmi::network::IP_INTERFACE,
                                                    ipmi::network::ROOT,
-                                                   ipmi::network::IP_TYPE) :
-                                channelConfig.ipaddr;
+                                                   ethIp) :
+                                channelConf->ipaddr;
 
-                    prefix = channelConfig.netmask.empty() ?
+                    prefix = channelConf->netmask.empty() ?
                         properties["PrefixLength"].get<uint8_t>() :
                         ipmi::network::toPrefix(AF_INET,
-                                channelConfig.netmask);
-
+                                channelConf->netmask);
                 }
                 catch (InternalFailure& e)
                 {
                     log<level::INFO>("Failed to get IP object which matches",
                             entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
-                            entry("MATCH=%s", ipmi::network::IP_TYPE));
+                            entry("MATCH=%s", ethIp));
                 }
 
                 auto systemProperties = ipmi::getAllDbusProperties(
@@ -221,10 +246,9 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                         systemObject.first,
                         ipmi::network::SYSTEMCONFIG_INTERFACE);
 
-                gateway = channelConfig.gateway.empty() ?
+                gateway = channelConf->gateway.empty() ?
                         systemProperties["DefaultGateway"].get<std::string>() :
-                        channelConfig.gateway;
-
+                        channelConf->gateway;
             }
         }
 
@@ -250,7 +274,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                 bus,
                 ipmi::network::ETHERNET_INTERFACE,
                 ipmi::network::ROOT,
-                ipmi::network::INTERFACE);
+                ethdevice);
 
         // setting the physical interface mode to static.
         ipmi::setDbusProperty(bus,
@@ -266,14 +290,14 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
         ipmi::deleteAllDbusObjects(bus,
                                    ipmi::network::ROOT,
                                    ipmi::network::IP_INTERFACE,
-                                   ipmi::network::IP_TYPE);
+                                   ethIp);
 
         if (vlanID)
         {
             ipmi::network::createVLAN(bus,
                                       ipmi::network::SERVICE,
                                       ipmi::network::ROOT,
-                                      ipmi::network::INTERFACE,
+                                      ethdevice,
                                       vlanID);
 
             auto networkInterfaceObject = ipmi::getDbusObject(
@@ -284,7 +308,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
            networkInterfacePath = networkInterfaceObject.first;
         }
 
-        if (channelConfig.ipsrc == ipmi::network::IPOrigin::DHCP)
+        if (channelConf->ipsrc == ipmi::network::IPOrigin::DHCP)
         {
             ipmi::setDbusProperty(bus,
                                   ipmi::network::SERVICE,
@@ -303,6 +327,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                                   "DHCPEnabled",
                                   false);
 
+            // TODO(venture): Prefix must be set too!
             if (!ipaddress.empty())
             {
                 ipmi::network::createIP(bus,
@@ -332,13 +357,13 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                         entry("ADDRESS=%s", ipaddress.c_str()),
                         entry("GATEWAY=%s", gateway.c_str()),
                         entry("VLANID=%d", vlanID),
-                        entry("IPSRC=%d", channelConfig.ipsrc));
+                        entry("IPSRC=%d", channelConf->ipsrc));
 
         commit<InternalFailure>();
         rc = IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    channelConfig.clear();
+    channelConf->clear();
     return rc;
 }
 
@@ -352,17 +377,15 @@ ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto responseData = reinterpret_cast<GetChannelAccessResponse*>
             (outPayload.data());
 
-    // Channel 1 is arbitrarily assigned to ETH0 channel
-    constexpr auto channelOne = 0x01;
-
     /*
      * The value Eh is used as a way to identify the current channel that
      * the command is being received from.
      */
     constexpr auto channelE = 0x0E;
+    int channel = requestData->channelNumber;
+    std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
 
-    if (requestData->channelNumber != channelOne &&
-        requestData->channelNumber != channelE)
+    if (channel != channelE && ethdevice.empty())
     {
         *data_len = 0;
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -408,20 +431,20 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         IPMI_CHANNEL_TYPE_IPMB,
         1,0x41,0xA7,0x00,0,0};
     uint8_t *p = (uint8_t*) request;
+    int channel = (*p) & CHANNEL_MASK;
+    std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
 
     printf("IPMI APP GET CHANNEL INFO\n");
 
-    // The supported channels numbers are 1 and 8.
+    // The supported channels numbers are those which are configured.
     // Channel Number E is used as way to identify the current channel
     // that the command is being is received from.
-    if (*p == 0xe || *p == 1 || *p == 8) {
-
-        *data_len = sizeof(resp);
-        memcpy(response, resp, *data_len);
-
-    } else {
+    if (channel != 0xe && ethdevice.empty()) {
         rc = IPMI_CC_PARM_OUT_OF_RANGE;
         *data_len = 0;
+    } else {
+        *data_len = sizeof(resp);
+        memcpy(response, resp, *data_len);
     }
 
     return rc;
