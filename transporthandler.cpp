@@ -9,6 +9,7 @@
 #include "ipmid.hpp"
 #include "transporthandler.hpp"
 #include "utils.hpp"
+#include "net.hpp"
 
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
@@ -23,7 +24,7 @@
 
 const int SIZE_MAC = 18; //xx:xx:xx:xx:xx:xx
 
-struct ChannelConfig_t channelConfig;
+std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
@@ -31,12 +32,33 @@ namespace fs = std::experimental::filesystem;
 
 void register_netfn_transport_functions() __attribute__((constructor));
 
+struct ChannelConfig_t* getChannelConfig(int channel)
+{
+    auto item = channelConfig.find(channel);
+    if (item == channelConfig.end())
+    {
+        channelConfig[channel] = std::make_unique<struct ChannelConfig_t>();
+    }
+
+    return channelConfig[channel].get();
+}
+
 // Helper Function to get IP Address/NetMask/Gateway/MAC Address from Network Manager or
 // Cache based on Set-In-Progress State
-ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
+ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+    std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    // if ethdevice is an empty string they weren't expecting this channel.
+    if (ethdevice.empty())
+    {
+        // TODO: return error from getNetworkData()
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    std::string ethIP = ethdevice + "/" + ipmi::network::IP_TYPE;
+    auto channelConf = getChannelConfig(channel);
 
     try
     {
@@ -45,14 +67,14 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_IP:
             {
                 std::string ipaddress;
-                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
                         ipaddress = ipmi::getIPAddress(bus,
                                                        ipmi::network::IP_INTERFACE,
                                                        ipmi::network::ROOT,
-                                                       ipmi::network::IP_TYPE);
+                                                       ethIP);
 
                     }
                     // ignore the exception, as it is a valid condtion that
@@ -62,9 +84,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                         // nothing to do.
                     }
                 }
-                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    ipaddress = channelConfig.ipaddr;
+                    ipaddress = channelConf->ipaddr;
                 }
 
                 inet_pton(AF_INET, ipaddress.c_str(),
@@ -76,7 +98,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             {
                 std::string networkInterfacePath;
 
-                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -87,7 +109,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                                 bus,
                                 ipmi::network::IP_INTERFACE,
                                 ipmi::network::ROOT,
-                                ipmi::network::IP_TYPE);
+                                ethIP);
 
                         // Get the parent interface of the IP object.
                         try
@@ -124,7 +146,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                                 bus,
                                 ipmi::network::ETHERNET_INTERFACE,
                                 ipmi::network::ROOT,
-                                ipmi::network::INTERFACE);
+                                ethdevice);
 
                         networkInterfacePath = networkInterfaceObject.first;
                     }
@@ -143,9 +165,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
 
                     memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
                 }
-                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                   memcpy(data, &(channelConfig.ipsrc),
+                   memcpy(data, &(channelConf->ipsrc),
                           ipmi::network::IPSRC_SIZE_BYTE);
                 }
             }
@@ -154,7 +176,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_SUBNET:
             {
                 unsigned long mask {};
-                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -182,9 +204,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                     }
                     memcpy(data, &mask, ipmi::network::IPV4_ADDRESS_SIZE_BYTE);
                 }
-                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    inet_pton(AF_INET, channelConfig.netmask.c_str(),
+                    inet_pton(AF_INET, channelConf->netmask.c_str(),
                               reinterpret_cast<void*>(data));
                 }
 
@@ -195,7 +217,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             {
                 std::string gateway;
 
-                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -221,9 +243,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                     }
 
                 }
-                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    gateway = channelConfig.gateway;
+                    gateway = channelConf->gateway;
                 }
 
                 inet_pton(AF_INET, gateway.c_str(),
@@ -234,12 +256,13 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_MAC:
             {
                 std::string macAddress;
-                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     auto macObjectInfo = ipmi::getDbusObject(
                                              bus,
                                              ipmi::network::MAC_INTERFACE,
-                                             ipmi::network::ROOT);
+                                             ipmi::network::ROOT,
+                                             ethdevice);
 
                     auto variant = ipmi::getDbusProperty(
                                      bus,
@@ -251,9 +274,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                     macAddress = variant.get<std::string>();
 
                 }
-                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    macAddress = channelConfig.macAddress;
+                    macAddress = channelConf->macAddress;
                 }
 
                 sscanf(macAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
@@ -269,7 +292,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_VLAN:
             {
                 uint16_t vlanID {};
-                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -299,9 +322,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
 
                     memcpy(data, &vlanID, ipmi::network::VLAN_SIZE_BYTE);
                 }
-                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    memcpy(data, &(channelConfig.vlanID),
+                    memcpy(data, &(channelConf->vlanID),
                            ipmi::network::VLAN_SIZE_BYTE);
                 }
             }
@@ -355,6 +378,15 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
     auto reqptr = reinterpret_cast<const set_lan_t*>(request);
     sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
+    // channel number is the lower nibble
+    int channel = reqptr->channel & CHANNEL_MASK;
+    std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    if (ethdevice.empty())
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    auto channelConf = getChannelConfig(channel);
+
     switch (reqptr->parameter)
     {
         case LAN_PARM_IP:
@@ -363,8 +395,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
                      reqptr->data[0], reqptr->data[1],
                      reqptr->data[2], reqptr->data[3]);
 
-            channelConfig.ipaddr.assign(ipaddr);
-
+            channelConf->ipaddr.assign(ipaddr);
         }
         break;
 
@@ -372,7 +403,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
         {
             uint8_t ipsrc{};
             memcpy(&ipsrc, reqptr->data, ipmi::network::IPSRC_SIZE_BYTE);
-            channelConfig.ipsrc = static_cast<ipmi::network::IPOrigin>(ipsrc);
+            channelConf->ipsrc = static_cast<ipmi::network::IPOrigin>(ipsrc);
         }
         break;
 
@@ -392,7 +423,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
                                      bus,
                                      ipmi::network::MAC_INTERFACE,
                                      ipmi::network::ROOT,
-                                     ipmi::network::INTERFACE);
+                                     ethdevice);
 
             ipmi::setDbusProperty(bus,
                                   macObjectInfo.second,
@@ -401,8 +432,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
                                   "MACAddress",
                                   std::string(mac));
 
-            channelConfig.macAddress = mac;
-
+            channelConf->macAddress = mac;
         }
         break;
 
@@ -411,7 +441,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             snprintf(netmask, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
                      reqptr->data[0], reqptr->data[1],
                      reqptr->data[2], reqptr->data[3]);
-            channelConfig.netmask.assign(netmask);
+            channelConf->netmask.assign(netmask);
         }
         break;
 
@@ -420,8 +450,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             snprintf(gateway, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
                      reqptr->data[0], reqptr->data[1],
                      reqptr->data[2], reqptr->data[3]);
-            channelConfig.gateway.assign(gateway);
-
+            channelConf->gateway.assign(gateway);
         }
         break;
 
@@ -433,7 +462,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             // We assume that ipmitool always send enable
             // bit as 1.
             vlan = le16toh(vlan);
-            channelConfig.vlanID = vlan;
+            channelConf->vlanID = vlan;
         }
         break;
 
@@ -441,22 +470,20 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
         {
             if (reqptr->data[0] == SET_COMPLETE)
             {
-                channelConfig.lan_set_in_progress = SET_COMPLETE;
+                channelConf->lan_set_in_progress = SET_COMPLETE;
 
                 log<level::INFO>("Network data from Cache",
-                                 entry("PREFIX=%s", channelConfig.netmask.c_str()),
-                                 entry("ADDRESS=%s", channelConfig.ipaddr.c_str()),
-                                 entry("GATEWAY=%s", channelConfig.gateway.c_str()),
-                                 entry("VLAN=%d", channelConfig.vlanID));
+                                 entry("PREFIX=%s", channelConf->netmask.c_str()),
+                                 entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
+                                 entry("GATEWAY=%s", channelConf->gateway.c_str()),
+                                 entry("VLAN=%d", channelConf->vlanID));
 
                 log<level::INFO>("Use Set Channel Access command to apply");
-
             }
             else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
             {
-                channelConfig.lan_set_in_progress = SET_IN_PROGRESS;
+                channelConf->lan_set_in_progress = SET_IN_PROGRESS;
             }
-
         }
         break;
 
@@ -464,7 +491,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
         {
             rc = IPMI_CC_PARM_NOT_SUPPORTED;
         }
-
     }
 
     return rc;
@@ -490,6 +516,8 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
 
     get_lan_t *reqptr = (get_lan_t*) request;
+    // channel number is the lower nibble
+    int channel = reqptr->rev_channel & CHANNEL_MASK;
 
     if (reqptr->rev_channel & 0x80) // Revision is bit 7
     {
@@ -499,9 +527,16 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
         return IPMI_CC_OK;
     }
 
+    std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    if (ethdevice.empty())
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    auto channelConf = getChannelConfig(channel);
+
     if (reqptr->parameter == LAN_PARM_INPROGRESS)
     {
-        uint8_t buf[] = {current_revision, channelConfig.lan_set_in_progress};
+        uint8_t buf[] = {current_revision, channelConf->lan_set_in_progress};
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
     }
@@ -527,7 +562,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
         *data_len = sizeof(current_revision);
         memcpy(buf, &current_revision, *data_len);
 
-        if (getNetworkData(reqptr->parameter, &buf[1]) == IPMI_CC_OK)
+        if (getNetworkData(reqptr->parameter, &buf[1], channel) == IPMI_CC_OK)
         {
             if (reqptr->parameter == LAN_PARM_MAC)
             {
@@ -550,7 +585,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
 
         *data_len = sizeof(current_revision);
         memcpy(buf, &current_revision, *data_len);
-        if (getNetworkData(reqptr->parameter, &buf[1]) == IPMI_CC_OK)
+        if (getNetworkData(reqptr->parameter, &buf[1], channel) == IPMI_CC_OK)
         {
             *data_len = sizeof(buf);
             memcpy(response, &buf, *data_len);
@@ -561,7 +596,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
         uint8_t buff[ipmi::network::IPSRC_SIZE_BYTE + 1] = {};
         *data_len = sizeof(current_revision);
         memcpy(buff, &current_revision, *data_len);
-        if (getNetworkData(reqptr->parameter, &buff[1]) == IPMI_CC_OK)
+        if (getNetworkData(reqptr->parameter, &buff[1], channel) == IPMI_CC_OK)
         {
             *data_len = sizeof(buff);
             memcpy(response, &buff, *data_len);

@@ -161,7 +161,6 @@ namespace network
 
 constexpr auto ROOT = "/xyz/openbmc_project/network";
 constexpr auto SERVICE = "xyz.openbmc_project.Network";
-constexpr auto INTERFACE = "eth0";
 constexpr auto IP_TYPE = "ipv4";
 constexpr auto IPV4_PREFIX = "169.254";
 constexpr auto IPV6_PREFIX = "fe80";
