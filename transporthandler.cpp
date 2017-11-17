@@ -25,14 +25,6 @@ const int SIZE_MAC = 18; //xx:xx:xx:xx:xx:xx
 
 struct ChannelConfig_t channelConfig;
 
-const uint8_t SET_COMPLETE = 0;
-const uint8_t SET_IN_PROGRESS = 1;
-const uint8_t SET_COMMIT_WRITE = 2; //Optional
-const uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
-
-// Status of Set-In-Progress Parameter (# 0)
-uint8_t lan_set_in_progress = SET_COMPLETE;
-
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 namespace fs = std::experimental::filesystem;
@@ -53,7 +45,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_IP:
             {
                 std::string ipaddress;
-                if (lan_set_in_progress == SET_COMPLETE)
+                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -70,7 +62,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                         // nothing to do.
                     }
                 }
-                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
                 {
                     ipaddress = channelConfig.ipaddr;
                 }
@@ -84,7 +76,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             {
                 std::string networkInterfacePath;
 
-                if (lan_set_in_progress == SET_COMPLETE)
+                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -151,7 +143,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
 
                     memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
                 }
-                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
                 {
                    memcpy(data, &(channelConfig.ipsrc),
                           ipmi::network::IPSRC_SIZE_BYTE);
@@ -162,7 +154,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_SUBNET:
             {
                 unsigned long mask {};
-                if (lan_set_in_progress == SET_COMPLETE)
+                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -190,7 +182,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                     }
                     memcpy(data, &mask, ipmi::network::IPV4_ADDRESS_SIZE_BYTE);
                 }
-                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
                 {
                     inet_pton(AF_INET, channelConfig.netmask.c_str(),
                               reinterpret_cast<void*>(data));
@@ -203,7 +195,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             {
                 std::string gateway;
 
-                if (lan_set_in_progress == SET_COMPLETE)
+                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -229,7 +221,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                     }
 
                 }
-                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
                 {
                     gateway = channelConfig.gateway;
                 }
@@ -242,7 +234,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_MAC:
             {
                 std::string macAddress;
-                if (lan_set_in_progress == SET_COMPLETE)
+                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
                 {
                     auto macObjectInfo = ipmi::getDbusObject(
                                              bus,
@@ -259,7 +251,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                     macAddress = variant.get<std::string>();
 
                 }
-                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
                 {
                     macAddress = channelConfig.macAddress;
                 }
@@ -277,7 +269,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
             case LAN_PARM_VLAN:
             {
                 uint16_t vlanID {};
-                if (lan_set_in_progress == SET_COMPLETE)
+                if (channelConfig.lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
@@ -307,7 +299,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
 
                     memcpy(data, &vlanID, ipmi::network::VLAN_SIZE_BYTE);
                 }
-                else if (lan_set_in_progress == SET_IN_PROGRESS)
+                else if (channelConfig.lan_set_in_progress == SET_IN_PROGRESS)
                 {
                     memcpy(data, &(channelConfig.vlanID),
                            ipmi::network::VLAN_SIZE_BYTE);
@@ -449,7 +441,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
         {
             if (reqptr->data[0] == SET_COMPLETE)
             {
-                lan_set_in_progress = SET_COMPLETE;
+                channelConfig.lan_set_in_progress = SET_COMPLETE;
 
                 log<level::INFO>("Network data from Cache",
                                  entry("PREFIX=%s", channelConfig.netmask.c_str()),
@@ -462,7 +454,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             }
             else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
             {
-                lan_set_in_progress = SET_IN_PROGRESS;
+                channelConfig.lan_set_in_progress = SET_IN_PROGRESS;
             }
 
         }
@@ -509,7 +501,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
 
     if (reqptr->parameter == LAN_PARM_INPROGRESS)
     {
-        uint8_t buf[] = {current_revision, lan_set_in_progress};
+        uint8_t buf[] = {current_revision, channelConfig.lan_set_in_progress};
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
     }
