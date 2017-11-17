@@ -27,6 +27,11 @@ static const int LAN_PARM_SUBNET      = 6;
 static const int LAN_PARM_GATEWAY     = 12;
 static const int LAN_PARM_VLAN        = 20;
 
+const uint8_t SET_COMPLETE = 0;
+const uint8_t SET_IN_PROGRESS = 1;
+const uint8_t SET_COMMIT_WRITE = 2; //Optional
+const uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
+
 struct ChannelConfig_t
 {
     std::string ipaddr;
@@ -38,6 +43,7 @@ struct ChannelConfig_t
     // with phosphor-dbus interfaces.
     // vlan id is in 12 bits and the 16th bit is for enable mask.
     uint32_t vlanID = ipmi::network::VLAN_ID_MASK;
+    uint8_t lan_set_in_progress = SET_COMPLETE;
 
     void clear()
     {
@@ -47,5 +53,6 @@ struct ChannelConfig_t
         macAddress.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
+        lan_set_in_progress = SET_COMPLETE;
     }
 };
