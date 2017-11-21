@@ -57,10 +57,19 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                 {
                     try
                     {
-                        ipaddress = ipmi::getIPAddress(bus,
-                                                       ipmi::network::IP_INTERFACE,
-                                                       ipmi::network::ROOT,
-                                                       ipmi::network::IP_TYPE);
+                        auto ipObjectInfo = ipmi::getIPObject(
+                                bus,
+                                ipmi::network::IP_INTERFACE,
+                                ipmi::network::ROOT,
+                                ipmi::network::IP_TYPE);
+
+                        auto properties = ipmi::getAllDbusProperties(
+                                bus,
+                                ipObjectInfo.second,
+                                ipObjectInfo.first,
+                                ipmi::network::IP_INTERFACE);
+
+                        ipaddress = properties["Address"].get<std::string>();
 
                     }
                     // ignore the exception, as it is a valid condtion that
@@ -166,7 +175,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getDbusObject(
+                        auto ipObjectInfo = ipmi::getIPObject(
                                 bus,
                                 ipmi::network::IP_INTERFACE,
                                 ipmi::network::ROOT,
@@ -281,7 +290,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getDbusObject(
+                        auto ipObjectInfo = ipmi::getIPObject(
                                 bus,
                                 ipmi::network::IP_INTERFACE,
                                 ipmi::network::ROOT,

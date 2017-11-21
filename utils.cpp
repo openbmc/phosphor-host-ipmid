@@ -96,10 +96,10 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
 
 }
 
-std::string getIPAddress(sdbusplus::bus::bus& bus,
-                         const std::string& interface,
-                         const std::string& serviceRoot,
-                         const std::string& match)
+DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
+                           const std::string& interface,
+                           const std::string& serviceRoot,
+                           const std::string& match)
 {
     auto objectTree = getAllDbusObjects(bus, serviceRoot, interface, match);
 
@@ -110,7 +110,7 @@ std::string getIPAddress(sdbusplus::bus::bus& bus,
         elog<InternalFailure>();
     }
 
-    std::string ipaddress;
+    DbusObjectInfo objectInfo;
 
     for (auto& object : objectTree)
     {
@@ -121,10 +121,10 @@ std::string getIPAddress(sdbusplus::bus::bus& bus,
                            ipmi::network::IP_INTERFACE,
                            "Address");
 
-        ipaddress = std::move(variant.get<std::string>());
+        objectInfo =  std::make_pair(object.first, object.second.begin()->first);
 
         // if LinkLocalIP found look for Non-LinkLocalIP
-        if (ipmi::network::isLinkLocalIP(ipaddress))
+        if (ipmi::network::isLinkLocalIP(variant.get<std::string>()))
         {
             continue;
         }
@@ -132,11 +132,8 @@ std::string getIPAddress(sdbusplus::bus::bus& bus,
         {
             break;
         }
-
     }
-
-    return ipaddress;
-
+    return objectInfo;
 }
 
 Value getDbusProperty(sdbusplus::bus::bus& bus,
