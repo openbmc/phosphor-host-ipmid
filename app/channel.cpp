@@ -97,10 +97,11 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
 
                 // if the system is having ip object,then
                 // get the IP object.
-                ipObject = ipmi::getDbusObject(bus,
-                                               ipmi::network::IP_INTERFACE,
-                                               ipmi::network::ROOT,
-                                               ipmi::network::IP_TYPE);
+                ipObject = ipmi::getIPObject(
+                                bus,
+                                ipmi::network::IP_INTERFACE,
+                                ipmi::network::ROOT,
+                                ipmi::network::IP_TYPE);
 
                 // Get the parent interface of the IP object.
                 try
@@ -196,11 +197,8 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                             ipmi::network::IP_INTERFACE);
 
                     ipaddress = channelConfig.ipaddr.empty() ?
-                                ipmi::getIPAddress(bus,
-                                                   ipmi::network::IP_INTERFACE,
-                                                   ipmi::network::ROOT,
-                                                   ipmi::network::IP_TYPE) :
-                                channelConfig.ipaddr;
+                        properties["Address"].get<std::string>() :
+                        channelConfig.ipaddr;
 
                     prefix = channelConfig.netmask.empty() ?
                         properties["PrefixLength"].get<uint8_t>() :
