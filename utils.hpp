@@ -45,19 +45,19 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
                              const std::string& subtreePath = ROOT,
                              const std::string& match = {});
 
-/** @brief Gets the ipAddres of first dbus IP object of Non-LinkLocalIPAddress
+/** @brief Get the ipObject of first dbus IP object of Non-LinkLocalIPAddress
  *         type from the given subtree, if not available gets IP object of
  *         LinkLocalIPAddress type.
  *  @param[in] bus - DBUS Bus Object.
  *  @param[in] interface - Dbus interface.
  *  @param[in] subtreePath - subtree from where the search should start.
  *  @param[in] match - identifier for object.
- *  @return On success returns the ipAddress.
+ *  @return On success returns the object having objectpath and servicename.
  */
-std::string getIPAddress(sdbusplus::bus::bus& bus,
-                         const std::string& interface,
-                         const std::string& subtreePath,
-                         const std::string& match);
+DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
+                           const std::string& interface,
+                           const std::string& subtreePath,
+                           const std::string& match);
 
 /** @brief Gets the value associated with the given object
  *         and the interface.
