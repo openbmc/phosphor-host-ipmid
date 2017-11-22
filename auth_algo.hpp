@@ -92,6 +92,27 @@ class Interface
         std::vector<uint8_t> virtual generateICV(
             const std::vector<uint8_t>& input) const = 0;
 
+        /**
+         * @brief Check if the Authentication algorithm is supported
+         *
+         * @param[in] algo - authentication algorithm
+         *
+         * @return true if algorithm is supported else false
+         *
+         */
+        static bool isAlgorithmSupported(Algorithms algo)
+        {
+            if (algo == Algorithms::RAKP_NONE ||
+                algo == Algorithms::RAKP_HMAC_SHA1)
+            {
+               return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         // User Key is hardcoded to PASSW0RD till the IPMI User account
         // management is in place.
         std::array<uint8_t, USER_KEY_MAX_LENGTH> userKey = {"0penBmc"};

@@ -64,7 +64,7 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
         }
         while (1);
 
-        // Set the Authentication Algorithm to RAKP_HMAC_SHA1
+        // Set the Authentication Algorithm
         switch (authAlgo)
         {
             case cipher::rakp_auth::Algorithms::RAKP_HMAC_SHA1:

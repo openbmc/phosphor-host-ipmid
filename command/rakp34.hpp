@@ -19,7 +19,6 @@ struct RAKP3request
     uint8_t rmcpStatusCode;
     uint16_t reserved;
     uint32_t managedSystemSessionID;
-    uint8_t keyExchangeAuthCode[20];
 } __attribute__((packed));
 
 /**

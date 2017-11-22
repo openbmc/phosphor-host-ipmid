@@ -12,23 +12,6 @@ namespace cipher
 namespace crypt
 {
 
-Interface::Interface(const std::vector<uint8_t>& sik, const key& addKey)
-{
-    unsigned int mdLen = 0;
-
-    // Generated K2 for the confidentiality algorithm with the additional key
-    // keyed with SIK.
-    k2.resize(sik.size());
-    if (HMAC(EVP_sha1(), sik.data(), sik.size(), addKey.data(),
-             addKey.size(), k2.data(), &mdLen) == NULL)
-    {
-        throw std::runtime_error("Generating K2 for confidentiality algorithm"
-                                 "failed");
-    }
-}
-
-constexpr key AlgoAES128::const2;
-
 constexpr std::array<uint8_t, AlgoAES128::AESCBC128BlockSize - 1>
         AlgoAES128::confPadBytes;
 

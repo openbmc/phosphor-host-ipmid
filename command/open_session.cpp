@@ -19,8 +19,8 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     auto response = reinterpret_cast<OpenSessionResponse*>(outPayload.data());
 
     // Check for valid Authentication Algorithms
-    if (request->authAlgo != static_cast<uint8_t>
-        (cipher::rakp_auth::Algorithms::RAKP_HMAC_SHA1))
+    if (!cipher::rakp_auth::Interface::isAlgorithmSupported(
+                static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo)))
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_AUTH_ALGO);
@@ -28,8 +28,8 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     }
 
     // Check for valid Integrity Algorithms
-    if(!cipher::integrity::Interface::isAlgorithmSupported(static_cast
-                    <cipher::integrity::Algorithms>(request->intAlgo)))
+    if (!cipher::integrity::Interface::isAlgorithmSupported(
+                static_cast<cipher::integrity::Algorithms>(request->intAlgo)))
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_INTEGRITY_ALGO);
