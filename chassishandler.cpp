@@ -17,6 +17,7 @@
 #include <sstream>
 #include <array>
 #include <fstream>
+#include <future>
 #include <experimental/filesystem>
 #include <string>
 #include <map>
@@ -47,6 +48,7 @@ constexpr size_t SIZE_PREFIX = 7;
 constexpr size_t MAX_PREFIX_VALUE = 32;
 constexpr size_t SIZE_COOKIE = 4;
 constexpr size_t SIZE_VERSION = 2;
+constexpr size_t DEFAULT_IDENTIFY_TIME_OUT = 15;
 
 //PetiBoot-Specific
 static constexpr uint8_t net_conf_initial_bytes[] = {0x80, 0x21, 0x70, 0x62,
@@ -59,6 +61,9 @@ static constexpr size_t MAC_OFFSET = 9;
 static constexpr size_t ADDRTYPE_OFFSET = 16;
 static constexpr size_t IPADDR_OFFSET = 17;
 
+static std::unique_ptr<std::future<void>> ipmi_chassis_identify_future;
+static std::atomic_size_t ipmi_chassis_identify_ref_count(0);
+
 
 void register_netfn_chassis_functions() __attribute__((constructor));
 
@@ -67,6 +72,8 @@ void register_netfn_chassis_functions() __attribute__((constructor));
 const char *settings_object_name  =  "/org/openbmc/settings/host0";
 const char *settings_intf_name    =  "org.freedesktop.DBus.Properties";
 const char *host_intf_name        =  "org.openbmc.settings.Host";
+const char *identify_led_object_name =
+    "/xyz/openbmc_project/led/groups/enclosure_identify";
 
 constexpr auto SETTINGS_ROOT = "/";
 constexpr auto SETTINGS_MATCH = "host0";
@@ -1025,6 +1032,101 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ( (rc < 0) ? IPMI_CC_INVALID : IPMI_CC_OK);
 }
 
+ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
+{
+    if (*data_len > 2)
+    {
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    uint8_t identify_interval = *data_len > 0 ?
+                                (static_cast<uint8_t*>(request))[0] : DEFAULT_IDENTIFY_TIME_OUT;
+    uint8_t force_identify =
+        *data_len == 2 ? (static_cast<uint8_t*>(request))[1] & 0x01 : 0;
+
+    size_t ref_id = ++ipmi_chassis_identify_ref_count;
+
+    // lookup enclosure_identify group owner(s) in mapper
+    auto mapperCall = chassis::internal::dbus.new_method_call(
+                          ipmi::MAPPER_BUS_NAME,
+                          ipmi::MAPPER_OBJ,
+                          ipmi::MAPPER_INTF,
+                          "GetObject");
+
+    mapperCall.append(identify_led_object_name);
+    static const std::vector<std::string> interfaces =
+    {
+        "xyz.openbmc_project.Led.Group",
+        "org.freedesktop.DBus.Properties"
+    };
+    mapperCall.append(interfaces);
+    auto mapperReply = chassis::internal::dbus.call(mapperCall);
+    if (mapperReply.is_method_error())
+    {
+        fprintf(stderr, "Chassis Identify: Error communicating to mapper.");
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+    std::vector<std::pair<std::string, std::vector<std::string>>> mapperResp;
+    mapperReply.read(mapperResp);
+
+    for (auto& object : mapperResp)
+    {
+
+        std::string& connection = object.first;
+
+        if (identify_interval || force_identify)
+        {
+            auto ledOn = chassis::internal::dbus.new_method_call(
+                             connection.c_str(),
+                             identify_led_object_name,
+                             "org.freedesktop.DBus.Properties", "Set");
+            ledOn.append(
+                "xyz.openbmc_project.Led.Group", "Asserted",
+                sdbusplus::message::variant<bool>(
+                    true));
+            auto ledReply = chassis::internal::dbus.call(ledOn);
+            if (ledReply.is_method_error())
+            {
+                fprintf(stderr, "Chassis Identify: Error Setting State On\n");
+                return IPMI_CC_RESPONSE_ERROR;
+            }
+            if (force_identify)
+            {
+                return IPMI_CC_OK;
+            }
+        }
+
+        ipmi_chassis_identify_future = std::make_unique<std::future<void>>(
+                                           std::async(std::launch::async, [connection, identify_interval, ref_id]
+        {
+            std::this_thread::sleep_for(
+                std::chrono::seconds(identify_interval));
+
+            // another thread was started when we were asleep, exit
+            if (ref_id != ipmi_chassis_identify_ref_count)
+            {
+                return;
+            }
+            auto ledOff = chassis::internal::dbus.new_method_call(
+                connection.c_str(),
+                identify_led_object_name,
+                "org.freedesktop.DBus.Properties", "Set");
+            ledOff.append("xyz.openbmc_project.Led.Group", "Asserted",
+            sdbusplus::message::variant<bool>(
+                false));
+            auto ledReply = chassis::internal::dbus.call(ledOff);
+            if (ledReply.is_method_error())
+            {
+                fprintf(stderr, "Chassis Identify: Error Setting State Off\n");
+            }
+        }));
+    }
+    return IPMI_CC_OK;
+}
+
 namespace boot_options
 {
 
@@ -1376,6 +1478,11 @@ void register_netfn_chassis_functions()
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL);
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL, ipmi_chassis_control,
                            PRIVILEGE_OPERATOR);
+
+    // <Chassis Identify>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_CHASSIS, IPMI_CMD_CHASSIS_IDENTIFY);
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_IDENTIFY, NULL,
+                           ipmi_chassis_identify, PRIVILEGE_OPERATOR);
 
     // <Set System Boot Options>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS);
