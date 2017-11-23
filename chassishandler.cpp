@@ -71,6 +71,9 @@ const char *host_intf_name        =  "org.openbmc.settings.Host";
 constexpr auto SETTINGS_ROOT = "/";
 constexpr auto SETTINGS_MATCH = "host0";
 
+constexpr auto hostMACObjPath = "/xyz/openbmc_project/network/host0/intf";
+constexpr auto hostIPObjPath = "/xyz/openbmc_project/network/host0/intf/addr";
+
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 
@@ -276,38 +279,15 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
     try
     {
-        //TODO There may be cases where an interface is implemented by multiple
-        // objects,to handle such cases we are interested on that object
-        //  which are on interested busname.
-        //  Currenlty mapper doesn't give the readable busname(gives busid)
-        //  so we can't match with bus name so giving some object specific info
-        //  as SETTINGS_MATCH.
-        //  Later SETTINGS_MATCH will be replaced with busname.
-
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        auto ipObjectInfo = ipmi::getDbusObject(bus, IP_INTERFACE,
-                                                SETTINGS_ROOT, SETTINGS_MATCH);
+        auto service = ipmi::getService(bus, MAC_INTERFACE, hostMACObjPath);
 
-        auto macObjectInfo = ipmi::getDbusObject(bus, MAC_INTERFACE,
-                                                 SETTINGS_ROOT, SETTINGS_MATCH);
-
-        properties  = ipmi::getAllDbusProperties(bus, ipObjectInfo.second,
-                                            ipObjectInfo.first, IP_INTERFACE);
-        auto variant =
-            ipmi::getDbusProperty(bus, macObjectInfo.second,
-                                  macObjectInfo.first,
-                                  MAC_INTERFACE, "MACAddress");
-
-       auto ipAddress = properties["Address"].get<std::string>();
-
-        auto gateway = properties["Gateway"].get<std::string>();
-
-        auto prefix = properties["PrefixLength"].get<uint8_t>();
-
-        uint8_t isStatic = (properties["Origin"].get<std::string>() ==
-            "xyz.openbmc_project.Network.IP.AddressOrigin.Static")
-                ? 1 : 0;
+        auto variant = ipmi::getDbusProperty(bus,
+                                             service,
+                                             hostMACObjPath,
+                                             MAC_INTERFACE,
+                                             "MACAddress");
 
         auto MACAddress = variant.get<std::string>();
 
@@ -323,6 +303,23 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
             rc = -1;
             return rc;
         }
+
+        properties  = ipmi::getAllDbusProperties(bus,
+                                                 service,
+                                                 hostIPObjPath,
+                                                 IP_INTERFACE);
+
+
+        auto ipAddress = properties["Address"].get<std::string>();
+
+        auto gateway = properties["Gateway"].get<std::string>();
+
+        auto prefix = properties["PrefixLength"].get<uint8_t>();
+
+        uint8_t isStatic = (properties["Origin"].get<std::string>() ==
+            "xyz.openbmc_project.Network.IP.AddressOrigin.Static")
+                ? 1 : 0;
+
         // if addr is static then ipaddress,gateway,prefix
         // should not be default one,don't send blank override.
         if (isStatic)
