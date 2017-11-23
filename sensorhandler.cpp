@@ -488,6 +488,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus *bus = ipmid_get_sd_bus_connection();
     sd_bus_message *reply = NULL;
     int reading = 0;
+    char* assertion = NULL;
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
@@ -539,6 +540,39 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             resp->value         = (uint8_t)reading;
             resp->operation     = 0;
             resp->indication[0] = 0;
+            resp->indication[1] = 0;
+            break;
+
+        case 0xCA:
+            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "s");
+            if (r < 0) {
+                fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
+                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
+                        a.bus, a.path, a.interface);
+                break;
+            }
+
+            r = sd_bus_message_read(reply, "s", &assertion);
+            if (r < 0) {
+                fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
+                break;
+            }
+
+            printf("Contents of a PS Redundancy: %s\n", assertion);
+
+            rc = IPMI_CC_OK;
+            *data_len=sizeof(sensorreadingresp_t);
+
+            resp->value         = 0;
+            resp->operation     = 0;
+            if (strcmp(assertion,"Enabled") == 0)
+            {
+                resp->indication[0] = 0x02;
+            }
+            else
+            {
+                resp->indication[0] = 0x1;
+            }
             resp->indication[1] = 0;
             break;
 
