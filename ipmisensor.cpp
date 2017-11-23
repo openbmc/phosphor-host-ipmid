@@ -204,7 +204,8 @@ lookup_t g_ipmidbuslookup[] = {
 	{0x12, 0x02, set_sensor_dbus_state_system_event, "setValue", "", ""},
 	{0x12, 0x03, set_sensor_dbus_state_system_event, "setValue", "", ""},
 	{0x12, 0x04, set_sensor_dbus_state_system_event, "setValue", "", ""},
-	{0xD8, 0x00, set_sensor_dbus_state_simple,       "setValue", "Disabled", ""},
+	{0xCA, 0x00, set_sensor_dbus_state_simple,       "setValue", "Disabled", ""},
+        {0xCA, 0x01, set_sensor_dbus_state_simple,       "setValue", "Enabled", ""},
 	{0xFF, 0xFF, NULL, "", "", ""}
 };
 
