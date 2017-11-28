@@ -154,7 +154,7 @@ int set_sensor_dbus_state_system_event(const sensorRES_t *pRec, const lookup_t *
 					break;
 		case 0x01 : snprintf(p, sizeof(valuestring), "OEM Boot Event");
 					break;
-		case 0x02 : snprintf(p, sizeof(valuestring), "Undetermine System Hardware Failure");
+		case 0x02 : snprintf(p, sizeof(valuestring), "Undetermined System Hardware Failure");
 					break;
 		case 0x03 : snprintf(p, sizeof(valuestring), "System Failure see error log for more details (0x%02x)", pRec->event_data2);
 					break;
