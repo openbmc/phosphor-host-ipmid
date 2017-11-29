@@ -103,7 +103,8 @@ class Interface
         static bool isAlgorithmSupported(Algorithms algo)
         {
             if (algo == Algorithms::RAKP_NONE ||
-                algo == Algorithms::RAKP_HMAC_SHA1)
+                algo == Algorithms::RAKP_HMAC_SHA1 ||
+                algo == Algorithms::RAKP_HMAC_SHA256)
             {
                return true;
             }
@@ -170,6 +171,39 @@ class AlgoSHA1 : public Interface
         AlgoSHA1& operator=(const AlgoSHA1&) = default;
         AlgoSHA1(AlgoSHA1&&) = default;
         AlgoSHA1& operator=(AlgoSHA1&&) = default;
+
+        std::vector<uint8_t> generateHMAC(
+                const std::vector<uint8_t>& input) const override;
+
+        std::vector<uint8_t> generateICV(
+                const std::vector<uint8_t>& input) const override;
+};
+
+/**
+ * @class AlgoSHA256
+ *
+ * RAKP-HMAC-SHA256 specifies the use of RAKP messages for the key exchange
+ * portion of establishing the session, and that HMAC-SHA256 (per [FIPS 180-2]
+ * and [RFC4634] and is used to create a 32-byte Key Exchange Authentication
+ * Code fields in RAKP Message 2 and RAKP Message 3. HMAC-SHA256-128 (per
+ * [RFC4868]) is used for generating a 16-byte Integrity Check Value field for
+ * RAKP Message 4.
+ */
+
+class AlgoSHA256 : public Interface
+{
+    public:
+        static constexpr size_t integrityCheckValueLength = 16;
+
+        explicit AlgoSHA256(integrity::Algorithms intAlgo,
+                          crypt::Algorithms cryptAlgo) :
+                Interface(intAlgo, cryptAlgo) {}
+
+        ~AlgoSHA256() = default;
+        AlgoSHA256(const AlgoSHA256&) = default;
+        AlgoSHA256& operator=(const AlgoSHA256&) = default;
+        AlgoSHA256(AlgoSHA256&&) = default;
+        AlgoSHA256& operator=(AlgoSHA256&&) = default;
 
         std::vector<uint8_t> generateHMAC(
                 const std::vector<uint8_t>& input) const override;

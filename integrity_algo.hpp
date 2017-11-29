@@ -90,7 +90,9 @@ class Interface
          */
         static bool isAlgorithmSupported(Algorithms algo)
         {
-            if (algo == Algorithms::NONE || algo == Algorithms::HMAC_SHA1_96)
+            if (algo == Algorithms::NONE ||
+                algo == Algorithms::HMAC_SHA1_96 ||
+                algo == Algorithms::HMAC_SHA256_128)
             {
                return true;
             }
@@ -219,6 +221,91 @@ class AlgoSHA1 final : public Interface
          *
          * @param[in] input - pointer to the message
          * @param[in] length - length of the message
+         *
+         * @return on success returns the message authentication code
+         *
+         */
+        std::vector<uint8_t> generateHMAC(const uint8_t* input,
+                const size_t len) const;
+};
+
+/**
+ * @class AlgoSHA256
+ *
+ * @brief Implementation of the HMAC-SHA256-128 Integrity algorithm
+ *
+ * HMAC-SHA256-128 take the Session Integrity Key and use it to generate K1. K1
+ * is then used as the key for use in HMAC to produce the AuthCode field.  For
+ * “one-key” logins, the user’s key (password) is used in the creation of the
+ * Session Integrity Key. When the HMAC-SHA256-128 Integrity Algorithm is used
+ * the resulting AuthCode field is 16 bytes (128 bits).
+ */
+class AlgoSHA256 final : public Interface
+{
+    public:
+        static constexpr size_t SHA256_128_AUTHCODE_LENGTH = 16;
+
+        /**
+         * @brief Constructor for AlgoSHA256
+         *
+         * @param[in] - Session Integrity Key
+         */
+        explicit AlgoSHA256(const std::vector<uint8_t>& sik);
+
+        AlgoSHA256() = delete;
+        ~AlgoSHA256() = default;
+        AlgoSHA256(const AlgoSHA256&) = default;
+        AlgoSHA256& operator=(const AlgoSHA256&) = default;
+        AlgoSHA256(AlgoSHA256&&) = default;
+        AlgoSHA256& operator=(AlgoSHA256&&) = default;
+
+        /**
+         * @brief Verify the integrity data of the packet
+         *
+         * @param[in] packet - Incoming IPMI packet
+         * @param[in] length - Length of the data in the packet to calculate
+         *                     the integrity data
+         * @param[in] integrityData - Iterator to the authCode in the packet
+         *
+         * @return true if authcode in the packet is equal to one generated
+         *         using integrity algorithm on the packet data, false otherwise
+         */
+        bool verifyIntegrityData(
+                const std::vector<uint8_t>& packet,
+                const size_t length,
+                std::vector<uint8_t>::const_iterator integrityData)
+            const override;
+
+        /**
+         * @brief Generate integrity data for the outgoing IPMI packet
+         *
+         * @param[in] packet - Outgoing IPMI packet
+         *
+         * @return on success return the integrity data for the outgoing IPMI
+         *         packet
+         */
+        std::vector<uint8_t> generateIntegrityData(
+                const std::vector<uint8_t>& packet) const override;
+
+        /**
+         * @brief Generate additional keying material based on SIK
+         *
+         * @param[in] sik - session integrity key
+         * @param[in] data - 20-byte Const_n
+         *
+         * @return on success returns the Kn based on HMAC-SHA256
+         *
+         */
+        std::vector<uint8_t> generateKn(
+                const std::vector<uint8_t>& sik,
+                const rmcp::Const_n& const_n) const;
+
+    private:
+        /**
+         * @brief Generate HMAC based on HMAC-SHA256-128 algorithm
+         *
+         * @param[in] input - pointer to the message
+         * @param[in] len - length of the message
          *
          * @return on success returns the message authentication code
          *

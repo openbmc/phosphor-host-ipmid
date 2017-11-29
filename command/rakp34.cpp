@@ -29,6 +29,13 @@ void applyIntegrityAlgo(const uint32_t bmcSessionID)
                         authAlgo->sessionIntegrityKey));
             break;
         }
+        case cipher::integrity::Algorithms::HMAC_SHA256_128:
+        {
+            session->setIntegrityAlgo(
+                std::make_unique<cipher::integrity::AlgoSHA256>(
+                        authAlgo->sessionIntegrityKey));
+            break;
+        }
         default:
             break;
     }
