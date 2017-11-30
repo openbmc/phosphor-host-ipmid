@@ -137,6 +137,8 @@ class Interface
 class AlgoSHA1 : public Interface
 {
     public:
+        static constexpr size_t integrityCheckValueLength = 12;
+
         explicit AlgoSHA1(integrity::Algorithms intAlgo,
                           crypt::Algorithms cryptAlgo) :
                 Interface(intAlgo, cryptAlgo) {}

@@ -37,6 +37,7 @@ std::vector<uint8_t> AlgoSHA1::generateICV(std::vector<uint8_t>& input) const
         std::cerr << "Generate Session Integrity Key failed\n";
         output.resize(0);
     }
+    output.resize(integrityCheckValueLength);
 
     return output;
 }
