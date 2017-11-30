@@ -74,7 +74,7 @@ class Interface
          *        needs to be set before this operation.
          */
         std::vector<uint8_t> virtual generateHMAC(
-            std::vector<uint8_t>& input) const = 0;
+            const std::vector<uint8_t>& input) const = 0;
 
         /**
          * @brief Generate the Integrity Check Value
@@ -90,7 +90,7 @@ class Interface
          *        hash operation needs to be set before this operation.
          */
         std::vector<uint8_t> virtual generateICV(
-            std::vector<uint8_t>& input) const = 0;
+            const std::vector<uint8_t>& input) const = 0;
 
         // User Key is hardcoded to PASSW0RD till the IPMI User account
         // management is in place.
@@ -150,11 +150,11 @@ class AlgoSHA1 : public Interface
         AlgoSHA1(AlgoSHA1&&) = default;
         AlgoSHA1& operator=(AlgoSHA1&&) = default;
 
-        std::vector<uint8_t> generateHMAC(std::vector<uint8_t>& input) const
-        override;
+        std::vector<uint8_t> generateHMAC(
+                const std::vector<uint8_t>& input) const override;
 
-        std::vector<uint8_t> generateICV(std::vector<uint8_t>& input) const
-        override;
+        std::vector<uint8_t> generateICV(
+                const std::vector<uint8_t>& input) const override;
 };
 
 }// namespace auth

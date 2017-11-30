@@ -8,7 +8,6 @@ namespace sol
 {
 
 using ConsoleBuffer = std::deque<uint8_t>;
-using Buffer = std::vector<uint8_t>;
 
 /** @class ConsoleData
  *
@@ -47,7 +46,7 @@ class ConsoleData
          *
          *  @param[in] input - data to be written to the console buffer.
          */
-        void write(const Buffer& input)
+        void write(const std::vector<uint8_t>& input)
         {
             data.insert(data.end(), input.begin(), input.end());
         }

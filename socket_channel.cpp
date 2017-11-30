@@ -19,12 +19,12 @@ std::string Channel::getRemoteAddress() const
     return std::string(tmp);
 }
 
-std::tuple<int, buffer> Channel::read()
+std::tuple<int, std::vector<uint8_t>> Channel::read()
 {
     int rc = 0;
     int readSize = 0;
     ssize_t readDataLen = 0;
-    buffer outBuffer(0);
+    std::vector<uint8_t> outBuffer(0);
 
     if (ioctl(sockfd, FIONREAD, &readSize) < 0)
     {
@@ -70,7 +70,7 @@ std::tuple<int, buffer> Channel::read()
     return std::make_tuple(rc, std::move(outBuffer));
 }
 
-int Channel::write(buffer& inBuffer)
+int Channel::write(const std::vector<uint8_t>& inBuffer)
 {
     int rc = 0;
     auto outputPtr = inBuffer.data();

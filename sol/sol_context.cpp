@@ -13,7 +13,7 @@ void Context::processInboundPayload(uint8_t seqNum,
                                     uint8_t ackSeqNum,
                                     uint8_t count,
                                     bool status,
-                                    const Buffer& input)
+                                    const std::vector<uint8_t>& input)
 {
     uint8_t respAckSeqNum = 0;
     uint8_t acceptedCount = 0;
@@ -127,7 +127,7 @@ void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
         std::get<eventloop::EventLoop&>(singletonPool).switchTimer
                 (payloadInstance, eventloop::Timers::ACCUMULATE, true);
 
-        Buffer outPayload(sizeof(Payload));
+        std::vector<uint8_t> outPayload(sizeof(Payload));
         auto response = reinterpret_cast<Payload*>(outPayload.data());
         response->packetSeqNum = 0;
         response->packetAckSeqNum = ackSeqNum;
@@ -204,7 +204,7 @@ void Context::resendPayload(bool clear)
     }
 }
 
-void Context::sendPayload(const Buffer& out) const
+void Context::sendPayload(const std::vector<uint8_t>& out) const
 {
     auto session = (std::get<session::Manager&>(singletonPool).getSession(
                     sessionID)).lock();

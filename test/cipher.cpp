@@ -51,7 +51,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
     }
 
     mdLen = 0;
-    cipher::integrity::Buffer output(SHA_DIGEST_LENGTH);
+    std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     size_t length = packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE;
 
     if (HMAC(EVP_sha1(), K1.data(), K1.size(),
@@ -102,7 +102,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
     }
 
     mdLen = 0;
-    cipher::integrity::Buffer output(SHA_DIGEST_LENGTH);
+    std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     size_t length = packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE;
 
     if (HMAC(EVP_sha1(), K1.data(), K1.size(),

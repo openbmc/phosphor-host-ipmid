@@ -18,7 +18,7 @@ std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
     auto request = reinterpret_cast<const Payload*>(inPayload.data());
     auto solDataSize = inPayload.size() - sizeof(Payload);
 
-    Buffer charData(solDataSize);
+    std::vector<uint8_t> charData(solDataSize);
     if( solDataSize > 0)
     {
         std::copy_n(inPayload.data() + sizeof(Payload),

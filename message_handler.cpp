@@ -187,7 +187,7 @@ void Handler::setChannelInSession() const
     session->channelPtr = channel;
 }
 
-void Handler::sendSOLPayload(const sol::Buffer& input)
+void Handler::sendSOLPayload(const std::vector<uint8_t>& input)
 {
     Message outMessage;
 

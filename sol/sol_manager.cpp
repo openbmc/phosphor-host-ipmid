@@ -52,7 +52,7 @@ void Manager::initHostConsoleFd()
     }
 }
 
-int Manager::writeConsoleSocket(const Buffer& input) const
+int Manager::writeConsoleSocket(const std::vector<uint8_t>& input) const
 {
     auto inBuffer = input.data();
     auto inBufferSize = input.size();

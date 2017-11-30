@@ -9,7 +9,8 @@ namespace cipher
 namespace integrity
 {
 
-Interface::Interface(const Buffer& sik, const Key& addKey, size_t authLength)
+Interface::Interface(const std::vector<uint8_t>& sik,
+                     const Key& addKey, size_t authLength)
 {
     unsigned int mdLen = 0;
 
@@ -25,9 +26,10 @@ Interface::Interface(const Buffer& sik, const Key& addKey, size_t authLength)
     authCodeLength = authLength;
 }
 
-Buffer AlgoSHA1::generateHMAC(const uint8_t* input, const size_t len) const
+std::vector<uint8_t> AlgoSHA1::generateHMAC(const uint8_t* input,
+        const size_t len) const
 {
-    Buffer output(SHA_DIGEST_LENGTH);
+    std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
 
     if (HMAC(EVP_sha1(), K1.data(), K1.size(), input, len,
@@ -45,9 +47,10 @@ Buffer AlgoSHA1::generateHMAC(const uint8_t* input, const size_t len) const
     return output;
 }
 
-bool AlgoSHA1::verifyIntegrityData(const Buffer& packet,
-                                   const size_t length,
-                                   Buffer::const_iterator integrityData) const
+bool AlgoSHA1::verifyIntegrityData(
+        const std::vector<uint8_t>& packet,
+        const size_t length,
+        std::vector<uint8_t>::const_iterator integrityData) const
 {
 
     auto output = generateHMAC(
@@ -59,7 +62,8 @@ bool AlgoSHA1::verifyIntegrityData(const Buffer& packet,
     return (std::equal(output.begin(), output.end(), integrityData));
 }
 
-Buffer AlgoSHA1::generateIntegrityData(const Buffer& packet) const
+std::vector<uint8_t> AlgoSHA1::generateIntegrityData(
+        const std::vector<uint8_t>& packet) const
 {
     return generateHMAC(
             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE,

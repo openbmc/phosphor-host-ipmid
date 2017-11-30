@@ -209,7 +209,7 @@ class Context
                                    uint8_t ackSeqNum,
                                    uint8_t count,
                                    bool status,
-                                   const Buffer& input);
+                                   const std::vector<uint8_t>& input);
 
         /** @brief Send the outbound SOL payload.
          *
@@ -242,7 +242,7 @@ class Context
          *  A copy of the SOL payload is kept here, so that when a retry needs
          *  to be attempted the payload is sent again.
          */
-        Buffer payloadCache;
+        std::vector<uint8_t> payloadCache;
 
         /**
          * @brief Send Response for Incoming SOL payload.
@@ -257,7 +257,7 @@ class Context
          *
          *  @param[in] out - buffer containing the SOL payload.
          */
-        void sendPayload(const Buffer& out) const;
+        void sendPayload(const std::vector<uint8_t>& out) const;
 };
 
 } // namespace sol

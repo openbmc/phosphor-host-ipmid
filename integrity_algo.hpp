@@ -10,7 +10,6 @@ namespace cipher
 namespace integrity
 {
 
-using Buffer = std::vector<uint8_t>;
 using Key = std::array<uint8_t, SHA_DIGEST_LENGTH>;
 
 /*
@@ -66,7 +65,7 @@ class Interface
          * @param[in] - Additional keying material to generate K1
          * @param[in] - AuthCode length
          */
-        explicit Interface(const Buffer& sik,
+        explicit Interface(const std::vector<uint8_t>& sik,
                            const Key& addKey,
                            size_t authLength);
 
@@ -88,9 +87,9 @@ class Interface
          *         using integrity algorithm on the packet data, false otherwise
          */
         bool virtual verifyIntegrityData(
-                const Buffer& packet,
+                const std::vector<uint8_t>& packet,
                 const size_t packetLen,
-                Buffer::const_iterator integrityData) const = 0;
+                std::vector<uint8_t>::const_iterator integrityData) const = 0;
 
         /**
          * @brief Generate integrity data for the outgoing IPMI packet
@@ -100,7 +99,8 @@ class Interface
          * @return authcode for the outgoing IPMI packet
          *
          */
-        Buffer virtual generateIntegrityData(const Buffer& input) const = 0;
+        std::vector<uint8_t> virtual generateIntegrityData(
+                const std::vector<uint8_t>& input) const = 0;
 
         /**
          * @brief Check if the Integrity algorithm is supported
@@ -157,7 +157,7 @@ class AlgoSHA1 final : public Interface
          *
          * @param[in] - Session Integrity Key
          */
-        explicit AlgoSHA1(const Buffer& sik) :
+        explicit AlgoSHA1(const std::vector<uint8_t>& sik) :
             Interface(sik, const1, SHA1_96_AUTHCODE_LENGTH) {}
 
         AlgoSHA1() = delete;
@@ -179,9 +179,10 @@ class AlgoSHA1 final : public Interface
          *         using integrity algorithm on the packet data, false otherwise
          */
         bool verifyIntegrityData(
-                const Buffer& packet,
+                const std::vector<uint8_t>& packet,
                 const size_t length,
-                Buffer::const_iterator integrityData) const override;
+                std::vector<uint8_t>::const_iterator integrityData)
+            const override;
 
         /**
          * @brief Generate integrity data for the outgoing IPMI packet
@@ -191,7 +192,8 @@ class AlgoSHA1 final : public Interface
          * @return on success return the integrity data for the outgoing IPMI
          *         packet
          */
-        Buffer generateIntegrityData(const Buffer& packet) const override;
+        std::vector<uint8_t> generateIntegrityData(
+                const std::vector<uint8_t>& packet) const override;
 
     private:
         /**
@@ -203,7 +205,8 @@ class AlgoSHA1 final : public Interface
          * @return on success returns the message authentication code
          *
          */
-        Buffer generateHMAC(const uint8_t* input, const size_t len) const;
+        std::vector<uint8_t> generateHMAC(const uint8_t* input,
+                const size_t len) const;
 };
 
 }// namespace integrity

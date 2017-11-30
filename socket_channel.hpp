@@ -10,7 +10,6 @@
 namespace udpsocket
 {
 
-using buffer = std::vector<uint8_t>;
 /** @class Channel
  *
  *  @brief Provides encapsulation for UDP socket operations like Read, Peek,
@@ -79,7 +78,7 @@ class Channel
          *         In case of error, the return code is < 0 and vector is set
          *         to size 0.
          */
-        std::tuple<int, buffer> read();
+        std::tuple<int, std::vector<uint8_t>> read();
 
         /**
          *  @brief Write the outgoing packet
@@ -92,7 +91,7 @@ class Channel
          *  @return In case of success the return code is 0 and return code is
          *          < 0 in case of failure.
          */
-        int write(buffer& inBuffer);
+        int write(const std::vector<uint8_t>& inBuffer);
 
         /**
          * @brief Returns file descriptor for the socket

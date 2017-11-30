@@ -68,7 +68,7 @@ class Handler
          *
          *  @param[in] input - SOL Payload
          */
-        void sendSOLPayload(const sol::Buffer& input);
+        void sendSOLPayload(const std::vector<uint8_t>& input);
 
         /** @brief Send the unsolicited IPMI payload to the remote console.
          *
