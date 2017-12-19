@@ -176,6 +176,17 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                     ipmi::network::ETHERNET_INTERFACE,
                     "DHCPEnabled").get<bool>();
 
+            // if interface mode is not given then get the interface mode
+            // from the system so that it can be applied later.
+            if (channelConf->ipsrc == ipmi::network::IPOrigin::UNSPECIFIED)
+            {
+                channelConf->ipsrc = ipmi::network::IPOrigin::STATIC;
+                if(enableDHCP)
+                {
+                    channelConf->ipsrc = ipmi::network::IPOrigin::DHCP;
+                }
+            }
+
             // check whether user has given all the data
             // or the configured system interface is dhcp enabled,
             // in both of the cases get the values from the cache.
@@ -188,18 +199,6 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                 ipaddress = channelConf->ipaddr;
                 prefix = ipmi::network::toPrefix(AF_INET, channelConf->netmask);
                 gateway = channelConf->gateway;
-                if (channelConf->vlanID != ipmi::network::VLAN_ID_MASK)
-                {
-                    //get the first twelve bits which is vlan id
-                    //not interested in rest of the bits.
-                    channelConf->vlanID = le32toh(channelConf->vlanID);
-                    vlanID = channelConf->vlanID & ipmi::network::VLAN_ID_MASK;
-                }
-                else
-                {
-                    vlanID = ipmi::network::getVLAN(networkInterfacePath);
-                }
-
             }
             else // asked ip src = static and configured system src = static
                 // or partially given data.
