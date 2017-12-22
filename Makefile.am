@@ -15,7 +15,8 @@ BUILT_SOURCES = \
                ipmiwhitelist.cpp \
                sensor-gen.cpp \
                inventory-sensor-gen.cpp \
-               fru-read-gen.cpp
+               fru-read-gen.cpp \
+               channel-gen.cpp
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -45,6 +46,9 @@ inventory-sensor-gen.cpp:
 
 fru-read-gen.cpp:
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
+
+channel-gen.cpp:
+	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
 libapphandlerdir = ${libdir}/ipmid-providers
 libapphandler_LTLIBRARIES = libapphandler.la
