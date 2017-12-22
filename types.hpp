@@ -181,6 +181,7 @@ using InvObjectIDMap = std::map<InventoryPath, SelData>;
 
 namespace network
 {
+using ChannelEthMap = std::map<int, std::string>;
 
 constexpr auto MAC_ADDRESS_FORMAT = "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx";
 constexpr auto IP_ADDRESS_FORMAT = "%u.%u.%u.%u";
