@@ -29,6 +29,11 @@ constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
 constexpr auto app_ifc = "org.openbmc.NetworkManager";
 constexpr auto app_nwinterface = "eth0";
 
+constexpr auto bmc_interface = "xyz.openbmc_project.Inventory.Item.Bmc";
+constexpr auto bmc_guid_interface = "xyz.openbmc_project.Common.UUID";
+constexpr auto bmc_guid_property = "UUID";
+constexpr auto bmc_guid_len = 16;
+
 void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace phosphor::logging;
@@ -416,6 +421,71 @@ ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    try
+    {
+        // Get the Inventory object implementing BMC interface
+        ipmi::DbusObjectInfo bmcObject =
+            ipmi::getDbusObject(bus, bmc_interface);
+
+        // Read UUID property value from bmcObject
+        // UUID is in RFC4122 format Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
+        auto variant = ipmi::getDbusProperty(
+                bus, bmcObject.second, bmcObject.first, bmc_guid_interface,
+                bmc_guid_property);
+        std::string guidProp = variant.get<std::string>();
+
+        // Erase "-" characters from the property value
+        guidProp.erase(std::remove(guidProp.begin(), guidProp.end(), '-'),
+                guidProp.end());
+
+        auto guidPropLen = guidProp.length();
+        // Validate UUID data
+        // Divide by 2 as 1 byte is built from 2 chars
+        if ( (guidPropLen <=0) || ((guidPropLen/2) != bmc_guid_len) )
+
+        {
+            log<level::ERR>("Invalid UUID property value",
+                    entry("UUID_LENGTH=%d", guidPropLen));
+            return IPMI_CC_RESPONSE_ERROR;
+        }
+
+        // Convert data in RFC4122(MSB) format to LSB format
+        // Get 2 characters at a time as 1 byte is built from 2 chars and
+        // convert to hex byte
+        // TODO: Data printed for GUID command is not as per the
+        // GUID format defined in IPMI specification 2.0 section 20.8
+        // Ticket raised: https://sourceforge.net/p/ipmitool/bugs/501/
+        uint8_t respGuid[bmc_guid_len];
+        for (size_t i = 0, respLoc = (bmc_guid_len - 1);
+            i < guidPropLen && respLoc >= 0; i += 2, respLoc--)
+        {
+            auto value = static_cast<uint8_t>(
+                    std::stoi(guidProp.substr(i, 2).c_str(), NULL, 16));
+            respGuid[respLoc] = value;
+        }
+
+        *data_len = bmc_guid_len;
+        memcpy(response, &respGuid, bmc_guid_len);
+    }
+    catch (const InternalFailure& e)
+    {
+        log<level::ERR>("Failed in reading BMC UUID property",
+                        entry("INTERFACE=%s", bmc_interface),
+                        entry("PROPERTY_INTERFACE=%s", bmc_guid_interface),
+                        entry("PROPERTY=%s", bmc_guid_property));
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return rc;
+}
+
 void register_netfn_app_functions()
 {
     // <Get BT Interface Capabilities>
@@ -474,6 +544,10 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info,
                            PRIVILEGE_USER);
 
+    // <Get System GUID Command>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_SYS_GUID);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL, ipmi_app_get_sys_guid,
+                           PRIVILEGE_USER);
     return;
 }
 
