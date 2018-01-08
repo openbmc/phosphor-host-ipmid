@@ -124,7 +124,8 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     int r = 0;
     char *busname = NULL;
 
-    // Current time interval that is set in watchdog.
+    // Current properties of the watchdog daemon.
+    bool enabled = false;
     uint64_t interval = 0;
 
     // Status code.
@@ -139,6 +140,34 @@ ipmi_ret_t ipmi_app_reset_watchdog(
                 objname, strerror(-r));
         goto finish;
     }
+
+    // Check if our watchdog is running
+    r = sd_bus_call_method(bus, busname, objname, property_iface,
+                           "Get", &error, &reply, "ss",
+                           iface, "Enabled");
+    if(r < 0) {
+        fprintf(stderr, "Failed to get current Enabled msg: %s\n",
+                strerror(-r));
+        goto finish;
+    }
+
+    // Now extract the value
+    r = sd_bus_message_read(reply, "v", "b", &enabled);
+    if (r < 0) {
+        fprintf(stderr, "Failed to read current Enabled: %s\n",
+                strerror(-r));
+        goto finish;
+    }
+
+    // If we are not enable we should indicate that
+    if (!enabled) {
+        printf("Watchdog not enabled during reset\n");
+        rc = IPMI_WDOG_CC_NOT_INIT;
+        goto finish;
+    }
+
+    sd_bus_error_free(&error);
+    reply = sd_bus_message_unref(reply);
 
     // Get the current interval and set it back.
     r = sd_bus_call_method(bus, busname, objname, property_iface,
