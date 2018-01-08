@@ -29,6 +29,11 @@ constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
 constexpr auto app_ifc = "org.openbmc.NetworkManager";
 constexpr auto app_nwinterface = "eth0";
 
+constexpr auto bmcInterface = "xyz.openbmc_project.Inventory.Item.Bmc";
+constexpr auto bmcUUIDInterface = "xyz.openbmc_project.Common.UUID";
+constexpr auto bmcUUIDProperty = "UUID";
+constexpr auto bmcUUIDLen = 16;
+
 void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace phosphor::logging;
@@ -416,6 +421,61 @@ ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    try
+    {
+        // Get the Inventory object implementing Bmc interface
+        ipmi::DbusObjectInfo bmcObject;
+        bmcObject = std::move(ipmi::getDbusObject(bus, bmcInterface));
+    
+        auto uuidPropMap = ipmi::getAllDbusProperties(
+                bus, bmcObject.second, bmcObject.first, bmcUUIDInterface);
+        std::string uuid = uuidPropMap[bmcUUIDProperty].get<std::string>();
+
+        // UUID is in RFC4122 format. 
+        // Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
+        // Erase "-" characters
+        std::size_t found = uuid.find_first_of("-");
+        while (found!=std::string::npos)
+        {
+            uuid.erase(found,1);
+            found=uuid.find_first_of("-",found+1);
+        }
+        
+        // Read the values and update the respones buffer
+        uint8_t resp_uuid[bmcUUIDLen];
+        int len = uuid.length();
+        for (auto i = 0, resp_loc = bmcUUIDLen - 1;
+            i < len  && resp_loc >= 0; i += 2, resp_loc--)
+        {
+            auto value = std::stoi(uuid.substr(i, 2).c_str(), NULL, 16);
+            memcpy(reinterpret_cast<void*>(&resp_uuid[resp_loc]), &value, 1);
+        }
+        
+        // Data length
+        *data_len = bmcUUIDLen;
+
+        // Pack the actual response
+        memcpy(response, &resp_uuid, *data_len);
+    }
+    catch(const InternalFailure& e )
+    {
+        log<level::ERR>("Failed in reading BMC UUID property",
+                        entry("INTERFACE=%s", bmcInterface),
+                        entry("PROPERTY_INTERFACE=%s", bmcUUIDInterface),
+                        entry("PROPERTY=%s", bmcUUIDProperty));
+        return IPMI_CC_UNSPECIFIED_ERROR;    
+    }
+    return rc;
+}
+
 void register_netfn_app_functions()
 {
     // <Get BT Interface Capabilities>
@@ -474,6 +534,10 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info,
                            PRIVILEGE_USER);
 
+    // <Get System GUID Command>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_SYS_GUID);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL, ipmi_app_get_sys_guid,
+                           PRIVILEGE_USER);
     return;
 }
 
