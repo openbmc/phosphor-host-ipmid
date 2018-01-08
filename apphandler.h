@@ -14,6 +14,7 @@ enum ipmi_netfn_app_cmds
     IPMI_CMD_RESET_WD               = 0x22,
     IPMI_CMD_SET_WD                 = 0x24,
     IPMI_CMD_GET_CAP_BIT            = 0x36,
+    IPMI_CMD_GET_SYS_GUID           = 0x37,
     IPMI_CMD_SET_CHAN_ACCESS        = 0x40,
     IPMI_CMD_GET_CHANNEL_ACCESS     = 0x41,
     IPMI_CMD_GET_CHAN_INFO          = 0x42,
