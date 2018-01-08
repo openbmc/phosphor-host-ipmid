@@ -13,6 +13,7 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <cstddef>
 #include <experimental/filesystem>
 
@@ -28,6 +29,10 @@ extern sd_bus *bus;
 constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
 constexpr auto app_ifc = "org.openbmc.NetworkManager";
 constexpr auto app_nwinterface = "eth0";
+
+constexpr auto BMC_INTERFACE = "xyz.openbmc_project.Inventory.Item.Bmc";
+constexpr auto UUID_INTERFACE = "xyz.openbmc_project.Common.UUID";
+constexpr auto UUID_PROPERTY = "UUID";
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -416,6 +421,73 @@ ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+
+{
+    ipmi_ret_t rc = IPMI_CC_INVALID;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    // Get the BMC object implementing Bmc empty interface
+    auto bmcObject = ipmi::getDbusObject(bus, BMC_INTERFACE);
+    auto uuidPropMap = ipmi::getAllDbusProperties(
+            bus, bmcObject.second, bmcObject.first, UUID_INTERFACE);
+    std::string uuidProp = uuidPropMap[UUID_PROPERTY].get<std::string>();
+
+    // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
+    uuidProp = "61a39523-78f2-11e5-9862-e6402cfc3223";
+    // Get the UUID octects separated by dash
+    char* tokptr = NULL;
+    char * cstr = new char [uuidProp.length()+1];
+    std::strcpy (cstr, uuidProp.c_str());
+    char* id_octet = strtok_r(cstr, "-", &tokptr);
+    if (id_octet == NULL)
+    {
+        log<level::ERR>("Unexpected UUID format:",
+                        entry("UUID=%s", uuidProp));
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+
+    // Response is 16 hex bytes per IPMI Spec
+    const int resp_size = 16;
+
+    // Array to hold the formatted response
+    uint8_t resp_uuid[resp_size];
+
+    // Point resp end of array to save in reverse order
+    int resp_loc = resp_size-1;
+    while (id_octet != NULL)
+    {
+        // Calculate the octet string size since it varies
+        // Divide it by 2 for the array size since 1 byte is built from 2 chars
+        int tmp_size = strlen(id_octet)/2;
+        int i = 0;
+        for (i = 0; i < tmp_size; i++)
+        {
+            // Holder of the 2 chars that will become a byte
+            char tmp_array[3] = {0};
+            strncpy(tmp_array, id_octet, 2); // 2 chars at a time
+
+            // Convert to hex byte
+            int resp_byte = strtoul(tmp_array, NULL, 16);
+
+            // Copy end to first
+            memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1);
+            resp_loc--;
+            id_octet += 2; // Finished with the 2 chars, advance
+        }
+        id_octet = strtok_r(NULL, "-", &tokptr); // Get next octet
+    }
+
+    // Data length
+    *data_len = resp_size;
+
+    // Pack the actual response
+    memcpy(response, &resp_uuid, *data_len);
+    return rc;
+}
+
 void register_netfn_app_functions()
 {
     // <Get BT Interface Capabilities>
@@ -474,6 +546,10 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info,
                            PRIVILEGE_USER);
 
+    // <Get System GUID Command>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_SYS_GUID);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL, ipmi_app_get_sys_guid,
+                           PRIVILEGE_USER);
     return;
 }
 
