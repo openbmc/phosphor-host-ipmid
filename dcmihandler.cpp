@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <fstream>
+#include "nlohmann/json.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 using namespace phosphor::logging;
@@ -603,6 +605,80 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+dcmi::DCMICaps dcmiCaps = {
+ {1,{3,{{"PowerManagement",2,0,1},{"OOBSecondaryLan",3,2,1},
+     {"SerialTMODE",3,1,1},{"InBandSystemInterfaceChannel",3,0,1}}}},
+ {2,{5,{{"SELAutoRollOver",1,15,1},{"FlushEntireSELUponRollOver",1,14,1},
+     {"RecordLevelSELFlushUponRollOver",1,13,1},{"NumberOfSELEntries",1,0,12},
+     {"TempMonitoringSamplingFreq",5,0,8}}}},
+ {3,{2,{{"PowerMgmtDeviceSlaveAddress",1,1,7},{"BMCChannelNumber",2,4,4},
+     {"DeviceRivision",2,0,4}}}},
+ {4,{3,{{"MandatoryPrimaryLanOOBSupport",1,0,8},
+     {"OptionalSecondaryLanOOBSupport",2,0,8},
+     {"OptionalSerialOOBMTMODECapability",3,0,8}}}}
+};
+
+ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t data_len, ipmi_context_t context)
+{
+
+    const char* jsonFile = "/usr/share/ipmi-providers/dcmi_cap.json";
+
+    std::ifstream dcmiCapFile(jsonFile);
+    if (!dcmiCapFile.is_open())
+    {
+        log<level::ERR>("DCMI Capabilities file not found");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    auto data = nlohmann::json::parse(dcmiCapFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("DCMI Capabilities JSON parser failure");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    auto requestData = reinterpret_cast<const dcmi::GetDCMICapRequest*>
+                   (request);
+
+    auto caps = dcmiCaps.find(requestData->param);
+    if (caps == dcmiCaps.end())
+    {
+        log<level::ERR>("Invalid input parameter");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    auto responseData = reinterpret_cast<dcmi::GetDCMICapResponse*>
+            (response);
+
+    for (auto cap : caps->second.capList)
+    {
+        if ((cap.position / 8) || (cap.length > 8))
+        {
+            ((uint16_t *)responseData->data)[(cap.bytePosition - 1)/2] |=
+                data.value(cap.name.c_str(),0) << cap.position; 
+        }
+        else
+        {
+            responseData->data[cap.bytePosition - 1] |=
+                 data.value(cap.name.c_str(),0) << cap.position;
+        }
+    }
+
+    responseData->groupID = dcmi::groupExtId;
+    responseData->paramRevision = 2;
+    *data_len = 4 + caps->second.size;
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -653,6 +729,11 @@ void register_netfn_dcmi_functions()
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR,
         NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
 
+    // <Get DCMI capabilities>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+        NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
+        NULL, getDCMICapabilities, PRIVILEGE_USER);
     return;
 }
 // 956379
