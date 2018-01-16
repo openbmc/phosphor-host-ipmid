@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <fstream>
+#include <bitset>
+#include "nlohmann/json.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 using namespace phosphor::logging;
@@ -20,6 +23,11 @@ constexpr auto PCAP_INTERFACE = "xyz.openbmc_project.Control.Power.Cap";
 
 constexpr auto POWER_CAP_PROP = "PowerCap";
 constexpr auto POWER_CAP_ENABLE_PROP = "PowerCapEnable";
+
+constexpr auto DCMI_PARAMETER_REVISION = 2;
+constexpr auto DCMI_SPEC_MAJOR_VERSION = 1;
+constexpr auto DCMI_SPEC_MINOR_VERSION = 5;
+constexpr auto DCMI_CAP_JSON_FILE = "/usr/share/ipmi-providers/dcmi_cap.json";
 
 using namespace phosphor::logging;
 
@@ -603,6 +611,126 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+//List of the capabilities under each parameter
+dcmi::DCMICaps dcmiCaps =
+{
+//Supported DCMI Capabilities
+    {
+        dcmi::DCMICapParameters::SUPPORTED_DCMI_CAPS,
+        {
+            3, {{"PowerManagement", 2, 0, 1},
+                {"OOBSecondaryLan", 3, 2, 1},
+                {"SerialTMODE", 3, 1, 1},
+                {"InBandSystemInterfaceChannel", 3, 0, 1}
+            }
+        }
+    },
+//Mandatory Platform Attributes
+    {
+        dcmi::DCMICapParameters::MANDATORY_PLAT_ATTRIBUTES,
+        {
+            5, {{"SELAutoRollOver", 1, 15, 1},
+                {"FlushEntireSELUponRollOver", 1, 14, 1},
+                {"RecordLevelSELFlushUponRollOver", 1, 13, 1},
+                {"NumberOfSELEntries", 1, 0, 12},
+                {"TempMonitoringSamplingFreq", 5, 0, 8}
+            }
+        }
+    },
+//Optional Platform Attributes
+    {
+        dcmi::DCMICapParameters::OPTIONAL_PLAT_ATTRIBUTES,
+        {
+            2, {{"PowerMgmtDeviceSlaveAddress", 1, 1, 7},
+                {"BMCChannelNumber", 2, 4, 4},
+                {"DeviceRivision", 2, 0, 4}
+            }
+        }
+    },
+//Manageability Access Attributes
+    {
+        dcmi::DCMICapParameters::MANAGEABILITY_ACCESS_ATTRIBUTES,
+        {
+            3, {{"MandatoryPrimaryLanOOBSupport", 1, 0, 8},
+                {"OptionalSecondaryLanOOBSupport", 2, 0, 8},
+                {"OptionalSerialOOBMTMODECapability", 3, 0, 8}
+            }
+        }
+    }
+};
+
+ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                               ipmi_request_t request, ipmi_response_t response,
+                               ipmi_data_len_t data_len, ipmi_context_t context)
+{
+
+    std::ifstream dcmiCapFile(DCMI_CAP_JSON_FILE);
+    if (!dcmiCapFile.is_open())
+    {
+        log<level::ERR>("DCMI Capabilities file not found");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    auto data = nlohmann::json::parse(dcmiCapFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("DCMI Capabilities JSON parser failure");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    auto requestData = reinterpret_cast<const dcmi::GetDCMICapRequest*>
+                       (request);
+
+    //get list of capabilities in a parameter
+    auto caps =
+        dcmiCaps.find(static_cast<dcmi::DCMICapParameters>(requestData->param));
+    if (caps == dcmiCaps.end())
+    {
+        log<level::ERR>("Invalid input parameter");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    auto responseData = reinterpret_cast<dcmi::GetDCMICapResponse*>
+                        (response);
+
+    //For each capabilities in a parameter fill the data from
+    //the json file based on the capability name.
+    for (auto cap : caps->second.capList)
+    {
+        //If the data is beyond first byte boundary, insert in a
+        //16bit pattern for example number of SEL entries are represented
+        //in 12bits.
+        if ((cap.length + cap.position) > 8)
+        {
+            //Read the value corresponding to capability name and assign to
+            //16bit bitset.
+            std::bitset<16> val(data.value(cap.name.c_str(), 0));
+            val <<= cap.position;
+            reinterpret_cast<uint16_t*>(responseData->data)[
+                (cap.bytePosition - 1) / sizeof(uint16_t)] |= val.to_ulong();
+        }
+        else
+        {
+            responseData->data[cap.bytePosition - 1] |=
+                data.value(cap.name.c_str(), 0) << cap.position;
+        }
+    }
+
+    responseData->groupID = dcmi::groupExtId;
+    responseData->major = DCMI_SPEC_MAJOR_VERSION;
+    responseData->minor = DCMI_SPEC_MINOR_VERSION;
+    responseData->paramRevision = DCMI_PARAMETER_REVISION;
+    *data_len = sizeof(*responseData) + caps->second.size;
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -653,6 +781,9 @@ void register_netfn_dcmi_functions()
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR,
         NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
 
+    // <Get DCMI capabilities>
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
+        NULL, getDCMICapabilities, PRIVILEGE_USER);
     return;
 }
 // 956379
