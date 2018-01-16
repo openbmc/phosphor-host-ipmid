@@ -12,6 +12,7 @@ namespace dcmi
 enum Commands
 {
     // Get capability bits
+    GET_CAPABILITIES = 0x01,
     GET_POWER_LIMIT = 0x03,
     SET_POWER_LIMIT = 0x04,
     APPLY_POWER_LIMIT = 0x05,
@@ -257,6 +258,55 @@ struct SetMgmntCtrlIdStrResponse
     uint8_t groupID;            //!< Group extension identification.
     uint8_t offset;             //!< Last Offset Written.
 } __attribute__((packed));
+
+/** @struct GetDCMICapRequest
+ *
+ *  DCMI payload for Get capabilities cmd request.
+ */
+struct GetDCMICapRequest
+{
+    uint8_t groupID;
+    uint8_t param;
+} __attribute__((packed));
+
+/** @struct GetDCMICapRequest
+ *
+ *  DCMI payload for Get capabilities cmd response.
+ */
+struct GetDCMICapResponse
+{
+    uint8_t groupID;
+    uint8_t major;
+    uint8_t minor;
+    uint8_t paramRevision;
+    char data[];
+} __attribute__((packed));
+
+/** @struct DCMICap
+ *
+ *  DCMI capabilities protocol info.
+ */
+struct DCMICap
+{
+    std::string name;
+    uint8_t bytePosition;
+    uint8_t position;
+};
+
+using DCMICapList = std::vector<DCMICap>;
+
+/** @struct DCMICapEntry
+ *
+ *  DCMI capabilities list and size for each
+ *  parameter.
+ */
+struct DCMICapEntry
+{
+    uint8_t size;
+    DCMICapList capList;
+};
+
+using DCMICaps = std::map<uint8_t, DCMICapEntry>;
 
 } // namespace dcmi
 
