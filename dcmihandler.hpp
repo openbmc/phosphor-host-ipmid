@@ -12,6 +12,7 @@ namespace dcmi
 enum Commands
 {
     // Get capability bits
+    GET_CAPABILITIES = 0x01,
     GET_POWER_LIMIT = 0x03,
     SET_POWER_LIMIT = 0x04,
     APPLY_POWER_LIMIT = 0x05,
@@ -257,6 +258,67 @@ struct SetMgmntCtrlIdStrResponse
     uint8_t groupID;            //!< Group extension identification.
     uint8_t offset;             //!< Last Offset Written.
 } __attribute__((packed));
+
+/** @enum DCMICapParameters
+ *
+ * DCMI Capability parameters
+ */
+enum class DCMICapParameters
+{
+    SUPPORTED_DCMI_CAPS = 0x01,             //!< Supported DCMI Capabilities
+    MANDATORY_PLAT_ATTRIBUTES = 0x02,       //!< Mandatory Platform Attributes
+    OPTIONAL_PLAT_ATTRIBUTES = 0x03,        //!< Optional Platform Attributes
+    MANAGEABILITY_ACCESS_ATTRIBUTES = 0x04, //!< Manageability Access Attributes
+};
+
+/** @struct GetDCMICapRequest
+ *
+ *  DCMI payload for Get capabilities cmd request.
+ */
+struct GetDCMICapRequest
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t param;              //!< Capability parameter selector.
+} __attribute__((packed));
+
+/** @struct GetDCMICapRequest
+ *
+ *  DCMI payload for Get capabilities cmd response.
+ */
+struct GetDCMICapResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint8_t major;              //!< DCMI Specification Conformance - major ver
+    uint8_t minor;              //!< DCMI Specification Conformance - minor ver
+    uint8_t paramRevision;      //!< Parameter Revision = 02h
+    uint8_t data[];             //!< Capability array
+} __attribute__((packed));
+
+/** @struct DCMICap
+ *
+ *  DCMI capabilities protocol info.
+ */
+struct DCMICap
+{
+    std::string name;           //!< Name of DCMI capability.
+    uint8_t bytePosition;       //!< Starting byte number from DCMI spec.
+    uint8_t position;           //!< bit position from the DCMI spec.
+    uint8_t length;             //!< Length of the value from DCMI spec.
+};
+
+using DCMICapList = std::vector<DCMICap>;
+
+/** @struct DCMICapEntry
+ *
+ *  DCMI capabilities list and size for each parameter.
+ */
+struct DCMICapEntry
+{
+    uint8_t size;               //!< Size of capability array in bytes.
+    DCMICapList capList;        //!< List of capabilities for a parameter.
+};
+
+using DCMICaps = std::map<DCMICapParameters, DCMICapEntry>;
 
 } // namespace dcmi
 
