@@ -603,6 +603,14 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+            ipmi_request_t request, ipmi_response_t response,
+            ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    return IPMI_CC_OK;
+}
+
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -653,6 +661,11 @@ void register_netfn_dcmi_functions()
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR,
         NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
 
+    // <Get Power Reading>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+            NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING,
+                           NULL, getPowerReading, PRIVILEGE_USER);
     return;
 }
 // 956379
