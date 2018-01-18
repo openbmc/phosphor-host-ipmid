@@ -3,14 +3,15 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
+#include <nlohmann/json.hpp>
 #include "utils.hpp"
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <fstream>
 #include <bitset>
-#include "nlohmann/json.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
+#include "config.h"
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -28,6 +29,10 @@ constexpr auto DCMI_PARAMETER_REVISION = 2;
 constexpr auto DCMI_SPEC_MAJOR_VERSION = 1;
 constexpr auto DCMI_SPEC_MINOR_VERSION = 5;
 constexpr auto DCMI_CAP_JSON_FILE = "/usr/share/ipmi-providers/dcmi_cap.json";
+
+constexpr auto SENSOR_VALUE_INTF = "xyz.openbmc_project.Sensor.Value";
+constexpr auto SENSOR_VALUE_PROP = "Value";
+constexpr auto SENSOR_SCALE_PROP = "Scale";
 
 using namespace phosphor::logging;
 
@@ -731,6 +736,68 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+int64_t getPowerReading(sdbusplus::bus::bus& bus)
+{
+    std::ifstream sensorFile(POWER_READING_SENSOR);
+    std::string objectPath;
+    if (!sensorFile.is_open())
+    {
+        log<level::ERR>("Power reading configuration file not found",
+                    entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+        elog<InternalFailure>();
+    }
+
+    auto data = nlohmann::json::parse(sensorFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Error in parsing configuration file",
+                    entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+        elog<InternalFailure>();
+    }
+
+    objectPath = data.value("path", "");
+    if (objectPath.empty())
+    {
+        log<level::ERR>("Power sensor D-Bus object path is empty",
+                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+        elog<InternalFailure>();
+    }
+
+    auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
+
+    //Read the sensor value and scale properties
+    auto properties = ipmi::getAllDbusProperties(
+                            bus, service, objectPath, SENSOR_VALUE_INTF);
+    auto power = properties[SENSOR_VALUE_PROP].get<int64_t>();
+    auto scale = properties[SENSOR_SCALE_PROP].get<int64_t>();
+
+    // Power reading needs to be scaled with the Scale value using the formula
+    // Value * 10^Scale.
+    power *= std::pow(10, scale);
+
+    return power;
+}
+
+ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+            ipmi_request_t request, ipmi_response_t response,
+            ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    try
+    {
+        getPowerReading(bus);
+    }
+    catch (InternalFailure& e)
+    {
+        log<level::ERR>("Error in reading power sensor value",
+                        entry("INTERFACE=%s", SENSOR_VALUE_INTF),
+                        entry("PROPERTY=%s", SENSOR_VALUE_PROP));
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return rc;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -784,6 +851,10 @@ void register_netfn_dcmi_functions()
     // <Get DCMI capabilities>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
         NULL, getDCMICapabilities, PRIVILEGE_USER);
+
+    // <Get Power Reading>
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING,
+                           NULL, getPowerReading, PRIVILEGE_USER);
     return;
 }
 // 956379
