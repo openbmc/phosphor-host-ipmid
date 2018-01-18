@@ -12,6 +12,7 @@ namespace dcmi
 enum Commands
 {
     // Get capability bits
+    GET_POWER_READING = 0x02,
     GET_POWER_LIMIT = 0x03,
     SET_POWER_LIMIT = 0x04,
     APPLY_POWER_LIMIT = 0x05,
@@ -256,6 +257,37 @@ struct SetMgmntCtrlIdStrResponse
 {
     uint8_t groupID;            //!< Group extension identification.
     uint8_t offset;             //!< Last Offset Written.
+} __attribute__((packed));
+
+/** @struct GetPowerReadingRequest
+ *
+ *  DCMI Get Power Reading command request.
+ */
+struct GetPowerReadingRequest
+{
+    uint8_t groupID;        //!< Group extension identification.
+    uint8_t mode;           //!< Mode
+    uint8_t modeAttribute;  //!< Mode Attributes
+} __attribute__((packed));
+
+/** @struct GetPowerReadingResponse
+ *
+ *  DCMI payload for Get Power Limit command response.
+ */
+struct GetPowerReadingResponse
+{
+    uint8_t groupID;            //!< Group extension identification.
+    uint16_t currentPower;      //!< Current power in watts
+    uint16_t minimumPower;      //!< Minimum power over sampling duration
+                                //!< in watts
+    uint16_t maximumPower;      //!< Maximum power over sampling duration
+                                //!< in watts
+    uint16_t averagePower;      //!< Average power over sampling duration
+                                //!< in watts
+    uint32_t timeStamp;         //!< IPMI specification based time stamp
+    uint32_t timeFrame;         //!< Statistics reporting time period in milli
+                                //!< seconds.
+    uint8_t powerReadingState;  //!< Power Reading State
 } __attribute__((packed));
 
 } // namespace dcmi
