@@ -32,6 +32,7 @@ ipmi_ret_t ipmi_app_set_watchdog(
     sd_bus_message *reply = NULL;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     int r = 0;
+    ipmi_ret_t ret = IPMI_CC_UNSPECIFIED_ERROR;
 
     set_wd_data_t *reqptr = (set_wd_data_t*) request;
 
@@ -54,6 +55,7 @@ ipmi_ret_t ipmi_app_set_watchdog(
     if (r < 0) {
         fprintf(stderr, "Failed to get %s bus name: %s\n",
                 objname, strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
@@ -64,6 +66,7 @@ ipmi_ret_t ipmi_app_set_watchdog(
     if(r < 0) {
         fprintf(stderr, "Failed to disable Watchdog: %s\n",
                     strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
@@ -74,6 +77,7 @@ ipmi_ret_t ipmi_app_set_watchdog(
      */
     if (0 == reqptr->timer_action)
     {
+        ret = IPMI_CC_OK;
         goto finish;
     }
 
@@ -89,6 +93,7 @@ ipmi_ret_t ipmi_app_set_watchdog(
         if(r < 0) {
             fprintf(stderr, "Failed to set new expiration time: %s\n",
                     strerror(-r));
+            ret = IPMI_CC_BUSY;
             goto finish;
         }
 
@@ -99,16 +104,18 @@ ipmi_ret_t ipmi_app_set_watchdog(
         if(r < 0) {
             fprintf(stderr, "Failed to Enable Watchdog: %s\n",
                     strerror(-r));
+            ret = IPMI_CC_BUSY;
             goto finish;
         }
     }
 
+    ret = IPMI_CC_OK;
 finish:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
     free(busname);
 
-    return (r < 0) ? -1 : IPMI_CC_OK;
+    return ret;
 }
 
 ipmi_ret_t ipmi_app_reset_watchdog(
@@ -129,7 +136,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     uint64_t interval = 0;
 
     // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
+    ipmi_ret_t ret = IPMI_CC_UNSPECIFIED_ERROR;
     *data_len = 0;
 
     printf("WATCHDOG RESET\n");
@@ -138,6 +145,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     if (r < 0) {
         fprintf(stderr, "Failed to get %s bus name: %s\n",
                 objname, strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
@@ -148,6 +156,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     if(r < 0) {
         fprintf(stderr, "Failed to get current Enabled msg: %s\n",
                 strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
@@ -156,13 +165,14 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     if (r < 0) {
         fprintf(stderr, "Failed to read current Enabled: %s\n",
                 strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
     // If we are not enable we should indicate that
     if (!enabled) {
         printf("Watchdog not enabled during reset\n");
-        rc = IPMI_WDOG_CC_NOT_INIT;
+        ret = IPMI_WDOG_CC_NOT_INIT;
         goto finish;
     }
 
@@ -177,6 +187,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     if(r < 0) {
         fprintf(stderr, "Failed to get current Interval msg: %s\n",
                 strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
@@ -185,6 +196,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     if (r < 0) {
         fprintf(stderr, "Failed to read current interval: %s\n",
                 strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
@@ -198,13 +210,15 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     if(r < 0) {
         fprintf(stderr, "Failed to refresh the timer: %s\n",
                 strerror(-r));
+        ret = IPMI_CC_BUSY;
         goto finish;
     }
 
+    ret = IPMI_CC_OK;
 finish:
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
     free(busname);
 
-    return rc;
+    return ret;
 }
