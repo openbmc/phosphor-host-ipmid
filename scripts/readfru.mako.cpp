@@ -7,16 +7,19 @@ extern const FruMap frus = {
    {${key},{
 <%
     fru = fruDict[key]
+    entityID = fru['entityID']
+    entityInstance = fru['entityInstance']
+    objectPath = fru['path']
+    interfaces = fru['interfaces']
 %>
-    % for object,interfaces in fru.items():
-         {"${object}",{
-         % for interface,properties in interfaces.items():
-             {"${interface}",{
-            % if properties:
-                % for dbus_property,property_value in properties.items():
-                    {"${dbus_property}",{
-                        "${property_value.get("IPMIFruSection", "")}",
-                        "${property_value.get("IPMIFruProperty", "")}", \
+        ${entityID}, ${entityInstance}, "${objectPath}", {
+    % for interface,properties in interfaces.items():
+        {"${interface}",{
+        % if properties:
+            % for dbus_property,property_value in properties.items():
+                {"${dbus_property}",{
+                "${property_value.get("IPMIFruSection", "")}",
+                "${property_value.get("IPMIFruProperty", "")}", \
 <%
     delimiter = property_value.get("IPMIFruValueDelimiter")
     if not delimiter:
@@ -25,13 +28,12 @@ extern const FruMap frus = {
         delimiter = '\\' + hex(delimiter)[1:]
 %>
                      "${delimiter}"
-                 }},
-                % endfor
-            %endif
-             }},
-         % endfor
+                }},
+            % endfor
+        %endif
         }},
     % endfor
-   }},
+        }
+    }},
 % endfor
 };
