@@ -82,7 +82,7 @@ void processFruPropChange(sdbusplus::message::message& msg)
         auto& instanceList = fru.second;
         for (auto& instance : instanceList)
         {
-            if(instance.first == path)
+            if(instance.path == path)
             {
                 found = true;
                 break;
@@ -133,10 +133,10 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     auto& instanceList = iter->second;
     for (auto& instance : instanceList)
     {
-        for (auto& intf : instance.second)
+        for (auto& intf : instance.interfaces)
         {
             ipmi::PropertyMap allProp = readAllProperties(
-                    intf.first, instance.first);
+                    intf.first, instance.path);
             for (auto& properties : intf.second)
             {
                 auto iter = allProp.find(properties.first);
