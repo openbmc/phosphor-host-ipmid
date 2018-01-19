@@ -79,19 +79,14 @@ void processFruPropChange(sdbusplus::message::message& msg)
     {
         bool found = false;
         auto& fruId = fru.first;
-        auto& instanceList = fru.second;
-        for (auto& instance : instanceList)
+        auto& fruInfo = fru.second;
+        if (fruInfo.instancePath == path)
         {
-            if(instance.first == path)
+            if (found)
             {
-                found = true;
+                cache::fruMap.erase(fruId);
                 break;
             }
-        }
-        if (found)
-        {
-            cache::fruMap.erase(fruId);
-            break;
         }
     }
 }
@@ -130,13 +125,11 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     }
 
     FruInventoryData data;
-    auto& instanceList = iter->second;
-    for (auto& instance : instanceList)
-    {
-        for (auto& intf : instance.second)
+    auto& fruInfo = iter->second;
+        for (auto& intf : fruInfo.interfaces)
         {
             ipmi::PropertyMap allProp = readAllProperties(
-                    intf.first, instance.first);
+                    intf.first, fruInfo.instancePath);
             for (auto& properties : intf.second)
             {
                 auto iter = allProp.find(properties.first);
@@ -147,7 +140,6 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
                 }
             }
         }
-    }
     return data;
 }
 
