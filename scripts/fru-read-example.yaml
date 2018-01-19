@@ -11,7 +11,10 @@
 #       d-bus Properties
 #         IPMI Fru mapping
 0:
-  /system:
+  entityID: 200
+  entityInstance: 1
+  path: /system
+  interfaces:
     xyz.openbmc_project.Inventory.Item:
       PrettyName:
         IPMIFruProperty: Product Name
@@ -35,7 +38,10 @@
         IPMIFruSection: Product
     xyz.openbmc_project.Inventory.Item.System:
 1:
-  /system/chassis/motherboard/dimm0:
+  entityID: 8
+  entityInstance: 1
+  path: /system/chassis/motherboard/dimm0
+  interfaces:
     xyz.openbmc_project.Inventory.Item:
       PrettyName:
         IPMIFruProperty: Product Name
@@ -59,7 +65,10 @@
         IPMIFruSection: Product
     xyz.openbmc_project.Inventory.Item.Dimm:
 2:
-  /system/chassis/motherboard/dimm1:
+  entityID: 8
+  entityInstance: 2
+  path: /system/chassis/motherboard/dimm1
+  interfaces:
     xyz.openbmc_project.Inventory.Item:
       PrettyName:
         IPMIFruProperty: Product Name
@@ -83,7 +92,10 @@
         IPMIFruSection: Product
     xyz.openbmc_project.Inventory.Item.Dimm:
 3:
-  /system/chassis/motherboard/cpu0:
+  entityID: 3
+  entityInstance: 1
+  path: /system/chassis/motherboard/cpu0
+  interfaces:
     xyz.openbmc_project.Inventory.Item:
       PrettyName:
         IPMIFruProperty: Product Name
@@ -103,7 +115,10 @@
         IPMIFruSection: Board
     xyz.openbmc_project.Inventory.Item.Cpu:
 4:
-  /system/chassis/motherboard/cpu1:
+  entityID: 3
+  entityInstance: 2
+  path: /system/chassis/motherboard/cpu1
+  interfaces:
     xyz.openbmc_project.Inventory.Item:
       PrettyName:
         IPMIFruProperty: Product Name
