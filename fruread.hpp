@@ -21,7 +21,16 @@ using DbusInterface = std::string;
 using DbusInterfaceVec = std::vector<std::pair<DbusInterface, DbusPropertyVec>>;
 
 using FruInstancePath = std::string;
-using FruInstanceVec = std::vector<std::pair<FruInstancePath, DbusInterfaceVec>>;
+
+struct FruInstance
+{
+    uint8_t entityID;
+    uint8_t entityInstance;
+    FruInstancePath path;
+    DbusInterfaceVec interfaces;
+};
+
+using FruInstanceVec = std::vector<FruInstance>;
 
 using FruId = uint32_t;
 using FruMap = std::map<FruId, FruInstanceVec>;
