@@ -9,7 +9,7 @@ namespace ipmi
 namespace network
 {
 
-extern const ChannelEthMap ethdevices = {
+const ChannelEthMap ethdevices = {
 % for channel,channelInfo in interfaceDict.iteritems():
     {${channel},"${channelInfo['ifName']}"},
 % endfor

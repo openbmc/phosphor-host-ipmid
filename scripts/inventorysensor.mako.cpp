@@ -6,7 +6,7 @@
 #include "types.hpp"
 using namespace ipmi::sensor;
 
-extern const InvObjectIDMap invSensors = {
+const InvObjectIDMap invSensors = {
 % for key in sensorDict.iterkeys():
    % if key:
 {"${key}",

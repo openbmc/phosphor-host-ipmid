@@ -29,7 +29,7 @@ interfaceDict = {}
 
 using namespace ipmi::sensor;
 
-extern const IdInfoMap sensors = {
+const IdInfoMap sensors = {
 % for key in sensorDict.iterkeys():
    % if key:
 {${key},{
