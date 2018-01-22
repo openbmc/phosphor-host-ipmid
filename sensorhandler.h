@@ -39,6 +39,8 @@ int set_sensor_dbus_state_s(uint8_t , const char *, const char *);
 int set_sensor_dbus_state_y(uint8_t , const char *, const uint8_t);
 int find_openbmc_path(uint8_t , dbus_interface_t *);
 
+#define FRU_RECORD_ID_START 256
+
 /**
  * Get SDR Info
  */
@@ -108,7 +110,7 @@ inline uint8_t get_reservation_id(GetSdrReq* req)
     return (req->reservation_id_lsb + (req->reservation_id_msb << 8));
 };
 
-inline uint8_t get_record_id(GetSdrReq* req)
+inline uint16_t get_record_id(GetSdrReq* req)
 {
     return (req->record_id_lsb + (req->record_id_msb << 8));
 };
@@ -126,7 +128,7 @@ struct GetSdrResp
 namespace response
 {
 
-inline void set_next_record_id(int next, GetSdrResp* resp)
+inline void set_next_record_id(uint16_t next, GetSdrResp* resp)
 {
     resp->next_record_id_lsb = next & 0xff;
     resp->next_record_id_msb = (next >> 8) & 0xff;
@@ -157,7 +159,8 @@ inline void set_record_id(int id, SensorDataRecordHeader* hdr)
 
 enum SensorDataRecordType
 {
-    SENSOR_DATA_FULL_RECORD = 1,
+    SENSOR_DATA_FULL_RECORD = 0x1,
+    SENSOR_DATA_FRU_RECORD = 0x11,
 };
 
 // Record key
@@ -166,6 +169,14 @@ struct SensorDataRecordKey
     uint8_t owner_id;
     uint8_t owner_lun;
     uint8_t sensor_number;
+} __attribute__((packed));
+
+struct SensorDataFruRecordKey
+{
+    uint8_t deviceAddress;
+    uint8_t fruID;
+    uint8_t accessLun;
+    uint8_t channelNumber;
 } __attribute__((packed));
 
 namespace key
@@ -203,6 +214,8 @@ inline void set_owner_lun_channel(uint8_t channel, SensorDataRecordKey* key)
 
 // Body - full record
 #define FULL_RECORD_ID_STR_MAX_LENGTH 16
+#define FRU_RECORD_DEVICE_ID_MAX_LENGTH FULL_RECORD_ID_STR_MAX_LENGTH
+
 struct SensorDataFullRecordBody
 {
     uint8_t entity_id;
@@ -242,6 +255,18 @@ struct SensorDataFullRecordBody
     uint8_t oem_reserved;
     uint8_t id_string_info;
     char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
+} __attribute__((packed));
+
+struct SensorDataFruRecordBody
+{
+    uint8_t reserved;
+    uint8_t deviceType;
+    uint8_t deviceTypeModifier;
+    uint8_t entityID;
+    uint8_t entityInstance;
+    uint8_t oem;
+    uint8_t deviceIDLen;
+    char deviceID[FRU_RECORD_DEVICE_ID_MAX_LENGTH];
 } __attribute__((packed));
 
 namespace body
@@ -448,6 +473,29 @@ inline void set_id_type(uint8_t type, SensorDataFullRecordBody* body)
     body->id_string_info |= (type & 0x3)<<6;
 };
 
+// These below functions could be combined with above three functions
+// by passing the pointer of actual member of the structure instead
+// of passing the full structure pointer but that will break the uniformity
+// of the code and in near future we would be refactoring this piece of code.
+
+inline void set_device_id_strlen(uint8_t len, SensorDataFruRecordBody* body)
+{
+    body->deviceIDLen &= ~(0x1f);
+    body->deviceIDLen |= len & 0x1f;
+};
+
+inline uint8_t get_device_id_strlen( SensorDataFruRecordBody* body)
+{
+    return body->deviceIDLen & 0x1f;
+};
+
+inline void set_device_id_type(uint8_t type, SensorDataFruRecordBody* body)
+{
+    body->deviceIDLen &= ~(3<<6);
+    body->deviceIDLen |= (type & 0x3)<<6;
+};
+
+
 } // namespace body
 
 // More types contained in section 43.17 Sensor Unit Type Codes,
@@ -468,6 +516,13 @@ struct SensorDataFullRecord
     SensorDataRecordHeader header;
     SensorDataRecordKey key;
     SensorDataFullRecordBody body;
+} __attribute__((packed));
+
+struct SensorDataFruRecord
+{
+    SensorDataRecordHeader header;
+    SensorDataFruRecordKey key;
+    SensorDataFruRecordBody body;
 } __attribute__((packed));
 
 } // get_sdr
