@@ -259,6 +259,14 @@ struct SetMgmntCtrlIdStrResponse
     uint8_t offset;             //!< Last Offset Written.
 } __attribute__((packed));
 
+/** @brief Read power reading from occ sensor object
+ *
+ *  @param[in] bus - dbus connection
+ *
+ *  @return total power reading
+ */
+int64_t getPowerReading(sdbusplus::bus::bus& bus);
+
 /** @struct GetPowerReadingRequest
  *
  *  DCMI Get Power Reading command request.
