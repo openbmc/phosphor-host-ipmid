@@ -639,10 +639,23 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+    auto requestData = reinterpret_cast<const dcmi::GetPowerReadingRequest*>
+                   (request);
+    std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerReadingResponse));
+    auto responseData = reinterpret_cast<dcmi::GetPowerReadingResponse*>
+            (outPayload.data());
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    int64_t power = 0;
     try
     {
-        getPowerReading(bus);
+        power = getPowerReading(bus);
     }
     catch (InternalFailure& e)
     {
@@ -651,6 +664,18 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                         entry("PROPERTY=%s", SENSOR_VALUE_PROP));
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
+    responseData->groupID = dcmi::groupExtId;
+
+    // TODO: At present setting currentPower value to min max and avg power.
+    // TimeFrame, TimeStamp, PowerReadingState are not yet supported
+    uint16_t totalPower = static_cast<uint16_t>(power);
+    responseData->currentPower = totalPower;
+    responseData->minimumPower = totalPower;
+    responseData->maximumPower = totalPower;
+    responseData->averagePower = totalPower;
+
+    *data_len = outPayload.size();
+    memcpy(response, outPayload.data(), *data_len);
     return rc;
 }
 
