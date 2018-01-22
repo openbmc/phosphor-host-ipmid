@@ -383,7 +383,12 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
 
         if(r < 0) {
            response[0] = IPMI_CC_UNSPECIFIED_ERROR;
+           resplen = 0;
         }
+    }
+    else
+    {
+        resplen = resplen - 1; // first byte is for return code.
     }
 
     fprintf(ipmiio, "IPMI Response:\n");
@@ -391,7 +396,7 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
 
     // Send the response buffer from the ipmi command
     r = send_ipmi_message(m, sequence, netfn, lun, cmd, response[0],
-		    ((unsigned char *)response) + 1, resplen - 1);
+		    ((unsigned char *)response) + 1, resplen);
     if (r < 0) {
         fprintf(stderr, "Failed to send the response message\n");
         return -1;
