@@ -3,11 +3,14 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
+#include <nlohmann/json.hpp>
 #include "utils.hpp"
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <fstream>
 #include "xyz/openbmc_project/Common/error.hpp"
+#include "config.h"
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -22,6 +25,9 @@ constexpr auto POWER_CAP_PROP = "PowerCap";
 constexpr auto POWER_CAP_ENABLE_PROP = "PowerCapEnable";
 
 using namespace phosphor::logging;
+
+constexpr auto SENSOR_VALUE_INTF = "xyz.openbmc_project.Sensor.Value";
+constexpr auto SENSOR_VALUE_PROP = "Value";
 
 namespace dcmi
 {
@@ -603,11 +609,74 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+int64_t getPowerReading(sdbusplus::bus::bus& bus)
+{
+    std::ifstream sensorFile(POWER_READING_SENSOR);
+    std::string objectPath;
+    if (sensorFile.is_open())
+    {
+        auto data = nlohmann::json::parse(sensorFile, nullptr, false);
+        if (!data.is_discarded())
+        {
+            objectPath = data.value("path", "");
+        }
+    }
+    if(objectPath.empty())
+    {
+        log<level::ERR>("Error in reading power value",
+                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+        elog<InternalFailure>();
+    }
+
+    auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
+    auto value = ipmi::getDbusProperty(
+            bus, service, objectPath, SENSOR_VALUE_INTF, SENSOR_VALUE_PROP);
+    return value.get<int64_t>();
+}
+
 ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    return IPMI_CC_OK;
+    ipmi_ret_t rc = IPMI_CC_OK;
+    auto requestData = reinterpret_cast<const dcmi::GetPowerReadingRequest*>
+                   (request);
+    std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerReadingResponse));
+    auto responseData = reinterpret_cast<dcmi::GetPowerReadingResponse*>
+            (outPayload.data());
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    int64_t power = 0;
+    try
+    {
+        power = getPowerReading(bus);
+    }
+    catch (InternalFailure& e)
+    {
+        log<level::ERR>("Error in reading power value",
+                        entry("INTERFACE=%s", SENSOR_VALUE_INTF),
+                        entry("PROPERTY=%s", SENSOR_VALUE_PROP));
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    responseData->groupID = dcmi::groupExtId;
+
+    // TODO: At present setting currentPower value to min max and avg power.
+    // TimeFrame, TimeStamp, PowerReadingState are not yet supported
+    uint16_t totalPower = static_cast<uint16_t>(power);
+    responseData->currentPower = totalPower;
+    responseData->minimumPower = totalPower;
+    responseData->maximumPower = totalPower;
+    responseData->averagePower = totalPower;
+
+    *data_len = outPayload.size();
+    memcpy(response, outPayload.data(), *data_len);
+    return rc;
 }
 
 

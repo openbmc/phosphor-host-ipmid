@@ -146,6 +146,11 @@ AS_IF([test "x$CONTROL_HOST_OBJ_MGR" == "x"],
       [CONTROL_HOST_OBJ_MGR="/xyz/openbmc_project/control"])
 AC_DEFINE_UNQUOTED([CONTROL_HOST_OBJ_MGR], ["$CONTROL_HOST_OBJ_MGR"], [The Control Host D-Bus Object Manager])
 
+# Power reading sensors configuration file
+AC_ARG_VAR(POWER_READING_SENSOR, [Power reading sensor conf file])
+AS_IF([test "x$POWER_READING_SENSOR" == "x"],[POWER_READING_SENSOR="/tmp/power_reading.json"])
+AC_DEFINE_UNQUOTED([POWER_READING_SENSOR], ["$POWER_READING_SENSOR"], [Power eading sensor conf file])
+
 # Create configured output
 AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile softoff/test/Makefile])
 AC_OUTPUT
