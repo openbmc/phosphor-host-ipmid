@@ -63,3 +63,4 @@ Makefile
 /inventory-sensor-gen.cpp
 /fru-read-gen.cpp
 /app/*.lo
+/channel-gen.cpp
