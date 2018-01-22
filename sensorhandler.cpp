@@ -9,15 +9,23 @@
 #include "host-ipmid/ipmid-api.h"
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
+#include "fruread.hpp"
 #include "ipmid.hpp"
 #include "sensorhandler.h"
 #include "types.hpp"
 #include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
+static constexpr uint8_t fruInventoryDevice = 0x10;
+static constexpr uint8_t IPMIFruInventory = 0x02;
+static constexpr uint8_t BMCSlaveAddress = 0x20;
+
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;
 extern const ipmi::sensor::IdInfoMap sensors;
+extern const FruMap frus;
+
+
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
@@ -825,7 +833,7 @@ ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         get_sdr_info::request::get_count(request) == false)
     {
         // Get Sensor Count
-        resp->count = sensors.size();
+        resp->count = sensors.size() + frus.size();
     }
     else
     {
@@ -1009,6 +1017,95 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
     return IPMI_CC_OK;
 };
 
+ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
+                            ipmi_data_len_t data_len)
+{
+    auto req = reinterpret_cast<get_sdr::GetSdrReq*>(request);
+    auto resp = reinterpret_cast<get_sdr::GetSdrResp*>(response);
+    get_sdr::SensorDataFruRecord record {};
+
+    auto fru = frus.begin();
+    uint8_t fruID {};
+    auto recordID = get_sdr::request::get_record_id(req);
+
+    fruID = recordID - FRU_RECORD_ID_START;
+    fru = frus.find(fruID);
+    if (fru == frus.end())
+    {
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    /* Header */
+    get_sdr::header::set_record_id(recordID, &(record.header));
+    record.header.sdr_version = SDR_VERSION; // Based on IPMI Spec v2.0 rev 1.1
+    record.header.record_type = get_sdr::SENSOR_DATA_FRU_RECORD;
+    record.header.record_length = sizeof(record.key) + sizeof(record.body);
+
+    /* Key */
+    record.key.fruID = fruID;
+    record.key.accessLun |= IPMI_LOGICAL_FRU;
+    record.key.deviceAddress = BMCSlaveAddress;
+
+    /* Body */
+    record.body.entityID = fru->second[0].entityID;
+    record.body.entityInstance = fru->second[0].entityInstance;
+    record.body.deviceType = fruInventoryDevice;
+    record.body.deviceTypeModifier = IPMIFruInventory;
+
+    /* Device ID string */
+    auto deviceID = fru->second[0].path.substr(
+            fru->second[0].path.find_last_of('/') + 1,
+            fru->second[0].path.length());
+
+
+    if (deviceID.length() > get_sdr::FRU_RECORD_DEVICE_ID_MAX_LENGTH)
+    {
+        get_sdr::body::set_device_id_strlen(
+                get_sdr::FRU_RECORD_DEVICE_ID_MAX_LENGTH,
+                &(record.body));
+    }
+    else
+    {
+        get_sdr::body::set_device_id_strlen(deviceID.length(),
+                &(record.body));
+    }
+
+    strncpy(record.body.deviceID, deviceID.c_str(),
+            get_sdr::body::get_device_id_strlen(&(record.body)));
+
+    if (++fru == frus.end())
+    {
+        get_sdr::response::set_next_record_id(END_OF_RECORD, resp); // last record
+    }
+    else
+    {
+        get_sdr::response::set_next_record_id(
+                (FRU_RECORD_ID_START + fru->first), resp);
+    }
+
+    if (req->bytes_to_read > (sizeof(*resp) - req->offset))
+    {
+        *data_len = (sizeof(*resp) - req->offset);
+    }
+    else
+    {
+        *data_len =  req->bytes_to_read;
+    }
+
+    if (*data_len <= 0)
+    {
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    memcpy(resp->record_data,
+            reinterpret_cast<uint8_t*>(&record) + req->offset,
+            (*data_len));
+
+    *data_len += 2; // additional 2 bytes for next record ID
+
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             ipmi_request_t request, ipmi_response_t response,
                             ipmi_data_len_t data_len, ipmi_context_t context)
@@ -1022,13 +1119,25 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // Note: we use an iterator so we can provide the next ID at the end of
         // the call.
         auto sensor = sensors.begin();
+        auto recordID = get_sdr::request::get_record_id(req);
 
         // At the beginning of a scan, the host side will send us id=0.
-        if (get_sdr::request::get_record_id(req) != 0)
+        if (recordID != 0)
         {
-            sensor = sensors.find(get_sdr::request::get_record_id(req));
-            if(sensor == sensors.end()) {
-                return IPMI_CC_SENSOR_INVALID;
+            // recordID greater then 255,it means it is a FRU record.
+            // Currently we are supporting two record types either FULL record
+            // or FRU record.
+            if (recordID >= FRU_RECORD_ID_START)
+            {
+                return ipmi_fru_get_sdr(request, response, data_len);
+            }
+            else
+            {
+                sensor = sensors.find(recordID);
+                if (sensor == sensors.end())
+                {
+                    return IPMI_CC_SENSOR_INVALID;
+                }
             }
         }
 
@@ -1056,7 +1165,13 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         if (++sensor == sensors.end())
         {
-            get_sdr::response::set_next_record_id(0xFFFF, resp); // last record
+            // we have reached till end of sensor, so assign the next record id
+            // to 256(Max Sensor ID = 255) + FRU ID(may start with 0).
+            auto next_record_id = (frus.size()) ?
+                frus.begin()->first + FRU_RECORD_ID_START :
+                END_OF_RECORD;
+
+            get_sdr::response::set_next_record_id(next_record_id, resp);
         }
         else
         {

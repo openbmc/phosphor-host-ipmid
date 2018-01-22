@@ -16,6 +16,16 @@ enum ipmi_netfn_sen_cmds
     IPMI_CMD_GET_SENSOR_THRESHOLDS = 0x27,
 };
 
+/**
+ * @enum device_type
+ * IPMI FRU device types
+ */
+enum device_type
+{
+    IPMI_PHYSICAL_FRU = 0x00,
+    IPMI_LOGICAL_FRU = 0x80,
+};
+
 // Discrete sensor types.
 enum ipmi_sensor_types
 {
@@ -39,6 +49,11 @@ struct dbus_interface_t {
 int set_sensor_dbus_state_s(uint8_t , const char *, const char *);
 int set_sensor_dbus_state_y(uint8_t , const char *, const uint8_t);
 int find_openbmc_path(uint8_t , dbus_interface_t *);
+
+static const uint16_t FRU_RECORD_ID_START = 256;
+static const uint8_t SDR_VERSION = 0x51;
+static const uint16_t END_OF_RECORD = 0xFFFF;
+static const uint8_t LENGTH_MASK = 0x1F;
 
 /**
  * Get SDR Info
@@ -109,7 +124,7 @@ inline uint8_t get_reservation_id(GetSdrReq* req)
     return (req->reservation_id_lsb + (req->reservation_id_msb << 8));
 };
 
-inline uint8_t get_record_id(GetSdrReq* req)
+inline uint16_t get_record_id(GetSdrReq* req)
 {
     return (req->record_id_lsb + (req->record_id_msb << 8));
 };
@@ -127,7 +142,7 @@ struct GetSdrResp
 namespace response
 {
 
-inline void set_next_record_id(int next, GetSdrResp* resp)
+inline void set_next_record_id(uint16_t next, GetSdrResp* resp)
 {
     resp->next_record_id_lsb = next & 0xff;
     resp->next_record_id_msb = (next >> 8) & 0xff;
@@ -158,7 +173,8 @@ inline void set_record_id(int id, SensorDataRecordHeader* hdr)
 
 enum SensorDataRecordType
 {
-    SENSOR_DATA_FULL_RECORD = 1,
+    SENSOR_DATA_FULL_RECORD = 0x1,
+    SENSOR_DATA_FRU_RECORD = 0x11,
 };
 
 // Record key
@@ -167,6 +183,18 @@ struct SensorDataRecordKey
     uint8_t owner_id;
     uint8_t owner_lun;
     uint8_t sensor_number;
+} __attribute__((packed));
+
+/** @struct SensorDataFruRecordKey
+ *
+ *  FRU Device Locator Record(key) - SDR Type 11
+ */
+struct SensorDataFruRecordKey
+{
+    uint8_t deviceAddress;
+    uint8_t fruID;
+    uint8_t accessLun;
+    uint8_t channelNumber;
 } __attribute__((packed));
 
 namespace key
@@ -219,6 +247,9 @@ struct GetSensorThresholdsResponse
 
 // Body - full record
 #define FULL_RECORD_ID_STR_MAX_LENGTH 16
+
+static const int FRU_RECORD_DEVICE_ID_MAX_LENGTH = 16;
+
 struct SensorDataFullRecordBody
 {
     uint8_t entity_id;
@@ -258,6 +289,22 @@ struct SensorDataFullRecordBody
     uint8_t oem_reserved;
     uint8_t id_string_info;
     char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
+} __attribute__((packed));
+
+/** @struct SensorDataFruRecordBody
+ *
+ *  FRU Device Locator Record(body) - SDR Type 11
+ */
+struct SensorDataFruRecordBody
+{
+    uint8_t reserved;
+    uint8_t deviceType;
+    uint8_t deviceTypeModifier;
+    uint8_t entityID;
+    uint8_t entityInstance;
+    uint8_t oem;
+    uint8_t deviceIDLen;
+    char deviceID[FRU_RECORD_DEVICE_ID_MAX_LENGTH];
 } __attribute__((packed));
 
 namespace body
@@ -464,6 +511,17 @@ inline void set_id_type(uint8_t type, SensorDataFullRecordBody* body)
     body->id_string_info |= (type & 0x3)<<6;
 };
 
+inline void set_device_id_strlen(uint8_t len, SensorDataFruRecordBody* body)
+{
+    body->deviceIDLen &= ~(LENGTH_MASK);
+    body->deviceIDLen |= len & LENGTH_MASK;
+};
+
+inline uint8_t get_device_id_strlen( SensorDataFruRecordBody* body)
+{
+    return body->deviceIDLen & LENGTH_MASK;
+};
+
 } // namespace body
 
 // More types contained in section 43.17 Sensor Unit Type Codes,
@@ -484,6 +542,17 @@ struct SensorDataFullRecord
     SensorDataRecordHeader header;
     SensorDataRecordKey key;
     SensorDataFullRecordBody body;
+} __attribute__((packed));
+
+/** @struct SensorDataFruRecord
+ *
+ *  FRU Device Locator Record - SDR Type 11
+ */
+struct SensorDataFruRecord
+{
+    SensorDataRecordHeader header;
+    SensorDataFruRecordKey key;
+    SensorDataFruRecordBody body;
 } __attribute__((packed));
 
 } // get_sdr
