@@ -630,6 +630,98 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+
+    const uint8_t NON_CRITICAL_LOW_MASK = 0x1;
+    const uint8_t NON_CRITICAL_HIGH_MASK = 0x8;
+    const uint8_t CRITICAL_LOW_MASK = 0x2;
+    const uint8_t CRITICAL_HIGH_MASK = 0x10;
+
+    constexpr auto WARNING_THRESHOLD_INTERFACE =
+        "xyz.openbmc_project.Sensor.Threshold.Warning";
+    constexpr auto CRITICAL_THRESHOLD_INTERFACE =
+        "xyz.openbmc_project.Sensor.Threshold.Critical";
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    uint8_t sensorNum = *(reinterpret_cast<uint8_t *>(request));
+
+    const auto iter = sensors.find(sensorNum);
+    if (iter == sensors.end())
+    {
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    const auto sensorInfo = iter->second;
+
+    get_sdr::GetSensorThresholdsResponse *responseData =
+        reinterpret_cast<get_sdr::GetSensorThresholdsResponse *>(response);
+
+    auto service = ipmi::getService(bus,
+                                    sensorInfo.sensorInterface,
+                                    sensorInfo.sensorPath);
+    responseData->validMask = 0;
+
+    try
+    {
+        auto thresholds = ipmi::getAllDbusProperties(bus,
+                                          service,
+                                          sensorInfo.sensorPath,
+                                          WARNING_THRESHOLD_INTERFACE);
+        auto warnLow = thresholds["WarningLow"].get<int64_t>();
+        auto warnHigh = thresholds["WarningHigh"].get<int64_t>();
+
+        responseData->lowerNonCitical = static_cast<uint8_t>((
+            warnLow - sensorInfo.scaledOffset)/
+                (sensorInfo.coefficientM ? sensorInfo.coefficientM : 1));
+        responseData->upperNonCritical = static_cast<uint8_t>((
+            warnHigh - sensorInfo.scaledOffset)/
+                (sensorInfo.coefficientM ? sensorInfo.coefficientM : 1));
+
+        //Mark non critcal values are valid.
+        responseData->validMask |= NON_CRITICAL_LOW_MASK;
+        responseData->validMask |= NON_CRITICAL_HIGH_MASK;
+    }
+    catch (InternalFailure& e)
+    {
+        //Mask if the property is not present
+        responseData->validMask &= ~(NON_CRITICAL_LOW_MASK);
+        responseData->validMask &= ~(NON_CRITICAL_HIGH_MASK);
+    }
+
+    try
+    {
+        auto thresholds = ipmi::getAllDbusProperties(bus,
+                                          service,
+                                          sensorInfo.sensorPath,
+                                          CRITICAL_THRESHOLD_INTERFACE);
+        auto critLow = thresholds["CriticalLow"].get<int64_t>();
+        auto critHigh = thresholds["CriticalHigh"].get<int64_t>();
+        responseData->lowerCritical = static_cast<uint8_t>((
+            critLow - sensorInfo.scaledOffset)/
+                (sensorInfo.coefficientM ? sensorInfo.coefficientM : 1));
+        responseData->upperNonCritical = static_cast<uint8_t>((
+            critHigh - sensorInfo.scaledOffset)/
+                (sensorInfo.coefficientM ? sensorInfo.coefficientM : 1));
+
+        //Mark critical values as valid.
+        responseData->validMask |= CRITICAL_LOW_MASK;
+        responseData->validMask |= CRITICAL_HIGH_MASK;
+    }
+    catch (InternalFailure& e)
+    {
+        //Mask critical values if the property is not presnet.
+        responseData->validMask &= ~(CRITICAL_LOW_MASK);
+        responseData->validMask &= ~(CRITICAL_HIGH_MASK);
+    }
+
+    *data_len = sizeof(get_sdr::GetSensorThresholdsResponse);
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
@@ -946,6 +1038,11 @@ void register_netfn_sen_functions()
            NETFUN_SENSOR, IPMI_CMD_GET_SDR);
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR,
                            nullptr, ipmi_sen_get_sdr,
+                           PRIVILEGE_USER);
+
+    // <Get Sensor Thresholds>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_THRESHOLDS,
+                           nullptr, ipmi_sen_get_sensor_thresholds,
                            PRIVILEGE_USER);
 
     return;
