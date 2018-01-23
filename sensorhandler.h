@@ -13,6 +13,7 @@ enum ipmi_netfn_sen_cmds
     IPMI_CMD_GET_SENSOR_READING = 0x2D,
     IPMI_CMD_GET_SENSOR_TYPE    = 0x2F,
     IPMI_CMD_SET_SENSOR         = 0x30,
+    IPMI_CMD_GET_SENSOR_THRESHOLDS = 0x27,
 };
 
 // Discrete sensor types.
@@ -205,6 +206,16 @@ inline void set_owner_lun_channel(uint8_t channel, SensorDataRecordKey* key)
 };
 
 } // namespace key
+
+/** @struct GetSensorThresholdsResponse
+ *
+ *  Response structure for Get Sensor Thresholds command
+ */
+struct GetSensorThresholdsResponse
+{
+    uint8_t validMask; //Indicates which values are valid
+    uint8_t data[6];   //Container for threshold values
+} __attribute__((packed));
 
 // Body - full record
 #define FULL_RECORD_ID_STR_MAX_LENGTH 16
