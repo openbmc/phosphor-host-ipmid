@@ -87,6 +87,17 @@ PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
                                  const std::string& objPath,
                                  const std::string& interface);
 
+/** @brief Gets all managed objects associated with the given object
+ *         and the interface.
+ *  @param[in] bus - DBUS Bus Object.
+ *  @param[in] service - Dbus service name.
+ *  @param[in] objPath - Dbus object path.
+ *  @return On success returns the map of name value pair.
+ */
+ObjectValueTree getManagedObjects(sdbusplus::bus::bus& bus,
+                                 const std::string& service,
+                                 const std::string& objPath);
+
 /** @brief Sets the property value of the given object.
  *  @param[in] bus - DBUS Bus Object.
  *  @param[in] service - Dbus service name.
