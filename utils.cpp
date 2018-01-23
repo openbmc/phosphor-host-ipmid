@@ -198,6 +198,31 @@ PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
     return properties;
 }
 
+ObjectValueTree getManagedObjects(sdbusplus::bus::bus& bus,
+                                 const std::string& service,
+                                 const std::string& objPath)
+{
+    ipmi::ObjectValueTree interfaces;
+
+    auto method = bus.new_method_call(
+                      service.c_str(),
+                      objPath.c_str(),
+                      "org.freedesktop.DBus.ObjectManager",
+                      "GetManagedObjects");
+
+    auto reply = bus.call(method);
+
+    if (reply.is_method_error())
+    {
+         log<level::ERR>("Failed to get managed objects",
+                         entry("PATH=%s", objPath.c_str()));
+         elog<InternalFailure>();
+    }
+
+    reply.read(interfaces);
+    return interfaces;
+}
+
 void setDbusProperty(sdbusplus::bus::bus& bus,
                      const std::string& service,
                      const std::string& objPath,
