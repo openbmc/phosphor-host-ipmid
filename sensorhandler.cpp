@@ -851,21 +851,22 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody *body,
         get_sdr::body::set_b_exp(info->exponentB, body);
         get_sdr::body::set_r_exp(scale, body);
 
-        /* ID string */
-        std::string id_string = info->sensorPath.substr(
-            info->sensorPath.find_last_of('/')+1, info->sensorPath.length());
         get_sdr::body::set_id_type(0b00, body); // 00 = unicode
-        if (id_string.length() > FULL_RECORD_ID_STR_MAX_LENGTH)
-        {
-            get_sdr::body::set_id_strlen(FULL_RECORD_ID_STR_MAX_LENGTH, body);
-        }
-        else
-        {
-            get_sdr::body::set_id_strlen(id_string.length(), body);
-        }
-        strncpy(body->id_string, id_string.c_str(),
-                get_sdr::body::get_id_strlen(body));
     }
+
+    /* ID string */
+    auto id_string = info->sensorNameFunc(*info);
+
+    if (id_string.length() > FULL_RECORD_ID_STR_MAX_LENGTH)
+    {
+        get_sdr::body::set_id_strlen(FULL_RECORD_ID_STR_MAX_LENGTH, body);
+    }
+    else
+    {
+        get_sdr::body::set_id_strlen(id_string.length(), body);
+    }
+    strncpy(body->id_string, id_string.c_str(),
+            get_sdr::body::get_id_strlen(body));
 
     return IPMI_CC_OK;
 };
@@ -902,12 +903,14 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         record.header.record_length = sizeof(get_sdr::SensorDataFullRecord);
 
         /* Key */
+        get_sdr::key::set_owner_id_bmc(&(record.key));
         record.key.sensor_number = sensor_id;
 
         /* Body */
-        record.body.entity_id = sensor_id;
+        record.body.entity_id = sensor->second.entityType;
         record.body.sensor_type = sensor->second.sensorType;
         record.body.event_reading_type = sensor->second.sensorReadingType;
+        record.body.entity_instance = sensor->second.instance;
 
         // Set the type-specific details given the DBus interface
         ret = populate_record_from_dbus(&(record.body), &(sensor->second),
