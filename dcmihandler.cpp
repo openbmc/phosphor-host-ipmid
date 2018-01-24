@@ -603,6 +603,96 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+namespace dcmi
+{
+namespace temp_readings
+{
+
+List read(const std::string& type, uint8_t instance,
+          uint8_t instanceStart, uint8_t& numInstances)
+{
+    numInstances = 0;
+    return {};
+}
+
+} // namsespace temp_readings
+} // namsepace dcmi
+
+ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    static const std::map<uint8_t, std::string> entityIdToName {
+        {0x40, "inlet"},
+        {0x37, "inlet"},
+        {0x41, "cpu"},
+        {0x03, "cpu"},
+        {0x42, "baseboard"},
+        {0x07, "baseboard"}
+    };
+
+    auto requestData =
+        reinterpret_cast<const dcmi::GetTempReadingsRequest*>(request);
+    dcmi::GetTempReadingsResponseHdr responseData;
+
+    auto it = entityIdToName.find(requestData->entityId);
+    if (entityIdToName.end() == it)
+    {
+        log<level::ERR>("Unknown Entity ID",
+                        entry("ENTITY_ID=%d", requestData->entityId));
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        log<level::ERR>("Invalid Group ID",
+                        entry("GROUP_ID=%d", requestData->groupID));
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (requestData->sensorType != dcmi::temperatureSensorType)
+    {
+        log<level::ERR>("Invalid sensor type",
+                        entry("SENSOR_TYPE=%d", requestData->sensorType));
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    dcmi::temp_readings::List temps{};
+    try
+    {
+        uint8_t numInstances{};
+        temps = dcmi::temp_readings::read(it->second,
+                                          requestData->entityInstance,
+                                          requestData->instanceStart,
+                                          numInstances);
+        responseData.numInstances = numInstances;
+        responseData.numDataSets = temps.size();
+    }
+    catch (InternalFailure& e)
+    {
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    responseData.groupID = dcmi::groupExtId;
+    memcpy(response, &responseData, sizeof(dcmi::GetTempReadingsResponseHdr));
+    size_t payloadSize =
+        temps.size() * sizeof(dcmi::temp_readings::Response);
+    if (!temps.empty())
+    {
+        memcpy(static_cast<uint8_t*>(response) +
+               sizeof(dcmi::GetTempReadingsResponseHdr),
+               temps.data(),
+               payloadSize);
+    }
+    *data_len = sizeof(dcmi::GetTempReadingsResponseHdr) + payloadSize;
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -652,6 +742,10 @@ void register_netfn_dcmi_functions()
         NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR);
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR,
         NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
+
+    // <Get Temperature Readings>
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_TEMP_READINGS,
+                           NULL, getTempReadings, PRIVILEGE_USER);
 
     return;
 }
