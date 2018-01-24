@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <sdbusplus/bus.hpp>
+#include "nlohmann/json.hpp"
 
 namespace dcmi
 {
@@ -50,6 +51,8 @@ namespace temp_readings
     static constexpr auto maxDataSets = 8;
     static constexpr auto maxInstances = 255;
     static constexpr auto maxTemp = 128; // degrees C
+    static constexpr auto configFile =
+        "/usr/share/ipmi-providers/dcmi_temp_readings.json";
 
     /** @struct Response
      *
@@ -70,6 +73,10 @@ namespace temp_readings
 
     using ResponseList = std::vector<Response>;
     using NumInstances = size_t;
+    using Value = uint8_t;
+    using Sign = bool;
+    using Temperature = std::tuple<Value, Sign>;
+    using Json = nlohmann::json;
 }
 
 static constexpr auto groupExtId = 0xDC;
@@ -375,6 +382,24 @@ struct GetTempReadingsResponseHdr
 
 namespace temp_readings
 {
+    /** @brief Read temperature from a d-bus object, scale it as per dcmi
+     *         get temperature reading requirements.
+     *
+     *  @param[in] dbusService - the D-Bus service
+     *  @param[in] dbusPath - the D-Bus path
+     *
+     *  @return A temperature reading
+     */
+    Temperature readTemp(const std::string& dbusService,
+                         const std::string& dbusPath);
+
+    /** @brief Parse out JSON config file containing information
+     *         related to temperature readings.
+     *
+     *  @return A json object
+     */
+    Json parseConfig();
+
     /** @brief Read temperatures and fill up DCMI response for the Get
      *         Temperature Readings command. This looks at a specific
      *         instance.
