@@ -7,7 +7,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <fstream>
+#include <cmath>
 #include "xyz/openbmc_project/Common/error.hpp"
+#include "nlohmann/json.hpp"
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -611,8 +614,146 @@ namespace temp_readings
 List read(const std::string& type, uint8_t instance,
           uint8_t instanceStart, uint8_t& numInstances)
 {
-    numInstances = 0;
-    return {};
+    using json = nlohmann::json;
+    List response{};
+    static const std::vector<json> empty{};
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    static constexpr auto filename =
+        "/usr/share/ipmi-providers/dcmi_temp_readings.json";
+    std::ifstream jsonFile(filename);
+    if (jsonFile.is_open())
+    {
+        auto data = nlohmann::json::parse(jsonFile, nullptr, false);
+        if (!data.is_discarded())
+        {
+            std::vector<json> readings = data.value(type, empty);
+            numInstances = 0;
+            for (const auto& j : readings)
+            {
+                try
+                {
+                    uint8_t instanceNum = j.value("instance", 0);
+                    // Not the specific instance we're looking for
+                    if (instance && (instance != instanceNum))
+                    {
+                        continue;
+                    }
+                    // Not in the instance range we're interested in
+                    if (!instance &&
+                        (instanceNum < instanceStart))
+                    {
+                        continue;
+                    }
+                    std::string path = j.value("dbus", "");
+
+                    auto service =
+                        ipmi::getService(bus,
+                                         "xyz.openbmc_project.Sensor.Value",
+                                         path);
+                    auto method = bus.new_method_call(
+                                      service.c_str(),
+                                      path.c_str(),
+                                      "org.freedesktop.DBus.Properties",
+                                      "Get");
+                    method.append("xyz.openbmc_project.Sensor.Value", "Value");
+                    auto reply = bus.call(method);
+                    if (reply.is_method_error())
+                    {
+                        log<level::ERR>("Error in reading Sensor.Value",
+                                        entry("PATH=%s", path.c_str()));
+                    }
+                    else
+                    {
+                        // Found the single instance we're interested in
+                        if (instance && (instance == instanceNum))
+                        {
+                            numInstances = 1;
+                        }
+                        else
+                        {
+                            // Client needs data for more than one instance, but
+                            // since the response set has a limit of 8, avoid
+                            // further d-bus calls once we hit the limit. Find
+                            // out the total number of instances though.
+                            ++numInstances;
+                            if (maxDataSets == response.size())
+                            {
+                                continue;
+                            }
+                        }
+
+                        // Read the temperature value from d-bus object. Need
+                        // some conversion. As per the interface
+                        // xyz.openbmc_project.Sensor.Value, the temperature is
+                        // a int64_t and in degrees C. It needs to be scaled by
+                        // using the formula Value * 10^Scale.
+                        // The ipmi spec has the temperature as a uint8_t, with
+                        // a separate single bit for the sign.
+                        sdbusplus::message::variant<int64_t> result{};
+                        reply.read(result);
+                        int64_t temperature = result.get<int64_t>();
+                        uint64_t absTemp = std::abs(temperature);
+
+                        method = bus.new_method_call(
+                                     service.c_str(),
+                                     path.c_str(),
+                                     "org.freedesktop.DBus.Properties",
+                                     "Get");
+                        method.append("xyz.openbmc_project.Sensor.Value",
+                                      "Scale");
+                        reply = bus.call(method);
+                        if (reply.is_method_error())
+                        {
+                            log<level::ERR>("Error in reading Sensor.Scale",
+                                            entry("PATH=%s", path.c_str()));
+                            continue;
+                        }
+                        reply.read(result);
+                        int64_t scale = result.get<int64_t>();
+                        absTemp *= std::pow(10, scale);
+
+                        Response r{};
+                        r.instance = instanceNum;
+                        // Max absolute temp as per ipmi spec is 128.
+                        if (maxTemp < absTemp)
+                        {
+                            absTemp = maxTemp;
+                        }
+                        r.temperature = static_cast<uint8_t>(absTemp);
+                        if (0 > temperature)
+                        {
+                            // A < 0 temperature.
+                            r.sign = 1;
+                        }
+                        response.push_back(std::move(r));
+                        // We have the response ready, break out.
+                        if (instance && (instance == instanceNum))
+                        {
+                            break;
+                        }
+                    }
+                }
+                catch (std::exception& e)
+                {
+                    log<level::DEBUG>(e.what());
+                    continue;
+                }
+            }
+        }
+        else
+        {
+            log<level::ERR>("Temperature readings JSON parser failure");
+            elog<InternalFailure>();
+        }
+    }
+    else
+    {
+        log<level::ERR>("Temperature readings JSON file not found");
+        elog<InternalFailure>();
+    }
+
+    return response;
 }
 
 } // namsespace temp_readings
