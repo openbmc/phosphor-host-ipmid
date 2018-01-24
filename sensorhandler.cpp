@@ -489,6 +489,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus_message *reply = NULL;
     int reading = 0;
     char* assertion = NULL;
+    ipmi::sensor::GetSensorResponse getResponse {};
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
@@ -538,7 +539,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             *data_len=sizeof(sensorreadingresp_t);
 
             resp->value         = (uint8_t)reading;
-            resp->operation     = 0;
+            resp->operation     = 1<<6;;
             resp->indication[0] = 0;
             resp->indication[1] = 0;
             break;
@@ -642,19 +643,20 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 auto getResponse =  iter->second.getFunc(iter->second);
                 *data_len = getResponse.size();
                 memcpy(resp, getResponse.data(), *data_len);
+                resp->operation = 1<<6;
                 return IPMI_CC_OK;
             }
             catch (InternalFailure& e)
             {
-                 log<level::ERR>("Get sensor failed",
-                                 entry("SENSOR_NUM=%d", reqptr->sennum));
-                 commit<InternalFailure>();
-                 return IPMI_CC_SENSOR_INVALID;
+                *data_len = getResponse.size();
+                memcpy(resp, getResponse.data(), *data_len);
+                return IPMI_CC_OK;
             }
             catch (const std::runtime_error& e)
             {
-                log<level::ERR>(e.what());
-                return IPMI_CC_SENSOR_INVALID;
+                *data_len = getResponse.size();
+                memcpy(resp, getResponse.data(), *data_len);
+                return IPMI_CC_OK;
             }
         }
     }
