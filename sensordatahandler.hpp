@@ -49,6 +49,60 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg);
 namespace get
 {
 
+/** @brief Populate sensor name from the D-Bus property associated with the
+ *         sensor. In the example entry from the yaml, the name of the D-bus
+ *         property "AttemptsLeft" is the sensor name.
+ *
+ *         0x07:
+ *            sensorType: 195
+ *            path: /xyz/openbmc_project/state/host0
+ *            sensorReadingType: 0x6F
+ *            serviceInterface: org.freedesktop.DBus.Properties
+ *            readingType: readingAssertion
+ *            sensorNamePattern: nameProperty
+ *            interfaces:
+ *              xyz.openbmc_project.Control.Boot.RebootAttempts:
+ *                AttemptsLeft:
+ *                    Offsets:
+ *                        0xFF:
+ *                          type: uint32_t
+ *
+ *
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return On success return the sensor name for the sensor.
+ */
+inline SensorName nameProperty(const Info& sensorInfo)
+{
+    return sensorInfo.propertyInterfaces.begin()->second.begin()->first;
+}
+
+/** @brief Populate sensor name from the D-Bus object associated with the
+ *         sensor. If the object path is /system/chassis/motherboard/dimm0 then
+ *         the leaf dimm0 is considered as the sensor name.
+ *
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return On success return the sensor name for the sensor.
+ */
+inline SensorName nameLeaf(const Info& sensorInfo)
+{
+    return sensorInfo.sensorPath.substr(
+            sensorInfo.sensorPath.find_last_of('/') + 1,
+            sensorInfo.sensorPath.length());
+}
+
+/** @brief Populate sensor name from the D-Bus object associated with the
+ *         sensor. If the object path is /system/chassis/motherboard/cpu0/core0
+ *         then the sensor name is cpu0_core0. The leaf and the parent is put
+ *         together to get the sensor name.
+ *
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return On success return the sensor name for the sensor.
+ */
+SensorName nameParentLeaf(const Info& sensorInfo);
+
 /**
  *  @brief Helper function to map the dbus info to sensor's assertion status
  *         for the get sensor reading command.
