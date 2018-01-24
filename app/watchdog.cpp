@@ -125,7 +125,7 @@ ipmi_ret_t ipmi_app_reset_watchdog(
     char *busname = NULL;
 
     // Current properties of the watchdog daemon.
-    bool enabled = false;
+    uint32_t enabled = 0;
     uint64_t interval = 0;
 
     // Status code.
