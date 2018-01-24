@@ -489,6 +489,8 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     sd_bus_message *reply = NULL;
     int reading = 0;
     char* assertion = NULL;
+    ipmi::sensor::GetSensorResponse getResponse {};
+    static constexpr auto scanningEnabledBit = 6;
 
     printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
 
@@ -622,7 +624,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             resp->value = static_cast<uint8_t>(
                     (raw_value - sensor.scaledOffset) / sensor.coefficientM);
-            resp->operation = 1<<6; // scanning enabled
+            resp->operation = 1 << scanningEnabledBit; // scanning enabled
             resp->indication[0] = 0; // not a threshold sensor. ignore
             resp->indication[1] = 0;
             rc = IPMI_CC_OK;
@@ -638,22 +640,23 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             try
             {
-                auto getResponse =  iter->second.getFunc(iter->second);
+                getResponse =  iter->second.getFunc(iter->second);
                 *data_len = getResponse.size();
                 memcpy(resp, getResponse.data(), *data_len);
+                resp->operation = 1 << scanningEnabledBit;
                 return IPMI_CC_OK;
             }
             catch (InternalFailure& e)
             {
-                 log<level::ERR>("Get sensor failed",
-                                 entry("SENSOR_NUM=%d", reqptr->sennum));
-                 commit<InternalFailure>();
-                 return IPMI_CC_SENSOR_INVALID;
+                *data_len = getResponse.size();
+                memcpy(resp, getResponse.data(), *data_len);
+                return IPMI_CC_OK;
             }
             catch (const std::runtime_error& e)
             {
-                log<level::ERR>(e.what());
-                return IPMI_CC_SENSOR_INVALID;
+                *data_len = getResponse.size();
+                memcpy(resp, getResponse.data(), *data_len);
+                return IPMI_CC_OK;
             }
         }
     }
