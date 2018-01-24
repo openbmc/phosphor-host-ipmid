@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <fstream>
+#include <cmath>
 #include "xyz/openbmc_project/Common/error.hpp"
 
 using namespace phosphor::logging;
@@ -608,16 +610,182 @@ namespace dcmi
 namespace temp_readings
 {
 
+Json parseConfig()
+{
+    std::ifstream jsonFile(configFile);
+    if (!jsonFile.is_open())
+    {
+        log<level::ERR>("Temperature readings JSON file not found");
+        elog<InternalFailure>();
+    }
+
+    auto data = nlohmann::json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Temperature readings JSON parser failure");
+        elog<InternalFailure>();
+    }
+
+    return data;
+}
+
+Temperature readTemp(const std::string& dbusService,
+                     const std::string& dbusPath)
+{
+    // Read the temperature value from d-bus object. Need
+    // some conversion. As per the interface
+    // xyz.openbmc_project.Sensor.Value, the temperature is
+    // a int64_t and in degrees C. It needs to be scaled by
+    // using the formula Value * 10^Scale.
+    // The ipmi spec has the temperature as a uint8_t, with
+    // a separate single bit for the sign.
+ 
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto result = ipmi::getDbusProperty(bus, dbusService, dbusPath,
+                                        "xyz.openbmc_project.Sensor.Value",
+                                        "Value");
+    int64_t temperature = result.get<int64_t>();
+    uint64_t absTemp = std::abs(temperature);
+
+    result = ipmi::getDbusProperty(bus, dbusService, dbusPath,
+                                   "xyz.openbmc_project.Sensor.Value",
+                                   "Scale");
+    int64_t factor = result.get<int64_t>();
+    uint64_t scale = std::pow(10, factor); // pow() returns float/double
+    uint64_t tempDegrees = 0;
+    // Overflow safe multiplication when the scale is > 0
+    if (scale && __builtin_umull_overflow(absTemp, scale, &tempDegrees))
+    {
+        log<level::ERR>("Multiplication overflow detected",
+                        entry("TEMP_VALUE=%llu", absTemp),
+                        entry("SCALE_FACTOR=%llu", scale));
+        elog<InternalFailure>();
+    }
+    else
+    {
+        // The (uint64_t)scale value is 0, effectively this is division
+        tempDegrees = absTemp * std::pow(10, factor);
+    }
+    // Max absolute temp as per ipmi spec is 128.
+    if (tempDegrees > maxTemp)
+    {
+        tempDegrees = maxTemp;
+    }
+
+    return std::make_tuple(static_cast<uint8_t>(tempDegrees),
+                           (temperature < 0));
+}
+
 Response read(const std::string& type, uint8_t instance)
 {
-    return {};
+    Response response{};
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    if (!instance)
+    {
+        log<level::ERR>("Expected non-zero instance");
+        elog<InternalFailure>();
+    }
+
+    auto data = parseConfig();
+    static const std::vector<Json> empty{};
+    std::vector<Json> readings = data.value(type, empty);
+    for (const auto& j : readings)
+    {
+        uint8_t instanceNum = j.value("instance", 0);
+        // Not the instance we're interested in
+        if (instanceNum != instance)
+        {
+            continue;
+        }
+
+        std::string path = j.value("dbus", "");
+        std::string service;
+        try
+        {
+            service =
+                ipmi::getService(bus,
+                                 "xyz.openbmc_project.Sensor.Value",
+                                 path);
+        }
+        catch (std::exception& e)
+        {
+            log<level::DEBUG>(e.what());
+            return response;
+        }
+
+        response.instance = instance;
+        uint8_t temp{};
+        bool sign{};
+        std::tie(temp, sign) = readTemp(service, path);
+        response.temperature = temp;
+        response.sign = sign;
+
+        // Found the instance we're interested in
+        break;
+    }
+
+    return response;
 }
 
 std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
                                                uint8_t instanceStart)
 {
-    ResponseList empty{};
-    return std::make_tuple(empty, 0);
+    ResponseList response{};
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    size_t numInstances = 0;
+    auto data = parseConfig();
+    static const std::vector<Json> empty{};
+    std::vector<Json> readings = data.value(type, empty);
+    for (const auto& j : readings)
+    {
+        try
+        {
+            uint8_t instanceNum = j.value("instance", 0);
+            // Not in the instance range we're interested in
+            if (instanceNum < instanceStart)
+            {
+                continue;
+            }
+
+            std::string path = j.value("dbus", "");
+            auto service =
+                ipmi::getService(bus,
+                                 "xyz.openbmc_project.Sensor.Value",
+                                 path);
+
+            // Client needs data for more than one instance, but
+            // since the response set has a limit of 8, avoid
+            // further d-bus calls once we hit the limit. Find
+            // out the total number of instances though.
+            ++numInstances;
+            if (response.size() == maxDataSets)
+            {
+                continue;
+            }
+
+            Response r{};
+            r.instance = instanceNum;
+            uint8_t temp{};
+            bool sign{};
+            std::tie(temp, sign) = readTemp(service, path);
+            r.temperature = temp;
+            r.sign = sign;
+            response.push_back(r);
+        }
+        catch (std::exception& e)
+        {
+            log<level::DEBUG>(e.what());
+            continue;
+        }
+    }
+
+    if(numInstances > maxInstances)
+    {
+        numInstances = maxInstances;
+    }
+    return std::make_tuple(response, numInstances);
 }
 
 } // namsespace temp_readings
