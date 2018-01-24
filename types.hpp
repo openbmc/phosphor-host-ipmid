@@ -115,6 +115,9 @@ using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 using Scale = int16_t;
 using Unit = std::string;
+using EntityType = uint8_t;
+using EntityInst = uint8_t;
+using SensorName = std::string;
 
 enum class Mutability
 {
@@ -136,6 +139,8 @@ inline Mutability operator&(Mutability lhs, Mutability rhs)
 
 struct Info
 {
+   EntityType entityType;
+   EntityInst instance;
    Type sensorType;
    InstancePath sensorPath;
    DbusInterface sensorInterface;
@@ -150,6 +155,7 @@ struct Info
    std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
    std::function<GetSensorResponse(const Info&)> getFunc;
    Mutability mutability;
+   std::function<SensorName(const Info&)> sensorNameFunc;
    DbusInterfaceMap propertyInterfaces;
 };
 

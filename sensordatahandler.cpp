@@ -110,6 +110,20 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
 namespace get
 {
 
+SensorName nameParentLeaf(const Info& sensorInfo)
+{
+    const auto pos = sensorInfo.sensorPath.find_last_of('/');
+    const auto leaf = sensorInfo.sensorPath.substr(pos + 1);
+
+    const auto remaining = sensorInfo.sensorPath.substr(0, pos);
+
+    const auto parentPos = remaining.find_last_of('/');
+    auto parent = remaining.substr(parentPos + 1);
+
+    parent += "_" + leaf;
+    return parent;
+}
+
 GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
                                      const InstancePath& path,
                                      const DbusInterface& interface)
