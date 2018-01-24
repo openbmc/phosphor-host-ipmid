@@ -11,6 +11,8 @@
   serviceInterface: org.freedesktop.DBus.Properties
   # Where the sensor value is represented - assertion bits/reading/event data
   readingType: assertion
+  # Sensor name would be occ0
+  sensorNamePattern: nameLeaf
   eventType: 0x6F
   # All the d-bus interfaces : properties that must be updated for this path
   interfaces:
@@ -35,6 +37,7 @@
   path: /system/chassis/motherboard/dimm1
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
+  sensorNamePattern: nameLeaf
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
@@ -70,6 +73,8 @@
   # serves as the value, or reading. Hence, the offset above is intentionally
   # 0xFF, to indicate not to check any specific bits in the assertion.
   readingType: readingAssertion
+  # Sensor name would be AttemptsLeft
+  sensorNamePattern: nameProperty
   sensorReadingType: 0x6F
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
@@ -83,6 +88,7 @@
             type: uint32_t
   path: /xyz/openbmc_project/state/host1
   readingType: readingAssertion
+  sensorNamePattern: nameProperty
   sensorReadingType: 0x6F
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
@@ -97,6 +103,7 @@
   mutability: Mutability::Write|Mutability::Read
   serviceInterface: org.freedesktop.DBus.Properties
   readingType: readingData
+  sensorNamePattern: nameLeaf
   interfaces:
     xyz.openbmc_project.Sensor.Value:
       Value:
@@ -110,6 +117,8 @@
   sensorReadingType: 0x6F
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
+  # Sensor name would be cpu0_core22
+  sensorNamePattern: nameParentLeaf
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
       Functional:
