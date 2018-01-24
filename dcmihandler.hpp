@@ -19,6 +19,7 @@ enum Commands
     SET_ASSET_TAG = 0x08,
     GET_MGMNT_CTRL_ID_STR = 0x09,
     SET_MGMNT_CTRL_ID_STR = 0x0A,
+    GET_TEMP_READINGS = 0x10,
 };
 
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
@@ -31,6 +32,7 @@ static constexpr auto networkConfigObj =
 static constexpr auto networkConfigIntf =
         "xyz.openbmc_project.Network.SystemConfiguration";
 static constexpr auto hostNameProp = "HostName";
+static constexpr auto temperatureSensorType = 0x01;
 
 namespace assettag
 {
@@ -41,6 +43,33 @@ namespace assettag
     using ObjectTree = std::map<ObjectPath, std::map<Service, Interfaces>>;
 
 } //namespace assettag
+
+namespace temp_readings
+{
+    static constexpr auto maxDataSets = 8;
+    static constexpr auto maxInstances = 255;
+    static constexpr auto maxTemp = 128; // degrees C
+
+    /** @struct Response
+     *
+     *  DCMI payload for Get Temperature Readings response
+     */
+    struct Response
+    {
+#if BYTE_ORDER == LITTLE_ENDIAN
+        uint8_t temperature: 7;   //!< Temperature reading in Celcius
+        uint8_t sign: 1;          //!< Sign bit
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+        uint8_t sign: 1;          //!< Sign bit
+        uint8_t temperature: 7;   //!< Temperature reading in Celcius
+#endif
+        uint8_t instance;       //!< Entity instance number
+    } __attribute__((packed));
+
+    using ResponseList = std::vector<Response>;
+    using NumInstances = size_t;
+}
 
 static constexpr auto groupExtId = 0xDC;
 
@@ -257,6 +286,59 @@ struct SetMgmntCtrlIdStrResponse
     uint8_t groupID;            //!< Group extension identification.
     uint8_t offset;             //!< Last Offset Written.
 } __attribute__((packed));
+
+/** @struct GetTempReadingsRequest
+ *
+ *  DCMI payload for Get Temperature Readings request
+ */
+struct GetTempReadingsRequest
+{
+    uint8_t groupID;             //!< Group extension identification.
+    uint8_t sensorType;          //!< Type of the sensor
+    uint8_t entityId;            //!< Entity ID
+    uint8_t entityInstance;      //!< Entity Instance (0 means all instances)
+    uint8_t instanceStart;       //!< Instance start (used if instance is 0)
+} __attribute__((packed));
+
+/** @struct GetTempReadingsResponse
+ *
+ *  DCMI header for Get Temperature Readings response
+ */
+struct GetTempReadingsResponseHdr
+{
+    uint8_t groupID;                //!< Group extension identification.
+    uint8_t numInstances;           //!< No. of instances for requested id
+    uint8_t numDataSets;            //!< No. of sets of temperature data
+} __attribute__((packed));
+
+namespace temp_readings
+{
+    /** @brief Read temperatures and fill up DCMI response for the Get
+     *         Temperature Readings command. This looks at a specific
+     *         instance.
+     *
+     *  @param[in] type - one of "inlet", "cpu", "baseboard"
+     *  @param[in] instance - A non-zero Entity instance number
+     *
+     *  @return A temperature reading
+     */
+    Response read (const std::string& type, uint8_t instance);
+
+    /** @brief Read temperatures and fill up DCMI response for the Get
+     *         Temperature Readings command. This looks at a range of
+     *         instances.
+     *
+     *  @param[in] type - one of "inlet", "cpu", "baseboard"
+     *  @param[in] instanceStart - Entity instance start index
+     *  @param[out] numInstances - number of entity instances for the entity id
+     *                             in the response
+     *
+     *  @return A tuple, containing a list of temperature readings and the
+     *          number of instances.
+     */
+    std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
+                                                   uint8_t instanceStart);
+}
 
 } // namespace dcmi
 
