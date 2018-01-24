@@ -181,6 +181,11 @@ inline void set_owner_id_system_sw(SensorDataRecordKey* key)
     key->owner_id |= 0x01;
 };
 
+inline void set_owner_id_bmc(SensorDataRecordKey* key)
+{
+    key->owner_id |= 0x20;
+};
+
 inline void set_owner_id_address(uint8_t addr, SensorDataRecordKey* key)
 {
     key->owner_id &= 0x01;
