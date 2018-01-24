@@ -39,6 +39,8 @@ extern const IdInfoMap sensors = {
        path = sensor["path"]
        serviceInterface = sensor["serviceInterface"]
        sensorType = sensor["sensorType"]
+       entityID = sensor.get("entityID", 0)
+       instance = sensor.get("entityInstance", 0)
        readingType = sensor["sensorReadingType"]
        multiplier = sensor.get("multiplierM", 1)
        offsetB = sensor.get("offsetB", 0)
@@ -47,6 +49,8 @@ extern const IdInfoMap sensors = {
        scale = sensor.get("scale", 0)
        hasScale = "true" if "scale" in sensor.keys() else "false"
        valueReadingType = sensor["readingType"]
+       sensorNamePattern = sensor.get("sensorNamePattern", "nameLeaf")
+       sensorNameFunc = "get::" + sensorNamePattern
        updateFunc = interfaceDict[serviceInterface]["updateFunc"]
        updateFunc += sensor["readingType"]
        getFunc = interfaceDict[serviceInterface]["getFunc"]
@@ -63,10 +67,10 @@ extern const IdInfoMap sensors = {
            sensorInterface = next(iter(interfaces))
        mutability = sensor.get("mutability", "Mutability::Read")
 %>
-        ${sensorType},"${path}","${sensorInterface}",${readingType},${multiplier},
-        ${offsetB},${exp},${offsetB * pow(10,exp)},
-        ${hasScale},${scale},"${unit}",
-        ${updateFunc},${getFunc},Mutability(${mutability}),{
+        ${entityID},${instance},${sensorType},"${path}","${sensorInterface}",
+        ${readingType},${multiplier}, ${offsetB},${exp},
+        ${offsetB * pow(10,exp)}, ${hasScale},${scale},"${unit}",
+        ${updateFunc},${getFunc},Mutability(${mutability}),${sensorNameFunc},{
     % for interface,properties in interfaces.items():
             {"${interface}",{
             % for dbus_property,property_value in properties.items():
