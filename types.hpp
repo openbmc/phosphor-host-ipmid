@@ -139,6 +139,8 @@ inline Mutability operator&(Mutability lhs, Mutability rhs)
 
 struct Info
 {
+   EntityType entityType;
+   EntityInst instance;
    Type sensorType;
    InstancePath sensorPath;
    DbusInterface sensorInterface;
@@ -153,6 +155,7 @@ struct Info
    std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
    std::function<GetSensorResponse(const Info&)> getFunc;
    Mutability mutability;
+   std::function<SensorName(const Info&)> sensorNameFunc;
    DbusInterfaceMap propertyInterfaces;
 };
 
