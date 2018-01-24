@@ -115,6 +115,9 @@ using Exponent = uint8_t;
 using ScaledOffset = int64_t;
 using Scale = int16_t;
 using Unit = std::string;
+using EntityType = uint8_t;
+using EntityInst = uint8_t;
+using SensorName = std::string;
 
 enum class Mutability
 {
