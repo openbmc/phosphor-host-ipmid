@@ -573,7 +573,6 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 resp->indication[0] = 0x1;
             }
             resp->indication[1] = 0;
-            free(assertion);
             break;
 
         case IPMI_SENSOR_TEMP:
