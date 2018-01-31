@@ -95,7 +95,7 @@ void postFormatProcessing(FruAreaData& data)
     data.at(areaSizeOffset) = (data.size() + checksumSize) /
         (recordUnitOfMeasurment);
 
-    //Finally add board info checksum
+    //Finally add area checksum
     appendDataChecksum(data);
 }
 
@@ -165,7 +165,7 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
  * @param[in/out] data Common Header section data container
  */
 void buildCommonHeaderSection(
-    const uint32_t& infoAreaSize, uint32_t& offset, FruAreaData& data)
+    const uint32_t& infoAreaSize, uint16_t& offset, FruAreaData& data)
 {
     //Check if data for internal use section populated
     if (infoAreaSize == 0)
@@ -175,9 +175,12 @@ void buildCommonHeaderSection(
     }
     else
     {
+        // offset should be multiple of 8.
+        auto remainder = offset % recordUnitOfMeasurment;
+        offset += (remainder > 0) ? recordUnitOfMeasurment - remainder : 0;
         //Place data to define offset to area data section
-        data.emplace_back((offset + commonHeaderFormatSize)
-            / recordUnitOfMeasurment);
+        data.emplace_back(offset / recordUnitOfMeasurment);
+
         offset += infoAreaSize;
     }
 }
@@ -304,12 +307,11 @@ FruAreaData buildProductInfoArea(const PropertyMap& propMap)
 
 FruAreaData buildFruAreaData(const FruInventoryData& inventory)
 {
-    FruAreaData combFruArea;
+    FruAreaData combFruArea{};
     //Now build common header with data for this FRU Inv Record
     //Use this variable to increment size of header as we go along to determine
     //offset for the subsequent area offsets
-    uint32_t curDataOffset = 0;
-
+    uint16_t curDataOffset = commonHeaderFormatSize;
     //First byte is id for version of FRU Info Storage Spec used
     combFruArea.emplace_back(specVersion);
 
@@ -323,6 +325,7 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
     {
         chassisArea = std::move(buildChassisInfoArea(chassisIt->second));
     }
+    // update the offset to chassis data.
     buildCommonHeaderSection(chassisArea.size(), curDataOffset, combFruArea);
 
     //4th byte is offset to board data
@@ -332,6 +335,8 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
     {
         boardArea = std::move(buildBoardInfoArea(boardIt->second));
     }
+    // update the offset to the board data.
+    buildCommonHeaderSection(boardArea.size(), curDataOffset, combFruArea);
 
     //5th byte is offset to product data
     FruAreaData prodArea;
@@ -340,13 +345,14 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
     {
         prodArea = std::move(buildProductInfoArea(prodIt->second));
     }
+    // update the offset to the product data.
     buildCommonHeaderSection(prodArea.size(), curDataOffset, combFruArea);
 
     //6th byte is offset to multirecord data
     combFruArea.emplace_back(recordNotPresent);
 
     //7th byte is PAD
-    padData(combFruArea);
+    combFruArea.emplace_back(recordNotPresent);
 
     //8th (Final byte of Header Format) is the checksum
     appendDataChecksum(combFruArea);
