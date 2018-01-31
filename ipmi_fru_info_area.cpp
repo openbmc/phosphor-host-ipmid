@@ -33,6 +33,8 @@ static constexpr auto endOfCustomFields        = 0xC1;
 static constexpr auto commonHeaderFormatSize   = 0x8; //size in bytes
 static constexpr auto manufacturingDateSize     = 0x3;
 static constexpr auto areaSizeOffset           = 0x1;
+static constexpr uint8_t typeASCII             = 0xC0;
+static constexpr auto maxRecordAttributeValue  = 0x1F;
 
 /**
  * @brief Format Beginning of Individual IPMI FRU Data Section
@@ -120,8 +122,19 @@ void appendData(const Property& key, const PropertyMap& propMap,
         {
             value.erase(0, 2);
         }
-        data.emplace_back(value.length());
-        std::copy(value.begin(), value.end(), std::back_inserter(data));
+
+        // 5 bits for length
+        // if length is greater then 31(2^5) bytes then trim the data to 31 bytess.
+        auto valueLength =  (value.length() > maxRecordAttributeValue) ?
+            maxRecordAttributeValue : value.length();
+        // 2 bits for type
+        // Set the type to ascii
+        uint8_t typeLength = valueLength | ipmi::fru::typeASCII;
+
+        data.emplace_back(typeLength);
+        std::copy(value.begin(),
+                  value.begin() + valueLength,
+                  std::back_inserter(data));
     }
     else
     {
