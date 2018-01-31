@@ -120,7 +120,10 @@ void appendData(const Property& key, const PropertyMap& propMap,
         {
             value.erase(0, 2);
         }
-        data.emplace_back(value.length());
+
+        // 5 bits for length and 2bits for type
+        uint8_t typeLength = value.length() | ipmi::fru::typeASCII;
+        data.emplace_back(typeLength);
         std::copy(value.begin(), value.end(), std::back_inserter(data));
     }
     else

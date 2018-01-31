@@ -6,6 +6,9 @@ namespace ipmi
 {
 namespace fru
 {
+
+static constexpr uint8_t typeASCII = 0xC0;
+
 using FruAreaData = std::vector<uint8_t>;
 using Section = std::string;
 using Value = std::string;
