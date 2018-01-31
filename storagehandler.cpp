@@ -651,9 +651,17 @@ ipmi_ret_t ipmi_storage_read_fru_data(
                             entry("SIZE_OF_FRU_AREA=%s", size));
             return IPMI_CC_INVALID;
         }
-        std::copy((fruArea.begin() + offset), (fruArea.begin() + reqptr->count),
-                (static_cast<uint8_t*>(response)));
-        *data_len = reqptr->count;
+
+        // Write the count of requested data.
+        auto buff = static_cast<uint8_t *>(response);
+        *buff = reqptr->count;
+        buff++;
+
+        std::copy((fruArea.begin() + offset),
+                  (fruArea.begin() + offset + reqptr->count),
+                  buff);
+
+        *data_len = reqptr->count + 1; // additional one byte for count
     }
     catch (const InternalFailure& e)
     {
