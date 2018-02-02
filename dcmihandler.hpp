@@ -50,7 +50,7 @@ namespace temp_readings
 {
     static constexpr auto maxDataSets = 8;
     static constexpr auto maxInstances = 255;
-    static constexpr auto maxTemp = 128; // degrees C
+    static constexpr auto maxTemp = 127; // degrees C
     static constexpr auto configFile =
         "/usr/share/ipmi-providers/dcmi_temp_readings.json";
 
