@@ -1103,20 +1103,98 @@ namespace dcmi
 namespace sensor_info
 {
 
+Response createFromJson(const Json& config)
+{
+    Response response{};
+    uint16_t recordId = config.value("record_id", 0);
+    response.recordIdLsb = recordId & 0xFF;
+    response.recordIdMsb = (recordId >> 8) & 0xFF;
+    return response;
+}
+
 std::tuple<Response, NumInstances> read(const std::string& type,
                                         uint8_t instance,
                                         const Json& config)
 {
-    Response empty{};
-    return std::make_tuple(empty, 0);
+    Response response{};
+
+    if (!instance)
+    {
+        log<level::ERR>("Expected non-zero instance");
+        elog<InternalFailure>();
+    }
+
+    static const std::vector<Json> empty{};
+    std::vector<Json> readings = config.value(type, empty);
+    size_t numInstances = readings.size();
+    for (const auto& reading : readings)
+    {
+        uint8_t instanceNum = reading.value("instance", 0);
+        // Not the instance we're interested in
+        if (instanceNum != instance)
+        {
+            continue;
+        }
+
+        response = createFromJson(reading);
+
+        // Found the instance we're interested in
+        break;
+    }
+
+    if (numInstances > maxInstances)
+    {
+        log<level::DEBUG>("Trimming IPMI num instances",
+                          entry("NUM_INSTANCES=%d", numInstances));
+        numInstances = maxInstances;
+    }
+    return std::make_tuple(response, numInstances);
 }
 
 std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
                                                uint8_t instanceStart,
                                                const Json& config)
 {
-    ResponseList empty{};
-    return std::make_tuple(empty, 0);
+    ResponseList responses{};
+
+    size_t numInstances = 0;
+    static const std::vector<Json> empty{};
+    std::vector<Json> readings = config.value(type, empty);
+    numInstances = readings.size();
+    for (const auto& reading : readings)
+    {
+        try
+        {
+            // Max of 8 records
+            if (responses.size() == maxRecords)
+            {
+                break;
+            }
+
+            uint8_t instanceNum = reading.value("instance", 0);
+            // Not in the instance range we're interested in
+            if (instanceNum < instanceStart)
+            {
+                continue;
+            }
+
+            Response response = createFromJson(reading);
+            responses.push_back(response);
+        }
+        catch (std::exception& e)
+        {
+            log<level::DEBUG>(e.what());
+            continue;
+        }
+    }
+
+    if (numInstances > maxInstances)
+    {
+        log<level::DEBUG>("Trimming IPMI num instances",
+                          entry("NUM_INSTANCES=%d", numInstances));
+        numInstances = maxInstances;
+    }
+    return std::make_tuple(responses, numInstances);
 }
 
 } // namespace sensor_info
