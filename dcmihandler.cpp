@@ -40,6 +40,18 @@ using namespace phosphor::logging;
 namespace dcmi
 {
 
+// Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
+static const std::map<uint8_t, std::string> entityIdToName
+{
+    {0x40, "inlet"},
+    {0x37, "inlet"},
+    {0x41, "cpu"},
+    {0x03, "cpu"},
+    {0x42, "baseboard"},
+    {0x07, "baseboard"}
+};
+
+
 uint32_t getPcap(sdbusplus::bus::bus& bus)
 {
     auto settingService = ipmi::getService(bus,
@@ -230,6 +242,25 @@ std::string getHostName(void)
         networkConfigObj, networkConfigIntf, hostNameProp);
 
     return value.get<std::string>();
+}
+
+Json parseSensorConfig()
+{
+    std::ifstream jsonFile(configFile);
+    if (!jsonFile.is_open())
+    {
+        log<level::ERR>("Temperature readings JSON file not found");
+        elog<InternalFailure>();
+    }
+
+    auto data = Json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Temperature readings JSON parser failure");
+        elog<InternalFailure>();
+    }
+
+    return data;
 }
 
 } // namespace dcmi
@@ -742,25 +773,6 @@ namespace dcmi
 namespace temp_readings
 {
 
-Json parseConfig()
-{
-    std::ifstream jsonFile(configFile);
-    if (!jsonFile.is_open())
-    {
-        log<level::ERR>("Temperature readings JSON file not found");
-        elog<InternalFailure>();
-    }
-
-    auto data = Json::parse(jsonFile, nullptr, false);
-    if (data.is_discarded())
-    {
-        log<level::ERR>("Temperature readings JSON parser failure");
-        elog<InternalFailure>();
-    }
-
-    return data;
-}
-
 Temperature readTemp(const std::string& dbusService,
                      const std::string& dbusPath)
 {
@@ -815,7 +827,7 @@ std::tuple<Response, NumInstances> read(const std::string& type,
         elog<InternalFailure>();
     }
 
-    auto data = parseConfig();
+    auto data = parseSensorConfig();
     static const std::vector<Json> empty{};
     std::vector<Json> readings = data.value(type, empty);
     size_t numInstances = readings.size();
@@ -868,7 +880,7 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
     size_t numInstances = 0;
-    auto data = parseConfig();
+    auto data = parseSensorConfig();
     static const std::vector<Json> empty{};
     std::vector<Json> readings = data.value(type, empty);
     numInstances = readings.size();
@@ -925,17 +937,6 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    // Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
-    static const std::map<uint8_t, std::string> entityIdToName
-    {
-        {0x40, "inlet"},
-        {0x37, "inlet"},
-        {0x41, "cpu"},
-        {0x03, "cpu"},
-        {0x42, "baseboard"},
-        {0x07, "baseboard"}
-    };
-
     auto requestData =
         reinterpret_cast<const dcmi::GetTempReadingsRequest*>(request);
     auto responseData =
@@ -949,8 +950,8 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     *data_len = 0;
 
-    auto it = entityIdToName.find(requestData->entityId);
-    if (it == entityIdToName.end())
+    auto it = dcmi::entityIdToName.find(requestData->entityId);
+    if (it == dcmi::entityIdToName.end())
     {
         log<level::ERR>("Unknown Entity ID",
                         entry("ENTITY_ID=%d", requestData->entityId));
@@ -1097,6 +1098,118 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+namespace dcmi
+{
+namespace sensor_info
+{
+
+std::tuple<Response, NumInstances> read(const std::string& type,
+                                        uint8_t instance,
+                                        const Json& config)
+{
+    Response empty{};
+    return std::make_tuple(empty, 0);
+}
+
+std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
+                                               uint8_t instanceStart,
+                                               const Json& config)
+{
+    ResponseList empty{};
+    return std::make_tuple(empty, 0);
+}
+
+} // namespace sensor_info
+} // namespace dcmi
+
+ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                         ipmi_request_t request, ipmi_response_t response,
+                         ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData =
+        reinterpret_cast<const dcmi::GetSensorInfoRequest*>(request);
+    auto responseData =
+        reinterpret_cast<dcmi::GetSensorInfoResponseHdr*>(response);
+
+    if (*data_len != sizeof(dcmi::GetSensorInfoRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    *data_len = 0;
+
+    auto it = dcmi::entityIdToName.find(requestData->entityId);
+    if (it == dcmi::entityIdToName.end())
+    {
+        log<level::ERR>("Unknown Entity ID",
+                        entry("ENTITY_ID=%d", requestData->entityId));
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        log<level::ERR>("Invalid Group ID",
+                        entry("GROUP_ID=%d", requestData->groupID));
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (requestData->sensorType != dcmi::temperatureSensorType)
+    {
+        log<level::ERR>("Invalid sensor type",
+                        entry("SENSOR_TYPE=%d", requestData->sensorType));
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    dcmi::sensor_info::ResponseList sensors{};
+    static dcmi::Json config{};
+    static bool parsed = false;
+
+    try
+    {
+        if (!parsed)
+        {
+            config = dcmi::parseSensorConfig();
+            parsed = true;
+        }
+
+        if (!requestData->entityInstance)
+        {
+            // Read all instances
+            std::tie(sensors, responseData->numInstances) =
+                dcmi::sensor_info::readAll(it->second,
+                                           requestData->instanceStart,
+                                           config);
+        }
+        else
+        {
+            // Read one instance
+            sensors.resize(1);
+            std::tie(sensors[0], responseData->numInstances) =
+                dcmi::sensor_info::read(it->second,
+                                        requestData->entityInstance,
+                                        config);
+        }
+        responseData->numRecords = sensors.size();
+    }
+    catch (InternalFailure& e)
+    {
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    responseData->groupID = dcmi::groupExtId;
+    size_t payloadSize = sensors.size() * sizeof(dcmi::sensor_info::Response);
+    if (!sensors.empty())
+    {
+        memcpy(responseData + 1, // copy payload right after the response header
+               sensors.data(),
+               payloadSize);
+    }
+    *data_len = sizeof(dcmi::GetSensorInfoResponseHdr) + payloadSize;
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -1158,6 +1271,11 @@ void register_netfn_dcmi_functions()
     // <Get Power Reading>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING,
                            NULL, getPowerReading, PRIVILEGE_USER);
+
+    // <Get Sensor Info>
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_SENSOR_INFO,
+                           NULL, getSensorInfo, PRIVILEGE_USER);
+
     return;
 }
 // 956379
