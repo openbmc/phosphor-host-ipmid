@@ -105,7 +105,8 @@ int convert_version(const char * p, rev_t *rev)
         location = s.find_first_of(".");
         if (location != std::string::npos)
         {
-            rev->major = static_cast<char>(std::stoi(s.substr(0, location), 0, 16));
+            rev->major = static_cast<char>(
+                    std::stoi(s.substr(0, location), 0, 16));
             token = s.substr(location+1);
         }
 
@@ -114,7 +115,8 @@ int convert_version(const char * p, rev_t *rev)
             location = token.find_first_of(".-");
             if (location != std::string::npos)
             {
-                rev->minor = static_cast<char>(std::stoi(token.substr(0, location), 0, 16));
+                rev->minor = static_cast<char>(
+                        std::stoi(token.substr(0, location), 0, 16));
                 token = token.substr(location+1);
             }
         }
@@ -164,8 +166,9 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    const char  *objname = "/org/openbmc/inventory/system/chassis/motherboard/bmc";
-    const char  *iface   = "org.openbmc.InventoryItem";
+    const char *objname =
+            "/org/openbmc/inventory/system/chassis/motherboard/bmc";
+    const char *iface   = "org.openbmc.InventoryItem";
     char *ver = NULL;
     char *busname = NULL;
     int r;
@@ -307,12 +310,14 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     char *busname = NULL;
 
     // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
-    // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte order
+    // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte
+    // order
     // Ex: 0x2332fc2c40e66298e511f2782395a361
 
     const int resp_size = 16; // Response is 16 hex bytes per IPMI Spec
     uint8_t resp_uuid[resp_size]; // Array to hold the formatted response
-    int resp_loc = resp_size-1; // Point resp end of array to save in reverse order
+    // Point resp end of array to save in reverse order
+    int resp_loc = resp_size-1;
     int i = 0;
     char *tokptr = NULL;
     char *id_octet = NULL;
@@ -349,7 +354,8 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     // Traverse the UUID
-    id_octet = strtok_r(uuid, "-", &tokptr); // Get the UUID octects separated by dash
+    // Get the UUID octects separated by dash
+    id_octet = strtok_r(uuid, "-", &tokptr);
 
     if (id_octet == NULL)
     {
@@ -367,11 +373,13 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         for(i = 0; i < tmp_size; i++)
         {
-            char tmp_array[3] = {0}; // Holder of the 2 chars that will become a byte
+            // Holder of the 2 chars that will become a byte
+            char tmp_array[3] = {0};
             strncpy(tmp_array, id_octet, 2); // 2 chars at a time
 
             int resp_byte = strtoul(tmp_array, NULL, 16); // Convert to hex byte
-            memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1); // Copy end to first
+            // Copy end to first
+            memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1);
             resp_loc--;
             id_octet+=2; // Finished with the 2 chars, advance
         }
@@ -499,66 +507,124 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_app_functions()
 {
     // <Get BT Interface Capabilities>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CAP_BIT);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CAP_BIT, NULL, ipmi_app_get_bt_capabilities,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_CAP_BIT);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_CAP_BIT,
+                           NULL,
+                           ipmi_app_get_bt_capabilities,
                            PRIVILEGE_USER);
 
     // <Wildcard Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_WILDCARD);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_WILDCARD, NULL, ipmi_app_wildcard_handler,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_WILDCARD);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_WILDCARD,
+                           NULL,
+                           ipmi_app_wildcard_handler,
                            PRIVILEGE_USER);
 
     // <Reset Watchdog Timer>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_RESET_WD);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_RESET_WD, NULL, ipmi_app_reset_watchdog,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_RESET_WD);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_RESET_WD,
+                           NULL,
+                           ipmi_app_reset_watchdog,
                            PRIVILEGE_OPERATOR);
 
     // <Set Watchdog Timer>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_SET_WD);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL, ipmi_app_set_watchdog,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_SET_WD);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_SET_WD,
+                           NULL,
+                           ipmi_app_set_watchdog,
                            PRIVILEGE_OPERATOR);
 
     // <Get Device ID>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_ID);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_ID, NULL, ipmi_app_get_device_id,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_DEVICE_ID);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_DEVICE_ID,
+                           NULL,
+                           ipmi_app_get_device_id,
                            PRIVILEGE_USER);
 
     // <Get Self Test Results>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS, NULL,
-                    ipmi_app_get_self_test_results, PRIVILEGE_USER);
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_SELF_TEST_RESULTS);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_SELF_TEST_RESULTS,
+                           NULL,
+                           ipmi_app_get_self_test_results,
+                           PRIVILEGE_USER);
 
     // <Get Device GUID>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL, ipmi_app_get_device_guid,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_DEVICE_GUID);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_DEVICE_GUID,
+                           NULL,
+                           ipmi_app_get_device_guid,
                            PRIVILEGE_USER);
 
     // <Set ACPI Power State>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_SET_ACPI);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL, ipmi_app_set_acpi_power_state,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_SET_ACPI);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_SET_ACPI,
+                           NULL,
+                           ipmi_app_set_acpi_power_state,
                            PRIVILEGE_ADMIN);
 
     // <Set Channel Access>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP,
-                                            IPMI_CMD_SET_CHAN_ACCESS);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS, NULL,
-                                    ipmi_set_channel_access, PRIVILEGE_ADMIN);
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_SET_CHAN_ACCESS);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_SET_CHAN_ACCESS,
+                           NULL,
+                           ipmi_set_channel_access,
+                           PRIVILEGE_ADMIN);
 
     // <Get Channel Access>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
-                           ipmi_get_channel_access, PRIVILEGE_USER);
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_CHANNEL_ACCESS);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_CHANNEL_ACCESS,
+                           NULL,
+                           ipmi_get_channel_access,
+                           PRIVILEGE_USER);
 
     // <Get Channel Info Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_CHAN_INFO);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL, ipmi_app_channel_info,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_CHAN_INFO);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_CHAN_INFO,
+                           NULL,
+                           ipmi_app_channel_info,
                            PRIVILEGE_USER);
 
     // <Get System GUID Command>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_APP, IPMI_CMD_GET_SYS_GUID);
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL, ipmi_app_get_sys_guid,
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+           NETFUN_APP,
+           IPMI_CMD_GET_SYS_GUID);
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_SYS_GUID,
+                           NULL,
+                           ipmi_app_get_sys_guid,
                            PRIVILEGE_USER);
     return;
 }
-
 
