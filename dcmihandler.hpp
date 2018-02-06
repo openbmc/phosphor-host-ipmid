@@ -449,6 +449,14 @@ namespace temp_readings
 
 namespace sensor_info
 {
+    /** @brief Create response from JSON config.
+     *
+     *  @param[in] config - JSON config info about DCMI sensors
+     *
+     *  @return Sensor info response
+     */
+    Response createFromJson(const Json& config);
+
     /** @brief Read sensor info and fill up DCMI response for the Get
      *         Sensor Info command. This looks at a specific
      *         instance.
