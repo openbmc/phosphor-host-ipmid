@@ -10,6 +10,9 @@
 namespace dcmi
 {
 
+using NumInstances = size_t;
+using Json = nlohmann::json;
+
 enum Commands
 {
     // Get capability bits
@@ -19,6 +22,7 @@ enum Commands
     SET_POWER_LIMIT = 0x04,
     APPLY_POWER_LIMIT = 0x05,
     GET_ASSET_TAG = 0x06,
+    GET_SENSOR_INFO = 0x07,
     SET_ASSET_TAG = 0x08,
     GET_MGMNT_CTRL_ID_STR = 0x09,
     SET_MGMNT_CTRL_ID_STR = 0x0A,
@@ -36,6 +40,9 @@ static constexpr auto networkConfigIntf =
         "xyz.openbmc_project.Network.SystemConfiguration";
 static constexpr auto hostNameProp = "HostName";
 static constexpr auto temperatureSensorType = 0x01;
+static constexpr auto maxInstances = 255;
+static constexpr auto configFile =
+    "/usr/share/ipmi-providers/dcmi_sensors.json";
 
 namespace assettag
 {
@@ -50,10 +57,7 @@ namespace assettag
 namespace temp_readings
 {
     static constexpr auto maxDataSets = 8;
-    static constexpr auto maxInstances = 255;
     static constexpr auto maxTemp = 127; // degrees C
-    static constexpr auto configFile =
-        "/usr/share/ipmi-providers/dcmi_temp_readings.json";
 
     /** @struct Response
      *
@@ -73,12 +77,27 @@ namespace temp_readings
     } __attribute__((packed));
 
     using ResponseList = std::vector<Response>;
-    using NumInstances = size_t;
     using Value = uint8_t;
     using Sign = bool;
     using Temperature = std::tuple<Value, Sign>;
-    using Json = nlohmann::json;
 }
+
+namespace sensor_info
+{
+    static constexpr auto maxRecords = 8;
+
+    /** @struct Response
+     *
+     *  DCMI payload for Get Sensor Info response
+     */
+    struct Response
+    {
+        uint8_t recordIdLsb;       //!< SDR record id LS byte
+        uint8_t recordIdMsb;       //!< SDR record id MS byte
+    } __attribute__((packed));
+
+    using ResponseList = std::vector<Response>;
+} // namespace sensor_info
 
 static constexpr auto groupExtId = 0xDC;
 
@@ -381,6 +400,13 @@ struct GetTempReadingsResponseHdr
     uint8_t numDataSets;            //!< No. of sets of temperature data
 } __attribute__((packed));
 
+/** @brief Parse out JSON config file containing information
+ *         related to sensors.
+ *
+ *  @return A json object
+ */
+Json parseSensorConfig();
+
 namespace temp_readings
 {
     /** @brief Read temperature from a d-bus object, scale it as per dcmi
@@ -393,13 +419,6 @@ namespace temp_readings
      */
     Temperature readTemp(const std::string& dbusService,
                          const std::string& dbusPath);
-
-    /** @brief Parse out JSON config file containing information
-     *         related to temperature readings.
-     *
-     *  @return A json object
-     */
-    Json parseConfig();
 
     /** @brief Read temperatures and fill up DCMI response for the Get
      *         Temperature Readings command. This looks at a specific
@@ -427,6 +446,39 @@ namespace temp_readings
     std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
                                                    uint8_t instanceStart);
 }
+
+namespace sensor_info
+{
+    /** @brief Read sensor info and fill up DCMI response for the Get
+     *         Sensor Info command. This looks at a specific
+     *         instance.
+     *
+     *  @param[in] type - one of "inlet", "cpu", "baseboard"
+     *  @param[in] instance - A non-zero Entity instance number
+     *  @param[in] config - JSON config info about DCMI sensors
+     *
+     *  @return A tuple, containing a sensor info response and
+     *          number of instances.
+     */
+    std::tuple<Response, NumInstances> read(const std::string& type,
+                                            uint8_t instance,
+                                            const Json& config);
+
+    /** @brief Read sensor info and fill up DCMI response for the Get
+     *         Sensor Info command. This looks at a range of
+     *         instances.
+     *
+     *  @param[in] type - one of "inlet", "cpu", "baseboard"
+     *  @param[in] instanceStart - Entity instance start index
+     *  @param[in] config - JSON config info about DCMI sensors
+     *
+     *  @return A tuple, containing a list of sensor info responses and the
+     *          number of instances.
+     */
+    std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
+                                                   uint8_t instanceStart,
+                                                   const Json& config);
+} // namespace sensor_info
 
 /** @brief Read power reading from power reading sensor object
  *
@@ -467,6 +519,30 @@ struct GetPowerReadingResponse
     uint32_t timeFrame;         //!< Statistics reporting time period in milli
                                 //!< seconds.
     uint8_t powerReadingState;  //!< Power Reading State
+} __attribute__((packed));
+
+/** @struct GetSensorInfoRequest
+ *
+ *  DCMI payload for Get Sensor Info request
+ */
+struct GetSensorInfoRequest
+{
+    uint8_t groupID;             //!< Group extension identification.
+    uint8_t sensorType;          //!< Type of the sensor
+    uint8_t entityId;            //!< Entity ID
+    uint8_t entityInstance;      //!< Entity Instance (0 means all instances)
+    uint8_t instanceStart;       //!< Instance start (used if instance is 0)
+} __attribute__((packed));
+
+/** @struct GetSensorInfoResponseHdr
+ *
+ *  DCMI header for Get Sensor Info response
+ */
+struct GetSensorInfoResponseHdr
+{
+    uint8_t groupID;                //!< Group extension identification.
+    uint8_t numInstances;           //!< No. of instances for requested id
+    uint8_t numRecords;             //!< No. of record ids in the response
 } __attribute__((packed));
 
 } // namespace dcmi
