@@ -1107,16 +1107,86 @@ std::tuple<Response, NumInstances> read(const std::string& type,
                                         uint8_t instance,
                                         const Json& config)
 {
-    Response empty{};
-    return std::make_tuple(empty, 0);
+    Response response{};
+
+    if (!instance)
+    {
+        log<level::ERR>("Expected non-zero instance");
+        elog<InternalFailure>();
+    }
+
+    static const std::vector<Json> empty{};
+    std::vector<Json> readings = config.value(type, empty);
+    size_t numInstances = readings.size();
+    for (const auto& j : readings)
+    {
+        uint8_t instanceNum = j.value("instance", 0);
+        // Not the instance we're interested in
+        if (instanceNum != instance)
+        {
+            continue;
+        }
+
+        uint16_t recordId = j.value("record_id", 0);
+        response.recordIdLsb = recordId & 0xFF;
+        response.recordIdMsb = (recordId >> 8) & 0xFF;
+
+        // Found the instance we're interested in
+        break;
+    }
+
+    if (numInstances > maxInstances)
+    {
+        numInstances = maxInstances;
+    }
+    return std::make_tuple(response, numInstances);
 }
 
 std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
                                                uint8_t instanceStart,
                                                const Json& config)
 {
-    ResponseList empty{};
-    return std::make_tuple(empty, 0);
+    ResponseList response{};
+
+    size_t numInstances = 0;
+    static const std::vector<Json> empty{};
+    std::vector<Json> readings = config.value(type, empty);
+    numInstances = readings.size();
+    for (const auto& j : readings)
+    {
+        try
+        {
+            // Max of 8 records
+            if (response.size() == maxRecords)
+            {
+                break;
+            }
+
+            uint8_t instanceNum = j.value("instance", 0);
+            // Not in the instance range we're interested in
+            if (instanceNum < instanceStart)
+            {
+                continue;
+            }
+
+            Response r{};
+            uint16_t recordId = j.value("record_id", 0);
+            r.recordIdLsb = recordId & 0xFF;
+            r.recordIdMsb = (recordId >> 8) & 0xFF;
+            response.push_back(r);
+        }
+        catch (std::exception& e)
+        {
+            log<level::DEBUG>(e.what());
+            continue;
+        }
+    }
+
+    if (numInstances > maxInstances)
+    {
+        numInstances = maxInstances;
+    }
+    return std::make_tuple(response, numInstances);
 }
 
 } // namespace sensor_info
