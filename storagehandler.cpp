@@ -11,6 +11,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <sdbusplus/server.hpp>
 
+#include "fruread.hpp"
 #include "host-ipmid/ipmid-api.h"
 #include "read_fru_data.hpp"
 #include "selutility.hpp"
@@ -24,6 +25,8 @@ void register_netfn_storage_functions() __attribute__((constructor));
 
 unsigned int   g_sel_time    = 0xFFFFFFFF;
 extern unsigned short g_sel_reserve;
+extern const ipmi::sensor::IdInfoMap sensors;
+extern const FruMap frus;
 
 namespace {
 constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
@@ -665,6 +668,29 @@ ipmi_ret_t ipmi_storage_read_fru_data(
     return rc;
 }
 
+ipmi_ret_t ipmi_get_repository_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    constexpr auto sdrVersion = 0x51;
+    auto responseData =
+        reinterpret_cast<GetRepositoryInfoResponse*>(response);
+
+    memset(responseData, 0 , sizeof(GetRepositoryInfoResponse));
+
+    responseData->sdrVersion = sdrVersion;
+
+    uint16_t records = frus.size() + sensors.size();
+    responseData->recordCountMs = records >> 8;
+    responseData->recordCountLs = records;
+
+    responseData->freeSpace[0] = 0xFF;
+    responseData->freeSpace[1] = 0xFF;
+
+    *data_len = sizeof(GetRepositoryInfoResponse);
+
+    return IPMI_CC_OK;
+}
 
 void register_netfn_storage_functions()
 {
@@ -722,6 +748,11 @@ void register_netfn_storage_functions()
             IPMI_CMD_READ_FRU_DATA);
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
             ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
+
+    // <Get Repository Info>
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_REPOSITORY_INFO,
+                           nullptr, ipmi_get_repository_info,
+                           PRIVILEGE_USER);
 
     ipmi::fru::registerCallbackHandler();
     return;
