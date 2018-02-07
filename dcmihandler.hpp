@@ -20,6 +20,8 @@ enum Commands
     SET_ASSET_TAG = 0x08,
     GET_MGMNT_CTRL_ID_STR = 0x09,
     SET_MGMNT_CTRL_ID_STR = 0x0A,
+    SET_CONF_PARAMS = 0x12,
+    GET_CONF_PARAMS = 0x13,
 };
 
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
@@ -32,6 +34,13 @@ static constexpr auto networkConfigObj =
 static constexpr auto networkConfigIntf =
         "xyz.openbmc_project.Network.SystemConfiguration";
 static constexpr auto hostNameProp = "HostName";
+static constexpr auto ethernetIntf = "xyz.openbmc_project.Network.EthernetInterface";
+static constexpr auto ethernetObj = "/xyz/openbmc_project/network/eth0";
+static constexpr auto dhcpObj = "/xyz/openbmc_project/network/config/dhcp";
+static constexpr auto dhcpIntf = "xyz.openbmc_project.Network.DHCPConfiguration";
+static constexpr auto systemBusName = "org.freedesktop.systemd1";
+static constexpr auto systemPath = "/org/freedesktop/systemd1";
+static constexpr auto systemIntf = "org.freedesktop.systemd1.Manager";
 
 namespace assettag
 {
@@ -319,6 +328,92 @@ struct DCMICapEntry
 };
 
 using DCMICaps = std::map<DCMICapParameters, DCMICapEntry>;
+
+/**
+ *  @brief Parameters for DCMI Configuration Parameters
+ */
+enum DCMI_CONFIG_PARAMS
+{
+    DCMI_ACTIVATE_DHCP = 1,
+    DCMI_DISCOVER_CONFIG,
+    DCMI_DHCP_TIMING1,
+    DCMI_DHCP_TIMING2,
+    DCMI_DHCP_TIMING3,
+    DCMI_RAND_BACK_OFF_MASK = 0x80,
+    DCMI_OPTION_60_43_MASK = 0x02,
+    DCMI_OPTION_12_MASK = 0x01,
+};
+
+/** @struct SetConfParamsRequest
+ *
+ *  DCMI Set DCMI Configuration Parameters Command.
+ *  Refer DCMI specification Version 1.1 Section 6.1.2
+ */
+struct SetConfParamsRequest
+{
+    uint8_t groupID;        //!< Group extension identification.
+    uint8_t paramSelect;    //!< Parameter selector.
+    uint8_t setSelect;      //!< Set Selector (use 00h for parameters that only
+                            //!< have one set).
+    uint8_t data[];         //!< Configuration parameter data.
+} __attribute__((packed));
+
+/** @struct SetConfParamsResponse
+ *
+ *  DCMI Set DCMI Configuration Parameters Command response.
+ *  Refer DCMI specification Version 1.1 Section 6.1.2
+ */
+struct SetConfParamsResponse
+{
+    uint8_t  groupID;        //!< Group extension identification.
+} __attribute__((packed));
+
+/** @struct GetConfParamsRequest
+ *
+ *  DCMI GGet DCMI Configuration Parameters Command.
+ *  Refer DCMI specification Version 1.1 Section 6.1.3
+ */
+struct GetConfParamsRequest
+{
+    uint8_t groupID;        //!< Group extension identification.
+    uint8_t paramSelect;    //!< Parameter selector.
+    uint8_t setSelect;      //!< Set Selector. Selects a given set of parameters
+                            //!< under a given Parameter selector value. 00h if
+                            //!< parameter doesn't use a Set Selector.
+} __attribute__((packed));
+
+/** @struct GetConfParamsResponse
+ *
+ *  DCMI Get DCMI Configuration Parameters Command response.
+ *  Refer DCMI specification Version 1.1 Section 6.1.3
+ */
+struct GetConfParamsResponse
+{
+    uint8_t groupID;         //!< Group extension identification.
+    uint8_t major;           //!< DCMI Spec Conformance - major ver = 01h.
+    uint8_t minor;           //!< DCMI Spec Conformance - minor ver = 05h.
+    uint8_t paramRevision;   //!< Parameter Revision = 01h.
+    uint8_t data[];          //!< Parameter data.
+
+} __attribute__((packed));
+
+/** @brief Restart the systemd unit
+ *  @param[in] unit - systemd unit name which needs to be
+ *                    restarted.
+ */
+inline void restartSystemdUnit(const std::string& unit)
+{
+    auto bus = sdbusplus::bus::new_default();
+    auto method = bus.new_method_call(
+                      systemBusName,
+                      systemPath,
+                      systemIntf,
+                      "RestartUnit");
+
+    method.append(unit, "replace");
+    bus.call_noreply(method);
+
+}
 
 } // namespace dcmi
 

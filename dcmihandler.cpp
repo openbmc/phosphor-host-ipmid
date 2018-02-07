@@ -27,6 +27,7 @@ constexpr auto POWER_CAP_ENABLE_PROP = "PowerCapEnable";
 constexpr auto DCMI_PARAMETER_REVISION = 2;
 constexpr auto DCMI_SPEC_MAJOR_VERSION = 1;
 constexpr auto DCMI_SPEC_MINOR_VERSION = 5;
+constexpr auto DCMI_CONFIG_PARAMETER_REVISION = 1;
 constexpr auto DCMI_CAP_JSON_FILE = "/usr/share/ipmi-providers/dcmi_cap.json";
 
 using namespace phosphor::logging;
@@ -224,6 +225,46 @@ std::string getHostName(void)
         networkConfigObj, networkConfigIntf, hostNameProp);
 
     return value.get<std::string>();
+}
+
+bool getDHCEnabled()
+{
+    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+
+    auto service = ipmi::getService(bus, ethernetIntf, ethernetObj);
+    auto value = ipmi::getDbusProperty(bus, service,
+                                       ethernetObj, ethernetIntf, "DHCPEnabled");
+
+    return value.get<bool>();
+}
+
+
+void setDHCEnabled(bool value)
+{
+    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+
+    auto service = ipmi::getService(bus, ethernetIntf, ethernetObj);
+    ipmi::setDbusProperty(bus, service, ethernetObj, ethernetIntf,
+                          "DHCPEnabled", value);
+}
+
+bool getDHCProperty(std::string prop)
+{
+    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+
+    auto service = ipmi::getService(bus, dhcpIntf, dhcpObj);
+    auto value = ipmi::getDbusProperty(bus, service, dhcpObj, dhcpIntf, prop);
+
+    return value.get<bool>();
+}
+
+
+void setDHCProperty(std::string prop, bool value)
+{
+    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+
+    auto service = ipmi::getService(bus, dhcpIntf, dhcpObj);
+    ipmi::setDbusProperty(bus, service, dhcpObj, dhcpIntf, prop, value);
 }
 
 } // namespace dcmi
@@ -731,6 +772,177 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const dcmi::SetConfParamsRequest*>
+                       (request);
+    auto responseData = reinterpret_cast<dcmi::SetConfParamsResponse*>
+                        (response);
+
+    *data_len = 0;
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    try
+    {
+        auto enableDHCP = dcmi::getDHCEnabled();
+        auto enabledHCPOpt12 = dcmi::getDHCProperty("dHCPOpt12Enabled");
+        auto enabledHCPOpt60Opt43 = dcmi::getDHCProperty(
+                                        "dHCPOpt60Opt43Enabled");
+
+        // Take action based on the Parameter Selector
+        switch (requestData->paramSelect)
+        {
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_ACTIVATE_DHCP:
+                if (requestData->data[0] == 0x01)
+                {
+                    // If DHCP is enabled, Trigger DHCP protocol restart
+                    if (enableDHCP)
+                    {
+                        dcmi::restartSystemdUnit("systemd-networkd.service");
+                    }
+                }
+                break;
+
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DISCOVER_CONFIG:
+
+                if (requestData->data[0] &
+                    dcmi::DCMI_CONFIG_PARAMS::DCMI_OPTION_12_MASK)
+                {
+                    if (!enabledHCPOpt12)
+                    {
+                        dcmi::setDHCProperty("dHCPOpt12Enabled", true);
+                    }
+
+                }
+                else
+                {
+                    if (enabledHCPOpt12)
+                    {
+                        dcmi::setDHCProperty("dHCPOpt12Enabled", false);
+                    }
+
+                }
+
+                if (requestData->data[0] &
+                    dcmi::DCMI_CONFIG_PARAMS::DCMI_OPTION_60_43_MASK)
+                {
+                    if (!enabledHCPOpt60Opt43)
+                    {
+                        dcmi::setDHCProperty("dHCPOpt60Opt43Enabled", true);
+                    }
+                }
+                else
+                {
+                    if (enabledHCPOpt60Opt43)
+                    {
+                        dcmi::setDHCProperty("dHCPOpt60Opt43Enabled", false);
+                    }
+                }
+                // Systemd-networkd doesn't support Random Back off
+                if (requestData->data[0] &
+                    dcmi::DCMI_CONFIG_PARAMS::DCMI_RAND_BACK_OFF_MASK)
+                {
+                    return IPMI_CC_INVALID;
+                }
+                break;
+            // Systemd-networkd doesn't allow to configure DHCP timigs
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DHCP_TIMING1:
+                return IPMI_CC_INVALID;
+                break;
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DHCP_TIMING2:
+                return IPMI_CC_INVALID;
+                break;
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DHCP_TIMING3:
+                return IPMI_CC_INVALID;
+                break;
+            default:
+                return IPMI_CC_INVALID;
+        }
+    }
+    catch (InternalFailure& e)
+    {
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    responseData->groupID = dcmi::groupExtId;
+    *data_len = sizeof(dcmi::SetConfParamsResponse);
+
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+
+    auto requestData = reinterpret_cast<const dcmi::GetConfParamsRequest*>
+                       (request);
+    auto responseData = reinterpret_cast<dcmi::GetConfParamsResponse*>
+                        (response);
+    *data_len = 0;
+    if (requestData->groupID != dcmi::groupExtId)
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    try
+    {
+        auto enabledHCPOpt12 = dcmi::getDHCProperty("dHCPOpt12Enabled");
+        auto enabledHCPOpt60Opt43 = dcmi::getDHCProperty(
+                                        "dHCPOpt60Opt43Enabled");
+
+        // Take action based on the Parameter Selector
+        switch (requestData->paramSelect)
+        {
+                responseData->data[0] = 0x00;
+
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_ACTIVATE_DHCP:
+                responseData->data[0] = 0x00;
+                break;
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DISCOVER_CONFIG:
+                if (enabledHCPOpt12)
+                {
+                    responseData->data[0] |=
+                        dcmi::DCMI_CONFIG_PARAMS::DCMI_OPTION_12_MASK;
+                }
+                if (enabledHCPOpt60Opt43)
+                {
+                    responseData->data[0] |=
+                        dcmi::DCMI_CONFIG_PARAMS::DCMI_OPTION_60_43_MASK;
+                }
+                break;
+            // Get below values form Systemd-networkd source code
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DHCP_TIMING1:
+                responseData->data[0] = 0xFF;
+                break;
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DHCP_TIMING2:
+                responseData->data[0] = 0xFF;
+                break;
+            case dcmi::DCMI_CONFIG_PARAMS::DCMI_DHCP_TIMING3:
+                responseData->data[0] = 0xFF;
+                break;
+            default:
+                return IPMI_CC_INVALID;
+        }
+    }
+    catch (InternalFailure& e)
+    {
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    responseData->groupID = dcmi::groupExtId;
+    responseData->major = DCMI_SPEC_MAJOR_VERSION;
+    responseData->minor = DCMI_SPEC_MINOR_VERSION;
+    responseData->paramRevision = DCMI_CONFIG_PARAMETER_REVISION;
+    *data_len = sizeof(dcmi::GetConfParamsResponse) + 1;
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
@@ -784,6 +996,20 @@ void register_netfn_dcmi_functions()
     // <Get DCMI capabilities>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
         NULL, getDCMICapabilities, PRIVILEGE_USER);
+
+    // <Get DCMI Configuration Parameters>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+        NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS);
+
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS,
+        NULL, getDCMIConfParams, PRIVILEGE_USER);
+
+    // <Set DCMI Configuration Parameters>
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
+        NETFUN_GRPEXT, dcmi::Commands::SET_CONF_PARAMS);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_CONF_PARAMS,
+        NULL, setDCMIConfParams, PRIVILEGE_ADMIN);
+
     return;
 }
 // 956379
