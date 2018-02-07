@@ -24,7 +24,7 @@ static constexpr auto chassis          = "Chassis";
 static constexpr auto product          = "Product";
 
 static constexpr auto specVersion              = 0x1;
-static constexpr auto recordUnitOfMeasurment   = 0x8; //size in bytes
+static constexpr auto recordUnitOfMeasurement   = 0x8; //size in bytes
 static constexpr auto checksumSize             = 0x1; //size in bytes
 static constexpr auto recordNotPresent         = 0x0;
 static constexpr auto englishLanguageCode      = 0x0;
@@ -76,10 +76,10 @@ void appendDataChecksum(FruAreaData& data)
  */
 void padData(FruAreaData& data)
 {
-    uint8_t pad = (data.size() + checksumSize) % recordUnitOfMeasurment;
+    uint8_t pad = (data.size() + checksumSize) % recordUnitOfMeasurement;
     if (pad)
     {
-        data.resize((data.size() + recordUnitOfMeasurment - pad));
+        data.resize((data.size() + recordUnitOfMeasurement - pad));
     }
 }
 
@@ -189,12 +189,12 @@ void buildCommonHeaderSection(
     else
     {
         // offset should be multiple of 8.
-        auto remainder = offset % recordUnitOfMeasurment;
+        auto remainder = offset % recordUnitOfMeasurement;
         // add the padding bytes in the offset so that offset
         // will be multiple of 8 byte.
-        offset += (remainder > 0) ? recordUnitOfMeasurment - remainder : 0;
+        offset += (remainder > 0) ? recordUnitOfMeasurement - remainder : 0;
         //Place data to define offset to area data section
-        data.emplace_back(offset / recordUnitOfMeasurment);
+        data.emplace_back(offset / recordUnitOfMeasurement);
 
         offset += infoAreaSize;
     }
