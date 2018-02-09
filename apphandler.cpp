@@ -533,7 +533,7 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_RESET_WD,
                            NULL,
-                           ipmi_app_reset_watchdog,
+                           ipmi_app_watchdog_reset,
                            PRIVILEGE_OPERATOR);
 
     // <Set Watchdog Timer>
@@ -543,7 +543,7 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_SET_WD,
                            NULL,
-                           ipmi_app_set_watchdog,
+                           ipmi_app_watchdog_set,
                            PRIVILEGE_OPERATOR);
 
     // <Get Device ID>
