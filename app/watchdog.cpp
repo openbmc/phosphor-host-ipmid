@@ -1,25 +1,16 @@
 #include "watchdog.hpp"
-#include "utils.hpp"
 
-#include <systemd/sd-bus.h>
+#include <cstdint>
+#include <endian.h>
+#include <phosphor-logging/log.hpp>
+#include <string>
 
-#include <mapper.h>
-#include <sdbusplus/bus.hpp>
+#include "watchdog_service.hpp"
+#include "host-ipmid/ipmid-api.h"
+#include "ipmid.hpp"
 
-extern sd_bus *bus;
-
-struct set_wd_data_t {
-    uint8_t timer_use;
-    uint8_t timer_action;
-    uint8_t preset;
-    uint8_t flags;
-    uint8_t ls;
-    uint8_t ms;
-}  __attribute__ ((packed));
-
-static constexpr auto objname = "/xyz/openbmc_project/watchdog/host0";
-static constexpr auto iface = "xyz.openbmc_project.State.Watchdog";
-static constexpr auto property_iface = "org.freedesktop.DBus.Properties";
+using phosphor::logging::level;
+using phosphor::logging::log;
 
 ipmi_ret_t ipmi_app_watchdog_reset(
         ipmi_netfn_t netfn,
@@ -29,102 +20,55 @@ ipmi_ret_t ipmi_app_watchdog_reset(
         ipmi_data_len_t data_len,
         ipmi_context_t context)
 {
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
-    char *busname = NULL;
-
-    // Current properties of the watchdog daemon.
-    int enabled = 0;
-    uint64_t interval = 0;
-
-    // Status code.
-    ipmi_ret_t ret = IPMI_CC_UNSPECIFIED_ERROR;
+    // We never return data with this command so immediately get rid of it
     *data_len = 0;
 
-    printf("WATCHDOG RESET\n");
-    // Get bus name
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s bus name: %s\n",
-                objname, strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
+    try
+    {
+        WatchdogService wd_service;
+        WatchdogService::Properties wd_prop = wd_service.getProperties();
+
+        // Reset the countdown to make sure we don't expire our timer
+        wd_service.setTimeRemaining(wd_prop.interval);
+
+        // The spec states that the timer is activated by reset
+        wd_service.setEnabled(true);
+
+        return IPMI_CC_OK;
     }
-
-    // Check if our watchdog is running
-    r = sd_bus_call_method(bus, busname, objname, property_iface,
-                           "Get", &error, &reply, "ss",
-                           iface, "Enabled");
-    if(r < 0) {
-        fprintf(stderr, "Failed to get current Enabled msg: %s\n",
-                strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
+    catch (const std::exception& e)
+    {
+        const std::string e_str = std::string("wd_reset: ") + e.what();
+        log<level::ERR>(e_str.c_str());
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
-
-    // Now extract the value
-    r = sd_bus_message_read(reply, "v", "b", &enabled);
-    if (r < 0) {
-        fprintf(stderr, "Failed to read current Enabled: %s\n",
-                strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
+    catch (...)
+    {
+        log<level::ERR>("wd_reset: Unknown Error");
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
-
-    // If we are not enable we should indicate that
-    if (!enabled) {
-        printf("Watchdog not enabled during reset\n");
-        ret = IPMI_WDOG_CC_NOT_INIT;
-        goto finish;
-    }
-
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-
-    // Get the current interval and set it back.
-    r = sd_bus_call_method(bus, busname, objname, property_iface,
-                           "Get", &error, &reply, "ss",
-                           iface, "Interval");
-
-    if(r < 0) {
-        fprintf(stderr, "Failed to get current Interval msg: %s\n",
-                strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
-    }
-
-    // Now extract the value
-    r = sd_bus_message_read(reply, "v", "t", &interval);
-    if (r < 0) {
-        fprintf(stderr, "Failed to read current interval: %s\n",
-                strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
-    }
-
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-
-    // Set watchdog timer
-    r = sd_bus_call_method(bus, busname, objname, property_iface,
-                           "Set", &error, &reply, "ssv",
-                           iface, "TimeRemaining", "t", interval);
-    if(r < 0) {
-        fprintf(stderr, "Failed to refresh the timer: %s\n",
-                strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
-    }
-
-    ret = IPMI_CC_OK;
-finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
-
-    return ret;
 }
+
+static constexpr uint8_t wd_dont_stop = 0x1 << 6;
+static constexpr uint8_t wd_timeout_action_mask = 0x3;
+
+enum class IpmiAction : uint8_t {
+    None = 0x0,
+    HardReset = 0x1,
+    PowerOff = 0x2,
+    PowerCycle = 0x3,
+};
+
+struct wd_set_req {
+    uint8_t timer_use;
+    uint8_t timer_action;
+    uint8_t pretimeout;  // (seconds)
+    uint8_t expire_flags;
+    uint16_t initial_countdown;  // Little Endian (deciseconds)
+}  __attribute__ ((packed));
+static_assert(sizeof(wd_set_req) == 6, "wd_set_req has invalid size.");
+static_assert(sizeof(wd_set_req) <= MAX_IPMI_BUFFER,
+        "wd_get_res can't fit in request buffer.");
 
 ipmi_ret_t ipmi_app_watchdog_set(
         ipmi_netfn_t netfn,
@@ -134,91 +78,57 @@ ipmi_ret_t ipmi_app_watchdog_set(
         ipmi_data_len_t data_len,
         ipmi_context_t context)
 {
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
-    ipmi_ret_t ret = IPMI_CC_UNSPECIFIED_ERROR;
-
-    set_wd_data_t *reqptr = (set_wd_data_t*) request;
-
-    uint16_t timer = 0;
-
-    // Making this uint64_t to match with provider
-    uint64_t timer_ms = 0;
-    char *busname = NULL;
+    // Extract the request data
+    if (*data_len < sizeof(wd_set_req))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    wd_set_req req;
+    memcpy(&req, request, sizeof(req));
+    req.initial_countdown = le16toh(req.initial_countdown);
     *data_len = 0;
 
-    // Get number of 100ms intervals
-    timer = (((uint16_t)reqptr->ms) << 8) + reqptr->ls;
-    // Get timer value in ms
-    timer_ms = timer * 100;
-
-    printf("WATCHDOG SET Timer:[0x%X] 100ms intervals\n",timer);
-
-    // Get bus name
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s bus name: %s\n",
-                objname, strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
-    }
-
-    // Disable watchdog if running
-    r = sd_bus_call_method(bus, busname, objname, property_iface,
-                           "Set", &error, &reply, "ssv",
-                           iface, "Enabled", "b", false);
-    if(r < 0) {
-        fprintf(stderr, "Failed to disable Watchdog: %s\n",
-                    strerror(-r));
-        ret = IPMI_CC_BUSY;
-        goto finish;
-    }
-
-    /*
-     * If the action is 0, it means, do nothing.  Multiple actions on timer
-     * expiration aren't supported by phosphor-watchdog yet, so when the
-     * action set is "none", we should just leave the timer disabled.
-     */
-    if (0 == reqptr->timer_action)
+    try
     {
-        ret = IPMI_CC_OK;
-        goto finish;
-    }
-
-    if (reqptr->timer_use & 0x40)
-    {
-        sd_bus_error_free(&error);
-        reply = sd_bus_message_unref(reply);
-
-        // Set the Interval for the Watchdog
-        r = sd_bus_call_method(bus, busname, objname, property_iface,
-                               "Set", &error, &reply, "ssv",
-                               iface, "Interval", "t", timer_ms);
-        if(r < 0) {
-            fprintf(stderr, "Failed to set new expiration time: %s\n",
-                    strerror(-r));
-            ret = IPMI_CC_BUSY;
-            goto finish;
+        WatchdogService wd_service;
+        // Stop the timer if the don't stop bit is not set
+        if (!(req.timer_use & wd_dont_stop))
+        {
+            wd_service.setEnabled(false);
         }
 
-        // Now Enable Watchdog
-        r = sd_bus_call_method(bus, busname, objname, property_iface,
-                               "Set", &error, &reply, "ssv",
-                               iface, "Enabled", "b", true);
-        if(r < 0) {
-            fprintf(stderr, "Failed to Enable Watchdog: %s\n",
-                    strerror(-r));
-            ret = IPMI_CC_BUSY;
-            goto finish;
+        // Set the action based on the request
+        // Unfortunately we only really support enable or disable
+        // and don't actually support a real action. Until we have proper
+        // action support just map NONE as a disable action.
+        const auto ipmi_action = static_cast<IpmiAction>(
+                req.timer_action & wd_timeout_action_mask);
+        if (ipmi_action == IpmiAction::None)
+        {
+            wd_service.setEnabled(false);
         }
+
+        // Set the new interval and the time remaining deci -> mill seconds
+        const uint64_t interval = req.initial_countdown * 100;
+        wd_service.setInterval(interval);
+        wd_service.setTimeRemaining(interval);
+
+        return IPMI_CC_OK;
     }
-
-    ret = IPMI_CC_OK;
-finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
-
-    return ret;
+    catch (const std::domain_error &)
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    catch (const std::exception& e)
+    {
+        const std::string e_str = std::string("wd_set: ") + e.what();
+        log<level::ERR>(e_str.c_str());
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    catch (...)
+    {
+        log<level::ERR>("wd_set: Unknown Error");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
 }

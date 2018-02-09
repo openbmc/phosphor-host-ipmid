@@ -60,6 +60,7 @@ libapphandler_la_SOURCES = \
 	net.cpp \
 	app/channel.cpp \
 	app/watchdog.cpp \
+	app/watchdog_service.cpp \
 	apphandler.cpp \
 	sensorhandler.cpp \
 	storagehandler.cpp \
