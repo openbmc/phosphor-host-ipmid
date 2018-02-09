@@ -271,3 +271,101 @@ ipmi_ret_t ipmi_app_watchdog_set(
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 }
+
+/** @brief Converts a DBUS Watchdog Action to IPMI defined action
+ *  @param[in] wd_action The DBUS Watchdog Action
+ *  @return The IpmiAction that the wd_action maps to
+ */
+IpmiAction wdActionToIpmiAction(Watchdog::Action wd_action)
+{
+    switch(wd_action)
+    {
+        case Watchdog::Action::None:
+        {
+            return IpmiAction::None;
+        }
+        case Watchdog::Action::HardReset:
+        {
+            return IpmiAction::HardReset;
+        }
+        case Watchdog::Action::PowerOff:
+        {
+            return IpmiAction::PowerOff;
+        }
+        case Watchdog::Action::PowerCycle:
+        {
+            return IpmiAction::PowerCycle;
+        }
+        default:
+        {
+            // We have no method via IPMI to signal that the action is unknown
+			// or unmappable in some way.
+            // Just ignore the error and return NONE so the host can reconcile.
+            return IpmiAction::None;
+        }
+    }
+}
+
+struct wd_get_res {
+    uint8_t timer_use;
+    uint8_t timer_action;
+    uint8_t pretimeout;
+    uint8_t expire_flags;
+    uint16_t initial_countdown;  // Little Endian (deciseconds)
+    uint16_t present_countdown;  // Little Endian (deciseconds)
+}  __attribute__ ((packed));
+static_assert(sizeof(wd_get_res) == 8, "wd_get_res has invalid size.");
+static_assert(sizeof(wd_get_res) <= MAX_IPMI_BUFFER,
+        "wd_get_res can't fit in response buffer.");
+
+static constexpr uint8_t wd_dont_log = 0x1 << 7;
+static constexpr uint8_t wd_running = 0x1 << 6;
+
+ipmi_ret_t ipmi_app_watchdog_get(
+        ipmi_netfn_t netfn,
+        ipmi_cmd_t cmd,
+        ipmi_request_t request,
+        ipmi_response_t response,
+        ipmi_data_len_t data_len,
+        ipmi_context_t context)
+{
+    // Assume we will fail and send no data outside the return code
+    *data_len = 0;
+
+    try
+    {
+        WatchdogService wd_service;
+        WatchdogProperties wd_prop = wd_service.getProperties();
+
+        // Build and return the response
+        wd_get_res res;
+        res.timer_use = wd_dont_log;
+        res.timer_action = static_cast<uint8_t>(
+                wdActionToIpmiAction(wd_prop.expireAction));
+        if (wd_prop.enabled)
+        {
+            res.timer_use |= wd_running;
+        }
+        // TODO: Do something about having pretimeout support
+        res.pretimeout = 0;
+        res.expire_flags = 0;
+        // Interval and timeRemaining need converted from milli -> deci seconds
+        res.initial_countdown = htole16(wd_prop.interval / 100);
+        res.present_countdown = htole16(wd_prop.timeRemaining / 100);
+
+        memcpy(response, &res, sizeof(res));
+        *data_len = sizeof(res);
+        return IPMI_CC_OK;
+    }
+    catch (const std::exception& e)
+    {
+        const std::string e_str = std::string("wd_get: ") + e.what();
+        log<level::ERR>(e_str.c_str());
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    catch (...)
+    {
+        log<level::ERR>("wd_get: Unknown Error");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+}
