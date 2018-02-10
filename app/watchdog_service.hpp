@@ -14,6 +14,7 @@ class WatchdogService {
          *         watchdog service.
          */
         struct Properties {
+            bool initialized;
             bool enabled;
             uint64_t interval;
             uint64_t timeRemaining;
@@ -25,6 +26,13 @@ class WatchdogService {
          *  @return A populated WatchdogProperties struct
          */
         Properties getProperties();
+
+        /** @brief Sets the value of the initialized property on the host
+		 *         watchdog
+         *
+         *  @param[in] initialized - The new initializedvalue
+         */
+        void setInitialized(bool initialized);
 
         /** @brief Sets the value of the enabled property on the host watchdog
          *

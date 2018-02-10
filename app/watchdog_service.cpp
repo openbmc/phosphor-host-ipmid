@@ -34,6 +34,7 @@ WatchdogService::Properties WatchdogService::getProperties()
     std::map<std::string, variant<bool, uint64_t, std::string>> properties;
     response.read(properties);
     Properties wd_prop;
+    wd_prop.initialized = get<bool>(properties.at("Initialized"));
     wd_prop.enabled = get<bool>(properties.at("Enabled"));
     wd_prop.interval = get<uint64_t>(properties.at("Interval"));
     wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
@@ -51,6 +52,11 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
     {
         throw std::runtime_error(std::string("Failed to set property: ") + key);
     }
+}
+
+void WatchdogService::setInitialized(bool initialized)
+{
+    setProperty("Initialized", initialized);
 }
 
 void WatchdogService::setEnabled(bool enabled)
