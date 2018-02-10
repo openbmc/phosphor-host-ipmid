@@ -17,6 +17,7 @@ using phosphor::logging::level;
 using phosphor::logging::log;
 
 struct WatchdogProperties {
+    bool initialized;
     bool enabled;
     uint64_t interval;
     uint64_t timeRemaining;
@@ -26,6 +27,7 @@ class WatchdogService {
     public:
         WatchdogService();
         WatchdogProperties getProperties();
+        void setInitialized(bool initialized);
         void setEnabled(bool enabled);
         void setInterval(uint64_t interval);
         void setTimeRemaining(uint64_t remaining);
@@ -62,6 +64,7 @@ WatchdogProperties WatchdogService::getProperties()
     std::map<std::string, variant<bool, uint64_t, std::string>> properties;
     response.read(properties);
     WatchdogProperties wd_prop;
+    wd_prop.initialized = get<bool>(properties.at("Initialized"));
     wd_prop.enabled = get<bool>(properties.at("Enabled"));
     wd_prop.interval = get<uint64_t>(properties.at("Interval"));
     wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
@@ -79,6 +82,11 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
     {
         throw std::runtime_error(std::string("Failed to set property: ") + key);
     }
+}
+
+void WatchdogService::setInitialized(bool initialized)
+{
+    setProperty("Initialized", initialized);
 }
 
 void WatchdogService::setEnabled(bool enabled)
@@ -111,6 +119,13 @@ ipmi_ret_t ipmi_app_watchdog_reset(
     {
         WatchdogService wd_service;
         WatchdogProperties wd_prop = wd_service.getProperties();
+
+        // Notify the caller if we haven't initialized our timer yet
+        // so it can configure actions and timeouts
+        if (!wd_prop.initialized)
+        {
+            return IPMI_WDOG_CC_NOT_INIT;
+        }
 
         // Reset the countdown to make sure we don't expire our timer
         wd_service.setTimeRemaining(wd_prop.interval);
@@ -197,6 +212,9 @@ ipmi_ret_t ipmi_app_watchdog_set(
         const uint64_t interval = req.initial_countdown * 100;
         wd_service.setInterval(interval);
         wd_service.setTimeRemaining(interval);
+
+        // Mark as initialized so that future resets behave correctly
+        wd_service.setInitialized(true);
 
         return IPMI_CC_OK;
     }
