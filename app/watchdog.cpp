@@ -28,6 +28,13 @@ ipmi_ret_t ipmi_app_watchdog_reset(
         WatchdogService wd_service;
         WatchdogService::Properties wd_prop = wd_service.getProperties();
 
+        // Notify the caller if we haven't initialized our timer yet
+        // so it can configure actions and timeouts
+        if (!wd_prop.initialized)
+        {
+            return IPMI_WDOG_CC_NOT_INIT;
+        }
+
         // Reset the countdown to make sure we don't expire our timer
         wd_service.setTimeRemaining(wd_prop.interval);
 
@@ -113,6 +120,9 @@ ipmi_ret_t ipmi_app_watchdog_set(
         const uint64_t interval = req.initial_countdown * 100;
         wd_service.setInterval(interval);
         wd_service.setTimeRemaining(interval);
+
+        // Mark as initialized so that future resets behave correctly
+        wd_service.setInitialized(true);
 
         return IPMI_CC_OK;
     }
