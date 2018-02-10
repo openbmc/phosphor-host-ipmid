@@ -6,6 +6,7 @@
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
 #include <string>
+#include <xyz/openbmc_project/State/Watchdog/server.hpp>
 
 #include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
@@ -13,12 +14,15 @@
 
 using sdbusplus::message::variant_ns::get;
 using sdbusplus::message::variant_ns::variant;
+using sdbusplus::xyz::openbmc_project::State::server::convertForMessage;
+using sdbusplus::xyz::openbmc_project::State::server::Watchdog;
 using phosphor::logging::level;
 using phosphor::logging::log;
 
 struct WatchdogProperties {
     bool initialized;
     bool enabled;
+    Watchdog::Action expireAction;
     uint64_t interval;
     uint64_t timeRemaining;
 };
@@ -29,6 +33,7 @@ class WatchdogService {
         WatchdogProperties getProperties();
         void setInitialized(bool initialized);
         void setEnabled(bool enabled);
+        void setExpireAction(Watchdog::Action expireAction);
         void setInterval(uint64_t interval);
         void setTimeRemaining(uint64_t remaining);
 
@@ -66,6 +71,8 @@ WatchdogProperties WatchdogService::getProperties()
     WatchdogProperties wd_prop;
     wd_prop.initialized = get<bool>(properties.at("Initialized"));
     wd_prop.enabled = get<bool>(properties.at("Enabled"));
+    wd_prop.expireAction = Watchdog::convertActionFromString(
+            get<std::string>(properties.at("ExpireAction")));
     wd_prop.interval = get<uint64_t>(properties.at("Interval"));
     wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
     return wd_prop;
@@ -92,6 +99,11 @@ void WatchdogService::setInitialized(bool initialized)
 void WatchdogService::setEnabled(bool enabled)
 {
     setProperty("Enabled", enabled);
+}
+
+void WatchdogService::setExpireAction(Watchdog::Action expireAction)
+{
+    setProperty("ExpireAction", convertForMessage(expireAction));
 }
 
 void WatchdogService::setInterval(uint64_t interval)
@@ -157,6 +169,37 @@ enum class IpmiAction : uint8_t {
     PowerCycle = 0x3,
 };
 
+/** @brief Converts an IPMI Watchdog Action to DBUS defined action
+ *  @param[in] ipmi_action The IPMI Watchdog Action
+ *  @return The Watchdog Action that the ipmi_action maps to
+ */
+Watchdog::Action ipmiActionToWdAction(IpmiAction ipmi_action)
+{
+    switch(ipmi_action)
+    {
+        case IpmiAction::None:
+        {
+            return Watchdog::Action::None;
+        }
+        case IpmiAction::HardReset:
+        {
+            return Watchdog::Action::HardReset;
+        }
+        case IpmiAction::PowerOff:
+        {
+            return Watchdog::Action::PowerOff;
+        }
+        case IpmiAction::PowerCycle:
+        {
+            return Watchdog::Action::PowerCycle;
+        }
+        default:
+        {
+            throw std::domain_error("IPMI Action is invalid");
+        }
+    }
+}
+
 struct wd_set_req {
     uint8_t timer_use;
     uint8_t timer_action;
@@ -197,15 +240,9 @@ ipmi_ret_t ipmi_app_watchdog_set(
         }
 
         // Set the action based on the request
-        // Unfortunately we only really support enable or disable
-        // and don't actually support a real action. Until we have proper
-        // action support just map NONE as a disable action.
         const auto ipmi_action = static_cast<IpmiAction>(
                 req.timer_action & wd_timeout_action_mask);
-        if (ipmi_action == IpmiAction::None)
-        {
-            wd_service.setEnabled(false);
-        }
+        wd_service.setExpireAction(ipmiActionToWdAction(ipmi_action));
 
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = req.initial_countdown * 100;
