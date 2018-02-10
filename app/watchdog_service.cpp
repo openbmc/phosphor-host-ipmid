@@ -3,12 +3,14 @@
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
 #include <string>
+#include <xyz/openbmc_project/State/Watchdog/server.hpp>
 
 #include "host-ipmid/ipmid-api.h"
 #include "utils.hpp"
 
 using sdbusplus::message::variant_ns::get;
 using sdbusplus::message::variant_ns::variant;
+using sdbusplus::xyz::openbmc_project::State::server;
 
 static constexpr char *wd_path = "/xyz/openbmc_project/watchdog/host0";
 static constexpr char *wd_intf = "xyz.openbmc_project.State.Watchdog";
@@ -36,6 +38,8 @@ WatchdogService::Properties WatchdogService::getProperties()
     Properties wd_prop;
     wd_prop.initialized = get<bool>(properties.at("Initialized"));
     wd_prop.enabled = get<bool>(properties.at("Enabled"));
+    wd_prop.expireAction = server::Watchdog::convertActionFromString(
+            get<std::string>(properties.at("ExpireAction")));
     wd_prop.interval = get<uint64_t>(properties.at("Interval"));
     wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
     return wd_prop;
@@ -62,6 +66,11 @@ void WatchdogService::setInitialized(bool initialized)
 void WatchdogService::setEnabled(bool enabled)
 {
     setProperty("Enabled", enabled);
+}
+
+void WatchdogService::setExpireAction(Action expireAction)
+{
+    setProperty("ExpireAction", server::convertForMessage(expireAction));
 }
 
 void WatchdogService::setInterval(uint64_t interval)

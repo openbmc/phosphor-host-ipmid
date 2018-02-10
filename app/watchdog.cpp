@@ -66,6 +66,37 @@ enum class IpmiAction : uint8_t {
     PowerCycle = 0x3,
 };
 
+/** @brief Converts an IPMI Watchdog Action to DBUS defined action
+ *  @param[in] ipmi_action The IPMI Watchdog Action
+ *  @return The Watchdog Action that the ipmi_action maps to
+ */
+WatchdogService::Action ipmiActionToWdAction(IpmiAction ipmi_action)
+{
+    switch(ipmi_action)
+    {
+        case IpmiAction::None:
+        {
+            return WatchdogService::Action::None;
+        }
+        case IpmiAction::HardReset:
+        {
+            return WatchdogService::Action::HardReset;
+        }
+        case IpmiAction::PowerOff:
+        {
+            return WatchdogService::Action::PowerOff;
+        }
+        case IpmiAction::PowerCycle:
+        {
+            return WatchdogService::Action::PowerCycle;
+        }
+        default:
+        {
+            throw std::domain_error("IPMI Action is invalid");
+        }
+    }
+}
+
 struct wd_set_req {
     uint8_t timer_use;
     uint8_t timer_action;
@@ -106,15 +137,9 @@ ipmi_ret_t ipmi_app_watchdog_set(
         }
 
         // Set the action based on the request
-        // Unfortunately we only really support enable or disable
-        // and don't actually support a real action. Until we have proper
-        // action support just map NONE as a disable action.
         const auto ipmi_action = static_cast<IpmiAction>(
                 req.timer_action & wd_timeout_action_mask);
-        if (ipmi_action == IpmiAction::None)
-        {
-            wd_service.setEnabled(false);
-        }
+        wd_service.setExpireAction(ipmiActionToWdAction(ipmi_action));
 
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = req.initial_countdown * 100;

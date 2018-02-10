@@ -1,5 +1,6 @@
 #pragma once
 #include <sdbusplus/bus.hpp>
+#include <xyz/openbmc_project/State/Watchdog/server.hpp>
 
 /** @class WatchdogService
  *  @brief Access to the running OpenBMC watchdog implementation.
@@ -10,12 +11,15 @@ class WatchdogService {
     public:
         WatchdogService();
 
+        using sdbusplus::xyz::openbmc_project::State::server::Watchdog::Action;
+
         /** @brief Contains a copy of the properties enumerated by the
          *         watchdog service.
          */
         struct Properties {
             bool initialized;
             bool enabled;
+            Action expireAction;
             uint64_t interval;
             uint64_t timeRemaining;
         };
@@ -39,6 +43,12 @@ class WatchdogService {
          *  @param[in] enabled - The new enabled value
          */
         void setEnabled(bool enabled);
+
+        /** @brief Sets the value of the expireAction property on the host watchdog
+         *
+         *  @param[in] expireAction - The new expireAction value
+         */
+        void setExpireAction(Action expireAction);
 
         /** @brief Sets the value of the interval property on the host watchdog
          *
