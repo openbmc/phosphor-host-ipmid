@@ -1037,18 +1037,28 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
         elog<InternalFailure>();
     }
 
-    auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
+    // Return default value if failed to read from DBus object
+    int64_t power = 0;
+    try
+    {
+        auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
 
-    //Read the sensor value and scale properties
-    auto properties = ipmi::getAllDbusProperties(
-                            bus, service, objectPath, SENSOR_VALUE_INTF);
-    auto power = properties[SENSOR_VALUE_PROP].get<int64_t>();
-    auto scale = properties[SENSOR_SCALE_PROP].get<int64_t>();
+        //Read the sensor value and scale properties
+        auto properties = ipmi::getAllDbusProperties(
+                                bus, service, objectPath, SENSOR_VALUE_INTF);
+        auto value = properties[SENSOR_VALUE_PROP].get<int64_t>();
+        auto scale = properties[SENSOR_SCALE_PROP].get<int64_t>();
 
-    // Power reading needs to be scaled with the Scale value using the formula
-    // Value * 10^Scale.
-    power *= std::pow(10, scale);
-
+        // Power reading needs to be scaled with the Scale value using the
+        // formula Value * 10^Scale.
+        power = value * std::pow(10, scale);
+    }
+    catch (std::exception& e)
+    {
+        log<level::INFO>("Failure to read power value from DBus object",
+                        entry("OBJECT_PATH=%s", objectPath),
+                        entry("INTERFACE=%s", SENSOR_VALUE_INTF));
+    }
     return power;
 }
 
