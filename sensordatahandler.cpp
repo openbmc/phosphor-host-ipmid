@@ -266,23 +266,55 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
     std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
-    msg.append(interface->first);
+
+    using NameRef = decltype(std::cref(interface->second.cbegin()->first));
+    using ValueRef = std::reference_wrapper<const Value>;
+    using MessageArgument = std::pair<NameRef, std::vector<ValueRef>>;
+    std::vector<MessageArgument> messageArguments;
+
     for (const auto& property : interface->second)
     {
-        msg.append(property.first);
+        std::vector<ValueRef> valueRefs;
         for (const auto& value : std::get<OffsetValueMap>(property.second))
         {
             if (assertionSet.test(value.first))
             {
-                msg.append(value.second.assert);
+                valueRefs.push_back(value.second.assert);
             }
             if (deassertionSet.test(value.first))
             {
-                msg.append(value.second.deassert);
+                valueRefs.push_back(value.second.deassert);
             }
         }
+
+        if (!valueRefs.empty())
+        {
+            messageArguments.push_back(
+                    std::make_pair(property.first, std::move(valueRefs)));
+        }
     }
-    return updateToDbus(msg);
+
+    if (!messageArguments.empty())
+    {
+        msg.append(interface->first);
+        for (const auto& arg: messageArguments)
+        {
+            const auto& propertyName = arg.first.get();
+            const auto& propertyValues = arg.second;
+
+            msg.append(propertyName);
+
+            for (auto value: propertyValues)
+            {
+                msg.append(value.get());
+            }
+        }
+
+        return updateToDbus(msg);
+    }
+
+    // State did not change.  Nothing to do.
+    return IPMI_CC_OK;
 }
 
 }//namespace set
