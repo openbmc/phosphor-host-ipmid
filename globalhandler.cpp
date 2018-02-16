@@ -1,64 +1,62 @@
 #include "globalhandler.h"
 #include "host-ipmid/ipmid-api.h"
+#include "utils.hpp"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <mapper.h>
 
-const char  *control_object_name  =  "/org/openbmc/control/bmc0";
-const char  *control_intf_name    =  "org.openbmc.control.Bmc";
+#include <sdbusplus/bus.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
+
+using InternalFailure =
+    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+
+constexpr auto control_object_name  =  "/org/openbmc/control/bmc0";
+constexpr auto control_intf_name    =  "org.openbmc.control.Bmc";
 
 void register_netfn_global_functions() __attribute__((constructor));
 
-int dbus_reset(const char *method)
+void dbus_reset(const char *method)
 {
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *m = NULL;
-    sd_bus *bus = NULL;
-    char* connection = NULL;
-    int r;
+    std::string connection;
 
-    bus = ipmid_get_sd_bus_connection();
-    r = mapper_get_service(bus, control_object_name, &connection);
-    if (r < 0) {
+    try
+    {
+      sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+      connection = ipmi::getService(bus,
+                                    control_intf_name,
+                                    control_object_name);
+    }
+    catch (InternalFailure& e)
+    {
         fprintf(stderr, "Failed to get connection for %s: %s\n",
-                control_object_name, strerror(-r));
-        goto finish;
+                control_object_name, e.what());
+        return;
     }
 
-    printf("connection: %s\n", connection);
+    printf("connection: %s\n", connection.c_str());
 
     // Open the system bus where most system services are provided.
-    bus = ipmid_get_sd_bus_connection();
-    
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
     /*
      * Bus, service, object path, interface and method are provided to call
      * the method.
      * Signatures and input arguments are provided by the arguments at the
      * end.
      */
-    r = sd_bus_call_method(bus,
-            connection,                                /* service to contact */
-            control_object_name,                       /* object path */
-            control_intf_name,                         /* interface name */
-            method,                               /* method name */
-            &error,                                    /* object to return error in */
-            &m,                                        /* return message on success */
-            NULL,
-            NULL
+    auto new_method = bus.new_method_call(
+            connection.c_str(),             /* service to contact */
+            control_object_name,            /* object path */
+            control_intf_name,              /* interface name */
+            method                          /* method name */
             );
-
-    if (r < 0) {
-        fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-        goto finish;
+    if (!bus.call(new_method))
+    {
+        fprintf(stderr, "Failed to issue method call: %s\n", method);
     }
-
-finish:
-    sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
-    free(connection);
-
-    return r;
 }
 
 ipmi_ret_t ipmi_global_warm_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
