@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math.h>
 #include "sensorhandler.h"
 #include "types.hpp"
 #include "utils.hpp"
@@ -197,11 +198,13 @@ GetSensorResponse readingData(const Info& sensorInfo)
             sensorInfo.propertyInterfaces.begin()->first,
             sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    auto value = static_cast<uint8_t>(
-            (propValue.get<T>() - sensorInfo.scaledOffset) /
-            (sensorInfo.coefficientM ? sensorInfo.coefficientM : 1));
+    double value = propValue.get<T>() * pow(10,
+            sensorInfo.scale - sensorInfo.exponentR);
 
-    setReading(value, responseData);
+    auto rawData = static_cast<uint8_t>(
+            (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM);
+
+    setReading(rawData, responseData);
 
     return response;
 }
