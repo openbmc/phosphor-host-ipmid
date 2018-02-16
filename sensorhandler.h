@@ -527,6 +527,11 @@ inline uint8_t get_device_id_strlen(SensorDataFruRecordBody* body)
     return body->deviceIDLen & LENGTH_MASK;
 };
 
+inline void set_readable_mask(uint8_t mask, SensorDataFullRecordBody* body)
+{
+    body->discrete_reading_setting_mask[1] = mask & 0x3F;
+}
+
 } // namespace body
 
 // More types contained in section 43.17 Sensor Unit Type Codes,
@@ -537,6 +542,7 @@ enum SensorUnitTypeCodes
     SENSOR_UNIT_DEGREES_C = 1,
     SENSOR_UNIT_VOLTS = 4,
     SENSOR_UNIT_AMPERES = 5,
+    SENSOR_UNIT_WATTS = 6,
     SENSOR_UNIT_JOULES = 7,
     SENSOR_UNIT_METERS = 34,
     SENSOR_UNIT_REVOLUTIONS = 41,
