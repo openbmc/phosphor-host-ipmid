@@ -100,6 +100,11 @@
   multiplierM: 511
   offsetB: 0
   bExp: 0
+  # Result exponent field in Type 1 SDR(2's complement, signed)
+  rExp: 0
+  # Applies for analog sensors, the actual reading value for the sensor is
+  # Value * 10^N
+  scale: -3
   mutability: Mutability::Write|Mutability::Read
   serviceInterface: org.freedesktop.DBus.Properties
   readingType: readingData

@@ -115,8 +115,8 @@ using InstancePath = std::string;
 using Type = uint8_t;
 using ReadingType = uint8_t;
 using Multiplier = uint16_t;
-using OffsetB = uint16_t;
-using Exponent = uint8_t;
+using OffsetB = int16_t;
+using Exponent = int8_t;
 using ScaledOffset = int64_t;
 using Scale = int16_t;
 using Unit = std::string;
@@ -154,6 +154,7 @@ struct Info
    OffsetB coefficientB;
    Exponent exponentB;
    ScaledOffset scaledOffset;
+   Exponent exponentR;
    bool hasScale;
    Scale scale;
    Unit unit;
