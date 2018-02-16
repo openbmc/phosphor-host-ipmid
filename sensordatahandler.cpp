@@ -277,11 +277,13 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
         std::vector<ValueRef> valueRefs;
         for (const auto& value : std::get<OffsetValueMap>(property.second))
         {
-            if (assertionSet.test(value.first))
+            if (value.first < assertionSet.size()
+                    && assertionSet.test(value.first))
             {
                 valueRefs.push_back(value.second.assert);
             }
-            if (deassertionSet.test(value.first))
+            if (value.first < deassertionSet.size()
+                    && deassertionSet.test(value.first))
             {
                 valueRefs.push_back(value.second.deassert);
             }
