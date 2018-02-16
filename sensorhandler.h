@@ -213,8 +213,13 @@ inline void set_owner_lun_channel(uint8_t channel, SensorDataRecordKey* key)
  */
 struct GetSensorThresholdsResponse
 {
-    uint8_t validMask; //Indicates which values are valid
-    uint8_t data[6];   //Container for threshold values
+    uint8_t validMask;          //!< valid mask
+    uint8_t lowerNonCritical;   //!< lower non-critical threshold
+    uint8_t lowerCritical;      //!< lower critical threshold
+    uint8_t lowerNonRecoverable;//!< lower non-recoverable threshold
+    uint8_t upperNonCritical;   //!< upper non-critical threshold
+    uint8_t upperCritical;      //!< upper critical threshold
+    uint8_t upperNonRecoverable;//!< upper non-recoverable threshold
 } __attribute__((packed));
 
 // Body - full record
