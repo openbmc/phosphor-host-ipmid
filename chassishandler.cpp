@@ -28,8 +28,6 @@
 #include <xyz/openbmc_project/State/Host/server.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 
-#include <sdbusplus/bus.hpp>
-#include <sdbusplus/server/object.hpp>
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
 #include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
@@ -126,134 +124,6 @@ settings::Objects objects(dbus,
 } // namespace cache
 } // namespace internal
 } // namespace chassis
-
-//TODO : Can remove the below function as we have
-//       new functions which uses sdbusplus.
-//
-//       openbmc/openbmc#1489
-int dbus_get_property(const char *name, char **buf)
-{
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *m = NULL;
-    sd_bus *bus = NULL;
-    char *temp_buf = NULL;
-    char *connection = NULL;
-    int r;
-
-    // Get the system bus where most system services are provided.
-    bus = ipmid_get_sd_bus_connection();
-
-    r = mapper_get_service(bus, settings_object_name, &connection);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s connection: %s\n",
-                settings_object_name, strerror(-r));
-        goto finish;
-    }
-
-    /*
-     * Bus, service, object path, interface and method are provided to call
-     * the method.
-     * Signatures and input arguments are provided by the arguments at the
-     * end.
-     */
-    r = sd_bus_call_method(bus,
-                           connection,                                 /* service to contact */
-                           settings_object_name,                       /* object path */
-                           settings_intf_name,                         /* interface name */
-                           "Get",                                      /* method name */
-                           &error,                                     /* object to return error in */
-                           &m,                                         /* return message on success */
-                           "ss",                                       /* input signature */
-                           host_intf_name,                             /* first argument */
-                           name);                                      /* second argument */
-
-    if (r < 0) {
-        fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-        goto finish;
-    }
-
-    /*
-     * The output should be parsed exactly the same as the output formatting
-     * specified.
-     */
-    r = sd_bus_message_read(m, "v", "s", &temp_buf);
-    if (r < 0) {
-        fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r));
-        goto finish;
-    }
-
-    *buf = strdup(temp_buf);
-    /*    *buf = (char*) malloc(strlen(temp_buf));
-    if (*buf) {
-        strcpy(*buf, temp_buf);
-    }
-     */
-    printf("IPMID boot option property get: {%s}.\n", (char *) temp_buf);
-
-finish:
-    sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
-    free(connection);
-
-    return r;
-}
-
-//TODO : Can remove the below function as we have
-//       new functions which uses sdbusplus.
-//
-//       openbmc/openbmc#1489
-
-int dbus_set_property(const char * name, const char *value)
-{
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *m = NULL;
-    sd_bus *bus = NULL;
-    char *connection = NULL;
-    int r;
-
-    // Get the system bus where most system services are provided.
-    bus = ipmid_get_sd_bus_connection();
-
-    r = mapper_get_service(bus, settings_object_name, &connection);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s connection: %s\n",
-                settings_object_name, strerror(-r));
-        goto finish;
-    }
-
-    /*
-     * Bus, service, object path, interface and method are provided to call
-     * the method.
-     * Signatures and input arguments are provided by the arguments at the
-     * end.
-     */
-    r = sd_bus_call_method(bus,
-                           connection,                                 /* service to contact */
-                           settings_object_name,                       /* object path */
-                           settings_intf_name,                         /* interface name */
-                           "Set",                                      /* method name */
-                           &error,                                     /* object to return error in */
-                           &m,                                         /* return message on success */
-                           "ssv",                                      /* input signature */
-                           host_intf_name,                             /* first argument */
-                           name,                                       /* second argument */
-                           "s",                                        /* third argument */
-                           value);                                     /* fourth argument */
-
-    if (r < 0) {
-        fprintf(stderr, "Failed to issue method call: %s\n", error.message);
-        goto finish;
-    }
-
-    printf("IPMID boot option property set: {%s}.\n", value);
-
-    finish:
-    sd_bus_error_free(&error);
-    sd_bus_message_unref(m);
-    free(connection);
-
-    return r;
-}
 
 struct get_sys_boot_options_t {
     uint8_t parameter;
@@ -595,9 +465,6 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_request_t request, ipmi_response_t response,
                                 ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    // sd_bus error
-    ipmi_ret_t rc = IPMI_CC_OK;
-
     ipmi_chassis_cap_t chassis_cap{};
 
     *data_len = sizeof(ipmi_chassis_cap_t);
@@ -634,13 +501,13 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     memcpy(response, &chassis_cap, *data_len);
 
-    return rc;
+    return IPMI_CC_OK;
 }
 
 //------------------------------------------
 // Calls into Host State Manager Dbus object
 //------------------------------------------
-int initiate_state_transition(State::Host::Transition transition)
+void initiate_state_transition(State::Host::Transition transition)
 {
     // OpenBMC Host State Manager dbus framework
     constexpr auto HOST_STATE_MANAGER_ROOT  = "/xyz/openbmc_project/state/host0";
@@ -648,53 +515,21 @@ int initiate_state_transition(State::Host::Transition transition)
     constexpr auto DBUS_PROPERTY_IFACE      = "org.freedesktop.DBus.Properties";
     constexpr auto PROPERTY                 = "RequestedHostTransition";
 
-    // sd_bus error
-    int rc = 0;
-    char  *busname = NULL;
-
-    // SD Bus error report mechanism.
-    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
+    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
     // Gets a hook onto either a SYSTEM or SESSION bus
-    sd_bus *bus_type = ipmid_get_sd_bus_connection();
-    rc = mapper_get_service(bus_type, HOST_STATE_MANAGER_ROOT, &busname);
-    if (rc < 0)
-    {
-        log<level::ERR>("Failed to get bus name",
-                        entry("ERROR=%s, OBJPATH=%s",
-                              strerror(-rc), HOST_STATE_MANAGER_ROOT));
-        return rc;
-    }
-
+    const std::string busname = ipmi::getService(bus,
+                                                 DBUS_PROPERTY_IFACE,
+                                                 HOST_STATE_MANAGER_ROOT);
     // Convert to string equivalent of the passed in transition enum.
     auto request = State::convertForMessage(transition);
 
-    rc = sd_bus_call_method(bus_type,                // On the system bus
-                            busname,                 // Service to contact
-                            HOST_STATE_MANAGER_ROOT, // Object path
-                            DBUS_PROPERTY_IFACE,     // Interface name
-                            "Set",                   // Method to be called
-                            &bus_error,              // object to return error
-                            nullptr,                 // Response buffer if any
-                            "ssv",                   // Takes 3 arguments
-                            HOST_STATE_MANAGER_IFACE,
-                            PROPERTY,
-                            "s", request.c_str());
-    if(rc < 0)
-    {
-        log<level::ERR>("Failed to initiate transition",
-                        entry("ERROR=%s, REQUEST=%s",
-                              bus_error.message, request.c_str()));
-    }
-    else
-    {
-        log<level::INFO>("Transition request initiated successfully");
-    }
-
-    sd_bus_error_free(&bus_error);
-    free(busname);
-
-    return rc;
+    ipmi::setDbusProperty(bus,
+                          busname,
+                          HOST_STATE_MANAGER_ROOT,
+                          HOST_STATE_MANAGER_IFACE,
+                          PROPERTY,
+                          request);
 }
 
 namespace power_policy
@@ -722,75 +557,53 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                    ipmi_data_len_t data_len,
                                    ipmi_context_t context)
 {
-    const char  *objname = "/org/openbmc/control/power0";
-    const char  *intf = "org.openbmc.control.Power";
-
-    sd_bus *bus = NULL;
-    sd_bus_message *reply = NULL;
-    int r = 0;
-    int pgood = 0;
-    char *busname = NULL;
-    ipmi_ret_t rc = IPMI_CC_OK;
-    ipmi_get_chassis_status_t chassis_status{};
-
-    uint8_t s = 0;
-
     using namespace chassis::internal;
     using namespace chassis::internal::cache;
     using namespace power_policy;
 
-    const auto& powerRestoreSetting = objects.map.at(powerRestoreIntf).front();
-    auto method =
-        dbus.new_method_call(
+    DbusValue powerRestore;
+    try
+    {
+        const auto& powerRestoreSetting = objects.map.at(powerRestoreIntf).front();
+        auto result = ipmi::getDbusProperty(
+            dbus,
             objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
             powerRestoreSetting.c_str(),
-            ipmi::PROP_INTF,
-            "Get");
-    method.append(powerRestoreIntf, "PowerRestorePolicy");
-    auto resp = dbus.call(method);
-    if (resp.is_method_error())
+            powerRestoreIntf,
+            "PowerRestorePolicy");
+        powerRestore =
+            RestorePolicy::convertPolicyFromString(result.get<std::string>());
+    }
+    catch (InternalFailure)
     {
         log<level::ERR>("Error in PowerRestorePolicy Get");
-        report<InternalFailure>();
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    sdbusplus::message::variant<std::string> result;
-    resp.read(result);
-    auto powerRestore =
-        RestorePolicy::convertPolicyFromString(result.get<std::string>());
 
     *data_len = 4;
 
-    bus = ipmid_get_sd_bus_connection();
-
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get bus name, return value: %s.\n", strerror(-r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+    constexpr auto objname = "/org/openbmc/control/power0";
+    constexpr auto intf = "org.openbmc.control.Power";
+    auto busname = ipmi::getService(dbus, intf, objname);
+    int pgood;
+    try
+    {
+      auto result = ipmi::getDbusProperty(dbus, busname, objname, intf, "pgood");
+      pgood = result.get<int>();
+      printf("pgood is 0x%02x\n", pgood);
     }
-
-    r = sd_bus_get_property(bus, busname, objname, intf, "pgood", NULL, &reply, "i");
-    if (r < 0) {
-        fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
+    catch (InternalFailure)
+    {
+        fprintf(stderr, "Failed to get property");
         fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
-                busname, objname, intf);
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+                busname.c_str(), objname, intf);
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    r = sd_bus_message_read(reply, "i", &pgood);
-    if (r < 0) {
-        fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
+    const uint8_t powerRestorePolicy = dbusToIpmi.at(powerRestore);
 
-    printf("pgood is 0x%02x\n", pgood);
-
-    s = dbusToIpmi.at(powerRestore);
-
+    ipmi_get_chassis_status_t chassis_status{};
     // Current Power State
     // [7] reserved
     // [6..5] power restore policy
@@ -822,8 +635,7 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // [0] power is on
     //       1b = system power is on
     //       0b = system power is off(soft-off S4/S5, or mechanical off)
-
-    chassis_status.cur_power_state = ((s & 0x3)<<5) | (pgood & 0x1);
+    chassis_status.cur_power_state = ((powerRestorePolicy & 0x3)<<5) | (pgood & 0x1);
 
     // Last Power Event
     // [7..5] – reserved
@@ -833,7 +645,6 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // [1] – 1b = last power down caused by a Power overload
     // [0] – 1b = AC failed
     // set to 0x0,  for we don't support these fields.
-
     chassis_status.last_power_event = 0;
 
     // Misc. Chassis State
@@ -864,28 +675,19 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &chassis_status, *data_len);
 
-finish:
-    free(busname);
-    reply = sd_bus_message_unref(reply);
-
-    return rc;
+    return IPMI_CC_OK;
 }
 
 //-------------------------------------------------------------
 // Send a command to SoftPowerOff application to stop any timer
 //-------------------------------------------------------------
-int stop_soft_off_timer()
+void stop_soft_off_timer()
 {
-    constexpr auto iface            = "org.freedesktop.DBus.Properties";
     constexpr auto soft_off_iface   = "xyz.openbmc_project.Ipmi.Internal."
             "SoftPowerOff";
-
     constexpr auto property         = "ResponseReceived";
-    constexpr auto value            = "xyz.openbmc_project.Ipmi.Internal."
-            "SoftPowerOff.HostResponse.HostShutdown";
-
-    // Get the system bus where most system services are provided.
-    auto bus = ipmid_get_sd_bus_connection();
+    std::string value = "xyz.openbmc_project.Ipmi.Internal.SoftPowerOff."
+        "HostResponse.HostShutdown";
 
     // Get the service name
     // TODO openbmc/openbmc#1661 - Mapper refactor
@@ -903,19 +705,18 @@ int stop_soft_off_timer()
     //    return r;
     //}
 
+    try
+    {
     // No error object or reply expected.
-    int rc = sd_bus_call_method(bus, SOFTOFF_BUSNAME, SOFTOFF_OBJPATH, iface,
-                                "Set", nullptr, nullptr, "ssv",
-                                soft_off_iface, property, "s", value);
-    if (rc < 0)
+        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+        ipmi::setDbusProperty(bus, SOFTOFF_BUSNAME, SOFTOFF_OBJPATH,
+                              soft_off_iface, property, value);
+    }
+    catch(InternalFailure& e)
     {
         fprintf(stderr, "Failed to set property in SoftPowerOff object: %s\n",
-                strerror(-rc));
+                e.what());
     }
-
-    //TODO openbmc/openbmc#1661 - Mapper refactor
-    //free(busname);
-    return rc;
 }
 
 //----------------------------------------------------------------------
@@ -963,7 +764,7 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     switch(chassis_ctrl_cmd)
     {
         case CMD_POWER_ON:
-            rc = initiate_state_transition(State::Host::Transition::On);
+            initiate_state_transition(State::Host::Transition::On);
             break;
         case CMD_POWER_OFF:
             // This path would be hit in 2 conditions.
@@ -978,7 +779,7 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             // For now, we are going ahead with trying to nudge the soft off and
             // interpret the failure to do so as a non softoff case
-            rc = stop_soft_off_timer();
+            stop_soft_off_timer();
 
             // Only request the Off transition if the soft power off
             // application is not running
@@ -991,7 +792,7 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 indicate_no_softoff_needed();
 
                 // Now request the shutdown
-                rc = initiate_state_transition(State::Host::Transition::Off);
+                initiate_state_transition(State::Host::Transition::Off);
             }
             else
             {
@@ -1012,12 +813,12 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // originating via a soft power off SMS request)
             indicate_no_softoff_needed();
 
-            rc = initiate_state_transition(State::Host::Transition::Reboot);
+            initiate_state_transition(State::Host::Transition::Reboot);
             break;
 
         case CMD_SOFT_OFF_VIA_OVER_TEMP:
             // Request Host State Manager to do a soft power off
-            rc = initiate_state_transition(State::Host::Transition::Off);
+            initiate_state_transition(State::Host::Transition::Off);
             break;
 
         default:
@@ -1497,3 +1298,5 @@ void register_netfn_chassis_functions()
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL,
                            ipmi_chassis_set_sys_boot_options, PRIVILEGE_OPERATOR);
 }
+
+
