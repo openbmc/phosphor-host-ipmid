@@ -197,26 +197,6 @@ enum class ThresholdMask
     CRITICAL_HIGH_MASK = 0x10,
 };
 
-enum class ThresholdIndex
-{
-    NON_CRITICAL_LOW_IDX = 0,
-    CRITICAL_LOW_IDX = 1,
-    NON_RECOVERABLE_LOW_IDX = 2,
-    NON_CRITICAL_HIGH_IDX = 3,
-    CRITICAL_HIGH_IDX = 4,
-    NON_RECOVERABLE_HIGH_IDX = 5,
-};
-
-struct ThresholdLevel
-{
-    std::string property;
-    ThresholdMask maskValue;
-    ThresholdIndex idx;
-};
-
-using SensorThresholds = std::vector<ThresholdLevel>;
-using Thresholds = std::map<std::string, SensorThresholds>;
-
 }// namespace sensor
 
 namespace network

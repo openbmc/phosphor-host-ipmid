@@ -675,64 +675,87 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-        ipmi_request_t request, ipmi_response_t response,
-        ipmi_data_len_t data_len, ipmi_context_t context)
+void getSensorThresholds(uint8_t sensorNum,
+                         get_sdr::GetSensorThresholdsResponse* response)
 {
-    constexpr auto warningThresholdInterface =
+    constexpr auto warningThreshIntf =
         "xyz.openbmc_project.Sensor.Threshold.Warning";
-    constexpr auto criticalThresholdInterface =
+    constexpr auto criticalThreshIntf =
         "xyz.openbmc_project.Sensor.Threshold.Critical";
-    constexpr auto valueInterface =
-        "xyz.openbmc_project.Sensor.Value";
-    constexpr auto sensorRoot = "/xyz/openbmc_project/sensors";
-
-    ipmi::sensor::Thresholds thresholds =
-    {
-        {
-            warningThresholdInterface,
-            {
-                {
-                    "WarningLow",
-                    ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK,
-                    ipmi::sensor::ThresholdIndex::NON_CRITICAL_LOW_IDX
-                },
-                {
-                    "WarningHigh",
-                    ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK,
-                    ipmi::sensor::ThresholdIndex::NON_CRITICAL_HIGH_IDX
-                }
-            }
-        },
-        {
-            criticalThresholdInterface,
-            {
-               {
-                    "CriticalLow",
-                    ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK,
-                    ipmi::sensor::ThresholdIndex::CRITICAL_LOW_IDX
-                },
-                {
-                    "CriticalHigh",
-                    ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK,
-                    ipmi::sensor::ThresholdIndex::CRITICAL_HIGH_IDX
-                }
-            }
-        }
-    };
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
+    const auto iter = sensors.find(sensorNum);
+    const auto info = iter->second;
+
+    auto service = ipmi::getService(bus, info.sensorInterface, info.sensorPath);
+
+    auto warnThresholds = ipmi::getAllDbusProperties(bus,
+                                                     service,
+                                                     info.sensorPath,
+                                                     warningThreshIntf);
+
+    double warnLow = warnThresholds["WarningLow"].get<int64_t>();
+    double warnHigh = warnThresholds["WarningHigh"].get<int64_t>();
+
+    if (warnLow != 0)
+    {
+        warnLow *= pow(10, info.scale - info.exponentR);
+        response->lowerNonCritical = static_cast<uint8_t>((
+            warnLow - info.scaledOffset) / info.coefficientM);
+        response->validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK);
+    }
+
+    if (warnHigh != 0)
+    {
+        warnHigh *= pow(10, info.scale - info.exponentR);
+        response->upperNonCritical = static_cast<uint8_t>((
+            warnHigh - info.scaledOffset) / info.coefficientM);
+        response->validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK);
+    }
+
+    auto critThresholds = ipmi::getAllDbusProperties(bus,
+                                                     service,
+                                                     info.sensorPath,
+                                                     criticalThreshIntf);
+    double critLow = critThresholds["CriticalLow"].get<int64_t>();
+    double critHigh = critThresholds["CriticalHigh"].get<int64_t>();
+
+    if (critLow != 0)
+    {
+        critLow *= pow(10, info.scale - info.exponentR);
+        response->lowerCritical = static_cast<uint8_t>((
+            critLow - info.scaledOffset) / info.coefficientM);
+        response->validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK);
+    }
+
+    if (critHigh != 0)
+    {
+        critHigh *= pow(10, info.scale - info.exponentR);
+        response->upperCritical = static_cast<uint8_t>((
+            critHigh - info.scaledOffset)/ info.coefficientM);
+        response->validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK);
+    }
+}
+
+ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    constexpr auto valueInterface = "xyz.openbmc_project.Sensor.Value";
+
     if (*data_len != sizeof(uint8_t))
     {
+        *data_len = 0;
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
-    auto sensorNum = *(reinterpret_cast<uint8_t*>(request));
 
-    auto responseData =
-        reinterpret_cast<get_sdr::GetSensorThresholdsResponse*>(response);
-
-    responseData->validMask = 0;
+    auto sensorNum = *(reinterpret_cast<const uint8_t *>(request));
+    *data_len = 0;
 
     const auto iter = sensors.find(sensorNum);
     if (iter == sensors.end())
@@ -740,69 +763,26 @@ ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_SENSOR_INVALID;
     }
 
-    const auto sensorInfo = iter->second;
+    const auto info = iter->second;
 
     //Proceed only if the sensor value interface is implemented.
-    if (sensorInfo.propertyInterfaces.find(valueInterface) ==
-        sensorInfo.propertyInterfaces.end())
+    if (info.propertyInterfaces.find(valueInterface) ==
+        info.propertyInterfaces.end())
     {
         //return with valid mask as 0
         return IPMI_CC_OK;
     }
 
-    std::string service;
-    try
-    {
-        service = ipmi::getService(bus,
-                                   sensorInfo.sensorInterface,
-                                   sensorInfo.sensorPath);
-    }
-    catch (const std::runtime_error& e)
-    {
-        log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    //prevent divide by 0
-    auto coefficientM =
-        sensorInfo.coefficientM ? sensorInfo.coefficientM : 1;
+    auto responseData =
+        reinterpret_cast<get_sdr::GetSensorThresholdsResponse*>(response);
 
     try
     {
-        auto mngObjects = ipmi::getManagedObjects(bus,
-                          service,
-                          sensorRoot);
-
-        auto senIter = mngObjects.find(sensorInfo.sensorPath);
-        if (senIter == mngObjects.end())
-        {
-            return IPMI_CC_SENSOR_INVALID;
-        }
-
-        for (const auto& threshold : thresholds)
-        {
-            auto thresholdType = senIter->second.find(threshold.first);
-            if (thresholdType != senIter->second.end())
-            {
-                for (const auto& threshLevel : threshold.second)
-                {
-                    auto val = thresholdType->
-                        second[threshLevel.property].get<int64_t>();
-                    if (val != 0)
-                    {
-                        auto idx = static_cast<uint8_t>(threshLevel.idx);
-                        responseData->data[idx] = static_cast<uint8_t>(
-                            (val - sensorInfo.scaledOffset) / coefficientM);
-                        responseData->validMask |=
-                            static_cast<uint8_t>(threshLevel.maskValue);
-                    }
-                }
-            }
-        }
+        getSensorThresholds(sensorNum, responseData);
     }
-    catch (InternalFailure& e)
+    catch (std::exception& e)
     {
-        //Not able to get the values, reset the mask.
+        //Mask if the property is not present
         responseData->validMask = 0;
     }
 
