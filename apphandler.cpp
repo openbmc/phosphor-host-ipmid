@@ -10,7 +10,6 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdint.h>
-#include <systemd/sd-bus.h>
 #include <mapper.h>
 #include <array>
 #include <vector>
@@ -24,8 +23,6 @@
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
-
-extern sd_bus *bus;
 
 constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
 constexpr auto app_ifc = "org.openbmc.NetworkManager";
@@ -166,12 +163,8 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    const char *objname =
-            "/org/openbmc/inventory/system/chassis/motherboard/bmc";
-    const char *iface   = "org.openbmc.InventoryItem";
-    char *ver = NULL;
-    char *busname = NULL;
-    int r;
+    constexpr auto objname = "/org/openbmc/inventory/system/chassis/motherboard/bmc";
+    constexpr auto iface   = "org.openbmc.InventoryItem";
     rev_t rev = {0};
     static ipmi_device_id_t dev_id{};
     static bool dev_id_initialized = false;
@@ -182,33 +175,26 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (!dev_id_initialized)
     {
-        // Firmware revision is already implemented,
-        // so get it from appropriate position.
-        r = mapper_get_service(bus, objname, &busname);
-        if (r < 0) {
-            fprintf(stderr, "Failed to get %s bus name: %s\n",
-                    objname, strerror(-r));
-            goto finish;
-        }
-        r = sd_bus_get_property_string(bus,busname,objname,iface,"version",
-                NULL, &ver);
-        if ( r < 0 ) {
-            fprintf(stderr, "Failed to obtain version property: %s\n",
-                    strerror(-r));
-        } else {
-            r = convert_version(ver, &rev);
-            if( r >= 0 ) {
-                // bit7 identifies if the device is available
-                // 0=normal operation
-                // 1=device firmware, SDR update,
-                // or self-initialization in progress.
-                // our SDR is normal working condition, so mask:
-                dev_id.fw[0] = 0x7F & rev.major;
+        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+        auto service = ipmi::getService(bus, objname, iface);
+        auto variant = ipmi::getDbusProperty(bus,
+                                             service,
+                                             objname,
+                                             iface,
+                                             "version");
+        auto ver = variant.get<std::string>();
+        int r = convert_version(ver.c_str(), &rev);
+        if (r >= 0) {
+            // bit7 identifies if the device is available
+            // 0=normal operation
+            // 1=device firmware, SDR update,
+            // or self-initialization in progress.
+            // our SDR is normal working condition, so mask:
+            dev_id.fw[0] = 0x7F & rev.major;
 
-                rev.minor = (rev.minor > 99 ? 99 : rev.minor);
-                dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-                memcpy(&dev_id.aux, rev.d, 4);
-            }
+            rev.minor = (rev.minor > 99 ? 99 : rev.minor);
+            dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
+            memcpy(&dev_id.aux, rev.d, 4);
         }
 
         // IPMI Spec version 2.0
@@ -251,9 +237,6 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Pack the actual response
     memcpy(response, &dev_id, *data_len);
-finish:
-    free(busname);
-    free(ver);
     return rc;
 }
 
@@ -300,90 +283,75 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    const char  *objname = "/org/openbmc/control/chassis0";
-    const char  *iface = "org.freedesktop.DBus.Properties";
-    const char  *chassis_iface = "org.openbmc.control.Chassis";
-    sd_bus_message *reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
-    char *uuid = NULL;
-    char *busname = NULL;
+    *data_len = 0;
+    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+    constexpr auto objname = "/org/openbmc/control/chassis0";
+    constexpr auto chassis_iface = "org.openbmc.control.Chassis";
+    std::string busname;
+    try
+    {
+        printf("IPMI GET DEVICE GUID\n");
+        // Call Get properties method with the interface and property name
+        busname = ipmi::getService(bus, chassis_iface, objname);
+    }
+    catch (std::runtime_error& e)
+    {
+        fprintf(stderr, "Failed to get %s bus name: %s\n", objname, e.what());
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
 
     // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
     // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte
     // order
     // Ex: 0x2332fc2c40e66298e511f2782395a361
+    std::string uuid;
+    try
+    {
+        auto value = ipmi::getDbusProperty(bus,
+                                           busname,
+                                           objname,
+                                           chassis_iface,
+                                           "uuid");
+        uuid = value.get<std::string>();
+    }
+    catch (InternalFailure)
+    {
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
 
     const int resp_size = 16; // Response is 16 hex bytes per IPMI Spec
     uint8_t resp_uuid[resp_size]; // Array to hold the formatted response
     // Point resp end of array to save in reverse order
     int resp_loc = resp_size-1;
-    int i = 0;
-    char *tokptr = NULL;
-    char *id_octet = NULL;
-
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-    *data_len = 0;
-
-    printf("IPMI GET DEVICE GUID\n");
-
-    // Call Get properties method with the interface and property name
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0) {
-        fprintf(stderr, "Failed to get %s bus name: %s\n",
-                objname, strerror(-r));
-        goto finish;
-    }
-    r = sd_bus_call_method(bus,busname,objname,iface,
-                           "Get",&error, &reply, "ss",
-                           chassis_iface, "uuid");
-    if (r < 0)
-    {
-        fprintf(stderr, "Failed to call Get Method: %s\n", strerror(-r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
-
-    r = sd_bus_message_read(reply, "v", "s", &uuid);
-    if (r < 0 || uuid == NULL)
-    {
-        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto finish;
-    }
 
     // Traverse the UUID
     // Get the UUID octects separated by dash
-    id_octet = strtok_r(uuid, "-", &tokptr);
-
-    if (id_octet == NULL)
+    size_t start = 0;
+    size_t end = uuid.find_first_of("-");
+    if (end == std::string::npos)
     {
-        // Error
-        fprintf(stderr, "Unexpected UUID format: %s", uuid);
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto finish;
+        fprintf(stderr, "Unexpected UUID format: %s", uuid.c_str());
+        return IPMI_CC_RESPONSE_ERROR;
     }
 
-    while (id_octet != NULL)
+    while (end != std::string::npos)
     {
-        // Calculate the octet string size since it varies
-        // Divide it by 2 for the array size since 1 byte is built from 2 chars
-        int tmp_size = strlen(id_octet)/2;
-
-        for(i = 0; i < tmp_size; i++)
+        for(; start < end; start += 2)
         {
             // Holder of the 2 chars that will become a byte
-            char tmp_array[3] = {0};
-            strncpy(tmp_array, id_octet, 2); // 2 chars at a time
+            std::string tmp_byte = "0" + uuid.substr(start, start + 2);
 
-            int resp_byte = strtoul(tmp_array, NULL, 16); // Convert to hex byte
+            // convert to hex
+            int resp_byte = strtoul(tmp_byte.c_str(), NULL, 16);
+
             // Copy end to first
             memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1);
             resp_loc--;
-            id_octet+=2; // Finished with the 2 chars, advance
+
+            start += 2; // Finished with the 2 chars, advance
         }
-        id_octet=strtok_r(NULL, "-", &tokptr); // Get next octet
+        start = end + 1;
+        end = uuid.find_first_of("-");
     }
 
     // Data length
@@ -392,12 +360,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Pack the actual response
     memcpy(response, &resp_uuid, *data_len);
 
-finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
-
-    return rc;
+    return IPMI_CC_OK;
 }
 
 ipmi_ret_t ipmi_app_get_bt_capabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -627,4 +590,5 @@ void register_netfn_app_functions()
                            PRIVILEGE_USER);
     return;
 }
+
 
