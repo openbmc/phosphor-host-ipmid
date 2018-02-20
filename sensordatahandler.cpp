@@ -256,33 +256,71 @@ ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData,
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                      const Info& sensorInfo)
 {
-    auto msg = makeDbusMsg(
-                   "org.freedesktop.DBus.Properties",
-                   sensorInfo.sensorPath,
-                   "Set",
-                   sensorInfo.sensorInterface);
-
     std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
     std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
 
+    // On the off chance the same bit is asserted both ways
+    // (assert/deassert) ignore it.
+    auto bits = assertionSet ^ deassertionSet;
+
     const auto& interface = sensorInfo.propertyInterfaces.begin();
-    msg.append(interface->first);
-    for (const auto& property : interface->second)
+    ipmi::sensor::PropertyMap messageArguments;
+
+    // Process each (de)asserted bit.
+    for (decltype(bits.size()) bit = 0; bit < bits.size(); bit++)
     {
-        msg.append(property.first);
-        for (const auto& value : std::get<OffsetValueMap>(property.second))
+        if (!bits.test(bit))
         {
-            if (assertionSet.test(value.first))
+            continue;
+        }
+
+        // Look for a DBus property in the offset value map
+        // that maps to this bit.
+        for (const auto& property : interface->second)
+        {
+            const auto& offsetValueMap =
+                std::get<OffsetValueMap>(property.second);
+            auto mapEntry = offsetValueMap.find(bit);
+
+            if (mapEntry == offsetValueMap.end())
             {
-                msg.append(value.second.assert);
+                // This DBus property(inner loop)
+                // didn't map to this bit(outer loop).
+                continue;
             }
-            if (deassertionSet.test(value.first))
+
+            if (assertionSet.test(bit))
             {
-                msg.append(value.second.deassert);
+                if (mapEntry->second.assert.valid())
+                {
+                    messageArguments.emplace(
+                            property.first, mapEntry->second.assert);
+                }
+            }
+            else
+            {
+                if (mapEntry->second.deassert.valid())
+                {
+                    messageArguments.emplace(
+                            property.first, mapEntry->second.deassert);
+                }
             }
         }
     }
-    return updateToDbus(msg);
+
+    if (!messageArguments.empty())
+    {
+        auto msg = makeDbusMsg(
+                "org.freedesktop.DBus.Properties",
+                sensorInfo.sensorPath,
+                "Set",
+                sensorInfo.sensorInterface);
+        msg.append(interface->first);
+        msg.append(messageArguments);
+        return updateToDbus(msg);
+    }
+
+    return IPMI_CC_OK;
 }
 
 }//namespace set
