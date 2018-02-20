@@ -36,6 +36,14 @@ constexpr auto bmc_guid_interface = "xyz.openbmc_project.Common.UUID";
 constexpr auto bmc_guid_property = "UUID";
 constexpr auto bmc_guid_len = 16;
 
+static constexpr auto softwareVersionRedundancyPriorityIntf =
+        "xyz.openbmc_project.Software.RedundancyPriority";
+static constexpr auto softwareVersionIntf =
+        "xyz.openbmc_project.Software.Version";
+static constexpr auto softwareRoot = "/xyz/openbmc_project/software";
+
+
+
 void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace phosphor::logging;
@@ -54,6 +62,69 @@ typedef struct
    uint8_t prod_id[2];
    uint8_t aux[4];
 }__attribute__((packed)) ipmi_device_id_t;
+
+/**
+ * @brief Get the software object which is having high RedundancyPriority(Zero)
+ *         from the softwareRoot path. The RedundancyPriority interface provids
+ *         the relationship between two (or more) software versions activated
+ *         for a single managed element. And the property Priority shows which
+ *         version is the primary (with value = 0) and which are available for
+ *         redundancy.
+ *
+ * @param[in] bus - DBUS Bus Object
+ *
+ */
+ipmi::DbusObjectInfo getActiveSoftwareObject(sdbusplus::bus::bus& bus)
+{
+
+    auto objectTree = ipmi::getAllDbusObjects(bus, softwareRoot,
+                      softwareVersionRedundancyPriorityIntf,
+                      "");
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("No Object has implemented the Software interface",
+                        entry("INTERFACE=%s",
+                              softwareVersionRedundancyPriorityIntf));
+        elog<InternalFailure>();
+    }
+
+    ipmi::DbusObjectInfo objectInfo;
+    auto objectFound = false;
+
+    for (auto& object : objectTree)
+    {
+        auto variant = ipmi::getDbusProperty(
+                           bus,
+                           object.second.begin()->first,
+                           object.first,
+                           softwareVersionRedundancyPriorityIntf,
+                           "Priority");
+
+
+        // Look for an Object with RedundancyPriority = 0
+        if (variant.get<uint8_t>() == 0)
+        {
+            objectFound = true;
+            objectInfo =  std::make_pair(object.first,
+                                     object.second.begin()->first);
+            break;
+        }
+        else
+        {
+            continue;
+        }
+    }
+
+    if(!objectFound)
+    {
+        log<level::ERR>("Could not found an Object with RedundancyPriority = 0");
+        elog<InternalFailure>();
+    }
+
+    return objectInfo;
+}
+
 
 ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
@@ -166,11 +237,6 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    const char *objname =
-            "/org/openbmc/inventory/system/chassis/motherboard/bmc";
-    const char *iface   = "org.openbmc.InventoryItem";
-    char *ver = NULL;
-    char *busname = NULL;
     int r;
     rev_t rev = {0};
     static ipmi_device_id_t dev_id{};
@@ -182,33 +248,38 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (!dev_id_initialized)
     {
-        // Firmware revision is already implemented,
-        // so get it from appropriate position.
-        r = mapper_get_service(bus, objname, &busname);
-        if (r < 0) {
-            fprintf(stderr, "Failed to get %s bus name: %s\n",
-                    objname, strerror(-r));
-            goto finish;
-        }
-        r = sd_bus_get_property_string(bus,busname,objname,iface,"version",
-                NULL, &ver);
-        if ( r < 0 ) {
-            fprintf(stderr, "Failed to obtain version property: %s\n",
-                    strerror(-r));
-        } else {
-            r = convert_version(ver, &rev);
-            if( r >= 0 ) {
-                // bit7 identifies if the device is available
-                // 0=normal operation
-                // 1=device firmware, SDR update,
-                // or self-initialization in progress.
-                // our SDR is normal working condition, so mask:
-                dev_id.fw[0] = 0x7F & rev.major;
+        try
+        {
+            sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-                rev.minor = (rev.minor > 99 ? 99 : rev.minor);
-                dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-                memcpy(&dev_id.aux, rev.d, 4);
-            }
+            auto softwareObjectInfo = getActiveSoftwareObject(bus);
+
+            auto version = ipmi::getDbusProperty(
+                           bus,
+                           softwareObjectInfo.second,
+                           softwareObjectInfo.first,
+                           softwareVersionIntf,
+                           "Priority");
+
+            r = convert_version(version.get<std::string>().c_str(), &rev);
+        }
+        catch (std::exception& e)
+        {
+            log<level::ERR>(e.what());
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+
+        if( r >= 0 ) {
+            // bit7 identifies if the device is available
+            // 0=normal operation
+            // 1=device firmware, SDR update,
+            // or self-initialization in progress.
+            // our SDR is normal working condition, so mask:
+            dev_id.fw[0] = 0x7F & rev.major;
+
+            rev.minor = (rev.minor > 99 ? 99 : rev.minor);
+            dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
+            memcpy(&dev_id.aux, rev.d, 4);
         }
 
         // IPMI Spec version 2.0
@@ -251,9 +322,7 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Pack the actual response
     memcpy(response, &dev_id, *data_len);
-finish:
-    free(busname);
-    free(ver);
+
     return rc;
 }
 

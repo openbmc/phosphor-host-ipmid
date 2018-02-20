@@ -71,57 +71,6 @@ struct sensorreadingresp_t {
     uint8_t indication[2];
 }  __attribute__ ((packed)) ;
 
-// Use a lookup table to find the interface name of a specific sensor
-// This will be used until an alternative is found.  this is the first
-// step for mapping IPMI
-int find_interface_property_fru_type(dbus_interface_t *interface, const char *property_name, char *property_value) {
-
-    char  *str1;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *reply = NULL, *m=NULL;
-
-
-    int r;
-
-    r = sd_bus_message_new_method_call(bus,&m,interface->bus,interface->path,"org.freedesktop.DBus.Properties","Get");
-    if (r < 0) {
-        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
-        fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
-                interface->bus, interface->path, interface->interface);
-        goto final;
-    }
-
-    r = sd_bus_message_append(m, "ss", "org.openbmc.InventoryItem", property_name);
-    if (r < 0) {
-        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
-        fprintf(stderr,"Bus: %s Path: %s Interface: %s \n",
-                interface->bus, interface->path, interface->interface);
-        goto final;
-    }
-
-    r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
-        goto final;
-    }
-
-    r = sd_bus_message_read(reply, "v",  "s", &str1) ;
-    if (r < 0) {
-        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
-        goto final;
-    }
-
-    strcpy(property_value, str1);
-
-final:
-
-    sd_bus_error_free(&error);
-    m = sd_bus_message_unref(m);
-    reply = sd_bus_message_unref(reply);
-
-    return r;
-}
-
 int get_bus_for_path(const char *path, char **busname) {
     return mapper_get_service(bus, path, busname);
 }
@@ -332,19 +281,6 @@ uint8_t dbus_to_sensor_type(char *p) {
 }
 
 
-uint8_t dbus_to_sensor_type_from_dbus(dbus_interface_t *a) {
-    char fru_type_name[64];
-    int r= 0;
-
-    r = find_interface_property_fru_type(a, "fru_type", fru_type_name);
-    if (r<0) {
-        fprintf(stderr, "Failed to get a fru type: %s", strerror(-r));
-        return -1;
-    } else {
-        return dbus_to_sensor_type(fru_type_name);
-    }
-}
-
 uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
 
     char *p;
@@ -359,12 +295,6 @@ uint8_t get_type_from_interface(dbus_interface_t dbus_if) {
     if (dbus_if.sensortype != 0)
     {
         type = dbus_if.sensortype;
-    }
-    // Legacy codebase does not populate type during initial handling:
-    else if (strstr(dbus_if.interface, "InventoryItem")) {
-        // InventoryItems are real frus.  So need to get the
-        // fru_type property
-        type = dbus_to_sensor_type_from_dbus(&dbus_if);
     } else {
         // Non InventoryItems
         p = strrchr (dbus_if.path, '/');
