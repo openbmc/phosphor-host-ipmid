@@ -280,6 +280,47 @@ std::string getService(sdbusplus::bus::bus& bus,
     return mapperResponse.begin()->first;
 }
 
+DbusObjectInfo getActiveSoftwareObject(sdbusplus::bus::bus& bus,
+                           const std::string& interface,
+                           const std::string& serviceRoot,
+                           const std::string& match)
+{
+
+    auto objectTree = getAllDbusObjects(bus, serviceRoot, interface, match);
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("No Object has implemented the Software interface",
+                        entry("INTERFACE=%s", interface.c_str()));
+        elog<InternalFailure>();
+    }
+
+    DbusObjectInfo objectInfo;
+    for (auto& object : objectTree)
+    {
+        auto variant = ipmi::getDbusProperty(
+                           bus,
+                           object.second.begin()->first,
+                           object.first,
+                           ipmi::softwareVersionRedundancyPriorityInterface,
+                           "Priority");
+
+        objectInfo =  std::make_pair(object.first,
+                            object.second.begin()->first);
+
+        // Look for Object with RedundancyPriority = 0
+        if (variant.get<uint8_t>() != 0)
+        {
+            continue;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return objectInfo;
+}
+
 ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus::bus& bus,
                                    const std::string& serviceRoot,
                                    const std::string& interface,

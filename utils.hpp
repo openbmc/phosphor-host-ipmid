@@ -20,6 +20,12 @@ constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
 
+static constexpr auto softwareVersionRedundancyPriorityInterface =
+        "xyz.openbmc_project.Software.RedundancyPriority";
+static constexpr auto softwareVersionInterface =
+        "xyz.openbmc_project.Software.Version";
+static constexpr auto softwareRoot = "/xyz/openbmc_project/software";
+
 /**
  * @brief Get the DBUS Service name for the input dbus path
  *
@@ -57,6 +63,19 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
 DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
                            const std::string& interface,
                            const std::string& subtreePath,
+                           const std::string& match);
+
+/** @brief Get the software object which is having high RedundancyPriority(Zero)
+ *         from the given subtree.
+ *  @param[in] bus - DBUS Bus Object.
+ *  @param[in] interface - Dbus interface.
+ *  @param[in] subtreePath - subtree from where the search should start.
+ *  @param[in] match - identifier for object.
+ *  @return On success returns the object having objectpath and servicename.
+ */
+DbusObjectInfo getActiveSoftwareObject(sdbusplus::bus::bus& bus,
+                           const std::string& interface,
+                           const std::string& serviceRoot,
                            const std::string& match);
 
 /** @brief Gets the value associated with the given object

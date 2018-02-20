@@ -166,11 +166,6 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    const char *objname =
-            "/org/openbmc/inventory/system/chassis/motherboard/bmc";
-    const char *iface   = "org.openbmc.InventoryItem";
-    char *ver = NULL;
-    char *busname = NULL;
     int r;
     rev_t rev = {0};
     static ipmi_device_id_t dev_id{};
@@ -182,33 +177,42 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (!dev_id_initialized)
     {
-        // Firmware revision is already implemented,
-        // so get it from appropriate position.
-        r = mapper_get_service(bus, objname, &busname);
-        if (r < 0) {
-            fprintf(stderr, "Failed to get %s bus name: %s\n",
-                    objname, strerror(-r));
-            goto finish;
-        }
-        r = sd_bus_get_property_string(bus,busname,objname,iface,"version",
-                NULL, &ver);
-        if ( r < 0 ) {
-            fprintf(stderr, "Failed to obtain version property: %s\n",
-                    strerror(-r));
-        } else {
-            r = convert_version(ver, &rev);
-            if( r >= 0 ) {
-                // bit7 identifies if the device is available
-                // 0=normal operation
-                // 1=device firmware, SDR update,
-                // or self-initialization in progress.
-                // our SDR is normal working condition, so mask:
-                dev_id.fw[0] = 0x7F & rev.major;
+        try
+        {
+            sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-                rev.minor = (rev.minor > 99 ? 99 : rev.minor);
-                dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-                memcpy(&dev_id.aux, rev.d, 4);
-            }
+            auto softwareObjectInfo = ipmi::getActiveSoftwareObject(
+                                    bus,
+                                    ipmi::softwareVersionRedundancyPriorityInterface,
+                                    ipmi::softwareRoot,
+                                    "");
+
+            auto properties = ipmi::getAllDbusProperties(
+                                    bus,
+                                    softwareObjectInfo.second,
+                                    softwareObjectInfo.first,
+                                    ipmi::softwareVersionInterface);
+
+            auto version = properties["Version"].get<std::string>();
+            r = convert_version(version.c_str(), &rev);
+        }
+        catch (std::exception& e)
+        {
+            log<level::ERR>(e.what());
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+
+        if( r >= 0 ) {
+            // bit7 identifies if the device is available
+            // 0=normal operation
+            // 1=device firmware, SDR update,
+            // or self-initialization in progress.
+            // our SDR is normal working condition, so mask:
+            dev_id.fw[0] = 0x7F & rev.major;
+
+            rev.minor = (rev.minor > 99 ? 99 : rev.minor);
+            dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
+            memcpy(&dev_id.aux, rev.d, 4);
         }
 
         // IPMI Spec version 2.0
@@ -251,9 +255,7 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Pack the actual response
     memcpy(response, &dev_id, *data_len);
-finish:
-    free(busname);
-    free(ver);
+
     return rc;
 }
 
