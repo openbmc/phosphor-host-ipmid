@@ -1098,10 +1098,10 @@ void register_netfn_sen_functions()
                            nullptr, ipmi_sen_get_sdr_info,
                            PRIVILEGE_USER);
 
-    // <Get SDR>
+    // <Get Device SDR>
     printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",
-           NETFUN_SENSOR, IPMI_CMD_GET_SDR);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR,
+           NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR);
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR,
                            nullptr, ipmi_sen_get_sdr,
                            PRIVILEGE_USER);
 

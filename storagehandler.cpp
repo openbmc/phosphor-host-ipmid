@@ -19,6 +19,7 @@
 #include "storagehandler.h"
 #include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
+#include "sensorhandler.h"
 
 
 void register_netfn_storage_functions() __attribute__((constructor));
@@ -760,6 +761,11 @@ void register_netfn_storage_functions()
     // <Get Repository Info>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_REPOSITORY_INFO,
                            nullptr, ipmi_get_repository_info,
+                           PRIVILEGE_USER);
+
+    // <Get SDR>
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SDR,
+                           nullptr, ipmi_sen_get_sdr_info,
                            PRIVILEGE_USER);
 
     ipmi::fru::registerCallbackHandler();

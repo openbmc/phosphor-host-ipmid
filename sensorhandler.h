@@ -3,12 +3,13 @@
 
 #include <stdint.h>
 #include "types.hpp"
+#include "host-ipmid/ipmid-api.h"
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
 {
     IPMI_CMD_GET_SDR_INFO       = 0x20,
-    IPMI_CMD_GET_SDR            = 0x21,
+    IPMI_CMD_GET_DEVICE_SDR     = 0x21,
     IPMI_CMD_RESERVE_SDR_REPO   = 0x22,
     IPMI_CMD_GET_SENSOR_READING = 0x2D,
     IPMI_CMD_GET_SENSOR_TYPE    = 0x2F,
@@ -49,6 +50,12 @@ struct dbus_interface_t {
 int set_sensor_dbus_state_s(uint8_t , const char *, const char *);
 int set_sensor_dbus_state_y(uint8_t , const char *, const uint8_t);
 int find_openbmc_path(uint8_t , dbus_interface_t *);
+
+ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context);
 
 static const uint16_t FRU_RECORD_ID_START = 256;
 static const uint8_t SDR_VERSION = 0x51;
