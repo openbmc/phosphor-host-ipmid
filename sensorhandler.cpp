@@ -1082,24 +1082,18 @@ void register_netfn_sen_functions()
                            nullptr, ipmi_sen_get_sensor_reading,
                            PRIVILEGE_USER);
 
-    // <Reserve SDR>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_SENSOR, IPMI_CMD_RESERVE_SDR_REPO);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_RESERVE_SDR_REPO,
+    // <Reserve Device SDR Repository>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_RESERVE_DEVICE_SDR_REPO,
                            nullptr, ipmi_sen_reserve_sdr,
                            PRIVILEGE_USER);
 
-    // <Get SDR Info>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",
-           NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR_INFO,
+    // <Get Device SDR Info>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR_INFO,
                            nullptr, ipmi_sen_get_sdr_info,
                            PRIVILEGE_USER);
 
-    // <Get SDR>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%x]\n",
-           NETFUN_SENSOR, IPMI_CMD_GET_SDR);
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SDR,
+    // <Get Device SDR>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR,
                            nullptr, ipmi_sen_get_sdr,
                            PRIVILEGE_USER);
 

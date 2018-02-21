@@ -8,6 +8,8 @@ enum ipmi_netfn_storage_cmds
     IPMI_CMD_GET_FRU_INV_AREA_INFO  = 0x10,
     IPMI_CMD_GET_REPOSITORY_INFO = 0x20,
     IPMI_CMD_READ_FRU_DATA  = 0x11,
+    IPMI_CMD_RESERVE_SDR    = 0x22,
+    IPMI_CMD_GET_SDR        = 0x23,
     IPMI_CMD_GET_SEL_INFO   = 0x40,
     IPMI_CMD_RESERVE_SEL    = 0x42,
     IPMI_CMD_GET_SEL_ENTRY  = 0x43,
