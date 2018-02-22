@@ -27,10 +27,6 @@
 
 extern sd_bus *bus;
 
-constexpr auto app_obj = "/org/openbmc/NetworkManager/Interface";
-constexpr auto app_ifc = "org.openbmc.NetworkManager";
-constexpr auto app_nwinterface = "eth0";
-
 constexpr auto bmc_interface = "xyz.openbmc_project.Inventory.Item.Bmc";
 constexpr auto bmc_guid_interface = "xyz.openbmc_project.Common.UUID";
 constexpr auto bmc_guid_property = "UUID";
