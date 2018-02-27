@@ -256,33 +256,55 @@ ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData,
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                      const Info& sensorInfo)
 {
-    auto msg = makeDbusMsg(
+    std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
+    std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
+    auto bothSet = assertionSet ^ deassertionSet;
+
+    const auto& interface = sensorInfo.propertyInterfaces.begin();
+
+    for (const auto& property : interface->second)
+    {
+        Value tmp{mapbox::util::no_init()};
+        for (const auto& value : std::get<OffsetValueMap>(property.second))
+        {
+            if (bothSet.size() <= value.first || !bothSet.test(value.first))
+            {
+                // A BIOS shouldn't do this but ignore if they do.
+                continue;
+            }
+
+            if (assertionSet.test(value.first))
+            {
+                tmp = value.second.assert;
+                break;
+            }
+            if (deassertionSet.test(value.first))
+            {
+                tmp = value.second.deassert;
+                break;
+            }
+        }
+
+        if (tmp.valid())
+        {
+            auto msg = makeDbusMsg(
                    "org.freedesktop.DBus.Properties",
                    sensorInfo.sensorPath,
                    "Set",
                    sensorInfo.sensorInterface);
+            msg.append(interface->first);
+            msg.append(property.first);
+            msg.append(tmp);
 
-    std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
-    std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
-
-    const auto& interface = sensorInfo.propertyInterfaces.begin();
-    msg.append(interface->first);
-    for (const auto& property : interface->second)
-    {
-        msg.append(property.first);
-        for (const auto& value : std::get<OffsetValueMap>(property.second))
-        {
-            if (assertionSet.test(value.first))
+            auto rc = updateToDbus(msg);
+            if (rc)
             {
-                msg.append(value.second.assert);
-            }
-            if (deassertionSet.test(value.first))
-            {
-                msg.append(value.second.deassert);
+                return rc;
             }
         }
     }
-    return updateToDbus(msg);
+
+    return IPMI_CC_OK;
 }
 
 }//namespace set
