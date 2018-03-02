@@ -483,64 +483,59 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ipmiRC;
 }
 
-
-ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t legacyGetSensorReading(uint8_t sensorNum,
+                                  ipmi_response_t response,
+                                  ipmi_data_len_t data_len)
 {
-    sensor_data_t *reqptr = (sensor_data_t*)request;
-    ipmi_ret_t rc = IPMI_CC_SENSOR_INVALID;
-    uint8_t type = 0;
-    sensorreadingresp_t *resp = (sensorreadingresp_t*) response;
     int r;
     dbus_interface_t a;
     sd_bus *bus = ipmid_get_sd_bus_connection();
+    ipmi_ret_t rc = IPMI_CC_SENSOR_INVALID;
+    uint8_t type = 0;
     sd_bus_message *reply = NULL;
     int reading = 0;
     char* assertion = NULL;
-    ipmi::sensor::GetSensorResponse getResponse {};
-    static constexpr auto scanningEnabledBit = 6;
+    sensorreadingresp_t *resp = (sensorreadingresp_t*) response;
+    r = find_openbmc_path(sensorNum, &a);
 
-    printf("IPMI GET_SENSOR_READING [0x%02x]\n",reqptr->sennum);
-
-    r = find_openbmc_path(reqptr->sennum, &a);
+    *data_len=0;
 
     if (r < 0)
     {
-        fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
+        sd_journal_print(LOG_ERR, "Failed to find Sensor 0x%02x\n", sensorNum);
+        return IPMI_CC_SENSOR_INVALID;
     }
     else
     {
         type = get_type_from_interface(a);
-        if(type == 0) {
-            fprintf(stderr, "Failed to find Sensor 0x%02x\n", reqptr->sennum);
+        if (type == 0)
+        {
+            sd_journal_print(LOG_ERR, "Failed to find Sensor 0x%02x\n",
+                             sensorNum);
             return IPMI_CC_SENSOR_INVALID;
         }
-
-        fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n", a.bus, a.path,
-                        a.interface);
     }
-
-    *data_len=0;
 
     switch(type) {
         case 0xC2:
         case 0xC8:
-            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "i");
-            if (r < 0) {
-                fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
-                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
-                        a.bus, a.path, a.interface);
+            r = sd_bus_get_property(bus,a.bus, a.path, a.interface,
+                                    "value", NULL, &reply, "i");
+            if (r < 0)
+            {
+                sd_journal_print(LOG_ERR, "Failed to call sd_bus_get_property:"
+                                 " %d, %s\n", r, strerror(-r));
+                sd_journal_print(LOG_ERR, "Bus: %s, Path: %s, Interface: %s\n",
+                                 a.bus, a.path, a.interface);
                 break;
             }
 
             r = sd_bus_message_read(reply, "i", &reading);
             if (r < 0) {
-                fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
+                sd_journal_print(LOG_ERR, "Failed to read sensor: %s\n",
+                                 strerror(-r));
                 break;
             }
-
-            printf("Contents of a 0x%02x is 0x%02x\n", type, reading);
 
             rc = IPMI_CC_OK;
             *data_len=sizeof(sensorreadingresp_t);
@@ -553,17 +548,22 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         //TODO openbmc/openbmc#2154 Move this sensor to right place.
         case 0xCA:
-            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value", NULL, &reply, "s");
-            if (r < 0) {
-                fprintf(stderr, "Failed to call sd_bus_get_property:%d,  %s\n", r, strerror(-r));
-                fprintf(stderr, "Bus: %s, Path: %s, Interface: %s\n",
-                        a.bus, a.path, a.interface);
+            r = sd_bus_get_property(bus,a.bus, a.path, a.interface, "value",
+                                    NULL, &reply, "s");
+            if (r < 0)
+            {
+                sd_journal_print(LOG_ERR, "Failed to call sd_bus_get_property:"
+                                 " %d, %s\n", r, strerror(-r));
+                sd_journal_print(LOG_ERR, "Bus: %s, Path: %s, Interface: %s\n",
+                                 a.bus, a.path, a.interface);
                 break;
             }
 
             r = sd_bus_message_read(reply, "s", &assertion);
-            if (r < 0) {
-                fprintf(stderr, "Failed to read sensor: %s\n", strerror(-r));
+            if (r < 0)
+            {
+                sd_journal_print(LOG_ERR, "Failed to read sensor: %s\n",
+                                 strerror(-r));
                 break;
             }
 
@@ -585,43 +585,49 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         default:
         {
-            const auto iter = sensors.find(reqptr->sennum);
-            if (iter == sensors.end())
-            {
-                return IPMI_CC_SENSOR_INVALID;
-            }
-            if (ipmi::sensor::Mutability::Read !=
-                  (iter->second.mutability & ipmi::sensor::Mutability::Read))
-            {
-                return IPMI_CC_SENSOR_INVALID;
-            }
-
-            try
-            {
-                getResponse =  iter->second.getFunc(iter->second);
-                *data_len = getResponse.size();
-                memcpy(resp, getResponse.data(), *data_len);
-                resp->operation = 1 << scanningEnabledBit;
-                return IPMI_CC_OK;
-            }
-            catch (InternalFailure& e)
-            {
-                *data_len = getResponse.size();
-                memcpy(resp, getResponse.data(), *data_len);
-                return IPMI_CC_OK;
-            }
-            catch (const std::runtime_error& e)
-            {
-                *data_len = getResponse.size();
-                memcpy(resp, getResponse.data(), *data_len);
-                return IPMI_CC_OK;
-            }
+            return IPMI_CC_SENSOR_INVALID;
         }
     }
 
     reply = sd_bus_message_unref(reply);
 
     return rc;
+}
+
+ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    sensor_data_t *reqptr = (sensor_data_t*)request;
+    sensorreadingresp_t *resp = (sensorreadingresp_t*) response;
+    ipmi::sensor::GetSensorResponse getResponse {};
+    static constexpr auto scanningEnabledBit = 6;
+
+    const auto iter = sensors.find(reqptr->sennum);
+    if (iter == sensors.end())
+    {
+        return legacyGetSensorReading(reqptr->sennum, response, data_len);
+    }
+    if (ipmi::sensor::Mutability::Read !=
+          (iter->second.mutability & ipmi::sensor::Mutability::Read))
+    {
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    try
+    {
+        getResponse =  iter->second.getFunc(iter->second);
+        *data_len = getResponse.size();
+        memcpy(resp, getResponse.data(), *data_len);
+        resp->operation = 1 << scanningEnabledBit;
+        return IPMI_CC_OK;
+    }
+    catch (const std::exception& e)
+    {
+        *data_len = getResponse.size();
+        memcpy(resp, getResponse.data(), *data_len);
+        return IPMI_CC_OK;
+    }
 }
 
 void getSensorThresholds(uint8_t sensorNum,
