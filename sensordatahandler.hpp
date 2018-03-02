@@ -271,24 +271,18 @@ template<typename T>
 ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
                        const Info& sensorInfo)
 {
-    auto msg = makeDbusMsg(
-                   "org.freedesktop.DBus.Properties",
-                   sensorInfo.sensorPath,
-                   "Set",
-                   sensorInfo.sensorInterface);
+    auto msg = makeDbusMsg("org.freedesktop.DBus.Properties",
+                           sensorInfo.sensorPath,
+                           "Set",
+                           sensorInfo.sensorInterface);
+
+    T raw_value = (sensorInfo.coefficientM * cmdData.reading) +
+                  sensorInfo.scaledOffset;
+
+    raw_value *= pow(10, sensorInfo.exponentR - sensorInfo.scale);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);
-
-    ipmi::sensor::Multiplier m = sensorInfo.coefficientM;
-    if (0 == m)
-    {
-        m = 1;  // Avoid * 0
-    }
-
-    // TODO: Refactor this into a generated function depending on the type
-    // of conversion for the value between IPMI and dbus.
-    T raw_value = (m * cmdData.reading) + sensorInfo.scaledOffset;
 
     for (const auto& property : interface->second)
     {
