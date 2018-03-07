@@ -1,3 +1,4 @@
+#include <chrono>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -7,6 +8,7 @@
 
 #include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
+#include "timer.hpp"
 #include "transporthandler.hpp"
 #include "utils.hpp"
 #include "net.hpp"
@@ -22,16 +24,7 @@
 #include <mapper.h>
 #endif
 
-/** @struct SetChannelAccessRequest
- *
- * IPMI payload for Set Channel access command request.
- */
-struct SetChannelAccessRequest
-{
-    uint8_t channelNumber;       //!< Channel number.
-    uint8_t setting;             //!< The setting values.
-    uint8_t privilegeLevelLimit; //!< The Privilege Level Limit
-} __attribute__((packed));
+extern std::unique_ptr<phosphor::ipmi::Timer> networkTimer;
 
 const int SIZE_MAC = 18; //xx:xx:xx:xx:xx:xx
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
@@ -40,6 +33,7 @@ std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+
 namespace fs = std::experimental::filesystem;
 
 void register_netfn_transport_functions() __attribute__((constructor));
@@ -391,6 +385,11 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
+    using namespace std::chrono_literals;
+
+    // time to wait before applying the network changes.
+    constexpr auto networkTimeout = 10000000us; // 10 sec
+
     char ipaddr[INET_ADDRSTRLEN];
     char netmask[INET_ADDRSTRLEN];
     char gateway[INET_ADDRSTRLEN];
@@ -498,11 +497,19 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
                                  entry("GATEWAY=%s", channelConf->gateway.c_str()),
                                  entry("VLAN=%d", channelConf->vlanID));
 
-                log<level::INFO>("Use Set Channel Access command to apply");
+                if (!networkTimer)
+                {
+                  log<level::ERR>("Network timer is not instantiated");
+                  return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+
+                // start/restart the timer
+                networkTimer->startTimer(networkTimeout);
             }
             else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
             {
                 channelConf->lan_set_in_progress = SET_IN_PROGRESS;
+                channelConf->flush = true;
             }
         }
         break;
@@ -632,15 +639,8 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
     return rc;
 }
 
-ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
-                                   ipmi_cmd_t cmd,
-                                   ipmi_request_t request,
-                                   ipmi_response_t response,
-                                   ipmi_data_len_t data_len,
-                                   ipmi_context_t context)
+void applyChanges(int channel)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-
     std::string ipaddress;
     std::string gateway;
     uint8_t prefix {};
@@ -649,25 +649,16 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
     ipmi::DbusObjectInfo ipObject;
     ipmi::DbusObjectInfo systemObject;
 
-    if (*data_len < sizeof(SetChannelAccessRequest))
-    {
-        return IPMI_CC_INVALID;
-    }
-
-    auto requestData = reinterpret_cast<const SetChannelAccessRequest*>
-                   (request);
-    int channel = requestData->channelNumber & CHANNEL_MASK;
-
     auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
     if (ethdevice.empty())
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        log<level::ERR>("Unable to get the interface name",
+                        entry("CHANNEL=%d", channel));
+        return;
     }
     auto ethIp = ethdevice + "/" + ipmi::network::IP_TYPE;
     auto channelConf = getChannelConfig(channel);
 
-    // Todo: parse the request data if needed.
-    // Using Set Channel cmd to apply changes of Set Lan Cmd.
     try
     {
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
@@ -729,9 +720,8 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                                     entry("INTERFACE=%s",
                                           ipmi::network::ETHERNET_INTERFACE));
                     commit<InternalFailure>();
-                    rc = IPMI_CC_UNSPECIFIED_ERROR;
                     channelConf->clear();
-                    return rc;
+                    return;
                 }
 
                 networkInterfacePath = ancestorMap.begin()->first;
@@ -938,15 +928,42 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn,
                         entry("IPSRC=%d", channelConf->ipsrc));
 
         commit<InternalFailure>();
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
     }
 
     channelConf->clear();
-    return rc;
+}
+
+void commitNetworkChanges()
+{
+    for (const auto &channel : channelConfig)
+    {
+        if (channel.second->flush)
+        {
+            applyChanges(channel.first);
+        }
+    }
+}
+
+void createNetworkTimer()
+{
+    if (!networkTimer)
+    {
+        std::function<void()> networkTimerCallback(
+                std::bind(&commitNetworkChanges));
+
+        networkTimer =
+            std::make_unique<phosphor::ipmi::Timer>(
+                    ipmid_get_sd_event_connection(),
+                    networkTimerCallback);
+    }
+
 }
 
 void register_netfn_transport_functions()
 {
+    // As this timer is only for transport handler
+    // so creating it here.
+    createNetworkTimer();
     // <Wildcard Command>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",NETFUN_TRANSPORT, IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL, ipmi_transport_wildcard,
