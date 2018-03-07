@@ -51,13 +51,14 @@ int Timer::timeoutHandler(sd_event_source* eventSource,
     auto timer = static_cast<Timer*>(userData);
     timer->expired = true;
 
+    log<level::INFO>("Timer expired");
     // Call optional user call back function if available
     if(timer->userCallBack)
     {
         timer->userCallBack();
     }
 
-    log<level::INFO>("Timer expired");
+    sd_event_source_set_enabled(eventSource, SD_EVENT_OFF);
     return 0;
 }
 
@@ -80,6 +81,7 @@ int Timer::startTimer(std::chrono::microseconds timeValue)
 {
     // Disable the timer
     setTimer(SD_EVENT_OFF);
+    expired = false;
 
     // Get the current MONOTONIC time and add the delta
     auto expireTime = getTime() + timeValue;
