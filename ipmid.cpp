@@ -42,6 +42,9 @@ sdbusPtr sdbusp;
 using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
 cmdManagerPtr cmdManager;
 
+// Global timer for network changes
+std::unique_ptr<phosphor::ipmi::Timer> networkTimer = nullptr;
+
 // Command and handler tuple. Used when clients ask the command to be put
 // into host message queue
 using CommandHandler = phosphor::host::command::CommandHandler;
