@@ -29,6 +29,7 @@ static const int LAN_PARM_VLAN        = 20;
 
 constexpr uint8_t SET_COMPLETE = 0;
 constexpr uint8_t SET_IN_PROGRESS = 1;
+constexpr uint8_t SET_IN_PROGRESS_DEFAULT = 0xFF;
 constexpr uint8_t SET_COMMIT_WRITE = 2; //Optional
 constexpr uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
 
@@ -47,6 +48,7 @@ struct ChannelConfig_t
     // vlan id is in 12 bits and the 16th bit is for enable mask.
     uint32_t vlanID = ipmi::network::VLAN_ID_MASK;
     uint8_t lan_set_in_progress = SET_COMPLETE;
+    bool flush = false;
 
     void clear()
     {
@@ -57,6 +59,7 @@ struct ChannelConfig_t
         vlanID = ipmi::network::VLAN_ID_MASK;
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
         lan_set_in_progress = SET_COMPLETE;
+        flush = false;
     }
 };
 
@@ -66,3 +69,19 @@ struct ChannelConfig_t
 // @param[in] channel the channel
 // @return the ChannelConfig_t pointer.
 struct ChannelConfig_t* getChannelConfig(int channel);
+
+/** @brief Iterate over all the channelconfig and if
+ *         user has given the data for a channel then
+ *         apply the network changes for that channel.
+ */
+void commitNetworkChanges();
+
+/* @brief  Apply the network changes which is there in the
+ *         network cache for a given channel which gets filled
+ *         through setLan command. If some of the network
+ *         parameter was not given by the setLan then this function
+ *         gets the value of that parameter which is already
+ *         configured on the system.
+ * @param[in] channel: channel number.
+ */
+void applyChanges(int channel);
