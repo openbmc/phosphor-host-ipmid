@@ -589,16 +589,6 @@ void register_netfn_app_functions()
                            ipmi_app_set_acpi_power_state,
                            PRIVILEGE_ADMIN);
 
-    // <Set Channel Access>
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_APP,
-           IPMI_CMD_SET_CHAN_ACCESS);
-    ipmi_register_callback(NETFUN_APP,
-                           IPMI_CMD_SET_CHAN_ACCESS,
-                           NULL,
-                           ipmi_set_channel_access,
-                           PRIVILEGE_ADMIN);
-
     // <Get Channel Access>
     printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
            NETFUN_APP,
