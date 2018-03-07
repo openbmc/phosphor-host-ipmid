@@ -66,3 +66,11 @@ struct ChannelConfig_t
 // @param[in] channel the channel
 // @return the ChannelConfig_t pointer.
 struct ChannelConfig_t* getChannelConfig(int channel);
+
+/** @brief Apply the network changes which is there in the
+ *         network cache, which gets filled through setLan
+ *         command. If some of the network parameter was not given
+ *         by the setLan then this function gets the value of
+ *         that parameter which is already configured on the system.
+ */
+void commitNetworkChanges();
