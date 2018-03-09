@@ -302,10 +302,10 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 dev_id.manuf_id[0] = data.value("manuf_id", 0);
                 dev_id.prod_id[1] = data.value("prod_id", 0) >> 8;
                 dev_id.prod_id[0] = data.value("prod_id", 0);
-                dev_id.aux[3] = data.value("aux", 0) >> 24;
-                dev_id.aux[2] = data.value("aux", 0) >> 16;
-                dev_id.aux[1] = data.value("aux", 0) >> 8;
-                dev_id.aux[0] = data.value("aux", 0);
+                dev_id.aux[3] = data.value("aux", 0);
+                dev_id.aux[2] = data.value("aux", 0) >> 8;
+                dev_id.aux[1] = data.value("aux", 0) >> 16;
+                dev_id.aux[0] = data.value("aux", 0) >> 24;
 
                 //Don't read the file every time if successful
                 dev_id_initialized = true;
