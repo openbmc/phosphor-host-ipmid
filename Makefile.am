@@ -54,7 +54,8 @@ netipmid_SOURCES = \
 	sol_module.hpp \
 	sol_module.cpp \
 	settings.hpp \
-	settings.cpp
+	settings.cpp \
+	timer.cpp
 
 netipmid_CPPFLAGS = -DNET_IPMID_LIB_PATH=\"/usr/lib/net-ipmid/\"
 

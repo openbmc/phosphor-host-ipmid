@@ -20,6 +20,7 @@
 #include "provider_registration.hpp"
 #include "socket_channel.hpp"
 #include "sol_module.hpp"
+#include "timer.hpp"
 
 // Tuple of Global Singletons
 session::Manager manager;
@@ -31,6 +32,9 @@ std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
         sol::Manager&> singletonPool(manager, table, loop, solManager);
 
 sd_bus* bus = nullptr;
+
+// Global timer for network changes
+std::unique_ptr<phosphor::ipmi::Timer> networkTimer = nullptr;
 
 FILE* ipmidbus = nullptr;
 unsigned short g_sel_reserve = 0xFFFF;
