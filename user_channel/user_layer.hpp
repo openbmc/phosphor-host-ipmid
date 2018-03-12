@@ -20,9 +20,46 @@
 
 namespace ipmi
 {
+
+// TODO: Has to be replaced with proper channel number assignment logic
+enum class EChannelID : uint8_t
+{
+    chanLan1 = 0x01
+};
+
+static constexpr uint8_t invalidUserId = 0xFF;
+static constexpr uint8_t reservedUserId = 0x0;
+static constexpr uint8_t ipmiMaxUserName = 16;
+static constexpr uint8_t ipmiMaxUsers = 15;
+static constexpr uint8_t ipmiMaxChannels = 16;
+
+struct PrivAccess
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t privilege : 4;
+    uint8_t ipmiEnabled : 1;
+    uint8_t linkAuthEnabled : 1;
+    uint8_t accessCallback : 1;
+    uint8_t reserved : 1;
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved : 1;
+    uint8_t accessCallback : 1;
+    uint8_t linkAuthEnabled : 1;
+    uint8_t ipmiEnabled : 1;
+    uint8_t privilege : 4;
+#endif
+} __attribute__((packed));
+
+/** @brief initializes user management
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserInit();
+
 /** @brief The ipmi get user password layer call
  *
- *  @param[in] userName
+ *  @param[in] userName - user name
  *
  *  @return password or empty string
  */
@@ -31,7 +68,7 @@ std::string ipmiUserGetPassword(const std::string& userName);
 /** @brief The IPMI call to clear password entry associated with specified
  * username
  *
- *  @param[in] userName
+ *  @param[in] userName - user name to be removed
  *
  *  @return 0 on success, non-zero otherwise.
  */
@@ -40,14 +77,108 @@ ipmi_ret_t ipmiClearUserEntryPassword(const std::string& userName);
 /** @brief The IPMI call to reuse password entry for the renamed user
  *  to another one
  *
- *  @param[in] userName
- *  @param[in] newUserName
+ *  @param[in] userName - user name which has to be renamed
+ *  @param[in] newUserName - new user name
  *
  *  @return 0 on success, non-zero otherwise.
  */
 ipmi_ret_t ipmiRenameUserEntryPassword(const std::string& userName,
                                        const std::string& newUserName);
 
-// TODO: Define required user layer API Call's which user layer shared library
-// must implement.
+/** @brief determines valid userId
+ *
+ *  @param[in] userId - user id
+ *
+ *  @return true if valid, false otherwise
+ */
+bool ipmiUserIsValidUserId(const uint8_t& userId);
+
+/** @brief determines valid channel
+ *
+ *  @param[in] chNum- channel number
+ *
+ *  @return true if valid, false otherwise
+ */
+bool ipmiUserIsValidChannel(const uint8_t& chNum);
+
+/** @brief determines valid privilege level
+ *
+ *  @param[in] priv - privilege level
+ *
+ *  @return true if valid, false otherwise
+ */
+bool ipmiUserIsValidPrivilege(const uint8_t& priv);
+
+/** @brief get user id corresponding to the user name
+ *
+ *  @param[in] userName - user name
+ *
+ *  @return userid. Will return 0xff if no user id found
+ */
+uint8_t ipmiUserGetUserId(const std::string& userName);
+
+/** @brief set's user name
+ *
+ *  @param[in] userId - user id
+ *  @param[in] userName - user name
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserSetUserName(const uint8_t& userId, const char* userName);
+
+/** @brief get user name
+ *
+ *  @param[in] userId - user id
+ *  @param[out] userName - user name
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserGetUserName(const uint8_t& userId, std::string& userName);
+
+/** @brief provides available fixed, max, and enabled user counts
+ *
+ *  @param[out] maxChUsers - max channel users
+ *  @param[out] enabledUsers - enabled user count
+ *  @param[out] fixedUsers - fixed user count
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserGetAllCounts(uint8_t& maxChUsers, uint8_t& enabledUsers,
+                                uint8_t& fixedUsers);
+
+/** @brief determines whether user is enabled
+ *
+ *  @param[in] userId - user id
+ *..@param[out] state - state of the user
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserCheckEnabled(const uint8_t& userId, bool& state);
+
+/** @brief provides user privilege access data
+ *
+ *  @param[in] userId - user id
+ *  @param[in] chNum - channel number
+ *  @param[out] privAccess - privilege access data
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t& userId,
+                                      const uint8_t& chNum,
+                                      PrivAccess& privAccess);
+
+/** @brief sets user privilege access data
+ *
+ *  @param[in] userId - user id
+ *  @param[in] chNum - channel number
+ *  @param[in] privAccess - privilege access data
+ *  @param[in] otherPrivUpdate - flags to indicate other fields update
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t& userId,
+                                      const uint8_t& chNum,
+                                      const PrivAccess& privAccess,
+                                      const bool& otherPrivUpdate);
+
 } // namespace ipmi
