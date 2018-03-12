@@ -1,5 +1,7 @@
 #include "apphandler.h"
 
+#include "user_channel/usercommands.hpp"
+
 #include <arpa/inet.h>
 #include <mapper.h>
 #include <stdint.h>
@@ -652,5 +654,6 @@ void register_netfn_app_functions()
     // <Get Channel Cipher Suites Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
                            getChannelCipherSuites, PRIVILEGE_CALLBACK);
+    ipmi::registerUserIpmiFunctions();
     return;
 }
