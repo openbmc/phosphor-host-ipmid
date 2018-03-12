@@ -1,4 +1,5 @@
 #include "apphandler.hpp"
+#include "user_channel/usercommands.hpp"
 
 #include "app/channel.hpp"
 #include "app/watchdog.hpp"
@@ -866,5 +867,7 @@ void register_netfn_app_functions()
     // <Get System Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
                            ipmi_app_get_system_info, PRIVILEGE_USER);
+
+    ipmi::registerUserIpmiFunctions();
     return;
 }
