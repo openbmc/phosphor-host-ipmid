@@ -17,10 +17,19 @@
 #include "user_layer.hpp"
 
 #include "passwd_mgr.hpp"
+#include "user_mgmt.hpp"
+
 static ipmi::PasswdMgr passwdMgr;
 
 namespace ipmi
 {
+
+ipmi_ret_t ipmiUserInit()
+{
+    getUserAccessObject();
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmiUserGetPassword(const std::string& userName,
                                std::string& password)
 {
@@ -45,6 +54,108 @@ ipmi_ret_t ipmiRenameUserEntryPassword(const std::string& userName,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     return IPMI_CC_OK;
+}
+
+bool ipmiUserIsValidUserId(const uint8_t& userId)
+{
+    return UserAccess::isValidUserId(userId);
+}
+
+bool ipmiUserIsValidChannel(const uint8_t& chNum)
+{
+    return UserAccess::isValidChannel(chNum);
+}
+
+bool ipmiUserIsValidPrivilege(const uint8_t& priv)
+{
+    return UserAccess::isValidPrivilege(priv);
+}
+
+uint8_t ipmiUserGetUserId(const std::string& userName)
+{
+    return getUserAccessObject().getUserId(userName);
+}
+
+ipmi_ret_t ipmiUserSetUserName(const uint8_t& userId, const char* userName)
+{
+    return getUserAccessObject().setUserName(userId, userName);
+}
+
+ipmi_ret_t ipmiUserGetUserName(const uint8_t& userId, std::string& userName)
+{
+    return getUserAccessObject().getUserName(userId, userName);
+}
+
+ipmi_ret_t ipmiUserGetAllCounts(uint8_t& maxChUsers, uint8_t& enabledUsers,
+                                uint8_t& fixedUsers)
+{
+    maxChUsers = ipmiMaxUsers;
+    UsersTbl* userData = getUserAccessObject().getUsersTblPtr();
+    enabledUsers = 0;
+    fixedUsers = 0;
+    for (size_t count = 1; count <= ipmiMaxUsers; ++count)
+    {
+        if (userData->user[count].userEnabled)
+        {
+            enabledUsers++;
+        }
+        if (userData->user[count].fixedUserName)
+        {
+            fixedUsers++;
+        }
+    }
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmiUserCheckEnabled(const uint8_t& userId, bool& state)
+{
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    UserInfo* userInfo = getUserAccessObject().getUserInfo(userId);
+    state = userInfo->userEnabled ? true : false;
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t& userId,
+                                      const uint8_t& chNum,
+                                      PrivAccess& privAccess)
+{
+
+    if (!UserAccess::isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    UserInfo* userInfo = getUserAccessObject().getUserInfo(userId);
+    privAccess.privilege = userInfo->userPrivAccess[chNum].privilege;
+    privAccess.ipmiEnabled = userInfo->userPrivAccess[chNum].ipmiEnabled;
+    privAccess.linkAuthEnabled =
+        userInfo->userPrivAccess[chNum].linkAuthEnabled;
+    privAccess.accessCallback = userInfo->userPrivAccess[chNum].accessCallback;
+
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t& userId,
+                                      const uint8_t& chNum,
+                                      const PrivAccess& privAccess,
+                                      const bool& otherPrivUpdates)
+{
+    UserPrivAccess userPrivAccess;
+    userPrivAccess.privilege = privAccess.privilege;
+    if (otherPrivUpdates == true)
+    {
+        userPrivAccess.ipmiEnabled = privAccess.ipmiEnabled;
+        userPrivAccess.linkAuthEnabled = privAccess.linkAuthEnabled;
+        userPrivAccess.accessCallback = privAccess.accessCallback;
+    }
+    return getUserAccessObject().setUserPrivilegeAccess(
+        userId, chNum, userPrivAccess, otherPrivUpdates);
 }
 
 } // namespace ipmi

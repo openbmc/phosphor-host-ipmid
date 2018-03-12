@@ -67,6 +67,7 @@ libuserlayerdir = ${libdir}
 libuserlayer_LTLIBRARIES = libuserlayer.la
 libuserlayer_la_SOURCES = \
         user_channel/user_layer.cpp \
+        user_channel/user_mgmt.cpp \
         user_channel/passwd_mgr.cpp
 
 libuserlayer_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
@@ -97,6 +98,7 @@ libipmi20_la_SOURCES = \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
+	user_channel/usercommands.cpp \
 	$(libipmi20_BUILT_LIST)
 
 @CODE_COVERAGE_RULES@
