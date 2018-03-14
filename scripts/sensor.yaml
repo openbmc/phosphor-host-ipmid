@@ -1,0 +1,4685 @@
+3:
+  entityID: 34
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.State.Boot.Progress:
+      BootProgress:
+        Offsets:
+          0:
+            set: xyz.openbmc_project.State.Boot.Progress.ProgressStages.Unspecified
+            type: string
+          1:
+            set: xyz.openbmc_project.State.Boot.Progress.ProgressStages.MemoryInit
+            type: string
+          3:
+            set: xyz.openbmc_project.State.Boot.Progress.ProgressStages.SecondaryProcInit
+            type: string
+          7:
+            set: xyz.openbmc_project.State.Boot.Progress.ProgressStages.PCIInit
+            type: string
+          19:
+            set: xyz.openbmc_project.State.Boot.Progress.ProgressStages.OSStart
+            type: string
+          20:
+            set: xyz.openbmc_project.State.Boot.Progress.ProgressStages.MotherboardInit
+            type: string
+  path: /xyz/openbmc_project/state/host0
+  readingType: eventdata2
+  sensorNamePattern: nameProperty
+  sensorReadingType: 111
+  sensorType: 15
+  serviceInterface: org.freedesktop.DBus.Properties
+5:
+  entityID: 35
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.State.OperatingSystem.Status:
+      OperatingSystemState:
+        Offsets:
+          1:
+            assert: xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.CBoot
+            type: string
+          2:
+            assert: xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.PXEBoot
+            type: string
+          3:
+            assert: xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.DiagBoot
+            type: string
+          4:
+            assert: xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.CDROMBoot
+            type: string
+          5:
+            assert: xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.ROMBoot
+            type: string
+          6:
+            assert: xyz.openbmc_project.State.OperatingSystem.Status.OSStatus.BootComplete
+            type: string
+  path: /xyz/openbmc_project/state/host0
+  readingType: assertion
+  sensorNamePattern: nameProperty
+  sensorReadingType: 111
+  sensorType: 31
+  serviceInterface: org.freedesktop.DBus.Properties
+7:
+  entityID: 34
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Control.Boot.RebootAttempts:
+      AttemptsLeft:
+        Offsets:
+          255:
+            type: uint32_t
+  path: /xyz/openbmc_project/state/host0
+  readingType: readingAssertion
+  sensorNamePattern: nameProperty
+  sensorReadingType: 111
+  sensorType: 195
+  serviceInterface: org.freedesktop.DBus.Properties
+8:
+  entityID: 210
+  entityInstance: 1
+  interfaces:
+    org.open_power.OCC.Status:
+      OccActive:
+        Offsets:
+          0:
+            assert: false
+            deassert: true
+            type: bool
+          1:
+            assert: true
+            deassert: false
+            type: bool
+  path: /org/open_power/control/occ0
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 9
+  sensorType: 9
+  serviceInterface: org.freedesktop.DBus.Properties
+9:
+  entityID: 210
+  entityInstance: 2
+  interfaces:
+    org.open_power.OCC.Status:
+      OccActive:
+        Offsets:
+          0:
+            assert: false
+            deassert: true
+            type: bool
+          1:
+            assert: true
+            deassert: false
+            type: bool
+  path: /org/open_power/control/occ1
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 9
+  sensorType: 9
+  serviceInterface: org.freedesktop.DBus.Properties
+17:
+  bExp: 0
+  entityID: 208
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core0
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+18:
+  entityID: 208
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core0
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+20:
+  bExp: 0
+  entityID: 208
+  entityInstance: 4
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core1
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+21:
+  entityID: 208
+  entityInstance: 3
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core1
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+23:
+  bExp: 0
+  entityID: 208
+  entityInstance: 6
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core2
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+24:
+  entityID: 208
+  entityInstance: 5
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core2
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+26:
+  bExp: 0
+  entityID: 208
+  entityInstance: 8
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core3
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+27:
+  entityID: 208
+  entityInstance: 7
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core3
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+29:
+  bExp: 0
+  entityID: 208
+  entityInstance: 10
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core4
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+30:
+  entityID: 208
+  entityInstance: 9
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core4
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+32:
+  bExp: 0
+  entityID: 208
+  entityInstance: 12
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core5
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+33:
+  entityID: 208
+  entityInstance: 11
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core5
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+35:
+  bExp: 0
+  entityID: 208
+  entityInstance: 14
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core6
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+36:
+  entityID: 208
+  entityInstance: 13
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core6
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+38:
+  bExp: 0
+  entityID: 208
+  entityInstance: 16
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core7
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+39:
+  entityID: 208
+  entityInstance: 15
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core7
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+41:
+  bExp: 0
+  entityID: 208
+  entityInstance: 18
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core8
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+42:
+  entityID: 208
+  entityInstance: 17
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core8
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+44:
+  bExp: 0
+  entityID: 208
+  entityInstance: 20
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core9
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+45:
+  entityID: 208
+  entityInstance: 19
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core9
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+47:
+  bExp: 0
+  entityID: 208
+  entityInstance: 22
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core10
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+48:
+  entityID: 208
+  entityInstance: 21
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core10
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+50:
+  bExp: 0
+  entityID: 208
+  entityInstance: 24
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core11
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+51:
+  entityID: 208
+  entityInstance: 23
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core11
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+53:
+  bExp: 0
+  entityID: 208
+  entityInstance: 26
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core12
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+54:
+  entityID: 208
+  entityInstance: 25
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core12
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+56:
+  bExp: 0
+  entityID: 208
+  entityInstance: 28
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core13
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+57:
+  entityID: 208
+  entityInstance: 27
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core13
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+59:
+  bExp: 0
+  entityID: 208
+  entityInstance: 30
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core14
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+60:
+  entityID: 208
+  entityInstance: 29
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core14
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+62:
+  bExp: 0
+  entityID: 208
+  entityInstance: 32
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core15
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+63:
+  entityID: 208
+  entityInstance: 31
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core15
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+65:
+  bExp: 0
+  entityID: 208
+  entityInstance: 34
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core16
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+66:
+  entityID: 208
+  entityInstance: 33
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core16
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+68:
+  bExp: 0
+  entityID: 208
+  entityInstance: 36
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core17
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+69:
+  entityID: 208
+  entityInstance: 35
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core17
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+71:
+  bExp: 0
+  entityID: 208
+  entityInstance: 38
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core18
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+72:
+  entityID: 208
+  entityInstance: 37
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core18
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+74:
+  bExp: 0
+  entityID: 208
+  entityInstance: 40
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core19
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+75:
+  entityID: 208
+  entityInstance: 39
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core19
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+77:
+  bExp: 0
+  entityID: 208
+  entityInstance: 42
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core20
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+78:
+  entityID: 208
+  entityInstance: 41
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core20
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+80:
+  bExp: 0
+  entityID: 208
+  entityInstance: 44
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core21
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+81:
+  entityID: 208
+  entityInstance: 43
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core21
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+83:
+  bExp: 0
+  entityID: 208
+  entityInstance: 46
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core22
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+84:
+  entityID: 208
+  entityInstance: 45
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core22
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+86:
+  bExp: 0
+  entityID: 208
+  entityInstance: 48
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0/core23
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+87:
+  entityID: 208
+  entityInstance: 47
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0/core23
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+90:
+  entityID: 3
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu0
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+91:
+  bExp: 0
+  entityID: 208
+  entityInstance: 50
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core0
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+92:
+  entityID: 208
+  entityInstance: 49
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core0
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+94:
+  bExp: 0
+  entityID: 208
+  entityInstance: 52
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core1
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+95:
+  entityID: 208
+  entityInstance: 51
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core1
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+97:
+  bExp: 0
+  entityID: 208
+  entityInstance: 54
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core2
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+98:
+  entityID: 208
+  entityInstance: 53
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core2
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+100:
+  bExp: 0
+  entityID: 208
+  entityInstance: 56
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core3
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+101:
+  entityID: 208
+  entityInstance: 55
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core3
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+103:
+  bExp: 0
+  entityID: 208
+  entityInstance: 58
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core4
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+104:
+  entityID: 208
+  entityInstance: 57
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core4
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+106:
+  bExp: 0
+  entityID: 208
+  entityInstance: 60
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core5
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+107:
+  entityID: 208
+  entityInstance: 59
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core5
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+109:
+  bExp: 0
+  entityID: 208
+  entityInstance: 62
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core6
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+110:
+  entityID: 208
+  entityInstance: 61
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core6
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+112:
+  bExp: 0
+  entityID: 208
+  entityInstance: 64
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core7
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+113:
+  entityID: 208
+  entityInstance: 63
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core7
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+115:
+  bExp: 0
+  entityID: 208
+  entityInstance: 66
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core8
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+116:
+  entityID: 208
+  entityInstance: 65
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core8
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+118:
+  bExp: 0
+  entityID: 208
+  entityInstance: 68
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core9
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+119:
+  entityID: 208
+  entityInstance: 67
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core9
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+121:
+  bExp: 0
+  entityID: 208
+  entityInstance: 70
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core10
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+122:
+  entityID: 208
+  entityInstance: 69
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core10
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+124:
+  bExp: 0
+  entityID: 208
+  entityInstance: 72
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core11
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+125:
+  entityID: 208
+  entityInstance: 71
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core11
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+127:
+  bExp: 0
+  entityID: 208
+  entityInstance: 74
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core12
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+128:
+  entityID: 208
+  entityInstance: 73
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core12
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+130:
+  bExp: 0
+  entityID: 208
+  entityInstance: 76
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core13
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+131:
+  entityID: 208
+  entityInstance: 75
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core13
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+133:
+  bExp: 0
+  entityID: 208
+  entityInstance: 78
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core14
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+134:
+  entityID: 208
+  entityInstance: 77
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core14
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+136:
+  bExp: 0
+  entityID: 208
+  entityInstance: 80
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core15
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+137:
+  entityID: 208
+  entityInstance: 79
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core15
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+139:
+  bExp: 0
+  entityID: 208
+  entityInstance: 82
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core16
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+140:
+  entityID: 208
+  entityInstance: 81
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core16
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+142:
+  bExp: 0
+  entityID: 208
+  entityInstance: 84
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core17
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+143:
+  entityID: 208
+  entityInstance: 83
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core17
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+145:
+  bExp: 0
+  entityID: 208
+  entityInstance: 86
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core18
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+146:
+  entityID: 208
+  entityInstance: 85
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core18
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+148:
+  bExp: 0
+  entityID: 208
+  entityInstance: 88
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core19
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+149:
+  entityID: 208
+  entityInstance: 87
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core19
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+151:
+  bExp: 0
+  entityID: 208
+  entityInstance: 90
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core20
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+152:
+  entityID: 208
+  entityInstance: 89
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core20
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+154:
+  bExp: 0
+  entityID: 208
+  entityInstance: 92
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core21
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+155:
+  entityID: 208
+  entityInstance: 91
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core21
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+157:
+  bExp: 0
+  entityID: 208
+  entityInstance: 94
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core22
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+158:
+  entityID: 208
+  entityInstance: 93
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core22
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+160:
+  bExp: 0
+  entityID: 208
+  entityInstance: 96
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1/core23
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+161:
+  entityID: 208
+  entityInstance: 95
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            skipOn: deassert
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1/core23
+  readingType: assertion
+  sensorNamePattern: nameParentLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+164:
+  entityID: 3
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/cpu1
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 7
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+165:
+  bExp: 0
+  entityID: 32
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm0
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+166:
+  entityID: 32
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm0
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+167:
+  bExp: 0
+  entityID: 32
+  entityInstance: 4
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm1
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+168:
+  entityID: 32
+  entityInstance: 3
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm1
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+169:
+  bExp: 0
+  entityID: 32
+  entityInstance: 18
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm2
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+170:
+  entityID: 32
+  entityInstance: 17
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm2
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+171:
+  bExp: 0
+  entityID: 32
+  entityInstance: 20
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm3
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+172:
+  entityID: 32
+  entityInstance: 19
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm3
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+173:
+  bExp: 0
+  entityID: 32
+  entityInstance: 22
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm4
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+174:
+  entityID: 32
+  entityInstance: 21
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm4
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+175:
+  bExp: 0
+  entityID: 32
+  entityInstance: 24
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm5
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+176:
+  entityID: 32
+  entityInstance: 23
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm5
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+177:
+  bExp: 0
+  entityID: 32
+  entityInstance: 26
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm6
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+178:
+  entityID: 32
+  entityInstance: 25
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm6
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+179:
+  bExp: 0
+  entityID: 32
+  entityInstance: 28
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm7
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+180:
+  entityID: 32
+  entityInstance: 27
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm7
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+181:
+  bExp: 0
+  entityID: 32
+  entityInstance: 30
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm8
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+182:
+  entityID: 32
+  entityInstance: 29
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm8
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+183:
+  bExp: 0
+  entityID: 32
+  entityInstance: 32
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm9
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+184:
+  entityID: 32
+  entityInstance: 31
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm9
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+185:
+  bExp: 0
+  entityID: 32
+  entityInstance: 6
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm10
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+186:
+  entityID: 32
+  entityInstance: 5
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm10
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+187:
+  bExp: 0
+  entityID: 32
+  entityInstance: 8
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm11
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+188:
+  entityID: 32
+  entityInstance: 7
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm11
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+189:
+  bExp: 0
+  entityID: 32
+  entityInstance: 10
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm12
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+190:
+  entityID: 32
+  entityInstance: 9
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm12
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+191:
+  bExp: 0
+  entityID: 32
+  entityInstance: 12
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm13
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+192:
+  entityID: 32
+  entityInstance: 11
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm13
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+193:
+  bExp: 0
+  entityID: 32
+  entityInstance: 14
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm14
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+194:
+  entityID: 32
+  entityInstance: 13
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm14
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+195:
+  bExp: 0
+  entityID: 32
+  entityInstance: 16
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/dimm15
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+196:
+  entityID: 32
+  entityInstance: 15
+  interfaces:
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          4:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          6:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/dimm15
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 111
+  sensorType: 12
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+197:
+  entityID: 216
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Inventory.Decorator.Replaceable:
+      FieldReplaceable:
+        Offsets:
+          7:
+            assert: true
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/gv100card0
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 23
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+198:
+  bExp: 0
+  entityID: 216
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card0
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+199:
+  bExp: 0
+  entityID: 217
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card0
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+200:
+  entityID: 216
+  entityInstance: 3
+  interfaces:
+    xyz.openbmc_project.Inventory.Decorator.Replaceable:
+      FieldReplaceable:
+        Offsets:
+          7:
+            assert: true
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/gv100card1
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 23
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+201:
+  bExp: 0
+  entityID: 216
+  entityInstance: 4
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card1
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+202:
+  bExp: 0
+  entityID: 217
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card1
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+203:
+  entityID: 216
+  entityInstance: 5
+  interfaces:
+    xyz.openbmc_project.Inventory.Decorator.Replaceable:
+      FieldReplaceable:
+        Offsets:
+          7:
+            assert: true
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/gv100card2
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 23
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+204:
+  bExp: 0
+  entityID: 216
+  entityInstance: 6
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card2
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+205:
+  bExp: 0
+  entityID: 217
+  entityInstance: 3
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card2
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+206:
+  entityID: 216
+  entityInstance: 7
+  interfaces:
+    xyz.openbmc_project.Inventory.Decorator.Replaceable:
+      FieldReplaceable:
+        Offsets:
+          7:
+            assert: true
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/gv100card3
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 23
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+207:
+  bExp: 0
+  entityID: 216
+  entityInstance: 8
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card3
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+208:
+  bExp: 0
+  entityID: 217
+  entityInstance: 4
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card3
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+209:
+  entityID: 216
+  entityInstance: 9
+  interfaces:
+    xyz.openbmc_project.Inventory.Decorator.Replaceable:
+      FieldReplaceable:
+        Offsets:
+          7:
+            assert: true
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/gv100card4
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 23
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+210:
+  bExp: 0
+  entityID: 216
+  entityInstance: 10
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card4
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+211:
+  bExp: 0
+  entityID: 217
+  entityInstance: 5
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card4
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+212:
+  entityID: 216
+  entityInstance: 11
+  interfaces:
+    xyz.openbmc_project.Inventory.Decorator.Replaceable:
+      FieldReplaceable:
+        Offsets:
+          7:
+            assert: true
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+  path: /system/chassis/motherboard/gv100card5
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 23
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+213:
+  bExp: 0
+  entityID: 216
+  entityInstance: 12
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card5
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+214:
+  bExp: 0
+  entityID: 217
+  entityInstance: 6
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/gv100card5
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+215:
+  entityID: 3
+  entityInstance: 3
+  interfaces:
+    xyz.openbmc_project.Control.TPM.Policy:
+      TPMEnable:
+        Offsets:
+          0:
+            assert: false
+            type: bool
+          1:
+            assert: true
+            type: bool
+  path: /xyz/openbmc_project/control/host0/TPMEnable
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 3
+  sensorType: 204
+  serviceInterface: org.freedesktop.DBus.Properties
+218:
+  entityID: 33
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Control.Boot.RebootPolicy:
+      AutoReboot:
+        Offsets:
+          0:
+            assert: false
+            type: bool
+          1:
+            assert: true
+            type: bool
+  path: /xyz/openbmc_project/control/host0/auto_reboot
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 3
+  sensorType: 9
+  serviceInterface: org.freedesktop.DBus.Properties
+219:
+  entityID: 33
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Object.Enable:
+      Enabled:
+        Offsets:
+          0:
+            assert: false
+            type: bool
+          1:
+            assert: true
+            type: bool
+  path: /org/open_power/control/volatile
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 3
+  sensorType: 12
+  serviceInterface: org.freedesktop.DBus.Properties
+220:
+  entityID: 3
+  entityInstance: 4
+  interfaces:
+    xyz.openbmc_project.Control.Host.TurboAllowed:
+      TurboAllowed:
+        Offsets:
+          0:
+            assert: false
+            deassert: true
+            type: bool
+          1:
+            assert: true
+            deassert: false
+            type: bool
+  path: /xyz/openbmc_project/control/host0/turbo_allowed
+  readingType: assertion
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 3
+  sensorType: 203
+  serviceInterface: org.freedesktop.DBus.Properties
+221:
+  bExp: 0
+  entityID: 29
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan0_0
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+222:
+  bExp: 0
+  entityID: 29
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan0_1
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+223:
+  bExp: 0
+  entityID: 29
+  entityInstance: 3
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan1_0
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+224:
+  bExp: 0
+  entityID: 218
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu0
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 0
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+225:
+  bExp: 0
+  entityID: 218
+  entityInstance: 2
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: -127
+  path: /system/chassis/motherboard/cpu1
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 0
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+226:
+  bExp: 0
+  entityID: 29
+  entityInstance: 4
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan1_1
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+227:
+  bExp: 0
+  entityID: 29
+  entityInstance: 5
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan2_0
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+228:
+  bExp: 0
+  entityID: 29
+  entityInstance: 6
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan2_1
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+229:
+  bExp: 0
+  entityID: 29
+  entityInstance: 7
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan3_0
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+230:
+  bExp: 0
+  entityID: 29
+  entityInstance: 8
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 100
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/fan_tach/fan3_1
+  rExp: 0
+  readingType: readingData
+  scale: 0
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 4
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.RPMS
+231:
+  bExp: 0
+  entityID: 10
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/fan_disk_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+232:
+  bExp: 0
+  entityID: 10
+  entityInstance: 3
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p0_gpu0_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+233:
+  bExp: 0
+  entityID: 10
+  entityInstance: 4
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p0_gpu1_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+234:
+  bExp: 0
+  entityID: 10
+  entityInstance: 5
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p0_gpu2_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+235:
+  bExp: 0
+  entityID: 10
+  entityInstance: 6
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p1_gpu0_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+236:
+  bExp: 0
+  entityID: 10
+  entityInstance: 7
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p1_gpu1_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+237:
+  bExp: 0
+  entityID: 10
+  entityInstance: 8
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p1_gpu2_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+238:
+  bExp: 0
+  entityID: 10
+  entityInstance: 9
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p0_io_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+239:
+  bExp: 0
+  entityID: 10
+  entityInstance: 10
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p1_io_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+240:
+  bExp: 0
+  entityID: 10
+  entityInstance: 11
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p0_mem_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+241:
+  bExp: 0
+  entityID: 10
+  entityInstance: 12
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p1_mem_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+242:
+  bExp: 0
+  entityID: 10
+  entityInstance: 13
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p0_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+243:
+  bExp: 0
+  entityID: 10
+  entityInstance: 14
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/p1_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+244:
+  bExp: 0
+  entityID: 10
+  entityInstance: 15
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 10
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/ps0_input_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+245:
+  bExp: 0
+  entityID: 10
+  entityInstance: 16
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 10
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/ps1_input_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+246:
+  bExp: 0
+  entityID: 10
+  entityInstance: 17
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 20
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/power/total_power
+  rExp: 0
+  readingType: readingData
+  scale: -6
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 8
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Watts
+247:
+  bExp: 0
+  entityID: 10
+  entityInstance: 19
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/voltage/ps0_input_voltage
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 2
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Volts
+248:
+  bExp: 0
+  entityID: 10
+  entityInstance: 20
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 2
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/voltage/ps1_input_voltage
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 2
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Volts
+249:
+  bExp: 0
+  entityID: 10
+  entityInstance: 21
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 10
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/voltage/ps0_output_voltage
+  rExp: -2
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 2
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Volts
+250:
+  bExp: 0
+  entityID: 10
+  entityInstance: 22
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 10
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/voltage/ps1_output_voltage
+  rExp: -2
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 2
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Volts
+251:
+  bExp: 0
+  entityID: 10
+  entityInstance: 23
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/current/ps0_output_current
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 3
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Amperes
+252:
+  bExp: 0
+  entityID: 10
+  entityInstance: 24
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 1
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/current/ps1_output_current
+  rExp: 0
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 3
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.Amperes
+253:
+  bExp: 0
+  entityID: 35
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 30
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/temperature/pcie
+  rExp: -2
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
+254:
+  bExp: 0
+  entityID: 64
+  entityInstance: 1
+  interfaces:
+    xyz.openbmc_project.Sensor.Value:
+      Value:
+        Offsets:
+          255:
+            type: int64_t
+  multiplierM: 20
+  offsetB: 0
+  path: /xyz/openbmc_project/sensors/temperature/ambient
+  rExp: -2
+  readingType: readingData
+  scale: -3
+  sensorNamePattern: nameLeaf
+  sensorReadingType: 1
+  sensorType: 1
+  serviceInterface: org.freedesktop.DBus.Properties
+  unit: xyz.openbmc_project.Sensor.Value.Unit.DegreesC
