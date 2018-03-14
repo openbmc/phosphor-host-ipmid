@@ -914,9 +914,9 @@ int stop_soft_off_timer()
 }
 
 //----------------------------------------------------------------------
-// Create file to indicate there is no need for softoff notification to host
+// Create a file in /run/openbmc with the specified name
 //----------------------------------------------------------------------
-void indicate_no_softoff_needed()
+void create_breadcrumb_file(const std::string& fileName)
 {
     fs::path path{HOST_INBAND_REQUEST_DIR};
     if (!fs::is_directory(path))
@@ -925,7 +925,7 @@ void indicate_no_softoff_needed()
     }
 
     // Add the host instance (default 0 for now) to the file name
-    std::string file{HOST_INBAND_REQUEST_FILE};
+    std::string file{fileName};
     auto size = std::snprintf(nullptr,0,file.c_str(),0);
     size++; // null
     std::unique_ptr<char[]> buf(new char[size]);
@@ -983,7 +983,7 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 // that it should not run. Not doing this will result in State
                 // manager doing a default soft power off when asked for power
                 // off.
-                indicate_no_softoff_needed();
+                create_breadcrumb_file(HOST_INBAND_REQUEST_FILE);
 
                 // Now request the shutdown
                 rc = initiate_state_transition(State::Host::Transition::Off);
@@ -1005,7 +1005,11 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // that it should not run since this is a direct user initiated
             // power reboot request (i.e. a reboot request that is not
             // originating via a soft power off SMS request)
-            indicate_no_softoff_needed();
+            create_breadcrumb_file(HOST_INBAND_REQUEST_FILE);
+
+            // Second, create a file indicating that this is specifically a
+            // reboot, as opposed to a power off.
+            create_breadcrumb_file(HOST_REBOOT_REQUEST_FILE);
 
             rc = initiate_state_transition(State::Host::Transition::Reboot);
             break;

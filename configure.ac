@@ -131,6 +131,11 @@ AS_IF([test "x$enable_softoff" != "xno"],
     AS_IF([test "x$HOST_INBAND_REQUEST_FILE" == "x"],
         [HOST_INBAND_REQUEST_FILE="host@%u-request"])
     [AC_DEFINE_UNQUOTED([HOST_INBAND_REQUEST_FILE], ["$HOST_INBAND_REQUEST_FILE"], [File to create if host has initiated shutdown or reboot])]
+
+    [AC_ARG_VAR(HOST_REBOOT_REQUEST_FILE, [File which indicates the host has initiated a reboot])]
+    AS_IF([test "x$HOST_REBOOT_REQUEST_FILE" == "x"],
+        [HOST_REBOOT_REQUEST_FILE="host@%u-reboot"])
+    [AC_DEFINE_UNQUOTED([HOST_REBOOT_REQUEST_FILE], ["$HOST_REBOOT_REQUEST_FILE"], [File to create if host has initiated  reboot])]
 )
 
 # Control Host Interfaces
