@@ -1,4 +1,5 @@
 #pragma once
+#include <experimental/optional>
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/State/Watchdog/server.hpp>
 
@@ -67,7 +68,7 @@ class WatchdogService {
         /** @brief sdbusplus handle */
         sdbusplus::bus::bus bus;
         /** @brief The name of the mapped host watchdog service */
-        const std::string wd_service;
+        static std::experimental::optional<std::string> wd_service;
 
         /** @brief Sets the value of the property on the host watchdog
          *
