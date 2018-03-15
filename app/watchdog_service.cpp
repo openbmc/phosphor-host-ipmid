@@ -6,7 +6,6 @@
 #include <xyz/openbmc_project/State/Watchdog/server.hpp>
 
 #include "host-ipmid/ipmid-api.h"
-#include "utils.hpp"
 
 using sdbusplus::message::variant_ns::get;
 using sdbusplus::message::variant_ns::variant;
@@ -17,20 +16,21 @@ static constexpr char wd_path[] = "/xyz/openbmc_project/watchdog/host0";
 static constexpr char wd_intf[] = "xyz.openbmc_project.State.Watchdog";
 static constexpr char prop_intf[] = "org.freedesktop.DBus.Properties";
 
+ipmi::ServiceCache WatchdogService::wd_service(wd_intf, wd_path);
+
 WatchdogService::WatchdogService()
-    : bus(ipmid_get_sd_bus_connection()),
-    wd_service(ipmi::getService(bus, wd_intf, wd_path))
+    : bus(ipmid_get_sd_bus_connection())
 {
 }
 
 WatchdogService::Properties WatchdogService::getProperties()
 {
-    auto request = bus.new_method_call(wd_service.c_str(), wd_path,
-            prop_intf, "GetAll");
+    auto request = wd_service.newMethodCall(bus, prop_intf, "GetAll");
     request.append(wd_intf);
     auto response = bus.call(request);
     if (response.is_method_error())
     {
+        wd_service.invalidate();
         throw std::runtime_error("Failed to get watchdog properties");
     }
 
@@ -49,12 +49,12 @@ WatchdogService::Properties WatchdogService::getProperties()
 template <typename T>
 void WatchdogService::setProperty(const std::string& key, const T& val)
 {
-    auto request = bus.new_method_call(wd_service.c_str(), wd_path,
-            prop_intf, "Set");
+    auto request = wd_service.newMethodCall(bus, prop_intf, "Set");
     request.append(wd_intf, key, variant<T>(val));
     auto response = bus.call(request);
     if (response.is_method_error())
     {
+        wd_service.invalidate();
         throw std::runtime_error(std::string("Failed to set property: ") + key);
     }
 }
