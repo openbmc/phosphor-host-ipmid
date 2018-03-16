@@ -1,7 +1,8 @@
 #pragma once
+#include <experimental/optional>
+#include <sdbusplus/server.hpp>
 
 #include "types.hpp"
-#include <sdbusplus/server.hpp>
 
 namespace ipmi
 {
@@ -19,6 +20,64 @@ constexpr auto DELETE_INTERFACE = "xyz.openbmc_project.Object.Delete";
 constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
+
+/** @class ServiceCache
+ *  @brief Caches lookups of service names from the object mapper.
+ *  @details Most ipmi commands need to talk to other dbus daemons to perform
+ *           their intended actions on the BMC. This usually means they will
+ *           first look up the service name providing the interface they
+ *           require. This class reduces the number of such calls by caching
+ *           the lookup for a specific service.
+ */
+class ServiceCache {
+    public:
+        /** @brief Creates a new service cache for the given interface
+         *         and path.
+         *
+         *  @param[in] intf - The interface used for each lookup
+         *  @param[in] path - The path used for each lookup
+         */
+        ServiceCache(const std::string& intf, const std::string& path);
+        ServiceCache(std::string&& intf, std::string&& path);
+
+        /** @brief Gets the service name from the cache or does in a
+         *         lookup when invalid.
+         *
+         *  @param[in] bus - The bus associated with and used for looking
+         *                   up the service.
+         */
+        const std::string& getService(sdbusplus::bus::bus& bus);
+
+        /** @brief Invalidates the current service name */
+        void invalidate();
+
+        /** @brief A wrapper around sdbusplus bus.new_method_call
+         *
+         *  @param[in] bus - The bus used for calling the method
+         *  @param[in] intf - The interface containing the method
+         *  @param[in] method - The method name
+         *  @return The message containing the method call.
+         */
+        sdbusplus::message::message newMethodCall(sdbusplus::bus::bus& bus,
+                                                  const char *intf,
+                                                  const char *method);
+    private:
+        /** @brief DBUS interface provided by the service */
+        const std::string intf;
+        /** @brief DBUS path provided by the service */
+        const std::string path;
+        /** @brief The name of the service if valid */
+        std::experimental::optional<std::string> cachedService;
+        /** @brief The name of the bus used in the service lookup */
+        std::experimental::optional<std::string> cachedBusName;
+
+        /** @brief Check to see if the current cache is valid
+         *
+         * @param[in] bus - The bus used for the service lookup
+         * @return True if the cache is valid false otherwise.
+         */
+        bool isValid(sdbusplus::bus::bus& bus) const;
+};
 
 /**
  * @brief Get the DBUS Service name for the input dbus path
