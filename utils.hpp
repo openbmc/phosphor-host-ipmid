@@ -1,7 +1,8 @@
 #pragma once
+#include <experimental/optional>
+#include <sdbusplus/server.hpp>
 
 #include "types.hpp"
-#include <sdbusplus/server.hpp>
 
 namespace ipmi
 {
@@ -19,6 +20,25 @@ constexpr auto DELETE_INTERFACE = "xyz.openbmc_project.Object.Delete";
 constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
+
+class ServiceCache {
+    public:
+        ServiceCache(const std::string& intf, const std::string& path);
+
+        const std::string& getService(sdbusplus::bus::bus& bus);
+        void invalidate();
+
+        sdbusplus::message::message newMethodCall(sdbusplus::bus::bus& bus,
+                                                  const char *intf,
+                                                  const char *method);
+    private:
+        const std::string intf;
+        const std::string path;
+        std::experimental::optional<std::string> cachedService;
+        std::experimental::optional<std::string> cachedBusName;
+
+        bool isValid(sdbusplus::bus::bus& bus) const;
+};
 
 /**
  * @brief Get the DBUS Service name for the input dbus path
