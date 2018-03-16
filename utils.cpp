@@ -250,6 +250,40 @@ void setDbusProperty(sdbusplus::bus::bus& bus,
 }
 
 
+ServiceCache::ServiceCache(const std::string& intf, const std::string& path)
+    : intf(intf), path(path), cachedService(std::experimental::nullopt),
+      cachedBusName(std::experimental::nullopt)
+{
+}
+
+const std::string& ServiceCache::getService(sdbusplus::bus::bus& bus)
+{
+    if (!isValid(bus))
+    {
+        cachedBusName = bus.get_unique_name();
+        cachedService = ::ipmi::getService(bus, intf, path);
+    }
+    return cachedService.value();
+}
+
+void ServiceCache::invalidate()
+{
+    cachedBusName = std::experimental::nullopt;
+    cachedService = std::experimental::nullopt;
+}
+
+sdbusplus::message::message ServiceCache::newMethodCall(
+        sdbusplus::bus::bus& bus, const char *intf, const char *method)
+{
+    return bus.new_method_call(getService(bus).c_str(), path.c_str(),
+                               intf, method);
+}
+
+bool ServiceCache::isValid(sdbusplus::bus::bus& bus) const
+{
+    return cachedService && cachedBusName == bus.get_unique_name();
+}
+
 std::string getService(sdbusplus::bus::bus& bus,
                        const std::string& intf,
                        const std::string& path)
