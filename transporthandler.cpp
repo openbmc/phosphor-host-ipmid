@@ -699,7 +699,7 @@ void applyChanges(int channel)
 
                 // if the system is having ip object,then
                 // get the IP object.
-                ipObject = ipmi::getDbusObject(bus,
+                ipObject = ipmi::getIPObject(bus,
                                                ipmi::network::IP_INTERFACE,
                                                ipmi::network::ROOT,
                                                ethIp);
