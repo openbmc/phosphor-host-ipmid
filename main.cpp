@@ -51,6 +51,14 @@ sd_bus* ipmid_get_sd_bus_connection()
 /*
  * @brief Required by apphandler IPMI Provider Library
  */
+sd_event* ipmid_get_sd_event_connection()
+{
+    return loop.event;
+}
+
+/*
+ * @brief Required by apphandler IPMI Provider Library
+ */
 unsigned short get_sel_reserve_id()
 {
     return g_sel_reserve;

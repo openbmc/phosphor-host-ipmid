@@ -132,6 +132,9 @@ class EventLoop
          */
         void switchRetryTimer(uint8_t payloadInst, bool status);
 
+        /** @brief Event loop object. */
+        sd_event* event = nullptr;
+
     private:
         /** @brief Event source object for host console. */
         EventSource hostConsole = nullptr;
@@ -146,8 +149,6 @@ class EventLoop
          */
         PayloadMap payloadInfo;
 
-        /** @brief Event loop object. */
-        sd_event* event = nullptr;
 };
 
 } // namespace eventloop
