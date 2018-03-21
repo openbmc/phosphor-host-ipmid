@@ -1,3 +1,4 @@
+#include <fstream>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -5,6 +6,7 @@
 #include <string>
 #include <experimental/filesystem>
 
+#include "app/channel.hpp"
 #include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
 #include "transporthandler.hpp"
@@ -351,6 +353,41 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
     return rc;
 }
 
+namespace cipher
+{
+
+std::vector<uint8_t> getCipherList()
+{
+    std::vector<uint8_t> cipherList;
+
+    std::ifstream jsonFile(configFile);
+    if (!jsonFile.is_open())
+    {
+        log<level::ERR>("Channel Cipher suites file not found");
+        elog<InternalFailure>();
+    }
+
+    auto data = Json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Parsing channel cipher suites JSON failed");
+        elog<InternalFailure>();
+    }
+
+    // Byte 1 is reserved
+    cipherList.push_back(0x00);
+
+    for (auto it = data.begin(); it != data.end(); ++it)
+    {
+        const Json &record = it.value();
+        cipherList.push_back(record.value(cipher, 0));
+    }
+
+    return cipherList;
+}
+
+} //namespace cipher
+
 ipmi_ret_t ipmi_transport_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
@@ -535,6 +572,22 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
         return IPMI_CC_OK;
     }
 
+    static std::vector<uint8_t> cipherList;
+    static auto listInit = false;
+
+    if (!listInit)
+    {
+        try
+        {
+            cipherList = cipher::getCipherList();
+            listInit = true;
+        }
+        catch (const std::exception &e)
+        {
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+
     auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
     if (ethdevice.empty())
     {
@@ -609,6 +662,22 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
             *data_len = sizeof(buff);
             memcpy(response, &buff, *data_len);
         }
+    }
+    else if (reqptr->parameter == CIPHER_SUITE_COUNT)
+    {
+        *(static_cast<uint8_t*>(response)) = current_revision;
+        *(static_cast<uint8_t*>(response) + 1) =
+                static_cast<uint8_t>(cipherList.size());
+        *data_len = sizeof(current_revision) + sizeof(uint8_t);
+    }
+    else if (reqptr->parameter == CIPHER_SUITE_ENTRIES)
+    {
+        *(static_cast<uint8_t*>(response)) = current_revision;
+        // Byte 1 is reserved
+        std::copy_n(cipherList.data(),
+                    cipherList.size(),
+                    static_cast<uint8_t*>(response) + 1);
+        *data_len = static_cast<uint8_t>(cipherList.size()) + 1;
     }
     else
     {
