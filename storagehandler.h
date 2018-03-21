@@ -46,6 +46,15 @@ struct ReadFruDataRequest
 }__attribute__ ((packed));
 
 /**
+ * @struct Read FRU Data command response data
+ */
+struct ReadFruDataResponse
+{
+    uint8_t count; ///< Response data Count.
+    uint8_t data[]; ///< Response data.
+}__attribute__ ((packed));
+
+/**
  * @struct Get FRU inventory area info command request data
  */
 struct FruInvenAreaInfoRequest
