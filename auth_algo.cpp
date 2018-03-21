@@ -12,6 +12,8 @@ namespace cipher
 namespace rakp_auth
 {
 
+const std::string userName = "admin";
+
 std::vector<uint8_t> AlgoSHA1::generateHMAC(
         const std::vector<uint8_t>& input) const
 {

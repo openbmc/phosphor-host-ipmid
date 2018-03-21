@@ -3,6 +3,7 @@
 #include <openssl/rand.h>
 
 #include <algorithm>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 
@@ -45,6 +46,29 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
+    auto rakp1Size = sizeof(RAKP1request) -
+            (userNameMaxLen - request->user_name_len);
+
+    // Validate user name length in the message
+    if (request->user_name_len > userNameMaxLen ||
+        inPayload.size() !=  rakp1Size)
+    {
+        response->rmcpStatusCode =
+            static_cast<uint8_t>(RAKP_ReturnCode::INVALID_NAME_LENGTH);
+        return outPayload;
+    }
+
+    session->userName.assign(request->user_name, request->user_name_len);
+
+    // Validate the user name if the username is provided
+    if (request->user_name_len &&
+        (session->userName != cipher::rakp_auth::userName))
+    {
+        response->rmcpStatusCode =
+            static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
+        return outPayload;
+    }
+
     // Update transaction time
     session->updateLastTransactionTime();
 
@@ -70,7 +94,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
                  cipher::rakp_auth::REMOTE_CONSOLE_RANDOM_NUMBER_LEN +
                  cipher::rakp_auth::BMC_RANDOM_NUMBER_LEN +
                  BMC_GUID_LEN + sizeof(request->req_max_privilege_level) +
-                 sizeof(request->user_name_len));
+                 sizeof(request->user_name_len) +
+                 session->userName.size());
 
     auto iter = input.begin();
 
@@ -127,6 +152,9 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     // User Name Length Byte
     std::copy_n(&(request->user_name_len), sizeof(request->user_name_len),
                 iter);
+    std::advance(iter, sizeof(request->user_name_len));
+
+    std::copy_n(session->userName.data(), session->userName.size(), iter);
 
     // Generate Key Exchange Authentication Code - RAKP2
     auto output = authAlgo->generateHMAC(input);

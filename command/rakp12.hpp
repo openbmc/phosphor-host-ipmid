@@ -8,6 +8,8 @@
 namespace command
 {
 
+constexpr size_t userNameMaxLen = 16;
+
 /**
  * @struct RAKP1request
  *
@@ -23,7 +25,7 @@ struct RAKP1request
     uint8_t req_max_privilege_level;
     uint16_t reserved3;
     uint8_t user_name_len;
-    char user_name[16];
+    char user_name[userNameMaxLen];
 } __attribute__((packed));
 
 /**
