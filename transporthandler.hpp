@@ -26,6 +26,8 @@ static const int LAN_PARM_MAC         = 5;
 static const int LAN_PARM_SUBNET      = 6;
 static const int LAN_PARM_GATEWAY     = 12;
 static const int LAN_PARM_VLAN        = 20;
+static const int CIPHER_SUITE_COUNT   = 22;
+static const int CIPHER_SUITE_ENTRIES = 23;
 
 constexpr uint8_t SET_COMPLETE = 0;
 constexpr uint8_t SET_IN_PROGRESS = 1;
