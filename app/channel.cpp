@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "net.hpp"
 
+#include <fstream>
 #include <string>
 #include <arpa/inet.h>
 
@@ -441,4 +442,121 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     return rc;
+}
+
+namespace cipher
+{
+
+std::vector<uint8_t> getCipherRecords()
+{
+    std::vector<uint8_t> records;
+
+    std::ifstream jsonFile(configFile);
+    if (!jsonFile.is_open())
+    {
+        log<level::ERR>("Channel Cipher suites file not found");
+        elog<InternalFailure>();
+    }
+
+    auto data = Json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Parsing channel cipher suites JSON failed");
+        elog<InternalFailure>();
+    }
+
+    for (auto it = data.begin(); it != data.end(); ++it)
+    {
+        const Json &record = it.value();
+
+        if (record.find(oem) != record.end())
+        {
+            records.push_back(oemCipherSuite);
+            records.push_back(record.value(cipher, 0));
+            records.push_back(record.value(oem, 0));
+            records.push_back(record.value(oem, 0) >> 8);
+            records.push_back(record.value(oem, 0) >> 16);
+
+        }
+        else
+        {
+            records.push_back(stdCipherSuite);
+            records.push_back(record.value(cipher, 0));
+        }
+
+        records.push_back(record.value(auth, 0));
+        records.push_back(record.value(integrity, 0) | integrityTag);
+        records.push_back(record.value(conf, 0) | confTag);
+    }
+
+    return records;
+}
+
+} //namespace cipher
+
+ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
+                                  ipmi_cmd_t cmd,
+                                  ipmi_request_t request,
+                                  ipmi_response_t response,
+                                  ipmi_data_len_t data_len,
+                                  ipmi_context_t context)
+{
+    static std::vector<uint8_t> records;
+    static auto recordInit = false;
+
+    auto requestData =
+        reinterpret_cast<const GetChannelCipherRequest*>(request);
+
+
+    if (*data_len < sizeof(GetChannelCipherRequest))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    *data_len = 0;
+
+    if (cipher::listCipherSuite !=
+            (requestData->listIndex & cipher::listTypeMask))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (!recordInit)
+    {
+        try
+        {
+            records = cipher::getCipherRecords();
+            recordInit = true;
+        }
+        catch (const std::exception &e)
+        {
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+
+    auto index = static_cast<size_t>(
+            requestData->listIndex & cipher::listIndexMask);
+    auto start = std::min(index * cipher::respSize, records.size());
+    auto end = std::min((index * cipher::respSize) + cipher::respSize,
+                        records.size());
+    auto size = end - start;
+
+    auto responseData = reinterpret_cast<GetChannelCipherRespHeader*>
+            (response);
+    responseData->channelNumber = cipher::defaultChannelNumber;
+
+    if (!size)
+    {
+        *data_len = sizeof(GetChannelCipherRespHeader);
+    }
+    else
+    {
+        std::copy_n(records.data() + start,
+                    size,
+                    static_cast<uint8_t*>(response) + 1);
+        *data_len = size + sizeof(GetChannelCipherRespHeader);
+    }
+
+    return IPMI_CC_OK;
 }

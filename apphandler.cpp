@@ -704,6 +704,13 @@ void register_netfn_app_functions()
                            NULL,
                            ipmi_app_get_sys_guid,
                            PRIVILEGE_USER);
+
+    // <Get Channel Cipher Suites Command>
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_GET_CHAN_CIPHER_SUITES,
+                           NULL,
+                           getChannelCipherSuites,
+                           PRIVILEGE_CALLBACK);
     return;
 }
 

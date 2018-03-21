@@ -19,6 +19,7 @@ enum ipmi_netfn_app_cmds
     IPMI_CMD_SET_CHAN_ACCESS        = 0x40,
     IPMI_CMD_GET_CHANNEL_ACCESS     = 0x41,
     IPMI_CMD_GET_CHAN_INFO          = 0x42,
+    IPMI_CMD_GET_CHAN_CIPHER_SUITES = 0x54,
 };
 
 #endif
