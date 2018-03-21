@@ -640,32 +640,31 @@ ipmi_ret_t ipmi_storage_read_fru_data(
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     const ReadFruDataRequest* reqptr =
-         reinterpret_cast<const ReadFruDataRequest*>(request);
+        reinterpret_cast<const ReadFruDataRequest*>(request);
+    auto resptr =
+        reinterpret_cast<ReadFruDataResponse*>(response);
     auto offset =
         static_cast<uint16_t>(reqptr->offsetMS << 8 | reqptr->offsetLS);
     try
     {
         const auto& fruArea = getFruAreaData(reqptr->fruID);
         auto size = fruArea.size();
-        if ((offset + reqptr->count) > size)
+
+        // Write the count of response data.
+        if ((offset + reqptr->count) <= size)
         {
-            log<level::ERR>("Invalid offset and count",
-                            entry("OFFSET=%s", offset),
-                            entry("COUNT=%s", reqptr->count),
-                            entry("SIZE_OF_FRU_AREA=%s", size));
-            return IPMI_CC_INVALID;
+            resptr->count = reqptr->count;
+        }
+        else
+        {
+            resptr->count = size - offset;
         }
 
-        // Write the count of requested data.
-        auto buff = static_cast<uint8_t *>(response);
-        *buff = reqptr->count;
-        buff++;
-
         std::copy((fruArea.begin() + offset),
-                  (fruArea.begin() + offset + reqptr->count),
-                  buff);
+                  (fruArea.begin() + offset + resptr->count),
+                  resptr->data);
 
-        *data_len = reqptr->count + 1; // additional one byte for count
+        *data_len = resptr->count + 1; // additional one byte for count
     }
     catch (const InternalFailure& e)
     {
