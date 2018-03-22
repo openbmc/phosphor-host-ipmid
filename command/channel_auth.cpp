@@ -10,8 +10,6 @@ namespace command
 std::vector<uint8_t> GetChannelCapabilities(
         const std::vector<uint8_t>& inPayload, const message::Handler& handler)
 {
-    std::cout << ">> GetChannelCapabilities\n";
-
     std::vector<uint8_t> outPayload(sizeof(GetChannelCapabilitiesResp));
     auto response = reinterpret_cast<GetChannelCapabilitiesResp*>
                     (outPayload.data());
@@ -46,8 +44,6 @@ std::vector<uint8_t> GetChannelCapabilities(
     response->oemID[1] = 0;
     response->oemID[2] = 0;
     response->oemAuxillary = 0;
-
-    std::cout << "<< GetChannelCapabilities\n";
     return outPayload;
 }
 

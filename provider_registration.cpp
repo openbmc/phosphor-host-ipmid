@@ -50,7 +50,6 @@ void registerCallbackHandlers(const char* providerLibPath)
     {
         handlerPath = providerLibPath;
         handlerPath += handlerList[numLibs]->d_name;
-        std::cout << "Registering handler: " << handlerPath << "\n";
 
         auto lib_handler = dlopen(handlerPath.c_str(), RTLD_NOW);
 

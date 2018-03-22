@@ -67,7 +67,6 @@ void applyCryptAlgo(const uint32_t bmcSessionID)
 std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
                             const message::Handler& handler)
 {
-    std::cout << ">> RAKP34\n";
 
     std::vector<uint8_t> outPayload(sizeof(RAKP4response));
     auto request = reinterpret_cast<const RAKP3request*>(inPayload.data());
@@ -266,8 +265,6 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     applyCryptAlgo(session->getBMCSessionID());
 
     session->state = session::State::ACTIVE;
-
-    std::cout << "<< RAKP34\n";
     return outPayload;
 }
 

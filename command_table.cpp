@@ -6,6 +6,11 @@
 #include "message_handler.hpp"
 #include "message_parsers.hpp"
 #include "sessions_manager.hpp"
+#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
+
+using namespace phosphor::logging;
 
 namespace command
 {
@@ -16,13 +21,10 @@ void Table::registerCommand(CommandID inCommand, std::unique_ptr<Entry>&& entry)
 
     if (command)
     {
-        std::cout << "I> Already Registered, Skipping " << std::hex
-                  << inCommand.command << "\n";
+        log<level::DEBUG>("Already Registered", phosphor::logging::entry(
+            "SKIPPED_ENTRY=0x%x", uint32_t(inCommand.command)));
         return;
     }
-
-    std::cout << "I> Registering Command" << std::hex
-              << inCommand.command << "\n";
 
     command = std::move(entry);
 }

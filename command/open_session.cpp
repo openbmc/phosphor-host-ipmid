@@ -12,7 +12,6 @@ namespace command
 std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
                                  const message::Handler& handler)
 {
-    std::cout << ">> openSession\n";
 
     std::vector<uint8_t> outPayload(sizeof(OpenSessionResponse));
     auto request = reinterpret_cast<const OpenSessionRequest*>(inPayload.data());
@@ -89,8 +88,6 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
 
     // Session state is Setup in progress
     session->state = session::State::SETUP_IN_PROGRESS;
-
-    std::cout << "<< openSession\n";
     return outPayload;
 }
 
