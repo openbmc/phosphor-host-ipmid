@@ -189,6 +189,40 @@ std::vector<uint8_t> getPayloadStatus(const std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
+std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
+                                    const message::Handler& handler)
+{
+    std::vector<uint8_t> outPayload(sizeof(GetPayloadInfoResponse));
+    auto request = reinterpret_cast<const GetPayloadInfoRequest*>
+                   (inPayload.data());
+    auto response = reinterpret_cast<GetPayloadInfoResponse*>
+                    (outPayload.data());
+
+    // SOL is the payload currently supported for payload status & only one
+    // instance of SOL is supported.
+    if (static_cast<uint8_t>(message::PayloadType::SOL) != request->payloadType
+        || request->payloadInstance != 1)
+    {
+        response->completionCode = IPMI_CC_INVALID_FIELD_REQUEST;
+        return outPayload;
+    }
+
+    auto status = std::get<sol::Manager&>(singletonPool).isPayloadActive(
+            request->payloadInstance);
+
+    if (!status)
+    {
+        response->completionCode = IPMI_CC_RESPONSE_ERROR;
+        return outPayload;
+    }
+
+    auto& context = std::get<sol::Manager&>(singletonPool).getContext
+            (request->payloadInstance);
+    response->sessionID = context.sessionID;
+
+    return outPayload;
+}
+
 } // namespace command
 
 } // namespace sol

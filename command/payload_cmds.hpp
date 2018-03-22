@@ -251,6 +251,41 @@ struct GetPayloadStatusResponse
 std::vector<uint8_t> getPayloadStatus(const std::vector<uint8_t>& inPayload,
                                       const message::Handler& handler);
 
+/** @struct GetPayloadInfoRequest
+ *
+ *  IPMI payload for Get Payload Instance info command request.
+ */
+struct GetPayloadInfoRequest
+{
+    uint8_t payloadType;    //!< Payload type
+    uint8_t payloadInstance;//!< Payload instance
+} __attribute__((packed));
+
+/** @struct GetPayloadInfoResponse
+ *
+ *  IPMI payload for Get Payload Instance info command response.
+ */
+struct GetPayloadInfoResponse
+{
+    uint8_t completionCode; //!< Completion code.
+    uint32_t sessionID;     //!< Session ID
+    uint8_t portNumber;     //!< Port number
+    uint8_t reserved[7];    //!< Reserved
+} __attribute__((packed));
+
+/** @brief Get Payload Instance Info Command.
+ *
+ *  This command returns information about a specific instance of a payload
+ *  type. Session ID is returned by this command
+ *
+ *  @param[in] inPayload - Request Data for the command.
+ *  @param[in] handler - Reference to the Message Handler.
+ *
+ *  @return Response data for the command
+ */
+std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
+                                    const message::Handler& handler);
+
 } // namespace command
 
 } // namespace sol

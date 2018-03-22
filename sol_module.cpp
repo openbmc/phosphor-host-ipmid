@@ -44,6 +44,14 @@ void registerCommands()
             },
             &getPayloadStatus, session::Privilege::USER, false
         },
+        // Get Payload Instance Info Command
+        {
+            {
+                (static_cast<uint32_t>(message::PayloadType::IPMI) << 16) |
+                static_cast<uint16_t>(::command::NetFns::APP) | 0x4B
+            },
+            &getPayloadInfo, session::Privilege::USER, false
+        },
         // Set SOL Configuration Parameters
         {
             {
