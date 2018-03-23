@@ -32,6 +32,7 @@ std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
         sol::Manager&> singletonPool(manager, table, loop, solManager);
 
 sd_bus* bus = nullptr;
+sd_event* events = nullptr;
 
 // Global timer for network changes
 std::unique_ptr<phosphor::ipmi::Timer> networkTimer = nullptr;
@@ -53,7 +54,7 @@ sd_bus* ipmid_get_sd_bus_connection()
  */
 sd_event* ipmid_get_sd_event_connection()
 {
-    return loop.event;
+    return events;
 }
 
 /*
@@ -79,6 +80,14 @@ int main(int i_argc, char* i_argv[])
         goto finish;
     }
 
+    /* Get an sd event handler */
+    rc = sd_event_default(&events);
+    if (rc < 0)
+    {
+        std::cerr << "Failure to create sd_event" << strerror(-rc) <<"\n";
+        goto finish;
+    }
+
     // Register callback to update cache for a GUID change and cache the GUID
     command::registerGUIDChangeCallback();
     cache::guid = command::getSystemGUID();
@@ -94,10 +103,11 @@ int main(int i_argc, char* i_argv[])
     sol::command::registerCommands();
 
     // Start Event Loop
-    return std::get<eventloop::EventLoop&>(singletonPool).startEventLoop();
+    return std::get<eventloop::EventLoop&>(singletonPool).startEventLoop(events);
 
 finish:
     sd_bus_unref(bus);
+    sd_event_unref(events);
 
     return 0;
 }

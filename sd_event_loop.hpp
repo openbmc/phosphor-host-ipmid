@@ -66,10 +66,11 @@ class EventLoop
 
         /** @brief Initialise the event loop and add the handler for incoming
          *         IPMI packets.
+         *  @param[in] events- sd bus event;
          *
          *  @return EXIT_SUCCESS on success and EXIT_FAILURE on failure.
          */
-        int startEventLoop();
+        int startEventLoop(sd_event* events);
 
         /** @brief Add host console I/O event source to the event loop.
          *
