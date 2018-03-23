@@ -1130,7 +1130,7 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE || *data_len >
             DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE)
     {
-        log<level::ERR>("Invalid Group ID or Invaild Requested Packet size",
+        log<level::ERR>("Invalid Group ID or Invalid Requested Packet size",
                         entry("GROUP_ID=%d", requestData->groupID),
                         entry("PACKET SIZE=%d", *data_len));
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -1208,7 +1208,7 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (requestData->groupID != dcmi::groupExtId || *data_len != sizeof(
             dcmi::GetConfParamsRequest))
     {
-        log<level::ERR>("Invalid Group ID or Invaild Requested Packet size",
+        log<level::ERR>("Invalid Group ID or Invalid Requested Packet size",
                         entry("GROUP_ID=%d", requestData->groupID),
                         entry("PACKET SIZE=%d", *data_len));
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -1300,7 +1300,7 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     responseData->groupID = dcmi::groupExtId;
 
     // TODO: openbmc/openbmc#2819
-    // Minumum, Maximum, Average power, TimeFrame, TimeStamp,
+    // Minimum, Maximum, Average power, TimeFrame, TimeStamp,
     // PowerReadingState readings need to be populated
     // after Telemetry changes.
     uint16_t totalPower = static_cast<uint16_t>(power);
