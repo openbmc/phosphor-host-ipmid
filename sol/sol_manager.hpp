@@ -169,6 +169,16 @@ class Manager
          */
         std::chrono::milliseconds retryInterval = 100ms;
 
+        /** @brief Channel Number
+         *
+         *  This parameter indicates which IPMI channel is being used for the
+         *  communication parameters (e.g. IP address, MAC address) for the SOL
+         *  Payload. Typically, these parameters will come from the same channel
+         *  that the Activate Payload command for SOL was accepted over. The
+         *  network channel number is defaulted to 1.
+         */
+        uint8_t channel = 1;
+
         /** @brief Start a SOL payload instance.
          *
          *  Starting a payload instance involves creating the context object,

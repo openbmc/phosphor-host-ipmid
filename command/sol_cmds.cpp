@@ -229,9 +229,14 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
             std::copy_n(buffer, sizeof(port), std::back_inserter(outPayload));
             break;
         }
+        case Parameter::CHANNEL:
+        {
+            outPayload.push_back(std::get<sol::Manager&>
+                    (singletonPool).channel);
+            break;
+        }
         case Parameter::NVBITRATE:
         case Parameter::VBITRATE:
-        case Parameter::CHANNEL:
         default:
             response->completionCode = ipmiCCParamNotSupported;
     }
