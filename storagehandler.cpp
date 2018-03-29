@@ -608,6 +608,14 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
     ipmi_ret_t rc = IPMI_CC_OK;
     const FruInvenAreaInfoRequest* reqptr =
         reinterpret_cast<const FruInvenAreaInfoRequest*>(request);
+
+    auto iter = frus.find(reqptr->fruID);
+    if (iter == frus.end())
+    {
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
     try
     {
         const auto& fruArea = getFruAreaData(reqptr->fruID);
@@ -627,7 +635,6 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
         rc = IPMI_CC_UNSPECIFIED_ERROR;
         *data_len = 0;
         log<level::ERR>(e.what());
-        report<InternalFailure>();
     }
     return rc;
 }
@@ -641,6 +648,14 @@ ipmi_ret_t ipmi_storage_read_fru_data(
     ipmi_ret_t rc = IPMI_CC_OK;
     const ReadFruDataRequest* reqptr =
          reinterpret_cast<const ReadFruDataRequest*>(request);
+
+    auto iter = frus.find(reqptr->fruID);
+    if (iter == frus.end())
+    {
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
     auto offset =
         static_cast<uint16_t>(reqptr->offsetMS << 8 | reqptr->offsetLS);
     try
@@ -672,7 +687,6 @@ ipmi_ret_t ipmi_storage_read_fru_data(
         rc = IPMI_CC_UNSPECIFIED_ERROR;
         *data_len = 0;
         log<level::ERR>(e.what());
-        report<InternalFailure>();
     }
     return rc;
 }
