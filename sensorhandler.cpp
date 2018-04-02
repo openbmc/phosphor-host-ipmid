@@ -15,6 +15,7 @@
 #include "types.hpp"
 #include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
+#include <iostream>
 
 static constexpr uint8_t fruInventoryDevice = 0x10;
 static constexpr uint8_t IPMIFruInventory = 0x02;
@@ -372,6 +373,13 @@ ipmi_ret_t setSensorReading(void *request)
 
     try
     {
+        if (ipmi::sensor::Mutability::Write !=
+              (iter->second.mutability & ipmi::sensor::Mutability::Write))
+        {
+            log<level::ERR>("Sensor Set operation is not allowed",
+                            entry("SENSOR_NUM=%d", cmdData.number));
+            return IPMI_CC_ILLEGAL_COMMAND;
+        }
         return iter->second.updateFunc(cmdData, iter->second);
     }
     catch (InternalFailure& e)
