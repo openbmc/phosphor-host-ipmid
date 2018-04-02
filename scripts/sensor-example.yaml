@@ -11,6 +11,9 @@
   serviceInterface: org.freedesktop.DBus.Properties
   # Where the sensor value is represented - assertion bits/reading/event data
   readingType: assertion
+  # indicate if a sensor is READ/WRITE/RW.
+  # This particular sensor read and write operation is allowed
+  mutability: Mutability::Write|Mutability::Read
   # Sensor name would be occ0
   sensorNamePattern: nameLeaf
   eventType: 0x6F
@@ -37,6 +40,7 @@
   path: /system/chassis/motherboard/dimm1
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
+  mutability: Mutability::Write|Mutability::Read
   sensorNamePattern: nameLeaf
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
@@ -76,6 +80,7 @@
   # Sensor name would be AttemptsLeft
   sensorNamePattern: nameProperty
   sensorReadingType: 0x6F
+  mutability: Mutability::Write|Mutability::Read
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
 
@@ -90,6 +95,7 @@
   readingType: readingAssertion
   sensorNamePattern: nameProperty
   sensorReadingType: 0x6F
+  mutability: Mutability::Write|Mutability::Read
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
 
@@ -122,6 +128,7 @@
   sensorReadingType: 0x6F
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
+  mutability: Mutability::Write|Mutability::Read
   # Sensor name would be cpu0_core22
   sensorNamePattern: nameParentLeaf
   interfaces:
