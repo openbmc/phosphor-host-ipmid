@@ -105,6 +105,13 @@ int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface
         goto final;
     }
 
+    if (strlen(str2) == 0)
+    {
+        // Path being empty occurs when the sensor id is not in SystemManager
+        r = -EINVAL;
+        goto final;
+    }
+
     r = get_bus_for_path(str2, &str1);
     if (r < 0) {
         fprintf(stderr, "Failed to get %s busname: %s\n",
@@ -311,7 +318,7 @@ uint8_t find_type_for_sensor_number(uint8_t num) {
     r = find_openbmc_path(num, &dbus_if);
     if (r < 0) {
         fprintf(stderr, "Could not find sensor %d\n", num);
-        return r;
+        return 0;
     }
     return get_type_from_interface(dbus_if);
 }
