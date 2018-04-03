@@ -15,10 +15,12 @@
 #include "sensorhandler.h"
 #include "storagehandler.h"
 #include "types.hpp"
+#include "xyz/openbmc_project/Logging/Entry/server.hpp"
 
 
 using namespace std;
 using namespace phosphor::logging;
+using namespace sdbusplus::xyz::openbmc_project::Logging::server;
 extern const ipmi::sensor::InvObjectIDMap invSensors;
 
 //////////////////////////
@@ -32,24 +34,26 @@ struct esel_section_headers_t {
 
 struct severity_values_t {
 	uint8_t type;
-	const char *description;
+	Entry::Level level;
 };
 
 
 const std::vector<severity_values_t> g_sev_desc = {
-	{0x10, "recoverable error"},
-	{0x20, "predictive error"},
-	{0x40, "unrecoverable error"},
-	{0x50, "critical error"},
-	{0x60, "error from a diagnostic test"},
-	{0x70, "recovered symptom "},
-	{0xFF, "Unknown"},
+	{0x10, Entry::Level::Warning}, // recoverable error
+	{0x20, Entry::Level::Warning}, // predictive error
+        // TODO via github issue 3066 : map level below to Level::Unrecoverable
+	{0x40, Entry::Level::Error}, // unrecoverable error
+        // TODO via github issue 3066 : map level below to Level::Critical
+	{0x50, Entry::Level::Error}, // critical error
+	{0x60, Entry::Level::Error}, // error from a diagnostic test
+	{0x70, Entry::Level::Warning}, // recoverable symptom
+	{0xFF, Entry::Level::Error}, //unknown error
 };
 
-const char* sev_lookup(uint8_t n) {
+Entry::Level sev_lookup(uint8_t n) {
 	auto i = std::find_if(std::begin(g_sev_desc), std::end(g_sev_desc),
 	                      [n](auto p){ return p.type == n || p.type == 0xFF; });
-	return i->description;
+	return i->level;
 }
 
 
@@ -124,7 +128,7 @@ fclose_fp:
 }
 
 
-const char *create_esel_severity(const uint8_t *buffer) {
+Entry::Level create_esel_severity(const uint8_t *buffer) {
 
 	uint8_t severity;
 	// Dive in to the IBM log to find the severity
@@ -162,7 +166,8 @@ int create_esel_association(const uint8_t *buffer, std::string& inventoryPath)
 
 
 
-int create_esel_description(const uint8_t *buffer, const char *sev, char **message) {
+int create_esel_description(const uint8_t *buffer, Entry::Level level,
+                            char **message) {
 
 
 	ipmi_add_sel_request_t *p;
@@ -173,7 +178,8 @@ int create_esel_description(const uint8_t *buffer, const char *sev, char **messa
 
 	find_sensor_type_string(p->sensornumber,&m);
 
-	r = asprintf(message, "A %s has experienced a %s", m, sev );
+	r = asprintf(message, "A %s has experienced an error of level %d",
+                     m, static_cast<uint32_t>(level) );
 	if (r == -1) {
 		fprintf(stderr,
 			"Failed to allocate memory for ESEL description\n");
@@ -186,7 +192,7 @@ int create_esel_description(const uint8_t *buffer, const char *sev, char **messa
 
 
 int send_esel_to_dbus(const char *desc,
-                      const char *sev,
+                      Entry::Level level,
                       const std::string& inventoryPath,
                       uint8_t *debug,
                       size_t debuglen)
@@ -205,7 +211,8 @@ int send_esel_to_dbus(const char *desc,
     using error =  sdbusplus::org::open_power::Host::Error::Event;
     using metadata = org::open_power::Host::Event;
 
-    report<error>(metadata::ESEL(selData.get()),
+    report<error>(level,
+                  metadata::ESEL(selData.get()),
                   metadata::CALLOUT_INVENTORY_PATH(inventoryPath.c_str()));
 
     return 0;
@@ -214,7 +221,6 @@ int send_esel_to_dbus(const char *desc,
 
 void send_esel(uint16_t recordid) {
 	char *desc;
-	const char *sev;
 	uint8_t *buffer = NULL;
 	const char *path = "/tmp/esel";
 	ssize_t sz;
@@ -227,7 +233,7 @@ void send_esel(uint16_t recordid) {
 		return;
 	}
 
-	sev = create_esel_severity(buffer);
+	auto sev = create_esel_severity(buffer);
 	create_esel_association(buffer, inventoryPath);
 	create_esel_description(buffer, sev, &desc);
 
