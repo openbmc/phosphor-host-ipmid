@@ -33,6 +33,7 @@
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
 #include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
+#include <xyz/openbmc_project/State/PowerOnHours/server.hpp>
 
 #include "config.h"
 
@@ -41,6 +42,7 @@
 #define SET_PARM_BOOT_FLAGS_PERMANENT        0x40 //boot flags data1 7th bit on
 #define SET_PARM_BOOT_FLAGS_VALID_ONE_TIME   0x80 //boot flags data1 8th bit on
 #define SET_PARM_BOOT_FLAGS_VALID_PERMANENT  0xC0 //boot flags data1 7 & 8 bit on
+#define MINUTES_PER_COUNT                    60   //Minutes per count
 
 constexpr size_t SIZE_MAC  = 18;
 constexpr size_t SIZE_BOOT_OPTION = (uint8_t)BootOptionResponseSize::
@@ -79,6 +81,11 @@ constexpr auto SETTINGS_MATCH = "host0";
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 
+static constexpr auto chassisStateRoot = "/xyz/openbmc_project/state";
+static constexpr auto chassisPOHStateIntf =
+                                    "xyz.openbmc_project.State.PowerOnHours";
+static constexpr auto POHCounterPropertyName = "POHCounter";
+static constexpr auto match = "chassis0";
 
 typedef struct
 {
@@ -98,6 +105,15 @@ typedef struct
     uint8_t front_panel_button_cap_status;
 }__attribute__((packed)) ipmi_get_chassis_status_t;
 
+/**
+ * @struct Get POH counter command response data
+ */
+struct GetPOHCountResponse
+{
+    uint8_t min_per_count; ///< Minutes per count
+    uint8_t counter_reading[4]; ///< Counter reading
+}__attribute__((packed));
+
 // Phosphor Host State manager
 namespace State = sdbusplus::xyz::openbmc_project::State::server;
 
@@ -115,6 +131,8 @@ constexpr auto bootModeIntf = "xyz.openbmc_project.Control.Boot.Mode";
 constexpr auto bootSourceIntf = "xyz.openbmc_project.Control.Boot.Source";
 constexpr auto powerRestoreIntf =
     "xyz.openbmc_project.Control.Power.RestorePolicy";
+constexpr auto pohIntf =
+    "xyz.openbmc_project.State.PowerOnHours";
 sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
 
 namespace cache
@@ -579,6 +597,23 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
     }
 
     return 0;
+}
+
+uint32_t getPOHCounter()
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    auto chassisStateObj = ipmi::getDbusObject(bus, chassisPOHStateIntf,
+                                               chassisStateRoot, match);
+
+    auto service = ipmi::getService(bus, chassisPOHStateIntf,
+                                    chassisStateObj.first);
+
+    auto propValue = ipmi::getDbusProperty(bus, service, chassisStateObj.first,
+                                           chassisPOHStateIntf,
+                                           POHCounterPropertyName);
+
+    return propValue.get<uint32_t>();
 }
 
 ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -1466,6 +1501,35 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_get_poh_counter(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                ipmi_request_t request, ipmi_response_t response,
+                                ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    // sd_bus error
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    auto resptr = reinterpret_cast<GetPOHCountResponse*>(response);
+
+    try
+    {
+        uint32_t pohCounter = getPOHCounter();
+        resptr->counter_reading[0] = pohCounter;
+        resptr->counter_reading[1] = pohCounter >> 8;
+        resptr->counter_reading[2] = pohCounter >> 16;
+        resptr->counter_reading[3] = pohCounter >> 24;
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(e.what());
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    resptr->min_per_count = MINUTES_PER_COUNT;
+    *data_len = sizeof(GetPOHCountResponse);
+
+    return rc;
+}
+
 void register_netfn_chassis_functions()
 {
     // <Wildcard Command>
@@ -1495,4 +1559,7 @@ void register_netfn_chassis_functions()
     // <Set System Boot Options>
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL,
                            ipmi_chassis_set_sys_boot_options, PRIVILEGE_OPERATOR);
+    // <Get POH Counter>
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_POH_COUNTER, NULL,
+                           ipmi_get_poh_counter, PRIVILEGE_OPERATOR);
 }
