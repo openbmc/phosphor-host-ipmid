@@ -16,6 +16,7 @@ enum ipmi_netfn_app_cmds
     // Get capability bits
     IPMI_CMD_SET_SYS_BOOT_OPTIONS = 0x08,
     IPMI_CMD_GET_SYS_BOOT_OPTIONS = 0x09,
+    IPMI_CMD_GET_POH_COUNTER      = 0x0F,
 };
 
 // Command specific completion codes
