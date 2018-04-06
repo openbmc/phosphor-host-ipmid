@@ -552,7 +552,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (ipmi::sensor::Mutability::Read !=
           (iter->second.mutability & ipmi::sensor::Mutability::Read))
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return IPMI_CC_ILLEGAL_COMMAND;
     }
 
     try
