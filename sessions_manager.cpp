@@ -47,7 +47,7 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
              * is the key for the session map and is generated using std::rand.
              * There is a rare chance for collision of BMC session ID, so the
              * following check validates that. In the case of collision the
-             * created session is reseted and a new session is created for
+             * created session is reset and a new session is created for
              * validating collision.
              */
             auto iterator = sessionsMap.find(session->getBMCSessionID());

@@ -28,7 +28,7 @@ std::vector<uint8_t> AlgoAES128::decryptPayload(
     /*
      * The confidentiality pad length is the last byte in the payload, it would
      * tell the number of pad bytes in the payload. We added a condition, so
-     * that buffer overrun does't happen.
+     * that buffer overrun doesn't happen.
      */
     size_t confPadLength = plainPayload.back();
     auto padLength = std::min(plainPayload.size() -1, confPadLength);
