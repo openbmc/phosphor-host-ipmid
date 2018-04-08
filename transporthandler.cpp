@@ -91,8 +91,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
                         ipaddress = properties["Address"].get<std::string>();
                     }
-                    // ignore the exception, as it is a valid condtion that
-                    // system is not confiured with any ip.
+                    // ignore the exception, as it is a valid condition that
+                    // the system is not configured with any IP.
                     catch (InternalFailure& e)
                     {
                         // nothing to do.
@@ -210,8 +210,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         mask = ipmi::network::MASK_32_BIT;
                         mask = htonl(mask << (ipmi::network::BITS_32 - prefix));
                     }
-                    // ignore the exception, as it is a valid condtion that
-                    // system is not confiured with any ip.
+                    // ignore the exception, as it is a valid condition that
+                    // the system is not configured with any IP.
                     catch (InternalFailure& e)
                     {
                         // nothing to do
@@ -249,8 +249,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         gateway = systemProperties["DefaultGateway"].get<
                             std::string>();
                     }
-                    // ignore the exception, as it is a valid condtion that
-                    // system is not confiured with any ip.
+                    // ignore the exception, as it is a valid condition that
+                    // the system is not configured with any IP.
                     catch (InternalFailure& e)
                     {
                         // nothing to do
@@ -327,8 +327,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             vlanID |= htole16(ipmi::network::VLAN_ENABLE_MASK);
                         }
                     }
-                    // ignore the exception, as it is a valid condtion that
-                    // system is not confiured with any ip.
+                    // ignore the exception, as it is a valid condition that
+                    // the system is not configured with any IP.
                     catch (InternalFailure& e)
                     {
                         // nothing to do

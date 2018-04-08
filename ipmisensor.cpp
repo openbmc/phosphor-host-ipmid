@@ -122,7 +122,7 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pT
 
 		case 0x00 : snprintf(p, sizeof(valuestring), "POST Error, %s", event_data_lookup(g_fwprogress00h, pRec->event_data2));
 					break;
-		case 0x01 : /* Using g_fwprogress02h for 0x01 because thats what the ipmi spec says to do */
+		case 0x01 : /* Using g_fwprogress02h for 0x01 because that's what the ipmi spec says to do */
 					snprintf(p, sizeof(valuestring), "FW Hang, %s", event_data_lookup(g_fwprogress02h, pRec->event_data2));
 					break;
 		case 0x02 : snprintf(p, sizeof(valuestring), "FW Progress, %s", event_data_lookup(g_fwprogress02h, pRec->event_data2));
