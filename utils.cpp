@@ -496,7 +496,7 @@ void createIP(sdbusplus::bus::bus& bus,
 
     if (reply.is_method_error())
     {
-        log<level::ERR>("Failed to excute method",
+        log<level::ERR>("Failed to execute method",
                         entry("METHOD=%s", "IP"),
                         entry("PATH=%s", objPath.c_str()));
         elog<InternalFailure>();
@@ -522,7 +522,7 @@ void createVLAN(sdbusplus::bus::bus& bus,
 
     if (reply.is_method_error())
     {
-        log<level::ERR>("Failed to excute method",
+        log<level::ERR>("Failed to execute method",
                         entry("METHOD=%s", "VLAN"),
                         entry("PATH=%s", objPath.c_str()));
         elog<InternalFailure>();

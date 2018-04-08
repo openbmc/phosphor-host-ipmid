@@ -79,7 +79,7 @@ These are the Command codes allocated for use with the OpenBMC OEM Number.
 ### I2C Device Access (Command 2)
 
 The next subsections describe command and response messages supporting
-the I2C Device Access extension OpenBMC OEM extenstion (command code 2).
+the I2C Device Access extension OpenBMC OEM extension (command code 2).
 
 #### I2C Request Message - Overall
 
