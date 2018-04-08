@@ -200,7 +200,7 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
         /* By default should only print on failure to find wildcard command. */
 #ifdef __IPMI_DEBUG__
         fprintf(stderr, "No registered handlers for NetFn:[0x%X], Cmd:[0x%X]"
-               " trying Wilcard implementation \n",netfn, cmd);
+               " trying Wildcard implementation \n",netfn, cmd);
 #endif
 
         // Now that we did not find any specific [NetFn,Cmd], tuple, check for

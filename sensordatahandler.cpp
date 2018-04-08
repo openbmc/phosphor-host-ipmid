@@ -68,7 +68,7 @@ ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
     const auto& iter = mapperResponse.find(path);
     if (iter == mapperResponse.end())
     {
-        log<level::ERR>("Coudn't find d-bus path",
+        log<level::ERR>("Couldn't find d-bus path",
                         entry("PATH=%s", path),
                         entry("INTERFACE=%s", interface));
         elog<InternalFailure>();
