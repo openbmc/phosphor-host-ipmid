@@ -1,6 +1,9 @@
 #include <algorithm>
 #include <map>
 #include <numeric>
+
+#include <time.h>
+
 #include "ipmi_fru_info_area.hpp"
 #include <phosphor-logging/elog.hpp>
 namespace ipmi
@@ -35,6 +38,8 @@ static constexpr auto manufacturingDateSize     = 0x3;
 static constexpr auto areaSizeOffset           = 0x1;
 static constexpr uint8_t typeASCII             = 0xC0;
 static constexpr auto maxRecordAttributeValue  = 0x1F;
+
+static constexpr auto secs_from_1970_1996 = 820454400;
 
 /**
  * @brief Format Beginning of Individual IPMI FRU Data Section
@@ -154,15 +159,25 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
 {
     //MFG Date/Time
     auto iter = propMap.find(buildDate);
-    if (iter != propMap.end())
-    {
-        auto& value = iter->second;
-        if (value.length() == manufacturingDateSize)
-        {
-            std::copy(
-                value.begin(), value.end(), std::back_inserter(data));
-            return;
-        }
+    if (iter != propMap.end()) {
+        struct tm tm;
+        memset(&tm, 0, sizeof(struct tm));
+        strptime(iter->second.c_str(), "%F - %H:%M:%S", &tm);
+        time_t raw = mktime(&tm);
+
+        // From FRU Spec:
+        // "Mfg. Date / Time
+        // Number of minutes from 0:00 hrs 1/1/96.
+        // LSbyte first (little endian)
+        // 00_00_00h = unspecified."
+        raw -= secs_from_1970_1996;
+        raw /= 60;
+        uint8_t fru_raw[3];
+        fru_raw[0] = raw & 0xFF;
+        fru_raw[1] = (raw >> 8) & 0xFF;
+        fru_raw[2] = (raw >> 16) & 0xFF;
+        std::copy(fru_raw, fru_raw + 3, std::back_inserter(data));
+        return;
     }
     //Blank date
     data.emplace_back(0);
