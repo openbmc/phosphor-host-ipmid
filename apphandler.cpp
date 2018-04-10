@@ -576,6 +576,41 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_app_set_user_pwd(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    uint8_t pwd[20];
+    constexpr auto IMPI_USER_PWD_PATH = "/etc/ipmipwd";
+    constexpr auto IPMI_CMD_CHANGE_PWD = 0x02;
+    constexpr auto IPMI_PWD_LENGTH_20_BYTES = 0x80;
+
+    ipmi_ret_t rc = IPMI_CC_OK;
+    auto pwdLength = 16;
+    auto requestData = reinterpret_cast<const SetPwdRequest*>(request);
+    if ((requestData->userId & IPMI_PWD_LENGTH_20_BYTES) ==
+                               IPMI_PWD_LENGTH_20_BYTES)
+    {
+        pwdLength = 20;
+    }
+
+    //allow changing password only for root
+    if ((requestData->userId & 0x1f) != 1)
+    {
+        return  IPMI_CC_INVALID;
+    }
+
+    if (requestData->operation != IPMI_CMD_CHANGE_PWD)
+    {
+        return  IPMI_CC_INVALID;
+    }
+
+    memcpy(pwd, requestData->pwd, pwdLength);
+    std::ofstream os(IMPI_USER_PWD_PATH);
+    os << pwd << std::endl;
+    return rc;
+}
+
 void register_netfn_app_functions()
 {
     // <Get BT Interface Capabilities>
@@ -694,6 +729,10 @@ void register_netfn_app_functions()
                            NULL,
                            ipmi_app_get_sys_guid,
                            PRIVILEGE_USER);
+
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_PASSWORD, NULL, ipmi_app_set_user_pwd,
+                           SYSTEM_INTERFACE);
+
     return;
 }
 

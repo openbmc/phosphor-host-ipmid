@@ -19,6 +19,18 @@ enum ipmi_netfn_app_cmds
     IPMI_CMD_SET_CHAN_ACCESS        = 0x40,
     IPMI_CMD_GET_CHANNEL_ACCESS     = 0x41,
     IPMI_CMD_GET_CHAN_INFO          = 0x42,
+    IPMI_CMD_SET_PASSWORD           = 0x47,
 };
 
+/**
+ * @struct SetPwdRequest
+ *
+ * IPMI Request data for set user password command
+ */
+struct SetPwdRequest
+{
+    uint8_t userId; //User id to change password
+    uint8_t operation; //Opertaion on user id
+    uint8_t pwd[20]; //New password
+};
 #endif
