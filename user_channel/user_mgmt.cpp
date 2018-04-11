@@ -14,7 +14,6 @@
 // limitations under the License.
 */
 #include "user_mgmt.hpp"
-#include <host-ipmid/ipmid-api.h>
 #include <phosphor-ipmi-host/apphandler.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -35,7 +34,10 @@ using namespace phosphor::logging;
 
 namespace ipmi {
 
-static constexpr auto IPMI_USER_DATA_FILE = "/var/ipmi_user.dat";
+static constexpr char IPMI_USER_DATA_FILE[] = "/var/ipmi_user.dat";
+static constexpr char IPMI_GRP_NAME[] = "ipmi";
+static constexpr size_t PRIVILEGE_NO_ACCESS = 0xF;
+static constexpr size_t PRIVILEGE_MASK = 0xF;
 
 // User manager related
 static constexpr char USER_MANAGER_SERVICE[] =
@@ -48,8 +50,17 @@ static constexpr char USER_MANAGER_MGR_INTERFACE[] =
     "xyz.openbmc_project.User.UserMgr";
 static constexpr char USER_MANAGER_USER_INTERFACE[] =
     "xyz.openbmc_project.User.Users";
-static constexpr char ADD_USER_METHOD[] = "AddUser";
+static constexpr char CREATE_USER_METHOD[] = "CreateUser";
 static constexpr char DELETE_USER_METHOD[] = "DeleteUser";
+static constexpr char RENAME_USER_METHOD[] = "RenameUser";
+// User manager signal memebers
+static constexpr char USER_CREATED_SIGNAL[] = "UserCreated";
+static constexpr char USER_DELETED_SIGNAL[] = "UserDeleted";
+static constexpr char USER_RENAMED_SIGNAL[] = "UserRenamed";
+static constexpr char USER_GRPS_UPD_SIGNAL[] = "UserGroupsUpdated";
+static constexpr char USER_PRIV_UPD_SIGNAL[] = "UserPrivilegeUpdated";
+static constexpr char USER_ENABLED_SIGNAL[] = "UserEnabled";
+static constexpr char USER_DISABLED_SIGNAL[] = "UserDisabled";
 
 // D-Bus property related
 static constexpr char DBUS_PROPERTIES_INTERFACE[] =
@@ -80,95 +91,144 @@ using InternalFailure =
 
 std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal(nullptr);
 
-void userUpdatedSignalHandler(UserAccess *usrAccess,
-                              sdbusplus::message::message &msg) {
-  std::string userName, update, priv;
-  std::vector<std::string> groups;
-  log<level::ERR>("userUpdatedSignalHandler");
-  msg.read(update, userName, groups, priv);
-  log<level::ERR>("userUpdatedSignalHandler After Msg read");
-  if (userName.empty() || update.empty()) {
-    log<level::ERR>("Received Empty user name / update");
+void userUpdateHelper(UserAccess *usrAccess, const std::string &signal,
+                      const std::string &userName,
+                      const std::vector<std::string> &groups,
+                      const std::string &priv, const std::string &newUserName) {
+  if (usrAccess == nullptr) {
+    log<level::DEBUG>("Null user access pointer - Invalid input");
     return;
   }
   boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
       userLock{usrAccess->userMutex};
-  UserMgr::UserUpdate userUpdate = UserMgr::convertUserUpdateFromString(update);
-  userdata_t *userData = usrAccess->getUserDataPtr();
-  switch (userUpdate) {
-    case UserMgr::UserUpdate::Added: {
-      size_t emptySlot = 0xFF;
-      for (size_t count = 1; count < IPMI_MAX_USERS; ++count) {
-        std::string curName((char *)userData->user[count].userName, 0,
-                            IPMI_MAX_USER_NAME);
-        if (userName == curName) {
-          log<level::DEBUG>("User name exists",
-                            entry("USER_NAME=%s", userName.c_str()));
-          return;  // user name exists.
-        }
-        if ((!userData->user[count].userInSystem) &&
-            (userData->user[count].userName[0] == '\0') && emptySlot == 0xFF) {
-          emptySlot = count;
-        }
-      }
-      if (emptySlot == 0xFF) {
-        log<level::ERR>("No empty slots to add user",
-                        entry("USER_NAME=%s", userName.c_str()));
-        return;
-      }
-      std::strncpy((char *)userData->user[emptySlot].userName, userName.c_str(),
-                   IPMI_MAX_USER_NAME);
-      // TODO: Do the privilege conversion and update to the requested one
-      for (size_t chCount = 0; chCount < IPMI_MAX_CHANNELS; ++chCount) {
-        userData->user[emptySlot].userPrivAccess[chCount].privilege =
-            PRIVILEGE_ADMIN;
-        userData->user[emptySlot].userPrivAccess[chCount].ipmi_enabled = 0x1;
-        userData->user[emptySlot].userPrivAccess[chCount].link_auth_enabled =
-            0x1;
-        userData->user[emptySlot].userPrivAccess[chCount].access_callback = 0x1;
-      }
-      userData->user[emptySlot].userInSystem = 1;
-      usrAccess->writeUserData();
-      log<level::DEBUG>("UserUpdatedSignal - Added successfully",
-                        entry("USER_NAME=%s", userName),
-                        entry("USER_ID=%d", emptySlot));
-      return;
-    }
-    case UserMgr::UserUpdate::Deleted: {
-      for (size_t count = 1; count < IPMI_MAX_USERS; ++count) {
-        std::string curName((char *)userData->user[count].userName, 0,
-                            IPMI_MAX_USER_NAME);
-        if (userName == curName) {
-          std::fill((uint8_t *)userData->user[count].userName,
-                    (uint8_t *)userData->user[count].userName +
-                        sizeof(userData->user[count].userName),
-                    0);
-          for (size_t chCount = 0; chCount < IPMI_MAX_CHANNELS; ++chCount) {
-            userData->user[count].userPrivAccess[chCount].privilege = 0;
-            userData->user[count].userPrivAccess[chCount].ipmi_enabled = 0;
-            userData->user[count].userPrivAccess[chCount].link_auth_enabled = 0;
-            userData->user[count].userPrivAccess[chCount].access_callback = 0;
-          }
-          userData->user[count].userChgInProgress = 0;
-          userData->user[count].userInSystem = 0;
-          usrAccess->writeUserData();
-          log<level::DEBUG>("UserUpdatedSignal - Deleted",
-                            entry("USER_NAME=%s", userName),
-                            entry("USER_ID=%d", count));
-          return;
-        }
-      }
-      log<level::DEBUG>("UserUpdatedSignal - Deleted - User not found",
-                        entry("USER_NAME=%s", userName.c_str()));
-      return;
-    }
-    // TODO:  Do for Role & Group Update
-    default:
-      log<level::ERR>("UserUpdatedSignal- TODO - Yet-to-implement",
-                      entry("SIGNAL=%s", update));
 
+  userdata_t *userData = usrAccess->getUserDataPtr();
+  if (signal == USER_CREATED_SIGNAL) {
+    size_t emptySlot = 0xFF;
+    for (size_t usrIndex = 1; usrIndex <= IPMI_MAX_USERS; ++usrIndex) {
+      std::string curName((char *)userData->user[usrIndex].userName, 0,
+                          IPMI_MAX_USER_NAME);
+      if (userName == curName) {
+        log<level::DEBUG>("User name exists",
+                          entry("USER_NAME=%s", userName.c_str()));
+        return;  // user name exists.
+      }
+      if ((!userData->user[usrIndex].userInSystem) &&
+          (userData->user[usrIndex].userName[0] == '\0') && emptySlot == 0xFF) {
+        emptySlot = usrIndex;
+      }
+    }
+    if (emptySlot == 0xFF) {
+      log<level::ERR>("No empty slots to add user",
+                      entry("USER_NAME=%s", userName.c_str()));
       return;
+    }
+    std::strncpy((char *)userData->user[emptySlot].userName, userName.c_str(),
+                 IPMI_MAX_USER_NAME);
+    uint8_t userPriv =
+        UserAccess::convertToIPMIPrivilege(priv) & PRIVILEGE_MASK;
+    for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS; ++chIndex) {
+      userData->user[emptySlot].userPrivAccess[chIndex].privilege = userPriv;
+      userData->user[emptySlot].userPrivAccess[chIndex].ipmi_enabled = 0x1;
+      userData->user[emptySlot].userPrivAccess[chIndex].link_auth_enabled = 0x1;
+      userData->user[emptySlot].userPrivAccess[chIndex].access_callback = 0x1;
+    }
+    userData->user[emptySlot].userInSystem = 1;
+  } else {
+    size_t usrIndex;
+    for (usrIndex = 1; usrIndex <= IPMI_MAX_USERS; ++usrIndex) {
+      std::string curName((char *)userData->user[usrIndex].userName, 0,
+                          IPMI_MAX_USER_NAME);
+      if (userName == curName) {
+        break;  // found the entry
+      }
+    }
+    if (usrIndex > IPMI_MAX_USERS) {
+      log<level::DEBUG>("User not found for signal",
+                        entry("USER_NAME=%s", userName.c_str()),
+                        entry("SIGNAL=%s", signal.c_str()));
+      return;
+    }
+    if (signal == USER_DELETED_SIGNAL) {
+      std::fill((uint8_t *)userData->user[usrIndex].userName,
+                (uint8_t *)userData->user[usrIndex].userName +
+                    sizeof(userData->user[usrIndex].userName),
+                0);
+      for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS; ++chIndex) {
+        userData->user[usrIndex].userPrivAccess[chIndex].privilege =
+            PRIVILEGE_NO_ACCESS;
+        userData->user[usrIndex].userPrivAccess[chIndex].ipmi_enabled = 0;
+        userData->user[usrIndex].userPrivAccess[chIndex].link_auth_enabled = 0;
+        userData->user[usrIndex].userPrivAccess[chIndex].access_callback = 0;
+      }
+      userData->user[usrIndex].userInSystem = 0;
+    } else if (signal == USER_PRIV_UPD_SIGNAL) {
+      uint8_t userPriv =
+          UserAccess::convertToIPMIPrivilege(priv) & PRIVILEGE_MASK;
+      for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS; ++chIndex) {
+        userData->user[usrIndex].userPrivAccess[chIndex].privilege = userPriv;
+      }
+    } else if (signal == USER_RENAMED_SIGNAL) {
+      std::fill((uint8_t *)userData->user[usrIndex].userName,
+                (uint8_t *)userData->user[usrIndex].userName +
+                    sizeof(userData->user[usrIndex].userName),
+                0);
+      std::strncpy((char *)userData->user[usrIndex].userName,
+                   newUserName.c_str(), IPMI_MAX_USER_NAME);
+    } else if (signal == USER_ENABLED_SIGNAL ||
+               signal == USER_DISABLED_SIGNAL) {
+      userData->user[usrIndex].userEnabled =
+          (signal == USER_ENABLED_SIGNAL) ? 1 : 0;
+    } else {
+      log<level::ERR>("Unhandled UserUpdateSignal",
+                      entry("SIGNAL=%s", signal.c_str()));
+      return;
+    }
   }
+  usrAccess->writeUserData();
+  log<level::DEBUG>("Signal handled successfully",
+                    entry("USER_NAME=%s", userName.c_str()),
+                    entry("SIGNAL=%s", signal.c_str()));
+
+  return;
+}
+
+void userUpdatedSignalHandler(UserAccess *usrAccess,
+                              sdbusplus::message::message &msg) {
+  std::string signal = msg.get_member();
+  std::string userName, update, priv, newUserName;
+  std::vector<std::string> groups;
+  if (signal == USER_RENAMED_SIGNAL) {
+    msg.read(userName, groups, priv, newUserName);
+  } else if (!signal.empty()) {
+    msg.read(userName, groups, priv);
+  }
+
+  if (signal.empty() || userName.empty() ||
+      (signal == USER_RENAMED_SIGNAL && newUserName.empty())) {
+    log<level::ERR>("Invalid inputs received");
+    return;
+  }
+
+  if (signal == USER_GRPS_UPD_SIGNAL) {
+    if (std::find(groups.begin(), groups.end(), IPMI_GRP_NAME) ==
+        groups.end()) {
+      // remove user from ipmi user list.
+      userUpdateHelper(usrAccess, USER_DELETED_SIGNAL, userName, groups, priv,
+                       newUserName);
+    } else {
+      // add user to ipmi user list.
+      userUpdateHelper(usrAccess, USER_CREATED_SIGNAL, userName, groups, priv,
+                       newUserName);
+    }
+  } else {
+    if (std::find(groups.begin(), groups.end(), IPMI_GRP_NAME) ==
+        groups.end()) {
+      return;  // skip other handlers for non-IPMI based user.
+    }
+    userUpdateHelper(usrAccess, signal, userName, groups, priv, newUserName);
+  }
+  return;
 }
 
 UserAccess::~UserAccess() {
@@ -191,7 +251,6 @@ UserAccess::UserAccess() : bus(ipmid_get_sd_bus_connection()) {
     userUpdatedSignal = std::make_unique<sdbusplus::bus::match_t>(
         bus,
         sdbusplus::bus::match::rules::type::signal() +
-            sdbusplus::bus::match::rules::member("UserUpdated") +
             sdbusplus::bus::match::rules::path(USER_MANAGER_OBJ_BASE_PATH) +
             sdbusplus::bus::match::rules::interface(USER_MANAGER_MGR_INTERFACE),
         std::bind(userUpdatedSignalHandler, this, std::placeholders::_1));
@@ -219,10 +278,38 @@ bool UserAccess::isValidChannel(uint8_t chNum) {
 }
 
 bool UserAccess::isValidUserId(uint8_t userId) {
-  if (userId >= IPMI_MAX_USERS || userId == 0) {
+  if (userId > IPMI_MAX_USERS || userId == 0) {
     return false;
   }
   return true;
+}
+
+static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
+    "",               // PRIVILEGE_RESERVED - 0
+    "priv-callback",  // PRIVILEGE_CALLBACK - 1
+    "priv-user",      // PRIVILEGE_USER - 2
+    "priv-operator",  // PRIVILEGE_OPERATOR - 3
+    "priv-admin",     // PRIVILEGE_ADMIN - 4
+    "priv-custom"     // PRIVILEGE_OEM - 5
+};
+
+CommandPrivilege UserAccess::convertToIPMIPrivilege(const std::string &value) {
+  auto iter = std::find(ipmiPrivIndex.begin(), ipmiPrivIndex.end(), value);
+  if (iter == ipmiPrivIndex.end()) {
+    return (CommandPrivilege)PRIVILEGE_NO_ACCESS;
+  } else {
+    return (CommandPrivilege)std::distance(ipmiPrivIndex.begin(), iter);
+  }
+}
+
+std::string UserAccess::convertToSystemPrivilege(CommandPrivilege &value) {
+  try {
+    return ipmiPrivIndex.at(value);
+  } catch (...) {
+    log<level::ERR>("Error in converting to system privilege",
+                    entry("PRIV=%d", value));
+    return "";
+  }
 }
 
 bool UserAccess::isValidUserName(const char *user_name) {
@@ -276,7 +363,7 @@ int UserAccess::getUserName(uint8_t userId, std::string &userName) {
 }
 
 int UserAccess::setUserName(uint8_t userId, const char *user_name) {
-  if (!isValidUserId(userId)) {
+  if (!isValidUserId(userId) || userId == 1) {
     return INVALID_USER_ID;
   }
 
@@ -309,15 +396,16 @@ int UserAccess::setUserName(uint8_t userId, const char *user_name) {
     // Create new user
     auto method =
         bus.new_method_call(USER_MANAGER_SERVICE, USER_MANAGER_OBJ_BASE_PATH,
-                            USER_MANAGER_MGR_INTERFACE, ADD_USER_METHOD);
-    // TODO: Fetch proper role & group
+                            USER_MANAGER_MGR_INTERFACE, CREATE_USER_METHOD);
+    // TODO: Fetch proper privilege & enable state once set User access is
+    // implemented
     // if LAN Channel specified, then create user for all groups
     // follow channel privilege for user creation.
-    method.append(newUser.c_str(), availableGroups, "priv-admin");
+    method.append(newUser.c_str(), availableGroups, "priv-admin", true);
     auto reply = bus.call(method);
     if (reply.is_method_error()) {
       log<level::DEBUG>("Failed to excute method",
-                        entry("METHOD=%s", ADD_USER_METHOD),
+                        entry("METHOD=%s", CREATE_USER_METHOD),
                         entry("PATH=%s", USER_MANAGER_OBJ_BASE_PATH));
       return IPMI_CC_UNSPECIFIED_ERROR;
     }
@@ -325,33 +413,15 @@ int UserAccess::setUserName(uint8_t userId, const char *user_name) {
     userInfo->userInSystem = 1;
     writeUserData();
   } else if (oldUser != newUser && validUser) {
-    // Update by deleting old user and creating new one
+    // User rename
     auto method =
         bus.new_method_call(USER_MANAGER_SERVICE, USER_MANAGER_OBJ_BASE_PATH,
-                            USER_MANAGER_MGR_INTERFACE, DELETE_USER_METHOD);
-    method.append(oldUser.c_str());
+                            USER_MANAGER_MGR_INTERFACE, RENAME_USER_METHOD);
+    method.append(oldUser.c_str(), newUser.c_str());
     auto reply = bus.call(method);
     if (reply.is_method_error()) {
       log<level::DEBUG>("Failed to excute method",
-                        entry("METHOD=%s", DELETE_USER_METHOD),
-                        entry("PATH=%s", USER_MANAGER_OBJ_BASE_PATH));
-      return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-    std::fill((uint8_t *)userInfo->userName,
-              (uint8_t *)userInfo->userName + sizeof(userInfo->userName), 0);
-    userInfo->userInSystem = 0;
-    writeUserData();
-    method =
-        bus.new_method_call(USER_MANAGER_SERVICE, USER_MANAGER_OBJ_BASE_PATH,
-                            USER_MANAGER_MGR_INTERFACE, ADD_USER_METHOD);
-    // TODO: Fetch proper role & group
-    // if LAN Channel specified, then create user for all groups
-    // follow channel privilege for user creation.
-    method.append(newUser.c_str(), availableGroups, "priv-admin");
-    reply = bus.call(method);
-    if (reply.is_method_error()) {
-      log<level::DEBUG>("Failed to excute method",
-                        entry("METHOD=%s", ADD_USER_METHOD),
+                        entry("METHOD=%s", RENAME_USER_METHOD),
                         entry("PATH=%s", USER_MANAGER_OBJ_BASE_PATH));
       return IPMI_CC_UNSPECIFIED_ERROR;
     }
@@ -469,30 +539,24 @@ std::time_t UserAccess::getUpdatedFileTime() {
 void UserAccess::initUserDataFile() {
   boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
       userLock{userMutex};
+  // TODO: Implement sync-up with user-manager for every startup.
   if (readUserData() != 0) {  // File is empty, create it for the first time
     std::fill((uint8_t *)&userDataInfo,
               (uint8_t *)&userDataInfo + sizeof(userDataInfo), 0);
     userDataInfo.version = USER_DATA_VERSION;
     std::strncpy((char *)userDataInfo.signature, USER_DATA_SIGNATURE,
                  sizeof(userDataInfo.signature));
-
-    // TODO: Remove below block of code. Time being add root user here in
-    // user ID 1
-    std::strncpy((char *)userDataInfo.user[1].userName, "root",
-                 sizeof(userDataInfo.user[1].userName));
-    for (auto i = 0; i < IPMI_MAX_CHANNELS; ++i) {
-      userDataInfo.user[1].userPrivAccess[i].privilege = PRIVILEGE_ADMIN;
-      userDataInfo.user[1].userPrivAccess[i].ipmi_enabled = 0x1;
-      userDataInfo.user[1].userPrivAccess[i].link_auth_enabled = 0x1;
-      userDataInfo.user[1].userPrivAccess[i].access_callback = 0x1;
-    }
-    userDataInfo.user[1].userEnabled = 1;
+    // user ID 1 - Null user -Disabled
+    userDataInfo.user[1].userEnabled = 0;
     userDataInfo.user[1].userInSystem = 1;
     userDataInfo.user[1].fixedUserName = 1;
     userDataInfo.user[1].passwordInSystem = 0;
-    // TODO: Remove above block of code. Time being add root user here in
-    // user ID 1
-
+    for (size_t userIndex = 1; userIndex <= IPMI_MAX_USERS; ++userIndex) {
+      for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS; ++chIndex) {
+        userDataInfo.user[userIndex].userPrivAccess[chIndex].privilege =
+            PRIVILEGE_NO_ACCESS;
+      }
+    }
     writeUserData();
   }
   return;

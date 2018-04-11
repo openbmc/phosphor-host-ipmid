@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 #pragma once
+#include <host-ipmid/ipmid-api.h>
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/User/UserMgr/server.hpp>
 #include <cstdint>
@@ -25,7 +26,7 @@ namespace ipmi {
 
 static constexpr uint8_t IPMI_MAX_USER_NAME = 16;
 static constexpr uint8_t IPMI_MAX_PASSWD_SIZE = 20;
-static constexpr uint8_t IPMI_MAX_USERS = 16;
+static constexpr uint8_t IPMI_MAX_USERS = 15;
 static constexpr uint8_t IPMI_MAX_CHANNELS = 16;
 static constexpr uint16_t USER_DATA_VERSION = 1;
 static const char *USER_DATA_SIGNATURE = "OpenBMC";
@@ -88,7 +89,8 @@ struct userinfo_t {
 struct userdata_t {
   uint16_t version;
   uint8_t signature[14];
-  userinfo_t user[IPMI_MAX_USERS];
+  userinfo_t user[IPMI_MAX_USERS +
+                  1];  //+1 to map with UserId directly. UserId 0 is reserved.
 } __attribute__((packed));
 
 using UserMgr = sdbusplus::xyz::openbmc_project::User::server::UserMgr;
@@ -108,6 +110,10 @@ class UserAccess {
   static bool isValidChannel(uint8_t chNum);
 
   static bool isValidUserId(uint8_t userId);
+
+  static CommandPrivilege convertToIPMIPrivilege(const std::string &value);
+
+  static std::string convertToSystemPrivilege(CommandPrivilege &value);
 
   bool isValidUserName(const char *user_name);
 
