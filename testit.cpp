@@ -15,7 +15,7 @@ unsigned char g_sensortype [][2] = {
 uint8_t find_type_for_sensor_number(uint8_t sensor_number) {
 
     int i=0;
-    uint8_t rc; 
+    uint8_t rc;
 
     while (g_sensortype[i][0] != 0xff) {
         if (g_sensortype[i][1] == sensor_number) {
@@ -48,7 +48,7 @@ int set_sensor_dbus_state_s(unsigned char number, const char *member, const char
 }
 
 int set_sensor_dbus_state_y(unsigned char number, char const* member, uint8_t value) {
-    
+
     char val[2];
 
 
@@ -81,7 +81,7 @@ uint8_t testrec_procfailed[]   = {0x02, 0xa9, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00
 // Virtual Sensor 5, setting a Value of 0h
 uint8_t testrec_bootprogress[] = {0x05, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x0E, 0x00};
 
-// Virtual Sensor setting a boot count 
+// Virtual Sensor setting a boot count
 uint8_t testrec_bootcount[]    = {0x01, 0x09, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 // Invalid sensor number
@@ -89,7 +89,7 @@ uint8_t testrec_invalidnumber[]= {0x35, 0xa9, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00
 
 
 int check_results(int rc, const char *method, const char *value) {
-    if (strcmp(g_results_method, method)) { 
+    if (strcmp(g_results_method, method)) {
         printf("ERROR: Method Failed, expect %s found %s\n", method, g_results_method);
         return -1;
     }

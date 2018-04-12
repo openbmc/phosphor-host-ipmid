@@ -81,12 +81,12 @@ int main(int argc, char *argv[])
 	long val;
 	uint16_t num;
 	int r;
-	
+
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s sensornumber\n", argv[0]);
 		return -1;
 	}
-	
+
 	str = argv[1];
 	base = (argc > 2) ? atoi(argv[2]) : 10;
 
@@ -102,11 +102,11 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to connect to system bus: %s\n",
                 strerror(-r));
         goto finish;
-    } 
+    }
 
-    send_esel(num);	
+    send_esel(num);
 
-	
+
 finish:
     sd_bus_unref(bus);
 
