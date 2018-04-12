@@ -26,7 +26,7 @@ enum CommandPrivilege {
 #define IPMI_CC_LEN 1
 
 // IPMI Net Function number as specified by IPMI V2.0 spec.
-// Example : 
+// Example :
 // NETFUN_APP      =   (0x06 << 2),
 typedef unsigned char   ipmi_netfn_t;
 

@@ -12,12 +12,12 @@ struct sensorRES_t {
 	uint8_t operation;
 	uint8_t sensor_reading;
 	uint8_t assert_state7_0;
-	uint8_t assert_state14_8;	
+	uint8_t assert_state14_8;
 	uint8_t deassert_state7_0;
-	uint8_t deassert_state14_8;	
+	uint8_t deassert_state14_8;
 	uint8_t event_data1;
 	uint8_t event_data2;
-	uint8_t event_data3;	
+	uint8_t event_data3;
 } __attribute__ ((packed));
 
 #define ISBITSET(x,y) (((x)>>(y))&0x01)
@@ -112,7 +112,7 @@ char *event_data_lookup(event_data_t *p, uint8_t b) {
 
 
 //  The fw progress sensor contains some additional information that needs to be processed
-//  prior to calling the dbus code.  
+//  prior to calling the dbus code.
 int set_sensor_dbus_state_fwprogress(const sensorRES_t *pRec, const lookup_t *pTable, const char *value) {
 
 	char valuestring[128];
@@ -221,12 +221,12 @@ void reportSensorEventDeassert(sensorRES_t *pRec, int index) {
 
 
 int findindex(const uint8_t sensor_type, int offset, int *index) {
-	
+
 	int i=0, rc=0;
 	lookup_t *pTable = g_ipmidbuslookup;
 
 	do {
-		if ( ((pTable+i)->sensor_type == sensor_type) && 
+		if ( ((pTable+i)->sensor_type == sensor_type) &&
 			 ((pTable+i)->offset  == offset) ) {
 			rc = 1;
 			*index = i;

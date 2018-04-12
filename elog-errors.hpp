@@ -1775,7 +1775,7 @@ namespace Create
 namespace _QuotaExceeded
 {
 
-struct REASON 
+struct REASON
 {
     static constexpr auto str = "REASON = %s";
     static constexpr auto str_short = "REASON ";
