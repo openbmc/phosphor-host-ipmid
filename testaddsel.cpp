@@ -81,23 +81,23 @@ final:
 
 int main(int argc, char *argv[])
 {
-	int base;
-	char *endptr, *str;
-	long val;
-	uint16_t num;
-	int r;
-	
-	if (argc < 2) {
-		fprintf(stderr, "Usage: %s sensornumber\n", argv[0]);
-		return -1;
-	}
-	
-	str = argv[1];
-	base = (argc > 2) ? atoi(argv[2]) : 10;
+    int base;
+    char *endptr, *str;
+    long val;
+    uint16_t num;
+    int r;
 
-	val = strtol(str, &endptr, base);
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s sensornumber\n", argv[0]);
+        return -1;
+    }
 
-	num = (uint16_t) val;
+    str = argv[1];
+    base = (argc > 2) ? atoi(argv[2]) : 10;
+
+    val = strtol(str, &endptr, base);
+
+    num = (uint16_t) val;
 
 
 
@@ -107,13 +107,13 @@ int main(int argc, char *argv[])
         log<level::ERR>("Failed to connect to system bus",
                         entry("ERRNO=0x%X", -r));
         goto finish;
-    } 
+    }
 
-    send_esel(num);	
+    send_esel(num);
 
-	
+
 finish:
     sd_bus_unref(bus);
 
-	return 0;
+    return 0;
 }
