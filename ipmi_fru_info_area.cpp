@@ -281,11 +281,8 @@ FruAreaData buildBoardInfoArea(const PropertyMap& propMap)
         //Board part number
         appendData(partNumber, propMap, fruAreaData);
 
-        //FRU File ID - Empty
-        fruAreaData.emplace_back(typeLengthByteNull);
-
-        // Empty FRU File ID bytes
-        fruAreaData.emplace_back(recordNotPresent);
+        //FRU File ID
+        appendData(version, propMap, fruAreaData);
 
         //End of custom fields
         fruAreaData.emplace_back(endOfCustomFields);
@@ -327,11 +324,8 @@ FruAreaData buildProductInfoArea(const PropertyMap& propMap)
         //Add Asset Tag
         fruAreaData.emplace_back(recordNotPresent);
 
-        //FRU File ID - Empty
-        fruAreaData.emplace_back(typeLengthByteNull);
-
-        // Empty FRU File ID bytes
-        fruAreaData.emplace_back(recordNotPresent);
+        //FRU File ID
+        appendData(version, propMap, fruAreaData);
 
         //End of custom fields
         fruAreaData.emplace_back(endOfCustomFields);
