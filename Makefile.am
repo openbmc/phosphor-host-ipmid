@@ -61,8 +61,21 @@ fru-read-gen.cpp:
 channel-gen.cpp:
 	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
+libuserlayerdir = ${libdir}
+libuserlayer_LTLIBRARIES = libuserlayer.la
+libuserlayer_la_SOURCES = \
+        user/user_layer.cpp \
+        user/passwd_mgr.hpp \
+        user/passwd_mgr.cpp
+
+libuserlayer_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
+	-lssl -version-info 0:0:0 -shared
+libuserlayer_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 libipmi20dir = ${libdir}/ipmid-providers
 libipmi20_LTLIBRARIES = libipmi20.la
+libipmi20_la_DEPENDENCIES = libuserlayer.la
 libipmi20_la_SOURCES = \
 	net.cpp \
 	app/channel.cpp \
@@ -94,7 +107,7 @@ TESTS = $(check_PROGRAMS)
 
 libipmi20_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
-	-version-info 0:0:0 -shared
+	-luserlayer -version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
 	$(BOOST_CXX) $(PHOSPHOR_LOGGING_CFLAGS) \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
@@ -118,6 +131,7 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
                              $(SDBUSPLUS_CFLAGS)
 
 nobase_include_HEADERS = \
+	user/user_layer.hpp \
 	host-ipmid/ipmid-api.h \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp \
