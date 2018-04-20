@@ -22,7 +22,8 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/named_recursive_mutex.hpp>
 
-namespace ipmi {
+namespace ipmi
+{
 
 static constexpr uint8_t IPMI_MAX_USER_NAME = 16;
 static constexpr uint8_t IPMI_MAX_PASSWD_SIZE = 20;
@@ -46,106 +47,110 @@ static constexpr uint8_t INVALID_USER_NAME = 0x1;
 static constexpr size_t MAX_DBUS_OBJECT_PATH = 255;
 
 typedef enum {
-  CHAN_IPMB,        // Channel 0x00
-  CHAN_LAN1,        // Channel 0x01
-  CHAN_LAN2,        // Channel 0x02
-  CHAN_LAN3,        // Channel 0x03
-  CHAN_EMP,         // Channel 0x04
-  CHAN_ICMB,        // Channel 0x05
-  CHAN_SMLINK0,     // Channel 0x06
-  CHAN_SMM,         // Channel 0x07
-  CHAN_INTRABMC,    // Channel 0x08
-  CHAN_SIPMB,       // Channel 0x09       (Secondary IPMB)
-  CHAN_PCIE,        // Channel 0x0A       (PCIE slots)
-  CHAN_B_RESERVED,  // Channel 0x0B       (reserved)
-  CHAN_INTERNAL,    // Channel 0x0C
-  CHAN_D_RESERVED,  // Channel 0x0D       (reserved)
-  CHAN_SELF,        // Channel 0x0E       (refers to self)
-  CHAN_SMS          // Channel 0x0F
+    CHAN_IPMB,       // Channel 0x00
+    CHAN_LAN1,       // Channel 0x01
+    CHAN_LAN2,       // Channel 0x02
+    CHAN_LAN3,       // Channel 0x03
+    CHAN_EMP,        // Channel 0x04
+    CHAN_ICMB,       // Channel 0x05
+    CHAN_SMLINK0,    // Channel 0x06
+    CHAN_SMM,        // Channel 0x07
+    CHAN_INTRABMC,   // Channel 0x08
+    CHAN_SIPMB,      // Channel 0x09       (Secondary IPMB)
+    CHAN_PCIE,       // Channel 0x0A       (PCIE slots)
+    CHAN_B_RESERVED, // Channel 0x0B       (reserved)
+    CHAN_INTERNAL,   // Channel 0x0C
+    CHAN_D_RESERVED, // Channel 0x0D       (reserved)
+    CHAN_SELF,       // Channel 0x0E       (refers to self)
+    CHAN_SMS         // Channel 0x0F
 } EChannelID;
 
-struct user_priv_access {
-  uint8_t privilege : 4;
-  uint8_t ipmi_enabled : 1;
-  uint8_t link_auth_enabled : 1;
-  uint8_t access_callback : 1;
-  uint8_t reserved : 1;
+struct user_priv_access
+{
+    uint8_t privilege : 4;
+    uint8_t ipmi_enabled : 1;
+    uint8_t link_auth_enabled : 1;
+    uint8_t access_callback : 1;
+    uint8_t reserved : 1;
 } __attribute__((packed));
 
-struct userinfo_t {
-  uint8_t userName[IPMI_MAX_USER_NAME];
-  user_priv_access userPrivAccess[IPMI_MAX_CHANNELS];
-  uint8_t userEnabled : 1;
-  uint8_t userInSystem : 1;
-  uint8_t passwordInSystem : 1;
-  uint8_t passwordSet : 1;
-  uint8_t fixedUserName : 1;
-  uint8_t userChgInProgress : 1;
-  uint8_t reserved : 2;
-  uint8_t payloadEnabled[IPMI_MAX_CHANNELS];
-  uint8_t payloadEnabled2[IPMI_MAX_CHANNELS];
+struct userinfo_t
+{
+    uint8_t userName[IPMI_MAX_USER_NAME];
+    user_priv_access userPrivAccess[IPMI_MAX_CHANNELS];
+    uint8_t userEnabled : 1;
+    uint8_t userInSystem : 1;
+    uint8_t passwordInSystem : 1;
+    uint8_t passwordSet : 1;
+    uint8_t fixedUserName : 1;
+    uint8_t userChgInProgress : 1;
+    uint8_t reserved : 2;
+    uint8_t payloadEnabled[IPMI_MAX_CHANNELS];
+    uint8_t payloadEnabled2[IPMI_MAX_CHANNELS];
 } __attribute__((packed));
 
-struct userdata_t {
-  uint16_t version;
-  uint8_t signature[14];
-  userinfo_t user[IPMI_MAX_USERS +
-                  1];  //+1 to map with UserId directly. UserId 0 is reserved.
+struct userdata_t
+{
+    uint16_t version;
+    uint8_t signature[14];
+    userinfo_t user[IPMI_MAX_USERS +
+                    1]; //+1 to map with UserId directly. UserId 0 is reserved.
 } __attribute__((packed));
 
 using UserMgr = sdbusplus::xyz::openbmc_project::User::server::UserMgr;
 
 class UserAccess;
 
-class UserAccess {
- public:
-  UserAccess(const UserAccess &) = delete;
-  UserAccess &operator=(const UserAccess &) = delete;
-  UserAccess(UserAccess &&) = delete;
-  UserAccess &operator=(UserAccess &&) = delete;
+class UserAccess
+{
+  public:
+    UserAccess(const UserAccess &) = delete;
+    UserAccess &operator=(const UserAccess &) = delete;
+    UserAccess(UserAccess &&) = delete;
+    UserAccess &operator=(UserAccess &&) = delete;
 
-  ~UserAccess();
-  UserAccess();
+    ~UserAccess();
+    UserAccess();
 
-  static bool isValidChannel(uint8_t chNum);
+    static bool isValidChannel(uint8_t chNum);
 
-  static bool isValidUserId(uint8_t userId);
+    static bool isValidUserId(uint8_t userId);
 
-  static CommandPrivilege convertToIPMIPrivilege(const std::string &value);
+    static CommandPrivilege convertToIPMIPrivilege(const std::string &value);
 
-  static std::string convertToSystemPrivilege(CommandPrivilege &value);
+    static std::string convertToSystemPrivilege(CommandPrivilege &value);
 
-  bool isValidUserName(const char *user_name);
+    bool isValidUserName(const char *user_name);
 
-  userinfo_t *getUserInfo(uint8_t userId);
+    userinfo_t *getUserInfo(uint8_t userId);
 
-  void setUserInfo(uint8_t userId, userinfo_t *userInfo);
+    void setUserInfo(uint8_t userId, userinfo_t *userInfo);
 
-  int getUserName(uint8_t userId, std::string &userName);
+    int getUserName(uint8_t userId, std::string &userName);
 
-  int setUserName(uint8_t userId, const char *user_name);
+    int setUserName(uint8_t userId, const char *user_name);
 
-  int readUserData();
+    int readUserData();
 
-  int writeUserData();
+    int writeUserData();
 
-  void checkAndReloadUserData();
+    void checkAndReloadUserData();
 
-  userdata_t *getUserDataPtr();
+    userdata_t *getUserDataPtr();
 
-  boost::interprocess::named_recursive_mutex userMutex{
-      boost::interprocess::open_or_create, IPMI_USER_MUTEX};
+    boost::interprocess::named_recursive_mutex userMutex{
+        boost::interprocess::open_or_create, IPMI_USER_MUTEX};
 
- private:
-  userdata_t userDataInfo;
-  std::vector<std::string> availablePrivileges;
-  std::vector<std::string> availableGroups;
-  sdbusplus::bus::bus bus;
-  std::time_t fileLastUpdatedTime;
-  bool signalHndlrObject = false;
-  boost::interprocess::file_lock sigHndlrLock;
-  std::time_t getUpdatedFileTime();
-  void getSystemPrivAndGroups();
-  void initUserDataFile();
+  private:
+    userdata_t userDataInfo;
+    std::vector<std::string> availablePrivileges;
+    std::vector<std::string> availableGroups;
+    sdbusplus::bus::bus bus;
+    std::time_t fileLastUpdatedTime;
+    bool signalHndlrObject = false;
+    boost::interprocess::file_lock sigHndlrLock;
+    std::time_t getUpdatedFileTime();
+    void getSystemPrivAndGroups();
+    void initUserDataFile();
 };
-}
+} // namespace ipmi

@@ -18,12 +18,13 @@
 #include <cstdint>
 
 // IPMI commands for user command NETFN:APP.
-enum ipmi_netfn_user_cmds {
-  IPMI_CMD_SET_USER_ACCESS = 0x43,
-  IPMI_CMD_GET_USER_ACCESS = 0x44,
-  IPMI_CMD_SET_USER_NAME = 0x45,
-  IPMI_CMD_GET_USER_NAME = 0x46,
-  IPMI_CMD_SET_USER_PASSWORD = 0x47,
+enum ipmi_netfn_user_cmds
+{
+    IPMI_CMD_SET_USER_ACCESS = 0x43,
+    IPMI_CMD_GET_USER_ACCESS = 0x44,
+    IPMI_CMD_SET_USER_NAME = 0x45,
+    IPMI_CMD_GET_USER_NAME = 0x46,
+    IPMI_CMD_SET_USER_PASSWORD = 0x47,
 };
 
 static constexpr uint8_t USER_ID_DISABLED_VIA_SET_PASSWORD = 0x2;
