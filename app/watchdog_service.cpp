@@ -23,6 +23,19 @@ WatchdogService::WatchdogService()
 {
 }
 
+void WatchdogService::resetTimeRemaining(bool enableWatchdog)
+{
+    auto request = wd_service.newMethodCall(
+            bus, wd_intf, "ResetTimeRemaining");
+    request.append(enableWatchdog);
+    auto response = bus.call(request);
+    if (response.is_method_error())
+    {
+        wd_service.invalidate();
+        throw std::runtime_error("Failed to ResetTimeRemaining on watchdog");
+    }
+}
+
 WatchdogService::Properties WatchdogService::getProperties()
 {
     auto request = wd_service.newMethodCall(bus, prop_intf, "GetAll");
