@@ -95,7 +95,8 @@ std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal(nullptr);
 void userUpdateHelper(UserAccess *usrAccess, const std::string &signal,
                       const std::string &userName,
                       const std::vector<std::string> &groups,
-                      const std::string &priv, const std::string &newUserName)
+                      const std::string &priv, const bool &enabled,
+                      const std::string &newUserName)
 {
     if (usrAccess == nullptr)
     {
@@ -148,6 +149,7 @@ void userUpdateHelper(UserAccess *usrAccess, const std::string &signal,
             userData->user[emptySlot].userPrivAccess[chIndex].access_callback =
                 0x1;
         }
+        userData->user[emptySlot].userEnabled = enabled;
         userData->user[emptySlot].userInSystem = 1;
     }
     else
@@ -212,8 +214,7 @@ void userUpdateHelper(UserAccess *usrAccess, const std::string &signal,
         else if (signal == USER_ENABLED_SIGNAL ||
                  signal == USER_DISABLED_SIGNAL)
         {
-            userData->user[usrIndex].userEnabled =
-                (signal == USER_ENABLED_SIGNAL) ? 1 : 0;
+            userData->user[usrIndex].userEnabled = enabled;
         }
         else
         {
@@ -236,13 +237,19 @@ void userUpdatedSignalHandler(UserAccess *usrAccess,
     std::string signal = msg.get_member();
     std::string userName, update, priv, newUserName;
     std::vector<std::string> groups;
+    bool enabled = false;
     if (signal == USER_RENAMED_SIGNAL)
     {
-        msg.read(userName, groups, priv, newUserName);
+        msg.read(userName, groups, priv, enabled, newUserName);
+    }
+    else if (signal == USER_DISABLED_SIGNAL || signal == USER_ENABLED_SIGNAL)
+    {
+        msg.read(userName, groups, priv);
+        enabled = (signal == USER_ENABLED_SIGNAL) ? true : false;
     }
     else if (!signal.empty())
     {
-        msg.read(userName, groups, priv);
+        msg.read(userName, groups, priv, enabled);
     }
 
     if (signal.empty() || userName.empty() ||
@@ -259,13 +266,13 @@ void userUpdatedSignalHandler(UserAccess *usrAccess,
         {
             // remove user from ipmi user list.
             userUpdateHelper(usrAccess, USER_DELETED_SIGNAL, userName, groups,
-                             priv, newUserName);
+                             priv, enabled, newUserName);
         }
         else
         {
             // add user to ipmi user list.
             userUpdateHelper(usrAccess, USER_CREATED_SIGNAL, userName, groups,
-                             priv, newUserName);
+                             priv, enabled, newUserName);
         }
     }
     else
@@ -275,7 +282,7 @@ void userUpdatedSignalHandler(UserAccess *usrAccess,
         {
             return; // skip other handlers for non-IPMI based user.
         }
-        userUpdateHelper(usrAccess, signal, userName, groups, priv,
+        userUpdateHelper(usrAccess, signal, userName, groups, priv, enabled,
                          newUserName);
     }
     return;
