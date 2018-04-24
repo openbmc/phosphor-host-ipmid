@@ -46,6 +46,15 @@ static constexpr uint8_t INVALID_USER_NAME = 0x1;
 
 static constexpr size_t MAX_DBUS_OBJECT_PATH = 255;
 
+using DbusUserPropVariant =
+    sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
+
+using DbusUserObjPath = sdbusplus::message::object_path;
+
+using DbusUserObjValue =
+    std::map<std::string,
+             std::vector<std::pair<std::string, DbusUserPropVariant>>>;
+
 typedef enum {
     CHAN_IPMB,       // Channel 0x00
     CHAN_LAN1,       // Channel 0x01
@@ -135,6 +144,14 @@ class UserAccess
     int writeUserData();
 
     void checkAndReloadUserData();
+
+    void getUserObjProperties(const DbusUserObjValue &userObjs,
+                              std::vector<std::string> &usrGrps,
+                              std::string &usrPriv, bool &usrEnabled);
+
+    bool addUserEntry(const std::string &userName, size_t priv, bool enabled);
+
+    void deleteUserIndex(size_t usrIdx);
 
     userdata_t *getUserDataPtr();
 
