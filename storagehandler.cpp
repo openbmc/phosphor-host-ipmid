@@ -652,6 +652,11 @@ ipmi_ret_t ipmi_storage_read_fru_data(
         const auto& fruArea = getFruAreaData(reqptr->fruID);
         auto size = fruArea.size();
 
+        if (offset >= size)
+        {
+            return IPMI_CC_PARM_OUT_OF_RANGE;
+        }
+
         // Write the count of response data.
         if ((offset + reqptr->count) <= size)
         {
