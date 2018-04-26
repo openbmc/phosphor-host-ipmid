@@ -68,7 +68,6 @@ struct FruInvenAreaInfoRequest
  */
 struct FruInvenAreaInfoResponse
 {
-    uint8_t  completionCode;  ///< Completion code
     uint8_t  sizels;          ///< Fru Inventory area size in bytes, LS Byte
     uint8_t  sizems;          ///< Fru Inventory are size in bytes, MS Byte
     uint8_t  access;    ///< 0b Devices is accessed by bytes, 1b - by words
