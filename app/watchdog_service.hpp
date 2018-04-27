@@ -15,6 +15,14 @@ class WatchdogService {
 
         using Action = sdbusplus::xyz::openbmc_project::State::server::Watchdog::Action;
 
+        /** @brief Resets the time remaining on the watchdog.
+         *         Equivalent to setTimeRemaining(getInterval()).
+         *         Optionally enables the watchdog.
+         *
+         *  @param[in] enableWatchdog - Should the call also enable the watchdog
+         */
+        void resetTimeRemaining(bool enableWatchdog);
+
         /** @brief Contains a copy of the properties enumerated by the
          *         watchdog service.
          */
