@@ -40,12 +40,8 @@ ipmi_ret_t ipmi_app_watchdog_reset(
             return IPMI_WDOG_CC_NOT_INIT;
         }
 
-        // Reset the countdown to make sure we don't expire our timer
-        wd_service.setTimeRemaining(wd_prop.interval);
-
-        // The spec states that the timer is activated by reset
-        wd_service.setEnabled(true);
-
+        // The ipmi standard dictates we enable the watchdog during reset
+        wd_service.resetTimeRemaining(true);
         return IPMI_CC_OK;
     }
     catch (const InternalFailure& e)
