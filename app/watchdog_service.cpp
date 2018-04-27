@@ -60,6 +60,22 @@ WatchdogService::Properties WatchdogService::getProperties()
 }
 
 template <typename T>
+T WatchdogService::getProperty(const std::string& key)
+{
+    auto request = wd_service.newMethodCall(bus, prop_intf, "Get");
+    request.append(wd_intf, key);
+    auto response = bus.call(request);
+    if (response.is_method_error())
+    {
+        wd_service.invalidate();
+        throw std::runtime_error(std::string("Failed to get property: ") + key);
+    }
+    variant<T> value;
+    response.read(value);
+    return get<T>(value);
+}
+
+template <typename T>
 void WatchdogService::setProperty(const std::string& key, const T& val)
 {
     auto request = wd_service.newMethodCall(bus, prop_intf, "Set");
@@ -70,6 +86,11 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
         wd_service.invalidate();
         throw std::runtime_error(std::string("Failed to set property: ") + key);
     }
+}
+
+bool WatchdogService::getInitialized()
+{
+    return getProperty<bool>("Initialized");
 }
 
 void WatchdogService::setInitialized(bool initialized)

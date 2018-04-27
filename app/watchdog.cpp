@@ -26,11 +26,10 @@ ipmi_ret_t ipmi_app_watchdog_reset(
     try
     {
         WatchdogService wd_service;
-        WatchdogService::Properties wd_prop = wd_service.getProperties();
 
         // Notify the caller if we haven't initialized our timer yet
         // so it can configure actions and timeouts
-        if (!wd_prop.initialized)
+        if (!wd_service.getInitialized())
         {
             return IPMI_WDOG_CC_NOT_INIT;
         }
