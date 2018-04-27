@@ -79,6 +79,24 @@ WatchdogService::Properties WatchdogService::getProperties()
 }
 
 template <typename T>
+T WatchdogService::getProperty(const std::string& key)
+{
+    auto request = wd_service.newMethodCall(bus, prop_intf, "Get");
+    request.append(wd_intf, key);
+    auto response = bus.call(request);
+    if (response.is_method_error())
+    {
+        wd_service.invalidate();
+        log<level::ERR>("WatchdogService: Method error getting property",
+                        entry("PROPERTY=%s", key.c_str()));
+        elog<InternalFailure>();
+    }
+    variant<T> value;
+    response.read(value);
+    return get<T>(value);
+}
+
+template <typename T>
 void WatchdogService::setProperty(const std::string& key, const T& val)
 {
     bool wasValid = wd_service.isValid(bus);
@@ -97,6 +115,11 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
                         entry("PROPERTY=%s", key.c_str()));
         elog<InternalFailure>();
     }
+}
+
+bool WatchdogService::getInitialized()
+{
+    return getProperty<bool>("Initialized");
 }
 
 void WatchdogService::setInitialized(bool initialized)

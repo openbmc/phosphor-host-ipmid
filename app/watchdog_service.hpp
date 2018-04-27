@@ -41,8 +41,15 @@ class WatchdogService {
          */
         Properties getProperties();
 
+        /** @brief Get the value of the initialized property on the host
+         *         watchdog
+         *
+         *  @return The value of the property
+         */
+        bool getInitialized();
+
         /** @brief Sets the value of the initialized property on the host
-		 *         watchdog
+         *         watchdog
          *
          *  @param[in] initialized - The new initializedvalue
          */
@@ -78,6 +85,14 @@ class WatchdogService {
         sdbusplus::bus::bus bus;
         /** @brief The name of the mapped host watchdog service */
         static ipmi::ServiceCache wd_service;
+
+        /** @brief Gets the value of the property on the host watchdog
+         *
+         *  @param[in] key - The name of the property
+         *  @return The value of the property
+         */
+        template <typename T>
+        T getProperty(const std::string& key);
 
         /** @brief Sets the value of the property on the host watchdog
          *
