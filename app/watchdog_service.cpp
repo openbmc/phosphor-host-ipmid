@@ -32,6 +32,28 @@ WatchdogService::WatchdogService()
 {
 }
 
+void WatchdogService::resetTimeRemaining(bool enableWatchdog)
+{
+    bool wasValid = wd_service.isValid(bus);
+    auto request = wd_service.newMethodCall(
+            bus, wd_intf, "ResetTimeRemaining");
+    request.append(enableWatchdog);
+    auto response = bus.call(request);
+    if (response.is_method_error())
+    {
+        wd_service.invalidate();
+        if (wasValid)
+        {
+            // Retry the request once in case the cached service was stale
+            return resetTimeRemaining(enableWatchdog);
+        }
+        log<level::ERR>(
+                "WatchdogService: Method error resetting time remaining",
+                entry("ENABLE_WATCHDOG=%d", !!enableWatchdog));
+        elog<InternalFailure>();
+    }
+}
+
 WatchdogService::Properties WatchdogService::getProperties()
 {
     bool wasValid = wd_service.isValid(bus);
