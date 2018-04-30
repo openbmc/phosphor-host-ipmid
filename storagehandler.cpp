@@ -20,6 +20,7 @@
 #include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "sensorhandler.h"
+#include <iostream>
 
 
 void register_netfn_storage_functions() __attribute__((constructor));
@@ -433,6 +434,7 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     using namespace std::chrono;
     uint64_t host_time_usec = 0;
     uint32_t resp = 0;
+    std::stringstream hostTime;
 
     try
     {
@@ -469,8 +471,11 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    log<level::DEBUG>("Host time:",
-                      entry("HOST_TIME=%s", getTimeString(host_time_usec)));
+    hostTime << "Host time:" << host_time_usec << " , " << getTimeString(
+                host_time_usec);
+    std::string s = hostTime.str();
+    log<level::DEBUG>(hostTime.str().c_str());
+
 
     // Time is really long int but IPMI wants just uint32. This works okay until
     // the number of seconds since 1970 overflows uint32 size.. Still a whole
