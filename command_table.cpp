@@ -41,9 +41,6 @@ std::vector<uint8_t> Table::executeCommand(uint32_t inCommand,
 
     if (iterator == commandTable.end())
     {
-        std::cerr << "E> Table:: Command Not found: 0x" << std::hex << inCommand
-                  << "\n";
-
         response.resize(1);
         response[0] = IPMI_CC_INVALID;
     }
