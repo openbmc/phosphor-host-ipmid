@@ -87,21 +87,17 @@ int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface
     int r;
     r = get_bus_for_path(objname, &busname);
     if (r < 0) {
-        fprintf(stderr, "Failed to get %s busname: %s\n",
-                objname, strerror(-r));
         goto final;
     }
 
     r = sd_bus_call_method(bus,busname,objname,iface, "getObjectFromByteId",
                            &error, &reply, "sy", type, num);
     if (r < 0) {
-        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
         goto final;
     }
 
     r = sd_bus_message_read(reply, "(ss)", &str2, &str3);
     if (r < 0) {
-        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
         goto final;
     }
 
