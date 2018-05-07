@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 #include <cstddef>
+#include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
+#include "host-ipmid/ipmid-api.h"
+
+using namespace sdbusplus::xyz::openbmc_project::Control::Boot::server;
 
 // IPMI commands for Chassis net functions.
 enum ipmi_netfn_app_cmds
@@ -55,4 +60,15 @@ enum class BootOptionResponseSize : size_t
     OPAL_NETWORK_SETTINGS         = 50
 };
 
+ /** @brief Set the property value for boot source
+ *  @param[in] source - boot source value
+ *  @return On failure return IPMI error.
+ */
+ipmi_ret_t setBootSource(const Source::Sources& source);
+
+ /** @brief Set the property value for boot mode
+ *  @param[in] mode - boot mode value
+ *  @return On failure return IPMI error.
+ */
+ipmi_ret_t setBootMode(const Mode::Modes& mode);
 #endif
