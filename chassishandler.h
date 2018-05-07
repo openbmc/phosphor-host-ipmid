@@ -35,12 +35,12 @@ enum ipmi_generic_return_codes
 // Various Chassis operations under a single command.
 enum ipmi_chassis_control_cmds : uint8_t
 {
-	CMD_POWER_OFF 			   = 0x00,
-	CMD_POWER_ON 			   = 0x01,
-	CMD_POWER_CYCLE 		   = 0x02,
-	CMD_HARD_RESET 			   = 0x03,
-	CMD_PULSE_DIAGNOSTIC_INTR  = 0x04,
-	CMD_SOFT_OFF_VIA_OVER_TEMP = 0x05,
+    CMD_POWER_OFF               = 0x00,
+    CMD_POWER_ON                = 0x01,
+    CMD_POWER_CYCLE             = 0x02,
+    CMD_HARD_RESET              = 0x03,
+    CMD_PULSE_DIAGNOSTIC_INTR   = 0x04,
+    CMD_SOFT_OFF_VIA_OVER_TEMP  = 0x05,
 };
 enum class BootOptionParameter : size_t
 {
