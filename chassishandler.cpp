@@ -1434,6 +1434,14 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                     *data_len = 0;
                     return rc;
                 }
+                // If a set boot device is mapping to a boot source, then reset
+                // the boot mode D-Bus property to default.
+                // This way the ipmid code can determine which property is not
+                // at the default value
+                if(sourceItr->second != Source::Sources::Default)
+                {
+                    setBootMode(Mode::Modes::Regular);
+                }
             }
             if (modeIpmiToDbus.end() != modeItr)
             {
@@ -1442,6 +1450,14 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 {
                     *data_len = 0;
                     return rc;
+                }
+                // If a set boot device is mapping to a boot mode, then reset
+                // the boot source D-Bus property to default.
+                // This way the ipmid code can determine which property is not
+                // at the default value
+                if(modeItr->second != Mode::Modes::Regular)
+                {
+                    setBootSource(Source::Sources::Default);
                 }
             }
         }
