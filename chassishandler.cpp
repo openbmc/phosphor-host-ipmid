@@ -105,7 +105,7 @@ namespace fs = std::experimental::filesystem;
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
-
+using namespace sdbusplus::xyz::openbmc_project::Control::Boot::server;
 namespace chassis
 {
 namespace internal
@@ -1178,6 +1178,61 @@ std::map<Mode::Modes, IpmiValue> modeDbusToIpmi =
 
 } // namespace boot_options
 
+
+/** @brief Set the property value for boot source
+ *  @param[in] source - boot source value
+ *  @return On failure return IPMI error.
+ */
+static ipmi_ret_t setBootSource(const Source::Sources& source)
+{
+    using namespace chassis::internal;
+    using namespace chassis::internal::cache;
+    sdbusplus::message::variant<std::string> property =
+        convertForMessage(source);
+    auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
+    const auto& bootSourceSetting = std::get<settings::Path>(bootSetting);
+    auto method =
+        dbus.new_method_call(
+             objects.service(bootSourceSetting, bootSourceIntf).c_str(),
+             bootSourceSetting.c_str(), ipmi::PROP_INTF, "Set");
+    method.append(bootSourceIntf, "BootSource", property);
+    auto reply = dbus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in BootSource Set");
+        report<InternalFailure>();
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
+ /** @brief Set the property value for boot mode
+ *  @param[in] mode - boot mode value
+ *  @return On failure return IPMI error.
+ */
+static ipmi_ret_t setBootMode(const Mode::Modes& mode)
+{
+    using namespace chassis::internal;
+    using namespace chassis::internal::cache;
+    sdbusplus::message::variant<std::string> property =
+        convertForMessage(mode);
+    auto bootSetting = settings::boot::setting(objects, bootModeIntf);
+    const auto& bootModeSetting = std::get<settings::Path>(bootSetting);
+    auto method =
+        dbus.new_method_call(
+             objects.service(bootModeSetting, bootModeIntf).c_str(),
+             bootModeSetting.c_str(), ipmi::PROP_INTF, "Set");
+    method.append(bootModeIntf, "BootMode", property);
+    auto reply = dbus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in BootMode Set");
+        report<InternalFailure>();
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                              ipmi_request_t request,
                                              ipmi_response_t response,
@@ -1385,52 +1440,20 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             auto sourceItr = sourceIpmiToDbus.find(bootOption);
             if (sourceIpmiToDbus.end() != sourceItr)
             {
-                sdbusplus::message::variant<std::string> property =
-                    convertForMessage(sourceItr->second);
-                auto bootSetting = settings::boot::setting(objects,
-                                                           bootSourceIntf);
-                const auto& bootSourceSetting =
-                    std::get<settings::Path>(bootSetting);
-                auto method =
-                    dbus.new_method_call(
-                         objects.service(bootSourceSetting, bootSourceIntf).
-                             c_str(),
-                         bootSourceSetting.c_str(),
-                         ipmi::PROP_INTF,
-                         "Set");
-                method.append(bootSourceIntf, "BootSource", property);
-                auto reply = dbus.call(method);
-                if (reply.is_method_error())
+                rc = setBootSource(sourceItr->second);
+                if (rc != IPMI_CC_OK)
                 {
-                    log<level::ERR>("Error in BootSource Set");
-                    report<InternalFailure>();
                     *data_len = 0;
-                    return IPMI_CC_UNSPECIFIED_ERROR;
+                    return rc;
                 }
-
             }
             if (modeIpmiToDbus.end() != modeItr)
             {
-                sdbusplus::message::variant<std::string> property =
-                    convertForMessage(modeItr->second);
-                auto bootSetting = settings::boot::setting(objects,
-                                                           bootModeIntf);
-                const auto& bootModeSetting =
-                    std::get<settings::Path>(bootSetting);
-                auto method =
-                    dbus.new_method_call(
-                         objects.service(bootModeSetting, bootModeIntf).c_str(),
-                         bootModeSetting.c_str(),
-                         ipmi::PROP_INTF,
-                         "Set");
-                method.append(bootModeIntf, "BootMode", property);
-                auto reply = dbus.call(method);
-                if (reply.is_method_error())
+                rc = setBootMode(modeItr->second);
+                if (rc != IPMI_CC_OK)
                 {
-                    log<level::ERR>("Error in BootMode Set");
-                    report<InternalFailure>();
                     *data_len = 0;
-                    return IPMI_CC_UNSPECIFIED_ERROR;
+                    return rc;
                 }
             }
         }
