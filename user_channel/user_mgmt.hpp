@@ -51,9 +51,10 @@ using DbusUserPropVariant =
 
 using DbusUserObjPath = sdbusplus::message::object_path;
 
-using DbusUserObjValue =
-    std::map<std::string,
-             std::vector<std::pair<std::string, DbusUserPropVariant>>>;
+using DbusUserObjProperties =
+    std::vector<std::pair<std::string, DbusUserPropVariant>>;
+
+using DbusUserObjValue = std::map<std::string, DbusUserObjProperties>;
 
 typedef enum {
     CHAN_IPMB,       // Channel 0x00
@@ -73,6 +74,16 @@ typedef enum {
     CHAN_SELF,       // Channel 0x0E       (refers to self)
     CHAN_SMS         // Channel 0x0F
 } EChannelID;
+
+typedef enum {
+    RESERVED_EVENT,
+    USER_CREATED,
+    USER_DELETED,
+    USER_RENAMED,
+    USER_GRP_UPDATED,
+    USER_PRIV_UPDATED,
+    USER_STATE_UPDATED
+} UserUpdateEvent;
 
 struct user_priv_access
 {
@@ -110,6 +121,8 @@ using UserMgr = sdbusplus::xyz::openbmc_project::User::server::UserMgr;
 
 class UserAccess;
 
+UserAccess &getUserAccessObject();
+
 class UserAccess
 {
   public:
@@ -121,23 +134,23 @@ class UserAccess
     ~UserAccess();
     UserAccess();
 
-    static bool isValidChannel(uint8_t chNum);
+    static bool isValidChannel(const uint8_t &chNum);
 
-    static bool isValidUserId(uint8_t userId);
+    static bool isValidUserId(const uint8_t &userId);
 
     static CommandPrivilege convertToIPMIPrivilege(const std::string &value);
 
-    static std::string convertToSystemPrivilege(CommandPrivilege &value);
+    static std::string convertToSystemPrivilege(const CommandPrivilege &value);
 
     bool isValidUserName(const char *user_name);
 
-    userinfo_t *getUserInfo(uint8_t userId);
+    userinfo_t *getUserInfo(const uint8_t &userId);
 
-    void setUserInfo(uint8_t userId, userinfo_t *userInfo);
+    void setUserInfo(const uint8_t &userId, userinfo_t *userInfo);
 
-    int getUserName(uint8_t userId, std::string &userName);
+    int getUserName(const uint8_t &userId, std::string &userName);
 
-    int setUserName(uint8_t userId, const char *user_name);
+    int setUserName(const uint8_t &userId, const char *user_name);
 
     int readUserData();
 
@@ -145,13 +158,18 @@ class UserAccess
 
     void checkAndReloadUserData();
 
-    void getUserObjProperties(const DbusUserObjValue &userObjs,
-                              std::vector<std::string> &usrGrps,
-                              std::string &usrPriv, bool &usrEnabled);
+    void getUserProperties(const DbusUserObjProperties &properties,
+                           std::vector<std::string> &usrGrps,
+                           std::string &usrPriv, bool &usrEnabled);
 
-    bool addUserEntry(const std::string &userName, size_t priv, bool enabled);
+    int getUserObjProperties(const DbusUserObjValue &userObjs,
+                             std::vector<std::string> &usrGrps,
+                             std::string &usrPriv, bool &usrEnabled);
 
-    void deleteUserIndex(size_t usrIdx);
+    bool addUserEntry(const std::string &userName, const std::string &priv,
+                      const bool &enabled);
+
+    void deleteUserIndex(const size_t &usrIdx);
 
     userdata_t *getUserDataPtr();
 
