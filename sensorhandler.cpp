@@ -460,7 +460,6 @@ ipmi_ret_t legacyGetSensorReading(uint8_t sensorNum,
 
     switch(type) {
         case 0xC2:
-        case 0xC8:
             r = sd_bus_get_property(bus,a.bus, a.path, a.interface,
                                     "value", NULL, &reply, "i");
             if (r < 0)
@@ -485,6 +484,34 @@ ipmi_ret_t legacyGetSensorReading(uint8_t sensorNum,
             resp->value         = (uint8_t)reading;
             resp->operation     = 0;
             resp->indication[0] = 0;
+            resp->indication[1] = 0;
+            break;
+
+        case 0xC8:
+            r = sd_bus_get_property(bus,a.bus, a.path, a.interface,
+                                    "value", NULL, &reply, "i");
+            if (r < 0)
+            {
+                sd_journal_print(LOG_ERR, "Failed to call sd_bus_get_property:"
+                                 " %d, %s\n", r, strerror(-r));
+                sd_journal_print(LOG_ERR, "Bus: %s, Path: %s, Interface: %s\n",
+                                 a.bus, a.path, a.interface);
+                break;
+            }
+
+            r = sd_bus_message_read(reply, "i", &reading);
+            if (r < 0) {
+                sd_journal_print(LOG_ERR, "Failed to read sensor: %s\n",
+                                 strerror(-r));
+                break;
+            }
+
+            rc = IPMI_CC_OK;
+            *data_len=sizeof(sensorreadingresp_t);
+
+            resp->value         = 0;
+            resp->operation     = 0;
+            resp->indication[0] = (uint8_t)reading;
             resp->indication[1] = 0;
             break;
 
