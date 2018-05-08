@@ -482,9 +482,11 @@ ipmi_ret_t legacyGetSensorReading(uint8_t sensorNum,
             rc = IPMI_CC_OK;
             *data_len=sizeof(sensorreadingresp_t);
 
-            resp->value         = (uint8_t)reading;
+            resp->value         = 0;
             resp->operation     = 0;
-            resp->indication[0] = 0;
+            // For derating factor sensor, the hostboot code is expecting the
+            // retrun value of sensor at third byte.
+            resp->indication[0] = (uint8_t)reading;
             resp->indication[1] = 0;
             break;
 
