@@ -160,7 +160,7 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
 {
     //MFG Date/Time
     auto iter = propMap.find(buildDate);
-    if (iter != propMap.end())
+    if (iter != propMap.end() && !iter->second.empty())
     {
         tm time = {};
         strptime(iter->second.c_str(), "%F - %H:%M:%S", &time);
