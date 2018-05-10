@@ -2,8 +2,11 @@
 
 #include <cstdint>
 #include <endian.h>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <string>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 #include "watchdog_service.hpp"
 #include "host-ipmid/ipmid-api.h"
@@ -11,6 +14,8 @@
 
 using phosphor::logging::level;
 using phosphor::logging::log;
+using phosphor::logging::report;
+using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 ipmi_ret_t ipmi_app_watchdog_reset(
         ipmi_netfn_t netfn,
@@ -43,15 +48,22 @@ ipmi_ret_t ipmi_app_watchdog_reset(
 
         return IPMI_CC_OK;
     }
+    catch (const InternalFailure& e)
+    {
+        report<InternalFailure>();
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
     catch (const std::exception& e)
     {
         const std::string e_str = std::string("wd_reset: ") + e.what();
         log<level::ERR>(e_str.c_str());
+        report<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (...)
     {
         log<level::ERR>("wd_reset: Unknown Error");
+        report<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 }
@@ -155,15 +167,22 @@ ipmi_ret_t ipmi_app_watchdog_set(
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
+    catch (const InternalFailure& e)
+    {
+        report<InternalFailure>();
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
     catch (const std::exception& e)
     {
         const std::string e_str = std::string("wd_set: ") + e.what();
         log<level::ERR>(e_str.c_str());
+        report<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (...)
     {
         log<level::ERR>("wd_set: Unknown Error");
+        report<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 }
@@ -253,15 +272,22 @@ ipmi_ret_t ipmi_app_watchdog_get(
         *data_len = sizeof(res);
         return IPMI_CC_OK;
     }
+    catch (const InternalFailure& e)
+    {
+        report<InternalFailure>();
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
     catch (const std::exception& e)
     {
         const std::string e_str = std::string("wd_get: ") + e.what();
         log<level::ERR>(e_str.c_str());
+        report<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (...)
     {
         log<level::ERR>("wd_get: Unknown Error");
+        report<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 }
