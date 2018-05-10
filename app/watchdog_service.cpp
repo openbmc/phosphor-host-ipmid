@@ -1,14 +1,23 @@
 #include "watchdog_service.hpp"
 
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
 #include <string>
+#include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Watchdog/server.hpp>
 
 #include "host-ipmid/ipmid-api.h"
 
+using phosphor::logging::entry;
+using phosphor::logging::elog;
+using phosphor::logging::level;
+using phosphor::logging::log;
 using sdbusplus::message::variant_ns::get;
 using sdbusplus::message::variant_ns::variant;
+using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using sdbusplus::xyz::openbmc_project::State::server::convertForMessage;
 using sdbusplus::xyz::openbmc_project::State::server::Watchdog;
 
@@ -37,7 +46,8 @@ WatchdogService::Properties WatchdogService::getProperties()
             // Retry the request once in case the cached service was stale
             return getProperties();
         }
-        throw std::runtime_error("Failed to get watchdog properties");
+        log<level::ERR>("WatchdogService: Method error getting properties");
+        elog<InternalFailure>();
     }
 
     std::map<std::string, variant<bool, uint64_t, std::string>> properties;
@@ -67,7 +77,9 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
             // Retry the request once in case the cached service was stale
             return setProperty(key, val);
         }
-        throw std::runtime_error(std::string("Failed to set property: ") + key);
+        log<level::ERR>("WatchdogService: Method error setting property",
+                        entry("PROPERTY=%s", key.c_str()));
+        elog<InternalFailure>();
     }
 }
 
