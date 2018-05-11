@@ -61,6 +61,13 @@ class ServiceCache {
         sdbusplus::message::message newMethodCall(sdbusplus::bus::bus& bus,
                                                   const char *intf,
                                                   const char *method);
+
+        /** @brief Check to see if the current cache is valid
+         *
+         * @param[in] bus - The bus used for the service lookup
+         * @return True if the cache is valid false otherwise.
+         */
+        bool isValid(sdbusplus::bus::bus& bus) const;
     private:
         /** @brief DBUS interface provided by the service */
         const std::string intf;
@@ -70,13 +77,6 @@ class ServiceCache {
         std::experimental::optional<std::string> cachedService;
         /** @brief The name of the bus used in the service lookup */
         std::experimental::optional<std::string> cachedBusName;
-
-        /** @brief Check to see if the current cache is valid
-         *
-         * @param[in] bus - The bus used for the service lookup
-         * @return True if the cache is valid false otherwise.
-         */
-        bool isValid(sdbusplus::bus::bus& bus) const;
 };
 
 /**
