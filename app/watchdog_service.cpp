@@ -25,12 +25,17 @@ WatchdogService::WatchdogService()
 
 WatchdogService::Properties WatchdogService::getProperties()
 {
+    bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, prop_intf, "GetAll");
     request.append(wd_intf);
     auto response = bus.call(request);
     if (response.is_method_error())
     {
         wd_service.invalidate();
+        if (wasValid)
+        {
+            return getProperties();
+        }
         throw std::runtime_error("Failed to get watchdog properties");
     }
 
@@ -49,12 +54,17 @@ WatchdogService::Properties WatchdogService::getProperties()
 template <typename T>
 void WatchdogService::setProperty(const std::string& key, const T& val)
 {
+    bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, prop_intf, "Set");
     request.append(wd_intf, key, variant<T>(val));
     auto response = bus.call(request);
     if (response.is_method_error())
     {
         wd_service.invalidate();
+        if (wasValid)
+        {
+            return setProperty(key, val);
+        }
         throw std::runtime_error(std::string("Failed to set property: ") + key);
     }
 }
