@@ -35,12 +35,14 @@
 #include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
 
 #include "config.h"
-
+#include "timer.hpp"
 //Defines
 #define SET_PARM_VERSION                     0x01
 #define SET_PARM_BOOT_FLAGS_PERMANENT        0x40 //boot flags data1 7th bit on
 #define SET_PARM_BOOT_FLAGS_VALID_ONE_TIME   0x80 //boot flags data1 8th bit on
 #define SET_PARM_BOOT_FLAGS_VALID_PERMANENT  0xC0 //boot flags data1 7 & 8 bit on
+
+std::unique_ptr<phosphor::ipmi::Timer> identifyTimer = nullptr;
 
 constexpr size_t SIZE_MAC  = 18;
 constexpr size_t SIZE_BOOT_OPTION = (uint8_t)BootOptionResponseSize::
@@ -62,6 +64,10 @@ static constexpr size_t MAC_OFFSET = 9;
 static constexpr size_t ADDRTYPE_OFFSET = 16;
 static constexpr size_t IPADDR_OFFSET = 17;
 
+static constexpr size_t ENC_IDENTIFY_OBJECTS_SIZE = 1;
+static constexpr size_t CHASSIS_IDENTIFY_REQ_LEN = 2;
+static constexpr size_t IDENTIFY_INTERVAL_POS = 0;
+static constexpr size_t FORCE_IDENTIFY_POS = 1;
 
 void register_netfn_chassis_functions() __attribute__((constructor));
 
@@ -1034,32 +1040,13 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ( (rc < 0) ? IPMI_CC_INVALID : IPMI_CC_OK);
 }
 
-ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                 ipmi_request_t request,
-                                 ipmi_response_t response,
-                                 ipmi_data_len_t data_len,
-                                 ipmi_context_t context)
+/** @brief Return D-Bus connection string to enclosure identify LED object
+ *
+ *  @param[in, out] connection - connection to D-Bus object
+ *  @return a IPMI return code
+ */
+ipmi_ret_t getEnclosureIdentifyConnection(std::string& connection)
 {
-    static std::atomic_size_t currentCallerId(0);
-    static std::unique_ptr<std::future<void>> future;
-    static std::condition_variable condition;
-    static std::mutex timeoutMutex;
-
-    if (*data_len > 2)
-    {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-    uint8_t identifyInterval = *data_len > 0 ?
-                               (static_cast<uint8_t*>(request))[0] :
-                               DEFAULT_IDENTIFY_TIME_OUT;
-    bool forceIdentify =
-        *data_len == 2 ? (static_cast<uint8_t*>(request))[1] & 0x01 : false;
-
-    currentCallerId++;
-
-    // stop any threads currently running
-    condition.notify_all();
-
     // lookup enclosure_identify group owner(s) in mapper
     auto mapperCall = chassis::internal::dbus.new_method_call(
                           ipmi::MAPPER_BUS_NAME,
@@ -1082,59 +1069,103 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     std::vector<std::pair<std::string, std::vector<std::string>>> mapperResp;
     mapperReply.read(mapperResp);
 
-    for (auto& object : mapperResp)
+    if(mapperResp.size() != ENC_IDENTIFY_OBJECTS_SIZE)
     {
-        std::string& connection = object.first;
+        log<level::ERR>("Invalid number of enclosure identify objects.");
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+    auto pair = mapperResp[ENC_IDENTIFY_OBJECTS_SIZE - 1];
+    connection = pair.first;
+    return IPMI_CC_OK;
+}
 
-        if (identifyInterval || forceIdentify)
+/** @brief Turn On/Off enclosure identify LED
+ *
+ *  @param[in] flag - true to turn on LED, false to turn off
+ *  @return a IPMI return code
+ */
+ipmi_ret_t enclosureIdentityLed(bool flag)
+{
+    using namespace chassis::internal;
+    std::string connection{};
+    ipmi_ret_t rc = getEnclosureIdentifyConnection(connection);
+    if (rc != IPMI_CC_OK)
+    {
+        return rc;
+    }
+    auto led = dbus.new_method_call(connection.c_str(),
+        identify_led_object_name, "org.freedesktop.DBus.Properties", "Set");
+    led.append("xyz.openbmc_project.Led.Group", "Asserted",
+    sdbusplus::message::variant<bool>(flag));
+    auto ledReply = dbus.call(led);
+    if (ledReply.is_method_error())
+    {
+        log<level::ERR>("Chassis Identify: Error Setting State On/Off\n");
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
+/** @brief Turn Off enclosure identify LED
+ *  Callback method for the timer
+ */
+void enclosureIdentityLed0ff()
+{
+    ipmi_ret_t rc = enclosureIdentityLed(false);
+    if (rc != IPMI_CC_OK)
+    {
+        log<level::ERR>("Chassis Identify: Error Setting State Off \n");
+    }
+}
+
+/** @brief Create enclosure identify timer
+ */
+void createIdentifyTimer()
+{
+    if (!identifyTimer)
+    {
+        std::function<void()> identifyCallback(
+            std::bind(&enclosureIdentityLed0ff));
+        identifyTimer = std::make_unique<phosphor::ipmi::Timer>(
+            ipmid_get_sd_event_connection(), identifyCallback);
+    }
+}
+
+ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
+{
+    if (*data_len > CHASSIS_IDENTIFY_REQ_LEN)
+    {
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    uint8_t identifyInterval = *data_len > IDENTIFY_INTERVAL_POS ?
+            (static_cast<uint8_t*>(request))[IDENTIFY_INTERVAL_POS] :
+                DEFAULT_IDENTIFY_TIME_OUT;
+    bool forceIdentify = (*data_len == CHASSIS_IDENTIFY_REQ_LEN) ? 
+            (static_cast<uint8_t*>(request))[FORCE_IDENTIFY_POS] & 0x01 : false;
+    if (identifyInterval || forceIdentify)
+    {
+        ipmi_ret_t rc = enclosureIdentityLed(true);
+        if (rc != IPMI_CC_OK)
         {
-            auto ledOn = chassis::internal::dbus.new_method_call(
-                             connection.c_str(),
-                             identify_led_object_name,
-                             "org.freedesktop.DBus.Properties", "Set");
-            ledOn.append(
-                "xyz.openbmc_project.Led.Group", "Asserted",
-                sdbusplus::message::variant<bool>(
-                    true));
-            auto ledReply = chassis::internal::dbus.call(ledOn);
-            if (ledReply.is_method_error())
-            {
-                log<level::ERR>("Chassis Identify: Error Setting State On\n");
-                return IPMI_CC_RESPONSE_ERROR;
-            }
-            if (forceIdentify)
-            {
-                return IPMI_CC_OK;
-            }
+            log<level::ERR>("Chassis Identify: Error Setting State On\n");
+            return rc;
         }
-
-        size_t threadCallerId = currentCallerId;
-        future = std::make_unique<std::future<void>>(
-                     std::async(std::launch::async,
-                                [connection,
-                                 identifyInterval,
-                                 threadCallerId]
+        if (forceIdentify)
         {
-            std::unique_lock<std::mutex> lock(timeoutMutex);
-            if (condition.wait_for(lock,
-            std::chrono::seconds(identifyInterval),
-            [&threadCallerId]{return currentCallerId != threadCallerId;}))
-            {
-                return;  // another thread started.
-            }
-            auto ledOff = chassis::internal::dbus.new_method_call(
-                connection.c_str(),
-                identify_led_object_name,
-                "org.freedesktop.DBus.Properties", "Set");
-            ledOff.append("xyz.openbmc_project.Led.Group", "Asserted",
-            sdbusplus::message::variant<bool>(
-                false));
-            auto ledReply = chassis::internal::dbus.call(ledOff);
-            if (ledReply.is_method_error())
-            {
-                log<level::ERR>("Chassis Identify: Error Setting State Off\n");
-            }
-        }));
+            return IPMI_CC_OK;
+        }
+    }
+
+    if (identifyInterval)
+    {
+        // start/restart the timer
+        auto time = std::chrono::duration_cast<std::chrono::microseconds>(
+                        std::chrono::seconds(identifyInterval));
+        identifyTimer->startTimer(time);
     }
     return IPMI_CC_OK;
 }
@@ -1468,6 +1499,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_chassis_functions()
 {
+    createIdentifyTimer();
+
     // <Wildcard Command>
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_WILDCARD, NULL, ipmi_chassis_wildcard,
                            PRIVILEGE_USER);
