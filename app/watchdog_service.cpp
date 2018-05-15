@@ -1,10 +1,12 @@
 #include "watchdog_service.hpp"
 
+#include <exception>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
+#include <stdexcept>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Watchdog/server.hpp>
@@ -71,17 +73,28 @@ WatchdogService::Properties WatchdogService::getProperties()
         log<level::ERR>("WatchdogService: Method error getting properties");
         elog<InternalFailure>();
     }
+    try
+    {
+        std::map<std::string, variant<bool, uint64_t, std::string>> properties;
+        response.read(properties);
+        Properties wd_prop;
+        wd_prop.initialized = get<bool>(properties.at("Initialized"));
+        wd_prop.enabled = get<bool>(properties.at("Enabled"));
+        wd_prop.expireAction = Watchdog::convertActionFromString(
+                get<std::string>(properties.at("ExpireAction")));
+        wd_prop.interval = get<uint64_t>(properties.at("Interval"));
+        wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
+        return wd_prop;
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("WatchdogService: Decode error in get properties",
+                        entry("ERROR=%s", e.what()),
+                        entry("REPLY_SIG=%s", response.get_signature()));
+        elog<InternalFailure>();
+    }
 
-    std::map<std::string, variant<bool, uint64_t, std::string>> properties;
-    response.read(properties);
-    Properties wd_prop;
-    wd_prop.initialized = get<bool>(properties.at("Initialized"));
-    wd_prop.enabled = get<bool>(properties.at("Enabled"));
-    wd_prop.expireAction = Watchdog::convertActionFromString(
-            get<std::string>(properties.at("ExpireAction")));
-    wd_prop.interval = get<uint64_t>(properties.at("Interval"));
-    wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
-    return wd_prop;
+    throw std::runtime_error("WatchdogService: Got to end of get properties");
 }
 
 template <typename T>
@@ -103,9 +116,22 @@ T WatchdogService::getProperty(const std::string& key)
                         entry("PROPERTY=%s", key.c_str()));
         elog<InternalFailure>();
     }
-    variant<T> value;
-    response.read(value);
-    return get<T>(value);
+    try
+    {
+        variant<T> value;
+        response.read(value);
+        return get<T>(value);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("WatchdogService: Decode error in get property",
+                        entry("PROPERTY=%s", key.c_str()),
+                        entry("ERROR=%s", e.what()),
+                        entry("REPLY_SIG=%s", response.get_signature()));
+        elog<InternalFailure>();
+    }
+
+    throw std::runtime_error("WatchdogService: Got to end of get property");
 }
 
 template <typename T>
