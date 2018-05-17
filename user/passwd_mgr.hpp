@@ -18,6 +18,7 @@
 
 #include <ctime>
 #include <unordered_map>
+#include <vector>
 
 namespace ipmi
 {
@@ -42,6 +43,12 @@ class PasswdMgr
      */
     std::string getPasswdByUserName(const std::string& userName);
 
+    /** @brief Clear username and password entry for the specified user
+     *
+     *  @param[in] userName - username
+     */
+    int clearUserEntry(const std::string& userName);
+
   private:
     std::unordered_map<std::string, std::string> passwdMapList;
     std::time_t fileLastUpdatedTime;
@@ -53,15 +60,33 @@ class PasswdMgr
      *
      */
     void initPasswordMap(void);
-    /** @brief decrypts the data provided
+    /** @brief Function to read the passwd file data
      *
+     *  @param[out] outBytes - vector to hold buffer
+     *   deleted.
+     *
+     * @return error response
+     */
+    int readPasswdFileData(std::vector<uint8_t>& outBytes);
+    /** @brief  writes passwdMapList to encrypted file
+     *
+     *  @param[in] userName - user name that has to be renamed / deleted
+     *  @param[in] newUserName - new user name. If empty, userName will be
+     *   deleted.
+     *
+     * @return error response
+     */
+    int updatePasswdSpecialFile(const std::string& userName);
+    /** @brief encrypts or decrypt the data provided
+     *
+     *  @param[in] isEncrypt - do encrypt if set to 1, else do decrypt.
      *  @param[in] cipher - cipher to be used
      *  @param[in] key - pointer to the key
      *  @param[in] keyLen - Length of the key to be used
      *  @param[in] iv - pointer to initialization vector
      *  @param[in] ivLen - Length of the iv
-     *  @param[in] inBytesLen - input data to be decrypted
-     *  @param[in] inBytesLen - input size to be decrypted
+     *  @param[in] inBytesLen - input data to be encrypted / decrypted
+     *  @param[in] inBytesLen - input size to be encrypted / decrypted
      *  @param[in] mac - message authentication code - to figure out corruption
      *  @param[in] macLen - size of MAC
      *  @param[in] outBytes - ptr to store output bytes
@@ -69,10 +94,11 @@ class PasswdMgr
      *
      * @return error response
      */
-    int decrypt(const EVP_CIPHER* cipher, uint8_t* key, size_t keyLen,
-                uint8_t* iv, size_t ivLen, uint8_t* inBytes, size_t inBytesLen,
-                uint8_t* mac, size_t macLen, uint8_t* outBytes,
-                size_t* outBytesLen);
+    int encryptDecryptData(uint8_t isEncrypt, const EVP_CIPHER* cipher,
+                           uint8_t* key, size_t keyLen, uint8_t* iv,
+                           size_t ivLen, uint8_t* inBytes, size_t inBytesLen,
+                           uint8_t* mac, size_t* macLen, uint8_t* outBytes,
+                           size_t* outBytesLen);
 };
 
 } // namespace ipmi
