@@ -27,4 +27,11 @@ ipmi_ret_t ipmiUserGetPassword(const std::string& userName,
     password = passwdMgr.getPasswdByUserName(userName);
     return IPMI_CC_OK;
 }
+
+ipmi_ret_t ipmiUserClearPassword(const std::string& userName)
+{
+    passwdMgr.clearUserEntry(userName);
+    return IPMI_CC_OK;
+}
+
 } // namespace ipmi
