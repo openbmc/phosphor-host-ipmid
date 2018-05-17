@@ -25,9 +25,18 @@
  *
  *  @return 0 on success, non-zero otherwise.
  */
-ipmi_ret_t ipmi_user_get_password(const std::string &userName, std::string &password);
+ipmi_ret_t ipmi_user_get_password(const std::string& userName,
+                                  std::string& password);
 
-// TODO: Define required user layer API Call's which user layer shared library must 
+/** @brief The IPMI call to clear password entry associated with specified username
+ *
+ *  @param[in] userName
+ *
+ *  @return 0 on success, non-zero otherwise.
+ */
+ipmi_ret_t ipmi_user_clear_password(const std::string& userName);
+
+// TODO: Define required user layer API Call's which user layer shared library must
 // implement.
 
 

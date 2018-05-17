@@ -18,9 +18,15 @@
 #include "passwd_mgr.hpp"
 static ipmi::PasswdMgr passwdMgr;
 
-
-ipmi_ret_t ipmi_user_get_password(const std::string &userName, std::string &password)
+ipmi_ret_t ipmi_user_get_password(const std::string& userName,
+                                  std::string& password)
 {
     password = passwdMgr.getPasswdByUserName(userName);
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmi_user_clear_password(const std::string& userName)
+{
+    passwdMgr.clearUserEntry(userName);
     return IPMI_CC_OK;
 }

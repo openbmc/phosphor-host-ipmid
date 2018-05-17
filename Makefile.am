@@ -39,6 +39,7 @@ ipmid_LDFLAGS = \
 	$(LIBADD_DLOPEN) \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	$(CRYPTO_LIBS) \
 	-lstdc++fs \
 	-pthread \
 	-export-dynamic

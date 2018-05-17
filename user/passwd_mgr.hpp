@@ -17,6 +17,8 @@
 #include <ctime>
 #include <openssl/evp.h>
 #include <unordered_map>
+#include <iostream>
+#include <vector>
 
 namespace ipmi
 {
@@ -41,6 +43,12 @@ class PasswdMgr
          */
         std::string getPasswdByUserName(const std::string& userName);
 
+        /** @brief Clear username and password entry for the specified user
+         *
+         *  @param[in] userName - username
+         */
+        int clearUserEntry(const std::string& userName);
+
     private:
         std::unordered_map<std::string, std::string> passwdMapList;
         std::time_t fileLastUpdatedTime;
@@ -52,13 +60,23 @@ class PasswdMgr
          *
          */
         void initPasswordMap(void);
-        /** @brief decrypts the data provided
+        /** @brief Function to read the passwd file data
          *
          */
-        int decrypt(const EVP_CIPHER* cipher, uint8_t* key, size_t keyLen,
-                    uint8_t* iv, size_t ivLen, uint8_t* inBytes, size_t inBytesLen,
-                    uint8_t* mac, size_t macLen, uint8_t* outBytes,
-                    size_t* outBytesLen);
+        int readPasswdFileData(std::vector<uint8_t>& outBytes);
+        /** @brief  writes passwdMapList to encrypted file
+         *
+         */
+        int updatePasswdSpecialFile(const std::string& userName);
+        /** @brief encrypts or decrypt the data provided
+         *
+         */
+        int encrypt_decrypt_data(uint8_t isEncrypt, const EVP_CIPHER* cipher,
+                                 uint8_t* key, size_t keyLen, uint8_t* iv,
+                                 size_t ivLen, uint8_t* inBytes,
+                                 size_t inBytesLen, uint8_t* mac,
+                                 size_t* macLen, uint8_t* outBytes,
+                                 size_t* outBytesLen);
 };
 
 } // namespace ipmi
