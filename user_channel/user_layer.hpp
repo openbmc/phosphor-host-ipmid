@@ -28,6 +28,15 @@ namespace ipmi
  */
 std::string ipmiUserGetPassword(const std::string& userName);
 
+/** @brief The IPMI call to clear password entry associated with specified
+ * username
+ *
+ *  @param[in] userName
+ *
+ *  @return 0 on success, non-zero otherwise.
+ */
+ipmi_ret_t ipmiUserClearPassword(const std::string& userName);
+
 // TODO: Define required user layer API Call's which user layer shared library
 // must implement.
 } // namespace ipmi
