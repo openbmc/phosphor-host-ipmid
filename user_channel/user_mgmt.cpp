@@ -304,7 +304,7 @@ void userUpdatedSignalHandler(UserAccess *usrAccess,
     }
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
-        userLock{usrAccess->userMutex};
+        userLock{*(usrAccess->userMutex.get())};
     usrAccess->checkAndReloadUserData();
 
     if (signal == DBUS_PROPERTIES_CHANGED_SIGNAL)
@@ -383,7 +383,6 @@ void userUpdatedSignalHandler(UserAccess *usrAccess,
 
 UserAccess::~UserAccess()
 {
-    boost::interprocess::named_recursive_mutex::remove(IPMI_USER_MUTEX);
     if (signalHndlrObject == true)
     {
         userUpdatedSignal.reset();
@@ -394,6 +393,33 @@ UserAccess::~UserAccess()
 
 UserAccess::UserAccess() : bus(ipmid_get_sd_bus_connection())
 {
+    std::ofstream mutexCleanUpFile;
+    mutexCleanUpFile.open(IPMI_MUTEX_CLEANUP_LOCK_FILE,
+                          std::ofstream::out | std::ofstream::app);
+    if (!mutexCleanUpFile.good())
+    {
+        log<level::DEBUG>("Unable to open mutex cleanup file");
+        return;
+    }
+    mutexCleanUpFile.close();
+    mutexCleanupLock =
+        boost::interprocess::file_lock(IPMI_MUTEX_CLEANUP_LOCK_FILE);
+    if (mutexCleanupLock.try_lock())
+    {
+        boost::interprocess::named_recursive_mutex::remove(IPMI_USER_MUTEX);
+        userMutex =
+            std::make_unique<boost::interprocess::named_recursive_mutex>(
+                boost::interprocess::open_or_create, IPMI_USER_MUTEX);
+        mutexCleanupLock.lock_sharable();
+    }
+    else
+    {
+        mutexCleanupLock.lock_sharable();
+        userMutex =
+            std::make_unique<boost::interprocess::named_recursive_mutex>(
+                boost::interprocess::open_or_create, IPMI_USER_MUTEX);
+    }
+
     initUserDataFile();
     getSystemPrivAndGroups();
     sigHndlrLock = boost::interprocess::file_lock(IPMI_USER_DATA_FILE);
@@ -528,26 +554,26 @@ bool UserAccess::isValidUserName(const char *user_name)
     return true;
 }
 
-int UserAccess::getUserName(const uint8_t &userId, std::string &userName)
+ipmi_ret_t UserAccess::getUserName(const uint8_t &userId, std::string &userName)
 {
     if (!isValidUserId(userId))
     {
-        return INVALID_USER_ID;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
     }
     auto userInfo = getUserInfo(userId);
     userName.assign((char *)userInfo->userName, 0, IPMI_MAX_USER_NAME);
-    return 0;
+    return IPMI_CC_OK;
 }
 
-int UserAccess::setUserName(const uint8_t &userId, const char *user_name)
+ipmi_ret_t UserAccess::setUserName(const uint8_t &userId, const char *user_name)
 {
     if (!isValidUserId(userId))
     {
-        return INVALID_USER_ID;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
     }
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
-        userLock{userMutex};
+        userLock{*userMutex.get()};
     bool validUser = isValidUserName(user_name);
     std::string oldUser;
     getUserName(userId, oldUser);
@@ -623,15 +649,15 @@ int UserAccess::setUserName(const uint8_t &userId, const char *user_name)
     }
     else if (!validUser)
     {
-        return INVALID_USER_NAME;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
     }
-    return 0;
+    return IPMI_CC_OK;
 }
 
 int UserAccess::readUserData()
 {
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
-        userLock{userMutex};
+        userLock{*userMutex.get()};
 
     std::ifstream iUsrData(IPMI_USER_DATA_FILE,
                            std::ios::in | std::ios::binary);
@@ -665,7 +691,7 @@ int UserAccess::readUserData()
 int UserAccess::writeUserData()
 {
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
-        userLock{userMutex};
+        userLock{*userMutex.get()};
     std::ofstream oUsrData(IPMI_USER_DATA_FILE,
                            std::ios::out | std::ios::binary);
     if (!oUsrData.is_open())
@@ -856,7 +882,7 @@ int UserAccess::getUserObjProperties(const DbusUserObjValue &userObjs,
 void UserAccess::initUserDataFile()
 {
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
-        userLock{userMutex};
+        userLock{*userMutex.get()};
     if (readUserData() != 0)
     { // File is empty, create it for the first time
         std::fill((uint8_t *)&userDataInfo,

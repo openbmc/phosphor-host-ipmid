@@ -21,7 +21,7 @@
 #include <phosphor-logging/log.hpp>
 #include <usercommands.hpp>
 #include <regex>
-#include "user_mgmt.hpp"
+#include "user_layer.hpp"
 
 using namespace phosphor::logging;
 
@@ -60,12 +60,8 @@ struct get_user_access_resp_t
     uint8_t enabled_users : 6;
     uint8_t enabled_status : 2;
     uint8_t fixed_users : 6;
-    uint8_t reserved_3 : 2;
-    uint8_t privilege : 4;
-    uint8_t ipmi_enabled : 1;
-    uint8_t link_auth_enabled : 1;
-    uint8_t access_callback : 1;
-    uint8_t reserved_4 : 1;
+    uint8_t reserved_2 : 2;
+    user_priv_access_t priv_access;
 } __attribute__((packed));
 
 struct set_user_name_req_t
@@ -127,8 +123,8 @@ ipmi_ret_t ipmi_get_user_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::DEBUG>("Get user access - Invalid field in request");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
-    if (!UserAccess::isValidUserId(req->user_id) ||
-        !UserAccess::isValidChannel(req->ch_num))
+    if (!ipmi_user_is_valid_user_id(req->user_id) ||
+        !ipmi_user_is_valid_channel(req->ch_num))
     {
         log<level::DEBUG>("Get user access - Parameter out of range");
         return IPMI_CC_PARM_OUT_OF_RANGE;
@@ -140,31 +136,18 @@ ipmi_ret_t ipmi_get_user_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         static_cast<get_user_access_resp_t *>(response);
 
     std::fill((uint8_t *)resp, (uint8_t *)resp + sizeof(*resp), 0);
-    // Note: count is 1 based and we don't want to include User ID 0.
-    resp->max_ch_users = IPMI_MAX_USERS - 1;
-    userdata_t *userData = getUserAccessObject().getUserDataPtr();
 
-    for (size_t count = 1; count < IPMI_MAX_USERS; ++count)
-    {
-        if (userData->user[count].userEnabled)
-        {
-            resp->enabled_users++;
-        }
-        if (userData->user[count].fixedUserName)
-        {
-            resp->fixed_users++;
-        }
-    }
-    resp->enabled_status = USER_ID_DISABLED_VIA_SET_PASSWORD >>
-                           userData->user[req->user_id].userEnabled;
-    resp->privilege =
-        userData->user[req->user_id].userPrivAccess[ch_num].privilege;
-    resp->ipmi_enabled =
-        userData->user[req->user_id].userPrivAccess[ch_num].ipmi_enabled;
-    resp->link_auth_enabled =
-        userData->user[req->user_id].userPrivAccess[ch_num].link_auth_enabled;
-    resp->access_callback =
-        userData->user[req->user_id].userPrivAccess[ch_num].access_callback;
+    uint8_t max_ch_users = 0, enabled_users = 0, fixed_users = 0;
+    ipmi_user_get_max_counts(max_ch_users, enabled_users, fixed_users);
+    resp->max_ch_users = max_ch_users;
+    resp->enabled_users = enabled_users;
+    resp->fixed_users = fixed_users;
+    bool enabled_state = false;
+    ipmi_user_check_enabled(req->user_id, enabled_state);
+    resp->enabled_status = enabled_state == true
+                               ? USER_ID_ENABLED_VIA_SET_PASSWORD
+                               : USER_ID_DISABLED_VIA_SET_PASSWORD;
+    resp->priv_access = ipmi_user_get_privilege_access(req->user_id, ch_num);
     *data_len = sizeof(*resp);
 
     return IPMI_CC_OK;
@@ -188,25 +171,13 @@ ipmi_ret_t ipmi_set_user_name(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
-    if (!UserAccess::isValidUserId(req->user_id))
+    if (!ipmi_user_is_valid_user_id(req->user_id))
     {
         log<level::DEBUG>("Set user name - Invalid user id");
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
-    int ret =
-        getUserAccessObject().setUserName(req->user_id, (char *)req->user_name);
-    if (ret == INVALID_USER_NAME)
-    {
-        log<level::DEBUG>("Set user name - Invalid user name");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-    else if (ret != 0)
-    {
-        log<level::DEBUG>("Set user name - Internal error");
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
 
-    return IPMI_CC_OK;
+    return ipmi_user_set_user_name(req->user_id, (char *)req->user_name);
 }
 
 /** @brief implementes the get user name command
@@ -235,7 +206,7 @@ ipmi_ret_t ipmi_get_user_name(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     std::string user_name;
-    if (getUserAccessObject().getUserName(req->user_id, user_name) != 0)
+    if (ipmi_user_get_user_name(req->user_id, user_name) != IPMI_CC_OK)
     { // Invalid User ID
         log<level::DEBUG>("User Name not found",
                           entry("USER-ID:%d", (uint8_t)req->user_id));
@@ -352,7 +323,7 @@ ipmi_ret_t ipmi_set_user_password(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     std::string user_name;
-    if (getUserAccessObject().getUserName(req->user_id, user_name) != 0)
+    if (ipmi_user_get_user_name(req->user_id, user_name) != IPMI_CC_OK)
     {
         log<level::DEBUG>("User Name not found",
                           entry("USER-ID:%d", (uint8_t)req->user_id));

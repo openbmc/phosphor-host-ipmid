@@ -27,6 +27,7 @@ enum ipmi_netfn_user_cmds
     IPMI_CMD_SET_USER_PASSWORD = 0x47,
 };
 
+static constexpr uint8_t USER_ID_ENABLED_VIA_SET_PASSWORD = 0x1;
 static constexpr uint8_t USER_ID_DISABLED_VIA_SET_PASSWORD = 0x2;
 
 /** @brief The set user password IPMI command.
