@@ -6,6 +6,7 @@
 #include "sys_info_param.hpp"
 #include "transporthandler.hpp"
 #include "types.hpp"
+#include "user_channel/channelcommands.hpp"
 #include "user_channel/usercommands.hpp"
 #include "utils.hpp"
 
@@ -1122,6 +1123,11 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_ACPI, NULL,
                            ipmi_app_get_acpi_power_state, PRIVILEGE_ADMIN);
 
+// TODO: Below code and associated api's need to be removed later.
+// Its commented for now to avoid merge conflicts with upstream
+// changes and smooth upstream upgrades.
+#if 0
+>>>>>>> IPMI Channel commands implementation
     // <Get Channel Access>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
                            ipmi_get_channel_access, PRIVILEGE_USER);
@@ -1129,6 +1135,7 @@ void register_netfn_app_functions()
     // <Get Channel Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL,
                            ipmi_app_channel_info, PRIVILEGE_USER);
+#endif
 
     // <Get System GUID Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL,
@@ -1137,13 +1144,15 @@ void register_netfn_app_functions()
     // <Get Channel Cipher Suites Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
                            getChannelCipherSuites, PRIVILEGE_CALLBACK);
+#if 0
     // <Set Channel Access Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS, NULL,
                            ipmi_set_channel_access, PRIVILEGE_ADMIN);
-
+#endif
     // <Get System Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
                            ipmi_app_get_system_info, PRIVILEGE_USER);
     ipmi::registerUserIpmiFunctions();
+    ipmi::registerChannelFunctions();
     return;
 }
