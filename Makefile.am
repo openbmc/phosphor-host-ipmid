@@ -68,7 +68,9 @@ libuserlayer_LTLIBRARIES = libuserlayer.la
 libuserlayer_la_SOURCES = \
         user_channel/user_layer.cpp \
         user_channel/user_mgmt.cpp \
-        user_channel/passwd_mgr.cpp
+        user_channel/passwd_mgr.cpp \
+        user_channel/channel_mgmt.cpp \
+        user_channel/channel_layer.cpp
 
 libuserlayer_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
@@ -99,6 +101,7 @@ libipmi20_la_SOURCES = \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
 	user_channel/usercommands.cpp \
+	user_channel/channelcommands.cpp \
 	$(libipmi20_BUILT_LIST)
 
 @CODE_COVERAGE_RULES@
@@ -138,6 +141,7 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
 nobase_include_HEADERS = \
 	host-ipmid/iana.hpp \
 	user_channel/user_layer.hpp \
+	user_channel/channel_layer.hpp \
 	host-ipmid/ipmid-api.h \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp \

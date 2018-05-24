@@ -1,5 +1,6 @@
 #include "apphandler.h"
 
+#include "user_channel/channelcommands.hpp"
 #include "user_channel/usercommands.hpp"
 
 #include <arpa/inet.h>
@@ -639,6 +640,10 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL,
                            ipmi_app_set_acpi_power_state, PRIVILEGE_ADMIN);
 
+// TODO: Below code and associated api's need to be removed later.
+// Its commented for now to avoiding merge conflicts with upstream
+// changes and smooth upstream upgrades.
+#if 0
     // <Get Channel Access>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
                            ipmi_get_channel_access, PRIVILEGE_USER);
@@ -646,6 +651,7 @@ void register_netfn_app_functions()
     // <Get Channel Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL,
                            ipmi_app_channel_info, PRIVILEGE_USER);
+#endif
 
     // <Get System GUID Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL,
@@ -655,5 +661,6 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
                            getChannelCipherSuites, PRIVILEGE_CALLBACK);
     ipmi::registerUserIpmiFunctions();
+    ipmi::registerChannelFunctions();
     return;
 }
