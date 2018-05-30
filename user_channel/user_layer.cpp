@@ -29,6 +29,11 @@ bool ipmi_user_is_valid_channel(const uint8_t &ch_num)
     return UserAccess::isValidChannel(ch_num);
 }
 
+bool ipmi_user_is_valid_privilege(const uint8_t &priv)
+{
+    return UserAccess::isValidPrivilege(priv);
+}
+
 ipmi_ret_t ipmi_user_set_user_name(const uint8_t &user_id,
                                    const char *user_name)
 {
@@ -74,11 +79,34 @@ ipmi_ret_t ipmi_user_check_enabled(const uint8_t &user_id, bool &state)
     return IPMI_CC_OK;
 }
 
-user_priv_access_t ipmi_user_get_privilege_access(const uint8_t &user_id,
-                                                  const uint8_t &ch_num)
+ipmi_ret_t ipmi_user_get_privilege_access(const uint8_t &user_id,
+                                          const uint8_t &ch_num,
+                                          user_priv_access_t &priv_access)
 {
+
+    if (!UserAccess::isValidChannel(ch_num))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!UserAccess::isValidUserId(user_id))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
     userdata_t *userData = getUserAccessObject().getUserDataPtr();
-    return userData->user[user_id].userPrivAccess[ch_num];
+    std::copy((uint8_t *)&(userData->user[user_id].userPrivAccess[ch_num]),
+              ((uint8_t *)&(userData->user[user_id].userPrivAccess[ch_num])) +
+                  sizeof(priv_access),
+              (uint8_t *)&priv_access);
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmi_user_set_privilege_access(const uint8_t &user_id,
+                                          const uint8_t &ch_num,
+                                          const user_priv_access_t &priv_access,
+                                          const uint8_t &flags)
+{
+    return getUserAccessObject().setUserPrivilegeAccess(user_id, ch_num,
+                                                        priv_access, flags);
 }
 
 } // namespace ipmi

@@ -59,6 +59,13 @@ struct user_priv_access_t
     uint8_t reserved : 1;
 } __attribute__((packed));
 
+enum SetUserPrivAccFlags : uint8_t
+{
+    USER_ACC_NO_UPDATE = (0),
+    USER_ACC_PRIV_UPDATE = (1 << 0),
+    USER_ACC_OTHER_BITS_UPDATE = (1 << 1)
+};
+
 /** @brief determines valid user_id
  *
  *  @param[in] user id
@@ -74,6 +81,14 @@ bool ipmi_user_is_valid_user_id(const uint8_t &user_id);
  *  @return true if valid, false otherwise
  */
 bool ipmi_user_is_valid_channel(const uint8_t &ch_num);
+
+/** @brief determines valid privilege level
+ *
+ *  @param[in] privilege level
+ *
+ *  @return true if valid, false otherwise
+ */
+bool ipmi_user_is_valid_privilege(const uint8_t &priv);
 
 /** @brief set's user name
  *
@@ -120,12 +135,26 @@ ipmi_ret_t ipmi_user_check_enabled(const uint8_t &user_id, bool &state);
  *
  *  @param[in] user id
  *  @param[in] channel number
- *
- *  @return privilege access data ([0:3] - privilege, [4] - ipmi enabled, [5]
- * -link auth enabled, [6] -access callback, [7] - reserved.
+ *  @param[out] privilege access data ([0:3] - privilege, [4] - ipmi enabled,
+ * [5] -link auth enabled, [6] -access callback, [7] - reserved.
+ *  @return IPMI_CC_OK for success, others for failure.
  */
-user_priv_access_t ipmi_user_get_privilege_access(const uint8_t &user_id,
-                                                  const uint8_t &ch_num);
+ipmi_ret_t ipmi_user_get_privilege_access(const uint8_t &user_id,
+                                          const uint8_t &ch_num,
+                                          user_priv_access_t &priv_access);
+
+/** @brief sets user privilege access data
+ *
+ *  @param[in] user id
+ *  @param[in] channel number
+ *  @param[in] privilege access data ([0:3] - privilege, [4] - ipmi enabled, [5]
+ * -link auth enabled, [6] -access callback, [7] - reserved.
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmi_user_set_privilege_access(const uint8_t &user_id,
+                                          const uint8_t &ch_num,
+                                          const user_priv_access_t &priv_access,
+                                          const uint8_t &flags);
 
 // TODO: Define required user layer API Call's which user layer shared library
 // must implement.

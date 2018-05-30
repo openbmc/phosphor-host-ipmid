@@ -98,6 +98,46 @@ ipmi_ret_t ipmi_set_user_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_data_len_t data_len,
                                 ipmi_context_t context)
 {
+    const set_user_access_req_t *req =
+        static_cast<set_user_access_req_t *>(request);
+    size_t req_length = *data_len;
+
+    if (!(req_length == sizeof(*req) ||
+          (req_length == (sizeof(*req) - sizeof(uint8_t) /* skip optional*/))))
+    {
+        log<level::DEBUG>("Set user access - Invalid Length");
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    if (req->reserved_1 != 0 || req->reserved_2 != 0 || req->reserved_3 != 0 ||
+        req->sess_limit != 0 ||
+        (!ipmi_user_is_valid_channel(req->ch_num) ||
+         (!ipmi_user_is_valid_privilege(req->privilege))))
+    // TODO: Need to check for session support and return invalid field in
+    // request
+    {
+        log<level::DEBUG>("Set user access - Invalid field in request");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!ipmi_user_is_valid_user_id(req->user_id))
+    {
+        log<level::DEBUG>("Set user access - Parameter out of range");
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    // TODO: Determine the Channel number 0xE (Self Channel number ?)
+    uint8_t ch_num = req->ch_num;
+    user_priv_access_t priv_access = {0};
+    uint8_t flags = USER_ACC_NO_UPDATE;
+    if (req->bits_update)
+    {
+        priv_access.ipmi_enabled = req->ipmi_enabled;
+        priv_access.link_auth_enabled = req->link_auth_enabled;
+        priv_access.access_callback = req->access_callback;
+        flags |= USER_ACC_OTHER_BITS_UPDATE;
+    }
+    priv_access.privilege = req->privilege;
+    flags |= USER_ACC_PRIV_UPDATE;
+    ipmi_user_set_privilege_access(req->user_id, ch_num, priv_access, flags);
+
     return 0;
 }
 
@@ -118,13 +158,15 @@ ipmi_ret_t ipmi_get_user_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::DEBUG>("Get user access - Invalid Length");
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
-    if (req->reserved_1 != 0 || req->reserved_2 != 0)
+    if (req->reserved_1 != 0 || req->reserved_2 != 0 ||
+        (!ipmi_user_is_valid_channel(req->ch_num)))
+    // TODO: Need to check for session support and return invalid field in
+    // request
     {
         log<level::DEBUG>("Get user access - Invalid field in request");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
-    if (!ipmi_user_is_valid_user_id(req->user_id) ||
-        !ipmi_user_is_valid_channel(req->ch_num))
+    if (!ipmi_user_is_valid_user_id(req->user_id))
     {
         log<level::DEBUG>("Get user access - Parameter out of range");
         return IPMI_CC_PARM_OUT_OF_RANGE;
@@ -144,10 +186,10 @@ ipmi_ret_t ipmi_get_user_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     resp->fixed_users = fixed_users;
     bool enabled_state = false;
     ipmi_user_check_enabled(req->user_id, enabled_state);
-    resp->enabled_status = enabled_state == true
+    resp->enabled_status = (enabled_state == true)
                                ? USER_ID_ENABLED_VIA_SET_PASSWORD
                                : USER_ID_DISABLED_VIA_SET_PASSWORD;
-    resp->priv_access = ipmi_user_get_privilege_access(req->user_id, ch_num);
+    ipmi_user_get_privilege_access(req->user_id, ch_num, resp->priv_access);
     *data_len = sizeof(*resp);
 
     return IPMI_CC_OK;

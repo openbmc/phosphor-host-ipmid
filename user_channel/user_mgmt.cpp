@@ -41,6 +41,7 @@ static constexpr char DBUS_PROPERTIES_INTERFACE[] =
     "org.freedesktop.DBus.Properties";
 static constexpr char DBUS_PROPERTIES_GET_ALL_METHOD[] = "GetAll";
 static constexpr char DBUS_PROPERTIES_CHANGED_SIGNAL[] = "PropertiesChanged";
+static constexpr char DBUS_PROPERTIES_SET_METHOD[] = "Set";
 
 // Object Manager related
 static constexpr char DBUS_OBJ_MANAGER_INTERFACE[] =
@@ -96,6 +97,8 @@ static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-custom"    // PRIVILEGE_OEM - 5
 };
 
+static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
 using PrivAndGroupType =
     sdbusplus::message::variant<std::string, std::vector<std::string>>;
 
@@ -108,8 +111,7 @@ using InternalFailure =
 std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal(nullptr);
 std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal(nullptr);
 
-// TODO: Netipmid doesn't support getService. Below code can be removed
-// once netipmid supports / lib utils has been added.
+// TODO:  Below code can be removed once it is moved to common layer libmiscutil
 std::string getUserService(sdbusplus::bus::bus &bus, const std::string &intf,
                            const std::string &path)
 {
@@ -138,9 +140,44 @@ std::string getUserService(sdbusplus::bus::bus &bus, const std::string &intf,
     return mapperResponse.begin()->first;
 }
 
-static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
-static std::string userMgmtService = ipmi::getUserService(
-    bus, USER_MANAGER_MGR_INTERFACE, USER_MANAGER_OBJ_BASE_PATH);
+void setDbusProperty(sdbusplus::bus::bus &bus, const std::string &service,
+                     const std::string &objPath, const std::string &interface,
+                     const std::string &property,
+                     const DbusUserPropVariant &value)
+{
+    auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
+                                      DBUS_PROPERTIES_INTERFACE,
+                                      DBUS_PROPERTIES_SET_METHOD);
+
+    method.append(interface, property, value);
+
+    if (!bus.call(method))
+    {
+        log<level::ERR>("Failed to set property",
+                        entry("PROPERTY=%s", property.c_str()),
+                        entry("PATH=%s", objPath.c_str()),
+                        entry("INTERFACE=%s", interface.c_str()));
+        elog<InternalFailure>();
+    }
+}
+
+static std::string getUserServiceName()
+{
+    static std::string userMgmtService;
+    if (userMgmtService.empty())
+    {
+        try
+        {
+            userMgmtService = ipmi::getUserService(
+                bus, USER_MANAGER_MGR_INTERFACE, USER_MANAGER_OBJ_BASE_PATH);
+        }
+        catch (...)
+        {
+            userMgmtService.clear();
+        }
+    }
+    return userMgmtService;
+}
 
 static UserAccess userAccess;
 
@@ -207,10 +244,19 @@ void userUpdateHelper(UserAccess *usrAccess, const UserUpdateEvent &userEvent,
             {
                 uint8_t userPriv =
                     UserAccess::convertToIPMIPrivilege(priv) & PRIVILEGE_MASK;
-                for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS; ++chIndex)
+                // Update all channels privileges, only if it is not equivalent
+                // to getUsrMgmtSyncIndex()
+                if (userData->user[usrIndex]
+                        .userPrivAccess[UserAccess::getUsrMgmtSyncIndex()]
+                        .privilege != userPriv)
                 {
-                    userData->user[usrIndex].userPrivAccess[chIndex].privilege =
-                        userPriv;
+                    for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS;
+                         ++chIndex)
+                    {
+                        userData->user[usrIndex]
+                            .userPrivAccess[chIndex]
+                            .privilege = userPriv;
+                    }
                 }
                 break;
             }
@@ -344,7 +390,7 @@ void userUpdatedSignalHandler(UserAccess *usrAccess,
                 else
                 {
                     auto method = bus.new_method_call(
-                        userMgmtService.c_str(), msg.get_path(),
+                        getUserServiceName().c_str(), msg.get_path(),
                         DBUS_PROPERTIES_INTERFACE,
                         DBUS_PROPERTIES_GET_ALL_METHOD);
                     method.append(USER_MANAGER_USER_INTERFACE);
@@ -483,6 +529,25 @@ bool UserAccess::isValidUserId(const uint8_t &userId)
     return true;
 }
 
+bool UserAccess::isValidPrivilege(const uint8_t &priv)
+{
+    if ((priv >= PRIVILEGE_CALLBACK && priv <= PRIVILEGE_OEM) ||
+        priv == PRIVILEGE_NO_ACCESS)
+    {
+        return true;
+    }
+    return false;
+}
+
+uint8_t UserAccess::getUsrMgmtSyncIndex()
+{
+    // TODO: Need to determine a way to figure out the index
+    // which has to be in sync with system user privilege
+    // level(Phosphor-user-manager). Note: For time being CHAN_LAN1 is marked as
+    // sync index to the user-manager privilege..
+    return static_cast<uint8_t>(CHAN_LAN1);
+}
+
 CommandPrivilege UserAccess::convertToIPMIPrivilege(const std::string &value)
 {
     auto iter = std::find(ipmiPrivIndex.begin(), ipmiPrivIndex.end(), value);
@@ -528,7 +593,7 @@ bool UserAccess::isValidUserName(const char *user_name)
     }
 
     auto method = bus.new_method_call(
-        userMgmtService.c_str(), USER_MANAGER_OBJ_BASE_PATH,
+        getUserServiceName().c_str(), USER_MANAGER_OBJ_BASE_PATH,
         DBUS_OBJ_MANAGER_INTERFACE, DBUS_OBJ_MANAGER_GET_OBJ_METHOD);
     auto reply = bus.call(method);
 
@@ -554,13 +619,82 @@ bool UserAccess::isValidUserName(const char *user_name)
     return true;
 }
 
+ipmi_ret_t UserAccess::setUserPrivilegeAccess(
+    const uint8_t &userId, const uint8_t &chNum,
+    const user_priv_access_t &privAccess, const uint8_t &flags)
+{
+    if (!isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
+        userLock{*userMutex.get()};
+    userinfo_t *userInfo = getUserInfo(userId);
+    std::string userName;
+    userName.assign((char *)userInfo->userName, 0, IPMI_MAX_USER_NAME);
+    if (userName.empty())
+    {
+        log<level::DEBUG>("User name not set / invalid");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    if (flags & USER_ACC_PRIV_UPDATE)
+    {
+        std::string priv = convertToSystemPrivilege(
+            static_cast<CommandPrivilege>(privAccess.privilege));
+        if (priv.empty())
+        {
+            return IPMI_CC_PARM_OUT_OF_RANGE;
+        }
+        uint8_t syncIndex = getUsrMgmtSyncIndex();
+        if (chNum == syncIndex &&
+            privAccess.privilege !=
+                userInfo->userPrivAccess[syncIndex].privilege)
+        {
+            std::string userPath =
+                std::string(USER_MANAGER_OBJ_USERS_BASE_PATH) + "/" + userName;
+            try
+            {
+                setDbusProperty(bus, getUserServiceName().c_str(),
+                                userPath.c_str(), USER_MANAGER_USER_INTERFACE,
+                                USER_PRIV_PROP, priv);
+            }
+            catch (...)
+            {
+                log<level::DEBUG>("Failed to excute SetDBusProperty",
+                                  entry("PROPERTY=%s", USER_PRIV_PROP),
+                                  entry("PATH=%s", userPath.c_str()));
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+        }
+        userInfo->userPrivAccess[chNum].privilege = privAccess.privilege;
+    }
+    if (flags & USER_ACC_OTHER_BITS_UPDATE)
+    {
+        userInfo->userPrivAccess[chNum].ipmi_enabled = privAccess.ipmi_enabled;
+        userInfo->userPrivAccess[chNum].link_auth_enabled =
+            privAccess.link_auth_enabled;
+        userInfo->userPrivAccess[chNum].access_callback =
+            privAccess.access_callback;
+    }
+    if (writeUserData() != 0)
+    {
+        log<level::DEBUG>("Write user data failed");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t UserAccess::getUserName(const uint8_t &userId, std::string &userName)
 {
     if (!isValidUserId(userId))
     {
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
-    auto userInfo = getUserInfo(userId);
+    userinfo_t *userInfo = getUserInfo(userId);
     userName.assign((char *)userInfo->userName, 0, IPMI_MAX_USER_NAME);
     return IPMI_CC_OK;
 }
@@ -577,7 +711,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId, const char *user_name)
     bool validUser = isValidUserName(user_name);
     std::string oldUser;
     getUserName(userId, oldUser);
-    auto userInfo = getUserInfo(userId);
+    userinfo_t *userInfo = getUserInfo(userId);
 
     std::string newUser(user_name, 0, IPMI_MAX_USER_NAME);
     if (newUser.empty() && !oldUser.empty())
@@ -586,7 +720,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId, const char *user_name)
         std::string userPath =
             std::string(USER_MANAGER_OBJ_USERS_BASE_PATH) + "/" + oldUser;
         auto method = bus.new_method_call(
-            userMgmtService.c_str(), userPath.c_str(),
+            getUserServiceName().c_str(), userPath.c_str(),
             USER_MANAGER_USER_INTERFACE, DELETE_USER_METHOD);
         auto reply = bus.call(method);
         if (reply.is_method_error())
@@ -600,13 +734,12 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId, const char *user_name)
                   (uint8_t *)userInfo->userName + sizeof(userInfo->userName),
                   0);
         userInfo->userInSystem = 0;
-        writeUserData();
     }
     else if (oldUser.empty() && !newUser.empty() && validUser)
     {
         // Create new user
         auto method = bus.new_method_call(
-            userMgmtService.c_str(), USER_MANAGER_OBJ_BASE_PATH,
+            getUserServiceName().c_str(), USER_MANAGER_OBJ_BASE_PATH,
             USER_MANAGER_MGR_INTERFACE, CREATE_USER_METHOD);
         // TODO: Fetch proper privilege & enable state once set User access is
         // implemented
@@ -623,13 +756,12 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId, const char *user_name)
         }
         std::strncpy((char *)userInfo->userName, user_name, IPMI_MAX_USER_NAME);
         userInfo->userInSystem = 1;
-        writeUserData();
     }
     else if (oldUser != newUser && validUser)
     {
         // User rename
         auto method = bus.new_method_call(
-            userMgmtService.c_str(), USER_MANAGER_OBJ_BASE_PATH,
+            getUserServiceName().c_str(), USER_MANAGER_OBJ_BASE_PATH,
             USER_MANAGER_MGR_INTERFACE, RENAME_USER_METHOD);
         method.append(oldUser.c_str(), newUser.c_str());
         auto reply = bus.call(method);
@@ -645,11 +777,15 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId, const char *user_name)
                   0);
         std::strncpy((char *)userInfo->userName, user_name, IPMI_MAX_USER_NAME);
         userInfo->userInSystem = 1;
-        writeUserData();
     }
     else if (!validUser)
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (writeUserData() != 0)
+    {
+        log<level::DEBUG>("Write user data failed");
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
     return IPMI_CC_OK;
 }
@@ -802,7 +938,7 @@ userdata_t *UserAccess::getUserDataPtr()
 void UserAccess::getSystemPrivAndGroups()
 {
     auto method = bus.new_method_call(
-        userMgmtService.c_str(), USER_MANAGER_OBJ_BASE_PATH,
+        getUserServiceName().c_str(), USER_MANAGER_OBJ_BASE_PATH,
         DBUS_PROPERTIES_INTERFACE, DBUS_PROPERTIES_GET_ALL_METHOD);
     method.append(USER_MANAGER_MGR_INTERFACE);
 
@@ -902,7 +1038,7 @@ void UserAccess::initUserDataFile()
     }
 
     auto method = bus.new_method_call(
-        userMgmtService.c_str(), USER_MANAGER_OBJ_BASE_PATH,
+        getUserServiceName().c_str(), USER_MANAGER_OBJ_BASE_PATH,
         DBUS_OBJ_MANAGER_INTERFACE, DBUS_OBJ_MANAGER_GET_OBJ_METHOD);
     auto reply = bus.call(method);
 
@@ -950,15 +1086,19 @@ void UserAccess::initUserDataFile()
                     // in IPMI
                     uint8_t priv = UserAccess::convertToIPMIPrivilege(usrPriv) &
                                    PRIVILEGE_MASK;
-                    for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS;
-                         ++chIndex)
+                    // Update all channels priv, only if it is not equivalent to
+                    // getUsrMgmtSyncIndex()
+                    if (userData->user[usrIdx]
+                            .userPrivAccess[getUsrMgmtSyncIndex()]
+                            .privilege != priv)
                     {
-                        if (userData->user[usrIdx]
-                                .userPrivAccess[chIndex]
-                                .privilege != priv)
+                        for (size_t chIndex = 0; chIndex < IPMI_MAX_CHANNELS;
+                             ++chIndex)
+                        {
                             userData->user[usrIdx]
                                 .userPrivAccess[chIndex]
                                 .privilege = priv;
+                        }
                     }
                     if (userData->user[usrIdx].userEnabled != usrEnabled)
                     {

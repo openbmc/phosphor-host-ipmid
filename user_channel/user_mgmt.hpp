@@ -101,6 +101,10 @@ class UserAccess
 
     static bool isValidUserId(const uint8_t &userId);
 
+    static bool isValidPrivilege(const uint8_t &priv);
+
+    static uint8_t getUsrMgmtSyncIndex();
+
     static CommandPrivilege convertToIPMIPrivilege(const std::string &value);
 
     static std::string convertToSystemPrivilege(const CommandPrivilege &value);
@@ -114,6 +118,11 @@ class UserAccess
     ipmi_ret_t getUserName(const uint8_t &userId, std::string &userName);
 
     ipmi_ret_t setUserName(const uint8_t &userId, const char *user_name);
+
+    ipmi_ret_t setUserPrivilegeAccess(const uint8_t &userId,
+                                      const uint8_t &chNum,
+                                      const user_priv_access_t &privAccess,
+                                      const uint8_t &flags);
 
     int readUserData();
 
