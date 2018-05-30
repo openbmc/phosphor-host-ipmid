@@ -57,7 +57,7 @@ void Host::execute(Base::Host::Command command)
 
     log<level::DEBUG>("Pushing cmd on to queue",
             entry("CONTROL_HOST_CMD=%s",
-                  convertForMessage(command)));
+                  convertForMessage(command).c_str()));
 
     auto cmd = std::make_tuple(ipmiCommand.at(command),
                         std::bind(&Host::commandStatusHandler,

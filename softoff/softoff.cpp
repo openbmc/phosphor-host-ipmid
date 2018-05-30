@@ -86,9 +86,9 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
         else
         {
             log<level::INFO>("Timer started waiting for host to shutdown",
-                    entry("TIMEOUT_IN_MSEC=%llu",
-                        duration_cast<milliseconds>(seconds
-                            (IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS))));
+                entry("TIMEOUT_IN_MSEC=%llu",
+                      (duration_cast<milliseconds>(seconds
+                        (IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS))).count()));
         }
     }
     else

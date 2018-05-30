@@ -877,7 +877,7 @@ void applyChanges(int channel)
                 {
                     log<level::INFO>("Failed to get IP object which matches",
                             entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
-                            entry("MATCH=%s", ethIp));
+                            entry("MATCH=%s", ethIp.c_str()));
                 }
 
                 auto systemProperties = ipmi::getAllDbusProperties(

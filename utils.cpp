@@ -543,7 +543,7 @@ uint8_t toPrefix(int addressFamily, const std::string& subnetMask)
     if (rc <= 0)
     {
         log<level::ERR>("inet_pton failed:",
-                        entry("SUBNETMASK=%s", subnetMask));
+                        entry("SUBNETMASK=%s", subnetMask.c_str()));
         return 0;
     }
 
@@ -556,7 +556,7 @@ uint8_t toPrefix(int addressFamily, const std::string& subnetMask)
     else
     {
         log<level::ERR>("Invalid Mask",
-                        entry("SUBNETMASK=%s", subnetMask));
+                        entry("SUBNETMASK=%s", subnetMask.c_str()));
         return 0;
     }
 }

@@ -1110,7 +1110,7 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
     catch (std::exception& e)
     {
         log<level::INFO>("Failure to read power value from D-Bus object",
-                        entry("OBJECT_PATH=%s", objectPath),
+                        entry("OBJECT_PATH=%s", objectPath.c_str()),
                         entry("INTERFACE=%s", SENSOR_VALUE_INTF));
     }
     return power;
