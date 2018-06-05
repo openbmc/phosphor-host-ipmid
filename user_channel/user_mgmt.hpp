@@ -16,7 +16,7 @@
 #pragma once
 #include <host-ipmid/ipmid-api.h>
 #include <sdbusplus/bus.hpp>
-#include <xyz/openbmc_project/User/UserMgr/server.hpp>
+#include <xyz/openbmc_project/User/Mgr/server.hpp>
 #include <cstdint>
 #include <ctime>
 #include <boost/interprocess/sync/file_lock.hpp>
@@ -80,7 +80,7 @@ struct userdata_t
                     1]; //+1 to map with UserId directly. UserId 0 is reserved.
 } __attribute__((packed));
 
-using UserMgr = sdbusplus::xyz::openbmc_project::User::server::UserMgr;
+using UserMgr = sdbusplus::xyz::openbmc_project::User::server::Mgr;
 
 class UserAccess;
 
