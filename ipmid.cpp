@@ -239,10 +239,34 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
     // make sense.
     char *respo = &((char *)response)[IPMI_CC_LEN];
 
-    // Response message from the plugin goes into a byte post the base response
-    rc = (handler_and_context.first) (netfn, cmd, request, respo,
-                                      data_len, handler_and_context.second);
-
+    try
+    {
+        // Response message from the plugin goes into a byte post the base
+        // response
+        rc = (handler_and_context.first) (netfn, cmd, request, respo,
+                                          data_len, handler_and_context.second);
+    }
+    // IPMI command handlers can throw unhandled exceptions, catch those
+    // and return sane error code.
+    catch(std::exception &e)
+    {
+        log<level::ERR>(e.what(), entry("NET_FUN=0x%X", netfn),
+                        entry("CMD=0x%X", cmd));
+        *(reinterpret_cast<uint8_t*>(response)) = rc =
+                                                  IPMI_CC_UNSPECIFIED_ERROR;
+        *data_len = IPMI_CC_LEN;
+        return rc;
+    }
+    catch(...)
+    {
+        log<level::ERR>("Unhandled exception, returning unspecified error",
+                        entry("NET_FUN=0x%X", netfn),
+                        entry("CMD=0x%X", cmd));
+        *(reinterpret_cast<uint8_t*>(response)) = rc =
+                                                  IPMI_CC_UNSPECIFIED_ERROR;
+        *data_len = IPMI_CC_LEN;
+        return rc;
+    }
     // Now copy the return code that we got from handler and pack it in first
     // byte.
     memcpy(response, &rc, IPMI_CC_LEN);
