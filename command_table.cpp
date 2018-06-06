@@ -91,12 +91,22 @@ std::vector<uint8_t> ProviderIpmidEntry::executeCommand(
 {
     std::vector<uint8_t> response(message::parser::MAX_PAYLOAD_SIZE - 1);
     size_t respSize = commandData.size();
-
-    ipmi_ret_t ipmiRC = functor(0, 0,
-                                reinterpret_cast<void*>(commandData.data()),
-                                reinterpret_cast<void*>(response.data() + 1),
-                                &respSize, NULL);
-
+    ipmi_ret_t ipmiRC = IPMI_CC_UNSPECIFIED_ERROR;
+    try
+    {
+        ipmiRC = functor(0, 0, reinterpret_cast<void*>(commandData.data()),
+                         reinterpret_cast<void*>(response.data() + 1),
+                         &respSize, NULL);
+    }
+    // IPMI command handlers can throw unhandled exceptions, catch those
+    // and return sane error code.
+    catch (const std::exception& e)
+    {
+        std::cerr << "E> Unspecified error for command 0x" << std::hex
+                  << command.command << " - " << e.what() << "\n";
+        respSize = 0;
+        // fall through
+    }
     /*
      * respSize gets you the size of the response data for the IPMI command. The
      * first byte in a response to the IPMI command is the Completion Code.
