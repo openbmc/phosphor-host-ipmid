@@ -14,8 +14,29 @@
 
 using phosphor::logging::level;
 using phosphor::logging::log;
-using phosphor::logging::report;
+using phosphor::logging::commit;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+
+static bool lastCallSuccessful = false;
+
+void reportError()
+{
+    // We don't want to fill the SEL with errors if the daemon dies and doesn't
+    // come back but the watchdog keeps on ticking. Instead, we only report the
+    // error if we haven't reported one since the last successful call
+    if (!lastCallSuccessful)
+    {
+        return;
+    }
+    lastCallSuccessful = false;
+
+    // TODO: This slow down the end of the IPMI transaction waiting
+    // for the commit to finish. commit<>() can take at least 5 seconds
+    // to complete. 5s is very slow for an IPMI command and ends up
+    // congesting the IPMI channel needlessly, especially if the watchdog
+    // is ticking fairly quickly and we have some transient issues.
+    commit<InternalFailure>();
+}
 
 ipmi_ret_t ipmi_app_watchdog_reset(
         ipmi_netfn_t netfn,
@@ -36,29 +57,31 @@ ipmi_ret_t ipmi_app_watchdog_reset(
         // so it can configure actions and timeouts
         if (!wd_service.getInitialized())
         {
+            lastCallSuccessful = true;
             return IPMI_WDOG_CC_NOT_INIT;
         }
 
         // The ipmi standard dictates we enable the watchdog during reset
         wd_service.resetTimeRemaining(true);
+        lastCallSuccessful = true;
         return IPMI_CC_OK;
     }
     catch (const InternalFailure& e)
     {
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (const std::exception& e)
     {
         const std::string e_str = std::string("wd_reset: ") + e.what();
         log<level::ERR>(e_str.c_str());
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (...)
     {
         log<level::ERR>("wd_reset: Unknown Error");
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 }
@@ -156,6 +179,7 @@ ipmi_ret_t ipmi_app_watchdog_set(
         // Mark as initialized so that future resets behave correctly
         wd_service.setInitialized(true);
 
+        lastCallSuccessful = true;
         return IPMI_CC_OK;
     }
     catch (const std::domain_error &)
@@ -164,20 +188,20 @@ ipmi_ret_t ipmi_app_watchdog_set(
     }
     catch (const InternalFailure& e)
     {
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (const std::exception& e)
     {
         const std::string e_str = std::string("wd_set: ") + e.what();
         log<level::ERR>(e_str.c_str());
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (...)
     {
         log<level::ERR>("wd_set: Unknown Error");
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 }
@@ -265,24 +289,25 @@ ipmi_ret_t ipmi_app_watchdog_get(
 
         memcpy(response, &res, sizeof(res));
         *data_len = sizeof(res);
+        lastCallSuccessful = true;
         return IPMI_CC_OK;
     }
     catch (const InternalFailure& e)
     {
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (const std::exception& e)
     {
         const std::string e_str = std::string("wd_get: ") + e.what();
         log<level::ERR>(e_str.c_str());
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     catch (...)
     {
         log<level::ERR>("wd_get: Unknown Error");
-        report<InternalFailure>();
+        reportError();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 }
