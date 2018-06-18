@@ -132,5 +132,54 @@ sd_bus_slot *ipmid_get_sd_bus_slot(void);
 #ifdef __cplusplus
 }
 #endif
+#ifdef __cplusplus
+
+using IpmiNetFn = ipmi_netfn_t;
+using IpmiCmdPrivilege = ipmi_cmd_privilege_t;
+using IpmiRet = ipmi_ret_t;
+using IpmiDataLen = ipmi_data_len_t;
+using IpmiContext = ipmi_context_t;
+using IpmiResponse = ipmi_response_t;
+using IpmiRequest = ipmi_request_t;
+using IpmiCmd = ipmi_cmd_t;
+using IpmidCallback = ipmid_callback_t;
+using IpmiNetFnCode = ipmi_net_fns;
+using IpmiRetCode = ipmi_return_codes;
+using IpmiNetFnWildCardCmd = ipmi_netfn_wild_card_cmd;
+
+using SdBus = sd_bus;
+using SdEvent = sd_event;
+using SdBusSlot = sd_bus_slot;
+
+
+inline  unsigned short getSelReserveId(void)
+{
+    return  get_sel_reserve_id();
+}
+
+inline void ipmiRegisterCallback(IpmiNetFn netFn, IpmiCmd cmd,
+                                 IpmiContext context , IpmidCallback callback,
+                                 IpmiCmdPrivilege cmdPriv)
+{
+    ipmi_register_callback(netFn, cmd, context, callback,
+                           cmdPriv);
+}
+
+inline SdBus* ipmidgetSdBusConnection()
+{
+    return ipmid_get_sd_bus_connection();
+}
+
+inline SdEvent* ipmidGetSdEventConnection()
+{
+    return ipmid_get_sd_event_connection();
+}
+
+inline SdBusSlot* ipmidGetSdBusSlot()
+{
+    return ipmid_get_sd_bus_slot();
+}
+
+#endif
 
 #endif
