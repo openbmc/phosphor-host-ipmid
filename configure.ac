@@ -71,6 +71,9 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
     AC_SUBST([OESDK_TESTCASE_FLAGS], [$testcase_flags])
 )
 
+# Add code coverage tool
+AX_CODE_COVERAGE
+
 AC_ARG_VAR(WHITELIST_CONF, [Paths to IPMI whitelisted commands conf files. (default = ${srcdir}/host-ipmid-whitelist.conf)])
 if test -z "$WHITELIST_CONF"; then
         WHITELIST_CONF=${srcdir}/host-ipmid-whitelist.conf

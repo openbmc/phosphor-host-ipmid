@@ -78,6 +78,13 @@ libapphandler_la_SOURCES = \
 	sensordatahandler.cpp \
 	$(libapphandler_BUILT_LIST)
 
+@CODE_COVERAGE_RULES@
+
+check_PROGRAMS =
+XFAIL_TESTS =
+
+TESTS = $(check_PROGRAMS)
+
 libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs -version-info 0:0:0 -shared
 libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 
