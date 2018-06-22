@@ -72,7 +72,16 @@ struct sensorreadingresp_t {
 }  __attribute__ ((packed)) ;
 
 int get_bus_for_path(const char *path, char **busname) {
-    return mapper_get_service(bus, path, busname);
+    // Trying for paths with root provided
+    int r = mapper_get_service(bus, path, busname);
+
+    if (r < 0) {
+        // Tryring for paths without root
+        return mapper_get_service(bus,
+                                  (std::string(ipmi::sensor::inventoryRoot) + path).c_str(),
+                                  busname);
+    }
+    return r;
 }
 
 int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
