@@ -158,6 +158,8 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
         }
     }
 
+    responseData->operation = 1 << 6; // Enable scanning
+
     return response;
 }
 
