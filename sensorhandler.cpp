@@ -19,6 +19,7 @@
 static constexpr uint8_t fruInventoryDevice = 0x10;
 static constexpr uint8_t IPMIFruInventory = 0x02;
 static constexpr uint8_t BMCSlaveAddress = 0x20;
+static constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory";
 
 extern int updateSensorRecordFromSSRAESC(const void *);
 extern sd_bus *bus;
@@ -72,8 +73,13 @@ struct sensorreadingresp_t {
 }  __attribute__ ((packed)) ;
 
 int get_bus_for_path(const char *path, char **busname) {
-    return mapper_get_service(bus, path, busname);
+    int r = mapper_get_service(bus, path, busname);
+    if (r >= 0) return r;
+
+    return mapper_get_service(bus, (std::string(inventoryRoot) + path).c_str(),
+                              busname);
 }
+
 
 int legacy_dbus_openbmc_path(const char *type, const uint8_t num, dbus_interface_t *interface) {
     char  *busname = NULL;
