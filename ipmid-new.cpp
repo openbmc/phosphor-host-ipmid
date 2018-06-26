@@ -111,6 +111,20 @@ auto print_values(uint16_t u16, const std::string& s,
   return ipmi::response(ipmi::ccSuccess, u16, s, u32, u8, d);
 }
 
+auto OemCustomCmd(uint24_t iana, uint8_t cmd, bool enabled, uint7_t other, std::bitset<5> fivr, std::bitset<3> three)
+{
+  std::cerr << __FUNCTION__ << "(uint24_t iana, uint8_t cmd, bit enabled, uint7_t other, bitset<5> fivr, bitset<3> three)\n";
+  std::cerr << std::hex
+    << "iana = " << iana
+    << "\ncmd = " << int(cmd)
+    << "\nenabled = " << enabled
+    << "\nother = " << other
+    << "\nfivr = " << fivr
+    << "\nthree = " << three
+    << "\n";
+  return ipmi::response(ipmi::ccSuccess, 'a', uint4_t(0x9), uint2_t(3), bit(1), true, uint16_t(0xbeef),
+          uint32_t(0xd00dfeed), double(2.71828182845904523536028747135), fivr, three);
+}
 
 ipmi_ret_t ipmiLegacyGetDeviceID(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
     ipmi_request_t request, ipmi_response_t response,
@@ -161,7 +175,7 @@ int main()
     }
     std::cerr << '\n';
     request->raw[0] = 1;
-    request->bits = 0;
+    request->rawIndex = 0;
     response = handler->call(request);
     std::cerr << std::hex;
     for (auto r : response->raw)
@@ -234,6 +248,28 @@ int main()
           response->raw.begin() + 1, response->raw.end()))
     {
       std::cerr << "ipmiLegacyGetDeviceID result does not match expected\n";
+    }
+  }
+
+  {
+    std::vector<uint8_t> in{ 0x00, 0x01, 0x57, 0x37, 0xea, 0x2b };
+    auto request =
+      std::make_shared<ipmi::message::Request>(
+          std::make_shared<ipmi::Context>(), in, id++);
+    auto handler = ipmi::makeHandler(OemCustomCmd);
+    auto response = handler->call(request);
+    std::cerr << std::hex;
+    for (auto r : response->raw)
+    {
+      std::cerr << (int)r << ' ';
+    }
+    std::cerr << '\n';
+    std::vector<uint8_t> out = { 0x61, 0x9f, 0xef, 0xbe, 0xed, 0xfe,
+      0x0d, 0xd0, 0x69, 0x57, 0x14, 0x8b, 0x0a, 0xbf, 0x05, 0x40, 0x2b };
+    if (!std::equal(out.begin(), out.end(),
+          response->raw.begin() + 1, response->raw.end()))
+    {
+      std::cerr << "OemCustomCmd result does not match expected\n";
     }
   }
 
