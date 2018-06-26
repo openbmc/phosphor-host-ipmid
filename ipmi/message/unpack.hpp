@@ -80,19 +80,19 @@ template <typename S> struct unpack_single
 
         // copy out bits from vector....
         /* for unpacking big-ending, you can use a reverse_iterator
-        auto fiter = m.raw.begin() + m.bits/8 + sizeof(t);
+        auto fiter = m.raw.begin() + m.rawIndex + sizeof(t);
         auto riter = std::make_reverse_iterator(fiter);
         */
-        if (m.raw.size() * 8 < (m.bits + 8 * sizeof(t)))
+        if (m.raw.size() < (m.rawIndex + sizeof(t)))
         {
-          std::cerr << "unpack error: requesting too many bits\n";
+          std::cerr << "unpack error: requesting too many bytes\n";
           return 1;
         }
-        auto fiter = m.raw.begin() + m.bits / 8;
+        auto fiter = m.raw.begin() + m.rawIndex;
         std::copy_n(fiter, sizeof(t),
             reinterpret_cast<uint8_t*>(&t));
-        // std::cerr << "consumed " << sizeof(t)*8 <<" bits\n";
-        m.bits += (8 * sizeof(t));
+        // std::cerr << "consumed " << sizeof(t) <<" bytes\n";
+        m.rawIndex += sizeof(t);
         return 0;
     }
 };
@@ -138,6 +138,119 @@ struct unpack_single<std::string>
   }
 };
 
+/** @brief Specialization of unpack_single for fixed_uint_t types
+ */
+template <unsigned N>
+struct unpack_single<fixed_uint_t<N>>
+{
+  static int op(Request& m, fixed_uint_t<N>& t)
+  {
+    constexpr size_t count = N;
+    // acquire enough bits in the stream to fulfill the request
+    if (m.fillBits(count) < 0)
+    {
+      return -1;
+    }
+    uint64_t bitmask = uint64_t((1 << count) - 1) << (m.bitCount - count);
+    t = (m.bitStream >> (m.bitCount - count));
+    // clear bits from stream
+    m.bitStream &= ~bitmask;
+    m.bitCount -= count;
+    return 0;
+  }
+};
+
+/** @brief Specialization of unpack_single for bool. */
+template <> struct unpack_single<bool>
+{
+  static int op(Request& m, bool& b)
+  {
+    // acquire enough bits in the stream to fulfill the request
+    if (m.fillBits(1) < 0)
+    {
+      return -1;
+    }
+    uint64_t bitmask = uint64_t(1) << (m.bitCount - 1);
+    b = static_cast<bool>(m.bitStream >> (m.bitCount - 1));
+    // clear bits from stream
+    m.bitStream &= ~bitmask;
+    m.bitCount--;
+    return 0;
+  }
+};
+
+/** @brief Specialization of unpack_single for std::bitset<N>
+ */
+template <size_t N>
+struct unpack_single<std::bitset<N>>
+{
+  static int op(Request& m, std::bitset<N>& t)
+  {
+    constexpr size_t count = N;
+    // acquire enough bits in the stream to fulfill the request
+    if (m.fillBits(count) < 0)
+    {
+      return -1;
+    }
+    uint64_t bitmask = uint64_t((1 << count) - 1) << (m.bitCount - count);
+    t = std::bitset<N>(m.bitStream >> (m.bitCount - count));
+    // clear bits from stream
+    m.bitStream &= ~bitmask;
+    m.bitCount -= count;
+    return 0;
+  }
+};
+
+/** @brief Specialization of unpack_single for std::array<T, N> */
+template <typename T, size_t N>
+struct unpack_single<std::array<T, N>>
+{
+  static int op(Request& m, std::array<T, N>& t)
+  {
+    for (auto v : t)
+    {
+      int ret = unpack_single<T>::op(m, v);
+      if (0 != ret)
+      {
+        return ret;
+      }
+    }
+    return 0;
+  }
+};
+
+/** @brief Specialization of unpack_single for std::vector<T> */
+template <typename T>
+struct unpack_single<std::vector<T>>
+{
+  static int op(Request& m, std::vector<T>& t)
+  {
+    while (m.rawIndex < m.raw.size())
+    {
+      T v;
+      int ret = unpack_single<T>::op(m, v);
+      if (0 != ret)
+      {
+        return ret;
+      }
+      t.push_back(v);
+    }
+    return 0;
+  }
+};
+
+/** @brief Specialization of unpack_single for std::vector<uint8_t> */
+template <>
+struct unpack_single<std::vector<uint8_t>>
+{
+  static int op(Request& m, std::vector<uint8_t>& t)
+  {
+    // copy out the remainder of the message
+    t.insert(t.begin(), m.raw.begin() + m.rawIndex, m.raw.end());
+    m.rawIndex = m.raw.size();
+    return 0;
+  }
+};
 
 } // namespace details
 

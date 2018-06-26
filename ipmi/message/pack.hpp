@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <array>
 #include <ipmi/message/types.hpp>
 #include <memory>
 #include <tuple>
@@ -44,6 +45,7 @@ namespace details
 // 7. array of any of the above (known length)
 // 8. vector of any of the above (unknown length)
 // 9. ????
+
 
 
 /** @struct pack_single
@@ -81,12 +83,14 @@ template <typename S> struct pack_single
         static_assert(std::is_fundamental<Td<T>>::value,
                       "Non-basic types are not allowed.");
 
+        // this interface only allows full-byte access; skip partial bits
+        m.drain();
         // copy in bits to vector....
         auto fiter = reinterpret_cast<uint8_t*>(&t);
         auto eiter = fiter + sizeof(t);
         m.raw.insert(m.raw.end(), fiter, eiter);
-        // std::cerr << "consumed " << sizeof(t)*8 <<" bits\n";
-        m.bits += (8 * sizeof(t));
+        // std::cerr << "consumed " << sizeof(t)
+        //    << " bytes; raw is now size()-> " << m.raw.size() << "\n";
         return 0;
     }
 };
@@ -113,14 +117,24 @@ struct pack_single<std::string>
   }
 };
 
-#if 0
-/** @brief Specialization of pack_single for std::bitset<N> */
-template <size_t N>
-struct pack_single<std::bitset<N>>
+/** @brief Specialization of pack_single for fixed_uint_t types
+ */
+template <unsigned N>
+struct pack_single<fixed_uint_t<N>>
 {
-  static int op(Response& m, std::bitset<N>& t)
+  static int op(Response& m, fixed_uint_t<N>& t)
   {
-    // check if we need to shift
+    size_t count = N;
+    static_assert(N <= sizeof(uint64_t)*CHAR_BIT,
+        "Only mp-integers of 64 bits or less are allowed");
+    uint64_t bits = t;
+    while (count > 0)
+    {
+      size_t appendCount = std::min(count, size_t(CHAR_BIT));
+      m.appendBits(appendCount, static_cast<uint8_t>(bits));
+      bits >>= CHAR_BIT;
+      count -= appendCount;
+    }
     return 0;
   }
 };
@@ -128,13 +142,69 @@ struct pack_single<std::bitset<N>>
 /** @brief Specialization of pack_single for bool. */
 template <> struct pack_single<bool>
 {
-    static int op(sd_bus_message* m, bool& b)
-    {
-        m.pack_bit(b);
-        return 0;
-    }
+  static int op(Response& m, bool& b)
+  {
+    m.appendBits(1, b);
+    return 0;
+  }
 };
-#endif /* 0 */
+
+/** @brief Specialization of pack_single for std::bitset<N> */
+template <size_t N>
+struct pack_single<std::bitset<N>>
+{
+  static int op(Response& m, std::bitset<N>& t)
+  {
+    size_t count = N;
+    static_assert(N <= sizeof(unsigned long long)*CHAR_BIT,
+        "Only std::bitset of 64 bits or less are allowed");
+    unsigned long long bits = t.to_ullong();
+    while (count > 0)
+    {
+      size_t appendCount = std::min(count, size_t(CHAR_BIT));
+      m.appendBits(appendCount, static_cast<uint8_t>(bits));
+      bits >>= CHAR_BIT;
+      count -= appendCount;
+    }
+    return 0;
+  }
+};
+
+/** @brief Specialization of pack_single for std::array<T, N> */
+template <typename T, size_t N>
+struct pack_single<std::array<T, N>>
+{
+  static int op(Response& m, std::array<T, N>& t)
+  {
+    for (auto v : t)
+    {
+      int ret = pack_single<T>::op(m, v);
+      if (0 != ret)
+      {
+        return ret;
+      }
+    }
+    return 0;
+  }
+};
+
+/** @brief Specialization of pack_single for std::vector<T, N> */
+template <typename T>
+struct pack_single<std::vector<T>>
+{
+  static int op(Response& m, std::vector<T>& t)
+  {
+    for (auto v : t)
+    {
+      int ret = pack_single<T>::op(m, v);
+      if (0 != ret)
+      {
+        return ret;
+      }
+    }
+    return 0;
+  }
+};
 
 } // namespace details
 
