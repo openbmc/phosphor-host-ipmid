@@ -2,6 +2,7 @@
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/State/Host/server.hpp>
 #include <systemintfcmds.h>
 #include <utils.hpp>
 #include <config.h>
@@ -18,15 +19,26 @@ namespace command
 constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
 constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
 constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
+constexpr auto HOST_STATE_PATH = "/xyz/openbmc_project/state/host0";
+constexpr auto HOST_STATE_INTERFACE = "xyz.openbmc_project.State.Host";
+constexpr auto HOST_TRANS_PROP = "RequestedHostTransition";
 
 // For throwing exceptions
 using namespace phosphor::logging;
 using InternalFailure = sdbusplus::xyz::openbmc_project::Common::
                             Error::InternalFailure;
 
+namespace sdbusRule = sdbusplus::bus::match::rules;
+
 Manager::Manager(sdbusplus::bus::bus& bus, sd_event* event) :
             bus(bus),
-            timer(event, std::bind(&Manager::hostTimeout, this))
+            timer(event, std::bind(&Manager::hostTimeout, this)),
+            hostTransitionMatch(bus,
+                    sdbusRule::propertiesChanged(
+                        HOST_STATE_PATH,
+                        HOST_STATE_INTERFACE),
+                    std::bind(&Manager::clearQueueOnPowerOn, this,
+                        std::placeholders::_1))
 {
     // Nothing to do here.
 }
@@ -75,6 +87,11 @@ void Manager::hostTimeout()
 {
     log<level::ERR>("Host control timeout hit!");
 
+    clearQueue();
+}
+
+void Manager::clearQueue()
+{
     // Dequeue all entries and send fail signal
     while(!this->workQueue.empty())
     {
@@ -148,6 +165,29 @@ void Manager::execute(CommandHandler command)
     }
 
     return;
+}
+
+void Manager::clearQueueOnPowerOn(sdbusplus::message::message& msg)
+{
+    namespace server = sdbusplus::xyz::openbmc_project::State::server;
+
+    ::ipmi::DbusInterface interface;
+    ::ipmi::PropertyMap properties;
+
+    msg.read(interface, properties);
+
+    if (properties.find(HOST_TRANS_PROP) == properties.end())
+    {
+        return;
+    }
+
+    auto& requestedState = properties.at(HOST_TRANS_PROP).get<std::string>();
+
+    if (server::Host::convertTransitionFromString(requestedState) ==
+            server::Host::Transition::On)
+    {
+        clearQueue();
+    }
 }
 
 } // namespace command
