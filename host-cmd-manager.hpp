@@ -3,6 +3,7 @@
 #include <tuple>
 #include <queue>
 #include <sdbusplus/bus.hpp>
+#include <sdbusplus/bus/match.hpp>
 #include <timer.hpp>
 #include <host-ipmid/ipmid-host-cmd-utils.hpp>
 
@@ -68,6 +69,31 @@ class Manager
          */
         void hostTimeout();
 
+        /** @brief Clears the command queue
+         *
+         *  @detail Clears the command queue and calls all callbacks
+         *          specifying the command wasn't successful.
+         */
+        void clearQueue();
+
+        /** @brief Clears the command queue on a power on
+         *
+         *  @detail The properties changed handler for the
+         *          RequestedHostTransition property.  When this property
+         *          changes to 'On', this function will purge the command
+         *          queue.
+         *
+         *          This is done to avoid having commands that were issued
+         *          before the host powers on from getting sent to the host,
+         *          either due to race conditions around state transitions
+         *          or from a user doing something like requesting an already
+         *          powered off system to power off again and then immediately
+         *          requesting a power on.
+         *
+         *  @param[in] msg - the sdbusplus message containing the property
+         */
+        void clearQueueOnPowerOn(sdbusplus::message::message& msg);
+
         /** @brief Reference to the dbus handler */
         sdbusplus::bus::bus& bus;
 
@@ -76,6 +102,9 @@ class Manager
 
         /** @brief Timer for commands to host */
         phosphor::ipmi::Timer timer;
+
+        /** @brief Match handler for the requested host state */
+        sdbusplus::bus::match_t hostTransitionMatch;
 };
 
 } // namespace command
