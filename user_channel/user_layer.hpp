@@ -20,59 +20,42 @@
 namespace ipmi
 {
 
-static constexpr uint8_t MAX_IPMI_20_PASSWORD_SIZE = 20;
-static constexpr uint8_t MAX_IPMI_15_PASSWORD_SIZE = 16;
-static constexpr uint8_t DISABLE_USER = 0x00;
-static constexpr uint8_t ENABLE_USER = 0x01;
-static constexpr uint8_t SET_PASSWORD = 0x02;
-static constexpr uint8_t TEST_PASSWORD = 0x03;
+enum class EChannelID : uint8_t
+{
+    chanIpmb = 0x00,      // Channel 0x00
+    chanLan1 = 0x01,      // Channel 0x01
+    chanLan2 = 0x02,      // Channel 0x02
+    chanLan3 = 0x03,      // Channel 0x03
+    chanEmp = 0x04,       // Channel 0x04
+    chanIcmb = 0x05,      // Channel 0x05
+    chanSmlink0 = 0x06,   // Channel 0x06
+    chanSmm = 0x07,       // Channel 0x07
+    chanIntrabmc = 0x08,  // Channel 0x08
+    chanSipmb = 0x09,     // Channel 0x09       (Secondary IPMB)
+    chanPcie = 0x0A,      // Channel 0x0A       (PCIE slots)
+    chanBReserved = 0x0B, // Channel 0x0B       (reserved)
+    chanInternal = 0x0C,  // Channel 0x0C
+    chanDReserved = 0x0D, // Channel 0x0D       (reserved)
+    chanSelf = 0x0E,      // Channel 0x0E       (refers to self)
+    chanSms = 0x0F        // Channel 0x0F
+};
 
-static constexpr uint8_t INVALID_USER_ID = 0x1;
-static constexpr uint8_t INVALID_CH_ID = 0x1;
-static constexpr uint8_t INVALID_USER_NAME = 0x1;
-
-typedef enum {
-    CHAN_IPMB,       // Channel 0x00
-    CHAN_LAN1,       // Channel 0x01
-    CHAN_LAN2,       // Channel 0x02
-    CHAN_LAN3,       // Channel 0x03
-    CHAN_EMP,        // Channel 0x04
-    CHAN_ICMB,       // Channel 0x05
-    CHAN_SMLINK0,    // Channel 0x06
-    CHAN_SMM,        // Channel 0x07
-    CHAN_INTRABMC,   // Channel 0x08
-    CHAN_SIPMB,      // Channel 0x09       (Secondary IPMB)
-    CHAN_PCIE,       // Channel 0x0A       (PCIE slots)
-    CHAN_B_RESERVED, // Channel 0x0B       (reserved)
-    CHAN_INTERNAL,   // Channel 0x0C
-    CHAN_D_RESERVED, // Channel 0x0D       (reserved)
-    CHAN_SELF,       // Channel 0x0E       (refers to self)
-    CHAN_SMS         // Channel 0x0F
-} EChannelID;
-
-struct user_priv_access_t
+struct PrivAccess
 {
     uint8_t privilege : 4;
-    uint8_t ipmi_enabled : 1;
-    uint8_t link_auth_enabled : 1;
-    uint8_t access_callback : 1;
+    uint8_t ipmiEnabled : 1;
+    uint8_t linkAuthEnabled : 1;
+    uint8_t accessCallback : 1;
     uint8_t reserved : 1;
 } __attribute__((packed));
 
-enum SetUserPrivAccFlags : uint8_t
-{
-    USER_ACC_NO_UPDATE = (0),
-    USER_ACC_PRIV_UPDATE = (1 << 0),
-    USER_ACC_OTHER_BITS_UPDATE = (1 << 1)
-};
-
-/** @brief determines valid user_id
+/** @brief determines valid userId
  *
  *  @param[in] user id
  *
  *  @return true if valid, false otherwise
  */
-bool ipmi_user_is_valid_user_id(const uint8_t &user_id);
+bool ipmiUserIsValidUserId(const uint8_t &userId);
 
 /** @brief determines valid channel
  *
@@ -80,7 +63,7 @@ bool ipmi_user_is_valid_user_id(const uint8_t &user_id);
  *
  *  @return true if valid, false otherwise
  */
-bool ipmi_user_is_valid_channel(const uint8_t &ch_num);
+bool ipmiUserIsValidChannel(const uint8_t &chNum);
 
 /** @brief determines valid privilege level
  *
@@ -88,27 +71,25 @@ bool ipmi_user_is_valid_channel(const uint8_t &ch_num);
  *
  *  @return true if valid, false otherwise
  */
-bool ipmi_user_is_valid_privilege(const uint8_t &priv);
+bool ipmiUserIsValidPrivilege(const uint8_t &priv);
 
 /** @brief set's user name
  *
- *  @param[in] user_id
- *  @param[in] user_name
+ *  @param[in] user id
+ *  @param[in] user name
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmi_user_set_user_name(const uint8_t &user_id,
-                                   const char *user_name);
+ipmi_ret_t ipmiUserSetUserName(const uint8_t &userId, const char *userName);
 
 /** @brief get user name
  *
- *  @param[in] user_id
- *  @param[out] user_name
+ *  @param[in] user id
+ *  @param[out] user name
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmi_user_get_user_name(const uint8_t &user_id,
-                                   std::string &user_name);
+ipmi_ret_t ipmiUserGetUserName(const uint8_t &userId, std::string &userName);
 
 /** @brief provides available fixed, max, and enabled user counts
  *
@@ -118,9 +99,8 @@ ipmi_ret_t ipmi_user_get_user_name(const uint8_t &user_id,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmi_user_get_max_counts(uint8_t &max_ch_users,
-                                    uint8_t &enabled_users,
-                                    uint8_t &fixed_users);
+ipmi_ret_t ipmiUserGetMaxCounts(uint8_t &maxChUsers, uint8_t &enabledUsers,
+                                uint8_t &fixedUsers);
 
 /** @brief determines whether user is enabled
  *
@@ -129,7 +109,7 @@ ipmi_ret_t ipmi_user_get_max_counts(uint8_t &max_ch_users,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmi_user_check_enabled(const uint8_t &user_id, bool &state);
+ipmi_ret_t ipmiUserCheckEnabled(const uint8_t &userId, bool &state);
 
 /** @brief provides user privilege access data
  *
@@ -139,22 +119,22 @@ ipmi_ret_t ipmi_user_check_enabled(const uint8_t &user_id, bool &state);
  * [5] -link auth enabled, [6] -access callback, [7] - reserved.
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmi_user_get_privilege_access(const uint8_t &user_id,
-                                          const uint8_t &ch_num,
-                                          user_priv_access_t &priv_access);
+ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t &userId,
+                                      const uint8_t &chNum,
+                                      PrivAccess &privAccess);
 
 /** @brief sets user privilege access data
  *
  *  @param[in] user id
  *  @param[in] channel number
  *  @param[in] privilege access data ([0:3] - privilege, [4] - ipmi enabled, [5]
- * -link auth enabled, [6] -access callback, [7] - reserved.
+ *  @param[in] update other fields in privilege access
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmi_user_set_privilege_access(const uint8_t &user_id,
-                                          const uint8_t &ch_num,
-                                          const user_priv_access_t &priv_access,
-                                          const uint8_t &flags);
+ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t &userId,
+                                      const uint8_t &chNum,
+                                      const PrivAccess &privAccess,
+                                      const bool &otherPrivUpdate);
 
 // TODO: Define required user layer API Call's which user layer shared library
 // must implement.

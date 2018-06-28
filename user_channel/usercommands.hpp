@@ -27,22 +27,5 @@ enum ipmi_netfn_user_cmds
     IPMI_CMD_SET_USER_PASSWORD = 0x47,
 };
 
-static constexpr uint8_t USER_ID_ENABLED_VIA_SET_PASSWORD = 0x1;
-static constexpr uint8_t USER_ID_DISABLED_VIA_SET_PASSWORD = 0x2;
-
-/** @brief The set user password IPMI command.
- *
- *  @param[in] netfn
- *  @param[in] cmd
- *  @param[in] request
- *  @param[in,out] response
- *  @param[out] data_len
- *  @param[in] context
- *
- *  @return IPMI_CC_OK on success, non-zero otherwise.
- */
-ipmi_ret_t ipmi_app_set_user_password(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                      ipmi_request_t request,
-                                      ipmi_response_t response,
-                                      ipmi_data_len_t data_len,
-                                      ipmi_context_t context);
+static constexpr uint8_t userIdEnabledViaSetPassword = 0x1;
+static constexpr uint8_t userIdDisabledViaSetPassword = 0x2;

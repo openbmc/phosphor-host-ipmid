@@ -16,7 +16,6 @@
 #pragma once
 #include <host-ipmid/ipmid-api.h>
 #include <sdbusplus/bus.hpp>
-#include <xyz/openbmc_project/User/Mgr/server.hpp>
 #include <cstdint>
 #include <ctime>
 #include <boost/interprocess/sync/file_lock.hpp>
@@ -26,16 +25,12 @@
 namespace ipmi
 {
 
-static constexpr uint8_t IPMI_MAX_USER_NAME = 16;
-static constexpr uint8_t IPMI_MAX_PASSWD_SIZE = 20;
-static constexpr uint8_t IPMI_MAX_USERS = 15;
-static constexpr uint8_t IPMI_MAX_CHANNELS = 16;
-static constexpr uint16_t USER_DATA_VERSION = 1;
-static const char *USER_DATA_SIGNATURE = "OpenBMC";
-static const char *IPMI_USER_MUTEX = "ipmi_usr_mutex";
-static const char *IPMI_MUTEX_CLEANUP_LOCK_FILE = "/var/ipmi_usr_mutex_cleanup";
-
-static constexpr size_t MAX_DBUS_OBJECT_PATH = 255;
+static constexpr uint8_t ipmiMaxUserName = 16;
+static constexpr uint8_t ipmiMaxUsers = 15;
+static constexpr uint8_t ipmiMaxChannels = 16;
+static constexpr const char *ipmiUserMutex = "ipmi_usr_mutex";
+static constexpr const char *ipmiMutexCleanupLockFile =
+    "/var/ipmi_usr_mutex_cleanup";
 
 using DbusUserPropVariant =
     sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
@@ -47,40 +42,39 @@ using DbusUserObjProperties =
 
 using DbusUserObjValue = std::map<std::string, DbusUserObjProperties>;
 
-typedef enum {
-    RESERVED_EVENT,
-    USER_CREATED,
-    USER_DELETED,
-    USER_RENAMED,
-    USER_GRP_UPDATED,
-    USER_PRIV_UPDATED,
-    USER_STATE_UPDATED
-} UserUpdateEvent;
-
-struct userinfo_t
+enum class UserUpdateEvent
 {
-    uint8_t userName[IPMI_MAX_USER_NAME];
-    user_priv_access_t userPrivAccess[IPMI_MAX_CHANNELS];
-    uint8_t userEnabled : 1;
-    uint8_t userInSystem : 1;
-    uint8_t passwordInSystem : 1;
-    uint8_t passwordSet : 1;
-    uint8_t fixedUserName : 1;
-    uint8_t userChgInProgress : 1;
-    uint8_t reserved : 2;
-    uint8_t payloadEnabled[IPMI_MAX_CHANNELS];
-    uint8_t payloadEnabled2[IPMI_MAX_CHANNELS];
-} __attribute__((packed));
+    reservedEvent,
+    userCreated,
+    userDeleted,
+    userRenamed,
+    userGrpUpdated,
+    userPrivUpdated,
+    userStateUpdated
+};
 
-struct userdata_t
+struct UserPrivAccess
 {
-    uint16_t version;
-    uint8_t signature[14];
-    userinfo_t user[IPMI_MAX_USERS +
-                    1]; //+1 to map with UserId directly. UserId 0 is reserved.
-} __attribute__((packed));
+    uint8_t privilege;
+    bool ipmiEnabled;
+    bool linkAuthEnabled;
+    bool accessCallback;
+};
 
-using UserMgr = sdbusplus::xyz::openbmc_project::User::server::Mgr;
+struct UserInfo
+{
+    uint8_t userName[ipmiMaxUserName];
+    UserPrivAccess userPrivAccess[ipmiMaxChannels];
+    bool userEnabled;
+    bool userInSystem;
+    bool fixedUserName;
+};
+
+struct UsersTbl
+{
+    UserInfo user[ipmiMaxUsers +
+                  1]; //+1 to map with UserId directly. UserId 0 is reserved.
+};
 
 class UserAccess;
 
@@ -109,24 +103,24 @@ class UserAccess
 
     static std::string convertToSystemPrivilege(const CommandPrivilege &value);
 
-    bool isValidUserName(const char *user_name);
+    bool isValidUserName(const char *userNameInChar);
 
-    userinfo_t *getUserInfo(const uint8_t &userId);
+    UserInfo *getUserInfo(const uint8_t &userId);
 
-    void setUserInfo(const uint8_t &userId, userinfo_t *userInfo);
+    void setUserInfo(const uint8_t &userId, UserInfo *userInfo);
 
     ipmi_ret_t getUserName(const uint8_t &userId, std::string &userName);
 
-    ipmi_ret_t setUserName(const uint8_t &userId, const char *user_name);
+    ipmi_ret_t setUserName(const uint8_t &userId, const char *userNameInChar);
 
     ipmi_ret_t setUserPrivilegeAccess(const uint8_t &userId,
                                       const uint8_t &chNum,
-                                      const user_priv_access_t &privAccess,
-                                      const uint8_t &flags);
+                                      const UserPrivAccess &privAccess,
+                                      const bool &otherPrivUpdates);
 
-    int readUserData();
+    void readUserData();
 
-    int writeUserData();
+    void writeUserData();
 
     void checkAndReloadUserData();
 
@@ -143,13 +137,13 @@ class UserAccess
 
     void deleteUserIndex(const size_t &usrIdx);
 
-    userdata_t *getUserDataPtr();
+    UsersTbl *getUsersTblPtr();
 
     std::unique_ptr<boost::interprocess::named_recursive_mutex> userMutex{
         nullptr};
 
   private:
-    userdata_t userDataInfo;
+    UsersTbl usersTbl;
     std::vector<std::string> availablePrivileges;
     std::vector<std::string> availableGroups;
     sdbusplus::bus::bus bus;
