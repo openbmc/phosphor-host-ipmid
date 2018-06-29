@@ -67,13 +67,16 @@ static constexpr size_t privMask = 0xF;
 
 // User manager related
 static constexpr const char *userMgrObjBasePath = "/xyz/openbmc_project/user";
-static constexpr const char *userObjBasePath =
-    "/xyz/openbmc_project/user/Users";
-static constexpr const char *userMgrInterface = "xyz.openbmc_project.User.Mgr";
-static constexpr const char *usersInterface = "xyz.openbmc_project.User.Users";
+static constexpr const char *userObjBasePath = "/xyz/openbmc_project/user";
+static constexpr const char *userMgrInterface =
+    "xyz.openbmc_project.User.Manager";
+static constexpr const char *usersInterface =
+    "xyz.openbmc_project.User.Attributes";
+static constexpr const char *deleteUserInterface =
+    "xyz.openbmc_project.Object.Delete";
 
 static constexpr const char *createUserMethod = "CreateUser";
-static constexpr const char *deleteUserMethod = "DeleteUser";
+static constexpr const char *deleteUserMethod = "Delete";
 static constexpr const char *renameUserMethod = "RenameUser";
 // User manager signal memebers
 static constexpr const char *userRenamedSignal = "UserRenamed";
@@ -722,7 +725,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId,
         std::string userPath = std::string(userObjBasePath) + "/" + oldUser;
         auto method =
             bus.new_method_call(getUserServiceName().c_str(), userPath.c_str(),
-                                usersInterface, deleteUserMethod);
+                                deleteUserInterface, deleteUserMethod);
         auto reply = bus.call(method);
         if (reply.is_method_error())
         {
