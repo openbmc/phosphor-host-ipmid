@@ -14,7 +14,6 @@
 // limitations under the License.
 */
 
-#include <host-ipmid/ipmid-api.h>
 #include <phosphor-ipmi-host/apphandler.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -23,9 +22,9 @@
 #include <fstream>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <experimental/filesystem>
-#include "channel_mgmt.hpp"
 #include <exception>
 #include <unordered_map>
+#include "channel_mgmt.hpp"
 
 namespace ipmi
 {
@@ -134,39 +133,12 @@ bool ChannelConfig::isValidChannel(const uint8_t &chNum)
     return true;
 }
 
-bool ChannelConfig::isDeviceExist(const uint8_t &chNum)
-{
-    // TODO: This is not the reliable way to find the device
-    // associated with ethernet interface. Need to revisit later
-    struct stat fileStat;
-    std::string devName("/sys/class/net/eth");
-    devName += std::to_string(chNum - 1);
-
-    if (stat(devName.data(), &fileStat) != 0)
-    {
-        log<level::DEBUG>("Ethernet device not found");
-        return false;
-    }
-
-    return true;
-}
-
 EChannelSessSupported
     ChannelConfig::getChannelSessionSupport(const uint8_t &chNum)
 {
     EChannelSessSupported chSessSupport =
         (EChannelSessSupported)channelData[chNum].chInfo.sessionSupported;
     return chSessSupport;
-}
-
-bool ChannelConfig::isValidPrivLimit(const uint8_t &privLimit)
-{
-    if ((privLimit < PRIVILEGE_CALLBACK) || (privLimit > PRIVILEGE_OEM))
-    {
-        return false;
-    }
-
-    return true;
 }
 
 bool ChannelConfig::isValidAuthType(const uint8_t &chNum,
@@ -182,16 +154,6 @@ bool ChannelConfig::isValidAuthType(const uint8_t &chNum,
     if (!(authTypeSupported & (1 << authType)))
     {
         log<level::DEBUG>("Authentication type is not supported.");
-        return false;
-    }
-
-    return true;
-}
-
-bool ChannelConfig::isValidAccessMode(const uint8_t &accessMode)
-{
-    if ((accessMode < accessDisabled) || (accessMode > accessShared))
-    {
         return false;
     }
 

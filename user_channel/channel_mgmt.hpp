@@ -19,7 +19,7 @@
 #include <ctime>
 #include <boost/interprocess/sync/named_recursive_mutex.hpp>
 #include <nlohmann/json.hpp>
-#include "channelcommands.hpp"
+#include "channel_layer.hpp"
 
 namespace ipmi
 {
@@ -27,40 +27,6 @@ namespace ipmi
 using Json = nlohmann::json;
 
 static constexpr const char *IPMI_CHANNEL_MUTEX = "ipmi_channel_mutex";
-
-// TODO: This should be declared in ipmi-api.h
-static constexpr uint8_t PRIVILEGE_MAX = PRIVILEGE_OEM + 1;
-
-enum AccessSetFlag
-{
-    setAccessMode = (1 << 0),
-    setUserAuthEnabled = (1 << 1),
-    setMsgAuthEnabled = (1 << 2),
-    setAlertingEnabled = (1 << 3),
-    setPrivLimit = (1 << 4),
-};
-
-// Struct to store channel access data
-struct ChannelAccess
-{
-    uint8_t accessMode;
-    bool userAuthDisabled;
-    bool perMsgAuthDisabled;
-    bool alertingDisabled;
-    uint8_t privLimit;
-};
-
-// Struct store channel info data
-struct ChannelInfo
-{
-    uint8_t mediumType;
-    uint8_t protocolType;
-    uint8_t sessionSupported;
-    bool isIpmi; // Is session IPMI
-    // This is used in Get LAN Configuration parameter.
-    // This holds the supported AuthTypes for a given channel.
-    uint8_t authTypeSupported;
-};
 
 struct ChannelAccessData
 {
@@ -95,12 +61,6 @@ class ChannelConfig
     ChannelConfig();
 
     bool isValidChannel(const uint8_t &chNum);
-
-    bool isDeviceExist(const uint8_t &chNum);
-
-    bool isValidPrivLimit(const uint8_t &privLimit);
-
-    bool isValidAccessMode(const uint8_t &accessMode);
 
     bool isValidAuthType(const uint8_t &chNum, const uint8_t &authType);
 

@@ -14,13 +14,12 @@
 // limitations under the License.
 */
 
-#include <host-ipmid/ipmid-api.h>
 #include <phosphor-ipmi-host/apphandler.h>
 #include <commandutils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <regex>
 #include "channelcommands.hpp"
-#include "channel_mgmt.hpp"
+#include "channel_layer.hpp"
 
 using namespace phosphor::logging;
 
@@ -102,13 +101,13 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // TODO: Self channel number (0xE) has to be determined.
     uint8_t chNum = req->ch_num;
-    if (!getChannelConfigObject().isValidChannel(chNum))
+    if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Set channel access - Parameter out of range");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    if (sessionNone == getChannelConfigObject().getChannelSessionSupport(chNum))
+    if (sessionNone == getChannelSessionSupport(chNum))
     {
         log<level::DEBUG>("Set channel access - No support on channel");
         return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
@@ -166,8 +165,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (setNVFlag != 0)
     {
-        compCode = getChannelConfigObject().setChannelAccessPersistData(
-            chNum, chNVData, setNVFlag);
+        compCode = setChannelAccessPersistData(chNum, chNVData, setNVFlag);
         if (compCode != IPMI_CC_OK)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
@@ -177,8 +175,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (setActFlag != 0)
     {
-        compCode = getChannelConfigObject().setChannelAccessData(
-            chNum, chActData, setActFlag);
+        compCode = setChannelAccessData(chNum, chActData, setActFlag);
         if (compCode != IPMI_CC_OK)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
@@ -209,7 +206,7 @@ ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // TODO: Self channel number (0xE) has to be determined.
     uint8_t chNum = req->ch_num;
-    if (!getChannelConfigObject().isValidChannel(chNum))
+    if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel access - Parameter out of range");
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -222,7 +219,7 @@ ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    if (sessionNone == getChannelConfigObject().getChannelSessionSupport(chNum))
+    if (sessionNone == getChannelSessionSupport(chNum))
     {
         log<level::DEBUG>("Get channel access - No support on channel");
         return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
@@ -239,13 +236,11 @@ ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (req->access_set_mode == nvData)
     {
-        compCode = getChannelConfigObject().getChannelAccessPersistData(
-            chNum, chAccess);
+        compCode = getChannelAccessPersistData(chNum, chAccess);
     }
     else if (req->access_set_mode == activeData)
     {
-        compCode =
-            getChannelConfigObject().getChannelAccessData(chNum, chAccess);
+        compCode = getChannelAccessData(chNum, chAccess);
     }
 
     if (compCode != IPMI_CC_OK)
@@ -283,16 +278,15 @@ ipmi_ret_t ipmi_get_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // TODO: Self channel number (0xE) has to be determined.
     uint8_t chNum = req->ch_num;
-    if (!getChannelConfigObject().isValidChannel(chNum))
+    if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel info - Parameter out of range");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
     // Check the existance of device for session-less channels.
-    if ((sessionNone !=
-         getChannelConfigObject().getChannelSessionSupport(chNum)) &&
-        (!(getChannelConfigObject().isDeviceExist(chNum))))
+    if ((sessionNone != getChannelSessionSupport(chNum)) &&
+        (!(isDeviceExist(chNum))))
     {
         log<level::DEBUG>("Get channel info - Device not exist");
         return IPMI_CC_PARM_OUT_OF_RANGE;
@@ -305,8 +299,7 @@ ipmi_ret_t ipmi_get_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
               reinterpret_cast<uint8_t *>(resp) + sizeof(*resp), 0);
 
     ChannelInfo chInfo;
-    ipmi_ret_t compCode =
-        getChannelConfigObject().getChannelInfo(chNum, chInfo);
+    ipmi_ret_t compCode = getChannelInfo(chNum, chInfo);
     if (compCode != IPMI_CC_OK)
     {
         return compCode;
@@ -315,8 +308,7 @@ ipmi_ret_t ipmi_get_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     resp->ch_num = chNum;
     resp->medium_type = chInfo.mediumType;
     resp->msg_prot_type = chInfo.protocolType;
-    resp->act_sess_count =
-        getChannelConfigObject().getChannelActiveSessions(chNum);
+    resp->act_sess_count = getChannelActiveSessions(chNum);
     resp->sess_type = chInfo.sessionSupported;
 
     // IPMI Spec: The IPMI Enterprise Number is: 7154 (decimal)
