@@ -931,7 +931,7 @@ int ChannelConfig::writeChannelPersistData()
 int ChannelConfig::checkAndReloadNVData()
 {
     std::time_t updateTime = getUpdatedFileTime(channelNvDataFilename);
-    int ret = -1;
+    int ret = 0;
     if (updateTime != nvFileLastUpdatedTime || updateTime == -1)
     {
         try
@@ -942,6 +942,7 @@ int ChannelConfig::checkAndReloadNVData()
         {
             log<level::ERR>("Exception caught in readChannelPersistData.",
                             entry("MSG=%s", e.what()));
+            ret = -1;
         }
     }
     return ret;
@@ -950,7 +951,7 @@ int ChannelConfig::checkAndReloadNVData()
 int ChannelConfig::checkAndReloadVoltData()
 {
     std::time_t updateTime = getUpdatedFileTime(channelVolatileDataFilename);
-    int ret = -1;
+    int ret = 0;
     if (updateTime != voltFileLastUpdatedTime || updateTime == -1)
     {
         try
@@ -961,6 +962,7 @@ int ChannelConfig::checkAndReloadVoltData()
         {
             log<level::ERR>("Exception caught in readChannelVolatileData.",
                             entry("MSG=%s", e.what()));
+            ret = -1;
         }
     }
     return ret;

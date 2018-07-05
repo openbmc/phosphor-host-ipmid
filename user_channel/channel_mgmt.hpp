@@ -91,7 +91,7 @@ class ChannelConfig
     ChannelConfig(ChannelConfig &&) = delete;
     ChannelConfig &operator=(ChannelConfig &&) = delete;
 
-    ~ChannelConfig();
+    ~ChannelConfig() = default;
     ChannelConfig();
 
     bool isValidChannel(const uint8_t &chNum);
