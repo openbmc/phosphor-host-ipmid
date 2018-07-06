@@ -823,7 +823,7 @@ void UserAccess::readUserData()
         throw std::ios_base::failure("Error opening IPMI user data file");
     }
 
-    Json jsonUsersTbl = nullptr;
+    Json jsonUsersTbl = Json::array();
     jsonUsersTbl = Json::parse(iUsrData, nullptr, false);
 
     if (jsonUsersTbl.size() != ipmiMaxUsers)
@@ -834,17 +834,9 @@ void UserAccess::readUserData()
             "Corrupted IPMI user data file - invalid user count");
     }
 
-    for (auto it = jsonUsersTbl.begin(); it != jsonUsersTbl.end(); ++it)
+    for (size_t usrIndex = 1; usrIndex <= ipmiMaxUsers; ++usrIndex)
     {
-        std::string key = it.key();
-        uint8_t usrIndex = 0;
-        unsigned long tmp = std::stoul(key, nullptr);
-        if (tmp < 1 || tmp > ipmiMaxUsers)
-        {
-            throw std::out_of_range("Out of range user id");
-        }
-        usrIndex = static_cast<uint8_t>(tmp);
-        Json userInfo = it.value();
+        Json userInfo = jsonUsersTbl[usrIndex - 1]; // json array starts with 0.
         if (userInfo.is_null())
         {
             log<level::ERR>("Error in reading IPMI user data file - "
@@ -915,7 +907,7 @@ void UserAccess::writeUserData()
             "Error in creating temporary IPMI user data file");
     }
 
-    Json jsonUsersTbl;
+    Json jsonUsersTbl = Json::array();
     for (size_t usrIndex = 1; usrIndex <= ipmiMaxUsers; ++usrIndex)
     {
         Json jsonUserInfo;
@@ -945,7 +937,7 @@ void UserAccess::writeUserData()
         jsonUserInfo[jsonUserEnabled] = usersTbl.user[usrIndex].userEnabled;
         jsonUserInfo[jsonUserInSys] = usersTbl.user[usrIndex].userInSystem;
         jsonUserInfo[jsonFixedUser] = usersTbl.user[usrIndex].fixedUserName;
-        jsonUsersTbl[std::to_string(usrIndex)] = jsonUserInfo;
+        jsonUsersTbl.push_back(jsonUserInfo);
     }
 
     oUsrData << jsonUsersTbl;
