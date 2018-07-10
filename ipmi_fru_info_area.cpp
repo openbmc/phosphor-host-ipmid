@@ -40,6 +40,8 @@ static constexpr uint8_t typeASCII             = 0xC0;
 static constexpr auto maxRecordAttributeValue  = 0x1F;
 
 static constexpr auto secs_from_1970_1996 = 820454400;
+//End of Unix Time on 32-bit machine is 2147483647(0x7FFFFFFF)
+static constexpr auto secs_to_end_of_Unix_time = 2147483647;
 static constexpr auto secs_per_min = 60;
 
 /**
@@ -171,7 +173,7 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
         // Number of minutes from 0:00 hrs 1/1/96.
         // LSbyte first (little endian)
         // 00_00_00h = unspecified."
-        if (raw > secs_from_1970_1996)
+        if ((raw >= secs_from_1970_1996) || (raw <= secs_to_end_of_Unix_time))
         {
             raw -= secs_from_1970_1996;
             raw /= secs_per_min;
