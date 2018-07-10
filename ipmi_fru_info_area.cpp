@@ -40,7 +40,10 @@ static constexpr uint8_t typeASCII             = 0xC0;
 static constexpr auto maxRecordAttributeValue  = 0x1F;
 
 static constexpr auto secs_from_1970_1996 = 820454400;
+static constexpr auto maxMfgDateValue = 0xFFFFFF; //3 Byte length
 static constexpr auto secs_per_min = 60;
+static constexpr auto
+    secs_to_max_mfgdate = secs_from_1970_1996 + secs_per_min * maxMfgDateValue;
 
 /**
  * @brief Format Beginning of Individual IPMI FRU Data Section
@@ -160,7 +163,7 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
 {
     //MFG Date/Time
     auto iter = propMap.find(buildDate);
-    if (iter != propMap.end())
+    if ((iter != propMap.end()) && (iter->second.size() >0))
     {
         tm time = {};
         strptime(iter->second.c_str(), "%F - %H:%M:%S", &time);
@@ -171,7 +174,7 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
         // Number of minutes from 0:00 hrs 1/1/96.
         // LSbyte first (little endian)
         // 00_00_00h = unspecified."
-        if (raw > secs_from_1970_1996)
+        if ((raw >= secs_from_1970_1996) && (raw <= secs_to_max_mfgdate))
         {
             raw -= secs_from_1970_1996;
             raw /= secs_per_min;
