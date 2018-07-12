@@ -32,12 +32,21 @@ struct Context
 {
   using ptr = std::shared_ptr<Context>;
 
-  int msg_id;
+  Context()
+    : netFn(0), cmd(0), channel(0), userId(0), priv(privilegeNone)
+  {
+  }
+
+  Context(NetFn netFn, Cmd cmd, int channel, int userId, Privilege priv)
+    : netFn(netFn), cmd(cmd), channel(channel), userId(userId), priv(priv)
+  {
+  }
+
+  NetFn netFn;
+  Cmd cmd;
   int channel;
-  int userid;
-  int privilege;
-  int netfn;
-  int cmd;
+  int userId;
+  Privilege priv;
   // TODO VM: what about user context -- legacy's void*?
 };
 
@@ -94,7 +103,7 @@ struct Response
   using ptr = std::shared_ptr<Response>;
 
   explicit Response(Context::ptr& context, const uint64_t& msgId)
-    : ctx(context), msgId(msgId) {}
+    : bitStream(0), bitCount(0), ctx(context), msgId(msgId), cc(ccSuccess) {}
 
   // base empty pack
   int pack()
@@ -178,6 +187,7 @@ struct Response
   Context::ptr ctx;
   std::vector<uint8_t> raw;
   const uint64_t msgId;
+  Cc cc;
 };
 
 struct Request
@@ -317,6 +327,12 @@ struct Request
   {
     bitStream = 0;
     bitCount = 0;
+  }
+
+  void reset()
+  {
+    discardBits();
+    rawIndex = 0;
   }
 
   Context::ptr ctx;

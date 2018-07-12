@@ -16,6 +16,8 @@
  */
 #pragma once
 
+#define ALLOW_DEPRECATED_API 1
+
 #if __has_include(<optional>)
 #include <optional>
 #elif __has_include(<experimental/optional>)
@@ -30,6 +32,9 @@ namespace std {
 #else
 #  error optional not available
 #endif
+#include <ipmi/message/types.hpp>
+#include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/asio/connection.hpp>
 
 /* NOTE:
  *
@@ -42,14 +47,32 @@ namespace std {
 namespace ipmi
 {
 
+using Iana = uint24_t;
+
+using Group = uint8_t;
+constexpr Group groupPICMG = 0x00;
+constexpr Group groupDMTG  = 0x01;
+constexpr Group groupSSI   = 0x02;
+constexpr Group groupVSO   = 0x03;
+constexpr Group groupDCMI  = 0xDC;
+
+enum Priority {
+  prioOpenBmcBase = 10,
+  prioOemBase = 20,
+  prioOdmBase = 30,
+  prioCustomBase = 40,
+  prioMax = 50,
+};
+
 /*
  * Specifies the minimum privilege level required to execute the command
  * This means the command can be executed at a given privilege level or higher
  * privilege level. Those commands which can be executed via system interface
  * only should use SYSTEM_INTERFACE
  */
-enum privilege {
-  privilegeCallback = 0x01,
+enum Privilege {
+  privilegeNone = 0x00,
+  privilegeCallback,
   privilegeUser,
   privilegeOperator,
   privilegeAdmin,
@@ -77,6 +100,17 @@ constexpr NetFn netFnApp       = 0x06;
 constexpr NetFn netFnFirmware  = 0x08;
 constexpr NetFn netFnStorage   = 0x0A;
 constexpr NetFn netFnTransport = 0x0C;
+// reserved 0Eh..28h
+constexpr NetFn netFnGroup     = 0x2C;
+constexpr NetFn netFnOem       = 0x2E;
+constexpr NetFn netFnOemOne    = 0x30;
+constexpr NetFn netFnOemTwo    = 0x32;
+constexpr NetFn netFnOemThree  = 0x34;
+constexpr NetFn netFnOemFour   = 0x36;
+constexpr NetFn netFnOemFive   = 0x38;
+constexpr NetFn netFnOemSix    = 0x3A;
+constexpr NetFn netFnOemSeven  = 0x3C;
+constexpr NetFn netFnOemEight  = 0x3E;
 
 // IPMI commands for net functions. Callbacks using this should be careful to
 // parse arguments to the sub-functions and can take advantage of the built-in
@@ -159,4 +193,13 @@ using RspType = std::tuple<ipmi::Cc, std::optional<std::tuple<RetTypes...>>>;
 
 } // namespace ipmi
 
+#include <ipmi/registration.hpp>
 
+// any client can interact with the main asio service
+std::shared_ptr<boost::asio::io_service> getIoService();
+
+// any client can interact with the main sdbus
+std::shared_ptr<sdbusplus::asio::connection> getSdBus();
+
+using work_t = void(void);
+void post_work(work_t work);
