@@ -60,7 +60,7 @@ static constexpr const char *objMapperInterface =
 static constexpr const char *getSubTreeMethod = "GetSubTree";
 static constexpr const char *getObjectMethod = "GetObject";
 
-static constexpr const char *ipmiUserDataFile = "/var/ipmi_user.json";
+static constexpr const char *ipmiUserDataFile = "/var/ipmi/ipmi_user.json";
 static constexpr const char *ipmiGrpName = "ipmi";
 static constexpr size_t privNoAccess = 0xF;
 static constexpr size_t privMask = 0xF;

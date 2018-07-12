@@ -30,7 +30,7 @@ static constexpr uint8_t ipmiMaxUsers = 15;
 static constexpr uint8_t ipmiMaxChannels = 16;
 static constexpr const char *ipmiUserMutex = "ipmi_usr_mutex";
 static constexpr const char *ipmiMutexCleanupLockFile =
-    "/var/ipmi_usr_mutex_cleanup";
+    "/var/ipmi/ipmi_usr_mutex_cleanup";
 
 using DbusUserPropVariant =
     sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
