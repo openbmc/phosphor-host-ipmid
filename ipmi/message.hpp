@@ -37,12 +37,21 @@ struct Context
 {
   using ptr = std::shared_ptr<Context>;
 
-  int msg_id;
+  Context()
+    : netFn(0), cmd(0), channel(0), userId(0), priv(privilegeNone)
+  {
+  }
+
+  Context(NetFn netFn, Cmd cmd, int channel, int userId, Privilege priv)
+    : netFn(netFn), cmd(cmd), channel(channel), userId(userId), priv(priv)
+  {
+  }
+
+  NetFn netFn;
+  Cmd cmd;
   int channel;
-  int userid;
-  int privilege;
-  int netfn;
-  int cmd;
+  int userId;
+  Privilege priv;
   // TODO VM: what about user context -- legacy's void*?
 };
 
@@ -322,6 +331,12 @@ struct Request
   {
     bitStream = 0;
     bitCount = 0;
+  }
+
+  void reset()
+  {
+    discardBits();
+    rawIndex = 0;
   }
 
   Context::ptr ctx;

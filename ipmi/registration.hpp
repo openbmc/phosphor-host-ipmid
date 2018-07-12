@@ -14,23 +14,172 @@
  * limitations under the License.
  */
 #pragma once
+#if __has_include(<any>)
+#include <optional>
+#elif __has_include(<experimental/any>)
+#include <experimental/any>
+namespace std {
+  // splice experimental::any into std
+  using std::experimental::any;
+}
+#else
+#  error any not available
+#endif
+#include <ipmi/ipmi-api.hpp>
+#include <ipmi/handler.hpp>
 
 namespace ipmi
 {
 
-/*
-// key on pair of <netfn, cmd>
-static std::unordered_map<
-  std::pair<int,int>,
-  std::listHandlerBase::ptr>
-> ipmiHandlers;
 
-template <typename Handler>
-void registerHandler(Handler&& h)
+namespace impl
 {
 
-}
-*/
+void registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
+    details::HandlerBase::ptr handler, std::any& ctx);
+void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+    details::HandlerBase::ptr handler, std::any& ctx);
+void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+    details::HandlerBase::ptr handler, std::any& ctx);
 
+} // namespace impl
+
+template <typename Handler>
+void registerHandler(int prio, NetFn netFn, Cmd cmd,
+    Privilege priv, Handler&& handler)
+{
+  auto h = ipmi::details::makeHandler(handler);
+  // use an empty std::any for context since none was passed in
+  std::any empty;
+  impl::registerHandler(prio, netFn, cmd, priv, h, empty);
+}
+
+template <typename Handler, typename Context>
+void registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
+    Handler&& handler, Context& ctx)
+{
+  auto h = ipmi::details::makeHandler(handler);
+  // add in a std::any(ctx) to the mix
+  impl::registerHandler(prio, netFn, cmd, priv, h, std::any(ctx));
+}
+
+/* From IPMI 2.0 spec Network Function Codes Table (Row 2Ch):
+    The first data byte position in requests and respo nses under this network
+    function identifies the defining body that specifies command functionality.
+    Software assumes that the command and completion code field positions will
+    hold command and completion code values.
+
+    The following values are used to ident ify the defining body:
+    00h PICMG - PCI Industrial Computer Manufacturer’s Group.  ( www.picmg.com )
+    01h DMTF Pre-OS Working Group ASF Specification ( www.dmtf.org )
+    02h Server System Infrastructure (SSI) Forum ( www.ssiforum.org )
+    03h VITA Standards Organization (VSO) (www.vita.com)
+    DCh DCMI Specifications ( www.intel.com/go/dcmi )
+    all other Reserved
+
+    When this network function is used, the ID for the defining body occupies
+    the first data byte in a request, and the second data byte (following the
+    completion code) in a response.
+ */
+template <typename Handler>
+void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+    Handler&& handler)
+{
+  auto h = ipmi::details::makeHandler(handler);
+  // use an empty std::any for context since none was passed in
+  std::any empty;
+  impl::registerGroupHandler(prio, group, cmd, priv, h, empty);
+}
+
+template <typename Handler, typename Context>
+void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+    Handler&& handler, Context& ctx)
+{
+  auto h = ipmi::details::makeHandler(handler);
+  // add in a std::any(ctx) to the mix
+  impl::registerGroupHandler(prio, group, cmd, priv, h, std::any(ctx));
+}
+
+/* From IPMI spec Network Function Codes Table (Row 2Eh):
+    The first three data bytes of requests and responses under this network
+    function explicitly identify the OEM or non -IPMI group that specifies the
+    command functionality. While the OEM or non -IPMI group defines the
+    functional semantics for the cmd and remaining data fields, the cmd field
+    is required to hold the same value in requests and responses for a given
+    operation in order to be supported under the IPMI message handling and
+    transport mechanisms.
+
+    When this network function is used, the IANA Enterprise Number for the
+    defining body occupies the first three data bytes in a request, and the
+    first three data bytes following the completion code position in a
+    response.
+ */
+template <typename Handler>
+void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+    Handler&& handler)
+{
+  auto h = ipmi::details::makeHandler(handler);
+  // use an empty std::any for context since none was passed in
+  std::any empty;
+  impl::registerOemHandler(prio, iana, cmd, priv, h, empty);
+}
+
+template <typename Handler, typename Context>
+void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+    Handler&& handler, Context& ctx)
+{
+  auto h = ipmi::details::makeHandler(handler);
+  // add in a std::any(ctx) to the mix
+  impl::registerOemHandler(prio, iana, cmd, priv, h, std::any(ctx));
+}
+
+#ifdef ALLOW_DEPRECATED_API
+/* TODO: deprecated function: print warning once no more *internal*
+ *       IPMI command handlers use this; delete it a year after that.
+ */
+[[deprecated("Use ipmi::registerHandler() instead")]]
+static inline void ipmi_register_callback(ipmi_netfn_t netfn,
+        ipmi_cmd_t cmd, ipmi_context_t context,
+        ipmid_callback_t handler, ipmi_cmd_privilege_t priv)
+{
+  auto h = ipmi::details::makeHandler(handler);
+  // translate priv from deprecated enum to current
+  Privilege realPriv;
+  switch (priv)
+  {
+    case PRIVILEGE_CALLBACK:
+      realPriv = privilegeCallback;
+      break;
+    case PRIVILEGE_USER:
+      realPriv = privilegeUser;
+      break;
+    case PRIVILEGE_OPERATOR:
+      realPriv = privilegeOperator;
+      break;
+    case PRIVILEGE_ADMIN:
+      realPriv = privilegeAdmin;
+      break;
+    case PRIVILEGE_OEM:
+      realPriv = privilegeOem;
+      break;
+    case SYSTEM_INTERFACE:
+      realPriv = privilegeAdmin;
+      break;
+  }
+  auto ctx = std::any();
+  if (context)
+  {
+    ctx = std::any(context);
+  }
+  impl::registerHandler(prioOpenBmcBase, netfn, cmd, realPriv, h, ctx);
+}
+#endif /* ALLOW_DEPRECATED_API */
+/*
+
+// execute the command (old style)
+ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+                      ipmi_response_t response, ipmi_data_len_t data_len);
+
+*/
 } // namespace ipmi
 

@@ -25,9 +25,26 @@
 #include <ipmi/message.hpp>
 
 
+#ifdef ALLOW_DEPRECATED_API
 /* FOR NOW UNTIL INTEGRATION */
 // ----------------------------------------------------------------------------
 
+/*
+ * Specifies the minimum privilege level required to execute the command
+ * This means the command can be executed at a given privilege level or higher
+ * privilege level. Those commands which can be executed via system interface
+ * only should use SYSTEM_INTERFACE
+ */
+enum CommandPrivilege {
+  PRIVILEGE_CALLBACK = 0x01,
+  PRIVILEGE_USER,
+  PRIVILEGE_OPERATOR,
+  PRIVILEGE_ADMIN,
+  PRIVILEGE_OEM,
+  SYSTEM_INTERFACE   = 0xFF,
+};
+
+typedef enum CommandPrivilege ipmi_cmd_privilege_t;
 // IPMI Net Function number as specified by IPMI V2.0 spec.
 // Example :
 // NETFUN_APP      =   (0x06 << 2),
@@ -64,8 +81,12 @@ typedef size_t*   ipmi_data_len_t;
 // Plugin function return the status code
 typedef unsigned char ipmi_ret_t;
 
+typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
+                                       ipmi_response_t, ipmi_data_len_t, ipmi_context_t);
+
 // ----------------------------------------------------------------------------
 /* END NOW UNTIL INTEGRATION */
+#endif /* ALLOW_DEPRECATED_API */
 
 
 
@@ -101,7 +122,7 @@ class IpmiHandler : public HandlerBase
       ipmi_ret_t(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
           ipmi_response_t, ipmi_data_len_t, ipmi_context_t);
  public:
-  IpmiHandler(Handler&& handler)
+  IpmiHandler(const Handler&& handler)
     : handler_(std::move(handler))
   {
   }
@@ -148,6 +169,7 @@ class IpmiHandler : public HandlerBase
     return response;
   }
 
+#ifdef ALLOW_DEPRECATED_API
   /* specialization for legacy handler */
   template <typename T>
   std::enable_if_t<std::is_same<
@@ -167,19 +189,19 @@ class IpmiHandler : public HandlerBase
     response->raw.resize(1 + len);
     return response;
   }
+#endif /* ALLOW_DEPRECATED_API */
+
 };
 
-} // namespace details
-
-// TODO VM: handler ptr alias?
-
 template<typename Handler>
-static inline auto makeHandler(Handler& handler)
+static inline auto makeHandler(const Handler& handler)
 {
-  ipmi::details::HandlerBase::ptr ptr(
-      new ipmi::details::IpmiHandler<decltype(handler)>(handler)
+  HandlerBase::ptr ptr(
+      new IpmiHandler<decltype(handler)>(handler)
     );
   return ptr;
 }
+
+} // namespace details
 
 } // namespace ipmi
