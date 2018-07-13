@@ -118,6 +118,14 @@ libsysintfcmds_la_CXXFLAGS = -std=c++17 $(SYSTEMD_CFLAGS) \
                              $(SDBUSPLUS_CFLAGS)
 
 nobase_include_HEADERS = \
+	ipmi/ipmi-api.hpp \
+	ipmi/handler.hpp \
+	ipmi/filter.hpp \
+	ipmi/message.hpp \
+	ipmi/message/pack.hpp \
+	ipmi/message/types.hpp \
+	ipmi/message/unpack.hpp \
+	ipmi/registration.hpp \
 	host-ipmid/ipmid-api.h \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp \
