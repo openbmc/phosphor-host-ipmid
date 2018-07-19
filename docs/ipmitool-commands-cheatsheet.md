@@ -10,27 +10,27 @@ if the ipmitool is outside the BMC (i.e on the network) then set the interface a
 
 ### Set the interface mode
 
-ipmitool lan set <channel> ipsrc static
+ipmitool lan set `<channel>` ipsrc static
 
 ### Set the IP Address
 
-ipmitool lan set <channel> ipaddr <ip>
+ipmitool lan set `<channel>` ipaddr `<ip>`
 
 ### Set the network mask
 
-ipmitool lan set <channel> netmask <mask>
+ipmitool lan set `<channel>` netmask `<mask>`
 
 ### Set the default gateway
 
-ipmitool lan set <channel> defgw ipaddr <ip>
+ipmitool lan set `<channel>` defgw ipaddr `<ip>`
 
 ### Set the VLAN
 
-ipmitool lan set <channel> vlan id <id>
+ipmitool lan set `<channel>` vlan id `<id>`
 
 ### Delete the VLAN
 
-ipmitool lan set <channel> vlan id off
+ipmitool lan set `<channel>` vlan id off
 
 NOTE: The user can group multiple set operations since the IPMI daemon
 waits for 10 seconds after each set operation before applying the configuration.
