@@ -1,5 +1,15 @@
 #include <bitset>
+#if __has_include(<filesystem>)
+#include <filesystem>
+#elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
+namespace std {
+  // splice experimental::filesystem into std
+  namespace filesystem = std::experimental::filesystem;
+}
+#else
+#  error filesystem not available
+#endif
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
@@ -409,7 +419,7 @@ namespace get
 
 GetSensorResponse assertion(const Info& sensorInfo)
 {
-    namespace fs = std::experimental::filesystem;
+    namespace fs = std::filesystem;
 
     fs::path path{ipmi::sensor::inventoryRoot};
     path += sensorInfo.sensorPath;

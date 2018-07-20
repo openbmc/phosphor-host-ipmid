@@ -1,6 +1,16 @@
 #include <chrono>
 #include <vector>
+#if __has_include(<filesystem>)
+#include <filesystem>
+#elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
+namespace std {
+  // splice experimental::filesystem into std
+  namespace filesystem = std::experimental::filesystem;
+}
+#else
+#  error filesystem not available
+#endif
 #include <phosphor-logging/elog-errors.hpp>
 #include "host-ipmid/ipmid-api.h"
 #include "xyz/openbmc_project/Common/error.hpp"
@@ -241,7 +251,7 @@ void readLoggingObjectPaths(ObjectPaths& paths)
         std::sort(paths.begin(), paths.end(), [](const std::string& a,
                                                  const std::string& b)
         {
-            namespace fs = std::experimental::filesystem;
+            namespace fs = std::filesystem;
             fs::path pathA(a);
             fs::path pathB(b);
             auto idA = std::stoul(pathA.filename().string());
