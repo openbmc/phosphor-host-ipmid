@@ -7,6 +7,17 @@
 #include "types.hpp"
 #include "utils.hpp"
 
+#if __has_include(<filesystem>)
+#include <filesystem>
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
+namespace std {
+  // splice experimental::filesystem into std
+  namespace filesystem = std::experimental::filesystem;
+}
+#else
+#  error filesystem not available
+#endif
 #include <fstream>
 #include <stdio.h>
 #include <stdint.h>
@@ -16,7 +27,6 @@
 #include <vector>
 #include <string>
 #include <cstddef>
-#include <experimental/filesystem>
 
 #include <arpa/inet.h>
 #include "transporthandler.hpp"
@@ -49,7 +59,7 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using Version = sdbusplus::xyz::openbmc_project::Software::server::Version;
 using Activation =
     sdbusplus::xyz::openbmc_project::Software::server::Activation;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 // Offset in get device id command.
 typedef struct

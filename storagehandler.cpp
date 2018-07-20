@@ -2,7 +2,17 @@
 #include <arpa/inet.h>
 #include <chrono>
 #include <cstdio>
+#if __has_include(<filesystem>)
+#include <filesystem>
+#elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
+namespace std {
+  // splice experimental::filesystem into std
+  namespace filesystem = std::experimental::filesystem;
+}
+#else
+#  error filesystem not available
+#endif
 #include <mapper.h>
 #include <string>
 #include <systemd/sd-bus.h>
@@ -203,7 +213,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         else
         {
-            namespace fs = std::experimental::filesystem;
+            namespace fs = std::filesystem;
             fs::path path(*iter);
             record.nextRecordID = static_cast<uint16_t>
                      (std::stoul(std::string(path.filename().c_str())));

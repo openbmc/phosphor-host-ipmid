@@ -5,7 +5,17 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 #include <string>
+#if __has_include(<filesystem>)
+#include <filesystem>
+#elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
+namespace std {
+  // splice experimental::filesystem into std
+  namespace filesystem = std::experimental::filesystem;
+}
+#else
+#  error filesystem not available
+#endif
 
 #include "app/channel.hpp"
 #include "host-ipmid/ipmid-api.h"
@@ -36,7 +46,7 @@ std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 void register_netfn_transport_functions() __attribute__((constructor));
 

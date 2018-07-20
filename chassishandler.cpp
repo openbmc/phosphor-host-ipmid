@@ -19,7 +19,17 @@
 #include <fstream>
 #include <future>
 #include <chrono>
+#if __has_include(<filesystem>)
+#include <filesystem>
+#elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
+namespace std {
+  // splice experimental::filesystem into std
+  namespace filesystem = std::experimental::filesystem;
+}
+#else
+#  error filesystem not available
+#endif
 #include <string>
 #include <map>
 
@@ -122,7 +132,7 @@ struct GetPOHCountResponse
 // Phosphor Host State manager
 namespace State = sdbusplus::xyz::openbmc_project::State::server;
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
