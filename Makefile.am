@@ -12,7 +12,7 @@ ipmid_SOURCES = \
 	oemrouter.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 
-libapphandler_BUILT_LIST = \
+libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
 	inventory-sensor-gen.cpp \
 	fru-read-gen.cpp \
@@ -20,7 +20,7 @@ libapphandler_BUILT_LIST = \
 
 BUILT_SOURCES = \
                ipmiwhitelist.cpp \
-               $(libapphandler_BUILT_LIST)
+               $(libipmi20_BUILT_LIST)
 
 
 CLEANFILES = $(BUILT_SOURCES)
@@ -55,9 +55,9 @@ fru-read-gen.cpp:
 channel-gen.cpp:
 	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
-libapphandlerdir = ${libdir}/ipmid-providers
-libapphandler_LTLIBRARIES = libapphandler.la
-libapphandler_la_SOURCES = \
+libipmi20dir = ${libdir}/ipmid-providers
+libipmi20_LTLIBRARIES = libipmi20.la
+libipmi20_la_SOURCES = \
 	net.cpp \
 	app/channel.cpp \
 	app/watchdog.cpp \
@@ -77,7 +77,7 @@ libapphandler_la_SOURCES = \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
-	$(libapphandler_BUILT_LIST)
+	$(libipmi20_BUILT_LIST)
 
 @CODE_COVERAGE_RULES@
 
@@ -86,8 +86,12 @@ XFAIL_TESTS =
 
 TESTS = $(check_PROGRAMS)
 
-libapphandler_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) $(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs -version-info 0:0:0 -shared
-libapphandler_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+libipmi20_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
+	-version-info 0:0:0 -shared
+libipmi20_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 
 libsysintfcmdsdir = ${libdir}/ipmid-providers
 libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
