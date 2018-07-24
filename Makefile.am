@@ -111,7 +111,8 @@ nobase_include_HEADERS = \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp \
 	host-ipmid/oemopenbmc.hpp \
-	host-ipmid/oemrouter.hpp
+	host-ipmid/oemrouter.hpp \
+	host-ipmid/oemgoog.hpp
 
 # Forcing the build of self and then subdir
 SUBDIRS = . test softoff
