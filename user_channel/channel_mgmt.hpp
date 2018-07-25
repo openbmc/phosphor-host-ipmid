@@ -167,6 +167,8 @@ class ChannelConfig
 
     EChannelProtocolType convertToProtocolTypeIndex(const std::string& value);
 
+    uint8_t convertToChannelIndexNumber(const uint8_t& chNum);
+
     std::string convertToNetInterface(const std::string& value);
 };
 
