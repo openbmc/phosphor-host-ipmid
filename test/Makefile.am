@@ -18,6 +18,7 @@ sample_unittest_LDADD = $(top_builddir)/sample.o
 check_PROGRAMS += %reldir%/sample_unittest
 
 # Build/add oemrouter_unittest to test suite
-check_PROGRAMS += oemrouter_unittest
-oemrouter_unittest_SOURCES = oemrouter_unittest.cpp
-oemrouter_unittest_LDADD = $(top_builddir)/oemrouter.o
+# Issue #3325
+#check_PROGRAMS += oemrouter_unittest
+#oemrouter_unittest_SOURCES = oemrouter_unittest.cpp
+#oemrouter_unittest_LDADD = $(top_builddir)/oemrouter.o
