@@ -22,6 +22,7 @@ namespace ipmi
 {
 
 static constexpr uint8_t maxIpmiChannels = 16;
+static constexpr uint8_t selfChNum = 0xE;
 
 // IPMI return codes specific to channel
 enum ipmi_channel_return_codes
