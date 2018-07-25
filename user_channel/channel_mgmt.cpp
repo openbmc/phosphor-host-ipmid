@@ -107,6 +107,11 @@ static std::unordered_map<std::string, EChannelMediumType> mediumTypeMap = {
     {"oem", EChannelMediumType::oem},
     {"unknown", EChannelMediumType::unknown}};
 
+static std::unordered_map<EInterfaceIndex, std::string> interfaceMap = {
+    {interfaceKCS, "KCS"},
+    {interfaceLAN1, "LAN1"},
+    {interfaceUnknown, "unknown"}};
+
 static std::unordered_map<std::string, EChannelProtocolType> protocolTypeMap = {
     {"na", EChannelProtocolType::na},
     {"ipmb-1.0", EChannelProtocolType::ipmbV10},
@@ -778,6 +783,39 @@ EChannelProtocolType
     }
 
     return static_cast<EChannelProtocolType>(it->second);
+}
+
+uint8_t ChannelConfig::convertToChannelIndexNumber(const uint8_t& chNum)
+{
+
+    // TODO: There is limitation in current design. we cannot detect exact
+    // LAN interface(eth0 or eth1) so Implementation may be updated
+    // when there is any design update to figure out all the interfaces
+    // independently based on the message.
+
+    static uint8_t curChannel = 0xFF;
+
+    if (curChannel == 0xFF)
+    {
+        auto it = interfaceMap.find(getInterfaceIndex());
+        if (it == interfaceMap.end())
+        {
+            log<level::ERR>("Invalid Interface type ",
+                            entry("InterfaceIndex: %d", getInterfaceIndex()));
+            throw std::invalid_argument("Invalid interface type.");
+        }
+
+        for (uint8_t channel = 0; channel < maxIpmiChannels; channel++)
+        {
+            std::string& interfaceName = it->second;
+            if (channelData[channel].chName == interfaceName)
+            {
+                curChannel = channelData[channel].chID;
+                break;
+            }
+        }
+    }
+    return ((chNum == 0xE) ? curChannel : chNum);
 }
 
 std::string ChannelConfig::convertToNetInterface(const std::string& value)
