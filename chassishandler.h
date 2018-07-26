@@ -5,7 +5,7 @@
 #include <cstddef>
 
 // IPMI commands for Chassis net functions.
-enum ipmi_netfn_app_cmds
+enum ipmi_netfn_chassis_cmds
 {
     IPMI_CMD_GET_CHASSIS_CAP      = 0x00,
     // Chassis Status
