@@ -64,3 +64,13 @@ Makefile
 /fru-read-gen.cpp
 /app/*.lo
 /channel-gen.cpp
+
+# ignore vim swap files
+.*.sw*
+# failures from patch
+*.orig
+*.rej
+# backup files from some editors
+*~
+.cscope/
+build/
