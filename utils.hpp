@@ -183,7 +183,7 @@ void setDbusProperty(sdbusplus::bus::bus& bus,
 ObjectTree getAllDbusObjects(sdbusplus::bus::bus& bus,
                              const std::string& serviceRoot,
                              const std::string& interface,
-                             const std::string& match);
+                             const std::string& match = {});
 
 /** @brief Deletes all the dbus objects from the given service root
            which matches the object identifier.
