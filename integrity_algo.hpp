@@ -17,15 +17,16 @@ namespace integrity
  * contents for the AuthCode “signature” field that accompanies authenticated
  * IPMI v2.0/RMCP+ messages once the session has been established. If the
  * Integrity Algorithm is none the AuthCode value is not calculated and the
- * AuthCode field in the message is not present.
+ * AuthCode field in the message is not present. Based on security
+ * recommendations NONE will not be supported.
  */
 enum class Algorithms : uint8_t
 {
-    NONE,                  // Mandatory
-    HMAC_SHA1_96,          // Mandatory
-    HMAC_MD5_128,          // Optional
-    MD5_128,               // Optional
-    HMAC_SHA256_128,       // Optional
+    NONE,            // Mandatory (implemented, not supported)
+    HMAC_SHA1_96,    // Mandatory (implemented, default choice in ipmitool)
+    HMAC_MD5_128,    // Optional (not implemented)
+    MD5_128,         // Optional (not implemented)
+    HMAC_SHA256_128, // Optional (implemented, best available)
 };
 
 /**
@@ -90,8 +91,7 @@ class Interface
          */
         static bool isAlgorithmSupported(Algorithms algo)
         {
-            if (algo == Algorithms::NONE ||
-                algo == Algorithms::HMAC_SHA1_96 ||
+            if (algo == Algorithms::HMAC_SHA1_96 ||
                 algo == Algorithms::HMAC_SHA256_128)
             {
                return true;

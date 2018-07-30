@@ -20,11 +20,12 @@ namespace crypt
  * When payload data is encrypted, there may be additional “Confidentiality
  * Header” and/or “Confidentiality Trailer” fields that are included within the
  * payload. The size and definition of those fields is specific to the
- * particular confidentiality algorithm.
+ * particular confidentiality algorithm. Based on security recommendations
+ * encrypting IPMI traffic is preferred, so NONE is not supported.
  */
 enum class Algorithms : uint8_t
 {
-    NONE,               /**< No encryption (mandatory option) */
+    NONE,               /**< No encryption (mandatory , not supported) */
     AES_CBC_128,        /**< AES-CBC-128 Algorithm (mandatory option) */
     xRC4_128,           /**< xRC4-128 Algorithm (optional option) */
     xRC4_40,            /**< xRC4-40 Algorithm (optional option) */
@@ -86,7 +87,7 @@ class Interface
          */
         static bool isAlgorithmSupported(Algorithms algo)
         {
-            if (algo == Algorithms::NONE || algo == Algorithms::AES_CBC_128)
+            if (algo == Algorithms::AES_CBC_128)
             {
                return true;
             }

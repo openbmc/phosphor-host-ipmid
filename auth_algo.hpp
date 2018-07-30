@@ -27,10 +27,10 @@ extern const std::string userName;
  */
 enum class Algorithms : uint8_t
 {
-    RAKP_NONE = 0,              // Mandatory
-    RAKP_HMAC_SHA1,             // Mandatory
-    RAKP_HMAC_MD5,              // Optional
-    RAKP_HMAC_SHA256,           // Optional
+    RAKP_NONE = 0,    // Mandatory (implemented, not supported)
+    RAKP_HMAC_SHA1,   // Mandatory (implemented, default choice in ipmitool)
+    RAKP_HMAC_MD5,    // Optional (not implemented)
+    RAKP_HMAC_SHA256, // Optional (implemented, best available)
     // Reserved used to indicate an invalid authentication algorithm
     RAKP_HMAC_INVALID = 0xB0
 };
@@ -102,8 +102,7 @@ class Interface
          */
         static bool isAlgorithmSupported(Algorithms algo)
         {
-            if (algo == Algorithms::RAKP_NONE ||
-                algo == Algorithms::RAKP_HMAC_SHA1 ||
+            if (algo == Algorithms::RAKP_HMAC_SHA1 ||
                 algo == Algorithms::RAKP_HMAC_SHA256)
             {
                return true;
