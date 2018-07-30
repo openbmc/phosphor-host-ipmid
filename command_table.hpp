@@ -10,23 +10,31 @@
 namespace command
 {
 
-union CommandID
+struct CommandID
 {
-    uint32_t command;
-
-    uint8_t reserved;
-    message::PayloadType payloadType;
-
-    union
+    static constexpr size_t lunBits = 2;
+    CommandID(uint32_t command) : command(command)
     {
-        uint8_t netFn : 6;
-        uint8_t lun : 2;
+    }
 
-        uint8_t netFnLun;
-    } NetFnLun;
-
-    uint8_t cmd;
-} __attribute__((packed));
+    uint8_t netFnLun() const
+    {
+        return static_cast<uint8_t>(command >> CHAR_BIT);
+    }
+    uint8_t netFn() const
+    {
+        return netFnLun() >> lunBits;
+    }
+    uint8_t lun() const
+    {
+        return netFnLun() & ((1 << (lunBits + 1)) - 1);
+    }
+    uint8_t cmd() const
+    {
+        return static_cast<uint8_t>(command);
+    }
+    uint32_t command;
+};
 
 /**
  * CommandFunctor is the functor register for commands defined in
@@ -196,47 +204,6 @@ class NetIpmidEntry final : public Entry
     CommandFunctor functor;
 
     bool sessionless;
-};
-
-/**
- * @class ProviderIpmidEntry
- *
- * ProviderIpmidEntry is used to register commands to the Command Table, that
- * are registered by IPMI provider libraries.
- *
- */
-class ProviderIpmidEntry final : public Entry
-{
-  public:
-    ProviderIpmidEntry(CommandID command, ipmid_callback_t functor,
-                       session::Privilege privilege) :
-        Entry(command, privilege),
-        functor(functor)
-    {
-    }
-
-    /**
-     * @brief Execute the command
-     *
-     * Execute the callback handler
-     *
-     * @param[in] commandData - Request Data for the command
-     * @param[in] handler - Reference to the Message Handler
-     *
-     * @return Response data for the command
-     */
-    std::vector<uint8_t>
-        executeCommand(std::vector<uint8_t>& commandData,
-                       const message::Handler& handler) override;
-
-    virtual ~ProviderIpmidEntry() = default;
-    ProviderIpmidEntry(const ProviderIpmidEntry&) = default;
-    ProviderIpmidEntry& operator=(const ProviderIpmidEntry&) = default;
-    ProviderIpmidEntry(ProviderIpmidEntry&&) = default;
-    ProviderIpmidEntry& operator=(ProviderIpmidEntry&&) = default;
-
-  private:
-    ipmid_callback_t functor;
 };
 
 /**

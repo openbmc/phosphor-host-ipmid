@@ -53,8 +53,7 @@ AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libm
 AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd development package required])])
 
 # Checks for library functions.
-LT_INIT([dlopen disable-static shared])
-LT_LIB_DLLOAD
+LT_INIT([disable-static shared])
 
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT

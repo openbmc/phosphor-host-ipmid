@@ -6,11 +6,22 @@
 #include "sessions_manager.hpp"
 
 #include <iomanip>
+#include <main.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <user_channel/user_layer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
+
+namespace ipmi
+{
+using Value = sdbusplus::message::variant<bool, uint8_t, int16_t, uint16_t,
+                                          int32_t, uint32_t, int64_t, uint64_t,
+                                          double, std::string>;
+
+} // namespace ipmi
 
 namespace command
 {
@@ -23,8 +34,7 @@ void Table::registerCommand(CommandID inCommand, std::unique_ptr<Entry>&& entry)
     {
         log<level::DEBUG>(
             "Already Registered",
-            phosphor::logging::entry("SKIPPED_ENTRY=0x%x",
-                                     uint32_t(inCommand.command)));
+            phosphor::logging::entry("SKIPPED_ENTRY=0x%x", inCommand.command));
         return;
     }
 
@@ -43,8 +53,52 @@ std::vector<uint8_t> Table::executeCommand(uint32_t inCommand,
 
     if (iterator == commandTable.end())
     {
-        response.resize(1);
-        response[0] = IPMI_CC_INVALID;
+        CommandID command(inCommand);
+
+        auto bus = getSdBus();
+        // forward the request onto the main ipmi queue
+        auto method = bus->new_method_call(
+            "xyz.openbmc_project.Ipmi.Host", "/xyz/openbmc_project/Ipmi",
+            "xyz.openbmc_project.Ipmi.Server", "execute");
+        uint8_t lun = command.lun();
+        uint8_t netFn = command.netFn();
+        uint8_t cmd = command.cmd();
+        std::shared_ptr<session::Session> session =
+            std::get<session::Manager&>(singletonPool)
+                .getSession(handler.sessionID);
+        std::map<std::string, ipmi::Value> options = {
+            {"userId", ipmi::Value(ipmi::ipmiUserGetUserId(session->userName))},
+            {"privilege", ipmi::Value(static_cast<int>(session->curPrivLevel))},
+        };
+        method.append(netFn, lun, cmd, commandData, options);
+        using IpmiDbusRspType = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t,
+                                           std::vector<uint8_t>>;
+        IpmiDbusRspType rspTuple;
+        try
+        {
+            auto reply = bus->call(method);
+            reply.read(rspTuple);
+        }
+        catch (const sdbusplus::exception::SdBusError& e)
+        {
+            response.push_back(IPMI_CC_UNSPECIFIED_ERROR);
+            log<level::ERR>("Error sending command to ipmi queue");
+            elog<InternalFailure>();
+        }
+        auto& [rnetFn, rlun, rcmd, cc, responseData] = rspTuple;
+        if (uint8_t(netFn + 1) != rnetFn || rlun != lun || rcmd != cmd)
+        {
+            response.push_back(IPMI_CC_UNSPECIFIED_ERROR);
+            log<level::ERR>("DBus call/response mismatch from ipmi queue");
+            elog<InternalFailure>();
+        }
+        else
+        {
+            response.reserve(1 + responseData.size());
+            response.push_back(cc);
+            response.insert(response.end(), responseData.begin(),
+                            responseData.end());
+        }
     }
     else
     {
@@ -80,62 +134,13 @@ std::vector<uint8_t>
         errResponse.resize(1);
         errResponse[0] = IPMI_CC_INSUFFICIENT_PRIVILEGE;
         log<level::INFO>("Table: Insufficient privilege for command",
-                         entry("LUN=%x", int(command.NetFnLun.lun)),
-                         entry("NETFN=%x", int(command.NetFnLun.netFn)),
-                         entry("CMD=%x", command.cmd));
+                         entry("LUN=%x", command.lun()),
+                         entry("NETFN=%x", command.netFn()),
+                         entry("CMD=%x", command.cmd()));
         return errResponse;
     }
 
     return functor(commandData, handler);
-}
-
-std::vector<uint8_t>
-    ProviderIpmidEntry::executeCommand(std::vector<uint8_t>& commandData,
-                                       const message::Handler& handler)
-{
-    std::vector<uint8_t> response(message::parser::MAX_PAYLOAD_SIZE - 1);
-    size_t respSize = commandData.size();
-    ipmi_ret_t ipmiRC = IPMI_CC_UNSPECIFIED_ERROR;
-    std::shared_ptr<session::Session> session =
-        std::get<session::Manager&>(singletonPool)
-            .getSession(handler.sessionID);
-
-    if (session->curPrivLevel >= Entry::getPrivilege())
-    {
-        try
-        {
-            ipmiRC = functor(0, 0, reinterpret_cast<void*>(commandData.data()),
-                             reinterpret_cast<void*>(response.data() + 1),
-                             &respSize, NULL);
-        }
-        // IPMI command handlers can throw unhandled exceptions, catch those
-        // and return sane error code.
-        catch (const std::exception& e)
-        {
-            log<level::ERR>("Table: Unspecified error for command",
-                            entry("EXCEPTION=%s", e.what()),
-                            entry("LUN=%x", int(command.NetFnLun.lun)),
-                            entry("NETFN=%x", int(command.NetFnLun.netFn)),
-                            entry("CMD=%x", command.cmd));
-            respSize = 0;
-            // fall through
-        }
-    }
-    else
-    {
-        respSize = 0;
-        ipmiRC = IPMI_CC_INSUFFICIENT_PRIVILEGE;
-    }
-    /*
-     * respSize gets you the size of the response data for the IPMI command. The
-     * first byte in a response to the IPMI command is the Completion Code.
-     * So we are inserting completion code as the first byte and incrementing
-     * the response payload size by the size of the completion code.
-     */
-    response[0] = ipmiRC;
-    response.resize(respSize + sizeof(ipmi_ret_t));
-
-    return response;
 }
 
 } // namespace command
