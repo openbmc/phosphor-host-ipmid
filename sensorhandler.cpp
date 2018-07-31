@@ -619,8 +619,10 @@ void getSensorThresholds(uint8_t sensorNum,
                                                      info.sensorPath,
                                                      warningThreshIntf);
 
-    double warnLow = warnThresholds["WarningLow"].get<int64_t>();
-    double warnHigh = warnThresholds["WarningHigh"].get<int64_t>();
+    double warnLow = mapbox::util::apply_visitor(ipmi::VariantToDoubleVisitor(),
+                                                 warnThresholds["WarningLow"]);
+    double warnHigh = mapbox::util::apply_visitor(
+        ipmi::VariantToDoubleVisitor(), warnThresholds["WarningHigh"]);
 
     if (warnLow != 0)
     {
@@ -644,8 +646,10 @@ void getSensorThresholds(uint8_t sensorNum,
                                                      service,
                                                      info.sensorPath,
                                                      criticalThreshIntf);
-    double critLow = critThresholds["CriticalLow"].get<int64_t>();
-    double critHigh = critThresholds["CriticalHigh"].get<int64_t>();
+    double critLow = mapbox::util::apply_visitor(ipmi::VariantToDoubleVisitor(),
+                                                 critThresholds["CriticalLow"]);
+    double critHigh = mapbox::util::apply_visitor(
+        ipmi::VariantToDoubleVisitor(), critThresholds["CriticalHigh"]);
 
     if (critLow != 0)
     {
