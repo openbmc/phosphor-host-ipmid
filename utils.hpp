@@ -208,6 +208,27 @@ ObjectTree getAllAncestors(sdbusplus::bus::bus& bus,
                            const std::string& path,
                            InterfaceList&& interfaces);
 
+/** @struct VariantToDoubleVisitor
+ *  @brief Visitor to convert variants to doubles
+ *  @details Preforms a static cast on the underlying type
+ */
+struct VariantToDoubleVisitor
+{
+    template <typename T>
+    std::enable_if_t<std::is_arithmetic<T>::value, double>
+    operator()(const T &t) const
+    {
+        return static_cast<double>(t);
+    }
+
+    template <typename T>
+    std::enable_if_t<!std::is_arithmetic<T>::value, double>
+    operator()(const T &t) const
+    {
+        throw std::invalid_argument("Cannot translate type to double");
+    }
+};
+
 namespace method_no_args
 {
 
