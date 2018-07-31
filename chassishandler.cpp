@@ -1180,6 +1180,7 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 DEFAULT_IDENTIFY_TIME_OUT;
     bool forceIdentify = (*data_len == chassisIdentifyReqLength) ?
             (static_cast<uint8_t*>(request))[forceIdentifyPos] & 0x01 : false;
+
     if (identifyInterval || forceIdentify)
     {
         // stop the timer if already started, for force identify we should
@@ -1203,6 +1204,10 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
                         std::chrono::seconds(identifyInterval));
         identifyTimer->startTimer(time);
+    }
+    else if (!identifyInterval)
+    {
+        enclosureIdentifyLedOff();
     }
     return IPMI_CC_OK;
 }
