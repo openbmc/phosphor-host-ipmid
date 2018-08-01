@@ -25,8 +25,12 @@ BUILT_SOURCES = \
 
 CLEANFILES = $(BUILT_SOURCES)
 
+BOOST_CXX = -DBOOST_ERROR_CODE_HEADER_ONLY \
+	    -DBOOST_SYSTEM_NO_DEPRECATED \
+	    -DBOOST_ALL_NO_LIB
 #TODO - Make this path a configure option (bitbake parameter)
-ipmid_CPPFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" \
+ipmid_CXXFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" \
+		 $(BOOST_CXX) \
                  $(PHOSPHOR_LOGGING_CFLAGS) \
                  $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 ipmid_LDFLAGS = \
@@ -35,6 +39,8 @@ ipmid_LDFLAGS = \
 	$(LIBADD_DLOPEN) \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	-lstdc++fs \
+	-pthread \
 	-export-dynamic
 
 # TODO: Rather than use -export-dynamic, we should use -export-symbol to have a
@@ -90,7 +96,7 @@ libipmi20_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(BOOST_CXX) $(PHOSPHOR_LOGGING_CFLAGS) \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 
 libsysintfcmdsdir = ${libdir}/ipmid-providers
@@ -105,6 +111,7 @@ libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) \
                             $(SDBUSPLUS_LIBS) \
                             -version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
+			     $(BOOST_CXX) \
                              $(libmapper_CFLAGS) \
                              $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
                              $(PHOSPHOR_LOGGING_CFLAGS) \
