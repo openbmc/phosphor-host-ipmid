@@ -112,7 +112,18 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     responseData->eraseTimeStamp = ipmi::sel::invalidTimeStamp;
     responseData->operationSupport = ipmi::sel::operationSupport;
 
-    ipmi::sel::readLoggingObjectPaths(cache::paths);
+    try
+    {
+        ipmi::sel::readLoggingObjectPaths(cache::paths);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        // No action if reading log objects have failed for this command.
+        // readLoggingObjectPaths will throw exception if there are no log
+        // entries. The command will be responded with number of SEL entries
+        // as 0.
+    }
+
     responseData->entries = 0;
     responseData->addTimeStamp = ipmi::sel::invalidTimeStamp;
 
@@ -267,7 +278,17 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_RESERVATION_ID;
     }
 
-    ipmi::sel::readLoggingObjectPaths(cache::paths);
+    try
+    {
+        ipmi::sel::readLoggingObjectPaths(cache::paths);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        // readLoggingObjectPaths will throw exception if there are no error
+        // log entries.
+        *data_len = 0;
+        return IPMI_CC_SENSOR_INVALID;
+    }
 
     if (cache::paths.empty())
     {
@@ -371,6 +392,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     }
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    ipmi::sel::ObjectPaths objectPaths;
     auto depth = 0;
 
     auto mapperCall =
@@ -380,17 +402,25 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     mapperCall.append(depth);
     mapperCall.append(ipmi::sel::ObjectPaths({ipmi::sel::logEntryIntf}));
 
-    auto reply = bus.call(mapperCall);
-    if (reply.is_method_error())
+    try
     {
-        memcpy(response, &eraseProgress, sizeof(eraseProgress));
-        *data_len = sizeof(eraseProgress);
-        return IPMI_CC_OK;
-    }
+        auto reply = bus.call(mapperCall);
+        if (reply.is_method_error())
+        {
+            memcpy(response, &eraseProgress, sizeof(eraseProgress));
+            *data_len = sizeof(eraseProgress);
+            return IPMI_CC_OK;
+        }
 
-    ipmi::sel::ObjectPaths objectPaths;
-    reply.read(objectPaths);
-    if (objectPaths.empty())
+        reply.read(objectPaths);
+        if (objectPaths.empty())
+        {
+            memcpy(response, &eraseProgress, sizeof(eraseProgress));
+            *data_len = sizeof(eraseProgress);
+            return IPMI_CC_OK;
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
     {
         memcpy(response, &eraseProgress, sizeof(eraseProgress));
         *data_len = sizeof(eraseProgress);
