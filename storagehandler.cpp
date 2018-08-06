@@ -98,7 +98,16 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     responseData->eraseTimeStamp = ipmi::sel::invalidTimeStamp;
     responseData->operationSupport = ipmi::sel::operationSupport;
 
-    ipmi::sel::readLoggingObjectPaths(cache::paths);
+    try
+    {
+        ipmi::sel::readLoggingObjectPaths(cache::paths);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        // No action if reading log objects have failed for this command.
+        // The command will be responded with number of SEL entries as 0.
+    }
+
     responseData->entries = 0;
     responseData->addTimeStamp = ipmi::sel::invalidTimeStamp;
 
