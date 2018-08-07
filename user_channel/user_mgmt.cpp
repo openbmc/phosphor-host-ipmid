@@ -958,8 +958,8 @@ bool UserAccess::addUserEntry(const std::string &userName,
                               const std::string &sysPriv, const bool &enabled)
 {
     UsersTbl *userData = getUsersTblPtr();
-    size_t usrIndex = 1;
-    for (; usrIndex <= ipmiMaxUsers; ++usrIndex)
+    size_t freeIndex = 0xFF;
+    for (size_t usrIndex = 1; usrIndex <= ipmiMaxUsers; ++usrIndex)
     {
         std::string curName(
             reinterpret_cast<char *>(userData->user[usrIndex].userName), 0,
@@ -972,30 +972,32 @@ bool UserAccess::addUserEntry(const std::string &userName,
         }
 
         if ((!userData->user[usrIndex].userInSystem) &&
-            (userData->user[usrIndex].userName[0] == '\0'))
+            (userData->user[usrIndex].userName[0] == '\0') &&
+            (freeIndex == 0xFF))
         {
-            break;
+            freeIndex = usrIndex;
         }
     }
-    if (usrIndex > ipmiMaxUsers)
+    if (freeIndex == 0xFF)
     {
         log<level::ERR>("No empty slots found");
         return false;
     }
-    std::strncpy(reinterpret_cast<char *>(userData->user[usrIndex].userName),
+    std::strncpy(reinterpret_cast<char *>(userData->user[freeIndex].userName),
                  userName.c_str(), ipmiMaxUserName);
     uint8_t priv =
         static_cast<uint8_t>(UserAccess::convertToIPMIPrivilege(sysPriv)) &
         privMask;
     for (size_t chIndex = 0; chIndex < ipmiMaxChannels; ++chIndex)
     {
-        userData->user[usrIndex].userPrivAccess[chIndex].privilege = priv;
-        userData->user[usrIndex].userPrivAccess[chIndex].ipmiEnabled = true;
-        userData->user[usrIndex].userPrivAccess[chIndex].linkAuthEnabled = true;
-        userData->user[usrIndex].userPrivAccess[chIndex].accessCallback = true;
+        userData->user[freeIndex].userPrivAccess[chIndex].privilege = priv;
+        userData->user[freeIndex].userPrivAccess[chIndex].ipmiEnabled = true;
+        userData->user[freeIndex].userPrivAccess[chIndex].linkAuthEnabled =
+            true;
+        userData->user[freeIndex].userPrivAccess[chIndex].accessCallback = true;
     }
-    userData->user[usrIndex].userInSystem = true;
-    userData->user[usrIndex].userEnabled = enabled;
+    userData->user[freeIndex].userInSystem = true;
+    userData->user[freeIndex].userEnabled = enabled;
 
     return true;
 }
