@@ -49,6 +49,13 @@ struct PrivAccess
     uint8_t reserved : 1;
 } __attribute__((packed));
 
+/** @brief initializes user management
+ *
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserInit();
+
 /** @brief determines valid userId
  *
  *  @param[in] user id

@@ -396,6 +396,7 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void registerNetfnFirmwareFunctions()
 {
+    ipmiUserInit();
     print_registration(NETFUN_APP, IPMI_CMD_SET_USER_ACCESS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_ACCESS, NULL,
                            ipmiSetUserAccess, PRIVILEGE_ADMIN);

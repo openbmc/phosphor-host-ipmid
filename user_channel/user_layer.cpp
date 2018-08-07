@@ -19,6 +19,12 @@
 
 namespace ipmi
 {
+
+ipmi_ret_t ipmiUserInit()
+{
+    getUserAccessObject();
+    return IPMI_CC_OK;
+}
 bool ipmiUserIsValidUserId(const uint8_t &userId)
 {
     return UserAccess::isValidUserId(userId);

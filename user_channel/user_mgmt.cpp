@@ -22,7 +22,6 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/server/object.hpp>
-#include <variantvisitors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/User/Common/error.hpp>
 #include <fstream>
@@ -97,7 +96,11 @@ static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-custom"    // PRIVILEGE_OEM - 5
 };
 
-static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+inline static sdbusplus::bus::bus &getBus()
+{
+    static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+    return bus;
+}
 
 using namespace phosphor::logging;
 using Json = nlohmann::json;
@@ -118,13 +121,13 @@ std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal(nullptr);
 std::string getUserService(sdbusplus::bus::bus &bus, const std::string &intf,
                            const std::string &path)
 {
-    auto mapperCall = bus.new_method_call(objMapperService, objMapperPath,
-                                          objMapperInterface, getObjectMethod);
+    auto mapperCall = getBus().new_method_call(
+        objMapperService, objMapperPath, objMapperInterface, getObjectMethod);
 
     mapperCall.append(path);
     mapperCall.append(std::vector<std::string>({intf}));
 
-    auto mapperResponseMsg = bus.call(mapperCall);
+    auto mapperResponseMsg = getBus().call(mapperCall);
 
     if (mapperResponseMsg.is_method_error())
     {
@@ -148,12 +151,12 @@ void setDbusProperty(sdbusplus::bus::bus &bus, const std::string &service,
                      const DbusUserPropVariant &value)
 {
     auto method =
-        bus.new_method_call(service.c_str(), objPath.c_str(),
-                            dBusPropertiesInterface, setPropertiesMethod);
+        getBus().new_method_call(service.c_str(), objPath.c_str(),
+                                 dBusPropertiesInterface, setPropertiesMethod);
 
     method.append(interface, property, value);
 
-    if (!bus.call(method))
+    if (!getBus().call(method))
     {
         log<level::ERR>("Failed to set property",
                         entry("PROPERTY=%s", property.c_str()),
@@ -170,8 +173,8 @@ static std::string getUserServiceName()
     {
         try
         {
-            userMgmtService =
-                ipmi::getUserService(bus, userMgrInterface, userMgrObjBasePath);
+            userMgmtService = ipmi::getUserService(getBus(), userMgrInterface,
+                                                   userMgrObjBasePath);
         }
         catch (std::runtime_error &e)
         {
@@ -181,10 +184,9 @@ static std::string getUserServiceName()
     return userMgmtService;
 }
 
-static UserAccess userAccess;
-
 UserAccess &getUserAccessObject()
 {
+    static UserAccess userAccess;
     return userAccess;
 }
 
@@ -396,11 +398,11 @@ void userUpdatedSignalHandler(UserAccess *usrAccess,
                 }
                 else
                 {
-                    auto method = bus.new_method_call(
+                    auto method = getBus().new_method_call(
                         getUserServiceName().c_str(), msg.get_path(),
                         dBusPropertiesInterface, getAllPropertiesMethod);
                     method.append(usersInterface);
-                    auto reply = bus.call(method);
+                    auto reply = getBus().call(method);
                     if (reply.is_method_error())
                     {
                         log<level::DEBUG>(
@@ -480,13 +482,13 @@ UserAccess::UserAccess() : bus(ipmid_get_sd_bus_connection())
     {
         log<level::DEBUG>("Registering signal handler");
         userUpdatedSignal = std::make_unique<sdbusplus::bus::match_t>(
-            bus,
+            getBus(),
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::interface(dBusObjManager) +
                 sdbusplus::bus::match::rules::path(userMgrObjBasePath),
             std::bind(userUpdatedSignalHandler, this, std::placeholders::_1));
         userPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
-            bus,
+            getBus(),
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::path_namespace(userObjBasePath) +
                 sdbusplus::bus::match::rules::interface(
@@ -605,16 +607,16 @@ bool UserAccess::isValidUserName(const char *userNameInChar)
         return false;
     }
 
-    auto method =
-        bus.new_method_call(getUserServiceName().c_str(), userMgrObjBasePath,
-                            dBusObjManager, getManagedObjectsMethod);
-    auto reply = bus.call(method);
+    auto method = getBus().new_method_call(getUserServiceName().c_str(),
+                                           userMgrObjBasePath, dBusObjManager,
+                                           getManagedObjectsMethod);
+    auto reply = getBus().call(method);
 
     if (reply.is_method_error())
     {
-        log<level::DEBUG>("Failed to excute method",
-                          entry("METHOD=%s", getSubTreeMethod),
-                          entry("PATH=%s", userMgrObjBasePath));
+        log<level::ERR>("Failed to excute method",
+                        entry("METHOD=%s", getSubTreeMethod),
+                        entry("PATH=%s", userMgrObjBasePath));
         return false;
     }
     std::map<DbusUserObjPath, DbusUserObjValue> properties;
@@ -666,8 +668,9 @@ ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t &userId,
         privAccess.privilege != userInfo->userPrivAccess[syncIndex].privilege)
     {
         std::string userPath = std::string(userObjBasePath) + "/" + userName;
-        setDbusProperty(bus, getUserServiceName().c_str(), userPath.c_str(),
-                        usersInterface, userPrivProperty, priv);
+        setDbusProperty(getBus(), getUserServiceName().c_str(),
+                        userPath.c_str(), usersInterface, userPrivProperty,
+                        priv);
     }
     userInfo->userPrivAccess[chNum].privilege = privAccess.privilege;
 
@@ -723,10 +726,10 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId,
     {
         // Delete existing user
         std::string userPath = std::string(userObjBasePath) + "/" + oldUser;
-        auto method =
-            bus.new_method_call(getUserServiceName().c_str(), userPath.c_str(),
-                                deleteUserInterface, deleteUserMethod);
-        auto reply = bus.call(method);
+        auto method = getBus().new_method_call(
+            getUserServiceName().c_str(), userPath.c_str(), deleteUserInterface,
+            deleteUserMethod);
+        auto reply = getBus().call(method);
         if (reply.is_method_error())
         {
             log<level::DEBUG>("Failed to excute method",
@@ -743,15 +746,15 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId,
     else if (oldUser.empty() && !newUser.empty() && validUser)
     {
         // Create new user
-        auto method = bus.new_method_call(getUserServiceName().c_str(),
-                                          userMgrObjBasePath, userMgrInterface,
-                                          createUserMethod);
+        auto method = getBus().new_method_call(
+            getUserServiceName().c_str(), userMgrObjBasePath, userMgrInterface,
+            createUserMethod);
         // TODO: Fetch proper privilege & enable state once set User access is
         // implemented
         // if LAN Channel specified, then create user for all groups
         // follow channel privilege for user creation.
         method.append(newUser.c_str(), availableGroups, "priv-admin", true);
-        auto reply = bus.call(method);
+        auto reply = getBus().call(method);
         if (reply.is_method_error())
         {
             log<level::DEBUG>("Failed to excute method",
@@ -766,11 +769,11 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t &userId,
     else if (oldUser != newUser && validUser)
     {
         // User rename
-        auto method = bus.new_method_call(getUserServiceName().c_str(),
-                                          userMgrObjBasePath, userMgrInterface,
-                                          renameUserMethod);
+        auto method = getBus().new_method_call(
+            getUserServiceName().c_str(), userMgrObjBasePath, userMgrInterface,
+            renameUserMethod);
         method.append(oldUser.c_str(), newUser.c_str());
-        auto reply = bus.call(method);
+        auto reply = getBus().call(method);
         if (reply.is_method_error())
         {
             log<level::DEBUG>("Failed to excute method",
@@ -1044,12 +1047,12 @@ UsersTbl *UserAccess::getUsersTblPtr()
 
 void UserAccess::getSystemPrivAndGroups()
 {
-    auto method =
-        bus.new_method_call(getUserServiceName().c_str(), userMgrObjBasePath,
-                            dBusPropertiesInterface, getAllPropertiesMethod);
+    auto method = getBus().new_method_call(
+        getUserServiceName().c_str(), userMgrObjBasePath,
+        dBusPropertiesInterface, getAllPropertiesMethod);
     method.append(userMgrInterface);
 
-    auto reply = bus.call(method);
+    auto reply = getBus().call(method);
     if (reply.is_method_error())
     {
         log<level::DEBUG>("Failed to excute method",
@@ -1145,10 +1148,10 @@ void UserAccess::initUserDataFile()
         writeUserData();
     }
 
-    auto method =
-        bus.new_method_call(getUserServiceName().c_str(), userMgrObjBasePath,
-                            dBusObjManager, getManagedObjectsMethod);
-    auto reply = bus.call(method);
+    auto method = getBus().new_method_call(getUserServiceName().c_str(),
+                                           userMgrObjBasePath, dBusObjManager,
+                                           getManagedObjectsMethod);
+    auto reply = getBus().call(method);
 
     if (reply.is_method_error())
     {
