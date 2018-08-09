@@ -587,6 +587,8 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_app_functions()
 {
+    createServiceTimer();
+
     // <Get BT Interface Capabilities>
     ipmi_register_callback(NETFUN_APP,
                            IPMI_CMD_GET_CAP_BIT,
@@ -677,6 +679,13 @@ void register_netfn_app_functions()
                            NULL,
                            getChannelCipherSuites,
                            PRIVILEGE_CALLBACK);
+
+    // <Set Channel Access Command>
+    ipmi_register_callback(NETFUN_APP,
+                           IPMI_CMD_SET_CHAN_ACCESS,
+                           NULL,
+                           ipmi_set_channel_access,
+                           PRIVILEGE_ADMIN);
     return;
 }
 

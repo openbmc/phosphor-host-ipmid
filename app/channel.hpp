@@ -76,6 +76,8 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
                                   ipmi_data_len_t data_len,
                                   ipmi_context_t context);
 
+void createServiceTimer();
+
 namespace cipher
 {
 

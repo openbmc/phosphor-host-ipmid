@@ -3,6 +3,7 @@
 #include "transporthandler.hpp"
 #include "utils.hpp"
 #include "net.hpp"
+#include "timer.hpp"
 
 #include <fstream>
 #include <string>
@@ -15,6 +16,8 @@
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+
+std::unique_ptr<phosphor::ipmi::Timer> serviceTimer = nullptr;
 
 /** @struct GetChannelAccessRequest
  *
@@ -251,6 +254,152 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
                     size,
                     static_cast<uint8_t*>(response) + 1);
         *data_len = size + sizeof(GetChannelCipherRespHeader);
+    }
+
+    return IPMI_CC_OK;
+}
+
+/** @brief Start the network IPMI service
+ *
+ *  @param[in] bus - D-Bus bus object.
+ */
+void startNetIPMIService(sdbusplus::bus::bus& bus)
+{
+    using namespace ipmi;
+
+    std::vector<std::string> units = {"phosphor-ipmi-net.socket",
+                                      "phosphor-ipmi-net.service"};
+
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                      SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE,
+                                      "UnmaskUnitFiles");
+    method.append(units, false);
+    bus.call_noreply(method);
+
+    method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                 SYSTEMD_PATH,
+                                 SYSTEMD_INTERFACE,
+                                 "StartUnit");
+    method.append("phosphor-ipmi-net.socket", "replace");
+    bus.call_noreply(method);
+
+    method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                 SYSTEMD_PATH,
+                                 SYSTEMD_INTERFACE,
+                                 "StartUnit");
+
+    method.append("phosphor-ipmi-net.service", "replace");
+    bus.call_noreply(method);
+}
+
+/** @brief Stop the network IPMI daemon.
+ *
+ *  @param[in] bus - D-Bus bus object.
+ */
+void stopNetIPMIService()
+{
+    using namespace ipmi;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    try
+    {
+        auto method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                          SYSTEMD_PATH,
+                                          SYSTEMD_INTERFACE,
+                                          "StopUnit");
+
+        method.append("phosphor-ipmi-net.service", "replace");
+        bus.call_noreply(method);
+
+        method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                     SYSTEMD_PATH,
+                                     SYSTEMD_INTERFACE,
+                                     "StopUnit");
+
+        method.append("phosphor-ipmi-net.socket", "replace");
+        bus.call_noreply(method);
+
+        std::vector<std::string> units = {"phosphor-ipmi-net.service",
+                                          "phosphor-ipmi-net.socket"};
+
+        method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                     SYSTEMD_PATH,
+                                     SYSTEMD_INTERFACE,
+                                     "MaskUnitFiles");
+        method.append(units, false, true);
+        bus.call_noreply(method);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        sd_journal_print(LOG_INFO, "Error in Set Channel access %s", e.what());
+    }
+
+}
+
+/** @brief Create timer to turn on and off the enclosure LED
+ */
+void createServiceTimer()
+{
+    if (!serviceTimer)
+    {
+        serviceTimer = std::make_unique<phosphor::ipmi::Timer>(
+            ipmid_get_sd_event_connection(), stopNetIPMIService);
+    }
+}
+
+/** @struct SetChannelAccessRequest
+ *
+ *  IPMI payload for Set Channel access command request.
+ */
+struct SetChannelAccessRequest
+{
+    uint8_t channelNumber;  //!< Channel number
+    uint8_t accessMode;     //!< Access mode for IPMI messaging
+    uint8_t privLevel;      //!< Channel Privilege Level
+} __attribute__((packed));
+
+ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                            ipmi_request_t request, ipmi_response_t response,
+                            ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const SetChannelAccessRequest*>
+                   (request);
+
+    int channel = requestData->channelNumber;
+    // Validate the channel number corresponds to the
+    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    if (ethdevice.empty())
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    static constexpr auto accessModeMask = 0x07;
+    static constexpr auto disabled = 0;
+    static constexpr auto enabled = 2;
+    static constexpr uint8_t interval = 5;
+    auto accessMode = requestData->accessMode & accessModeMask;
+    static auto time = std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::seconds(interval));
+    serviceTimer->setTimer(SD_EVENT_OFF);
+
+    try
+    {
+        if (accessMode == enabled)
+        {
+            startNetIPMIService(bus);
+        }
+        else if (accessMode == disabled)
+        {
+            serviceTimer->startTimer(time);
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>(e.what());
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
     return IPMI_CC_OK;

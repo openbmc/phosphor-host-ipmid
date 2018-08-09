@@ -21,6 +21,10 @@ constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
 
+constexpr auto SYSTEMD_BUSNAME = "org.freedesktop.systemd1";
+constexpr auto SYSTEMD_PATH = "/org/freedesktop/systemd1";
+constexpr auto SYSTEMD_INTERFACE = "org.freedesktop.systemd1.Manager";
+
 /** @class ServiceCache
  *  @brief Caches lookups of service names from the object mapper.
  *  @details Most ipmi commands need to talk to other dbus daemons to perform
@@ -208,6 +212,60 @@ ObjectTree getAllAncestors(sdbusplus::bus::bus& bus,
                            const std::string& path,
                            InterfaceList&& interfaces);
 
+/** @brief Start the systemd unit and persist the change.
+ *
+ *  @param[in] bus - D-Bus bus object.
+ *  @param[in] unit - systemd unit to be started.
+ *
+ */
+inline void startSystemdUnit(sdbusplus::bus::bus& bus,
+                             const std::string& unit)
+{
+    auto method = bus.new_method_call(
+                      SYSTEMD_BUSNAME,
+                      SYSTEMD_PATH,
+                      SYSTEMD_INTERFACE,
+                      "UnmaskUnitFiles");
+
+    method.append(unit, false);
+    bus.call_noreply(method);
+
+    method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                 SYSTEMD_PATH,
+                                 SYSTEMD_INTERFACE,
+                                 "StartUnit");
+
+    method.append(unit, "replace");
+    bus.call_noreply(method);
+}
+
+/** @brief Stop the systemd unit and persist the change.
+ *
+ *  @param[in] bus - D-Bus bus object.
+ *  @param[in] unit - systemd unit to be stopped.
+ *
+ */
+inline void stopSystemdUnit(sdbusplus::bus::bus& bus,
+                             const std::string& unit)
+{
+    auto method = bus.new_method_call(
+                      SYSTEMD_BUSNAME,
+                      SYSTEMD_PATH,
+                      SYSTEMD_INTERFACE,
+                      "StopUnit");
+
+    method.append(unit, "replace");
+    bus.call_noreply(method);
+
+    method = bus.new_method_call(SYSTEMD_BUSNAME,
+                                 SYSTEMD_PATH,
+                                 SYSTEMD_INTERFACE,
+                                 "MaskUnitFiles");
+
+    method.append(unit, false, true);
+    bus.call_noreply(method);
+}
+
 namespace method_no_args
 {
 
@@ -282,7 +340,6 @@ void createVLAN(sdbusplus::bus::bus& bus,
  *  @param[in] path - Dbus object path.
  */
 uint32_t getVLAN(const std::string& path);
-
 } //namespace network
 } // namespace ipmi
 
