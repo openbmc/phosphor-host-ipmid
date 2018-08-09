@@ -652,5 +652,9 @@ void register_netfn_app_functions()
     // <Get Channel Cipher Suites Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
                            getChannelCipherSuites, PRIVILEGE_CALLBACK);
+
+    // <Set Channel Access Command>
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS, NULL,
+                           ipmi_set_channel_access, PRIVILEGE_ADMIN);
     return;
 }
