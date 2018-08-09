@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <arpa/inet.h>
+#include <boost/process/child.hpp>
 
 #include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
@@ -251,6 +252,123 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
                     size,
                     static_cast<uint8_t*>(response) + 1);
         *data_len = size + sizeof(GetChannelCipherRespHeader);
+    }
+
+    return IPMI_CC_OK;
+}
+
+template <typename... ArgTypes>
+static int executeCmd(const char *path, ArgTypes &&... tArgs)
+{
+    boost::process::child execProg(path, const_cast<char *>(tArgs)...);
+    execProg.wait();
+    return execProg.exit_code();
+}
+
+/** @brief Enable the network IPMI service on the specified ethernet interface.
+ *
+ *  @param[in] intf - ethernet interface on which to enable IPMI
+ */
+void enableNetworkIPMI(const std::string& intf)
+{
+    // Check if there is a iptable filter to drop IPMI packets for the
+    // interface.
+    auto retCode = executeCmd("/usr/sbin/iptables", "-C", "INPUT",
+            "-p", "udp", "-i", intf.c_str(),"--dport", "623", "-j", "DROP");
+
+    // If the iptable filter exists, delete the filter.
+    if (!retCode)
+    {
+        auto response = executeCmd("/usr/sbin/iptables", "-D", "INPUT",
+                "-p", "udp","-i", intf.c_str(),"--dport", "623", "-j", "DROP");
+
+        if(response)
+        {
+            log<level::ERR>("Dropping the iptables filter failed",
+                    entry("INTF=%s", intf.c_str()),
+                    entry("RETURN_CODE:%d", response));
+        }
+    }
+}
+
+/** @brief Disable the network IPMI service on the specified ethernet interface.
+ *
+ *  @param[in] intf - ethernet interface on which to disable IPMI
+ */
+void disableNetworkIPMI(const std::string& intf)
+{
+    // Check if there is a iptable filter to drop IPMI packets for the
+    // interface.
+    auto retCode = executeCmd("/usr/sbin/iptables", "-C", "INPUT",
+            "-p", "udp", "-i", intf.c_str(),"--dport", "623", "-j", "DROP");
+
+    // If the iptable filter does not exist, add filter to drop network IPMI
+    // packets
+    if (retCode)
+    {
+        auto response = executeCmd("/usr/sbin/iptables", "-I", "INPUT",
+                "-p", "udp","-i", intf.c_str(),"--dport", "623", "-j", "DROP");
+
+        if(response)
+        {
+            log<level::ERR>("Inserting iptables filter failed",
+                    entry("INTF=%s", intf.c_str()),
+                    entry("RETURN_CODE:%d", response));
+        }
+    }
+}
+
+/** @struct SetChannelAccessRequest
+ *
+ *  IPMI payload for Set Channel access command request.
+ */
+struct SetChannelAccessRequest
+{
+    uint8_t channelNumber;  //!< Channel number
+    uint8_t accessMode;     //!< Access mode for IPMI messaging
+    uint8_t privLevel;      //!< Channel Privilege Level
+} __attribute__((packed));
+
+ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                            ipmi_request_t request, ipmi_response_t response,
+                            ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto requestData = reinterpret_cast<const SetChannelAccessRequest*>
+                   (request);
+
+    int channel = requestData->channelNumber;
+    // Validate the channel number corresponds to any of the network channel.
+    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    if (ethdevice.empty())
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    // Bits[2:0] indicates the Access Mode, this mask field will extract the
+    // access mode from the command data.
+    static constexpr auto accessModeMask = 0x07;
+    auto accessMode = requestData->accessMode & accessModeMask;
+    static constexpr auto disabled = 0;
+    static constexpr auto enabled = 2;
+
+    try
+    {
+        if (accessMode == enabled)
+        {
+            enableNetworkIPMI(ethdevice);
+        }
+        else if (accessMode == disabled)
+        {
+            disableNetworkIPMI(ethdevice);
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>(e.what());
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
     return IPMI_CC_OK;
