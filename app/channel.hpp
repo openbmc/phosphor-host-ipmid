@@ -76,6 +76,11 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
                                   ipmi_data_len_t data_len,
                                   ipmi_context_t context);
 
+/* @brief Define a timer for stopping the network IPMI service.
+ *
+ */
+void createServiceTimer();
+
 namespace cipher
 {
 

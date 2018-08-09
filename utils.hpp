@@ -21,6 +21,10 @@ constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
 
+constexpr auto SYSTEMD_BUSNAME = "org.freedesktop.systemd1";
+constexpr auto SYSTEMD_PATH = "/org/freedesktop/systemd1";
+constexpr auto SYSTEMD_INTERFACE = "org.freedesktop.systemd1.Manager";
+
 /** @class ServiceCache
  *  @brief Caches lookups of service names from the object mapper.
  *  @details Most ipmi commands need to talk to other dbus daemons to perform
@@ -303,7 +307,6 @@ void createVLAN(sdbusplus::bus::bus& bus,
  *  @param[in] path - Dbus object path.
  */
 uint32_t getVLAN(const std::string& path);
-
 } //namespace network
 } // namespace ipmi
 
