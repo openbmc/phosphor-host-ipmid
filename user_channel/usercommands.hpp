@@ -17,6 +17,8 @@
 #pragma once
 #include <cstdint>
 
+namespace ipmi
+{
 // IPMI commands for user command NETFN:APP.
 enum ipmi_netfn_user_cmds
 {
@@ -29,3 +31,7 @@ enum ipmi_netfn_user_cmds
 
 static constexpr uint8_t userIdEnabledViaSetPassword = 0x1;
 static constexpr uint8_t userIdDisabledViaSetPassword = 0x2;
+
+void registerUserIpmiFunctions();
+}
+

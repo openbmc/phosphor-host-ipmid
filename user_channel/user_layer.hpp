@@ -51,10 +51,27 @@ struct PrivAccess
 
 /** @brief initializes user management
  *
- *
  *  @return IPMI_CC_OK for success, others for failure.
  */
 ipmi_ret_t ipmiUserInit();
+
+/** @brief The ipmi get user password layer call
+ *
+ *  @param[in] userName
+ *  @param[out] password
+ *
+ *  @return 0 on success, non-zero otherwise.
+ */
+ipmi_ret_t ipmiUserGetPassword(const std::string& userName,
+                             std::string& password);
+
+/** @brief The IPMI call to clear password entry associated with specified username
+ *
+ *  @param[in] userName
+ *
+ *  @return 0 on success, non-zero otherwise.
+ */
+ipmi_ret_t ipmiUserClearPassword(const std::string& userName);
 
 /** @brief determines valid userId
  *
@@ -143,6 +160,4 @@ ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t &userId,
                                       const PrivAccess &privAccess,
                                       const bool &otherPrivUpdate);
 
-// TODO: Define required user layer API Call's which user layer shared library
-// must implement.
 } // namespace ipmi

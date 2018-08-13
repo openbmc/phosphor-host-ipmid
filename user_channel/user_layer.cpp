@@ -16,6 +16,9 @@
 
 #include "user_layer.hpp"
 #include "user_mgmt.hpp"
+#include "passwd_mgr.hpp"
+
+static ipmi::PasswdMgr passwdMgr;
 
 namespace ipmi
 {
@@ -25,6 +28,20 @@ ipmi_ret_t ipmiUserInit()
     getUserAccessObject();
     return IPMI_CC_OK;
 }
+
+ipmi_ret_t ipmiUserGetPassword(const std::string& userName,
+                             std::string& password)
+{
+    password = passwdMgr.getPasswdByUserName(userName);
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmiUserClearPassword(const std::string& userName)
+{
+    passwdMgr.clearUserEntry(userName);
+    return IPMI_CC_OK;
+}
+
 bool ipmiUserIsValidUserId(const uint8_t &userId)
 {
     return UserAccess::isValidUserId(userId);

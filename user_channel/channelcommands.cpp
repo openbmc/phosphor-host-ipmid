@@ -14,19 +14,16 @@
 // limitations under the License.
 */
 
-#include <phosphor-ipmi-host/apphandler.h>
-#include <commandutils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <regex>
 #include "channelcommands.hpp"
 #include "channel_layer.hpp"
+#include "apphandler.h"
 
 using namespace phosphor::logging;
 
 namespace ipmi
 {
-
-void register_netfn_firmware_functions() __attribute__((constructor));
 
 struct set_channel_access_req_t
 {
@@ -328,17 +325,16 @@ ipmi_ret_t ipmi_get_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-void register_netfn_firmware_functions()
+void registerChannelFunctions()
 {
-    print_registration(NETFUN_APP, IPMI_CMD_SET_CHANNEL_ACCESS);
+    ipmiChannelInit();
+
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHANNEL_ACCESS, NULL,
                            ipmi_set_channel_access, PRIVILEGE_ADMIN);
 
-    print_registration(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
                            ipmi_get_channel_access, PRIVILEGE_ADMIN);
 
-    print_registration(NETFUN_APP, IPMI_CMD_GET_CHANNEL_INFO);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_INFO, NULL,
                            ipmi_get_channel_info, PRIVILEGE_ADMIN);
     return;

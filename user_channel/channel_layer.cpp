@@ -79,6 +79,12 @@ int getChannelActiveSessions(const uint8_t &chNum)
     return getChannelConfigObject().getChannelActiveSessions(chNum);
 }
 
+ipmi_ret_t ipmiChannelInit()
+{
+    getChannelConfigObject();
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t getChannelInfo(const uint8_t &chNum, ChannelInfo &chInfo)
 {
     return getChannelConfigObject().getChannelInfo(chNum, chInfo);

@@ -15,13 +15,12 @@
 */
 
 #include <host-ipmid/ipmid-api.h>
-#include <phosphor-ipmi-host/apphandler.h>
 #include <security/pam_appl.h>
-#include <commandutils.hpp>
 #include <phosphor-logging/log.hpp>
-#include <usercommands.hpp>
 #include <regex>
 #include "user_layer.hpp"
+#include "apphandler.h"
+#include "usercommands.hpp"
 
 namespace ipmi
 {
@@ -34,8 +33,6 @@ static constexpr uint8_t disableUser = 0x00;
 static constexpr uint8_t enableUser = 0x01;
 static constexpr uint8_t setPassword = 0x02;
 static constexpr uint8_t testPassword = 0x03;
-
-void registerNetfnFirmwareFunctions() __attribute__((constructor));
 
 struct SetUserAccessReq
 {
@@ -394,26 +391,21 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-void registerNetfnFirmwareFunctions()
+void registerUserIpmiFunctions()
 {
     ipmiUserInit();
-    print_registration(NETFUN_APP, IPMI_CMD_SET_USER_ACCESS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_ACCESS, NULL,
                            ipmiSetUserAccess, PRIVILEGE_ADMIN);
 
-    print_registration(NETFUN_APP, IPMI_CMD_GET_USER_ACCESS);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_USER_ACCESS, NULL,
                            ipmiGetUserAccess, PRIVILEGE_ADMIN);
 
-    print_registration(NETFUN_APP, IPMI_CMD_GET_USER_NAME);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_USER_NAME, NULL,
                            ipmiGetUserName, PRIVILEGE_ADMIN);
 
-    print_registration(NETFUN_APP, IPMI_CMD_SET_USER_NAME);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_NAME, NULL,
                            ipmiSetUserName, PRIVILEGE_ADMIN);
 
-    print_registration(NETFUN_APP, IPMI_CMD_SET_USER_PASSWORD);
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_PASSWORD, NULL,
                            ipmiSetUserPassword, PRIVILEGE_ADMIN);
 

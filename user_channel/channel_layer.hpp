@@ -151,6 +151,8 @@ EChannelSessSupported getChannelSessionSupport(const uint8_t &chNum);
 
 int getChannelActiveSessions(const uint8_t &chNum);
 
+ipmi_ret_t ipmiChannelInit();
+
 ipmi_ret_t getChannelInfo(const uint8_t &chNum, ChannelInfo &chInfo);
 
 ipmi_ret_t getChannelAccessData(const uint8_t &chNum,

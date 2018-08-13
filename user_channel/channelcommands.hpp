@@ -28,4 +28,5 @@ enum ipmi_netfn_channel_cmds
     IPMI_CMD_GET_CHANNEL_INFO = 0x42,
 };
 
+void registerChannelFunctions();
 } // namespace ipmi

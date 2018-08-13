@@ -6,6 +6,8 @@
 #include "nlohmann/json.hpp"
 #include "types.hpp"
 #include "utils.hpp"
+#include "user_channel/usercommands.hpp"
+#include "user_channel/channelcommands.hpp"
 
 #if __has_include(<filesystem>)
 #include <filesystem>
@@ -677,6 +679,10 @@ void register_netfn_app_functions()
                            NULL,
                            getChannelCipherSuites,
                            PRIVILEGE_CALLBACK);
+
+    ipmi::registerUserIpmiFunctions();
+    ipmi::registerChannelFunctions();
+
     return;
 }
 

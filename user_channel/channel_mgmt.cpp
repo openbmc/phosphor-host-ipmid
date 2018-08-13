@@ -14,10 +14,8 @@
 // limitations under the License.
 */
 
-#include <phosphor-ipmi-host/apphandler.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <commandutils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <fstream>
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -25,6 +23,7 @@
 #include <exception>
 #include <unordered_map>
 #include "channel_mgmt.hpp"
+#include "apphandler.h"
 
 namespace ipmi
 {
@@ -105,9 +104,9 @@ static std::array<std::string, 4> sessionSupportList = {
 static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
     "reserved", "callback", "user", "operator", "administrator", "oem"};
 
-static ChannelConfig channelConfig;
 ChannelConfig &getChannelConfigObject()
 {
+    static ChannelConfig channelConfig;
     return channelConfig;
 }
 

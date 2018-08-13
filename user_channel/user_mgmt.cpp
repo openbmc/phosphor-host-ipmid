@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 #include "user_mgmt.hpp"
-#include <phosphor-ipmi-host/apphandler.h>
+#include "apphandler.h"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <host-ipmid/ipmid-host-cmd.hpp>
