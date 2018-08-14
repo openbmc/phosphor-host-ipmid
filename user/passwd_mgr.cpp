@@ -157,7 +157,8 @@ int PasswdMgr::encrypt_decrypt_data(uint8_t isEncrypt, const EVP_CIPHER* cipher,
         size_t calMacLen = calMac.size();
         // calculate MAC for the encrypted message.
         if (NULL == HMAC(EVP_sha256(), key, keyLen, inBytes, inBytesLen,
-                         calMac.data(), &calMacLen))
+                         calMac.data(),
+                         reinterpret_cast<unsigned int*>(&calMacLen)))
         {
             log<level::DEBUG>("Error Failed to verify authentication");
             return -1;
@@ -212,7 +213,7 @@ int PasswdMgr::encrypt_decrypt_data(uint8_t isEncrypt, const EVP_CIPHER* cipher,
     {
         // Create MAC for the encrypted message
         if (NULL == HMAC(EVP_sha256(), key, keyLen, outBytes, *outBytesLen, mac,
-                         macLen))
+                         reinterpret_cast<unsigned int*>(macLen)))
         {
             log<level::DEBUG>("Failed to create authentication");
             return -1;
@@ -333,7 +334,7 @@ int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
     size_t keyLen = key.size();
     if (NULL == HMAC(EVP_sha256(), keyBuff.data(), keyBuff.size(),
                      input.data() + sizeof(*metaData), metaData->hashSize,
-                     key.data(), &keyLen))
+                     key.data(), reinterpret_cast<unsigned int*>(&keyLen)))
     {
         log<level::DEBUG>("Failed to create MAC for authentication");
         return -1;
@@ -507,7 +508,8 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName)
         return -1;
     }
     if (NULL == HMAC(digest, keyBuff.data(), keyBuff.size(), hash.data(),
-                     hashLen, key.data(), &keyLen))
+                     hashLen, key.data(),
+                     reinterpret_cast<unsigned int*>(&keyLen)))
     {
         log<level::DEBUG>("Failed to create MAC for authentication");
         return -1;
