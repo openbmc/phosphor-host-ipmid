@@ -65,13 +65,15 @@ channel-gen.cpp:
 libuserlayerdir = ${libdir}
 libuserlayer_LTLIBRARIES = libuserlayer.la
 libuserlayer_la_SOURCES = \
-        user/user_layer.cpp \
-        user/passwd_mgr.hpp \
-        user/passwd_mgr.cpp
+        user_channel/user_layer.cpp \
+        user_channel/user_mgmt.cpp \
+        user_channel/passwd_mgr.cpp \
+        user_channel/channel_mgmt.cpp \
+        user_channel/channel_layer.cpp
 
 libuserlayer_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
-	-lssl -version-info 0:0:0 -shared
+	$(LIBPAM) $(LIBCRYPT) -lpam_misc -lssl -version-info 0:0:0 -shared
 libuserlayer_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
 	$(PHOSPHOR_LOGGING_CFLAGS) $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 libipmi20dir = ${libdir}/ipmid-providers
@@ -97,6 +99,8 @@ libipmi20_la_SOURCES = \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
+	user_channel/usercommands.cpp \
+	user_channel/channelcommands.cpp \
 	$(libipmi20_BUILT_LIST)
 
 @CODE_COVERAGE_RULES@
@@ -132,7 +136,7 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
                              $(SDBUSPLUS_CFLAGS)
 
 nobase_include_HEADERS = \
-	user/user_layer.hpp \
+	user_channel/user_layer.hpp \
 	host-ipmid/ipmid-api.h \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp \

@@ -14,19 +14,24 @@
 // limitations under the License.
 */
 
-#include "user_layer.hpp"
-#include "passwd_mgr.hpp"
-static ipmi::PasswdMgr passwdMgr;
+#pragma once
+#include <cstdint>
 
-ipmi_ret_t ipmi_user_get_password(const std::string& userName,
-                                  std::string& password)
+namespace ipmi
 {
-    password = passwdMgr.getPasswdByUserName(userName);
-    return IPMI_CC_OK;
+// IPMI commands for user command NETFN:APP.
+enum ipmi_netfn_user_cmds
+{
+    IPMI_CMD_SET_USER_ACCESS = 0x43,
+    IPMI_CMD_GET_USER_ACCESS = 0x44,
+    IPMI_CMD_SET_USER_NAME = 0x45,
+    IPMI_CMD_GET_USER_NAME = 0x46,
+    IPMI_CMD_SET_USER_PASSWORD = 0x47,
+};
+
+static constexpr uint8_t userIdEnabledViaSetPassword = 0x1;
+static constexpr uint8_t userIdDisabledViaSetPassword = 0x2;
+
+void registerUserIpmiFunctions();
 }
 
-ipmi_ret_t ipmi_user_clear_password(const std::string& userName)
-{
-    passwdMgr.clearUserEntry(userName);
-    return IPMI_CC_OK;
-}
