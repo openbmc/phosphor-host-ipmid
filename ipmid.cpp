@@ -559,6 +559,11 @@ sd_bus_slot* ipmid_get_sd_bus_slot(void)
     return ipmid_slot;
 }
 
+EInterfaceIndex getInterfaceIndex(void)
+{
+    return interfaceKCS;
+}
+
 // Calls host command manager to do the right thing for the command
 void ipmid_send_cmd_to_host(CommandHandler&& cmd)
 {
