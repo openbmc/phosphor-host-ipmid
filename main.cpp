@@ -90,6 +90,11 @@ void cancelSELReservation(void)
     selReservationValid = false;
 }
 
+EInterfaceIndex getInterfaceIndex(void)
+{
+    return interfaceLAN1;
+}
+
 int main()
 {
     /*
