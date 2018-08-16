@@ -131,6 +131,23 @@ enum ipmi_return_codes
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
+// Temp solution: To detect the request source channel.
+// There is no stright forward way to get the exact
+// channel so we are hardcoding it to KCS in case host-ipmid
+// and LAN1 for netipmid.
+// we can't differentiate between LAN1 & LAN2 for netipmid in this logic.
+// As our current design will not be able to support the same. This is done
+// so that in all the places where ever we need to use the self channel can be
+// be implemented properly and based on new architecture.this can be updated.
+typedef enum
+{
+    interfaceKCS = 0,
+    interfaceLAN1 = 1,
+    interfaceUnknown = 0xFF
+} EInterfaceIndex;
+
+EInterfaceIndex getInterfaceIndex(void);
+
 sd_bus* ipmid_get_sd_bus_connection(void);
 sd_event* ipmid_get_sd_event_connection(void);
 sd_bus_slot* ipmid_get_sd_bus_slot(void);
