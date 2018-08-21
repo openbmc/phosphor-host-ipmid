@@ -767,6 +767,9 @@ std::map<DbusValue, IpmiValue> dbusToIpmi =
     {RestorePolicy::Policy::AlwaysOn, 0x02}
 };
 
+static constexpr uint8_t NO_CHANGE = 0x03;
+static constexpr uint8_t ALL_SUPPORT = 0x01 | 0x02 | 0x04;
+static constexpr uint8_t POLICY_BIT_MASK = 0x03;
 } // namespace power_policy
 
 //----------------------------------------------------------------------
@@ -1618,6 +1621,78 @@ ipmi_ret_t ipmiGetPOHCounter(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_chassis_set_power_restore_policy(ipmi_netfn_t netfn,
+                                                 ipmi_cmd_t cmd,
+                                                 ipmi_request_t request,
+                                                 ipmi_response_t response,
+                                                 ipmi_data_len_t data_len,
+                                                 ipmi_context_t context)
+{
+    auto *reqptr = reinterpret_cast<uint8_t *>(request);
+    auto *resptr = reinterpret_cast<uint8_t *>(response);
+
+    power_policy::DbusValue value =
+                            power_policy::RestorePolicy::Policy::AlwaysOff;
+
+    if (*data_len != 1)
+    {
+        phosphor::logging::log<level::ERR>("Unsupported request length",
+            entry("LEN=0x%x", *data_len));
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    *reqptr = *reqptr & power_policy::POLICY_BIT_MASK;
+    if (*reqptr > power_policy::NO_CHANGE)
+    {
+        phosphor::logging::log<level::ERR>("Unsupported request parameter",
+            entry("REQ=0x%x", *reqptr));
+        *data_len = 0;
+        return IPMI_CC_PARM_NOT_SUPPORTED;
+    }
+
+    if (*reqptr == power_policy::NO_CHANGE)
+    {
+        // just return the supported policy
+        *resptr = power_policy::ALL_SUPPORT;
+        *data_len = 1;
+        return IPMI_CC_OK;
+    }
+
+    for (auto const& it : power_policy::dbusToIpmi)
+    {
+        if (it.second == *reqptr)
+        {
+            value = it.first;
+            break;
+        }
+    }
+
+    const settings::Path& powerRestoreSetting =
+                  chassis::internal::cache::objects.map.at(
+                  chassis::internal::powerRestoreIntf).front();
+    sdbusplus::message::variant<std::string> property =
+                                                    convertForMessage(value);
+
+    auto method = chassis::internal::dbus.new_method_call(
+                      chassis::internal::cache::objects.service(powerRestoreSetting,
+                      chassis::internal::powerRestoreIntf).c_str(),
+                      powerRestoreSetting.c_str(), ipmi::PROP_INTF, "Set");
+
+    method.append(chassis::internal::powerRestoreIntf, "PowerRestorePolicy",
+                      property);
+    auto reply = chassis::internal::dbus.call(method);
+    if (reply.is_method_error())
+    {
+        phosphor::logging::log<level::ERR>("Unspecified Error");
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    *data_len = 1;
+    return IPMI_CC_OK;
+}
+
 void register_netfn_chassis_functions()
 {
     createIdentifyTimer();
@@ -1652,4 +1727,8 @@ void register_netfn_chassis_functions()
     // <Get POH Counter>
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_POH_COUNTER, NULL,
                            ipmiGetPOHCounter, PRIVILEGE_USER);
+
+    // <Set Power Restore Policy>
+    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_RESTORE_POLICY, NULL,
+                           ipmi_chassis_set_power_restore_policy, PRIVILEGE_OPERATOR);
 }
