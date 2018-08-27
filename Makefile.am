@@ -32,7 +32,8 @@ BOOST_CXX = -DBOOST_ERROR_CODE_HEADER_ONLY \
 ipmid_CXXFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" \
 		 $(BOOST_CXX) \
                  $(PHOSPHOR_LOGGING_CFLAGS) \
-                 $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+                 $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+                 -flto
 ipmid_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
