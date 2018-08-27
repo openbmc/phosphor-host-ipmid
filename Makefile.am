@@ -32,7 +32,8 @@ BOOST_CXX = -DBOOST_ERROR_CODE_HEADER_ONLY \
 ipmid_CXXFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" \
 		 $(BOOST_CXX) \
                  $(PHOSPHOR_LOGGING_CFLAGS) \
-                 $(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+                 $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+                 -flto
 ipmid_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
@@ -97,7 +98,8 @@ libipmi20_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
 	$(BOOST_CXX) $(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+	-flto
 
 libsysintfcmdsdir = ${libdir}/ipmid-providers
 libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
@@ -115,7 +117,8 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
                              $(libmapper_CFLAGS) \
                              $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
                              $(PHOSPHOR_LOGGING_CFLAGS) \
-                             $(SDBUSPLUS_CFLAGS)
+                             $(SDBUSPLUS_CFLAGS) \
+							 -flto
 
 nobase_include_HEADERS = \
 	host-ipmid/ipmid-api.h \
