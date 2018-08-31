@@ -1,27 +1,32 @@
+#include "config.h"
+
 #include "dcmihandler.hpp"
-#include "host-ipmid/ipmid-api.h"
+
+#include "net.hpp"
+#include "utils.hpp"
+
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <bitset>
+#include <cmath>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
-#include <nlohmann/json.hpp>
-#include "utils.hpp"
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <fstream>
-#include <bitset>
-#include <cmath>
-#include "xyz/openbmc_project/Common/error.hpp"
-#include "config.h"
-#include "net.hpp"
+#include <xyz/openbmc_project/Common/error.hpp>
+
+#include "host-ipmid/ipmid-api.h"
 
 using namespace phosphor::logging;
 using InternalFailure =
-        sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 void register_netfn_dcmi_functions() __attribute__((constructor));
 
-constexpr auto PCAP_PATH    = "/xyz/openbmc_project/control/host0/power_cap";
+constexpr auto PCAP_PATH = "/xyz/openbmc_project/control/host0/power_cap";
 constexpr auto PCAP_INTERFACE = "xyz.openbmc_project.Control.Power.Cap";
 
 constexpr auto POWER_CAP_PROP = "PowerCap";
@@ -38,10 +43,10 @@ constexpr auto DCMI_ACTIVATE_DHCP_MASK = 0x01;
 constexpr auto DCMI_ACTIVATE_DHCP_REPLY = 0x00;
 constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE = 0x05;
 constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE = 0x04;
-constexpr auto DHCP_TIMING1 = 0x04; // 4 sec
-constexpr auto DHCP_TIMING2_UPPER = 0x00; //2 min
+constexpr auto DHCP_TIMING1 = 0x04;       // 4 sec
+constexpr auto DHCP_TIMING2_UPPER = 0x00; // 2 min
 constexpr auto DHCP_TIMING2_LOWER = 0x78;
-constexpr auto DHCP_TIMING3_UPPER = 0x00; //64 sec
+constexpr auto DHCP_TIMING3_UPPER = 0x00; // 64 sec
 constexpr auto DHCP_TIMING3_LOWER = 0x40;
 // When DHCP Option 12 is enabled the string "SendHostName=true" will be
 // added into n/w configuration file and the parameter
@@ -60,26 +65,16 @@ namespace dcmi
 {
 
 // Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
-static const std::map<uint8_t, std::string> entityIdToName
-{
-    {0x40, "inlet"},
-    {0x37, "inlet"},
-    {0x41, "cpu"},
-    {0x03, "cpu"},
-    {0x42, "baseboard"},
-    {0x07, "baseboard"}
-};
-
+static const std::map<uint8_t, std::string> entityIdToName{
+    {0x40, "inlet"}, {0x37, "inlet"},     {0x41, "cpu"},
+    {0x03, "cpu"},   {0x42, "baseboard"}, {0x07, "baseboard"}};
 
 uint32_t getPcap(sdbusplus::bus::bus& bus)
 {
-    auto settingService = ipmi::getService(bus,
-                                           PCAP_INTERFACE,PCAP_PATH);
+    auto settingService = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
-    auto method = bus.new_method_call(settingService.c_str(),
-                                      PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties",
-                                      "Get");
+    auto method = bus.new_method_call(settingService.c_str(), PCAP_PATH,
+                                      "org.freedesktop.DBus.Properties", "Get");
 
     method.append(PCAP_INTERFACE, POWER_CAP_PROP);
     auto reply = bus.call(method);
@@ -97,13 +92,10 @@ uint32_t getPcap(sdbusplus::bus::bus& bus)
 
 bool getPcapEnabled(sdbusplus::bus::bus& bus)
 {
-    auto settingService = ipmi::getService(bus,
-                                           PCAP_INTERFACE,PCAP_PATH);
+    auto settingService = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
-    auto method = bus.new_method_call(settingService.c_str(),
-                                      PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties",
-                                      "Get");
+    auto method = bus.new_method_call(settingService.c_str(), PCAP_PATH,
+                                      "org.freedesktop.DBus.Properties", "Get");
 
     method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
     auto reply = bus.call(method);
@@ -123,10 +115,8 @@ void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap)
 {
     auto service = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
-    auto method = bus.new_method_call(service.c_str(),
-                                      PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties",
-                                      "Set");
+    auto method = bus.new_method_call(service.c_str(), PCAP_PATH,
+                                      "org.freedesktop.DBus.Properties", "Set");
 
     method.append(PCAP_INTERFACE, POWER_CAP_PROP);
     method.append(sdbusplus::message::variant<uint32_t>(powerCap));
@@ -144,10 +134,8 @@ void setPcapEnable(sdbusplus::bus::bus& bus, bool enabled)
 {
     auto service = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
-    auto method = bus.new_method_call(service.c_str(),
-                                      PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties",
-                                      "Set");
+    auto method = bus.new_method_call(service.c_str(), PCAP_PATH,
+                                      "org.freedesktop.DBus.Properties", "Set");
 
     method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
     method.append(sdbusplus::message::variant<bool>(enabled));
@@ -171,10 +159,8 @@ void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree)
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     auto depth = 0;
 
-    auto mapperCall = bus.new_method_call(mapperBusName,
-                                          mapperObjPath,
-                                          mapperIface,
-                                          "GetSubTree");
+    auto mapperCall = bus.new_method_call(mapperBusName, mapperObjPath,
+                                          mapperIface, "GetSubTree");
 
     mapperCall.append(inventoryRoot);
     mapperCall.append(depth);
@@ -206,10 +192,8 @@ std::string readAssetTag()
     readAssetTagObjectTree(objectTree);
 
     auto method = bus.new_method_call(
-            (objectTree.begin()->second.begin()->first).c_str(),
-            (objectTree.begin()->first).c_str(),
-            dcmi::propIntf,
-            "Get");
+        (objectTree.begin()->second.begin()->first).c_str(),
+        (objectTree.begin()->first).c_str(), dcmi::propIntf, "Get");
     method.append(dcmi::assetTagIntf);
     method.append(dcmi::assetTagProp);
 
@@ -236,10 +220,8 @@ void writeAssetTag(const std::string& assetTag)
     readAssetTagObjectTree(objectTree);
 
     auto method = bus.new_method_call(
-            (objectTree.begin()->second.begin()->first).c_str(),
-            (objectTree.begin()->first).c_str(),
-            dcmi::propIntf,
-            "Set");
+        (objectTree.begin()->second.begin()->first).c_str(),
+        (objectTree.begin()->first).c_str(), dcmi::propIntf, "Set");
     method.append(dcmi::assetTagIntf);
     method.append(dcmi::assetTagProp);
     method.append(sdbusplus::message::variant<std::string>(assetTag));
@@ -254,11 +236,11 @@ void writeAssetTag(const std::string& assetTag)
 
 std::string getHostName(void)
 {
-    sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
     auto service = ipmi::getService(bus, networkConfigIntf, networkConfigObj);
-    auto value = ipmi::getDbusProperty(bus, service,
-        networkConfigObj, networkConfigIntf, hostNameProp);
+    auto value = ipmi::getDbusProperty(bus, service, networkConfigObj,
+                                       networkConfigIntf, hostNameProp);
 
     return value.get<std::string>();
 }
@@ -267,13 +249,13 @@ bool getDHCPEnabled()
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-    auto ethdevice = ipmi::network::ChanneltoEthernet(
-                                ethernetDefaultChannelNum);
-    auto ethernetObj = ipmi::getDbusObject(bus, ethernetIntf, networkRoot,
-                                ethdevice);
+    auto ethdevice =
+        ipmi::network::ChanneltoEthernet(ethernetDefaultChannelNum);
+    auto ethernetObj =
+        ipmi::getDbusObject(bus, ethernetIntf, networkRoot, ethdevice);
     auto service = ipmi::getService(bus, ethernetIntf, ethernetObj.first);
-    auto value = ipmi::getDbusProperty(bus, service,
-                                ethernetObj.first, ethernetIntf, "DHCPEnabled");
+    auto value = ipmi::getDbusProperty(bus, service, ethernetObj.first,
+                                       ethernetIntf, "DHCPEnabled");
 
     return value.get<bool>();
 }
@@ -287,7 +269,6 @@ bool getDHCPOption(std::string prop)
 
     return value.get<bool>();
 }
-
 
 void setDHCPOption(std::string prop, bool value)
 {
@@ -322,11 +303,11 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                          ipmi_request_t request, ipmi_response_t response,
                          ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const dcmi::GetPowerLimitRequest*>
-                   (request);
+    auto requestData =
+        reinterpret_cast<const dcmi::GetPowerLimitRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerLimitResponse));
-    auto responseData = reinterpret_cast<dcmi::GetPowerLimitResponse*>
-            (outPayload.data());
+    auto responseData =
+        reinterpret_cast<dcmi::GetPowerLimitResponse*>(outPayload.data());
 
     if (requestData->groupID != dcmi::groupExtId)
     {
@@ -334,7 +315,7 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    sdbusplus::bus::bus sdbus {ipmid_get_sd_bus_connection()};
+    sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
     uint32_t pcapValue = 0;
     bool pcapEnable = false;
 
@@ -383,11 +364,11 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                          ipmi_request_t request, ipmi_response_t response,
                          ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const dcmi::SetPowerLimitRequest*>
-                   (request);
+    auto requestData =
+        reinterpret_cast<const dcmi::SetPowerLimitRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::SetPowerLimitResponse));
-    auto responseData = reinterpret_cast<dcmi::SetPowerLimitResponse*>
-            (outPayload.data());
+    auto responseData =
+        reinterpret_cast<dcmi::SetPowerLimitResponse*>(outPayload.data());
 
     if (requestData->groupID != dcmi::groupExtId)
     {
@@ -395,7 +376,7 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    sdbusplus::bus::bus sdbus {ipmid_get_sd_bus_connection()};
+    sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
     // Only process the power limit requested in watts.
     try
@@ -422,11 +403,11 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                            ipmi_request_t request, ipmi_response_t response,
                            ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const dcmi::ApplyPowerLimitRequest*>
-                   (request);
+    auto requestData =
+        reinterpret_cast<const dcmi::ApplyPowerLimitRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::ApplyPowerLimitResponse));
-    auto responseData = reinterpret_cast<dcmi::ApplyPowerLimitResponse*>
-            (outPayload.data());
+    auto responseData =
+        reinterpret_cast<dcmi::ApplyPowerLimitResponse*>(outPayload.data());
 
     if (requestData->groupID != dcmi::groupExtId)
     {
@@ -434,7 +415,7 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    sdbusplus::bus::bus sdbus {ipmid_get_sd_bus_connection()};
+    sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
     try
     {
@@ -461,11 +442,11 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const dcmi::GetAssetTagRequest*>
-                   (request);
+    auto requestData =
+        reinterpret_cast<const dcmi::GetAssetTagRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::GetAssetTagResponse));
-    auto responseData = reinterpret_cast<dcmi::GetAssetTagResponse*>
-            (outPayload.data());
+    auto responseData =
+        reinterpret_cast<dcmi::GetAssetTagResponse*>(outPayload.data());
 
     if (requestData->groupID != dcmi::groupExtId)
     {
@@ -536,11 +517,11 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const dcmi::SetAssetTagRequest*>
-                   (request);
+    auto requestData =
+        reinterpret_cast<const dcmi::SetAssetTagRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::SetAssetTagResponse));
-    auto responseData = reinterpret_cast<dcmi::SetAssetTagResponse*>
-            (outPayload.data());
+    auto responseData =
+        reinterpret_cast<dcmi::SetAssetTagResponse*>(outPayload.data());
 
     if (requestData->groupID != dcmi::groupExtId)
     {
@@ -573,7 +554,7 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         assetTag.replace(requestData->offset,
                          assetTag.size() - requestData->offset,
                          static_cast<const char*>(request) +
-                         sizeof(dcmi::SetAssetTagRequest),
+                             sizeof(dcmi::SetAssetTagRequest),
                          requestData->bytes);
 
         dcmi::writeAssetTag(assetTag);
@@ -593,13 +574,13 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-    ipmi_request_t request, ipmi_response_t response,
-    ipmi_data_len_t data_len, ipmi_context_t context)
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const dcmi::GetMgmntCtrlIdStrRequest *>
-        (request);
-    auto responseData = reinterpret_cast<dcmi::GetMgmntCtrlIdStrResponse *>
-        (response);
+    auto requestData =
+        reinterpret_cast<const dcmi::GetMgmntCtrlIdStrRequest*>(request);
+    auto responseData =
+        reinterpret_cast<dcmi::GetMgmntCtrlIdStrResponse*>(response);
     std::string hostName;
 
     *data_len = 0;
@@ -626,7 +607,7 @@ ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     auto responseStr = hostName.substr(requestData->offset, requestData->bytes);
     auto responseStrLen = std::min(static_cast<std::size_t>(requestData->bytes),
-        responseStr.length() + 1);
+                                   responseStr.length() + 1);
     responseData->groupID = dcmi::groupExtId;
     responseData->strLen = hostName.length();
     std::copy(begin(responseStr), end(responseStr), responseData->data);
@@ -636,23 +617,24 @@ ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-    ipmi_request_t request, ipmi_response_t response,
-    ipmi_data_len_t data_len, ipmi_context_t context)
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len, ipmi_context_t context)
 {
     static std::array<char, dcmi::maxCtrlIdStrLen + 1> newCtrlIdStr;
 
-    auto requestData = reinterpret_cast<const dcmi::SetMgmntCtrlIdStrRequest *>
-        (request);
-    auto responseData = reinterpret_cast<dcmi::SetMgmntCtrlIdStrResponse *>
-        (response);
+    auto requestData =
+        reinterpret_cast<const dcmi::SetMgmntCtrlIdStrRequest*>(request);
+    auto responseData =
+        reinterpret_cast<dcmi::SetMgmntCtrlIdStrResponse*>(response);
 
     *data_len = 0;
 
     if (requestData->groupID != dcmi::groupExtId ||
         requestData->bytes > dcmi::maxBytes ||
         requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen + 1 ||
-        (requestData->offset + requestData->bytes == dcmi::maxCtrlIdStrLen + 1 &&
-            requestData->data[requestData->bytes - 1] != '\0'))
+        (requestData->offset + requestData->bytes ==
+             dcmi::maxCtrlIdStrLen + 1 &&
+         requestData->data[requestData->bytes - 1] != '\0'))
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
@@ -670,8 +652,9 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
         /* replace part of string and mark byte after the last as \0 */
-        auto restStrIter = std::copy_n(requestData->data,
-            requestData->bytes, begin(newCtrlIdStr) + requestData->offset);
+        auto restStrIter =
+            std::copy_n(requestData->data, requestData->bytes,
+                        begin(newCtrlIdStr) + requestData->offset);
         /* if the last written byte is not 64th - add '\0' */
         if (requestData->offset + requestData->bytes <= dcmi::maxCtrlIdStrLen)
         {
@@ -680,13 +663,14 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         /* if input data contains '\0' whole string is sent - update hostname */
         auto it = std::find(requestData->data,
-            requestData->data + requestData->bytes, '\0');
+                            requestData->data + requestData->bytes, '\0');
         if (it != requestData->data + requestData->bytes)
         {
-            sdbusplus::bus::bus bus{ ipmid_get_sd_bus_connection() };
+            sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
             ipmi::setDbusProperty(bus, dcmi::networkServiceName,
-                dcmi::networkConfigObj, dcmi::networkConfigIntf,
-                dcmi::hostNameProp, std::string(newCtrlIdStr.data()));
+                                  dcmi::networkConfigObj,
+                                  dcmi::networkConfigIntf, dcmi::hostNameProp,
+                                  std::string(newCtrlIdStr.data()));
         }
     }
     catch (InternalFailure& e)
@@ -701,53 +685,35 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-//List of the capabilities under each parameter
-dcmi::DCMICaps dcmiCaps =
-{
-//Supported DCMI Capabilities
-    {
-        dcmi::DCMICapParameters::SUPPORTED_DCMI_CAPS,
-        {
-            3, {{"PowerManagement", 2, 0, 1},
-                {"OOBSecondaryLan", 3, 2, 1},
-                {"SerialTMODE", 3, 1, 1},
-                {"InBandSystemInterfaceChannel", 3, 0, 1}
-            }
-        }
-    },
-//Mandatory Platform Attributes
-    {
-        dcmi::DCMICapParameters::MANDATORY_PLAT_ATTRIBUTES,
-        {
-            5, {{"SELAutoRollOver", 1, 15, 1},
-                {"FlushEntireSELUponRollOver", 1, 14, 1},
-                {"RecordLevelSELFlushUponRollOver", 1, 13, 1},
-                {"NumberOfSELEntries", 1, 0, 12},
-                {"TempMonitoringSamplingFreq", 5, 0, 8}
-            }
-        }
-    },
-//Optional Platform Attributes
-    {
-        dcmi::DCMICapParameters::OPTIONAL_PLAT_ATTRIBUTES,
-        {
-            2, {{"PowerMgmtDeviceSlaveAddress", 1, 1, 7},
-                {"BMCChannelNumber", 2, 4, 4},
-                {"DeviceRivision", 2, 0, 4}
-            }
-        }
-    },
-//Manageability Access Attributes
-    {
-        dcmi::DCMICapParameters::MANAGEABILITY_ACCESS_ATTRIBUTES,
-        {
-            3, {{"MandatoryPrimaryLanOOBSupport", 1, 0, 8},
-                {"OptionalSecondaryLanOOBSupport", 2, 0, 8},
-                {"OptionalSerialOOBMTMODECapability", 3, 0, 8}
-            }
-        }
-    }
-};
+// List of the capabilities under each parameter
+dcmi::DCMICaps dcmiCaps = {
+    // Supported DCMI Capabilities
+    {dcmi::DCMICapParameters::SUPPORTED_DCMI_CAPS,
+     {3,
+      {{"PowerManagement", 2, 0, 1},
+       {"OOBSecondaryLan", 3, 2, 1},
+       {"SerialTMODE", 3, 1, 1},
+       {"InBandSystemInterfaceChannel", 3, 0, 1}}}},
+    // Mandatory Platform Attributes
+    {dcmi::DCMICapParameters::MANDATORY_PLAT_ATTRIBUTES,
+     {5,
+      {{"SELAutoRollOver", 1, 15, 1},
+       {"FlushEntireSELUponRollOver", 1, 14, 1},
+       {"RecordLevelSELFlushUponRollOver", 1, 13, 1},
+       {"NumberOfSELEntries", 1, 0, 12},
+       {"TempMonitoringSamplingFreq", 5, 0, 8}}}},
+    // Optional Platform Attributes
+    {dcmi::DCMICapParameters::OPTIONAL_PLAT_ATTRIBUTES,
+     {2,
+      {{"PowerMgmtDeviceSlaveAddress", 1, 1, 7},
+       {"BMCChannelNumber", 2, 4, 4},
+       {"DeviceRivision", 2, 0, 4}}}},
+    // Manageability Access Attributes
+    {dcmi::DCMICapParameters::MANAGEABILITY_ACCESS_ATTRIBUTES,
+     {3,
+      {{"MandatoryPrimaryLanOOBSupport", 1, 0, 8},
+       {"OptionalSecondaryLanOOBSupport", 2, 0, 8},
+       {"OptionalSerialOOBMTMODECapability", 3, 0, 8}}}}};
 
 ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                ipmi_request_t request, ipmi_response_t response,
@@ -768,10 +734,10 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    auto requestData = reinterpret_cast<const dcmi::GetDCMICapRequest*>
-                       (request);
+    auto requestData =
+        reinterpret_cast<const dcmi::GetDCMICapRequest*>(request);
 
-    //get list of capabilities in a parameter
+    // get list of capabilities in a parameter
     auto caps =
         dcmiCaps.find(static_cast<dcmi::DCMICapParameters>(requestData->param));
     if (caps == dcmiCaps.end())
@@ -786,24 +752,25 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    auto responseData = reinterpret_cast<dcmi::GetDCMICapResponse*>
-                        (response);
+    auto responseData = reinterpret_cast<dcmi::GetDCMICapResponse*>(response);
 
-    //For each capabilities in a parameter fill the data from
-    //the json file based on the capability name.
+    // For each capabilities in a parameter fill the data from
+    // the json file based on the capability name.
     for (auto cap : caps->second.capList)
     {
-        //If the data is beyond first byte boundary, insert in a
-        //16bit pattern for example number of SEL entries are represented
-        //in 12bits.
+        // If the data is beyond first byte boundary, insert in a
+        // 16bit pattern for example number of SEL entries are represented
+        // in 12bits.
         if ((cap.length + cap.position) > 8)
         {
-            //Read the value corresponding to capability name and assign to
-            //16bit bitset.
+            // Read the value corresponding to capability name and assign to
+            // 16bit bitset.
             std::bitset<16> val(data.value(cap.name.c_str(), 0));
             val <<= cap.position;
-            reinterpret_cast<uint16_t*>(responseData->data)[
-                (cap.bytePosition - 1) / sizeof(uint16_t)] |= val.to_ulong();
+            reinterpret_cast<uint16_t*>(
+                responseData
+                    ->data)[(cap.bytePosition - 1) / sizeof(uint16_t)] |=
+                val.to_ulong();
         }
         else
         {
@@ -836,8 +803,8 @@ Temperature readTemp(const std::string& dbusService,
     // with a separate single bit for the sign.
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    auto result = ipmi::getAllDbusProperties(bus, dbusService, dbusPath,
-                                        "xyz.openbmc_project.Sensor.Value");
+    auto result = ipmi::getAllDbusProperties(
+        bus, dbusService, dbusPath, "xyz.openbmc_project.Sensor.Value");
     auto temperature = result.at("Value").get<int64_t>();
     uint64_t absTemp = std::abs(temperature);
 
@@ -845,8 +812,7 @@ Temperature readTemp(const std::string& dbusService,
     uint64_t scale = std::pow(10, factor); // pow() returns float/double
     unsigned long long tempDegrees = 0;
     // Overflow safe multiplication when the scale is > 0
-    if (scale && __builtin_umulll_overflow(
-                     absTemp, scale, &tempDegrees))
+    if (scale && __builtin_umulll_overflow(absTemp, scale, &tempDegrees))
     {
         log<level::ERR>("Multiplication overflow detected",
                         entry("TEMP_VALUE=%llu", absTemp),
@@ -898,9 +864,7 @@ std::tuple<Response, NumInstances> read(const std::string& type,
         try
         {
             service =
-                ipmi::getService(bus,
-                                 "xyz.openbmc_project.Sensor.Value",
-                                 path);
+                ipmi::getService(bus, "xyz.openbmc_project.Sensor.Value", path);
         }
         catch (std::exception& e)
         {
@@ -956,9 +920,7 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
 
             std::string path = j.value("dbus", "");
             auto service =
-                ipmi::getService(bus,
-                                 "xyz.openbmc_project.Sensor.Value",
-                                 path);
+                ipmi::getService(bus, "xyz.openbmc_project.Sensor.Value", path);
 
             Response r{};
             r.instance = instanceNum;
@@ -983,12 +945,12 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
     return std::make_tuple(response, numInstances);
 }
 
-} // namsespace temp_readings
-} // namsepace dcmi
+} // namespace temp_readings
+} // namespace dcmi
 
 ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                       ipmi_request_t request, ipmi_response_t response,
-                       ipmi_data_len_t data_len, ipmi_context_t context)
+                           ipmi_request_t request, ipmi_response_t response,
+                           ipmi_data_len_t data_len, ipmi_context_t context)
 {
     auto requestData =
         reinterpret_cast<const dcmi::GetTempReadingsRequest*>(request);
@@ -1051,13 +1013,11 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     responseData->groupID = dcmi::groupExtId;
-    size_t payloadSize =
-        temps.size() * sizeof(dcmi::temp_readings::Response);
+    size_t payloadSize = temps.size() * sizeof(dcmi::temp_readings::Response);
     if (!temps.empty())
     {
         memcpy(responseData + 1, // copy payload right after the response header
-               temps.data(),
-               payloadSize);
+               temps.data(), payloadSize);
     }
     *data_len = sizeof(dcmi::GetTempReadingsResponseHdr) + payloadSize;
 
@@ -1071,7 +1031,7 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
     if (!sensorFile.is_open())
     {
         log<level::ERR>("Power reading configuration file not found",
-                    entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
         elog<InternalFailure>();
     }
 
@@ -1079,7 +1039,7 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
     if (data.is_discarded())
     {
         log<level::ERR>("Error in parsing configuration file",
-                    entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
         elog<InternalFailure>();
     }
 
@@ -1097,9 +1057,9 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
     {
         auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
 
-        //Read the sensor value and scale properties
-        auto properties = ipmi::getAllDbusProperties(
-                                bus, service, objectPath, SENSOR_VALUE_INTF);
+        // Read the sensor value and scale properties
+        auto properties = ipmi::getAllDbusProperties(bus, service, objectPath,
+                                                     SENSOR_VALUE_INTF);
         auto value = properties[SENSOR_VALUE_PROP].get<int64_t>();
         auto scale = properties[SENSOR_SCALE_PROP].get<int64_t>();
 
@@ -1110,8 +1070,8 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
     catch (std::exception& e)
     {
         log<level::INFO>("Failure to read power value from D-Bus object",
-                        entry("OBJECT_PATH=%s", objectPath.c_str()),
-                        entry("INTERFACE=%s", SENSOR_VALUE_INTF));
+                         entry("OBJECT_PATH=%s", objectPath.c_str()),
+                         entry("INTERFACE=%s", SENSOR_VALUE_INTF));
     }
     return power;
 }
@@ -1120,15 +1080,14 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const dcmi::SetConfParamsRequest*>
-                       (request);
-    auto responseData = reinterpret_cast<dcmi::SetConfParamsResponse*>
-                        (response);
+    auto requestData =
+        reinterpret_cast<const dcmi::SetConfParamsRequest*>(request);
+    auto responseData =
+        reinterpret_cast<dcmi::SetConfParamsResponse*>(response);
 
-
-    if (requestData->groupID != dcmi::groupExtId || *data_len <
-            DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE || *data_len >
-            DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE)
+    if (requestData->groupID != dcmi::groupExtId ||
+        *data_len < DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE ||
+        *data_len > DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE)
     {
         log<level::ERR>("Invalid Group ID or Invalid Requested Packet size",
                         entry("GROUP_ID=%d", requestData->groupID),
@@ -1141,19 +1100,19 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     try
     {
         // Take action based on the Parameter Selector
-        switch (static_cast<dcmi::DCMIConfigParameters>(
-                requestData->paramSelect))
+        switch (
+            static_cast<dcmi::DCMIConfigParameters>(requestData->paramSelect))
         {
             case dcmi::DCMIConfigParameters::ActivateDHCP:
 
                 if ((requestData->data[0] & DCMI_ACTIVATE_DHCP_MASK) &&
-                        dcmi::getDHCPEnabled())
+                    dcmi::getDHCPEnabled())
                 {
-                  // When these conditions are met we have to trigger DHCP
-                  // protocol restart using the latest parameter settings, but
-                  // as per n/w manager design, each time when we update n/w
-                  // parameters, n/w service is restarted. So we no need to take
-                  // any action in this case.
+                    // When these conditions are met we have to trigger DHCP
+                    // protocol restart using the latest parameter settings, but
+                    // as per n/w manager design, each time when we update n/w
+                    // parameters, n/w service is restarted. So we no need to
+                    // take any action in this case.
                 }
                 break;
 
@@ -1198,15 +1157,15 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_data_len_t data_len, ipmi_context_t context)
 {
 
-    auto requestData = reinterpret_cast<const dcmi::GetConfParamsRequest*>
-                       (request);
-    auto responseData = reinterpret_cast<dcmi::GetConfParamsResponse*>
-                        (response);
+    auto requestData =
+        reinterpret_cast<const dcmi::GetConfParamsRequest*>(request);
+    auto responseData =
+        reinterpret_cast<dcmi::GetConfParamsResponse*>(response);
 
     responseData->data[0] = 0x00;
 
-    if (requestData->groupID != dcmi::groupExtId || *data_len != sizeof(
-            dcmi::GetConfParamsRequest))
+    if (requestData->groupID != dcmi::groupExtId ||
+        *data_len != sizeof(dcmi::GetConfParamsRequest))
     {
         log<level::ERR>("Invalid Group ID or Invalid Requested Packet size",
                         entry("GROUP_ID=%d", requestData->groupID),
@@ -1219,8 +1178,8 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     try
     {
         // Take action based on the Parameter Selector
-        switch (static_cast<dcmi::DCMIConfigParameters>(
-                requestData->paramSelect))
+        switch (
+            static_cast<dcmi::DCMIConfigParameters>(requestData->paramSelect))
         {
             case dcmi::DCMIConfigParameters::ActivateDHCP:
                 responseData->data[0] = DCMI_ACTIVATE_DHCP_REPLY;
@@ -1267,16 +1226,15 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-
 ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-            ipmi_request_t request, ipmi_response_t response,
-            ipmi_data_len_t data_len, ipmi_context_t context)
+                           ipmi_request_t request, ipmi_response_t response,
+                           ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    auto requestData = reinterpret_cast<const dcmi::GetPowerReadingRequest*>
-                   (request);
-    auto responseData = reinterpret_cast<dcmi::GetPowerReadingResponse*>
-            (response);
+    auto requestData =
+        reinterpret_cast<const dcmi::GetPowerReadingRequest*>(request);
+    auto responseData =
+        reinterpret_cast<dcmi::GetPowerReadingResponse*>(response);
 
     if (requestData->groupID != dcmi::groupExtId)
     {
@@ -1328,8 +1286,7 @@ Response createFromJson(const Json& config)
 }
 
 std::tuple<Response, NumInstances> read(const std::string& type,
-                                        uint8_t instance,
-                                        const Json& config)
+                                        uint8_t instance, const Json& config)
 {
     Response response{};
 
@@ -1366,9 +1323,8 @@ std::tuple<Response, NumInstances> read(const std::string& type,
     return std::make_tuple(response, numInstances);
 }
 
-std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
-                                               uint8_t instanceStart,
-                                               const Json& config)
+std::tuple<ResponseList, NumInstances>
+    readAll(const std::string& type, uint8_t instanceStart, const Json& config)
 {
     ResponseList responses{};
 
@@ -1471,16 +1427,14 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // Read all instances
             std::tie(sensors, responseData->numInstances) =
                 dcmi::sensor_info::readAll(it->second,
-                                           requestData->instanceStart,
-                                           config);
+                                           requestData->instanceStart, config);
         }
         else
         {
             // Read one instance
             sensors.resize(1);
             std::tie(sensors[0], responseData->numInstances) =
-                dcmi::sensor_info::read(it->second,
-                                        requestData->entityInstance,
+                dcmi::sensor_info::read(it->second, requestData->entityInstance,
                                         config);
         }
         responseData->numRecords = sensors.size();
@@ -1495,8 +1449,7 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (!sensors.empty())
     {
         memcpy(responseData + 1, // copy payload right after the response header
-               sensors.data(),
-               payloadSize);
+               sensors.data(), payloadSize);
     }
     *data_len = sizeof(dcmi::GetSensorInfoResponseHdr) + payloadSize;
 
@@ -1507,13 +1460,13 @@ void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
 
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_LIMIT,
-                           NULL, getPowerLimit, PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_LIMIT, NULL,
+                           getPowerLimit, PRIVILEGE_USER);
 
     // <Set Power Limit>
 
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_POWER_LIMIT,
-                           NULL, setPowerLimit, PRIVILEGE_OPERATOR);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_POWER_LIMIT, NULL,
+                           setPowerLimit, PRIVILEGE_OPERATOR);
 
     // <Activate/Deactivate Power Limit>
 
@@ -1522,26 +1475,26 @@ void register_netfn_dcmi_functions()
 
     // <Get Asset Tag>
 
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_ASSET_TAG,
-                           NULL, getAssetTag, PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_ASSET_TAG, NULL,
+                           getAssetTag, PRIVILEGE_USER);
 
     // <Set Asset Tag>
 
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_ASSET_TAG,
-                           NULL, setAssetTag, PRIVILEGE_OPERATOR);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_ASSET_TAG, NULL,
+                           setAssetTag, PRIVILEGE_OPERATOR);
 
     // <Get Management Controller Identifier String>
 
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_MGMNT_CTRL_ID_STR,
-        NULL, getMgmntCtrlIdStr, PRIVILEGE_USER);
+                           NULL, getMgmntCtrlIdStr, PRIVILEGE_USER);
 
     // <Set Management Controller Identifier String>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR,
-        NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
+                           NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
 
     // <Get DCMI capabilities>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
-        NULL, getDCMICapabilities, PRIVILEGE_USER);
+                           NULL, getDCMICapabilities, PRIVILEGE_USER);
 
     // <Get Temperature Readings>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_TEMP_READINGS,
@@ -1552,16 +1505,16 @@ void register_netfn_dcmi_functions()
                            NULL, getPowerReading, PRIVILEGE_USER);
 
     // <Get Sensor Info>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_SENSOR_INFO,
-                           NULL, getSensorInfo, PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_SENSOR_INFO, NULL,
+                           getSensorInfo, PRIVILEGE_USER);
 
     // <Get DCMI Configuration Parameters>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS,
-        NULL, getDCMIConfParams, PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS, NULL,
+                           getDCMIConfParams, PRIVILEGE_USER);
 
     // <Set DCMI Configuration Parameters>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_CONF_PARAMS,
-        NULL, setDCMIConfParams, PRIVILEGE_ADMIN);
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_CONF_PARAMS, NULL,
+                           setDCMIConfParams, PRIVILEGE_ADMIN);
 
     return;
 }

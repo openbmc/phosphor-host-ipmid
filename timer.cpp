@@ -1,6 +1,7 @@
+#include "timer.hpp"
+
 #include <chrono>
 #include <phosphor-logging/log.hpp>
-#include "timer.hpp"
 namespace phosphor
 {
 namespace ipmi
@@ -27,7 +28,7 @@ void Timer::initialize()
     if (r < 0)
     {
         log<level::ERR>("Failure to set initial expiration time value",
-                entry("ERROR=%s", strerror(-r)));
+                        entry("ERROR=%s", strerror(-r)));
 
         throw std::runtime_error("Timer initialization failed");
     }
@@ -37,7 +38,7 @@ void Timer::initialize()
     if (r < 0)
     {
         log<level::ERR>("Failure to disable timer",
-                entry("ERROR=%s", strerror(-r)));
+                        entry("ERROR=%s", strerror(-r)));
 
         throw std::runtime_error("Disabling the timer failed");
     }
@@ -45,15 +46,15 @@ void Timer::initialize()
 }
 
 /** @brief callback handler on timeout */
-int Timer::timeoutHandler(sd_event_source* eventSource,
-                          uint64_t usec, void* userData)
+int Timer::timeoutHandler(sd_event_source* eventSource, uint64_t usec,
+                          void* userData)
 {
     auto timer = static_cast<Timer*>(userData);
     timer->expired = true;
 
     log<level::INFO>("Timer expired");
     // Call optional user call back function if available
-    if(timer->userCallBack)
+    if (timer->userCallBack)
     {
         timer->userCallBack();
     }
@@ -91,7 +92,7 @@ int Timer::startTimer(std::chrono::microseconds timeValue)
     if (r < 0)
     {
         log<level::ERR>("Failure to set timer",
-                entry("ERROR=%s", strerror(-r)));
+                        entry("ERROR=%s", strerror(-r)));
         return r;
     }
 
@@ -101,7 +102,7 @@ int Timer::startTimer(std::chrono::microseconds timeValue)
     if (r < 0)
     {
         log<level::ERR>("Failure to start timer",
-                entry("ERROR=%s", strerror(-r)));
+                        entry("ERROR=%s", strerror(-r)));
     }
     return r;
 }

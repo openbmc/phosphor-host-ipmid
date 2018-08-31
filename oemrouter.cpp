@@ -1,9 +1,9 @@
+#include "host-ipmid/oemrouter.hpp"
+
 #include <cstdio>
 #include <cstring>
 #include <map>
 #include <utility>
-
-#include "host-ipmid/oemrouter.hpp"
 
 namespace oem
 {
@@ -13,20 +13,21 @@ using Key = std::pair<Number, ipmi_cmd_t>;
 // Private implementation of OemRouter Interface.
 class RouterImpl : public Router
 {
-    public:
-        RouterImpl() {}
+  public:
+    RouterImpl()
+    {
+    }
 
-        // Implement OemRouter Interface.
-        void activate() override;
-        void registerHandler(Number oen, ipmi_cmd_t cmd,
-                             Handler handler) override;
+    // Implement OemRouter Interface.
+    void activate() override;
+    void registerHandler(Number oen, ipmi_cmd_t cmd, Handler handler) override;
 
-        // Actual message routing function.
-        ipmi_ret_t routeMsg(ipmi_cmd_t cmd, const uint8_t* reqBuf,
-                            uint8_t* replyBuf, size_t* dataLen);
+    // Actual message routing function.
+    ipmi_ret_t routeMsg(ipmi_cmd_t cmd, const uint8_t* reqBuf,
+                        uint8_t* replyBuf, size_t* dataLen);
 
-    private:
-        std::map<Key, Handler> handlers;
+  private:
+    std::map<Key, Handler> handlers;
 };
 
 // Static global instance for simplicity.
@@ -66,8 +67,10 @@ ipmi_ret_t RouterImpl::routeMsg(ipmi_cmd_t cmd, const uint8_t* reqBuf,
         iter = handlers.find(wildKey);
         if (iter == handlers.end())
         {
-            fprintf(stderr, "No Registered handler for NetFn:[0x2E], "
-                    "OEM:[%#08X], Cmd:[%#04X]\n", number, cmd);
+            fprintf(stderr,
+                    "No Registered handler for NetFn:[0x2E], "
+                    "OEM:[%#08X], Cmd:[%#04X]\n",
+                    number, cmd);
             *dataLen = groupMagicSize;
             return IPMI_CC_INVALID;
         }
@@ -91,8 +94,8 @@ ipmi_ret_t RouterImpl::routeMsg(ipmi_cmd_t cmd, const uint8_t* reqBuf,
     size_t oemDataLen = *dataLen - groupMagicSize;
     Handler& handler = iter->second;
 
-    auto rc = handler(cmd, reqBuf + groupMagicSize,
-                      replyBuf + groupMagicSize, &oemDataLen);
+    auto rc = handler(cmd, reqBuf + groupMagicSize, replyBuf + groupMagicSize,
+                      &oemDataLen);
 
     // Add OEMGroup bytes to nominal reply.
     *dataLen = oemDataLen + groupMagicSize;
@@ -101,8 +104,8 @@ ipmi_ret_t RouterImpl::routeMsg(ipmi_cmd_t cmd, const uint8_t* reqBuf,
 
 // Function suitable for use as ipmi_netfn_router() call-back.
 // Translates call-back pointer args to more specific types.
-ipmi_ret_t ipmi_oem_wildcard_handler(ipmi_netfn_t /* netfn */,
-                                     ipmi_cmd_t cmd, ipmi_request_t request,
+ipmi_ret_t ipmi_oem_wildcard_handler(ipmi_netfn_t /* netfn */, ipmi_cmd_t cmd,
+                                     ipmi_request_t request,
                                      ipmi_response_t response,
                                      ipmi_data_len_t dataLen,
                                      ipmi_context_t context)
@@ -112,8 +115,7 @@ ipmi_ret_t ipmi_oem_wildcard_handler(ipmi_netfn_t /* netfn */,
     uint8_t* replyBuf = static_cast<uint8_t*>(response);
 
     // View context as router object, defaulting nullptr to global object.
-    auto router = static_cast<RouterImpl*>(
-            context ? context : mutableRouter());
+    auto router = static_cast<RouterImpl*>(context ? context : mutableRouter());
 
     // Send message parameters to dispatcher.
     return router->routeMsg(cmd, reqBuf, replyBuf, dataLen);
@@ -123,14 +125,13 @@ ipmi_ret_t ipmi_oem_wildcard_handler(ipmi_netfn_t /* netfn */,
 void RouterImpl::activate()
 {
     // Register netfn 0x2e OEM Group, any (wildcard) command.
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n",
-           NETFUN_OEM_GROUP, IPMI_CMD_WILDCARD);
+    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_OEM_GROUP,
+           IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_OEM_GROUP, IPMI_CMD_WILDCARD, this,
                            ipmi_oem_wildcard_handler, PRIVILEGE_OEM);
 }
 
-void RouterImpl::registerHandler(Number oen, ipmi_cmd_t cmd,
-                                 Handler handler)
+void RouterImpl::registerHandler(Number oen, ipmi_cmd_t cmd, Handler handler)
 {
     auto cmdKey = std::make_pair(oen, cmd);
     auto iter = handlers.find(cmdKey);
@@ -141,9 +142,11 @@ void RouterImpl::registerHandler(Number oen, ipmi_cmd_t cmd,
     }
     else
     {
-        fprintf(stderr, "ERROR : Duplicate registration for NetFn:[0x2E], "
-                "OEM:[%#08X], Cmd:[%#04X]\n", oen, cmd);
+        fprintf(stderr,
+                "ERROR : Duplicate registration for NetFn:[0x2E], "
+                "OEM:[%#08X], Cmd:[%#04X]\n",
+                oen, cmd);
     }
 }
 
-}  // namespace oem
+} // namespace oem

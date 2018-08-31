@@ -1,8 +1,10 @@
+#include "settings.hpp"
+
+#include "utils.hpp"
+
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
-#include "xyz/openbmc_project/Common/error.hpp"
-#include "settings.hpp"
-#include "utils.hpp"
+#include <xyz/openbmc_project/Common/error.hpp>
 
 namespace settings
 {
@@ -15,14 +17,12 @@ constexpr auto mapperPath = "/xyz/openbmc_project/object_mapper";
 constexpr auto mapperIntf = "xyz.openbmc_project.ObjectMapper";
 
 Objects::Objects(sdbusplus::bus::bus& bus,
-                 const std::vector<Interface>& filter):
+                 const std::vector<Interface>& filter) :
     bus(bus)
 {
     auto depth = 0;
 
-    auto mapperCall = bus.new_method_call(mapperService,
-                                          mapperPath,
-                                          mapperIntf,
+    auto mapperCall = bus.new_method_call(mapperService, mapperPath, mapperIntf,
                                           "GetSubTree");
     mapperCall.append(root);
     mapperCall.append(depth);
@@ -66,10 +66,8 @@ Objects::Objects(sdbusplus::bus::bus& bus,
 Service Objects::service(const Path& path, const Interface& interface) const
 {
     using Interfaces = std::vector<Interface>;
-    auto mapperCall = bus.new_method_call(mapperService,
-                                          mapperPath,
-                                          mapperIntf,
-                                          "GetObject");
+    auto mapperCall =
+        bus.new_method_call(mapperService, mapperPath, mapperIntf, "GetObject");
     mapperCall.append(path);
     mapperCall.append(Interfaces({interface}));
 
@@ -118,12 +116,9 @@ std::tuple<Path, OneTimeEnabled> setting(const Objects& objects,
     const Path& oneTimeSetting = paths[index];
     const Path& regularSetting = paths[!index];
 
-    auto method =
-        objects.bus.new_method_call(
-            objects.service(oneTimeSetting, iface).c_str(),
-            oneTimeSetting.c_str(),
-            ipmi::PROP_INTF,
-            "Get");
+    auto method = objects.bus.new_method_call(
+        objects.service(oneTimeSetting, iface).c_str(), oneTimeSetting.c_str(),
+        ipmi::PROP_INTF, "Get");
     method.append(enabledIntf, "Enabled");
     auto reply = objects.bus.call(method);
     if (reply.is_method_error())

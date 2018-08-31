@@ -24,6 +24,5 @@ using FruInventoryData = std::map<Section, PropertyMap>;
  */
 FruAreaData buildFruAreaData(const FruInventoryData& inventory);
 
-} //fru
-} //ipmi
-
+} // namespace fru
+} // namespace ipmi

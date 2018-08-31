@@ -1,17 +1,17 @@
 #include "channel.hpp"
-#include "types.hpp"
-#include "transporthandler.hpp"
-#include "utils.hpp"
-#include "net.hpp"
 
-#include <fstream>
-#include <string>
+#include "net.hpp"
+#include "transporthandler.hpp"
+#include "types.hpp"
+#include "utils.hpp"
+
 #include <arpa/inet.h>
 
-#include <phosphor-logging/log.hpp>
+#include <fstream>
 #include <phosphor-logging/elog-errors.hpp>
-#include "xyz/openbmc_project/Common/error.hpp"
-
+#include <phosphor-logging/log.hpp>
+#include <string>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
@@ -22,8 +22,8 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
  */
 struct GetChannelAccessRequest
 {
-    uint8_t channelNumber;      //!< Channel number.
-    uint8_t volatileSetting;    //!< Get non-volatile or the volatile setting.
+    uint8_t channelNumber;   //!< Channel number.
+    uint8_t volatileSetting; //!< Get non-volatile or the volatile setting.
 } __attribute__((packed));
 
 /** @struct GetChannelAccessResponse
@@ -32,20 +32,21 @@ struct GetChannelAccessRequest
  */
 struct GetChannelAccessResponse
 {
-    uint8_t settings;          //!< Channel settings.
-    uint8_t privilegeLimit;    //!< Channel privilege level limit.
+    uint8_t settings;       //!< Channel settings.
+    uint8_t privilegeLimit; //!< Channel privilege level limit.
 } __attribute__((packed));
 
-
 ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                            ipmi_request_t request, ipmi_response_t response,
-                            ipmi_data_len_t data_len, ipmi_context_t context)
+                                   ipmi_request_t request,
+                                   ipmi_response_t response,
+                                   ipmi_data_len_t data_len,
+                                   ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const GetChannelAccessRequest*>
-                   (request);
+    auto requestData =
+        reinterpret_cast<const GetChannelAccessRequest *>(request);
     std::vector<uint8_t> outPayload(sizeof(GetChannelAccessResponse));
-    auto responseData = reinterpret_cast<GetChannelAccessResponse*>
-            (outPayload.data());
+    auto responseData =
+        reinterpret_cast<GetChannelAccessResponse *>(outPayload.data());
 
     /*
      * The value Eh is used as a way to identify the current channel that
@@ -71,7 +72,7 @@ ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     constexpr auto channelSetting = 0x32;
 
     responseData->settings = channelSetting;
-    //Defaulting the channel privilege to administrator level.
+    // Defaulting the channel privilege to administrator level.
     responseData->privilegeLimit = PRIVILEGE_ADMIN;
 
     *data_len = outPayload.size();
@@ -91,26 +92,35 @@ ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 #define IPMI_CHANNEL_MEDIUM_TYPE_OTHER 6
 
 ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    uint8_t resp[] = {
-        1,
-        IPMI_CHANNEL_MEDIUM_TYPE_OTHER,
-        IPMI_CHANNEL_TYPE_IPMB,
-        1,0x41,0xA7,0x00,0,0};
-    uint8_t *p = (uint8_t*) request;
+    uint8_t resp[] = {1,
+                      IPMI_CHANNEL_MEDIUM_TYPE_OTHER,
+                      IPMI_CHANNEL_TYPE_IPMB,
+                      1,
+                      0x41,
+                      0xA7,
+                      0x00,
+                      0,
+                      0};
+    uint8_t *p = (uint8_t *)request;
     int channel = (*p) & CHANNEL_MASK;
     std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
 
     // The supported channels numbers are those which are configured.
     // Channel Number E is used as way to identify the current channel
     // that the command is being is received from.
-    if (channel != 0xe && ethdevice.empty()) {
+    if (channel != 0xe && ethdevice.empty())
+    {
         rc = IPMI_CC_PARM_OUT_OF_RANGE;
         *data_len = 0;
-    } else {
+    }
+    else
+    {
         *data_len = sizeof(resp);
         memcpy(response, resp, *data_len);
     }
@@ -149,7 +159,7 @@ std::vector<uint8_t> getCipherRecords()
         elog<InternalFailure>();
     }
 
-    for (const auto& record : data)
+    for (const auto &record : data)
     {
         if (record.find(oem) != record.end())
         {
@@ -161,7 +171,6 @@ std::vector<uint8_t> getCipherRecords()
             records.push_back(record.value(oem, 0));
             records.push_back(record.value(oem, 0) >> 8);
             records.push_back(record.value(oem, 0) >> 16);
-
         }
         else
         {
@@ -182,10 +191,9 @@ std::vector<uint8_t> getCipherRecords()
     return records;
 }
 
-} //namespace cipher
+} // namespace cipher
 
-ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
-                                  ipmi_cmd_t cmd,
+ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_request_t request,
                                   ipmi_response_t response,
                                   ipmi_data_len_t data_len,
@@ -195,8 +203,7 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
     static auto recordInit = false;
 
     auto requestData =
-        reinterpret_cast<const GetChannelCipherRequest*>(request);
-
+        reinterpret_cast<const GetChannelCipherRequest *>(request);
 
     if (*data_len < sizeof(GetChannelCipherRequest))
     {
@@ -208,7 +215,7 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
 
     // Support only for list algorithms by cipher suite
     if (cipher::listCipherSuite !=
-            (requestData->listIndex & cipher::listTypeMask))
+        (requestData->listIndex & cipher::listTypeMask))
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
@@ -228,17 +235,17 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
 
     // List index(00h-3Fh), 0h selects the first set of 16, 1h selects the next
     // set of 16 and so on.
-    auto index = static_cast<size_t>(
-            requestData->listIndex & cipher::listIndexMask);
+    auto index =
+        static_cast<size_t>(requestData->listIndex & cipher::listIndexMask);
 
     // Calculate the number of record data bytes to be returned.
     auto start = std::min(index * cipher::respSize, records.size());
-    auto end = std::min((index * cipher::respSize) + cipher::respSize,
-                        records.size());
+    auto end =
+        std::min((index * cipher::respSize) + cipher::respSize, records.size());
     auto size = end - start;
 
-    auto responseData = reinterpret_cast<GetChannelCipherRespHeader*>
-            (response);
+    auto responseData =
+        reinterpret_cast<GetChannelCipherRespHeader *>(response);
     responseData->channelNumber = cipher::defaultChannelNumber;
 
     if (!size)
@@ -247,9 +254,8 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
     }
     else
     {
-        std::copy_n(records.data() + start,
-                    size,
-                    static_cast<uint8_t*>(response) + 1);
+        std::copy_n(records.data() + start, size,
+                    static_cast<uint8_t *>(response) + 1);
         *data_len = size + sizeof(GetChannelCipherRespHeader);
     }
 
