@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.hpp"
+
 #include <string>
 // IPMI commands for Transport net functions.
 enum ipmi_netfn_storage_cmds
@@ -17,22 +18,22 @@ enum ipmi_transport_return_codes
 };
 
 // Parameters
-static const int LAN_PARM_INPROGRESS  = 0;
+static const int LAN_PARM_INPROGRESS = 0;
 static const int LAN_PARM_AUTHSUPPORT = 1;
 static const int LAN_PARM_AUTHENABLES = 2;
-static const int LAN_PARM_IP          = 3;
-static const int LAN_PARM_IPSRC       = 4;
-static const int LAN_PARM_MAC         = 5;
-static const int LAN_PARM_SUBNET      = 6;
-static const int LAN_PARM_GATEWAY     = 12;
-static const int LAN_PARM_VLAN        = 20;
-static const int CIPHER_SUITE_COUNT   = 22;
+static const int LAN_PARM_IP = 3;
+static const int LAN_PARM_IPSRC = 4;
+static const int LAN_PARM_MAC = 5;
+static const int LAN_PARM_SUBNET = 6;
+static const int LAN_PARM_GATEWAY = 12;
+static const int LAN_PARM_VLAN = 20;
+static const int CIPHER_SUITE_COUNT = 22;
 static const int CIPHER_SUITE_ENTRIES = 23;
 
 constexpr uint8_t SET_COMPLETE = 0;
 constexpr uint8_t SET_IN_PROGRESS = 1;
-constexpr uint8_t SET_COMMIT_WRITE = 2; //Optional
-constexpr uint8_t SET_IN_PROGRESS_RESERVED = 3; //Reserved
+constexpr uint8_t SET_COMMIT_WRITE = 2;         // Optional
+constexpr uint8_t SET_IN_PROGRESS_RESERVED = 3; // Reserved
 
 const int CHANNEL_MASK = 0x0f;
 const int NUM_CHANNELS = 0x0f;

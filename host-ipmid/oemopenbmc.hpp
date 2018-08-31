@@ -1,7 +1,8 @@
 #pragma once
 
-#include "host-ipmid/ipmid-api.h"
 #include "host-ipmid/oemrouter.hpp"
+
+#include "host-ipmid/ipmid-api.h"
 
 namespace oem
 {
@@ -22,4 +23,4 @@ enum Cmd
     fanManualCmd = 4,
 };
 
-}  // namespace oem
+} // namespace oem

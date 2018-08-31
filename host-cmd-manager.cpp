@@ -1,13 +1,14 @@
+#include <config.h>
+#include <systemintfcmds.h>
+
 #include <chrono>
-#include <phosphor-logging/log.hpp>
+#include <host-cmd-manager.hpp>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <timer.hpp>
+#include <utils.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
-#include <systemintfcmds.h>
-#include <utils.hpp>
-#include <config.h>
-#include <host-cmd-manager.hpp>
-#include <timer.hpp>
 
 namespace phosphor
 {
@@ -25,20 +26,17 @@ constexpr auto HOST_TRANS_PROP = "RequestedHostTransition";
 
 // For throwing exceptions
 using namespace phosphor::logging;
-using InternalFailure = sdbusplus::xyz::openbmc_project::Common::
-                            Error::InternalFailure;
+using InternalFailure =
+    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
 Manager::Manager(sdbusplus::bus::bus& bus, sd_event* event) :
-            bus(bus),
-            timer(event, std::bind(&Manager::hostTimeout, this)),
-            hostTransitionMatch(bus,
-                    sdbusRule::propertiesChanged(
-                        HOST_STATE_PATH,
-                        HOST_STATE_INTERFACE),
-                    std::bind(&Manager::clearQueueOnPowerOn, this,
-                        std::placeholders::_1))
+    bus(bus), timer(event, std::bind(&Manager::hostTimeout, this)),
+    hostTransitionMatch(
+        bus,
+        sdbusRule::propertiesChanged(HOST_STATE_PATH, HOST_STATE_INTERFACE),
+        std::bind(&Manager::clearQueueOnPowerOn, this, std::placeholders::_1))
 {
     // Nothing to do here.
 }
@@ -51,10 +49,10 @@ IpmiCmdData Manager::getNextCommand()
     if (r < 0)
     {
         log<level::ERR>("Failure to STOP the timer",
-                entry("ERROR=%s", strerror(-r)));
+                        entry("ERROR=%s", strerror(-r)));
     }
 
-    if(this->workQueue.empty())
+    if (this->workQueue.empty())
     {
         // Just return a heartbeat in this case.  A spurious SMS_ATN was
         // asserted for the host (probably from a previous boot).
@@ -93,7 +91,7 @@ void Manager::hostTimeout()
 void Manager::clearQueue()
 {
     // Dequeue all entries and send fail signal
-    while(!this->workQueue.empty())
+    while (!this->workQueue.empty())
     {
         auto command = this->workQueue.front();
         this->workQueue.pop();
@@ -117,11 +115,11 @@ void Manager::checkQueueAndAlertHost()
         std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
         std::string IPMI_INTERFACE("org.openbmc.HostIpmi");
 
-        auto host = ::ipmi::getService(this->bus,IPMI_INTERFACE,IPMI_PATH);
+        auto host = ::ipmi::getService(this->bus, IPMI_INTERFACE, IPMI_PATH);
 
         // Start the timer for this transaction
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
-                        std::chrono::seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
+            std::chrono::seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
 
         auto r = timer.startTimer(time);
         if (r < 0)
@@ -130,10 +128,9 @@ void Manager::checkQueueAndAlertHost()
             return;
         }
 
-        auto method = this->bus.new_method_call(host.c_str(),
-                                                IPMI_PATH.c_str(),
-                                                IPMI_INTERFACE.c_str(),
-                                                "setAttention");
+        auto method =
+            this->bus.new_method_call(host.c_str(), IPMI_PATH.c_str(),
+                                      IPMI_INTERFACE.c_str(), "setAttention");
         auto reply = this->bus.call(method);
 
         if (reply.is_method_error())
@@ -149,7 +146,7 @@ void Manager::checkQueueAndAlertHost()
 void Manager::execute(CommandHandler command)
 {
     log<level::DEBUG>("Pushing cmd on to queue",
-            entry("COMMAND=%d", std::get<0>(command).first));
+                      entry("COMMAND=%d", std::get<0>(command).first));
 
     this->workQueue.emplace(command);
 
@@ -184,7 +181,7 @@ void Manager::clearQueueOnPowerOn(sdbusplus::message::message& msg)
     auto& requestedState = properties.at(HOST_TRANS_PROP).get<std::string>();
 
     if (server::Host::convertTransitionFromString(requestedState) ==
-            server::Host::Transition::On)
+        server::Host::Transition::On)
     {
         clearQueue();
     }
@@ -192,4 +189,4 @@ void Manager::clearQueueOnPowerOn(sdbusplus::message::message& msg)
 
 } // namespace command
 } // namespace host
-} // namepsace phosphor
+} // namespace phosphor

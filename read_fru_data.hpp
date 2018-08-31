@@ -1,7 +1,8 @@
 #pragma once
-#include <string>
-#include <sdbusplus/bus.hpp>
 #include "ipmi_fru_info_area.hpp"
+
+#include <sdbusplus/bus.hpp>
+#include <string>
 
 namespace ipmi
 {
@@ -24,5 +25,5 @@ const FruAreaData& getFruAreaData(const FRUId& fruNum);
  * @return negative value on failure
  */
 int registerCallbackHandler();
-} //fru
-} //ipmi
+} // namespace fru
+} // namespace ipmi
