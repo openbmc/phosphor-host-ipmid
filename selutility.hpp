@@ -1,8 +1,9 @@
 #pragma once
 
+#include "types.hpp"
+
 #include <cstdint>
 #include <sdbusplus/server.hpp>
-#include "types.hpp"
 
 namespace ipmi
 {
@@ -28,7 +29,7 @@ using Timestamp = uint64_t;
 using Message = std::string;
 using AdditionalData = std::vector<std::string>;
 using PropertyType = sdbusplus::message::variant<Resolved, Id, Timestamp,
-                     Message, AdditionalData>;
+                                                 Message, AdditionalData>;
 
 static constexpr auto selVersion = 0x51;
 static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
@@ -40,12 +41,12 @@ static constexpr auto operationSupport = 0x0A;
  */
 struct GetSELInfoResponse
 {
-    uint8_t selVersion;             //!< SEL revision.
-    uint16_t entries;               //!< Number of log entries in SEL.
-    uint16_t freeSpace;             //!< Free Space in bytes.
-    uint32_t addTimeStamp;          //!< Most recent addition timestamp.
-    uint32_t eraseTimeStamp;        //!< Most recent erase timestamp.
-    uint8_t operationSupport;       //!< Operation support.
+    uint8_t selVersion;       //!< SEL revision.
+    uint16_t entries;         //!< Number of log entries in SEL.
+    uint16_t freeSpace;       //!< Free Space in bytes.
+    uint32_t addTimeStamp;    //!< Most recent addition timestamp.
+    uint32_t eraseTimeStamp;  //!< Most recent erase timestamp.
+    uint8_t operationSupport; //!< Operation support.
 } __attribute__((packed));
 
 static constexpr auto firstEntry = 0x0000;
@@ -59,10 +60,10 @@ static constexpr auto selRecordSize = 16;
  */
 struct GetSELEntryRequest
 {
-    uint16_t reservationID;         //!< Reservation ID.
-    uint16_t selRecordID;           //!< SEL Record ID.
-    uint8_t offset;                 //!< Offset into record.
-    uint8_t readLength;             //!< Bytes to read.
+    uint16_t reservationID; //!< Reservation ID.
+    uint16_t selRecordID;   //!< SEL Record ID.
+    uint8_t offset;         //!< Offset into record.
+    uint8_t readLength;     //!< Bytes to read.
 } __attribute__((packed));
 
 /** @struct GetSELEntryResponse
@@ -71,18 +72,18 @@ struct GetSELEntryRequest
  */
 struct GetSELEntryResponse
 {
-    uint16_t nextRecordID;          //!< Next RecordID.
-    uint16_t recordID;              //!< Record ID.
-    uint8_t recordType;             //!< Record Type.
-    uint32_t timeStamp;             //!< Timestamp.
-    uint16_t generatorID;           //!< Generator ID.
-    uint8_t eventMsgRevision;       //!< Event Message Revision.
-    uint8_t sensorType;             //!< Sensor Type.
-    uint8_t sensorNum;              //!< Sensor Number.
-    uint8_t eventType;              //!< Event Dir | Event Type.
-    uint8_t eventData1;             //!< Event Data 1.
-    uint8_t eventData2;             //!< Event Data 2.
-    uint8_t eventData3;             //!< Event Data 3.
+    uint16_t nextRecordID;    //!< Next RecordID.
+    uint16_t recordID;        //!< Record ID.
+    uint8_t recordType;       //!< Record Type.
+    uint32_t timeStamp;       //!< Timestamp.
+    uint16_t generatorID;     //!< Generator ID.
+    uint8_t eventMsgRevision; //!< Event Message Revision.
+    uint8_t sensorType;       //!< Sensor Type.
+    uint8_t sensorNum;        //!< Sensor Number.
+    uint8_t eventType;        //!< Event Dir | Event Type.
+    uint8_t eventData1;       //!< Event Data 1.
+    uint8_t eventData2;       //!< Event Data 2.
+    uint8_t eventData3;       //!< Event Data 3.
 } __attribute__((packed));
 
 /** @struct DeleteSELEntryRequest
@@ -91,8 +92,8 @@ struct GetSELEntryResponse
  */
 struct DeleteSELEntryRequest
 {
-    uint16_t reservationID;         //!< Reservation ID.
-    uint16_t selRecordID;           //!< SEL Record ID.
+    uint16_t reservationID; //!< Reservation ID.
+    uint16_t selRecordID;   //!< SEL Record ID.
 } __attribute__((packed));
 
 static constexpr auto initiateErase = 0xAA;
@@ -105,11 +106,11 @@ static constexpr auto eraseComplete = 0x01;
  */
 struct ClearSELRequest
 {
-    uint16_t reservationID;         //!< Reservation ID.
-    uint8_t charC;                  //!< Char 'C'(0x43h).
-    uint8_t charL;                  //!< Char 'L'(0x4Ch).
-    uint8_t charR;                  //!< Char 'R'(0x52h).
-    uint8_t eraseOperation;         //!< Erase operation.
+    uint16_t reservationID; //!< Reservation ID.
+    uint8_t charC;          //!< Char 'C'(0x43h).
+    uint8_t charL;          //!< Char 'L'(0x4Ch).
+    uint8_t charR;          //!< Char 'R'(0x52h).
+    uint8_t eraseOperation; //!< Erase operation.
 } __attribute__((packed));
 
 /** @brief Convert logging entry to SEL
@@ -156,11 +157,11 @@ namespace internal
  *  @return On success return the SEL event record, throw an exception in case
  *          of failure.
  */
-GetSELEntryResponse prepareSELEntry(
-        const std::string& objPath,
-        ipmi::sensor::InvObjectIDMap::const_iterator iter);
+GetSELEntryResponse
+    prepareSELEntry(const std::string& objPath,
+                    ipmi::sensor::InvObjectIDMap::const_iterator iter);
 
-}
+} // namespace internal
 
 } // namespace sel
 

@@ -1,85 +1,83 @@
-#include <iostream>
-#include <chrono>
-#include <gtest/gtest.h>
 #include "timer.hpp"
+
+#include <chrono>
+#include <iostream>
+
+#include <gtest/gtest.h>
 
 using namespace phosphor::ipmi;
 
 class TimerTest : public ::testing::Test
 {
-    public:
-        // systemd event handler
-        sd_event* events;
+  public:
+    // systemd event handler
+    sd_event* events;
 
-        // Need this so that events can be initialized.
-        int rc;
+    // Need this so that events can be initialized.
+    int rc;
 
-        // Source of event
-        sd_event_source* eventSource = nullptr;
+    // Source of event
+    sd_event_source* eventSource = nullptr;
 
-        // Add a Timer Object
-        Timer timer;
+    // Add a Timer Object
+    Timer timer;
 
-        // Gets called as part of each TEST_F construction
-        TimerTest()
-            : rc(sd_event_default(&events)),
-              timer(events)
-        {
-            // Check for successful creation of
-            // event handler and timer object.
-            EXPECT_GE(rc, 0);
-        }
+    // Gets called as part of each TEST_F construction
+    TimerTest() : rc(sd_event_default(&events)), timer(events)
+    {
+        // Check for successful creation of
+        // event handler and timer object.
+        EXPECT_GE(rc, 0);
+    }
 
-        // Gets called as part of each TEST_F destruction
-        ~TimerTest()
-        {
-            events = sd_event_unref(events);
-        }
+    // Gets called as part of each TEST_F destruction
+    ~TimerTest()
+    {
+        events = sd_event_unref(events);
+    }
 };
-
 
 class TimerTestCallBack : public ::testing::Test
 {
-    public:
-        // systemd event handler
-        sd_event* events;
+  public:
+    // systemd event handler
+    sd_event* events;
 
-        // Need this so that events can be initialized.
-        int rc;
+    // Need this so that events can be initialized.
+    int rc;
 
-        // Source of event
-        sd_event_source* eventSource = nullptr;
+    // Source of event
+    sd_event_source* eventSource = nullptr;
 
-        // Add a Timer Object
-        std::unique_ptr<Timer> timer = nullptr;
+    // Add a Timer Object
+    std::unique_ptr<Timer> timer = nullptr;
 
-        // Indicates optional call back fun was called
-        bool callBackDone = false;
+    // Indicates optional call back fun was called
+    bool callBackDone = false;
 
-        void callBack()
-        {
-            callBackDone = true;
-        }
+    void callBack()
+    {
+        callBackDone = true;
+    }
 
-        // Gets called as part of each TEST_F construction
-        TimerTestCallBack()
-            : rc(sd_event_default(&events))
+    // Gets called as part of each TEST_F construction
+    TimerTestCallBack() : rc(sd_event_default(&events))
 
-        {
-            // Check for successful creation of
-            // event handler and timer object.
-            EXPECT_GE(rc, 0);
+    {
+        // Check for successful creation of
+        // event handler and timer object.
+        EXPECT_GE(rc, 0);
 
-            std::function<void()> func(std::bind(
-                    &TimerTestCallBack::callBack, this));
-            timer = std::make_unique<Timer>(events, func);
-        }
+        std::function<void()> func(
+            std::bind(&TimerTestCallBack::callBack, this));
+        timer = std::make_unique<Timer>(events, func);
+    }
 
-        // Gets called as part of each TEST_F destruction
-        ~TimerTestCallBack()
-        {
-            events = sd_event_unref(events);
-        }
+    // Gets called as part of each TEST_F destruction
+    ~TimerTestCallBack()
+    {
+        events = sd_event_unref(events);
+    }
 };
 
 /** @brief Makes sure that timer is expired and the
@@ -95,11 +93,11 @@ TEST_F(TimerTest, timerExpiresAfter2seconds)
     // Waiting 2 seconds is enough here since we have
     // already spent some usec now
     int count = 0;
-    while(count < 2 && !timer.isExpired())
+    while (count < 2 && !timer.isExpired())
     {
         // Returns -0- on timeout and positive number on dispatch
         auto sleepTime = duration_cast<microseconds>(seconds(1));
-        if(!sd_event_run(events, sleepTime.count()))
+        if (!sd_event_run(events, sleepTime.count()))
         {
             count++;
         }
@@ -123,11 +121,11 @@ TEST_F(TimerTest, timerNotExpiredAfter2Seconds)
 
     // Wait 2 seconds and see that timer is not expired
     int count = 0;
-    while(count < 2)
+    while (count < 2)
     {
         // Returns -0- on timeout
         auto sleepTime = duration_cast<microseconds>(seconds(1));
-        if(!sd_event_run(events, sleepTime.count()))
+        if (!sd_event_run(events, sleepTime.count()))
         {
             count++;
         }
@@ -157,11 +155,11 @@ TEST_F(TimerTest, updateTimerAndExpectExpire)
 
     // Wait 3 seconds and see that timer is expired
     int count = 0;
-    while(count < 3 && !timer.isExpired())
+    while (count < 3 && !timer.isExpired())
     {
         // Returns -0- on timeout
         auto sleepTime = duration_cast<microseconds>(seconds(1));
-        if(!sd_event_run(events, sleepTime.count()))
+        if (!sd_event_run(events, sleepTime.count()))
         {
             count++;
         }
@@ -193,11 +191,11 @@ TEST_F(TimerTest, updateTimerAndNeverExpire)
 
     // Wait 2 seconds and see that timer is expired
     int count = 0;
-    while(count < 2)
+    while (count < 2)
     {
         // Returns -0- on timeout
         auto sleepTime = duration_cast<microseconds>(seconds(1));
-        if(!sd_event_run(events, sleepTime.count()))
+        if (!sd_event_run(events, sleepTime.count()))
         {
             count++;
         }
@@ -219,11 +217,11 @@ TEST_F(TimerTestCallBack, optionalFuncCallBackDone)
     // Waiting 2 seconds is enough here since we have
     // already spent some usec now
     int count = 0;
-    while(count < 2 && !timer->isExpired())
+    while (count < 2 && !timer->isExpired())
     {
         // Returns -0- on timeout and positive number on dispatch
         auto sleepTime = duration_cast<microseconds>(seconds(1));
-        if(!sd_event_run(events, sleepTime.count()))
+        if (!sd_event_run(events, sleepTime.count()))
         {
             count++;
         }
@@ -248,11 +246,11 @@ TEST_F(TimerTestCallBack, timerNotExpiredAfter2SecondsNoOptionalCallBack)
 
     // Wait 2 seconds and see that timer is not expired
     int count = 0;
-    while(count < 2)
+    while (count < 2)
     {
         // Returns -0- on timeout
         auto sleepTime = duration_cast<microseconds>(seconds(1));
-        if(!sd_event_run(events, sleepTime.count()))
+        if (!sd_event_run(events, sleepTime.count()))
         {
             count++;
         }

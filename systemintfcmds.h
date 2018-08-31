@@ -6,22 +6,22 @@
 // These are per skiboot ipmi-sel code
 
 // OEM_SEL type with Timestamp
-#define SEL_OEM_ID_0        0x55
+#define SEL_OEM_ID_0 0x55
 // SEL type is OEM and -not- general SEL
 #define SEL_RECORD_TYPE_OEM 0xC0
 // Minor command for soft shurdown
-#define SOFT_OFF            0x00
+#define SOFT_OFF 0x00
 // Major command for Any kind of power ops
-#define CMD_POWER           0x04
+#define CMD_POWER 0x04
 // Major command for the heartbeat operation (verify host is alive)
-#define CMD_HEARTBEAT       0xFF
+#define CMD_HEARTBEAT 0xFF
 
 // IPMI commands used via System Interface functions.
 enum ipmi_netfn_system_intf_cmds
 {
     IPMI_CMD_SET_BMC_GLOBAL_ENABLES = 0x2E,
-    IPMI_CMD_GET_MSG_FLAGS          = 0x31,
-    IPMI_CMD_READ_EVENT             = 0x35,
+    IPMI_CMD_GET_MSG_FLAGS = 0x31,
+    IPMI_CMD_READ_EVENT = 0x35,
 };
 
 // A Mechanism to tell host to shtudown hosts by sending this PEM SEL. Really

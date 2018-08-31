@@ -1,7 +1,7 @@
+#include "utils.hpp"
+
 #include <map>
 #include <string>
-
-#include "utils.hpp"
 
 // Not sure if this should live in utils.  Because it's really a per-system
 // configuration, instead of just hard-coding channel 1 to be eth0, one could
@@ -31,4 +31,3 @@ std::string ChanneltoEthernet(int channel)
 
 } // namespace network
 } // namespace ipmi
-

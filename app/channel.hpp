@@ -12,13 +12,11 @@
  *
  *  @return IPMI_CC_OK on success, non-zero otherwise.
  */
-ipmi_ret_t ipmi_set_channel_access(
-        ipmi_netfn_t netfn,
-        ipmi_cmd_t cmd,
-        ipmi_request_t request,
-        ipmi_response_t response,
-        ipmi_data_len_t data_len,
-        ipmi_context_t context);
+ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                   ipmi_request_t request,
+                                   ipmi_response_t response,
+                                   ipmi_data_len_t data_len,
+                                   ipmi_context_t context);
 
 /** @brief The get channel access IPMI command.
  *
@@ -31,13 +29,11 @@ ipmi_ret_t ipmi_set_channel_access(
  *
  *  @return IPMI_CC_OK on success, non-zero otherwise.
  */
-ipmi_ret_t ipmi_get_channel_access(
-        ipmi_netfn_t netfn,
-        ipmi_cmd_t cmd,
-        ipmi_request_t request,
-        ipmi_response_t response,
-        ipmi_data_len_t data_len,
-        ipmi_context_t context);
+ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                   ipmi_request_t request,
+                                   ipmi_response_t response,
+                                   ipmi_data_len_t data_len,
+                                   ipmi_context_t context);
 
 /** @brief The get channel info IPMI command.
  *
@@ -50,13 +46,11 @@ ipmi_ret_t ipmi_get_channel_access(
  *
  *  @return IPMI_CC_OK on success, non-zero otherwise.
  */
-ipmi_ret_t ipmi_app_channel_info(
-        ipmi_netfn_t netfn,
-        ipmi_cmd_t cmd,
-        ipmi_request_t request,
-        ipmi_response_t response,
-        ipmi_data_len_t data_len,
-        ipmi_context_t context);
+ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context);
 
 /** @brief Implementation of get channel cipher suites command
  *
@@ -69,8 +63,7 @@ ipmi_ret_t ipmi_app_channel_info(
  *
  *  @return IPMI_CC_OK on success, non-zero otherwise.
  */
-ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn,
-                                  ipmi_cmd_t cmd,
+ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_request_t request,
                                   ipmi_response_t response,
                                   ipmi_data_len_t data_len,
@@ -86,8 +79,7 @@ static constexpr auto listIndexMask = 0x3F;
 static constexpr auto respSize = 16;
 
 using Json = nlohmann::json;
-static constexpr auto configFile =
-    "/usr/share/ipmi-providers/cipher_list.json";
+static constexpr auto configFile = "/usr/share/ipmi-providers/cipher_list.json";
 static constexpr auto cipher = "cipher";
 static constexpr auto stdCipherSuite = 0xC0;
 static constexpr auto oemCipherSuite = 0xC1;
@@ -98,7 +90,7 @@ static constexpr auto integrityTag = 0x40;
 static constexpr auto conf = "confidentiality";
 static constexpr auto confTag = 0x80;
 
-} //namespace cipher
+} // namespace cipher
 
 /** @struct GetChannelCipherRequest
  *
@@ -106,9 +98,9 @@ static constexpr auto confTag = 0x80;
  */
 struct GetChannelCipherRequest
 {
-    uint8_t channelNumber;      //!< Channel Number
-    uint8_t payloadType;        //!< Payload type number
-    uint8_t listIndex;          //!< List Index
+    uint8_t channelNumber; //!< Channel Number
+    uint8_t payloadType;   //!< Payload type number
+    uint8_t listIndex;     //!< List Index
 } __attribute__((packed));
 
 /** @struct GetChannelCipherRespHeader
@@ -117,7 +109,5 @@ struct GetChannelCipherRequest
  */
 struct GetChannelCipherRespHeader
 {
-    uint8_t channelNumber;      //!< Channel Number
+    uint8_t channelNumber; //!< Channel Number
 } __attribute__((packed));
-
-

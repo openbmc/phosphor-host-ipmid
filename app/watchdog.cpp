@@ -1,29 +1,29 @@
 #include "watchdog.hpp"
 
-#include <cstdint>
+#include "ipmid.hpp"
+#include "watchdog_service.hpp"
+
 #include <endian.h>
-#include <phosphor-logging/elog.hpp>
+
+#include <cstdint>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 
-#include "watchdog_service.hpp"
 #include "host-ipmid/ipmid-api.h"
-#include "ipmid.hpp"
 
 using phosphor::logging::level;
 using phosphor::logging::log;
 using phosphor::logging::report;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
-ipmi_ret_t ipmi_app_watchdog_reset(
-        ipmi_netfn_t netfn,
-        ipmi_cmd_t cmd,
-        ipmi_request_t request,
-        ipmi_response_t response,
-        ipmi_data_len_t data_len,
-        ipmi_context_t context)
+ipmi_ret_t ipmi_app_watchdog_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                   ipmi_request_t request,
+                                   ipmi_response_t response,
+                                   ipmi_data_len_t data_len,
+                                   ipmi_context_t context)
 {
     // We never return data with this command so immediately get rid of it
     *data_len = 0;
@@ -66,7 +66,8 @@ ipmi_ret_t ipmi_app_watchdog_reset(
 static constexpr uint8_t wd_dont_stop = 0x1 << 6;
 static constexpr uint8_t wd_timeout_action_mask = 0x3;
 
-enum class IpmiAction : uint8_t {
+enum class IpmiAction : uint8_t
+{
     None = 0x0,
     HardReset = 0x1,
     PowerOff = 0x2,
@@ -79,7 +80,7 @@ enum class IpmiAction : uint8_t {
  */
 WatchdogService::Action ipmiActionToWdAction(IpmiAction ipmi_action)
 {
-    switch(ipmi_action)
+    switch (ipmi_action)
     {
         case IpmiAction::None:
         {
@@ -104,24 +105,23 @@ WatchdogService::Action ipmiActionToWdAction(IpmiAction ipmi_action)
     }
 }
 
-struct wd_set_req {
+struct wd_set_req
+{
     uint8_t timer_use;
     uint8_t timer_action;
-    uint8_t pretimeout;  // (seconds)
+    uint8_t pretimeout; // (seconds)
     uint8_t expire_flags;
-    uint16_t initial_countdown;  // Little Endian (deciseconds)
-}  __attribute__ ((packed));
+    uint16_t initial_countdown; // Little Endian (deciseconds)
+} __attribute__((packed));
 static_assert(sizeof(wd_set_req) == 6, "wd_set_req has invalid size.");
 static_assert(sizeof(wd_set_req) <= MAX_IPMI_BUFFER,
-        "wd_get_res can't fit in request buffer.");
+              "wd_get_res can't fit in request buffer.");
 
-ipmi_ret_t ipmi_app_watchdog_set(
-        ipmi_netfn_t netfn,
-        ipmi_cmd_t cmd,
-        ipmi_request_t request,
-        ipmi_response_t response,
-        ipmi_data_len_t data_len,
-        ipmi_context_t context)
+ipmi_ret_t ipmi_app_watchdog_set(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
 {
     // Extract the request data
     if (*data_len < sizeof(wd_set_req))
@@ -144,8 +144,8 @@ ipmi_ret_t ipmi_app_watchdog_set(
         }
 
         // Set the action based on the request
-        const auto ipmi_action = static_cast<IpmiAction>(
-                req.timer_action & wd_timeout_action_mask);
+        const auto ipmi_action =
+            static_cast<IpmiAction>(req.timer_action & wd_timeout_action_mask);
         wd_service.setExpireAction(ipmiActionToWdAction(ipmi_action));
 
         // Set the new interval and the time remaining deci -> mill seconds
@@ -158,7 +158,7 @@ ipmi_ret_t ipmi_app_watchdog_set(
 
         return IPMI_CC_OK;
     }
-    catch (const std::domain_error &)
+    catch (const std::domain_error&)
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
@@ -188,7 +188,7 @@ ipmi_ret_t ipmi_app_watchdog_set(
  */
 IpmiAction wdActionToIpmiAction(WatchdogService::Action wd_action)
 {
-    switch(wd_action)
+    switch (wd_action)
     {
         case WatchdogService::Action::None:
         {
@@ -216,28 +216,27 @@ IpmiAction wdActionToIpmiAction(WatchdogService::Action wd_action)
     }
 }
 
-struct wd_get_res {
+struct wd_get_res
+{
     uint8_t timer_use;
     uint8_t timer_action;
     uint8_t pretimeout;
     uint8_t expire_flags;
-    uint16_t initial_countdown;  // Little Endian (deciseconds)
-    uint16_t present_countdown;  // Little Endian (deciseconds)
-}  __attribute__ ((packed));
+    uint16_t initial_countdown; // Little Endian (deciseconds)
+    uint16_t present_countdown; // Little Endian (deciseconds)
+} __attribute__((packed));
 static_assert(sizeof(wd_get_res) == 8, "wd_get_res has invalid size.");
 static_assert(sizeof(wd_get_res) <= MAX_IPMI_BUFFER,
-        "wd_get_res can't fit in response buffer.");
+              "wd_get_res can't fit in response buffer.");
 
 static constexpr uint8_t wd_dont_log = 0x1 << 7;
 static constexpr uint8_t wd_running = 0x1 << 6;
 
-ipmi_ret_t ipmi_app_watchdog_get(
-        ipmi_netfn_t netfn,
-        ipmi_cmd_t cmd,
-        ipmi_request_t request,
-        ipmi_response_t response,
-        ipmi_data_len_t data_len,
-        ipmi_context_t context)
+ipmi_ret_t ipmi_app_watchdog_get(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
 {
     // Assume we will fail and send no data outside the return code
     *data_len = 0;
@@ -250,8 +249,8 @@ ipmi_ret_t ipmi_app_watchdog_get(
         // Build and return the response
         wd_get_res res;
         res.timer_use = wd_dont_log;
-        res.timer_action = static_cast<uint8_t>(
-                wdActionToIpmiAction(wd_prop.expireAction));
+        res.timer_action =
+            static_cast<uint8_t>(wdActionToIpmiAction(wd_prop.expireAction));
         if (wd_prop.enabled)
         {
             res.timer_use |= wd_running;
