@@ -1,12 +1,16 @@
 #include "globalhandler.h"
-#include "host-ipmid/ipmid-api.h"
-#include <stdio.h>
-#include <string>
-#include <utils.hpp>
-#include <phosphor-logging/log.hpp>
-#include <phosphor-logging/elog-errors.hpp>
+
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "xyz/openbmc_project/State/BMC/server.hpp"
+
+#include <stdio.h>
+
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <string>
+#include <utils.hpp>
+
+#include "host-ipmid/ipmid-api.h"
 
 static constexpr auto bmcStateRoot = "/xyz/openbmc_project/state";
 static constexpr auto bmcStateIntf = "xyz.openbmc_project.State.BMC";
@@ -22,15 +26,15 @@ void resetBMC()
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-    auto bmcStateObj = ipmi::getDbusObject(bus, bmcStateIntf, bmcStateRoot,
-                                           match);
+    auto bmcStateObj =
+        ipmi::getDbusObject(bus, bmcStateIntf, bmcStateRoot, match);
 
     auto service = ipmi::getService(bus, bmcStateIntf, bmcStateObj.first);
 
     ipmi::setDbusProperty(bus, service, bmcStateObj.first, bmcStateIntf,
-                    reqTransition, convertForMessage(BMC::Transition::Reboot));
+                          reqTransition,
+                          convertForMessage(BMC::Transition::Reboot));
 }
-
 
 ipmi_ret_t ipmi_global_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,

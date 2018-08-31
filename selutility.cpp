@@ -4,25 +4,29 @@
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
-namespace std {
-  // splice experimental::filesystem into std
-  namespace filesystem = std::experimental::filesystem;
-}
+namespace std
+{
+// splice experimental::filesystem into std
+namespace filesystem = std::experimental::filesystem;
+} // namespace std
 #else
-#  error filesystem not available
+#error filesystem not available
 #endif
-#include <phosphor-logging/elog-errors.hpp>
-#include "host-ipmid/ipmid-api.h"
-#include "xyz/openbmc_project/Common/error.hpp"
 #include "config.h"
+
 #include "selutility.hpp"
 #include "types.hpp"
 #include "utils.hpp"
+#include "xyz/openbmc_project/Common/error.hpp"
+
+#include <phosphor-logging/elog-errors.hpp>
+
+#include "host-ipmid/ipmid-api.h"
 
 extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;
 using InternalFailure =
-        sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 namespace ipmi
 {
@@ -33,20 +37,18 @@ namespace sel
 namespace internal
 {
 
-GetSELEntryResponse prepareSELEntry(
-        const std::string& objPath,
-        ipmi::sensor::InvObjectIDMap::const_iterator iter)
+GetSELEntryResponse
+    prepareSELEntry(const std::string& objPath,
+                    ipmi::sensor::InvObjectIDMap::const_iterator iter)
 {
-    GetSELEntryResponse record {};
+    GetSELEntryResponse record{};
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     auto service = ipmi::getService(bus, logEntryIntf, objPath);
 
     // Read all the log entry properties.
-    auto methodCall = bus.new_method_call(service.c_str(),
-                                          objPath.c_str(),
-                                          propIntf,
-                                          "GetAll");
+    auto methodCall = bus.new_method_call(service.c_str(), objPath.c_str(),
+                                          propIntf, "GetAll");
     methodCall.append(logEntryIntf);
 
     auto reply = bus.call(methodCall);
@@ -69,7 +71,7 @@ GetSELEntryResponse prepareSELEntry(
     }
 
     record.recordID = static_cast<uint16_t>(
-            sdbusplus::message::variant_ns::get<uint32_t>(iterId->second));
+        sdbusplus::message::variant_ns::get<uint32_t>(iterId->second));
 
     // Read Timestamp from the log entry.
     static constexpr auto propTimeStamp = "Timestamp";
@@ -81,10 +83,10 @@ GetSELEntryResponse prepareSELEntry(
     }
 
     std::chrono::milliseconds chronoTimeStamp(
-            sdbusplus::message::variant_ns::get<uint64_t>
-            (iterTimeStamp->second));
-    record.timeStamp = static_cast<uint32_t>(std::chrono::duration_cast<
-            std::chrono::seconds>(chronoTimeStamp).count());
+        sdbusplus::message::variant_ns::get<uint64_t>(iterTimeStamp->second));
+    record.timeStamp = static_cast<uint32_t>(
+        std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp)
+            .count());
 
     static constexpr auto systemEventRecord = 0x02;
     static constexpr auto generatorID = 0x2000;
@@ -134,10 +136,8 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     auto service = ipmi::getService(bus, assocIntf, objPath);
 
     // Read the Associations interface.
-    auto methodCall = bus.new_method_call(service.c_str(),
-                                          objPath.c_str(),
-                                          propIntf,
-                                          "Get");
+    auto methodCall =
+        bus.new_method_call(service.c_str(), objPath.c_str(), propIntf, "Get");
     methodCall.append(assocIntf);
     methodCall.append(assocProp);
 
@@ -148,14 +148,13 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
         elog<InternalFailure>();
     }
 
-    using AssociationList = std::vector<std::tuple<
-                            std::string, std::string, std::string>>;
+    using AssociationList =
+        std::vector<std::tuple<std::string, std::string, std::string>>;
 
     sdbusplus::message::variant<AssociationList> list;
     reply.read(list);
 
-    auto& assocs = sdbusplus::message::variant_ns::get<AssociationList>
-         (list);
+    auto& assocs = sdbusplus::message::variant_ns::get<AssociationList>(list);
 
     /*
      * Check if the log entry has any callout associations, if there is a
@@ -166,18 +165,18 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     {
         if (std::get<0>(item).compare(CALLOUT_FWD_ASSOCIATION) == 0)
         {
-             auto iter = invSensors.find(std::get<2>(item));
-             if (iter == invSensors.end())
-             {
-                 iter = invSensors.find(BOARD_SENSOR);
-                 if (iter == invSensors.end())
-                 {
-                     log<level::ERR>("Motherboard sensor not found");
-                     elog<InternalFailure>();
-                 }
-             }
+            auto iter = invSensors.find(std::get<2>(item));
+            if (iter == invSensors.end())
+            {
+                iter = invSensors.find(BOARD_SENSOR);
+                if (iter == invSensors.end())
+                {
+                    log<level::ERR>("Motherboard sensor not found");
+                    elog<InternalFailure>();
+                }
+            }
 
-             return internal::prepareSELEntry(objPath, iter);
+            return internal::prepareSELEntry(objPath, iter);
         }
     }
 
@@ -202,10 +201,8 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
     using namespace std::string_literals;
     static const auto propTimeStamp = "Timestamp"s;
 
-    auto methodCall = bus.new_method_call(service.c_str(),
-                                          objPath.c_str(),
-                                          propIntf,
-                                          "Get");
+    auto methodCall =
+        bus.new_method_call(service.c_str(), objPath.c_str(), propIntf, "Get");
     methodCall.append(logEntryIntf);
     methodCall.append(propTimeStamp);
 
@@ -220,7 +217,7 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
     reply.read(timeStamp);
 
     std::chrono::milliseconds chronoTimeStamp(
-            sdbusplus::message::variant_ns::get<uint64_t>(timeStamp));
+        sdbusplus::message::variant_ns::get<uint64_t>(timeStamp));
 
     return std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp);
 }
@@ -231,10 +228,8 @@ void readLoggingObjectPaths(ObjectPaths& paths)
     auto depth = 0;
     paths.clear();
 
-    auto mapperCall = bus.new_method_call(mapperBusName,
-                                          mapperObjPath,
-                                          mapperIntf,
-                                          "GetSubTreePaths");
+    auto mapperCall = bus.new_method_call(mapperBusName, mapperObjPath,
+                                          mapperIntf, "GetSubTreePaths");
     mapperCall.append(logBasePath);
     mapperCall.append(depth);
     mapperCall.append(ObjectPaths({logEntryIntf}));
@@ -248,17 +243,16 @@ void readLoggingObjectPaths(ObjectPaths& paths)
     {
         reply.read(paths);
 
-        std::sort(paths.begin(), paths.end(), [](const std::string& a,
-                                                 const std::string& b)
-        {
-            namespace fs = std::filesystem;
-            fs::path pathA(a);
-            fs::path pathB(b);
-            auto idA = std::stoul(pathA.filename().string());
-            auto idB = std::stoul(pathB.filename().string());
+        std::sort(paths.begin(), paths.end(),
+                  [](const std::string& a, const std::string& b) {
+                      namespace fs = std::filesystem;
+                      fs::path pathA(a);
+                      fs::path pathB(b);
+                      auto idA = std::stoul(pathA.filename().string());
+                      auto idB = std::stoul(pathB.filename().string());
 
-            return idA < idB;
-        });
+                      return idA < idB;
+                  });
     }
 }
 

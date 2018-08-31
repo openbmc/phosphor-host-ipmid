@@ -1,8 +1,8 @@
 #include "watchdog_service.hpp"
 
 #include <exception>
-#include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
@@ -13,8 +13,8 @@
 
 #include "host-ipmid/ipmid-api.h"
 
-using phosphor::logging::entry;
 using phosphor::logging::elog;
+using phosphor::logging::entry;
 using phosphor::logging::level;
 using phosphor::logging::log;
 using sdbusplus::message::variant_ns::get;
@@ -29,16 +29,14 @@ static constexpr char prop_intf[] = "org.freedesktop.DBus.Properties";
 
 ipmi::ServiceCache WatchdogService::wd_service(wd_intf, wd_path);
 
-WatchdogService::WatchdogService()
-    : bus(ipmid_get_sd_bus_connection())
+WatchdogService::WatchdogService() : bus(ipmid_get_sd_bus_connection())
 {
 }
 
 void WatchdogService::resetTimeRemaining(bool enableWatchdog)
 {
     bool wasValid = wd_service.isValid(bus);
-    auto request = wd_service.newMethodCall(
-            bus, wd_intf, "ResetTimeRemaining");
+    auto request = wd_service.newMethodCall(bus, wd_intf, "ResetTimeRemaining");
     request.append(enableWatchdog);
     auto response = bus.call(request);
     if (response.is_method_error())
@@ -50,8 +48,8 @@ void WatchdogService::resetTimeRemaining(bool enableWatchdog)
             return resetTimeRemaining(enableWatchdog);
         }
         log<level::ERR>(
-                "WatchdogService: Method error resetting time remaining",
-                entry("ENABLE_WATCHDOG=%d", !!enableWatchdog));
+            "WatchdogService: Method error resetting time remaining",
+            entry("ENABLE_WATCHDOG=%d", !!enableWatchdog));
         elog<InternalFailure>();
     }
 }
@@ -81,7 +79,7 @@ WatchdogService::Properties WatchdogService::getProperties()
         wd_prop.initialized = get<bool>(properties.at("Initialized"));
         wd_prop.enabled = get<bool>(properties.at("Enabled"));
         wd_prop.expireAction = Watchdog::convertActionFromString(
-                get<std::string>(properties.at("ExpireAction")));
+            get<std::string>(properties.at("ExpireAction")));
         wd_prop.interval = get<uint64_t>(properties.at("Interval"));
         wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
         return wd_prop;
@@ -97,11 +95,10 @@ WatchdogService::Properties WatchdogService::getProperties()
     // Needed instead of elog<InternalFailure>() since the compiler can't
     // deduce the that elog<>() always throws
     throw std::runtime_error(
-            "WatchdogService: Should not reach end of getProperties");
+        "WatchdogService: Should not reach end of getProperties");
 }
 
-template <typename T>
-T WatchdogService::getProperty(const std::string& key)
+template <typename T> T WatchdogService::getProperty(const std::string& key)
 {
     bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, prop_intf, "Get");
@@ -137,7 +134,7 @@ T WatchdogService::getProperty(const std::string& key)
     // Needed instead of elog<InternalFailure>() since the compiler can't
     // deduce the that elog<>() always throws
     throw std::runtime_error(
-            "WatchdogService: Should not reach end of getProperty");
+        "WatchdogService: Should not reach end of getProperty");
 }
 
 template <typename T>

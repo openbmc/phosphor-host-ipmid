@@ -1,49 +1,52 @@
-#include <algorithm>
 #include <arpa/inet.h>
+
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
-namespace std {
-  // splice experimental::filesystem into std
-  namespace filesystem = std::experimental::filesystem;
-}
+namespace std
+{
+// splice experimental::filesystem into std
+namespace filesystem = std::experimental::filesystem;
+} // namespace std
 #else
-#  error filesystem not available
+#error filesystem not available
 #endif
-#include <mapper.h>
-#include <string>
-#include <systemd/sd-bus.h>
-
-#include <phosphor-logging/log.hpp>
-#include <phosphor-logging/elog-errors.hpp>
-#include <sdbusplus/server.hpp>
-
 #include "fruread.hpp"
-#include "host-ipmid/ipmid-api.h"
 #include "read_fru_data.hpp"
 #include "selutility.hpp"
-#include "storageaddsel.h"
-#include "storagehandler.h"
 #include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
-#include "sensorhandler.h"
 
+#include <mapper.h>
+#include <systemd/sd-bus.h>
+
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/server.hpp>
+#include <string>
+
+#include "host-ipmid/ipmid-api.h"
+#include "sensorhandler.h"
+#include "storageaddsel.h"
+#include "storagehandler.h"
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
-unsigned int   g_sel_time    = 0xFFFFFFFF;
+unsigned int g_sel_time = 0xFFFFFFFF;
 extern unsigned short g_sel_reserve;
 extern const ipmi::sensor::IdInfoMap sensors;
 extern const FruMap frus;
 
-namespace {
+namespace
+{
 constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
 constexpr auto HOST_TIME_PATH = "/xyz/openbmc_project/time/host";
 constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
-constexpr auto PROPERTY_ELAPSED= "Elapsed";
+constexpr auto PROPERTY_ELAPSED = "Elapsed";
 
 const char* getTimeString(const uint64_t& usecSinceEpoch)
 {
@@ -52,26 +55,26 @@ const char* getTimeString(const uint64_t& usecSinceEpoch)
     auto t = system_clock::to_time_t(tp);
     return std::ctime(&t);
 }
-}
+} // namespace
 
 namespace cache
 {
-    /*
-     * This cache contains the object paths of the logging entries sorted in the
-     * order of the filename(numeric order). The cache is initialized by
-     * invoking readLoggingObjectPaths with the cache as the parameter. The
-     * cache is invoked in the execution of the Get SEL info and Delete SEL
-     * entry command. The Get SEL Info command is typically invoked before the
-     * Get SEL entry command, so the cache is utilized for responding to Get SEL
-     * entry command. The cache is invalidated by clearing after Delete SEL
-     * entry and Clear SEL command.
-     */
-    ipmi::sel::ObjectPaths paths;
+/*
+ * This cache contains the object paths of the logging entries sorted in the
+ * order of the filename(numeric order). The cache is initialized by
+ * invoking readLoggingObjectPaths with the cache as the parameter. The
+ * cache is invoked in the execution of the Get SEL info and Delete SEL
+ * entry command. The Get SEL Info command is typically invoked before the
+ * Get SEL entry command, so the cache is utilized for responding to Get SEL
+ * entry command. The cache is invalidated by clearing after Delete SEL
+ * entry and Clear SEL command.
+ */
+ipmi::sel::ObjectPaths paths;
 
-} // namespace objectPathsCache
+} // namespace cache
 
 using InternalFailure =
-        sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using namespace phosphor::logging;
 using namespace ipmi::fru;
 
@@ -84,10 +87,11 @@ enum class AccessMode
     words  ///< Device is accessed by words
 };
 
-
 ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+                                 ipmi_request_t request,
+                                 ipmi_response_t response,
+                                 ipmi_data_len_t data_len,
+                                 ipmi_context_t context)
 {
     // Status code.
     ipmi_ret_t rc = IPMI_CC_INVALID;
@@ -100,8 +104,8 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                       ipmi_data_len_t data_len, ipmi_context_t context)
 {
     std::vector<uint8_t> outPayload(sizeof(ipmi::sel::GetSELInfoResponse));
-    auto responseData = reinterpret_cast<ipmi::sel::GetSELInfoResponse*>
-            (outPayload.data());
+    auto responseData =
+        reinterpret_cast<ipmi::sel::GetSELInfoResponse*>(outPayload.data());
 
     responseData->selVersion = ipmi::sel::selVersion;
     // Last erase timestamp is not available from log manager.
@@ -119,8 +123,7 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         try
         {
             responseData->addTimeStamp = static_cast<uint32_t>(
-                    (ipmi::sel::getEntryTimeStamp(cache::paths.back())
-                    .count()));
+                (ipmi::sel::getEntryTimeStamp(cache::paths.back()).count()));
         }
         catch (InternalFailure& e)
         {
@@ -141,8 +144,8 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const ipmi::sel::GetSELEntryRequest*>
-                   (request);
+    auto requestData =
+        reinterpret_cast<const ipmi::sel::GetSELEntryRequest*>(request);
 
     if (requestData->reservationID != 0)
     {
@@ -183,7 +186,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    ipmi::sel::GetSELEntryResponse record {};
+    ipmi::sel::GetSELEntryResponse record{};
 
     // Convert the log entry into SEL record.
     try
@@ -202,9 +205,8 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-
     // Identify the next SEL record ID
-    if(iter != cache::paths.end())
+    if (iter != cache::paths.end())
     {
         ++iter;
         if (iter == cache::paths.end())
@@ -215,8 +217,8 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             namespace fs = std::filesystem;
             fs::path path(*iter);
-            record.nextRecordID = static_cast<uint16_t>
-                     (std::stoul(std::string(path.filename().c_str())));
+            record.nextRecordID = static_cast<uint16_t>(
+                std::stoul(std::string(path.filename().c_str())));
         }
     }
     else
@@ -239,8 +241,8 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
         auto diff = ipmi::sel::selRecordSize - requestData->offset;
-        auto readLength = std::min(diff,
-                                   static_cast<int>(requestData->readLength));
+        auto readLength =
+            std::min(diff, static_cast<int>(requestData->readLength));
 
         memcpy(response, &record.nextRecordID, sizeof(record.nextRecordID));
         memcpy(static_cast<uint8_t*>(response) + sizeof(record.nextRecordID),
@@ -256,8 +258,8 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                           ipmi_data_len_t data_len, ipmi_context_t context)
 {
     namespace fs = std::experimental::filesystem;
-    auto requestData = reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>
-            (request);
+    auto requestData =
+        reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>(request);
 
     if (g_sel_reserve != requestData->reservationID)
     {
@@ -280,15 +282,15 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         iter = cache::paths.begin();
         fs::path path(*iter);
-        delRecordID = static_cast<uint16_t>
-                (std::stoul(std::string(path.filename().c_str())));
+        delRecordID = static_cast<uint16_t>(
+            std::stoul(std::string(path.filename().c_str())));
     }
     else if (requestData->selRecordID == ipmi::sel::lastEntry)
     {
         iter = cache::paths.end();
         fs::path path(*iter);
-        delRecordID = static_cast<uint16_t>
-                (std::stoul(std::string(path.filename().c_str())));
+        delRecordID = static_cast<uint16_t>(
+            std::stoul(std::string(path.filename().c_str())));
     }
     else
     {
@@ -318,10 +320,8 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    auto methodCall = bus.new_method_call(service.c_str(),
-                                          (*iter).c_str(),
-                                          ipmi::sel::logDeleteIntf,
-                                          "Delete");
+    auto methodCall = bus.new_method_call(service.c_str(), (*iter).c_str(),
+                                          ipmi::sel::logDeleteIntf, "Delete");
     auto reply = bus.call(methodCall);
     if (reply.is_method_error())
     {
@@ -341,8 +341,8 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
                     ipmi_response_t response, ipmi_data_len_t data_len,
                     ipmi_context_t context)
 {
-    auto requestData = reinterpret_cast<const ipmi::sel::ClearSELRequest*>
-            (request);
+    auto requestData =
+        reinterpret_cast<const ipmi::sel::ClearSELRequest*>(request);
 
     if (g_sel_reserve != requestData->reservationID)
     {
@@ -350,8 +350,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         return IPMI_CC_INVALID_RESERVATION_ID;
     }
 
-    if (requestData->charC != 'C' ||
-        requestData->charL != 'L' ||
+    if (requestData->charC != 'C' || requestData->charL != 'L' ||
         requestData->charR != 'R')
     {
         *data_len = 0;
@@ -374,10 +373,9 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     auto depth = 0;
 
-    auto mapperCall = bus.new_method_call(ipmi::sel::mapperBusName,
-                                          ipmi::sel::mapperObjPath,
-                                          ipmi::sel::mapperIntf,
-                                          "GetSubTreePaths");
+    auto mapperCall =
+        bus.new_method_call(ipmi::sel::mapperBusName, ipmi::sel::mapperObjPath,
+                            ipmi::sel::mapperIntf, "GetSubTreePaths");
     mapperCall.append(ipmi::sel::logBasePath);
     mapperCall.append(depth);
     mapperCall.append(ipmi::sel::ObjectPaths({ipmi::sel::logEntryIntf}));
@@ -403,8 +401,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
 
     try
     {
-        service = ipmi::getService(bus,
-                                   ipmi::sel::logDeleteIntf,
+        service = ipmi::getService(bus, ipmi::sel::logDeleteIntf,
                                    objectPaths.front());
     }
     catch (const std::runtime_error& e)
@@ -416,10 +413,8 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
 
     for (const auto& iter : objectPaths)
     {
-        auto methodCall = bus.new_method_call(service.c_str(),
-                                              iter.c_str(),
-                                              ipmi::sel::logDeleteIntf,
-                                              "Delete");
+        auto methodCall = bus.new_method_call(
+            service.c_str(), iter.c_str(), ipmi::sel::logDeleteIntf, "Delete");
 
         auto reply = bus.call(methodCall);
         if (reply.is_method_error())
@@ -437,8 +432,10 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
 }
 
 ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+                                     ipmi_request_t request,
+                                     ipmi_response_t response,
+                                     ipmi_data_len_t data_len,
+                                     ipmi_context_t context)
 {
     using namespace std::chrono;
     uint64_t host_time_usec = 0;
@@ -452,10 +449,8 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         sdbusplus::message::variant<uint64_t> value;
 
         // Get host time
-        auto method = bus.new_method_call(service.c_str(),
-                                          HOST_TIME_PATH,
-                                          DBUS_PROPERTIES,
-                                          "Get");
+        auto method = bus.new_method_call(service.c_str(), HOST_TIME_PATH,
+                                          DBUS_PROPERTIES, "Get");
 
         method.append(TIME_INTERFACE, PROPERTY_ELAPSED);
         auto reply = bus.call(method);
@@ -483,7 +478,6 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     hostTime << "Host time:" << getTimeString(host_time_usec);
     log<level::DEBUG>(hostTime.str().c_str());
 
-
     // Time is really long int but IPMI wants just uint32. This works okay until
     // the number of seconds since 1970 overflows uint32 size.. Still a whole
     // lot of time here to even think about that.
@@ -500,8 +494,10 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+                                     ipmi_request_t request,
+                                     ipmi_response_t response,
+                                     ipmi_data_len_t data_len,
+                                     ipmi_context_t context)
 {
     using namespace std::chrono;
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -518,10 +514,8 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         sdbusplus::message::variant<uint64_t> value{usec.count()};
 
         // Set host time
-        auto method = bus.new_method_call(service.c_str(),
-                                          HOST_TIME_PATH,
-                                          DBUS_PROPERTIES,
-                                          "Set");
+        auto method = bus.new_method_call(service.c_str(), HOST_TIME_PATH,
+                                          DBUS_PROPERTIES, "Set");
 
         method.append(TIME_INTERFACE, PROPERTY_ELAPSED, value);
         auto reply = bus.call(method);
@@ -548,13 +542,16 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+                                    ipmi_request_t request,
+                                    ipmi_response_t response,
+                                    ipmi_data_len_t data_len,
+                                    ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    // IPMI spec, Reservation ID, the value simply increases against each execution of reserve_sel command.
-    if( ++g_sel_reserve == 0)
+    // IPMI spec, Reservation ID, the value simply increases against each
+    // execution of reserve_sel command.
+    if (++g_sel_reserve == 0)
         g_sel_reserve = 1;
 
     *data_len = sizeof(g_sel_reserve);
@@ -566,12 +563,14 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+                                ipmi_request_t request,
+                                ipmi_response_t response,
+                                ipmi_data_len_t data_len,
+                                ipmi_context_t context)
 {
 
     ipmi_ret_t rc = IPMI_CC_OK;
-    ipmi_add_sel_request_t *p = (ipmi_add_sel_request_t*) request;
+    ipmi_add_sel_request_t* p = (ipmi_add_sel_request_t*)request;
     uint16_t recordid;
 
     recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
@@ -598,11 +597,10 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-//Read FRU info area
+// Read FRU info area
 ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
-        ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-        ipmi_response_t response, ipmi_data_len_t data_len,
-        ipmi_context_t context)
+    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+    ipmi_response_t response, ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     const FruInvenAreaInfoRequest* reqptr =
@@ -629,7 +627,7 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
         // Pack the actual response
         memcpy(response, &resp, *data_len);
     }
-    catch(const InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         rc = IPMI_CC_UNSPECIFIED_ERROR;
         *data_len = 0;
@@ -638,17 +636,17 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
     return rc;
 }
 
-//Read FRU data
-ipmi_ret_t ipmi_storage_read_fru_data(
-        ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-        ipmi_response_t response, ipmi_data_len_t data_len,
-        ipmi_context_t context)
+// Read FRU data
+ipmi_ret_t ipmi_storage_read_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                      ipmi_request_t request,
+                                      ipmi_response_t response,
+                                      ipmi_data_len_t data_len,
+                                      ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     const ReadFruDataRequest* reqptr =
         reinterpret_cast<const ReadFruDataRequest*>(request);
-    auto resptr =
-        reinterpret_cast<ReadFruDataResponse*>(response);
+    auto resptr = reinterpret_cast<ReadFruDataResponse*>(response);
 
     auto iter = frus.find(reqptr->fruID);
     if (iter == frus.end())
@@ -680,8 +678,7 @@ ipmi_ret_t ipmi_storage_read_fru_data(
         }
 
         std::copy((fruArea.begin() + offset),
-                  (fruArea.begin() + offset + resptr->count),
-                  resptr->data);
+                  (fruArea.begin() + offset + resptr->count), resptr->data);
 
         *data_len = resptr->count + 1; // additional one byte for count
     }
@@ -695,14 +692,15 @@ ipmi_ret_t ipmi_storage_read_fru_data(
 }
 
 ipmi_ret_t ipmi_get_repository_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+                                    ipmi_request_t request,
+                                    ipmi_response_t response,
+                                    ipmi_data_len_t data_len,
+                                    ipmi_context_t context)
 {
     constexpr auto sdrVersion = 0x51;
-    auto responseData =
-        reinterpret_cast<GetRepositoryInfoResponse*>(response);
+    auto responseData = reinterpret_cast<GetRepositoryInfoResponse*>(response);
 
-    memset(responseData, 0 , sizeof(GetRepositoryInfoResponse));
+    memset(responseData, 0, sizeof(GetRepositoryInfoResponse));
 
     responseData->sdrVersion = sdrVersion;
 
@@ -721,63 +719,60 @@ ipmi_ret_t ipmi_get_repository_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_storage_functions()
 {
     // <Wildcard Command>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL, ipmi_storage_wildcard,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL,
+                           ipmi_storage_wildcard, PRIVILEGE_USER);
 
     // <Get SEL Info>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL, getSELInfo,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL,
+                           getSELInfo, PRIVILEGE_USER);
 
     // <Get SEL Time>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL, ipmi_storage_get_sel_time,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL,
+                           ipmi_storage_get_sel_time, PRIVILEGE_USER);
 
     // <Set SEL Time>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL, ipmi_storage_set_sel_time,
-                           PRIVILEGE_OPERATOR);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL,
+                           ipmi_storage_set_sel_time, PRIVILEGE_OPERATOR);
 
     // <Reserve SEL>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL, ipmi_storage_reserve_sel,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL,
+                           ipmi_storage_reserve_sel, PRIVILEGE_USER);
 
     // <Get SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL, getSELEntry,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
+                           getSELEntry, PRIVILEGE_USER);
 
     // <Delete SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL, deleteSELEntry,
-                           PRIVILEGE_OPERATOR);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL,
+                           deleteSELEntry, PRIVILEGE_OPERATOR);
 
     // <Add SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL, ipmi_storage_add_sel,
-                           PRIVILEGE_OPERATOR);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
+                           ipmi_storage_add_sel, PRIVILEGE_OPERATOR);
     // <Clear SEL>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL, NULL, clearSEL,
                            PRIVILEGE_OPERATOR);
     // <Get FRU Inventory Area Info>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_FRU_INV_AREA_INFO, NULL,
-            ipmi_storage_get_fru_inv_area_info, PRIVILEGE_OPERATOR);
+                           ipmi_storage_get_fru_inv_area_info,
+                           PRIVILEGE_OPERATOR);
 
     // <Add READ FRU Data
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
-            ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
+                           ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
 
     // <Get Repository Info>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_REPOSITORY_INFO,
-                           nullptr, ipmi_get_repository_info,
-                           PRIVILEGE_USER);
+                           nullptr, ipmi_get_repository_info, PRIVILEGE_USER);
 
     // <Reserve SDR Repository>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SDR,
-                           nullptr, ipmi_sen_reserve_sdr,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SDR, nullptr,
+                           ipmi_sen_reserve_sdr, PRIVILEGE_USER);
 
     // <Get SDR>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SDR,
-                           nullptr, ipmi_sen_get_sdr,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SDR, nullptr,
+                           ipmi_sen_get_sdr, PRIVILEGE_USER);
 
     ipmi::fru::registerCallbackHandler();
     return;
 }
-
