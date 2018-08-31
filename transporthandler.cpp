@@ -1,44 +1,47 @@
-#include <chrono>
-#include <fstream>
+#include <arpa/inet.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
-#include <arpa/inet.h>
+
+#include <chrono>
+#include <fstream>
 #include <string>
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
-namespace std {
-  // splice experimental::filesystem into std
-  namespace filesystem = std::experimental::filesystem;
-}
+namespace std
+{
+// splice experimental::filesystem into std
+namespace filesystem = std::experimental::filesystem;
+} // namespace std
 #else
-#  error filesystem not available
+#error filesystem not available
 #endif
 
 #include "app/channel.hpp"
-#include "host-ipmid/ipmid-api.h"
 #include "ipmid.hpp"
+#include "net.hpp"
 #include "timer.hpp"
 #include "transporthandler.hpp"
 #include "utils.hpp"
-#include "net.hpp"
 
-#include <phosphor-logging/log.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include "xyz/openbmc_project/Common/error.hpp"
+#include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+
+#include "host-ipmid/ipmid-api.h"
 
 #define SYSTEMD_NETWORKD_DBUS 1
 
 #ifdef SYSTEMD_NETWORKD_DBUS
-#include <systemd/sd-bus.h>
 #include <mapper.h>
+#include <systemd/sd-bus.h>
 #endif
 
 extern std::unique_ptr<phosphor::ipmi::Timer> networkTimer;
 
-const int SIZE_MAC = 18; //xx:xx:xx:xx:xx:xx
+const int SIZE_MAC = 18; // xx:xx:xx:xx:xx:xx
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
 
 std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
@@ -61,8 +64,8 @@ struct ChannelConfig_t* getChannelConfig(int channel)
     return channelConfig[channel].get();
 }
 
-// Helper Function to get IP Address/NetMask/Gateway/MAC Address from Network Manager or
-// Cache based on Set-In-Progress State
+// Helper Function to get IP Address/NetMask/Gateway/MAC Address from Network
+// Manager or Cache based on Set-In-Progress State
 ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -89,17 +92,13 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getIPObject(
-                                bus,
-                                ipmi::network::IP_INTERFACE,
-                                ipmi::network::ROOT,
-                                ethIP);
+                        auto ipObjectInfo =
+                            ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
+                                              ipmi::network::ROOT, ethIP);
 
                         auto properties = ipmi::getAllDbusProperties(
-                                bus,
-                                ipObjectInfo.second,
-                                ipObjectInfo.first,
-                                ipmi::network::IP_INTERFACE);
+                            bus, ipObjectInfo.second, ipObjectInfo.first,
+                            ipmi::network::IP_INTERFACE);
 
                         ipaddress = properties["Address"].get<std::string>();
                     }
@@ -132,33 +131,29 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         // if the system is having ip object,then
                         // get the IP object.
                         auto ipObject = ipmi::getDbusObject(
-                                bus,
-                                ipmi::network::IP_INTERFACE,
-                                ipmi::network::ROOT,
-                                ethIP);
+                            bus, ipmi::network::IP_INTERFACE,
+                            ipmi::network::ROOT, ethIP);
 
                         // Get the parent interface of the IP object.
                         try
                         {
                             ipmi::InterfaceList interfaces;
                             interfaces.emplace_back(
-                                    ipmi::network::ETHERNET_INTERFACE);
+                                ipmi::network::ETHERNET_INTERFACE);
 
                             ancestorMap = ipmi::getAllAncestors(
-                                    bus,
-                                    ipObject.first,
-                                    std::move(interfaces));
+                                bus, ipObject.first, std::move(interfaces));
                         }
                         catch (InternalFailure& e)
                         {
                             // if unable to get the parent interface
                             // then commit the error and return.
-                            log<level::ERR>("Unable to get the parent interface",
-                                    entry("PATH=%s", ipObject.first.c_str()),
-                                    entry("INTERFACE=%s",
-                                        ipmi::network::ETHERNET_INTERFACE));
+                            log<level::ERR>(
+                                "Unable to get the parent interface",
+                                entry("PATH=%s", ipObject.first.c_str()),
+                                entry("INTERFACE=%s",
+                                      ipmi::network::ETHERNET_INTERFACE));
                             break;
-
                         }
                         // for an ip object there would be single parent
                         // interface.
@@ -169,54 +164,45 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         // if there is no ip configured on the system,then
                         // get the network interface object.
                         auto networkInterfaceObject = ipmi::getDbusObject(
-                                bus,
-                                ipmi::network::ETHERNET_INTERFACE,
-                                ipmi::network::ROOT,
-                                ethdevice);
+                            bus, ipmi::network::ETHERNET_INTERFACE,
+                            ipmi::network::ROOT, ethdevice);
 
                         networkInterfacePath = networkInterfaceObject.first;
                     }
 
                     auto variant = ipmi::getDbusProperty(
-                            bus,
-                            ipmi::network::SERVICE,
-                            networkInterfacePath,
-                            ipmi::network::ETHERNET_INTERFACE,
-                            "DHCPEnabled");
+                        bus, ipmi::network::SERVICE, networkInterfacePath,
+                        ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled");
 
                     auto dhcpEnabled = variant.get<bool>();
                     // As per IPMI spec 2=>DHCP, 1=STATIC
-                    auto ipsrc = dhcpEnabled ? ipmi::network::IPOrigin::DHCP :
-                                               ipmi::network::IPOrigin::STATIC;
+                    auto ipsrc = dhcpEnabled ? ipmi::network::IPOrigin::DHCP
+                                             : ipmi::network::IPOrigin::STATIC;
 
                     memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                   memcpy(data, &(channelConf->ipsrc),
-                          ipmi::network::IPSRC_SIZE_BYTE);
+                    memcpy(data, &(channelConf->ipsrc),
+                           ipmi::network::IPSRC_SIZE_BYTE);
                 }
             }
             break;
 
             case LAN_PARM_SUBNET:
             {
-                unsigned long mask {};
+                unsigned long mask{};
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
                         auto ipObjectInfo = ipmi::getIPObject(
-                                bus,
-                                ipmi::network::IP_INTERFACE,
-                                ipmi::network::ROOT,
-                                ipmi::network::IP_TYPE);
+                            bus, ipmi::network::IP_INTERFACE,
+                            ipmi::network::ROOT, ipmi::network::IP_TYPE);
 
                         auto properties = ipmi::getAllDbusProperties(
-                                bus,
-                                ipObjectInfo.second,
-                                ipObjectInfo.first,
-                                ipmi::network::IP_INTERFACE);
+                            bus, ipObjectInfo.second, ipObjectInfo.first,
+                            ipmi::network::IP_INTERFACE);
 
                         auto prefix = properties["PrefixLength"].get<uint8_t>();
                         mask = ipmi::network::MASK_32_BIT;
@@ -235,7 +221,6 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     inet_pton(AF_INET, channelConf->netmask.c_str(),
                               reinterpret_cast<void*>(data));
                 }
-
             }
             break;
 
@@ -248,18 +233,15 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     try
                     {
                         auto systemObject = ipmi::getDbusObject(
-                                bus,
-                                ipmi::network::SYSTEMCONFIG_INTERFACE,
-                                ipmi::network::ROOT);
+                            bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
+                            ipmi::network::ROOT);
 
                         auto systemProperties = ipmi::getAllDbusProperties(
-                                bus,
-                                systemObject.second,
-                                systemObject.first,
-                                ipmi::network::SYSTEMCONFIG_INTERFACE);
+                            bus, systemObject.second, systemObject.first,
+                            ipmi::network::SYSTEMCONFIG_INTERFACE);
 
-                        gateway = systemProperties["DefaultGateway"].get<
-                            std::string>();
+                        gateway = systemProperties["DefaultGateway"]
+                                      .get<std::string>();
                     }
                     // ignore the exception, as it is a valid condition that
                     // the system is not configured with any IP.
@@ -267,7 +249,6 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     {
                         // nothing to do
                     }
-
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
@@ -284,21 +265,15 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 std::string macAddress;
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
-                    auto macObjectInfo = ipmi::getDbusObject(
-                                             bus,
-                                             ipmi::network::MAC_INTERFACE,
-                                             ipmi::network::ROOT,
-                                             ethdevice);
+                    auto macObjectInfo =
+                        ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
+                                            ipmi::network::ROOT, ethdevice);
 
                     auto variant = ipmi::getDbusProperty(
-                                     bus,
-                                     macObjectInfo.second,
-                                     macObjectInfo.first,
-                                     ipmi::network::MAC_INTERFACE,
-                                     "MACAddress");
+                        bus, macObjectInfo.second, macObjectInfo.first,
+                        ipmi::network::MAC_INTERFACE, "MACAddress");
 
                     macAddress = variant.get<std::string>();
-
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
@@ -306,36 +281,30 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 }
 
                 sscanf(macAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
-                       (data),
-                       (data + 1),
-                       (data + 2),
-                       (data + 3),
-                       (data + 4),
+                       (data), (data + 1), (data + 2), (data + 3), (data + 4),
                        (data + 5));
             }
             break;
 
             case LAN_PARM_VLAN:
             {
-                uint16_t vlanID {};
+                uint16_t vlanID{};
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     try
                     {
                         auto ipObjectInfo = ipmi::getIPObject(
-                                bus,
-                                ipmi::network::IP_INTERFACE,
-                                ipmi::network::ROOT,
-                                ipmi::network::IP_TYPE);
+                            bus, ipmi::network::IP_INTERFACE,
+                            ipmi::network::ROOT, ipmi::network::IP_TYPE);
 
                         vlanID = static_cast<uint16_t>(
-                                ipmi::network::getVLAN(ipObjectInfo.first));
+                            ipmi::network::getVLAN(ipObjectInfo.first));
 
                         vlanID = htole16(vlanID);
 
                         if (vlanID)
                         {
-                            //Enable the 16th bit
+                            // Enable the 16th bit
                             vlanID |= htole16(ipmi::network::VLAN_ENABLE_MASK);
                         }
                     }
@@ -401,11 +370,13 @@ std::vector<uint8_t> getCipherList()
     return cipherList;
 }
 
-} //namespace cipher
+} // namespace cipher
 
 ipmi_ret_t ipmi_transport_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                              ipmi_request_t request, ipmi_response_t response,
-                              ipmi_data_len_t data_len, ipmi_context_t context)
+                                   ipmi_request_t request,
+                                   ipmi_response_t response,
+                                   ipmi_data_len_t data_len,
+                                   ipmi_context_t context)
 {
     // Status code.
     ipmi_ret_t rc = IPMI_CC_INVALID;
@@ -418,10 +389,9 @@ struct set_lan_t
     uint8_t channel;
     uint8_t parameter;
     uint8_t data[8]; // Per IPMI spec, not expecting more than this size
-}  __attribute__((packed));
+} __attribute__((packed));
 
-ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
-                                  ipmi_cmd_t cmd,
+ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_request_t request,
                                   ipmi_response_t response,
                                   ipmi_data_len_t data_len,
@@ -456,8 +426,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
         case LAN_PARM_IP:
         {
             snprintf(ipaddr, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
-                     reqptr->data[0], reqptr->data[1],
-                     reqptr->data[2], reqptr->data[3]);
+                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
+                     reqptr->data[3]);
 
             channelConf->ipaddr.assign(ipaddr);
         }
@@ -476,25 +446,16 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             char mac[SIZE_MAC];
 
             snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
-                     reqptr->data[0],
-                     reqptr->data[1],
-                     reqptr->data[2],
-                     reqptr->data[3],
-                     reqptr->data[4],
-                     reqptr->data[5]);
+                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
+                     reqptr->data[3], reqptr->data[4], reqptr->data[5]);
 
-            auto macObjectInfo = ipmi::getDbusObject(
-                                     bus,
-                                     ipmi::network::MAC_INTERFACE,
-                                     ipmi::network::ROOT,
-                                     ethdevice);
+            auto macObjectInfo =
+                ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
+                                    ipmi::network::ROOT, ethdevice);
 
-            ipmi::setDbusProperty(bus,
-                                  macObjectInfo.second,
-                                  macObjectInfo.first,
-                                  ipmi::network::MAC_INTERFACE,
-                                  "MACAddress",
-                                  std::string(mac));
+            ipmi::setDbusProperty(
+                bus, macObjectInfo.second, macObjectInfo.first,
+                ipmi::network::MAC_INTERFACE, "MACAddress", std::string(mac));
 
             channelConf->macAddress = mac;
         }
@@ -503,8 +464,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
         case LAN_PARM_SUBNET:
         {
             snprintf(netmask, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
-                     reqptr->data[0], reqptr->data[1],
-                     reqptr->data[2], reqptr->data[3]);
+                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
+                     reqptr->data[3]);
             channelConf->netmask.assign(netmask);
         }
         break;
@@ -512,15 +473,15 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
         case LAN_PARM_GATEWAY:
         {
             snprintf(gateway, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
-                     reqptr->data[0], reqptr->data[1],
-                     reqptr->data[2], reqptr->data[3]);
+                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
+                     reqptr->data[3]);
             channelConf->gateway.assign(gateway);
         }
         break;
 
         case LAN_PARM_VLAN:
         {
-            uint16_t vlan {};
+            uint16_t vlan{};
             memcpy(&vlan, reqptr->data, ipmi::network::VLAN_SIZE_BYTE);
             // We are not storing the enable bit
             // We assume that ipmitool always send enable
@@ -536,16 +497,17 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn,
             {
                 channelConf->lan_set_in_progress = SET_COMPLETE;
 
-                log<level::INFO>("Network data from Cache",
-                                 entry("PREFIX=%s", channelConf->netmask.c_str()),
-                                 entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
-                                 entry("GATEWAY=%s", channelConf->gateway.c_str()),
-                                 entry("VLAN=%d", channelConf->vlanID));
+                log<level::INFO>(
+                    "Network data from Cache",
+                    entry("PREFIX=%s", channelConf->netmask.c_str()),
+                    entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
+                    entry("GATEWAY=%s", channelConf->gateway.c_str()),
+                    entry("VLAN=%d", channelConf->vlanID));
 
                 if (!networkTimer)
                 {
-                  log<level::ERR>("Network timer is not instantiated");
-                  return IPMI_CC_UNSPECIFIED_ERROR;
+                    log<level::ERR>("Network timer is not instantiated");
+                    return IPMI_CC_UNSPECIFIED_ERROR;
                 }
 
                 // start/restart the timer
@@ -574,10 +536,9 @@ struct get_lan_t
     uint8_t parameter;
     uint8_t parameter_set;
     uint8_t parameter_block;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
-                                  ipmi_cmd_t cmd,
+ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_request_t request,
                                   ipmi_response_t response,
                                   ipmi_data_len_t data_len,
@@ -587,7 +548,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
     *data_len = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
 
-    get_lan_t *reqptr = (get_lan_t*) request;
+    get_lan_t* reqptr = (get_lan_t*)request;
     // channel number is the lower nibble
     int channel = reqptr->rev_channel & CHANNEL_MASK;
 
@@ -609,7 +570,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
             cipherList = cipher::getCipherList();
             listInit = true;
         }
-        catch (const std::exception &e)
+        catch (const std::exception& e)
         {
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
@@ -630,13 +591,13 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
     }
     else if (reqptr->parameter == LAN_PARM_AUTHSUPPORT)
     {
-        uint8_t buf[] = {current_revision,0x04};
+        uint8_t buf[] = {current_revision, 0x04};
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
     }
     else if (reqptr->parameter == LAN_PARM_AUTHENABLES)
     {
-        uint8_t buf[] = {current_revision,0x04,0x04,0x04,0x04,0x04};
+        uint8_t buf[] = {current_revision, 0x04, 0x04, 0x04, 0x04, 0x04};
         *data_len = sizeof(buf);
         memcpy(response, &buf, *data_len);
     }
@@ -704,11 +665,10 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn,
     {
         *(static_cast<uint8_t*>(response)) = current_revision;
         // Byte 1 is reserved
-        std::copy_n(cipherList.data(),
-                    cipherList.size(),
+        std::copy_n(cipherList.data(), cipherList.size(),
                     static_cast<uint8_t*>(response) + 1);
-        *data_len = sizeof(current_revision) +
-                static_cast<uint8_t>(cipherList.size());
+        *data_len =
+            sizeof(current_revision) + static_cast<uint8_t>(cipherList.size());
     }
     else
     {
@@ -724,8 +684,8 @@ void applyChanges(int channel)
 {
     std::string ipaddress;
     std::string gateway;
-    uint8_t prefix {};
-    uint32_t vlanID {};
+    uint8_t prefix{};
+    uint32_t vlanID{};
     std::string networkInterfacePath;
     ipmi::DbusObjectInfo ipObject;
     ipmi::DbusObjectInfo systemObject;
@@ -752,8 +712,8 @@ void applyChanges(int channel)
                          entry("IPSRC=%d", channelConf->ipsrc));
         if (channelConf->vlanID != ipmi::network::VLAN_ID_MASK)
         {
-            //get the first twelve bits which is vlan id
-            //not interested in rest of the bits.
+            // get the first twelve bits which is vlan id
+            // not interested in rest of the bits.
             channelConf->vlanID = le32toh(channelConf->vlanID);
             vlanID = channelConf->vlanID & ipmi::network::VLAN_ID_MASK;
         }
@@ -763,10 +723,9 @@ void applyChanges(int channel)
         if (channelConf->ipsrc != ipmi::network::IPOrigin::DHCP)
         {
             // always get the system object
-            systemObject = ipmi::getDbusObject(
-                    bus,
-                    ipmi::network::SYSTEMCONFIG_INTERFACE,
-                    ipmi::network::ROOT);
+            systemObject =
+                ipmi::getDbusObject(bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
+                                    ipmi::network::ROOT);
 
             // the below code is to determine the mode of the interface
             // as the handling is same, if the system is configured with
@@ -775,21 +734,18 @@ void applyChanges(int channel)
             {
                 ipmi::ObjectTree ancestorMap;
 
-                ipmi::InterfaceList interfaces {
-                    ipmi::network::ETHERNET_INTERFACE };
+                ipmi::InterfaceList interfaces{
+                    ipmi::network::ETHERNET_INTERFACE};
 
                 // if the system is having ip object,then
                 // get the IP object.
-                ipObject = ipmi::getIPObject(bus,
-                                               ipmi::network::IP_INTERFACE,
-                                               ipmi::network::ROOT,
-                                               ethIp);
+                ipObject = ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
+                                             ipmi::network::ROOT, ethIp);
 
                 // Get the parent interface of the IP object.
                 try
                 {
-                    ancestorMap = ipmi::getAllAncestors(bus,
-                                                        ipObject.first,
+                    ancestorMap = ipmi::getAllAncestors(bus, ipObject.first,
                                                         std::move(interfaces));
                 }
                 catch (InternalFailure& e)
@@ -815,30 +771,27 @@ void applyChanges(int channel)
 
                 // if there is no ip configured on the system,then
                 // get the network interface object.
-                auto networkInterfaceObject = ipmi::getDbusObject(
-                        bus,
-                        ipmi::network::ETHERNET_INTERFACE,
-                        ipmi::network::ROOT,
-                        ethdevice);
+                auto networkInterfaceObject =
+                    ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
+                                        ipmi::network::ROOT, ethdevice);
 
                 networkInterfacePath = std::move(networkInterfaceObject.first);
             }
 
             // get the configured mode on the system.
-            auto enableDHCP = ipmi::getDbusProperty(
-                    bus,
-                    ipmi::network::SERVICE,
-                    networkInterfacePath,
-                    ipmi::network::ETHERNET_INTERFACE,
-                    "DHCPEnabled").get<bool>();
+            auto enableDHCP =
+                ipmi::getDbusProperty(
+                    bus, ipmi::network::SERVICE, networkInterfacePath,
+                    ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled")
+                    .get<bool>();
 
             // if ip address source is not given then get the ip source mode
             // from the system so that it can be applied later.
             if (channelConf->ipsrc == ipmi::network::IPOrigin::UNSPECIFIED)
             {
-                channelConf->ipsrc = (enableDHCP) ?
-                    ipmi::network::IPOrigin::DHCP :
-                    ipmi::network::IPOrigin::STATIC;
+                channelConf->ipsrc = (enableDHCP)
+                                         ? ipmi::network::IPOrigin::DHCP
+                                         : ipmi::network::IPOrigin::STATIC;
             }
 
             // check whether user has given all the data
@@ -849,13 +802,13 @@ void applyChanges(int channel)
                  !channelConf->gateway.empty()) ||
                 (enableDHCP)) // configured system interface mode = DHCP
             {
-                //convert mask into prefix
+                // convert mask into prefix
                 ipaddress = channelConf->ipaddr;
                 prefix = ipmi::network::toPrefix(AF_INET, channelConf->netmask);
                 gateway = channelConf->gateway;
             }
             else // asked ip src = static and configured system src = static
-                // or partially given data.
+                 // or partially given data.
             {
                 // We have partial filled cache so get the remaining
                 // info from the system.
@@ -869,36 +822,34 @@ void applyChanges(int channel)
                 try
                 {
                     auto properties = ipmi::getAllDbusProperties(
-                            bus,
-                            ipObject.second,
-                            ipObject.first,
-                            ipmi::network::IP_INTERFACE);
+                        bus, ipObject.second, ipObject.first,
+                        ipmi::network::IP_INTERFACE);
 
-                    ipaddress = channelConf->ipaddr.empty() ?
-                        properties["Address"].get<std::string>() :
-                        channelConf->ipaddr;
+                    ipaddress = channelConf->ipaddr.empty()
+                                    ? properties["Address"].get<std::string>()
+                                    : channelConf->ipaddr;
 
-                    prefix = channelConf->netmask.empty() ?
-                        properties["PrefixLength"].get<uint8_t>() :
-                        ipmi::network::toPrefix(AF_INET,
-                                channelConf->netmask);
-               }
+                    prefix = channelConf->netmask.empty()
+                                 ? properties["PrefixLength"].get<uint8_t>()
+                                 : ipmi::network::toPrefix(
+                                       AF_INET, channelConf->netmask);
+                }
                 catch (InternalFailure& e)
                 {
-                    log<level::INFO>("Failed to get IP object which matches",
-                            entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
-                            entry("MATCH=%s", ethIp.c_str()));
+                    log<level::INFO>(
+                        "Failed to get IP object which matches",
+                        entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
+                        entry("MATCH=%s", ethIp.c_str()));
                 }
 
                 auto systemProperties = ipmi::getAllDbusProperties(
-                        bus,
-                        systemObject.second,
-                        systemObject.first,
-                        ipmi::network::SYSTEMCONFIG_INTERFACE);
+                    bus, systemObject.second, systemObject.first,
+                    ipmi::network::SYSTEMCONFIG_INTERFACE);
 
-                gateway = channelConf->gateway.empty() ?
-                        systemProperties["DefaultGateway"].get<std::string>() :
-                        channelConf->gateway;
+                gateway =
+                    channelConf->gateway.empty()
+                        ? systemProperties["DefaultGateway"].get<std::string>()
+                        : channelConf->gateway;
             }
         }
 
@@ -913,100 +864,74 @@ void applyChanges(int channel)
 
         // instead of deleting all the vlan interfaces and
         // all the ipv4 address,we will call reset method.
-        //delete all the vlan interfaces
+        // delete all the vlan interfaces
 
-        ipmi::deleteAllDbusObjects(bus,
-                                   ipmi::network::ROOT,
+        ipmi::deleteAllDbusObjects(bus, ipmi::network::ROOT,
                                    ipmi::network::VLAN_INTERFACE);
 
         // set the interface mode  to static
-        auto networkInterfaceObject = ipmi::getDbusObject(
-                bus,
-                ipmi::network::ETHERNET_INTERFACE,
-                ipmi::network::ROOT,
-                ethdevice);
+        auto networkInterfaceObject =
+            ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
+                                ipmi::network::ROOT, ethdevice);
 
         // setting the physical interface mode to static.
-        ipmi::setDbusProperty(bus,
-                              ipmi::network::SERVICE,
-                              networkInterfaceObject.first,
-                              ipmi::network::ETHERNET_INTERFACE,
-                              "DHCPEnabled",
-                              false);
+        ipmi::setDbusProperty(
+            bus, ipmi::network::SERVICE, networkInterfaceObject.first,
+            ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled", false);
 
         networkInterfacePath = networkInterfaceObject.first;
 
-        //delete all the ipv4 addresses
-        ipmi::deleteAllDbusObjects(bus,
-                                   ipmi::network::ROOT,
-                                   ipmi::network::IP_INTERFACE,
-                                   ethIp);
+        // delete all the ipv4 addresses
+        ipmi::deleteAllDbusObjects(bus, ipmi::network::ROOT,
+                                   ipmi::network::IP_INTERFACE, ethIp);
 
         if (vlanID)
         {
-            ipmi::network::createVLAN(bus,
-                                      ipmi::network::SERVICE,
-                                      ipmi::network::ROOT,
-                                      ethdevice,
-                                      vlanID);
+            ipmi::network::createVLAN(bus, ipmi::network::SERVICE,
+                                      ipmi::network::ROOT, ethdevice, vlanID);
 
             auto networkInterfaceObject = ipmi::getDbusObject(
-                    bus,
-                    ipmi::network::VLAN_INTERFACE,
-                    ipmi::network::ROOT);
+                bus, ipmi::network::VLAN_INTERFACE, ipmi::network::ROOT);
 
-           networkInterfacePath = networkInterfaceObject.first;
+            networkInterfacePath = networkInterfaceObject.first;
         }
 
         if (channelConf->ipsrc == ipmi::network::IPOrigin::DHCP)
         {
-            ipmi::setDbusProperty(bus,
-                                  ipmi::network::SERVICE,
-                                  networkInterfacePath,
-                                  ipmi::network::ETHERNET_INTERFACE,
-                                  "DHCPEnabled",
-                                  true);
+            ipmi::setDbusProperty(
+                bus, ipmi::network::SERVICE, networkInterfacePath,
+                ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled", true);
         }
         else
         {
-            //change the mode to static
-            ipmi::setDbusProperty(bus,
-                                  ipmi::network::SERVICE,
-                                  networkInterfacePath,
-                                  ipmi::network::ETHERNET_INTERFACE,
-                                  "DHCPEnabled",
-                                  false);
+            // change the mode to static
+            ipmi::setDbusProperty(
+                bus, ipmi::network::SERVICE, networkInterfacePath,
+                ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled", false);
 
             if (!ipaddress.empty())
             {
-                ipmi::network::createIP(bus,
-                                        ipmi::network::SERVICE,
-                                        networkInterfacePath,
-                                        ipv4Protocol,
-                                        ipaddress,
-                                        prefix);
+                ipmi::network::createIP(bus, ipmi::network::SERVICE,
+                                        networkInterfacePath, ipv4Protocol,
+                                        ipaddress, prefix);
             }
 
             if (!gateway.empty())
             {
-                ipmi::setDbusProperty(bus,
-                                      systemObject.second,
+                ipmi::setDbusProperty(bus, systemObject.second,
                                       systemObject.first,
                                       ipmi::network::SYSTEMCONFIG_INTERFACE,
-                                      "DefaultGateway",
-                                      std::string(gateway));
+                                      "DefaultGateway", std::string(gateway));
             }
         }
-
     }
     catch (InternalFailure& e)
     {
-        log<level::ERR>("Failed to set network data",
-                        entry("PREFIX=%d", prefix),
-                        entry("ADDRESS=%s", ipaddress.c_str()),
-                        entry("GATEWAY=%s", gateway.c_str()),
-                        entry("VLANID=%d", vlanID),
-                        entry("IPSRC=%d", channelConf->ipsrc));
+        log<level::ERR>(
+            "Failed to set network data", entry("PREFIX=%d", prefix),
+            entry("ADDRESS=%s", ipaddress.c_str()),
+            entry("GATEWAY=%s", gateway.c_str()), entry("VLANID=%d", vlanID),
+            entry("IPSRC=%d", channelConf->ipsrc));
 
         commit<InternalFailure>();
     }
@@ -1016,7 +941,7 @@ void applyChanges(int channel)
 
 void commitNetworkChanges()
 {
-    for (const auto &channel : channelConfig)
+    for (const auto& channel : channelConfig)
     {
         if (channel.second->flush)
         {
@@ -1030,14 +955,11 @@ void createNetworkTimer()
     if (!networkTimer)
     {
         std::function<void()> networkTimerCallback(
-                std::bind(&commitNetworkChanges));
+            std::bind(&commitNetworkChanges));
 
-        networkTimer =
-            std::make_unique<phosphor::ipmi::Timer>(
-                    ipmid_get_sd_event_connection(),
-                    networkTimerCallback);
+        networkTimer = std::make_unique<phosphor::ipmi::Timer>(
+            ipmid_get_sd_event_connection(), networkTimerCallback);
     }
-
 }
 
 void register_netfn_transport_functions()
@@ -1046,16 +968,16 @@ void register_netfn_transport_functions()
     // so creating it here.
     createNetworkTimer();
     // <Wildcard Command>
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL, ipmi_transport_wildcard,
-                           PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_WILDCARD, NULL,
+                           ipmi_transport_wildcard, PRIVILEGE_USER);
 
     // <Set LAN Configuration Parameters>
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_LAN, NULL, ipmi_transport_set_lan,
-                           PRIVILEGE_ADMIN);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_LAN, NULL,
+                           ipmi_transport_set_lan, PRIVILEGE_ADMIN);
 
     // <Get LAN Configuration Parameters>
-    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL, ipmi_transport_get_lan,
-                           PRIVILEGE_OPERATOR);
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL,
+                           ipmi_transport_get_lan, PRIVILEGE_OPERATOR);
 
     return;
 }

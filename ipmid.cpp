@@ -1,40 +1,43 @@
-#include <stdio.h>
-#include <dlfcn.h>
-#include <iostream>
-#include <unistd.h>
+#include "ipmid.hpp"
+
+#include "host-ipmid/oemrouter.hpp"
+#include "settings.hpp"
+
 #include <assert.h>
 #include <dirent.h>
-#include <systemd/sd-bus.h>
-#include <string.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <mapper.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <systemd/sd-bus.h>
+#include <unistd.h>
+
+#include <algorithm>
+#include <host-cmd-manager.hpp>
+#include <host-ipmid/ipmid-host-cmd.hpp>
+#include <iostream>
+#include <ipmiwhitelist.hpp>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <phosphor-logging/log.hpp>
-#include <sys/time.h>
-#include <errno.h>
-#include <mapper.h>
-#include "sensorhandler.h"
-#include <vector>
-#include <algorithm>
-#include <iterator>
-#include <ipmiwhitelist.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
-#include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
-#include "sensorhandler.h"
-#include "ipmid.hpp"
-#include "settings.hpp"
-#include <host-cmd-manager.hpp>
-#include <host-ipmid/ipmid-host-cmd.hpp>
 #include <timer.hpp>
-#include "host-ipmid/oemrouter.hpp"
+#include <vector>
+#include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
+
+#include "sensorhandler.h"
 
 using namespace phosphor::logging;
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
-sd_bus *bus = NULL;
-sd_bus_slot *ipmid_slot = NULL;
-sd_event *events = nullptr;
+sd_bus* bus = NULL;
+sd_bus_slot* ipmid_slot = NULL;
+sd_event* events = nullptr;
 
 // Need this to use new sdbusplus compatible interfaces
 sdbusPtr sdbusp;
@@ -55,17 +58,19 @@ bool restricted_mode = true;
 
 FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
-void print_usage(void) {
-  fprintf(stderr, "Options:  [-d mask]\n");
-  fprintf(stderr, "    mask : 0x01 - Print ipmi packets\n");
-  fprintf(stderr, "    mask : 0x02 - Print DBUS operations\n");
-  fprintf(stderr, "    mask : 0x04 - Print ipmi command details\n");
-  fprintf(stderr, "    mask : 0xFF - Print all trace\n");
+void print_usage(void)
+{
+    fprintf(stderr, "Options:  [-d mask]\n");
+    fprintf(stderr, "    mask : 0x01 - Print ipmi packets\n");
+    fprintf(stderr, "    mask : 0x02 - Print DBUS operations\n");
+    fprintf(stderr, "    mask : 0x04 - Print ipmi command details\n");
+    fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
-const char * DBUS_INTF = "org.openbmc.HostIpmi";
+const char* DBUS_INTF = "org.openbmc.HostIpmi";
 
-const char * FILTER = "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
+const char* FILTER =
+    "type='signal',interface='org.openbmc.HostIpmi',member='ReceivedMessage'";
 
 typedef std::pair<ipmi_netfn_t, ipmi_cmd_t> ipmi_fn_cmd_t;
 typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
@@ -99,55 +104,59 @@ std::unique_ptr<settings::Objects> objects = nullptr;
 #define HEXDUMP_COLS 16
 #endif
 
-void hexdump(FILE *s, void *mem, size_t len)
+void hexdump(FILE* s, void* mem, size_t len)
 {
-        unsigned int i, j;
+    unsigned int i, j;
 
-        for(i = 0; i < len + ((len % HEXDUMP_COLS) ? (HEXDUMP_COLS - len % HEXDUMP_COLS) : 0); i++)
+    for (i = 0;
+         i <
+         len + ((len % HEXDUMP_COLS) ? (HEXDUMP_COLS - len % HEXDUMP_COLS) : 0);
+         i++)
+    {
+        /* print offset */
+        if (i % HEXDUMP_COLS == 0)
         {
-                /* print offset */
-                if(i % HEXDUMP_COLS == 0)
-                {
-                        fprintf(s,"0x%06x: ", i);
-                }
-
-                /* print hex data */
-                if(i < len)
-                {
-                        fprintf(s,"%02x ", 0xFF & ((char*)mem)[i]);
-                }
-                else /* end of block, just aligning for ASCII dump */
-                {
-                        fprintf(s,"   ");
-                }
-
-                /* print ASCII dump */
-                if(i % HEXDUMP_COLS == (HEXDUMP_COLS - 1))
-                {
-                        for(j = i - (HEXDUMP_COLS - 1); j <= i; j++)
-                        {
-                                if(j >= len) /* end of block, not really printing */
-                                {
-                                        fputc(' ', s);
-                                }
-                                else if(isprint(((char*)mem)[j])) /* printable char */
-                                {
-                                        fputc(0xFF & ((char*)mem)[j], s);
-                                }
-                                else /* other char */
-                                {
-                                        fputc('.',s);
-                                }
-                        }
-                        fputc('\n',s);
-                }
+            fprintf(s, "0x%06x: ", i);
         }
+
+        /* print hex data */
+        if (i < len)
+        {
+            fprintf(s, "%02x ", 0xFF & ((char*)mem)[i]);
+        }
+        else /* end of block, just aligning for ASCII dump */
+        {
+            fprintf(s, "   ");
+        }
+
+        /* print ASCII dump */
+        if (i % HEXDUMP_COLS == (HEXDUMP_COLS - 1))
+        {
+            for (j = i - (HEXDUMP_COLS - 1); j <= i; j++)
+            {
+                if (j >= len) /* end of block, not really printing */
+                {
+                    fputc(' ', s);
+                }
+                else if (isprint(((char*)mem)[j])) /* printable char */
+                {
+                    fputc(0xFF & ((char*)mem)[j], s);
+                }
+                else /* other char */
+                {
+                    fputc('.', s);
+                }
+            }
+            fputc('\n', s);
+        }
+    }
 }
 
-
-// Method that gets called by shared libraries to get their command handlers registered
-void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_context_t context,
-                            ipmid_callback_t handler, ipmi_cmd_privilege_t priv)
+// Method that gets called by shared libraries to get their command handlers
+// registered
+void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                            ipmi_context_t context, ipmid_callback_t handler,
+                            ipmi_cmd_privilege_t priv)
 {
     // Pack NetFn and Command in one.
     auto netfn_and_cmd = std::make_pair(netfn, cmd);
@@ -157,10 +166,9 @@ void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_context_t c
 
     // Check if the registration has already been made..
     auto iter = g_ipmid_router_map.find(netfn_and_cmd);
-    if(iter != g_ipmid_router_map.end())
+    if (iter != g_ipmid_router_map.end())
     {
-        log<level::ERR>("Duplicate registration",
-                        entry("NETFN=0x%X", netfn),
+        log<level::ERR>("Duplicate registration", entry("NETFN=0x%X", netfn),
                         entry("CMD=0x%X", cmd));
     }
     else
@@ -173,22 +181,22 @@ void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_context_t c
 }
 
 // Looks at the map and calls corresponding handler functions.
-ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-                      ipmi_response_t response, ipmi_data_len_t data_len)
+ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                             ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len)
 {
     // return from the Command handlers.
     ipmi_ret_t rc = IPMI_CC_INVALID;
 
     // If restricted mode is true and command is not whitelisted, don't
     // execute the command
-    if(restricted_mode)
+    if (restricted_mode)
     {
         if (!std::binary_search(whitelist.cbegin(), whitelist.cend(),
-                                        std::make_pair(netfn, cmd)))
+                                std::make_pair(netfn, cmd)))
         {
             log<level::ERR>("Net function not whitelisted",
-                            entry("NETFN=0x%X", netfn),
-                            entry("CMD=0x%X", cmd));
+                            entry("NETFN=0x%X", netfn), entry("CMD=0x%X", cmd));
             rc = IPMI_CC_INSUFFICIENT_PRIVILEGE;
             memcpy(response, &rc, IPMI_CC_LEN);
             *data_len = IPMI_CC_LEN;
@@ -199,20 +207,20 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
     // Walk the map that has the registered handlers and invoke the approprite
     // handlers for matching commands.
     auto iter = g_ipmid_router_map.find(std::make_pair(netfn, cmd));
-    if(iter == g_ipmid_router_map.end())
+    if (iter == g_ipmid_router_map.end())
     {
         /* By default should only print on failure to find wildcard command. */
 #ifdef __IPMI_DEBUG__
         log<level::ERR>(
-              "No registered handlers for NetFn, trying Wilcard implementation",
-              entry("NET_FUN=0x%X", netfn)
-              entry("CMD=0x%X", IPMI_CMD_WILDCARD));
+            "No registered handlers for NetFn, trying Wilcard implementation",
+            entry("NET_FUN=0x%X", netfn) entry("CMD=0x%X", IPMI_CMD_WILDCARD));
 #endif
 
         // Now that we did not find any specific [NetFn,Cmd], tuple, check for
         // NetFn, WildCard command present.
-        iter = g_ipmid_router_map.find(std::make_pair(netfn, IPMI_CMD_WILDCARD));
-        if(iter == g_ipmid_router_map.end())
+        iter =
+            g_ipmid_router_map.find(std::make_pair(netfn, IPMI_CMD_WILDCARD));
+        if (iter == g_ipmid_router_map.end())
         {
             log<level::ERR>("No Registered handlers for NetFn",
                             entry("NET_FUN=0x%X", netfn),
@@ -228,8 +236,7 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
 #ifdef __IPMI_DEBUG__
     // We have either a perfect match -OR- a wild card atleast,
     log<level::ERR>("Calling Net function",
-                    entry("NET_FUN=0x%X", netfn)
-                    entry("CMD=0x%X", cmd));
+                    entry("NET_FUN=0x%X", netfn) entry("CMD=0x%X", cmd));
 #endif
 
     // Extract the map data onto appropriate containers
@@ -238,18 +245,18 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
     // Creating a pointer type casted to char* to make sure we advance 1 byte
     // when we advance pointer to next's address. advancing void * would not
     // make sense.
-    char *respo = &((char *)response)[IPMI_CC_LEN];
+    char* respo = &((char*)response)[IPMI_CC_LEN];
 
     try
     {
         // Response message from the plugin goes into a byte post the base
         // response
-        rc = (handler_and_context.first) (netfn, cmd, request, respo,
-                                          data_len, handler_and_context.second);
+        rc = (handler_and_context.first)(netfn, cmd, request, respo, data_len,
+                                         handler_and_context.second);
     }
     // IPMI command handlers can throw unhandled exceptions, catch those
     // and return sane error code.
-    catch (const std::exception &e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what(), entry("NET_FUN=0x%X", netfn),
                         entry("CMD=0x%X", cmd));
@@ -267,63 +274,62 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t 
     return rc;
 }
 
-
-
-
-static int send_ipmi_message(sd_bus_message *req, unsigned char seq, unsigned char netfn, unsigned char lun, unsigned char cmd, unsigned char cc, unsigned char *buf, unsigned char len) {
+static int send_ipmi_message(sd_bus_message* req, unsigned char seq,
+                             unsigned char netfn, unsigned char lun,
+                             unsigned char cmd, unsigned char cc,
+                             unsigned char* buf, unsigned char len)
+{
 
     sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message *reply = NULL, *m=NULL;
+    sd_bus_message *reply = NULL, *m = NULL;
     const char *dest, *path;
     int r, pty;
 
     dest = sd_bus_message_get_sender(req);
     path = sd_bus_message_get_path(req);
 
-    r = sd_bus_message_new_method_call(bus,&m,dest,path,
-                                       DBUS_INTF,
+    r = sd_bus_message_new_method_call(bus, &m, dest, path, DBUS_INTF,
                                        "sendMessage");
-    if (r < 0) {
+    if (r < 0)
+    {
         log<level::ERR>("Failed to add the method object",
                         entry("ERRNO=0x%X", -r));
         return -1;
     }
 
-
     // Responses in IPMI require a bit set.  So there ya go...
     netfn |= 0x01;
 
-
     // Add the bytes needed for the methods to be called
     r = sd_bus_message_append(m, "yyyyy", seq, netfn, lun, cmd, cc);
-    if (r < 0) {
+    if (r < 0)
+    {
         log<level::ERR>("Failed add the netfn and others",
                         entry("ERRNO=0x%X", -r));
         goto final;
     }
 
     r = sd_bus_message_append_array(m, 'y', buf, len);
-    if (r < 0) {
+    if (r < 0)
+    {
         log<level::ERR>("Failed to add the string of response bytes",
                         entry("ERRNO=0x%X", -r));
         goto final;
     }
 
-
-
     // Call the IPMI responder on the bus so the message can be sent to the CEC
     r = sd_bus_call(bus, m, 0, &error, &reply);
-    if (r < 0) {
-        log<level::ERR>("Failed to call the method",
-                        entry("DEST=%s", dest),
-                        entry("PATH=%s", path),
-                        entry("ERRNO=0x%X", -r));
+    if (r < 0)
+    {
+        log<level::ERR>("Failed to call the method", entry("DEST=%s", dest),
+                        entry("PATH=%s", path), entry("ERRNO=0x%X", -r));
         goto final;
     }
 
     r = sd_bus_message_read(reply, "x", &pty);
-    if (r < 0) {
-       log<level::ERR>("Failed to get a reply from the method",
+    if (r < 0)
+    {
+        log<level::ERR>("Failed to get a reply from the method",
                         entry("ERRNO=0x%X", -r));
     }
 
@@ -345,11 +351,9 @@ void cache_restricted_mode()
     const auto& restrictionModeSetting =
         objects->map.at(restrictionModeIntf).front();
     auto method = dbus.new_method_call(
-                      objects->service(restrictionModeSetting,
-                          restrictionModeIntf).c_str(),
-                      restrictionModeSetting.c_str(),
-                      "org.freedesktop.DBus.Properties",
-                      "Get");
+        objects->service(restrictionModeSetting, restrictionModeIntf).c_str(),
+        restrictionModeSetting.c_str(), "org.freedesktop.DBus.Properties",
+        "Get");
     method.append(restrictionModeIntf, "RestrictionMode");
     auto resp = dbus.call(method);
     if (resp.is_method_error())
@@ -363,45 +367,49 @@ void cache_restricted_mode()
     resp.read(result);
     auto restrictionMode =
         RestrictionMode::convertModesFromString(result.get<std::string>());
-    if(RestrictionMode::Modes::Whitelist == restrictionMode)
+    if (RestrictionMode::Modes::Whitelist == restrictionMode)
     {
         restricted_mode = true;
     }
 }
 
-static int handle_restricted_mode_change(sd_bus_message *m, void *user_data,
-                                                    sd_bus_error *ret_error)
+static int handle_restricted_mode_change(sd_bus_message* m, void* user_data,
+                                         sd_bus_error* ret_error)
 {
     cache_restricted_mode();
     return 0;
 }
 
-static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
-                         *ret_error) {
+static int handle_ipmi_command(sd_bus_message* m, void* user_data,
+                               sd_bus_error* ret_error)
+{
     int r = 0;
     unsigned char sequence, netfn, lun, cmd;
-    const void *request;
+    const void* request;
     size_t sz;
-    size_t resplen =MAX_IPMI_BUFFER;
+    size_t resplen = MAX_IPMI_BUFFER;
     unsigned char response[MAX_IPMI_BUFFER];
 
     memset(response, 0, MAX_IPMI_BUFFER);
 
-    r = sd_bus_message_read(m, "yyyy",  &sequence, &netfn, &lun, &cmd);
-    if (r < 0) {
+    r = sd_bus_message_read(m, "yyyy", &sequence, &netfn, &lun, &cmd);
+    if (r < 0)
+    {
         log<level::ERR>("Failed to parse signal message",
                         entry("ERRNO=0x%X", -r));
         return -1;
     }
 
-    r = sd_bus_message_read_array(m, 'y',  &request, &sz );
-    if (r < 0) {
+    r = sd_bus_message_read_array(m, 'y', &request, &sz);
+    if (r < 0)
+    {
         log<level::ERR>("Failed to parse signal message",
                         entry("ERRNO=0x%X", -r));
         return -1;
     }
 
-    fprintf(ipmiio, "IPMI Incoming: Seq 0x%02x, NetFn 0x%02x, CMD: 0x%02x \n", sequence, netfn, cmd);
+    fprintf(ipmiio, "IPMI Incoming: Seq 0x%02x, NetFn 0x%02x, CMD: 0x%02x \n",
+            sequence, netfn, cmd);
     hexdump(ipmiio, (void*)request, sz);
 
     // Allow the length field to be used for both input and output of the
@@ -410,14 +418,13 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
 
     // Now that we have parsed the entire byte array from the caller
     // we can call the ipmi router to do the work...
-    r = ipmi_netfn_router(netfn, cmd, (void *)request, (void *)response, &resplen);
-    if(r != 0)
+    r = ipmi_netfn_router(netfn, cmd, (void*)request, (void*)response,
+                          &resplen);
+    if (r != 0)
     {
 #ifdef __IPMI_DEBUG__
-        log<level::ERR>("ERROR in handling NetFn",
-                        entry("ERRNO=0x%X", -r),
-                        entry("NET_FUN=0x%X", netfn),
-                        entry("CMD=0x%X", cmd));
+        log<level::ERR>("ERROR in handling NetFn", entry("ERRNO=0x%X", -r),
+                        entry("NET_FUN=0x%X", netfn), entry("CMD=0x%X", cmd));
 #endif
         resplen = 0;
     }
@@ -427,27 +434,26 @@ static int handle_ipmi_command(sd_bus_message *m, void *user_data, sd_bus_error
     }
 
     fprintf(ipmiio, "IPMI Response:\n");
-    hexdump(ipmiio,  (void*)response, resplen);
+    hexdump(ipmiio, (void*)response, resplen);
 
     // Send the response buffer from the ipmi command
     r = send_ipmi_message(m, sequence, netfn, lun, cmd, response[0],
-		    ((unsigned char *)response) + 1, resplen);
-    if (r < 0) {
+                          ((unsigned char*)response) + 1, resplen);
+    if (r < 0)
+    {
         log<level::ERR>("Failed to send the response message");
         return -1;
     }
 
-
     return 0;
 }
-
 
 //----------------------------------------------------------------------
 // handler_select
 // Select all the files ending with with .so. in the given diretcory
 // @d: dirent structure containing the file name
 //----------------------------------------------------------------------
-int handler_select(const struct dirent *entry)
+int handler_select(const struct dirent* entry)
 {
     // To hold ".so" from entry->d_name;
     char dname_copy[4] = {0};
@@ -455,18 +461,19 @@ int handler_select(const struct dirent *entry)
     // We want to avoid checking for everything and isolate to the ones having
     // .so.* or .so in them.
     // Check for versioned libraries .so.*
-    if(strstr(entry->d_name, IPMI_PLUGIN_SONAME_EXTN))
+    if (strstr(entry->d_name, IPMI_PLUGIN_SONAME_EXTN))
     {
         return 1;
     }
     // Check for non versioned libraries .so
-    else if(strstr(entry->d_name, IPMI_PLUGIN_EXTN))
+    else if (strstr(entry->d_name, IPMI_PLUGIN_EXTN))
     {
         // It is possible that .so could be anywhere in the string but unlikely
         // But being careful here. Get the base address of the string, move
         // until end and come back 3 steps and that gets what we need.
-        strcpy(dname_copy, (entry->d_name + strlen(entry->d_name)-strlen(IPMI_PLUGIN_EXTN)));
-        if(strcmp(dname_copy, IPMI_PLUGIN_EXTN) == 0)
+        strcpy(dname_copy, (entry->d_name + strlen(entry->d_name) -
+                            strlen(IPMI_PLUGIN_EXTN)));
+        if (strcmp(dname_copy, IPMI_PLUGIN_EXTN) == 0)
         {
             return 1;
         }
@@ -474,18 +481,18 @@ int handler_select(const struct dirent *entry)
     return 0;
 }
 
-// This will do a dlopen of every .so in ipmi_lib_path and will dlopen everything so that they will
-// register a callback handler
+// This will do a dlopen of every .so in ipmi_lib_path and will dlopen
+// everything so that they will register a callback handler
 void ipmi_register_callback_handlers(const char* ipmi_lib_path)
 {
     // For walking the ipmi_lib_path
-    struct dirent **handler_list;
+    struct dirent** handler_list;
     int num_handlers = 0;
 
     // This is used to check and abort if someone tries to register a bad one.
-    void *lib_handler = NULL;
+    void* lib_handler = NULL;
 
-    if(ipmi_lib_path == NULL)
+    if (ipmi_lib_path == NULL)
     {
         log<level::ERR>("No handlers to be registered for ipmi.. Aborting");
         assert(0);
@@ -503,11 +510,12 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
         // already a .so, adding one more is not any harm.
         handler_fqdn += "/";
 
-        num_handlers = scandir(ipmi_lib_path, &handler_list, handler_select, alphasort);
+        num_handlers =
+            scandir(ipmi_lib_path, &handler_list, handler_select, alphasort);
         if (num_handlers < 0)
             return;
 
-        while(num_handlers--)
+        while (num_handlers--)
         {
             handler_fqdn = ipmi_lib_path;
             handler_fqdn += handler_list[num_handlers]->d_name;
@@ -518,7 +526,7 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
 
             lib_handler = dlopen(handler_fqdn.c_str(), RTLD_NOW);
 
-            if(lib_handler == NULL)
+            if (lib_handler == NULL)
             {
                 log<level::ERR>("ERROR opening",
                                 entry("HANDLER=%s", handler_fqdn.c_str()),
@@ -536,67 +544,75 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
     return;
 }
 
-sd_bus *ipmid_get_sd_bus_connection(void) {
+sd_bus* ipmid_get_sd_bus_connection(void)
+{
     return bus;
 }
 
-sd_event *ipmid_get_sd_event_connection(void) {
+sd_event* ipmid_get_sd_event_connection(void)
+{
     return events;
 }
 
-sd_bus_slot *ipmid_get_sd_bus_slot(void) {
+sd_bus_slot* ipmid_get_sd_bus_slot(void)
+{
     return ipmid_slot;
 }
 
 // Calls host command manager to do the right thing for the command
-void ipmid_send_cmd_to_host(CommandHandler&& cmd) {
-     return cmdManager->execute(std::move(cmd));
+void ipmid_send_cmd_to_host(CommandHandler&& cmd)
+{
+    return cmdManager->execute(std::move(cmd));
 }
 
-cmdManagerPtr& ipmid_get_host_cmd_manager() {
-     return cmdManager;
+cmdManagerPtr& ipmid_get_host_cmd_manager()
+{
+    return cmdManager;
 }
 
-sdbusPtr& ipmid_get_sdbus_plus_handler() {
-     return sdbusp;
+sdbusPtr& ipmid_get_sdbus_plus_handler()
+{
+    return sdbusp;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     int r;
     unsigned long tvalue;
     int c;
 
-
-
     // This file and subsequient switch is for turning on levels
     // of trace
-    ipmicmddetails = ipmiio = ipmidbus =  fopen("/dev/null", "w");
+    ipmicmddetails = ipmiio = ipmidbus = fopen("/dev/null", "w");
 
-    while ((c = getopt (argc, argv, "h:d:")) != -1)
-        switch (c) {
+    while ((c = getopt(argc, argv, "h:d:")) != -1)
+        switch (c)
+        {
             case 'd':
-                tvalue =  strtoul(optarg, NULL, 16);
-                if (1&tvalue) {
+                tvalue = strtoul(optarg, NULL, 16);
+                if (1 & tvalue)
+                {
                     ipmiio = stdout;
                 }
-                if (2&tvalue) {
+                if (2 & tvalue)
+                {
                     ipmidbus = stdout;
                 }
-                if (4&tvalue) {
+                if (4 & tvalue)
+                {
                     ipmicmddetails = stdout;
                 }
                 break;
-          case 'h':
-          case '?':
+            case 'h':
+            case '?':
                 print_usage();
                 return 1;
         }
 
-
     /* Connect to system bus */
     r = sd_bus_open_system(&bus);
-    if (r < 0) {
+    if (r < 0)
+    {
         log<level::ERR>("Failed to connect to system bus",
                         entry("ERRNO=0x%X", -r));
         goto finish;
@@ -614,8 +630,8 @@ int main(int argc, char *argv[])
     // Now create the Host Bound Command manager. Need sdbusplus
     // to use the generated bindings
     sdbusp = std::make_unique<sdbusplus::bus::bus>(bus);
-    cmdManager = std::make_unique<phosphor::host::command::Manager>(
-                            *sdbusp, events);
+    cmdManager =
+        std::make_unique<phosphor::host::command::Manager>(*sdbusp, events);
 
     // Activate OemRouter.
     oem::mutableRouter()->activate();
@@ -623,11 +639,11 @@ int main(int argc, char *argv[])
     // Register all the handlers that provider implementation to IPMI commands.
     ipmi_register_callback_handlers(HOST_IPMI_LIB_PATH);
 
-	// Watch for BT messages
+    // Watch for BT messages
     r = sd_bus_add_match(bus, &ipmid_slot, FILTER, handle_ipmi_command, NULL);
-    if (r < 0) {
-        log<level::ERR>("Failed: sd_bus_add_match",
-                        entry("FILTER=%s", FILTER),
+    if (r < 0)
+    {
+        log<level::ERR>("Failed: sd_bus_add_match", entry("FILTER=%s", FILTER),
                         entry("ERRNO=0x%X", -r));
         goto finish;
     }
@@ -640,8 +656,7 @@ int main(int argc, char *argv[])
         using namespace internal::cache;
         sdbusplus::bus::bus dbus{bus};
         objects = std::make_unique<settings::Objects>(
-                      dbus,
-                      std::vector<settings::Interface>({restrictionModeIntf}));
+            dbus, std::vector<settings::Interface>({restrictionModeIntf}));
         // Initialize restricted mode
         cache_restricted_mode();
         // Wait for changes on Restricted mode
@@ -652,7 +667,8 @@ int main(int argc, char *argv[])
                 restrictionModeIntf),
             handle_restricted_mode_change);
 
-        for (;;) {
+        for (;;)
+        {
             /* Process requests */
             r = sd_event_run(events, (uint64_t)-1);
             if (r < 0)
@@ -670,5 +686,4 @@ finish:
     sd_bus_slot_unref(ipmid_slot);
     sd_bus_unref(bus);
     return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
-
 }

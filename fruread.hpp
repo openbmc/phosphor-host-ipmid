@@ -2,9 +2,10 @@
 #define OPENBMC_IPMI_FRU_READ_H
 
 #include <systemd/sd-bus.h>
+
 #include <array>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 struct IPMIFruData

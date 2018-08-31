@@ -1,11 +1,12 @@
-#include <functional>
-#include <systemintfcmds.h>
-#include <host-ipmid/ipmid-host-cmd.hpp>
-#include <host-ipmid/ipmid-host-cmd-utils.hpp>
-#include <utils.hpp>
-#include <phosphor-logging/log.hpp>
 #include <config.h>
+#include <systemintfcmds.h>
+
+#include <functional>
 #include <host-interface.hpp>
+#include <host-ipmid/ipmid-host-cmd-utils.hpp>
+#include <host-ipmid/ipmid-host-cmd.hpp>
+#include <phosphor-logging/log.hpp>
+#include <utils.hpp>
 namespace phosphor
 {
 namespace host
@@ -25,44 +26,30 @@ using OEMCmd = uint8_t;
 // This is needed when invoking the callback handler to indicate
 // the status of the executed command.
 static const std::map<OEMCmd, Host::Command> intfCommand = {
-    {
-        CMD_HEARTBEAT,
-            Base::Host::Command::Heartbeat
-    },
-    {
-        CMD_POWER,
-            Base::Host::Command::SoftOff
-    }
-};
+    {CMD_HEARTBEAT, Base::Host::Command::Heartbeat},
+    {CMD_POWER, Base::Host::Command::SoftOff}};
 
 // Map of Interface command to its corresponding IPMI OEM command.
 // This is needed when pushing IPMI commands to command manager's
 // queue. The same pair will be returned when IPMI asks us
 // why a SMS_ATN was sent
 static const std::map<Host::Command, IpmiCmdData> ipmiCommand = {
-    {
-        Base::Host::Command::Heartbeat,
-            std::make_pair(CMD_HEARTBEAT, 0x00)
-    },
-    {
-        Base::Host::Command::SoftOff,
-            std::make_pair(CMD_POWER, SOFT_OFF)
-    }
-};
+    {Base::Host::Command::Heartbeat, std::make_pair(CMD_HEARTBEAT, 0x00)},
+    {Base::Host::Command::SoftOff, std::make_pair(CMD_POWER, SOFT_OFF)}};
 
 // Called at user request
 void Host::execute(Base::Host::Command command)
 {
     using namespace phosphor::logging;
 
-    log<level::DEBUG>("Pushing cmd on to queue",
-            entry("CONTROL_HOST_CMD=%s",
-                  convertForMessage(command).c_str()));
+    log<level::DEBUG>(
+        "Pushing cmd on to queue",
+        entry("CONTROL_HOST_CMD=%s", convertForMessage(command).c_str()));
 
     auto cmd = std::make_tuple(ipmiCommand.at(command),
-                        std::bind(&Host::commandStatusHandler,
-                            this, std::placeholders::_1,
-                                std::placeholders::_2));
+                               std::bind(&Host::commandStatusHandler, this,
+                                         std::placeholders::_1,
+                                         std::placeholders::_2));
 
     return ipmid_send_cmd_to_host(std::move(cmd));
 }
@@ -79,4 +66,4 @@ void Host::commandStatusHandler(IpmiCmdData cmd, bool status)
 
 } // namespace command
 } // namespace host
-} // namepsace phosphor
+} // namespace phosphor

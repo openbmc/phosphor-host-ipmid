@@ -1,10 +1,12 @@
 #pragma once
 
-#include <math.h>
-#include "sensorhandler.h"
 #include "types.hpp"
 #include "utils.hpp"
+
+#include <math.h>
+
 #include "host-ipmid/ipmid-api.h"
+#include "sensorhandler.h"
 
 namespace ipmi
 {
@@ -89,8 +91,8 @@ inline SensorName nameProperty(const Info& sensorInfo)
 inline SensorName nameLeaf(const Info& sensorInfo)
 {
     return sensorInfo.sensorPath.substr(
-            sensorInfo.sensorPath.find_last_of('/') + 1,
-            sensorInfo.sensorPath.length());
+        sensorInfo.sensorPath.find_last_of('/') + 1,
+        sensorInfo.sensorPath.length());
 }
 
 /** @brief Populate sensor name from the D-Bus object associated with the
@@ -147,23 +149,20 @@ GetSensorResponse eventdata2(const Info& sensorInfo);
  *
  *  @return Response for get sensor reading command.
  */
-template<typename T>
+template <typename T>
 GetSensorResponse readingAssertion(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    GetSensorResponse response {};
+    GetSensorResponse response{};
     auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
 
-    auto service = ipmi::getService(bus,
-                                    sensorInfo.sensorInterface,
+    auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
 
     auto propValue = ipmi::getDbusProperty(
-            bus,
-            service,
-            sensorInfo.sensorPath,
-            sensorInfo.propertyInterfaces.begin()->first,
-            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+        bus, service, sensorInfo.sensorPath,
+        sensorInfo.propertyInterfaces.begin()->first,
+        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
     setAssertionBytes(static_cast<uint16_t>(propValue.get<T>()), responseData);
 
@@ -178,38 +177,35 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
  *
  *  @return Response for get sensor reading command.
  */
-template<typename T>
+template <typename T>
 GetSensorResponse readingData(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    GetSensorResponse response {};
+    GetSensorResponse response{};
     auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
 
     enableScanning(responseData);
 
-    auto service = ipmi::getService(bus,
-                                    sensorInfo.sensorInterface,
+    auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
 
     auto propValue = ipmi::getDbusProperty(
-            bus,
-            service,
-            sensorInfo.sensorPath,
-            sensorInfo.propertyInterfaces.begin()->first,
-            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+        bus, service, sensorInfo.sensorPath,
+        sensorInfo.propertyInterfaces.begin()->first,
+        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    double value = propValue.get<T>() * pow(10,
-            sensorInfo.scale - sensorInfo.exponentR);
+    double value =
+        propValue.get<T>() * pow(10, sensorInfo.scale - sensorInfo.exponentR);
 
-    auto rawData = static_cast<uint8_t>(
-            (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM);
+    auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
+                                        sensorInfo.coefficientM);
 
     setReading(rawData, responseData);
 
     return response;
 }
 
-} //namespace get
+} // namespace get
 
 namespace set
 {
@@ -240,15 +236,13 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-template<typename T>
+template <typename T>
 ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
                             const Info& sensorInfo)
 {
-    auto msg = makeDbusMsg(
-                   "org.freedesktop.DBus.Properties",
-                   sensorInfo.sensorPath,
-                   "Set",
-                   sensorInfo.sensorInterface);
+    auto msg =
+        makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
+                    "Set", sensorInfo.sensorInterface);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);
@@ -267,19 +261,18 @@ ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return an IPMI error code
  */
-template<typename T>
+template <typename T>
 ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
                        const Info& sensorInfo)
 {
-    T raw_value = (sensorInfo.coefficientM * cmdData.reading) +
-                  sensorInfo.scaledOffset;
+    T raw_value =
+        (sensorInfo.coefficientM * cmdData.reading) + sensorInfo.scaledOffset;
 
     raw_value *= pow(10, sensorInfo.exponentR - sensorInfo.scale);
 
-    auto msg = makeDbusMsg("org.freedesktop.DBus.Properties",
-                           sensorInfo.sensorPath,
-                           "Set",
-                           sensorInfo.sensorInterface);
+    auto msg =
+        makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
+                    "Set", sensorInfo.sensorInterface);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);
@@ -298,8 +291,7 @@ ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData,
-                     const Info& sensorInfo,
+ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData, const Info& sensorInfo,
                      uint8_t data);
 
 /** @brief Update d-bus based on eventdata1 type sensor data
@@ -335,7 +327,7 @@ inline ipmi_ret_t eventdata3(const SetSensorReadingReq& cmdData,
     return eventdata(cmdData, sensorInfo, cmdData.eventData3);
 }
 
-}//namespace set
+} // namespace set
 
 namespace notify
 {
@@ -361,7 +353,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
                      const Info& sensorInfo);
 
-}//namespace notify
+} // namespace notify
 
 namespace inventory
 {
@@ -382,5 +374,5 @@ GetSensorResponse assertion(const Info& sensorInfo);
 } // namespace get
 
 } // namespace inventory
-}//namespace sensor
-}//namespace ipmi
+} // namespace sensor
+} // namespace ipmi

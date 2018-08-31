@@ -3,9 +3,8 @@
 #include <stdint.h>
 
 #include <map>
-#include <string>
-
 #include <sdbusplus/server.hpp>
+#include <string>
 
 namespace ipmi
 {
@@ -22,8 +21,8 @@ using Value = sdbusplus::message::variant<bool, uint8_t, int16_t, uint16_t,
 
 using PropertyMap = std::map<DbusProperty, Value>;
 
-using ObjectTree = std::map<DbusObjectPath,
-                            std::map<DbusService, std::vector<DbusInterface>>>;
+using ObjectTree =
+    std::map<DbusObjectPath, std::map<DbusService, std::vector<DbusInterface>>>;
 
 using InterfaceList = std::vector<std::string>;
 
@@ -43,16 +42,16 @@ using Offset = uint8_t;
  */
 enum class SkipAssertion
 {
-    NONE, //No skip defined
-    ASSERT, //Skip on Assert
-    DEASSERT, //Skip on Deassert
+    NONE,     // No skip defined
+    ASSERT,   // Skip on Assert
+    DEASSERT, // Skip on Deassert
 };
 
 struct Values
 {
-   SkipAssertion skip;
-   Value assert;
-   Value deassert;
+    SkipAssertion skip;
+    Value assert;
+    Value deassert;
 };
 
 /**
@@ -61,8 +60,8 @@ struct Values
  */
 struct PreReqValues
 {
-    Value assert; //Value in case of assert.
-    Value deassert; //Value in case of deassert.
+    Value assert;   // Value in case of assert.
+    Value deassert; // Value in case of deassert.
 };
 
 using PreReqOffsetValueMap = std::map<Offset, PreReqValues>;
@@ -93,17 +92,17 @@ struct SetSensorReadingReq
  */
 struct GetReadingResponse
 {
-    uint8_t reading;            //!< Sensor reading.
-    uint8_t operation;          //!< Sensor scanning status / reading state.
-    uint8_t assertOffset0_7;    //!< Discrete assertion states(0-7).
-    uint8_t assertOffset8_14;   //!< Discrete assertion states(8-14).
+    uint8_t reading;          //!< Sensor reading.
+    uint8_t operation;        //!< Sensor scanning status / reading state.
+    uint8_t assertOffset0_7;  //!< Discrete assertion states(0-7).
+    uint8_t assertOffset8_14; //!< Discrete assertion states(8-14).
 } __attribute__((packed));
 
 constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory";
 
 using GetSensorResponse = std::array<uint8_t, sizeof(GetReadingResponse)>;
 
-using OffsetValueMap = std::map<Offset,Values>;
+using OffsetValueMap = std::map<Offset, Values>;
 
 using DbusPropertyValues = std::pair<PreReqOffsetValueMap, OffsetValueMap>;
 
@@ -126,47 +125,47 @@ using SensorName = std::string;
 
 enum class Mutability
 {
-   Read = 1 << 0,
-   Write = 1 << 1,
+    Read = 1 << 0,
+    Write = 1 << 1,
 };
 
 inline Mutability operator|(Mutability lhs, Mutability rhs)
 {
-  return static_cast<Mutability>(
-      static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+    return static_cast<Mutability>(static_cast<uint8_t>(lhs) |
+                                   static_cast<uint8_t>(rhs));
 }
 
 inline Mutability operator&(Mutability lhs, Mutability rhs)
 {
-  return static_cast<Mutability>(
-      static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+    return static_cast<Mutability>(static_cast<uint8_t>(lhs) &
+                                   static_cast<uint8_t>(rhs));
 }
 
 struct Info
 {
-   EntityType entityType;
-   EntityInst instance;
-   Type sensorType;
-   InstancePath sensorPath;
-   DbusInterface sensorInterface;
-   ReadingType sensorReadingType;
-   Multiplier coefficientM;
-   OffsetB coefficientB;
-   Exponent exponentB;
-   ScaledOffset scaledOffset;
-   Exponent exponentR;
-   bool hasScale;
-   Scale scale;
-   Unit unit;
-   std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
-   std::function<GetSensorResponse(const Info&)> getFunc;
-   Mutability mutability;
-   std::function<SensorName(const Info&)> sensorNameFunc;
-   DbusInterfaceMap propertyInterfaces;
+    EntityType entityType;
+    EntityInst instance;
+    Type sensorType;
+    InstancePath sensorPath;
+    DbusInterface sensorInterface;
+    ReadingType sensorReadingType;
+    Multiplier coefficientM;
+    OffsetB coefficientB;
+    Exponent exponentB;
+    ScaledOffset scaledOffset;
+    Exponent exponentR;
+    bool hasScale;
+    Scale scale;
+    Unit unit;
+    std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
+    std::function<GetSensorResponse(const Info&)> getFunc;
+    Mutability mutability;
+    std::function<SensorName(const Info&)> sensorNameFunc;
+    DbusInterfaceMap propertyInterfaces;
 };
 
 using Id = uint8_t;
-using IdInfoMap = std::map<Id,Info>;
+using IdInfoMap = std::map<Id, Info>;
 
 using PropertyMap = ipmi::PropertyMap;
 
@@ -179,10 +178,10 @@ using IpmiUpdateData = sdbusplus::message::message;
 
 struct SelData
 {
-   Id sensorID;
-   Type sensorType;
-   ReadingType eventReadingType;
-   Offset eventOffset;
+    Id sensorID;
+    Type sensorType;
+    ReadingType eventReadingType;
+    Offset eventOffset;
 };
 
 using InventoryPath = std::string;
@@ -197,7 +196,7 @@ enum class ThresholdMask
     CRITICAL_HIGH_MASK = 0x10,
 };
 
-}// namespace sensor
+} // namespace sensor
 
 namespace network
 {
@@ -222,13 +221,12 @@ constexpr auto MASK_32_BIT = 0xFFFFFFFF;
 constexpr auto VLAN_ID_MASK = 0x00000FFF;
 constexpr auto VLAN_ENABLE_MASK = 0x8000;
 
-enum class IPOrigin: uint8_t
+enum class IPOrigin : uint8_t
 {
     UNSPECIFIED = 0,
     STATIC = 1,
     DHCP = 2,
 };
 
-
-}//namespace network
-}//namespace ipmi
+} // namespace network
+} // namespace ipmi
