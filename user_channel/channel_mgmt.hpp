@@ -29,6 +29,11 @@ namespace ipmi
 
 using Json = nlohmann::json;
 
+using DbusVariant =
+    sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
+
+using DbusChObjProperties = std::vector<std::pair<std::string, DbusVariant>>;
+
 static constexpr const char* ipmiChannelMutex = "ipmi_channel_mutex";
 static constexpr const char* ipmiChMutexCleanupLockFile =
     "/var/lib/ipmi/ipmi_channel_mutex_cleanup";
@@ -61,7 +66,7 @@ class ChannelConfig
     ChannelConfig(ChannelConfig&&) = delete;
     ChannelConfig& operator=(ChannelConfig&&) = delete;
 
-    ~ChannelConfig() = default;
+    ~ChannelConfig();
     ChannelConfig();
 
     /** @brief determines valid channel
@@ -172,6 +177,36 @@ class ChannelConfig
                                          const uint8_t& priv,
                                          EAuthType& authType);
 
+    /** @brief conver to channel privilege from system privilege
+     *
+     *  @param[in] value - privilege value
+     *
+     *  @return Channel privilege
+     */
+    CommandPrivilege convertToPrivLimitIndex(const std::string& value);
+
+    /** @brief function to write persistent channel configuration to config file
+     *
+     *  @return 0 for success, -errno for failure.
+     */
+    int writeChannelPersistData();
+
+    /** @brief function to write volatile channel configuration to config file
+     *
+     *  @return 0 for success, -errno for failure.
+     */
+    int writeChannelVolatileData();
+
+    /** @brief function to get channel data based on channel number
+     *
+     *  @param[in] chNum - channel number
+     *
+     *  @return 0 for success, -errno for failure.
+     */
+    ChannelData* getChannelDataPtr(const uint8_t& chNum);
+
+    uint32_t signalFlag = 0;
+
     std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex{
         nullptr};
 
@@ -182,6 +217,8 @@ class ChannelConfig
     std::time_t getUpdatedFileTime(const std::string& fileName);
     boost::interprocess::file_lock mutexCleanupLock;
     sdbusplus::bus::bus bus;
+    bool signalHndlrObjectState = false;
+    boost::interprocess::file_lock sigHndlrLock;
 
     /** @brief function to initialize persistent channel configuration
      *
@@ -209,23 +246,11 @@ class ChannelConfig
      */
     int readChannelPersistData();
 
-    /** @brief function to write persistent channel configuration to config file
-     *
-     *  @return 0 for success, -errno for failure.
-     */
-    int writeChannelPersistData();
-
     /** @brief function to read volatile channel data
      *
      *  @return 0 for success, -errno for failure.
      */
     int readChannelVolatileData();
-
-    /** @brief function to write volatile channel configuration to config file
-     *
-     *  @return 0 for success, -errno for failure.
-     */
-    int writeChannelVolatileData();
 
     /** @brief function to check and reload persistent channel data
      *
@@ -238,6 +263,45 @@ class ChannelConfig
      *  @return 0 for success, -errno for failure.
      */
     int checkAndReloadVolatileData();
+
+    /** @brief function to sync channel privilege with system network channel
+     * privilege
+     *
+     *  @return 0 for success, -errno for failure.
+     */
+    int syncNetworkChannelConfig();
+
+    /** @brief function to set D-Bus property value
+     *
+     *  @param[in] bus - bus
+     *  @param[in] service - service name
+     *  @param[in] objPath - object path
+     *  @param[in] interface - interface
+     *  @param[in] property - property name
+     *  @param[in] value - property value
+     *
+     *  @return 0 for success, -errno for failure.
+     */
+    int setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
+                        const std::string& objPath,
+                        const std::string& interface,
+                        const std::string& property, const DbusVariant& value);
+
+    /** @brief function to get D-Bus property value
+     *
+     *  @param[in] bus - bus
+     *  @param[in] service - service name
+     *  @param[in] objPath - object path
+     *  @param[in] interface - interface
+     *  @param[in] property - property name
+     *  @param[out] value - property value
+     *
+     *  @return 0 for success, -errno for failure.
+     */
+    int getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
+                        const std::string& objPath,
+                        const std::string& interface,
+                        const std::string& property, DbusVariant& value);
 
     /** @brief function to read json config file
      *
@@ -272,14 +336,6 @@ class ChannelConfig
      *  @return access mode in string
      */
     std::string convertToAccessModeString(const uint8_t& value);
-
-    /** @brief conver to channel privilege from system privilege
-     *
-     *  @param[in] value - privilege value
-     *
-     *  @return Channel privilege
-     */
-    CommandPrivilege convertToPrivLimitIndex(const std::string& value);
 
     /** @brief function to convert privilege value to string
      *
