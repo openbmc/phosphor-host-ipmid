@@ -29,6 +29,11 @@ namespace ipmi
 
 using Json = nlohmann::json;
 
+using DbusVariant =
+    sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
+
+using DbusChObjProperties = std::vector<std::pair<std::string, DbusVariant>>;
+
 static constexpr const char* ipmiChannelMutex = "ipmi_channel_mutex";
 static constexpr const char* ipmiChMutexCleanupLockFile =
     "/var/lib/ipmi/ipmi_channel_mutex_cleanup";
@@ -62,7 +67,7 @@ class ChannelConfig
     ChannelConfig(ChannelConfig&&) = delete;
     ChannelConfig& operator=(ChannelConfig&&) = delete;
 
-    ~ChannelConfig() = default;
+    ~ChannelConfig();
     ChannelConfig();
 
     bool isValidChannel(const uint8_t& chNum);
@@ -96,6 +101,16 @@ class ChannelConfig
                                          const uint8_t& priv,
                                          uint8_t& authType);
 
+    CommandPrivilege convertToPrivLimitIndex(const std::string& value);
+
+    int writeChannelPersistData();
+
+    int writeChannelVolatileData();
+
+    ChannelData* getChannelDataPtr(const uint8_t& chNum);
+
+    uint32_t signalFlag = 0;
+
     std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex{
         nullptr};
 
@@ -106,6 +121,8 @@ class ChannelConfig
     std::time_t getUpdatedFileTime(const std::string& fileName);
     boost::interprocess::file_lock mutexCleanupLock;
     sdbusplus::bus::bus bus;
+    bool signalHndlrObject = false;
+    boost::interprocess::file_lock sigHndlrLock;
 
     void initChannelPersistData();
 
@@ -116,15 +133,23 @@ class ChannelConfig
 
     int readChannelPersistData();
 
-    int writeChannelPersistData();
-
     int readChannelVolatileData();
-
-    int writeChannelVolatileData();
 
     int checkAndReloadNVData();
 
     int checkAndReloadVoltData();
+
+    int syncNetworkChannelConfig();
+
+    int setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
+                        const std::string& objPath,
+                        const std::string& interface,
+                        const std::string& property, const DbusVariant& value);
+
+    int getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
+                        const std::string& objPath,
+                        const std::string& interface,
+                        const std::string& property, DbusVariant& value);
 
     Json readJsonFile(const std::string& configFile);
 
@@ -134,8 +159,6 @@ class ChannelConfig
 
     std::string convertToAccessModeString(const uint8_t& value);
 
-    CommandPrivilege convertToPrivLimitIndex(const std::string& value);
-
     std::string convertToPrivLimitString(const uint8_t& value);
 
     EChannelSessSupported
@@ -144,6 +167,10 @@ class ChannelConfig
     EChannelMediumType convertToMediumTypeIndex(const std::string& value);
 
     EChannelProtocolType convertToProtocolTypeIndex(const std::string& value);
+
+    uint8_t convertToChannelIndexNumber(const uint8_t& chNum);
+
+    std::string convertToNetInterface(const std::string& value);
 };
 
 } // namespace ipmi
