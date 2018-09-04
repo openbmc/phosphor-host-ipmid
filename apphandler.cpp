@@ -36,9 +36,12 @@ namespace std {
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "xyz/openbmc_project/Software/Version/server.hpp"
 #include "xyz/openbmc_project/Software/Activation/server.hpp"
+#include "xyz/openbmc_project/State/BMC/server.hpp"
 
 extern sd_bus *bus;
 
+constexpr auto bmc_state_interface = "xyz.openbmc_project.State.BMC";
+constexpr auto bmc_state_property = "CurrentBMCState";
 constexpr auto bmc_interface = "xyz.openbmc_project.Inventory.Item.Bmc";
 constexpr auto bmc_guid_interface = "xyz.openbmc_project.Common.UUID";
 constexpr auto bmc_guid_property = "UUID";
@@ -59,6 +62,7 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using Version = sdbusplus::xyz::openbmc_project::Software::server::Version;
 using Activation =
     sdbusplus::xyz::openbmc_project::Software::server::Activation;
+using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
 
 // Offset in get device id command.
@@ -149,6 +153,21 @@ std::string getActiveSoftwareVersionInfo()
     return revision;
 }
 
+bool getCurrentBmcState()
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    // Get the Inventory object implementing the BMC interface
+    ipmi::DbusObjectInfo bmcObject =
+        ipmi::getDbusObject(bus, bmc_state_interface);
+    auto variant = ipmi::getDbusProperty(
+        bus, bmcObject.second, bmcObject.first,
+        bmc_state_interface, bmc_state_property);
+
+    return variant.is<std::string>() &&
+        BMC::convertBMCStateFromString(variant.get<std::string>()) ==
+        BMC::BMCState::Ready;
+}
 
 ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
@@ -266,6 +285,8 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     static ipmi_device_id_t dev_id{};
     static bool dev_id_initialized = false;
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
+    constexpr auto IPMI_DEVID_STATE_SHIFT = 7;
+    constexpr auto IPMI_DEVID_FW1_MASK = ~(1 << IPMI_DEVID_STATE_SHIFT);
 
     // Data length
     *data_len = sizeof(dev_id);
@@ -287,8 +308,9 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // 0=normal operation
             // 1=device firmware, SDR update,
             // or self-initialization in progress.
-            // our SDR is normal working condition, so mask:
-            dev_id.fw[0] = 0x7F & rev.major;
+            // The availability may change in run time, so mask here
+            // and initialize later.
+            dev_id.fw[0] = rev.major & IPMI_DEVID_FW1_MASK;
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
@@ -331,6 +353,13 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             log<level::ERR>("Device ID file not found");
             rc = IPMI_CC_UNSPECIFIED_ERROR;
         }
+    }
+
+    // Set availability to the actual current BMC state
+    dev_id.fw[0] &= IPMI_DEVID_FW1_MASK;
+    if (!getCurrentBmcState())
+    {
+        dev_id.fw[0] |= (1 << IPMI_DEVID_STATE_SHIFT);
     }
 
     // Pack the actual response
