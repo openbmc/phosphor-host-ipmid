@@ -90,18 +90,16 @@ std::vector<uint8_t> AlgoAES128::decryptData(const uint8_t* iv,
                                const uint8_t* input,
                                const int inputLen) const
 {
-    EVP_CIPHER_CTX ctx;
-
     // Initializes Cipher context
-    EVP_CIPHER_CTX_init(&ctx);
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
     auto cleanupFunc = [](EVP_CIPHER_CTX* ctx)
     {
-        EVP_CIPHER_CTX_cleanup(ctx);
+        EVP_CIPHER_CTX_free(ctx);
     };
 
     std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)>
-            ctxPtr(&ctx, cleanupFunc);
+            ctxPtr(ctx, cleanupFunc);
 
     /*
      * EVP_DecryptInit_ex sets up cipher context ctx for encryption with type
@@ -156,18 +154,16 @@ std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
         throw std::runtime_error("RAND_bytes failed");
     }
 
-    EVP_CIPHER_CTX ctx;
-
     // Initializes Cipher context
-    EVP_CIPHER_CTX_init(&ctx);
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
     auto cleanupFunc = [](EVP_CIPHER_CTX* ctx)
     {
-        EVP_CIPHER_CTX_cleanup(ctx);
+        EVP_CIPHER_CTX_free(ctx);
     };
 
     std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)>
-            ctxPtr(&ctx, cleanupFunc);
+            ctxPtr(ctx, cleanupFunc);
 
     /*
      * EVP_EncryptInit_ex sets up cipher context ctx for encryption with type

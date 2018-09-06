@@ -392,32 +392,31 @@ TEST(CryptAlgo, AES_CBC_128_EncryptPayloadValidate)
      * implementation
      */
 
-    EVP_CIPHER_CTX ctx;
-    EVP_CIPHER_CTX_init(&ctx);
-    if (!EVP_DecryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, k2.data(),
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, k2.data(),
                             cipher.data()))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
+        EVP_CIPHER_CTX_free(ctx);
         FAIL() << "EVP_DecryptInit_ex failed for type AES-CBC-128";
     }
 
-    EVP_CIPHER_CTX_set_padding(&ctx, 0);
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
     std::vector<uint8_t> output(
             cipher.size() + cipher::crypt::AlgoAES128::AESCBC128BlockSize);
     int outputLen = 0;
 
-    if (!EVP_DecryptUpdate(&ctx, output.data(), &outputLen,
+    if (!EVP_DecryptUpdate(ctx, output.data(), &outputLen,
                            cipher.data() +
                            cipher::crypt::AlgoAES128::AESCBC128ConfHeader,
                            cipher.size() -
                            cipher::crypt::AlgoAES128::AESCBC128ConfHeader))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
+        EVP_CIPHER_CTX_free(ctx);
         FAIL() << "EVP_DecryptUpdate failed";
     }
 
     output.resize(outputLen);
-    EVP_CIPHER_CTX_cleanup(&ctx);
+    EVP_CIPHER_CTX_free(ctx);
 
     /*
      * Step -3 Check if the plain payload matches with the decrypted one
@@ -441,8 +440,8 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
     // Hardcoded Session Integrity Key
     std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                                  13, 14, 15, 16, 17, 18, 19, 20 };
-    EVP_CIPHER_CTX ctx;
-    EVP_CIPHER_CTX_init(&ctx);
+    EVP_CIPHER_CTX* ctx;
+    ctx = EVP_CIPHER_CTX_new();
     std::vector<uint8_t> k2(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
     constexpr rmcp::Const_n const1 = { 0x02, 0x02, 0x02, 0x02, 0x02,
@@ -467,29 +466,29 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
         FAIL() << "Generating K2 for confidentiality algorithm failed";
     }
 
-    if (!EVP_EncryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, k2.data(),
+    if (!EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, k2.data(),
                             output.data()))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
+        EVP_CIPHER_CTX_free(ctx);
         FAIL() << "EVP_EncryptInit_ex failed for type AES-CBC-128";
     }
 
-    EVP_CIPHER_CTX_set_padding(&ctx, 0);
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
     int outputLen = 0;
 
-    if (!EVP_EncryptUpdate(&ctx,
+    if (!EVP_EncryptUpdate(ctx,
                            output.data() +
                            cipher::crypt::AlgoAES128::AESCBC128ConfHeader,
                            &outputLen,
                            payload.data(),
                            payload.size()))
     {
-        EVP_CIPHER_CTX_cleanup(&ctx);
+        EVP_CIPHER_CTX_free(ctx);
         FAIL() << "EVP_EncryptUpdate failed";
     }
 
     output.resize(cipher::crypt::AlgoAES128::AESCBC128ConfHeader + outputLen);
-    EVP_CIPHER_CTX_cleanup(&ctx);
+    EVP_CIPHER_CTX_free(ctx);
 
     /*
      * Step-2 Decrypt the encrypted payload using the implemented API for
