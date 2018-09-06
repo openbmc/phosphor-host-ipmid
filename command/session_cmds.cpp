@@ -6,6 +6,8 @@
 #include <host-ipmid/ipmid-api.h>
 
 #include <iostream>
+#include <user_channel/channel_layer.hpp>
+#include <user_channel/user_layer.hpp>
 
 namespace command
 {
@@ -29,18 +31,54 @@ std::vector<uint8_t>
     if (reqPrivilegeLevel == 0) // Just return present privilege level
     {
         response->newPrivLevel = static_cast<uint8_t>(session->curPrivLevel);
+        return outPayload;
     }
-    else if (reqPrivilegeLevel <= static_cast<uint8_t>(session->maxPrivLevel))
+    if (reqPrivilegeLevel >
+        (session->reqMaxPrivLevel & session::reqMaxPrivMask))
     {
-        session->curPrivLevel =
-            static_cast<session::Privilege>(reqPrivilegeLevel);
-        response->newPrivLevel = reqPrivilegeLevel;
+        // Requested level exceeds Channel and/or User Privilege Limit
+        response->completionCode = IPMI_CC_EXCEEDS_USER_PRIV;
+        return outPayload;
+    }
+
+    uint8_t userId = ipmi::ipmiUserGetUserId(session->userName);
+    if (userId == ipmi::invalidUserId)
+    {
+        response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
+        return outPayload;
+    }
+    ipmi::PrivAccess userAccess{};
+    ipmi::ChannelAccess chAccess{};
+    if ((ipmi::ipmiUserGetPrivilegeAccess(userId, session->chNum, userAccess) !=
+         IPMI_CC_OK) ||
+        (ipmi::getChannelAccessData(session->chNum, chAccess) != IPMI_CC_OK))
+    {
+        response->completionCode = IPMI_CC_INVALID_PRIV_LEVEL;
+        return outPayload;
+    }
+    // Use the minimum privilege of user or channel
+    uint8_t minPriv = 0;
+    if (chAccess.privLimit < userAccess.privilege)
+    {
+        minPriv = chAccess.privLimit;
     }
     else
+    {
+        minPriv = userAccess.privilege;
+    }
+    if (reqPrivilegeLevel > minPriv)
     {
         // Requested level exceeds Channel and/or User Privilege Limit
         response->completionCode = IPMI_CC_EXCEEDS_USER_PRIV;
     }
+    else
+    {
+        // update current privilege of the session.
+        session->curPrivLevel =
+            static_cast<session::Privilege>(reqPrivilegeLevel);
+        response->newPrivLevel = reqPrivilegeLevel;
+    }
+
     return outPayload;
 }
 
