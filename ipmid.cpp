@@ -1,7 +1,10 @@
 #include "ipmid.hpp"
 
-#include "host-ipmid/oemrouter.hpp"
+#include "host-cmd-manager.hpp"
+#include "ipmiwhitelist.hpp"
+#include "sensorhandler.hpp"
 #include "settings.hpp"
+#include "timer.hpp"
 
 #include <assert.h>
 #include <dirent.h>
@@ -16,21 +19,17 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <host-cmd-manager.hpp>
 #include <host-ipmid/ipmid-host-cmd.hpp>
+#include <host-ipmid/oemrouter.hpp>
 #include <iostream>
-#include <ipmiwhitelist.hpp>
 #include <iterator>
 #include <map>
 #include <memory>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
-#include <timer.hpp>
 #include <vector>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
-
-#include "sensorhandler.h"
 
 using namespace phosphor::logging;
 namespace sdbusRule = sdbusplus::bus::match::rules;
