@@ -4,11 +4,11 @@
 #include "types.hpp"
 #include "utils.hpp"
 
+#include <host-ipmid/ipmid-api.h>
+
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#include "host-ipmid/ipmid-api.h"
 
 extern const FruMap frus;
 namespace ipmi

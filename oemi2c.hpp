@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <host-ipmid/iana.hpp>
+#include <host-ipmid/oemopenbmc.hpp>
 #include <host-ipmid/oemrouter.hpp>
 #include <memory>
 

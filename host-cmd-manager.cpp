@@ -1,12 +1,14 @@
-#include <config.h>
-#include <systemintfcmds.h>
+#include "config.h"
+
+#include "host-cmd-manager.hpp"
+
+#include "systemintfcmds.hpp"
+#include "timer.hpp"
+#include "utils.hpp"
 
 #include <chrono>
-#include <host-cmd-manager.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
-#include <timer.hpp>
-#include <utils.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
 
