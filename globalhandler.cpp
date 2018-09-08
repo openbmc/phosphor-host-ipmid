@@ -3,7 +3,6 @@
 #include "utils.hpp"
 
 #include <host-ipmid/ipmid-api.h>
-#include <stdio.h>
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
