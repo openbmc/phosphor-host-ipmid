@@ -4,6 +4,7 @@
 #include "watchdog_service.hpp"
 
 #include <endian.h>
+#include <host-ipmid/ipmid-api.h>
 
 #include <cstdint>
 #include <phosphor-logging/elog-errors.hpp>
@@ -11,8 +12,6 @@
 #include <phosphor-logging/log.hpp>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#include "host-ipmid/ipmid-api.h"
 
 using phosphor::logging::level;
 using phosphor::logging::log;

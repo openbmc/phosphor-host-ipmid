@@ -1,11 +1,11 @@
 #pragma once
 
+#include <host-ipmid/ipmid-api.h>
+
 #include <array>
 #include <cstdint>
 #include <functional>
 #include <vector>
-
-#include "host-ipmid/ipmid-api.h"
 
 namespace oem
 {
