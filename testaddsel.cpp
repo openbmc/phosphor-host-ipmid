@@ -1,3 +1,5 @@
+#include "sensorhandler.hpp"
+
 #include <errno.h>
 #include <limits.h>
 #include <mapper.h>
@@ -5,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <systemd/sd-bus.h>
-
-#include "sensorhandler.h"
 
 extern void send_esel(uint16_t recordid);
 
