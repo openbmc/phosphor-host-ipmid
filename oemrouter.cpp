@@ -1,7 +1,6 @@
-#include "host-ipmid/oemrouter.hpp"
-
 #include <cstdio>
 #include <cstring>
+#include <host-ipmid/oemrouter.hpp>
 #include <map>
 #include <utility>
 

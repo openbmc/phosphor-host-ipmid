@@ -1,5 +1,4 @@
-#ifndef OPENBMC_IPMI_FRU_READ_H
-#define OPENBMC_IPMI_FRU_READ_H
+#pragma once
 
 #include <systemd/sd-bus.h>
 
@@ -35,5 +34,3 @@ using FruInstanceVec = std::vector<FruInstance>;
 
 using FruId = uint32_t;
 using FruMap = std::map<FruId, FruInstanceVec>;
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __HOST_IPMI_DCMI_HANDLER_H__
-#define __HOST_IPMI_DCMI_HANDLER_H__
+#pragma once
 
 #include "nlohmann/json.hpp"
 
@@ -628,5 +627,3 @@ struct GetConfParamsResponse
 } __attribute__((packed));
 
 } // namespace dcmi
-
-#endif

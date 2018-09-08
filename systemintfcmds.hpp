@@ -1,5 +1,4 @@
-#ifndef __SYSTEM_INTF_CMDS_HANDLER_H__
-#define __SYSTEM_INTF_CMDS_HANDLER_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -42,5 +41,3 @@ struct oem_sel_timestamped
     uint8_t cmd;
     uint8_t data[4];
 };
-
-#endif
