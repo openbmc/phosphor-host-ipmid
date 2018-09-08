@@ -1,12 +1,11 @@
 #pragma once
 
+#include "sensorhandler.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
+#include <host-ipmid/ipmid-api.h>
 #include <math.h>
-
-#include "host-ipmid/ipmid-api.h"
-#include "sensorhandler.h"
 
 namespace ipmi
 {

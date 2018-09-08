@@ -1,10 +1,11 @@
-#include "sensorhandler.h"
+#include "sensorhandler.hpp"
 
 #include "fruread.hpp"
 #include "ipmid.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
+#include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
 #include <math.h>
 #include <stdio.h>
@@ -17,8 +18,6 @@
 #include <set>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
-
-#include "host-ipmid/ipmid-api.h"
 
 static constexpr uint8_t fruInventoryDevice = 0x10;
 static constexpr uint8_t IPMIFruInventory = 0x02;
