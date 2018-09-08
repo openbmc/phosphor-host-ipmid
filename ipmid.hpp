@@ -1,8 +1,7 @@
-#ifndef __HOST_IPMID_IPMI_H__
-#define __HOST_IPMID_IPMI_H__
-#include <stdio.h>
+#pragma once
 
-#include "host-ipmid/ipmid-api.h"
+#include <host-ipmid/ipmid-api.h>
+#include <stdio.h>
 
 // When the requester sends in a netfn and a command along with data, this
 // function will look for registered handlers that will handle that [netfn,cmd]
@@ -23,5 +22,3 @@ ipmi_ret_t ipmi_netfn_router(const ipmi_netfn_t, const ipmi_cmd_t,
 #define MAX_IPMI_BUFFER 64
 
 extern FILE *ipmiio, *ipmidbus, *ipmicmddetails;
-
-#endif

@@ -1,11 +1,9 @@
-#ifndef __HOST_IPMI_SEN_HANDLER_H__
-#define __HOST_IPMI_SEN_HANDLER_H__
+#pragma once
 
 #include "types.hpp"
 
+#include <host-ipmid/ipmid-api.h>
 #include <stdint.h>
-
-#include "host-ipmid/ipmid-api.h"
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
@@ -639,4 +637,3 @@ inline void enableScanning(ipmi::sensor::GetReadingResponse* resp)
 } // namespace sensor
 
 } // namespace ipmi
-#endif
