@@ -11,8 +11,6 @@
 #include <arpa/inet.h>
 #include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <systemd/sd-bus.h>
 
 #include <nlohmann/json.hpp>
