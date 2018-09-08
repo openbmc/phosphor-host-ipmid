@@ -1,8 +1,6 @@
 #include "ipmid.hpp"
 
 #include <host-ipmid/ipmid-api.h>
-#include <stdint.h>
-#include <stdio.h>
 
 #define GRPEXT_GET_GROUP_CMD 0
 void register_netfn_groupext_functions() __attribute__((constructor));
