@@ -1,6 +1,6 @@
 #pragma once
 
-#include "host-ipmid/ipmid-api.h"
+#include <host-ipmid/ipmid-api.h>
 
 /** @brief The RESET watchdog IPMI command.
  *
