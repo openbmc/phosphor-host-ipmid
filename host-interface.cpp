@@ -1,12 +1,15 @@
-#include <config.h>
-#include <systemintfcmds.h>
+#include "config.h"
+
+#include "host-interface.hpp"
+
+#include "systemintfcmds.hpp"
+#include "utils.hpp"
 
 #include <functional>
-#include <host-interface.hpp>
 #include <host-ipmid/ipmid-host-cmd-utils.hpp>
 #include <host-ipmid/ipmid-host-cmd.hpp>
 #include <phosphor-logging/log.hpp>
-#include <utils.hpp>
+
 namespace phosphor
 {
 namespace host
