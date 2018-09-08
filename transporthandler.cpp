@@ -1,11 +1,11 @@
+#include "transporthandler.hpp"
+
 #include <arpa/inet.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include <chrono>
 #include <fstream>
 #include <string>
+
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
@@ -23,7 +23,6 @@ namespace filesystem = std::experimental::filesystem;
 #include "ipmid.hpp"
 #include "net.hpp"
 #include "timer.hpp"
-#include "transporthandler.hpp"
 #include "utils.hpp"
 
 #include <host-ipmid/ipmid-api.h>
