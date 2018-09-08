@@ -1,5 +1,4 @@
-#ifndef __HOST_IPMI_CHASSIS_HANDLER_H__
-#define __HOST_IPMI_CHASSIS_HANDLER_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -56,5 +55,3 @@ enum class BootOptionResponseSize : size_t
     BOOT_FLAGS = 5,
     OPAL_NETWORK_SETTINGS = 50
 };
-
-#endif
