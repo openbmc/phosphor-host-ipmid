@@ -5,7 +5,8 @@
 #include "utils.hpp"
 
 #include <host-ipmid/ipmid-api.h>
-#include <math.h>
+
+#include <cmath>
 
 namespace ipmi
 {
@@ -193,8 +194,8 @@ GetSensorResponse readingData(const Info& sensorInfo)
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    double value =
-        propValue.get<T>() * pow(10, sensorInfo.scale - sensorInfo.exponentR);
+    double value = propValue.get<T>() *
+                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
 
     auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
                                         sensorInfo.coefficientM);
@@ -267,7 +268,7 @@ ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
     T raw_value =
         (sensorInfo.coefficientM * cmdData.reading) + sensorInfo.scaledOffset;
 
-    raw_value *= pow(10, sensorInfo.exponentR - sensorInfo.scale);
+    raw_value *= std::pow(10, sensorInfo.exponentR - sensorInfo.scale);
 
     auto msg =
         makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
