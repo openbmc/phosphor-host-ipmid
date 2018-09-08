@@ -3,9 +3,8 @@
 
 #include "types.hpp"
 
+#include <host-ipmid/ipmid-api.h>
 #include <stdint.h>
-
-#include "host-ipmid/ipmid-api.h"
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
