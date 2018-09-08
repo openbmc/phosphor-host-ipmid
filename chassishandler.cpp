@@ -1,4 +1,6 @@
-#include "chassishandler.h"
+#include "config.h"
+
+#include "chassishandler.hpp"
 
 #include "ipmid.hpp"
 #include "settings.hpp"
@@ -7,6 +9,7 @@
 
 #include <arpa/inet.h>
 #include <endian.h>
+#include <host-ipmid/ipmid-api.h>
 #include <limits.h>
 #include <mapper.h>
 #include <netinet/in.h>
@@ -20,8 +23,6 @@
 #include <fstream>
 #include <future>
 #include <sstream>
-
-#include "host-ipmid/ipmid-api.h"
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
@@ -34,7 +35,6 @@ namespace filesystem = std::experimental::filesystem;
 #else
 #error filesystem not available
 #endif
-#include "config.h"
 
 #include "timer.hpp"
 
@@ -50,6 +50,7 @@ namespace filesystem = std::experimental::filesystem;
 #include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
 #include <xyz/openbmc_project/State/PowerOnHours/server.hpp>
+
 // Defines
 #define SET_PARM_VERSION 0x01
 #define SET_PARM_BOOT_FLAGS_PERMANENT 0x40      // boot flags data1 7th bit on
