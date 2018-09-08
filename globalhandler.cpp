@@ -1,15 +1,15 @@
-#include "globalhandler.h"
+#include "globalhandler.hpp"
 
+#include "utils.hpp"
+
+#include <host-ipmid/ipmid-api.h>
 #include <stdio.h>
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <string>
-#include <utils.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/BMC/server.hpp>
-
-#include "host-ipmid/ipmid-api.h"
 
 static constexpr auto bmcStateRoot = "/xyz/openbmc_project/state";
 static constexpr auto bmcStateIntf = "xyz.openbmc_project.State.BMC";

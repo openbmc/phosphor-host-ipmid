@@ -1,5 +1,4 @@
-#ifndef __HOST_IPMI_STORAGE_HANDLER_H__
-#define __HOST_IPMI_STORAGE_HANDLER_H__
+#pragma once
 
 #include <cstdint>
 
@@ -88,4 +87,3 @@ struct GetRepositoryInfoResponse
     uint8_t deletionTimestamp[4]; //< Most recent deletion timestamp LS first
     uint8_t operationSupport;     //< Operation support
 } __attribute__((packed));
-#endif
