@@ -1,12 +1,11 @@
 #pragma once
 
-#include "host-ipmid/oemopenbmc.hpp"
-#include "host-ipmid/oemrouter.hpp"
+#include <host-ipmid/ipmid-api.h>
 
 #include <cstdint>
+#include <host-ipmid/oemopenbmc.hpp>
+#include <host-ipmid/oemrouter.hpp>
 #include <memory>
-
-#include "host-ipmid/ipmid-api.h"
 
 namespace oem
 {
