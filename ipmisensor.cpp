@@ -1,9 +1,6 @@
 #include "sensorhandler.hpp"
 
 #include <malloc.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 extern uint8_t find_type_for_sensor_number(uint8_t);
 
