@@ -5,6 +5,7 @@
 #include "net.hpp"
 #include "utils.hpp"
 
+#include <host-ipmid/ipmid-api.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,8 +18,6 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#include "host-ipmid/ipmid-api.h"
 
 using namespace phosphor::logging;
 using InternalFailure =

@@ -1,5 +1,7 @@
 #include "watchdog_service.hpp"
 
+#include <host-ipmid/ipmid-api.h>
+
 #include <exception>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
@@ -10,8 +12,6 @@
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Watchdog/server.hpp>
-
-#include "host-ipmid/ipmid-api.h"
 
 using phosphor::logging::elog;
 using phosphor::logging::entry;
