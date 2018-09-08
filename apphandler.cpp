@@ -12,8 +12,6 @@
 #include <host-ipmid/ipmid-api.h>
 #include <limits.h>
 #include <mapper.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
 
