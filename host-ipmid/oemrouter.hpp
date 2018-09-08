@@ -1,18 +1,18 @@
 #pragma once
 
+#include <host-ipmid/ipmid-api.h>
+
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <host-ipmid/iana.hpp>
 #include <vector>
-
-#include "host-ipmid/ipmid-api.h"
 
 namespace oem
 {
 constexpr size_t groupMagicSize = 3;
 
 using Group = std::array<uint8_t, groupMagicSize>;
-using Number = uint32_t; // smallest standard size >= 24.
 
 // Handler signature includes ipmi cmd to support wildcard cmd match.
 // Buffers and lengths exclude the OemGroup bytes in the IPMI message.

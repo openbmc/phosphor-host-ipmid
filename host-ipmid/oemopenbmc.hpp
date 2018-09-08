@@ -6,12 +6,6 @@
 
 namespace oem
 {
-
-/*
- * This is the OpenBMC IANA OEM Number
- */
-constexpr Number obmcOemNumber = 49871;
-
 /*
  * OpenBMC OEM Extension IPMI Command codes.
  */

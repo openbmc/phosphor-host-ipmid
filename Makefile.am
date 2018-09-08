@@ -121,6 +121,7 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
 							 -flto
 
 nobase_include_HEADERS = \
+	host-ipmid/iana.hpp \
 	host-ipmid/ipmid-api.h \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp \
