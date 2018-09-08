@@ -4,7 +4,6 @@
 #include <limits.h>
 #include <mapper.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <systemd/sd-bus.h>
 
