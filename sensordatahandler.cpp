@@ -1,20 +1,10 @@
-#include <bitset>
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 #include "sensordatahandler.hpp"
+
 #include "types.hpp"
 #include "utils.hpp"
 
+#include <bitset>
+#include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>

@@ -1,28 +1,18 @@
-#include <arpa/inet.h>
+#include "storagehandler.h"
 
-#include <algorithm>
-#include <chrono>
-#include <cstdio>
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 #include "fruread.hpp"
 #include "read_fru_data.hpp"
 #include "selutility.hpp"
 #include "utils.hpp"
 
+#include <arpa/inet.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
+#include <algorithm>
+#include <chrono>
+#include <cstdio>
+#include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/server.hpp>
@@ -32,7 +22,6 @@ namespace filesystem = std::experimental::filesystem;
 #include "host-ipmid/ipmid-api.h"
 #include "sensorhandler.h"
 #include "storageaddsel.h"
-#include "storagehandler.h"
 
 void register_netfn_storage_functions() __attribute__((constructor));
 

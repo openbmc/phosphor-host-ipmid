@@ -1,33 +1,22 @@
+#include "transporthandler.hpp"
+
+#include "app/channel.hpp"
+#include "ipmid.hpp"
+#include "net.hpp"
+#include "timer.hpp"
+#include "utils.hpp"
+
 #include <arpa/inet.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <chrono>
-#include <fstream>
-#include <string>
-#if __has_include(<filesystem>)
 #include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
-
-#include "app/channel.hpp"
-#include "ipmid.hpp"
-#include "net.hpp"
-#include "timer.hpp"
-#include "transporthandler.hpp"
-#include "utils.hpp"
-
+#include <fstream>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 #include "host-ipmid/ipmid-api.h"

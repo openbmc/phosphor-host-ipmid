@@ -15,24 +15,10 @@
 #include <stdio.h>
 #include <systemd/sd-bus.h>
 
-#include "host-ipmid/ipmid-api.h"
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
@@ -43,6 +29,8 @@ namespace filesystem = std::experimental::filesystem;
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
+
+#include "host-ipmid/ipmid-api.h"
 
 extern sd_bus* bus;
 
