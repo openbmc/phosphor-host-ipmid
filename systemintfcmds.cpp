@@ -7,7 +7,6 @@
 
 #include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
-#include <stdio.h>
 
 #include <host-ipmid/ipmid-host-cmd.hpp>
 
