@@ -6,9 +6,6 @@
 #include "utils.hpp"
 
 #include <host-ipmid/ipmid-api.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include <bitset>
 #include <cmath>
