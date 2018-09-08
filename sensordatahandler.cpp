@@ -12,14 +12,13 @@ namespace filesystem = std::experimental::filesystem;
 #error filesystem not available
 #endif
 #include "sensordatahandler.hpp"
+#include "sensorhandler.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#include "sensorhandler.h"
 
 namespace ipmi
 {
