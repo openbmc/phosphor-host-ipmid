@@ -7,12 +7,10 @@
 
 #include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
 #include <systemd/sd-bus.h>
 
 #include <bitset>
+#include <cmath>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <set>
@@ -455,7 +453,7 @@ void getSensorThresholds(uint8_t sensorNum,
 
     if (warnLow != 0)
     {
-        warnLow *= pow(10, info.scale - info.exponentR);
+        warnLow *= std::pow(10, info.scale - info.exponentR);
         response->lowerNonCritical = static_cast<uint8_t>(
             (warnLow - info.scaledOffset) / info.coefficientM);
         response->validMask |= static_cast<uint8_t>(
@@ -464,7 +462,7 @@ void getSensorThresholds(uint8_t sensorNum,
 
     if (warnHigh != 0)
     {
-        warnHigh *= pow(10, info.scale - info.exponentR);
+        warnHigh *= std::pow(10, info.scale - info.exponentR);
         response->upperNonCritical = static_cast<uint8_t>(
             (warnHigh - info.scaledOffset) / info.coefficientM);
         response->validMask |= static_cast<uint8_t>(
@@ -480,7 +478,7 @@ void getSensorThresholds(uint8_t sensorNum,
 
     if (critLow != 0)
     {
-        critLow *= pow(10, info.scale - info.exponentR);
+        critLow *= std::pow(10, info.scale - info.exponentR);
         response->lowerCritical = static_cast<uint8_t>(
             (critLow - info.scaledOffset) / info.coefficientM);
         response->validMask |= static_cast<uint8_t>(
@@ -489,7 +487,7 @@ void getSensorThresholds(uint8_t sensorNum,
 
     if (critHigh != 0)
     {
-        critHigh *= pow(10, info.scale - info.exponentR);
+        critHigh *= std::pow(10, info.scale - info.exponentR);
         response->upperCritical = static_cast<uint8_t>(
             (critHigh - info.scaledOffset) / info.coefficientM);
         response->validMask |= static_cast<uint8_t>(
