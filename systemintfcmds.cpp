@@ -8,6 +8,7 @@
 #include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
 
+#include <cstring>
 #include <host-ipmid/ipmid-host-cmd.hpp>
 
 void register_netfn_app_functions() __attribute__((constructor));
@@ -50,10 +51,10 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     oem_sel.data[0] = hostCmd.second;
 
     // All '0xFF' since unused.
-    memset(&oem_sel.data[1], 0xFF, 3);
+    std::memset(&oem_sel.data[1], 0xFF, 3);
 
     // Pack the actual response
-    memcpy(response, &oem_sel, *data_len);
+    std::memcpy(response, &oem_sel, *data_len);
     return rc;
 }
 
@@ -80,7 +81,7 @@ ipmi_ret_t ipmi_app_get_msg_flags(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = sizeof(set_event_msg_buffer_full);
 
     // Pack the actual response
-    memcpy(response, &set_event_msg_buffer_full, *data_len);
+    std::memcpy(response, &set_event_msg_buffer_full, *data_len);
 
     return rc;
 }
@@ -96,7 +97,7 @@ ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Event and message logging enabled by default so return for now
 #ifdef __IPMI_DEBUG__
-    printf("IPMI APP SET BMC GLOBAL ENABLES Ignoring for now\n");
+    std::printf("IPMI APP SET BMC GLOBAL ENABLES Ignoring for now\n");
 #endif
 
     return rc;

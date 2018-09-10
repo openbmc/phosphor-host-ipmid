@@ -2,6 +2,8 @@
 
 #include <host-ipmid/ipmid-api.h>
 
+#include <cstdio>
+
 #define GRPEXT_GET_GROUP_CMD 0
 void register_netfn_groupext_functions() __attribute__((constructor));
 
@@ -13,7 +15,7 @@ ipmi_ret_t ipmi_groupext(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     uint8_t* p = (uint8_t*)response;
 
-    printf("IPMI GROUP EXTENSIONS\n");
+    std::printf("IPMI GROUP EXTENSIONS\n");
 
     *data_len = 1;
     *p = 0;

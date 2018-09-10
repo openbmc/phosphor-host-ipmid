@@ -5,6 +5,7 @@
 #include <map>
 #include <numeric>
 #include <phosphor-logging/elog.hpp>
+
 namespace ipmi
 {
 namespace fru
@@ -184,8 +185,8 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
             std::copy(fru_raw, fru_raw + 3, std::back_inserter(data));
             return;
         }
-        fprintf(stderr, "MgfDate invalid date: %u secs since UNIX epoch\n",
-                static_cast<unsigned int>(raw));
+        std::fprintf(stderr, "MgfDate invalid date: %u secs since UNIX epoch\n",
+                     static_cast<unsigned int>(raw));
     }
     // Blank date
     data.emplace_back(0);
