@@ -79,11 +79,29 @@ typedef std::pair<ipmid_callback_t, ipmi_context_t> ipmi_fn_context_t;
 std::map<ipmi_fn_cmd_t, ipmi_fn_context_t> g_ipmid_router_map;
 
 // IPMI Spec, shared Reservation ID.
-unsigned short g_sel_reserve = 0xFFFF;
+static unsigned short selReservationID = 0xFFFF;
+static bool selReservationValid = false;
 
-unsigned short get_sel_reserve_id(void)
+unsigned short reserveSel(void)
 {
-    return g_sel_reserve;
+    // IPMI spec, Reservation ID, the value simply increases against each
+    // execution of the Reserve SEL command.
+    if (++selReservationID == 0)
+    {
+        selReservationID = 1;
+    }
+    selReservationValid = true;
+    return selReservationID;
+}
+
+bool checkSELReservation(unsigned short id)
+{
+    return (selReservationValid && selReservationID == id);
+}
+
+void cancelSELReservation(void)
+{
+    selReservationValid = false;
 }
 
 namespace internal
