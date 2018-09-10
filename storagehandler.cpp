@@ -1,8 +1,27 @@
+#include "storagehandler.hpp"
+
+#include "fruread.hpp"
+#include "read_fru_data.hpp"
+#include "selutility.hpp"
+#include "sensorhandler.hpp"
+#include "storageaddsel.hpp"
+#include "utils.hpp"
+
 #include <arpa/inet.h>
+#include <host-ipmid/ipmid-api.h>
+#include <mapper.h>
+#include <systemd/sd-bus.h>
 
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
+#include <cstring>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/server.hpp>
+#include <string>
+#include <xyz/openbmc_project/Common/error.hpp>
+
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
@@ -15,23 +34,6 @@ namespace filesystem = std::experimental::filesystem;
 #else
 #error filesystem not available
 #endif
-#include "fruread.hpp"
-#include "read_fru_data.hpp"
-#include "selutility.hpp"
-#include "sensorhandler.hpp"
-#include "storageaddsel.hpp"
-#include "storagehandler.hpp"
-#include "utils.hpp"
-
-#include <host-ipmid/ipmid-api.h>
-#include <mapper.h>
-#include <systemd/sd-bus.h>
-
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/server.hpp>
-#include <string>
-#include <xyz/openbmc_project/Common/error.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -133,7 +135,7 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    memcpy(response, outPayload.data(), outPayload.size());
+    std::memcpy(response, outPayload.data(), outPayload.size());
     *data_len = outPayload.size();
 
     return IPMI_CC_OK;
@@ -227,7 +229,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (requestData->readLength == ipmi::sel::entireRecord)
     {
-        memcpy(response, &record, sizeof(record));
+        std::memcpy(response, &record, sizeof(record));
         *data_len = sizeof(record);
     }
     else
@@ -243,9 +245,11 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto readLength =
             std::min(diff, static_cast<int>(requestData->readLength));
 
-        memcpy(response, &record.nextRecordID, sizeof(record.nextRecordID));
-        memcpy(static_cast<uint8_t*>(response) + sizeof(record.nextRecordID),
-               &record.recordID + requestData->offset, readLength);
+        std::memcpy(response, &record.nextRecordID,
+                    sizeof(record.nextRecordID));
+        std::memcpy(static_cast<uint8_t*>(response) +
+                        sizeof(record.nextRecordID),
+                    &record.recordID + requestData->offset, readLength);
         *data_len = sizeof(record.nextRecordID) + readLength;
     }
 
@@ -330,7 +334,7 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Invalidate the cache of dbus entry objects.
     cache::paths.clear();
-    memcpy(response, &delRecordID, sizeof(delRecordID));
+    std::memcpy(response, &delRecordID, sizeof(delRecordID));
     *data_len = sizeof(delRecordID);
 
     return IPMI_CC_OK;
@@ -364,7 +368,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
      */
     if (requestData->eraseOperation == ipmi::sel::getEraseStatus)
     {
-        memcpy(response, &eraseProgress, sizeof(eraseProgress));
+        std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
         *data_len = sizeof(eraseProgress);
         return IPMI_CC_OK;
     }
@@ -382,7 +386,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     auto reply = bus.call(mapperCall);
     if (reply.is_method_error())
     {
-        memcpy(response, &eraseProgress, sizeof(eraseProgress));
+        std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
         *data_len = sizeof(eraseProgress);
         return IPMI_CC_OK;
     }
@@ -391,7 +395,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     reply.read(objectPaths);
     if (objectPaths.empty())
     {
-        memcpy(response, &eraseProgress, sizeof(eraseProgress));
+        std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
         *data_len = sizeof(eraseProgress);
         return IPMI_CC_OK;
     }
@@ -425,7 +429,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
 
     // Invalidate the cache of dbus entry objects.
     cache::paths.clear();
-    memcpy(response, &eraseProgress, sizeof(eraseProgress));
+    std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
     *data_len = sizeof(eraseProgress);
     return IPMI_CC_OK;
 }
@@ -487,7 +491,7 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = sizeof(resp);
 
     // Pack the actual response
-    memcpy(response, &resp, *data_len);
+    std::memcpy(response, &resp, *data_len);
 
     return IPMI_CC_OK;
 }
@@ -556,7 +560,7 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = sizeof(g_sel_reserve);
 
     // Pack the actual response
-    memcpy(response, &g_sel_reserve, *data_len);
+    std::memcpy(response, &g_sel_reserve, *data_len);
 
     return rc;
 }
@@ -577,7 +581,7 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = sizeof(g_sel_reserve);
 
     // Pack the actual response
-    memcpy(response, &p->eventdata[1], 2);
+    std::memcpy(response, &p->eventdata[1], 2);
 
     // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
     // a maintenance procedure associated with eSEL record.
@@ -624,7 +628,7 @@ ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
         *data_len = sizeof(resp);
 
         // Pack the actual response
-        memcpy(response, &resp, *data_len);
+        std::memcpy(response, &resp, *data_len);
     }
     catch (const InternalFailure& e)
     {
@@ -699,7 +703,7 @@ ipmi_ret_t ipmi_get_repository_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     constexpr auto sdrVersion = 0x51;
     auto responseData = reinterpret_cast<GetRepositoryInfoResponse*>(response);
 
-    memset(responseData, 0, sizeof(GetRepositoryInfoResponse));
+    std::memset(responseData, 0, sizeof(GetRepositoryInfoResponse));
 
     responseData->sdrVersion = sdrVersion;
 
