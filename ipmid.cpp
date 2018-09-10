@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <cstring>
 #include <host-ipmid/ipmid-host-cmd.hpp>
 #include <host-ipmid/oemrouter.hpp>
 #include <iostream>
@@ -56,11 +57,11 @@ FILE *ipmiio, *ipmidbus, *ipmicmddetails;
 
 void print_usage(void)
 {
-    fprintf(stderr, "Options:  [-d mask]\n");
-    fprintf(stderr, "    mask : 0x01 - Print ipmi packets\n");
-    fprintf(stderr, "    mask : 0x02 - Print DBUS operations\n");
-    fprintf(stderr, "    mask : 0x04 - Print ipmi command details\n");
-    fprintf(stderr, "    mask : 0xFF - Print all trace\n");
+    std::fprintf(stderr, "Options:  [-d mask]\n");
+    std::fprintf(stderr, "    mask : 0x01 - Print ipmi packets\n");
+    std::fprintf(stderr, "    mask : 0x02 - Print DBUS operations\n");
+    std::fprintf(stderr, "    mask : 0x04 - Print ipmi command details\n");
+    std::fprintf(stderr, "    mask : 0xFF - Print all trace\n");
 }
 
 const char* DBUS_INTF = "org.openbmc.HostIpmi";
@@ -112,17 +113,17 @@ void hexdump(FILE* s, void* mem, size_t len)
         /* print offset */
         if (i % HEXDUMP_COLS == 0)
         {
-            fprintf(s, "0x%06x: ", i);
+            std::fprintf(s, "0x%06x: ", i);
         }
 
         /* print hex data */
         if (i < len)
         {
-            fprintf(s, "%02x ", 0xFF & ((char*)mem)[i]);
+            std::fprintf(s, "%02x ", 0xFF & ((char*)mem)[i]);
         }
         else /* end of block, just aligning for ASCII dump */
         {
-            fprintf(s, "   ");
+            std::fprintf(s, "   ");
         }
 
         /* print ASCII dump */
@@ -132,18 +133,18 @@ void hexdump(FILE* s, void* mem, size_t len)
             {
                 if (j >= len) /* end of block, not really printing */
                 {
-                    fputc(' ', s);
+                    std::fputc(' ', s);
                 }
-                else if (isprint(((char*)mem)[j])) /* printable char */
+                else if (std::isprint(((char*)mem)[j])) /* printable char */
                 {
-                    fputc(0xFF & ((char*)mem)[j], s);
+                    std::fputc(0xFF & ((char*)mem)[j], s);
                 }
                 else /* other char */
                 {
-                    fputc('.', s);
+                    std::fputc('.', s);
                 }
             }
-            fputc('\n', s);
+            std::fputc('\n', s);
         }
     }
 }
@@ -194,7 +195,7 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             log<level::ERR>("Net function not whitelisted",
                             entry("NETFN=0x%X", netfn), entry("CMD=0x%X", cmd));
             rc = IPMI_CC_INSUFFICIENT_PRIVILEGE;
-            memcpy(response, &rc, IPMI_CC_LEN);
+            std::memcpy(response, &rc, IPMI_CC_LEN);
             *data_len = IPMI_CC_LEN;
             return rc;
         }
@@ -223,7 +224,7 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             entry("CMD=0x%X", IPMI_CMD_WILDCARD));
 
             // Respond with a 0xC1
-            memcpy(response, &rc, IPMI_CC_LEN);
+            std::memcpy(response, &rc, IPMI_CC_LEN);
             *data_len = IPMI_CC_LEN;
             return rc;
         }
@@ -262,7 +263,7 @@ ipmi_ret_t ipmi_netfn_router(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     // Now copy the return code that we got from handler and pack it in first
     // byte.
-    memcpy(response, &rc, IPMI_CC_LEN);
+    std::memcpy(response, &rc, IPMI_CC_LEN);
 
     // Data length is now actual data + completion code.
     *data_len = *data_len + IPMI_CC_LEN;
@@ -386,7 +387,7 @@ static int handle_ipmi_command(sd_bus_message* m, void* user_data,
     size_t resplen = MAX_IPMI_BUFFER;
     unsigned char response[MAX_IPMI_BUFFER];
 
-    memset(response, 0, MAX_IPMI_BUFFER);
+    std::memset(response, 0, MAX_IPMI_BUFFER);
 
     r = sd_bus_message_read(m, "yyyy", &sequence, &netfn, &lun, &cmd);
     if (r < 0)
@@ -404,8 +405,9 @@ static int handle_ipmi_command(sd_bus_message* m, void* user_data,
         return -1;
     }
 
-    fprintf(ipmiio, "IPMI Incoming: Seq 0x%02x, NetFn 0x%02x, CMD: 0x%02x \n",
-            sequence, netfn, cmd);
+    std::fprintf(ipmiio,
+                 "IPMI Incoming: Seq 0x%02x, NetFn 0x%02x, CMD: 0x%02x \n",
+                 sequence, netfn, cmd);
     hexdump(ipmiio, (void*)request, sz);
 
     // Allow the length field to be used for both input and output of the
@@ -429,7 +431,7 @@ static int handle_ipmi_command(sd_bus_message* m, void* user_data,
         resplen = resplen - 1; // first byte is for return code.
     }
 
-    fprintf(ipmiio, "IPMI Response:\n");
+    std::fprintf(ipmiio, "IPMI Response:\n");
     hexdump(ipmiio, (void*)response, resplen);
 
     // Send the response buffer from the ipmi command
