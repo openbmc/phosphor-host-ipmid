@@ -17,6 +17,7 @@
 
 #include <array>
 #include <chrono>
+#include <cstring>
 #include <fstream>
 #include <future>
 #include <map>
@@ -372,7 +373,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         // don't send blank override.
         if ((MACAddress == ipmi::network::DEFAULT_MAC_ADDRESS))
         {
-            memset(respptr->data, 0, SIZE_BOOT_OPTION);
+            std::memset(respptr->data, 0, SIZE_BOOT_OPTION);
             rc = -1;
             return rc;
         }
@@ -383,7 +384,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
             if ((ipAddress == ipmi::network::DEFAULT_ADDRESS) ||
                 (gateway == ipmi::network::DEFAULT_ADDRESS) || (!prefix))
             {
-                memset(respptr->data, 0, SIZE_BOOT_OPTION);
+                std::memset(respptr->data, 0, SIZE_BOOT_OPTION);
                 rc = -1;
                 return rc;
             }
@@ -397,7 +398,8 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
         respptr->data[MAC_OFFSET + 6] = 0x00;
 
-        memcpy(respptr->data + ADDRTYPE_OFFSET, &isStatic, sizeof(isStatic));
+        std::memcpy(respptr->data + ADDRTYPE_OFFSET, &isStatic,
+                    sizeof(isStatic));
 
         uint8_t addressFamily = (properties["Type"].get<std::string>() ==
                                  "xyz.openbmc_project.Network.IP.Protocol.IPv4")
@@ -414,7 +416,7 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
         uint8_t prefixOffset = IPADDR_OFFSET + addrSize;
 
-        memcpy(respptr->data + prefixOffset, &prefix, sizeof(prefix));
+        std::memcpy(respptr->data + prefixOffset, &prefix, sizeof(prefix));
 
         uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
 
@@ -424,24 +426,24 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
     catch (InternalFailure& e)
     {
         commit<InternalFailure>();
-        memset(respptr->data, 0, SIZE_BOOT_OPTION);
+        std::memset(respptr->data, 0, SIZE_BOOT_OPTION);
         rc = -1;
         return rc;
     }
 
     // PetiBoot-Specific
     // If success then copy the first 9 bytes to the data
-    memcpy(respptr->data, net_conf_initial_bytes,
-           sizeof(net_conf_initial_bytes));
+    std::memcpy(respptr->data, net_conf_initial_bytes,
+                sizeof(net_conf_initial_bytes));
 
-    memcpy(respptr->data + ADDR_SIZE_OFFSET, &addrSize, sizeof(addrSize));
+    std::memcpy(respptr->data + ADDR_SIZE_OFFSET, &addrSize, sizeof(addrSize));
 
 #ifdef _IPMI_DEBUG_
-    printf("\n===Printing the IPMI Formatted Data========\n");
+    std::printf("\n===Printing the IPMI Formatted Data========\n");
 
     for (uint8_t pos = 0; pos < index; pos++)
     {
-        printf("%02x ", respptr->data[pos]);
+        std::printf("%02x ", respptr->data[pos]);
     }
 #endif
 
@@ -468,7 +470,7 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
             struct sockaddr_in addr4
             {
             };
-            memcpy(&addr4.sin_addr.s_addr, &data[offset], addrSize);
+            std::memcpy(&addr4.sin_addr.s_addr, &data[offset], addrSize);
 
             inet_ntop(AF_INET, &addr4.sin_addr, ipAddr, INET_ADDRSTRLEN);
 
@@ -479,7 +481,7 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
             struct sockaddr_in6 addr6
             {
             };
-            memcpy(&addr6.sin6_addr.s6_addr, &data[offset], addrSize);
+            std::memcpy(&addr6.sin6_addr.s6_addr, &data[offset], addrSize);
 
             inet_ntop(AF_INET6, &addr6.sin6_addr, ipAddr, INET6_ADDRSTRLEN);
 
@@ -543,14 +545,14 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
                 elog<InternalFailure>();
             }
 
-            snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
-                     reqptr->data[MAC_OFFSET], reqptr->data[MAC_OFFSET + 1],
-                     reqptr->data[MAC_OFFSET + 2], reqptr->data[MAC_OFFSET + 3],
-                     reqptr->data[MAC_OFFSET + 4],
-                     reqptr->data[MAC_OFFSET + 5]);
+            std::snprintf(
+                mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
+                reqptr->data[MAC_OFFSET], reqptr->data[MAC_OFFSET + 1],
+                reqptr->data[MAC_OFFSET + 2], reqptr->data[MAC_OFFSET + 3],
+                reqptr->data[MAC_OFFSET + 4], reqptr->data[MAC_OFFSET + 5]);
 
-            memcpy(&addrOrigin, &(reqptr->data[ADDRTYPE_OFFSET]),
-                   sizeof(decltype(addrOrigin)));
+            std::memcpy(&addrOrigin, &(reqptr->data[ADDRTYPE_OFFSET]),
+                        sizeof(decltype(addrOrigin)));
 
             if (addrOrigin)
             {
@@ -559,13 +561,13 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
             }
 
             // Get the address size
-            memcpy(&addrSize, &reqptr->data[ADDR_SIZE_OFFSET],
-                   sizeof(addrSize));
+            std::memcpy(&addrSize, &reqptr->data[ADDR_SIZE_OFFSET],
+                        sizeof(addrSize));
 
             uint8_t prefixOffset = IPADDR_OFFSET + addrSize;
 
-            memcpy(&prefix, &(reqptr->data[prefixOffset]),
-                   sizeof(decltype(prefix)));
+            std::memcpy(&prefix, &(reqptr->data[prefixOffset]),
+                        sizeof(decltype(prefix)));
 
             uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
 
@@ -696,7 +698,7 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Chassis Bridge Device Address.
     chassis_cap.bridge_dev_addr = 0x20;
 
-    memcpy(response, &chassis_cap, *data_len);
+    std::memcpy(response, &chassis_cap, *data_len);
 
     return rc;
 }
@@ -924,7 +926,7 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     chassis_status.front_panel_button_cap_status = 0;
 
     // Pack the actual response
-    memcpy(response, &chassis_status, *data_len);
+    std::memcpy(response, &chassis_status, *data_len);
 
 finish:
     free(busname);
@@ -1323,7 +1325,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     get_sys_boot_options_t* reqptr = (get_sys_boot_options_t*)request;
     IpmiValue bootOption = ipmiDefault;
 
-    memset(resp, 0, sizeof(*resp));
+    std::memset(resp, 0, sizeof(*resp));
     resp->version = SET_PARM_VERSION;
     resp->parm = 5;
     resp->data[0] = SET_PARM_BOOT_FLAGS_VALID_ONE_TIME;
@@ -1457,8 +1459,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     set_sys_boot_options_t* reqptr = (set_sys_boot_options_t*)request;
 
-    printf("IPMI SET_SYS_BOOT_OPTIONS reqptr->parameter =[%d]\n",
-           reqptr->parameter);
+    std::printf("IPMI SET_SYS_BOOT_OPTIONS reqptr->parameter =[%d]\n",
+                reqptr->parameter);
 
     // This IPMI command does not have any resposne data
     *data_len = 0;
