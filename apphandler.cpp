@@ -302,7 +302,7 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            memcpy(&dev_id.aux, rev.d, 4);
+            std::memcpy(&dev_id.aux, rev.d, 4);
         }
 
         // IPMI Spec version 2.0
@@ -344,7 +344,7 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     // Pack the actual response
-    memcpy(response, &dev_id, *data_len);
+    std::memcpy(response, &dev_id, *data_len);
 
     return rc;
 }
@@ -385,7 +385,7 @@ ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     selftestresults[0] = 0x56;
     selftestresults[1] = 0;
 
-    memcpy(response, selftestresults, *data_len);
+    std::memcpy(response, selftestresults, *data_len);
 
     return rc;
 }
@@ -473,7 +473,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             int resp_byte = strtoul(tmp_array, NULL, 16); // Convert to hex byte
             // Copy end to first
-            memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1);
+            std::memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1);
             resp_loc--;
             id_octet += 2; // Finished with the 2 chars, advance
         }
@@ -484,7 +484,7 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = resp_size;
 
     // Pack the actual response
-    memcpy(response, &resp_uuid, *data_len);
+    std::memcpy(response, &resp_uuid, *data_len);
 
 finish:
     sd_bus_error_free(&error);
@@ -513,7 +513,7 @@ ipmi_ret_t ipmi_app_get_bt_capabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = sizeof(str);
 
     // Pack the actual response
-    memcpy(response, &str, *data_len);
+    std::memcpy(response, &str, *data_len);
 
     return rc;
 }
@@ -530,7 +530,7 @@ ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = strlen("THIS IS WILDCARD");
 
     // Now pack actual response
-    memcpy(response, "THIS IS WILDCARD", *data_len);
+    std::memcpy(response, "THIS IS WILDCARD", *data_len);
 
     return rc;
 }
@@ -589,7 +589,7 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
         *data_len = bmc_guid_len;
-        memcpy(response, &respGuid, bmc_guid_len);
+        std::memcpy(response, &respGuid, bmc_guid_len);
     }
     catch (const InternalFailure& e)
     {
@@ -621,9 +621,9 @@ ipmi_ret_t ipmi_app_set_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                     ipmi_data_len_t dataLen,
                                     ipmi_context_t context)
 {
-    printf("Handling IPMI_CMD_SET_SYSTEM_INFO Netfn:[0x%X], Cmd:[0x%X]\n",
-           netfn, cmd);
-    printf("Setting parameters is not implemented.\n");
+    std::printf("Handling IPMI_CMD_SET_SYSTEM_INFO Netfn:[0x%X], Cmd:[0x%X]\n",
+                netfn, cmd);
+    std::printf("Setting parameters is not implemented.\n");
     return IPMI_CC_INVALID;
 }
 
@@ -699,8 +699,8 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_sys_info_resp_t resp = {};
     size_t respLen = 0;
     uint8_t* const reqData = static_cast<uint8_t*>(request);
-    printf("Handling IPMI_CMD_GET_SYSTEM_INFO Netfn:[0x%X], Cmd:[0x%X]\n",
-           netfn, cmd);
+    std::printf("Handling IPMI_CMD_GET_SYSTEM_INFO Netfn:[0x%X], Cmd:[0x%X]\n",
+                netfn, cmd);
     const uint8_t paramRequested = reqData[1];
     std::string paramString;
     bool found;
@@ -708,7 +708,7 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (*dataLen < 4)
     {
-        fprintf(stderr, "command is too short (length %zu)\n", *dataLen);
+        std::fprintf(stderr, "command is too short (length %zu)\n", *dataLen);
         return IPMI_CC_INVALID;
     }
 
@@ -720,8 +720,8 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         goto writeResponse;
     }
 
-    printf("Get System Info Parameter %x, set %u\n", paramRequested,
-           resp.setSelector);
+    std::printf("Get System Info Parameter %x, set %u\n", paramRequested,
+                resp.setSelector);
 
     // The "Set In Progress" parameter can be used for rollback of parameter
     // data and is not implemented.
@@ -756,7 +756,7 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     respLen = sizeof(resp); // Write entire string data chunk in response.
 
 writeResponse:
-    memcpy(response, &resp, sizeof(resp));
+    std::memcpy(response, &resp, sizeof(resp));
     *dataLen = respLen;
     return IPMI_CC_OK;
 }
