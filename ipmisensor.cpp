@@ -123,22 +123,26 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t* pRec,
     {
 
         case 0x00:
-            snprintf(p, sizeof(valuestring), "POST Error, %s",
-                     event_data_lookup(g_fwprogress00h, pRec->event_data2));
+            std::snprintf(
+                p, sizeof(valuestring), "POST Error, %s",
+                event_data_lookup(g_fwprogress00h, pRec->event_data2));
             break;
         case 0x01: /* Using g_fwprogress02h for 0x01 because that's what the
                       ipmi spec says to do */
-            snprintf(p, sizeof(valuestring), "FW Hang, %s",
-                     event_data_lookup(g_fwprogress02h, pRec->event_data2));
+            std::snprintf(
+                p, sizeof(valuestring), "FW Hang, %s",
+                event_data_lookup(g_fwprogress02h, pRec->event_data2));
             break;
         case 0x02:
-            snprintf(p, sizeof(valuestring), "FW Progress, %s",
-                     event_data_lookup(g_fwprogress02h, pRec->event_data2));
+            std::snprintf(
+                p, sizeof(valuestring), "FW Progress, %s",
+                event_data_lookup(g_fwprogress02h, pRec->event_data2));
             break;
         default:
-            snprintf(p, sizeof(valuestring),
-                     "Internal warning, fw_progres offset unknown (0x%02x)",
-                     pTable->offset);
+            std::snprintf(
+                p, sizeof(valuestring),
+                "Internal warning, fw_progres offset unknown (0x%02x)",
+                pTable->offset);
             break;
     }
 
@@ -166,30 +170,32 @@ int set_sensor_dbus_state_system_event(const sensorRES_t* pRec,
     {
 
         case 0x00:
-            snprintf(p, sizeof(valuestring), "System Reconfigured");
+            std::snprintf(p, sizeof(valuestring), "System Reconfigured");
             break;
         case 0x01:
-            snprintf(p, sizeof(valuestring), "OEM Boot Event");
+            std::snprintf(p, sizeof(valuestring), "OEM Boot Event");
             break;
         case 0x02:
-            snprintf(p, sizeof(valuestring),
-                     "Undetermined System Hardware Failure");
+            std::snprintf(p, sizeof(valuestring),
+                          "Undetermined System Hardware Failure");
             break;
         case 0x03:
-            snprintf(p, sizeof(valuestring),
-                     "System Failure see error log for more details (0x%02x)",
-                     pRec->event_data2);
+            std::snprintf(
+                p, sizeof(valuestring),
+                "System Failure see error log for more details (0x%02x)",
+                pRec->event_data2);
             break;
         case 0x04:
-            snprintf(
+            std::snprintf(
                 p, sizeof(valuestring),
                 "System Failure see PEF error log for more details (0x%02x)",
                 pRec->event_data2);
             break;
         default:
-            snprintf(p, sizeof(valuestring),
-                     "Internal warning, system_event offset unknown (0x%02x)",
-                     pTable->offset);
+            std::snprintf(
+                p, sizeof(valuestring),
+                "Internal warning, system_event offset unknown (0x%02x)",
+                pTable->offset);
             break;
     }
 
