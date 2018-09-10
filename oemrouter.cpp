@@ -49,8 +49,8 @@ ipmi_ret_t RouterImpl::routeMsg(ipmi_cmd_t cmd, const uint8_t* reqBuf,
     // TODO: consider adding a way to suppress malformed replies.
     if (*dataLen < groupMagicSize)
     {
-        fprintf(stderr, "NetFn:[0x2E], OEM:[%zu bytes?], Cmd:[%#04X]\n",
-                *dataLen, cmd);
+        std::fprintf(stderr, "NetFn:[0x2E], OEM:[%zu bytes?], Cmd:[%#04X]\n",
+                     *dataLen, cmd);
         (*dataLen) = 0;
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
@@ -66,23 +66,24 @@ ipmi_ret_t RouterImpl::routeMsg(ipmi_cmd_t cmd, const uint8_t* reqBuf,
         iter = handlers.find(wildKey);
         if (iter == handlers.end())
         {
-            fprintf(stderr,
-                    "No Registered handler for NetFn:[0x2E], "
-                    "OEM:[%#08X], Cmd:[%#04X]\n",
-                    number, cmd);
+            std::fprintf(stderr,
+                         "No Registered handler for NetFn:[0x2E], "
+                         "OEM:[%#08X], Cmd:[%#04X]\n",
+                         number, cmd);
             *dataLen = groupMagicSize;
             return IPMI_CC_INVALID;
         }
 #ifdef __IPMI_DEBUG__
-        fprintf(stderr, "Wildcard NetFn:[0x2E], OEM:[%#08X], Cmd:[%#04X]\n",
-                number, cmd);
+        std::fprintf(stderr,
+                     "Wildcard NetFn:[0x2E], OEM:[%#08X], Cmd:[%#04X]\n",
+                     number, cmd);
 #endif
     }
     else
     {
 #ifdef __IPMI_DEBUG__
-        fprintf(stderr, "Match NetFn:[0x2E], OEM:[%#08X], Cmd:[%#04X]\n",
-                number, cmd);
+        std::fprintf(stderr, "Match NetFn:[0x2E], OEM:[%#08X], Cmd:[%#04X]\n",
+                     number, cmd);
 #endif
     }
 
@@ -124,8 +125,8 @@ ipmi_ret_t ipmi_oem_wildcard_handler(ipmi_netfn_t /* netfn */, ipmi_cmd_t cmd,
 void RouterImpl::activate()
 {
     // Register netfn 0x2e OEM Group, any (wildcard) command.
-    printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_OEM_GROUP,
-           IPMI_CMD_WILDCARD);
+    std::printf("Registering NetFn:[0x%X], Cmd:[0x%X]\n", NETFUN_OEM_GROUP,
+                IPMI_CMD_WILDCARD);
     ipmi_register_callback(NETFUN_OEM_GROUP, IPMI_CMD_WILDCARD, this,
                            ipmi_oem_wildcard_handler, PRIVILEGE_OEM);
 }
@@ -141,10 +142,10 @@ void RouterImpl::registerHandler(Number oen, ipmi_cmd_t cmd, Handler handler)
     }
     else
     {
-        fprintf(stderr,
-                "ERROR : Duplicate registration for NetFn:[0x2E], "
-                "OEM:[%#08X], Cmd:[%#04X]\n",
-                oen, cmd);
+        std::fprintf(stderr,
+                     "ERROR : Duplicate registration for NetFn:[0x2E], "
+                     "OEM:[%#08X], Cmd:[%#04X]\n",
+                     oen, cmd);
     }
 }
 
