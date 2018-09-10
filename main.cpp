@@ -38,7 +38,8 @@ sd_event* events = nullptr;
 std::unique_ptr<phosphor::ipmi::Timer> networkTimer = nullptr;
 
 FILE* ipmidbus = nullptr;
-unsigned short g_sel_reserve = 0xFFFF;
+static unsigned short selReservationID = 0xFFFF;
+static bool selReservationValid = false;
 sd_bus_slot* ipmid_slot = nullptr;
 
 /*
@@ -60,9 +61,31 @@ sd_event* ipmid_get_sd_event_connection()
 /*
  * @brief Required by apphandler IPMI Provider Library
  */
-unsigned short get_sel_reserve_id()
+unsigned short reserveSel(void)
 {
-    return g_sel_reserve;
+    // IPMI spec, Reservation ID, the value simply increases against each
+    // execution of the Reserve SEL command.
+    if (++selReservationID == 0) {
+        selReservationID = 1;
+    }
+    selReservationValid = true;
+    return selReservationID;
+}
+
+/*
+ * @brief Required by apphandler IPMI Provider Library
+ */
+bool checkSELReservation(unsigned short id)
+{
+    return (selReservationValid && selReservationID == id);
+}
+
+/*
+ * @brief Required by apphandler IPMI Provider Library
+ */
+void cancelSELReservation(void)
+{
+    selReservationValid = false;
 }
 
 int main(int i_argc, char* i_argv[])
