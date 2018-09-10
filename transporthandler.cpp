@@ -1,10 +1,27 @@
 #include "transporthandler.hpp"
 
+#include "app/channel.hpp"
+#include "ipmid.hpp"
+#include "net.hpp"
+#include "timer.hpp"
+#include "utils.hpp"
+
 #include <arpa/inet.h>
+#include <host-ipmid/ipmid-api.h>
 
 #include <chrono>
 #include <fstream>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
 #include <string>
+#include <xyz/openbmc_project/Common/error.hpp>
+
+#define SYSTEMD_NETWORKD_DBUS 1
+
+#ifdef SYSTEMD_NETWORKD_DBUS
+#include <mapper.h>
+#include <systemd/sd-bus.h>
+#endif
 
 #if __has_include(<filesystem>)
 #include <filesystem>
@@ -17,25 +34,6 @@ namespace filesystem = std::experimental::filesystem;
 } // namespace std
 #else
 #error filesystem not available
-#endif
-
-#include "app/channel.hpp"
-#include "ipmid.hpp"
-#include "net.hpp"
-#include "timer.hpp"
-#include "utils.hpp"
-
-#include <host-ipmid/ipmid-api.h>
-
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
-#include <xyz/openbmc_project/Common/error.hpp>
-
-#define SYSTEMD_NETWORKD_DBUS 1
-
-#ifdef SYSTEMD_NETWORKD_DBUS
-#include <mapper.h>
-#include <systemd/sd-bus.h>
 #endif
 
 extern std::unique_ptr<phosphor::ipmi::Timer> networkTimer;
@@ -178,12 +176,12 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     auto ipsrc = dhcpEnabled ? ipmi::network::IPOrigin::DHCP
                                              : ipmi::network::IPOrigin::STATIC;
 
-                    memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
+                    std::memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    memcpy(data, &(channelConf->ipsrc),
-                           ipmi::network::IPSRC_SIZE_BYTE);
+                    std::memcpy(data, &(channelConf->ipsrc),
+                                ipmi::network::IPSRC_SIZE_BYTE);
                 }
             }
             break;
@@ -213,7 +211,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     {
                         // nothing to do
                     }
-                    memcpy(data, &mask, ipmi::network::IPV4_ADDRESS_SIZE_BYTE);
+                    std::memcpy(data, &mask,
+                                ipmi::network::IPV4_ADDRESS_SIZE_BYTE);
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
@@ -314,12 +313,12 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         // nothing to do
                     }
 
-                    memcpy(data, &vlanID, ipmi::network::VLAN_SIZE_BYTE);
+                    std::memcpy(data, &vlanID, ipmi::network::VLAN_SIZE_BYTE);
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    memcpy(data, &(channelConf->vlanID),
-                           ipmi::network::VLAN_SIZE_BYTE);
+                    std::memcpy(data, &(channelConf->vlanID),
+                                ipmi::network::VLAN_SIZE_BYTE);
                 }
             }
             break;
@@ -424,9 +423,9 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         case LAN_PARM_IP:
         {
-            snprintf(ipaddr, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
-                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
-                     reqptr->data[3]);
+            std::snprintf(ipaddr, INET_ADDRSTRLEN,
+                          ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
+                          reqptr->data[1], reqptr->data[2], reqptr->data[3]);
 
             channelConf->ipaddr.assign(ipaddr);
         }
@@ -435,7 +434,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         case LAN_PARM_IPSRC:
         {
             uint8_t ipsrc{};
-            memcpy(&ipsrc, reqptr->data, ipmi::network::IPSRC_SIZE_BYTE);
+            std::memcpy(&ipsrc, reqptr->data, ipmi::network::IPSRC_SIZE_BYTE);
             channelConf->ipsrc = static_cast<ipmi::network::IPOrigin>(ipsrc);
         }
         break;
@@ -444,9 +443,9 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             char mac[SIZE_MAC];
 
-            snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
-                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
-                     reqptr->data[3], reqptr->data[4], reqptr->data[5]);
+            std::snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
+                          reqptr->data[0], reqptr->data[1], reqptr->data[2],
+                          reqptr->data[3], reqptr->data[4], reqptr->data[5]);
 
             auto macObjectInfo =
                 ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
@@ -462,18 +461,18 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         case LAN_PARM_SUBNET:
         {
-            snprintf(netmask, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
-                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
-                     reqptr->data[3]);
+            std::snprintf(netmask, INET_ADDRSTRLEN,
+                          ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
+                          reqptr->data[1], reqptr->data[2], reqptr->data[3]);
             channelConf->netmask.assign(netmask);
         }
         break;
 
         case LAN_PARM_GATEWAY:
         {
-            snprintf(gateway, INET_ADDRSTRLEN, ipmi::network::IP_ADDRESS_FORMAT,
-                     reqptr->data[0], reqptr->data[1], reqptr->data[2],
-                     reqptr->data[3]);
+            std::snprintf(gateway, INET_ADDRSTRLEN,
+                          ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
+                          reqptr->data[1], reqptr->data[2], reqptr->data[3]);
             channelConf->gateway.assign(gateway);
         }
         break;
@@ -481,7 +480,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         case LAN_PARM_VLAN:
         {
             uint16_t vlan{};
-            memcpy(&vlan, reqptr->data, ipmi::network::VLAN_SIZE_BYTE);
+            std::memcpy(&vlan, reqptr->data, ipmi::network::VLAN_SIZE_BYTE);
             // We are not storing the enable bit
             // We assume that ipmitool always send enable
             // bit as 1.
@@ -555,7 +554,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         // Only current revision was requested
         *data_len = sizeof(current_revision);
-        memcpy(response, &current_revision, *data_len);
+        std::memcpy(response, &current_revision, *data_len);
         return IPMI_CC_OK;
     }
 
@@ -586,19 +585,19 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         uint8_t buf[] = {current_revision, channelConf->lan_set_in_progress};
         *data_len = sizeof(buf);
-        memcpy(response, &buf, *data_len);
+        std::memcpy(response, &buf, *data_len);
     }
     else if (reqptr->parameter == LAN_PARM_AUTHSUPPORT)
     {
         uint8_t buf[] = {current_revision, 0x04};
         *data_len = sizeof(buf);
-        memcpy(response, &buf, *data_len);
+        std::memcpy(response, &buf, *data_len);
     }
     else if (reqptr->parameter == LAN_PARM_AUTHENABLES)
     {
         uint8_t buf[] = {current_revision, 0x04, 0x04, 0x04, 0x04, 0x04};
         *data_len = sizeof(buf);
-        memcpy(response, &buf, *data_len);
+        std::memcpy(response, &buf, *data_len);
     }
     else if ((reqptr->parameter == LAN_PARM_IP) ||
              (reqptr->parameter == LAN_PARM_SUBNET) ||
@@ -608,7 +607,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         uint8_t buf[ipmi::network::MAC_ADDRESS_SIZE_BYTE + 1] = {};
 
         *data_len = sizeof(current_revision);
-        memcpy(buf, &current_revision, *data_len);
+        std::memcpy(buf, &current_revision, *data_len);
 
         if (getNetworkData(reqptr->parameter, &buf[1], channel) == IPMI_CC_OK)
         {
@@ -620,7 +619,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             {
                 *data_len = ipmi::network::IPV4_ADDRESS_SIZE_BYTE + 1;
             }
-            memcpy(response, &buf, *data_len);
+            std::memcpy(response, &buf, *data_len);
         }
         else
         {
@@ -632,22 +631,22 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         uint8_t buf[ipmi::network::VLAN_SIZE_BYTE + 1] = {};
 
         *data_len = sizeof(current_revision);
-        memcpy(buf, &current_revision, *data_len);
+        std::memcpy(buf, &current_revision, *data_len);
         if (getNetworkData(reqptr->parameter, &buf[1], channel) == IPMI_CC_OK)
         {
             *data_len = sizeof(buf);
-            memcpy(response, &buf, *data_len);
+            std::memcpy(response, &buf, *data_len);
         }
     }
     else if (reqptr->parameter == LAN_PARM_IPSRC)
     {
         uint8_t buff[ipmi::network::IPSRC_SIZE_BYTE + 1] = {};
         *data_len = sizeof(current_revision);
-        memcpy(buff, &current_revision, *data_len);
+        std::memcpy(buff, &current_revision, *data_len);
         if (getNetworkData(reqptr->parameter, &buff[1], channel) == IPMI_CC_OK)
         {
             *data_len = sizeof(buff);
-            memcpy(response, &buff, *data_len);
+            std::memcpy(response, &buff, *data_len);
         }
     }
     else if (reqptr->parameter == CIPHER_SUITE_COUNT)
