@@ -11,6 +11,7 @@
 
 #include <bitset>
 #include <cmath>
+#include <cstring>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <set>
@@ -99,8 +100,8 @@ int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
     rc = get_bus_for_path(info.sensorPath.c_str(), &busname);
     if (rc < 0)
     {
-        fprintf(stderr, "Failed to get %s busname: %s\n",
-                info.sensorPath.c_str(), busname);
+        std::fprintf(stderr, "Failed to get %s busname: %s\n",
+                     info.sensorPath.c_str(), busname);
         goto final;
     }
 
@@ -134,16 +135,16 @@ int set_sensor_dbus_state_s(uint8_t number, const char* method,
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message* m = NULL;
 
-    fprintf(ipmidbus,
-            "Attempting to set a dbus Variant Sensor 0x%02x via %s with a "
-            "value of %s\n",
-            number, method, value);
+    std::fprintf(ipmidbus,
+                 "Attempting to set a dbus Variant Sensor 0x%02x via %s with a "
+                 "value of %s\n",
+                 number, method, value);
 
     r = find_openbmc_path(number, &a);
 
     if (r < 0)
     {
-        fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
+        std::fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
         return 0;
     }
 
@@ -151,21 +152,23 @@ int set_sensor_dbus_state_s(uint8_t number, const char* method,
                                        method);
     if (r < 0)
     {
-        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        std::fprintf(stderr, "Failed to create a method call: %s",
+                     strerror(-r));
         goto final;
     }
 
     r = sd_bus_message_append(m, "v", "s", value);
     if (r < 0)
     {
-        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        std::fprintf(stderr, "Failed to create a input parameter: %s",
+                     strerror(-r));
         goto final;
     }
 
     r = sd_bus_call(bus, m, 0, &error, NULL);
     if (r < 0)
     {
-        fprintf(stderr, "Failed to call the method: %s", strerror(-r));
+        std::fprintf(stderr, "Failed to call the method: %s", strerror(-r));
     }
 
 final:
@@ -183,16 +186,16 @@ int set_sensor_dbus_state_y(uint8_t number, const char* method,
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message* m = NULL;
 
-    fprintf(ipmidbus,
-            "Attempting to set a dbus Variant Sensor 0x%02x via %s with a "
-            "value of 0x%02x\n",
-            number, method, value);
+    std::fprintf(ipmidbus,
+                 "Attempting to set a dbus Variant Sensor 0x%02x via %s with a "
+                 "value of 0x%02x\n",
+                 number, method, value);
 
     r = find_openbmc_path(number, &a);
 
     if (r < 0)
     {
-        fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
+        std::fprintf(stderr, "Failed to find Sensor 0x%02x\n", number);
         return 0;
     }
 
@@ -200,21 +203,23 @@ int set_sensor_dbus_state_y(uint8_t number, const char* method,
                                        method);
     if (r < 0)
     {
-        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
+        std::fprintf(stderr, "Failed to create a method call: %s",
+                     strerror(-r));
         goto final;
     }
 
     r = sd_bus_message_append(m, "v", "i", value);
     if (r < 0)
     {
-        fprintf(stderr, "Failed to create a input parameter: %s", strerror(-r));
+        std::fprintf(stderr, "Failed to create a input parameter: %s",
+                     strerror(-r));
         goto final;
     }
 
     r = sd_bus_call(bus, m, 0, &error, NULL);
     if (r < 0)
     {
-        fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
+        std::fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));
     }
 
 final:
@@ -282,7 +287,7 @@ uint8_t find_type_for_sensor_number(uint8_t num)
     r = find_openbmc_path(num, &dbus_if);
     if (r < 0)
     {
-        fprintf(stderr, "Could not find sensor %d\n", num);
+        std::fprintf(stderr, "Could not find sensor %d\n", num);
         return 0;
     }
     return get_type_from_interface(dbus_if);
@@ -312,7 +317,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     *data_len = sizeof(buf);
-    memcpy(response, &buf, *data_len);
+    std::memcpy(response, &buf, *data_len);
 
     return rc;
 }
@@ -416,14 +421,14 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         getResponse = iter->second.getFunc(iter->second);
         *data_len = getResponse.size();
-        memcpy(resp, getResponse.data(), *data_len);
+        std::memcpy(resp, getResponse.data(), *data_len);
         resp->operation = 1 << scanningEnabledBit;
         return IPMI_CC_OK;
     }
     catch (const std::exception& e)
     {
         *data_len = getResponse.size();
-        memcpy(resp, getResponse.data(), *data_len);
+        std::memcpy(resp, getResponse.data(), *data_len);
         return IPMI_CC_OK;
     }
 }
@@ -639,8 +644,8 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
                 break;
             default:
                 // Cannot be hit.
-                fprintf(stderr, "Unknown value unit type: = %s\n",
-                        info->unit.c_str());
+                std::fprintf(stderr, "Unknown value unit type: = %s\n",
+                             info->unit.c_str());
         }
     }
     catch (sdbusplus::exception::InvalidEnumString e)
@@ -766,8 +771,9 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
 
-    memcpy(resp->record_data, reinterpret_cast<uint8_t*>(&record) + req->offset,
-           (dataLength));
+    std::memcpy(resp->record_data,
+                reinterpret_cast<uint8_t*>(&record) + req->offset,
+                (dataLength));
 
     *data_len = dataLength;
     *data_len += 2; // additional 2 bytes for next record ID
@@ -848,8 +854,8 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
         *data_len = sizeof(get_sdr::GetSdrResp) - req->offset;
-        memcpy(resp->record_data, (char*)&record + req->offset,
-               sizeof(get_sdr::SensorDataFullRecord) - req->offset);
+        std::memcpy(resp->record_data, (char*)&record + req->offset,
+                    sizeof(get_sdr::SensorDataFullRecord) - req->offset);
     }
 
     return ret;
