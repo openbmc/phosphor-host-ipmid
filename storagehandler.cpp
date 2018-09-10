@@ -37,7 +37,6 @@ namespace filesystem = std::experimental::filesystem;
 void register_netfn_storage_functions() __attribute__((constructor));
 
 unsigned int g_sel_time = 0xFFFFFFFF;
-extern unsigned short g_sel_reserve;
 extern const ipmi::sensor::IdInfoMap sensors;
 extern const FruMap frus;
 
@@ -160,7 +159,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     if (requestData->reservationID != 0)
     {
-        if (g_sel_reserve != requestData->reservationID)
+        if (!selReserved(requestData->reservationID))
         {
             *data_len = 0;
             return IPMI_CC_INVALID_RESERVATION_ID;
@@ -272,11 +271,15 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto requestData =
         reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>(request);
 
-    if (g_sel_reserve != requestData->reservationID)
+    if (!selReserved(requestData->reservationID))
     {
         *data_len = 0;
         return IPMI_CC_INVALID_RESERVATION_ID;
     }
+
+    // Per the IPMI spec, need to cancel the reservation when a SEL entry is
+    // deleted
+    cancelSelReservation();
 
     try
     {
@@ -365,7 +368,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     auto requestData =
         reinterpret_cast<const ipmi::sel::ClearSELRequest*>(request);
 
-    if (g_sel_reserve != requestData->reservationID)
+    if (!selReserved(requestData->reservationID))
     {
         *data_len = 0;
         return IPMI_CC_INVALID_RESERVATION_ID;
@@ -390,6 +393,9 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         *data_len = sizeof(eraseProgress);
         return IPMI_CC_OK;
     }
+
+    // Per the IPMI spec, need to cancel the reservation when the SEL is cleared
+    cancelSelReservation();
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     ipmi::sel::ObjectPaths objectPaths;
@@ -578,16 +584,12 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                     ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+    unsigned short selReserve = reserveSel();
 
-    // IPMI spec, Reservation ID, the value simply increases against each
-    // execution of reserve_sel command.
-    if (++g_sel_reserve == 0)
-        g_sel_reserve = 1;
-
-    *data_len = sizeof(g_sel_reserve);
+    *data_len = sizeof(selReserve);
 
     // Pack the actual response
-    memcpy(response, &g_sel_reserve, *data_len);
+    memcpy(response, &selReserve, *data_len);
 
     return rc;
 }
@@ -603,9 +605,13 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_add_sel_request_t* p = (ipmi_add_sel_request_t*)request;
     uint16_t recordid;
 
+    // Per the IPMI spec, need to cancel the reservation when a SEL entry is
+    // added
+    cancelSelReservation();
+
     recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
 
-    *data_len = sizeof(g_sel_reserve);
+    *data_len = sizeof(recordid);
 
     // Pack the actual response
     memcpy(response, &p->eventdata[1], 2);

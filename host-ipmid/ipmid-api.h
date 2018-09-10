@@ -1,5 +1,6 @@
 #ifndef __HOST_IPMID_IPMI_COMMON_H__
 #define __HOST_IPMID_IPMI_COMMON_H__
+#include <stdbool.h>
 #include <stdlib.h>
 #include <systemd/sd-bus.h>
 
@@ -77,7 +78,9 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t, ipmi_context_t,
                             ipmid_callback_t, ipmi_cmd_privilege_t);
 
-unsigned short get_sel_reserve_id(void);
+unsigned short reserveSel(void);
+bool selReserved(unsigned short id);
+void cancelSelReservation(void);
 
 // These are the command network functions, the response
 // network functions are the function + 1. So to determine
