@@ -1,4 +1,14 @@
+#include "sensordatahandler.hpp"
+
+#include "sensorhandler.hpp"
+#include "types.hpp"
+#include "utils.hpp"
+
 #include <bitset>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
@@ -11,14 +21,6 @@ namespace filesystem = std::experimental::filesystem;
 #else
 #error filesystem not available
 #endif
-#include "sensordatahandler.hpp"
-#include "sensorhandler.hpp"
-#include "types.hpp"
-#include "utils.hpp"
-
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
-#include <xyz/openbmc_project/Common/error.hpp>
 
 namespace ipmi
 {
