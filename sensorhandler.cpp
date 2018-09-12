@@ -82,73 +82,6 @@ int get_bus_for_path(const char* path, char** busname)
     return mapper_get_service(bus, path, busname);
 }
 
-int legacy_dbus_openbmc_path(const char* type, const uint8_t num,
-                             dbus_interface_t* interface)
-{
-    char* busname = NULL;
-    const char* iface = "org.openbmc.managers.System";
-    const char* objname = "/org/openbmc/managers/System";
-    char *str1 = NULL, *str2, *str3;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message* reply = NULL;
-
-    int r;
-    r = get_bus_for_path(objname, &busname);
-    if (r < 0)
-    {
-        fprintf(stderr, "Failed to get %s busname: %s\n", objname,
-                strerror(-r));
-        goto final;
-    }
-
-    r = sd_bus_call_method(bus, busname, objname, iface, "getObjectFromByteId",
-                           &error, &reply, "sy", type, num);
-    if (r < 0)
-    {
-        fprintf(stderr, "Failed to create a method call: %s", strerror(-r));
-        goto final;
-    }
-
-    r = sd_bus_message_read(reply, "(ss)", &str2, &str3);
-    if (r < 0)
-    {
-        fprintf(stderr, "Failed to get a response: %s", strerror(-r));
-        goto final;
-    }
-
-    if (strlen(str2) == 0)
-    {
-        // Path being empty occurs when the sensor id is not in SystemManager
-        r = -EINVAL;
-        goto final;
-    }
-
-    r = get_bus_for_path(str2, &str1);
-    if (r < 0)
-    {
-        fprintf(stderr, "Failed to get %s busname: %s\n", str2, strerror(-r));
-        goto final;
-    }
-
-    strncpy(interface->bus, str1, MAX_DBUS_PATH);
-    strncpy(interface->path, str2, MAX_DBUS_PATH);
-    strncpy(interface->interface, str3, MAX_DBUS_PATH);
-
-    interface->sensornumber = num;
-    // Make sure we know that the type hasn't been set, as newer codebase will
-    // set it automatically from the YAML at this step.
-    interface->sensortype = 0;
-
-final:
-
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
-    free(str1);
-
-    return r;
-}
-
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
 // step for mapping IPMI
@@ -156,12 +89,11 @@ int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
 {
     int rc;
 
-    // When the sensor map does not contain the sensor requested,
-    // fall back to the legacy DBus lookup (deprecated)
     const auto& sensor_it = sensors.find(num);
     if (sensor_it == sensors.end())
     {
-        return legacy_dbus_openbmc_path("SENSOR", num, interface);
+        // The sensor map does not contain the sensor requested
+        return -EINVAL;
     }
 
     const auto& info = sensor_it->second;
@@ -461,148 +393,6 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ipmiRC;
 }
 
-ipmi_ret_t legacyGetSensorReading(uint8_t sensorNum, ipmi_response_t response,
-                                  ipmi_data_len_t data_len)
-{
-    int r;
-    dbus_interface_t a;
-    sd_bus* bus = ipmid_get_sd_bus_connection();
-    ipmi_ret_t rc = IPMI_CC_SENSOR_INVALID;
-    uint8_t type = 0;
-    sd_bus_message* reply = NULL;
-    int reading = 0;
-    char* assertion = NULL;
-    sensorreadingresp_t* resp = (sensorreadingresp_t*)response;
-    *data_len = 0;
-
-    r = find_openbmc_path(sensorNum, &a);
-    if (r < 0)
-    {
-        sd_journal_print(LOG_ERR, "Failed to find Sensor 0x%02x\n", sensorNum);
-        return IPMI_CC_SENSOR_INVALID;
-    }
-
-    type = get_type_from_interface(a);
-    if (type == 0)
-    {
-        sd_journal_print(LOG_ERR, "Failed to find Sensor 0x%02x\n", sensorNum);
-        return IPMI_CC_SENSOR_INVALID;
-    }
-
-    switch (type)
-    {
-        case 0xC2:
-            r = sd_bus_get_property(bus, a.bus, a.path, a.interface, "value",
-                                    NULL, &reply, "i");
-            if (r < 0)
-            {
-                sd_journal_print(LOG_ERR,
-                                 "Failed to call sd_bus_get_property:"
-                                 " %d, %s\n",
-                                 r, strerror(-r));
-                sd_journal_print(LOG_ERR, "Bus: %s, Path: %s, Interface: %s\n",
-                                 a.bus, a.path, a.interface);
-                break;
-            }
-
-            r = sd_bus_message_read(reply, "i", &reading);
-            if (r < 0)
-            {
-                sd_journal_print(LOG_ERR, "Failed to read sensor: %s\n",
-                                 strerror(-r));
-                break;
-            }
-
-            rc = IPMI_CC_OK;
-            *data_len = sizeof(sensorreadingresp_t);
-
-            resp->value = (uint8_t)reading;
-            resp->operation = 0;
-            resp->indication[0] = 0;
-            resp->indication[1] = 0;
-            break;
-
-        case 0xC8:
-            r = sd_bus_get_property(bus, a.bus, a.path, a.interface, "value",
-                                    NULL, &reply, "i");
-            if (r < 0)
-            {
-                sd_journal_print(LOG_ERR,
-                                 "Failed to call sd_bus_get_property:"
-                                 " %d, %s\n",
-                                 r, strerror(-r));
-                sd_journal_print(LOG_ERR, "Bus: %s, Path: %s, Interface: %s\n",
-                                 a.bus, a.path, a.interface);
-                break;
-            }
-
-            r = sd_bus_message_read(reply, "i", &reading);
-            if (r < 0)
-            {
-                sd_journal_print(LOG_ERR, "Failed to read sensor: %s\n",
-                                 strerror(-r));
-                break;
-            }
-
-            rc = IPMI_CC_OK;
-            *data_len = sizeof(sensorreadingresp_t);
-
-            resp->value = 0;
-            resp->operation = 0;
-            resp->indication[0] = (uint8_t)reading;
-            resp->indication[1] = 0;
-            break;
-
-        // TODO openbmc/openbmc#2154 Move this sensor to right place.
-        case 0xCA:
-            r = sd_bus_get_property(bus, a.bus, a.path, a.interface, "value",
-                                    NULL, &reply, "s");
-            if (r < 0)
-            {
-                sd_journal_print(LOG_ERR,
-                                 "Failed to call sd_bus_get_property:"
-                                 " %d, %s\n",
-                                 r, strerror(-r));
-                sd_journal_print(LOG_ERR, "Bus: %s, Path: %s, Interface: %s\n",
-                                 a.bus, a.path, a.interface);
-                break;
-            }
-
-            r = sd_bus_message_read(reply, "s", &assertion);
-            if (r < 0)
-            {
-                sd_journal_print(LOG_ERR, "Failed to read sensor: %s\n",
-                                 strerror(-r));
-                break;
-            }
-
-            rc = IPMI_CC_OK;
-            *data_len = sizeof(sensorreadingresp_t);
-
-            resp->value = 0;
-            resp->operation = 0;
-            if (strcmp(assertion, "Enabled") == 0)
-            {
-                resp->indication[0] = 0x02;
-            }
-            else
-            {
-                resp->indication[0] = 0x1;
-            }
-            resp->indication[1] = 0;
-            break;
-
-        default:
-        {
-            return IPMI_CC_SENSOR_INVALID;
-        }
-    }
-
-    reply = sd_bus_message_unref(reply);
-
-    return rc;
-}
-
 ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                        ipmi_request_t request,
                                        ipmi_response_t response,
@@ -617,7 +407,7 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     const auto iter = sensors.find(reqptr->sennum);
     if (iter == sensors.end())
     {
-        return legacyGetSensorReading(reqptr->sennum, response, data_len);
+        return IPMI_CC_SENSOR_INVALID;
     }
     if (ipmi::sensor::Mutability::Read !=
         (iter->second.mutability & ipmi::sensor::Mutability::Read))
