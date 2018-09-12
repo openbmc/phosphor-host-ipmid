@@ -4,6 +4,7 @@
 
 #include "ipmid.hpp"
 #include "settings.hpp"
+#include "timer.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
@@ -18,7 +19,20 @@
 #include <chrono>
 #include <fstream>
 #include <future>
+#include <map>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/bus.hpp>
+#include <sdbusplus/server/object.hpp>
 #include <sstream>
+#include <string>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
+#include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
+#include <xyz/openbmc_project/State/Host/server.hpp>
+#include <xyz/openbmc_project/State/PowerOnHours/server.hpp>
+
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
@@ -31,21 +45,6 @@ namespace filesystem = std::experimental::filesystem;
 #else
 #error filesystem not available
 #endif
-
-#include "timer.hpp"
-
-#include <map>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/bus.hpp>
-#include <sdbusplus/server/object.hpp>
-#include <string>
-#include <xyz/openbmc_project/Common/error.hpp>
-#include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
-#include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
-#include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
-#include <xyz/openbmc_project/State/Host/server.hpp>
-#include <xyz/openbmc_project/State/PowerOnHours/server.hpp>
 
 // Defines
 #define SET_PARM_VERSION 0x01

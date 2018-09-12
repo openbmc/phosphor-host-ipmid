@@ -2,8 +2,15 @@
 
 #include "selutility.hpp"
 
+#include "types.hpp"
+#include "utils.hpp"
+
+#include <host-ipmid/ipmid-api.h>
+
 #include <chrono>
+#include <phosphor-logging/elog-errors.hpp>
 #include <vector>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 #if __has_include(<filesystem>)
 #include <filesystem>
@@ -17,14 +24,6 @@ namespace filesystem = std::experimental::filesystem;
 #else
 #error filesystem not available
 #endif
-
-#include "types.hpp"
-#include "utils.hpp"
-
-#include <host-ipmid/ipmid-api.h>
-
-#include <phosphor-logging/elog-errors.hpp>
-#include <xyz/openbmc_project/Common/error.hpp>
 
 extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;
