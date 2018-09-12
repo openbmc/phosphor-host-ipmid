@@ -1,6 +1,8 @@
 #ifndef __HOST_IPMI_STORAGE_HANDLER_H__
 #define __HOST_IPMI_STORAGE_HANDLER_H__
 
+#include <cstdint>
+
 // IPMI commands for Storage net functions.
 enum ipmi_netfn_storage_cmds
 {
