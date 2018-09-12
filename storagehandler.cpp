@@ -1,8 +1,26 @@
+#include "storagehandler.hpp"
+
+#include "fruread.hpp"
+#include "read_fru_data.hpp"
+#include "selutility.hpp"
+#include "sensorhandler.hpp"
+#include "storageaddsel.hpp"
+#include "utils.hpp"
+
 #include <arpa/inet.h>
+#include <host-ipmid/ipmid-api.h>
+#include <mapper.h>
+#include <systemd/sd-bus.h>
 
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/server.hpp>
+#include <string>
+#include <xyz/openbmc_project/Common/error.hpp>
+
 #if __has_include(<filesystem>)
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
@@ -15,23 +33,6 @@ namespace filesystem = std::experimental::filesystem;
 #else
 #error filesystem not available
 #endif
-#include "fruread.hpp"
-#include "read_fru_data.hpp"
-#include "selutility.hpp"
-#include "sensorhandler.hpp"
-#include "storageaddsel.hpp"
-#include "storagehandler.hpp"
-#include "utils.hpp"
-
-#include <host-ipmid/ipmid-api.h>
-#include <mapper.h>
-#include <systemd/sd-bus.h>
-
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/server.hpp>
-#include <string>
-#include <xyz/openbmc_project/Common/error.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
