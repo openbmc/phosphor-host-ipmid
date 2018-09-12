@@ -15,7 +15,21 @@
 #include <systemd/sd-bus.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <fstream>
+#include <memory>
 #include <nlohmann/json.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <string>
+#include <tuple>
+#include <vector>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Software/Activation/server.hpp>
+#include <xyz/openbmc_project/Software/Version/server.hpp>
+#include <xyz/openbmc_project/State/BMC/server.hpp>
 
 #if __has_include(<filesystem>)
 #include <filesystem>
@@ -29,21 +43,6 @@ namespace filesystem = std::experimental::filesystem;
 #else
 #error filesystem not available
 #endif
-
-#include <algorithm>
-#include <array>
-#include <cstddef>
-#include <fstream>
-#include <memory>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
-#include <string>
-#include <tuple>
-#include <vector>
-#include <xyz/openbmc_project/Common/error.hpp>
-#include <xyz/openbmc_project/Software/Activation/server.hpp>
-#include <xyz/openbmc_project/Software/Version/server.hpp>
-#include <xyz/openbmc_project/State/BMC/server.hpp>
 
 extern sd_bus* bus;
 
