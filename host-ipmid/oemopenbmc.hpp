@@ -15,6 +15,7 @@ enum Cmd
     i2cCmd = 2,
     flashCmd = 3,
     fanManualCmd = 4,
+    blobTransferCmd = 128,
 };
 
 } // namespace oem
