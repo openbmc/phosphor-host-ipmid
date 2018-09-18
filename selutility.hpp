@@ -32,9 +32,24 @@ using AdditionalData = std::vector<std::string>;
 using PropertyType = sdbusplus::message::variant<Resolved, Id, Timestamp,
                                                  Message, AdditionalData>;
 
+// ID string generated using journalctl to include in the MESSAGE_ID field for
+// SEL entries.  Helps with filtering SEL entries in the journal.
+static constexpr const char* selMessageId = "b370836ccf2f4850ac5bee185b77893a";
+static constexpr uint8_t selOperationSupport = 0x02;
+static constexpr uint8_t systemEvent = 0x02;
+static constexpr size_t systemEventSize = 3;
+static constexpr uint8_t oemTsEventFirst = 0xC0;
+static constexpr uint8_t oemTsEventLast = 0xDF;
+static constexpr size_t oemTsEventSize = 9;
+static constexpr uint8_t oemEventFirst = 0xE0;
+static constexpr uint8_t oemEventLast = 0xFF;
+static constexpr size_t oemEventSize = 13;
+static constexpr uint8_t eventMsgRev = 0x04;
+
 static constexpr auto selVersion = 0x51;
 static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
 static constexpr auto operationSupport = 0x0A;
+constexpr static const uint8_t deassertionEvent = 1;
 
 /** @struct GetSELInfoResponse
  *
@@ -85,6 +100,73 @@ struct GetSELEntryResponse
     uint8_t eventData1;       //!< Event Data 1.
     uint8_t eventData2;       //!< Event Data 2.
     uint8_t eventData3;       //!< Event Data 3.
+} __attribute__((packed));
+
+/** @struct GetSELEntryResponseTyped
+ *
+ *  IPMI payload for Get SEL Entry command response for all record types.
+ */
+struct GetSELEntryResponseTyped
+{
+    uint16_t nextRecordID;
+    uint16_t recordID;
+    uint8_t recordType;
+    union
+    {
+        struct
+        {
+            uint32_t timestamp;
+            uint16_t generatorID;
+            uint8_t eventMsgRevision;
+            uint8_t sensorType;
+            uint8_t sensorNum;
+            uint8_t eventType : 7;
+            uint8_t eventDir : 1;
+            uint8_t eventData[ipmi::sel::systemEventSize];
+        } system;
+        struct
+        {
+            uint32_t timestamp;
+            uint8_t eventData[ipmi::sel::oemTsEventSize];
+        } oemTs;
+        struct
+        {
+            uint8_t eventData[ipmi::sel::oemEventSize];
+        } oem;
+    } record;
+} __attribute__((packed));
+
+/** @struct AddSELEntryRequestTyped
+ *
+ *  IPMI payload for Add SEL Entry command request for all record types.
+ */
+struct AddSELEntryRequestTyped
+{
+    uint16_t recordID;
+    uint8_t recordType;
+    union
+    {
+        struct
+        {
+            uint32_t timestamp;
+            uint16_t generatorID;
+            uint8_t eventMsgRevision;
+            uint8_t sensorType;
+            uint8_t sensorNum;
+            uint8_t eventType : 7;
+            uint8_t eventDir : 1;
+            uint8_t eventData[ipmi::sel::systemEventSize];
+        } __attribute__((packed)) system;
+        struct
+        {
+            uint32_t timestamp;
+            uint8_t eventData[ipmi::sel::oemTsEventSize];
+        } __attribute__((packed)) oemTs;
+        struct
+        {
+            uint8_t eventData[ipmi::sel::oemEventSize];
+        } __attribute__((packed)) oem;
+    } record;
 } __attribute__((packed));
 
 /** @struct DeleteSELEntryRequest

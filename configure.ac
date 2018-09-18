@@ -22,6 +22,14 @@ AS_IF([test "x$enable_softoff" != "xno"],
     [AC_CHECK_PROG([DIRNAME], dirname, dirname)]
 )
 
+# build with journal-based SEL
+AC_ARG_WITH([journal-sel],
+    AS_HELP_STRING([--with-journal-sel], [Builds with journal-based SEL commands instead of D-Bus-based])
+)
+AS_IF([test "x$with_journal_sel" = "xyes"], [
+    AX_APPEND_COMPILE_FLAGS([-DJOURNAL_SEL], [CXXFLAGS])
+])
+
 # Checks for libraries.
 AC_CHECK_LIB([pam], [pam_start], [], [AC_MSG_ERROR([libpam not found])])
 AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
