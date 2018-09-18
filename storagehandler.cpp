@@ -19,6 +19,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/server.hpp>
+#include <sdrutils.hpp>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -26,6 +27,7 @@
 #include <filesystem>
 #elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
+#include <experimental/string_view>
 namespace std
 {
 // splice experimental::filesystem into std
@@ -57,22 +59,6 @@ const char* getTimeString(const uint64_t& usecSinceEpoch)
 }
 } // namespace
 
-namespace cache
-{
-/*
- * This cache contains the object paths of the logging entries sorted in the
- * order of the filename(numeric order). The cache is initialized by
- * invoking readLoggingObjectPaths with the cache as the parameter. The
- * cache is invoked in the execution of the Get SEL info and Delete SEL
- * entry command. The Get SEL Info command is typically invoked before the
- * Get SEL entry command, so the cache is utilized for responding to Get SEL
- * entry command. The cache is invalidated by clearing after Delete SEL
- * entry and Clear SEL command.
- */
-ipmi::sel::ObjectPaths paths;
-
-} // namespace cache
-
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using namespace phosphor::logging;
@@ -103,58 +89,95 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                       ipmi_request_t request, ipmi_response_t response,
                       ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    std::vector<uint8_t> outPayload(sizeof(ipmi::sel::GetSELInfoResponse));
-    auto responseData =
-        reinterpret_cast<ipmi::sel::GetSELInfoResponse*>(outPayload.data());
+    if (*data_len != 0)
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    ipmi::sel::GetSELInfoResponse* responseData =
+        reinterpret_cast<ipmi::sel::GetSELInfoResponse*>(response);
 
     responseData->selVersion = ipmi::sel::selVersion;
     // Last erase timestamp is not available from log manager.
     responseData->eraseTimeStamp = ipmi::sel::invalidTimeStamp;
-    responseData->operationSupport = ipmi::sel::operationSupport;
-
-    try
-    {
-        ipmi::sel::readLoggingObjectPaths(cache::paths);
-    }
-    catch (const sdbusplus::exception::SdBusError& e)
-    {
-        // No action if reading log objects have failed for this command.
-        // readLoggingObjectPaths will throw exception if there are no log
-        // entries. The command will be responded with number of SEL entries
-        // as 0.
-    }
+    responseData->operationSupport = ipmi::sel::selOperationSupport;
 
     responseData->entries = 0;
-    responseData->addTimeStamp = ipmi::sel::invalidTimeStamp;
-
-    if (!cache::paths.empty())
+    int ret;
+    sd_journal* journal;
+    ret = sd_journal_open(&journal, SD_JOURNAL_LOCAL_ONLY);
+    if (ret < 0)
     {
-        responseData->entries = static_cast<uint16_t>(cache::paths.size());
-
-        try
+        log<level::ERR>("Failed to open journal: ",
+                        entry("ERRNO=%s", strerror(-ret)));
+    }
+    else
+    {
+        char match[256];
+        snprintf(match, sizeof(match), "MESSAGE_ID=%s",
+                 ipmi::sel::selMessageId);
+        sd_journal_add_match(journal, match, 0);
+        SD_JOURNAL_FOREACH(journal)
         {
-            responseData->addTimeStamp = static_cast<uint32_t>(
-                (ipmi::sel::getEntryTimeStamp(cache::paths.back()).count()));
+            responseData->entries++;
         }
-        catch (InternalFailure& e)
+        responseData->addTimeStamp = ipmi::sel::invalidTimeStamp;
+        if ((ret = sd_journal_seek_tail(journal)) < 0)
         {
+            log<level::ERR>("Failed to find seek_tail: ",
+                            entry("ERRNO=%s", strerror(-ret)));
         }
-        catch (const std::runtime_error& e)
+        else
         {
-            log<level::ERR>(e.what());
+            if ((ret = sd_journal_previous(journal)) <= 0)
+            {
+                log<level::ERR>("Failed to find a log entry: ",
+                                entry("ERRNO=%s", strerror(-ret)));
+            }
+            else
+            {
+                uint64_t timestamp;
+                if ((ret = sd_journal_get_realtime_usec(journal, &timestamp)) <
+                    0)
+                {
+                    log<level::ERR>("Failed to read timestamp: ",
+                                    entry("ERRNO=%s", strerror(-ret)));
+                }
+                else
+                {
+                    timestamp /= (1000 * 1000); // convert from us to s
+                    responseData->addTimeStamp =
+                        static_cast<uint32_t>(timestamp);
+                }
+            }
         }
+        sd_journal_close(journal);
     }
 
-    std::memcpy(response, outPayload.data(), outPayload.size());
-    *data_len = outPayload.size();
+    *data_len = sizeof(ipmi::sel::GetSELInfoResponse);
 
     return IPMI_CC_OK;
+}
+
+static void fromHexStr(const std::experimental::string_view hexStr,
+                       std::vector<uint8_t>& data)
+{
+    for (unsigned int i = 0; i < hexStr.size(); i += 2)
+    {
+        std::string s = hexStr.substr(i, 2).to_string();
+        data.push_back(static_cast<uint8_t>(strtol(s.c_str(), nullptr, 16)));
+    }
 }
 
 ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (*data_len != sizeof(ipmi::sel::GetSELEntryRequest))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
     auto requestData =
         reinterpret_cast<const ipmi::sel::GetSELEntryRequest*>(request);
 
@@ -167,83 +190,299 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    if (cache::paths.empty())
+    ipmi::sel::GetSELEntryResponse record{};
+    // Default as the last entry
+    record.nextRecordID = ipmi::sel::lastEntry;
+
+    // Check for the requested SEL Entry.
+    int ret;
+    sd_journal* journal;
+    ret = sd_journal_open(&journal, SD_JOURNAL_LOCAL_ONLY);
+    if (ret < 0)
+    {
+        log<level::ERR>("Failed to open journal: ",
+                        entry("ERRNO=%s", strerror(-ret)));
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
+    char match1[256];
+    snprintf(match1, sizeof(match1), "MESSAGE_ID=%s", ipmi::sel::selMessageId);
+    sd_journal_add_match(journal, match1, 0);
+
+    // Get the requested target SEL record ID if first or last is requested.
+    uint16_t targetID = requestData->selRecordID;
+    if (targetID == ipmi::sel::firstEntry)
+    {
+        SD_JOURNAL_FOREACH(journal)
+        {
+            const char* data = nullptr;
+            size_t length = 0;
+            // Get the record ID from the IPMI_SEL_RECORD_ID field of the first
+            // entry
+            ret = sd_journal_get_data(journal, "IPMI_SEL_RECORD_ID",
+                                      (const void**)&data, &length);
+            if (ret < 0)
+            {
+                sd_journal_close(journal);
+                *data_len = 0;
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            std::experimental::string_view metadata;
+            metadata = std::experimental::string_view(data, length);
+            // Only use the content after the "=" character.
+            metadata.remove_prefix(
+                std::min(metadata.find("=") + 1, metadata.size()));
+            targetID = strtol(metadata.data(), nullptr, 10);
+            break;
+        }
+    }
+    else if (targetID == ipmi::sel::lastEntry)
+    {
+        SD_JOURNAL_FOREACH_BACKWARDS(journal)
+        {
+            const char* data = nullptr;
+            size_t length = 0;
+            // Get the record ID from the IPMI_SEL_RECORD_ID field of the first
+            // entry
+            ret = sd_journal_get_data(journal, "IPMI_SEL_RECORD_ID",
+                                      (const void**)&data, &length);
+            if (ret < 0)
+            {
+                sd_journal_close(journal);
+                *data_len = 0;
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            std::experimental::string_view metadata;
+            metadata = std::experimental::string_view(data, length);
+            // Only use the content after the "=" character.
+            metadata.remove_prefix(
+                std::min(metadata.find("=") + 1, metadata.size()));
+            targetID = strtol(metadata.data(), nullptr, 10);
+            break;
+        }
+    }
+    char match2[256];
+    snprintf(match2, sizeof(match2), "IPMI_SEL_RECORD_ID=%d", targetID);
+    sd_journal_add_match(journal, match2, 0);
+    char match3[256];
+    snprintf(match3, sizeof(match3), "IPMI_SEL_RECORD_ID=%d", targetID + 1);
+    sd_journal_add_match(journal, match3, 0);
+    SD_JOURNAL_FOREACH(journal)
+    {
+        const char* data = nullptr;
+        size_t length = 0;
+        // Get the record ID from the IPMI_SEL_RECORD_ID field
+        uint16_t id;
+        ret = sd_journal_get_data(journal, "IPMI_SEL_RECORD_ID",
+                                  (const void**)&data, &length);
+        if (ret < 0)
+        {
+            sd_journal_close(journal);
+            *data_len = 0;
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+        std::experimental::string_view metadata;
+        metadata = std::experimental::string_view(data, length);
+        // Only use the content after the "=" character.
+        metadata.remove_prefix(
+            std::min(metadata.find("=") + 1, metadata.size()));
+        id = strtol(metadata.data(), nullptr, 10);
+        if (id == targetID)
+        {
+            // Found the desired record, so fill in the data
+            record.recordID = id;
+
+            // Get the record type from the IPMI_SEL_RECORD_TYPE field
+            ret = sd_journal_get_data(journal, "IPMI_SEL_RECORD_TYPE",
+                                      (const void**)&data, &length);
+            if (ret < 0)
+            {
+                sd_journal_close(journal);
+                *data_len = 0;
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            metadata = std::experimental::string_view(data, length);
+            // Only use the content after the "=" character.
+            metadata.remove_prefix(
+                std::min(metadata.find("=") + 1, metadata.size()));
+            record.recordType = strtol(metadata.data(), nullptr, 16);
+            // The rest of the record depends on the record type
+            if (record.recordType == ipmi::sel::systemEvent)
+            {
+                // Get the timestamp
+                uint64_t ts = 0;
+                ret = sd_journal_get_realtime_usec(journal, &ts);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                record.timeStamp = static_cast<uint32_t>(
+                    ts / 1000 / 1000); // Convert from us to s
+
+                // Get the generator ID from the IPMI_SEL_GENERATOR_ID field
+                ret = sd_journal_get_data(journal, "IPMI_SEL_GENERATOR_ID",
+                                          (const void**)&data, &length);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                metadata = std::experimental::string_view(data, length);
+                // Only use the content after the "=" character.
+                metadata.remove_prefix(
+                    std::min(metadata.find("=") + 1, metadata.size()));
+                record.generatorID = strtol(metadata.data(), nullptr, 10);
+                // Set the event message revision
+                record.eventMsgRevision = ipmi::sel::eventMsgRev;
+
+                // Get the IPMI_SEL_SENSOR_PATH field
+                ret = sd_journal_get_data(journal, "IPMI_SEL_SENSOR_PATH",
+                                          (const void**)&data, &length);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                metadata = std::experimental::string_view(data, length);
+                // Only use the content after the "=" character.
+                metadata.remove_prefix(
+                    std::min(metadata.find("=") + 1, metadata.size()));
+                record.sensorType = getSensorTypeFromPath(metadata.to_string());
+                record.sensorNum =
+                    getSensorNumberFromPath(metadata.to_string());
+                record.eventType =
+                    getSensorEventTypeFromPath(metadata.to_string());
+
+                // Get the event direction from the IPMI_SEL_EVENT_DIR field
+                ret = sd_journal_get_data(journal, "IPMI_SEL_EVENT_DIR",
+                                          (const void**)&data, &length);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                metadata = std::experimental::string_view(data, length);
+                // Only use the content after the "=" character.
+                metadata.remove_prefix(
+                    std::min(metadata.find("=") + 1, metadata.size()));
+                uint8_t eventDir = strtol(metadata.data(), nullptr, 10);
+                // Set the event direction
+                if (eventDir == 0)
+                {
+                    record.eventType |= 0x80;
+                }
+
+                // Get the event data from the IPMI_SEL_DATA field
+                ret = sd_journal_get_data(journal, "IPMI_SEL_DATA",
+                                          (const void**)&data, &length);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                metadata = std::experimental::string_view(data, length);
+                // Only use the content after the "=" character.
+                metadata.remove_prefix(
+                    std::min(metadata.find("=") + 1, metadata.size()));
+                std::vector<uint8_t> evtData;
+                fromHexStr(metadata, evtData);
+                record.eventData1 = evtData[0];
+                record.eventData2 = evtData[1];
+                record.eventData3 = evtData[2];
+            }
+            else if (record.recordType >= ipmi::sel::oemTsEventFirst &&
+                     record.recordType <= ipmi::sel::oemTsEventLast)
+            {
+                // Get the timestamp
+                uint64_t timestamp = 0;
+                ret = sd_journal_get_realtime_usec(journal, &timestamp);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                record.timeStamp = static_cast<uint32_t>(
+                    timestamp / 1000 / 1000); // Convert from us to s
+
+                // Get the OEM data from the IPMI_SEL_DATA field
+                ret = sd_journal_get_data(journal, "IPMI_SEL_DATA",
+                                          (const void**)&data, &length);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                metadata = std::experimental::string_view(data, length);
+                // Only use the content after the "=" character.
+                metadata.remove_prefix(
+                    std::min(metadata.find("=") + 1, metadata.size()));
+                std::vector<uint8_t> evtData;
+                fromHexStr(metadata, evtData);
+                // Only keep the bytes that fit in the record
+                std::copy_n(evtData.begin(),
+                            std::min(evtData.size(), ipmi::sel::oemTsEventSize),
+                            reinterpret_cast<uint8_t*>(&(record.generatorID)));
+            }
+            else if (record.recordType >= ipmi::sel::oemEventFirst &&
+                     record.recordType <= ipmi::sel::oemEventLast)
+            {
+                // Get the OEM data from the IPMI_SEL_DATA field
+                ret = sd_journal_get_data(journal, "IPMI_SEL_DATA",
+                                          (const void**)&data, &length);
+                if (ret < 0)
+                {
+                    sd_journal_close(journal);
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+                metadata = std::experimental::string_view(data, length);
+                // Only use the content after the "=" character.
+                metadata.remove_prefix(
+                    std::min(metadata.find("=") + 1, metadata.size()));
+                std::vector<uint8_t> evtData;
+                fromHexStr(metadata, evtData);
+                // Only keep the bytes that fit in the record
+                std::copy_n(evtData.begin(),
+                            std::min(evtData.size(), ipmi::sel::oemEventSize),
+                            reinterpret_cast<uint8_t*>(&(record.timeStamp)));
+            }
+        }
+        else if (id == targetID + 1)
+        {
+            record.nextRecordID = id;
+        }
+    }
+    sd_journal_close(journal);
+
+    // If we didn't find the requested record, return an error
+    if (record.recordID == 0)
     {
         *data_len = 0;
         return IPMI_CC_SENSOR_INVALID;
     }
 
-    ipmi::sel::ObjectPaths::const_iterator iter;
-
-    // Check for the requested SEL Entry.
-    if (requestData->selRecordID == ipmi::sel::firstEntry)
-    {
-        iter = cache::paths.begin();
-    }
-    else if (requestData->selRecordID == ipmi::sel::lastEntry)
-    {
-        iter = cache::paths.end();
-    }
-    else
-    {
-        std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
-                              std::to_string(requestData->selRecordID);
-
-        iter = std::find(cache::paths.begin(), cache::paths.end(), objPath);
-        if (iter == cache::paths.end())
-        {
-            *data_len = 0;
-            return IPMI_CC_SENSOR_INVALID;
-        }
-    }
-
-    ipmi::sel::GetSELEntryResponse record{};
-
-    // Convert the log entry into SEL record.
-    try
-    {
-        record = ipmi::sel::convertLogEntrytoSEL(*iter);
-    }
-    catch (InternalFailure& e)
-    {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-    catch (const std::runtime_error& e)
-    {
-        log<level::ERR>(e.what());
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    // Identify the next SEL record ID
-    if (iter != cache::paths.end())
-    {
-        ++iter;
-        if (iter == cache::paths.end())
-        {
-            record.nextRecordID = ipmi::sel::lastEntry;
-        }
-        else
-        {
-            namespace fs = std::filesystem;
-            fs::path path(*iter);
-            record.nextRecordID = static_cast<uint16_t>(
-                std::stoul(std::string(path.filename().c_str())));
-        }
-    }
-    else
-    {
-        record.nextRecordID = ipmi::sel::lastEntry;
-    }
-
     if (requestData->readLength == ipmi::sel::entireRecord)
     {
-        std::memcpy(response, &record, sizeof(record));
+        std::copy(&record, &record + 1,
+                  static_cast<ipmi::sel::GetSELEntryResponse*>(response));
         *data_len = sizeof(record);
     }
     else
     {
+        if (requestData->reservationID == 0)
+        {
+            *data_len = 0;
+            return IPMI_CC_INVALID_RESERVATION_ID;
+        }
         if (requestData->offset >= ipmi::sel::selRecordSize ||
             requestData->readLength > ipmi::sel::selRecordSize)
         {
@@ -255,111 +494,14 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto readLength =
             std::min(diff, static_cast<int>(requestData->readLength));
 
-        std::memcpy(response, &record.nextRecordID,
-                    sizeof(record.nextRecordID));
-        std::memcpy(static_cast<uint8_t*>(response) +
-                        sizeof(record.nextRecordID),
-                    &record.recordID + requestData->offset, readLength);
+        *static_cast<uint16_t*>(response) = record.nextRecordID;
+        std::copy(
+            reinterpret_cast<uint8_t*>(&record.recordID) + requestData->offset,
+            reinterpret_cast<uint8_t*>(&record.recordID) + requestData->offset +
+                readLength,
+            static_cast<uint8_t*>(response) + sizeof(record.nextRecordID));
         *data_len = sizeof(record.nextRecordID) + readLength;
     }
-
-    return IPMI_CC_OK;
-}
-
-ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                          ipmi_request_t request, ipmi_response_t response,
-                          ipmi_data_len_t data_len, ipmi_context_t context)
-{
-    namespace fs = std::experimental::filesystem;
-    auto requestData =
-        reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>(request);
-
-    if (!checkSELReservation(requestData->reservationID))
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_RESERVATION_ID;
-    }
-
-    // Per the IPMI spec, need to cancel the reservation when a SEL entry is
-    // deleted
-    cancelSELReservation();
-
-    try
-    {
-        ipmi::sel::readLoggingObjectPaths(cache::paths);
-    }
-    catch (const sdbusplus::exception::SdBusError& e)
-    {
-        // readLoggingObjectPaths will throw exception if there are no error
-        // log entries.
-        *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
-    }
-
-    if (cache::paths.empty())
-    {
-        *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
-    }
-
-    ipmi::sel::ObjectPaths::const_iterator iter;
-    uint16_t delRecordID = 0;
-
-    if (requestData->selRecordID == ipmi::sel::firstEntry)
-    {
-        iter = cache::paths.begin();
-        fs::path path(*iter);
-        delRecordID = static_cast<uint16_t>(
-            std::stoul(std::string(path.filename().c_str())));
-    }
-    else if (requestData->selRecordID == ipmi::sel::lastEntry)
-    {
-        iter = cache::paths.end();
-        fs::path path(*iter);
-        delRecordID = static_cast<uint16_t>(
-            std::stoul(std::string(path.filename().c_str())));
-    }
-    else
-    {
-        std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
-                              std::to_string(requestData->selRecordID);
-
-        iter = std::find(cache::paths.begin(), cache::paths.end(), objPath);
-        if (iter == cache::paths.end())
-        {
-            *data_len = 0;
-            return IPMI_CC_SENSOR_INVALID;
-        }
-        delRecordID = requestData->selRecordID;
-    }
-
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    std::string service;
-
-    try
-    {
-        service = ipmi::getService(bus, ipmi::sel::logDeleteIntf, *iter);
-    }
-    catch (const std::runtime_error& e)
-    {
-        log<level::ERR>(e.what());
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    auto methodCall = bus.new_method_call(service.c_str(), (*iter).c_str(),
-                                          ipmi::sel::logDeleteIntf, "Delete");
-    auto reply = bus.call(methodCall);
-    if (reply.is_method_error())
-    {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
-    // Invalidate the cache of dbus entry objects.
-    cache::paths.clear();
-    std::memcpy(response, &delRecordID, sizeof(delRecordID));
-    *data_len = sizeof(delRecordID);
 
     return IPMI_CC_OK;
 }
@@ -368,6 +510,11 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
                     ipmi_response_t response, ipmi_data_len_t data_len,
                     ipmi_context_t context)
 {
+    if (*data_len != sizeof(ipmi::sel::ClearSELRequest))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
     auto requestData =
         reinterpret_cast<const ipmi::sel::ClearSELRequest*>(request);
 
@@ -392,7 +539,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
      */
     if (requestData->eraseOperation == ipmi::sel::getEraseStatus)
     {
-        std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
+        *static_cast<uint8_t*>(response) = eraseProgress;
         *data_len = sizeof(eraseProgress);
         return IPMI_CC_OK;
     }
@@ -400,72 +547,18 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     // Per the IPMI spec, need to cancel any reservation when the SEL is cleared
     cancelSELReservation();
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    ipmi::sel::ObjectPaths objectPaths;
-    auto depth = 0;
-
-    auto mapperCall =
-        bus.new_method_call(ipmi::sel::mapperBusName, ipmi::sel::mapperObjPath,
-                            ipmi::sel::mapperIntf, "GetSubTreePaths");
-    mapperCall.append(ipmi::sel::logBasePath);
-    mapperCall.append(depth);
-    mapperCall.append(ipmi::sel::ObjectPaths({ipmi::sel::logEntryIntf}));
-
-    try
+    // Clear the SEL by by rotating the journal to start a new file then
+    // vacuuming to keep only the new file
+    if (system("journalctl --rotate") != 0)
     {
-        auto reply = bus.call(mapperCall);
-        if (reply.is_method_error())
-        {
-            std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-            *data_len = sizeof(eraseProgress);
-            return IPMI_CC_OK;
-        }
-
-        reply.read(objectPaths);
-        if (objectPaths.empty())
-        {
-            std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-            *data_len = sizeof(eraseProgress);
-            return IPMI_CC_OK;
-        }
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    if (system("journalctl --vacuum-files=1") != 0)
     {
-        std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-        *data_len = sizeof(eraseProgress);
-        return IPMI_CC_OK;
-    }
-
-    std::string service;
-
-    try
-    {
-        service = ipmi::getService(bus, ipmi::sel::logDeleteIntf,
-                                   objectPaths.front());
-    }
-    catch (const std::runtime_error& e)
-    {
-        log<level::ERR>(e.what());
-        *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    for (const auto& iter : objectPaths)
-    {
-        auto methodCall = bus.new_method_call(
-            service.c_str(), iter.c_str(), ipmi::sel::logDeleteIntf, "Delete");
-
-        auto reply = bus.call(methodCall);
-        if (reply.is_method_error())
-        {
-            *data_len = 0;
-            return IPMI_CC_UNSPECIFIED_ERROR;
-        }
-    }
-
-    // Invalidate the cache of dbus entry objects.
-    cache::paths.clear();
-    std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
+    *static_cast<uint8_t*>(response) = eraseProgress;
     *data_len = sizeof(eraseProgress);
     return IPMI_CC_OK;
 }
@@ -597,43 +690,97 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+ipmi_ret_t addSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    static constexpr char const* ipmiSELObject = "com.intel.IpmiSel";
+    static constexpr char const* ipmiSELPath = "/com/intel/IpmiSel";
+    static constexpr char const* ipmiSELAddInterface = "com.intel.IpmiSelAdd";
+    static const std::string ipmiSELAddMessage =
+        "IPMI SEL entry logged using IPMI Add SEL Entry command.";
+    uint16_t recordID = 0;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-    ipmi_ret_t rc = IPMI_CC_OK;
-    ipmi_add_sel_request_t* p = (ipmi_add_sel_request_t*)request;
-    uint16_t recordid;
+    if (*data_len != sizeof(ipmi_add_sel_request_t))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    ipmi_add_sel_request_t* req = (ipmi_add_sel_request_t*)request;
 
-    // Per the IPMI spec, need to cancel the reservation when a SEL entry is
+    // Per the IPMI spec, need to cancel any reservation when a SEL entry is
     // added
     cancelSELReservation();
 
-    recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
-
-    *data_len = sizeof(recordid);
-
-    // Pack the actual response
-    std::memcpy(response, &p->eventdata[1], 2);
-
-    // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
-    // a maintenance procedure associated with eSEL record.
-    static constexpr auto procedureType = 0xDE;
-    if (p->recordtype == procedureType)
+    if (req->recordtype == ipmi::sel::systemEvent)
     {
-        // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
-        // procedure number.
-        createProcedureLogEntry(p->sensortype);
+        std::string sensorPath = getPathFromSensorNumber(req->sensornumber);
+        std::vector<uint8_t> eventData(
+            req->eventdata, req->eventdata + ipmi::sel::systemEventSize);
+        bool assert = req->eventdir & 0x80 ? false : true;
+        uint16_t genId = req->generatorid[0] |
+                         static_cast<uint16_t>(req->generatorid[1]) << 8;
+        sdbusplus::message::message writeSEL = bus.new_method_call(
+            ipmiSELObject, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
+        writeSEL.append(ipmiSELAddMessage, sensorPath, eventData, assert,
+                        genId);
+        try
+        {
+            sdbusplus::message::message writeSELResp = bus.call(writeSEL);
+            writeSELResp.read(recordID);
+        }
+        catch (sdbusplus::exception_t&)
+        {
+            log<level::ERR>("error writing SEL");
+            *data_len = 0;
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
     }
-    else
+    else if (req->recordtype >= ipmi::sel::oemTsEventFirst &&
+             req->recordtype <= ipmi::sel::oemTsEventLast)
     {
-        send_esel(recordid);
+        std::vector<uint8_t> eventData(
+            req->generatorid, req->generatorid + ipmi::sel::oemTsEventSize);
+        sdbusplus::message::message writeSEL = bus.new_method_call(
+            ipmiSELObject, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAddOem");
+        writeSEL.append(ipmiSELAddMessage, eventData, req->recordtype);
+        try
+        {
+            sdbusplus::message::message writeSELResp = bus.call(writeSEL);
+            writeSELResp.read(recordID);
+        }
+        catch (sdbusplus::exception_t&)
+        {
+            log<level::ERR>("error writing SEL");
+            *data_len = 0;
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+    else if (req->recordtype >= ipmi::sel::oemEventFirst &&
+             req->recordtype <= ipmi::sel::oemEventLast)
+    {
+        std::vector<uint8_t> eventData(
+            req->timestamp, req->timestamp + ipmi::sel::oemEventSize);
+        sdbusplus::message::message writeSEL = bus.new_method_call(
+            ipmiSELObject, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAddOem");
+        writeSEL.append(ipmiSELAddMessage, eventData, req->recordtype);
+        try
+        {
+            sdbusplus::message::message writeSELResp = bus.call(writeSEL);
+            writeSELResp.read(recordID);
+        }
+        catch (sdbusplus::exception_t&)
+        {
+            log<level::ERR>("error writing SEL");
+            *data_len = 0;
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
     }
 
-    return rc;
+    *static_cast<uint16_t*>(response) = recordID;
+    *data_len = sizeof(recordID);
+    return IPMI_CC_OK;
 }
 
 // Read FRU info area
@@ -781,13 +928,9 @@ void register_netfn_storage_functions()
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
                            getSELEntry, PRIVILEGE_USER);
 
-    // <Delete SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL,
-                           deleteSELEntry, PRIVILEGE_OPERATOR);
-
     // <Add SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
-                           ipmi_storage_add_sel, PRIVILEGE_OPERATOR);
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL, addSELEntry,
+                           PRIVILEGE_OPERATOR);
     // <Clear SEL>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL, NULL, clearSEL,
                            PRIVILEGE_OPERATOR);
