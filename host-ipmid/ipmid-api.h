@@ -79,8 +79,8 @@ void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t, ipmi_context_t,
                             ipmid_callback_t, ipmi_cmd_privilege_t);
 
 unsigned short reserveSel(void);
-bool selReserved(unsigned short id);
-void cancelSelReservation(void);
+bool checkSELReservation(unsigned short id);
+void cancelSELReservation(void);
 
 // These are the command network functions, the response
 // network functions are the function + 1. So to determine
