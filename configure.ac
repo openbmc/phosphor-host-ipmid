@@ -56,6 +56,14 @@ AS_IF([test "x$enable_softoff" != "xno"],
     [AC_CHECK_PROG([DIRNAME], dirname, dirname)]
 )
 
+# build with journal-based SEL
+AC_ARG_WITH([journal-sel],
+    AS_HELP_STRING([--with-journal-sel], [Builds with journal-based SEL commands instead of D-Bus-based])
+)
+AS_IF([test "x$with_journal_sel" = "xyes"], [
+    AX_APPEND_COMPILE_FLAGS([-DJOURNAL_SEL], [CXXFLAGS])
+])
+
 # Make sure the pkgconfigdata is configured for automake
 PKG_INSTALLDIR
 
