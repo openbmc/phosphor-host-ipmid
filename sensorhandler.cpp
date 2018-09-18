@@ -1082,7 +1082,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     catch (sdbusplus::exception_t& e)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
+        log<level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     return IPMI_CC_OK;

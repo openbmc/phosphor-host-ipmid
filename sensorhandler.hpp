@@ -29,16 +29,6 @@ enum device_type
     IPMI_LOGICAL_FRU = 0x80,
 };
 
-// Discrete sensor types.
-enum ipmi_sensor_types
-{
-    IPMI_SENSOR_TEMP = 0x01,
-    IPMI_SENSOR_VOLTAGE = 0x02,
-    IPMI_SENSOR_CURRENT = 0x03,
-    IPMI_SENSOR_FAN = 0x04,
-    IPMI_SENSOR_TPM = 0xCC,
-};
-
 /** @brief Custom exception for reading sensors that are not funcitonal.
  */
 struct SensorFunctionalError : public std::exception

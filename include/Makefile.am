@@ -16,6 +16,8 @@ nobase_include_HEADERS = \
 	ipmid/types.hpp \
 	ipmid/utility.hpp \
 	ipmid/utils.hpp \
+	ipmid/sensorutils.hpp \
+	ipmid/sdrutils.hpp \
 	ipmid-host/cmd.hpp \
 	ipmid-host/cmd-utils.hpp
 
