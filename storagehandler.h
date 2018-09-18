@@ -26,7 +26,7 @@ struct ipmi_add_sel_request_t
 
     uint8_t recordid[2];
     uint8_t recordtype;
-    uint8_t timestampe[4];
+    uint8_t timestamp[4];
     uint8_t generatorid[2];
     uint8_t evmrev;
     uint8_t sensortype;
