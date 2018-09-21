@@ -45,9 +45,14 @@ class PasswdMgr
 
     /** @brief Clear username and password entry for the specified user
      *
-     *  @param[in] userName - username
+     *  @param[in] userName - user name that has to be renamed / deleted
+     *  @param[in] newUserName - new user name. If empty, userName will be
+     *   deleted.
+     *
+     * @return error response
      */
-    int clearUserEntry(const std::string& userName);
+    int updateUserEntry(const std::string& userName,
+                        const std::string& newUserName);
 
   private:
     std::unordered_map<std::string, std::string> passwdMapList;
@@ -70,11 +75,14 @@ class PasswdMgr
     /** @brief  Updates special password file by clearing the password entry
      *  for the user specified.
      *
-     *  @param[in] userName - user name entry that has to be removed.
+     *  @param[in] userName - user name that has to be renamed / deleted
+     *  @param[in] newUserName - new user name. If empty, userName will be
+     *   deleted.
      *
      * @return error response
      */
-    int updatePasswdSpecialFile(const std::string& userName);
+    int updatePasswdSpecialFile(const std::string& userName,
+                                const std::string& newUserName);
     /** @brief encrypts or decrypt the data provided
      *
      *  @param[in] isEncrypt - do encrypt if set to 1, else do decrypt.

@@ -28,9 +28,22 @@ ipmi_ret_t ipmiUserGetPassword(const std::string& userName,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmiUserClearPassword(const std::string& userName)
+ipmi_ret_t ipmiClearUserEntryPassword(const std::string& userName)
 {
-    passwdMgr.clearUserEntry(userName);
+    if (passwdMgr.updateUserEntry(userName, "") != 0)
+    {
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmiRenameUserEntryPassword(const std::string& userName,
+                                       const std::string& newUserName)
+{
+    if (passwdMgr.updateUserEntry(userName, newUserName) != 0)
+    {
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
     return IPMI_CC_OK;
 }
 
