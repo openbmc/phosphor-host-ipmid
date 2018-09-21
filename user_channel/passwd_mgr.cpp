@@ -78,7 +78,8 @@ std::string PasswdMgr::getPasswdByUserName(const std::string& userName)
     return iter->second;
 }
 
-int PasswdMgr::clearUserEntry(const std::string& userName)
+int PasswdMgr::updateUserEntry(const std::string& userName,
+                               const std::string& newUserName)
 {
     std::time_t updatedTime = getUpdatedFileTime();
     // Check file time stamp to know passwdMapList is up-to-date.
@@ -94,7 +95,7 @@ int PasswdMgr::clearUserEntry(const std::string& userName)
     }
 
     // Write passwdMap to Encryted file
-    if (updatePasswdSpecialFile(userName) != 0)
+    if (updatePasswdSpecialFile(userName, newUserName) != 0)
     {
         log<level::DEBUG>("Passwd file update failed");
         return -EIO;
@@ -330,7 +331,8 @@ int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
     return 0;
 }
 
-int PasswdMgr::updatePasswdSpecialFile(const std::string& userName)
+int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
+                                       const std::string& newUserName)
 {
     phosphor::user::shadow::Lock lock();
 
@@ -350,7 +352,8 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName)
 
     if (dataBuf.size() != 0)
     {
-        inBytesLen = dataBuf.size() + EVP_CIPHER_block_size(cipher);
+        inBytesLen =
+            dataBuf.size() + newUserName.size() + EVP_CIPHER_block_size(cipher);
     }
 
     std::vector<uint8_t> inBytes(inBytesLen);
@@ -368,12 +371,20 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName)
                 if (userName.compare(lineStr.substr(0, userEPos)) == 0)
                 {
                     isUsrFound = true;
+                    if (!newUserName.empty())
+                    {
+                        bytesWritten += std::snprintf(
+                            reinterpret_cast<char*>(&inBytes[0]) + bytesWritten,
+                            (inBytesLen - bytesWritten), "%s%s\n",
+                            newUserName.c_str(),
+                            lineStr.substr(userEPos, lineStr.size()).data());
+                    }
                 }
                 else
                 {
                     bytesWritten += std::snprintf(
                         reinterpret_cast<char*>(&inBytes[0]) + bytesWritten,
-                        inBytesLen, "%s\n", lineStr.data());
+                        (inBytesLen - bytesWritten), "%s\n", lineStr.data());
                 }
             }
             linePtr = strtok_r(NULL, "\n", &nToken);
