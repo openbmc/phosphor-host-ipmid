@@ -35,7 +35,18 @@ std::string ipmiUserGetPassword(const std::string& userName);
  *
  *  @return 0 on success, non-zero otherwise.
  */
-ipmi_ret_t ipmiUserClearPassword(const std::string& userName);
+ipmi_ret_t ipmiClearUserEntryPassword(const std::string& userName);
+
+/** @brief The IPMI call to reuse password entry for the renamed user
+ *  to another one
+ *
+ *  @param[in] userName
+ *  @param[in] newUserName
+ *
+ *  @return 0 on success, non-zero otherwise.
+ */
+ipmi_ret_t ipmiRenameUserEntryPassword(const std::string& userName,
+                                       const std::string& newUserName);
 
 // TODO: Define required user layer API Call's which user layer shared library
 // must implement.
