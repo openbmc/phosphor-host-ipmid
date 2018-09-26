@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 
+#include <chrono>
 #include <cstdint>
 #include <sdbusplus/server.hpp>
 
