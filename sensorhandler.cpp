@@ -854,9 +854,15 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             get_sdr::response::set_next_record_id(sensor->first, resp);
         }
 
-        *data_len = sizeof(get_sdr::GetSdrResp) - req->offset;
-        std::memcpy(resp->record_data, (char*)&record + req->offset,
-                    sizeof(get_sdr::SensorDataFullRecord) - req->offset);
+        size_t offset = req->offset;
+        if (offset > sizeof(get_sdr::SensorDataFullRecord))
+        {
+          offset = sizeof(get_sdr::SensorDataFullRecord);
+        }
+
+        *data_len = sizeof(get_sdr::GetSdrResp) - offset;
+        std::memcpy(resp->record_data, (char*)&record + offset,
+                    sizeof(get_sdr::SensorDataFullRecord) - offset);
     }
 
     return ret;
