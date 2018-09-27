@@ -447,6 +447,9 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     int i = 0;
     char* tokptr = NULL;
     char* id_octet = NULL;
+    size_t total_uuid_size = 0;
+    // 1 byte of resp is built from 2 chars of uuid.
+    constexpr size_t max_uuid_size = 2 * resp_size;
 
     // Status code.
     ipmi_ret_t rc = IPMI_CC_OK;
@@ -494,6 +497,15 @@ ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // Calculate the octet string size since it varies
         // Divide it by 2 for the array size since 1 byte is built from 2 chars
         int tmp_size = strlen(id_octet) / 2;
+
+        // Check if total UUID size has been exceeded
+        if (total_uuid_size += strlen(id_octet) > max_uuid_size)
+        {
+            // Error - UUID too long to store
+            log<level::ERR>("UUID too long", entry("UUID=%s", uuid));
+            rc = IPMI_CC_RESPONSE_ERROR;
+            goto finish;
+        }
 
         for (i = 0; i < tmp_size; i++)
         {
