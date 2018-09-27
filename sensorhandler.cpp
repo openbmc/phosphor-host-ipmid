@@ -757,23 +757,18 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
             (FRU_RECORD_ID_START + fru->first), resp);
     }
 
-    if (req->bytes_to_read > (sizeof(*resp) - req->offset))
+    // Check for invalid offset size
+    if (req->offset > sizeof(record))
     {
-        dataLength = (sizeof(*resp) - req->offset);
-    }
-    else
-    {
-        dataLength = req->bytes_to_read;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
     }
 
-    if (dataLength <= 0)
-    {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
+    dataLength = std::min(static_cast<size_t>(req->bytes_to_read),
+                          sizeof(record) - req->offset);
 
     std::memcpy(resp->record_data,
                 reinterpret_cast<uint8_t*>(&record) + req->offset,
-                (dataLength));
+                dataLength);
 
     *data_len = dataLength;
     *data_len += 2; // additional 2 bytes for next record ID
