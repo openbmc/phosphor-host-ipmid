@@ -848,9 +848,23 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             get_sdr::response::set_next_record_id(sensor->first, resp);
         }
 
-        *data_len = sizeof(get_sdr::GetSdrResp) - req->offset;
-        std::memcpy(resp->record_data, (char*)&record + req->offset,
-                    sizeof(get_sdr::SensorDataFullRecord) - req->offset);
+        if (req->offset > sizeof(record))
+        {
+            return IPMI_CC_PARM_OUT_OF_RANGE;
+        }
+
+        // data_len will ultimately be the size of the record, plus
+        // the size of the next record ID:
+        *data_len = std::min(static_cast<size_t>(req->bytes_to_read),
+                             sizeof(record) - req->offset);
+
+        std::memcpy(resp->record_data,
+                    reinterpret_cast<uint8_t*>(&record) + req->offset,
+                    *data_len);
+
+        // data_len should include the LSB and MSB:
+        *data_len += sizeof(resp->next_record_id_lsb)
+                     + sizeof(resp->next_record_id_msb);
     }
 
     return ret;
