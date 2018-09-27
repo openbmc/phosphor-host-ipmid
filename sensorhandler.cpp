@@ -757,7 +757,8 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
             (FRU_RECORD_ID_START + fru->first), resp);
     }
 
-    if (req->bytes_to_read > (sizeof(*resp) - req->offset))
+    if (req->bytes_to_read > (sizeof(*resp) - req->offset)
+        && req->offset < sizeof(*resp))
     {
         dataLength = (sizeof(*resp) - req->offset);
     }
