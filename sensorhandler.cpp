@@ -767,8 +767,7 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
                           sizeof(record) - req->offset);
 
     std::memcpy(resp->record_data,
-                reinterpret_cast<uint8_t*>(&record) + req->offset,
-                dataLength);
+                reinterpret_cast<uint8_t*>(&record) + req->offset, dataLength);
 
     *data_len = dataLength;
     *data_len += 2; // additional 2 bytes for next record ID
@@ -863,8 +862,8 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                     *data_len);
 
         // data_len should include the LSB and MSB:
-        *data_len += sizeof(resp->next_record_id_lsb)
-                     + sizeof(resp->next_record_id_msb);
+        *data_len +=
+            sizeof(resp->next_record_id_lsb) + sizeof(resp->next_record_id_msb);
     }
 
     return ret;
