@@ -4,11 +4,11 @@ sbin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
-	ipmid.cpp \
+	ipmid-new.cpp \
 	settings.cpp \
 	host-cmd-manager.cpp \
-	utils.cpp \
-	oemrouter.cpp
+	utils.cpp
+
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 
 libipmi20_BUILT_LIST = \
@@ -26,6 +26,7 @@ CLEANFILES = $(BUILT_SOURCES)
 
 BOOST_CXX = -DBOOST_ERROR_CODE_HEADER_ONLY \
 	    -DBOOST_SYSTEM_NO_DEPRECATED \
+	    -DBOOST_COROUTINES_NO_DEPRECATION_WARNING \
 	    -DBOOST_ALL_NO_LIB
 #TODO - Make this path a configure option (bitbake parameter)
 ipmid_CXXFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" \
@@ -39,6 +40,7 @@ ipmid_LDFLAGS = \
 	$(LIBADD_DLOPEN) \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	-lboost_coroutine \
 	-lstdc++fs \
 	-pthread \
 	-export-dynamic
@@ -95,7 +97,7 @@ TESTS = $(check_PROGRAMS)
 
 libipmi20_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
-	-version-info 0:0:0 -shared
+	-lboost_coroutine -version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
 	$(BOOST_CXX) $(PHOSPHOR_LOGGING_CFLAGS) \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \

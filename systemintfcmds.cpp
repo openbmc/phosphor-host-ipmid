@@ -5,11 +5,12 @@
 #include "host-cmd-manager.hpp"
 #include "host-interface.hpp"
 
-#include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
 
 #include <cstring>
 #include <host-ipmid/ipmid-host-cmd.hpp>
+#include <ipmi/ipmi-api.hpp>
+#include <ipmi/registration.hpp>
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -110,6 +111,8 @@ std::unique_ptr<phosphor::host::command::Host> host
     __attribute__((init_priority(101)));
 std::unique_ptr<sdbusplus::server::manager::manager> objManager
     __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::asio::connection> sdbusp
+    __attribute__((init_priority(101)));
 } // namespace
 
 #include <unistd.h>
@@ -131,14 +134,17 @@ void register_netfn_app_functions()
     // Create new xyz.openbmc_project.host object on the bus
     auto objPath = std::string{CONTROL_HOST_OBJ_MGR} + '/' + HOST_NAME + '0';
 
-    // Add sdbusplus ObjectManager.
-    auto& sdbusPlusHandler = ipmid_get_sdbus_plus_handler();
-    objManager = std::make_unique<sdbusplus::server::manager::manager>(
-        *sdbusPlusHandler, CONTROL_HOST_OBJ_MGR);
+    // Create a new sdbus connection so it can have a well-known name
+    auto io = getIoService();
+    sdbusp = std::make_unique<sdbusplus::asio::connection>(*io);
 
-    host = std::make_unique<phosphor::host::command::Host>(*sdbusPlusHandler,
+    // Add sdbusplus ObjectManager.
+    objManager = std::make_unique<sdbusplus::server::manager::manager>(
+        *sdbusp, CONTROL_HOST_OBJ_MGR);
+
+    host = std::make_unique<phosphor::host::command::Host>(*sdbusp,
                                                            objPath.c_str());
-    sdbusPlusHandler->request_name(CONTROL_HOST_BUSNAME);
+    sdbusp->request_name(CONTROL_HOST_BUSNAME);
 
     return;
 }
