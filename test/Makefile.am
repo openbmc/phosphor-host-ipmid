@@ -1,3 +1,18 @@
+COMMON_CXX = \
+	-flto \
+	-Wno-psabi \
+	$(SDBUSPLUS_CFLAGS) \
+	$(SYSTEMD_CFLAGS) \
+	$(libmapper_CFLAGS) \
+	$(SDBUSPLUS_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+	-DBOOST_ERROR_CODE_HEADER_ONLY \
+	-DBOOST_SYSTEM_NO_DEPRECATED \
+	-DBOOST_COROUTINES_NO_DEPRECATION_WARNING \
+	-DBOOST_ASIO_DISABLE_THREADS \
+	-DBOOST_ALL_NO_LIB
+
 AM_CPPFLAGS = -I$(top_srcdir) $(CODE_COVERAGE_CPPFLAGS) $(GTEST_CFLAGS)
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 AM_CXXFLAGS = $(GTEST_MAIN_CFLAGS) $(GTEST_CFLAGS)
@@ -12,7 +27,7 @@ sample_unittest_CPPFLAGS = -Igtest $(GTEST_CPPFLAGS) $(AM_CPPFLAGS)
 sample_unittest_CXXFLAGS = $(PTHREAD_CFLAGS) $(CODE_COVERAGE_CXXFLAGS) \
 			   $(CODE_COVERAGE_CFLAGS)
 sample_unittest_LDFLAGS = -lgtest_main -lgtest $(PTHREAD_LIBS) $(OESDK_TESTCASE_FLAGS) \
-   			$(CODE_COVERAGE_LDFLAGS)
+   			$(CODE_COVERAGE_LDFLAGS) -pthread
 sample_unittest_SOURCES = %reldir%/sample_unittest.cpp
 sample_unittest_LDADD = $(top_builddir)/sample.o
 check_PROGRAMS += %reldir%/sample_unittest
@@ -22,3 +37,27 @@ check_PROGRAMS += %reldir%/sample_unittest
 #check_PROGRAMS += oemrouter_unittest
 #oemrouter_unittest_SOURCES = oemrouter_unittest.cpp
 #oemrouter_unittest_LDADD = $(top_builddir)/oemrouter.o
+
+# Build/add message packing/unpacking unit tests
+message_unittest_CPPFLAGS = \
+	-Igtest \
+	$(GTEST_CPPFLAGS) \
+	$(AM_CPPFLAGS)
+message_unittest_CXXFLAGS = \
+	$(COMMON_CXX) \
+	$(PTHREAD_CFLAGS) \
+	$(CODE_COVERAGE_CXXFLAGS) \
+	$(CODE_COVERAGE_CFLAGS)
+message_unittest_LDFLAGS = \
+	-lgtest_main \
+	-lgtest \
+	-lsdbusplus \
+	-lsystemd \
+	$(PTHREAD_LIBS) \
+	$(OESDK_TESTCASE_FLAGS) \
+	$(CODE_COVERAGE_LDFLAGS) \
+	-pthread
+message_unittest_SOURCES = \
+	%reldir%/message/unpack.cpp \
+	%reldir%/message/pack.cpp
+check_PROGRAMS += message_unittest
