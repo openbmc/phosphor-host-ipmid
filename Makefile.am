@@ -10,11 +10,11 @@ sbin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
-	ipmid.cpp \
+	ipmid-new.cpp \
 	settings.cpp \
 	host-cmd-manager.cpp \
-	utils.cpp \
-	oemrouter.cpp
+	utils.cpp
+
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 
 libipmi20_BUILT_LIST = \
@@ -55,8 +55,8 @@ ipmid_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(CRYPTO_LIBS) \
+	-lboost_coroutine \
 	-lstdc++fs \
-	-pthread \
 	-export-dynamic
 
 # TODO: Rather than use -export-dynamic, we should use -export-symbol to have a
@@ -118,6 +118,7 @@ libipmi20_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-lstdc++fs \
+	-lboost_coroutine \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = $(COMMON_CXX)
 
