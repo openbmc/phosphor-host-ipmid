@@ -50,9 +50,6 @@ Makefile
 /ipmid
 .project
 /softoff/phosphor-softpoweroff
-/softoff/test/utest
-/softoff/test/*.log
-/softoff/test/*.trs
 /softoff/xyz/
 /test/sample_unittest
 /test/*.log

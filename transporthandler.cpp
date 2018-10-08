@@ -3,7 +3,6 @@
 #include "app/channel.hpp"
 #include "ipmid.hpp"
 #include "net.hpp"
-#include "timer.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>
@@ -13,6 +12,7 @@
 #include <fstream>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/timer.hpp>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -36,7 +36,7 @@ namespace filesystem = std::experimental::filesystem;
 #error filesystem not available
 #endif
 
-extern std::unique_ptr<phosphor::ipmi::Timer> networkTimer;
+extern std::unique_ptr<phosphor::Timer> networkTimer;
 
 const int SIZE_MAC = 18; // xx:xx:xx:xx:xx:xx
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
@@ -509,7 +509,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 }
 
                 // start/restart the timer
-                networkTimer->startTimer(networkTimeout);
+                networkTimer->start(networkTimeout);
             }
             else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
             {
@@ -955,8 +955,7 @@ void createNetworkTimer()
         std::function<void()> networkTimerCallback(
             std::bind(&commitNetworkChanges));
 
-        networkTimer = std::make_unique<phosphor::ipmi::Timer>(
-            ipmid_get_sd_event_connection(), networkTimerCallback);
+        networkTimer = std::make_unique<phosphor::Timer>(networkTimerCallback);
     }
 }
 

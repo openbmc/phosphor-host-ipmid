@@ -4,7 +4,7 @@
 #include <queue>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
-#include <timer.hpp>
+#include <sdbusplus/timer.hpp>
 #include <tuple>
 
 namespace phosphor
@@ -101,7 +101,7 @@ class Manager
     std::queue<CommandHandler> workQueue{};
 
     /** @brief Timer for commands to host */
-    phosphor::ipmi::Timer timer;
+    phosphor::Timer timer;
 
     /** @brief Match handler for the requested host state */
     sdbusplus::bus::match_t hostTransitionMatch;

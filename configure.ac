@@ -160,5 +160,5 @@ AS_IF([test "x$POWER_READING_SENSOR" == "x"],[POWER_READING_SENSOR="/usr/share/i
 AC_DEFINE_UNQUOTED([POWER_READING_SENSOR], ["$POWER_READING_SENSOR"], [Power reading sensor configuration file])
 
 # Create configured output
-AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile softoff/test/Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile])
 AC_OUTPUT

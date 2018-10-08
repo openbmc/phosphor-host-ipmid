@@ -4,7 +4,6 @@
 
 #include "ipmid.hpp"
 #include "settings.hpp"
-#include "timer.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
@@ -25,6 +24,7 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/server/object.hpp>
+#include <sdbusplus/timer.hpp>
 #include <sstream>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -49,13 +49,11 @@ namespace filesystem = std::experimental::filesystem;
 
 // Defines
 #define SET_PARM_VERSION 0x01
-#define SET_PARM_BOOT_FLAGS_PERMANENT 0x40      // boot flags data1 7th bit on
-#define SET_PARM_BOOT_FLAGS_VALID_ONE_TIME 0x80 // boot flags data1 8th bit on
-#define SET_PARM_BOOT_FLAGS_VALID_PERMANENT                                    \
-    0xC0 // boot flags data1 7 & 8 bit
-         // on
+#define SET_PARM_BOOT_FLAGS_PERMANENT 0x40
+#define SET_PARM_BOOT_FLAGS_VALID_ONE_TIME 0x80
+#define SET_PARM_BOOT_FLAGS_VALID_PERMANENT 0xC0
 
-std::unique_ptr<phosphor::ipmi::Timer> identifyTimer = nullptr;
+std::unique_ptr<phosphor::Timer> identifyTimer = nullptr;
 
 constexpr size_t SIZE_MAC = 18;
 constexpr size_t SIZE_BOOT_OPTION = (uint8_t)
@@ -1177,8 +1175,8 @@ void createIdentifyTimer()
 {
     if (!identifyTimer)
     {
-        identifyTimer = std::make_unique<phosphor::ipmi::Timer>(
-            ipmid_get_sd_event_connection(), enclosureIdentifyLedOff);
+        identifyTimer =
+            std::make_unique<phosphor::Timer>(enclosureIdentifyLedOff);
     }
 }
 
@@ -1205,7 +1203,7 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         // stop the timer if already started, for force identify we should
         // not turn off LED
-        identifyTimer->setTimer(SD_EVENT_OFF);
+        identifyTimer->stop();
         try
         {
             enclosureIdentifyLed(true);
@@ -1223,11 +1221,11 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // start the timer
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::seconds(identifyInterval));
-        identifyTimer->startTimer(time);
+        identifyTimer->start(time);
     }
     else if (!identifyInterval)
     {
-        identifyTimer->setTimer(SD_EVENT_OFF);
+        identifyTimer->stop();
         enclosureIdentifyLedOff();
     }
     return IPMI_CC_OK;

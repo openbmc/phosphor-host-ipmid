@@ -7,7 +7,6 @@ ipmid_SOURCES = \
 	ipmid.cpp \
 	settings.cpp \
 	host-cmd-manager.cpp \
-	timer.cpp \
 	utils.cpp \
 	oemrouter.cpp
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
