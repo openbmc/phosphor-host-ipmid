@@ -158,6 +158,13 @@ libsysintfcmds_la_CXXFLAGS = \
 	-flto
 
 nobase_include_HEADERS = \
+	ipmi/ipmi-api.hpp \
+	ipmi/handler.hpp \
+	ipmi/message.hpp \
+	ipmi/message/pack.hpp \
+	ipmi/message/types.hpp \
+	ipmi/message/unpack.hpp \
+	ipmi/registration.hpp \
 	host-ipmid/iana.hpp \
 	user_channel/user_layer.hpp \
 	user_channel/channel_layer.hpp \
