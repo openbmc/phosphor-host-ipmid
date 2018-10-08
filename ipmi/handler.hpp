@@ -214,6 +214,46 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         return response;
     }
 };
+template <>
+class IpmiHandler<oem::Handler> final : public HandlerBase
+{
+  public:
+    explicit IpmiHandler(const oem::Handler& handler) : handler_(handler)
+    {
+    }
+
+  private:
+    oem::Handler handler_;
+
+    message::Response::ptr
+        executeCallback(message::Request::ptr request) override
+    {
+        message::Response::ptr response = request->makeResponse();
+        size_t len = request->payload.size();
+        // allocate a big response buffer here
+        response->payload.resize(
+            getChannelMaxTransferSize(request->ctx->channel));
+
+        Cc ccRet{ccSuccess};
+        try
+        {
+            ccRet = handler_(request->ctx->cmd, request->payload.data(),
+                             response->payload.data(), &len);
+        }
+        catch (const std::exception& e)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Legacy OEM Handler failed to catch exception",
+                phosphor::logging::entry("EXCEPTION=%s", e.what()),
+                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
+                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            return errorResponse(request, ccUnspecifiedError);
+        }
+        response->cc = ccRet;
+        response->payload.resize(len);
+        return response;
+    }
+};
 
 inline auto makeLegacyHandler(const ipmid_callback_t& handler)
 {
@@ -221,6 +261,12 @@ inline auto makeLegacyHandler(const ipmid_callback_t& handler)
     return ptr;
 }
 
+inline auto makeLegacyHandler(oem::Handler&& handler)
+{
+    HandlerBase::ptr ptr(
+        new IpmiHandler<oem::Handler>(std::forward<oem::Handler>(handler)));
+    return ptr;
+}
 #endif // ALLOW_DEPRECATED_API
 
 template <typename Handler>
