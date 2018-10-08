@@ -150,6 +150,14 @@ static std::map<std::pair<Iana, Cmd>, /* key is Iana/Cmd (NetFn is 2Eh) */
                 HandlerTuple>
     oemHandlerMap;
 
+using FilterTuple = std::tuple<int,             /* prio */
+                               FilterBase::ptr, /* filter */
+                               std::any         /* ctx */
+                               >;
+
+/* list to hold all registered ipmi command filters */
+static std::list<FilterTuple> filterList;
+
 namespace impl
 {
 /* common function to register all standard IPMI handlers */
@@ -218,6 +226,18 @@ void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
     {
         mapCmd = item;
     }
+}
+
+/* common function to register all IPMI filter handlers */
+void registerFilter(int prio, FilterBase::ptr filter, std::any& ctx)
+{
+    FilterTuple item(prio, filter, ctx);
+
+    // walk the list and put it in the right place
+    auto i = filterList.begin();
+    for (; i != filterList.end() && std::get<int>(*i) > prio; i++)
+        ;
+    filterList.insert(i, item);
 }
 
 } // namespace impl
@@ -366,7 +386,12 @@ auto executionEntry(boost::asio::yield_context yield, NetFn netFn, uint8_t lun,
     auto ctx = std::make_shared<ipmi::Context>(netFn, cmd, 0, 0,
                                                ipmi::privilegeAdmin, &yield);
     auto request = std::make_shared<ipmi::message::Request>(ctx, data);
-    auto response = executeIpmiCommand(request);
+    auto response = filterIpmiCommand(request);
+    // an empty response means the command was not filtered
+    if (!response)
+    {
+        response = executeIpmiCommand(request);
+    }
 
     // Responses in IPMI require a bit set.  So there ya go...
     netFn |= 0x01;
@@ -582,7 +607,12 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         std::make_shared<ipmi::Context>(netFn, cmd, 0, 0, ipmi::privilegeAdmin);
     auto request = std::make_shared<ipmi::message::Request>(ctx, data);
 
-    auto response = ipmi::executeIpmiCommand(request);
+    auto response = ipmi::filterIpmiCommand(request);
+    // an empty response means the command was not filtered
+    if (!response)
+    {
+        response = ipmi::executeIpmiCommand(request);
+    }
 
     // Responses in IPMI require a bit set.  So there ya go...
     netFn |= 0x01;
