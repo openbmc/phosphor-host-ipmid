@@ -4,11 +4,11 @@ sbin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
-	ipmid.cpp \
+	ipmid-new.cpp \
 	settings.cpp \
 	host-cmd-manager.cpp \
-	utils.cpp \
-	oemrouter.cpp
+	utils.cpp
+
 nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 
 libipmi20_BUILT_LIST = \
@@ -26,8 +26,10 @@ CLEANFILES = $(BUILT_SOURCES)
 BOOST_CXX = \
 	-DBOOST_ERROR_CODE_HEADER_ONLY \
 	-DBOOST_SYSTEM_NO_DEPRECATED \
+	-DBOOST_COROUTINES_NO_DEPRECATION_WARNING \
 	-DBOOST_ALL_NO_LIB
 
+ipmid_DEPENDENCIES = libuserlayer.la
 ipmid_CXXFLAGS = \
 	$(BOOST_CXX) \
 	$(PHOSPHOR_LOGGING_CFLAGS) \
@@ -39,7 +41,9 @@ ipmid_LDFLAGS = \
 	$(LIBADD_DLOPEN) \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	-luserlayer \
 	$(CRYPTO_LIBS) \
+	-lboost_coroutine \
 	-lstdc++fs \
 	-pthread \
 	-export-dynamic
@@ -77,7 +81,7 @@ libuserlayer_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-lstdc++fs \
-	$(LIBPAM) $(LIBCRYPT) -lpam_misc -lssl \
+	$(LIBPAM) $(LIBCRYPT) -lpam_misc $(CRYPTO_LIBS) \
 	-version-info 0:0:0 -shared
 libuserlayer_la_CXXFLAGS = \
 	$(SYSTEMD_CFLAGS) \
@@ -127,6 +131,7 @@ libipmi20_la_LDFLAGS = \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-lstdc++fs \
 	-luserlayer \
+	-lboost_coroutine \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = \
 	$(SYSTEMD_CFLAGS) \
