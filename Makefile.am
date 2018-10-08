@@ -15,8 +15,6 @@ ipmid_SOURCES = \
 	host-cmd-manager.cpp \
 	utils.cpp
 
-nodist_ipmid_SOURCES = ipmiwhitelist.cpp
-
 libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
 	inventory-sensor-gen.cpp \
@@ -150,6 +148,19 @@ libsysintfcmds_la_LDFLAGS = \
 	$(SDBUSPLUS_LIBS) \
 	-version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = $(COMMON_CXX)
+
+libwhitelistdir = ${libdir}/ipmid-providers
+libwhitelist_LTLIBRARIES = libwhitelist.la
+libwhitelist_la_SOURCES = \
+	whitelist-filter.cpp
+libwhitelist_la_LDFLAGS = \
+	$(SYSTEMD_LIBS) \
+	$(libmapper_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	-version-info 0:0:0 -shared
+libwhitelist_la_CXXFLAGS = $(COMMON_CXX)
+nodist_libwhitelist_la_SOURCES = ipmiwhitelist.cpp
 
 nobase_include_HEADERS = \
 	ipmi/ipmi-api.hpp \
