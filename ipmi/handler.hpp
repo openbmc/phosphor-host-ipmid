@@ -230,6 +230,34 @@ class IpmiHandler<ipmid_callback_t> : public HandlerBase
         return response;
     }
 };
+template <>
+class IpmiHandler<oem::Handler> : public HandlerBase
+{
+  public:
+    explicit IpmiHandler(const oem::Handler& handler) : handler_(handler)
+    {
+    }
+
+  private:
+    oem::Handler handler_;
+
+    message::Response::ptr
+        executeCallback(message::Request::ptr request) override
+    {
+        auto response = request->makeResponse();
+        size_t len = request->raw.size();
+        // (re-)allocate a big request buffer here
+        request->raw.resize(64 * 1024);
+        // allocate a big response buffer here
+        response->raw.resize(64 * 1024);
+
+        auto ccRet = handler_(request->ctx->cmd, request->raw.data(),
+                              response->raw.data(), &len);
+        response->cc = ccRet;
+        response->raw.resize(len);
+        return response;
+    }
+};
 
 inline auto makeLegacyHandler(const ipmid_callback_t& handler)
 {
@@ -237,6 +265,12 @@ inline auto makeLegacyHandler(const ipmid_callback_t& handler)
     return ptr;
 }
 
+inline auto makeLegacyHandler(oem::Handler&& handler)
+{
+    HandlerBase::ptr ptr(
+        new IpmiHandler<oem::Handler>(std::forward<oem::Handler>(handler)));
+    return ptr;
+}
 #endif // ALLOW_DEPRECATED_API
 
 template <typename Handler>
