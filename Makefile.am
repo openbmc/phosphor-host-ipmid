@@ -39,6 +39,8 @@ COMMON_CXX = \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
 	-DBOOST_ERROR_CODE_HEADER_ONLY \
 	-DBOOST_SYSTEM_NO_DEPRECATED \
+	-DBOOST_COROUTINES_NO_DEPRECATION_WARNING \
+	-DBOOST_ASIO_DISABLE_THREADS \
 	-DBOOST_ALL_NO_LIB
 
 ipmid_CXXFLAGS = $(COMMON_CXX)
@@ -148,6 +150,13 @@ libsysintfcmds_la_LDFLAGS = \
 libsysintfcmds_la_CXXFLAGS = $(COMMON_CXX)
 
 nobase_include_HEADERS = \
+	ipmi/ipmi-api.hpp \
+	ipmi/handler.hpp \
+	ipmi/message.hpp \
+	ipmi/message/pack.hpp \
+	ipmi/message/types.hpp \
+	ipmi/message/unpack.hpp \
+	ipmi/registration.hpp \
 	user_channel/channel_layer.hpp \
 	user_channel/user_layer.hpp
 
