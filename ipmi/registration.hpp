@@ -28,6 +28,11 @@ namespace impl
 // IPMI command handler registration implementation
 bool registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
                      ::ipmi::HandlerBase::ptr handler, std::any& ctx);
+bool registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+                          ::ipmi::HandlerBase::ptr handler, std::any& ctx);
+bool registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+                        ::ipmi::HandlerBase::ptr handler, std::any& ctx);
+
 } // namespace impl
 
 template <typename Handler>
@@ -47,6 +52,76 @@ bool registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
     auto h = ipmi::makeHandler(handler);
     // add in a std::any(ctx) to the mix
     return impl::registerHandler(prio, netFn, cmd, priv, h, std::any(ctx));
+}
+
+/* From IPMI 2.0 spec Network Function Codes Table (Row 2Ch):
+   The first data byte position in requests and responses under this network
+   function identifies the defining body that specifies command functionality.
+   Software assumes that the command and completion code field positions will
+   hold command and completion code values.
+
+   The following values are used to identify the defining body:
+   00h PICMG - PCI Industrial Computer Manufacturer’s Group.  (www.picmg.com)
+   01h DMTF Pre-OS Working Group ASF Specification (www.dmtf.org)
+   02h Server System Infrastructure (SSI) Forum (www.ssiforum.org)
+   03h VITA Standards Organization (VSO) (www.vita.com)
+   DCh DCMI Specifications (www.intel.com/go/dcmi)
+   all other Reserved
+
+   When this network function is used, the ID for the defining body occupies
+   the first data byte in a request, and the second data byte (following the
+   completion code) in a response.
+ */
+template <typename Handler>
+void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+                          Handler&& handler)
+{
+    auto h = ipmi::makeHandler(handler);
+    // use an empty std::any for context since none was passed in
+    std::any empty;
+    impl::registerGroupHandler(prio, group, cmd, priv, h, empty);
+}
+
+template <typename Handler, typename Context>
+void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+                          Handler&& handler, Context& ctx)
+{
+    auto h = ipmi::makeHandler(handler);
+    // add in a std::any(ctx) to the mix
+    impl::registerGroupHandler(prio, group, cmd, priv, h, std::any(ctx));
+}
+
+/* From IPMI spec Network Function Codes Table (Row 2Eh):
+   The first three data bytes of requests and responses under this network
+   function explicitly identify the OEM or non-IPMI group that specifies the
+   command functionality. While the OEM or non-IPMI group defines the
+   functional semantics for the cmd and remaining data fields, the cmd field
+   is required to hold the same value in requests and responses for a given
+   operation in order to be supported under the IPMI message handling and
+   transport mechanisms.
+
+   When this network function is used, the IANA Enterprise Number for the
+   defining body occupies the first three data bytes in a request, and the
+   first three data bytes following the completion code position in a
+   response.
+ */
+template <typename Handler>
+void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+                        Handler&& handler)
+{
+    auto h = ipmi::makeHandler(handler);
+    // use an empty std::any for context since none was passed in
+    std::any empty;
+    impl::registerOemHandler(prio, iana, cmd, priv, h, empty);
+}
+
+template <typename Handler, typename Context>
+void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+                        Handler&& handler, Context& ctx)
+{
+    auto h = ipmi::makeHandler(handler);
+    // add in a std::any(ctx) to the mix
+    impl::registerOemHandler(prio, iana, cmd, priv, h, std::any(ctx));
 }
 
 } // namespace ipmi
