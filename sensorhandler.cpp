@@ -139,11 +139,6 @@ int set_sensor_dbus_state_s(uint8_t number, const char* method,
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message* m = NULL;
 
-    std::fprintf(ipmidbus,
-                 "Attempting to set a dbus Variant Sensor 0x%02x via %s with a "
-                 "value of %s\n",
-                 number, method, value);
-
     r = find_openbmc_path(number, &a);
 
     if (r < 0)
@@ -189,11 +184,6 @@ int set_sensor_dbus_state_y(uint8_t number, const char* method,
     int r;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus_message* m = NULL;
-
-    std::fprintf(ipmidbus,
-                 "Attempting to set a dbus Variant Sensor 0x%02x via %s with a "
-                 "value of 0x%02x\n",
-                 number, method, value);
 
     r = find_openbmc_path(number, &a);
 
