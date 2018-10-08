@@ -125,6 +125,16 @@ static std::unordered_map<unsigned int, /* key is NetFn/Cmd */
                           HandlerTuple>
     handlerMap;
 
+/* special map for decoding Group registered commands (NetFn 2Ch) */
+static std::unordered_map<unsigned int, /* key is Group/Cmd (NetFn is 2Ch) */
+                          HandlerTuple>
+    groupHandlerMap;
+
+/* special map for decoding OEM registered commands (NetFn 2Eh) */
+static std::unordered_map<unsigned int, /* key is Iana/Cmd (NetFn is 2Eh) */
+                          HandlerTuple>
+    oemHandlerMap;
+
 namespace impl
 {
 /* common function to register all standard IPMI handlers */
@@ -144,6 +154,42 @@ bool registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
 
     // consult the handler map and look for a match
     auto& mapCmd = handlerMap[netFnCmd];
+    if (!std::get<HandlerBase::ptr>(mapCmd) || std::get<int>(mapCmd) <= prio)
+    {
+        mapCmd = item;
+        return true;
+    }
+    return false;
+}
+
+/* common function to register all Group IPMI handlers */
+bool registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+                          HandlerBase::ptr handler)
+{
+    // create key and value for this handler
+    unsigned int netFnCmd = makeCmdKey(group, cmd);
+    HandlerTuple item(prio, priv, handler);
+
+    // consult the handler map and look for a match
+    auto& mapCmd = groupHandlerMap[netFnCmd];
+    if (!std::get<HandlerBase::ptr>(mapCmd) || std::get<int>(mapCmd) <= prio)
+    {
+        mapCmd = item;
+        return true;
+    }
+    return false;
+}
+
+/* common function to register all OEM IPMI handlers */
+bool registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+                        HandlerBase::ptr handler)
+{
+    // create key and value for this handler
+    unsigned int netFnCmd = makeCmdKey(iana, cmd);
+    HandlerTuple item(prio, priv, handler);
+
+    // consult the handler map and look for a match
+    auto& mapCmd = oemHandlerMap[netFnCmd];
     if (!std::get<HandlerBase::ptr>(mapCmd) || std::get<int>(mapCmd) <= prio)
     {
         mapCmd = item;
@@ -187,10 +233,56 @@ message::Response::ptr executeIpmiCommandCommon(
     return errorResponse(request, ccInvalidCommand);
 }
 
+message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
+{
+    // look up the group for this request
+    Group group;
+    if (0 != request->unpack(group))
+    {
+        return errorResponse(request, ccReqDataLenInvalid);
+    }
+    // The handler will need to unpack group as well; we just need it for lookup
+    request->payload.reset();
+    message::Response::ptr response =
+        executeIpmiCommandCommon(groupHandlerMap, group, request);
+    // if the handler should add the group; executeIpmiCommandCommon does not
+    if (response->cc != ccSuccess && response->payload.size() == 0)
+    {
+        response->pack(group);
+    }
+    return response;
+}
+
+message::Response::ptr executeIpmiOemCommand(message::Request::ptr request)
+{
+    // look up the iana for this request
+    Iana iana;
+    if (0 != request->unpack(iana))
+    {
+        return errorResponse(request, ccReqDataLenInvalid);
+    }
+    request->payload.reset();
+    message::Response::ptr response =
+        executeIpmiCommandCommon(oemHandlerMap, iana, request);
+    // if the handler should add the iana; executeIpmiCommandCommon does not
+    if (response->cc != ccSuccess && response->payload.size() == 0)
+    {
+        response->pack(iana);
+    }
+    return response;
+}
+
 message::Response::ptr executeIpmiCommand(message::Request::ptr request)
 {
     NetFn netFn = request->ctx->netFn;
-    // TODO: handler OEM and group OEM commands here
+    if (netFnGroup == netFn)
+    {
+        return executeIpmiGroupCommand(request);
+    }
+    else if (netFnOem == netFn)
+    {
+        return executeIpmiOemCommand(request);
+    }
     return executeIpmiCommandCommon(handlerMap, netFn, request);
 }
 
@@ -364,6 +456,37 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
     }
     ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv, h);
 }
+
+namespace oem
+{
+
+class LegacyRouter : public oem::Router
+{
+  public:
+    virtual ~LegacyRouter()
+    {
+    }
+
+    /// Enable message routing to begin.
+    void activate() override
+    {
+    }
+
+    void registerHandler(Number oen, ipmi_cmd_t cmd, Handler handler) override
+    {
+        auto h = ipmi::makeLegacyHandler(std::forward<Handler>(handler));
+        ipmi::impl::registerOemHandler(ipmi::prioOpenBmcBase, oen, cmd,
+                                       ipmi::Privilege::Admin, h);
+    }
+};
+static LegacyRouter legacyRouter;
+
+Router* mutableRouter()
+{
+    return &legacyRouter;
+}
+
+} // namespace oem
 
 /* legacy alternative to executionEntry */
 void handleLegacyIpmiCommand(sdbusplus::message::message& m)

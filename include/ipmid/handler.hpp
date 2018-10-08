@@ -354,6 +354,94 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
 };
 
 /**
+ * @brief Legacy IPMI OEM handler class
+ *
+ * Legacy IPMI OEM handlers will resolve into this class, which will behave the
+ * same way as the legacy IPMI queue, passing in a big buffer for the request
+ * and a big buffer for the response.
+ *
+ * As soon as all the handlers have been rewritten, this class will be marked as
+ * deprecated and eventually removed.
+ */
+template <>
+class IpmiHandler<oem::Handler> final : public HandlerBase
+{
+  public:
+    explicit IpmiHandler(const oem::Handler& handler) : handler_(handler)
+    {
+    }
+
+  private:
+    oem::Handler handler_;
+
+    /** @brief call the registered handler with the request
+     *
+     * This is called from the running queue context after it has already
+     * created a request object that contains all the information required to
+     * execute the ipmi command. This function will return the response object
+     * pointer that owns the response object that will ultimately get sent back
+     * to the requester.
+     *
+     * Because this is the legacy variety of IPMI handler, this function does
+     * not really have to do much other than pass the payload to the callback
+     * and return response to the caller.
+     *
+     * @param request a shared_ptr to a Request object
+     *
+     * @return a shared_ptr to a Response object
+     */
+    message::Response::ptr
+        executeCallback(message::Request::ptr request) override
+    {
+        message::Response::ptr response = request->makeResponse();
+        size_t len = request->payload.size();
+        // allocate a big response buffer here
+        response->payload.resize(
+            getChannelMaxTransferSize(request->ctx->channel));
+
+        Cc ccRet{ccSuccess};
+        try
+        {
+            ccRet = handler_(request->ctx->cmd, request->payload.data(),
+                             response->payload.data(), &len);
+        }
+        catch (const std::exception& e)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Legacy OEM Handler failed to catch exception",
+                phosphor::logging::entry("EXCEPTION=%s", e.what()),
+                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
+                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            return errorResponse(request, ccUnspecifiedError);
+        }
+        catch (...)
+        {
+            std::exception_ptr eptr;
+            try
+            {
+                eptr = std::current_exception();
+                if (eptr)
+                {
+                    std::rethrow_exception(eptr);
+                }
+            }
+            catch (const std::exception& e)
+            {
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "Handler failed to catch exception",
+                    phosphor::logging::entry("EXCEPTION=%s", e.what()),
+                    phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
+                    phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+                return errorResponse(request, ccUnspecifiedError);
+            }
+        }
+        response->cc = ccRet;
+        response->payload.resize(len);
+        return response;
+    }
+};
+
+/**
  * @brief create a legacy IPMI handler class and return a shared_ptr
  *
  * The queue uses a map of pointers to do the lookup. This function returns the
@@ -371,6 +459,24 @@ inline auto makeLegacyHandler(const ipmid_callback_t& handler)
     return ptr;
 }
 
+/**
+ * @brief create a legacy IPMI OEM handler class and return a shared_ptr
+ *
+ * The queue uses a map of pointers to do the lookup. This function returns the
+ * shared_ptr that owns the Handler object.
+ *
+ * This is called internally via the Router::registerHandler method.
+ *
+ * @param handler the function pointer to the callback
+ *
+ * @return A shared_ptr to the created handler object
+ */
+inline auto makeLegacyHandler(oem::Handler&& handler)
+{
+    HandlerBase::ptr ptr(
+        new IpmiHandler<oem::Handler>(std::forward<oem::Handler>(handler)));
+    return ptr;
+}
 #endif // ALLOW_DEPRECATED_API
 
 /**
