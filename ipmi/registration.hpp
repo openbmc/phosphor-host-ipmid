@@ -16,6 +16,7 @@
 #pragma once
 
 #include <any>
+#include <ipmi/filter.hpp>
 #include <ipmi/handler.hpp>
 #include <ipmi/ipmi-api.hpp>
 
@@ -32,6 +33,9 @@ void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
                           ::ipmi::HandlerBase::ptr handler, std::any& ctx);
 void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
                         ::ipmi::HandlerBase::ptr handler, std::any& ctx);
+
+// IPMI command filter registration implementation
+void registerFilter(int prio, ::ipmi::FilterBase::ptr filter, std::any& ctx);
 
 } // namespace impl
 
@@ -124,6 +128,22 @@ void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
     impl::registerOemHandler(prio, iana, cmd, priv, h, std::any(ctx));
 }
 
+template <typename Filter>
+void registerFilter(int prio, Filter&& filter)
+{
+    auto f = ipmi::makeFilter(filter);
+    // use an empty std::any for context since none was passed in
+    std::any empty;
+    impl::registerFilter(prio, f, empty);
+}
+
+template <typename Filter, typename Context>
+void registerFilter(int prio, Filter&& filter, Context& ctx)
+{
+    auto f = ipmi::makeFilter(filter);
+    // add in a std::any(ctx) to the mix
+    impl::registerFilter(prio, f, std::any(ctx));
+}
 } // namespace ipmi
 
 #ifdef ALLOW_DEPRECATED_API
