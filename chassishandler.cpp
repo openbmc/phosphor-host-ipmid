@@ -1398,7 +1398,7 @@ constexpr auto ipmiDefault = 0;
 std::map<IpmiValue, Source::Sources> sourceIpmiToDbus = {
     {0x01, Source::Sources::Network},
     {0x02, Source::Sources::Disk},
-    {0x05, Source::Sources::ExternalMedia},
+    //{0x05, Source::Sources::ExternalMedia},
     {ipmiDefault, Source::Sources::Default}};
 
 std::map<IpmiValue, Mode::Modes> modeIpmiToDbus = {
@@ -1409,7 +1409,7 @@ std::map<IpmiValue, Mode::Modes> modeIpmiToDbus = {
 std::map<Source::Sources, IpmiValue> sourceDbusToIpmi = {
     {Source::Sources::Network, 0x01},
     {Source::Sources::Disk, 0x02},
-    {Source::Sources::ExternalMedia, 0x05},
+    //{Source::Sources::ExternalMedia, 0x05},
     {Source::Sources::Default, ipmiDefault}};
 
 std::map<Mode::Modes, IpmiValue> modeDbusToIpmi = {
