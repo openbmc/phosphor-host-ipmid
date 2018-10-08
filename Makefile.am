@@ -125,6 +125,7 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
 nobase_include_HEADERS = \
 	ipmi/ipmi-api.hpp \
 	ipmi/handler.hpp \
+	ipmi/filter.hpp \
 	ipmi/message.hpp \
 	ipmi/message/pack.hpp \
 	ipmi/message/types.hpp \
