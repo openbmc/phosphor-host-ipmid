@@ -122,6 +122,19 @@ libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
                              $(SDBUSPLUS_CFLAGS) \
 							 -flto
 
+libwhitelistdir = ${libdir}/ipmid-providers
+libwhitelist_LTLIBRARIES = libwhitelist.la
+libwhitelist_la_SOURCES = \
+	whitelist-filter.cpp \
+	ipmiwhitelist.cpp
+libwhitelist_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	-version-info 0:0:0 -shared
+libwhitelist_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
+	$(BOOST_CXX) $(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+
+
 nobase_include_HEADERS = \
 	ipmi/ipmi-api.hpp \
 	ipmi/handler.hpp \
