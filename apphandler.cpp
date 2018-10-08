@@ -27,6 +27,7 @@
 #include <tuple>
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Control/Power/ACPIPowerState/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
 #include <xyz/openbmc_project/State/BMC/server.hpp>
@@ -174,16 +175,243 @@ bool getCurrentBmcState()
                BMC::BMCState::Ready;
 }
 
+namespace acpi_state
+{
+using namespace sdbusplus::xyz::openbmc_project::Control::Power::server;
+
+const static constexpr char* acpiObjPath =
+    "/xyz/openbmc_project/control/host0/acpi_power_state";
+const static constexpr char* acpiInterface =
+    "xyz.openbmc_project.Control.Power.ACPIPowerState";
+const static constexpr char* sysACPIProp = "SysACPIStatus";
+const static constexpr char* devACPIProp = "DevACPIStatus";
+
+// Defined in 20.6 of ipmi doc
+enum class PowerState : uint8_t
+{
+    S0_G0_D0 = 0x00,
+    S1_D1 = 0x01,
+    S2_D2 = 0x02,
+    S3_D3 = 0x03,
+    S4 = 0x04,
+    S5_G2 = 0x05,
+    S4_S5 = 0x06,
+    G3 = 0x07,
+    SLEEP = 0x08,
+    G1_SLEEP = 0x09,
+    OVERRIDE = 0x0a,
+    LEGACY_ON = 0x20,
+    LEGACY_OFF = 0x21,
+    UNKNOWN = 0x2a,
+    NOCHANGE = 0x7f,
+};
+
+static constexpr uint8_t stateChanged = 0x80;
+
+struct ACPIState
+{
+    uint8_t sysACPIState;
+    uint8_t devACPIState;
+} __attribute__((packed));
+
+std::map<ACPIPowerState::ACPI, PowerState> dbusToIPMI = {
+    {ACPIPowerState::ACPI::S0_G0_D0, PowerState::S0_G0_D0},
+    {ACPIPowerState::ACPI::S1_D1, PowerState::S1_D1},
+    {ACPIPowerState::ACPI::S2_D2, PowerState::S2_D2},
+    {ACPIPowerState::ACPI::S3_D3, PowerState::S3_D3},
+    {ACPIPowerState::ACPI::S4, PowerState::S4},
+    {ACPIPowerState::ACPI::S5_G2, PowerState::S5_G2},
+    {ACPIPowerState::ACPI::S4_S5, PowerState::S4_S5},
+    {ACPIPowerState::ACPI::G3, PowerState::G3},
+    {ACPIPowerState::ACPI::SLEEP, PowerState::SLEEP},
+    {ACPIPowerState::ACPI::G1_SLEEP, PowerState::G1_SLEEP},
+    {ACPIPowerState::ACPI::OVERRIDE, PowerState::OVERRIDE},
+    {ACPIPowerState::ACPI::LEGACY_ON, PowerState::LEGACY_ON},
+    {ACPIPowerState::ACPI::LEGACY_OFF, PowerState::LEGACY_OFF},
+    {ACPIPowerState::ACPI::Unknown, PowerState::UNKNOWN}};
+} // namespace acpi_state
+
 ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                          ipmi_request_t request,
                                          ipmi_response_t response,
                                          ipmi_data_len_t data_len,
                                          ipmi_context_t context)
 {
+    uint8_t s = static_cast<uint8_t>(acpi_state::PowerState::UNKNOWN);
     ipmi_ret_t rc = IPMI_CC_OK;
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    acpi_state::ACPIPowerState::ACPI value =
+        acpi_state::ACPIPowerState::ACPI::Unknown;
+
+    acpi_state::ACPIState* req =
+        reinterpret_cast<acpi_state::ACPIState*>(request);
+
+    if (*data_len != sizeof(acpi_state::ACPIState))
+    {
+        log<level::ERR>("set_acpi invalid len");
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    if (req->sysACPIState & acpi_state::stateChanged)
+    {
+        // set system power state
+        s = req->sysACPIState & ~acpi_state::stateChanged;
+        if ((s <= static_cast<uint8_t>(acpi_state::PowerState::OVERRIDE)) ||
+            (s == static_cast<uint8_t>(acpi_state::PowerState::LEGACY_ON)) ||
+            (s == static_cast<uint8_t>(acpi_state::PowerState::LEGACY_OFF)) ||
+            (s == static_cast<uint8_t>(acpi_state::PowerState::UNKNOWN)) ||
+            (s == static_cast<uint8_t>(acpi_state::PowerState::NOCHANGE)))
+        {
+            // valid input
+            if (s == static_cast<uint8_t>(acpi_state::PowerState::NOCHANGE))
+            {
+                log<level::DEBUG>("No change for system power state");
+            }
+            else
+            {
+                for (auto const& it : acpi_state::dbusToIPMI)
+                {
+                    if (static_cast<uint8_t>(it.second) == s)
+                    {
+                        value = it.first;
+                        break;
+                    }
+                }
+
+                try
+                {
+                    ipmi::DbusObjectInfo acpiObject =
+                        ipmi::getDbusObject(bus, acpi_state::acpiInterface);
+                    ipmi::setDbusProperty(
+                        bus, acpiObject.second, acpiObject.first,
+                        acpi_state::acpiInterface, acpi_state::sysACPIProp,
+                        convertForMessage(value));
+                }
+                catch (const InternalFailure& e)
+                {
+                    log<level::ERR>("Failed in set ACPI system property",
+                                    entry("EXCEPTION=%s", e.what()));
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+            }
+        }
+        else
+        {
+            log<level::ERR>("set_acpi_power sys invalid input",
+                            entry("S=%x", s));
+            *data_len = 0;
+            return IPMI_CC_PARM_OUT_OF_RANGE;
+        }
+    }
+    else
+    {
+        log<level::DEBUG>("Do not change system power state");
+    }
+
+    if (req->sysACPIState & acpi_state::stateChanged)
+    {
+        // set device power state
+        s = req->sysACPIState & ~acpi_state::stateChanged;
+        if ((s <= static_cast<uint8_t>(acpi_state::PowerState::S3_D3)) ||
+            (s == static_cast<uint8_t>(acpi_state::PowerState::UNKNOWN)) ||
+            (s == static_cast<uint8_t>(acpi_state::PowerState::NOCHANGE)))
+        {
+            // valid input
+            if (s == static_cast<uint8_t>(acpi_state::PowerState::NOCHANGE))
+            {
+                log<level::DEBUG>("No change for device power state");
+            }
+            else
+            {
+                for (auto const& it : acpi_state::dbusToIPMI)
+                {
+                    if (static_cast<uint8_t>(it.second) == s)
+                    {
+                        value = it.first;
+                        break;
+                    }
+                }
+
+                try
+                {
+                    ipmi::DbusObjectInfo acpiObject =
+                        ipmi::getDbusObject(bus, acpi_state::acpiInterface);
+                    ipmi::setDbusProperty(
+                        bus, acpiObject.second, acpiObject.first,
+                        acpi_state::acpiInterface, acpi_state::devACPIProp,
+                        convertForMessage(value));
+                }
+                catch (const InternalFailure& e)
+                {
+                    log<level::ERR>("Failed in set ACPI device property",
+                                    entry("EXCEPTION=%s", e.what()));
+                    *data_len = 0;
+                    return IPMI_CC_UNSPECIFIED_ERROR;
+                }
+            }
+        }
+        else
+        {
+            log<level::ERR>("set_acpi_power sys invalid input",
+                            entry("S=%x", s));
+            *data_len = 0;
+            return IPMI_CC_PARM_OUT_OF_RANGE;
+        }
+    }
+    else
+    {
+        log<level::DEBUG>("Do not change device power state");
+    }
+
+    return rc;
+}
+
+ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                         ipmi_request_t request,
+                                         ipmi_response_t response,
+                                         ipmi_data_len_t data_len,
+                                         ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+
+    acpi_state::ACPIState* res =
+        reinterpret_cast<acpi_state::ACPIState*>(response);
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
     *data_len = 0;
 
-    log<level::DEBUG>("IPMI SET ACPI STATE Ignoring for now\n");
+    try
+    {
+        ipmi::DbusObjectInfo acpiObject =
+            ipmi::getDbusObject(bus, acpi_state::acpiInterface);
+
+        auto sysACPIVal = ipmi::getDbusProperty(
+            bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
+            acpi_state::sysACPIProp);
+        auto sysACPI = acpi_state::ACPIPowerState::convertACPIFromString(
+            sysACPIVal.get<std::string>());
+        res->sysACPIState =
+            static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
+
+        auto devACPIVal = ipmi::getDbusProperty(
+            bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
+            acpi_state::devACPIProp);
+        auto devACPI = acpi_state::ACPIPowerState::convertACPIFromString(
+            devACPIVal.get<std::string>());
+        res->devACPIState =
+            static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
+
+        *data_len = sizeof(acpi_state::ACPIState);
+    }
+    catch (const InternalFailure& e)
+    {
+        log<level::ERR>("Failed in get ACPI property");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
     return rc;
 }
 
@@ -854,6 +1082,10 @@ void register_netfn_app_functions()
     // <Set ACPI Power State>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL,
                            ipmi_app_set_acpi_power_state, PRIVILEGE_ADMIN);
+
+    // <Get ACPI Power State>
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_ACPI, NULL,
+                           ipmi_app_get_acpi_power_state, PRIVILEGE_ADMIN);
 
     // <Get Channel Access>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
