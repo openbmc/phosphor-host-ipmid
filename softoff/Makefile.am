@@ -6,7 +6,6 @@ sbin_PROGRAMS = phosphor-softpoweroff
 #  https://debbugs.gnu.org/cgi/bugreport.cgi?bug=13928
 phosphor_softpoweroff_SOURCES = \
                     softoff.cpp \
-                    ../timer.cpp   \
                     mainapp.cpp \
                     xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.cpp \
                     ../utils.cpp
@@ -35,4 +34,3 @@ xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.hpp: ${top_srcdir}/xyz/ope
 	@mkdir -p `dirname $@`
 	$(SDBUSPLUSPLUS) -r $(top_srcdir) interface server-header xyz.openbmc_project.Ipmi.Internal.SoftPowerOff > $@
 
-SUBDIRS = test

@@ -16,12 +16,12 @@
 #include "config.h"
 
 #include "softoff.hpp"
-#include "timer.hpp"
 
 #include <systemd/sd-event.h>
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
+#include <sdbusplus/timer.hpp>
 #include <xyz/openbmc_project/State/Host/error.hpp>
 
 // Return -1 on any errors to ensure we follow the calling targets OnFailure=

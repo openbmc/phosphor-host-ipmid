@@ -3,12 +3,12 @@
 #include "host-cmd-manager.hpp"
 
 #include "systemintfcmds.hpp"
-#include "timer.hpp"
-#include "utils.hpp"
 
 #include <chrono>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/timer.hpp>
+#include <utils.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
 
@@ -47,7 +47,7 @@ Manager::Manager(sdbusplus::bus::bus& bus, sd_event* event) :
 IpmiCmdData Manager::getNextCommand()
 {
     // Stop the timer. Don't have to Err failure doing so.
-    auto r = timer.setTimer(SD_EVENT_OFF);
+    auto r = timer.stop();
     if (r < 0)
     {
         log<level::ERR>("Failure to STOP the timer",
@@ -123,7 +123,7 @@ void Manager::checkQueueAndAlertHost()
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS));
 
-        auto r = timer.startTimer(time);
+        auto r = timer.start(time);
         if (r < 0)
         {
             log<level::ERR>("Error starting timer for control host");

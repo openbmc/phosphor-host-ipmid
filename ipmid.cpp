@@ -4,7 +4,6 @@
 #include "ipmiwhitelist.hpp"
 #include "sensorhandler.hpp"
 #include "settings.hpp"
-#include "timer.hpp"
 
 #include <assert.h>
 #include <dirent.h>
@@ -26,6 +25,7 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
+#include <sdbusplus/timer.hpp>
 #include <vector>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
 
@@ -44,7 +44,7 @@ using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
 cmdManagerPtr cmdManager;
 
 // Global timer for network changes
-std::unique_ptr<phosphor::ipmi::Timer> networkTimer = nullptr;
+std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 
 // Command and handler tuple. Used when clients ask the command to be put
 // into host message queue

@@ -103,7 +103,7 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
 // Starts a timer
 int SoftPowerOff::startTimer(const std::chrono::microseconds& usec)
 {
-    return timer.startTimer(usec);
+    return timer.start(usec);
 }
 
 // Host Response handler
@@ -115,7 +115,7 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
     {
         // Disable the timer since Host has quiesced and we are
         // done with soft power off part
-        auto r = timer.setTimer(SD_EVENT_OFF);
+        auto r = timer.stop();
         if (r < 0)
         {
             log<level::ERR>("Failure to STOP the timer",
