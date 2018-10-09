@@ -2,8 +2,6 @@
 
 #include "chassishandler.hpp"
 
-#include "settings.hpp"
-
 #include <arpa/inet.h>
 #include <endian.h>
 #include <limits.h>
@@ -26,6 +24,7 @@
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/server/object.hpp>
 #include <sdbusplus/timer.hpp>
+#include <settings.hpp>
 #include <sstream>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -1628,45 +1627,30 @@ ipmi_ret_t ipmiGetPOHCounter(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_chassis_set_power_restore_policy(
-    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-    ipmi_response_t response, ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi::RspType<uint8_t>
+    ipmiChassisSetPowerRestorePolicy(boost::asio::yield_context yield,
+                                     uint8_t policy)
 {
-    auto* reqptr = reinterpret_cast<uint8_t*>(request);
-    auto* resptr = reinterpret_cast<uint8_t*>(response);
-    uint8_t reqPolicy = 0;
-
+    constexpr uint8_t ccParamNotSupported = 0x80;
     power_policy::DbusValue value =
         power_policy::RestorePolicy::Policy::AlwaysOff;
 
-    if (*data_len != power_policy::setPolicyReqLen)
-    {
-        phosphor::logging::log<level::ERR>("Unsupported request length",
-                                           entry("LEN=0x%x", *data_len));
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    if (*reqptr > power_policy::noChange)
+    if (policy & ~power_policy::policyBitMask)
     {
         phosphor::logging::log<level::ERR>("Reserved request parameter",
-                                           entry("REQ=0x%x", *reqptr));
-        *data_len = 0;
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+                                           entry("REQ=0x%x", int(policy)));
+        return ipmi::response(ccParamNotSupported);
     }
 
-    reqPolicy = *reqptr & power_policy::policyBitMask;
-    if (reqPolicy == power_policy::noChange)
+    if (policy == power_policy::noChange)
     {
         // just return the supported policy
-        *resptr = power_policy::allSupport;
-        *data_len = power_policy::setPolicyReqLen;
-        return IPMI_CC_OK;
+        return ipmi::responseSuccess(power_policy::allSupport);
     }
 
     for (auto const& it : power_policy::dbusToIpmi)
     {
-        if (it.second == reqPolicy)
+        if (it.second == policy)
         {
             value = it.first;
             break;
@@ -1682,33 +1666,30 @@ ipmi_ret_t ipmi_chassis_set_power_restore_policy(
         sdbusplus::message::variant<std::string> property =
             convertForMessage(value);
 
-        auto method = chassis::internal::dbus.new_method_call(
+        auto sdbusp = getSdBus();
+        boost::system::error_code ec;
+        sdbusp->yield_method_call<void>(
+            yield[ec],
             chassis::internal::cache::objects
                 .service(powerRestoreSetting,
                          chassis::internal::powerRestoreIntf)
                 .c_str(),
-            powerRestoreSetting.c_str(), ipmi::PROP_INTF, "Set");
-
-        method.append(chassis::internal::powerRestoreIntf, "PowerRestorePolicy",
-                      property);
-        auto reply = chassis::internal::dbus.call(method);
-        if (reply.is_method_error())
+            powerRestoreSetting, ipmi::PROP_INTF, "Set",
+            chassis::internal::powerRestoreIntf, "PowerRestorePolicy",
+            property);
+        if (ec)
         {
             phosphor::logging::log<level::ERR>("Unspecified Error");
-            *data_len = 0;
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ipmi::responseUnspecifiedError();
         }
     }
     catch (InternalFailure& e)
     {
         report<InternalFailure>();
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    *resptr = power_policy::allSupport;
-    *data_len = power_policy::setPolicyReqLen;
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(power_policy::allSupport);
 }
 
 void register_netfn_chassis_functions()
@@ -1753,7 +1734,8 @@ void register_netfn_chassis_functions()
                            ipmiGetPOHCounter, PRIVILEGE_USER);
 
     // <Set Power Restore Policy>
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_RESTORE_POLICY, NULL,
-                           ipmi_chassis_set_power_restore_policy,
-                           PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdSetPowerRestorePolicy,
+                          ipmi::Privilege::Operator,
+                          ipmiChassisSetPowerRestorePolicy);
 }
