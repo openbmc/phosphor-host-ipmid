@@ -794,32 +794,27 @@ Temperature readTemp(const std::string& dbusService,
 {
     // Read the temperature value from d-bus object. Need some conversion.
     // As per the interface xyz.openbmc_project.Sensor.Value, the temperature
-    // is an int64_t and in degrees C. It needs to be scaled by using the
+    // is an double and in degrees C. It needs to be scaled by using the
     // formula Value * 10^Scale. The ipmi spec has the temperature as a uint8_t,
     // with a separate single bit for the sign.
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     auto result = ipmi::getAllDbusProperties(
         bus, dbusService, dbusPath, "xyz.openbmc_project.Sensor.Value");
-    auto temperature = result.at("Value").get<int64_t>();
-    uint64_t absTemp = std::abs(temperature);
+    auto temperature = sdbusplus::message::variant_ns::apply_visitor(
+        ipmi::VariantToDoubleVisitor(), result.at("Value"));
+    double absTemp = std::abs(temperature);
 
-    auto factor = result.at("Scale").get<int64_t>();
-    uint64_t scale = std::pow(10, factor); // pow() returns float/double
-    unsigned long long tempDegrees = 0;
-    // Overflow safe multiplication when the scale is > 0
-    if (scale && __builtin_umulll_overflow(absTemp, scale, &tempDegrees))
+    auto findFactor = result.find("Scale");
+    double factor = 0.0;
+    if (findFactor != result.end())
     {
-        log<level::ERR>("Multiplication overflow detected",
-                        entry("TEMP_VALUE=%llu", absTemp),
-                        entry("SCALE_FACTOR=%llu", scale));
-        elog<InternalFailure>();
+        factor = sdbusplus::message::variant_ns::apply_visitor(
+            ipmi::VariantToDoubleVisitor(), findFactor->second);
     }
-    else
-    {
-        // The (uint64_t)scale value is 0, effectively this is division
-        tempDegrees = absTemp * std::pow(10, factor);
-    }
+    double scale = std::pow(10, factor);
+
+    auto tempDegrees = absTemp * scale;
     // Max absolute temp as per ipmi spec is 128.
     if (tempDegrees > maxTemp)
     {
