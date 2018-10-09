@@ -1152,6 +1152,9 @@ void enclosureIdentifyLed(bool flag)
 {
     using namespace chassis::internal;
     std::string connection = std::move(getEnclosureIdentifyConnection());
+    auto msg = std::string("enclosureIdentifyLed(") +
+               boost::lexical_cast<std::string>(flag) + ")";
+    log<level::DEBUG>(msg.c_str());
     auto led =
         dbus.new_method_call(connection.c_str(), identify_led_object_name,
                              "org.freedesktop.DBus.Properties", "Set");
@@ -1191,30 +1194,16 @@ void createIdentifyTimer()
     }
 }
 
-ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                 ipmi_request_t request,
-                                 ipmi_response_t response,
-                                 ipmi_data_len_t data_len,
-                                 ipmi_context_t context)
+ipmi::RspType<> ipmiChassisIdentify(std::optional<uint8_t> interval,
+                                    std::optional<uint8_t> force)
 {
-    if (*data_len > chassisIdentifyReqLength)
-    {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-    uint8_t identifyInterval =
-        *data_len > identifyIntervalPos
-            ? (static_cast<uint8_t*>(request))[identifyIntervalPos]
-            : DEFAULT_IDENTIFY_TIME_OUT;
-    bool forceIdentify =
-        (*data_len == chassisIdentifyReqLength)
-            ? (static_cast<uint8_t*>(request))[forceIdentifyPos] & 0x01
-            : false;
+    uint8_t identifyInterval = interval.value_or(DEFAULT_IDENTIFY_TIME_OUT);
+    bool forceIdentify = force.value_or(0) & 0x01;
 
-    *data_len = 0; // response have complete code only
     if (identifyInterval || forceIdentify)
     {
-        // stop the timer if already started, for force identify we should
-        // not turn off LED
+        // stop the timer if already started;
+        // for force identify we should not turn off LED
         identifyTimer->stop();
         try
         {
@@ -1223,12 +1212,12 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         catch (const InternalFailure& e)
         {
             report<InternalFailure>();
-            return IPMI_CC_RESPONSE_ERROR;
+            return ipmi::responseResponseError();
         }
 
         if (forceIdentify)
         {
-            return IPMI_CC_OK;
+            return ipmi::responseSuccess();
         }
         // start the timer
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -1240,7 +1229,7 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         identifyTimer->stop();
         enclosureIdentifyLedOff();
     }
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
 namespace boot_options
@@ -1741,8 +1730,9 @@ void register_netfn_chassis_functions()
                            ipmi_chassis_control, PRIVILEGE_OPERATOR);
 
     // <Chassis Identify>
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_IDENTIFY, NULL,
-                           ipmi_chassis_identify, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdChassisIdentify,
+                          ipmi::Privilege::Operator, ipmiChassisIdentify);
 
     // <Set System Boot Options>
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_SYS_BOOT_OPTIONS, NULL,
