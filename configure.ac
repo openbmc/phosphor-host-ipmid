@@ -1,6 +1,7 @@
 # Initialization
 AC_PREREQ([2.69])
 AC_INIT([phosphor-host-ipmid], [1.0], [https://github.com/openbmc/phosphor-host-ipmid/issues])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Wno-portability -Werror foreign dist-xz])
 AM_SILENT_RULES([yes])
@@ -46,6 +47,7 @@ PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces])
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus])
 AC_CHECK_HEADER(nlohmann/json.hpp, [], [AC_MSG_ERROR([Could not find nlohmann/json.hpp])])
+AX_BOOST_BASE([1.66],, [AC_MSG_ERROR([phosphor-host-ipmi requires Boost, but it was could not be found])])
 
 AS_IF([test "x$enable_softoff" != "xno"], [
     PKG_CHECK_MODULES([SDEVENTPLUS], [sdeventplus])
