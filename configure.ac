@@ -1,6 +1,7 @@
 # Initialization
 AC_PREREQ([2.69])
 AC_INIT([phosphor-host-ipmid], [1.0], [https://github.com/openbmc/phosphor-host-ipmid/issues])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror foreign dist-xz])
 AM_SILENT_RULES([yes])
@@ -28,6 +29,7 @@ PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging],, [AC_MSG_ERROR([Could 
 PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],, [AC_MSG_ERROR([Could not find phosphor-dbus-interfaces...openbmc/phosphor-dbus-interfaces package required])])
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,\
     AC_MSG_ERROR(["Requires sdbusplus package."]))
+AX_BOOST_BASE([1.66],, [AC_MSG_ERROR([phosphor-host-ipmi requires Boost, but it was could not be found])])
 
 AS_IF([test "x$enable_softoff" != "xno"],
     # Check for sdbusplus
