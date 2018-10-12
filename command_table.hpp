@@ -1,10 +1,11 @@
 #pragma once
 
-#include <functional>
-#include <map>
+#include "message_handler.hpp"
 
 #include <host-ipmid/ipmid-api.h>
-#include "message_handler.hpp"
+
+#include <functional>
+#include <map>
 
 namespace command
 {
@@ -18,8 +19,8 @@ union CommandID
 
     union
     {
-        uint8_t netFn: 6;
-        uint8_t lun: 2;
+        uint8_t netFn : 6;
+        uint8_t lun : 2;
 
         uint8_t netFnLun;
     } NetFnLun;
@@ -34,7 +35,7 @@ union CommandID
  * command is returned as a vector.
  */
 using CommandFunctor = std::function<std::vector<uint8_t>(
-        const std::vector<uint8_t>&, const message::Handler&)>;
+    const std::vector<uint8_t>&, const message::Handler&)>;
 
 /**
  * @struct CmdDetails
@@ -57,39 +58,39 @@ struct CmdDetails
  */
 enum class NetFns
 {
-    CHASSIS            = (0x00 << 10),
-    CHASSIS_RESP       = (0x01 << 10),
+    CHASSIS = (0x00 << 10),
+    CHASSIS_RESP = (0x01 << 10),
 
-    BRIDGE             = (0x02 << 10),
-    BRIDGE_RESP        = (0x03 << 10),
+    BRIDGE = (0x02 << 10),
+    BRIDGE_RESP = (0x03 << 10),
 
-    SENSOR             = (0x04 << 10),
-    SENSOR_RESP        = (0x05 << 10),
-    EVENT              = (0x04 << 10),
-    EVENT_RESP         = (0x05 << 10),
+    SENSOR = (0x04 << 10),
+    SENSOR_RESP = (0x05 << 10),
+    EVENT = (0x04 << 10),
+    EVENT_RESP = (0x05 << 10),
 
-    APP                = (0x06 << 10),
-    APP_RESP           = (0x07 << 10),
+    APP = (0x06 << 10),
+    APP_RESP = (0x07 << 10),
 
-    FIRMWARE           = (0x08 << 10),
-    FIRMWARE_RESP      = (0x09 << 10),
+    FIRMWARE = (0x08 << 10),
+    FIRMWARE_RESP = (0x09 << 10),
 
-    STORAGE            = (0x0A << 10),
-    STORAGE_RESP       = (0x0B << 10),
+    STORAGE = (0x0A << 10),
+    STORAGE_RESP = (0x0B << 10),
 
-    TRANSPORT          = (0x0C << 10),
-    TRANSPORT_RESP     = (0x0D << 10),
+    TRANSPORT = (0x0C << 10),
+    TRANSPORT_RESP = (0x0D << 10),
 
     //>>
-    RESERVED_START     = (0x0E << 10),
-    RESERVED_END       = (0x2B << 10),
+    RESERVED_START = (0x0E << 10),
+    RESERVED_END = (0x2B << 10),
     //<<
 
-    GROUP_EXTN         = (0x2C << 10),
-    GROUP_EXTN_RESP    = (0x2D << 10),
+    GROUP_EXTN = (0x2C << 10),
+    GROUP_EXTN_RESP = (0x2D << 10),
 
-    OEM                = (0x2E << 10),
-    OEM_RESP           = (0x2F << 10),
+    OEM = (0x2E << 10),
+    OEM_RESP = (0x2F << 10),
 };
 
 /**
@@ -106,46 +107,47 @@ enum class NetFns
 class Entry
 {
 
-    public:
-        Entry(CommandID command, session::Privilege privilege):
-            command(command),
-            privilege(privilege) {}
+  public:
+    Entry(CommandID command, session::Privilege privilege) :
+        command(command), privilege(privilege)
+    {
+    }
 
-        /**
-         * @brief Execute the command
-         *
-         * Execute the command
-         *
-         * @param[in] commandData - Request Data for the command
-         * @param[in] handler - Reference to the Message Handler
-         *
-         * @return Response data for the command
-         */
-        virtual std::vector<uint8_t> executeCommand(
-            std::vector<uint8_t>& commandData,
-            const message::Handler& handler) = 0;
+    /**
+     * @brief Execute the command
+     *
+     * Execute the command
+     *
+     * @param[in] commandData - Request Data for the command
+     * @param[in] handler - Reference to the Message Handler
+     *
+     * @return Response data for the command
+     */
+    virtual std::vector<uint8_t>
+        executeCommand(std::vector<uint8_t>& commandData,
+                       const message::Handler& handler) = 0;
 
-        auto getCommand() const
-        {
-            return command;
-        }
+    auto getCommand() const
+    {
+        return command;
+    }
 
-        auto getPrivilege() const
-        {
-            return privilege;
-        }
+    auto getPrivilege() const
+    {
+        return privilege;
+    }
 
-        virtual ~Entry() = default;
-        Entry(const Entry&) = default;
-        Entry& operator=(const Entry&) = default;
-        Entry(Entry&&) = default;
-        Entry& operator=(Entry&&) = default;
+    virtual ~Entry() = default;
+    Entry(const Entry&) = default;
+    Entry& operator=(const Entry&) = default;
+    Entry(Entry&&) = default;
+    Entry& operator=(Entry&&) = default;
 
-    protected:
-        CommandID command;
+  protected:
+    CommandID command;
 
-        //Specifies the minimum privilege level required to execute this command
-        session::Privilege privilege;
+    // Specifies the minimum privilege level required to execute this command
+    session::Privilege privilege;
 };
 
 /**
@@ -159,42 +161,41 @@ class Entry
  * established like Get System GUID, Get Channel Authentication Capabilities
  * and RAKP commands.
  */
-class NetIpmidEntry final: public Entry
+class NetIpmidEntry final : public Entry
 {
 
-    public:
-        NetIpmidEntry(CommandID command,
-                      CommandFunctor functor,
-                      session::Privilege privilege,
-                      bool sessionless):
-            Entry(command, privilege),
-            functor(functor),
-            sessionless(sessionless) {}
+  public:
+    NetIpmidEntry(CommandID command, CommandFunctor functor,
+                  session::Privilege privilege, bool sessionless) :
+        Entry(command, privilege),
+        functor(functor), sessionless(sessionless)
+    {
+    }
 
-        /**
-         * @brief Execute the command
-         *
-         * Execute the command
-         *
-         * @param[in] commandData - Request Data for the command
-         * @param[in] handler - Reference to the Message Handler
-         *
-         * @return Response data for the command
-         */
-        std::vector<uint8_t> executeCommand(std::vector<uint8_t>& commandData,
-                                            const message::Handler& handler)
-                                            override;
+    /**
+     * @brief Execute the command
+     *
+     * Execute the command
+     *
+     * @param[in] commandData - Request Data for the command
+     * @param[in] handler - Reference to the Message Handler
+     *
+     * @return Response data for the command
+     */
+    std::vector<uint8_t>
+        executeCommand(std::vector<uint8_t>& commandData,
+                       const message::Handler& handler) override;
 
-        virtual ~NetIpmidEntry() = default;
-        NetIpmidEntry(const NetIpmidEntry&) = default;
-        NetIpmidEntry& operator=(const NetIpmidEntry&) = default;
-        NetIpmidEntry(NetIpmidEntry&&) = default;
-        NetIpmidEntry& operator=(NetIpmidEntry&&) = default;
+    virtual ~NetIpmidEntry() = default;
+    NetIpmidEntry(const NetIpmidEntry&) = default;
+    NetIpmidEntry& operator=(const NetIpmidEntry&) = default;
+    NetIpmidEntry(NetIpmidEntry&&) = default;
+    NetIpmidEntry& operator=(NetIpmidEntry&&) = default;
 
-    private:
-        CommandFunctor functor;
+  private:
+    CommandFunctor functor;
 
-        bool sessionless;
+    bool sessionless;
 };
 
 /**
@@ -204,37 +205,38 @@ class NetIpmidEntry final: public Entry
  * are registered by IPMI provider libraries.
  *
  */
-class ProviderIpmidEntry final: public Entry
+class ProviderIpmidEntry final : public Entry
 {
-    public:
-        ProviderIpmidEntry(CommandID command,
-                           ipmid_callback_t functor,
-                           session::Privilege privilege):
-            Entry(command, privilege),
-            functor(functor) {}
+  public:
+    ProviderIpmidEntry(CommandID command, ipmid_callback_t functor,
+                       session::Privilege privilege) :
+        Entry(command, privilege),
+        functor(functor)
+    {
+    }
 
-        /**
-         * @brief Execute the command
-         *
-         * Execute the callback handler
-         *
-         * @param[in] commandData - Request Data for the command
-         * @param[in] handler - Reference to the Message Handler
-         *
-         * @return Response data for the command
-         */
-        std::vector<uint8_t> executeCommand(std::vector<uint8_t>& commandData,
-                                            const message::Handler& handler)
-                                            override;
+    /**
+     * @brief Execute the command
+     *
+     * Execute the callback handler
+     *
+     * @param[in] commandData - Request Data for the command
+     * @param[in] handler - Reference to the Message Handler
+     *
+     * @return Response data for the command
+     */
+    std::vector<uint8_t>
+        executeCommand(std::vector<uint8_t>& commandData,
+                       const message::Handler& handler) override;
 
-        virtual ~ProviderIpmidEntry() = default;
-        ProviderIpmidEntry(const ProviderIpmidEntry&) = default;
-        ProviderIpmidEntry& operator=(const ProviderIpmidEntry&) = default;
-        ProviderIpmidEntry(ProviderIpmidEntry&&) = default;
-        ProviderIpmidEntry& operator=(ProviderIpmidEntry&&) = default;
+    virtual ~ProviderIpmidEntry() = default;
+    ProviderIpmidEntry(const ProviderIpmidEntry&) = default;
+    ProviderIpmidEntry& operator=(const ProviderIpmidEntry&) = default;
+    ProviderIpmidEntry(ProviderIpmidEntry&&) = default;
+    ProviderIpmidEntry& operator=(ProviderIpmidEntry&&) = default;
 
-    private:
-        ipmid_callback_t functor;
+  private:
+    ipmid_callback_t functor;
 };
 
 /**
@@ -246,51 +248,50 @@ class ProviderIpmidEntry final: public Entry
  */
 class Table
 {
-    public:
+  public:
+    Table() = default;
+    ~Table() = default;
+    // Command Table is a singleton so copy, copy-assignment, move and
+    // move assignment is deleted
+    Table(const Table&) = delete;
+    Table& operator=(const Table&) = delete;
+    Table(Table&&) = default;
+    Table& operator=(Table&&) = default;
 
-        Table() = default;
-        ~Table() = default;
-        // Command Table is a singleton so copy, copy-assignment, move and
-        // move assignment is deleted
-        Table(const Table&) = delete;
-        Table& operator=(const Table&) = delete;
-        Table(Table&&) = default;
-        Table& operator=(Table&&) = default;
+    using CommandTable = std::map<uint32_t, std::unique_ptr<Entry>>;
 
-        using CommandTable = std::map<uint32_t, std::unique_ptr<Entry>>;
+    /**
+     * @brief Register a command
+     *
+     * Register a command with the command table
+     *
+     * @param[in] inCommand - Command ID
+     * @param[in] entry - Command Entry
+     *
+     * @return: None
+     *
+     * @note: Duplicate registrations will be rejected.
+     *
+     */
+    void registerCommand(CommandID inCommand, std::unique_ptr<Entry>&& entry);
 
-        /**
-         * @brief Register a command
-         *
-         * Register a command with the command table
-         *
-         * @param[in] inCommand - Command ID
-         * @param[in] entry - Command Entry
-         *
-         * @return: None
-         *
-         * @note: Duplicate registrations will be rejected.
-         *
-         */
-        void registerCommand(CommandID inCommand,
-                             std::unique_ptr<Entry>&& entry);
+    /**
+     * @brief Execute the command
+     *
+     * Execute the command for the corresponding CommandID
+     *
+     * @param[in] inCommand - Command ID to execute.
+     * @param[in] commandData - Request Data for the command
+     * @param[in] handler - Reference to the Message Handler
+     *
+     * @return Response data for the command
+     */
+    std::vector<uint8_t> executeCommand(uint32_t inCommand,
+                                        std::vector<uint8_t>& commandData,
+                                        const message::Handler& handler);
 
-        /**
-         * @brief Execute the command
-         *
-         * Execute the command for the corresponding CommandID
-         *
-         * @param[in] inCommand - Command ID to execute.
-         * @param[in] commandData - Request Data for the command
-         * @param[in] handler - Reference to the Message Handler
-         *
-         * @return Response data for the command
-         */
-        std::vector<uint8_t> executeCommand(uint32_t inCommand,
-                                            std::vector<uint8_t>& commandData,
-                                            const message::Handler& handler);
-    private:
-        CommandTable commandTable;
+  private:
+    CommandTable commandTable;
 };
 
-}// namespace command
+} // namespace command

@@ -1,22 +1,23 @@
 #include "rakp34.hpp"
 
-#include <algorithm>
-#include <cstring>
-#include <iostream>
-
 #include "comm_module.hpp"
 #include "endian.hpp"
 #include "guid.hpp"
 #include "main.hpp"
 #include "rmcp.hpp"
 
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+
 namespace command
 {
 
 void applyIntegrityAlgo(const uint32_t bmcSessionID)
 {
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-            bmcSessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(bmcSessionID))
+            .lock();
 
     auto authAlgo = session->getAuthAlgo();
 
@@ -25,15 +26,15 @@ void applyIntegrityAlgo(const uint32_t bmcSessionID)
         case cipher::integrity::Algorithms::HMAC_SHA1_96:
         {
             session->setIntegrityAlgo(
-                    std::make_unique<cipher::integrity::AlgoSHA1>(
-                        authAlgo->sessionIntegrityKey));
+                std::make_unique<cipher::integrity::AlgoSHA1>(
+                    authAlgo->sessionIntegrityKey));
             break;
         }
         case cipher::integrity::Algorithms::HMAC_SHA256_128:
         {
             session->setIntegrityAlgo(
                 std::make_unique<cipher::integrity::AlgoSHA256>(
-                        authAlgo->sessionIntegrityKey));
+                    authAlgo->sessionIntegrityKey));
             break;
         }
         default:
@@ -43,8 +44,9 @@ void applyIntegrityAlgo(const uint32_t bmcSessionID)
 
 void applyCryptAlgo(const uint32_t bmcSessionID)
 {
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-            bmcSessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(bmcSessionID))
+            .lock();
 
     auto authAlgo = session->getAuthAlgo();
 
@@ -53,10 +55,10 @@ void applyCryptAlgo(const uint32_t bmcSessionID)
         case cipher::crypt::Algorithms::AES_CBC_128:
         {
             auto intAlgo = session->getIntegrityAlgo();
-            auto k2 = intAlgo->generateKn(
-                    authAlgo->sessionIntegrityKey, rmcp::const_2);
+            auto k2 = intAlgo->generateKn(authAlgo->sessionIntegrityKey,
+                                          rmcp::const_2);
             session->setCryptAlgo(
-                    std::make_unique<cipher::crypt::AlgoAES128>(k2));
+                std::make_unique<cipher::crypt::AlgoAES128>(k2));
             break;
         }
         default:
@@ -82,8 +84,8 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     }
 
     // Session ID zero is reserved for Session Setup
-    if(endian::from_ipmi(request->managedSystemSessionID) ==
-                         session::SESSION_ZERO)
+    if (endian::from_ipmi(request->managedSystemSessionID) ==
+        session::SESSION_ZERO)
     {
         std::cerr << "RAKP34: BMC invalid Session ID\n";
         response->rmcpStatusCode =
@@ -94,8 +96,10 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     std::shared_ptr<session::Session> session;
     try
     {
-        session = (std::get<session::Manager&>(singletonPool).getSession(
-            endian::from_ipmi(request->managedSystemSessionID))).lock();
+        session = (std::get<session::Manager&>(singletonPool)
+                       .getSession(
+                           endian::from_ipmi(request->managedSystemSessionID)))
+                      .lock();
     }
     catch (std::exception& e)
     {
@@ -159,19 +163,19 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     auto output = authAlgo->generateHMAC(input);
 
     if (inPayload.size() != (sizeof(RAKP3request) + output.size()) ||
-            std::memcmp(output.data(), request+1, output.size()))
+        std::memcmp(output.data(), request + 1, output.size()))
     {
         std::cerr << "Mismatch in HMAC sent by remote console\n";
 
         response->messageTag = request->messageTag;
-        response->rmcpStatusCode = static_cast<uint8_t>
-                                   (RAKP_ReturnCode::INVALID_INTEGRITY_VALUE);
+        response->rmcpStatusCode =
+            static_cast<uint8_t>(RAKP_ReturnCode::INVALID_INTEGRITY_VALUE);
         response->reserved = 0;
         response->remoteConsoleSessionID = rcSessionID;
 
-        //close the session
-        std::get<session::Manager&>(singletonPool).stopSession(
-            session->getBMCSessionID());
+        // close the session
+        std::get<session::Manager&>(singletonPool)
+            .stopSession(session->getBMCSessionID());
 
         return outPayload;
     }
@@ -194,8 +198,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     iter = input.begin();
 
     // Remote Console Random Number
-    std::copy(authAlgo->rcRandomNum.begin(), authAlgo->rcRandomNum.end(),
-              iter);
+    std::copy(authAlgo->rcRandomNum.begin(), authAlgo->rcRandomNum.end(), iter);
     std::advance(iter, cipher::rakp_auth::REMOTE_CONSOLE_RANDOM_NUMBER_LEN);
 
     // Managed Console Random Number
@@ -239,8 +242,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     iter = input.begin();
 
     // Remote Console Random Number
-    std::copy(authAlgo->rcRandomNum.begin(), authAlgo->rcRandomNum.end(),
-              iter);
+    std::copy(authAlgo->rcRandomNum.begin(), authAlgo->rcRandomNum.end(), iter);
     std::advance(iter, cipher::rakp_auth::REMOTE_CONSOLE_RANDOM_NUMBER_LEN);
 
     // Managed System Session ID

@@ -1,8 +1,10 @@
-#include <phosphor-logging/log.hpp>
+#include "sol_cmds.hpp"
+
 #include "main.hpp"
 #include "sol/sol_context.hpp"
 #include "sol/sol_manager.hpp"
-#include "sol_cmds.hpp"
+
+#include <phosphor-logging/log.hpp>
 
 namespace sol
 {
@@ -19,23 +21,20 @@ std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
     auto solDataSize = inPayload.size() - sizeof(Payload);
 
     std::vector<uint8_t> charData(solDataSize);
-    if( solDataSize > 0)
+    if (solDataSize > 0)
     {
-        std::copy_n(inPayload.data() + sizeof(Payload),
-                    solDataSize,
+        std::copy_n(inPayload.data() + sizeof(Payload), solDataSize,
                     charData.begin());
     }
 
     try
     {
-        auto& context = std::get<sol::Manager&>(singletonPool).
-                getContext(handler.sessionID);
+        auto& context = std::get<sol::Manager&>(singletonPool)
+                            .getContext(handler.sessionID);
 
-        context.processInboundPayload(request->packetSeqNum,
-                                      request->packetAckSeqNum,
-                                      request->acceptedCharCount,
-                                      request->inOperation.ack,
-                                      charData);
+        context.processInboundPayload(
+            request->packetSeqNum, request->packetAckSeqNum,
+            request->acceptedCharCount, request->inOperation.ack, charData);
     }
     catch (std::exception& e)
     {
@@ -50,21 +49,20 @@ void activating(uint8_t payloadInstance, uint32_t sessionID)
 {
     std::vector<uint8_t> outPayload(sizeof(ActivatingRequest));
 
-    auto request = reinterpret_cast<ActivatingRequest*>
-                    (outPayload.data());
+    auto request = reinterpret_cast<ActivatingRequest*>(outPayload.data());
 
     request->sessionState = 0;
     request->payloadInstance = payloadInstance;
     request->majorVersion = MAJOR_VERSION;
     request->minorVersion = MINOR_VERSION;
 
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-            sessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
+            .lock();
 
     message::Handler msgHandler(session->channelPtr, sessionID);
 
-    msgHandler.sendUnsolicitedIPMIPayload(netfnTransport,
-                                          solActivatingCmd,
+    msgHandler.sendUnsolicitedIPMIPayload(netfnTransport, solActivatingCmd,
                                           outPayload);
 }
 
@@ -72,10 +70,9 @@ std::vector<uint8_t> setConfParams(const std::vector<uint8_t>& inPayload,
                                    const message::Handler& handler)
 {
     std::vector<uint8_t> outPayload(sizeof(SetConfParamsResponse));
-    auto request = reinterpret_cast<const SetConfParamsRequest*>
-                   (inPayload.data());
-    auto response = reinterpret_cast<SetConfParamsResponse*>
-                    (outPayload.data());
+    auto request =
+        reinterpret_cast<const SetConfParamsRequest*>(inPayload.data());
+    auto response = reinterpret_cast<SetConfParamsResponse*>(outPayload.data());
     response->completionCode = IPMI_CC_OK;
 
     switch (static_cast<Parameter>(request->paramSelector))
@@ -99,16 +96,16 @@ std::vector<uint8_t> setConfParams(const std::vector<uint8_t>& inPayload,
                 response->completionCode = ipmiCCWriteReadParameter;
             }
             else if (request->auth.privilege <
-                     static_cast<uint8_t>(session::Privilege::USER) ||
+                         static_cast<uint8_t>(session::Privilege::USER) ||
                      request->auth.privilege >
-                     static_cast<uint8_t>(session::Privilege::OEM))
+                         static_cast<uint8_t>(session::Privilege::OEM))
             {
                 response->completionCode = IPMI_CC_INVALID_FIELD_REQUEST;
             }
             else
             {
                 std::get<sol::Manager&>(singletonPool).solMinPrivilege =
-                       static_cast<session::Privilege>(request->auth.privilege);
+                    static_cast<session::Privilege>(request->auth.privilege);
             }
             break;
         }
@@ -123,9 +120,9 @@ std::vector<uint8_t> setConfParams(const std::vector<uint8_t>& inPayload,
             }
 
             std::get<sol::Manager&>(singletonPool).accumulateInterval =
-                    request->acc.interval * sol::accIntervalFactor * 1ms;
+                request->acc.interval * sol::accIntervalFactor * 1ms;
             std::get<sol::Manager&>(singletonPool).sendThreshold =
-                    request->acc.threshold;
+                request->acc.threshold;
             break;
         }
         case Parameter::RETRY:
@@ -133,9 +130,9 @@ std::vector<uint8_t> setConfParams(const std::vector<uint8_t>& inPayload,
             using namespace std::chrono_literals;
 
             std::get<sol::Manager&>(singletonPool).retryCount =
-                    request->retry.count;
+                request->retry.count;
             std::get<sol::Manager&>(singletonPool).retryInterval =
-                    request->retry.interval * sol::retryIntervalFactor * 1ms;
+                request->retry.interval * sol::retryIntervalFactor * 1ms;
             break;
         }
         case Parameter::PORT:
@@ -157,10 +154,9 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
                                    const message::Handler& handler)
 {
     std::vector<uint8_t> outPayload(sizeof(GetConfParamsResponse));
-    auto request = reinterpret_cast<const GetConfParamsRequest*>
-                   (inPayload.data());
-    auto response = reinterpret_cast<GetConfParamsResponse*>
-                    (outPayload.data());
+    auto request =
+        reinterpret_cast<const GetConfParamsRequest*>(inPayload.data());
+    auto response = reinterpret_cast<GetConfParamsResponse*>(outPayload.data());
     response->completionCode = IPMI_CC_OK;
     response->paramRev = parameterRevision;
 
@@ -173,50 +169,51 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
     {
         case Parameter::PROGRESS:
         {
-            outPayload.push_back(std::get<sol::Manager&>
-                    (singletonPool).progress);
+            outPayload.push_back(
+                std::get<sol::Manager&>(singletonPool).progress);
             break;
         }
         case Parameter::ENABLE:
         {
-            outPayload.push_back(std::get<sol::Manager&>
-                    (singletonPool).enable);
+            outPayload.push_back(std::get<sol::Manager&>(singletonPool).enable);
             break;
         }
         case Parameter::AUTHENTICATION:
         {
-            Auth value {0};
+            Auth value{0};
 
             value.encrypt = std::get<sol::Manager&>(singletonPool).forceEncrypt;
             value.auth = std::get<sol::Manager&>(singletonPool).forceAuth;
-            value.privilege  = static_cast<uint8_t>(std::get<sol::Manager&>
-                    (singletonPool).solMinPrivilege);
-            auto buffer = reinterpret_cast<const uint8_t *>(&value);
+            value.privilege = static_cast<uint8_t>(
+                std::get<sol::Manager&>(singletonPool).solMinPrivilege);
+            auto buffer = reinterpret_cast<const uint8_t*>(&value);
 
             std::copy_n(buffer, sizeof(value), std::back_inserter(outPayload));
             break;
         }
         case Parameter::ACCUMULATE:
         {
-            Accumulate value {0};
+            Accumulate value{0};
 
             value.interval = std::get<sol::Manager&>(singletonPool)
-                            .accumulateInterval.count()/sol::accIntervalFactor;
-            value.threshold = std::get<sol::Manager&>
-                            (singletonPool).sendThreshold;
-            auto buffer = reinterpret_cast<const uint8_t *>(&value);
+                                 .accumulateInterval.count() /
+                             sol::accIntervalFactor;
+            value.threshold =
+                std::get<sol::Manager&>(singletonPool).sendThreshold;
+            auto buffer = reinterpret_cast<const uint8_t*>(&value);
 
             std::copy_n(buffer, sizeof(value), std::back_inserter(outPayload));
             break;
         }
         case Parameter::RETRY:
         {
-            Retry value {0};
+            Retry value{0};
 
             value.count = std::get<sol::Manager&>(singletonPool).retryCount;
-            value.interval = std::get<sol::Manager&>(singletonPool)
-                    .retryInterval.count()/sol::retryIntervalFactor;
-            auto buffer = reinterpret_cast<const uint8_t *>(&value);
+            value.interval =
+                std::get<sol::Manager&>(singletonPool).retryInterval.count() /
+                sol::retryIntervalFactor;
+            auto buffer = reinterpret_cast<const uint8_t*>(&value);
 
             std::copy_n(buffer, sizeof(value), std::back_inserter(outPayload));
             break;
@@ -224,15 +221,15 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
         case Parameter::PORT:
         {
             auto port = endian::to_ipmi<uint16_t>(IPMI_STD_PORT);
-            auto buffer = reinterpret_cast<const uint8_t *>(&port);
+            auto buffer = reinterpret_cast<const uint8_t*>(&port);
 
             std::copy_n(buffer, sizeof(port), std::back_inserter(outPayload));
             break;
         }
         case Parameter::CHANNEL:
         {
-            outPayload.push_back(std::get<sol::Manager&>
-                    (singletonPool).channel);
+            outPayload.push_back(
+                std::get<sol::Manager&>(singletonPool).channel);
             break;
         }
         case Parameter::NVBITRATE:

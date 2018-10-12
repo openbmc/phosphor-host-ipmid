@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
-
 #include "message_handler.hpp"
+
+#include <vector>
 
 namespace command
 {
@@ -25,9 +25,9 @@ struct GetChannelCapabilitiesReq
  */
 struct GetChannelCapabilitiesResp
 {
-    uint8_t completionCode;     // Completion Code
+    uint8_t completionCode; // Completion Code
 
-    uint8_t channelNumber;      // Channel number that the request was
+    uint8_t channelNumber; // Channel number that the request was
     // received on
 
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -35,21 +35,21 @@ struct GetChannelCapabilitiesResp
     uint8_t md2 : 1;
     uint8_t md5 : 1;
     uint8_t reserved2 : 1;
-    uint8_t straightKey : 1;   // Straight password/key support
+    uint8_t straightKey : 1; // Straight password/key support
     // Support OEM identified by the IANA OEM ID in RMCP+ ping response
     uint8_t oem : 1;
     uint8_t reserved1 : 1;
-    uint8_t ipmiVersion : 1;    // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
+    uint8_t ipmiVersion : 1; // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
     // support
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t ipmiVersion : 1;    // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
+    uint8_t ipmiVersion : 1; // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
     // support
     uint8_t reserved1 : 1;
     // Support OEM identified by the IANA OEM ID in RMCP+ ping response
     uint8_t oem : 1;
-    uint8_t straightKey : 1;   // Straight password/key support
+    uint8_t straightKey : 1; // Straight password/key support
     uint8_t reserved2 : 1;
     uint8_t md5 : 1;
     uint8_t md2 : 1;
@@ -97,8 +97,8 @@ struct GetChannelCapabilitiesResp
 #endif
 
     // Below 4 bytes will all the 0's if no OEM authentication type available.
-    uint8_t oemID[3];  // IANA enterprise number for OEM/organization
-    uint8_t oemAuxillary;  // Addition OEM specific information..
+    uint8_t oemID[3];     // IANA enterprise number for OEM/organization
+    uint8_t oemAuxillary; // Addition OEM specific information..
 } __attribute__((packed));
 
 /**
@@ -118,7 +118,8 @@ struct GetChannelCapabilitiesResp
  *
  * @return Response data for the command
  */
-std::vector<uint8_t> GetChannelCapabilities(
-        const std::vector<uint8_t>& inPayload, const message::Handler& handler);
+std::vector<uint8_t>
+    GetChannelCapabilities(const std::vector<uint8_t>& inPayload,
+                           const message::Handler& handler);
 
 } // namespace command

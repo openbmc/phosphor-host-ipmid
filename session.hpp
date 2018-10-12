@@ -1,17 +1,17 @@
 #pragma once
 
+#include "auth_algo.hpp"
+#include "crypt_algo.hpp"
+#include "endian.hpp"
+#include "integrity_algo.hpp"
+#include "socket_channel.hpp"
+
 #include <chrono>
 #include <exception>
 #include <list>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "auth_algo.hpp"
-#include "crypt_algo.hpp"
-#include "integrity_algo.hpp"
-#include "endian.hpp"
-#include "socket_channel.hpp"
 
 namespace session
 {
@@ -31,10 +31,10 @@ enum class Privilege : uint8_t
 
 enum class State
 {
-    INACTIVE,             // Session is not in use
-    SETUP_IN_PROGRESS,    // Session Setup Sequence is progressing
-    ACTIVE,               // Session is active
-    TEAR_DOWN_IN_PROGRESS,// When Closing Session
+    INACTIVE,              // Session is not in use
+    SETUP_IN_PROGRESS,     // Session Setup Sequence is progressing
+    ACTIVE,                // Session is active
+    TEAR_DOWN_IN_PROGRESS, // When Closing Session
 };
 
 // Seconds of inactivity allowed during session setup stage
@@ -60,24 +60,24 @@ constexpr auto SESSION_INACTIVITY_TIMEOUT = 60s;
  */
 struct SequenceNumbers
 {
-        auto get(bool inbound = true) const
-        {
-            return inbound ? in : out;
-        }
+    auto get(bool inbound = true) const
+    {
+        return inbound ? in : out;
+    }
 
-        void set(uint32_t seqNumber, bool inbound = true)
-        {
-            inbound ? (in = seqNumber) : (out = seqNumber);
-        }
+    void set(uint32_t seqNumber, bool inbound = true)
+    {
+        inbound ? (in = seqNumber) : (out = seqNumber);
+    }
 
-        auto increment()
-        {
-            return ++out;
-        }
+    auto increment()
+    {
+        return ++out;
+    }
 
-    private:
-        uint32_t in = 0;
-        uint32_t out = 0;
+  private:
+    uint32_t in = 0;
+    uint32_t out = 0;
 };
 /**
  * @class Session
@@ -93,183 +93,179 @@ struct SequenceNumbers
  */
 class Session
 {
-    public:
+  public:
+    Session() = default;
+    ~Session() = default;
+    Session(const Session&) = delete;
+    Session& operator=(const Session&) = delete;
+    Session(Session&&) = default;
+    Session& operator=(Session&&) = default;
 
-        Session() = default;
-        ~Session() = default;
-        Session(const Session&) = delete;
-        Session& operator=(const Session&) = delete;
-        Session(Session&&) = default;
-        Session& operator=(Session&&) = default;
+    /**
+     * @brief Session Constructor
+     *
+     * This is issued by the Session Manager when a session is started for
+     * the Open SessionRequest command
+     *
+     * @param[in] inRemoteConsoleSessID - Remote Console Session ID
+     * @param[in] priv - Privilege Level requested in the Command
+     */
+    Session(SessionID inRemoteConsoleSessID, Privilege priv) :
+        curPrivLevel(priv), bmcSessionID(std::rand()),
+        remoteConsoleSessionID(inRemoteConsoleSessID)
+    {
+    }
 
-        /**
-         * @brief Session Constructor
-         *
-         * This is issued by the Session Manager when a session is started for
-         * the Open SessionRequest command
-         *
-         * @param[in] inRemoteConsoleSessID - Remote Console Session ID
-         * @param[in] priv - Privilege Level requested in the Command
-         */
-        Session(SessionID inRemoteConsoleSessID, Privilege priv):
-            curPrivLevel(priv),
-            bmcSessionID(std::rand()),
-            remoteConsoleSessionID(inRemoteConsoleSessID) {}
+    auto getBMCSessionID() const
+    {
+        return bmcSessionID;
+    }
 
-        auto getBMCSessionID() const
+    auto getRCSessionID() const
+    {
+        return remoteConsoleSessionID;
+    }
+
+    auto getAuthAlgo() const
+    {
+        if (authAlgoInterface)
         {
-            return bmcSessionID;
+            return authAlgoInterface.get();
         }
-
-        auto getRCSessionID() const
+        else
         {
-            return remoteConsoleSessionID;
+            throw std::runtime_error("Authentication Algorithm Empty");
         }
+    }
 
-        auto getAuthAlgo() const
+    void setAuthAlgo(std::unique_ptr<cipher::rakp_auth::Interface>&& inAuthAlgo)
+    {
+        authAlgoInterface = std::move(inAuthAlgo);
+    }
+
+    /**
+     * @brief Get Session's Integrity Algorithm
+     *
+     * @return pointer to the integrity algorithm
+     */
+    auto getIntegrityAlgo() const
+    {
+        if (integrityAlgoInterface)
         {
-            if(authAlgoInterface)
-            {
-                return authAlgoInterface.get();
-            }
-            else
-            {
-                throw std::runtime_error("Authentication Algorithm Empty");
-            }
+            return integrityAlgoInterface.get();
         }
-
-        void setAuthAlgo(std::unique_ptr<cipher::rakp_auth::Interface>&&
-                         inAuthAlgo)
+        else
         {
-            authAlgoInterface = std::move(inAuthAlgo);
+            throw std::runtime_error("Integrity Algorithm Empty");
         }
+    }
 
-        /**
-         * @brief Get Session's Integrity Algorithm
-         *
-         * @return pointer to the integrity algorithm
-         */
-        auto getIntegrityAlgo() const
+    /**
+     * @brief Set Session's Integrity Algorithm
+     *
+     * @param[in] integrityAlgo - unique pointer to integrity algorithm
+     *                              instance
+     */
+    void setIntegrityAlgo(
+        std::unique_ptr<cipher::integrity::Interface>&& integrityAlgo)
+    {
+        integrityAlgoInterface = std::move(integrityAlgo);
+    }
+
+    /** @brief Check if integrity algorithm is enabled for this session.
+     *
+     *  @return true if integrity algorithm is enabled else false.
+     */
+    auto isIntegrityAlgoEnabled()
+    {
+        return integrityAlgoInterface ? true : false;
+    }
+
+    /**
+     * @brief Get Session's Confidentiality Algorithm
+     *
+     * @return pointer to the confidentiality algorithm
+     */
+    auto getCryptAlgo() const
+    {
+        if (cryptAlgoInterface)
         {
-            if(integrityAlgoInterface)
-            {
-                return integrityAlgoInterface.get();
-            }
-            else
-            {
-                throw std::runtime_error("Integrity Algorithm Empty");
-            }
+            return cryptAlgoInterface.get();
         }
-
-        /**
-         * @brief Set Session's Integrity Algorithm
-         *
-         * @param[in] integrityAlgo - unique pointer to integrity algorithm
-         *                              instance
-         */
-        void setIntegrityAlgo(
-                std::unique_ptr<cipher::integrity::Interface>&& integrityAlgo)
+        else
         {
-            integrityAlgoInterface = std::move(integrityAlgo);
+            throw std::runtime_error("Confidentiality Algorithm Empty");
         }
+    }
 
-        /** @brief Check if integrity algorithm is enabled for this session.
-         *
-         *  @return true if integrity algorithm is enabled else false.
-         */
-        auto isIntegrityAlgoEnabled()
-        {
-            return integrityAlgoInterface ? true : false;
-        }
+    /**
+     * @brief Set Session's Confidentiality Algorithm
+     *
+     * @param[in] confAlgo - unique pointer to confidentiality algorithm
+     *                       instance
+     */
+    void setCryptAlgo(std::unique_ptr<cipher::crypt::Interface>&& cryptAlgo)
+    {
+        cryptAlgoInterface = std::move(cryptAlgo);
+    }
 
-        /**
-         * @brief Get Session's Confidentiality Algorithm
-         *
-         * @return pointer to the confidentiality algorithm
-         */
-        auto getCryptAlgo() const
-        {
-            if(cryptAlgoInterface)
-            {
-                return cryptAlgoInterface.get();
-            }
-            else
-            {
-                throw std::runtime_error("Confidentiality Algorithm Empty");
-            }
-        }
+    /** @brief Check if confidentiality algorithm is enabled for this
+     *         session.
+     *
+     *  @return true if confidentiality algorithm is enabled else false.
+     */
+    auto isCryptAlgoEnabled()
+    {
+        return cryptAlgoInterface ? true : false;
+    }
 
-        /**
-         * @brief Set Session's Confidentiality Algorithm
-         *
-         * @param[in] confAlgo - unique pointer to confidentiality algorithm
-         *                       instance
-         */
-        void setCryptAlgo(
-                std::unique_ptr<cipher::crypt::Interface>&& cryptAlgo)
-        {
-            cryptAlgoInterface = std::move(cryptAlgo);
-        }
+    void updateLastTransactionTime()
+    {
+        lastTime = std::chrono::steady_clock::now();
+    }
 
-        /** @brief Check if confidentiality algorithm is enabled for this
-         *         session.
-         *
-         *  @return true if confidentiality algorithm is enabled else false.
-         */
-        auto isCryptAlgoEnabled()
-        {
-            return cryptAlgoInterface ? true : false;
-        }
+    /**
+     * @brief Session Active Status
+     *
+     * Session Active status is decided upon the Session State and the last
+     * transaction time is compared against the session inactivity timeout.
+     *
+     */
+    bool isSessionActive();
 
-        void updateLastTransactionTime()
-        {
-            lastTime = std::chrono::steady_clock::now();
-        }
+    /**
+     * @brief Session's Current Privilege Level
+     */
+    Privilege curPrivLevel;
 
-        /**
-         * @brief Session Active Status
-         *
-         * Session Active status is decided upon the Session State and the last
-         * transaction time is compared against the session inactivity timeout.
-         *
-         */
-        bool isSessionActive();
+    /**
+     * @brief Session's Maximum Privilege Level
+     */
+    Privilege maxPrivLevel = Privilege::CALLBACK;
 
-        /**
-         * @brief Session's Current Privilege Level
-         */
-        Privilege curPrivLevel;
+    SequenceNumbers sequenceNums;  // Session Sequence Numbers
+    State state = State::INACTIVE; // Session State
+    std::string userName{};        // User Name
 
-        /**
-         * @brief Session's Maximum Privilege Level
-         */
-        Privilege maxPrivLevel = Privilege::CALLBACK;
+    /** @brief Socket channel for communicating with the remote client.*/
+    std::shared_ptr<udpsocket::Channel> channelPtr;
 
-        SequenceNumbers sequenceNums; // Session Sequence Numbers
-        State state = State::INACTIVE; // Session State
-        std::string userName {}; // User Name
+  private:
+    SessionID bmcSessionID = 0;           // BMC Session ID
+    SessionID remoteConsoleSessionID = 0; // Remote Console Session ID
 
-        /** @brief Socket channel for communicating with the remote client.*/
-        std::shared_ptr<udpsocket::Channel> channelPtr;
+    // Authentication Algorithm Interface for the Session
+    std::unique_ptr<cipher::rakp_auth::Interface> authAlgoInterface;
 
-    private:
+    // Integrity Algorithm Interface for the Session
+    std::unique_ptr<cipher::integrity::Interface> integrityAlgoInterface =
+        nullptr;
 
-        SessionID bmcSessionID = 0; //BMC Session ID
-        SessionID remoteConsoleSessionID = 0; //Remote Console Session ID
+    // Confidentiality Algorithm Interface for the Session
+    std::unique_ptr<cipher::crypt::Interface> cryptAlgoInterface = nullptr;
 
-        // Authentication Algorithm Interface for the Session
-        std::unique_ptr<cipher::rakp_auth::Interface> authAlgoInterface;
-
-        // Integrity Algorithm Interface for the Session
-        std::unique_ptr<cipher::integrity::Interface> integrityAlgoInterface =
-                nullptr;
-
-        // Confidentiality Algorithm Interface for the Session
-        std::unique_ptr<cipher::crypt::Interface> cryptAlgoInterface =
-                nullptr;
-
-        // Last Transaction Time
-        decltype(std::chrono::steady_clock::now()) lastTime;
+    // Last Transaction Time
+    decltype(std::chrono::steady_clock::now()) lastTime;
 };
 
 } // namespace session

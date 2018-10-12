@@ -1,18 +1,18 @@
-#include <phosphor-logging/log.hpp>
+#include "sol_context.hpp"
+
 #include "main.hpp"
 #include "sd_event_loop.hpp"
-#include "sol_context.hpp"
 #include "sol_manager.hpp"
+
+#include <phosphor-logging/log.hpp>
 
 namespace sol
 {
 
 using namespace phosphor::logging;
 
-void Context::processInboundPayload(uint8_t seqNum,
-                                    uint8_t ackSeqNum,
-                                    uint8_t count,
-                                    bool status,
+void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
+                                    uint8_t count, bool status,
                                     const std::vector<uint8_t>& input)
 {
     uint8_t respAckSeqNum = 0;
@@ -26,7 +26,7 @@ void Context::processInboundPayload(uint8_t seqNum,
      * specification. Retried packets use the same sequence number as the first
      * packet.
      */
-    if(seqNum && (seqNum != seqNums.get(true)))
+    if (seqNum && (seqNum != seqNums.get(true)))
     {
         log<level::INFO>("Out of sequence SOL packet - packet is dropped");
         return;
@@ -54,10 +54,10 @@ void Context::processInboundPayload(uint8_t seqNum,
     if (status || ((count != expectedCharCount) && ackSeqNum))
     {
         resendPayload(noClear);
-        std::get<eventloop::EventLoop&>(singletonPool).switchTimer
-                (payloadInstance, eventloop::Timers::RETRY, false);
-        std::get<eventloop::EventLoop&>(singletonPool).switchTimer
-                (payloadInstance, eventloop::Timers::RETRY, true);
+        std::get<eventloop::EventLoop&>(singletonPool)
+            .switchTimer(payloadInstance, eventloop::Timers::RETRY, false);
+        std::get<eventloop::EventLoop&>(singletonPool)
+            .switchTimer(payloadInstance, eventloop::Timers::RETRY, true);
         return;
     }
     /*
@@ -70,8 +70,8 @@ void Context::processInboundPayload(uint8_t seqNum,
         std::get<sol::Manager&>(singletonPool).dataBuffer.erase(count);
 
         // Once it is acknowledged stop the retry interval timer
-        std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
-                payloadInstance, eventloop::Timers::RETRY, false);
+        std::get<eventloop::EventLoop&>(singletonPool)
+            .switchTimer(payloadInstance, eventloop::Timers::RETRY, false);
 
         retryCounter = maxRetryCount;
         expectedCharCount = 0;
@@ -81,8 +81,8 @@ void Context::processInboundPayload(uint8_t seqNum,
     // Write character data to the Host Console
     if (!input.empty() && seqNum)
     {
-        auto rc = std::get<sol::Manager&>(singletonPool).writeConsoleSocket(
-                input);
+        auto rc =
+            std::get<sol::Manager&>(singletonPool).writeConsoleSocket(input);
         if (rc)
         {
             log<level::ERR>("Writing to console socket descriptor failed");
@@ -111,21 +111,20 @@ void Context::processInboundPayload(uint8_t seqNum,
     }
     else
     {
-        std::get<eventloop::EventLoop&>(singletonPool).switchTimer
-                (payloadInstance, eventloop::Timers::ACCUMULATE, true);
+        std::get<eventloop::EventLoop&>(singletonPool)
+            .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, true);
     }
 }
 
 void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
 {
-    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.
-                            size();
+    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
 
     /* Sent a ACK only response */
     if (payloadCache.size() != 0 || (bufferSize < sendThreshold))
     {
-        std::get<eventloop::EventLoop&>(singletonPool).switchTimer
-                (payloadInstance, eventloop::Timers::ACCUMULATE, true);
+        std::get<eventloop::EventLoop&>(singletonPool)
+            .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, true);
 
         std::vector<uint8_t> outPayload(sizeof(Payload));
         auto response = reinterpret_cast<Payload*>(outPayload.data());
@@ -145,15 +144,14 @@ void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
     response->outOperation.ack = ack;
     response->packetSeqNum = seqNums.incOutboundSeqNum();
 
-
     auto handle = std::get<sol::Manager&>(singletonPool).dataBuffer.read();
     std::copy_n(handle, readSize, payloadCache.data() + sizeof(Payload));
     expectedCharCount = readSize;
 
-    std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
-            payloadInstance, eventloop::Timers::RETRY, true);
-    std::get<eventloop::EventLoop&>(singletonPool).switchTimer
-            (payloadInstance, eventloop::Timers::ACCUMULATE, false);
+    std::get<eventloop::EventLoop&>(singletonPool)
+        .switchTimer(payloadInstance, eventloop::Timers::RETRY, true);
+    std::get<eventloop::EventLoop&>(singletonPool)
+        .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, false);
 
     sendPayload(payloadCache);
 }
@@ -162,8 +160,8 @@ int Context::sendOutboundPayload()
 {
     if (payloadCache.size() != 0)
     {
-        std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
-                payloadInstance, eventloop::Timers::ACCUMULATE, true);
+        std::get<eventloop::EventLoop&>(singletonPool)
+            .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, true);
         return -1;
     }
 
@@ -181,10 +179,10 @@ int Context::sendOutboundPayload()
     std::copy_n(handle, readSize, payloadCache.data() + sizeof(Payload));
     expectedCharCount = readSize;
 
-    std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
-            payloadInstance, eventloop::Timers::RETRY, true);
-    std::get<eventloop::EventLoop&>(singletonPool).switchTimer(
-            payloadInstance, eventloop::Timers::ACCUMULATE, false);
+    std::get<eventloop::EventLoop&>(singletonPool)
+        .switchTimer(payloadInstance, eventloop::Timers::RETRY, true);
+    std::get<eventloop::EventLoop&>(singletonPool)
+        .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, false);
 
     sendPayload(payloadCache);
 
@@ -195,19 +193,20 @@ void Context::resendPayload(bool clear)
 {
     sendPayload(payloadCache);
 
-    if(clear)
+    if (clear)
     {
         payloadCache.clear();
         expectedCharCount = 0;
-        std::get<sol::Manager&>(singletonPool).dataBuffer.erase(
-                expectedCharCount);
+        std::get<sol::Manager&>(singletonPool)
+            .dataBuffer.erase(expectedCharCount);
     }
 }
 
 void Context::sendPayload(const std::vector<uint8_t>& out) const
 {
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                    sessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
+            .lock();
 
     message::Handler msgHandler(session->channelPtr, sessionID);
 

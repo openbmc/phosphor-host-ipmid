@@ -1,14 +1,15 @@
+#include "provider_registration.hpp"
+
+#include "command_table.hpp"
+#include "main.hpp"
+
 #include <dirent.h>
 #include <dlfcn.h>
+#include <host-ipmid/ipmid-api.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <iostream>
-
-#include <host-ipmid/ipmid-api.h>
-#include "command_table.hpp"
-#include "main.hpp"
-#include "provider_registration.hpp"
 
 namespace provider
 {
@@ -38,8 +39,8 @@ void registerCallbackHandlers(const char* providerLibPath)
     struct dirent** handlerList = nullptr;
     std::string handlerPath(providerLibPath);
 
-    auto numLibs = scandir(providerLibPath, &handlerList, handler_select,
-                           alphasort);
+    auto numLibs =
+        scandir(providerLibPath, &handlerList, handler_select, alphasort);
     if (numLibs < 0)
     {
         return;
@@ -81,22 +82,19 @@ void registerCallbackHandlers(const char* providerLibPath)
  * @param[in] priv - IPMI Command Privilege
  */
 void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                            ipmi_context_t context,
-                            ipmid_callback_t handler, ipmi_cmd_privilege_t priv)
+                            ipmi_context_t context, ipmid_callback_t handler,
+                            ipmi_cmd_privilege_t priv)
 {
     uint16_t netFn = netfn << 10;
 
     // The payload type of IPMI commands provided by the shared libraries
     // is IPMI
-    command::CommandID command =
-    {
-        ((static_cast<uint32_t>(message::PayloadType::IPMI)) << 16) |
-        netFn | cmd
-    };
+    command::CommandID command = {
+        ((static_cast<uint32_t>(message::PayloadType::IPMI)) << 16) | netFn |
+        cmd};
 
-    std::get<command::Table&>(singletonPool).registerCommand(command,
-            std::make_unique<command::ProviderIpmidEntry>
-            (command, handler, static_cast<session::Privilege>(priv)));
+    std::get<command::Table&>(singletonPool)
+        .registerCommand(command, std::make_unique<command::ProviderIpmidEntry>(
+                                      command, handler,
+                                      static_cast<session::Privilege>(priv)));
 }
-
-

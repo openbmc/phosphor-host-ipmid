@@ -1,10 +1,10 @@
 #include "open_session.hpp"
 
-#include <iostream>
-
 #include "comm_module.hpp"
 #include "endian.hpp"
 #include "main.hpp"
+
+#include <iostream>
 
 namespace command
 {
@@ -14,12 +14,13 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
 {
 
     std::vector<uint8_t> outPayload(sizeof(OpenSessionResponse));
-    auto request = reinterpret_cast<const OpenSessionRequest*>(inPayload.data());
+    auto request =
+        reinterpret_cast<const OpenSessionRequest*>(inPayload.data());
     auto response = reinterpret_cast<OpenSessionResponse*>(outPayload.data());
 
     // Check for valid Authentication Algorithms
     if (!cipher::rakp_auth::Interface::isAlgorithmSupported(
-                static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo)))
+            static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo)))
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_AUTH_ALGO);
@@ -28,7 +29,7 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
 
     // Check for valid Integrity Algorithms
     if (!cipher::integrity::Interface::isAlgorithmSupported(
-                static_cast<cipher::integrity::Algorithms>(request->intAlgo)))
+            static_cast<cipher::integrity::Algorithms>(request->intAlgo)))
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_INTEGRITY_ALGO);
@@ -36,8 +37,8 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     }
 
     // Check for valid Confidentiality Algorithms
-    if(!cipher::crypt::Interface::isAlgorithmSupported(static_cast
-                    <cipher::crypt::Algorithms>(request->confAlgo)))
+    if (!cipher::crypt::Interface::isAlgorithmSupported(
+            static_cast<cipher::crypt::Algorithms>(request->confAlgo)))
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_CONF_ALGO);
@@ -48,19 +49,23 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     try
     {
         // Start an IPMI session
-        session = (std::get<session::Manager&>(singletonPool).startSession(
-                  endian::from_ipmi<>(request->remoteConsoleSessionID),
-                  static_cast<session::Privilege>(request->maxPrivLevel),
-                  static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo),
-                  static_cast<cipher::integrity::Algorithms>(request->intAlgo),
-                  static_cast<cipher::crypt::Algorithms>(request->confAlgo)
-                  )).lock();
+        session =
+            (std::get<session::Manager&>(singletonPool)
+                 .startSession(
+                     endian::from_ipmi<>(request->remoteConsoleSessionID),
+                     static_cast<session::Privilege>(request->maxPrivLevel),
+                     static_cast<cipher::rakp_auth::Algorithms>(
+                         request->authAlgo),
+                     static_cast<cipher::integrity::Algorithms>(
+                         request->intAlgo),
+                     static_cast<cipher::crypt::Algorithms>(request->confAlgo)))
+                .lock();
     }
     catch (std::exception& e)
     {
         std::cerr << e.what() << "\n";
-        response->status_code = static_cast<uint8_t>
-                                (RAKP_ReturnCode::INSUFFICIENT_RESOURCE);
+        response->status_code =
+            static_cast<uint8_t>(RAKP_ReturnCode::INSUFFICIENT_RESOURCE);
         std::cerr << "openSession : Problem opening a session\n";
         return outPayload;
     }
@@ -69,19 +74,19 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     response->status_code = static_cast<uint8_t>(RAKP_ReturnCode::NO_ERROR);
     response->maxPrivLevel = static_cast<uint8_t>(session->curPrivLevel);
     response->remoteConsoleSessionID = request->remoteConsoleSessionID;
-    response->managedSystemSessionID = endian::to_ipmi<>
-                                       (session->getBMCSessionID());
+    response->managedSystemSessionID =
+        endian::to_ipmi<>(session->getBMCSessionID());
 
-    response->authPayload = request->authPayload ;
-    response->authPayloadLen = request->authPayloadLen ;
+    response->authPayload = request->authPayload;
+    response->authPayloadLen = request->authPayloadLen;
     response->authAlgo = request->authAlgo;
 
-    response->intPayload = request->intPayload ;
-    response->intPayloadLen = request->intPayloadLen ;
+    response->intPayload = request->intPayload;
+    response->intPayloadLen = request->intPayloadLen;
     response->intAlgo = request->intAlgo;
 
-    response->confPayload = request->confPayload ;
-    response->confPayloadLen = request->confPayloadLen ;
+    response->confPayload = request->confPayload;
+    response->confPayloadLen = request->confPayloadLen;
     response->confAlgo = request->confAlgo;
 
     session->updateLastTransactionTime();

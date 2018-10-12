@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
-
-#include "message_handler.hpp"
 #include "comm_module.hpp"
+#include "message_handler.hpp"
+
+#include <vector>
 
 namespace command
 {

@@ -1,9 +1,10 @@
 #pragma once
 
-#include <array>
-#include <vector>
 #include "crypt_algo.hpp"
 #include "integrity_algo.hpp"
+
+#include <array>
+#include <vector>
 
 namespace cipher
 {
@@ -46,103 +47,105 @@ enum class Algorithms : uint8_t
  */
 class Interface
 {
-    public:
-        explicit Interface(integrity::Algorithms intAlgo,
-                           crypt::Algorithms cryptAlgo) :
-                intAlgo(intAlgo),
-                cryptAlgo(cryptAlgo) {}
+  public:
+    explicit Interface(integrity::Algorithms intAlgo,
+                       crypt::Algorithms cryptAlgo) :
+        intAlgo(intAlgo),
+        cryptAlgo(cryptAlgo)
+    {
+    }
 
-        Interface() = delete;
-        virtual ~Interface() = default;
-        Interface(const Interface&) = default;
-        Interface& operator=(const Interface&) = default;
-        Interface(Interface&&) = default;
-        Interface& operator=(Interface&&) = default;
+    Interface() = delete;
+    virtual ~Interface() = default;
+    Interface(const Interface&) = default;
+    Interface& operator=(const Interface&) = default;
+    Interface(Interface&&) = default;
+    Interface& operator=(Interface&&) = default;
 
-        /**
-         * @brief Generate the Hash Message Authentication Code
-         *
-         * This API is invoked to generate the Key Exchange Authentication Code
-         * in the RAKP2 and RAKP4 sequence and for generating the Session
-         * Integrity Key.
-         *
-         * @param input message
-         *
-         * @return hash output
-         *
-         * @note The user key which is the secret key for the hash operation
-         *        needs to be set before this operation.
-         */
-        std::vector<uint8_t> virtual generateHMAC(
-            const std::vector<uint8_t>& input) const = 0;
+    /**
+     * @brief Generate the Hash Message Authentication Code
+     *
+     * This API is invoked to generate the Key Exchange Authentication Code
+     * in the RAKP2 and RAKP4 sequence and for generating the Session
+     * Integrity Key.
+     *
+     * @param input message
+     *
+     * @return hash output
+     *
+     * @note The user key which is the secret key for the hash operation
+     *        needs to be set before this operation.
+     */
+    std::vector<uint8_t> virtual generateHMAC(
+        const std::vector<uint8_t>& input) const = 0;
 
-        /**
-         * @brief Generate the Integrity Check Value
-         *
-         * This API is invoked in the RAKP4 sequence for generating the
-         * Integrity Check Value.
-         *
-         * @param input message
-         *
-         * @return hash output
-         *
-         * @note The session integrity key which is the secret key for the
-         *        hash operation needs to be set before this operation.
-         */
-        std::vector<uint8_t> virtual generateICV(
-            const std::vector<uint8_t>& input) const = 0;
+    /**
+     * @brief Generate the Integrity Check Value
+     *
+     * This API is invoked in the RAKP4 sequence for generating the
+     * Integrity Check Value.
+     *
+     * @param input message
+     *
+     * @return hash output
+     *
+     * @note The session integrity key which is the secret key for the
+     *        hash operation needs to be set before this operation.
+     */
+    std::vector<uint8_t> virtual generateICV(
+        const std::vector<uint8_t>& input) const = 0;
 
-        /**
-         * @brief Check if the Authentication algorithm is supported
-         *
-         * @param[in] algo - authentication algorithm
-         *
-         * @return true if algorithm is supported else false
-         *
-         */
-        static bool isAlgorithmSupported(Algorithms algo)
+    /**
+     * @brief Check if the Authentication algorithm is supported
+     *
+     * @param[in] algo - authentication algorithm
+     *
+     * @return true if algorithm is supported else false
+     *
+     */
+    static bool isAlgorithmSupported(Algorithms algo)
+    {
+        if (algo == Algorithms::RAKP_HMAC_SHA1 ||
+            algo == Algorithms::RAKP_HMAC_SHA256)
         {
-            if (algo == Algorithms::RAKP_HMAC_SHA1 ||
-                algo == Algorithms::RAKP_HMAC_SHA256)
-            {
-               return true;
-            }
-            else
-            {
-                return false;
-            }
+            return true;
         }
+        else
+        {
+            return false;
+        }
+    }
 
-        // User Key is hardcoded to PASSW0RD till the IPMI User account
-        // management is in place.
-        std::array<uint8_t, USER_KEY_MAX_LENGTH> userKey = {"0penBmc"};
+    // User Key is hardcoded to PASSW0RD till the IPMI User account
+    // management is in place.
+    std::array<uint8_t, USER_KEY_MAX_LENGTH> userKey = {"0penBmc"};
 
-        // Managed System Random Number
-        std::array<uint8_t, BMC_RANDOM_NUMBER_LEN> bmcRandomNum;
+    // Managed System Random Number
+    std::array<uint8_t, BMC_RANDOM_NUMBER_LEN> bmcRandomNum;
 
-        // Remote Console Random Number
-        std::array<uint8_t, REMOTE_CONSOLE_RANDOM_NUMBER_LEN> rcRandomNum;
+    // Remote Console Random Number
+    std::array<uint8_t, REMOTE_CONSOLE_RANDOM_NUMBER_LEN> rcRandomNum;
 
-        // Session Integrity Key
-        std::vector<uint8_t> sessionIntegrityKey;
+    // Session Integrity Key
+    std::vector<uint8_t> sessionIntegrityKey;
 
-        /**
-         * Integrity Algorithm is activated and set in the session data only
-         * once the session setup is succeeded in the RAKP34 command. But the
-         * integrity algorithm is negotiated in the Open Session Request command
-         * . So the integrity algorithm successfully negotiated is stored
-         * in the authentication algorithm's instance.
-         */
-        integrity::Algorithms intAlgo;
+    /**
+     * Integrity Algorithm is activated and set in the session data only
+     * once the session setup is succeeded in the RAKP34 command. But the
+     * integrity algorithm is negotiated in the Open Session Request command
+     * . So the integrity algorithm successfully negotiated is stored
+     * in the authentication algorithm's instance.
+     */
+    integrity::Algorithms intAlgo;
 
-        /**
-         * Confidentiality Algorithm is activated and set in the session data
-         * only once the session setup is succeeded in the RAKP34 command. But
-         * the confidentiality algorithm is negotiated in the Open Session
-         * Request command. So the confidentiality algorithm successfully
-         * negotiated is stored in the authentication algorithm's instance.
-         */
-        crypt::Algorithms cryptAlgo;
+    /**
+     * Confidentiality Algorithm is activated and set in the session data
+     * only once the session setup is succeeded in the RAKP34 command. But
+     * the confidentiality algorithm is negotiated in the Open Session
+     * Request command. So the confidentiality algorithm successfully
+     * negotiated is stored in the authentication algorithm's instance.
+     */
+    crypt::Algorithms cryptAlgo;
 };
 
 /**
@@ -157,25 +160,27 @@ class Interface
 
 class AlgoSHA1 : public Interface
 {
-    public:
-        static constexpr size_t integrityCheckValueLength = 12;
+  public:
+    static constexpr size_t integrityCheckValueLength = 12;
 
-        explicit AlgoSHA1(integrity::Algorithms intAlgo,
-                          crypt::Algorithms cryptAlgo) :
-                Interface(intAlgo, cryptAlgo) {}
+    explicit AlgoSHA1(integrity::Algorithms intAlgo,
+                      crypt::Algorithms cryptAlgo) :
+        Interface(intAlgo, cryptAlgo)
+    {
+    }
 
-        AlgoSHA1() = delete;
-        ~AlgoSHA1() = default;
-        AlgoSHA1(const AlgoSHA1&) = default;
-        AlgoSHA1& operator=(const AlgoSHA1&) = default;
-        AlgoSHA1(AlgoSHA1&&) = default;
-        AlgoSHA1& operator=(AlgoSHA1&&) = default;
+    AlgoSHA1() = delete;
+    ~AlgoSHA1() = default;
+    AlgoSHA1(const AlgoSHA1&) = default;
+    AlgoSHA1& operator=(const AlgoSHA1&) = default;
+    AlgoSHA1(AlgoSHA1&&) = default;
+    AlgoSHA1& operator=(AlgoSHA1&&) = default;
 
-        std::vector<uint8_t> generateHMAC(
-                const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t>
+        generateHMAC(const std::vector<uint8_t>& input) const override;
 
-        std::vector<uint8_t> generateICV(
-                const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t>
+        generateICV(const std::vector<uint8_t>& input) const override;
 };
 
 /**
@@ -191,27 +196,28 @@ class AlgoSHA1 : public Interface
 
 class AlgoSHA256 : public Interface
 {
-    public:
-        static constexpr size_t integrityCheckValueLength = 16;
+  public:
+    static constexpr size_t integrityCheckValueLength = 16;
 
-        explicit AlgoSHA256(integrity::Algorithms intAlgo,
-                          crypt::Algorithms cryptAlgo) :
-                Interface(intAlgo, cryptAlgo) {}
+    explicit AlgoSHA256(integrity::Algorithms intAlgo,
+                        crypt::Algorithms cryptAlgo) :
+        Interface(intAlgo, cryptAlgo)
+    {
+    }
 
-        ~AlgoSHA256() = default;
-        AlgoSHA256(const AlgoSHA256&) = default;
-        AlgoSHA256& operator=(const AlgoSHA256&) = default;
-        AlgoSHA256(AlgoSHA256&&) = default;
-        AlgoSHA256& operator=(AlgoSHA256&&) = default;
+    ~AlgoSHA256() = default;
+    AlgoSHA256(const AlgoSHA256&) = default;
+    AlgoSHA256& operator=(const AlgoSHA256&) = default;
+    AlgoSHA256(AlgoSHA256&&) = default;
+    AlgoSHA256& operator=(AlgoSHA256&&) = default;
 
-        std::vector<uint8_t> generateHMAC(
-                const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t>
+        generateHMAC(const std::vector<uint8_t>& input) const override;
 
-        std::vector<uint8_t> generateICV(
-                const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t>
+        generateICV(const std::vector<uint8_t>& input) const override;
 };
 
-}// namespace auth
+} // namespace rakp_auth
 
-}// namespace cipher
-
+} // namespace cipher

@@ -1,9 +1,10 @@
 #pragma once
 
-#include <cstddef>
-#include <vector>
-#include <sdbusplus/bus/match.hpp>
 #include "comm_module.hpp"
+
+#include <cstddef>
+#include <sdbusplus/bus/match.hpp>
+#include <vector>
 
 namespace command
 {
@@ -32,4 +33,4 @@ namespace cache
 
 extern command::Guid guid;
 
-} //namespace cache
+} // namespace cache

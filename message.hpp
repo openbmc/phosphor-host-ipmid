@@ -8,15 +8,15 @@ namespace message
 
 enum class PayloadType : uint8_t
 {
-    IPMI                  = 0x00,
-    SOL                   = 0x01,
-    OPEN_SESSION_REQUEST  = 0x10,
+    IPMI = 0x00,
+    SOL = 0x01,
+    OPEN_SESSION_REQUEST = 0x10,
     OPEN_SESSION_RESPONSE = 0x11,
-    RAKP1                 = 0x12,
-    RAKP2                 = 0x13,
-    RAKP3                 = 0x14,
-    RAKP4                 = 0x15,
-    INVALID               = 0xFF,
+    RAKP1 = 0x12,
+    RAKP2 = 0x13,
+    RAKP3 = 0x14,
+    RAKP4 = 0x15,
+    INVALID = 0xFF,
 };
 
 /**
@@ -32,10 +32,12 @@ struct Message
 {
     static constexpr uint32_t MESSAGE_INVALID_SESSION_ID = 0xBADBADFF;
 
-    Message()
-        : payloadType(PayloadType::INVALID),
-          rcSessionID(Message::MESSAGE_INVALID_SESSION_ID),
-          bmcSessionID(Message::MESSAGE_INVALID_SESSION_ID) {}
+    Message() :
+        payloadType(PayloadType::INVALID),
+        rcSessionID(Message::MESSAGE_INVALID_SESSION_ID),
+        bmcSessionID(Message::MESSAGE_INVALID_SESSION_ID)
+    {
+    }
 
     ~Message() = default;
     Message(const Message&) = default;
@@ -43,12 +45,12 @@ struct Message
     Message(Message&&) = default;
     Message& operator=(Message&&) = default;
 
-    bool isPacketEncrypted;         // Message's Encryption Status
-    bool isPacketAuthenticated;     // Message's Authentication Status
-    PayloadType payloadType;        // Type of message payload (IPMI,SOL ..etc)
-    uint32_t rcSessionID;           // Remote Client's Session ID
-    uint32_t bmcSessionID;          // BMC's session ID
-    uint32_t sessionSeqNum;         // Session Sequence Number
+    bool isPacketEncrypted;     // Message's Encryption Status
+    bool isPacketAuthenticated; // Message's Authentication Status
+    PayloadType payloadType;    // Type of message payload (IPMI,SOL ..etc)
+    uint32_t rcSessionID;       // Remote Client's Session ID
+    uint32_t bmcSessionID;      // BMC's session ID
+    uint32_t sessionSeqNum;     // Session Sequence Number
 
     /** @brief Message payload
      *
@@ -116,4 +118,3 @@ using Response = Request;
 } // namespace LAN
 
 } // namespace message
-

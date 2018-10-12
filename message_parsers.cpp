@@ -1,12 +1,12 @@
 #include "message_parsers.hpp"
 
-#include <iostream>
-#include <memory>
-
 #include "endian.hpp"
 #include "main.hpp"
 #include "message.hpp"
 #include "sessions_manager.hpp"
+
+#include <iostream>
+#include <memory>
 
 namespace message
 {
@@ -14,8 +14,8 @@ namespace message
 namespace parser
 {
 
-std::tuple<std::unique_ptr<Message>, SessionHeader> unflatten(
-        std::vector<uint8_t>& inPacket)
+std::tuple<std::unique_ptr<Message>, SessionHeader>
+    unflatten(std::vector<uint8_t>& inPacket)
 {
     // Check if the packet has atleast the size of the RMCP Header
     if (inPacket.size() < sizeof(BasicHeader_t))
@@ -54,8 +54,7 @@ std::tuple<std::unique_ptr<Message>, SessionHeader> unflatten(
     }
 }
 
-std::vector<uint8_t> flatten(Message& outMessage,
-                             SessionHeader authType,
+std::vector<uint8_t> flatten(Message& outMessage, SessionHeader authType,
                              session::Session& session)
 {
     // Call the flatten routine based on the header type
@@ -101,9 +100,9 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 
     auto payloadLen = header->payloadLength;
 
-    (message->payload).assign(inPacket.data() + sizeof(SessionHeader_t),
-                              inPacket.data() + sizeof(SessionHeader_t) +
-                              payloadLen);
+    (message->payload)
+        .assign(inPacket.data() + sizeof(SessionHeader_t),
+                inPacket.data() + sizeof(SessionHeader_t) + payloadLen);
 
     return message;
 }
@@ -131,8 +130,8 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
 
     // Insert the Session Trailer
     packet.resize(packet.size() + sizeof(SessionTrailer_t));
-    auto trailer = reinterpret_cast<SessionTrailer_t*>(packet.data() +
-                   packet.size());
+    auto trailer =
+        reinterpret_cast<SessionTrailer_t*>(packet.data() + packet.size());
     trailer->legacyPad = 0x00;
 
     return packet;
@@ -155,8 +154,7 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 
     auto header = reinterpret_cast<SessionHeader_t*>(inPacket.data());
 
-    message->payloadType = static_cast<PayloadType>
-                           (header->payloadType & 0x3F);
+    message->payloadType = static_cast<PayloadType>(header->payloadType & 0x3F);
     message->bmcSessionID = endian::from_ipmi(header->sessId);
     message->sessionSeqNum = endian::from_ipmi(header->sessSeqNum);
     message->isPacketEncrypted =
@@ -168,8 +166,7 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 
     if (message->isPacketAuthenticated)
     {
-        if (!(internal::verifyPacketIntegrity(inPacket,
-                                              *(message.get()),
+        if (!(internal::verifyPacketIntegrity(inPacket, *(message.get()),
                                               payloadLen)))
         {
             throw std::runtime_error("Packet Integrity check failed");
@@ -180,15 +177,14 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     if (message->isPacketEncrypted)
     {
         // Assign the decrypted payload to the IPMI Message
-        message->payload = internal::decryptPayload(inPacket,
-                                                    *(message.get()),
-                                                    payloadLen);
+        message->payload =
+            internal::decryptPayload(inPacket, *(message.get()), payloadLen);
     }
     else
     {
         message->payload.assign(inPacket.begin() + sizeof(SessionHeader_t),
                                 inPacket.begin() + sizeof(SessionHeader_t) +
-                                payloadLen);
+                                    payloadLen);
     }
 
     return message;
@@ -226,8 +222,8 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     }
     else
     {
-        header->payloadLength = endian::to_ipmi<uint16_t>(
-                outMessage.payload.size());
+        header->payloadLength =
+            endian::to_ipmi<uint16_t>(outMessage.payload.size());
         payloadLen = outMessage.payload.size();
 
         // Insert the Payload into the Packet
@@ -262,8 +258,7 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session)
 }
 
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
-                           const Message& message,
-                           size_t payloadLen)
+                           const Message& message, size_t payloadLen)
 {
     /*
      * Padding bytes are added to cause the number of bytes in the data range
@@ -275,8 +270,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
 
     auto sessTrailerPos = sizeof(SessionHeader_t) + payloadLen + paddingLen;
 
-    auto trailer = reinterpret_cast<const SessionTrailer_t*>
-                                (packet.data() + sessTrailerPos);
+    auto trailer = reinterpret_cast<const SessionTrailer_t*>(packet.data() +
+                                                             sessTrailerPos);
 
     // Check trailer->padLength against paddingLen, both should match up,
     // return false if the lengths don't match
@@ -285,8 +280,9 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
         return false;
     }
 
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-        message.bmcSessionID)).lock();
+    auto session = (std::get<session::Manager&>(singletonPool)
+                        .getSession(message.bmcSessionID))
+                       .lock();
 
     auto integrityAlgo = session->getIntegrityAlgo();
 
@@ -294,7 +290,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
     // length is same as the length expected for the Integrity Algorithm that
     // was negotiated during the session open process.
     if ((packet.size() - sessTrailerPos - sizeof(SessionTrailer_t)) !=
-            integrityAlgo->authCodeLength)
+        integrityAlgo->authCodeLength)
     {
         return false;
     }
@@ -310,8 +306,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
     return integrityAlgo->verifyIntegrityData(packet, length, integrityIter);
 }
 
-void addIntegrityData(std::vector<uint8_t>& packet,
-                      const Message& message,
+void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
                       size_t payloadLen)
 {
     // The following logic calculates the number of padding bytes to be added to
@@ -321,38 +316,38 @@ void addIntegrityData(std::vector<uint8_t>& packet,
 
     packet.resize(packet.size() + sizeof(SessionTrailer_t));
 
-    auto trailer = reinterpret_cast<SessionTrailer_t*>
-                                (packet.data() + packet.size() -
-                                 sizeof(SessionTrailer_t));
+    auto trailer = reinterpret_cast<SessionTrailer_t*>(
+        packet.data() + packet.size() - sizeof(SessionTrailer_t));
 
     trailer->padLength = paddingLen;
     trailer->nextHeader = parser::RMCP_MESSAGE_CLASS_IPMI;
 
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-        message.bmcSessionID)).lock();
+    auto session = (std::get<session::Manager&>(singletonPool)
+                        .getSession(message.bmcSessionID))
+                       .lock();
 
-    auto integrityData = session->getIntegrityAlgo()->
-                                  generateIntegrityData(packet);
+    auto integrityData =
+        session->getIntegrityAlgo()->generateIntegrityData(packet);
 
     packet.insert(packet.end(), integrityData.begin(), integrityData.end());
 }
 
 std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
-                                    const Message& message,
-                                    size_t payloadLen)
+                                    const Message& message, size_t payloadLen)
 {
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                        message.bmcSessionID)).lock();
+    auto session = (std::get<session::Manager&>(singletonPool)
+                        .getSession(message.bmcSessionID))
+                       .lock();
 
-    return session->getCryptAlgo()->decryptPayload(packet,
-                                                  sizeof(SessionHeader_t),
-                                                  payloadLen);
+    return session->getCryptAlgo()->decryptPayload(
+        packet, sizeof(SessionHeader_t), payloadLen);
 }
 
 std::vector<uint8_t> encryptPayload(Message& message)
 {
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                        message.bmcSessionID)).lock();
+    auto session = (std::get<session::Manager&>(singletonPool)
+                        .getSession(message.bmcSessionID))
+                       .lock();
 
     return session->getCryptAlgo()->encryptPayload(message.payload);
 }

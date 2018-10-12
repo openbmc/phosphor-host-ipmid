@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
-
 #include "message_handler.hpp"
+
+#include <vector>
 
 namespace command
 {
@@ -71,8 +71,9 @@ struct SetSessionPrivLevelResp
  *
  * @return Response data for the command
  */
-std::vector<uint8_t> setSessionPrivilegeLevel(
-        const std::vector<uint8_t>& inPayload, const message::Handler& handler);
+std::vector<uint8_t>
+    setSessionPrivilegeLevel(const std::vector<uint8_t>& inPayload,
+                             const message::Handler& handler);
 
 constexpr uint8_t IPMI_CC_INVALID_SESSIONID = 0x87;
 

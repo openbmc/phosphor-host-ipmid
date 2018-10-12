@@ -43,8 +43,8 @@ struct BasicHeader_t
     // IPMI partial session header
     union
     {
-        uint8_t reserved1: 4;
-        uint8_t authType: 4;
+        uint8_t reserved1 : 4;
+        uint8_t authType : 4;
         uint8_t formatType;
     } format;
 } __attribute__((packed));
@@ -59,8 +59,8 @@ struct BasicHeader_t
  *         header type. In case of failure nullptr and session header type
  *         would be invalid.
  */
-std::tuple<std::unique_ptr<Message>, SessionHeader> unflatten(
-        std::vector<uint8_t>& inPacket);
+std::tuple<std::unique_ptr<Message>, SessionHeader>
+    unflatten(std::vector<uint8_t>& inPacket);
 
 /**
  * @brief Flatten an IPMI message and generate the IPMI packet with the
@@ -72,8 +72,7 @@ std::tuple<std::unique_ptr<Message>, SessionHeader> unflatten(
  *
  * @return IPMI packet on success
  */
-std::vector<uint8_t> flatten(Message& outMessage,
-                             SessionHeader authType,
+std::vector<uint8_t> flatten(Message& outMessage, SessionHeader authType,
                              session::Session& session);
 
 } // namespace parser
@@ -181,8 +180,7 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session);
  *
  */
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
-                           const Message& message,
-                           size_t payloadLen);
+                           const Message& message, size_t payloadLen);
 
 /**
  * @brief Add Integrity data to the outgoing IPMI packet
@@ -191,8 +189,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
  * @param[in] message - IPMI Message populated for the outgoing packet
  * @param[in] payloadLen - Length of the IPMI payload
  */
-void addIntegrityData(std::vector<uint8_t>& packet,
-                      const Message& message,
+void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
                       size_t payloadLen);
 
 /**
@@ -205,8 +202,7 @@ void addIntegrityData(std::vector<uint8_t>& packet,
  * @return on successful completion, return the plain text payload
  */
 std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
-                                    const Message& message,
-                                    size_t payloadLen);
+                                    const Message& message, size_t payloadLen);
 
 /**
  * @brief Encrypt the plain text payload for the outgoing IPMI packet

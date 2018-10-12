@@ -1,11 +1,11 @@
 #include "guid.hpp"
 
+#include <host-ipmid/ipmid-api.h>
+#include <mapper.h>
+
 #include <iostream>
 #include <sstream>
 #include <string>
-
-#include <host-ipmid/ipmid-api.h>
-#include <mapper.h>
 
 namespace cache
 {
@@ -26,8 +26,8 @@ Guid getSystemGUID()
 {
     // Canned System GUID for QEMU where the Chassis DBUS object is not
     // populated
-    Guid guid = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                  0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
+    Guid guid = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10};
 
     constexpr auto chassisIntf = "org.openbmc.control.Chassis";
 
@@ -43,8 +43,8 @@ Guid getSystemGUID()
         rc = mapper_get_service(bus, guidObjPath, &busname);
         if (rc < 0)
         {
-            std::cerr << "Failed to get " << guidObjPath << " bus name: "
-                      << strerror(-rc) << "\n";
+            std::cerr << "Failed to get " << guidObjPath
+                      << " bus name: " << strerror(-rc) << "\n";
             break;
         }
 
@@ -66,15 +66,14 @@ Guid getSystemGUID()
         std::string readUUID(uuid);
         auto len = readUUID.length();
 
-        for (size_t iter = 0, inc = 0;
-             iter < len && inc < BMC_GUID_LEN; iter += 2, inc++)
+        for (size_t iter = 0, inc = 0; iter < len && inc < BMC_GUID_LEN;
+             iter += 2, inc++)
         {
-            uint8_t hexVal = std::strtoul(readUUID.substr(iter, 2).c_str(),
-                                          NULL, 16);
+            uint8_t hexVal =
+                std::strtoul(readUUID.substr(iter, 2).c_str(), NULL, 16);
             guid[inc] = hexVal;
         }
-    }
-    while (0);
+    } while (0);
 
     sd_bus_error_free(&error);
     reply = sd_bus_message_unref(reply);
@@ -85,18 +84,18 @@ Guid getSystemGUID()
 
 void registerGUIDChangeCallback()
 {
-    if(matchPtr == nullptr)
+    if (matchPtr == nullptr)
     {
         using namespace sdbusplus::bus::match::rules;
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
         matchPtr = std::make_unique<sdbusplus::bus::match_t>(
             bus,
-            path_namespace(guidObjPath) +
-            type::signal() +
-            member("PropertiesChanged") +
-            interface(propInterface),
-            [](sdbusplus::message::message&){cache::guid = getSystemGUID();});
+            path_namespace(guidObjPath) + type::signal() +
+                member("PropertiesChanged") + interface(propInterface),
+            [](sdbusplus::message::message&) {
+                cache::guid = getSystemGUID();
+            });
     }
 }
 

@@ -14,8 +14,8 @@ namespace rakp_auth
 
 const std::string userName = "admin";
 
-std::vector<uint8_t> AlgoSHA1::generateHMAC(
-        const std::vector<uint8_t>& input) const
+std::vector<uint8_t>
+    AlgoSHA1::generateHMAC(const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -30,8 +30,8 @@ std::vector<uint8_t> AlgoSHA1::generateHMAC(
     return output;
 }
 
-std::vector<uint8_t> AlgoSHA1::generateICV(
-        const std::vector<uint8_t>& input) const
+std::vector<uint8_t>
+    AlgoSHA1::generateICV(const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -47,8 +47,8 @@ std::vector<uint8_t> AlgoSHA1::generateICV(
     return output;
 }
 
-std::vector<uint8_t> AlgoSHA256::generateHMAC(
-        const std::vector<uint8_t>& input) const
+std::vector<uint8_t>
+    AlgoSHA256::generateHMAC(const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA256_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -63,15 +63,15 @@ std::vector<uint8_t> AlgoSHA256::generateHMAC(
     return output;
 }
 
-std::vector<uint8_t> AlgoSHA256::generateICV(
-        const std::vector<uint8_t>& input) const
+std::vector<uint8_t>
+    AlgoSHA256::generateICV(const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA256_DIGEST_LENGTH);
     unsigned int mdLen = 0;
 
-    if (HMAC(EVP_sha256(),
-             sessionIntegrityKey.data(), sessionIntegrityKey.size(),
-             input.data(), input.size(), output.data(), &mdLen) == NULL)
+    if (HMAC(EVP_sha256(), sessionIntegrityKey.data(),
+             sessionIntegrityKey.size(), input.data(), input.size(),
+             output.data(), &mdLen) == NULL)
     {
         std::cerr << "Generate HMAC_SHA256_128 Integrity Check Value failed\n";
         output.resize(0);
@@ -81,6 +81,6 @@ std::vector<uint8_t> AlgoSHA256::generateICV(
     return output;
 }
 
-} // namespace auth
+} // namespace rakp_auth
 
 } // namespace cipher

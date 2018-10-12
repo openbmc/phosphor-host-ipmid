@@ -14,7 +14,7 @@ namespace udpsocket
 
 std::string Channel::getRemoteAddress() const
 {
-    char tmp[INET_ADDRSTRLEN] = { 0 };
+    char tmp[INET_ADDRSTRLEN] = {0};
     inet_ntop(AF_INET6, &address.inAddr.sin6_addr, tmp, sizeof(tmp));
     return std::string(tmp);
 }
@@ -41,12 +41,12 @@ std::tuple<int, std::vector<uint8_t>> Channel::read()
 
     do
     {
-        readDataLen = recvfrom(sockfd,               // File Descriptor
-                               outputPtr ,           // Buffer
-                               bufferSize,           // Bytes requested
-                               0,                    // Flags
-                               &address.sockAddr,    // Address
-                               &address.addrSize);   // Address Length
+        readDataLen = recvfrom(sockfd,             // File Descriptor
+                               outputPtr,          // Buffer
+                               bufferSize,         // Bytes requested
+                               0,                  // Flags
+                               &address.sockAddr,  // Address
+                               &address.addrSize); // Address Length
 
         if (readDataLen == 0) // Peer has performed an orderly shutdown
         {
@@ -62,8 +62,7 @@ std::tuple<int, std::vector<uint8_t>> Channel::read()
                       << "errno = " << rc << "\n";
             outBuffer.resize(0);
         }
-    }
-    while ((readDataLen < 0) && (-(rc) == EINTR));
+    } while ((readDataLen < 0) && (-(rc) == EINTR));
 
     // Resize the vector to the actual data read from the socket
     outBuffer.resize(readDataLen);
@@ -94,30 +93,31 @@ int Channel::write(const std::vector<uint8_t>& inBuffer)
             if (FD_ISSET(sockfd, &writeSet))
             {
                 address.addrSize =
-                        static_cast<socklen_t>(sizeof(address.inAddr));
+                    static_cast<socklen_t>(sizeof(address.inAddr));
                 do
                 {
-                    writeDataLen = sendto(sockfd,           // File Descriptor
-                                          outputPtr,        // Message
-                                          bufferSize,       // Length
-                                          MSG_NOSIGNAL,     // Flags
-                                          &address.sockAddr,// Destination Address
-                                          address.addrSize);// Address Length
+                    writeDataLen =
+                        sendto(sockfd,            // File Descriptor
+                               outputPtr,         // Message
+                               bufferSize,        // Length
+                               MSG_NOSIGNAL,      // Flags
+                               &address.sockAddr, // Destination Address
+                               address.addrSize); // Address Length
 
                     if (writeDataLen < 0)
                     {
                         rc = -errno;
-                        std::cerr << "Channel::Write: Write failed with errno:"
-                                  << rc << "\n";
+                        std::cerr
+                            << "Channel::Write: Write failed with errno:" << rc
+                            << "\n";
                     }
                     else if (static_cast<size_t>(writeDataLen) < bufferSize)
                     {
                         rc = -1;
                         std::cerr << "Channel::Write: Complete data not written"
-                                  " to the socket\n";
+                                     " to the socket\n";
                     }
-                }
-                while ((writeDataLen < 0) && (-(rc) == EINTR));
+                } while ((writeDataLen < 0) && (-(rc) == EINTR));
             }
             else
             {
@@ -137,14 +137,12 @@ int Channel::write(const std::vector<uint8_t>& inBuffer)
             else
             {
                 // Error
-                rc  = -errno;
-                std::cerr << "E> select call (writeset) had an error : "
-                          << rc << "\n";
+                rc = -errno;
+                std::cerr << "E> select call (writeset) had an error : " << rc
+                          << "\n";
             }
-
         }
-    }
-    while (spuriousWakeup);
+    } while (spuriousWakeup);
 
     return rc;
 }

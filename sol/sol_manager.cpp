@@ -1,11 +1,14 @@
+#include "sol_manager.hpp"
+
+#include "main.hpp"
+#include "sol_context.hpp"
+
 #include <sys/socket.h>
 #include <sys/un.h>
+
 #include <chrono>
 #include <cmath>
 #include <phosphor-logging/log.hpp>
-#include "main.hpp"
-#include "sol_context.hpp"
-#include "sol_manager.hpp"
 
 namespace sol
 {
@@ -14,7 +17,7 @@ using namespace phosphor::logging;
 
 CustomFD::~CustomFD()
 {
-    if(fd >= 0)
+    if (fd >= 0)
     {
         // Remove the host console descriptor from the sd_event_loop
         std::get<eventloop::EventLoop&>(singletonPool).stopHostConsole();
@@ -32,7 +35,7 @@ void Manager::initHostConsoleFd()
     if (fd < 0)
     {
         log<level::ERR>("Failed to open the host console socket",
-                entry("ERRNO=%d", errno));
+                        entry("ERRNO=%d", errno));
         throw std::runtime_error("Failed to open the host console socket");
     }
 
@@ -42,11 +45,11 @@ void Manager::initHostConsoleFd()
     consoleFD = std::make_unique<CustomFD>(fd);
     auto& conFD = *(consoleFD.get());
 
-    rc = connect(conFD(), (struct sockaddr *)&addr, sizeof(addr));
+    rc = connect(conFD(), (struct sockaddr*)&addr, sizeof(addr));
     if (rc < 0)
     {
         log<level::ERR>("Failed to connect to host console socket address",
-                entry("ERRNO=%d", errno));
+                        entry("ERRNO=%d", errno));
         consoleFD.reset();
         throw std::runtime_error("Failed to connect to console server");
     }
@@ -69,7 +72,7 @@ int Manager::writeConsoleSocket(const std::vector<uint8_t>& input) const
             if (errno == EINTR)
             {
                 log<level::INFO>(" Retrying to handle EINTR",
-                        entry("ERRNO=%d", errno));
+                                 entry("ERRNO=%d", errno));
                 rc = 0;
                 continue;
             }
@@ -77,7 +80,7 @@ int Manager::writeConsoleSocket(const std::vector<uint8_t>& input) const
             {
                 errVal = errno;
                 log<level::ERR>("Failed to write to host console socket",
-                        entry("ERRNO=%d", errno));
+                                entry("ERRNO=%d", errno));
                 return -errVal;
             }
         }
@@ -94,18 +97,19 @@ void Manager::startPayloadInstance(uint8_t payloadInstance,
         initHostConsoleFd();
 
         // Register the fd in the sd_event_loop
-        std::get<eventloop::EventLoop&>(singletonPool).startHostConsole(
-            *(consoleFD.get()));
+        std::get<eventloop::EventLoop&>(singletonPool)
+            .startHostConsole(*(consoleFD.get()));
     }
 
     // Create the SOL Context data for payload instance
-    auto context = std::make_unique<Context>(
-            retryCount, sendThreshold, payloadInstance, sessionID);
+    auto context = std::make_unique<Context>(retryCount, sendThreshold,
+                                             payloadInstance, sessionID);
 
-    std::get<eventloop::EventLoop&>(singletonPool).startSOLPayloadInstance(
+    std::get<eventloop::EventLoop&>(singletonPool)
+        .startSOLPayloadInstance(
             payloadInstance,
-            std::chrono::duration_cast<eventloop::IntervalType>
-                    (accumulateInterval),
+            std::chrono::duration_cast<eventloop::IntervalType>(
+                accumulateInterval),
             std::chrono::duration_cast<eventloop::IntervalType>(retryInterval));
 
     payloadMap.emplace(payloadInstance, std::move(context));
@@ -121,8 +125,8 @@ void Manager::stopPayloadInstance(uint8_t payloadInstance)
 
     payloadMap.erase(iter);
 
-    std::get<eventloop::EventLoop&>(singletonPool).stopSOLPayloadInstance(
-            payloadInstance);
+    std::get<eventloop::EventLoop&>(singletonPool)
+        .stopSOLPayloadInstance(payloadInstance);
 
     if (payloadMap.empty())
     {

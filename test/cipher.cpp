@@ -1,13 +1,16 @@
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
-#include <iostream>
-#include <vector>
 #include "crypt_algo.hpp"
 #include "integrity_algo.hpp"
 #include "message_parsers.hpp"
 #include "rmcp.hpp"
+
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <openssl/rand.h>
+#include <openssl/sha.h>
+
+#include <iostream>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
@@ -16,11 +19,11 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
      * Step-1 Generate Integrity Data for the packet, using the implemented API
      */
     // Packet = RMCP Session Header (4 bytes) + Packet (8 bytes)
-    std::vector<uint8_t> packet = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> packet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA1>(sik);
 
@@ -30,23 +33,21 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
     auto response = algoPtr->generateIntegrityData(packet);
 
     EXPECT_EQ(true, (response.size() ==
-                    cipher::integrity::AlgoSHA1::SHA1_96_AUTHCODE_LENGTH));
+                     cipher::integrity::AlgoSHA1::SHA1_96_AUTHCODE_LENGTH));
 
     /*
      * Step-2 Generate Integrity data using OpenSSL SHA1 algorithm
      */
     std::vector<uint8_t> k1(SHA_DIGEST_LENGTH);
-    constexpr rmcp::Const_n const1 = { 0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01
-                                     };
+    constexpr rmcp::Const_n const1 = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
 
     // Generated K1 for the integrity algorithm with the additional key keyed
     // with SIK.
     unsigned int mdLen = 0;
-    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(),
-             const1.size(), k1.data(), &mdLen) == NULL)
+    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
+             k1.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -56,8 +57,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
     size_t length = packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE;
 
     if (HMAC(EVP_sha1(), k1.data(), k1.size(),
-             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE,
-             length,
+             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
              output.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating integrity data failed";
@@ -80,24 +80,22 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
      */
 
     // Packet = RMCP Session Header (4 bytes) + Packet (8 bytes)
-    std::vector<uint8_t> packet = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> packet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 
     std::vector<uint8_t> k1(SHA_DIGEST_LENGTH);
-    constexpr rmcp::Const_n const1 = { 0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01
-                                     };
+    constexpr rmcp::Const_n const1 = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
 
     // Generated K1 for the integrity algorithm with the additional key keyed
     // with SIK.
     unsigned int mdLen = 0;
-    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(),
-             const1.size(), k1.data(), &mdLen) == NULL)
+    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
+             k1.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -107,8 +105,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
     size_t length = packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE;
 
     if (HMAC(EVP_sha1(), k1.data(), k1.size(),
-             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE,
-             length,
+             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
              output.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating integrity data failed";
@@ -122,23 +119,22 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
     auto packetSize = packet.size();
     packet.insert(packet.end(), output.begin(), output.end());
 
-     // Point to the integrity data in the packet
-     auto integrityIter = packet.cbegin();
-     std::advance(integrityIter, packetSize);
+    // Point to the integrity data in the packet
+    auto integrityIter = packet.cbegin();
+    std::advance(integrityIter, packetSize);
 
-     /*
-      * Step-3 Invoke the verifyIntegrityData API and validate the response
-      */
+    /*
+     * Step-3 Invoke the verifyIntegrityData API and validate the response
+     */
 
-     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA1>(sik);
-     ASSERT_EQ(true, (algoPtr != NULL));
+    auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA1>(sik);
+    ASSERT_EQ(true, (algoPtr != NULL));
 
-     auto check = algoPtr->verifyIntegrityData(
-             packet,
-             packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
-             integrityIter);
+    auto check = algoPtr->verifyIntegrityData(
+        packet, packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
+        integrityIter);
 
-     EXPECT_EQ(true, check);
+    EXPECT_EQ(true, check);
 }
 
 TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataFail)
@@ -148,9 +144,9 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataFail)
      */
 
     // Packet = RMCP Session Header (4 bytes) + Packet (8 bytes)
-    std::vector<uint8_t> packet = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> packet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-    std::vector<uint8_t> integrity = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> integrity = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     packet.insert(packet.end(), integrity.begin(), integrity.end());
 
@@ -163,19 +159,17 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataFail)
      */
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA1>(sik);
 
     ASSERT_EQ(true, (algoPtr != NULL));
 
-
     // Verify the Integrity Data
     auto check = algoPtr->verifyIntegrityData(
-            packet,
-            packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE,
-            integrityIter);
+        packet, packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE,
+        integrityIter);
 
     EXPECT_EQ(false, check);
 }
@@ -186,12 +180,12 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_GenerateIntegrityDataCheck)
      * Step-1 Generate Integrity Data for the packet, using the implemented API
      */
     // Packet = RMCP Session Header (4 bytes) + Packet (8 bytes)
-    std::vector<uint8_t> packet = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> packet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-                                 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                                23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA256>(sik);
 
@@ -200,24 +194,23 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_GenerateIntegrityDataCheck)
     // Generate the Integrity Data
     auto response = algoPtr->generateIntegrityData(packet);
 
-    EXPECT_EQ(true, (response.size() ==
-                    cipher::integrity::AlgoSHA256::SHA256_128_AUTHCODE_LENGTH));
+    EXPECT_EQ(true,
+              (response.size() ==
+               cipher::integrity::AlgoSHA256::SHA256_128_AUTHCODE_LENGTH));
 
     /*
      * Step-2 Generate Integrity data using OpenSSL SHA256 algorithm
      */
     std::vector<uint8_t> k1(SHA256_DIGEST_LENGTH);
-    constexpr rmcp::Const_n const1 = { 0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01
-                                     };
+    constexpr rmcp::Const_n const1 = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
 
     // Generated K1 for the integrity algorithm with the additional key keyed
     // with SIK.
     unsigned int mdLen = 0;
-    if (HMAC(EVP_sha256(), sik.data(), sik.size(), const1.data(),
-             const1.size(), k1.data(), &mdLen) == NULL)
+    if (HMAC(EVP_sha256(), sik.data(), sik.size(), const1.data(), const1.size(),
+             k1.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -227,8 +220,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_GenerateIntegrityDataCheck)
     size_t length = packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE;
 
     if (HMAC(EVP_sha256(), k1.data(), k1.size(),
-             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE,
-             length,
+             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
              output.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating integrity data failed";
@@ -251,25 +243,23 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataPass)
      */
 
     // Packet = RMCP Session Header (4 bytes) + Packet (8 bytes)
-    std::vector<uint8_t> packet = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> packet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-                                 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                                23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
 
     std::vector<uint8_t> k1(SHA256_DIGEST_LENGTH);
-    constexpr rmcp::Const_n const1 = { 0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01,
-                                       0x01, 0x01, 0x01, 0x01, 0x01
-                                     };
+    constexpr rmcp::Const_n const1 = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+                                      0x01, 0x01, 0x01, 0x01, 0x01, 0x01};
 
     // Generated K1 for the integrity algorithm with the additional key keyed
     // with SIK.
     unsigned int mdLen = 0;
-    if (HMAC(EVP_sha256(), sik.data(), sik.size(), const1.data(),
-             const1.size(), k1.data(), &mdLen) == NULL)
+    if (HMAC(EVP_sha256(), sik.data(), sik.size(), const1.data(), const1.size(),
+             k1.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -279,8 +269,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataPass)
     size_t length = packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE;
 
     if (HMAC(EVP_sha256(), k1.data(), k1.size(),
-             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE,
-             length,
+             packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
              output.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating integrity data failed";
@@ -306,9 +295,8 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataPass)
     ASSERT_EQ(true, (algoPtr != NULL));
 
     auto check = algoPtr->verifyIntegrityData(
-            packet,
-            packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
-            integrityIter);
+        packet, packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
+        integrityIter);
 
     EXPECT_EQ(true, check);
 }
@@ -320,9 +308,9 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataFail)
      */
 
     // Packet = RMCP Session Header (4 bytes) + Packet (8 bytes)
-    std::vector<uint8_t> packet = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> packet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-    std::vector<uint8_t> integrity = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> integrity = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     packet.insert(packet.end(), integrity.begin(), integrity.end());
 
@@ -335,20 +323,18 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataFail)
      */
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-                                 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                                12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                                23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA256>(sik);
 
     ASSERT_EQ(true, (algoPtr != NULL));
 
-
     // Verify the Integrity Data
     auto check = algoPtr->verifyIntegrityData(
-            packet,
-            packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE,
-            integrityIter);
+        packet, packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE,
+        integrityIter);
 
     EXPECT_EQ(false, check);
 }
@@ -359,24 +345,22 @@ TEST(CryptAlgo, AES_CBC_128_EncryptPayloadValidate)
      * Step-1 Generate the encrypted data using the implemented API for
      * AES-CBC-128
      */
-    std::vector<uint8_t> payload = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> payload = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 
     std::vector<uint8_t> k2(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
-    constexpr rmcp::Const_n const1 = { 0x02, 0x02, 0x02, 0x02, 0x02,
-                                       0x02, 0x02, 0x02, 0x02, 0x02,
-                                       0x02, 0x02, 0x02, 0x02, 0x02,
-                                       0x02, 0x02, 0x02, 0x02, 0x02
-                                     };
+    constexpr rmcp::Const_n const1 = {0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+                                      0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+                                      0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
 
     // Generated K2 for the confidentiality algorithm with the additional key
     // keyed with SIK.
-    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(),
-             const1.size(), k2.data(), &mdLen) == NULL)
+    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
+             k2.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating K2 for confidentiality algorithm failed";
     }
@@ -401,15 +385,14 @@ TEST(CryptAlgo, AES_CBC_128_EncryptPayloadValidate)
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
-    std::vector<uint8_t> output(
-            cipher.size() + cipher::crypt::AlgoAES128::AESCBC128BlockSize);
+    std::vector<uint8_t> output(cipher.size() +
+                                cipher::crypt::AlgoAES128::AESCBC128BlockSize);
     int outputLen = 0;
 
-    if (!EVP_DecryptUpdate(ctx, output.data(), &outputLen,
-                           cipher.data() +
-                           cipher::crypt::AlgoAES128::AESCBC128ConfHeader,
-                           cipher.size() -
-                           cipher::crypt::AlgoAES128::AESCBC128ConfHeader))
+    if (!EVP_DecryptUpdate(
+            ctx, output.data(), &outputLen,
+            cipher.data() + cipher::crypt::AlgoAES128::AESCBC128ConfHeader,
+            cipher.size() - cipher::crypt::AlgoAES128::AESCBC128ConfHeader))
     {
         EVP_CIPHER_CTX_free(ctx);
         FAIL() << "EVP_DecryptUpdate failed";
@@ -432,25 +415,23 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
      * implementation
      */
 
-    std::vector<uint8_t> payload = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                     13, 14, 15, 16};
+    std::vector<uint8_t> payload = {1, 2,  3,  4,  5,  6,  7,  8,
+                                    9, 10, 11, 12, 13, 14, 15, 16};
     payload.resize(payload.size() + 1);
     payload.back() = 0;
 
     // Hardcoded Session Integrity Key
-    std::vector<uint8_t> sik = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                                 13, 14, 15, 16, 17, 18, 19, 20 };
+    std::vector<uint8_t> sik = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
     EVP_CIPHER_CTX* ctx;
     ctx = EVP_CIPHER_CTX_new();
     std::vector<uint8_t> k2(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
-    constexpr rmcp::Const_n const1 = { 0x02, 0x02, 0x02, 0x02, 0x02,
-                                       0x02, 0x02, 0x02, 0x02, 0x02,
-                                       0x02, 0x02, 0x02, 0x02, 0x02,
-                                       0x02, 0x02, 0x02, 0x02, 0x02
-                                     };
-    std::vector<uint8_t> output(
-            payload.size() + cipher::crypt::AlgoAES128::AESCBC128BlockSize);
+    constexpr rmcp::Const_n const1 = {0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+                                      0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
+                                      0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
+    std::vector<uint8_t> output(payload.size() +
+                                cipher::crypt::AlgoAES128::AESCBC128BlockSize);
 
     if (!RAND_bytes(output.data(),
                     cipher::crypt::AlgoAES128::AESCBC128ConfHeader))
@@ -460,8 +441,8 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
 
     // Generated K2 for the confidentiality algorithm with the additional key
     // keyed with SIK.
-    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(),
-             const1.size(), k2.data(), &mdLen) == NULL)
+    if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
+             k2.data(), &mdLen) == NULL)
     {
         FAIL() << "Generating K2 for confidentiality algorithm failed";
     }
@@ -476,12 +457,9 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
     EVP_CIPHER_CTX_set_padding(ctx, 0);
     int outputLen = 0;
 
-    if (!EVP_EncryptUpdate(ctx,
-                           output.data() +
-                           cipher::crypt::AlgoAES128::AESCBC128ConfHeader,
-                           &outputLen,
-                           payload.data(),
-                           payload.size()))
+    if (!EVP_EncryptUpdate(
+            ctx, output.data() + cipher::crypt::AlgoAES128::AESCBC128ConfHeader,
+            &outputLen, payload.data(), payload.size()))
     {
         EVP_CIPHER_CTX_free(ctx);
         FAIL() << "EVP_EncryptUpdate failed";

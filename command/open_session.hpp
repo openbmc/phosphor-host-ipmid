@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
-
 #include "message_handler.hpp"
+
+#include <vector>
 
 namespace command
 {
@@ -14,25 +14,25 @@ namespace command
  */
 struct OpenSessionRequest
 {
-    uint8_t messageTag;  // Message tag from request buffer
+    uint8_t messageTag; // Message tag from request buffer
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t maxPrivLevel : 4 ;// Requested maximum privilege level
-    uint8_t reserved1 : 4;  // Reserved for future definition
+    uint8_t maxPrivLevel : 4; // Requested maximum privilege level
+    uint8_t reserved1 : 4;    // Reserved for future definition
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 4;  // Reserved for future definition
-    uint8_t maxPrivLevel : 4 ;// Requested maximum privilege level
+    uint8_t reserved1 : 4;    // Reserved for future definition
+    uint8_t maxPrivLevel : 4; // Requested maximum privilege level
 
 #endif
 
     uint16_t reserved2;
-    uint32_t remoteConsoleSessionID ;
+    uint32_t remoteConsoleSessionID;
 
-    uint8_t authPayload ;
-    uint16_t  reserved3;
-    uint8_t  authPayloadLen;
+    uint8_t authPayload;
+    uint16_t reserved3;
+    uint8_t authPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t authAlgo : 6;
@@ -49,7 +49,7 @@ struct OpenSessionRequest
 
     uint8_t intPayload;
     uint16_t reserved7;
-    uint8_t  intPayloadLen;
+    uint8_t intPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t intAlgo : 6;
@@ -66,7 +66,7 @@ struct OpenSessionRequest
 
     uint8_t confPayload;
     uint16_t reserved11;
-    uint8_t  confPayloadLen;
+    uint8_t confPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t confAlgo : 6;
@@ -125,7 +125,7 @@ struct OpenSessionResponse
 
     uint8_t intPayload;
     uint16_t reserved7;
-    uint8_t  intPayloadLen;
+    uint8_t intPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t intAlgo : 6;
@@ -143,7 +143,7 @@ struct OpenSessionResponse
 
     uint8_t confPayload;
     uint16_t reserved11;
-    uint8_t  confPayloadLen;
+    uint8_t confPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t confAlgo : 6;

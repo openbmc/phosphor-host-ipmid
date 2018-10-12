@@ -1,17 +1,17 @@
 #include "message_handler.hpp"
 
+#include "command_table.hpp"
+#include "main.hpp"
+#include "message.hpp"
+#include "message_parsers.hpp"
+#include "sessions_manager.hpp"
+
 #include <sys/socket.h>
 
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "command_table.hpp"
-#include "main.hpp"
-#include "message.hpp"
-#include "message_parsers.hpp"
-#include "sessions_manager.hpp"
 
 namespace message
 {
@@ -35,8 +35,9 @@ std::unique_ptr<Message> Handler::receive()
     std::unique_ptr<Message> message;
     std::tie(message, sessionHeader) = parser::unflatten(packet);
 
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                   message->bmcSessionID)).lock();
+    auto session = (std::get<session::Manager&>(singletonPool)
+                        .getSession(message->bmcSessionID))
+                       .lock();
 
     sessionID = message->bmcSessionID;
     message->rcSessionID = session->getRCSessionID();
@@ -45,29 +46,29 @@ std::unique_ptr<Message> Handler::receive()
     return message;
 }
 
-template<>
-std::unique_ptr<Message> Handler::createResponse<PayloadType::IPMI>(
-        std::vector<uint8_t>& output, Message& inMessage)
+template <>
+std::unique_ptr<Message>
+    Handler::createResponse<PayloadType::IPMI>(std::vector<uint8_t>& output,
+                                               Message& inMessage)
 {
     auto outMessage = std::make_unique<Message>();
     outMessage->payloadType = PayloadType::IPMI;
 
-    outMessage->payload.resize(sizeof(LAN::header::Response) +
-                               output.size() +
+    outMessage->payload.resize(sizeof(LAN::header::Response) + output.size() +
                                sizeof(LAN::trailer::Response));
 
-    auto reqHeader = reinterpret_cast<LAN::header::Request*>
-                     (inMessage.payload.data());
-    auto respHeader = reinterpret_cast<LAN::header::Response*>
-                      (outMessage->payload.data());
+    auto reqHeader =
+        reinterpret_cast<LAN::header::Request*>(inMessage.payload.data());
+    auto respHeader =
+        reinterpret_cast<LAN::header::Response*>(outMessage->payload.data());
 
     // Add IPMI LAN Message Response Header
     respHeader->rqaddr = reqHeader->rqaddr;
-    respHeader->netfn  = reqHeader->netfn | 0x04;
-    respHeader->cs     = crc8bit(&(respHeader->rqaddr), 2);
+    respHeader->netfn = reqHeader->netfn | 0x04;
+    respHeader->cs = crc8bit(&(respHeader->rqaddr), 2);
     respHeader->rsaddr = reqHeader->rsaddr;
-    respHeader->rqseq  = reqHeader->rqseq;
-    respHeader->cmd    = reqHeader->cmd;
+    respHeader->rqseq = reqHeader->rqseq;
+    respHeader->cmd = reqHeader->cmd;
 
     auto assembledSize = sizeof(LAN::header::Response);
 
@@ -77,8 +78,8 @@ std::unique_ptr<Message> Handler::createResponse<PayloadType::IPMI>(
     assembledSize += output.size();
 
     // Add the IPMI LAN Message Trailer
-    auto trailer = reinterpret_cast<LAN::trailer::Response*>
-                   (outMessage->payload.data() + assembledSize);
+    auto trailer = reinterpret_cast<LAN::trailer::Response*>(
+        outMessage->payload.data() + assembledSize);
     trailer->checksum = crc8bit(&respHeader->rsaddr, assembledSize - 3);
 
     return outMessage;
@@ -92,8 +93,8 @@ std::unique_ptr<Message> Handler::executeCommand(Message& inMessage)
 
     if (inMessage.payloadType == PayloadType::IPMI)
     {
-        if (inMessage.payload.size() < (sizeof(LAN::header::Request) +
-                                        sizeof(LAN::trailer::Request)))
+        if (inMessage.payload.size() <
+            (sizeof(LAN::header::Request) + sizeof(LAN::trailer::Request)))
         {
             return nullptr;
         }
@@ -102,17 +103,13 @@ std::unique_ptr<Message> Handler::executeCommand(Message& inMessage)
         auto end = inMessage.payload.end() - sizeof(LAN::trailer::Request);
         std::vector<uint8_t> inPayload(start, end);
 
-        output = std::get<command::Table&>(singletonPool).executeCommand(
-                     command,
-                     inPayload,
-                     *this);
+        output = std::get<command::Table&>(singletonPool)
+                     .executeCommand(command, inPayload, *this);
     }
     else
     {
-        output = std::get<command::Table&>(singletonPool).executeCommand(
-                     command,
-                     inMessage.payload,
-                     *this);
+        output = std::get<command::Table&>(singletonPool)
+                     .executeCommand(command, inMessage.payload, *this);
     }
 
     std::unique_ptr<Message> outMessage = nullptr;
@@ -124,7 +121,7 @@ std::unique_ptr<Message> Handler::executeCommand(Message& inMessage)
             break;
         case PayloadType::OPEN_SESSION_REQUEST:
             outMessage = createResponse<PayloadType::OPEN_SESSION_RESPONSE>(
-                             output, inMessage);
+                output, inMessage);
             break;
         case PayloadType::RAKP1:
             outMessage = createResponse<PayloadType::RAKP2>(output, inMessage);
@@ -149,15 +146,18 @@ std::unique_ptr<Message> Handler::executeCommand(Message& inMessage)
 
 uint32_t Handler::getCommand(Message& message)
 {
-    uint32_t command = 0 ;
+    uint32_t command = 0;
 
     command |= (static_cast<uint8_t>(message.payloadType) << 16);
     if (message.payloadType == PayloadType::IPMI)
     {
-        command |= ((reinterpret_cast<LAN::header::Request*>
-                     (message.payload.data()))->netfn) << 8;
-        command |= (reinterpret_cast<LAN::header::Request*>
-                    (message.payload.data()))->cmd;
+        command |=
+            ((reinterpret_cast<LAN::header::Request*>(message.payload.data()))
+                 ->netfn)
+            << 8;
+        command |=
+            (reinterpret_cast<LAN::header::Request*>(message.payload.data()))
+                ->cmd;
     }
 
     return command;
@@ -165,8 +165,9 @@ uint32_t Handler::getCommand(Message& message)
 
 void Handler::send(Message& outMessage)
 {
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                    sessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
+            .lock();
 
     // Flatten the packet
     auto packet = parser::flatten(outMessage, sessionHeader, *session);
@@ -181,8 +182,9 @@ void Handler::send(Message& outMessage)
 
 void Handler::setChannelInSession() const
 {
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                    sessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
+            .lock();
 
     session->channelPtr = channel;
 }
@@ -191,8 +193,9 @@ void Handler::sendSOLPayload(const std::vector<uint8_t>& input)
 {
     Message outMessage;
 
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                    sessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
+            .lock();
 
     outMessage.payloadType = PayloadType::SOL;
     outMessage.payload = input;
@@ -204,14 +207,14 @@ void Handler::sendSOLPayload(const std::vector<uint8_t>& input)
     send(outMessage);
 }
 
-void Handler::sendUnsolicitedIPMIPayload(uint8_t netfn,
-                                         uint8_t cmd,
+void Handler::sendUnsolicitedIPMIPayload(uint8_t netfn, uint8_t cmd,
                                          const std::vector<uint8_t>& output)
 {
     Message outMessage;
 
-    auto session = (std::get<session::Manager&>(singletonPool).getSession(
-                    sessionID)).lock();
+    auto session =
+        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
+            .lock();
 
     outMessage.payloadType = PayloadType::IPMI;
     outMessage.isPacketEncrypted = session->isCryptAlgoEnabled();
@@ -219,32 +222,30 @@ void Handler::sendUnsolicitedIPMIPayload(uint8_t netfn,
     outMessage.rcSessionID = session->getRCSessionID();
     outMessage.bmcSessionID = sessionID;
 
-    outMessage.payload.resize(sizeof(LAN::header::Request) +
-                              output.size() +
+    outMessage.payload.resize(sizeof(LAN::header::Request) + output.size() +
                               sizeof(LAN::trailer::Request));
 
-    auto respHeader = reinterpret_cast<LAN::header::Request*>
-                      (outMessage.payload.data());
+    auto respHeader =
+        reinterpret_cast<LAN::header::Request*>(outMessage.payload.data());
 
     // Add IPMI LAN Message Request Header
     respHeader->rsaddr = LAN::requesterBMCAddress;
-    respHeader->netfn  = (netfn << 0x02);
-    respHeader->cs     = crc8bit(&(respHeader->rsaddr), 2);
+    respHeader->netfn = (netfn << 0x02);
+    respHeader->cs = crc8bit(&(respHeader->rsaddr), 2);
     respHeader->rqaddr = LAN::responderBMCAddress;
-    respHeader->rqseq  = 0;
-    respHeader->cmd    = cmd;
+    respHeader->rqseq = 0;
+    respHeader->cmd = cmd;
 
     auto assembledSize = sizeof(LAN::header::Request);
 
     // Copy the output by the execution of the command
-    std::copy(output.begin(),
-              output.end(),
+    std::copy(output.begin(), output.end(),
               outMessage.payload.begin() + assembledSize);
     assembledSize += output.size();
 
     // Add the IPMI LAN Message Trailer
-    auto trailer = reinterpret_cast<LAN::trailer::Request*>
-                   (outMessage.payload.data() + assembledSize);
+    auto trailer = reinterpret_cast<LAN::trailer::Request*>(
+        outMessage.payload.data() + assembledSize);
 
     // Calculate the checksum for the field rqaddr in the header to the
     // command data, 3 corresponds to size of the fields before rqaddr( rsaddr,
@@ -254,5 +255,4 @@ void Handler::sendUnsolicitedIPMIPayload(uint8_t netfn,
     send(outMessage);
 }
 
-} //namespace message
-
+} // namespace message

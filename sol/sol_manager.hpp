@@ -1,10 +1,11 @@
 #pragma once
 
-#include <map>
-#include <memory>
 #include "console_buffer.hpp"
 #include "session.hpp"
 #include "sol_context.hpp"
+
+#include <map>
+#include <memory>
 
 namespace sol
 {
@@ -33,8 +34,9 @@ struct CustomFD
     CustomFD(CustomFD&&) = delete;
     CustomFD& operator=(CustomFD&&) = delete;
 
-    CustomFD(int fd) :
-        fd(fd) {}
+    CustomFD(int fd) : fd(fd)
+    {
+    }
 
     ~CustomFD();
 
@@ -43,8 +45,8 @@ struct CustomFD
         return fd;
     }
 
-    private:
-        int fd = -1;
+  private:
+    int fd = -1;
 };
 
 using namespace std::chrono_literals;
@@ -57,216 +59,215 @@ using namespace std::chrono_literals;
  */
 class Manager
 {
-    public:
+  public:
+    /** @brief SOL Payload Instance is the key for the map, the value is the
+     *         SOL context.
+     */
+    using SOLPayloadMap = std::map<Instance, std::unique_ptr<Context>>;
 
-        /** @brief SOL Payload Instance is the key for the map, the value is the
-         *         SOL context.
-         */
-        using SOLPayloadMap = std::map<Instance, std::unique_ptr<Context>>;
+    Manager() = default;
+    ~Manager() = default;
+    Manager(const Manager&) = delete;
+    Manager& operator=(const Manager&) = delete;
+    Manager(Manager&&) = default;
+    Manager& operator=(Manager&&) = default;
 
-        Manager() = default;
-        ~Manager() = default;
-        Manager(const Manager&) = delete;
-        Manager& operator=(const Manager&) = delete;
-        Manager(Manager&&) = default;
-        Manager& operator=(Manager&&) = default;
+    /** @brief Host Console Buffer. */
+    ConsoleData dataBuffer;
 
-        /** @brief Host Console Buffer. */
-        ConsoleData dataBuffer;
+    /** @brief Set in Progress.
+     *
+     *  This parameter is used to indicate when any of the SOL parameters
+     *  are being updated, and when the changes are completed. The bit is
+     *  primarily provided to alert software than some other software or
+     *  utility is in the process of making changes to the data. This field
+     *  is initialized to set complete.
+     */
+    uint8_t progress = 0;
 
-        /** @brief Set in Progress.
-         *
-         *  This parameter is used to indicate when any of the SOL parameters
-         *  are being updated, and when the changes are completed. The bit is
-         *  primarily provided to alert software than some other software or
-         *  utility is in the process of making changes to the data. This field
-         *  is initialized to set complete.
-         */
-        uint8_t progress = 0;
+    /** @brief SOL enable
+     *
+     *  This controls whether the SOL payload can be activated. By default
+     *  the SOL is enabled.
+     */
+    bool enable = true;
 
-        /** @brief SOL enable
-         *
-         *  This controls whether the SOL payload can be activated. By default
-         *  the SOL is enabled.
-         */
-        bool enable = true;
+    /** @brief SOL payload encryption.
+     *
+     *  Force encryption: if the cipher suite for the session supports
+     *  encryption, then this setting will force the use of encryption for
+     *  all SOL payload data. Encryption controlled by remote console:
+     *  Whether SOL packets are encrypted or not is selectable by the remote
+     *  console at the time the payload is activated. The default is force
+     *  encryption.
+     */
+    bool forceEncrypt = true;
 
-        /** @brief SOL payload encryption.
-         *
-         *  Force encryption: if the cipher suite for the session supports
-         *  encryption, then this setting will force the use of encryption for
-         *  all SOL payload data. Encryption controlled by remote console:
-         *  Whether SOL packets are encrypted or not is selectable by the remote
-         *  console at the time the payload is activated. The default is force
-         *  encryption.
-         */
-        bool forceEncrypt = true;
+    /** @brief SOL payload authentication.
+     *
+     *  Force authentication: if the cipher suite for the session supports
+     *  authentication, then this setting will force the use of  for
+     *  authentication for all SOL payload data. Authentication controlled
+     *  by remote console: Note that for the standard Cipher Suites,
+     *  if encryption is used authentication must also be used. Therefore,
+     *  while encryption is being used software will not be able to select
+     *  using unauthenticated payloads.
+     */
+    bool forceAuth = true;
 
-        /** @brief SOL payload authentication.
-         *
-         *  Force authentication: if the cipher suite for the session supports
-         *  authentication, then this setting will force the use of  for
-         *  authentication for all SOL payload data. Authentication controlled
-         *  by remote console: Note that for the standard Cipher Suites,
-         *  if encryption is used authentication must also be used. Therefore,
-         *  while encryption is being used software will not be able to select
-         *  using unauthenticated payloads.
-         */
-        bool forceAuth = true;
+    /** @brief SOL privilege level.
+     *
+     *  Sets the minimum operating privilege level that is required to be
+     *  able to activate SOL using the Activate Payload command.
+     */
+    session::Privilege solMinPrivilege = session::Privilege::USER;
 
-        /** @brief SOL privilege level.
-         *
-         *  Sets the minimum operating privilege level that is required to be
-         *  able to activate SOL using the Activate Payload command.
-         */
-        session::Privilege solMinPrivilege = session::Privilege::USER;
+    /** @brief Character Accumulate Interval
+     *
+     *  This sets the typical amount of time that the BMC will wait before
+     *  transmitting a partial SOL character data packet. (Where a partial
+     *  packet is defined as a packet that has fewer characters to transmit
+     *  than the number of characters specified by the character send
+     *  threshold. This parameter can be modified by the set SOL
+     *  configuration parameters command. The SOL configuration parameter,
+     *  Character Accumulate Interval is 5 ms increments, 1-based value. The
+     *  parameter value is accumulateInterval/5. The accumulateInterval
+     *  needs to be a multiple of 5.
+     */
+    std::chrono::milliseconds accumulateInterval = 100ms;
 
-        /** @brief Character Accumulate Interval
-         *
-         *  This sets the typical amount of time that the BMC will wait before
-         *  transmitting a partial SOL character data packet. (Where a partial
-         *  packet is defined as a packet that has fewer characters to transmit
-         *  than the number of characters specified by the character send
-         *  threshold. This parameter can be modified by the set SOL
-         *  configuration parameters command. The SOL configuration parameter,
-         *  Character Accumulate Interval is 5 ms increments, 1-based value. The
-         *  parameter value is accumulateInterval/5. The accumulateInterval
-         *  needs to be a multiple of 5.
-         */
-        std::chrono::milliseconds accumulateInterval = 100ms;
+    /** @brief Character Send Threshold
+     *
+     *  The BMC will automatically send an SOL character data packet
+     *  containing this number of characters as soon as this number of
+     *  characters (or greater) has been accepted from the baseboard serial
+     *  controller into the BMC. This provides a mechanism to tune the
+     *  buffer to reduce latency to when the first characters are received
+     *  after an idle interval. In the degenerate case, setting this value
+     *  to a ‘1’ would cause the BMC to send a packet as soon as the first
+     *  character was received. This parameter can be modified by the set
+     *  SOL configuration parameters command.
+     */
+    uint8_t sendThreshold = 1;
 
-        /** @brief Character Send Threshold
-         *
-         *  The BMC will automatically send an SOL character data packet
-         *  containing this number of characters as soon as this number of
-         *  characters (or greater) has been accepted from the baseboard serial
-         *  controller into the BMC. This provides a mechanism to tune the
-         *  buffer to reduce latency to when the first characters are received
-         *  after an idle interval. In the degenerate case, setting this value
-         *  to a ‘1’ would cause the BMC to send a packet as soon as the first
-         *  character was received. This parameter can be modified by the set
-         *  SOL configuration parameters command.
-         */
-        uint8_t sendThreshold = 1;
+    /** @brief Retry Count
+     *
+     *  1-based. 0 = no retries after packet is transmitted. Packet will be
+     *  dropped if no ACK/NACK received by time retries expire. The maximum
+     *  value for retry count is 7. This parameter can be modified by the
+     *  set SOL configuration parameters command.
+     */
+    uint8_t retryCount = 7;
 
-        /** @brief Retry Count
-         *
-         *  1-based. 0 = no retries after packet is transmitted. Packet will be
-         *  dropped if no ACK/NACK received by time retries expire. The maximum
-         *  value for retry count is 7. This parameter can be modified by the
-         *  set SOL configuration parameters command.
-         */
-        uint8_t retryCount = 7;
+    /** @brief Retry Interval
+     *
+     *  Sets the time that the BMC will wait before the first retry and the
+     *  time between retries when sending SOL packets to the remote console.
+     *  This parameter can be modified by the set SOL configuration
+     *  parameters command. The SOL configuration parameter Retry Interval
+     *  is 10 ms increments, 1-based value. The parameter value is
+     *  retryInterval/10. The retryInterval needs to be a multiple of 10.
+     */
+    std::chrono::milliseconds retryInterval = 100ms;
 
-        /** @brief Retry Interval
-         *
-         *  Sets the time that the BMC will wait before the first retry and the
-         *  time between retries when sending SOL packets to the remote console.
-         *  This parameter can be modified by the set SOL configuration
-         *  parameters command. The SOL configuration parameter Retry Interval
-         *  is 10 ms increments, 1-based value. The parameter value is
-         *  retryInterval/10. The retryInterval needs to be a multiple of 10.
-         */
-        std::chrono::milliseconds retryInterval = 100ms;
+    /** @brief Channel Number
+     *
+     *  This parameter indicates which IPMI channel is being used for the
+     *  communication parameters (e.g. IP address, MAC address) for the SOL
+     *  Payload. Typically, these parameters will come from the same channel
+     *  that the Activate Payload command for SOL was accepted over. The
+     *  network channel number is defaulted to 1.
+     */
+    uint8_t channel = 1;
 
-        /** @brief Channel Number
-         *
-         *  This parameter indicates which IPMI channel is being used for the
-         *  communication parameters (e.g. IP address, MAC address) for the SOL
-         *  Payload. Typically, these parameters will come from the same channel
-         *  that the Activate Payload command for SOL was accepted over. The
-         *  network channel number is defaulted to 1.
-         */
-        uint8_t channel = 1;
+    /** @brief Start a SOL payload instance.
+     *
+     *  Starting a payload instance involves creating the context object,
+     *  add the accumulate interval timer and retry interval timer to the
+     *  event loop.
+     *
+     *  @param[in] payloadInstance - SOL payload instance.
+     *  @param[in] sessionID - BMC session ID.
+     */
+    void startPayloadInstance(uint8_t payloadInstance,
+                              session::SessionID sessionID);
 
-        /** @brief Start a SOL payload instance.
-         *
-         *  Starting a payload instance involves creating the context object,
-         *  add the accumulate interval timer and retry interval timer to the
-         *  event loop.
-         *
-         *  @param[in] payloadInstance - SOL payload instance.
-         *  @param[in] sessionID - BMC session ID.
-         */
-        void startPayloadInstance(uint8_t payloadInstance,
-                                  session::SessionID sessionID);
+    /** @brief Stop SOL payload instance.
+     *
+     *  Stopping a payload instance involves stopping and removing the
+     *  accumulate interval timer and retry interval timer from the event
+     *  loop, delete the context object.
+     *
+     *  @param[in] payloadInstance - SOL payload instance
+     */
+    void stopPayloadInstance(uint8_t payloadInstance);
 
-        /** @brief Stop SOL payload instance.
-         *
-         *  Stopping a payload instance involves stopping and removing the
-         *  accumulate interval timer and retry interval timer from the event
-         *  loop, delete the context object.
-         *
-         *  @param[in] payloadInstance - SOL payload instance
-         */
-        void stopPayloadInstance(uint8_t payloadInstance);
+    /** @brief Get SOL Context by Payload Instance.
+     *
+     *  @param[in] payloadInstance - SOL payload instance.
+     *
+     *  @return reference to the SOL payload context.
+     */
+    Context& getContext(uint8_t payloadInstance)
+    {
+        auto iter = payloadMap.find(payloadInstance);
 
-        /** @brief Get SOL Context by Payload Instance.
-         *
-         *  @param[in] payloadInstance - SOL payload instance.
-         *
-         *  @return reference to the SOL payload context.
-         */
-        Context& getContext(uint8_t payloadInstance)
+        if (iter != payloadMap.end())
         {
-            auto iter = payloadMap.find(payloadInstance);
-
-            if (iter != payloadMap.end())
-            {
-                return *(iter->second);
-            }
-
-            std::string msg = "Invalid SOL payload instance " + payloadInstance;
-            throw std::runtime_error(msg.c_str());
-         }
-
-        /** @brief Get SOL Context by Session ID.
-         *
-         *  @param[in] sessionID - IPMI Session ID.
-         *
-         *  @return reference to the SOL payload context.
-         */
-        Context& getContext(session::SessionID sessionID)
-        {
-            for (const auto& kv : payloadMap)
-            {
-                if (kv.second->sessionID == sessionID)
-                {
-                    return *kv.second;
-                }
-            }
-
-            std::string msg = "Invalid SOL SessionID " + sessionID;
-            throw std::runtime_error(msg.c_str());
+            return *(iter->second);
         }
 
-        /** @brief Check if SOL payload is active.
-         *
-         *  @param[in] payloadInstance - SOL payload instance.
-         *
-         *  @return true if the instance is active and false it is not active.
-         */
-        auto isPayloadActive(uint8_t payloadInstance) const
+        std::string msg = "Invalid SOL payload instance " + payloadInstance;
+        throw std::runtime_error(msg.c_str());
+    }
+
+    /** @brief Get SOL Context by Session ID.
+     *
+     *  @param[in] sessionID - IPMI Session ID.
+     *
+     *  @return reference to the SOL payload context.
+     */
+    Context& getContext(session::SessionID sessionID)
+    {
+        for (const auto& kv : payloadMap)
         {
-            return (0 != payloadMap.count(payloadInstance));
+            if (kv.second->sessionID == sessionID)
+            {
+                return *kv.second;
+            }
         }
 
-        /** @brief Write data to the host console unix socket.
-         *
-         *  @param[in] input - Data from the remote console.
-         *
-         *  @return 0 on success and errno on failure.
-         */
-        int writeConsoleSocket(const std::vector<uint8_t>& input) const;
+        std::string msg = "Invalid SOL SessionID " + sessionID;
+        throw std::runtime_error(msg.c_str());
+    }
 
-    private:
-        SOLPayloadMap payloadMap;
+    /** @brief Check if SOL payload is active.
+     *
+     *  @param[in] payloadInstance - SOL payload instance.
+     *
+     *  @return true if the instance is active and false it is not active.
+     */
+    auto isPayloadActive(uint8_t payloadInstance) const
+    {
+        return (0 != payloadMap.count(payloadInstance));
+    }
 
-        /** @brief File descriptor for the host console. */
-        std::unique_ptr<CustomFD> consoleFD = nullptr;
+    /** @brief Write data to the host console unix socket.
+     *
+     *  @param[in] input - Data from the remote console.
+     *
+     *  @return 0 on success and errno on failure.
+     */
+    int writeConsoleSocket(const std::vector<uint8_t>& input) const;
 
-        /** @brief Initialize the host console file descriptor. */
-        void initHostConsoleFd();
+  private:
+    SOLPayloadMap payloadMap;
+
+    /** @brief File descriptor for the host console. */
+    std::unique_ptr<CustomFD> consoleFD = nullptr;
+
+    /** @brief Initialize the host console file descriptor. */
+    void initHostConsoleFd();
 };
 
-} //namespace sol
+} // namespace sol

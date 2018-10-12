@@ -1,8 +1,8 @@
 #include "session.hpp"
 
-#include <ctime>
-
 #include "endian.hpp"
+
+#include <ctime>
 
 namespace session
 {
@@ -10,8 +10,8 @@ namespace session
 bool Session::isSessionActive()
 {
     auto currentTime = std::chrono::steady_clock::now();
-    auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>
-                          (currentTime - lastTime);
+    auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(
+        currentTime - lastTime);
 
     switch (state)
     {

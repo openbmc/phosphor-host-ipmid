@@ -13,23 +13,23 @@ namespace sol
 struct Outbound
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t testMode: 2;            //!< Not supported.
-    uint8_t breakDetected: 1;       //!< Not supported.
-    uint8_t transmitOverrun: 1;     //!< Not supported.
-    uint8_t SOLDeactivating: 1;     //!< 0 : SOL is active, 1 : SOL deactivated.
-    uint8_t charUnavailable: 1;     //!< 0 : Available, 1 : Unavailable.
-    uint8_t ack: 1;                 //!< 0 : ACK, 1 : NACK.
-    uint8_t reserved: 1;            //!< Reserved.
+    uint8_t testMode : 2;        //!< Not supported.
+    uint8_t breakDetected : 1;   //!< Not supported.
+    uint8_t transmitOverrun : 1; //!< Not supported.
+    uint8_t SOLDeactivating : 1; //!< 0 : SOL is active, 1 : SOL deactivated.
+    uint8_t charUnavailable : 1; //!< 0 : Available, 1 : Unavailable.
+    uint8_t ack : 1;             //!< 0 : ACK, 1 : NACK.
+    uint8_t reserved : 1;        //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved: 1;        //!< Reserved.
-    uint8_t ack: 1;             //!< 0 : ACK, 1 : NACK.
-    uint8_t charUnavailable: 1; //!< 0 : Available, 1 : Unavailable.
-    uint8_t SOLDeactivating: 1; //!< 0 : SOL is active, 1 : SOL deactivated.
-    uint8_t transmitOverrun: 1; //!< Not supported.
-    uint8_t breakDetected: 1;   //!< Not supported.
-    uint8_t testMode: 2;        //!< Not supported.
+    uint8_t reserved : 1;        //!< Reserved.
+    uint8_t ack : 1;             //!< 0 : ACK, 1 : NACK.
+    uint8_t charUnavailable : 1; //!< 0 : Available, 1 : Unavailable.
+    uint8_t SOLDeactivating : 1; //!< 0 : SOL is active, 1 : SOL deactivated.
+    uint8_t transmitOverrun : 1; //!< Not supported.
+    uint8_t breakDetected : 1;   //!< Not supported.
+    uint8_t testMode : 2;        //!< Not supported.
 #endif
 } __attribute__((packed));
 
@@ -40,25 +40,25 @@ struct Outbound
 struct Inbound
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t flushOut: 1;        //!< Not supported.
-    uint8_t flushIn: 1;         //!< Not supported.
-    uint8_t dcd: 1;             //!< Not supported.
-    uint8_t cts: 1;             //!< Not supported.
-    uint8_t generateBreak: 1;   //!< Not supported.
-    uint8_t ring: 1;            //!< Not supported.
-    uint8_t ack: 1;             //!< 0 : ACK, 1 : NACK.
-    uint8_t reserved: 1;        //!< Reserved.
+    uint8_t flushOut : 1;      //!< Not supported.
+    uint8_t flushIn : 1;       //!< Not supported.
+    uint8_t dcd : 1;           //!< Not supported.
+    uint8_t cts : 1;           //!< Not supported.
+    uint8_t generateBreak : 1; //!< Not supported.
+    uint8_t ring : 1;          //!< Not supported.
+    uint8_t ack : 1;           //!< 0 : ACK, 1 : NACK.
+    uint8_t reserved : 1;      //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved: 1;        //!< Reserved.
-    uint8_t ack: 1;             //!< 0 : ACK, 1 : NACK.
-    uint8_t ring: 1;            //!< Not supported.
-    uint8_t generateBreak: 1;   //!< Not supported.
-    uint8_t cts: 1;             //!< Not supported.
-    uint8_t dcd: 1;             //!< Not supported.
-    uint8_t flushIn: 1;         //!< Not supported.
-    uint8_t flushOut: 1;        //!< Not supported.
+    uint8_t reserved : 1;      //!< Reserved.
+    uint8_t ack : 1;           //!< 0 : ACK, 1 : NACK.
+    uint8_t ring : 1;          //!< Not supported.
+    uint8_t generateBreak : 1; //!< Not supported.
+    uint8_t cts : 1;           //!< Not supported.
+    uint8_t dcd : 1;           //!< Not supported.
+    uint8_t flushIn : 1;       //!< Not supported.
+    uint8_t flushOut : 1;      //!< Not supported.
 #endif
 } __attribute__((packed));
 
@@ -69,14 +69,14 @@ struct Inbound
  */
 struct Payload
 {
-    uint8_t packetSeqNum;               //!< Packet sequence number
-    uint8_t packetAckSeqNum;            //!< Packet ACK/NACK sequence number
-    uint8_t acceptedCharCount;          //!< Accepted character count
+    uint8_t packetSeqNum;      //!< Packet sequence number
+    uint8_t packetAckSeqNum;   //!< Packet ACK/NACK sequence number
+    uint8_t acceptedCharCount; //!< Accepted character count
     union
     {
-        uint8_t operation;              //!<Operation/Status
-        struct Outbound outOperation;   //!<BMC to Remote Console
-        struct Inbound inOperation;     //!<Remote Console to BMC
+        uint8_t operation;            //!< Operation/Status
+        struct Outbound outOperation; //!< BMC to Remote Console
+        struct Inbound inOperation;   //!< Remote Console to BMC
     };
 } __attribute__((packed));
 
@@ -131,10 +131,10 @@ struct SequenceNumbers
         return out;
     }
 
-    private:
-        uint8_t in = 1;     //!< Inbound sequence number.
-        uint8_t out = 0;    //!< Outbound sequence number, since the first
-                            //!< operation is increment, it is initialised to 0
+  private:
+    uint8_t in = 1;  //!< Inbound sequence number.
+    uint8_t out = 0; //!< Outbound sequence number, since the first
+                     //!< operation is increment, it is initialised to 0
 };
 
 } // namespace internal
@@ -148,116 +148,111 @@ struct SequenceNumbers
  */
 class Context
 {
-    public:
-        Context() = default;
-        ~Context() = default;
-        Context(const Context&) = delete;
-        Context& operator=(const Context&) = delete;
-        Context(Context&&) = default;
-        Context& operator=(Context&&) = default;
+  public:
+    Context() = default;
+    ~Context() = default;
+    Context(const Context&) = delete;
+    Context& operator=(const Context&) = delete;
+    Context(Context&&) = default;
+    Context& operator=(Context&&) = default;
 
-        /** @brief Context Constructor.
-         *
-         *  This is issued by the SOL Manager when a SOL payload instance is
-         *  started for the activate payload command.
-         *
-         *  @param[in] maxRetryCount  - Retry count max value.
-         *  @param[in] sendThreshold - Character send threshold.
-         *  @param[in] instance - SOL payload instance.
-         *  @param[in] sessionID - BMC session ID.
-         */
-        Context(uint8_t maxRetryCount,
-                uint8_t sendThreshold,
-                uint8_t instance,
-                session::SessionID sessionID):
-            maxRetryCount(maxRetryCount),
-            retryCounter(maxRetryCount),
-            sendThreshold(sendThreshold),
-            payloadInstance(instance),
-            sessionID(sessionID) {}
+    /** @brief Context Constructor.
+     *
+     *  This is issued by the SOL Manager when a SOL payload instance is
+     *  started for the activate payload command.
+     *
+     *  @param[in] maxRetryCount  - Retry count max value.
+     *  @param[in] sendThreshold - Character send threshold.
+     *  @param[in] instance - SOL payload instance.
+     *  @param[in] sessionID - BMC session ID.
+     */
+    Context(uint8_t maxRetryCount, uint8_t sendThreshold, uint8_t instance,
+            session::SessionID sessionID) :
+        maxRetryCount(maxRetryCount),
+        retryCounter(maxRetryCount), sendThreshold(sendThreshold),
+        payloadInstance(instance), sessionID(sessionID)
+    {
+    }
 
-        static constexpr auto clear = true;
-        static constexpr auto noClear = false;
+    static constexpr auto clear = true;
+    static constexpr auto noClear = false;
 
-        /** @brief Retry count max value. */
-        const uint8_t maxRetryCount = 0;
+    /** @brief Retry count max value. */
+    const uint8_t maxRetryCount = 0;
 
-        /** @brief Retry counter. */
-        uint8_t retryCounter = 0;
+    /** @brief Retry counter. */
+    uint8_t retryCounter = 0;
 
-        /** @brief Character send threshold. */
-        const uint8_t sendThreshold = 0;
+    /** @brief Character send threshold. */
+    const uint8_t sendThreshold = 0;
 
-        /** @brief SOL payload instance. */
-        const uint8_t payloadInstance = 0;
+    /** @brief SOL payload instance. */
+    const uint8_t payloadInstance = 0;
 
-        /** @brief Session ID. */
-        const session::SessionID sessionID = 0;
+    /** @brief Session ID. */
+    const session::SessionID sessionID = 0;
 
-        /** @brief Process the Inbound SOL payload.
-         *
-         *  The SOL payload from the remote console is processed and the
-         *  acknowledgment handling is done.
-         *
-         *  @param[in] seqNum - Packet sequence number.
-         *  @param[in] ackSeqNum - Packet ACK/NACK sequence number.
-         *  @param[in] count - Accepted character count.
-         *  @param[in] operation - ACK is false, NACK is true
-         *  @param[in] input - Incoming SOL character data.
-         */
-        void processInboundPayload(uint8_t seqNum,
-                                   uint8_t ackSeqNum,
-                                   uint8_t count,
-                                   bool status,
-                                   const std::vector<uint8_t>& input);
+    /** @brief Process the Inbound SOL payload.
+     *
+     *  The SOL payload from the remote console is processed and the
+     *  acknowledgment handling is done.
+     *
+     *  @param[in] seqNum - Packet sequence number.
+     *  @param[in] ackSeqNum - Packet ACK/NACK sequence number.
+     *  @param[in] count - Accepted character count.
+     *  @param[in] operation - ACK is false, NACK is true
+     *  @param[in] input - Incoming SOL character data.
+     */
+    void processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum, uint8_t count,
+                               bool status, const std::vector<uint8_t>& input);
 
-        /** @brief Send the outbound SOL payload.
-         *
-         *  @return zero on success and negative value if condition for sending
-         *          the payload fails.
-         */
-        int sendOutboundPayload();
+    /** @brief Send the outbound SOL payload.
+     *
+     *  @return zero on success and negative value if condition for sending
+     *          the payload fails.
+     */
+    int sendOutboundPayload();
 
-        /** @brief Resend the SOL payload.
-         *
-         *  @param[in] clear - if true then send the payload and clear the
-         *                     cached payload, if false only send the payload.
-         */
-        void resendPayload(bool clear);
+    /** @brief Resend the SOL payload.
+     *
+     *  @param[in] clear - if true then send the payload and clear the
+     *                     cached payload, if false only send the payload.
+     */
+    void resendPayload(bool clear);
 
-    private:
-        /** @brief Expected character count.
-         *
-         *  Expected Sequence number and expected character count is set before
-         *  sending the SOL payload. The check is done against these values when
-         *  an incoming SOL payload is received.
-         */
-        size_t expectedCharCount = 0;
+  private:
+    /** @brief Expected character count.
+     *
+     *  Expected Sequence number and expected character count is set before
+     *  sending the SOL payload. The check is done against these values when
+     *  an incoming SOL payload is received.
+     */
+    size_t expectedCharCount = 0;
 
-        /** @brief Inbound and Outbound sequence numbers. */
-        internal::SequenceNumbers seqNums;
+    /** @brief Inbound and Outbound sequence numbers. */
+    internal::SequenceNumbers seqNums;
 
-        /** @brief Copy of the last sent SOL payload.
-         *
-         *  A copy of the SOL payload is kept here, so that when a retry needs
-         *  to be attempted the payload is sent again.
-         */
-        std::vector<uint8_t> payloadCache;
+    /** @brief Copy of the last sent SOL payload.
+     *
+     *  A copy of the SOL payload is kept here, so that when a retry needs
+     *  to be attempted the payload is sent again.
+     */
+    std::vector<uint8_t> payloadCache;
 
-        /**
-         * @brief Send Response for Incoming SOL payload.
-         *
-         * @param[in] ackSeqNum - Packet ACK/NACK Sequence Number.
-         * @param[in] count - Accepted Character Count.
-         * @param[in] ack - Set ACK/NACK in the Operation.
-         */
-        void prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack);
+    /**
+     * @brief Send Response for Incoming SOL payload.
+     *
+     * @param[in] ackSeqNum - Packet ACK/NACK Sequence Number.
+     * @param[in] count - Accepted Character Count.
+     * @param[in] ack - Set ACK/NACK in the Operation.
+     */
+    void prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack);
 
-        /** @brief Send the outgoing SOL payload.
-         *
-         *  @param[in] out - buffer containing the SOL payload.
-         */
-        void sendPayload(const std::vector<uint8_t>& out) const;
+    /** @brief Send the outgoing SOL payload.
+     *
+     *  @param[in] out - buffer containing the SOL payload.
+     */
+    void sendPayload(const std::vector<uint8_t>& out) const;
 };
 
 } // namespace sol

@@ -1,10 +1,13 @@
+#include "crypt_algo.hpp"
+
+#include "message_parsers.hpp"
+
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/rand.h>
+
 #include <algorithm>
 #include <numeric>
-#include "crypt_algo.hpp"
-#include "message_parsers.hpp"
 
 namespace cipher
 {
@@ -13,17 +16,17 @@ namespace crypt
 {
 
 constexpr std::array<uint8_t, AlgoAES128::AESCBC128BlockSize - 1>
-        AlgoAES128::confPadBytes;
+    AlgoAES128::confPadBytes;
 
-std::vector<uint8_t> AlgoAES128::decryptPayload(
-        const std::vector<uint8_t>& packet,
-        const size_t sessHeaderLen,
-        const size_t payloadLen) const
+std::vector<uint8_t>
+    AlgoAES128::decryptPayload(const std::vector<uint8_t>& packet,
+                               const size_t sessHeaderLen,
+                               const size_t payloadLen) const
 {
-    auto plainPayload = decryptData(
-            packet.data() + sessHeaderLen,
-            packet.data() + sessHeaderLen + AESCBC128ConfHeader,
-            payloadLen - AESCBC128ConfHeader);
+    auto plainPayload =
+        decryptData(packet.data() + sessHeaderLen,
+                    packet.data() + sessHeaderLen + AESCBC128ConfHeader,
+                    payloadLen - AESCBC128ConfHeader);
 
     /*
      * The confidentiality pad length is the last byte in the payload, it would
@@ -31,14 +34,14 @@ std::vector<uint8_t> AlgoAES128::decryptPayload(
      * that buffer overrun doesn't happen.
      */
     size_t confPadLength = plainPayload.back();
-    auto padLength = std::min(plainPayload.size() -1, confPadLength);
+    auto padLength = std::min(plainPayload.size() - 1, confPadLength);
 
     auto plainPayloadLen = plainPayload.size() - padLength - 1;
 
     // Additional check if the confidentiality pad bytes are as expected
-    if(!std::equal(plainPayload.begin() + plainPayloadLen,
-                   plainPayload.begin() + plainPayloadLen + padLength,
-                   confPadBytes.begin()))
+    if (!std::equal(plainPayload.begin() + plainPayloadLen,
+                    plainPayload.begin() + plainPayloadLen + padLength,
+                    confPadBytes.begin()))
     {
         throw std::runtime_error("Confidentiality pad bytes check failed");
     }
@@ -48,8 +51,8 @@ std::vector<uint8_t> AlgoAES128::decryptPayload(
     return plainPayload;
 }
 
-std::vector<uint8_t> AlgoAES128::encryptPayload(
-        std::vector<uint8_t>& payload) const
+std::vector<uint8_t>
+    AlgoAES128::encryptPayload(std::vector<uint8_t>& payload) const
 {
     auto payloadLen = payload.size();
 
@@ -77,8 +80,7 @@ std::vector<uint8_t> AlgoAES128::encryptPayload(
     if (0 != paddingLen)
     {
         std::iota(payload.begin() + payloadLen,
-                  payload.begin() + payloadLen + paddingLen,
-                  1);
+                  payload.begin() + payloadLen + paddingLen, 1);
     }
 
     payload.back() = paddingLen;
@@ -87,19 +89,16 @@ std::vector<uint8_t> AlgoAES128::encryptPayload(
 }
 
 std::vector<uint8_t> AlgoAES128::decryptData(const uint8_t* iv,
-                               const uint8_t* input,
-                               const int inputLen) const
+                                             const uint8_t* input,
+                                             const int inputLen) const
 {
     // Initializes Cipher context
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
-    auto cleanupFunc = [](EVP_CIPHER_CTX* ctx)
-    {
-        EVP_CIPHER_CTX_free(ctx);
-    };
+    auto cleanupFunc = [](EVP_CIPHER_CTX* ctx) { EVP_CIPHER_CTX_free(ctx); };
 
-    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)>
-            ctxPtr(ctx, cleanupFunc);
+    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)> ctxPtr(ctx,
+                                                                  cleanupFunc);
 
     /*
      * EVP_DecryptInit_ex sets up cipher context ctx for encryption with type
@@ -144,7 +143,7 @@ std::vector<uint8_t> AlgoAES128::decryptData(const uint8_t* iv,
 }
 
 std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
-        const int inputLen) const
+                                             const int inputLen) const
 {
     std::vector<uint8_t> output(inputLen + AESCBC128BlockSize);
 
@@ -157,13 +156,10 @@ std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
     // Initializes Cipher context
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
-    auto cleanupFunc = [](EVP_CIPHER_CTX* ctx)
-    {
-        EVP_CIPHER_CTX_free(ctx);
-    };
+    auto cleanupFunc = [](EVP_CIPHER_CTX* ctx) { EVP_CIPHER_CTX_free(ctx); };
 
-    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)>
-            ctxPtr(ctx, cleanupFunc);
+    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)> ctxPtr(ctx,
+                                                                  cleanupFunc);
 
     /*
      * EVP_EncryptInit_ex sets up cipher context ctx for encryption with type
@@ -194,10 +190,8 @@ std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
      * multiple of block size, we are not making the call to
      * EVP_DecryptFinal_ex()
      */
-    if (!EVP_EncryptUpdate(ctxPtr.get(),
-                           output.data() + AESCBC128ConfHeader,
-                           &outputLen,
-                           input, inputLen))
+    if (!EVP_EncryptUpdate(ctxPtr.get(), output.data() + AESCBC128ConfHeader,
+                           &outputLen, input, inputLen))
     {
         throw std::runtime_error("EVP_EncryptUpdate failed for type "
                                  "AES-CBC-128");
@@ -208,8 +202,6 @@ std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
     return output;
 }
 
-}// namespace crypt
+} // namespace crypt
 
-}// namespace cipher
-
-
+} // namespace cipher

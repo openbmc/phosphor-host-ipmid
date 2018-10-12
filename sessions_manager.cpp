@@ -1,12 +1,12 @@
 #include "sessions_manager.hpp"
 
+#include "session.hpp"
+
 #include <algorithm>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <memory>
-
-#include "session.hpp"
 
 namespace session
 {
@@ -24,10 +24,11 @@ Manager::Manager()
     std::srand(std::time(0));
 }
 
-std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
-        Privilege priv, cipher::rakp_auth::Algorithms authAlgo,
-        cipher::integrity::Algorithms intAlgo,
-        cipher::crypt::Algorithms cryptAlgo)
+std::weak_ptr<Session>
+    Manager::startSession(SessionID remoteConsoleSessID, Privilege priv,
+                          cipher::rakp_auth::Algorithms authAlgo,
+                          cipher::integrity::Algorithms intAlgo,
+                          cipher::crypt::Algorithms cryptAlgo)
 {
     std::shared_ptr<Session> session = nullptr;
     SessionID sessionID = 0;
@@ -53,7 +54,7 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
             auto iterator = sessionsMap.find(session->getBMCSessionID());
             if (iterator != sessionsMap.end())
             {
-               //Detected BMC Session ID collisions
+                // Detected BMC Session ID collisions
                 session.reset();
                 continue;
             }
@@ -61,8 +62,7 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
             {
                 break;
             }
-        }
-        while (1);
+        } while (1);
 
         // Set the Authentication Algorithm
         switch (authAlgo)
@@ -70,15 +70,15 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
             case cipher::rakp_auth::Algorithms::RAKP_HMAC_SHA1:
             {
                 session->setAuthAlgo(
-                        std::make_unique<cipher::rakp_auth::AlgoSHA1>(intAlgo,
-                        cryptAlgo));
+                    std::make_unique<cipher::rakp_auth::AlgoSHA1>(intAlgo,
+                                                                  cryptAlgo));
                 break;
             }
             case cipher::rakp_auth::Algorithms::RAKP_HMAC_SHA256:
             {
                 session->setAuthAlgo(
-                        std::make_unique<cipher::rakp_auth::AlgoSHA256>(
-                            intAlgo, cryptAlgo));
+                    std::make_unique<cipher::rakp_auth::AlgoSHA256>(intAlgo,
+                                                                    cryptAlgo));
                 break;
             }
             default:
@@ -91,9 +91,8 @@ std::weak_ptr<Session> Manager::startSession(SessionID remoteConsoleSessID,
     }
     else
     {
-        std::cerr << "E> No free sessions left: Active: " << activeSessions <<
-                  " Allowed: " <<
-                  MAX_SESSION_COUNT << "\n";
+        std::cerr << "E> No free sessions left: Active: " << activeSessions
+                  << " Allowed: " << MAX_SESSION_COUNT << "\n";
 
         for (const auto& iterator : sessionsMap)
         {
@@ -137,14 +136,13 @@ std::weak_ptr<Session> Manager::getSession(SessionID sessionID,
         }
         case RetrieveOption::RC_SESSION_ID:
         {
-            auto iter = std::find_if(sessionsMap.begin(),
-                                     sessionsMap.end(),
-                                     [sessionID](const std::pair<const uint32_t,
-                                                 std::shared_ptr<Session>>& in)
-                                                 -> bool
-            {
-                return sessionID == in.second->getRCSessionID();
-            });
+            auto iter = std::find_if(
+                sessionsMap.begin(), sessionsMap.end(),
+                [sessionID](
+                    const std::pair<const uint32_t, std::shared_ptr<Session>>&
+                        in) -> bool {
+                    return sessionID == in.second->getRCSessionID();
+                });
 
             if (iter != sessionsMap.end())
             {
@@ -161,7 +159,7 @@ std::weak_ptr<Session> Manager::getSession(SessionID sessionID,
 
 void Manager::cleanStaleEntries()
 {
-    for(auto iter = sessionsMap.begin(); iter != sessionsMap.end();)
+    for (auto iter = sessionsMap.begin(); iter != sessionsMap.end();)
     {
         auto session = iter->second;
         if ((session->getBMCSessionID() != SESSION_ZERO) &&
