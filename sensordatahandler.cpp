@@ -260,7 +260,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
 
     for (const auto& property : interface->second)
     {
-        Value tmp{mapbox::util::no_init()};
+        Value tmp{sdbusplus::message::variant_ns::no_init()};
         for (const auto& value : std::get<OffsetValueMap>(property.second))
         {
             if (bothSet.size() <= value.first || !bothSet.test(value.first))
