@@ -7,6 +7,7 @@
 #include <chrono>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
 #include <utils.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -32,6 +33,7 @@ using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
+namespace variant_ns = sdbusplus::message::variant_ns;
 
 Manager::Manager(sdbusplus::bus::bus& bus, sd_event* event) :
     bus(bus), timer(event, std::bind(&Manager::hostTimeout, this)),
@@ -180,7 +182,8 @@ void Manager::clearQueueOnPowerOn(sdbusplus::message::message& msg)
         return;
     }
 
-    auto& requestedState = properties.at(HOST_TRANS_PROP).get<std::string>();
+    auto& requestedState =
+        variant_ns::get<std::string>(properties.at(HOST_TRANS_PROP));
 
     if (server::Host::convertTransitionFromString(requestedState) ==
         server::Host::Transition::On)

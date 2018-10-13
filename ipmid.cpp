@@ -25,12 +25,14 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
 #include <vector>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
 
 using namespace phosphor::logging;
 namespace sdbusRule = sdbusplus::bus::match::rules;
+namespace variant_ns = sdbusplus::message::variant_ns;
 
 sd_bus* bus = NULL;
 sd_bus_slot* ipmid_slot = NULL;
@@ -380,8 +382,8 @@ void cache_restricted_mode()
     }
     sdbusplus::message::variant<std::string> result;
     resp.read(result);
-    auto restrictionMode =
-        RestrictionMode::convertModesFromString(result.get<std::string>());
+    auto restrictionMode = RestrictionMode::convertModesFromString(
+        variant_ns::get<std::string>(result));
     if (RestrictionMode::Modes::Whitelist == restrictionMode)
     {
         restricted_mode = true;

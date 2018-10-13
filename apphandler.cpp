@@ -23,6 +23,7 @@
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -69,6 +70,7 @@ using Activation =
     sdbusplus::xyz::openbmc_project::Software::server::Activation;
 using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
+namespace variant_ns = sdbusplus::message::variant_ns;
 
 // Offset in get device id command.
 typedef struct
@@ -123,12 +125,14 @@ std::string getActiveSoftwareVersionInfo()
                 auto& redundancyPriorityProps = intfMap.at(redundancyIntf);
                 auto& versionProps = intfMap.at(versionIntf);
                 auto& activationProps = intfMap.at(activationIntf);
-                auto priority =
-                    redundancyPriorityProps.at("Priority").get<uint8_t>();
-                auto purpose = versionProps.at("Purpose").get<std::string>();
-                auto activation =
-                    activationProps.at("Activation").get<std::string>();
-                auto version = versionProps.at("Version").get<std::string>();
+                auto priority = variant_ns::get<uint8_t>(
+                    redundancyPriorityProps.at("Priority"));
+                auto purpose =
+                    variant_ns::get<std::string>(versionProps.at("Purpose"));
+                auto activation = variant_ns::get<std::string>(
+                    activationProps.at("Activation"));
+                auto version =
+                    variant_ns::get<std::string>(versionProps.at("Version"));
                 if ((Version::convertVersionPurposeFromString(purpose) ==
                      Version::VersionPurpose::BMC) &&
                     (Activation::convertActivationsFromString(activation) ==
@@ -169,9 +173,9 @@ bool getCurrentBmcState()
         ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
                               bmc_state_interface, bmc_state_property);
 
-    return variant.is<std::string>() &&
-           BMC::convertBMCStateFromString(variant.get<std::string>()) ==
-               BMC::BMCState::Ready;
+    return variant_ns::holds_alternative<std::string>(variant) &&
+           BMC::convertBMCStateFromString(
+               variant_ns::get<std::string>(variant)) == BMC::BMCState::Ready;
 }
 
 ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -598,7 +602,7 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto variant =
             ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
                                   bmc_guid_interface, bmc_guid_property);
-        std::string guidProp = variant.get<std::string>();
+        std::string guidProp = variant_ns::get<std::string>(variant);
 
         // Erase "-" characters from the property value
         guidProp.erase(std::remove(guidProp.begin(), guidProp.end(), '-'),

@@ -14,6 +14,7 @@
 #include <cstring>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <set>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
@@ -453,10 +454,10 @@ void getSensorThresholds(uint8_t sensorNum,
     auto warnThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, warningThreshIntf);
 
-    double warnLow = variant_ns::apply_visitor(ipmi::VariantToDoubleVisitor(),
-                                               warnThresholds["WarningLow"]);
-    double warnHigh = variant_ns::apply_visitor(ipmi::VariantToDoubleVisitor(),
-                                                warnThresholds["WarningHigh"]);
+    double warnLow = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+                                       warnThresholds["WarningLow"]);
+    double warnHigh = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+                                        warnThresholds["WarningHigh"]);
 
     if (warnLow != 0)
     {
@@ -478,10 +479,10 @@ void getSensorThresholds(uint8_t sensorNum,
 
     auto critThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, criticalThreshIntf);
-    double critLow = variant_ns::apply_visitor(ipmi::VariantToDoubleVisitor(),
-                                               critThresholds["CriticalLow"]);
-    double critHigh = variant_ns::apply_visitor(ipmi::VariantToDoubleVisitor(),
-                                                critThresholds["CriticalHigh"]);
+    double critLow = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+                                       critThresholds["CriticalLow"]);
+    double critHigh = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+                                        critThresholds["CriticalHigh"]);
 
     if (critLow != 0)
     {
