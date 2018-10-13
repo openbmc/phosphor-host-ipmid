@@ -79,7 +79,6 @@ void processFruPropChange(sdbusplus::message::message& msg)
     for (auto& fru : frus)
     {
         bool found = false;
-        auto& fruId = fru.first;
         auto& instanceList = fru.second;
         for (auto& instance : instanceList)
         {
@@ -91,6 +90,8 @@ void processFruPropChange(sdbusplus::message::message& msg)
         }
         if (found)
         {
+            auto& fruId = fru.first;
+
             cache::fruMap.erase(fruId);
             break;
         }

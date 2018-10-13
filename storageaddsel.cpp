@@ -65,7 +65,6 @@ int find_sensor_type_string(uint8_t sensor_number, char** s)
 {
 
     dbus_interface_t a;
-    const char* p;
     int r;
 
     r = find_openbmc_path(sensor_number, &a);
@@ -78,6 +77,7 @@ int find_sensor_type_string(uint8_t sensor_number, char** s)
     }
     else
     {
+        const char* p;
 
         if ((p = strrchr(a.path, '/')) == NULL)
         {
