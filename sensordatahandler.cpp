@@ -5,8 +5,10 @@
 #include "utils.hpp"
 
 #include <bitset>
+#include <optional>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 #if __has_include(<filesystem>)
@@ -26,6 +28,8 @@ namespace ipmi
 {
 namespace sensor
 {
+
+namespace variant_ns = sdbusplus::message::variant_ns;
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -260,7 +264,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
 
     for (const auto& property : interface->second)
     {
-        Value tmp{sdbusplus::message::variant_ns::no_init()};
+        std::optional<Value> tmp;
         for (const auto& value : std::get<OffsetValueMap>(property.second))
         {
             if (bothSet.size() <= value.first || !bothSet.test(value.first))
@@ -281,14 +285,14 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
             }
         }
 
-        if (tmp.valid())
+        if (tmp)
         {
             auto msg = makeDbusMsg("org.freedesktop.DBus.Properties",
                                    sensorInfo.sensorPath, "Set",
                                    sensorInfo.sensorInterface);
             msg.append(interface->first);
             msg.append(property.first);
-            msg.append(tmp);
+            msg.append(*tmp);
 
             auto rc = updateToDbus(msg);
             if (rc)
@@ -348,7 +352,8 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     {
                         return IPMI_CC_OK;
                     }
-                    result = result && value.second.assert.get<bool>();
+                    result =
+                        result && variant_ns::get<bool>(value.second.assert);
                     valid = true;
                 }
                 else if (deassertionSet.test(value.first))
@@ -358,7 +363,8 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     {
                         return IPMI_CC_OK;
                     }
-                    result = result && value.second.deassert.get<bool>();
+                    result =
+                        result && variant_ns::get<bool>(value.second.deassert);
                     valid = true;
                 }
             }
@@ -367,11 +373,13 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
             {
                 if (assertionSet.test(value.first))
                 {
-                    result = result && value.second.assert.get<bool>();
+                    result =
+                        result && variant_ns::get<bool>(value.second.assert);
                 }
                 else if (deassertionSet.test(value.first))
                 {
-                    result = result && value.second.deassert.get<bool>();
+                    result =
+                        result && variant_ns::get<bool>(value.second.deassert);
                 }
             }
             if (valid)

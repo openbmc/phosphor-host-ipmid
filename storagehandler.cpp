@@ -18,6 +18,7 @@
 #include <cstring>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <sdbusplus/server.hpp>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -72,6 +73,8 @@ namespace cache
 ipmi::sel::ObjectPaths paths;
 
 } // namespace cache
+
+namespace variant_ns = sdbusplus::message::variant_ns;
 
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
@@ -501,7 +504,7 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
         reply.read(value);
-        host_time_usec = value.get<uint64_t>();
+        host_time_usec = variant_ns::get<uint64_t>(value);
     }
     catch (InternalFailure& e)
     {
