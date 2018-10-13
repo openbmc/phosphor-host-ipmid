@@ -256,7 +256,6 @@ uint8_t dbus_to_sensor_type(char* p)
 uint8_t get_type_from_interface(dbus_interface_t dbus_if)
 {
 
-    char* p;
     uint8_t type;
 
     // This is where sensors that do not exist in dbus but do
@@ -275,7 +274,7 @@ uint8_t get_type_from_interface(dbus_interface_t dbus_if)
     else
     {
         // Non InventoryItems
-        p = strrchr(dbus_if.path, '/');
+        char* p = strrchr(dbus_if.path, '/');
         type = dbus_to_sensor_type(p + 1);
     }
 
