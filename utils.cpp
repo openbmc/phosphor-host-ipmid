@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <net/if.h>
 
+#include <algorithm>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -74,25 +75,20 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
     }
 
     // else search the match string in the object path
-    auto objectFound = false;
-    for (auto& object : objectTree)
-    {
-        if (object.first.find(match) != std::string::npos)
-        {
-            objectFound = true;
-            objectInfo = make_pair(object.first,
-                                   std::move(object.second.begin()->first));
-            break;
-        }
-    }
+    auto found = std::find_if(
+        objectTree.begin(), objectTree.end(), [&match](const auto& object) {
+            return (object.first.find(match) != std::string::npos);
+        });
 
-    if (!objectFound)
+    if (found == objectTree.end())
     {
         log<level::ERR>("Failed to find object which matches",
                         entry("MATCH=%s", match.c_str()));
         elog<InternalFailure>();
+        // elog<> throws an exception.
     }
-    return objectInfo;
+
+    return make_pair((*found).first, std::move((*found).second.begin()->first));
 }
 
 DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
