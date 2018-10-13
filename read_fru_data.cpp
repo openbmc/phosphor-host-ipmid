@@ -8,6 +8,7 @@
 
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 extern const FruMap frus;
@@ -15,6 +16,9 @@ namespace ipmi
 {
 namespace fru
 {
+
+namespace variant_ns = sdbusplus::message::variant_ns;
+
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
@@ -143,8 +147,8 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
                 {
                     data[properties.second.section].emplace(
                         properties.first,
-                        std::move(
-                            allProp[properties.first].get<std::string>()));
+                        std::move(variant_ns::get<std::string>(
+                            allProp[properties.first])));
                 }
             }
         }
