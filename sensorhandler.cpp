@@ -299,7 +299,7 @@ ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                     ipmi_data_len_t data_len,
                                     ipmi_context_t context)
 {
-    sensor_data_t* reqptr = (sensor_data_t*)request;
+    auto reqptr = static_cast<sensor_data_t*>(request);
     ipmi_ret_t rc = IPMI_CC_OK;
 
     printf("IPMI GET_SENSOR_TYPE [0x%02X]\n", reqptr->sennum);
@@ -373,7 +373,7 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                ipmi_request_t request, ipmi_response_t response,
                                ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    sensor_data_t* reqptr = (sensor_data_t*)request;
+    auto reqptr = static_cast<sensor_data_t*>(request);
 
     log<level::DEBUG>("IPMI SET_SENSOR",
                       entry("SENSOR_NUM=0x%02x", reqptr->sennum));
@@ -401,8 +401,8 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                        ipmi_data_len_t data_len,
                                        ipmi_context_t context)
 {
-    sensor_data_t* reqptr = (sensor_data_t*)request;
-    sensorreadingresp_t* resp = (sensorreadingresp_t*)response;
+    auto reqptr = static_cast<sensor_data_t*>(request);
+    auto resp = static_cast<sensorreadingresp_t*>(response);
     ipmi::sensor::GetSensorResponse getResponse{};
     static constexpr auto scanningEnabledBit = 6;
 
