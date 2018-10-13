@@ -24,6 +24,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <sdbusplus/server/object.hpp>
 #include <sstream>
 #include <string>
@@ -140,6 +141,8 @@ namespace fs = std::filesystem;
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace sdbusplus::xyz::openbmc_project::Control::Boot::server;
+namespace variant_ns = sdbusplus::message::variant_ns;
+
 namespace chassis
 {
 namespace internal
@@ -351,19 +354,19 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
                                              macObjectInfo.first, MAC_INTERFACE,
                                              "MACAddress");
 
-        auto ipAddress = properties["Address"].get<std::string>();
+        auto ipAddress = variant_ns::get<std::string>(properties["Address"]);
 
-        auto gateway = properties["Gateway"].get<std::string>();
+        auto gateway = variant_ns::get<std::string>(properties["Gateway"]);
 
-        auto prefix = properties["PrefixLength"].get<uint8_t>();
+        auto prefix = variant_ns::get<uint8_t>(properties["PrefixLength"]);
 
         uint8_t isStatic =
-            (properties["Origin"].get<std::string>() ==
+            (variant_ns::get<std::string>(properties["Origin"]) ==
              "xyz.openbmc_project.Network.IP.AddressOrigin.Static")
                 ? 1
                 : 0;
 
-        auto MACAddress = variant.get<std::string>();
+        auto MACAddress = variant_ns::get<std::string>(variant);
 
         // it is expected here that we should get the valid data
         // but we may also get the default values.
@@ -401,10 +404,11 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         std::memcpy(respptr->data + ADDRTYPE_OFFSET, &isStatic,
                     sizeof(isStatic));
 
-        uint8_t addressFamily = (properties["Type"].get<std::string>() ==
-                                 "xyz.openbmc_project.Network.IP.Protocol.IPv4")
-                                    ? AF_INET
-                                    : AF_INET6;
+        uint8_t addressFamily =
+            (variant_ns::get<std::string>(properties["Type"]) ==
+             "xyz.openbmc_project.Network.IP.Protocol.IPv4")
+                ? AF_INET
+                : AF_INET6;
 
         addrSize = (addressFamily == AF_INET)
                        ? ipmi::network::IPV4_ADDRESS_SIZE_BYTE
@@ -638,7 +642,7 @@ uint32_t getPOHCounter()
         ipmi::getDbusProperty(bus, service, chassisStateObj.first,
                               chassisPOHStateIntf, pOHCounterProperty);
 
-    return propValue.get<uint32_t>();
+    return variant_ns::get<uint32_t>(propValue);
 }
 
 ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -820,8 +824,8 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     sdbusplus::message::variant<std::string> result;
     resp.read(result);
-    auto powerRestore =
-        RestorePolicy::convertPolicyFromString(result.get<std::string>());
+    auto powerRestore = RestorePolicy::convertPolicyFromString(
+        variant_ns::get<std::string>(result));
 
     *data_len = 4;
 
@@ -1367,8 +1371,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             sdbusplus::message::variant<std::string> result;
             reply.read(result);
-            auto bootSource =
-                Source::convertSourcesFromString(result.get<std::string>());
+            auto bootSource = Source::convertSourcesFromString(
+                variant_ns::get<std::string>(result));
 
             bootSetting = settings::boot::setting(objects, bootModeIntf);
             const auto& bootModeSetting = std::get<settings::Path>(bootSetting);
@@ -1385,8 +1389,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
             reply.read(result);
-            auto bootMode =
-                Mode::convertModesFromString(result.get<std::string>());
+            auto bootMode = Mode::convertModesFromString(
+                variant_ns::get<std::string>(result));
 
             bootOption = sourceDbusToIpmi.at(bootSource);
             if ((Mode::Modes::Regular == bootMode) &&
