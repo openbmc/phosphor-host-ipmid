@@ -6,6 +6,7 @@
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 namespace ipmi
@@ -13,6 +14,7 @@ namespace ipmi
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+namespace variant_ns = sdbusplus::message::variant_ns;
 
 namespace network
 {
@@ -120,7 +122,7 @@ DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
         objectInfo = std::make_pair(object.first, object.second.begin()->first);
 
         // if LinkLocalIP found look for Non-LinkLocalIP
-        if (ipmi::network::isLinkLocalIP(variant.get<std::string>()))
+        if (ipmi::network::isLinkLocalIP(variant_ns::get<std::string>(variant)))
         {
             continue;
         }
