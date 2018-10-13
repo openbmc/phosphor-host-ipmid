@@ -151,11 +151,9 @@ Entry::Level create_esel_severity(const uint8_t* buffer)
 
 int create_esel_association(const uint8_t* buffer, std::string& inventoryPath)
 {
-    uint8_t sensor;
-
     auto p = reinterpret_cast<const ipmi_add_sel_request_t*>(buffer);
 
-    sensor = p->sensornumber;
+    uint8_t sensor = p->sensornumber;
 
     inventoryPath = {};
 
@@ -163,13 +161,13 @@ int create_esel_association(const uint8_t* buffer, std::string& inventoryPath)
      * Search the sensor number to inventory path mapping to figure out the
      * inventory associated with the ESEL.
      */
-    for (auto const& iter : invSensors)
+    auto found = std::find_if(invSensors.begin(), invSensors.end(),
+                              [&sensor](const auto& iter) {
+                                  return (iter.second.sensorID == sensor);
+                              });
+    if (found != invSensors.end())
     {
-        if (iter.second.sensorID == sensor)
-        {
-            inventoryPath = iter.first;
-            break;
-        }
+        inventoryPath = found->first;
     }
 
     return 0;
