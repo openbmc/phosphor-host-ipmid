@@ -151,10 +151,9 @@ Entry::Level create_esel_severity(const uint8_t* buffer)
 
 int create_esel_association(const uint8_t* buffer, std::string& inventoryPath)
 {
-    ipmi_add_sel_request_t* p;
     uint8_t sensor;
 
-    p = (ipmi_add_sel_request_t*)buffer;
+    auto p = reinterpret_cast<const ipmi_add_sel_request_t*>(buffer);
 
     sensor = p->sensornumber;
 
@@ -179,12 +178,10 @@ int create_esel_association(const uint8_t* buffer, std::string& inventoryPath)
 int create_esel_description(const uint8_t* buffer, Entry::Level level,
                             char** message)
 {
-
-    ipmi_add_sel_request_t* p;
     char* m;
     int r;
 
-    p = (ipmi_add_sel_request_t*)buffer;
+    auto p = reinterpret_cast<const ipmi_add_sel_request_t*>(buffer);
 
     find_sensor_type_string(p->sensornumber, &m);
 
