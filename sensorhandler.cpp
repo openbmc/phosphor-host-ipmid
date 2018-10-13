@@ -648,7 +648,7 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
                              info->unit.c_str());
         }
     }
-    catch (sdbusplus::exception::InvalidEnumString e)
+    catch (const sdbusplus::exception::InvalidEnumString& e)
     {
         log<level::WARNING>("Warning: no unit provided for sensor!");
     }
