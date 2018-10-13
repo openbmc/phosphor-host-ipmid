@@ -283,7 +283,6 @@ int findindex(const uint8_t sensor_type, int offset, int* index)
 
 bool shouldReport(uint8_t sensorType, int offset, int* index)
 {
-
     bool rc = false;
 
     if (findindex(sensorType, offset, index))
@@ -304,10 +303,9 @@ bool shouldReport(uint8_t sensorType, int offset, int* index)
 
 int updateSensorRecordFromSSRAESC(const void* record)
 {
-
     auto pRec = static_cast<const sensorRES_t*>(record);
     uint8_t stype;
-    int index, i = 0;
+    int index;
 
     stype = find_type_for_sensor_number(pRec->sensor_number);
 
@@ -316,7 +314,6 @@ int updateSensorRecordFromSSRAESC(const void* record)
     // function
     if (stype == 0xC3)
     {
-
         shouldReport(stype, 0x00, &index);
         reportSensorEventAssert(pRec, index);
     }
@@ -324,7 +321,7 @@ int updateSensorRecordFromSSRAESC(const void* record)
     {
         // Scroll through each bit position .  Determine
         // if any bit is either asserted or Deasserted.
-        for (i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
 
             if ((ISBITSET(pRec->assert_state7_0, i)) &&
