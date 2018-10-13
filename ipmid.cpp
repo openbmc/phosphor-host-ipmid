@@ -505,7 +505,6 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
 {
     // For walking the ipmi_lib_path
     struct dirent** handler_list;
-    int num_handlers = 0;
 
     // This is used to check and abort if someone tries to register a bad one.
     void* lib_handler = NULL;
@@ -528,7 +527,7 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
         // already a .so, adding one more is not any harm.
         handler_fqdn += "/";
 
-        num_handlers =
+        int num_handlers =
             scandir(ipmi_lib_path, &handler_list, handler_select, alphasort);
         if (num_handlers < 0)
             return;
