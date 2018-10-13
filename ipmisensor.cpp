@@ -249,12 +249,12 @@ lookup_t g_ipmidbuslookup[] = {
     {0xCA, 0x01, set_sensor_dbus_state_simple, "setValue", "Enabled", ""},
     {0xFF, 0xFF, NULL, "", "", ""}};
 
-void reportSensorEventAssert(sensorRES_t* pRec, int index)
+void reportSensorEventAssert(const sensorRES_t* pRec, int index)
 {
     lookup_t* pTable = &g_ipmidbuslookup[index];
     (*pTable->func)(pRec, pTable, pTable->assertion);
 }
-void reportSensorEventDeassert(sensorRES_t* pRec, int index)
+void reportSensorEventDeassert(const sensorRES_t* pRec, int index)
 {
     lookup_t* pTable = &g_ipmidbuslookup[index];
     (*pTable->func)(pRec, pTable, pTable->deassertion);
@@ -305,7 +305,7 @@ bool shouldReport(uint8_t sensorType, int offset, int* index)
 int updateSensorRecordFromSSRAESC(const void* record)
 {
 
-    sensorRES_t* pRec = (sensorRES_t*)record;
+    auto pRec = static_cast<const sensorRES_t*>(record);
     uint8_t stype;
     int index, i = 0;
 
