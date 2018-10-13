@@ -99,16 +99,7 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                  ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    uint8_t resp[] = {1,
-                      IPMI_CHANNEL_MEDIUM_TYPE_OTHER,
-                      IPMI_CHANNEL_TYPE_IPMB,
-                      1,
-                      0x41,
-                      0xA7,
-                      0x00,
-                      0,
-                      0};
-    uint8_t* p = (uint8_t*)request;
+    uint8_t* p = static_cast<uint8_t*>(request);
     int channel = (*p) & CHANNEL_MASK;
     std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
 
@@ -122,6 +113,16 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     else
     {
+        uint8_t resp[] = {1,
+                          IPMI_CHANNEL_MEDIUM_TYPE_OTHER,
+                          IPMI_CHANNEL_TYPE_IPMB,
+                          1,
+                          0x41,
+                          0xA7,
+                          0x00,
+                          0,
+                          0};
+
         *data_len = sizeof(resp);
         memcpy(response, resp, *data_len);
     }
