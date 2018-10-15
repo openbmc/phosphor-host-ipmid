@@ -2,6 +2,7 @@
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 namespace settings
@@ -9,6 +10,7 @@ namespace settings
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+namespace variant_ns = sdbusplus::message::variant_ns;
 
 constexpr auto mapperService = "xyz.openbmc_project.ObjectMapper";
 constexpr auto mapperPath = "/xyz/openbmc_project/object_mapper";
@@ -130,7 +132,7 @@ std::tuple<Path, OneTimeEnabled> setting(const Objects& objects,
 
     sdbusplus::message::variant<bool> enabled;
     reply.read(enabled);
-    auto oneTimeEnabled = enabled.get<bool>();
+    auto oneTimeEnabled = variant_ns::get<bool>(enabled);
     const Path& setting = oneTimeEnabled ? oneTimeSetting : regularSetting;
     return std::make_tuple(setting, oneTimeEnabled);
 }
