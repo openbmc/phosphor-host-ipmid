@@ -3,12 +3,12 @@
 #include "message_handler.hpp"
 #include "message_parsers.hpp"
 #include "sessions_manager.hpp"
-#include "xyz/openbmc_project/Common/error.hpp"
 
 #include <iomanip>
 #include <iostream>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 using namespace phosphor::logging;
 
