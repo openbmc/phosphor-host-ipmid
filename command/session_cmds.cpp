@@ -23,9 +23,8 @@ std::vector<uint8_t>
     response->completionCode = IPMI_CC_OK;
     uint8_t reqPrivilegeLevel = request->reqPrivLevel;
 
-    auto session = (std::get<session::Manager&>(singletonPool)
-                        .getSession(handler.sessionID))
-                       .lock();
+    auto session = std::get<session::Manager&>(singletonPool)
+                       .getSession(handler.sessionID);
 
     if (reqPrivilegeLevel == 0) // Just return present privilege level
     {

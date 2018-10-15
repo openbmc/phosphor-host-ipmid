@@ -57,8 +57,7 @@ void activating(uint8_t payloadInstance, uint32_t sessionID)
     request->minorVersion = MINOR_VERSION;
 
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(sessionID);
 
     message::Handler msgHandler(session->channelPtr, sessionID);
 

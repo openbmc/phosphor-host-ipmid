@@ -53,11 +53,11 @@ class Manager
      * @return session handle on success and nullptr on failure
      *
      */
-    std::weak_ptr<Session> startSession(SessionID remoteConsoleSessID,
-                                        Privilege priv,
-                                        cipher::rakp_auth::Algorithms authAlgo,
-                                        cipher::integrity::Algorithms intAlgo,
-                                        cipher::crypt::Algorithms cryptAlgo);
+    std::shared_ptr<Session>
+        startSession(SessionID remoteConsoleSessID, Privilege priv,
+                     cipher::rakp_auth::Algorithms authAlgo,
+                     cipher::integrity::Algorithms intAlgo,
+                     cipher::crypt::Algorithms cryptAlgo);
 
     /**
      * @brief Stop IPMI Session
@@ -79,7 +79,7 @@ class Manager
      * @return session handle on success and nullptr on failure
      *
      */
-    std::weak_ptr<Session>
+    std::shared_ptr<Session>
         getSession(SessionID sessionID,
                    RetrieveOption option = RetrieveOption::BMC_SESSION_ID);
 

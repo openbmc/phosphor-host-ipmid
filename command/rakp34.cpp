@@ -16,8 +16,7 @@ namespace command
 void applyIntegrityAlgo(const uint32_t bmcSessionID)
 {
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(bmcSessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(bmcSessionID);
 
     auto authAlgo = session->getAuthAlgo();
 
@@ -45,8 +44,7 @@ void applyIntegrityAlgo(const uint32_t bmcSessionID)
 void applyCryptAlgo(const uint32_t bmcSessionID)
 {
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(bmcSessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(bmcSessionID);
 
     auto authAlgo = session->getAuthAlgo();
 
@@ -96,10 +94,9 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     std::shared_ptr<session::Session> session;
     try
     {
-        session = (std::get<session::Manager&>(singletonPool)
-                       .getSession(
-                           endian::from_ipmi(request->managedSystemSessionID)))
-                      .lock();
+        session =
+            std::get<session::Manager&>(singletonPool)
+                .getSession(endian::from_ipmi(request->managedSystemSessionID));
     }
     catch (std::exception& e)
     {

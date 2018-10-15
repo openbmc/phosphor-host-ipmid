@@ -35,10 +35,9 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     std::shared_ptr<session::Session> session;
     try
     {
-        session = (std::get<session::Manager&>(singletonPool)
-                       .getSession(
-                           endian::from_ipmi(request->managedSystemSessionID)))
-                      .lock();
+        session =
+            std::get<session::Manager&>(singletonPool)
+                .getSession(endian::from_ipmi(request->managedSystemSessionID));
     }
     catch (std::exception& e)
     {

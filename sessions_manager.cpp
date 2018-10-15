@@ -24,7 +24,7 @@ Manager::Manager()
     std::srand(std::time(0));
 }
 
-std::weak_ptr<Session>
+std::shared_ptr<Session>
     Manager::startSession(SessionID remoteConsoleSessID, Privilege priv,
                           cipher::rakp_auth::Algorithms authAlgo,
                           cipher::integrity::Algorithms intAlgo,
@@ -120,8 +120,8 @@ bool Manager::stopSession(SessionID bmcSessionID)
     }
 }
 
-std::weak_ptr<Session> Manager::getSession(SessionID sessionID,
-                                           RetrieveOption option)
+std::shared_ptr<Session> Manager::getSession(SessionID sessionID,
+                                             RetrieveOption option)
 {
     switch (option)
     {

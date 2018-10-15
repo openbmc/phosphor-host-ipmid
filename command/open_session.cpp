@@ -50,16 +50,15 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     {
         // Start an IPMI session
         session =
-            (std::get<session::Manager&>(singletonPool)
-                 .startSession(
-                     endian::from_ipmi<>(request->remoteConsoleSessionID),
-                     static_cast<session::Privilege>(request->maxPrivLevel),
-                     static_cast<cipher::rakp_auth::Algorithms>(
-                         request->authAlgo),
-                     static_cast<cipher::integrity::Algorithms>(
-                         request->intAlgo),
-                     static_cast<cipher::crypt::Algorithms>(request->confAlgo)))
-                .lock();
+            std::get<session::Manager&>(singletonPool)
+                .startSession(
+                    endian::from_ipmi<>(request->remoteConsoleSessionID),
+                    static_cast<session::Privilege>(request->maxPrivLevel),
+                    static_cast<cipher::rakp_auth::Algorithms>(
+                        request->authAlgo),
+                    static_cast<cipher::integrity::Algorithms>(
+                        request->intAlgo),
+                    static_cast<cipher::crypt::Algorithms>(request->confAlgo));
     }
     catch (std::exception& e)
     {

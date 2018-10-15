@@ -35,9 +35,8 @@ std::unique_ptr<Message> Handler::receive()
     std::unique_ptr<Message> message;
     std::tie(message, sessionHeader) = parser::unflatten(packet);
 
-    auto session = (std::get<session::Manager&>(singletonPool)
-                        .getSession(message->bmcSessionID))
-                       .lock();
+    auto session = std::get<session::Manager&>(singletonPool)
+                       .getSession(message->bmcSessionID);
 
     sessionID = message->bmcSessionID;
     message->rcSessionID = session->getRCSessionID();
@@ -166,8 +165,7 @@ uint32_t Handler::getCommand(Message& message)
 void Handler::send(Message& outMessage)
 {
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(sessionID);
 
     // Flatten the packet
     auto packet = parser::flatten(outMessage, sessionHeader, *session);
@@ -183,8 +181,7 @@ void Handler::send(Message& outMessage)
 void Handler::setChannelInSession() const
 {
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(sessionID);
 
     session->channelPtr = channel;
 }
@@ -194,8 +191,7 @@ void Handler::sendSOLPayload(const std::vector<uint8_t>& input)
     Message outMessage;
 
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(sessionID);
 
     outMessage.payloadType = PayloadType::SOL;
     outMessage.payload = input;
@@ -213,8 +209,7 @@ void Handler::sendUnsolicitedIPMIPayload(uint8_t netfn, uint8_t cmd,
     Message outMessage;
 
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(sessionID);
 
     outMessage.payloadType = PayloadType::IPMI;
     outMessage.isPacketEncrypted = session->isCryptAlgoEnabled();

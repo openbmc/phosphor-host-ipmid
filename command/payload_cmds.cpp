@@ -47,9 +47,8 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    auto session = (std::get<session::Manager&>(singletonPool)
-                        .getSession(handler.sessionID))
-                       .lock();
+    auto session = std::get<session::Manager&>(singletonPool)
+                       .getSession(handler.sessionID);
 
     if (!request->encryption && session->isCryptAlgoEnabled())
     {

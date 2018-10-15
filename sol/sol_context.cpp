@@ -205,8 +205,7 @@ void Context::resendPayload(bool clear)
 void Context::sendPayload(const std::vector<uint8_t>& out) const
 {
     auto session =
-        (std::get<session::Manager&>(singletonPool).getSession(sessionID))
-            .lock();
+        std::get<session::Manager&>(singletonPool).getSession(sessionID);
 
     message::Handler msgHandler(session->channelPtr, sessionID);
 

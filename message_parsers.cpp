@@ -280,9 +280,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
         return false;
     }
 
-    auto session = (std::get<session::Manager&>(singletonPool)
-                        .getSession(message.bmcSessionID))
-                       .lock();
+    auto session = std::get<session::Manager&>(singletonPool)
+                       .getSession(message.bmcSessionID);
 
     auto integrityAlgo = session->getIntegrityAlgo();
 
@@ -322,9 +321,8 @@ void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
     trailer->padLength = paddingLen;
     trailer->nextHeader = parser::RMCP_MESSAGE_CLASS_IPMI;
 
-    auto session = (std::get<session::Manager&>(singletonPool)
-                        .getSession(message.bmcSessionID))
-                       .lock();
+    auto session = std::get<session::Manager&>(singletonPool)
+                       .getSession(message.bmcSessionID);
 
     auto integrityData =
         session->getIntegrityAlgo()->generateIntegrityData(packet);
@@ -335,9 +333,8 @@ void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
 std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
                                     const Message& message, size_t payloadLen)
 {
-    auto session = (std::get<session::Manager&>(singletonPool)
-                        .getSession(message.bmcSessionID))
-                       .lock();
+    auto session = std::get<session::Manager&>(singletonPool)
+                       .getSession(message.bmcSessionID);
 
     return session->getCryptAlgo()->decryptPayload(
         packet, sizeof(SessionHeader_t), payloadLen);
@@ -345,9 +342,8 @@ std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
 
 std::vector<uint8_t> encryptPayload(Message& message)
 {
-    auto session = (std::get<session::Manager&>(singletonPool)
-                        .getSession(message.bmcSessionID))
-                       .lock();
+    auto session = std::get<session::Manager&>(singletonPool)
+                       .getSession(message.bmcSessionID);
 
     return session->getCryptAlgo()->encryptPayload(message.payload);
 }
