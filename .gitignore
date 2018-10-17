@@ -21,3 +21,8 @@ stamp-h1
 .project
 netipmid
 test-driver
+.*.sw*
+.cscope/
+*.orig
+*.rej
+*~
