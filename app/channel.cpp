@@ -99,7 +99,7 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                  ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    uint8_t* p = (uint8_t*)request;
+    auto* p = static_cast<uint8_t*>(request);
     int channel = (*p) & CHANNEL_MASK;
     std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
 
