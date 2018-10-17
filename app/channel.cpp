@@ -288,12 +288,21 @@ void enableNetworkIPMI(const std::string& intf)
         auto response =
             executeCmd("/usr/sbin/iptables", "-D", "INPUT", "-p", "udp", "-i",
                        intf.c_str(), "--dport", "623", "-j", "DROP");
-
         if (response)
         {
             log<level::ERR>("Dropping the iptables filter failed",
                             entry("INTF=%s", intf.c_str()),
-                            entry("RETURN_CODE:%d", response));
+                            entry("RETURN_CODE=%d", response));
+            return;
+        }
+
+        response =
+            std::system("/usr/sbin/iptables-save > /var/lib/iptables_rules");
+        if (response)
+        {
+            log<level::ERR>("Persisting the iptables failed",
+                            entry("INTF=%s", intf.c_str()),
+                            entry("RETURN_CODE=%d", response));
         }
     }
 }
@@ -317,12 +326,21 @@ void disableNetworkIPMI(const std::string& intf)
         auto response =
             executeCmd("/usr/sbin/iptables", "-I", "INPUT", "-p", "udp", "-i",
                        intf.c_str(), "--dport", "623", "-j", "DROP");
-
         if (response)
         {
             log<level::ERR>("Inserting iptables filter failed",
                             entry("INTF=%s", intf.c_str()),
-                            entry("RETURN_CODE:%d", response));
+                            entry("RETURN_CODE=%d", response));
+            return;
+        }
+
+        response =
+            std::system("/usr/sbin/iptables-save > /var/lib/iptables_rules");
+        if (response)
+        {
+            log<level::ERR>("Persisting the iptables failed",
+                            entry("INTF=%s", intf.c_str()),
+                            entry("RETURN_CODE=%d", response));
         }
     }
 }
