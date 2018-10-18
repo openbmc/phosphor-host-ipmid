@@ -30,6 +30,9 @@ PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,\
     AC_MSG_ERROR(["Requires sdbusplus package."]))
 
 AS_IF([test "x$enable_softoff" != "xno"],
+    PKG_CHECK_MODULES([SDEVENTPLUS], [sdeventplus],,\
+        AC_MSG_ERROR(["Requires sdeventplus package."]))
+
     # Check for sdbus++ tool
     [AC_PATH_PROG([SDBUSPLUSPLUS], [sdbus++])]
     AS_IF([test "x$SDBUSPLUSPLUS" == "x"],
