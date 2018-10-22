@@ -625,9 +625,7 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
                 body->sensor_units_2_base = get_sdr::SENSOR_UNIT_DEGREES_C;
                 break;
             case server::Value::Unit::RPMS:
-                body->sensor_units_2_base =
-                    get_sdr::SENSOR_UNIT_REVOLUTIONS;      // revolutions
-                get_sdr::body::set_rate_unit(0b100, body); // per minute
+                body->sensor_units_2_base = get_sdr::RPM;
                 break;
             case server::Value::Unit::Volts:
                 body->sensor_units_2_base = get_sdr::SENSOR_UNIT_VOLTS;
