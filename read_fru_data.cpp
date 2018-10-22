@@ -77,9 +77,9 @@ void processFruPropChange(sdbusplus::message::message& msg)
     {
         path.erase(0, strlen(OBJ_PATH));
     }
-    for (auto& fru : frus)
+    for (const auto& fru : frus)
     {
-        auto& instanceList = fru.second;
+        const auto& instanceList = fru.second;
 
         auto found = std::find_if(
             instanceList.begin(), instanceList.end(),
@@ -87,7 +87,7 @@ void processFruPropChange(sdbusplus::message::message& msg)
 
         if (found != instanceList.end())
         {
-            auto& fruId = fru.first;
+            const auto& fruId = fru.first;
 
             cache::fruMap.erase(fruId);
             break;
@@ -119,7 +119,7 @@ int registerCallbackHandler()
  */
 FruInventoryData readDataFromInventory(const FRUId& fruNum)
 {
-    auto iter = frus.find(fruNum);
+    const auto iter = frus.find(fruNum);
     if (iter == frus.end())
     {
         log<level::ERR>("Unsupported FRU ID ", entry("FRUID=%d", fruNum));
@@ -127,16 +127,16 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     }
 
     FruInventoryData data;
-    auto& instanceList = iter->second;
-    for (auto& instance : instanceList)
+    const auto& instanceList = iter->second;
+    for (const auto& instance : instanceList)
     {
-        for (auto& intf : instance.interfaces)
+        for (const auto& intf : instance.interfaces)
         {
             ipmi::PropertyMap allProp =
                 readAllProperties(intf.first, instance.path);
-            for (auto& properties : intf.second)
+            for (const auto& properties : intf.second)
             {
-                auto iter = allProp.find(properties.first);
+                const auto iter = allProp.find(properties.first);
                 if (iter != allProp.end())
                 {
                     data[properties.second.section].emplace(
@@ -152,7 +152,7 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
 
 const FruAreaData& getFruAreaData(const FRUId& fruNum)
 {
-    auto iter = cache::fruMap.find(fruNum);
+    const auto iter = cache::fruMap.find(fruNum);
     if (iter != cache::fruMap.end())
     {
         return iter->second;
