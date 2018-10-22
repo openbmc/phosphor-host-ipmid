@@ -6,6 +6,7 @@
 
 #include <host-ipmid/ipmid-api.h>
 
+#include <algorithm>
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -78,17 +79,13 @@ void processFruPropChange(sdbusplus::message::message& msg)
     }
     for (auto& fru : frus)
     {
-        bool found = false;
         auto& instanceList = fru.second;
-        for (auto& instance : instanceList)
-        {
-            if (instance.path == path)
-            {
-                found = true;
-                break;
-            }
-        }
-        if (found)
+
+        auto found = std::find_if(
+            instanceList.begin(), instanceList.end(),
+            [&path](const auto& iter) { return (iter.path == path); });
+
+        if (found != instanceList.end())
         {
             auto& fruId = fru.first;
 
