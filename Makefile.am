@@ -70,6 +70,7 @@ netipmid_LDFLAGS = \
 	-export-dynamic
 
 netipmid_CXXFLAGS = \
+	-flto \
 	$(SYSTEMD_CFLAGS) \
 	$(libmapper_CFLAGS) \
 	$(PHOSPHOR_LOGGING_CFLAGS) \
