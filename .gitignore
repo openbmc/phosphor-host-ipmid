@@ -51,9 +51,6 @@ Makefile
 .project
 /softoff/phosphor-softpoweroff
 /softoff/xyz/
-/test/sample_unittest
-/test/*.log
-/test/*.trs
 /fru-read-gen.cpp
 /ipmiwhitelist.cpp
 /sensor-gen.cpp
@@ -61,6 +58,16 @@ Makefile
 /fru-read-gen.cpp
 /app/*.lo
 /channel-gen.cpp
+
+# test related
+/test/sample_unittest
+/test/*.log
+/test/*.trs
+/test-suite.log
+*-1.0-coverage*
+test/*.gcda
+test/*.gcno
+softoff/test
 
 # ignore vim swap files
 .*.sw*
