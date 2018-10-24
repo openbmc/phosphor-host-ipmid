@@ -8,7 +8,6 @@
 #include "provider_registration.hpp"
 #include "socket_channel.hpp"
 #include "sol_module.hpp"
-#include "timer.hpp"
 
 #include <assert.h>
 #include <dirent.h>
@@ -20,6 +19,7 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <sdbusplus/timer.hpp>
 #include <tuple>
 
 // Tuple of Global Singletons
@@ -36,7 +36,7 @@ sd_bus* bus = nullptr;
 sd_event* events = nullptr;
 
 // Global timer for network changes
-std::unique_ptr<phosphor::ipmi::Timer> networkTimer = nullptr;
+std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 
 FILE* ipmidbus = nullptr;
 static unsigned short selReservationID = 0xFFFF;
