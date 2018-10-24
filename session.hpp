@@ -4,6 +4,7 @@
 #include "crypt_algo.hpp"
 #include "endian.hpp"
 #include "integrity_algo.hpp"
+#include "prng.hpp"
 #include "socket_channel.hpp"
 
 #include <chrono>
@@ -111,7 +112,7 @@ class Session
      * @param[in] priv - Privilege Level requested in the Command
      */
     Session(SessionID inRemoteConsoleSessID, Privilege priv) :
-        curPrivLevel(priv), bmcSessionID(std::rand()),
+        curPrivLevel(priv), bmcSessionID(crypto::prng::rand()),
         remoteConsoleSessionID(inRemoteConsoleSessID)
     {
     }

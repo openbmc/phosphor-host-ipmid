@@ -20,8 +20,6 @@ Manager::Manager()
      * through the lifetime of the Session Manager.
      */
     sessionsMap.emplace(0, std::make_shared<Session>());
-    // Seeding the pseudo-random generator
-    std::srand(std::time(0));
 }
 
 std::shared_ptr<Session>
