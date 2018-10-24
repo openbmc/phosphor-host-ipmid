@@ -176,48 +176,24 @@ int EventLoop::startEventLoop()
 {
     int fd = -1;
     int r = 0;
-    int listen_fd;
-    sigset_t ss;
+    int listenFd;
     sd_event_source* source = nullptr;
 
     sdbusplus::asio::sd_event_wrapper sdEvents(*io);
     event = sdEvents.get();
 
-    if (sigemptyset(&ss) < 0 || sigaddset(&ss, SIGTERM) < 0 ||
-        sigaddset(&ss, SIGINT) < 0)
-    {
-        r = -errno;
-        return EXIT_FAILURE;
-    }
-
-    /* Block SIGTERM first, so that the event loop can handle it */
-    if (sigprocmask(SIG_BLOCK, &ss, nullptr) < 0)
-    {
-        r = -errno;
-        return EXIT_FAILURE;
-    }
-
-    /* Let's make use of the default handler and "floating" reference features
-     * of sd_event_add_signal() */
-    r = sd_event_add_signal(event, nullptr, SIGTERM, nullptr, nullptr);
-    if (r < 0)
-    {
-        return EXIT_FAILURE;
-    }
-
-    r = sd_event_add_signal(event, nullptr, SIGINT, nullptr, nullptr);
-    if (r < 0)
-    {
-        return EXIT_FAILURE;
-    }
+    // set up boost::asio signal handling
+    boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
+    signals.async_wait([this](const boost::system::error_code& error,
+                              int signalNumber) { io->stop(); });
 
     // Create our own socket if SysD did not supply one.
-    listen_fd = sd_listen_fds(0);
-    if (listen_fd == 1)
+    listenFd = sd_listen_fds(0);
+    if (listenFd == 1)
     {
         fd = SD_LISTEN_FDS_START;
     }
-    else if (listen_fd > 1)
+    else if (listenFd > 1)
     {
         log<level::ERR>("Too many file descriptors received");
         return 1;
