@@ -9,7 +9,6 @@ netipmid_SOURCES = \
 	auth_algo.hpp \
 	auth_algo.cpp \
 	session.hpp \
-	session.cpp \
 	sessions_manager.hpp \
 	sessions_manager.cpp \
 	message_parsers.hpp \
