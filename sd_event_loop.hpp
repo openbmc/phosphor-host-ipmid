@@ -4,6 +4,7 @@
 
 #include <systemd/sd-event.h>
 
+#include <boost/asio/io_context.hpp>
 #include <chrono>
 #include <map>
 
@@ -42,7 +43,10 @@ enum class Timers
 class EventLoop
 {
   public:
-    EventLoop() = default;
+    explicit EventLoop(std::shared_ptr<boost::asio::io_context> io) : io(io)
+    {
+    }
+    EventLoop() = delete;
     ~EventLoop() = default;
     EventLoop(const EventLoop&) = delete;
     EventLoop& operator=(const EventLoop&) = delete;
@@ -67,11 +71,10 @@ class EventLoop
 
     /** @brief Initialise the event loop and add the handler for incoming
      *         IPMI packets.
-     *  @param[in] events- sd bus event;
      *
      *  @return EXIT_SUCCESS on success and EXIT_FAILURE on failure.
      */
-    int startEventLoop(sd_event* events);
+    int startEventLoop();
 
     /** @brief Add host console I/O event source to the event loop.
      *
@@ -138,6 +141,10 @@ class EventLoop
   private:
     /** @brief Event source object for host console. */
     EventSource hostConsole = nullptr;
+
+    /** @brief boost::asio io context to run with
+     */
+    std::shared_ptr<boost::asio::io_context> io;
 
     /** @brief Event source for the UDP socket listening on IPMI standard
      *         port.

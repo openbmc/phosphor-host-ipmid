@@ -13,19 +13,20 @@
 #include <dirent.h>
 #include <dlfcn.h>
 #include <host-ipmid/ipmid-api.h>
-#include <systemd/sd-bus.h>
 #include <systemd/sd-daemon.h>
 #include <systemd/sd-event.h>
 #include <unistd.h>
 
 #include <iostream>
+#include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/timer.hpp>
 #include <tuple>
 
 // Tuple of Global Singletons
+static auto io = std::make_shared<boost::asio::io_context>();
 session::Manager manager;
 command::Table table;
-eventloop::EventLoop loop;
+eventloop::EventLoop loop(io);
 sol::Manager solManager;
 
 std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
@@ -118,9 +119,8 @@ int main()
     {
         std::cerr << "Failed to connect to system bus:" << strerror(-rc)
                   << "\n";
-        goto finish;
+        return rc;
     }
-    sdbusp = std::make_shared<sdbusplus::bus::bus>(bus);
 
     /* Get an sd event handler */
     rc = sd_event_default(&events);
@@ -129,6 +129,7 @@ int main()
         std::cerr << "Failure to create sd_event" << strerror(-rc) << "\n";
         return EXIT_FAILURE;
     }
+    sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
 
     // Register callback to update cache for a GUID change and cache the GUID
     command::registerGUIDChangeCallback();
@@ -144,11 +145,5 @@ int main()
     sol::command::registerCommands();
 
     // Start Event Loop
-    return std::get<eventloop::EventLoop&>(singletonPool)
-        .startEventLoop(events);
-
-finish:
-    sd_event_unref(events);
-
-    return 0;
+    return std::get<eventloop::EventLoop&>(singletonPool).startEventLoop();
 }

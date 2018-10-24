@@ -8,7 +8,9 @@
 #include <sys/socket.h>
 #include <systemd/sd-daemon.h>
 
+#include <boost/asio/io_context.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/asio/sd_event.hpp>
 
 namespace eventloop
 {
@@ -170,35 +172,29 @@ static int retryTimerHandler(sd_event_source* s, uint64_t usec, void* userdata)
     return 0;
 }
 
-int EventLoop::startEventLoop(sd_event* events)
+int EventLoop::startEventLoop()
 {
     int fd = -1;
     int r = 0;
     int listen_fd;
     sigset_t ss;
     sd_event_source* source = nullptr;
-    auto bus = ipmid_get_sd_bus_connection();
 
-    event = events;
-    // Attach the bus to sd_event to service user requests
-    r = sd_bus_attach_event(bus, event, SD_EVENT_PRIORITY_NORMAL);
-    if (r < 0)
-    {
-        goto finish;
-    }
+    sdbusplus::asio::sd_event_wrapper sdEvents(*io);
+    event = sdEvents.get();
 
     if (sigemptyset(&ss) < 0 || sigaddset(&ss, SIGTERM) < 0 ||
         sigaddset(&ss, SIGINT) < 0)
     {
         r = -errno;
-        goto finish;
+        return EXIT_FAILURE;
     }
 
     /* Block SIGTERM first, so that the event loop can handle it */
     if (sigprocmask(SIG_BLOCK, &ss, nullptr) < 0)
     {
         r = -errno;
-        goto finish;
+        return EXIT_FAILURE;
     }
 
     /* Let's make use of the default handler and "floating" reference features
@@ -206,13 +202,13 @@ int EventLoop::startEventLoop(sd_event* events)
     r = sd_event_add_signal(event, nullptr, SIGTERM, nullptr, nullptr);
     if (r < 0)
     {
-        goto finish;
+        return EXIT_FAILURE;
     }
 
     r = sd_event_add_signal(event, nullptr, SIGINT, nullptr, nullptr);
     if (r < 0)
     {
-        goto finish;
+        return EXIT_FAILURE;
     }
 
     // Create our own socket if SysD did not supply one.
@@ -224,7 +220,7 @@ int EventLoop::startEventLoop(sd_event* events)
     else if (listen_fd > 1)
     {
         log<level::ERR>("Too many file descriptors received");
-        goto finish;
+        return 1;
     }
     else
     {
@@ -233,7 +229,7 @@ int EventLoop::startEventLoop(sd_event* events)
         {
             r = -errno;
             log<level::ERR>("Unable to manually open socket");
-            goto finish;
+            return EXIT_FAILURE;
         }
 
         address.sin_family = AF_INET;
@@ -244,35 +240,24 @@ int EventLoop::startEventLoop(sd_event* events)
         {
             r = -errno;
             log<level::ERR>("Unable to bind socket");
-            goto finish;
+            close(fd);
+            return EXIT_FAILURE;
         }
     }
 
     r = sd_event_add_io(event, &source, fd, EPOLLIN, udp623Handler, nullptr);
     if (r < 0)
     {
-        goto finish;
+        close(fd);
+        return EXIT_FAILURE;
     }
 
     udpIPMI.reset(source);
     source = nullptr;
 
-    r = sd_event_loop(event);
+    io->run();
 
-finish:
-
-    if (fd >= 0)
-    {
-        (void)close(fd);
-    }
-
-    if (r < 0)
-    {
-        log<level::ERR>("Event Loop Failure:",
-                        entry("FAILURE=%s", strerror(-r)));
-    }
-
-    return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 void EventLoop::startHostConsole(const sol::CustomFD& fd)
