@@ -81,18 +81,14 @@ void processFruPropChange(sdbusplus::message::message& msg)
     {
         path.erase(0, strlen(OBJ_PATH));
     }
-    for (auto& fru : frus)
+    for (const auto& [fruId, instanceList] : frus)
     {
-        auto& instanceList = fru.second;
-
         auto found = std::find_if(
             instanceList.begin(), instanceList.end(),
             [&path](const auto& iter) { return (iter.path == path); });
 
         if (found != instanceList.end())
         {
-            auto& fruId = fru.first;
-
             cache::fruMap.erase(fruId);
             break;
         }
