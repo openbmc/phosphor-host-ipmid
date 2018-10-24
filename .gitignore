@@ -62,6 +62,13 @@ Makefile
 /app/*.lo
 /channel-gen.cpp
 
+# test related
+/test-suite.log
+phosphor-host-ipmid-1.0-coverage*
+test/sample_unittest-sample_unittest.gcda
+test/sample_unittest-sample_unittest.gcno
+softoff/test
+
 # ignore vim swap files
 .*.sw*
 # failures from patch
