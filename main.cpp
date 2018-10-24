@@ -90,7 +90,7 @@ void cancelSELReservation(void)
     selReservationValid = false;
 }
 
-int main(int i_argc, char* i_argv[])
+int main()
 {
     /*
      * Required by apphandler IPMI Provider Library for logging.
