@@ -1,12 +1,7 @@
 #ifndef __HOST_IPMID_IPMI_COMMON_H__
 #define __HOST_IPMID_IPMI_COMMON_H__
-#include <stdbool.h>
-#include <stdlib.h>
-#include <systemd/sd-bus.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <systemd/sd-bus.h>
 
 /*
  * Specifies the minimum privilege level required to execute the command
@@ -135,9 +130,5 @@ enum ipmi_return_codes
 sd_bus* ipmid_get_sd_bus_connection(void);
 sd_event* ipmid_get_sd_event_connection(void);
 sd_bus_slot* ipmid_get_sd_bus_slot(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
