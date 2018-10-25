@@ -31,9 +31,6 @@ class EventLoop
      */
     int startEventLoop();
 
-    /** @brief Event loop object. */
-    sd_event* event = nullptr;
-
   private:
     /** @brief async handler for incoming udp packets */
     void handleRmcpPacket();

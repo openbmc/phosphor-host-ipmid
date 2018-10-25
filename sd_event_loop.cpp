@@ -48,9 +48,6 @@ void EventLoop::startRmcpReceive()
 
 int EventLoop::startEventLoop()
 {
-    sdbusplus::asio::sd_event_wrapper sdEvents(*io);
-    event = sdEvents.get();
-
     // set up boost::asio signal handling
     boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
     signals.async_wait(

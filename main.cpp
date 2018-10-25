@@ -34,7 +34,6 @@ std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
     singletonPool(manager, table, loop, solManager);
 
 sd_bus* bus = nullptr;
-sd_event* events = nullptr;
 
 std::shared_ptr<sdbusplus::asio::connection> sdbusp;
 
@@ -70,14 +69,6 @@ int main()
         return rc;
     }
 
-    /* Get an sd event handler */
-    rc = sd_event_default(&events);
-    if (rc < 0)
-    {
-        log<level::ERR>("Failure to create sd_event",
-                        entry("ERROR=%s", strerror(-rc)));
-        return EXIT_FAILURE;
-    }
     sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
 
     // Register callback to update cache for a GUID change and cache the GUID
