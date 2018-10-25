@@ -6,6 +6,7 @@
 #include "sol/console_buffer.hpp"
 
 #include <iostream>
+#include <memory>
 #include <numeric>
 
 namespace message
@@ -38,7 +39,7 @@ class Handler
      * @return IPMI Message on success and nullptr on failure
      *
      */
-    std::unique_ptr<Message> receive();
+    std::shared_ptr<Message> receive();
 
     /**
      * @brief Process the incoming IPMI message
@@ -51,7 +52,7 @@ class Handler
      *
      * @return Outgoing message on success and nullptr on failure
      */
-    std::unique_ptr<Message> executeCommand(Message& inMessage);
+    std::shared_ptr<Message> executeCommand(std::shared_ptr<Message> inMessage);
 
     /** @brief Send the outgoing message
      *
@@ -60,7 +61,7 @@ class Handler
      *
      *  @param[in] outMessage - Outgoing Message
      */
-    void send(Message& outMessage);
+    void send(std::shared_ptr<Message> outMessage);
 
     /** @brief Set socket channel in session object */
     void setChannelInSession() const;
@@ -109,10 +110,10 @@ class Handler
      * @return Outgoing message on success and nullptr on failure
      */
     template <PayloadType T>
-    std::unique_ptr<Message> createResponse(std::vector<uint8_t>& output,
-                                            Message& inMessage)
+    std::shared_ptr<Message> createResponse(std::vector<uint8_t>& output,
+                                            std::shared_ptr<Message> inMessage)
     {
-        auto outMessage = std::make_unique<Message>();
+        auto outMessage = std::make_shared<Message>();
         outMessage->payloadType = T;
         outMessage->payload = output;
         return outMessage;
@@ -125,7 +126,7 @@ class Handler
      *
      * @return Command ID in the incoming message
      */
-    uint32_t getCommand(Message& message);
+    uint32_t getCommand(std::shared_ptr<Message> message);
 
     /**
      * @brief Calculate 8 bit 2's complement checksum

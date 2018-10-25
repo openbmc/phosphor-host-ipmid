@@ -29,24 +29,22 @@ static int udp623Handler(sd_event_source* es, int fd, uint32_t revents,
         // Initialize the Message Handler with the socket channel
         message::Handler msgHandler(channelPtr);
 
-        std::unique_ptr<message::Message> inMessage;
-
         // Read the incoming IPMI packet
-        inMessage = msgHandler.receive();
+        std::shared_ptr<message::Message> inMessage(msgHandler.receive());
         if (inMessage == nullptr)
         {
             return 0;
         }
 
         // Execute the Command
-        auto outMessage = msgHandler.executeCommand(*(inMessage.get()));
+        auto outMessage = msgHandler.executeCommand(inMessage);
         if (outMessage == nullptr)
         {
             return 0;
         }
 
         // Send the response IPMI Message
-        msgHandler.send(*(outMessage.get()));
+        msgHandler.send(outMessage);
     }
     catch (std::exception& e)
     {

@@ -14,7 +14,7 @@ namespace message
 namespace parser
 {
 
-std::tuple<std::unique_ptr<Message>, SessionHeader>
+std::tuple<std::shared_ptr<Message>, SessionHeader>
     unflatten(std::vector<uint8_t>& inPacket)
 {
     // Check if the packet has atleast the size of the RMCP Header
@@ -54,8 +54,8 @@ std::tuple<std::unique_ptr<Message>, SessionHeader>
     }
 }
 
-std::vector<uint8_t> flatten(Message& outMessage, SessionHeader authType,
-                             session::Session& session)
+std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
+                             SessionHeader authType, session::Session& session)
 {
     // Call the flatten routine based on the header type
     switch (authType)
@@ -80,7 +80,7 @@ std::vector<uint8_t> flatten(Message& outMessage, SessionHeader authType,
 namespace ipmi15parser
 {
 
-std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
+std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 {
     // Check if the packet has atleast the Session Header
     if (inPacket.size() < sizeof(SessionHeader_t))
@@ -88,7 +88,7 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         throw std::runtime_error("IPMI1.5 Session Header Missing");
     }
 
-    auto message = std::make_unique<Message>();
+    auto message = std::make_shared<Message>();
 
     auto header = reinterpret_cast<SessionHeader_t*>(inPacket.data());
 
@@ -107,7 +107,8 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     return message;
 }
 
-std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
+std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
+                             session::Session& session)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -120,13 +121,13 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     header->base.format.formatType =
         static_cast<uint8_t>(parser::SessionHeader::IPMI15);
     header->sessSeqNum = 0;
-    header->sessId = endian::to_ipmi(outMessage.rcSessionID);
+    header->sessId = endian::to_ipmi(outMessage->rcSessionID);
 
-    header->payloadLength = static_cast<uint8_t>(outMessage.payload.size());
+    header->payloadLength = static_cast<uint8_t>(outMessage->payload.size());
 
     // Insert the Payload into the Packet
-    packet.insert(packet.end(), outMessage.payload.begin(),
-                  outMessage.payload.end());
+    packet.insert(packet.end(), outMessage->payload.begin(),
+                  outMessage->payload.end());
 
     // Insert the Session Trailer
     packet.resize(packet.size() + sizeof(SessionTrailer_t));
@@ -142,7 +143,7 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
 namespace ipmi20parser
 {
 
-std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
+std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 {
     // Check if the packet has atleast the Session Header
     if (inPacket.size() < sizeof(SessionHeader_t))
@@ -150,7 +151,7 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         throw std::runtime_error("IPMI2.0 Session Header Missing");
     }
 
-    auto message = std::make_unique<Message>();
+    auto message = std::make_shared<Message>();
 
     auto header = reinterpret_cast<SessionHeader_t*>(inPacket.data());
 
@@ -166,8 +167,7 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 
     if (message->isPacketAuthenticated)
     {
-        if (!(internal::verifyPacketIntegrity(inPacket, *(message.get()),
-                                              payloadLen)))
+        if (!(internal::verifyPacketIntegrity(inPacket, message, payloadLen)))
         {
             throw std::runtime_error("Packet Integrity check failed");
         }
@@ -178,7 +178,7 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     {
         // Assign the decrypted payload to the IPMI Message
         message->payload =
-            internal::decryptPayload(inPacket, *(message.get()), payloadLen);
+            internal::decryptPayload(inPacket, message, payloadLen);
     }
     else
     {
@@ -190,7 +190,8 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     return message;
 }
 
-std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
+std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
+                             session::Session& session)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -201,8 +202,8 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     header->base.classOfMsg = parser::RMCP_MESSAGE_CLASS_IPMI;
     header->base.format.formatType =
         static_cast<uint8_t>(parser::SessionHeader::IPMI20);
-    header->payloadType = static_cast<uint8_t>(outMessage.payloadType);
-    header->sessId = endian::to_ipmi(outMessage.rcSessionID);
+    header->payloadType = static_cast<uint8_t>(outMessage->payloadType);
+    header->sessId = endian::to_ipmi(outMessage->rcSessionID);
 
     // Add session sequence number
     internal::addSequenceNumber(packet, session);
@@ -210,7 +211,7 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     size_t payloadLen = 0;
 
     // Encrypt the payload if needed
-    if (outMessage.isPacketEncrypted)
+    if (outMessage->isPacketEncrypted)
     {
         header->payloadType |= PAYLOAD_ENCRYPT_MASK;
         auto cipherPayload = internal::encryptPayload(outMessage);
@@ -223,15 +224,15 @@ std::vector<uint8_t> flatten(Message& outMessage, session::Session& session)
     else
     {
         header->payloadLength =
-            endian::to_ipmi<uint16_t>(outMessage.payload.size());
-        payloadLen = outMessage.payload.size();
+            endian::to_ipmi<uint16_t>(outMessage->payload.size());
+        payloadLen = outMessage->payload.size();
 
         // Insert the Payload into the Packet
-        packet.insert(packet.end(), outMessage.payload.begin(),
-                      outMessage.payload.end());
+        packet.insert(packet.end(), outMessage->payload.begin(),
+                      outMessage->payload.end());
     }
 
-    if (outMessage.isPacketAuthenticated)
+    if (outMessage->isPacketAuthenticated)
     {
         internal::addIntegrityData(packet, outMessage, payloadLen);
     }
@@ -258,7 +259,8 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session)
 }
 
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
-                           const Message& message, size_t payloadLen)
+                           const std::shared_ptr<Message> message,
+                           size_t payloadLen)
 {
     /*
      * Padding bytes are added to cause the number of bytes in the data range
@@ -281,7 +283,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
     }
 
     auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(message.bmcSessionID);
+                       .getSession(message->bmcSessionID);
 
     auto integrityAlgo = session->getIntegrityAlgo();
 
@@ -305,8 +307,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
     return integrityAlgo->verifyIntegrityData(packet, length, integrityIter);
 }
 
-void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
-                      size_t payloadLen)
+void addIntegrityData(std::vector<uint8_t>& packet,
+                      const std::shared_ptr<Message> message, size_t payloadLen)
 {
     // The following logic calculates the number of padding bytes to be added to
     // IPMI packet. If needed each integrity Pad byte is set to FFh.
@@ -322,7 +324,7 @@ void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
     trailer->nextHeader = parser::RMCP_MESSAGE_CLASS_IPMI;
 
     auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(message.bmcSessionID);
+                       .getSession(message->bmcSessionID);
 
     auto integrityData =
         session->getIntegrityAlgo()->generateIntegrityData(packet);
@@ -331,21 +333,22 @@ void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
 }
 
 std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
-                                    const Message& message, size_t payloadLen)
+                                    const std::shared_ptr<Message> message,
+                                    size_t payloadLen)
 {
     auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(message.bmcSessionID);
+                       .getSession(message->bmcSessionID);
 
     return session->getCryptAlgo()->decryptPayload(
         packet, sizeof(SessionHeader_t), payloadLen);
 }
 
-std::vector<uint8_t> encryptPayload(Message& message)
+std::vector<uint8_t> encryptPayload(std::shared_ptr<Message> message)
 {
     auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(message.bmcSessionID);
+                       .getSession(message->bmcSessionID);
 
-    return session->getCryptAlgo()->encryptPayload(message.payload);
+    return session->getCryptAlgo()->encryptPayload(message->payload);
 }
 
 } // namespace internal

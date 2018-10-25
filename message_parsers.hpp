@@ -59,7 +59,7 @@ struct BasicHeader_t
  *         header type. In case of failure nullptr and session header type
  *         would be invalid.
  */
-std::tuple<std::unique_ptr<Message>, SessionHeader>
+std::tuple<std::shared_ptr<Message>, SessionHeader>
     unflatten(std::vector<uint8_t>& inPacket);
 
 /**
@@ -72,8 +72,8 @@ std::tuple<std::unique_ptr<Message>, SessionHeader>
  *
  * @return IPMI packet on success
  */
-std::vector<uint8_t> flatten(Message& outMessage, SessionHeader authType,
-                             session::Session& session);
+std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
+                             SessionHeader authType, session::Session& session);
 
 } // namespace parser
 
@@ -101,7 +101,7 @@ struct SessionTrailer_t
  *
  * @return IPMI message in the packet on success
  */
-std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
+std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
 
 /**
  * @brief Flatten an IPMI message and generate the IPMI packet with the
@@ -111,7 +111,8 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
  *
  * @return IPMI packet on success
  */
-std::vector<uint8_t> flatten(Message& outMessage, session::Session& session);
+std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
+                             session::Session& session);
 
 } // namespace ipmi15parser
 
@@ -147,7 +148,7 @@ struct SessionTrailer_t
  *
  * @return IPMI message in the packet on success
  */
-std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
+std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
 
 /**
  * @brief Flatten an IPMI message and generate the IPMI packet with the
@@ -157,7 +158,8 @@ std::unique_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
  *
  * @return IPMI packet on success
  */
-std::vector<uint8_t> flatten(Message& outMessage, session::Session& session);
+std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
+                             session::Session& session);
 
 namespace internal
 {
@@ -180,7 +182,8 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session);
  *
  */
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
-                           const Message& message, size_t payloadLen);
+                           const std::shared_ptr<Message> message,
+                           size_t payloadLen);
 
 /**
  * @brief Add Integrity data to the outgoing IPMI packet
@@ -189,7 +192,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
  * @param[in] message - IPMI Message populated for the outgoing packet
  * @param[in] payloadLen - Length of the IPMI payload
  */
-void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
+void addIntegrityData(std::vector<uint8_t>& packet,
+                      const std::shared_ptr<Message> message,
                       size_t payloadLen);
 
 /**
@@ -202,7 +206,8 @@ void addIntegrityData(std::vector<uint8_t>& packet, const Message& message,
  * @return on successful completion, return the plain text payload
  */
 std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
-                                    const Message& message, size_t payloadLen);
+                                    const std::shared_ptr<Message> message,
+                                    size_t payloadLen);
 
 /**
  * @brief Encrypt the plain text payload for the outgoing IPMI packet
@@ -211,7 +216,7 @@ std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
  *
  * @return on successful completion, return the encrypted payload
  */
-std::vector<uint8_t> encryptPayload(Message& message);
+std::vector<uint8_t> encryptPayload(std::shared_ptr<Message> message);
 
 } // namespace internal
 
