@@ -43,12 +43,22 @@ static unsigned short selReservationID = 0xFFFF;
 static bool selReservationValid = false;
 sd_bus_slot* ipmid_slot = nullptr;
 
+std::shared_ptr<sdbusplus::bus::bus> sdbusp;
+
 /*
  * @brief Required by apphandler IPMI Provider Library
  */
 sd_bus* ipmid_get_sd_bus_connection()
 {
     return bus;
+}
+
+/*
+ * @brief mechanism to get at sdbusplus object
+ */
+std::shared_ptr<sdbusplus::bus::bus> getSdBus()
+{
+    return sdbusp;
 }
 
 /*
@@ -110,13 +120,14 @@ int main()
                   << "\n";
         goto finish;
     }
+    sdbusp = std::make_shared<sdbusplus::bus::bus>(bus);
 
     /* Get an sd event handler */
     rc = sd_event_default(&events);
     if (rc < 0)
     {
         std::cerr << "Failure to create sd_event" << strerror(-rc) << "\n";
-        goto finish;
+        return EXIT_FAILURE;
     }
 
     // Register callback to update cache for a GUID change and cache the GUID
@@ -137,7 +148,6 @@ int main()
         .startEventLoop(events);
 
 finish:
-    sd_bus_unref(bus);
     sd_event_unref(events);
 
     return 0;
