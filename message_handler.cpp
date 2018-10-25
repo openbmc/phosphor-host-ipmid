@@ -168,7 +168,7 @@ void Handler::send(std::shared_ptr<Message> outMessage)
         std::get<session::Manager&>(singletonPool).getSession(sessionID);
 
     // Flatten the packet
-    auto packet = parser::flatten(outMessage, sessionHeader, *session);
+    auto packet = parser::flatten(outMessage, sessionHeader, session);
 
     // Write the packet
     auto writeStatus = channel->write(packet);

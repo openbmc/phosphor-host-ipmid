@@ -73,7 +73,8 @@ std::tuple<std::shared_ptr<Message>, SessionHeader>
  * @return IPMI packet on success
  */
 std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             SessionHeader authType, session::Session& session);
+                             SessionHeader authType,
+                             std::shared_ptr<session::Session> session);
 
 } // namespace parser
 
@@ -112,7 +113,7 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
  * @return IPMI packet on success
  */
 std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             session::Session& session);
+                             std::shared_ptr<session::Session> session);
 
 } // namespace ipmi15parser
 
@@ -159,7 +160,7 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
  * @return IPMI packet on success
  */
 std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             session::Session& session);
+                             std::shared_ptr<session::Session> session);
 
 namespace internal
 {
@@ -171,7 +172,8 @@ namespace internal
  * @param[in] session - session handle
  *
  */
-void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session);
+void addSequenceNumber(std::vector<uint8_t>& packet,
+                       std::shared_ptr<session::Session> session);
 
 /**
  * @brief Verify the integrity data of the incoming IPMI packet

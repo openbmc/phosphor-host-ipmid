@@ -55,7 +55,8 @@ std::tuple<std::shared_ptr<Message>, SessionHeader>
 }
 
 std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             SessionHeader authType, session::Session& session)
+                             SessionHeader authType,
+                             std::shared_ptr<session::Session> session)
 {
     // Call the flatten routine based on the header type
     switch (authType)
@@ -108,7 +109,7 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 }
 
 std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             session::Session& session)
+                             std::shared_ptr<session::Session> session)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -191,7 +192,7 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 }
 
 std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             session::Session& session)
+                             std::shared_ptr<session::Session> session)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -243,7 +244,8 @@ std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
 namespace internal
 {
 
-void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session)
+void addSequenceNumber(std::vector<uint8_t>& packet,
+                       std::shared_ptr<session::Session> session)
 {
     SessionHeader_t* header = reinterpret_cast<SessionHeader_t*>(packet.data());
 
@@ -253,7 +255,7 @@ void addSequenceNumber(std::vector<uint8_t>& packet, session::Session& session)
     }
     else
     {
-        auto seqNum = session.sequenceNums.increment();
+        auto seqNum = session->sequenceNums.increment();
         header->sessSeqNum = endian::to_ipmi(seqNum);
     }
 }
