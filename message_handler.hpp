@@ -6,7 +6,6 @@
 #include "sol/console_buffer.hpp"
 
 #include <memory>
-#include <numeric>
 
 namespace message
 {
@@ -24,10 +23,10 @@ class Handler
 
     Handler() = delete;
     ~Handler() = default;
-    Handler(const Handler&) = default;
-    Handler& operator=(const Handler&) = default;
-    Handler(Handler&&) = default;
-    Handler& operator=(Handler&&) = default;
+    Handler(const Handler&) = delete;
+    Handler& operator=(const Handler&) = delete;
+    Handler(Handler&&) = delete;
+    Handler& operator=(Handler&&) = delete;
 
     /**
      * @brief Receive the IPMI packet
@@ -94,50 +93,6 @@ class Handler
     std::shared_ptr<udpsocket::Channel> channel;
 
     parser::SessionHeader sessionHeader = parser::SessionHeader::IPMI20;
-
-    /**
-     * @brief Create the response IPMI message
-     *
-     * The IPMI outgoing message is constructed out of payload and the
-     * corresponding fields are populated.For the payload type IPMI, the
-     * LAN message header and trailer are added.
-     *
-     * @tparam[in] T - Outgoing message payload type
-     * @param[in] output - Payload for outgoing message
-     * @param[in] inMessage - Incoming IPMI message
-     *
-     * @return Outgoing message on success and nullptr on failure
-     */
-    template <PayloadType T>
-    std::shared_ptr<Message> createResponse(std::vector<uint8_t>& output,
-                                            std::shared_ptr<Message> inMessage)
-    {
-        auto outMessage = std::make_shared<Message>();
-        outMessage->payloadType = T;
-        outMessage->payload = output;
-        return outMessage;
-    }
-
-    /**
-     * @brief Extract the command from the IPMI payload
-     *
-     * @param[in] message - Incoming message
-     *
-     * @return Command ID in the incoming message
-     */
-    uint32_t getCommand(std::shared_ptr<Message> message);
-
-    /**
-     * @brief Calculate 8 bit 2's complement checksum
-     *
-     * Initialize checksum to 0. For each byte, checksum = (checksum + byte)
-     * modulo 256. Then checksum = - checksum. When the checksum and the
-     * bytes are added together, modulo 256, the result should be 0.
-     */
-    uint8_t crc8bit(const uint8_t* ptr, const size_t len)
-    {
-        return (0x100 - std::accumulate(ptr, ptr + len, 0));
-    }
 };
 
 } // namespace message
