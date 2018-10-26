@@ -85,23 +85,20 @@ std::shared_ptr<Session>
             }
         }
         sessionID = session->getBMCSessionID();
-        sessionsMap.emplace(sessionID, std::move(session));
+        sessionsMap.emplace(sessionID, session);
+        return session;
     }
-    else
+
+    std::cerr << "E> No free sessions left: Active: " << activeSessions
+              << " Allowed: " << MAX_SESSION_COUNT << "\n";
+
+    for (const auto& iterator : sessionsMap)
     {
-        std::cerr << "E> No free sessions left: Active: " << activeSessions
-                  << " Allowed: " << MAX_SESSION_COUNT << "\n";
-
-        for (const auto& iterator : sessionsMap)
-        {
-            std::cerr << "E> Active Session: 0x" << std::hex
-                      << std::setfill('0') << std::setw(8)
-                      << (iterator.second)->getBMCSessionID() << "\n";
-        }
-        throw std::runtime_error("No free sessions left");
+        std::cerr << "E> Active Session: 0x" << std::hex << std::setfill('0')
+                  << std::setw(8) << (iterator.second)->getBMCSessionID()
+                  << "\n";
     }
-
-    return getSession(sessionID);
+    throw std::runtime_error("No free sessions left");
 }
 
 bool Manager::stopSession(SessionID bmcSessionID)
