@@ -34,13 +34,12 @@ Guid getSystemGUID()
     sd_bus_message* reply = nullptr;
     sd_bus_error error = SD_BUS_ERROR_NULL;
     sd_bus* bus = ipmid_get_sd_bus_connection();
-    int rc = 0;
     char* uuid = nullptr;
     char* busname = nullptr;
 
     do
     {
-        rc = mapper_get_service(bus, guidObjPath, &busname);
+        int rc = mapper_get_service(bus, guidObjPath, &busname);
         if (rc < 0)
         {
             std::cerr << "Failed to get " << guidObjPath

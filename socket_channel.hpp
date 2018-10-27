@@ -38,10 +38,9 @@ class Channel
      *
      * @return None
      */
-    Channel(int insockfd, timeval& inTimeout)
+    Channel(int insockfd, timeval& inTimeout) :
+        sockfd(insockfd), timeout(inTimeout)
     {
-        sockfd = insockfd;
-        timeout = inTimeout;
     }
 
     /**
