@@ -647,8 +647,7 @@ int main(int argc, char* argv[])
     // Now create the Host Bound Command manager. Need sdbusplus
     // to use the generated bindings
     sdbusp = std::make_unique<sdbusplus::bus::bus>(bus);
-    cmdManager =
-        std::make_unique<phosphor::host::command::Manager>(*sdbusp, events);
+    cmdManager = std::make_unique<phosphor::host::command::Manager>(*sdbusp);
 
     // Activate OemRouter.
     oem::mutableRouter()->activate();

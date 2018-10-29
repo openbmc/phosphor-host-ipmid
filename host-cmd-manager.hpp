@@ -32,7 +32,7 @@ class Manager
      *  @param[in] bus   - dbus handler
      *  @param[in] event - pointer to sd_event
      */
-    Manager(sdbusplus::bus::bus& bus, sd_event* event);
+    explicit Manager(sdbusplus::bus::bus& bus);
 
     /** @brief  Extracts the next entry in the queue and returns
      *          Command and data part of it.
