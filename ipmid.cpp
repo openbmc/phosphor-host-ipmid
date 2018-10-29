@@ -656,8 +656,7 @@ int main(int argc, char* argv[])
     sdbusp = std::make_unique<sdbusplus::bus::bus>(bus);
     sdbusp->request_name("xyz.openbmc_project.Ipmi.Host");
 
-    cmdManager =
-        std::make_unique<phosphor::host::command::Manager>(*sdbusp, events);
+    cmdManager = std::make_unique<phosphor::host::command::Manager>(*sdbusp);
 
     // Activate OemRouter.
     oem::mutableRouter()->activate();
