@@ -35,8 +35,8 @@ using InternalFailure =
 namespace sdbusRule = sdbusplus::bus::match::rules;
 namespace variant_ns = sdbusplus::message::variant_ns;
 
-Manager::Manager(sdbusplus::bus::bus& bus, sd_event* event) :
-    bus(bus), timer(event, std::bind(&Manager::hostTimeout, this)),
+Manager::Manager(sdbusplus::bus::bus& bus) :
+    bus(bus), timer(std::bind(&Manager::hostTimeout, this)),
     hostTransitionMatch(
         bus,
         sdbusRule::propertiesChanged(HOST_STATE_PATH, HOST_STATE_INTERFACE),
