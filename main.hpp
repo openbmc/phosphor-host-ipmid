@@ -5,7 +5,7 @@
 #include "sol/sol_manager.hpp"
 
 #include <command_table.hpp>
-#include <sdbusplus/bus.hpp>
+#include <sdbusplus/asio/connection.hpp>
 #include <sessions_manager.hpp>
 #include <tuple>
 
@@ -19,4 +19,4 @@ static const auto IPMI_STD_PORT = 623;
 
 extern sd_bus* bus;
 
-std::shared_ptr<sdbusplus::bus::bus> getSdBus();
+std::shared_ptr<sdbusplus::asio::connection> getSdBus();

@@ -36,7 +36,7 @@ std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
 sd_bus* bus = nullptr;
 sd_event* events = nullptr;
 
-std::shared_ptr<sdbusplus::bus::bus> sdbusp;
+std::shared_ptr<sdbusplus::asio::connection> sdbusp;
 
 /*
  * @brief Required by apphandler IPMI Provider Library
@@ -49,7 +49,7 @@ sd_bus* ipmid_get_sd_bus_connection()
 /*
  * @brief mechanism to get at sdbusplus object
  */
-std::shared_ptr<sdbusplus::bus::bus> getSdBus()
+std::shared_ptr<sdbusplus::asio::connection> getSdBus()
 {
     return sdbusp;
 }
