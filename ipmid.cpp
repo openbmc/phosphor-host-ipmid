@@ -647,6 +647,8 @@ int main(int argc, char* argv[])
     // Now create the Host Bound Command manager. Need sdbusplus
     // to use the generated bindings
     sdbusp = std::make_unique<sdbusplus::bus::bus>(bus);
+    sdbusp->request_name("xyz.openbmc_project.Ipmi.Host");
+
     cmdManager =
         std::make_unique<phosphor::host::command::Manager>(*sdbusp, events);
 
