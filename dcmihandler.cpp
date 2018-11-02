@@ -50,8 +50,6 @@ constexpr auto DHCP_TIMING3_LOWER = 0x40;
 // SendHostNameEnabled will set to true.
 constexpr auto DHCP_OPT12_ENABLED = "SendHostNameEnabled";
 
-constexpr auto DCMI_CAP_JSON_FILE = "/usr/share/ipmi-providers/dcmi_cap.json";
-
 constexpr auto SENSOR_VALUE_INTF = "xyz.openbmc_project.Sensor.Value";
 constexpr auto SENSOR_VALUE_PROP = "Value";
 constexpr auto SENSOR_SCALE_PROP = "Scale";
@@ -276,7 +274,7 @@ void setDHCPOption(std::string prop, bool value)
     ipmi::setDbusProperty(bus, service, dhcpObj, dhcpIntf, prop, value);
 }
 
-Json parseSensorConfig()
+Json parseJSONConfig(const std::string& configFile)
 {
     std::ifstream jsonFile(configFile);
     if (!jsonFile.is_open())
@@ -718,7 +716,7 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                ipmi_data_len_t data_len, ipmi_context_t context)
 {
 
-    std::ifstream dcmiCapFile(DCMI_CAP_JSON_FILE);
+    std::ifstream dcmiCapFile(dcmi::gDCMICapabilitiesConfig);
     if (!dcmiCapFile.is_open())
     {
         log<level::ERR>("DCMI Capabilities file not found");
@@ -839,7 +837,7 @@ std::tuple<Response, NumInstances> read(const std::string& type,
         elog<InternalFailure>();
     }
 
-    auto data = parseSensorConfig();
+    auto data = parseJSONConfig(gDCMISensorsConfig);
     static const std::vector<Json> empty{};
     std::vector<Json> readings = data.value(type, empty);
     size_t numInstances = readings.size();
@@ -890,7 +888,7 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
     size_t numInstances = 0;
-    auto data = parseSensorConfig();
+    auto data = parseJSONConfig(gDCMISensorsConfig);
     static const std::vector<Json> empty{};
     std::vector<Json> readings = data.value(type, empty);
     numInstances = readings.size();
@@ -1411,7 +1409,7 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         if (!parsed)
         {
-            config = dcmi::parseSensorConfig();
+            config = dcmi::parseJSONConfig(dcmi::gDCMISensorsConfig);
             parsed = true;
         }
 
