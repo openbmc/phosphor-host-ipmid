@@ -42,7 +42,7 @@ static constexpr auto networkConfigIntf =
 static constexpr auto hostNameProp = "HostName";
 static constexpr auto temperatureSensorType = 0x01;
 static constexpr auto maxInstances = 255;
-static constexpr auto configFile =
+static constexpr auto kDCMISensorsConfig =
     "/usr/share/ipmi-providers/dcmi_sensors.json";
 static constexpr auto ethernetIntf =
     "xyz.openbmc_project.Network.EthernetInterface";
@@ -54,6 +54,8 @@ static constexpr auto dhcpIntf =
 static constexpr auto systemBusName = "org.freedesktop.systemd1";
 static constexpr auto systemPath = "/org/freedesktop/systemd1";
 static constexpr auto systemIntf = "org.freedesktop.systemd1.Manager";
+static constexpr auto kDCMICapabilitiesConfig = "/usr/share/ipmi-providers/dcmi_cap.json";
+
 
 namespace assettag
 {
@@ -411,12 +413,13 @@ struct GetTempReadingsResponseHdr
     uint8_t numDataSets;  //!< No. of sets of temperature data
 } __attribute__((packed));
 
-/** @brief Parse out JSON config file containing information
- *         related to sensors.
+/** @brief Parse out JSON config file.
+ *
+ *  @param[in] configFile - JSON config file name
  *
  *  @return A json object
  */
-Json parseSensorConfig();
+Json parseJSONConfig(const std::string& configFile);
 
 namespace temp_readings
 {
