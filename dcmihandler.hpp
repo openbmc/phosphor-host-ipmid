@@ -57,6 +57,7 @@ static constexpr auto systemIntf = "org.freedesktop.systemd1.Manager";
 static constexpr auto kDCMICapabilitiesConfig = "/usr/share/ipmi-providers/dcmi_cap.json";
 static constexpr auto kDCMIPowerMgmtCapability = "PowerManagement";
 static constexpr auto kDCMIPowerMgmtSupported = 0x1;
+static constexpr auto kMaxSELEntriesMask = 0xFFF;
 
 namespace assettag
 {
