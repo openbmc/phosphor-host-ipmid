@@ -55,7 +55,8 @@ static constexpr auto systemBusName = "org.freedesktop.systemd1";
 static constexpr auto systemPath = "/org/freedesktop/systemd1";
 static constexpr auto systemIntf = "org.freedesktop.systemd1.Manager";
 static constexpr auto kDCMICapabilitiesConfig = "/usr/share/ipmi-providers/dcmi_cap.json";
-
+static constexpr auto kDCMIPowerMgmtCapability = "PowerManagement";
+static constexpr auto kDCMIPowerMgmtSupported = 0x1;
 
 namespace assettag
 {
@@ -160,6 +161,13 @@ struct SetAssetTagResponse
     uint8_t groupID;   //!< Group extension identification.
     uint8_t tagLength; //!< Total asset tag length.
 } __attribute__((packed));
+
+/** @brief Check whether DCMI power management is supported
+ *         in the DCMI Capabilities config file.
+ *
+ *  @return True if DCMI power management is supported
+ */
+bool isDCMIPowerMgmtSupported();
 
 /** @brief Read the object tree to fetch the object path that implemented the
  *         Asset tag interface.
