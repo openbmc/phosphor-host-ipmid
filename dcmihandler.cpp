@@ -785,16 +785,23 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // If the data is beyond first byte boundary, insert in a
         // 16bit pattern for example number of SEL entries are represented
         // in 12bits.
-        if ((cap.length + cap.position) > 8)
+        if ((cap.length + cap.position) > dcmi::gByteBitSize)
         {
-            // Read the value corresponding to capability name and assign to
-            // 16bit bitset.
-            std::bitset<16> val(data.value(cap.name.c_str(), 0));
+            uint16_t val = data.value(cap.name.c_str(), 0);
+            // According to DCMI spec v1.5, max number of SEL entries is
+            // 4096, but bit 12b of DCMI capabilities Mandatory Platform
+            // Attributes field is reserved and therefore we can use only
+            // the provided 12 bits with maximum value of 4095.
+            // We're playing safe here by applying the mask
+            // to ensure that provided value will fit into 12 bits.
+            if (cap.length > dcmi::gByteBitSize)
+            {
+                val &= dcmi::gMaxSELEntriesMask;
+            }
             val <<= cap.position;
-            reinterpret_cast<uint16_t*>(
-                responseData
-                    ->data)[(cap.bytePosition - 1) / sizeof(uint16_t)] |=
-                val.to_ulong();
+            responseData->data[cap.bytePosition - 1] |=
+                static_cast<uint8_t>(val);
+            responseData->data[cap.bytePosition] |= val >> dcmi::gByteBitSize;
         }
         else
         {
