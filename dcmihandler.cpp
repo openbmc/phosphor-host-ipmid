@@ -65,6 +65,14 @@ static const std::map<uint8_t, std::string> entityIdToName{
     {0x40, "inlet"}, {0x37, "inlet"},     {0x41, "cpu"},
     {0x03, "cpu"},   {0x42, "baseboard"}, {0x07, "baseboard"}};
 
+bool isDCMIPowerMgmtSupported()
+{
+    auto data = parseJSONConfig(gDCMICapabilitiesConfig);
+
+    return (gDCMIPowerMgmtSupported ==
+            data.value(gDCMIPowerMgmtCapability, 0));
+}
+
 uint32_t getPcap(sdbusplus::bus::bus& bus)
 {
     auto settingService = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
@@ -299,6 +307,13 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                          ipmi_request_t request, ipmi_response_t response,
                          ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (!dcmi::isDCMIPowerMgmtSupported())
+    {
+        *data_len = 0;
+        log<level::ERR>("DCMI Power management is unsupported!");
+        return IPMI_CC_INVALID;
+    }
+
     auto requestData =
         reinterpret_cast<const dcmi::GetPowerLimitRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerLimitResponse));
@@ -360,6 +375,13 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                          ipmi_request_t request, ipmi_response_t response,
                          ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (!dcmi::isDCMIPowerMgmtSupported())
+    {
+        *data_len = 0;
+        log<level::ERR>("DCMI Power management is unsupported!");
+        return IPMI_CC_INVALID;
+    }
+
     auto requestData =
         reinterpret_cast<const dcmi::SetPowerLimitRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::SetPowerLimitResponse));
@@ -399,6 +421,13 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                            ipmi_request_t request, ipmi_response_t response,
                            ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (!dcmi::isDCMIPowerMgmtSupported())
+    {
+        *data_len = 0;
+        log<level::ERR>("DCMI Power management is unsupported!");
+        return IPMI_CC_INVALID;
+    }
+
     auto requestData =
         reinterpret_cast<const dcmi::ApplyPowerLimitRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::ApplyPowerLimitResponse));
@@ -1221,6 +1250,13 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                            ipmi_request_t request, ipmi_response_t response,
                            ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (!dcmi::isDCMIPowerMgmtSupported())
+    {
+        *data_len = 0;
+        log<level::ERR>("DCMI Power management is unsupported!");
+        return IPMI_CC_INVALID;
+    }
+
     ipmi_ret_t rc = IPMI_CC_OK;
     auto requestData =
         reinterpret_cast<const dcmi::GetPowerReadingRequest*>(request);
