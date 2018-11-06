@@ -10,6 +10,7 @@
 #include <bitset>
 #include <cmath>
 #include <fstream>
+#include <climits>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
@@ -786,16 +787,20 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // If the data is beyond first byte boundary, insert in a
         // 16bit pattern for example number of SEL entries are represented
         // in 12bits.
-        if ((cap.length + cap.position) > 8)
+        if ((cap.length + cap.position) > CHAR_BIT)
         {
-            // Read the value corresponding to capability name and assign to
-            // 16bit bitset.
-            std::bitset<16> val(data.value(cap.name.c_str(), 0));
+            uint16_t val = data.value(cap.name.c_str(), 0);
+            if ((dcmi::kMinSELEntriesNum > val) &&
+                (dcmi::kMaxSELEntriesNum <= val))
+            {
+                *data_len = 0;
+                log<level::ERR>("Number of SEL Entries \
+                                is out of range per DCMI specification!");
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
             val <<= cap.position;
-            reinterpret_cast<uint16_t*>(
-                responseData
-                    ->data)[(cap.bytePosition - 1) / sizeof(uint16_t)] |=
-                val.to_ulong();
+            responseData->data[cap.bytePosition - 1] |= val & 0xFF;
+            responseData->data[cap.bytePosition] |= val >> CHAR_BIT;
         }
         else
         {

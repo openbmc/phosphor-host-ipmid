@@ -57,6 +57,12 @@ static constexpr auto systemIntf = "org.freedesktop.systemd1.Manager";
 static constexpr auto kDCMICapabilitiesConfig = "/usr/share/ipmi-providers/dcmi_cap.json";
 static constexpr auto kDCMIPowerMgmtCapability = "PowerManagement";
 static constexpr auto kDCMIPowerMgmtSupported = 0x1;
+/* According to DCMI spec v1.5, max number of SEL entries is 4096,
+but bit 12b of DCMI capabilities Mandatory Platform Attributes field
+is reserved and therefore we can use only the provided 12 bits
+with maximum value of 4095. */
+static constexpr auto kMinSELEntriesNum = 64;
+static constexpr auto kMaxSELEntriesNum = 4096;
 
 namespace assettag
 {
