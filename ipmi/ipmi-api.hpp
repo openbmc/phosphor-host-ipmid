@@ -199,5 +199,8 @@ std::shared_ptr<boost::asio::io_service> getIoService();
 // any client can interact with the main sdbus
 std::shared_ptr<sdbusplus::asio::connection> getSdBus();
 
-using work_t = void(void);
-void post_work(work_t work);
+template <typename WorkFn>
+void post_work(WorkFn work)
+{
+    getIoService()->post(std::forward<WorkFn>(work));
+}
