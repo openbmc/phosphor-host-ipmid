@@ -136,6 +136,14 @@ static std::unordered_map<unsigned int, /* key is Iana/Cmd (NetFn is 2Eh) */
                           HandlerTuple>
     oemHandlerMap;
 
+using FilterTuple = std::tuple<int,             /* prio */
+                               FilterBase::ptr, /* filter */
+                               std::any         /* ctx */
+                               >;
+
+/* list to hold all registered ipmi command filters */
+static std::forward_list<FilterTuple> filterList;
+
 namespace impl
 {
 /* common function to register all standard IPMI handlers */
@@ -206,12 +214,55 @@ void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
     }
 }
 
+/* common function to register all IPMI filter handlers */
+void registerFilter(int prio, FilterBase::ptr filter, std::any& ctx)
+{
+    // check for initial placement
+    if (filterList.empty() || std::get<0>(filterList.front()) < prio)
+    {
+        filterList.emplace_front(std::make_tuple(prio, filter, ctx));
+    }
+    // walk the list and put it in the right place
+    auto j = filterList.begin();
+    for (auto i = j; i != filterList.end() && std::get<int>(*i) > prio; i++)
+    {
+        j = i;
+    }
+    filterList.emplace_after(j, std::make_tuple(prio, filter, ctx));
+}
+
 } // namespace impl
+
+message::Response::ptr filterIpmiCommand(message::Request::ptr request)
+{
+    // pass the command through the filter mechanism
+    // This can be the firmware firewall or any OEM mechanism like
+    // whitelist filtering based on operational mode
+    for (auto& item : filterList)
+    {
+        FilterBase::ptr filter = std::get<1>(item);
+        // auto& ctx = std::get<2>(item);
+        ipmi::Cc cc = filter->call(request);
+        if (ipmi::ccSuccess != cc)
+        {
+            return errorResponse(request, cc);
+        }
+    }
+    return message::Response::ptr();
+}
 
 message::Response::ptr executeIpmiCommandCommon(
     std::unordered_map<unsigned int, HandlerTuple>& handlers,
     unsigned int keyCommon, message::Request::ptr request)
 {
+    // filter the command first; a non-null message::Response::ptr
+    // means that the message has been rejected for some reason
+    message::Response::ptr response = filterIpmiCommand(request);
+    if (response)
+    {
+        return response;
+    }
+
     Cmd cmd = request->ctx->cmd;
     unsigned int key = makeCmdKey(keyCommon, cmd);
     auto cmdIter = handlers.find(key);
