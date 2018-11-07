@@ -1,7 +1,7 @@
 #pragma once
 #include "types.hpp"
 
-#include <experimental/optional>
+#include <optional>
 #include <sdbusplus/server.hpp>
 
 namespace ipmi
@@ -76,9 +76,9 @@ class ServiceCache
     /** @brief DBUS path provided by the service */
     const std::string path;
     /** @brief The name of the service if valid */
-    std::experimental::optional<std::string> cachedService;
+    std::optional<std::string> cachedService;
     /** @brief The name of the bus used in the service lookup */
-    std::experimental::optional<std::string> cachedBusName;
+    std::optional<std::string> cachedBusName;
 };
 
 /**
