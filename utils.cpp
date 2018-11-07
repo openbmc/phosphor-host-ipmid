@@ -227,15 +227,14 @@ void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
 }
 
 ServiceCache::ServiceCache(const std::string& intf, const std::string& path) :
-    intf(intf), path(path), cachedService(std::experimental::nullopt),
-    cachedBusName(std::experimental::nullopt)
+    intf(intf), path(path), cachedService(std::nullopt),
+    cachedBusName(std::nullopt)
 {
 }
 
 ServiceCache::ServiceCache(std::string&& intf, std::string&& path) :
-    intf(std::move(intf)), path(std::move(path)),
-    cachedService(std::experimental::nullopt),
-    cachedBusName(std::experimental::nullopt)
+    intf(std::move(intf)), path(std::move(path)), cachedService(std::nullopt),
+    cachedBusName(std::nullopt)
 {
 }
 
@@ -251,8 +250,8 @@ const std::string& ServiceCache::getService(sdbusplus::bus::bus& bus)
 
 void ServiceCache::invalidate()
 {
-    cachedBusName = std::experimental::nullopt;
-    cachedService = std::experimental::nullopt;
+    cachedBusName = std::nullopt;
+    cachedService = std::nullopt;
 }
 
 sdbusplus::message::message
