@@ -10,56 +10,48 @@
 namespace message
 {
 
-class Handler
+class Handler : public std::enable_shared_from_this<Handler>
 {
   public:
-    explicit Handler(
-        std::shared_ptr<udpsocket::Channel> channel,
-        uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
+    /**
+     * @brief Create a Handler intended for a full transaction
+     *        that may or may not use asynchronous responses
+     */
+    Handler(std::shared_ptr<udpsocket::Channel> channel,
+            std::shared_ptr<boost::asio::io_context> io,
+            uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
         sessionID(sessionID),
-        channel(channel)
+        channel(channel), io(io)
     {
     }
 
+    /**
+     * @brief Create a Handler intended for a send only (SOL)
+     */
+    Handler(std::shared_ptr<udpsocket::Channel> channel,
+            uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
+        sessionID(sessionID),
+        channel(channel), io(nullptr)
+    {
+    }
+
+    ~Handler();
     Handler() = delete;
-    ~Handler() = default;
     Handler(const Handler&) = delete;
     Handler& operator=(const Handler&) = delete;
     Handler(Handler&&) = delete;
     Handler& operator=(Handler&&) = delete;
 
     /**
-     * @brief Receive the IPMI packet
-     *
-     * Read the data on the socket, get the parser based on the Session
-     * header type and flatten the payload and generate the IPMI message
-     *
-     * @return IPMI Message on success and nullptr on failure
-     *
-     */
-    std::shared_ptr<Message> receive();
-
-    /**
      * @brief Process the incoming IPMI message
      *
-     * The incoming message payload is handled and the command handler for
-     * the Network function and Command is executed and the response message
-     * is returned
-     *
-     * @param[in] inMessage - Incoming Message
-     *
-     * @return Outgoing message on success and nullptr on failure
+     * The incoming payload is read from the channel. If a message is read, it
+     * is passed onto executeCommand, which may or may not execute the command
+     * asynchrounously. If the command is executed asynchrounously, a shared_ptr
+     * of self via shared_from_this will keep this object alive until the
+     * response is ready. Then on the destructor, the response will be sent.
      */
-    std::shared_ptr<Message> executeCommand(std::shared_ptr<Message> inMessage);
-
-    /** @brief Send the outgoing message
-     *
-     *  The payload in the outgoing message is flattened and sent out on the
-     *  socket
-     *
-     *  @param[in] outMessage - Outgoing Message
-     */
-    void send(std::shared_ptr<Message> outMessage);
+    void processIncoming();
 
     /** @brief Set socket channel in session object */
     void setChannelInSession() const;
@@ -88,11 +80,45 @@ class Handler
     // BMC Session ID for the Channel
     session::SessionID sessionID;
 
+    /** @brief response to send back */
+    std::optional<std::vector<uint8_t>> outPayload;
+
   private:
+    /**
+     * @brief Receive the IPMI packet
+     *
+     * Read the data on the socket, get the parser based on the Session
+     * header type and flatten the payload and generate the IPMI message
+     */
+    bool receive();
+
+    /**
+     * @brief Process the incoming IPMI message
+     *
+     * The incoming message payload is handled and the command handler for
+     * the Network function and Command is executed and the response message
+     * is returned
+     */
+    void executeCommand();
+
+    /** @brief Send the outgoing message
+     *
+     *  The payload in the outgoing message is flattened and sent out on the
+     *  socket
+     *
+     *  @param[in] outMessage - Outgoing Message
+     */
+    void send(std::shared_ptr<Message> outMessage);
+
     /** @brief Socket channel for communicating with the remote client.*/
     std::shared_ptr<udpsocket::Channel> channel;
 
+    /** @brief asio io context to run asynchrounously */
+    std::shared_ptr<boost::asio::io_context> io;
+
     parser::SessionHeader sessionHeader = parser::SessionHeader::IPMI20;
+
+    std::shared_ptr<message::Message> inMessage;
 };
 
 } // namespace message

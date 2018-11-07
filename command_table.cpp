@@ -41,13 +41,11 @@ void Table::registerCommand(CommandID inCommand, std::unique_ptr<Entry>&& entry)
     command = std::move(entry);
 }
 
-std::vector<uint8_t> Table::executeCommand(uint32_t inCommand,
-                                           std::vector<uint8_t>& commandData,
-                                           const message::Handler& handler)
+void Table::executeCommand(uint32_t inCommand,
+                           std::vector<uint8_t>& commandData,
+                           std::shared_ptr<message::Handler> handler)
 {
     using namespace std::chrono_literals;
-
-    std::vector<uint8_t> response;
 
     auto iterator = commandTable.find(inCommand);
 
@@ -57,54 +55,50 @@ std::vector<uint8_t> Table::executeCommand(uint32_t inCommand,
 
         auto bus = getSdBus();
         // forward the request onto the main ipmi queue
-        auto method = bus->new_method_call(
-            "xyz.openbmc_project.Ipmi.Host", "/xyz/openbmc_project/Ipmi",
-            "xyz.openbmc_project.Ipmi.Server", "execute");
+        using IpmiDbusRspType = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t,
+                                           std::vector<uint8_t>>;
         uint8_t lun = command.lun();
         uint8_t netFn = command.netFn();
         uint8_t cmd = command.cmd();
         std::shared_ptr<session::Session> session =
             std::get<session::Manager&>(singletonPool)
-                .getSession(handler.sessionID);
+                .getSession(handler->sessionID);
         std::map<std::string, ipmi::Value> options = {
             {"userId", ipmi::Value(ipmi::ipmiUserGetUserId(session->userName))},
             {"privilege", ipmi::Value(static_cast<int>(session->curPrivLevel))},
         };
-        method.append(netFn, lun, cmd, commandData, options);
-        using IpmiDbusRspType = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t,
-                                           std::vector<uint8_t>>;
-        IpmiDbusRspType rspTuple;
-        try
-        {
-            auto reply = bus->call(method);
-            reply.read(rspTuple);
-        }
-        catch (const sdbusplus::exception::SdBusError& e)
-        {
-            response.push_back(IPMI_CC_UNSPECIFIED_ERROR);
-            log<level::ERR>("Error sending command to ipmi queue");
-            elog<InternalFailure>();
-        }
-        auto& [rnetFn, rlun, rcmd, cc, responseData] = rspTuple;
-        if (uint8_t(netFn + 1) != rnetFn || rlun != lun || rcmd != cmd)
-        {
-            response.push_back(IPMI_CC_UNSPECIFIED_ERROR);
-            log<level::ERR>("DBus call/response mismatch from ipmi queue");
-            elog<InternalFailure>();
-        }
-        else
-        {
-            response.reserve(1 + responseData.size());
-            response.push_back(cc);
-            response.insert(response.end(), responseData.begin(),
-                            responseData.end());
-        }
+        bus->async_method_call(
+            [handler, this](const boost::system::error_code& ec,
+                            const IpmiDbusRspType& response) {
+                if (!ec)
+                {
+                    const uint8_t& cc = std::get<3>(response);
+                    const std::vector<uint8_t>& responseData =
+                        std::get<4>(response);
+                    std::vector<uint8_t> payload;
+                    payload.reserve(1 + responseData.size());
+                    payload.push_back(cc);
+                    payload.insert(payload.end(), responseData.begin(),
+                                   responseData.end());
+                    handler->outPayload = std::move(payload);
+                }
+                else
+                {
+                    std::vector<uint8_t> payload;
+                    payload.push_back(IPMI_CC_UNSPECIFIED_ERROR);
+                    handler->outPayload = std::move(payload);
+                }
+            },
+            "xyz.openbmc_project.Ipmi.Host", "/xyz/openbmc_project/Ipmi",
+            "xyz.openbmc_project.Ipmi.Server", "execute", netFn, lun, cmd,
+            commandData, options);
     }
     else
     {
         auto start = std::chrono::steady_clock::now();
 
-        response = iterator->second->executeCommand(commandData, handler);
+        handler->outPayload =
+            iterator->second->executeCommand(commandData, handler);
 
         auto end = std::chrono::steady_clock::now();
 
@@ -119,17 +113,16 @@ std::vector<uint8_t> Table::executeCommand(uint32_t inCommand,
                             entry("DELAY=%d", elapsedSeconds.count()));
         }
     }
-    return response;
 }
 
 std::vector<uint8_t>
     NetIpmidEntry::executeCommand(std::vector<uint8_t>& commandData,
-                                  const message::Handler& handler)
+                                  std::shared_ptr<message::Handler> handler)
 {
     std::vector<uint8_t> errResponse;
 
     // Check if the command qualifies to be run prior to establishing a session
-    if (!sessionless && (handler.sessionID == session::SESSION_ZERO))
+    if (!sessionless && (handler->sessionID == session::SESSION_ZERO))
     {
         errResponse.resize(1);
         errResponse[0] = IPMI_CC_INSUFFICIENT_PRIVILEGE;
@@ -140,7 +133,7 @@ std::vector<uint8_t>
         return errResponse;
     }
 
-    return functor(commandData, handler);
+    return functor(commandData, *handler);
 }
 
 } // namespace command

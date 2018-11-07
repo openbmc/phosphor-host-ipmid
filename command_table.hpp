@@ -133,7 +133,7 @@ class Entry
      */
     virtual std::vector<uint8_t>
         executeCommand(std::vector<uint8_t>& commandData,
-                       const message::Handler& handler) = 0;
+                       std::shared_ptr<message::Handler> handler) = 0;
 
     auto getCommand() const
     {
@@ -192,7 +192,7 @@ class NetIpmidEntry final : public Entry
      */
     std::vector<uint8_t>
         executeCommand(std::vector<uint8_t>& commandData,
-                       const message::Handler& handler) override;
+                       std::shared_ptr<message::Handler> handler) override;
 
     virtual ~NetIpmidEntry() = default;
     NetIpmidEntry(const NetIpmidEntry&) = default;
@@ -251,11 +251,9 @@ class Table
      * @param[in] commandData - Request Data for the command
      * @param[in] handler - Reference to the Message Handler
      *
-     * @return Response data for the command
      */
-    std::vector<uint8_t> executeCommand(uint32_t inCommand,
-                                        std::vector<uint8_t>& commandData,
-                                        const message::Handler& handler);
+    void executeCommand(uint32_t inCommand, std::vector<uint8_t>& commandData,
+                        std::shared_ptr<message::Handler> handler);
 
   private:
     CommandTable commandTable;

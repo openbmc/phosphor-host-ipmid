@@ -23,24 +23,9 @@ void EventLoop::handleRmcpPacket()
         auto channelPtr = std::make_shared<udpsocket::Channel>(udpSocket);
 
         // Initialize the Message Handler with the socket channel
-        auto msgHandler = std::make_shared<message::Handler>(channelPtr);
+        auto msgHandler = std::make_shared<message::Handler>(channelPtr, io);
 
-        // Read the incoming IPMI packet
-        std::shared_ptr<message::Message> inMessage(msgHandler->receive());
-        if (inMessage == nullptr)
-        {
-            return;
-        }
-
-        // Execute the Command
-        std::shared_ptr<message::Message> outMessage =
-            msgHandler->executeCommand(inMessage);
-        if (outMessage == nullptr)
-        {
-            return;
-        }
-        // Send the response IPMI Message
-        msgHandler->send(outMessage);
+        msgHandler->processIncoming();
     }
     catch (const std::exception& e)
     {

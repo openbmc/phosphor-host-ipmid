@@ -17,8 +17,9 @@ using namespace phosphor::logging;
 
 namespace message
 {
+using namespace phosphor::logging;
 
-std::shared_ptr<Message> Handler::receive()
+bool Handler::receive()
 {
     std::vector<uint8_t> packet;
     auto readStatus = 0;
@@ -30,51 +31,82 @@ std::shared_ptr<Message> Handler::receive()
     if (readStatus < 0)
     {
         log<level::ERR>("Error in Read", entry("STATUS=%x", readStatus));
-        return nullptr;
+        return false;
     }
 
     // Unflatten the packet
-    std::shared_ptr<Message> message;
-    std::tie(message, sessionHeader) = parser::unflatten(packet);
+    std::tie(inMessage, sessionHeader) = parser::unflatten(packet);
 
     auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(message->bmcSessionID);
+                       .getSession(inMessage->bmcSessionID);
 
-    sessionID = message->bmcSessionID;
-    message->rcSessionID = session->getRCSessionID();
+    sessionID = inMessage->bmcSessionID;
+    inMessage->rcSessionID = session->getRCSessionID();
     session->updateLastTransactionTime();
 
-    return message;
+    return true;
 }
 
-std::shared_ptr<Message>
-    Handler::executeCommand(std::shared_ptr<Message> inMessage)
+Handler::~Handler()
+{
+    if (outPayload)
+    {
+        std::shared_ptr<Message> outMessage =
+            inMessage->createResponse(*outPayload);
+        if (!outMessage)
+        {
+            return;
+        }
+        try
+        {
+            send(outMessage);
+        }
+        catch (const std::exception& e)
+        {
+            // send failed, most likely due to a session closure
+            log<level::INFO>("Async RMCP+ reply failed",
+                             entry("EXCEPTION=%s", e.what()));
+        }
+    }
+}
+
+void Handler::processIncoming()
+{
+    // Read the incoming IPMI packet
+    if (!receive())
+    {
+        return;
+    }
+
+    // Execute the Command, possibly asynchronously
+    executeCommand();
+
+    // send happens during the destructor if a payload was set
+}
+
+void Handler::executeCommand()
 {
     // Get the CommandID to map into the command table
     auto command = inMessage->getCommand();
-    std::vector<uint8_t> output{};
-
     if (inMessage->payloadType == PayloadType::IPMI)
     {
         if (inMessage->payload.size() <
             (sizeof(LAN::header::Request) + sizeof(LAN::trailer::Request)))
         {
-            return nullptr;
+            return;
         }
 
         auto start = inMessage->payload.begin() + sizeof(LAN::header::Request);
         auto end = inMessage->payload.end() - sizeof(LAN::trailer::Request);
         std::vector<uint8_t> inPayload(start, end);
-
-        output = std::get<command::Table&>(singletonPool)
-                     .executeCommand(command, inPayload, *this);
+        std::get<command::Table&>(singletonPool)
+            .executeCommand(command, inPayload, shared_from_this());
     }
     else
     {
-        output = std::get<command::Table&>(singletonPool)
-                     .executeCommand(command, inMessage->payload, *this);
+        std::get<command::Table&>(singletonPool)
+            .executeCommand(command, inMessage->payload, shared_from_this());
     }
-    return inMessage->createResponse(output);
 }
 
 void Handler::send(std::shared_ptr<Message> outMessage)
