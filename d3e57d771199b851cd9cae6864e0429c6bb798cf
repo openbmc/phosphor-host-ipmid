@@ -1,0 +1,10 @@
+Code-Review+1: James Feist <james.feist@linux.intel.com>
+Code-Review+1: Patrick Venture <venture@google.com>
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+2: Tom Joseph <tomjoseph@in.ibm.com>
+Submitted-by: Tom Joseph <tomjoseph@in.ibm.com>
+Submitted-at: Thu, 08 Nov 2018 09:32:23 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/14711
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
