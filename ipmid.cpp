@@ -627,7 +627,7 @@ int main(int argc, char* argv[])
         }
 
     /* Connect to system bus */
-    r = sd_bus_open_system(&bus);
+    r = sd_bus_default_system(&bus);
     if (r < 0)
     {
         log<level::ERR>("Failed to connect to system bus",
