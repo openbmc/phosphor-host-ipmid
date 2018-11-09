@@ -8,8 +8,61 @@
 
 namespace sol
 {
-
 using namespace phosphor::logging;
+
+Context::Context(std::shared_ptr<boost::asio::io_context> io,
+                 uint8_t maxRetryCount, uint8_t sendThreshold, uint8_t instance,
+                 session::SessionID sessionID) :
+    accumulateTimer(*io),
+    retryTimer(*io), maxRetryCount(maxRetryCount), retryCounter(maxRetryCount),
+    sendThreshold(sendThreshold), payloadInstance(instance),
+    sessionID(sessionID)
+{
+    session = std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    enableAccumulateTimer(true);
+}
+
+void Context::enableAccumulateTimer(bool enable)
+{
+    // fetch the timeout from the SOL manager
+    std::chrono::microseconds interval =
+        std::get<sol::Manager&>(singletonPool).accumulateInterval;
+    if (enable)
+    {
+        accumulateTimer.expires_after(interval);
+        accumulateTimer.async_wait([this](const boost::system::error_code& ec) {
+            if (!ec)
+            {
+                charAccTimerHandler();
+            }
+        });
+    }
+    else
+    {
+        accumulateTimer.cancel();
+    }
+}
+
+void Context::enableRetryTimer(bool enable)
+{
+    if (enable)
+    {
+        // fetch the timeout from the SOL manager
+        std::chrono::microseconds interval =
+            std::get<sol::Manager&>(singletonPool).retryInterval;
+        retryTimer.expires_after(interval);
+        retryTimer.async_wait([this](const boost::system::error_code& ec) {
+            if (!ec)
+            {
+                retryTimerHandler();
+            }
+        });
+    }
+    else
+    {
+        retryTimer.cancel();
+    }
+}
 
 void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
                                     uint8_t count, bool status,
@@ -54,10 +107,8 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
     if (status || ((count != expectedCharCount) && ackSeqNum))
     {
         resendPayload(noClear);
-        std::get<eventloop::EventLoop&>(singletonPool)
-            .switchTimer(payloadInstance, eventloop::Timers::RETRY, false);
-        std::get<eventloop::EventLoop&>(singletonPool)
-            .switchTimer(payloadInstance, eventloop::Timers::RETRY, true);
+        enableRetryTimer(false);
+        enableRetryTimer(true);
         return;
     }
     /*
@@ -70,8 +121,7 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
         std::get<sol::Manager&>(singletonPool).dataBuffer.erase(count);
 
         // Once it is acknowledged stop the retry interval timer
-        std::get<eventloop::EventLoop&>(singletonPool)
-            .switchTimer(payloadInstance, eventloop::Timers::RETRY, false);
+        enableRetryTimer(false);
 
         retryCounter = maxRetryCount;
         expectedCharCount = 0;
@@ -111,8 +161,7 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
     }
     else
     {
-        std::get<eventloop::EventLoop&>(singletonPool)
-            .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, true);
+        enableAccumulateTimer(true);
     }
 }
 
@@ -123,8 +172,7 @@ void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
     /* Sent a ACK only response */
     if (payloadCache.size() != 0 || (bufferSize < sendThreshold))
     {
-        std::get<eventloop::EventLoop&>(singletonPool)
-            .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, true);
+        enableAccumulateTimer(true);
 
         std::vector<uint8_t> outPayload(sizeof(Payload));
         auto response = reinterpret_cast<Payload*>(outPayload.data());
@@ -148,10 +196,8 @@ void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
     std::copy_n(handle, readSize, payloadCache.data() + sizeof(Payload));
     expectedCharCount = readSize;
 
-    std::get<eventloop::EventLoop&>(singletonPool)
-        .switchTimer(payloadInstance, eventloop::Timers::RETRY, true);
-    std::get<eventloop::EventLoop&>(singletonPool)
-        .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, false);
+    enableRetryTimer(true);
+    enableAccumulateTimer(false);
 
     sendPayload(payloadCache);
 }
@@ -160,8 +206,7 @@ int Context::sendOutboundPayload()
 {
     if (payloadCache.size() != 0)
     {
-        std::get<eventloop::EventLoop&>(singletonPool)
-            .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, true);
+        enableAccumulateTimer(true);
         return -1;
     }
 
@@ -179,10 +224,8 @@ int Context::sendOutboundPayload()
     std::copy_n(handle, readSize, payloadCache.data() + sizeof(Payload));
     expectedCharCount = readSize;
 
-    std::get<eventloop::EventLoop&>(singletonPool)
-        .switchTimer(payloadInstance, eventloop::Timers::RETRY, true);
-    std::get<eventloop::EventLoop&>(singletonPool)
-        .switchTimer(payloadInstance, eventloop::Timers::ACCUMULATE, false);
+    enableRetryTimer(true);
+    enableAccumulateTimer(false);
 
     sendPayload(payloadCache);
 
@@ -204,12 +247,54 @@ void Context::resendPayload(bool clear)
 
 void Context::sendPayload(const std::vector<uint8_t>& out) const
 {
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(sessionID);
-
     message::Handler msgHandler(session->channelPtr, sessionID);
 
     msgHandler.sendSOLPayload(out);
 }
 
+void Context::charAccTimerHandler()
+{
+    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
+
+    try
+    {
+        if (bufferSize > 0)
+        {
+            int rc = sendOutboundPayload();
+            if (rc == 0)
+            {
+                return;
+            }
+        }
+        enableAccumulateTimer(true);
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(e.what());
+    }
+}
+
+void Context::retryTimerHandler()
+{
+    try
+    {
+        if (retryCounter)
+        {
+            --retryCounter;
+            enableRetryTimer(true);
+            resendPayload(sol::Context::noClear);
+        }
+        else
+        {
+            retryCounter = maxRetryCount;
+            resendPayload(sol::Context::clear);
+            enableRetryTimer(false);
+            enableAccumulateTimer(true);
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(e.what());
+    }
+}
 } // namespace sol

@@ -102,15 +102,8 @@ void Manager::startPayloadInstance(uint8_t payloadInstance,
     }
 
     // Create the SOL Context data for payload instance
-    auto context = std::make_unique<Context>(retryCount, sendThreshold,
+    auto context = std::make_unique<Context>(io, retryCount, sendThreshold,
                                              payloadInstance, sessionID);
-
-    std::get<eventloop::EventLoop&>(singletonPool)
-        .startSOLPayloadInstance(
-            payloadInstance,
-            std::chrono::duration_cast<eventloop::IntervalType>(
-                accumulateInterval),
-            std::chrono::duration_cast<eventloop::IntervalType>(retryInterval));
 
     payloadMap.emplace(payloadInstance, std::move(context));
 }
@@ -124,9 +117,6 @@ void Manager::stopPayloadInstance(uint8_t payloadInstance)
     }
 
     payloadMap.erase(iter);
-
-    std::get<eventloop::EventLoop&>(singletonPool)
-        .stopSOLPayloadInstance(payloadInstance);
 
     if (payloadMap.empty())
     {

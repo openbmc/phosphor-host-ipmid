@@ -3,6 +3,9 @@
 #include "console_buffer.hpp"
 #include "session.hpp"
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/steady_timer.hpp>
+
 namespace sol
 {
 
@@ -149,33 +152,36 @@ struct SequenceNumbers
 class Context
 {
   public:
-    Context() = default;
+    Context() = delete;
     ~Context() = default;
     Context(const Context&) = delete;
     Context& operator=(const Context&) = delete;
-    Context(Context&&) = default;
-    Context& operator=(Context&&) = default;
+    Context(Context&&) = delete;
+    Context& operator=(Context&&) = delete;
 
     /** @brief Context Constructor.
      *
      *  This is issued by the SOL Manager when a SOL payload instance is
      *  started for the activate payload command.
      *
+     *  @param[in] io  - boost::asio io context for event scheduling.
      *  @param[in] maxRetryCount  - Retry count max value.
      *  @param[in] sendThreshold - Character send threshold.
      *  @param[in] instance - SOL payload instance.
      *  @param[in] sessionID - BMC session ID.
      */
-    Context(uint8_t maxRetryCount, uint8_t sendThreshold, uint8_t instance,
-            session::SessionID sessionID) :
-        maxRetryCount(maxRetryCount),
-        retryCounter(maxRetryCount), sendThreshold(sendThreshold),
-        payloadInstance(instance), sessionID(sessionID)
-    {
-    }
+    Context(std::shared_ptr<boost::asio::io_context> io, uint8_t maxRetryCount,
+            uint8_t sendThreshold, uint8_t instance,
+            session::SessionID sessionID);
 
     static constexpr auto clear = true;
     static constexpr auto noClear = false;
+
+    /** @brief accumulate timer */
+    boost::asio::steady_timer accumulateTimer;
+
+    /** @brief retry timer */
+    boost::asio::steady_timer retryTimer;
 
     /** @brief Retry count max value. */
     const uint8_t maxRetryCount = 0;
@@ -191,6 +197,28 @@ class Context
 
     /** @brief Session ID. */
     const session::SessionID sessionID = 0;
+
+    /** @brief session pointer
+     */
+    std::shared_ptr<session::Session> session;
+
+    /** @brief enable/disable accumulate timer
+     *
+     *  The timeout interval is managed by the SOL Manager;
+     *  this function only enables or disable the timer
+     *
+     *  @param[in] enable - enable(true) or disable(false) accumulation timer
+     */
+    void enableAccumulateTimer(bool enable);
+
+    /** @brief enable/disable retry timer
+     *
+     *  The timeout interval is managed by the SOL Manager;
+     *  this function only enables or disable the timer
+     *
+     *  @param[in] enable - enable(true) or disable(false) retry timer
+     */
+    void enableRetryTimer(bool enable);
 
     /** @brief Process the Inbound SOL payload.
      *
@@ -253,6 +281,12 @@ class Context
      *  @param[in] out - buffer containing the SOL payload.
      */
     void sendPayload(const std::vector<uint8_t>& out) const;
+
+    /** @brief accumlate timer handler called by timer */
+    void charAccTimerHandler();
+
+    /** @brief retry timer handler called by timer */
+    void retryTimerHandler();
 };
 
 } // namespace sol
