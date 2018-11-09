@@ -16,45 +16,49 @@ namespace eventloop
 {
 using namespace phosphor::logging;
 
-static int udp623Handler(sd_event_source* es, int fd, uint32_t revents,
-                         void* userdata)
+void EventLoop::handleRmcpPacket()
 {
-    std::shared_ptr<udpsocket::Channel> channelPtr;
-    struct timeval timeout;
-    timeout.tv_sec = SELECT_CALL_TIMEOUT;
-    timeout.tv_usec = 0;
-
     try
     {
-        channelPtr.reset(new udpsocket::Channel(fd, timeout));
+        auto channelPtr = std::make_shared<udpsocket::Channel>(udpSocket);
 
         // Initialize the Message Handler with the socket channel
-        message::Handler msgHandler(channelPtr);
+        auto msgHandler = std::make_shared<message::Handler>(channelPtr);
 
         // Read the incoming IPMI packet
-        std::shared_ptr<message::Message> inMessage(msgHandler.receive());
+        std::shared_ptr<message::Message> inMessage(msgHandler->receive());
         if (inMessage == nullptr)
         {
-            return 0;
+            return;
         }
 
         // Execute the Command
-        auto outMessage = msgHandler.executeCommand(inMessage);
+        std::shared_ptr<message::Message> outMessage =
+            msgHandler->executeCommand(inMessage);
         if (outMessage == nullptr)
         {
-            return 0;
+            return;
         }
-
         // Send the response IPMI Message
-        msgHandler.send(outMessage);
+        msgHandler->send(outMessage);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
-        log<level::ERR>("Executing the IPMI message failed");
-        log<level::ERR>(e.what());
+        log<level::ERR>("Executing the IPMI message failed",
+                        entry("EXCEPTION=%s", e.what()));
     }
+}
 
-    return 0;
+void EventLoop::startRmcpReceive()
+{
+    udpSocket->async_wait(boost::asio::socket_base::wait_read,
+                          [this](const boost::system::error_code& ec) {
+                              if (!ec)
+                              {
+                                  io->post([this]() { startRmcpReceive(); });
+                                  handleRmcpPacket();
+                              }
+                          });
 }
 
 static int consoleInputHandler(sd_event_source* es, int fd, uint32_t revents,
@@ -174,62 +178,45 @@ static int retryTimerHandler(sd_event_source* s, uint64_t usec, void* userdata)
 
 int EventLoop::startEventLoop()
 {
-    int fd = -1;
-    int r = 0;
-    int listenFd;
-    sd_event_source* source = nullptr;
-
     sdbusplus::asio::sd_event_wrapper sdEvents(*io);
     event = sdEvents.get();
 
     // set up boost::asio signal handling
     boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
-    signals.async_wait([this](const boost::system::error_code& error,
-                              int signalNumber) { io->stop(); });
+    signals.async_wait(
+        [this](const boost::system::error_code& error, int signalNumber) {
+            udpSocket->cancel();
+            udpSocket->close();
+            io->stop();
+        });
 
     // Create our own socket if SysD did not supply one.
-    listenFd = sd_listen_fds(0);
-    if (listenFd == 1)
+    int listensFdCount = sd_listen_fds(0);
+    if (listensFdCount == 1)
     {
-        fd = SD_LISTEN_FDS_START;
+        if (sd_is_socket(SD_LISTEN_FDS_START, AF_UNSPEC, SOCK_DGRAM, -1))
+        {
+            udpSocket = std::make_shared<boost::asio::ip::udp::socket>(
+                *io, boost::asio::ip::udp::v6(), SD_LISTEN_FDS_START);
+        }
     }
-    else if (listenFd > 1)
+    else if (listensFdCount > 1)
     {
         log<level::ERR>("Too many file descriptors received");
-        return 1;
-    }
-    else
-    {
-        struct sockaddr_in address;
-        if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == 0)
-        {
-            r = -errno;
-            log<level::ERR>("Unable to manually open socket");
-            return EXIT_FAILURE;
-        }
-
-        address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons(IPMI_STD_PORT);
-
-        if (bind(fd, (struct sockaddr*)&address, sizeof(address)) < 0)
-        {
-            r = -errno;
-            log<level::ERR>("Unable to bind socket");
-            close(fd);
-            return EXIT_FAILURE;
-        }
-    }
-
-    r = sd_event_add_io(event, &source, fd, EPOLLIN, udp623Handler, nullptr);
-    if (r < 0)
-    {
-        close(fd);
         return EXIT_FAILURE;
     }
-
-    udpIPMI.reset(source);
-    source = nullptr;
+    if (!udpSocket)
+    {
+        udpSocket = std::make_shared<boost::asio::ip::udp::socket>(
+            *io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v6(),
+                                                IPMI_STD_PORT));
+        if (!udpSocket)
+        {
+            log<level::ERR>("Failed to start listening on RMCP socket");
+            return EXIT_FAILURE;
+        }
+    }
+    startRmcpReceive();
 
     io->run();
 

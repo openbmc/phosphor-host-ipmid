@@ -139,6 +139,12 @@ class EventLoop
     sd_event* event = nullptr;
 
   private:
+    /** @brief async handler for incoming udp packets */
+    void handleRmcpPacket();
+
+    /** @brief register the async handler for incoming udp packets */
+    void startRmcpReceive();
+
     /** @brief Event source object for host console. */
     EventSource hostConsole = nullptr;
 
@@ -146,10 +152,9 @@ class EventLoop
      */
     std::shared_ptr<boost::asio::io_context> io;
 
-    /** @brief Event source for the UDP socket listening on IPMI standard
-     *         port.
+    /** @brief boost::asio udp socket
      */
-    EventSource udpIPMI = nullptr;
+    std::shared_ptr<boost::asio::ip::udp::socket> udpSocket = nullptr;
 
     /** @brief Map to keep information regarding IPMI payload instance and
      *         timers for character accumulate interval and retry interval.

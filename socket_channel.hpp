@@ -1,8 +1,7 @@
 #pragma once
 
-#include <arpa/inet.h>
-#include <unistd.h>
-
+#include <boost/asio/ip/udp.hpp>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -18,28 +17,24 @@ namespace udpsocket
 class Channel
 {
   public:
-    struct SockAddr_t
-    {
-        union
-        {
-            sockaddr sockAddr;
-            sockaddr_in6 inAddr;
-        };
-        socklen_t addrSize;
-    };
+    Channel() = delete;
+    ~Channel() = default;
+    Channel(const Channel& right) = delete;
+    Channel& operator=(const Channel& right) = delete;
+    Channel(Channel&&) = delete;
+    Channel& operator=(Channel&&) = delete;
 
     /**
      * @brief Constructor
      *
      * Initialize the IPMI socket object with the socket descriptor
      *
-     * @param [in] File Descriptor for the socket
-     * @param [in] Timeout parameter for the select call
+     * @param [in] pointer to a boost::asio udp socket object
      *
      * @return None
      */
-    Channel(int insockfd, timeval& inTimeout) :
-        sockfd(insockfd), timeout(inTimeout)
+    explicit Channel(std::shared_ptr<boost::asio::ip::udp::socket> socket) :
+        socket(socket)
     {
     }
 
@@ -51,7 +46,10 @@ class Channel
      *
      * @return IP address of the remote peer
      */
-    std::string getRemoteAddress() const;
+    std::string getRemoteAddress() const
+    {
+        return endpoint.address().to_string();
+    }
 
     /**
      * @brief Fetch the port number of the remote peer
@@ -63,7 +61,7 @@ class Channel
      */
     auto getPort() const
     {
-        return address.inAddr.sin6_port;
+        return endpoint.port();
     }
 
     /**
@@ -77,7 +75,19 @@ class Channel
      *         In case of error, the return code is < 0 and vector is set
      *         to size 0.
      */
-    std::tuple<int, std::vector<uint8_t>> read();
+    std::tuple<int, std::vector<uint8_t>> read()
+    {
+        std::vector<uint8_t> packet(socket->available());
+        try
+        {
+            socket->receive_from(boost::asio::buffer(packet), endpoint);
+        }
+        catch (const boost::system::system_error& e)
+        {
+            return std::make_tuple(e.code().value(), std::vector<uint8_t>());
+        }
+        return std::make_tuple(0, packet);
+    }
 
     /**
      *  @brief Write the outgoing packet
@@ -90,33 +100,30 @@ class Channel
      *  @return In case of success the return code is 0 and return code is
      *          < 0 in case of failure.
      */
-    int write(const std::vector<uint8_t>& inBuffer);
+    int write(const std::vector<uint8_t>& inBuffer)
+    {
+        try
+        {
+            socket->send_to(boost::asio::buffer(inBuffer), endpoint);
+        }
+        catch (const boost::system::system_error& e)
+        {
+            return e.code().value();
+        }
+        return 0;
+    }
 
     /**
      * @brief Returns file descriptor for the socket
      */
     auto getHandle(void) const
     {
-        return sockfd;
+        return socket->native_handle();
     }
 
-    ~Channel() = default;
-    Channel(const Channel& right) = delete;
-    Channel& operator=(const Channel& right) = delete;
-    Channel(Channel&&) = default;
-    Channel& operator=(Channel&&) = default;
-
   private:
-    /*
-     * The socket descriptor is the UDP server socket for the IPMI port.
-     * The same socket descriptor is used for multiple ipmi clients and the
-     * life of the descriptor is lifetime of the net-ipmid server. So we
-     * do not need to close the socket descriptor in the cleanup of the
-     * udpsocket class.
-     */
-    int sockfd;
-    SockAddr_t address;
-    timeval timeout;
+    std::shared_ptr<boost::asio::ip::udp::socket> socket;
+    boost::asio::ip::udp::endpoint endpoint{};
 };
 
 } // namespace udpsocket

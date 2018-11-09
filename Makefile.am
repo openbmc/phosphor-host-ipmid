@@ -11,7 +11,6 @@ sbin_PROGRAMS = \
 netipmid_SOURCES = \
 	endian.hpp \
 	socket_channel.hpp \
-	socket_channel.cpp \
 	message.hpp \
 	auth_algo.hpp \
 	auth_algo.cpp \
