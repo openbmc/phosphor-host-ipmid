@@ -6,6 +6,10 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <boost/asio/basic_stream_socket.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/local/stream_protocol.hpp>
+#include <boost/asio/write.hpp>
 #include <chrono>
 #include <cmath>
 #include <phosphor-logging/log.hpp>
@@ -15,80 +19,78 @@ namespace sol
 
 using namespace phosphor::logging;
 
-CustomFD::~CustomFD()
+void Manager::initConsoleSocket()
 {
-    if (fd >= 0)
-    {
-        // Remove the host console descriptor from the sd_event_loop
-        std::get<eventloop::EventLoop&>(singletonPool).stopHostConsole();
-        close(fd);
-    }
+    // explicit length constructor for NUL-prefixed abstract path
+    std::string path(CONSOLE_SOCKET_PATH, CONSOLE_SOCKET_PATH_LEN);
+    boost::asio::local::stream_protocol::endpoint ep(path);
+    consoleSocket =
+        std::make_unique<boost::asio::local::stream_protocol::socket>(*io);
+    consoleSocket->connect(ep);
 }
 
-void Manager::initHostConsoleFd()
+void Manager::consoleInputHandler()
 {
-    struct sockaddr_un addr;
-    int rc = 0;
-    int fd = 0;
-
-    fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (fd < 0)
+    boost::system::error_code ec;
+    boost::asio::socket_base::bytes_readable cmd(true);
+    consoleSocket->io_control(cmd, ec);
+    size_t readSize;
+    if (!ec)
     {
-        log<level::ERR>("Failed to open the host console socket",
-                        entry("ERRNO=%d", errno));
-        throw std::runtime_error("Failed to open the host console socket");
+        readSize = cmd.get();
+    }
+    else
+    {
+        log<level::ERR>("Reading ready count from host console socket failed:",
+                        entry("EXCEPTION=%s", ec.message().c_str()));
+        return;
+    }
+    std::vector<uint8_t> buffer(readSize);
+    ec.clear();
+    size_t readDataLen =
+        consoleSocket->read_some(boost::asio::buffer(buffer), ec);
+    if (ec)
+    {
+        log<level::ERR>("Reading from host console socket failed:",
+                        entry("EXCEPTION=%s", ec.message().c_str()));
+        return;
     }
 
-    memset(&addr, 0, sizeof(addr));
-    addr.sun_family = AF_UNIX;
-    memcpy(&addr.sun_path, &CONSOLE_SOCKET_PATH, CONSOLE_SOCKET_PATH_LEN);
-    consoleFD = std::make_unique<CustomFD>(fd);
-    auto& conFD = *(consoleFD.get());
-
-    rc =
-        connect(conFD(), (struct sockaddr*)&addr,
-                sizeof(addr) - sizeof(addr.sun_path) + CONSOLE_SOCKET_PATH_LEN);
-    if (rc < 0)
-    {
-        log<level::ERR>("Failed to connect to host console socket address",
-                        entry("ERRNO=%d", errno));
-        consoleFD.reset();
-        throw std::runtime_error("Failed to connect to console server");
-    }
+    // Update the Console buffer with data read from the socket
+    buffer.resize(readDataLen);
+    dataBuffer.write(buffer);
 }
 
 int Manager::writeConsoleSocket(const std::vector<uint8_t>& input) const
 {
-    auto inBuffer = input.data();
-    auto inBufferSize = input.size();
-    size_t pos = 0;
-    ssize_t rc = 0;
-    int errVal = 0;
-    auto& conFD = *(consoleFD.get());
+    boost::system::error_code ec;
+    boost::asio::write(*consoleSocket, boost::asio::buffer(input), ec);
+    return ec.value();
+}
 
-    for (pos = 0; pos < inBufferSize; pos += rc)
+void Manager::startHostConsole()
+{
+    if (!consoleSocket)
     {
-        rc = write(conFD(), inBuffer + pos, inBufferSize - pos);
-        if (rc <= 0)
-        {
-            if (errno == EINTR)
-            {
-                log<level::INFO>(" Retrying to handle EINTR",
-                                 entry("ERRNO=%d", errno));
-                rc = 0;
-                continue;
-            }
-            else
-            {
-                errVal = errno;
-                log<level::ERR>("Failed to write to host console socket",
-                                entry("ERRNO=%d", errno));
-                return -errVal;
-            }
-        }
+        initConsoleSocket();
     }
+    consoleSocket->async_wait(boost::asio::socket_base::wait_read,
+                              [this](const boost::system::error_code& ec) {
+                                  if (!ec)
+                                  {
+                                      consoleInputHandler();
+                                      startHostConsole();
+                                  }
+                              });
+}
 
-    return 0;
+void Manager::stopHostConsole()
+{
+    if (consoleSocket)
+    {
+        consoleSocket->cancel();
+        consoleSocket.reset();
+    }
 }
 
 void Manager::startPayloadInstance(uint8_t payloadInstance,
@@ -96,11 +98,7 @@ void Manager::startPayloadInstance(uint8_t payloadInstance,
 {
     if (payloadMap.empty())
     {
-        initHostConsoleFd();
-
-        // Register the fd in the sd_event_loop
-        std::get<eventloop::EventLoop&>(singletonPool)
-            .startHostConsole(*(consoleFD.get()));
+        startHostConsole();
     }
 
     // Create the SOL Context data for payload instance
@@ -132,7 +130,7 @@ void Manager::stopPayloadInstance(uint8_t payloadInstance)
 
     if (payloadMap.empty())
     {
-        consoleFD.reset();
+        stopHostConsole();
 
         dataBuffer.erase(dataBuffer.size());
     }

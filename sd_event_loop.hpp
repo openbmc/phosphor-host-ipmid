@@ -76,15 +76,6 @@ class EventLoop
      */
     int startEventLoop();
 
-    /** @brief Add host console I/O event source to the event loop.
-     *
-     *  @param[in] fd - File descriptor for host console socket.
-     */
-    void startHostConsole(const sol::CustomFD& fd);
-
-    /** @brief Remove host console I/O event source. */
-    void stopHostConsole();
-
     /** @brief Initialize the timers for the SOL payload instance
      *
      *  This API would add the Character accumulate interval timer event
@@ -144,9 +135,6 @@ class EventLoop
 
     /** @brief register the async handler for incoming udp packets */
     void startRmcpReceive();
-
-    /** @brief Event source object for host console. */
-    EventSource hostConsole = nullptr;
 
     /** @brief boost::asio io context to run with
      */

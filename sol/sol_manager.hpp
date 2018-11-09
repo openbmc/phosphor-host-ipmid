@@ -4,6 +4,8 @@
 #include "session.hpp"
 #include "sol_context.hpp"
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/local/stream_protocol.hpp>
 #include <map>
 #include <memory>
 
@@ -23,32 +25,6 @@ constexpr uint8_t retryIntervalFactor = 10;
 
 using Instance = uint8_t;
 
-/** @struct CustomFD
- *
- *  RAII wrapper for file descriptor.
- */
-struct CustomFD
-{
-    CustomFD(const CustomFD&) = delete;
-    CustomFD& operator=(const CustomFD&) = delete;
-    CustomFD(CustomFD&&) = delete;
-    CustomFD& operator=(CustomFD&&) = delete;
-
-    CustomFD(int fd) : fd(fd)
-    {
-    }
-
-    ~CustomFD();
-
-    int operator()() const
-    {
-        return fd;
-    }
-
-  private:
-    int fd = -1;
-};
-
 using namespace std::chrono_literals;
 
 /** @class Manager
@@ -65,12 +41,19 @@ class Manager
      */
     using SOLPayloadMap = std::map<Instance, std::unique_ptr<Context>>;
 
-    Manager() = default;
+    Manager() = delete;
     ~Manager() = default;
     Manager(const Manager&) = delete;
     Manager& operator=(const Manager&) = delete;
     Manager(Manager&&) = default;
     Manager& operator=(Manager&&) = default;
+
+    Manager(std::shared_ptr<boost::asio::io_context> io) : io(io)
+    {
+    }
+
+    /** @brief io context to add events to */
+    std::shared_ptr<boost::asio::io_context> io;
 
     /** @brief Host Console Buffer. */
     ConsoleData dataBuffer;
@@ -180,6 +163,12 @@ class Manager
      */
     uint8_t channel = 1;
 
+    /** @brief Add host console I/O event source to the event loop.  */
+    void startHostConsole();
+
+    /** @brief Remove host console I/O event source. */
+    void stopHostConsole();
+
     /** @brief Start a SOL payload instance.
      *
      *  Starting a payload instance involves creating the context object,
@@ -263,11 +252,15 @@ class Manager
   private:
     SOLPayloadMap payloadMap;
 
-    /** @brief File descriptor for the host console. */
-    std::unique_ptr<CustomFD> consoleFD = nullptr;
+    /** @brief Local stream socket for the host console. */
+    std::unique_ptr<boost::asio::local::stream_protocol::socket> consoleSocket =
+        nullptr;
 
     /** @brief Initialize the host console file descriptor. */
-    void initHostConsoleFd();
+    void initConsoleSocket();
+
+    /** @brief Handle incoming console data on the console socket */
+    void consoleInputHandler();
 };
 
 } // namespace sol

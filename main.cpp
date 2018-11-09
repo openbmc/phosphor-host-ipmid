@@ -29,7 +29,7 @@ static auto io = std::make_shared<boost::asio::io_context>();
 session::Manager manager;
 command::Table table;
 eventloop::EventLoop loop(io);
-sol::Manager solManager;
+sol::Manager solManager(io);
 
 std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
            sol::Manager&>

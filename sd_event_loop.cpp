@@ -61,50 +61,6 @@ void EventLoop::startRmcpReceive()
                           });
 }
 
-static int consoleInputHandler(sd_event_source* es, int fd, uint32_t revents,
-                               void* userdata)
-{
-    try
-    {
-        int readSize = 0;
-
-        if (ioctl(fd, FIONREAD, &readSize) < 0)
-        {
-            log<level::ERR>("ioctl failed for FIONREAD:",
-                            entry("ERRNO=%d", errno));
-            return 0;
-        }
-
-        std::vector<uint8_t> buffer(readSize);
-        auto bufferSize = buffer.size();
-        ssize_t readDataLen = 0;
-
-        readDataLen = read(fd, buffer.data(), bufferSize);
-
-        // Update the Console buffer with data read from the socket
-        if (readDataLen > 0)
-        {
-            buffer.resize(readDataLen);
-            std::get<sol::Manager&>(singletonPool).dataBuffer.write(buffer);
-        }
-        else if (readDataLen == 0)
-        {
-            log<level::ERR>("Connection Closed for host console socket");
-        }
-        else if (readDataLen < 0) // Error
-        {
-            log<level::ERR>("Reading from host console socket failed:",
-                            entry("ERRNO=%d", errno));
-        }
-    }
-    catch (std::exception& e)
-    {
-        log<level::ERR>(e.what());
-    }
-
-    return 0;
-}
-
 static int charAccTimerHandler(sd_event_source* s, uint64_t usec,
                                void* userdata)
 {
@@ -221,45 +177,6 @@ int EventLoop::startEventLoop()
     io->run();
 
     return EXIT_SUCCESS;
-}
-
-void EventLoop::startHostConsole(const sol::CustomFD& fd)
-{
-    int rc = 0;
-
-    if ((fd() == -1) || hostConsole.get())
-    {
-        throw std::runtime_error("Console descriptor already added");
-    }
-
-    sd_event_source* source = nullptr;
-
-    // Add the fd to the event loop for EPOLLIN
-    rc = sd_event_add_io(event, &source, fd(), EPOLLIN, consoleInputHandler,
-                         nullptr);
-    if (rc < 0)
-    {
-        throw std::runtime_error("Failed to add socket descriptor");
-    }
-
-    hostConsole.reset(source);
-    source = nullptr;
-}
-
-void EventLoop::stopHostConsole()
-{
-    if (hostConsole.get())
-    {
-        // Disable the host console payload
-        int rc = sd_event_source_set_enabled(hostConsole.get(), SD_EVENT_OFF);
-        if (rc < 0)
-        {
-            log<level::ERR>("Failed to disable the host console socket",
-                            entry("RC=%d", rc));
-        }
-
-        hostConsole.reset();
-    }
 }
 
 void EventLoop::startSOLPayloadInstance(uint8_t payloadInst,
