@@ -98,7 +98,7 @@ int main(int i_argc, char* i_argv[])
     ipmidbus = fopen("/dev/null", "w");
 
     // Connect to system bus
-    auto rc = sd_bus_open_system(&bus);
+    auto rc = sd_bus_default_system(&bus);
     if (rc < 0)
     {
         std::cerr << "Failed to connect to system bus:" << strerror(-rc)
