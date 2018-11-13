@@ -146,6 +146,15 @@ ipmi_ret_t ipmiUserGetUserName(const uint8_t& userId, std::string& userName);
 ipmi_ret_t ipmiUserGetAllCounts(uint8_t& maxChUsers, uint8_t& enabledUsers,
                                 uint8_t& fixedUsers);
 
+/** @brief function to update user enabled state
+ *
+ *  @param[in] userId - user id
+ *..@param[in] state - state of the user to be updated, true - user enabled.
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserUpdateEnabledState(const uint8_t& userId, const bool& state);
+
 /** @brief determines whether user is enabled
  *
  *  @param[in] userId - user id

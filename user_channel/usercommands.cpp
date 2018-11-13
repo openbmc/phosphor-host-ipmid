@@ -429,25 +429,42 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (!std::regex_match(passwd.c_str(),
                               std::regex("[a-zA-z_0-9][a-zA-Z_0-9,?:`!\"]*")))
         {
-            log<level::DEBUG>("Invalid password fields",
-                              entry("USER-ID:%d", (uint8_t)req->userId));
+            log<level::ERR>("Invalid password fields",
+                            entry("USER-ID:%d", (uint8_t)req->userId));
             return IPMI_CC_INVALID_FIELD_REQUEST;
         }
         if (!pamUpdatePasswd(userName.c_str(), passwd.c_str()))
         {
-            log<level::DEBUG>("Failed to update password",
-                              entry("USER-ID:%d", (uint8_t)req->userId));
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            log<level::ERR>("Failed to update password",
+                            entry("USER-ID:%d", (uint8_t)req->userId));
+            return IPMI_CC_INVALID_FIELD_REQUEST;
         }
+        return IPMI_CC_OK;
     }
-    else
+    else if (req->operation == enableUser || req->operation == disableUser)
     {
-        // TODO: test the password by reading the encrypted file
-        log<level::ERR>(
-            "Other operations not implemented - TODO yet to implement");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmiUserUpdateEnabledState(req->userId,
+                                          static_cast<bool>(req->operation));
     }
-    return IPMI_CC_OK;
+    else if (req->operation == testPassword)
+    {
+        auto password = ipmiUserGetPassword(userName);
+        std::string testPassword(
+            reinterpret_cast<const char*>(req->userPassword), 0,
+            passwordLength);
+        // Note: For security reasons password size won't be compared and
+        // wrong password size completion code will not be returned if size
+        // doesn't match as specified in IPMI specification.
+        if (password != testPassword)
+        {
+            log<level::DEBUG>("Test password failed",
+                              entry("USER-ID:%d", (uint8_t)req->userId));
+            return static_cast<ipmi_ret_t>(
+                IPMISetPasswordReturnCodes::ipmiCCPasswdFailMismatch);
+        }
+        return IPMI_CC_OK;
+    }
+    return IPMI_CC_INVALID_FIELD_REQUEST;
 }
 
 void registerUserIpmiFunctions()

@@ -631,6 +631,33 @@ bool UserAccess::isValidUserName(const char* userNameInChar)
     return true;
 }
 
+ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t& userId,
+                                           const bool& enabledState)
+{
+    if (!isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
+        userLock{*userMutex};
+    UserInfo* userInfo = getUserInfo(userId);
+    std::string userName;
+    userName.assign(reinterpret_cast<char*>(userInfo->userName), 0,
+                    ipmiMaxUserName);
+    if (userName.empty())
+    {
+        log<level::DEBUG>("User name not set / invalid");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    if (userInfo->userEnabled != enabledState)
+    {
+        std::string userPath = std::string(userObjBasePath) + "/" + userName;
+        setDbusProperty(bus, getUserServiceName().c_str(), userPath.c_str(),
+                        usersInterface, userEnabledProperty, enabledState);
+    }
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t& userId,
                                               const uint8_t& chNum,
                                               const UserPrivAccess& privAccess,
