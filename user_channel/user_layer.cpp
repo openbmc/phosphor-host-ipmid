@@ -109,6 +109,11 @@ ipmi_ret_t ipmiUserGetAllCounts(uint8_t& maxChUsers, uint8_t& enabledUsers,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t ipmiUserUpdateEnabledState(const uint8_t& userId, const bool& state)
+{
+    return getUserAccessObject().setUserEnabledState(userId, state);
+}
+
 ipmi_ret_t ipmiUserCheckEnabled(const uint8_t& userId, bool& state)
 {
     if (!UserAccess::isValidUserId(userId))

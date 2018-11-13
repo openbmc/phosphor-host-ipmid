@@ -29,6 +29,12 @@ enum ipmi_netfn_user_cmds
     IPMI_CMD_SET_USER_PASSWORD = 0x47,
 };
 
+enum class IPMISetPasswordReturnCodes
+{
+    ipmiCCPasswdFailMismatch = 0x80,
+    ipmiCCPasswdFailWrongSize = 0x81,
+};
+
 static constexpr uint8_t userIdEnabledViaSetPassword = 0x1;
 static constexpr uint8_t userIdDisabledViaSetPassword = 0x2;
 
