@@ -131,6 +131,14 @@ enum ipmi_return_codes
     IPMI_CC_UNSPECIFIED_ERROR = 0xFF,
 };
 
+/**
+ * Get the length of the IPMI response buffer.  The maximum length of a reply is
+ * required in data packing.
+ *
+ * @return the number of bytes.
+ */
+size_t ipmidGetResponseBufferLength(void);
+
 sd_bus* ipmid_get_sd_bus_connection(void);
 sd_event* ipmid_get_sd_event_connection(void);
 sd_bus_slot* ipmid_get_sd_bus_slot(void);

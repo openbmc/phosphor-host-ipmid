@@ -561,6 +561,11 @@ void ipmi_register_callback_handlers(const char* ipmi_lib_path)
     return;
 }
 
+size_t ipmidGetResponseBufferLength(void)
+{
+    return MAX_IPMI_BUFFER;
+}
+
 sd_bus* ipmid_get_sd_bus_connection(void)
 {
     return bus;
