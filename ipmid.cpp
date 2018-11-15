@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "ipmid.hpp"
 
 #include "host-cmd-manager.hpp"

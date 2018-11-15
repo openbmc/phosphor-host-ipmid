@@ -27,8 +27,7 @@ CLEANFILES = $(BUILT_SOURCES)
 BOOST_CXX = -DBOOST_ERROR_CODE_HEADER_ONLY \
 	    -DBOOST_SYSTEM_NO_DEPRECATED \
 	    -DBOOST_ALL_NO_LIB
-#TODO - Make this path a configure option (bitbake parameter)
-ipmid_CXXFLAGS = -DHOST_IPMI_LIB_PATH=\"/usr/lib/host-ipmid/\" \
+ipmid_CXXFLAGS = \
 		 $(BOOST_CXX) \
                  $(PHOSPHOR_LOGGING_CFLAGS) \
                  $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \

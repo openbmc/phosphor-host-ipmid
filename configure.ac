@@ -161,6 +161,10 @@ AC_ARG_VAR(POWER_READING_SENSOR, [Power reading sensor configuration file])
 AS_IF([test "x$POWER_READING_SENSOR" == "x"],[POWER_READING_SENSOR="/usr/share/ipmi-providers/power_reading.json"])
 AC_DEFINE_UNQUOTED([POWER_READING_SENSOR], ["$POWER_READING_SENSOR"], [Power reading sensor configuration file])
 
+AC_ARG_VAR(HOST_IPMI_LIB_PATH, [The file path to search for libraries.])
+AS_IF([test "x$HOST_IPMI_LIB_PATH" == "x"], [HOST_IPMI_LIB_PATH="/usr/lib/host-ipmid/"])
+AC_DEFINE_UNQUOTED([HOST_IPMI_LIB_PATH], ["$HOST_IPMI_LIB_PATH"], [The file path to search for libraries.])
+
 # Create configured output
 AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile])
 AC_OUTPUT
