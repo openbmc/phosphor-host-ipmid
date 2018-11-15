@@ -18,8 +18,8 @@ libipmi20_BUILT_LIST = \
 	channel-gen.cpp
 
 BUILT_SOURCES = \
-               ipmiwhitelist.cpp \
-               $(libipmi20_BUILT_LIST)
+	ipmiwhitelist.cpp \
+	$(libipmi20_BUILT_LIST)
 
 
 CLEANFILES = $(BUILT_SOURCES)
@@ -28,10 +28,10 @@ BOOST_CXX = -DBOOST_ERROR_CODE_HEADER_ONLY \
 	    -DBOOST_SYSTEM_NO_DEPRECATED \
 	    -DBOOST_ALL_NO_LIB
 ipmid_CXXFLAGS = \
-		 $(BOOST_CXX) \
-                 $(PHOSPHOR_LOGGING_CFLAGS) \
-                 $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-                 -flto
+	$(BOOST_CXX) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+	-flto
 ipmid_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
@@ -92,11 +92,18 @@ XFAIL_TESTS =
 
 TESTS = $(check_PROGRAMS)
 
-libipmi20_la_LDFLAGS = $(SYSTEMD_LIBS) $(libmapper_LIBS) \
-	$(PHOSPHOR_LOGGING_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS) -lstdc++fs \
+libipmi20_la_LDFLAGS = \
+	$(SYSTEMD_LIBS) \
+	$(libmapper_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	-lstdc++fs \
 	-version-info 0:0:0 -shared
-libipmi20_la_CXXFLAGS = $(SYSTEMD_CFLAGS) $(libmapper_CFLAGS) \
-	$(BOOST_CXX) $(PHOSPHOR_LOGGING_CFLAGS) \
+libipmi20_la_CXXFLAGS = \
+	$(SYSTEMD_CFLAGS) \
+	$(libmapper_CFLAGS) \
+	$(BOOST_CXX) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
 	-flto
 
@@ -105,19 +112,21 @@ libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
 libsysintfcmds_la_SOURCES = \
 	systemintfcmds.cpp \
 	host-interface.cpp
-libsysintfcmds_la_LDFLAGS = $(SYSTEMD_LIBS) \
-                            $(libmapper_LIBS) \
-                            $(PHOSPHOR_DBUS_INTERFACES_LIBS) \
-                            $(PHOSPHOR_LOGGING_LIBS) \
-                            $(SDBUSPLUS_LIBS) \
-                            -version-info 0:0:0 -shared
-libsysintfcmds_la_CXXFLAGS = $(SYSTEMD_CFLAGS) \
-			     $(BOOST_CXX) \
-                             $(libmapper_CFLAGS) \
-                             $(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-                             $(PHOSPHOR_LOGGING_CFLAGS) \
-                             $(SDBUSPLUS_CFLAGS) \
-							 -flto
+libsysintfcmds_la_LDFLAGS = \
+	$(SYSTEMD_LIBS) \
+	$(libmapper_LIBS) \
+	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(SDBUSPLUS_LIBS) \
+	-version-info 0:0:0 -shared
+libsysintfcmds_la_CXXFLAGS = \
+	$(SYSTEMD_CFLAGS) \
+	$(BOOST_CXX) \
+	$(libmapper_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(SDBUSPLUS_CFLAGS) \
+	-flto
 
 nobase_include_HEADERS = \
 	host-ipmid/iana.hpp \
