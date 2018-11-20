@@ -14,6 +14,8 @@ enum ipmi_netfn_storage_cmds
 enum ipmi_transport_return_codes
 {
     IPMI_CC_PARM_NOT_SUPPORTED = 0x80,
+    IPMI_CC_PARM_READ_ONLY = 0x82,
+    IPMI_CC_PARM_WRITE_ONLY = 0x83,
 };
 
 // Parameters
@@ -83,6 +85,9 @@ constexpr uint8_t SET_COMPLETE = 0;
 constexpr uint8_t SET_IN_PROGRESS = 1;
 constexpr uint8_t SET_COMMIT_WRITE = 2;         // Optional
 constexpr uint8_t SET_IN_PROGRESS_RESERVED = 3; // Reserved
+
+constexpr uint8_t SUPPORTED_V6_STATIC_ADDRS = 0x0f;
+constexpr uint8_t SUPPORTED_V6_DYNAMIC_ADDRS = 0x0f;
 
 const int CHANNEL_MASK = 0x0f;
 const int NUM_CHANNELS = 0x0f;
