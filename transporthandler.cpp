@@ -82,9 +82,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
     try
     {
-        switch (lan_param)
+        switch (static_cast<LanParam>(lan_param))
         {
-            case LAN_PARM_IP:
+            case LanParam::IP:
             {
                 std::string ipaddress;
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
@@ -119,7 +119,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             }
             break;
 
-            case LAN_PARM_IPSRC:
+            case LanParam::IPSRC:
             {
                 std::string networkInterfacePath;
 
@@ -189,7 +189,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             }
             break;
 
-            case LAN_PARM_SUBNET:
+            case LanParam::SUBNET:
             {
                 unsigned long mask{};
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
@@ -226,7 +226,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             }
             break;
 
-            case LAN_PARM_GATEWAY:
+            case LanParam::GATEWAY:
             {
                 std::string gateway;
 
@@ -262,7 +262,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             }
             break;
 
-            case LAN_PARM_MAC:
+            case LanParam::MAC:
             {
                 std::string macAddress;
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
@@ -288,7 +288,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             }
             break;
 
-            case LAN_PARM_VLAN:
+            case LanParam::VLAN:
             {
                 uint16_t vlanID{};
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
@@ -423,9 +423,9 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     auto channelConf = getChannelConfig(channel);
 
-    switch (reqptr->parameter)
+    switch (static_cast<LanParam>(reqptr->parameter))
     {
-        case LAN_PARM_IP:
+        case LanParam::IP:
         {
             std::snprintf(ipaddr, INET_ADDRSTRLEN,
                           ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
@@ -435,7 +435,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
-        case LAN_PARM_IPSRC:
+        case LanParam::IPSRC:
         {
             uint8_t ipsrc{};
             std::memcpy(&ipsrc, reqptr->data, ipmi::network::IPSRC_SIZE_BYTE);
@@ -443,7 +443,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
-        case LAN_PARM_MAC:
+        case LanParam::MAC:
         {
             char mac[SIZE_MAC];
 
@@ -463,7 +463,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
-        case LAN_PARM_SUBNET:
+        case LanParam::SUBNET:
         {
             std::snprintf(netmask, INET_ADDRSTRLEN,
                           ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
@@ -472,7 +472,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
-        case LAN_PARM_GATEWAY:
+        case LanParam::GATEWAY:
         {
             std::snprintf(gateway, INET_ADDRSTRLEN,
                           ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
@@ -481,7 +481,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
-        case LAN_PARM_VLAN:
+        case LanParam::VLAN:
         {
             uint16_t vlan{};
             std::memcpy(&vlan, reqptr->data, ipmi::network::VLAN_SIZE_BYTE);
@@ -493,7 +493,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
-        case LAN_PARM_INPROGRESS:
+        case LanParam::INPROGRESS:
         {
             if (reqptr->data[0] == SET_COMPLETE)
             {
@@ -585,9 +585,10 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     auto channelConf = getChannelConfig(channel);
 
-    switch (reqptr->parameter)
+    LanParam param = static_cast<LanParam>(reqptr->parameter);
+    switch (param)
     {
-        case LAN_PARM_INPROGRESS:
+        case LanParam::INPROGRESS:
         {
             uint8_t buf[] = {current_revision,
                              channelConf->lan_set_in_progress};
@@ -595,24 +596,24 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             std::memcpy(response, &buf, *data_len);
             break;
         }
-        case LAN_PARM_AUTHSUPPORT:
+        case LanParam::AUTHSUPPORT:
         {
             uint8_t buf[] = {current_revision, 0x04};
             *data_len = sizeof(buf);
             std::memcpy(response, &buf, *data_len);
             break;
         }
-        case LAN_PARM_AUTHENABLES:
+        case LanParam::AUTHENABLES:
         {
             uint8_t buf[] = {current_revision, 0x04, 0x04, 0x04, 0x04, 0x04};
             *data_len = sizeof(buf);
             std::memcpy(response, &buf, *data_len);
             break;
         }
-        case LAN_PARM_IP:
-        case LAN_PARM_SUBNET:
-        case LAN_PARM_GATEWAY:
-        case LAN_PARM_MAC:
+        case LanParam::IP:
+        case LanParam::SUBNET:
+        case LanParam::GATEWAY:
+        case LanParam::MAC:
         {
             uint8_t buf[ipmi::network::MAC_ADDRESS_SIZE_BYTE + 1] = {};
 
@@ -622,7 +623,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             if (getNetworkData(reqptr->parameter, &buf[1], channel) ==
                 IPMI_CC_OK)
             {
-                if (reqptr->parameter == LAN_PARM_MAC)
+                if (param == LanParam::MAC)
                 {
                     *data_len = sizeof(buf);
                 }
@@ -638,7 +639,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             break;
         }
-        case LAN_PARM_VLAN:
+        case LanParam::VLAN:
         {
             uint8_t buf[ipmi::network::VLAN_SIZE_BYTE + 1] = {};
 
@@ -652,7 +653,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             break;
         }
-        case LAN_PARM_IPSRC:
+        case LanParam::IPSRC:
         {
             uint8_t buff[ipmi::network::IPSRC_SIZE_BYTE + 1] = {};
             *data_len = sizeof(current_revision);
@@ -665,7 +666,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             break;
         }
-        case CIPHER_SUITE_COUNT:
+        case LanParam::CIPHER_SUITE_COUNT:
         {
             *(static_cast<uint8_t*>(response)) = current_revision;
             // Byte 1 is reserved byte and does not indicate a cipher suite ID,
@@ -676,7 +677,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             *data_len = sizeof(current_revision) + sizeof(count);
             break;
         }
-        case CIPHER_SUITE_ENTRIES:
+        case LanParam::CIPHER_SUITE_ENTRIES:
         {
             *(static_cast<uint8_t*>(response)) = current_revision;
             // Byte 1 is reserved
