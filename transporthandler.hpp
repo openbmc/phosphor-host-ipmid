@@ -18,17 +18,17 @@ enum ipmi_transport_return_codes
 };
 
 // Parameters
-enum LanParam : uint8_t
+enum class LanParam : uint8_t
 {
-    LAN_PARM_INPROGRESS = 0,
-    LAN_PARM_AUTHSUPPORT = 1,
-    LAN_PARM_AUTHENABLES = 2,
-    LAN_PARM_IP = 3,
-    LAN_PARM_IPSRC = 4,
-    LAN_PARM_MAC = 5,
-    LAN_PARM_SUBNET = 6,
-    LAN_PARM_GATEWAY = 12,
-    LAN_PARM_VLAN = 20,
+    INPROGRESS = 0,
+    AUTHSUPPORT = 1,
+    AUTHENABLES = 2,
+    IP = 3,
+    IPSRC = 4,
+    MAC = 5,
+    SUBNET = 6,
+    GATEWAY = 12,
+    VLAN = 20,
     CIPHER_SUITE_COUNT = 22,
     CIPHER_SUITE_ENTRIES = 23,
 };
