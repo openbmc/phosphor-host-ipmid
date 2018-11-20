@@ -585,98 +585,111 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     auto channelConf = getChannelConfig(channel);
 
-    if (reqptr->parameter == LAN_PARM_INPROGRESS)
+    switch (reqptr->parameter)
     {
-        uint8_t buf[] = {current_revision, channelConf->lan_set_in_progress};
-        *data_len = sizeof(buf);
-        std::memcpy(response, &buf, *data_len);
-    }
-    else if (reqptr->parameter == LAN_PARM_AUTHSUPPORT)
-    {
-        uint8_t buf[] = {current_revision, 0x04};
-        *data_len = sizeof(buf);
-        std::memcpy(response, &buf, *data_len);
-    }
-    else if (reqptr->parameter == LAN_PARM_AUTHENABLES)
-    {
-        uint8_t buf[] = {current_revision, 0x04, 0x04, 0x04, 0x04, 0x04};
-        *data_len = sizeof(buf);
-        std::memcpy(response, &buf, *data_len);
-    }
-    else if ((reqptr->parameter == LAN_PARM_IP) ||
-             (reqptr->parameter == LAN_PARM_SUBNET) ||
-             (reqptr->parameter == LAN_PARM_GATEWAY) ||
-             (reqptr->parameter == LAN_PARM_MAC))
-    {
-        uint8_t buf[ipmi::network::MAC_ADDRESS_SIZE_BYTE + 1] = {};
-
-        *data_len = sizeof(current_revision);
-        std::memcpy(buf, &current_revision, *data_len);
-
-        if (getNetworkData(reqptr->parameter, &buf[1], channel) == IPMI_CC_OK)
+        case LAN_PARM_INPROGRESS:
         {
-            if (reqptr->parameter == LAN_PARM_MAC)
+            uint8_t buf[] = {current_revision,
+                             channelConf->lan_set_in_progress};
+            *data_len = sizeof(buf);
+            std::memcpy(response, &buf, *data_len);
+            break;
+        }
+        case LAN_PARM_AUTHSUPPORT:
+        {
+            uint8_t buf[] = {current_revision, 0x04};
+            *data_len = sizeof(buf);
+            std::memcpy(response, &buf, *data_len);
+            break;
+        }
+        case LAN_PARM_AUTHENABLES:
+        {
+            uint8_t buf[] = {current_revision, 0x04, 0x04, 0x04, 0x04, 0x04};
+            *data_len = sizeof(buf);
+            std::memcpy(response, &buf, *data_len);
+            break;
+        }
+        case LAN_PARM_IP:
+        case LAN_PARM_SUBNET:
+        case LAN_PARM_GATEWAY:
+        case LAN_PARM_MAC:
+        {
+            uint8_t buf[ipmi::network::MAC_ADDRESS_SIZE_BYTE + 1] = {};
+
+            *data_len = sizeof(current_revision);
+            std::memcpy(buf, &current_revision, *data_len);
+
+            if (getNetworkData(reqptr->parameter, &buf[1], channel) ==
+                IPMI_CC_OK)
             {
-                *data_len = sizeof(buf);
+                if (reqptr->parameter == LAN_PARM_MAC)
+                {
+                    *data_len = sizeof(buf);
+                }
+                else
+                {
+                    *data_len = ipmi::network::IPV4_ADDRESS_SIZE_BYTE + 1;
+                }
+                std::memcpy(response, &buf, *data_len);
             }
             else
             {
-                *data_len = ipmi::network::IPV4_ADDRESS_SIZE_BYTE + 1;
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
             }
-            std::memcpy(response, &buf, *data_len);
+            break;
         }
-        else
+        case LAN_PARM_VLAN:
         {
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-        }
-    }
-    else if (reqptr->parameter == LAN_PARM_VLAN)
-    {
-        uint8_t buf[ipmi::network::VLAN_SIZE_BYTE + 1] = {};
+            uint8_t buf[ipmi::network::VLAN_SIZE_BYTE + 1] = {};
 
-        *data_len = sizeof(current_revision);
-        std::memcpy(buf, &current_revision, *data_len);
-        if (getNetworkData(reqptr->parameter, &buf[1], channel) == IPMI_CC_OK)
-        {
-            *data_len = sizeof(buf);
-            std::memcpy(response, &buf, *data_len);
+            *data_len = sizeof(current_revision);
+            std::memcpy(buf, &current_revision, *data_len);
+            if (getNetworkData(reqptr->parameter, &buf[1], channel) ==
+                IPMI_CC_OK)
+            {
+                *data_len = sizeof(buf);
+                std::memcpy(response, &buf, *data_len);
+            }
+            break;
         }
-    }
-    else if (reqptr->parameter == LAN_PARM_IPSRC)
-    {
-        uint8_t buff[ipmi::network::IPSRC_SIZE_BYTE + 1] = {};
-        *data_len = sizeof(current_revision);
-        std::memcpy(buff, &current_revision, *data_len);
-        if (getNetworkData(reqptr->parameter, &buff[1], channel) == IPMI_CC_OK)
+        case LAN_PARM_IPSRC:
         {
-            *data_len = sizeof(buff);
-            std::memcpy(response, &buff, *data_len);
+            uint8_t buff[ipmi::network::IPSRC_SIZE_BYTE + 1] = {};
+            *data_len = sizeof(current_revision);
+            std::memcpy(buff, &current_revision, *data_len);
+            if (getNetworkData(reqptr->parameter, &buff[1], channel) ==
+                IPMI_CC_OK)
+            {
+                *data_len = sizeof(buff);
+                std::memcpy(response, &buff, *data_len);
+            }
+            break;
         }
-    }
-    else if (reqptr->parameter == CIPHER_SUITE_COUNT)
-    {
-        *(static_cast<uint8_t*>(response)) = current_revision;
-        // Byte 1 is reserved byte and does not indicate a cipher suite ID, so
-        // no of cipher suite entry count is one less than the size of the
-        // vector
-        auto count = static_cast<uint8_t>(cipherList.size() - 1);
-        *(static_cast<uint8_t*>(response) + 1) = count;
-        *data_len = sizeof(current_revision) + sizeof(count);
-    }
-    else if (reqptr->parameter == CIPHER_SUITE_ENTRIES)
-    {
-        *(static_cast<uint8_t*>(response)) = current_revision;
-        // Byte 1 is reserved
-        std::copy_n(cipherList.data(), cipherList.size(),
-                    static_cast<uint8_t*>(response) + 1);
-        *data_len =
-            sizeof(current_revision) + static_cast<uint8_t>(cipherList.size());
-    }
-    else
-    {
-        log<level::ERR>("Unsupported parameter",
-                        entry("PARAMETER=0x%x", reqptr->parameter));
-        rc = IPMI_CC_PARM_NOT_SUPPORTED;
+        case CIPHER_SUITE_COUNT:
+        {
+            *(static_cast<uint8_t*>(response)) = current_revision;
+            // Byte 1 is reserved byte and does not indicate a cipher suite ID,
+            // so no of cipher suite entry count is one less than the size of
+            // the vector
+            auto count = static_cast<uint8_t>(cipherList.size() - 1);
+            *(static_cast<uint8_t*>(response) + 1) = count;
+            *data_len = sizeof(current_revision) + sizeof(count);
+            break;
+        }
+        case CIPHER_SUITE_ENTRIES:
+        {
+            *(static_cast<uint8_t*>(response)) = current_revision;
+            // Byte 1 is reserved
+            std::copy_n(cipherList.data(), cipherList.size(),
+                        static_cast<uint8_t*>(response) + 1);
+            *data_len = sizeof(current_revision) +
+                        static_cast<uint8_t>(cipherList.size());
+            break;
+        }
+        default:
+            log<level::ERR>("Unsupported parameter",
+                            entry("PARAMETER=0x%x", reqptr->parameter));
+            rc = IPMI_CC_PARM_NOT_SUPPORTED;
     }
 
     return rc;
