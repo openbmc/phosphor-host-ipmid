@@ -18,17 +18,20 @@ enum ipmi_transport_return_codes
 };
 
 // Parameters
-static const int LAN_PARM_INPROGRESS = 0;
-static const int LAN_PARM_AUTHSUPPORT = 1;
-static const int LAN_PARM_AUTHENABLES = 2;
-static const int LAN_PARM_IP = 3;
-static const int LAN_PARM_IPSRC = 4;
-static const int LAN_PARM_MAC = 5;
-static const int LAN_PARM_SUBNET = 6;
-static const int LAN_PARM_GATEWAY = 12;
-static const int LAN_PARM_VLAN = 20;
-static const int CIPHER_SUITE_COUNT = 22;
-static const int CIPHER_SUITE_ENTRIES = 23;
+enum LanParam : uint8_t
+{
+    LAN_PARM_INPROGRESS = 0,
+    LAN_PARM_AUTHSUPPORT = 1,
+    LAN_PARM_AUTHENABLES = 2,
+    LAN_PARM_IP = 3,
+    LAN_PARM_IPSRC = 4,
+    LAN_PARM_MAC = 5,
+    LAN_PARM_SUBNET = 6,
+    LAN_PARM_GATEWAY = 12,
+    LAN_PARM_VLAN = 20,
+    CIPHER_SUITE_COUNT = 22,
+    CIPHER_SUITE_ENTRIES = 23,
+};
 
 constexpr uint8_t SET_COMPLETE = 0;
 constexpr uint8_t SET_IN_PROGRESS = 1;
