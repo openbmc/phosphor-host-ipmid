@@ -525,6 +525,25 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
+        case LanParam::IPV6_AND_IPV4_SUPPORTED:
+        {
+            rc = IPMI_CC_PARM_READ_ONLY;
+            break;
+        }
+        case LanParam::IPV6_AND_IPV4_ENABLES:
+        {
+            // We current only support dual stack
+            if (reqptr->data[0] != 2)
+            {
+                rc = IPMI_CC_PARM_NOT_SUPPORTED;
+            }
+            break;
+        }
+        case LanParam::IPV6_STATUS:
+        {
+            rc = IPMI_CC_PARM_READ_ONLY;
+            break;
+        }
         default:
         {
             rc = IPMI_CC_PARM_NOT_SUPPORTED;
@@ -689,6 +708,60 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                         static_cast<uint8_t*>(response) + 1);
             *data_len = sizeof(current_revision) +
                         static_cast<uint8_t>(cipherList.size());
+            break;
+        }
+        case LanParam::IPV6_AND_IPV4_SUPPORTED:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t support;
+            } __attribute__((packed)) data;
+            data.revision = current_revision;
+            // Feature Support Matrix
+            //   [0] IPv6 Only - No
+            //   [1] IPv6 && IPv4 - Yes
+            //   [2] IPv6 Destinations for Lan Alerts - Yes
+            data.support = 0b110;
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
+            break;
+        }
+        case LanParam::IPV6_AND_IPV4_ENABLES:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t enables;
+            } __attribute__((packed)) data;
+            data.revision = current_revision;
+            // We current only support dual stack
+            data.enables = 0x02;
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
+            break;
+        }
+        case LanParam::IPV6_STATUS:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t static_addresses;
+                uint8_t dynamic_addresses;
+                uint8_t dynamic_types;
+            } __attribute__((packed)) data;
+            data.revision = current_revision;
+            data.static_addresses = SUPPORTED_V6_STATIC_ADDRS;
+            data.dynamic_addresses = SUPPORTED_V6_DYNAMIC_ADDRS;
+            // Feature Support Matrix (phosphor-networkd always uses both)
+            //   [0] DHCPv6 - Yes
+            //   [1] SLAAC - Yes
+            data.dynamic_types = 0b11;
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
             break;
         }
         default:
