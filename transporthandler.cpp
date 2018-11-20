@@ -523,6 +523,25 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
+        case LanParam::IPV6_AND_IPV4_SUPPORTED:
+        {
+            rc = IPMI_CC_PARM_READ_ONLY;
+            break;
+        }
+        case LanParam::IPV6_AND_IPV4_ENABLES:
+        {
+            // We current only support dual stack
+            if (reqptr->data[0] != 2)
+            {
+                rc = IPMI_CC_PARM_NOT_SUPPORTED;
+            }
+            break;
+        }
+        case LanParam::IPV6_STATUS:
+        {
+            rc = IPMI_CC_PARM_READ_ONLY;
+            break;
+        }
         default:
         {
             rc = IPMI_CC_PARM_NOT_SUPPORTED;
@@ -685,6 +704,33 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                         static_cast<uint8_t*>(response) + 1);
             *data_len = sizeof(current_revision) +
                         static_cast<uint8_t>(cipherList.size());
+            break;
+        }
+        case LanParam::IPV6_AND_IPV4_SUPPORTED:
+        {
+            // Feature Support Matrix
+            //   [0] IPv6 Only - No
+            //   [1] IPv6 && IPv4 - Yes
+            //   [2] IPv6 Destinations for Lan Alerts - Yes
+            reinterpret_cast<uint8_t*>(response)[0] = 0b110;
+            break;
+        }
+        case LanParam::IPV6_AND_IPV4_ENABLES:
+        {
+            // We current only support dual stack
+            reinterpret_cast<uint8_t*>(response)[0] = 2;
+            break;
+        }
+        case LanParam::IPV6_STATUS:
+        {
+            // We can support as many static IPs as possible
+            reinterpret_cast<uint8_t*>(response)[0] = 0xff;
+            // We can support as many dynamic IPs as possible
+            reinterpret_cast<uint8_t*>(response)[1] = 0xff;
+            // Feature Support Matrix
+            //   [0] SLAAC - Yes
+            //   [1] DHCPv6 - Yes
+            reinterpret_cast<uint8_t*>(response)[2] = 0b11;
             break;
         }
         default:
