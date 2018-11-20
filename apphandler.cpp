@@ -429,7 +429,7 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::sysACPIProp);
         auto sysACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            sysACPIVal.get<std::string>());
+            variant_ns::get<std::string>(sysACPIVal));
         res->sysACPIState =
             static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
 
@@ -437,7 +437,7 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::devACPIProp);
         auto devACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            devACPIVal.get<std::string>());
+            variant_ns::get<std::string>(devACPIVal));
         res->devACPIState =
             static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
 
