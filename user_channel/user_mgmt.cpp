@@ -818,7 +818,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t& userId,
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
         std::strncpy(reinterpret_cast<char*>(userInfo->userName),
-                     userNameInChar, ipmiMaxUserName);
+                     userNameInChar, ipmiMaxUserName -1);
         userInfo->userInSystem = true;
     }
     else if (oldUser != newUser && validUser)
@@ -844,7 +844,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t& userId,
                       sizeof(userInfo->userName),
                   0);
         std::strncpy(reinterpret_cast<char*>(userInfo->userName),
-                     userNameInChar, ipmiMaxUserName);
+                     userNameInChar, ipmiMaxUserName -1);
         ipmiRenameUserEntryPassword(oldUser, newUser);
         userInfo->userInSystem = true;
     }
