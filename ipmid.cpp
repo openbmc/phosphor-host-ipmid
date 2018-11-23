@@ -693,17 +693,7 @@ int main(int argc, char* argv[])
                 restrictionModeIntf),
             handle_restricted_mode_change);
 
-        for (;;)
-        {
-            /* Process requests */
-            r = sd_event_run(events, (uint64_t)-1);
-            if (r < 0)
-            {
-                log<level::ERR>("Failure in processing request",
-                                entry("ERRNO=0x%X", -r));
-                goto finish;
-            }
-        }
+        r = sd_event_loop(events);
     }
 
 finish:
