@@ -1642,6 +1642,55 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+namespace
+{
+namespace restart_cause
+{
+using namespace sdbusplus::xyz::openbmc_project::State::server;
+const std::map<Host::RestartCause, uint8_t> dbusToIpmi = {
+    {Host::RestartCause::Unknown, 0x0},
+    {Host::RestartCause::IpmiCommand, 0x1},
+    {Host::RestartCause::ResetButton, 0x2},
+    {Host::RestartCause::PowerButton, 0x3},
+    {Host::RestartCause::WatchdogTimer, 0x4},
+    {Host::RestartCause::OEM, 0x5},
+    {Host::RestartCause::PowerPolicyAlwaysOn, 0x6},
+    {Host::RestartCause::PowerPolicyPreviousState, 0x7},
+    {Host::RestartCause::PEFReset, 0x8},
+    {Host::RestartCause::PEFPowerCycle, 0x9},
+    {Host::RestartCause::SoftReset, 0xa},
+    {Host::RestartCause::RTCWakeup, 0xb}};
+} // namespace restart_cause
+} // namespace
+
+ipmi::RspType<uint8_t> // 0 - 0x0b - various restart causes
+    ipmiChassisGetSysRestartCause()
+{
+    constexpr const char* stateHostInterface = "xyz.openbmc_project.State.Host";
+    constexpr const char* hostRestartCause = "HostRestartCause";
+
+    uint8_t restartCause = 0;
+    try
+    {
+        std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+        ipmi::DbusObjectInfo hostObject =
+            ipmi::getDbusObject(*busp, stateHostInterface);
+        ipmi::Value variant =
+            ipmi::getDbusProperty(*busp, hostObject.second, hostObject.first,
+                                  stateHostInterface, hostRestartCause);
+        auto restartCauseStr = std::get<std::string>(variant);
+        restartCause = restart_cause::dbusToIpmi.at(
+            restart_cause::Host::convertRestartCauseFromString(
+                restartCauseStr));
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(e.what());
+        return ipmi::responseUnspecifiedError();
+    }
+    return ipmi::responseSuccess(restartCause);
+}
+
 /** @brief implements Get POH counter command
  *  @parameter
  *   -  none
@@ -1813,4 +1862,9 @@ void register_netfn_chassis_functions()
                           ipmi::chassis::cmdSetPowerRestorePolicy,
                           ipmi::Privilege::Operator,
                           ipmiChassisSetPowerRestorePolicy);
+
+    // <get Host Restart Cause>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdGetSystemRestartCause,
+                          ipmi::Privilege::User, ipmiChassisGetSysRestartCause);
 }
