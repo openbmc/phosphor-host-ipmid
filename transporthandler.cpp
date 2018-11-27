@@ -945,7 +945,7 @@ void applyChanges(int channel)
             }
         }
     }
-    catch (InternalFailure& e)
+    catch (sdbusplus::exception::exception& e)
     {
         log<level::ERR>(
             "Failed to set network data", entry("PREFIX=%d", prefix),

@@ -358,9 +358,10 @@ void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
                                            "Delete");
         }
     }
-    catch (InternalFailure& e)
+    catch (sdbusplus::exception::exception& e)
     {
-        log<level::INFO>("Unable to delete the objects having",
+        log<level::INFO>("sdbusplus exception - Unable to delete the objects",
+                         entry("ERROR=%s", e.what()),
                          entry("INTERFACE=%s", interface.c_str()),
                          entry("SERVICE=%s", serviceRoot.c_str()));
     }
