@@ -793,10 +793,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t& userId,
                               entry("PATH=%s", userPath.c_str()));
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
-        std::fill(userInfo->userName,
-                  userInfo->userName + sizeof(userInfo->userName), 0);
-        ipmiClearUserEntryPassword(oldUser);
-        userInfo->userInSystem = false;
+        deleteUserIndex(userId);
     }
     else if (oldUser.empty() && !newUser.empty() && validUser)
     {
@@ -806,10 +803,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t& userId,
             auto method = bus.new_method_call(
                 getUserServiceName().c_str(), userMgrObjBasePath,
                 userMgrInterface, createUserMethod);
-            // TODO: Fetch proper privilege & enable state once set User access
-            // is implemented if LAN Channel specified, then create user for all
-            // groups follow channel privilege for user creation.
-            method.append(newUser.c_str(), availableGroups, "priv-admin", true);
+            method.append(newUser.c_str(), availableGroups, "", false);
             auto reply = bus.call(method);
         }
         catch (const sdbusplus::exception::SdBusError& e)
