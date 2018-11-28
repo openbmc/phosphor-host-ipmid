@@ -193,6 +193,14 @@ EChannelSessSupported getChannelSessionSupport(const uint8_t& chNum);
  */
 int getChannelActiveSessions(const uint8_t& chNum);
 
+/** @brief determines maximum transfer size for a channel
+ *
+ *  @param[in] chNum - channel number
+ *
+ *  @return maximum bytes that can be transferred on this channel
+ */
+size_t getChannelMaxTransferSize(const uint8_t& chNum);
+
 /** @brief initializes channel management
  *
  *  @return IPMI_CC_OK for success, others for failure.

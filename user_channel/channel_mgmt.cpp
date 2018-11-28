@@ -62,6 +62,7 @@ static constexpr const char* propertiesChangedSignal = "PropertiesChanged";
 static constexpr const char* nameString = "name";
 static constexpr const char* isValidString = "is_valid";
 static constexpr const char* activeSessionsString = "active_sessions";
+static constexpr const char* maxTransferSizeString = "max_transfer_size";
 static constexpr const char* channelInfoString = "channel_info";
 static constexpr const char* mediumTypeString = "medium_type";
 static constexpr const char* protocolTypeString = "protocol_type";
@@ -86,6 +87,7 @@ static constexpr const uint8_t defaultSessionSupported =
 static constexpr const uint8_t defaultAuthType =
     static_cast<uint8_t>(EAuthType::none);
 static constexpr const bool defaultIsIpmiState = false;
+static constexpr size_t smallChannelSize = 64;
 
 std::unique_ptr<sdbusplus::bus::match_t> chPropertiesSignal(nullptr);
 
@@ -417,6 +419,11 @@ int ChannelConfig::getChannelActiveSessions(const uint8_t& chNum)
     // RAKP layer changes. This will be updated, once the
     // authentication part is implemented.
     return channelData[chNum].activeSessCount;
+}
+
+size_t ChannelConfig::getChannelMaxTransferSize(const uint8_t& chNum)
+{
+    return channelData[chNum].maxTransferSize;
 }
 
 ipmi_ret_t ChannelConfig::getChannelInfo(const uint8_t& chNum,
@@ -941,6 +948,8 @@ int ChannelConfig::loadChannelConfig()
                     jsonChData[isValidString].get<bool>();
                 channelData[chNum].activeSessCount =
                     jsonChData.value(activeSessionsString, 0);
+                channelData[chNum].maxTransferSize =
+                    jsonChData.value(maxTransferSizeString, smallChannelSize);
                 Json jsonChInfo = jsonChData[channelInfoString].get<Json>();
                 if (jsonChInfo.is_null())
                 {
