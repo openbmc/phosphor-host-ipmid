@@ -74,6 +74,11 @@ int getChannelActiveSessions(const uint8_t chNum)
     return getChannelConfigObject().getChannelActiveSessions(chNum);
 }
 
+size_t getChannelMaxTransferSize(uint8_t chNum)
+{
+    return getChannelConfigObject().getChannelMaxTransferSize(chNum);
+}
+
 ipmi_ret_t ipmiChannelInit()
 {
     getChannelConfigObject();
