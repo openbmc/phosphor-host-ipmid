@@ -62,6 +62,7 @@ struct ChannelData
     uint8_t activeSessCount;
     ChannelInfo chInfo;
     ChannelAccessData chAccess;
+    size_t maxTransferSize;
 };
 
 class ChannelConfig;
@@ -111,6 +112,14 @@ class ChannelConfig
      *  @return numer of active sessions
      */
     int getChannelActiveSessions(const uint8_t chNum);
+
+    /** @brief determines maximum transfer size for a channel
+     *
+     *  @param[in] chNum - channel number
+     *
+     *  @return maximum bytes that can be transferred on this channel
+     */
+    size_t getChannelMaxTransferSize(uint8_t chNum);
 
     /** @brief provides channel info details
      *
