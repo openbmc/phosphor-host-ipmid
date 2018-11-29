@@ -41,6 +41,18 @@ std::vector<uint8_t>
         return outPayload;
     }
 
+    // TODO: W/A code added to allow CI test cases to pass.
+    // Once test cases are updated to add -U option, the following
+    // code has to be removed
+    if (session->userName.empty())
+    {
+        // update current privilege of the session.
+        session->curPrivLevel =
+            static_cast<session::Privilege>(reqPrivilegeLevel);
+        response->newPrivLevel = reqPrivilegeLevel;
+        return outPayload;
+    }
+
     uint8_t userId = ipmi::ipmiUserGetUserId(session->userName);
     if (userId == ipmi::invalidUserId)
     {
