@@ -37,6 +37,9 @@ using DbusUserObjProperties =
 
 using DbusUserObjValue = std::map<std::string, DbusUserObjProperties>;
 
+/**
+ * @enum User update events.
+ */
 enum class UserUpdateEvent
 {
     reservedEvent,
@@ -48,6 +51,10 @@ enum class UserUpdateEvent
     userStateUpdated
 };
 
+/** @struct UserPrivAccess
+ *
+ *  Structure for user privilege access
+ */
 struct UserPrivAccess
 {
     uint8_t privilege;
@@ -56,6 +63,10 @@ struct UserPrivAccess
     bool accessCallback;
 };
 
+/** @struct UserInfo
+ *
+ *  Structure for user related information
+ */
 struct UserInfo
 {
     uint8_t userName[ipmiMaxUserName];
@@ -65,6 +76,10 @@ struct UserInfo
     bool fixedUserName;
 };
 
+/** @struct UsersTbl
+ *
+ *  Structure for array of user related information
+ */
 struct UsersTbl
 {
     //+1 to map with UserId directly. UserId 0 is reserved.
