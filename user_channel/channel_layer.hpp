@@ -24,14 +24,18 @@ namespace ipmi
 static constexpr uint8_t maxIpmiChannels = 16;
 static constexpr uint8_t selfChNum = 0xE;
 
-// IPMI return codes specific to channel
+/**
+ * @enum IPMI return codes specific to channel
+ */
 enum ipmi_channel_return_codes
 {
     IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL = 0x82,
     IPMI_CC_ACCESS_MODE_NOT_SUPPORTED_FOR_CHANEL = 0x83
 };
 
-// IPMI Spec: Channel Protocol Type
+/**
+ * @enum IPMI specification: Channel Protocol Type
+ */
 enum class EChannelProtocolType : uint8_t
 {
     na = 0x00,
@@ -47,7 +51,9 @@ enum class EChannelProtocolType : uint8_t
     oem = 0x1C,
 };
 
-// IPMI Spec: Channel Medium Type
+/**
+ * @enum IPMI specification: Channel Medium Type
+ */
 enum class EChannelMediumType : uint8_t
 {
     reserved = 0x00,
@@ -67,7 +73,9 @@ enum class EChannelMediumType : uint8_t
     unknown = 0x82,
 };
 
-// IPMI Spec: Channel Session Type
+/**
+ * @enum IPMI specification: Channel Session Type
+ */
 enum class EChannelSessSupported : uint8_t
 {
     none = 0,
@@ -76,7 +84,9 @@ enum class EChannelSessSupported : uint8_t
     any = 3,
 };
 
-// IPMI Spec: Channel Access Mode
+/**
+ * @enum IPMI specification: Channel Access Mode
+ */
 enum class EChannelAccessMode : uint8_t
 {
     disabled = 0,
@@ -85,7 +95,9 @@ enum class EChannelAccessMode : uint8_t
     shared = 3,
 };
 
-// IPMI Spec 2.0 : Authentication Types
+/**
+ * @enum IPMI specification: Authentication Types
+ */
 enum class EAuthType : uint8_t
 {
     none = (1 << 0x0),
@@ -96,7 +108,9 @@ enum class EAuthType : uint8_t
     oem = (1 << 0x5),
 };
 
-// IPMI Spec: Access mode for channel access set/get
+/**
+ * @enum IPMI specification: Access mode for channel access set/get
+ */
 typedef enum
 {
     doNotSet = 0x00,
@@ -105,6 +119,10 @@ typedef enum
     reserved = 0x03,
 } EChannelActionType;
 
+/**
+ * @enum Access set flag to determine changes that has to be updated
+ * in channel access data configuration.
+ */
 enum AccessSetFlag
 {
     setAccessMode = (1 << 0),
@@ -114,7 +132,11 @@ enum AccessSetFlag
     setPrivLimit = (1 << 4),
 };
 
-// Struct to store channel access data
+/** @struct ChannelAccess
+ *
+ *  Structure to store channel accesss related information, defined in IPMI
+ * specification and used in Get / Set channel access
+ */
 struct ChannelAccess
 {
     uint8_t accessMode;
@@ -124,7 +146,11 @@ struct ChannelAccess
     uint8_t privLimit;
 };
 
-// Struct store channel info data
+/** @struct ChannelInfo
+ *
+ *  Structure to store data about channel information, which identifies each
+ *  channel type and information as defined in IPMI specification.
+ */
 struct ChannelInfo
 {
     uint8_t mediumType;
