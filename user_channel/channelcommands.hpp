@@ -20,7 +20,9 @@
 namespace ipmi
 {
 
-// IPMI commands for channel command NETFN:APP.
+/**
+ * @enum IPMI commands for channel command NETFN:APP
+ */
 enum ipmi_netfn_channel_cmds
 {
     IPMI_CMD_SET_CHANNEL_ACCESS = 0x40,
