@@ -37,6 +37,10 @@ static constexpr uint8_t enableUser = 0x01;
 static constexpr uint8_t setPassword = 0x02;
 static constexpr uint8_t testPassword = 0x03;
 
+/** @struct SetUserAccessReq
+ *
+ *  Structure for set user access request command
+ */
 struct SetUserAccessReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -68,6 +72,10 @@ struct SetUserAccessReq
 
 } __attribute__((packed));
 
+/** @struct GetUserAccessReq
+ *
+ *  Structure for get user access request command
+ */
 struct GetUserAccessReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -84,6 +92,10 @@ struct GetUserAccessReq
 #endif
 } __attribute__((packed));
 
+/** @struct GetUserAccessResp
+ *
+ *  Structure for get user access response command
+ */
 struct GetUserAccessResp
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -105,6 +117,10 @@ struct GetUserAccessResp
     PrivAccess privAccess;
 } __attribute__((packed));
 
+/** @struct SetUserNameReq
+ *
+ *  Structure for set user name request command
+ */
 struct SetUserNameReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -118,6 +134,10 @@ struct SetUserNameReq
     uint8_t userName[16];
 } __attribute__((packed));
 
+/** @struct GetUserNameReq
+ *
+ *  Structure for get user name request command
+ */
 struct GetUserNameReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -130,11 +150,19 @@ struct GetUserNameReq
 #endif
 } __attribute__((packed));
 
+/** @struct GetUserNameResp
+ *
+ *  Structure for get user name response command
+ */
 struct GetUserNameResp
 {
     uint8_t userName[16];
 } __attribute__((packed));
 
+/** @struct SetUserPasswordReq
+ *
+ *  Structure for set user password request command
+ */
 struct SetUserPasswordReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
