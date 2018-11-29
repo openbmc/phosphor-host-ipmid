@@ -338,7 +338,7 @@ ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
 
-    getChannelInfoResp* resp = static_cast<getChannelInfoResp*>(response);
+    auto resp = static_cast<getChannelInfoResp*>(response);
 
     std::fill(reinterpret_cast<uint8_t*>(resp),
               reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
