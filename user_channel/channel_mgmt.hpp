@@ -38,12 +38,22 @@ static constexpr const char* ipmiChannelMutex = "ipmi_channel_mutex";
 static constexpr const char* ipmiChMutexCleanupLockFile =
     "/var/lib/ipmi/ipmi_channel_mutex_cleanup";
 
+/** @struct ChannelAccessData
+ *
+ *  Structure to store both non-volatile and volatile channel access information
+ *  as used by IPMI specification (refer spec sec 22.22 to 22.24)
+ */
 struct ChannelAccessData
 {
     ChannelAccess chNonVolatileData;
     ChannelAccess chVolatileData;
 };
 
+/** @struct ChannelData
+ *
+ *  Structure for channel information - base structure to get all information
+ * about the channel.(refer spec sec 22.22 to 22.24)
+ */
 struct ChannelData
 {
     std::string chName;
