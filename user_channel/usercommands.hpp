@@ -19,7 +19,10 @@
 
 namespace ipmi
 {
-// IPMI commands for user command NETFN:APP.
+
+/**
+ * @enum IPMI commands for user command NETFN:APP.
+ */
 enum ipmi_netfn_user_cmds
 {
     IPMI_CMD_SET_USER_ACCESS = 0x43,
@@ -29,6 +32,9 @@ enum ipmi_netfn_user_cmds
     IPMI_CMD_SET_USER_PASSWORD = 0x47,
 };
 
+/**
+ * @enum IPMI set password return codes (refer spec sec 22.30)
+ */
 enum class IPMISetPasswordReturnCodes
 {
     ipmiCCPasswdFailMismatch = 0x80,

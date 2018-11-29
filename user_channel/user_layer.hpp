@@ -22,6 +22,9 @@ namespace ipmi
 {
 
 // TODO: Has to be replaced with proper channel number assignment logic
+/**
+ * @enum Channel Id
+ */
 enum class EChannelID : uint8_t
 {
     chanLan1 = 0x01
@@ -33,6 +36,11 @@ static constexpr uint8_t ipmiMaxUserName = 16;
 static constexpr uint8_t ipmiMaxUsers = 15;
 static constexpr uint8_t ipmiMaxChannels = 16;
 
+/** @struct PrivAccess
+ *
+ *  User privilege related access data as per IPMI specification.(refer spec
+ * sec 22.26)
+ */
 struct PrivAccess
 {
 #if BYTE_ORDER == LITTLE_ENDIAN

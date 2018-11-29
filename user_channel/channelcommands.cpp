@@ -27,6 +27,10 @@ using namespace phosphor::logging;
 namespace ipmi
 {
 
+/** @struct setChannelAccessReq
+ *
+ *  Structure for set channel access request command (refer spec sec 22.22)
+ */
 struct setChannelAccessReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -56,6 +60,10 @@ struct setChannelAccessReq
 
 } __attribute__((packed));
 
+/** @struct getChannelAccessReq
+ *
+ *  Structure for get channel access request command (refer spec sec 22.23)
+ */
 struct getChannelAccessReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -72,6 +80,10 @@ struct getChannelAccessReq
 #endif
 } __attribute__((packed));
 
+/** @struct getChannelAccessResp
+ *
+ *  Structure for get channel access response command (refer spec sec 22.23)
+ */
 struct getChannelAccessResp
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -94,6 +106,10 @@ struct getChannelAccessResp
 #endif
 } __attribute__((packed));
 
+/** @struct getChannelInfoReq
+ *
+ *  Structure for get channel info request command (refer spec sec 22.24)
+ */
 struct getChannelInfoReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -106,6 +122,10 @@ struct getChannelInfoReq
 #endif
 } __attribute__((packed));
 
+/** @struct getChannelInfoResp
+ *
+ *  Structure for get channel info response command (refer spec sec 22.24)
+ */
 struct getChannelInfoResp
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
