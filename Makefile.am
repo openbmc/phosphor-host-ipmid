@@ -26,16 +26,19 @@ BUILT_SOURCES = \
 
 CLEANFILES = $(BUILT_SOURCES)
 
-BOOST_CXX = \
+COMMON_CXX = \
+	-flto \
+	-Wno-psabi \
+	$(SYSTEMD_CFLAGS) \
+	$(libmapper_CFLAGS) \
+	$(SDBUSPLUS_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
 	-DBOOST_ERROR_CODE_HEADER_ONLY \
 	-DBOOST_SYSTEM_NO_DEPRECATED \
 	-DBOOST_ALL_NO_LIB
 
-ipmid_CXXFLAGS = \
-	$(BOOST_CXX) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	-flto
+ipmid_CXXFLAGS = $(COMMON_CXX)
 ipmid_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
@@ -103,13 +106,7 @@ libipmi20_la_LDFLAGS = \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-lstdc++fs \
 	-version-info 0:0:0 -shared
-libipmi20_la_CXXFLAGS = \
-	$(SYSTEMD_CFLAGS) \
-	$(libmapper_CFLAGS) \
-	$(BOOST_CXX) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	-flto
+libipmi20_la_CXXFLAGS = $(COMMON_CXX)
 
 providers_LTLIBRARIES += libusercmds.la
 libusercmds_la_LIBADD = user_channel/libuserlayer.la
@@ -135,14 +132,7 @@ libsysintfcmds_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(SDBUSPLUS_LIBS) \
 	-version-info 0:0:0 -shared
-libsysintfcmds_la_CXXFLAGS = \
-	$(SYSTEMD_CFLAGS) \
-	$(BOOST_CXX) \
-	$(libmapper_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(SDBUSPLUS_CFLAGS) \
-	-flto
+libsysintfcmds_la_CXXFLAGS = $(COMMON_CXX)
 
 nobase_include_HEADERS = \
 	host-ipmid/iana.hpp \
