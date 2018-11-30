@@ -188,6 +188,7 @@ ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     const SetUserAccessReq* req = static_cast<SetUserAccessReq*>(request);
     size_t reqLength = *dataLen;
+    *dataLen = 0;
 
     if (!(reqLength == sizeof(*req) ||
           (reqLength == (sizeof(*req) - sizeof(uint8_t) /* skip optional*/))))
