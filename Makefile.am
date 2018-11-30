@@ -21,18 +21,22 @@ BUILT_SOURCES = \
 
 CLEANFILES = $(BUILT_SOURCES)
 
-BOOST_CXX = \
+COMMON_CXX = \
+	-flto \
+	-Wno-psabi \
+	$(SDBUSPLUS_CFLAGS) \
+	$(SYSTEMD_CFLAGS) \
+	$(libmapper_CFLAGS) \
+	$(SDBUSPLUS_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
 	-DBOOST_ERROR_CODE_HEADER_ONLY \
 	-DBOOST_SYSTEM_NO_DEPRECATED \
 	-DBOOST_COROUTINES_NO_DEPRECATION_WARNING \
 	-DBOOST_ALL_NO_LIB
 
 ipmid_DEPENDENCIES = libuserlayer.la
-ipmid_CXXFLAGS = \
-	$(BOOST_CXX) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	-flto
+ipmid_CXXFLAGS = $(COMMON_CXX)
 ipmid_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
@@ -81,11 +85,7 @@ libuserlayer_la_LDFLAGS = \
 	-lstdc++fs \
 	$(LIBPAM) $(LIBCRYPT) -lpam_misc $(CRYPTO_LIBS) \
 	-version-info 0:0:0 -shared
-libuserlayer_la_CXXFLAGS = \
-	$(SYSTEMD_CFLAGS) \
-	$(libmapper_CFLAGS) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+libuserlayer_la_CXXFLAGS = $(COMMON_CXX)
 
 libipmi20dir = ${libdir}/ipmid-providers
 libipmi20_LTLIBRARIES = libipmi20.la
@@ -131,13 +131,7 @@ libipmi20_la_LDFLAGS = \
 	-luserlayer \
 	-lboost_coroutine \
 	-version-info 0:0:0 -shared
-libipmi20_la_CXXFLAGS = \
-	$(SYSTEMD_CFLAGS) \
-	$(libmapper_CFLAGS) \
-	$(BOOST_CXX) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	-flto
+libipmi20_la_CXXFLAGS = $(COMMON_CXX)
 
 libsysintfcmdsdir = ${libdir}/ipmid-providers
 libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
@@ -151,14 +145,7 @@ libsysintfcmds_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(SDBUSPLUS_LIBS) \
 	-version-info 0:0:0 -shared
-libsysintfcmds_la_CXXFLAGS = \
-	$(SYSTEMD_CFLAGS) \
-	$(BOOST_CXX) \
-	$(libmapper_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(SDBUSPLUS_CFLAGS) \
-	-flto
+libsysintfcmds_la_CXXFLAGS = $(COMMON_CXX)
 
 libwhitelistdir = ${libdir}/ipmid-providers
 libwhitelist_LTLIBRARIES = libwhitelist.la
@@ -170,12 +157,7 @@ libwhitelist_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-version-info 0:0:0 -shared
-libwhitelist_la_CXXFLAGS = \
-	$(SYSTEMD_CFLAGS) \
-	$(libmapper_CFLAGS) \
-	$(BOOST_CXX) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+libwhitelist_la_CXXFLAGS = $(COMMON_CXX)
 nodist_libwhitelist_la_SOURCES = ipmiwhitelist.cpp
 
 nobase_include_HEADERS = \
