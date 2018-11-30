@@ -142,7 +142,7 @@ struct ChannelInfo
  *
  *  @return true if valid, false otherwise
  */
-bool isValidChannel(const uint8_t& chNum);
+bool isValidChannel(uint8_t chNum);
 
 /** @brief determines whether channel device exist
  *
@@ -150,7 +150,7 @@ bool isValidChannel(const uint8_t& chNum);
  *
  *  @return true if valid, false otherwise
  */
-bool doesDeviceExist(const uint8_t& chNum);
+bool doesDeviceExist(uint8_t chNum);
 
 /** @brief determines whether privilege limit is valid
  *
@@ -158,7 +158,7 @@ bool doesDeviceExist(const uint8_t& chNum);
  *
  *  @return true if valid, false otherwise
  */
-bool isValidPrivLimit(const uint8_t& privLimit);
+bool isValidPrivLimit(uint8_t privLimit);
 
 /** @brief determines whether access mode  is valid
  *
@@ -166,7 +166,7 @@ bool isValidPrivLimit(const uint8_t& privLimit);
  *
  *  @return true if valid, false otherwise
  */
-bool isValidAccessMode(const uint8_t& accessMode);
+bool isValidAccessMode(uint8_t accessMode);
 
 /** @brief determines valid authentication type based on channel number
  *
@@ -175,7 +175,7 @@ bool isValidAccessMode(const uint8_t& accessMode);
  *
  *  @return true if valid, false otherwise
  */
-bool isValidAuthType(const uint8_t& chNum, const EAuthType& authType);
+bool isValidAuthType(uint8_t chNum, EAuthType authType);
 
 /** @brief determines supported session type of a channel
  *
@@ -183,7 +183,7 @@ bool isValidAuthType(const uint8_t& chNum, const EAuthType& authType);
  *
  *  @return EChannelSessSupported - supported session type
  */
-EChannelSessSupported getChannelSessionSupport(const uint8_t& chNum);
+EChannelSessSupported getChannelSessionSupport(uint8_t chNum);
 
 /** @brief determines number of active sessions on a channel
  *
@@ -191,7 +191,7 @@ EChannelSessSupported getChannelSessionSupport(const uint8_t& chNum);
  *
  *  @return numer of active sessions
  */
-int getChannelActiveSessions(const uint8_t& chNum);
+int getChannelActiveSessions(uint8_t chNum);
 
 /** @brief initializes channel management
  *
@@ -206,7 +206,7 @@ ipmi_ret_t ipmiChannelInit();
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t getChannelInfo(const uint8_t& chNum, ChannelInfo& chInfo);
+ipmi_ret_t getChannelInfo(uint8_t chNum, ChannelInfo& chInfo);
 
 /** @brief provides channel access data
  *
@@ -215,8 +215,7 @@ ipmi_ret_t getChannelInfo(const uint8_t& chNum, ChannelInfo& chInfo);
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t getChannelAccessData(const uint8_t& chNum,
-                                ChannelAccess& chAccessData);
+ipmi_ret_t getChannelAccessData(uint8_t chNum, ChannelAccess& chAccessData);
 
 /** @brief to set channel access data
  *
@@ -226,9 +225,9 @@ ipmi_ret_t getChannelAccessData(const uint8_t& chNum,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t setChannelAccessData(const uint8_t& chNum,
+ipmi_ret_t setChannelAccessData(uint8_t chNum,
                                 const ChannelAccess& chAccessData,
-                                const uint8_t& setFlag);
+                                uint8_t setFlag);
 
 /** @brief to get channel access data persistent data
  *
@@ -237,7 +236,7 @@ ipmi_ret_t setChannelAccessData(const uint8_t& chNum,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t getChannelAccessPersistData(const uint8_t& chNum,
+ipmi_ret_t getChannelAccessPersistData(uint8_t chNum,
                                        ChannelAccess& chAccessData);
 
 /** @brief to set channel access data persistent data
@@ -248,9 +247,9 @@ ipmi_ret_t getChannelAccessPersistData(const uint8_t& chNum,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t setChannelAccessPersistData(const uint8_t& chNum,
+ipmi_ret_t setChannelAccessPersistData(uint8_t chNum,
                                        const ChannelAccess& chAccessData,
-                                       const uint8_t& setFlag);
+                                       uint8_t setFlag);
 
 /** @brief provides supported authentication type for the channel
  *
@@ -259,7 +258,7 @@ ipmi_ret_t setChannelAccessPersistData(const uint8_t& chNum,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t getChannelAuthTypeSupported(const uint8_t& chNum,
+ipmi_ret_t getChannelAuthTypeSupported(uint8_t chNum,
                                        uint8_t& authTypeSupported);
 
 /** @brief provides enabled authentication type for the channel
@@ -270,7 +269,7 @@ ipmi_ret_t getChannelAuthTypeSupported(const uint8_t& chNum,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t getChannelEnabledAuthType(const uint8_t& chNum, const uint8_t& priv,
+ipmi_ret_t getChannelEnabledAuthType(uint8_t chNum, uint8_t priv,
                                      EAuthType& authType);
 
 } // namespace ipmi

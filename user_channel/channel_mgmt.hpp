@@ -75,7 +75,7 @@ class ChannelConfig
      *
      *  @return true if valid, false otherwise
      */
-    bool isValidChannel(const uint8_t& chNum);
+    bool isValidChannel(uint8_t chNum);
 
     /** @brief determines valid authentication type
      *
@@ -84,7 +84,7 @@ class ChannelConfig
      *
      *  @return true if valid, false otherwise
      */
-    bool isValidAuthType(const uint8_t& chNum, const EAuthType& authType);
+    bool isValidAuthType(uint8_t chNum, EAuthType authType);
 
     /** @brief determines supported session type of a channel
      *
@@ -92,7 +92,7 @@ class ChannelConfig
      *
      *  @return EChannelSessSupported - supported session type
      */
-    EChannelSessSupported getChannelSessionSupport(const uint8_t& chNum);
+    EChannelSessSupported getChannelSessionSupport(uint8_t chNum);
 
     /** @brief determines number of active sessions on a channel
      *
@@ -100,7 +100,7 @@ class ChannelConfig
      *
      *  @return numer of active sessions
      */
-    int getChannelActiveSessions(const uint8_t& chNum);
+    int getChannelActiveSessions(uint8_t chNum);
 
     /** @brief provides channel info details
      *
@@ -109,7 +109,7 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelInfo(const uint8_t& chNum, ChannelInfo& chInfo);
+    ipmi_ret_t getChannelInfo(uint8_t chNum, ChannelInfo& chInfo);
 
     /** @brief provides channel access data
      *
@@ -118,8 +118,7 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelAccessData(const uint8_t& chNum,
-                                    ChannelAccess& chAccessData);
+    ipmi_ret_t getChannelAccessData(uint8_t chNum, ChannelAccess& chAccessData);
 
     /** @brief to set channel access data
      *
@@ -129,9 +128,9 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setChannelAccessData(const uint8_t& chNum,
+    ipmi_ret_t setChannelAccessData(uint8_t chNum,
                                     const ChannelAccess& chAccessData,
-                                    const uint8_t& setFlag);
+                                    uint8_t setFlag);
 
     /** @brief to get channel access data persistent data
      *
@@ -140,7 +139,7 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelAccessPersistData(const uint8_t& chNum,
+    ipmi_ret_t getChannelAccessPersistData(uint8_t chNum,
                                            ChannelAccess& chAccessData);
 
     /** @brief to set channel access data persistent data
@@ -151,9 +150,9 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setChannelAccessPersistData(const uint8_t& chNum,
+    ipmi_ret_t setChannelAccessPersistData(uint8_t chNum,
                                            const ChannelAccess& chAccessData,
-                                           const uint8_t& setFlag);
+                                           uint8_t setFlag);
 
     /** @brief provides supported authentication type for the channel
      *
@@ -162,7 +161,7 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelAuthTypeSupported(const uint8_t& chNum,
+    ipmi_ret_t getChannelAuthTypeSupported(uint8_t chNum,
                                            uint8_t& authTypeSupported);
 
     /** @brief provides enabled authentication type for the channel
@@ -173,8 +172,7 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelEnabledAuthType(const uint8_t& chNum,
-                                         const uint8_t& priv,
+    ipmi_ret_t getChannelEnabledAuthType(uint8_t chNum, uint8_t priv,
                                          EAuthType& authType);
 
     /** @brief conver to channel privilege from system privilege
@@ -203,7 +201,7 @@ class ChannelConfig
      *
      *  @return 0 for success, -errno for failure.
      */
-    ChannelData* getChannelDataPtr(const uint8_t& chNum);
+    ChannelData* getChannelDataPtr(uint8_t chNum);
 
     uint32_t signalFlag = 0;
 
@@ -231,8 +229,7 @@ class ChannelConfig
      *  @param[in] chNum - channel number
      *  @param[in] chName - channel name
      */
-    void setDefaultChannelConfig(const uint8_t& chNum,
-                                 const std::string& chName);
+    void setDefaultChannelConfig(uint8_t chNum, const std::string& chName);
 
     /** @brief function to load all channel configuration
      *
@@ -335,7 +332,7 @@ class ChannelConfig
      *
      *  @return access mode in string
      */
-    std::string convertToAccessModeString(const uint8_t& value);
+    std::string convertToAccessModeString(uint8_t value);
 
     /** @brief function to convert privilege value to string
      *
@@ -343,7 +340,7 @@ class ChannelConfig
      *
      *  @return privilege in string
      */
-    std::string convertToPrivLimitString(const uint8_t& value);
+    std::string convertToPrivLimitString(uint8_t value);
 
     /** @brief function to convert session support string to value type
      *
@@ -376,7 +373,7 @@ class ChannelConfig
      *
      *  @return channel index
      */
-    uint8_t convertToChannelIndexNumber(const uint8_t& chNum);
+    uint8_t convertToChannelIndexNumber(uint8_t chNum);
 
     /** @brief function to convert channel name to network interface name
      *
