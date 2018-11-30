@@ -1,3 +1,15 @@
+COMMON_CXX = \
+	-flto \
+	-Wno-psabi \
+	$(SYSTEMD_CFLAGS) \
+	$(libmapper_CFLAGS) \
+	$(SDBUSPLUS_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+	-DBOOST_ERROR_CODE_HEADER_ONLY \
+	-DBOOST_SYSTEM_NO_DEPRECATED \
+	-DBOOST_ALL_NO_LIB
+
 lib_LTLIBRARIES = libuserlayer.la
 libuserlayer_la_SOURCES = \
 	user_layer.cpp \
@@ -15,7 +27,4 @@ libuserlayer_la_LDFLAGS = \
 	-version-info 0:0:0 -shared
 libuserlayer_la_CXXFLAGS = \
 	-I$(top_srcdir) \
-	$(SYSTEMD_CFLAGS) \
-	$(libmapper_CFLAGS) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+	$(COMMON_CXX)
