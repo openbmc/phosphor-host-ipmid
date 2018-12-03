@@ -23,6 +23,7 @@ AS_IF([test "x$enable_softoff" != "xno"],
 )
 
 # Checks for libraries.
+AX_CHECK_OPENSSL([], [AC_MSG_ERROR(["openssl required and not found"])])
 AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
 PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 221], [], [AC_MSG_ERROR(["systemd required and not found"])])
 PKG_CHECK_MODULES([CRYPTO], [libcrypto >= 1.0.2g], ,[AC_MSG_ERROR([can't find openssl libcrypto])])
