@@ -77,7 +77,7 @@ libuserlayer_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-lstdc++fs \
-	$(LIBPAM) $(LIBCRYPT) -lpam_misc -lssl \
+	$(LIBPAM) $(CRYPTO_LIBS) -lpam_misc -lssl \
 	-version-info 0:0:0 -shared
 libuserlayer_la_CXXFLAGS = \
 	$(SYSTEMD_CFLAGS) \
