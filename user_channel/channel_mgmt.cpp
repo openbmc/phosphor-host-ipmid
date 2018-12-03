@@ -358,14 +358,14 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
     }
 }
 
-ChannelData* ChannelConfig::getChannelDataPtr(const uint8_t& chNum)
+ChannelData* ChannelConfig::getChannelDataPtr(const uint8_t chNum)
 {
     // reload data before using it.
     checkAndReloadVolatileData();
     return &channelData[chNum];
 }
 
-bool ChannelConfig::isValidChannel(const uint8_t& chNum)
+bool ChannelConfig::isValidChannel(const uint8_t chNum)
 {
     if (chNum > maxIpmiChannels)
     {
@@ -383,14 +383,14 @@ bool ChannelConfig::isValidChannel(const uint8_t& chNum)
 }
 
 EChannelSessSupported
-    ChannelConfig::getChannelSessionSupport(const uint8_t& chNum)
+    ChannelConfig::getChannelSessionSupport(const uint8_t chNum)
 {
     EChannelSessSupported chSessSupport =
         (EChannelSessSupported)channelData[chNum].chInfo.sessionSupported;
     return chSessSupport;
 }
 
-bool ChannelConfig::isValidAuthType(const uint8_t& chNum,
+bool ChannelConfig::isValidAuthType(const uint8_t chNum,
                                     const EAuthType& authType)
 {
     if ((authType < EAuthType::md2) || (authType > EAuthType::oem))
@@ -409,7 +409,7 @@ bool ChannelConfig::isValidAuthType(const uint8_t& chNum,
     return true;
 }
 
-int ChannelConfig::getChannelActiveSessions(const uint8_t& chNum)
+int ChannelConfig::getChannelActiveSessions(const uint8_t chNum)
 {
     // TODO: TEMPORARY FIX
     // Channels active session count is managed separatly
@@ -419,7 +419,7 @@ int ChannelConfig::getChannelActiveSessions(const uint8_t& chNum)
     return channelData[chNum].activeSessCount;
 }
 
-ipmi_ret_t ChannelConfig::getChannelInfo(const uint8_t& chNum,
+ipmi_ret_t ChannelConfig::getChannelInfo(const uint8_t chNum,
                                          ChannelInfo& chInfo)
 {
     if (!isValidChannel(chNum))
@@ -435,7 +435,7 @@ ipmi_ret_t ChannelConfig::getChannelInfo(const uint8_t& chNum,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ChannelConfig::getChannelAccessData(const uint8_t& chNum,
+ipmi_ret_t ChannelConfig::getChannelAccessData(const uint8_t chNum,
                                                ChannelAccess& chAccessData)
 {
     if (!isValidChannel(chNum))
@@ -464,9 +464,9 @@ ipmi_ret_t ChannelConfig::getChannelAccessData(const uint8_t& chNum,
 }
 
 ipmi_ret_t
-    ChannelConfig::setChannelAccessData(const uint8_t& chNum,
+    ChannelConfig::setChannelAccessData(const uint8_t chNum,
                                         const ChannelAccess& chAccessData,
-                                        const uint8_t& setFlag)
+                                        const uint8_t setFlag)
 {
     if (!isValidChannel(chNum))
     {
@@ -531,7 +531,7 @@ ipmi_ret_t
 }
 
 ipmi_ret_t
-    ChannelConfig::getChannelAccessPersistData(const uint8_t& chNum,
+    ChannelConfig::getChannelAccessPersistData(const uint8_t chNum,
                                                ChannelAccess& chAccessData)
 {
     if (!isValidChannel(chNum))
@@ -560,8 +560,8 @@ ipmi_ret_t
 }
 
 ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
-    const uint8_t& chNum, const ChannelAccess& chAccessData,
-    const uint8_t& setFlag)
+    const uint8_t chNum, const ChannelAccess& chAccessData,
+    const uint8_t setFlag)
 {
     if (!isValidChannel(chNum))
     {
@@ -648,7 +648,7 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
 }
 
 ipmi_ret_t
-    ChannelConfig::getChannelAuthTypeSupported(const uint8_t& chNum,
+    ChannelConfig::getChannelAuthTypeSupported(const uint8_t chNum,
                                                uint8_t& authTypeSupported)
 {
     if (!isValidChannel(chNum))
@@ -661,8 +661,8 @@ ipmi_ret_t
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ChannelConfig::getChannelEnabledAuthType(const uint8_t& chNum,
-                                                    const uint8_t& priv,
+ipmi_ret_t ChannelConfig::getChannelEnabledAuthType(const uint8_t chNum,
+                                                    const uint8_t priv,
                                                     EAuthType& authType)
 {
     if (!isValidChannel(chNum))
@@ -715,7 +715,7 @@ EChannelAccessMode
         std::distance(accessModeList.begin(), iter));
 }
 
-std::string ChannelConfig::convertToAccessModeString(const uint8_t& value)
+std::string ChannelConfig::convertToAccessModeString(const uint8_t value)
 {
     if (accessModeList.size() <= value)
     {
@@ -740,7 +740,7 @@ CommandPrivilege
     return static_cast<CommandPrivilege>(std::distance(privList.begin(), iter));
 }
 
-std::string ChannelConfig::convertToPrivLimitString(const uint8_t& value)
+std::string ChannelConfig::convertToPrivLimitString(const uint8_t value)
 {
     if (privList.size() <= value)
     {
@@ -797,7 +797,7 @@ EChannelProtocolType
     return static_cast<EChannelProtocolType>(it->second);
 }
 
-uint8_t ChannelConfig::convertToChannelIndexNumber(const uint8_t& chNum)
+uint8_t ChannelConfig::convertToChannelIndexNumber(const uint8_t chNum)
 {
 
     // TODO: There is limitation in current design. we cannot detect exact
@@ -884,7 +884,7 @@ int ChannelConfig::writeJsonFile(const std::string& configFile,
     return 0;
 }
 
-void ChannelConfig::setDefaultChannelConfig(const uint8_t& chNum,
+void ChannelConfig::setDefaultChannelConfig(const uint8_t chNum,
                                             const std::string& chName)
 {
     channelData[chNum].chName = chName;
