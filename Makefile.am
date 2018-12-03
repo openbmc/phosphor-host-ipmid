@@ -78,7 +78,6 @@ libuserlayer_la_LDFLAGS = \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-lstdc++fs \
 	$(OPENSSL_LIBS) \
-	-lpam_misc \
 	-version-info 0:0:0 -shared
 libuserlayer_la_CXXFLAGS = \
 	$(SYSTEMD_CFLAGS) \
@@ -126,6 +125,7 @@ libipmi20_la_LDFLAGS = \
 	$(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	$(LIBS) \
 	-lstdc++fs \
 	-luserlayer \
 	-version-info 0:0:0 -shared
