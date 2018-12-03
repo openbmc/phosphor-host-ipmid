@@ -91,7 +91,7 @@ ipmi_ret_t ipmiRenameUserEntryPassword(const std::string& userName,
  *
  *  @return true if valid, false otherwise
  */
-bool ipmiUserIsValidUserId(const uint8_t& userId);
+bool ipmiUserIsValidUserId(const uint8_t userId);
 
 /** @brief determines valid channel
  *
@@ -99,7 +99,7 @@ bool ipmiUserIsValidUserId(const uint8_t& userId);
  *
  *  @return true if valid, false otherwise
  */
-bool ipmiUserIsValidChannel(const uint8_t& chNum);
+bool ipmiUserIsValidChannel(const uint8_t chNum);
 
 /** @brief determines valid privilege level
  *
@@ -107,7 +107,7 @@ bool ipmiUserIsValidChannel(const uint8_t& chNum);
  *
  *  @return true if valid, false otherwise
  */
-bool ipmiUserIsValidPrivilege(const uint8_t& priv);
+bool ipmiUserIsValidPrivilege(const uint8_t priv);
 
 /** @brief get user id corresponding to the user name
  *
@@ -124,7 +124,7 @@ uint8_t ipmiUserGetUserId(const std::string& userName);
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmiUserSetUserName(const uint8_t& userId, const char* userName);
+ipmi_ret_t ipmiUserSetUserName(const uint8_t userId, const char* userName);
 
 /** @brief get user name
  *
@@ -133,7 +133,7 @@ ipmi_ret_t ipmiUserSetUserName(const uint8_t& userId, const char* userName);
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmiUserGetUserName(const uint8_t& userId, std::string& userName);
+ipmi_ret_t ipmiUserGetUserName(const uint8_t userId, std::string& userName);
 
 /** @brief provides available fixed, max, and enabled user counts
  *
@@ -153,7 +153,7 @@ ipmi_ret_t ipmiUserGetAllCounts(uint8_t& maxChUsers, uint8_t& enabledUsers,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmiUserUpdateEnabledState(const uint8_t& userId, const bool& state);
+ipmi_ret_t ipmiUserUpdateEnabledState(const uint8_t userId, const bool& state);
 
 /** @brief determines whether user is enabled
  *
@@ -162,7 +162,7 @@ ipmi_ret_t ipmiUserUpdateEnabledState(const uint8_t& userId, const bool& state);
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmiUserCheckEnabled(const uint8_t& userId, bool& state);
+ipmi_ret_t ipmiUserCheckEnabled(const uint8_t userId, bool& state);
 
 /** @brief provides user privilege access data
  *
@@ -172,8 +172,7 @@ ipmi_ret_t ipmiUserCheckEnabled(const uint8_t& userId, bool& state);
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t& userId,
-                                      const uint8_t& chNum,
+ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       PrivAccess& privAccess);
 
 /** @brief sets user privilege access data
@@ -185,8 +184,7 @@ ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t& userId,
  *
  *  @return IPMI_CC_OK for success, others for failure.
  */
-ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t& userId,
-                                      const uint8_t& chNum,
+ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const PrivAccess& privAccess,
                                       const bool& otherPrivUpdate);
 

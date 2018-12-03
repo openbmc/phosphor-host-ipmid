@@ -92,7 +92,7 @@ class UserAccess
      *
      *  @return true if valid, false otherwise
      */
-    static bool isValidChannel(const uint8_t& chNum);
+    static bool isValidChannel(const uint8_t chNum);
 
     /** @brief determines valid userId
      *
@@ -100,7 +100,7 @@ class UserAccess
      *
      *  @return true if valid, false otherwise
      */
-    static bool isValidUserId(const uint8_t& userId);
+    static bool isValidUserId(const uint8_t userId);
 
     /** @brief determines valid user privilege
      *
@@ -108,7 +108,7 @@ class UserAccess
      *
      *  @return true if valid, false otherwise
      */
-    static bool isValidPrivilege(const uint8_t& priv);
+    static bool isValidPrivilege(const uint8_t priv);
 
     /** @brief determines sync index to be mapped with common-user-management
      *
@@ -155,7 +155,7 @@ class UserAccess
      *
      *  @return UserInfo for the specified user id
      */
-    UserInfo* getUserInfo(const uint8_t& userId);
+    UserInfo* getUserInfo(const uint8_t userId);
 
     /** @brief sets user information
      *
@@ -163,7 +163,7 @@ class UserAccess
      *  @param[in] userInfo - user information
      *
      */
-    void setUserInfo(const uint8_t& userId, UserInfo* userInfo);
+    void setUserInfo(const uint8_t userId, UserInfo* userInfo);
 
     /** @brief provides user name
      *
@@ -172,7 +172,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getUserName(const uint8_t& userId, std::string& userName);
+    ipmi_ret_t getUserName(const uint8_t userId, std::string& userName);
 
     /** @brief to set user name
      *
@@ -181,7 +181,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setUserName(const uint8_t& userId, const char* userNameInChar);
+    ipmi_ret_t setUserName(const uint8_t userId, const char* userNameInChar);
 
     /** @brief to set user enabled state
      *
@@ -190,7 +190,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setUserEnabledState(const uint8_t& userId,
+    ipmi_ret_t setUserEnabledState(const uint8_t userId,
                                    const bool& enabledState);
 
     /** @brief to set user privilege and access details
@@ -203,8 +203,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setUserPrivilegeAccess(const uint8_t& userId,
-                                      const uint8_t& chNum,
+    ipmi_ret_t setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const UserPrivAccess& privAccess,
                                       const bool& otherPrivUpdates);
 

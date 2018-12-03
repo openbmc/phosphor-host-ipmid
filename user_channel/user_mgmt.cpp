@@ -508,13 +508,13 @@ UserAccess::UserAccess() : bus(ipmid_get_sd_bus_connection())
     }
 }
 
-UserInfo* UserAccess::getUserInfo(const uint8_t& userId)
+UserInfo* UserAccess::getUserInfo(const uint8_t userId)
 {
     checkAndReloadUserData();
     return &usersTbl.user[userId];
 }
 
-void UserAccess::setUserInfo(const uint8_t& userId, UserInfo* userInfo)
+void UserAccess::setUserInfo(const uint8_t userId, UserInfo* userInfo)
 {
     checkAndReloadUserData();
     std::copy(reinterpret_cast<uint8_t*>(userInfo),
@@ -523,17 +523,17 @@ void UserAccess::setUserInfo(const uint8_t& userId, UserInfo* userInfo)
     writeUserData();
 }
 
-bool UserAccess::isValidChannel(const uint8_t& chNum)
+bool UserAccess::isValidChannel(const uint8_t chNum)
 {
     return (chNum < ipmiMaxChannels);
 }
 
-bool UserAccess::isValidUserId(const uint8_t& userId)
+bool UserAccess::isValidUserId(const uint8_t userId)
 {
     return ((userId <= ipmiMaxUsers) && (userId != reservedUserId));
 }
 
-bool UserAccess::isValidPrivilege(const uint8_t& priv)
+bool UserAccess::isValidPrivilege(const uint8_t priv)
 {
     return ((priv >= PRIVILEGE_CALLBACK && priv <= PRIVILEGE_OEM) ||
             priv == privNoAccess);
@@ -633,7 +633,7 @@ bool UserAccess::isValidUserName(const char* userNameInChar)
     return true;
 }
 
-ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t& userId,
+ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
                                            const bool& enabledState)
 {
     if (!isValidUserId(userId))
@@ -660,8 +660,8 @@ ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t& userId,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t& userId,
-                                              const uint8_t& chNum,
+ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
+                                              const uint8_t chNum,
                                               const UserPrivAccess& privAccess,
                                               const bool& otherPrivUpdates)
 {
@@ -747,7 +747,7 @@ uint8_t UserAccess::getUserId(const std::string& userName)
     return usrIndex;
 }
 
-ipmi_ret_t UserAccess::getUserName(const uint8_t& userId, std::string& userName)
+ipmi_ret_t UserAccess::getUserName(const uint8_t userId, std::string& userName)
 {
     if (!isValidUserId(userId))
     {
@@ -759,7 +759,7 @@ ipmi_ret_t UserAccess::getUserName(const uint8_t& userId, std::string& userName)
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t UserAccess::setUserName(const uint8_t& userId,
+ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
                                    const char* userNameInChar)
 {
     if (!isValidUserId(userId))

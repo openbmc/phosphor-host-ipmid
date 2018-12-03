@@ -57,17 +57,17 @@ ipmi_ret_t ipmiRenameUserEntryPassword(const std::string& userName,
     return IPMI_CC_OK;
 }
 
-bool ipmiUserIsValidUserId(const uint8_t& userId)
+bool ipmiUserIsValidUserId(const uint8_t userId)
 {
     return UserAccess::isValidUserId(userId);
 }
 
-bool ipmiUserIsValidChannel(const uint8_t& chNum)
+bool ipmiUserIsValidChannel(const uint8_t chNum)
 {
     return UserAccess::isValidChannel(chNum);
 }
 
-bool ipmiUserIsValidPrivilege(const uint8_t& priv)
+bool ipmiUserIsValidPrivilege(const uint8_t priv)
 {
     return UserAccess::isValidPrivilege(priv);
 }
@@ -77,12 +77,12 @@ uint8_t ipmiUserGetUserId(const std::string& userName)
     return getUserAccessObject().getUserId(userName);
 }
 
-ipmi_ret_t ipmiUserSetUserName(const uint8_t& userId, const char* userName)
+ipmi_ret_t ipmiUserSetUserName(const uint8_t userId, const char* userName)
 {
     return getUserAccessObject().setUserName(userId, userName);
 }
 
-ipmi_ret_t ipmiUserGetUserName(const uint8_t& userId, std::string& userName)
+ipmi_ret_t ipmiUserGetUserName(const uint8_t userId, std::string& userName)
 {
     return getUserAccessObject().getUserName(userId, userName);
 }
@@ -109,12 +109,12 @@ ipmi_ret_t ipmiUserGetAllCounts(uint8_t& maxChUsers, uint8_t& enabledUsers,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmiUserUpdateEnabledState(const uint8_t& userId, const bool& state)
+ipmi_ret_t ipmiUserUpdateEnabledState(const uint8_t userId, const bool& state)
 {
     return getUserAccessObject().setUserEnabledState(userId, state);
 }
 
-ipmi_ret_t ipmiUserCheckEnabled(const uint8_t& userId, bool& state)
+ipmi_ret_t ipmiUserCheckEnabled(const uint8_t userId, bool& state)
 {
     if (!UserAccess::isValidUserId(userId))
     {
@@ -125,8 +125,7 @@ ipmi_ret_t ipmiUserCheckEnabled(const uint8_t& userId, bool& state)
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t& userId,
-                                      const uint8_t& chNum,
+ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       PrivAccess& privAccess)
 {
 
@@ -148,8 +147,7 @@ ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t& userId,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t& userId,
-                                      const uint8_t& chNum,
+ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const PrivAccess& privAccess,
                                       const bool& otherPrivUpdates)
 {
