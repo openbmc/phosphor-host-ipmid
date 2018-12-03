@@ -120,6 +120,8 @@ XFAIL_TESTS =
 
 TESTS = $(check_PROGRAMS)
 
+libipmi20_la_LIBADD = \
+	libuserlayer.la
 libipmi20_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
@@ -127,7 +129,6 @@ libipmi20_la_LDFLAGS = \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(LIBS) \
 	-lstdc++fs \
-	-luserlayer \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = \
 	$(SYSTEMD_CFLAGS) \
