@@ -20,6 +20,7 @@ static constexpr auto buildDate = "BuildDate";
 static constexpr auto model = "Model";
 static constexpr auto prettyName = "PrettyName";
 static constexpr auto version = "Version";
+static constexpr auto type = "Type";
 
 // Board info areas
 static constexpr auto board = "Board";
@@ -108,6 +109,25 @@ void postFormatProcessing(FruAreaData& data)
 
     // Finally add area checksum
     appendDataChecksum(data);
+}
+
+/**
+ * @brief Read chassis type property value from inventory and append to the FRU
+ * area data.
+ *
+ * @param[in] propMap map of property values
+ * @param[in,out] data FRU area data to be appended
+ */
+void appendChassisType(const PropertyMap& propMap, FruAreaData& data)
+{
+    uint8_t chassisType = 0; // Not specified
+    auto iter = propMap.find(type);
+    if (iter != propMap.end())
+    {
+        auto value = iter->second;
+        chassisType = std::stoi(value);
+    }
+    data.emplace_back(chassisType);
 }
 
 /**
@@ -239,7 +259,7 @@ FruAreaData buildChassisInfoArea(const PropertyMap& propMap)
         preFormatProcessing(false, fruAreaData);
 
         // chassis type
-        fruAreaData.emplace_back(0);
+        appendChassisType(propMap, fruAreaData);
 
         // Chasiss part number, in config.yaml it is configured as model
         appendData(model, propMap, fruAreaData);
