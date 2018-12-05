@@ -88,6 +88,8 @@ libuserlayer_la_CXXFLAGS = \
 libipmi20dir = ${libdir}/ipmid-providers
 libipmi20_LTLIBRARIES = libipmi20.la
 libipmi20_la_DEPENDENCIES = libuserlayer.la
+install-libipmi20LTLIBRARIES: install-libuserlayerLTLIBRARIES
+
 libipmi20_la_SOURCES = \
 	net.cpp \
 	app/channel.cpp \
