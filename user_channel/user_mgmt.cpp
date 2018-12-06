@@ -769,12 +769,17 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t& userId,
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         userLock{*userMutex};
-    bool validUser = isValidUserName(userNameInChar);
     std::string oldUser;
     getUserName(userId, oldUser);
-    UserInfo* userInfo = getUserInfo(userId);
 
     std::string newUser(userNameInChar, 0, ipmiMaxUserName);
+    if (oldUser == newUser)
+    {
+        // requesting to set the same user name, return success.
+        return IPMI_CC_OK;
+    }
+    bool validUser = isValidUserName(userNameInChar);
+    UserInfo* userInfo = getUserInfo(userId);
     if (newUser.empty() && !oldUser.empty())
     {
         // Delete existing user
