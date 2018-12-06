@@ -12,6 +12,7 @@ constexpr size_t userNameMaxLen = 16;
 
 constexpr uint8_t userNameOnlyLookupMask = 0x10;
 constexpr uint8_t userNameOnlyLookup = 0x10;
+constexpr uint8_t userNamePrivLookup = 0x0;
 
 /**
  * @struct RAKP1request

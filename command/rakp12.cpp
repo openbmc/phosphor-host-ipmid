@@ -125,11 +125,10 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     session->reqMaxPrivLevel = request->req_max_privilege_level;
     session->curPrivLevel = static_cast<session::Privilege>(
         request->req_max_privilege_level & session::reqMaxPrivMask);
-    if (((request->req_max_privilege_level & userNameOnlyLookupMask) !=
-         userNameOnlyLookup) ||
-        (request->user_name_len == 0))
+    if (request->user_name_len == 0)
     {
-        // Skip privilege based lookup for security purpose
+        // Bail out, if user name is not specified.
+        // Yes, NULL user name is not supported for security reasons.
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
         return outPayload;
@@ -190,6 +189,19 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     if (session->curPrivLevel > static_cast<session::Privilege>(minPriv))
     {
         session->curPrivLevel = static_cast<session::Privilege>(minPriv);
+    }
+    // For username / privilege lookup, fail with UNAUTH_NAME, if requested
+    // max privilege is greater than the user privilege.
+    if (((request->req_max_privilege_level & userNameOnlyLookupMask) ==
+         userNamePrivLookup) &&
+        ((request->req_max_privilege_level & session::reqMaxPrivMask) >
+         userAccess.privilege))
+    {
+        std::cerr
+            << "Username/Privilege lookup failed for requested privilege\n";
+        response->rmcpStatusCode =
+            static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
+        return outPayload;
     }
 
     std::fill(authAlgo->userKey.data(),
