@@ -1,0 +1,52 @@
+option('tests', type: 'combo', choices: ['auto', 'true', 'false'],
+       value: 'auto', description: 'Build tests')
+option('examples', type: 'boolean', value: true, description: 'Build examples')
+
+option('install-provider-path', type: 'string', value: 'ipmid-providers',
+       description: 'Where in libdir to install the potential providers')
+option('load-provider-path', type: 'string', value: 'host-ipmid',
+       description: 'Where in libdir to load host-ipmid modules')
+
+option('whitelist-confs', type: 'array', value: ['host-ipmid-whitelist.conf'],
+       description: 'List of whitelist configs')
+
+option('sensor-yaml', type: 'string', value: 'sensor-example.yaml',
+       description: 'Sensor yaml used for generating definitons')
+option('inventory-sensor-yaml', type: 'string',
+       value: 'inventory-sensor-example.yaml',
+       description: 'Inentory sensor yaml used for generating definitons')
+option('fru-read-yaml', type: 'string', value: 'fru-read-example.yaml',
+       description: 'FRU yaml used for generating definitons')
+option('channel-yaml', type: 'string', value: 'channel-example.yaml',
+       description: 'Channel yaml used for generating definitons')
+
+option('host-name', type: 'string', value: 'host',
+       description: 'Host name in the object path')
+option('control-host-busname', type: 'string',
+       value: 'xyz.openbmc_project.Control.Host',
+       description: 'DBus name to register')
+option('control-host-objpath', type: 'string',
+       value: '/xyz/openbmc_project/control',
+       description: 'DBus object path')
+option('host-inband-dir', type: 'string',
+       value: '/run/openbmc',
+       description: 'Location of file to indicate host in shutdown')
+option('host-inband-file', type: 'string',
+       value: 'host@%u-request',
+       description: 'Filename to indicate host in shutdown')
+
+option('power-reading-config', type: 'string',
+       value: 'ipmi-providers/power_reading.json',
+       description: 'Power reading config file relative to datadir')
+
+option('sms-atn-ack-timeout-sec', type: 'integer', min: 1, value: 30,
+       description: 'Maximum time to wait for IPMI SMS ATN ACK')
+option('host-shutdown-complete-timeout-sec', type: 'integer', min: 1,
+       value: 2700, description: 'Maximum time to wait for host shutdown')
+
+option('softoff-busname', type: 'string',
+       value: 'xyz.openbmc_project.Ipmi.Internal.SoftPowerOff',
+       description: 'DBus name to register')
+option('softoff-objpath', type: 'string',
+       value: '/xyz/openbmc_project/ipmi/internal/soft_power_off',
+       description: 'DBus path to register')
