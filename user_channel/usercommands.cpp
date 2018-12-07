@@ -467,6 +467,7 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_INVALID_FIELD_REQUEST;
 }
 
+void registerUserIpmiFunctions() __attribute__((constructor));
 void registerUserIpmiFunctions()
 {
     ipmiUserInit();

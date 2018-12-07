@@ -62,14 +62,16 @@ fru-read-gen.cpp:
 channel-gen.cpp:
 	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
-libuserlayerdir = ${libdir}
+libuserlayerdir = ${libdir}/ipmid-providers
 libuserlayer_LTLIBRARIES = libuserlayer.la
 libuserlayer_la_SOURCES = \
-        user_channel/user_layer.cpp \
-        user_channel/user_mgmt.cpp \
-        user_channel/passwd_mgr.cpp \
-        user_channel/channel_mgmt.cpp \
-        user_channel/channel_layer.cpp
+	user_channel/usercommands.cpp \
+	user_channel/channelcommands.cpp \
+	user_channel/user_layer.cpp \
+	user_channel/user_mgmt.cpp \
+	user_channel/passwd_mgr.cpp \
+	user_channel/channel_mgmt.cpp \
+	user_channel/channel_layer.cpp
 
 libuserlayer_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
@@ -87,8 +89,6 @@ libuserlayer_la_CXXFLAGS = \
 
 libipmi20dir = ${libdir}/ipmid-providers
 libipmi20_LTLIBRARIES = libipmi20.la
-libipmi20_la_DEPENDENCIES = libuserlayer.la
-install-libipmi20LTLIBRARIES: install-libuserlayerLTLIBRARIES
 
 libipmi20_la_SOURCES = \
 	net.cpp \
@@ -111,8 +111,6 @@ libipmi20_la_SOURCES = \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
-	user_channel/usercommands.cpp \
-	user_channel/channelcommands.cpp \
 	$(libipmi20_BUILT_LIST)
 
 @CODE_COVERAGE_RULES@
@@ -128,7 +126,6 @@ libipmi20_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-lstdc++fs \
-	-luserlayer \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = \
 	$(SYSTEMD_CFLAGS) \
@@ -161,8 +158,6 @@ libsysintfcmds_la_CXXFLAGS = \
 
 nobase_include_HEADERS = \
 	host-ipmid/iana.hpp \
-	user_channel/user_layer.hpp \
-	user_channel/channel_layer.hpp \
 	host-ipmid/ipmid-api.h \
 	host-ipmid/ipmid-host-cmd.hpp \
 	host-ipmid/ipmid-host-cmd-utils.hpp \
