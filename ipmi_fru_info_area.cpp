@@ -46,6 +46,16 @@ static constexpr auto secs_per_min = 60;
 static constexpr auto secsToMaxMfgdate =
     secs_from_1970_1996 + secs_per_min * maxMfgDateValue;
 
+// Minimum size of resulting FRU blob.
+// This is also the theoretical maximum size according to the spec:
+// 8 bytes header + 5 areas at 0xff*8 bytes max each
+// 8 + 5*0xff*8 = 0x27e0
+static constexpr auto fruMinSize = 0x27E0;
+
+// Value to use for padding.
+// Using 0xff to match the default (blank) value in a physical EEPROM.
+static constexpr auto fruPadValue = 0xff;
+
 /**
  * @brief Format Beginning of Individual IPMI FRU Data Section
  *
@@ -426,6 +436,12 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
 
     // add product use area data
     combFruArea.insert(combFruArea.end(), prodArea.begin(), prodArea.end());
+
+    // If area is smaller than the minimum size, pad it. This enables ipmitool
+    // to update the FRU blob with values longer than the original payload.
+    if (combFruArea.size() < fruMinSize) {
+        combFruArea.resize(fruMinSize, fruPadValue);
+    }
 
     return combFruArea;
 }
