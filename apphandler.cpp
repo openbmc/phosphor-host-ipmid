@@ -6,8 +6,6 @@
 #include "sys_info_param.hpp"
 #include "transporthandler.hpp"
 #include "types.hpp"
-#include "user_channel/channelcommands.hpp"
-#include "user_channel/usercommands.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>
@@ -1152,7 +1150,5 @@ void register_netfn_app_functions()
     // <Get System Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
                            ipmi_app_get_system_info, PRIVILEGE_USER);
-    ipmi::registerUserIpmiFunctions();
-    ipmi::registerChannelFunctions();
     return;
 }
