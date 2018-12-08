@@ -169,8 +169,7 @@ ipmi_ret_t ipmiSetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
 
-    // TODO: Self channel number (0xE) has to be determined.
-    uint8_t chNum = req->chNum;
+    uint8_t chNum = convertCurrentChannelNum(req->chNum);
     if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Set channel access - Parameter out of range");
@@ -275,8 +274,7 @@ ipmi_ret_t ipmiGetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
 
-    // TODO: Self channel number (0xE) has to be determined.
-    uint8_t chNum = req->chNum;
+    uint8_t chNum = convertCurrentChannelNum(req->chNum);
     if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel access - Parameter out of range");
@@ -342,8 +340,7 @@ ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
 
-    // TODO: Self channel number (0xE) has to be determined.
-    uint8_t chNum = req->chNum;
+    uint8_t chNum = convertCurrentChannelNum(req->chNum);
     if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel info - Parameter out of range");
