@@ -17,6 +17,7 @@
 #include "usercommands.hpp"
 
 #include "apphandler.hpp"
+#include "channel_layer.hpp"
 #include "user_layer.hpp"
 
 #include <host-ipmid/ipmid-api.h>
@@ -196,12 +197,11 @@ ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::DEBUG>("Set user access - Invalid Length");
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
+    uint8_t chNum = convertCurrentChannelNum(req->chNum);
     if (req->reserved1 != 0 || req->reserved2 != 0 || req->reserved3 != 0 ||
-        req->sessLimit != 0 ||
-        (!ipmiUserIsValidChannel(req->chNum) ||
-         (!ipmiUserIsValidPrivilege(req->privilege))))
-    // TODO: Need to check for session support and return invalid field in
-    // request
+        req->sessLimit != 0 || (!isValidChannel(chNum)) ||
+        (!ipmiUserIsValidPrivilege(req->privilege)) ||
+        (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
     {
         log<level::DEBUG>("Set user access - Invalid field in request");
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -211,8 +211,7 @@ ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::DEBUG>("Set user access - Parameter out of range");
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
-    // TODO: Determine the Channel number 0xE (Self Channel number ?)
-    uint8_t chNum = req->chNum;
+
     PrivAccess privAccess = {0};
     if (req->bitsUpdate)
     {
@@ -240,10 +239,10 @@ ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::DEBUG>("Get user access - Invalid Length");
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
+    uint8_t chNum = convertCurrentChannelNum(req->chNum);
     if (req->reserved1 != 0 || req->reserved2 != 0 ||
-        (!ipmiUserIsValidChannel(req->chNum)))
-    // TODO: Need to check for session support and return invalid field in
-    // request
+        (!isValidChannel(chNum)) ||
+        (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
     {
         log<level::DEBUG>("Get user access - Invalid field in request");
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -256,8 +255,6 @@ ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     uint8_t maxChUsers = 0, enabledUsers = 0, fixedUsers = 0;
     bool enabledState = false;
-    // TODO: Determine the Channel number 0xE (Self Channel number ?)
-    uint8_t chNum = req->chNum;
     GetUserAccessResp* resp = static_cast<GetUserAccessResp*>(response);
 
     std::fill(reinterpret_cast<uint8_t*>(resp),
