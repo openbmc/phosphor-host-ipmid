@@ -218,6 +218,15 @@ ipmi_ret_t getChannelInfo(const uint8_t& chNum, ChannelInfo& chInfo);
 ipmi_ret_t getChannelAccessData(const uint8_t& chNum,
                                 ChannelAccess& chAccessData);
 
+/** @brief provides function to convert self channel number (0xE)
+ *
+ *  @param[in] chNum - channel number as requested in commands.
+ *
+ *  @return same channel number or proper channel number for self channel number
+ * (0xE).
+ */
+uint8_t getConvertedSelfChannelNum(const uint8_t chNum);
+
 /** @brief to set channel access data
  *
  *  @param[in] chNum - channel number
