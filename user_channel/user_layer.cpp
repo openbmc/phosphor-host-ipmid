@@ -62,11 +62,6 @@ bool ipmiUserIsValidUserId(const uint8_t& userId)
     return UserAccess::isValidUserId(userId);
 }
 
-bool ipmiUserIsValidChannel(const uint8_t& chNum)
-{
-    return UserAccess::isValidChannel(chNum);
-}
-
 bool ipmiUserIsValidPrivilege(const uint8_t& priv)
 {
     return UserAccess::isValidPrivilege(priv);
