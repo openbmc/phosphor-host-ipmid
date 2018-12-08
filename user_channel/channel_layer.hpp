@@ -22,7 +22,7 @@ namespace ipmi
 {
 
 static constexpr uint8_t maxIpmiChannels = 16;
-static constexpr uint8_t selfChNum = 0xE;
+static constexpr uint8_t currentChNum = 0xE;
 
 // IPMI return codes specific to channel
 enum ipmi_channel_return_codes
@@ -217,6 +217,15 @@ ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo);
  */
 ipmi_ret_t getChannelAccessData(const uint8_t chNum,
                                 ChannelAccess& chAccessData);
+
+/** @brief provides function to convert current channel number (0xE)
+ *
+ *  @param[in] chNum - channel number as requested in commands.
+ *
+ *  @return same channel number or proper channel number for current channel
+ * number (0xE).
+ */
+uint8_t convertCurrentChannelNum(const uint8_t chNum);
 
 /** @brief to set channel access data
  *

@@ -59,6 +59,11 @@ bool isValidChannel(const uint8_t chNum)
     return getChannelConfigObject().isValidChannel(chNum);
 }
 
+uint8_t convertCurrentChannelNum(const uint8_t chNum)
+{
+    return getChannelConfigObject().convertToChannelIndexNumber(chNum);
+}
+
 bool isValidAuthType(const uint8_t chNum, const EAuthType& authType)
 {
     return getChannelConfigObject().isValidAuthType(chNum, authType);

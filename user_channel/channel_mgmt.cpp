@@ -827,7 +827,7 @@ uint8_t ChannelConfig::convertToChannelIndexNumber(const uint8_t chNum)
             }
         }
     }
-    return ((chNum == selfChNum) ? curChannel : chNum);
+    return ((chNum == currentChNum) ? curChannel : chNum);
 }
 
 std::string ChannelConfig::convertToNetInterface(const std::string& value)
