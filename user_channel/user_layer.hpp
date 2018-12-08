@@ -93,14 +93,6 @@ ipmi_ret_t ipmiRenameUserEntryPassword(const std::string& userName,
  */
 bool ipmiUserIsValidUserId(const uint8_t userId);
 
-/** @brief determines valid channel
- *
- *  @param[in] chNum- channel number
- *
- *  @return true if valid, false otherwise
- */
-bool ipmiUserIsValidChannel(const uint8_t chNum);
-
 /** @brief determines valid privilege level
  *
  *  @param[in] priv - privilege level
