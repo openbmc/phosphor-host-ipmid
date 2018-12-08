@@ -108,7 +108,7 @@ static std::unordered_map<std::string, EChannelMediumType> mediumTypeMap = {
     {"unknown", EChannelMediumType::unknown}};
 
 static std::unordered_map<EInterfaceIndex, std::string> interfaceMap = {
-    {interfaceKCS, "KCS"},
+    {interfaceKCS, "SMS"},
     {interfaceLAN1, "LAN1"},
     {interfaceUnknown, "unknown"}};
 
