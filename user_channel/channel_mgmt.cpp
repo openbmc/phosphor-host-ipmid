@@ -295,8 +295,10 @@ ChannelConfig::~ChannelConfig()
     }
 }
 
-ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
+ChannelConfig::ChannelConfig(sdbusplus::bus::bus &bus)
 {
+    mgmtBus = &bus;
+    signalHndlrObjectState = false;
     std::ofstream mutexCleanUpFile;
     mutexCleanUpFile.open(ipmiChMutexCleanupLockFile,
                           std::ofstream::out | std::ofstream::app);
@@ -333,7 +335,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
     {
         log<level::DEBUG>("Registering channel signal handler.");
         chPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
-            bus,
+            *mgmtBus,
             sdbusplus::bus::match::rules::path_namespace(
                 networkIntfObjectBasePath) +
                 sdbusplus::bus::match::rules::type::signal() +
@@ -613,7 +615,7 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
             std::string(networkIntfObjectBasePath) + "/" + intfName;
         try
         {
-            if (0 != setDbusProperty(bus, networkIntfServiceName,
+            if (0 != setDbusProperty(networkIntfServiceName,
                                      networkIntfObj, networkChConfigIntfName,
                                      privilegePropertyString, privStr))
             {
@@ -1256,8 +1258,7 @@ int ChannelConfig::checkAndReloadVolatileData()
     return ret;
 }
 
-int ChannelConfig::setDbusProperty(sdbusplus::bus::bus& bus,
-                                   const std::string& service,
+int ChannelConfig::setDbusProperty(const std::string& service,
                                    const std::string& objPath,
                                    const std::string& interface,
                                    const std::string& property,
@@ -1266,12 +1267,12 @@ int ChannelConfig::setDbusProperty(sdbusplus::bus::bus& bus,
     try
     {
         auto method =
-            bus.new_method_call(service.c_str(), objPath.c_str(),
+            mgmtBus->new_method_call(service.c_str(), objPath.c_str(),
                                 "org.freedesktop.DBus.Properties", "Set");
 
         method.append(interface, property, value);
 
-        auto reply = bus.call(method);
+        auto reply = mgmtBus->call(method);
     }
     catch (const sdbusplus::exception::SdBusError& e)
     {
@@ -1286,8 +1287,7 @@ int ChannelConfig::setDbusProperty(sdbusplus::bus::bus& bus,
     return 0;
 }
 
-int ChannelConfig::getDbusProperty(sdbusplus::bus::bus& bus,
-                                   const std::string& service,
+int ChannelConfig::getDbusProperty(const std::string& service,
                                    const std::string& objPath,
                                    const std::string& interface,
                                    const std::string& property,
@@ -1296,12 +1296,12 @@ int ChannelConfig::getDbusProperty(sdbusplus::bus::bus& bus,
     try
     {
         auto method =
-            bus.new_method_call(service.c_str(), objPath.c_str(),
+            mgmtBus->new_method_call(service.c_str(), objPath.c_str(),
                                 "org.freedesktop.DBus.Properties", "Get");
 
         method.append(interface, property);
 
-        auto reply = bus.call(method);
+        auto reply = mgmtBus->call(method);
         reply.read(value);
     }
     catch (const sdbusplus::exception::SdBusError& e)
@@ -1333,7 +1333,7 @@ int ChannelConfig::syncNetworkChannelConfig()
                 std::string networkIntfObj =
                     std::string(networkIntfObjectBasePath) + "/" + intfName;
                 DbusVariant variant;
-                if (0 != getDbusProperty(bus, networkIntfServiceName,
+                if (0 != getDbusProperty(networkIntfServiceName,
                                          networkIntfObj,
                                          networkChConfigIntfName,
                                          privilegePropertyString, variant))

@@ -78,7 +78,8 @@ int getChannelActiveSessions(const uint8_t chNum)
 
 ipmi_ret_t ipmiChannelInit()
 {
-    ChannelConfig channelConfigObj;
+    static sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    ChannelConfig channelConfigObj(bus);
     channelConfig = &channelConfigObj;
     return IPMI_CC_OK;
 }
