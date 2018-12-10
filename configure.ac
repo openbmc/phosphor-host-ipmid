@@ -167,5 +167,5 @@ AS_IF([test "x$HOST_IPMI_LIB_PATH" == "x"], [HOST_IPMI_LIB_PATH="/usr/lib/host-i
 AC_DEFINE_UNQUOTED([HOST_IPMI_LIB_PATH], ["$HOST_IPMI_LIB_PATH"], [The file path to search for libraries.])
 
 # Create configured output
-AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile user_channel/Makefile])
 AC_OUTPUT
