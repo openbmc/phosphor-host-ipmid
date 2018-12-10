@@ -32,15 +32,15 @@ PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],, [AC_M
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,\
     AC_MSG_ERROR(["Requires sdbusplus package."]))
 
-AS_IF([test "x$enable_softoff" != "xno"],
+AS_IF([test "x$enable_softoff" != "xno"], [
     PKG_CHECK_MODULES([SDEVENTPLUS], [sdeventplus],,\
         AC_MSG_ERROR(["Requires sdeventplus package."]))
 
     # Check for sdbus++ tool
-    [AC_PATH_PROG([SDBUSPLUSPLUS], [sdbus++])]
+    AC_PATH_PROG([SDBUSPLUSPLUS], [sdbus++])
     AS_IF([test "x$SDBUSPLUSPLUS" == "x"],
           AC_MSG_ERROR([Cannot find sdbus++]))
-)
+])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
