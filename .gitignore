@@ -36,8 +36,11 @@ Makefile.in
 /texinfo.tex
 
 # Repo Specific Items
+*.a
 *.o
 *.lo
+*.la
+*.so*
 /config.h
 /config.h.in~
 /config.log
@@ -45,8 +48,8 @@ Makefile.in
 Makefile
 .deps
 .dirstamp
-/lib*
 .libs/
+/libtool
 /*-libtool
 /ipmid
 .project
