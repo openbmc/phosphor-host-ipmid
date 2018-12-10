@@ -23,7 +23,9 @@
 namespace ipmi
 {
 
-bool doesDeviceExist(const uint8_t chNum)
+static ChannelConfig* channelConfig = nullptr;
+
+bool doesDeviceExist(const uint8_t& chNum)
 {
     // TODO: This is not the reliable way to find the device
     // associated with ethernet interface as the channel number to
@@ -56,76 +58,73 @@ bool isValidAccessMode(const uint8_t accessMode)
 
 bool isValidChannel(const uint8_t chNum)
 {
-    return getChannelConfigObject().isValidChannel(chNum);
+    return channelConfig->isValidChannel(chNum);
 }
 
 bool isValidAuthType(const uint8_t chNum, const EAuthType& authType)
 {
-    return getChannelConfigObject().isValidAuthType(chNum, authType);
+    return channelConfig->isValidAuthType(chNum, authType);
 }
 
 EChannelSessSupported getChannelSessionSupport(const uint8_t chNum)
 {
-    return getChannelConfigObject().getChannelSessionSupport(chNum);
+    return channelConfig->getChannelSessionSupport(chNum);
 }
 
 int getChannelActiveSessions(const uint8_t chNum)
 {
-    return getChannelConfigObject().getChannelActiveSessions(chNum);
+    return channelConfig->getChannelActiveSessions(chNum);
 }
 
 ipmi_ret_t ipmiChannelInit()
 {
-    getChannelConfigObject();
+    static ChannelConfig channelConfigObj;
+    channelConfig = &channelConfigObj;
     return IPMI_CC_OK;
 }
 
 ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo)
 {
-    return getChannelConfigObject().getChannelInfo(chNum, chInfo);
+    return channelConfig->getChannelInfo(chNum, chInfo);
 }
 
 ipmi_ret_t getChannelAccessData(const uint8_t chNum,
                                 ChannelAccess& chAccessData)
 {
-    return getChannelConfigObject().getChannelAccessData(chNum, chAccessData);
+    return channelConfig->getChannelAccessData(chNum, chAccessData);
 }
 
 ipmi_ret_t setChannelAccessData(const uint8_t chNum,
                                 const ChannelAccess& chAccessData,
                                 const uint8_t setFlag)
 {
-    return getChannelConfigObject().setChannelAccessData(chNum, chAccessData,
-                                                         setFlag);
+    return channelConfig->setChannelAccessData(chNum, chAccessData, setFlag);
 }
 
 ipmi_ret_t getChannelAccessPersistData(const uint8_t chNum,
                                        ChannelAccess& chAccessData)
 {
-    return getChannelConfigObject().getChannelAccessPersistData(chNum,
-                                                                chAccessData);
+    return channelConfig->getChannelAccessPersistData(chNum, chAccessData);
 }
 
 ipmi_ret_t setChannelAccessPersistData(const uint8_t chNum,
                                        const ChannelAccess& chAccessData,
                                        const uint8_t setFlag)
 {
-    return getChannelConfigObject().setChannelAccessPersistData(
-        chNum, chAccessData, setFlag);
+    return channelConfig->setChannelAccessPersistData(chNum, chAccessData,
+                                                      setFlag);
 }
 
 ipmi_ret_t getChannelAuthTypeSupported(const uint8_t chNum,
                                        uint8_t& authTypeSupported)
 {
-    return getChannelConfigObject().getChannelAuthTypeSupported(
-        chNum, authTypeSupported);
+    return channelConfig->getChannelAuthTypeSupported(chNum, authTypeSupported);
 }
 
 ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
                                      EAuthType& authType)
 {
-    return getChannelConfigObject().getChannelEnabledAuthType(chNum, priv,
-                                                              authType);
+    return channelConfig->getChannelEnabledAuthType(chNum, priv, authType);
 }
 
 } // namespace ipmi
