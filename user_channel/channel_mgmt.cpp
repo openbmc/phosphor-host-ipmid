@@ -286,12 +286,6 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
     return;
 }
 
-ChannelConfig& getChannelConfigObject()
-{
-    static ChannelConfig channelConfig;
-    return channelConfig;
-}
-
 ChannelConfig::~ChannelConfig()
 {
     if (signalHndlrObjectState)

@@ -54,10 +54,6 @@ struct ChannelData
     ChannelAccessData chAccess;
 };
 
-class ChannelConfig;
-
-ChannelConfig& getChannelConfigObject();
-
 class ChannelConfig
 {
   public:
