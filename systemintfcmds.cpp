@@ -6,7 +6,6 @@
 #include "host-interface.hpp"
 
 #include <host-ipmid/ipmid-api.h>
-#include <mapper.h>
 
 #include <cstring>
 #include <host-ipmid/ipmid-host-cmd.hpp>
