@@ -1,5 +1,8 @@
 AM_DEFAULT_SOURCE_EXT = .cpp
 
+providersdir = ${libdir}/ipmid-providers
+providers_LTLIBRARIES =
+
 sbin_PROGRAMS = \
 	ipmid
 
@@ -62,32 +65,8 @@ fru-read-gen.cpp:
 channel-gen.cpp:
 	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
-libuserlayerdir = ${libdir}
-libuserlayer_LTLIBRARIES = libuserlayer.la
-libuserlayer_la_SOURCES = \
-        user_channel/user_layer.cpp \
-        user_channel/user_mgmt.cpp \
-        user_channel/passwd_mgr.cpp \
-        user_channel/channel_mgmt.cpp \
-        user_channel/channel_layer.cpp
-
-libuserlayer_la_LDFLAGS = \
-	$(SYSTEMD_LIBS) \
-	$(libmapper_LIBS) \
-	$(PHOSPHOR_LOGGING_LIBS) \
-	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
-	-lstdc++fs \
-	$(CRYPTO_LIBS) \
-	-version-info 0:0:0 -shared
-libuserlayer_la_CXXFLAGS = \
-	$(SYSTEMD_CFLAGS) \
-	$(libmapper_CFLAGS) \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
-
-libipmi20dir = ${libdir}/ipmid-providers
-libipmi20_LTLIBRARIES = libipmi20.la
-libipmi20_la_DEPENDENCIES = libuserlayer.la
+providers_LTLIBRARIES += libipmi20.la
+libipmi20_la_LIBADD = user_channel/libuserlayer.la
 libipmi20_la_SOURCES = \
 	net.cpp \
 	app/channel.cpp \
@@ -127,7 +106,6 @@ libipmi20_la_LDFLAGS = \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(LIBS) \
 	-lstdc++fs \
-	-luserlayer \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = \
 	$(SYSTEMD_CFLAGS) \
@@ -137,8 +115,7 @@ libipmi20_la_CXXFLAGS = \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
 	-flto
 
-libsysintfcmdsdir = ${libdir}/ipmid-providers
-libsysintfcmds_LTLIBRARIES = libsysintfcmds.la
+providers_LTLIBRARIES += libsysintfcmds.la
 libsysintfcmds_la_SOURCES = \
 	systemintfcmds.cpp \
 	host-interface.cpp
@@ -169,4 +146,4 @@ nobase_include_HEADERS = \
 	host-ipmid/oemrouter.hpp
 
 # Forcing the build of self and then subdir
-SUBDIRS = . test softoff
+SUBDIRS = user_channel . test softoff
