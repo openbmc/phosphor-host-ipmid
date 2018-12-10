@@ -11,7 +11,6 @@
 #include <dirent.h>
 #include <dlfcn.h>
 #include <errno.h>
-#include <mapper.h>
 #include <sys/time.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
