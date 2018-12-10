@@ -234,9 +234,9 @@ class ChannelConfig
     std::time_t voltFileLastUpdatedTime;
     std::time_t getUpdatedFileTime(const std::string& fileName);
     boost::interprocess::file_lock mutexCleanupLock;
-    sdbusplus::bus::bus bus;
-    bool signalHndlrObjectState = false;
+    bool signalHndlrObjectState;
     boost::interprocess::file_lock sigHndlrLock;
+    sdbusplus::bus::bus bus;
 
     /** @brief function to initialize persistent channel configuration
      *
@@ -291,7 +291,6 @@ class ChannelConfig
 
     /** @brief function to set D-Bus property value
      *
-     *  @param[in] bus - bus
      *  @param[in] service - service name
      *  @param[in] objPath - object path
      *  @param[in] interface - interface
@@ -300,14 +299,12 @@ class ChannelConfig
      *
      *  @return 0 for success, -errno for failure.
      */
-    int setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
-                        const std::string& objPath,
+    int setDbusProperty(const std::string& service, const std::string& objPath,
                         const std::string& interface,
                         const std::string& property, const DbusVariant& value);
 
     /** @brief function to get D-Bus property value
      *
-     *  @param[in] bus - bus
      *  @param[in] service - service name
      *  @param[in] objPath - object path
      *  @param[in] interface - interface
@@ -316,8 +313,7 @@ class ChannelConfig
      *
      *  @return 0 for success, -errno for failure.
      */
-    int getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
-                        const std::string& objPath,
+    int getDbusProperty(const std::string& service, const std::string& objPath,
                         const std::string& interface,
                         const std::string& property, DbusVariant& value);
 
