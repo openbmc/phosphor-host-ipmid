@@ -303,6 +303,7 @@ ChannelConfig::~ChannelConfig()
 
 ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
 {
+    signalHndlrObjectState = false;
     std::ofstream mutexCleanUpFile;
     mutexCleanUpFile.open(ipmiChMutexCleanupLockFile,
                           std::ofstream::out | std::ofstream::app);
@@ -619,8 +620,8 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
             std::string(networkIntfObjectBasePath) + "/" + intfName;
         try
         {
-            if (0 != setDbusProperty(bus, networkIntfServiceName,
-                                     networkIntfObj, networkChConfigIntfName,
+            if (0 != setDbusProperty(networkIntfServiceName, networkIntfObj,
+                                     networkChConfigIntfName,
                                      privilegePropertyString, privStr))
             {
                 log<level::DEBUG>("Network interface does not exist",
@@ -996,7 +997,6 @@ int ChannelConfig::readChannelVolatileData()
         log<level::DEBUG>("Error in opening IPMI Channel data file");
         return -EIO;
     }
-
     try
     {
         // Fill in global structure
@@ -1065,7 +1065,6 @@ int ChannelConfig::readChannelPersistData()
         log<level::DEBUG>("Error in opening IPMI Channel data file");
         return -EIO;
     }
-
     try
     {
         // Fill in global structure
@@ -1262,8 +1261,7 @@ int ChannelConfig::checkAndReloadVolatileData()
     return ret;
 }
 
-int ChannelConfig::setDbusProperty(sdbusplus::bus::bus& bus,
-                                   const std::string& service,
+int ChannelConfig::setDbusProperty(const std::string& service,
                                    const std::string& objPath,
                                    const std::string& interface,
                                    const std::string& property,
@@ -1292,8 +1290,7 @@ int ChannelConfig::setDbusProperty(sdbusplus::bus::bus& bus,
     return 0;
 }
 
-int ChannelConfig::getDbusProperty(sdbusplus::bus::bus& bus,
-                                   const std::string& service,
+int ChannelConfig::getDbusProperty(const std::string& service,
                                    const std::string& objPath,
                                    const std::string& interface,
                                    const std::string& property,
@@ -1339,8 +1336,7 @@ int ChannelConfig::syncNetworkChannelConfig()
                 std::string networkIntfObj =
                     std::string(networkIntfObjectBasePath) + "/" + intfName;
                 DbusVariant variant;
-                if (0 != getDbusProperty(bus, networkIntfServiceName,
-                                         networkIntfObj,
+                if (0 != getDbusProperty(networkIntfServiceName, networkIntfObj,
                                          networkChConfigIntfName,
                                          privilegePropertyString, variant))
                 {
