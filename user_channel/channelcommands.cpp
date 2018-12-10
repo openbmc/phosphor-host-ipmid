@@ -373,6 +373,7 @@ ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+void registerChannelFunctions() __attribute__((constructor));
 void registerChannelFunctions()
 {
     ipmiChannelInit();

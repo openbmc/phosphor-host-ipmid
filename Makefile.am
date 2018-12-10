@@ -66,7 +66,6 @@ channel-gen.cpp:
 	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
 providers_LTLIBRARIES += libipmi20.la
-libipmi20_la_LIBADD = user_channel/libuserlayer.la
 libipmi20_la_SOURCES = \
 	net.cpp \
 	app/channel.cpp \
@@ -88,8 +87,6 @@ libipmi20_la_SOURCES = \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
-	user_channel/usercommands.cpp \
-	user_channel/channelcommands.cpp \
 	$(libipmi20_BUILT_LIST)
 
 @CODE_COVERAGE_RULES@
@@ -104,7 +101,6 @@ libipmi20_la_LDFLAGS = \
 	$(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
-	$(LIBS) \
 	-lstdc++fs \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = \
@@ -113,6 +109,19 @@ libipmi20_la_CXXFLAGS = \
 	$(BOOST_CXX) \
 	$(PHOSPHOR_LOGGING_CFLAGS) \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+	-flto
+
+providers_LTLIBRARIES += libusercmds.la
+libusercmds_la_LIBADD = user_channel/libuserlayer.la
+libusercmds_la_SOURCES = \
+	user_channel/usercommands.cpp \
+	user_channel/channelcommands.cpp
+libusercmds_la_LDFLAGS = \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(LIBS) \
+	-version-info 0:0:0 -shared
+libusercmds_la_CXXFLAGS = \
+	$(PHOSPHOR_LOGGING_CFLAGS) \
 	-flto
 
 providers_LTLIBRARIES += libsysintfcmds.la
