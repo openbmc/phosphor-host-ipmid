@@ -232,21 +232,13 @@ class ChannelConfig
      */
     int writeChannelVolatileData();
 
-    /** @brief function to get channel data based on channel number
-     *
-     *  @param[in] chNum - channel number
-     *
-     *  @return 0 for success, -errno for failure.
-     */
-    ChannelData* getChannelDataPtr(const uint8_t chNum);
-
     uint32_t signalFlag = 0;
 
     std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex{
         nullptr};
 
   private:
-    ChannelData channelData[maxIpmiChannels];
+    std::array<ChannelData, maxIpmiChannels> channelData;
     std::time_t nvFileLastUpdatedTime;
     std::time_t voltFileLastUpdatedTime;
     std::time_t getUpdatedFileTime(const std::string& fileName);
@@ -400,6 +392,23 @@ class ChannelConfig
      *  @return channel protocol  type
      */
     EChannelProtocolType convertToProtocolTypeIndex(const std::string& value);
+
+    /** @brief function to convert channel name to network interface name
+     *
+     *  @param[in] value - channel interface name - ipmi centric
+     *
+     *  @return network channel interface name
+     */
+    std::string convertToNetInterface(const std::string& value);
+
+    /** @brief function to handle Channel access property update through the
+     * D-Bus handler.
+     *
+     *  @param[in] path - D-Bus path to the network element (i.e. eth0)
+     *  @param[in] chProperties - D-Bus channel properties
+     */
+    void processChAccessPropChange(const std::string& path,
+                                   const DbusChObjProperties& chProperties);
 };
 
 } // namespace ipmi

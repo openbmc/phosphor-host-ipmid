@@ -151,8 +151,8 @@ std::string getNetIntfFromPath(const std::string& path)
     return intfName;
 }
 
-void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
-                               const DbusChObjProperties& chProperties)
+void ChannelConfig::processChAccessPropChange(
+    const std::string& path, const DbusChObjProperties& chProperties)
 {
     // Get interface name from path. ex: '/xyz/openbmc_project/network/eth0'
     std::string channelName;
@@ -195,8 +195,8 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
     uint8_t intfPriv = 0;
     try
     {
-        intfPriv =
-            static_cast<uint8_t>(chConfig.convertToPrivLimitIndex(intfPrivStr));
+        intfPriv = static_cast<uint8_t>(convertToPrivLimitIndex(intfPrivStr));
+        channelName = convertToChannelName(intfName);
     }
     catch (const std::invalid_argument& e)
     {
@@ -205,14 +205,12 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
     }
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
-        channelLock{*chConfig.channelMutex};
+        channelLock{*channelMutex};
     uint8_t chNum = 0;
-    ChannelData* chData;
     // Get the channel number based on the channel name.
     for (chNum = 0; chNum < maxIpmiChannels; chNum++)
     {
-        chData = chConfig.getChannelDataPtr(chNum);
-        if (chData->chName == channelName)
+        if (channelData[chNum].chName == channelName)
         {
             break;
         }
@@ -224,9 +222,9 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
     }
 
     // skip updating the values, if this property change originated from IPMI.
-    if (chConfig.signalFlag & (1 << chNum))
+    if (signalFlag & (1 << chNum))
     {
-        chConfig.signalFlag &= ~(1 << chNum);
+        signalFlag &= ~(1 << chNum);
         log<level::DEBUG>("Request originated from IPMI so ignoring signal");
         return;
     }
@@ -234,21 +232,23 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
     // Update both volatile & Non-volatile, if there is mismatch.
     // as property change other than IPMI, has to update both volatile &
     // non-volatile data.
-    if (chData->chAccess.chNonVolatileData.privLimit != intfPriv)
+    checkAndReloadVolatileData();
+    checkAndReloadNVData();
+    if (channelData[chNum].chAccess.chNonVolatileData.privLimit != intfPriv)
     {
         // Update NV data
-        chData->chAccess.chNonVolatileData.privLimit = intfPriv;
-        if (chConfig.writeChannelPersistData() != 0)
+        channelData[chNum].chAccess.chNonVolatileData.privLimit = intfPriv;
+        if (writeChannelPersistData() != 0)
         {
             log<level::ERR>("Failed to update the persist data file");
             return;
         }
 
         // Update Volatile data
-        if (chData->chAccess.chVolatileData.privLimit != intfPriv)
+        if (channelData[chNum].chAccess.chVolatileData.privLimit != intfPriv)
         {
-            chData->chAccess.chVolatileData.privLimit = intfPriv;
-            if (chConfig.writeChannelVolatileData() != 0)
+            channelData[chNum].chAccess.chVolatileData.privLimit = intfPriv;
+            if (writeChannelVolatileData() != 0)
             {
                 log<level::ERR>("Failed to update the volatile data file");
                 return;
@@ -325,17 +325,10 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                 std::string iface;
                 std::string path = msg.get_path();
                 msg.read(iface, props);
-                processChAccessPropChange(*this, path, props);
+                processChAccessPropChange(path, props);
             });
         signalHndlrObjectState = true;
     }
-}
-
-ChannelData* ChannelConfig::getChannelDataPtr(const uint8_t chNum)
-{
-    // reload data before using it.
-    checkAndReloadVolatileData();
-    return &channelData[chNum];
 }
 
 bool ChannelConfig::isValidChannel(const uint8_t chNum)
@@ -349,10 +342,9 @@ bool ChannelConfig::isValidChannel(const uint8_t chNum)
     if (channelData[chNum].isChValid == false)
     {
         log<level::DEBUG>("Channel is not valid");
-        return false;
     }
 
-    return true;
+    return channelData[chNum].isChValid;
 }
 
 EChannelSessSupported
@@ -879,7 +871,7 @@ int ChannelConfig::loadChannelConfig()
         channelLock{*channelMutex};
 
     Json data = readJsonFile(channelConfigDefaultFilename);
-    if (data == nullptr)
+    if (data.empty())
     {
         log<level::DEBUG>("Error in opening IPMI Channel data file");
         return -EIO;
