@@ -49,12 +49,12 @@ struct ChannelAccessData
     ChannelAccess chVolatileData;
 };
 
-/** @struct ChannelData
+/** @struct ChannelProperties
  *
  *  Structure for channel information - base structure to get all information
  * about the channel.(refer spec sec 22.22 to 22.24)
  */
-struct ChannelData
+struct ChannelProperties
 {
     std::string chName;
     uint8_t chID;
@@ -230,7 +230,7 @@ class ChannelConfig
         nullptr};
 
   private:
-    std::array<ChannelData, maxIpmiChannels> channelData;
+    std::array<ChannelProperties, maxIpmiChannels> channelData;
     std::time_t nvFileLastUpdatedTime;
     std::time_t voltFileLastUpdatedTime;
     std::time_t getUpdatedFileTime(const std::string& fileName);
