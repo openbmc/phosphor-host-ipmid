@@ -19,6 +19,9 @@ using namespace sdbusplus::xyz::openbmc_project::Control::server;
 using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
 extern cmdManagerPtr& ipmid_get_host_cmd_manager();
 
+// set BMC global enables initially
+uint8_t globalEnables = globalEnablesDefault;
+
 //-------------------------------------------------------------------
 // Called by Host post response from Get_Message_Flags
 //-------------------------------------------------------------------
@@ -75,14 +78,31 @@ ipmi_ret_t ipmi_app_get_msg_flags(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // bit:[1] from LSB : 1b = Event Message Buffer Full.
     // Return as 0 if Event Message Buffer is not supported,
     // or when the Event Message buffer is disabled.
-    // TODO. For now. assume its not disabled and send "0x2" anyway:
+    // For now, it is not supported.
 
-    uint8_t set_event_msg_buffer_full = 0x2;
+    uint8_t set_event_msg_buffer_full = 0x0;
     *data_len = sizeof(set_event_msg_buffer_full);
 
     // Pack the actual response
     std::memcpy(response, &set_event_msg_buffer_full, *data_len);
 
+    return rc;
+}
+
+
+ipmi_ret_t ipmi_app_get_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+					   ipmi_request_t request,
+					   ipmi_response_t response,
+					   ipmi_data_len_t data_len,
+					   ipmi_context_t context)
+{
+    ipmi_ret_t rc = IPMI_CC_OK;
+    if (0 != *data_len) 
+    {
+       return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    *data_len = 1;
+    *reinterpret_cast<uint8_t *>(response) = globalEnables;
     return rc;
 }
 
@@ -93,13 +113,32 @@ ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                            ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+
+    uint8_t *reqMask = reinterpret_cast<uint8_t *>(request);
+    if (1 != *data_len) 
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     *data_len = 0;
+    // Recv Message Queue and SEL are enabled by default.
+    // Event Message buffer are disabled by default (not supported).
+    // Any request that try to change the mask will be rejected
+    if ( *reqMask & ~globalEnables )
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
 
-    // Event and message logging enabled by default so return for now
-#ifdef __IPMI_DEBUG__
-    std::printf("IPMI APP SET BMC GLOBAL ENABLES Ignoring for now\n");
-#endif
+    if ( selEnable != (*reqMask & selEnable) )
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
 
+    if ( recvMsgQueueEnable != (*reqMask & recvMsgQueueEnable) )
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
     return rc;
 }
 
@@ -123,6 +162,10 @@ void register_netfn_app_functions()
     // <Set BMC Global Enables>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_BMC_GLOBAL_ENABLES, NULL,
                            ipmi_app_set_bmc_global_enables, SYSTEM_INTERFACE);
+
+    // <Get BMC Global Enables>
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_BMC_GLOBAL_ENABLES, NULL,
+                           ipmi_app_get_bmc_global_enables, SYSTEM_INTERFACE);
 
     // <Get Message Flags>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL,
