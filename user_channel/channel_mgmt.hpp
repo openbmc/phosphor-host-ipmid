@@ -197,16 +197,12 @@ class ChannelConfig
      */
     int writeChannelVolatileData();
 
-    uint32_t signalFlag = 0;
-
-    std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex{
-        nullptr};
-
   private:
+    uint32_t signalFlag;
+    std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex;
     std::array<ChannelData, maxIpmiChannels> channelData;
     std::time_t nvFileLastUpdatedTime;
     std::time_t voltFileLastUpdatedTime;
-    std::time_t getUpdatedFileTime(const std::string& fileName);
     boost::interprocess::file_lock mutexCleanupLock;
     bool signalHndlrObjectState;
     boost::interprocess::file_lock sigHndlrLock;
@@ -376,6 +372,15 @@ class ChannelConfig
 
     void processChAccessPropChange(const std::string& path,
                                    const DbusChObjProperties& chProperties);
+
+    /** @brief function to retrieve last modification time for the named file
+     *
+     *  @param[in] fileName - the name of the file for which to acquire
+     *  timestamp data
+     *
+     *  @return time the file was last modified
+     */
+    std::time_t getUpdatedFileTime(const std::string& fileName);
 };
 
 } // namespace ipmi

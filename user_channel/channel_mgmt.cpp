@@ -302,6 +302,7 @@ ChannelConfig::~ChannelConfig()
 ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
 {
     signalFlag = 0;
+    channelMutex = nullptr;
     signalHndlrObjectState = false;
     std::ofstream mutexCleanUpFile;
     mutexCleanUpFile.open(ipmiChMutexCleanupLockFile,
