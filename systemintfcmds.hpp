@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <host-ipmid/ipmid-api.h>
 
 // These are per skiboot ipmi-sel code
 
@@ -15,10 +16,23 @@
 // Major command for the heartbeat operation (verify host is alive)
 #define CMD_HEARTBEAT 0xFF
 
+
+// global enables
+// bit0   - Message Receive Queue enable
+// bit1   - Enable Event Message Buffer Full Interrupt
+// bit2   - Enable Event Message Buffer
+// bit3   - Enable System Event Logging
+// bit4   - reserved
+// bit5-7 - OEM 0~2 enables
+static constexpr uint8_t globalEnablesDefault = 0x09;
+static constexpr uint8_t selEnable = 0x08;
+static constexpr uint8_t recvMsgQueueEnable = 0x01;
+
 // IPMI commands used via System Interface functions.
 enum ipmi_netfn_system_intf_cmds
 {
     IPMI_CMD_SET_BMC_GLOBAL_ENABLES = 0x2E,
+    IPMI_CMD_GET_BMC_GLOBAL_ENABLES = 0x2F,
     IPMI_CMD_GET_MSG_FLAGS = 0x31,
     IPMI_CMD_READ_EVENT = 0x35,
 };
