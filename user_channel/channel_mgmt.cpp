@@ -405,7 +405,7 @@ bool ChannelConfig::isValidAuthType(const uint8_t chNum,
 int ChannelConfig::getChannelActiveSessions(const uint8_t chNum)
 {
     // TODO: TEMPORARY FIX
-    // Channels active session count is managed separatly
+    // Channels active session count is managed separately
     // by monitoring channel session which includes LAN and
     // RAKP layer changes. This will be updated, once the
     // authentication part is implemented.
@@ -894,6 +894,7 @@ void ChannelConfig::setDefaultChannelConfig(const uint8_t chNum,
 
 int ChannelConfig::loadChannelConfig()
 {
+    ChannelProperties* chData = &channelData[0];
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         channelLock{*channelMutex};
 
@@ -904,15 +905,12 @@ int ChannelConfig::loadChannelConfig()
         return -EIO;
     }
 
-    try
+    std::fill_n(reinterpret_cast<uint8_t*>(chData),
+                sizeof(ChannelProperties) * maxIpmiChannels, 0);
+    for (int chNum = 0; chNum < maxIpmiChannels; chNum++)
     {
-        // Fill in global structure
-        for (uint8_t chNum = 0; chNum < maxIpmiChannels; chNum++)
+        try
         {
-            std::fill(reinterpret_cast<uint8_t*>(&channelData[chNum]),
-                      reinterpret_cast<uint8_t*>(&channelData[chNum]) +
-                          sizeof(ChannelData),
-                      0);
             std::string chKey = std::to_string(chNum);
             Json jsonChData = data[chKey].get<Json>();
             if (jsonChData.is_null())
@@ -922,57 +920,49 @@ int ChannelConfig::loadChannelConfig()
                     entry("CHANNEL_NUM:%d", chNum));
                 // If user didn't want to configure specific channel (say
                 // reserved channel), then load that index with default values.
-                std::string chName(defaultChannelName);
-                setDefaultChannelConfig(chNum, chName);
+                setDefaultChannelConfig(chNum, defaultChannelName);
+                continue;
             }
-            else
+            Json jsonChInfo = jsonChData[channelInfoString].get<Json>();
+            if (jsonChInfo.is_null())
             {
-                std::string chName = jsonChData[nameString].get<std::string>();
-                channelData[chNum].chName = chName;
-                channelData[chNum].chID = chNum;
-                channelData[chNum].isChValid =
-                    jsonChData[isValidString].get<bool>();
-                channelData[chNum].activeSessCount =
-                    jsonChData.value(activeSessionsString, 0);
-                Json jsonChInfo = jsonChData[channelInfoString].get<Json>();
-                if (jsonChInfo.is_null())
-                {
-                    log<level::ERR>("Invalid/corrupted channel config file");
-                    return -EBADMSG;
-                }
-                else
-                {
-                    std::string medTypeStr =
-                        jsonChInfo[mediumTypeString].get<std::string>();
-                    channelData[chNum].chInfo.mediumType = static_cast<uint8_t>(
-                        convertToMediumTypeIndex(medTypeStr));
-                    std::string protoTypeStr =
-                        jsonChInfo[protocolTypeString].get<std::string>();
-                    channelData[chNum].chInfo.protocolType =
-                        static_cast<uint8_t>(
-                            convertToProtocolTypeIndex(protoTypeStr));
-                    std::string sessStr =
-                        jsonChInfo[sessionSupportedString].get<std::string>();
-                    channelData[chNum].chInfo.sessionSupported =
-                        static_cast<uint8_t>(
-                            convertToSessionSupportIndex(sessStr));
-                    channelData[chNum].chInfo.isIpmi =
-                        jsonChInfo[isIpmiString].get<bool>();
-                    channelData[chNum].chInfo.authTypeSupported =
-                        defaultAuthType;
-                }
+                log<level::ERR>("Invalid/corrupted channel config file");
+                return -1;
             }
+
+            chData = &channelData[chNum];
+            chData->chName = jsonChData[nameString].get<std::string>();
+            chData->chID = chNum;
+            chData->intfName = jsonChData[intfNameString].get<std::string>();
+            chData->is_NIC = jsonChData[isNICString].get<bool>();
+            chData->isChValid = jsonChData[isValidString].get<bool>();
+            chData->activeSessCount = jsonChData.value(activeSessionsString, 0);
+            std::string medTypeStr =
+                jsonChInfo[mediumTypeString].get<std::string>();
+            chData->chInfo.mediumType =
+                static_cast<uint8_t>(convertToMediumTypeIndex(medTypeStr));
+            std::string protoTypeStr =
+                jsonChInfo[protocolTypeString].get<std::string>();
+            chData->chInfo.protocolType =
+                static_cast<uint8_t>(convertToProtocolTypeIndex(protoTypeStr));
+            std::string sessStr =
+                jsonChInfo[sessionSupportedString].get<std::string>();
+            chData->chInfo.sessionSupported =
+                static_cast<uint8_t>(convertToSessionSupportIndex(sessStr));
+            chData->chInfo.isIpmi = jsonChInfo[isIpmiString].get<bool>();
+            chData->chInfo.authTypeSupported = defaultAuthType;
         }
-    }
-    catch (const Json::exception& e)
-    {
-        log<level::DEBUG>("Json Exception caught.", entry("MSG:%s", e.what()));
-        return -EBADMSG;
-    }
-    catch (const std::invalid_argument& e)
-    {
-        log<level::ERR>("Corrupted config.", entry("MSG:%s", e.what()));
-        return -EBADMSG;
+        catch (const Json::exception& e)
+        {
+            log<level::DEBUG>("Json Exception caught.",
+                              entry("MSG:%s", e.what()));
+            return -EBADMSG;
+        }
+        catch (const std::invalid_argument& e)
+        {
+            log<level::ERR>("Corrupted config.", entry("MSG:%s", e.what()));
+            return -EBADMSG;
+        }
     }
 
     return 0;
