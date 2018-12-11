@@ -298,6 +298,7 @@ ChannelConfig::ChannelConfig(sdbusplus::bus::bus &bus)
 {
     mgmtBus = &bus;
     signalFlag = 0;
+    channelMutex = nullptr;
     signalHndlrObjectState = false;
     std::ofstream mutexCleanUpFile;
     mutexCleanUpFile.open(ipmiChMutexCleanupLockFile,
