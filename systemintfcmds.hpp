@@ -19,6 +19,7 @@
 enum ipmi_netfn_system_intf_cmds
 {
     IPMI_CMD_SET_BMC_GLOBAL_ENABLES = 0x2E,
+    IPMI_CMD_GET_BMC_GLOBAL_ENABLES = 0x2F,
     IPMI_CMD_GET_MSG_FLAGS = 0x31,
     IPMI_CMD_READ_EVENT = 0x35,
 };
