@@ -17,8 +17,7 @@ nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
 	inventory-sensor-gen.cpp \
-	fru-read-gen.cpp \
-	channel-gen.cpp
+	fru-read-gen.cpp
 
 BUILT_SOURCES = \
 	ipmiwhitelist.cpp \
@@ -65,12 +64,8 @@ inventory-sensor-gen.cpp:
 fru-read-gen.cpp:
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
 
-channel-gen.cpp:
-	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
-
 providers_LTLIBRARIES += libipmi20.la
 libipmi20_la_SOURCES = \
-	net.cpp \
 	app/channel.cpp \
 	app/watchdog.cpp \
 	app/watchdog_service.cpp \
