@@ -60,6 +60,8 @@ static constexpr const char* propertiesChangedSignal = "PropertiesChanged";
 
 // STRING DEFINES: Should sync with key's in JSON
 static constexpr const char* nameString = "name";
+static constexpr const char* intfNameString = "intfName";
+static constexpr const char* isNICString = "is_NIC";
 static constexpr const char* isValidString = "is_valid";
 static constexpr const char* activeSessionsString = "active_sessions";
 static constexpr const char* channelInfoString = "channel_info";
@@ -135,34 +137,71 @@ static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
     "priv-reserved", "priv-callback", "priv-user",
     "priv-operator", "priv-admin",    "priv-oem"};
 
-static constexpr const char* LAN1_STR = "LAN1";
-static constexpr const char* LAN2_STR = "LAN2";
-static constexpr const char* LAN3_STR = "LAN3";
-static constexpr const char* ETH0_STR = "eth0";
-static constexpr const char* ETH1_STR = "eth1";
-static constexpr const char* ETH2_STR = "eth2";
-
-static std::unordered_map<std::string, std::string> channelToInterfaceMap = {
-    {LAN1_STR, ETH0_STR}, {LAN2_STR, ETH1_STR}, {LAN3_STR, ETH2_STR}};
-
-static std::unordered_map<std::string, std::string> interfaceToChannelMap = {
-    {ETH0_STR, LAN1_STR}, {ETH1_STR, LAN2_STR}, {ETH2_STR, LAN3_STR}};
-
-std::string convertToChannelName(const std::string& intfName)
+std::string ChannelConfig::convertToIntfNameFromChannelNum(const int chNum)
 {
-
-    auto it = interfaceToChannelMap.find(intfName);
-    if (it == interfaceToChannelMap.end())
+    for (const auto& it : channelData)
     {
-        log<level::ERR>("Invalid network interface.",
-                        entry("INTF:%s", intfName.c_str()));
-        throw std::invalid_argument("Invalid network interface");
+        if (it.chID == chNum)
+        {
+            return it.intfName;
+        }
     }
+    log<level::ERR>("Invalid channel number.",
+                    entry("ChannelID:%d", chNum));
+    throw std::invalid_argument("Invalid channel number");
 
-    return it->second;
+    return "";
 }
 
-std::string getNetIntfFromPath(const std::string& path)
+std::string ChannelConfig::convertToChannelNameFromIntfName(const std::string& intfName)
+{
+    for (const auto& it : channelData)
+    {
+        if (it.intfName == intfName)
+        {
+            return it.chName;
+        }
+    }
+    log<level::ERR>("Invalid network interface.",
+                    entry("INTF:%s", intfName.c_str()));
+    throw std::invalid_argument("Invalid network interface");
+
+    return "";
+}
+
+int ChannelConfig::convertToChannelNumberFromIntfName(const std::string& intfName)
+{
+    for (const auto& it : channelData)
+    {
+        if (it.intfName == intfName)
+        {
+            return it.chID;
+        }
+    }
+    log<level::ERR>("Invalid network interface.",
+                    entry("INTF:%s", intfName.c_str()));
+    throw std::invalid_argument("Invalid network interface");
+
+    return -1;
+}
+
+int ChannelConfig::convertToChannelNumberFromChannelName(const std::string& chName)
+{
+    for (const auto& it : channelData)
+    {
+        if (it.chName == chName)
+        {
+            return it.chID;
+        }
+    }
+    log<level::ERR>("Invalid channel name.",
+                    entry("Channel:%s", chName.c_str()));
+    throw std::invalid_argument("Invalid channel name");
+
+    return -1;
+}
+
+std::string ChannelConfig::getNetIntfFromPath(const std::string& path)
 {
     std::size_t pos = path.find(networkIntfObjectBasePath);
     if (pos == std::string::npos)
@@ -218,12 +257,12 @@ void ChannelConfig::processChAccessPropChange(const std::string& path,
     }
 
     uint8_t intfPriv = 0;
-    std::string channelName;
+    int chNum;
     try
     {
         intfPriv =
             static_cast<uint8_t>(convertToPrivLimitIndex(intfPrivStr));
-        channelName = convertToChannelName(intfName);
+        chNum = convertToChannelNumberFromIntfName(intfName);
     }
     catch (const std::invalid_argument& e)
     {
@@ -233,21 +272,6 @@ void ChannelConfig::processChAccessPropChange(const std::string& path,
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         channelLock{*channelMutex};
-    uint8_t chNum = 0;
-    // Get the channel number based on the channel name.
-    for (chNum = 0; chNum < maxIpmiChannels; chNum++)
-    {
-        if (channelData[chNum].chName == channelName)
-        {
-            break;
-        }
-    }
-    if (chNum >= maxIpmiChannels)
-    {
-        log<level::ERR>("Invalid interface in signal path");
-        return;
-    }
-
     // skip updating the values, if this property change originated from IPMI.
     if (signalFlag & (1 << chNum))
     {
@@ -602,7 +626,7 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
     if (setFlag & setPrivLimit)
     {
         // Send Update to network channel config interfaces over dbus
-        std::string intfName = convertToNetInterface(channelData[chNum].chName);
+        std::string intfName = channelData[chNum].intfName;
         std::string privStr = convertToPrivLimitString(chAccessData.privLimit);
         std::string networkIntfObj =
             std::string(networkIntfObjectBasePath) + "/" + intfName;
@@ -819,19 +843,6 @@ uint8_t ChannelConfig::convertToChannelIndexNumber(const uint8_t chNum)
     return ((chNum == selfChNum) ? curChannel : chNum);
 }
 
-std::string ChannelConfig::convertToNetInterface(const std::string& value)
-{
-    auto it = channelToInterfaceMap.find(value);
-    if (it == channelToInterfaceMap.end())
-    {
-        log<level::DEBUG>("Invalid channel name.",
-                          entry("NAME:%s", value.c_str()));
-        throw std::invalid_argument("Invalid channel name.");
-    }
-
-    return it->second;
-}
-
 Json ChannelConfig::readJsonFile(const std::string& configFile)
 {
     std::ifstream jsonFile(configFile);
@@ -891,7 +902,7 @@ void ChannelConfig::setDefaultChannelConfig(const uint8_t chNum,
 int ChannelConfig::loadChannelConfig()
 {
     int chNum;
-    ChannelData *chData = &channelData[0];
+    ChannelProperties *chData = &channelData[0];
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         channelLock{*channelMutex};
 
@@ -902,7 +913,8 @@ int ChannelConfig::loadChannelConfig()
         return -EIO;
     }
 
-    std::fill_n(reinterpret_cast<uint8_t*>(chData), sizeof(ChannelData) * maxIpmiChannels, 0);
+    std::fill_n(reinterpret_cast<uint8_t*>(chData), sizeof(ChannelProperties)
+                * maxIpmiChannels, 0);
     for (auto it = data.begin(); it != data.end(); ++it)
     {
         try
@@ -922,6 +934,8 @@ int ChannelConfig::loadChannelConfig()
                 chData = &channelData[chNum];
                 chData->chName = itValue[nameString].get<std::string>();
                 chData->chID = chNum;
+                chData->intfName = itValue[intfNameString].get<std::string>();
+                chData->is_NIC = itValue[isNICString].get<bool>();
                 chData->isChValid = itValue[isValidString].get<bool>();
                 chData->activeSessCount = itValue.value(activeSessionsString, 0);
                 Json jsonChInfo = itValue[channelInfoString].get<Json>();
@@ -1316,8 +1330,7 @@ int ChannelConfig::syncNetworkChannelConfig()
             std::string intfPrivStr;
             try
             {
-                std::string intfName =
-                    convertToNetInterface(channelData[chNum].chName);
+                std::string intfName = channelData[chNum].intfName;
                 std::string networkIntfObj =
                     std::string(networkIntfObjectBasePath) + "/" + intfName;
                 DbusVariant variant;

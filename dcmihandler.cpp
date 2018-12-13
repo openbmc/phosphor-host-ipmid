@@ -2,9 +2,9 @@
 
 #include "dcmihandler.hpp"
 
-#include "net.hpp"
 #include "utils.hpp"
 
+#include "user_channel/channel_layer.hpp"
 #include <host-ipmid/ipmid-api.h>
 
 #include <bitset>
@@ -248,7 +248,7 @@ bool getDHCPEnabled()
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
     auto ethdevice =
-        ipmi::network::ChanneltoEthernet(ethernetDefaultChannelNum);
+        ipmi::getChannelIntfNameFromChannelNumber(ethernetDefaultChannelNum);
     auto ethernetObj =
         ipmi::getDbusObject(bus, ethernetIntf, networkRoot, ethdevice);
     auto service = ipmi::getService(bus, ethernetIntf, ethernetObj.first);
