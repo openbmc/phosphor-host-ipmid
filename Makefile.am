@@ -99,6 +99,7 @@ XFAIL_TESTS =
 
 TESTS = $(check_PROGRAMS)
 
+libipmi20_la_LIBADD = user_channel/libuserlayer.la
 libipmi20_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
