@@ -44,9 +44,11 @@ struct ChannelAccessData
     ChannelAccess chVolatileData;
 };
 
-struct ChannelData
+struct ChannelProperties
 {
     std::string chName;
+    std::string intfName;
+    bool is_NIC;
     uint8_t chID;
     bool isChValid;
     uint8_t activeSessCount;
@@ -193,10 +195,16 @@ class ChannelConfig
      */
     int writeChannelVolatileData();
 
+    /** @brief Retrieves the LAN interface name via the IPMI channel number
+     *
+     *  @return the LAN interface name (i.e. eth0)
+     */
+    std::string convertToIntfNameFromChannelNum(const int chNum);
+
   private:
     uint32_t signalFlag;
     std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex;
-    std::array<ChannelData, maxIpmiChannels> channelData;
+    std::array<ChannelProperties, maxIpmiChannels> channelData;
     std::time_t nvFileLastUpdatedTime;
     std::time_t voltFileLastUpdatedTime;
     boost::interprocess::file_lock mutexCleanupLock;
@@ -360,11 +368,29 @@ class ChannelConfig
 
     /** @brief function to convert channel name to network interface name
      *
-     *  @param[in] value - channel interface name - ipmi centric
+     *  @param[in] value - IPMI channel name (i.e. LAN1)
      *
-     *  @return network channel interface name
+     *  @return network channel interface name (i.e. eth0)
      */
-    std::string convertToNetInterface(const std::string& value);
+    std::string convertToChannelNameFromIntfName(const std::string& chName);
+
+    /** @brief function to convert the LAN interface name to the IPMI channel
+     * number.
+     *
+     *  @param[in] intfName - the Linux device name (i.e. eth0)
+     *
+     *  @return IPMI channel number
+     */
+    int convertToChannelNumberFromIntfName(const std::string& intfName);
+
+    /** @brief function to convert channel name to the IPMI channel number.
+     *
+     *  @param[in] chName - the channel name defined in the JSON input file
+     *  (i.e. LAN1)
+     *
+     *  @return IPMI channel number
+     */
+    int convertToChannelNumberFromChannelName(const std::string& chName);
 
     void processChAccessPropChange(const std::string& path,
                                    const DbusChObjProperties& chProperties);
@@ -377,6 +403,14 @@ class ChannelConfig
      *  @return time the file was last modified
      */
     std::time_t getUpdatedFileTime(const std::string& fileName);
+
+    /** @brief function to convert the DBus path to a network interface name
+     *
+     *  @param[in] path - The DBus path to the device
+     *
+     *  @return network channel interface name (i.e. eth0)
+     */
+    std::string getNetIntfFromPath(const std::string& path);
 };
 
 } // namespace ipmi
