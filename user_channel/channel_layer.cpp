@@ -29,8 +29,7 @@ bool doesDeviceExist(const uint8_t chNum)
     // associated with ethernet interface as the channel number to
     // eth association is not done. Need to revisit later
     struct stat fileStat;
-    std::string devName("/sys/class/net/eth");
-    devName += std::to_string(chNum - 1);
+    std::string devName("/sys/class/net/" + getChannelName(chNum));
 
     if (stat(devName.data(), &fileStat) != 0)
     {
@@ -136,6 +135,11 @@ ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
 {
     return getChannelConfigObject().getChannelEnabledAuthType(chNum, priv,
                                                               authType);
+}
+
+std::string getChannelName(const int chNum)
+{
+    return getChannelConfigObject().getChannelName(chNum);
 }
 
 } // namespace ipmi
