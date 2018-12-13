@@ -137,7 +137,36 @@ static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
     "priv-reserved", "priv-callback", "priv-user",
     "priv-operator", "priv-admin",    "priv-oem"};
 
-std::string getNetIntfFromPath(const std::string& path)
+std::string ChannelConfig::getChannelName(const int chNum)
+{
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number.",
+                        entry("ChannelID:%d", chNum));
+        throw std::invalid_argument("Invalid channel number");
+    }
+
+    return channelData[chNum].chName;
+}
+
+int ChannelConfig::convertToChannelNumberFromChannelName(
+    const std::string& chName)
+{
+    for (const auto& it : channelData)
+    {
+        if (it.chName == chName)
+        {
+            return it.chID;
+        }
+    }
+    log<level::ERR>("Invalid channel name.",
+                    entry("Channel:%s", chName.c_str()));
+    throw std::invalid_argument("Invalid channel name");
+
+    return -1;
+}
+
+std::string ChannelConfig::getChannelNameFromPath(const std::string& path)
 {
     std::size_t pos = path.find(networkIntfObjectBasePath);
     if (pos == std::string::npos)
@@ -146,19 +175,19 @@ std::string getNetIntfFromPath(const std::string& path)
                         entry("PATH:%s", path.c_str()));
         throw std::invalid_argument("Invalid interface path");
     }
-    std::string intfName =
+    std::string chName =
         path.substr(pos + strlen(networkIntfObjectBasePath) + 1);
-    return intfName;
+    return chName;
 }
 
 void ChannelConfig::processChAccessPropChange(
     const std::string& path, const DbusChObjProperties& chProperties)
 {
     // Get interface name from path. ex: '/xyz/openbmc_project/network/eth0'
-    std::string channelName;
+    std::string chName;
     try
     {
-        channelName = getNetIntfFromPath(path);
+        chName = getChannelNameFromPath(path);
     }
     catch (const std::invalid_argument& e)
     {
@@ -188,15 +217,16 @@ void ChannelConfig::processChAccessPropChange(
     if (intfPrivStr.empty())
     {
         log<level::ERR>("Invalid privilege string.",
-                        entry("INTF:%s", channelName.c_str()));
+                        entry("INTF:%s", chName.c_str()));
         return;
     }
 
     uint8_t intfPriv = 0;
+    int chNum;
     try
     {
         intfPriv = static_cast<uint8_t>(convertToPrivLimitIndex(intfPrivStr));
-        channelName = convertToChannelName(intfName);
+        chNum = convertToChannelNumberFromChannelName(chName);
     }
     catch (const std::invalid_argument& e)
     {
@@ -206,21 +236,6 @@ void ChannelConfig::processChAccessPropChange(
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         channelLock{*channelMutex};
-    uint8_t chNum = 0;
-    // Get the channel number based on the channel name.
-    for (chNum = 0; chNum < maxIpmiChannels; chNum++)
-    {
-        if (channelData[chNum].chName == channelName)
-        {
-            break;
-        }
-    }
-    if (chNum >= maxIpmiChannels)
-    {
-        log<level::ERR>("Invalid interface in signal path");
-        return;
-    }
-
     // skip updating the values, if this property change originated from IPMI.
     if (signalFlag & (1 << chNum))
     {

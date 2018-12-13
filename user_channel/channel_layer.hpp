@@ -322,4 +322,12 @@ ipmi_ret_t getChannelAuthTypeSupported(const uint8_t chNum,
 ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
                                      EAuthType& authType);
 
+/** @brief Retrieves the LAN channel name from the IPMI channel number
+ *
+ *  @param[in] chNum - IPMI channel number
+ *
+ *  @return the LAN channel name (i.e. eth0)
+ */
+std::string getChannelName(const int chNum);
+
 } // namespace ipmi
