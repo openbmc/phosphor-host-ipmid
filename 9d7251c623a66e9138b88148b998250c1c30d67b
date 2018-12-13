@@ -1,0 +1,11 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Tom Joseph <tomjoseph@in.ibm.com>
+Code-Review+1: Brad Bishop <bradleyb@fuzziesquirrel.com>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+2: Emily Shaffer <emilyshaffer@google.com>
+Code-Review+1: William A. Kennington III <wak@google.com>
+Submitted-by: Vernon Mauery <vernon.mauery@linux.intel.com>
+Submitted-at: Thu, 13 Dec 2018 21:04:00 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/16739
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
