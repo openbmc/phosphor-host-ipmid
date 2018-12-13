@@ -68,7 +68,6 @@ channel-gen.cpp:
 providers_LTLIBRARIES += libipmi20.la
 libipmi20_la_LIBADD = user_channel/libuserlayer.la
 libipmi20_la_SOURCES = \
-	net.cpp \
 	app/channel.cpp \
 	app/watchdog.cpp \
 	app/watchdog_service.cpp \
