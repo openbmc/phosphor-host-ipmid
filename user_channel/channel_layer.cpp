@@ -133,4 +133,9 @@ ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
                                                               authType);
 }
 
+std::string getChannelIntfNameFromChannelNumber(const int chNum)
+{
+    return getChannelConfigObject().convertToIntfNameFromChannelNum(chNum);
+}
+
 } // namespace ipmi
