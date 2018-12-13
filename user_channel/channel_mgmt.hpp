@@ -224,6 +224,14 @@ class ChannelConfig
      */
     int writeChannelVolatileData();
 
+    /** @brief function to get channel name from channel number
+     *
+     *  @param[in] chNum - channel number index
+     *
+     *  @return network channel interface name
+     */
+    std::string getChannelName(const int chNum);
+
   private:
     uint32_t signalFlag = 0;
     std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex{
@@ -382,13 +390,14 @@ class ChannelConfig
      */
     EChannelProtocolType convertToProtocolTypeIndex(const std::string& value);
 
-    /** @brief function to convert channel name to network interface name
+    /** @brief function to convert channel name to the IPMI channel number.
      *
-     *  @param[in] value - channel interface name - ipmi centric
+     *  @param[in] chName - the channel name defined in the JSON input file
+     *  (i.e. LAN1)
      *
-     *  @return network channel interface name
+     *  @return IPMI channel number
      */
-    std::string convertToNetInterface(const std::string& value);
+    int convertToChannelNumberFromChannelName(const std::string& chName);
 
     /** @brief function to handle Channel access property update through the
      * D-Bus handler.
@@ -407,6 +416,14 @@ class ChannelConfig
      *  @return time the file was last modified
      */
     std::time_t getUpdatedFileTime(const std::string& fileName);
+
+    /** @brief function to convert the DBus path to a network channel name
+     *
+     *  @param[in] path - The DBus path to the device
+     *
+     *  @return network channel name (i.e. eth0)
+     */
+    std::string getChannelNameFromPath(const std::string& path);
 };
 
 } // namespace ipmi
