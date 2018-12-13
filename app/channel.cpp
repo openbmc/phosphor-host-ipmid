@@ -1,8 +1,8 @@
 #include "channel.hpp"
 
-#include "net.hpp"
 #include "transporthandler.hpp"
 #include "types.hpp"
+#include "user_channel/channel_layer.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>
@@ -55,7 +55,7 @@ ipmi_ret_t ipmi_get_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      */
     constexpr auto channelE = 0x0E;
     int channel = requestData->channelNumber;
-    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    auto ethdevice = ipmi::getChannelIntfNameFromChannelNumber(channel);
 
     if (channel != channelE && ethdevice.empty())
     {
@@ -101,7 +101,7 @@ ipmi_ret_t ipmi_app_channel_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     auto* p = static_cast<uint8_t*>(request);
     int channel = (*p) & CHANNEL_MASK;
-    std::string ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    std::string ethdevice = ipmi::getChannelIntfNameFromChannelNumber(channel);
 
     // The supported channels numbers are those which are configured.
     // Channel Number E is used as way to identify the current channel
@@ -350,7 +350,7 @@ ipmi_ret_t ipmi_set_channel_access(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     int channel = requestData->channelNumber;
     // Validate the channel number corresponds to any of the network channel.
-    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    auto ethdevice = ipmi::getChannelIntfNameFromChannelNumber(channel);
     if (ethdevice.empty())
     {
         *data_len = 0;
