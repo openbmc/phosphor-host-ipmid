@@ -2,7 +2,7 @@
 
 #include "app/channel.hpp"
 #include "ipmid.hpp"
-#include "net.hpp"
+#include "user_channel/channel_layer.hpp"
 #include "utils.hpp"
 
 #include <arpa/inet.h>
@@ -70,7 +70,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
     ipmi_ret_t rc = IPMI_CC_OK;
     sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    auto ethdevice = ipmi::getChannelIntfNameFromChannelNumber(channel);
     // if ethdevice is an empty string they weren't expecting this channel.
     if (ethdevice.empty())
     {
@@ -416,7 +416,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // channel number is the lower nibble
     int channel = reqptr->channel & CHANNEL_MASK;
-    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    auto ethdevice = ipmi::getChannelIntfNameFromChannelNumber(channel);
     if (ethdevice.empty())
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -578,7 +578,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    auto ethdevice = ipmi::getChannelIntfNameFromChannelNumber(channel);
     if (ethdevice.empty())
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -706,7 +706,7 @@ void applyChanges(int channel)
     ipmi::DbusObjectInfo ipObject;
     ipmi::DbusObjectInfo systemObject;
 
-    auto ethdevice = ipmi::network::ChanneltoEthernet(channel);
+    auto ethdevice = ipmi::getChannelIntfNameFromChannelNumber(channel);
     if (ethdevice.empty())
     {
         log<level::ERR>("Unable to get the interface name",
