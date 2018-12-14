@@ -5,10 +5,10 @@
 #include "host-cmd-manager.hpp"
 #include "host-interface.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <cstring>
-#include <host-ipmid/ipmid-host-cmd.hpp>
+#include <ipmid-host/cmd.hpp>
 
 void register_netfn_app_functions() __attribute__((constructor));
 

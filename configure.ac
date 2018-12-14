@@ -22,6 +22,9 @@ AS_IF([test "x$enable_softoff" != "xno"],
     [AC_CHECK_PROG([DIRNAME], dirname, dirname)]
 )
 
+# Make sure the pkgconfigdata is configured for automake
+PKG_INSTALLDIR
+
 # Checks for libraries.
 AC_CHECK_LIB([pam], [pam_start], [], [AC_MSG_ERROR([libpam not found])])
 AC_CHECK_LIB([mapper], [mapper_get_service], ,[AC_MSG_ERROR([Could not find libmapper...openbmc/phosphor-objmgr package required])])
@@ -163,5 +166,15 @@ AS_IF([test "x$HOST_IPMI_LIB_PATH" == "x"], [HOST_IPMI_LIB_PATH="/usr/lib/host-i
 AC_DEFINE_UNQUOTED([HOST_IPMI_LIB_PATH], ["$HOST_IPMI_LIB_PATH"], [The file path to search for libraries.])
 
 # Create configured output
-AC_CONFIG_FILES([Makefile test/Makefile softoff/Makefile user_channel/Makefile])
+AC_CONFIG_FILES([
+    Makefile
+    include/Makefile
+    libipmid/Makefile
+    libipmid/libipmid.pc
+    libipmid-host/Makefile
+    libipmid-host/libipmid-host.pc
+    softoff/Makefile
+    test/Makefile
+    user_channel/Makefile
+])
 AC_OUTPUT
