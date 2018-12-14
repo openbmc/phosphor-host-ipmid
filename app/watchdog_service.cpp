@@ -1,6 +1,6 @@
 #include "watchdog_service.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <exception>
 #include <phosphor-logging/elog-errors.hpp>

@@ -6,8 +6,8 @@
 #include "utils.hpp"
 
 #include <functional>
-#include <host-ipmid/ipmid-host-cmd-utils.hpp>
-#include <host-ipmid/ipmid-host-cmd.hpp>
+#include <ipmid-host/cmd-utils.hpp>
+#include <ipmid-host/cmd.hpp>
 #include <phosphor-logging/log.hpp>
 
 namespace phosphor
