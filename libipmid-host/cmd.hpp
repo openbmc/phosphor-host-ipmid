@@ -1,5 +1,4 @@
-#include "ipmid-host-cmd-utils.hpp"
-
+#include <libipmid-host/cmd-utils.hpp>
 #include <memory>
 #include <sdbusplus/bus.hpp>
 

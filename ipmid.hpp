@@ -1,6 +1,6 @@
 #pragma once
 
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 #include <stdio.h>
 
 // When the requester sends in a netfn and a command along with data, this

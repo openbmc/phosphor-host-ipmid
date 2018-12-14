@@ -1,8 +1,8 @@
 #pragma once
 
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 
-#include <host-ipmid/oemrouter.hpp>
+#include <libipmid/oemrouter.hpp>
 
 namespace oem
 {

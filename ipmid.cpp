@@ -17,10 +17,10 @@
 
 #include <algorithm>
 #include <cstring>
-#include <host-ipmid/ipmid-host-cmd.hpp>
-#include <host-ipmid/oemrouter.hpp>
 #include <iostream>
 #include <iterator>
+#include <libipmid-host/cmd.hpp>
+#include <libipmid/oemrouter.hpp>
 #include <map>
 #include <memory>
 #include <phosphor-logging/log.hpp>

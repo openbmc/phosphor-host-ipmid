@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 #pragma once
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 
 #include <string>
 

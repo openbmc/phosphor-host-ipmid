@@ -1,6 +1,6 @@
 #include "ipmid.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 
 #include <cstdio>
 

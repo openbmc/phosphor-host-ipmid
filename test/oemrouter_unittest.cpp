@@ -1,7 +1,7 @@
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 
 #include <cstring>
-#include <host-ipmid/oemrouter.hpp>
+#include <libipmid/oemrouter.hpp>
 
 #include "sample.h"
 

@@ -4,7 +4,7 @@
 #include "watchdog_service.hpp"
 
 #include <endian.h>
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 
 #include <cstdint>
 #include <phosphor-logging/elog-errors.hpp>

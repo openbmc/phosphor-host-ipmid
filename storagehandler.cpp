@@ -8,7 +8,7 @@
 #include "utils.hpp"
 
 #include <arpa/inet.h>
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 

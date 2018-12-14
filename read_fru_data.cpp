@@ -4,7 +4,7 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <libipmid/api.h>
 
 #include <algorithm>
 #include <map>
