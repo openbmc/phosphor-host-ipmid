@@ -4,7 +4,7 @@
 #include "storagehandler.hpp"
 #include "types.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
