@@ -2,7 +2,7 @@
 
 #include "types.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 #include <stdint.h>
 
 // IPMI commands for net functions.
