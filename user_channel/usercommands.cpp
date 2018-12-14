@@ -19,7 +19,7 @@
 #include "apphandler.hpp"
 #include "user_layer.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 #include <security/pam_appl.h>
 
 #include <phosphor-logging/log.hpp>
