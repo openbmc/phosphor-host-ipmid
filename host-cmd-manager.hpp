@@ -1,6 +1,6 @@
 #pragma once
 
-#include <host-ipmid/ipmid-host-cmd-utils.hpp>
+#include <ipmid-host/cmd-utils.hpp>
 #include <queue>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>

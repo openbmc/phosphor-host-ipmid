@@ -14,7 +14,6 @@ libuserlayer_la_LDFLAGS = \
 	$(CRYPTO_LIBS) \
 	-version-info 0:0:0 -shared
 libuserlayer_la_CXXFLAGS = \
-	-I$(top_srcdir) \
 	$(SYSTEMD_CFLAGS) \
 	$(libmapper_CFLAGS) \
 	$(PHOSPHOR_LOGGING_CFLAGS) \
