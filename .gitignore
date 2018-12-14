@@ -41,6 +41,7 @@ Makefile.in
 *.lo
 *.la
 *.so*
+*.pc
 /config.h
 /config.h.in~
 /config.log

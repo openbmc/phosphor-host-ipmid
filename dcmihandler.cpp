@@ -5,7 +5,7 @@
 #include "user_channel/channel_layer.hpp"
 #include "utils.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <bitset>
 #include <cmath>
