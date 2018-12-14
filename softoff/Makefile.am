@@ -1,5 +1,4 @@
 AM_DEFAULT_SOURCE_EXT = .cpp
-AM_CPPFLAGS = -I$(top_srcdir)
 sbin_PROGRAMS = phosphor-softpoweroff
 
 # Using ../ instead of $(top_srcdir) due to automake bug in version 1.15.

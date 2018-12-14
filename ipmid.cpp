@@ -17,9 +17,9 @@
 
 #include <algorithm>
 #include <cstring>
-#include <host-ipmid/ipmid-host-cmd.hpp>
-#include <host-ipmid/oemrouter.hpp>
 #include <iostream>
+#include <ipmid-host/cmd.hpp>
+#include <ipmid/oemrouter.hpp>
 #include <iterator>
 #include <map>
 #include <memory>
