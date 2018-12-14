@@ -5,7 +5,7 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <chrono>
 #include <phosphor-logging/elog-errors.hpp>
