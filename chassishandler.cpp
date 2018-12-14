@@ -9,7 +9,7 @@
 
 #include <arpa/inet.h>
 #include <endian.h>
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 #include <limits.h>
 #include <mapper.h>
 #include <netinet/in.h>
