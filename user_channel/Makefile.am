@@ -13,7 +13,7 @@ COMMON_CXX = \
 	-DBOOST_ASIO_DISABLE_THREADS \
 	-DBOOST_ALL_NO_LIB
 
-lib_LTLIBRARIES = libuserlayer.la
+lib_LTLIBRARIES = libuserlayer.la libchannellayer.la
 libuserlayer_la_SOURCES = \
 	user_layer.cpp \
 	user_mgmt.cpp \
@@ -29,5 +29,17 @@ libuserlayer_la_LDFLAGS = \
 	$(CRYPTO_LIBS) \
 	-version-info 0:0:0 -shared
 libuserlayer_la_CXXFLAGS = \
+	-I$(top_srcdir) \
+	$(COMMON_CXX)
+
+libchannellayer_la_SOURCES =
+libchannellayer_la_LDFLAGS = \
+	$(SYSTEMD_LIBS) \
+	$(libmapper_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	-lstdc++fs \
+	-version-info 0:0:0 -shared
+libchannellayer_la_CXXFLAGS = \
 	-I$(top_srcdir) \
 	$(COMMON_CXX)

@@ -1,5 +1,8 @@
 AM_DEFAULT_SOURCE_EXT = .cpp
 
+AM_CPPFLAGS = -I$(abs_srcdir) -I$(abs_srcdir)/include
+export AM_CPPFLAGS
+
 providersdir = ${libdir}/ipmid-providers
 providers_LTLIBRARIES =
 
@@ -40,6 +43,10 @@ COMMON_CXX = \
 	-DBOOST_ALL_NO_LIB
 
 ipmid_CXXFLAGS = $(COMMON_CXX)
+ipmid_LDADD = \
+	libipmid/libipmid.la \
+	user_channel/libchannellayer.la \
+	libipmid-host/libipmid-host.la
 ipmid_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
@@ -70,9 +77,13 @@ channel-gen.cpp:
 	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
 providers_LTLIBRARIES += libipmi20.la
+libipmi20_la_LIBADD = \
+	user_channel/libchannellayer.la \
+	libipmid/libipmid.la
 libipmi20_la_SOURCES = \
 	net.cpp \
 	app/channel.cpp \
+	user_channel/channelcommands.cpp \
 	app/watchdog.cpp \
 	app/watchdog_service.cpp \
 	apphandler.cpp \
@@ -110,19 +121,21 @@ libipmi20_la_LDFLAGS = \
 libipmi20_la_CXXFLAGS = $(COMMON_CXX)
 
 providers_LTLIBRARIES += libusercmds.la
-libusercmds_la_LIBADD = user_channel/libuserlayer.la
+libusercmds_la_LIBADD = \
+	libipmid/libipmid.la \
+	user_channel/libuserlayer.la
 libusercmds_la_SOURCES = \
-	user_channel/usercommands.cpp \
-	user_channel/channelcommands.cpp
+	user_channel/usercommands.cpp
 libusercmds_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(LIBS) \
 	-version-info 0:0:0 -shared
-libusercmds_la_CXXFLAGS = \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	-flto
+libusercmds_la_CXXFLAGS = $(COMMON_CXX)
 
 providers_LTLIBRARIES += libsysintfcmds.la
+libsysintfcmds_la_LIBADD = \
+	libipmid/libipmid.la \
+	libipmid-host/libipmid-host.la
 libsysintfcmds_la_SOURCES = \
 	systemintfcmds.cpp \
 	host-interface.cpp
@@ -136,14 +149,8 @@ libsysintfcmds_la_LDFLAGS = \
 libsysintfcmds_la_CXXFLAGS = $(COMMON_CXX)
 
 nobase_include_HEADERS = \
-	host-ipmid/iana.hpp \
-	user_channel/user_layer.hpp \
 	user_channel/channel_layer.hpp \
-	host-ipmid/ipmid-api.h \
-	host-ipmid/ipmid-host-cmd.hpp \
-	host-ipmid/ipmid-host-cmd-utils.hpp \
-	host-ipmid/oemopenbmc.hpp \
-	host-ipmid/oemrouter.hpp
+	user_channel/user_layer.hpp
 
 # Forcing the build of self and then subdir
-SUBDIRS = user_channel . test softoff
+SUBDIRS = include libipmid libipmid-host user_channel . test softoff
