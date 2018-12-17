@@ -135,7 +135,15 @@ void appendChassisType(const PropertyMap& propMap, FruAreaData& data)
     if (iter != propMap.end())
     {
         auto value = iter->second;
-        chassisType = std::stoi(value);
+        try {
+            chassisType = std::stoi(value);
+        }
+        catch (...)
+        {
+            std::fprintf(stderr, "Could not parse chassisType '%s'\n",
+                         value.c_str());
+            chassisType = 0;
+        }
     }
     data.emplace_back(chassisType);
 }
