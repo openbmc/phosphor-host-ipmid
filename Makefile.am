@@ -108,6 +108,7 @@ libipmi20_la_LDFLAGS = \
 	-lstdc++fs \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = \
+	-I$(top_srcdir) \
 	$(SYSTEMD_CFLAGS) \
 	$(libmapper_CFLAGS) \
 	$(BOOST_CXX) \
@@ -127,6 +128,7 @@ libsysintfcmds_la_LDFLAGS = \
 	$(SDBUSPLUS_LIBS) \
 	-version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = \
+	-I$(top_srcdir) \
 	$(SYSTEMD_CFLAGS) \
 	$(BOOST_CXX) \
 	$(libmapper_CFLAGS) \
