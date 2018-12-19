@@ -6,7 +6,6 @@
 #include "sessions_manager.hpp"
 
 #include <iomanip>
-#include <iostream>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -62,9 +61,8 @@ std::vector<uint8_t> Table::executeCommand(uint32_t inCommand,
         // exceeded message
         if (elapsedSeconds > 2s)
         {
-            std::cerr << "E> IPMI command timed out:Elapsed time = "
-                      << elapsedSeconds.count() << "s"
-                      << "\n";
+            log<level::ERR>("IPMI command timed out",
+                            entry("DELAY=%d", elapsedSeconds.count()));
         }
     }
     return response;
@@ -81,8 +79,10 @@ std::vector<uint8_t>
     {
         errResponse.resize(1);
         errResponse[0] = IPMI_CC_INSUFFICIENT_PRIVILEGE;
-        std::cerr << "E> Table::Not enough privileges for command 0x"
-                  << std::hex << command.command << "\n";
+        log<level::INFO>("Table: Insufficient privilege for command",
+                         entry("LUN=%x", int(command.NetFnLun.lun)),
+                         entry("NETFN=%x", int(command.NetFnLun.netFn)),
+                         entry("CMD=%x", command.cmd));
         return errResponse;
     }
 
@@ -112,8 +112,11 @@ std::vector<uint8_t>
         // and return sane error code.
         catch (const std::exception& e)
         {
-            std::cerr << "E> Unspecified error for command 0x" << std::hex
-                      << command.command << " - " << e.what() << "\n";
+            log<level::ERR>("Table: Unspecified error for command",
+                            entry("EXCEPTION=%s", e.what()),
+                            entry("LUN=%x", int(command.NetFnLun.lun)),
+                            entry("NETFN=%x", int(command.NetFnLun.netFn)),
+                            entry("CMD=%x", command.cmd));
             respSize = 0;
             // fall through
         }

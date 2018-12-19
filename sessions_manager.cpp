@@ -5,8 +5,10 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iomanip>
-#include <iostream>
 #include <memory>
+#include <phosphor-logging/log.hpp>
+
+using namespace phosphor::logging;
 
 namespace session
 {
@@ -89,15 +91,8 @@ std::shared_ptr<Session>
         return session;
     }
 
-    std::cerr << "E> No free sessions left: Active: " << activeSessions
-              << " Allowed: " << MAX_SESSION_COUNT << "\n";
+    log<level::INFO>("No free RMCP+ sessions left");
 
-    for (const auto& iterator : sessionsMap)
-    {
-        std::cerr << "E> Active Session: 0x" << std::hex << std::setfill('0')
-                  << std::setw(8) << (iterator.second)->getBMCSessionID()
-                  << "\n";
-    }
     throw std::runtime_error("No free sessions left");
 }
 

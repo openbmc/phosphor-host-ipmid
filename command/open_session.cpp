@@ -4,7 +4,9 @@
 #include "endian.hpp"
 #include "main.hpp"
 
-#include <iostream>
+#include <phosphor-logging/log.hpp>
+
+using namespace phosphor::logging;
 
 namespace command
 {
@@ -62,10 +64,10 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     }
     catch (std::exception& e)
     {
-        std::cerr << e.what() << "\n";
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INSUFFICIENT_RESOURCE);
-        std::cerr << "openSession : Problem opening a session\n";
+        log<level::ERR>("openSession : Problem opening a session",
+                        entry("EXCEPTION=%s", e.what()));
         return outPayload;
     }
 

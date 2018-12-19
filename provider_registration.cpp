@@ -9,7 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <iostream>
+#include <phosphor-logging/log.hpp>
+
+using namespace phosphor::logging;
 
 namespace provider
 {
@@ -31,8 +33,8 @@ void registerCallbackHandlers(const char* providerLibPath)
 {
     if (providerLibPath == NULL)
     {
-        std::cerr << "Path not provided for registering IPMI provider libraries"
-                  << "\n";
+        log<level::ERR>(
+            "Path not provided for registering IPMI provider libraries");
         return;
     }
 
@@ -56,7 +58,9 @@ void registerCallbackHandlers(const char* providerLibPath)
 
         if (lib_handler == NULL)
         {
-            std::cerr << "Error opening " << handlerPath << dlerror() << "\n";
+            log<level::ERR>("Error opening provider library",
+                            entry("PATH=%s", handlerPath.c_str()),
+                            entry("ERROR=%s", dlerror()));
         }
         free(handlerList[numLibs]);
     }

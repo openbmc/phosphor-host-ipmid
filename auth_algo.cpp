@@ -4,7 +4,9 @@
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 
-#include <iostream>
+#include <phosphor-logging/log.hpp>
+
+using namespace phosphor::logging;
 
 namespace cipher
 {
@@ -23,7 +25,7 @@ std::vector<uint8_t>
     if (HMAC(EVP_sha1(), userKey.data(), userKey.size(), input.data(),
              input.size(), output.data(), &mdLen) == NULL)
     {
-        std::cerr << "Generate HMAC failed\n";
+        log<level::ERR>("Generate HMAC failed");
         output.resize(0);
     }
 
@@ -39,7 +41,7 @@ std::vector<uint8_t>
     if (HMAC(EVP_sha1(), sessionIntegrityKey.data(), SHA_DIGEST_LENGTH,
              input.data(), input.size(), output.data(), &mdLen) == NULL)
     {
-        std::cerr << "Generate Session Integrity Key failed\n";
+        log<level::ERR>("Generate Session Integrity Key failed");
         output.resize(0);
     }
     output.resize(integrityCheckValueLength);
@@ -56,7 +58,7 @@ std::vector<uint8_t>
     if (HMAC(EVP_sha256(), userKey.data(), userKey.size(), input.data(),
              input.size(), output.data(), &mdLen) == NULL)
     {
-        std::cerr << "Generate HMAC_SHA256 failed\n";
+        log<level::ERR>("Generate HMAC_SHA256 failed");
         output.resize(0);
     }
 
@@ -73,7 +75,8 @@ std::vector<uint8_t>
              sessionIntegrityKey.size(), input.data(), input.size(),
              output.data(), &mdLen) == NULL)
     {
-        std::cerr << "Generate HMAC_SHA256_128 Integrity Check Value failed\n";
+        log<level::ERR>(
+            "Generate HMAC_SHA256_128 Integrity Check Value failed");
         output.resize(0);
     }
     output.resize(integrityCheckValueLength);

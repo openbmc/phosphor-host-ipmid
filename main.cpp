@@ -17,10 +17,12 @@
 #include <systemd/sd-event.h>
 #include <unistd.h>
 
-#include <iostream>
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/timer.hpp>
 #include <tuple>
+
+using namespace phosphor::logging;
 
 // Tuple of Global Singletons
 static auto io = std::make_shared<boost::asio::io_context>();
@@ -117,8 +119,8 @@ int main()
     auto rc = sd_bus_default_system(&bus);
     if (rc < 0)
     {
-        std::cerr << "Failed to connect to system bus:" << strerror(-rc)
-                  << "\n";
+        log<level::ERR>("Failed to connect to system bus",
+                        entry("ERROR=%s", strerror(-rc)));
         return rc;
     }
 
@@ -126,7 +128,8 @@ int main()
     rc = sd_event_default(&events);
     if (rc < 0)
     {
-        std::cerr << "Failure to create sd_event" << strerror(-rc) << "\n";
+        log<level::ERR>("Failure to create sd_event",
+                        entry("ERROR=%s", strerror(-rc)));
         return EXIT_FAILURE;
     }
     sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);

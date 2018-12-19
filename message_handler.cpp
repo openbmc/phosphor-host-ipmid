@@ -8,10 +8,12 @@
 
 #include <sys/socket.h>
 
-#include <iostream>
 #include <memory>
+#include <phosphor-logging/log.hpp>
 #include <string>
 #include <vector>
+
+using namespace phosphor::logging;
 
 namespace message
 {
@@ -27,7 +29,7 @@ std::shared_ptr<Message> Handler::receive()
     // Read of the packet failed
     if (readStatus < 0)
     {
-        std::cerr << "E> Error in Read : " << std::hex << readStatus << "\n";
+        log<level::ERR>("Error in Read", entry("STATUS=%x", readStatus));
         return nullptr;
     }
 

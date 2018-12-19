@@ -2,8 +2,6 @@
 
 #include <host-ipmid/ipmid-api.h>
 
-#include <iostream>
-
 namespace command
 {
 

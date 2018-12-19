@@ -5,7 +5,6 @@
 #include "message.hpp"
 #include "sessions_manager.hpp"
 
-#include <iostream>
 #include <memory>
 
 namespace message

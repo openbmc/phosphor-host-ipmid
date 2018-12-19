@@ -5,7 +5,6 @@
 
 #include <host-ipmid/ipmid-api.h>
 
-#include <iostream>
 #include <user_channel/channel_layer.hpp>
 #include <user_channel/user_layer.hpp>
 

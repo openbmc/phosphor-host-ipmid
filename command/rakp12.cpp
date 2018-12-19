@@ -10,9 +10,11 @@
 #include <algorithm>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
+#include <phosphor-logging/log.hpp>
 #include <user_channel/channel_layer.hpp>
 #include <user_channel/user_layer.hpp>
+
+using namespace phosphor::logging;
 
 namespace command
 {
@@ -28,7 +30,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     if (endian::from_ipmi(request->managedSystemSessionID) ==
         session::SESSION_ZERO)
     {
-        std::cerr << "RAKP12: BMC invalid Session ID\n";
+        log<level::INFO>("RAKP12: BMC invalid Session ID");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -43,7 +45,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     }
     catch (std::exception& e)
     {
-        std::cerr << e.what() << "\n";
+        log<level::ERR>("RAKP12 : session not found",
+                        entry("EXCEPTION=%s", e.what()));
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -197,8 +200,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         ((request->req_max_privilege_level & session::reqMaxPrivMask) >
          userAccess.privilege))
     {
-        std::cerr
-            << "Username/Privilege lookup failed for requested privilege\n";
+        log<level::INFO>(
+            "Username/Privilege lookup failed for requested privilege");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
         return outPayload;

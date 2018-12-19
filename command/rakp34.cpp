@@ -8,7 +8,9 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
+#include <phosphor-logging/log.hpp>
+
+using namespace phosphor::logging;
 
 namespace command
 {
@@ -75,7 +77,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     // Check if the RAKP3 Payload Length is as expected
     if (inPayload.size() < sizeof(RAKP3request))
     {
-        std::cerr << "RAKP34: Invalid RAKP3 request\n";
+        log<level::INFO>("RAKP34: Invalid RAKP3 request");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_INTEGRITY_VALUE);
         return outPayload;
@@ -85,7 +87,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     if (endian::from_ipmi(request->managedSystemSessionID) ==
         session::SESSION_ZERO)
     {
-        std::cerr << "RAKP34: BMC invalid Session ID\n";
+        log<level::INFO>("RAKP34: BMC invalid Session ID");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -100,7 +102,8 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     }
     catch (std::exception& e)
     {
-        std::cerr << e.what() << "\n";
+        log<level::ERR>("RAKP12 : session not found",
+                        entry("EXCEPTION=%s", e.what()));
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -162,7 +165,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     if (inPayload.size() != (sizeof(RAKP3request) + output.size()) ||
         std::memcmp(output.data(), request + 1, output.size()))
     {
-        std::cerr << "Mismatch in HMAC sent by remote console\n";
+        log<level::INFO>("Mismatch in HMAC sent by remote console");
 
         response->messageTag = request->messageTag;
         response->rmcpStatusCode =

@@ -8,7 +8,6 @@
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 
-#include <iostream>
 #include <vector>
 
 #include <gtest/gtest.h>

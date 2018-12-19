@@ -5,7 +5,6 @@
 #include "session.hpp"
 #include "sol/console_buffer.hpp"
 
-#include <iostream>
 #include <memory>
 #include <numeric>
 

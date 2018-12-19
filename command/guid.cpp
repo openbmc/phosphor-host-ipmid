@@ -3,9 +3,11 @@
 #include <host-ipmid/ipmid-api.h>
 #include <mapper.h>
 
-#include <iostream>
+#include <phosphor-logging/log.hpp>
 #include <sstream>
 #include <string>
+
+using namespace phosphor::logging;
 
 namespace cache
 {
@@ -42,8 +44,9 @@ Guid getSystemGUID()
         int rc = mapper_get_service(bus, guidObjPath, &busname);
         if (rc < 0)
         {
-            std::cerr << "Failed to get " << guidObjPath
-                      << " bus name: " << strerror(-rc) << "\n";
+            log<level::ERR>("Failed to get bus name",
+                            entry("PATH=%s", guidObjPath),
+                            entry("ERROR=%s", strerror(-rc)));
             break;
         }
 
@@ -51,14 +54,16 @@ Guid getSystemGUID()
                                 &error, &reply, "ss", chassisIntf, "uuid");
         if (rc < 0)
         {
-            std::cerr << "Failed to call Get Method:" << strerror(-rc) << "\n";
+            log<level::ERR>("Failed to call Get Method",
+                            entry("ERROR=%s", strerror(-rc)));
             break;
         }
 
         rc = sd_bus_message_read(reply, "v", "s", &uuid);
         if (rc < 0 || uuid == NULL)
         {
-            std::cerr << "Failed to get a response:" << strerror(-rc) << "\n";
+            log<level::ERR>("Failed to get a response",
+                            entry("ERROR=%s", strerror(-rc)));
             break;
         }
 

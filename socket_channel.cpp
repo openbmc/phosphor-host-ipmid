@@ -6,8 +6,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <iostream>
+#include <phosphor-logging/log.hpp>
 #include <string>
+
+using namespace phosphor::logging;
 
 namespace udpsocket
 {
@@ -28,7 +30,8 @@ std::tuple<int, std::vector<uint8_t>> Channel::read()
 
     if (ioctl(sockfd, FIONREAD, &readSize) < 0)
     {
-        std::cerr << "E> Channel::Read : ioctl failed with errno = " << errno;
+        log<level::ERR>("Channel::Read: ioctl failed",
+                        entry("ERRNO=%d", errno));
         rc = -errno;
         return std::make_tuple(rc, std::move(outBuffer));
     }
@@ -50,16 +53,15 @@ std::tuple<int, std::vector<uint8_t>> Channel::read()
 
         if (readDataLen == 0) // Peer has performed an orderly shutdown
         {
-            std::cerr << "E> Channel::Read : Connection Closed Fd[" << sockfd
-                      << "]\n";
+            log<level::ERR>("Channel::Read: Connection Closed");
             outBuffer.resize(0);
             rc = -1;
         }
         else if (readDataLen < 0) // Error
         {
             rc = -errno;
-            std::cerr << "E> Channel::Read : Receive Error Fd[" << sockfd << "]"
-                      << "errno = " << rc << "\n";
+            log<level::ERR>("Channel::Read: Receive Error",
+                            entry("ERRNO=%d", rc));
             outBuffer.resize(0);
         }
     } while ((readDataLen < 0) && (-(rc) == EINTR));
@@ -107,22 +109,22 @@ int Channel::write(const std::vector<uint8_t>& inBuffer)
                     if (writeDataLen < 0)
                     {
                         rc = -errno;
-                        std::cerr
-                            << "Channel::Write: Write failed with errno:" << rc
-                            << "\n";
+                        log<level::ERR>("Channel::Write: Write failed",
+                                        entry("ERRNO=%d", rc));
                     }
                     else if (static_cast<size_t>(writeDataLen) < bufferSize)
                     {
                         rc = -1;
-                        std::cerr << "Channel::Write: Complete data not written"
-                                     " to the socket\n";
+                        log<level::ERR>(
+                            "Channel::Write: Complete data not written"
+                            " to the socket");
                     }
                 } while ((writeDataLen < 0) && (-(rc) == EINTR));
             }
             else
             {
                 // Spurious wake up
-                std::cerr << "E> Spurious wake up on select (writeset)\n";
+                log<level::ERR>("Spurious wake up on select (writeset)");
                 spuriousWakeup = true;
             }
         }
@@ -132,14 +134,14 @@ int Channel::write(const std::vector<uint8_t>& inBuffer)
             {
                 // Timed out
                 rc = -1;
-                std::cerr << "E> We timed out on select call (writeset)\n";
+                log<level::ERR>("We timed out on select call (writeset)");
             }
             else
             {
                 // Error
                 rc = -errno;
-                std::cerr << "E> select call (writeset) had an error : " << rc
-                          << "\n";
+                log<level::ERR>("select call (writeset) error",
+                                entry("ERRNO=%d", rc));
             }
         }
     } while (spuriousWakeup);
