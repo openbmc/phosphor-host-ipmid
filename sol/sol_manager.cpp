@@ -45,7 +45,9 @@ void Manager::initHostConsoleFd()
     consoleFD = std::make_unique<CustomFD>(fd);
     auto& conFD = *(consoleFD.get());
 
-    rc = connect(conFD(), (struct sockaddr*)&addr, sizeof(addr));
+    rc =
+        connect(conFD(), (struct sockaddr*)&addr,
+                sizeof(addr) - sizeof(addr.sun_path) + CONSOLE_SOCKET_PATH_LEN);
     if (rc < 0)
     {
         log<level::ERR>("Failed to connect to host console socket address",
