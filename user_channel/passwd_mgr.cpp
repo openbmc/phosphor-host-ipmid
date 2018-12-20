@@ -62,6 +62,12 @@ struct MetaPassStruct
 
 using namespace phosphor::logging;
 
+PasswdMgr& PasswdMgr::getPasswdMgrObject()
+{
+    static PasswdMgr passwdMgr;
+    return passwdMgr;
+}
+
 PasswdMgr::PasswdMgr()
 {
     initPasswordMap();

@@ -86,10 +86,6 @@ struct UsersTbl
     UserInfo user[ipmiMaxUsers + 1];
 };
 
-class UserAccess;
-
-UserAccess& getUserAccessObject();
-
 class UserAccess
 {
   public:
@@ -98,8 +94,11 @@ class UserAccess
     UserAccess(UserAccess&&) = delete;
     UserAccess& operator=(UserAccess&&) = delete;
 
-    ~UserAccess();
-    UserAccess();
+    /** @brief function to get singleton UserAccess object reference
+     *
+     *  @return reference to UserAccess object - singleton
+     */
+    static UserAccess& getUserAccessObject();
 
     /** @brief determines valid channel
      *
@@ -291,6 +290,8 @@ class UserAccess
         nullptr};
 
   private:
+    ~UserAccess();
+    UserAccess();
     UsersTbl usersTbl;
     std::vector<std::string> availablePrivileges;
     std::vector<std::string> availableGroups;

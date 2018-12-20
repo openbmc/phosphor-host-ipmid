@@ -56,27 +56,31 @@ bool isValidAccessMode(const uint8_t accessMode)
 
 bool isValidChannel(const uint8_t chNum)
 {
-    return getChannelConfigObject().isValidChannel(chNum);
+    return ChannelConfig::getChannelConfigObject().isValidChannel(chNum);
 }
 
 uint8_t convertCurrentChannelNum(const uint8_t chNum)
 {
-    return getChannelConfigObject().convertToChannelIndexNumber(chNum);
+    return ChannelConfig::getChannelConfigObject().convertToChannelIndexNumber(
+        chNum);
 }
 
 bool isValidAuthType(const uint8_t chNum, const EAuthType& authType)
 {
-    return getChannelConfigObject().isValidAuthType(chNum, authType);
+    return ChannelConfig::getChannelConfigObject().isValidAuthType(chNum,
+                                                                   authType);
 }
 
 EChannelSessSupported getChannelSessionSupport(const uint8_t chNum)
 {
-    return getChannelConfigObject().getChannelSessionSupport(chNum);
+    return ChannelConfig::getChannelConfigObject().getChannelSessionSupport(
+        chNum);
 }
 
 int getChannelActiveSessions(const uint8_t chNum)
 {
-    return getChannelConfigObject().getChannelActiveSessions(chNum);
+    return ChannelConfig::getChannelConfigObject().getChannelActiveSessions(
+        chNum);
 }
 
 size_t getChannelMaxTransferSize(uint8_t chNum)
@@ -86,56 +90,58 @@ size_t getChannelMaxTransferSize(uint8_t chNum)
 
 ipmi_ret_t ipmiChannelInit()
 {
-    getChannelConfigObject();
+    ChannelConfig::getChannelConfigObject();
     return IPMI_CC_OK;
 }
 
 ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo)
 {
-    return getChannelConfigObject().getChannelInfo(chNum, chInfo);
+    return ChannelConfig::getChannelConfigObject().getChannelInfo(chNum,
+                                                                  chInfo);
 }
 
 ipmi_ret_t getChannelAccessData(const uint8_t chNum,
                                 ChannelAccess& chAccessData)
 {
-    return getChannelConfigObject().getChannelAccessData(chNum, chAccessData);
+    return ChannelConfig::getChannelConfigObject().getChannelAccessData(
+        chNum, chAccessData);
 }
 
 ipmi_ret_t setChannelAccessData(const uint8_t chNum,
                                 const ChannelAccess& chAccessData,
                                 const uint8_t setFlag)
 {
-    return getChannelConfigObject().setChannelAccessData(chNum, chAccessData,
-                                                         setFlag);
+    return ChannelConfig::getChannelConfigObject().setChannelAccessData(
+        chNum, chAccessData, setFlag);
 }
 
 ipmi_ret_t getChannelAccessPersistData(const uint8_t chNum,
                                        ChannelAccess& chAccessData)
 {
-    return getChannelConfigObject().getChannelAccessPersistData(chNum,
-                                                                chAccessData);
+    return ChannelConfig::getChannelConfigObject().getChannelAccessPersistData(
+        chNum, chAccessData);
 }
 
 ipmi_ret_t setChannelAccessPersistData(const uint8_t chNum,
                                        const ChannelAccess& chAccessData,
                                        const uint8_t setFlag)
 {
-    return getChannelConfigObject().setChannelAccessPersistData(
+    return ChannelConfig::getChannelConfigObject().setChannelAccessPersistData(
         chNum, chAccessData, setFlag);
 }
 
 ipmi_ret_t getChannelAuthTypeSupported(const uint8_t chNum,
                                        uint8_t& authTypeSupported)
 {
-    return getChannelConfigObject().getChannelAuthTypeSupported(
+    return ChannelConfig::getChannelConfigObject().getChannelAuthTypeSupported(
         chNum, authTypeSupported);
 }
 
 ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
                                      EAuthType& authType)
 {
-    return getChannelConfigObject().getChannelEnabledAuthType(chNum, priv,
-                                                              authType);
+    return ChannelConfig::getChannelConfigObject().getChannelEnabledAuthType(
+        chNum, priv, authType);
 }
 
 } // namespace ipmi
