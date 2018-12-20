@@ -64,10 +64,6 @@ struct ChannelData
     ChannelAccessData chAccess;
 };
 
-class ChannelConfig;
-
-ChannelConfig& getChannelConfigObject();
-
 class ChannelConfig
 {
   public:
@@ -76,8 +72,11 @@ class ChannelConfig
     ChannelConfig(ChannelConfig&&) = delete;
     ChannelConfig& operator=(ChannelConfig&&) = delete;
 
-    ~ChannelConfig();
-    ChannelConfig();
+    /** @brief function to get singleton ChannelConfig object reference
+     *
+     *  @return reference to ChannelConfig object - singleton
+     */
+    static ChannelConfig& getChannelConfigObject();
 
     /** @brief determines valid channel
      *
@@ -229,6 +228,8 @@ class ChannelConfig
         nullptr};
 
   private:
+    ~ChannelConfig();
+    ChannelConfig();
     ChannelData channelData[maxIpmiChannels];
     std::time_t nvFileLastUpdatedTime;
     std::time_t voltFileLastUpdatedTime;

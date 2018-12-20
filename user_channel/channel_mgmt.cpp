@@ -286,7 +286,7 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
     return;
 }
 
-ChannelConfig& getChannelConfigObject()
+ChannelConfig& ChannelConfig::getChannelConfigObject()
 {
     static ChannelConfig channelConfig;
     return channelConfig;

@@ -26,16 +26,16 @@ namespace ipmi
 class PasswdMgr
 {
   public:
-    ~PasswdMgr() = default;
     PasswdMgr(const PasswdMgr&) = delete;
     PasswdMgr& operator=(const PasswdMgr&) = delete;
     PasswdMgr(PasswdMgr&&) = delete;
     PasswdMgr& operator=(PasswdMgr&&) = delete;
 
-    /** @brief Constructs user password list
+    /** @brief function to get singleton PasswdMgr object reference
      *
+     *  @return reference to PasswdMgr object - singleton
      */
-    PasswdMgr();
+    static PasswdMgr& getPasswdMgrObject();
 
     /** @brief Get password for the user
      *
@@ -59,6 +59,11 @@ class PasswdMgr
                         const std::string& newUserName);
 
   private:
+    ~PasswdMgr() = default;
+    /** @brief Constructs user password list
+     *
+     */
+    PasswdMgr();
     using UserName = std::string;
     using Password = std::string;
     std::unordered_map<UserName, Password> passwdMapList;

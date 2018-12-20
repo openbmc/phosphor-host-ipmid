@@ -187,12 +187,6 @@ static std::string getUserServiceName()
     return userMgmtService;
 }
 
-UserAccess& getUserAccessObject()
-{
-    static UserAccess userAccess;
-    return userAccess;
-}
-
 int getUserNameFromPath(const std::string& path, std::string& userName)
 {
     static size_t pos = strlen(userObjBasePath) + 1;
@@ -436,6 +430,12 @@ void userUpdatedSignalHandler(UserAccess& usrAccess,
                          newUserName);
     }
     return;
+}
+
+UserAccess& UserAccess::getUserAccessObject()
+{
+    static UserAccess userAccess;
+    return userAccess;
 }
 
 UserAccess::~UserAccess()
