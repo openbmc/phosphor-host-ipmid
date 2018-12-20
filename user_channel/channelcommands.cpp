@@ -27,11 +27,11 @@ using namespace phosphor::logging;
 namespace ipmi
 {
 
-/** @struct setChannelAccessReq
+/** @struct SetChannelAccessReq
  *
  *  Structure for set channel access request command (refer spec sec 22.22)
  */
-struct setChannelAccessReq
+struct SetChannelAccessReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t chNum : 4;
@@ -60,11 +60,11 @@ struct setChannelAccessReq
 
 } __attribute__((packed));
 
-/** @struct getChannelAccessReq
+/** @struct GetChannelAccessReq
  *
  *  Structure for get channel access request command (refer spec sec 22.23)
  */
-struct getChannelAccessReq
+struct GetChannelAccessReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t chNum : 4;
@@ -80,11 +80,11 @@ struct getChannelAccessReq
 #endif
 } __attribute__((packed));
 
-/** @struct getChannelAccessResp
+/** @struct GetChannelAccessResp
  *
  *  Structure for get channel access response command (refer spec sec 22.23)
  */
-struct getChannelAccessResp
+struct GetChannelAccessResp
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t accessMode : 3;
@@ -106,11 +106,11 @@ struct getChannelAccessResp
 #endif
 } __attribute__((packed));
 
-/** @struct getChannelInfoReq
+/** @struct GetChannelInfoReq
  *
  *  Structure for get channel info request command (refer spec sec 22.24)
  */
-struct getChannelInfoReq
+struct GetChannelInfoReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t chNum : 4;
@@ -122,11 +122,11 @@ struct getChannelInfoReq
 #endif
 } __attribute__((packed));
 
-/** @struct getChannelInfoResp
+/** @struct GetChannelInfoResp
  *
  *  Structure for get channel info response command (refer spec sec 22.24)
  */
-struct getChannelInfoResp
+struct GetChannelInfoResp
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t chNum : 4;
@@ -158,7 +158,7 @@ ipmi_ret_t ipmiSetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_data_len_t data_len,
                                 ipmi_context_t context)
 {
-    const setChannelAccessReq* req = static_cast<setChannelAccessReq*>(request);
+    const SetChannelAccessReq* req = static_cast<SetChannelAccessReq*>(request);
     size_t reqLength = *data_len;
 
     *data_len = 0;
@@ -263,7 +263,7 @@ ipmi_ret_t ipmiGetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_data_len_t data_len,
                                 ipmi_context_t context)
 {
-    const getChannelAccessReq* req = static_cast<getChannelAccessReq*>(request);
+    const GetChannelAccessReq* req = static_cast<GetChannelAccessReq*>(request);
     size_t reqLength = *data_len;
 
     *data_len = 0;
@@ -293,7 +293,7 @@ ipmi_ret_t ipmiGetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
     }
 
-    getChannelAccessResp* resp = static_cast<getChannelAccessResp*>(response);
+    GetChannelAccessResp* resp = static_cast<GetChannelAccessResp*>(response);
 
     std::fill(reinterpret_cast<uint8_t*>(resp),
               reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
@@ -329,7 +329,7 @@ ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                               ipmi_request_t request, ipmi_response_t response,
                               ipmi_data_len_t data_len, ipmi_context_t context)
 {
-    const getChannelInfoReq* req = static_cast<getChannelInfoReq*>(request);
+    const GetChannelInfoReq* req = static_cast<GetChannelInfoReq*>(request);
     size_t reqLength = *data_len;
 
     *data_len = 0;
@@ -355,7 +355,7 @@ ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
 
-    getChannelInfoResp* resp = static_cast<getChannelInfoResp*>(response);
+    GetChannelInfoResp* resp = static_cast<GetChannelInfoResp*>(response);
 
     std::fill(reinterpret_cast<uint8_t*>(resp),
               reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);

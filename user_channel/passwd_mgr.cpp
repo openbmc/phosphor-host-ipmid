@@ -49,7 +49,7 @@ static inline size_t blockRound(size_t odd, size_t blk)
 /*
  * Meta data struct for encrypted password file
  */
-struct metaPassStruct
+struct MetaPassStruct
 {
     char signature[10];
     unsigned char reseved[2];
@@ -278,7 +278,7 @@ int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
     }
 
     // verify the signature first
-    metaPassStruct* metaData = reinterpret_cast<metaPassStruct*>(input.data());
+    MetaPassStruct* metaData = reinterpret_cast<MetaPassStruct*>(input.data());
     if (std::strncmp(metaData->signature, META_PASSWD_SIG,
                      sizeof(metaData->signature)))
     {
@@ -508,7 +508,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     OPENSSL_cleanse(key.data(), keyLen);
 
     // Update the meta password structure.
-    metaPassStruct metaData = {META_PASSWD_SIG, {0, 0}, 0, 0, 0, 0, 0};
+    MetaPassStruct metaData = {META_PASSWD_SIG, {0, 0}, 0, 0, 0, 0, 0};
     metaData.hashSize = hashLen;
     metaData.ivSize = ivLen;
     metaData.dataSize = bytesWritten;
