@@ -1,0 +1,12 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Andrew Geissler <geissonator@yahoo.com>
+Code-Review+1: Deepak Kodihalli <dkodihal@in.ibm.com>
+Ok-To-Test+1: Andrew Geissler <geissonator@yahoo.com>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Emily Shaffer <emilyshaffer@google.com>
+Code-Review+2: Vernon Mauery <vernon.mauery@linux.intel.com>
+Submitted-by: Tom Joseph <tomjoseph@in.ibm.com>
+Submitted-at: Thu, 20 Dec 2018 10:45:26 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/16295
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
