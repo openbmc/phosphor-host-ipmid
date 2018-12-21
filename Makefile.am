@@ -76,7 +76,6 @@ channel-gen.cpp:
 
 providers_LTLIBRARIES += libipmi20.la
 libipmi20_la_LIBADD = \
-	user_channel/libuserlayer.la \
 	user_channel/libchannellayer.la \
 	libipmid/libipmid.la
 libipmi20_la_SOURCES = \
@@ -124,15 +123,24 @@ libusercmds_la_LIBADD = \
 	libipmid/libipmid.la \
 	user_channel/libuserlayer.la
 libusercmds_la_SOURCES = \
-	user_channel/usercommands.cpp \
-	user_channel/channelcommands.cpp
+	user_channel/usercommands.cpp
 libusercmds_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(LIBS) \
 	-version-info 0:0:0 -shared
-libusercmds_la_CXXFLAGS = \
-	$(PHOSPHOR_LOGGING_CFLAGS) \
-	-flto
+libusercmds_la_CXXFLAGS = $(COMMON_CXX)
+
+providers_LTLIBRARIES += libchannelcmds.la
+libchannelcmds_la_LIBADD = \
+	libipmid/libipmid.la \
+	user_channel/libchannellayer.la
+libchannelcmds_la_SOURCES = \
+	user_channel/channelcommands.cpp
+libchannelcmds_la_LDFLAGS = \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(LIBS) \
+	-version-info 0:0:0 -shared
+libchannelcmds_la_CXXFLAGS = $(COMMON_CXX)
 
 providers_LTLIBRARIES += libsysintfcmds.la
 libsysintfcmds_la_LIBADD = \
