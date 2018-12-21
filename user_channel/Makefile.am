@@ -14,9 +14,7 @@ lib_LTLIBRARIES = libuserlayer.la libchannellayer.la
 libuserlayer_la_SOURCES = \
 	user_layer.cpp \
 	user_mgmt.cpp \
-	passwd_mgr.cpp \
-	channel_mgmt.cpp \
-	channel_layer.cpp
+	passwd_mgr.cpp
 libuserlayer_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
@@ -29,7 +27,9 @@ libuserlayer_la_CXXFLAGS = \
 	-I$(top_srcdir) \
 	$(COMMON_CXX)
 
-libchannellayer_la_SOURCES =
+libchannellayer_la_SOURCES = \
+	channel_mgmt.cpp \
+	channel_layer.cpp
 libchannellayer_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
