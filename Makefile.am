@@ -71,6 +71,7 @@ netipmid_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(LIBADD_DLOPEN) \
+	-lchannellayer \
 	-luserlayer \
 	-export-dynamic
 
