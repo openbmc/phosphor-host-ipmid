@@ -922,16 +922,22 @@ static std::string sysInfoReadSystemName()
 struct IpmiSysInfoResp
 {
     uint8_t paramRevision;
-    uint8_t setSelector;
     union
     {
         struct
         {
-            uint8_t encoding;
-            uint8_t stringLen;
-            uint8_t stringData0[14];
+            uint8_t setSelector;
+            union
+            {
+                struct
+                {
+                    uint8_t encoding;
+                    uint8_t stringLen;
+                    uint8_t stringData0[14];
+                } __attribute__((packed));
+                uint8_t stringDataN[16];
+            };
         } __attribute__((packed));
-        uint8_t stringDataN[16];
         uint8_t byteData;
     };
 } __attribute__((packed));
@@ -1003,6 +1009,222 @@ static int packGetSysInfoResp(const std::string& paramString,
     return splitStringParam(paramString, resp->setSelector, dataBuffer);
 }
 
+static constexpr uint8_t setComplete = 0x0;
+static constexpr uint8_t setInProgress = 0x1;
+static constexpr uint8_t commitWrite = 0x2;
+uint8_t transferStatus = setComplete;
+
+static constexpr uint8_t encodingASCII = 0x0; // ASCII+Latin1
+static constexpr uint8_t encodingUTF8 = 0x1;
+static constexpr uint8_t encodingUNICODE = 0x2;
+
+// each parameter could have multiple bytes for content storage
+// every IPMI transfer can only upload 16bytes.
+static constexpr uint8_t maxBytesPerParameter = 64;
+static constexpr uint8_t bytesPerChunk = 16;
+static constexpr uint8_t chunksLimit = (maxBytesPerParameter / bytesPerChunk);
+
+struct IpmiSysInfo
+{
+    uint8_t paramSelector;
+    uint8_t encoding;
+    uint8_t stringLen;
+    uint8_t stringDataN[maxBytesPerParameter];
+};
+
+IpmiSysInfo info;
+
+// cache paramter chunk data
+static ipmi_ret_t chunkHandler(uint8_t paraSelector, uint8_t* chunk,
+                               uint8_t chunkLen, IpmiSysInfo& info)
+{
+    uint8_t setSelector;
+    static int totalBytes = 0;
+    uint8_t validLen = 0;
+    uint8_t headerBytes = 0;
+    if (NULL == chunk)
+    {
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    // only cache chunk data for one parameter at a time
+    if ((info.paramSelector != paraSelector) &&
+        (transferStatus == setInProgress))
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "another parameter in transfer");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    setSelector = chunk[0];
+
+    if (setSelector == 0) // chunk0
+    {
+        info.encoding = chunk[1] & 0xF;
+        if (info.encoding != encodingASCII)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "support ASCII encoding only");
+            return IPMI_CC_INVALID_FIELD_REQUEST;
+        }
+        info.stringLen = chunk[2];
+        if (info.stringLen > maxBytesPerParameter)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "exceed max bytes");
+            return IPMI_CC_REQ_DATA_LEN_INVALID;
+        }
+        info.paramSelector = paraSelector;
+        headerBytes = 3;
+        transferStatus = setInProgress;
+    }
+    else
+    {
+        if (transferStatus != setInProgress)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "chunk x is received before chunk 0");
+            return IPMI_CC_INVALID_FIELD_REQUEST;
+        }
+        headerBytes = 1;
+    }
+    if (chunkLen < headerBytes)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>("invalid length");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    validLen = chunkLen - headerBytes;
+    std::memcpy((info.stringDataN + totalBytes), (chunk + headerBytes),
+                validLen);
+    totalBytes += validLen;
+
+    if ((totalBytes >= info.stringLen) && (transferStatus == setInProgress))
+    {
+        phosphor::logging::log<phosphor::logging::level::INFO>(
+            "paramter data transfer is complete");
+        info.stringDataN[info.stringLen] = '\0';
+        transferStatus = setComplete;
+        totalBytes = 0; // reset counter
+    }
+
+    return IPMI_CC_OK;
+}
+
+/**
+ * Initialize the systemStore
+ * non-volatile paramters are restored from file/storage
+ */
+static void systemStoreInit()
+{
+    sysInfoParamStore = std::make_unique<SysInfoParamStore>();
+    for (uint8_t paramRequested = IPMI_SYSINFO_SYSTEM_FW_VERSION;
+         paramRequested <= IPMI_SYSINFO_OS_HYP_URL; paramRequested++)
+    {
+        // these 2 are volatile
+        if ((paramRequested == IPMI_SYSINFO_OS_VERSION) ||
+            (paramRequested == IPMI_SYSINFO_OS_HYP_URL))
+        {
+            sysInfoParamStore->update(paramRequested, "", false);
+        }
+        else if (IPMI_SYSINFO_SYSTEM_NAME == paramRequested)
+        {
+            sysInfoParamStore->update(paramRequested, sysInfoReadSystemName);
+        }
+        else
+        { // if fail to restore from file, create empty file
+            if (0 != sysInfoParamStore->restore(paramRequested))
+            {
+                sysInfoParamStore->update(paramRequested, "", true);
+            }
+        }
+    }
+
+    for (uint32_t paramRequested = IPMI_SYSINFO_OEM_START;
+         paramRequested <= IPMI_SYSINFO_OEM_END; paramRequested++)
+    {
+        if (0 != sysInfoParamStore->restore((uint8_t)paramRequested))
+        {
+            sysInfoParamStore->update((uint8_t)paramRequested, "", true);
+        }
+    }
+    phosphor::logging::log<phosphor::logging::level::INFO>(
+        "systemStoreInit done");
+}
+
+ipmi_ret_t ipmi_app_set_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                    ipmi_request_t request,
+                                    ipmi_response_t response,
+                                    ipmi_data_len_t dataLen,
+                                    ipmi_context_t context)
+{
+    uint8_t* const reqData = static_cast<uint8_t*>(request);
+
+    constexpr int minRequestSize = 2;
+    constexpr int paramSelector = 0;
+    constexpr int chunkOffset = 1;
+    uint8_t chunkLen = *dataLen - 1;
+
+    const uint8_t paramRequested = reqData[paramSelector];
+    uint8_t* chunk = &(reqData[chunkOffset]);
+    int rc;
+
+    *dataLen = 0; // default to 0.
+    if (*dataLen < minRequestSize)
+    {
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    if (paramRequested == 0)
+    {
+        // attempt to set the 'set in progress' value (in parameter #0)
+        // when not in the set complete state.
+        if (transferStatus != setComplete)
+            &&(setInProgress == (chunk[0] & 0x3))
+            {
+                return IPMI_CC_FAIL_SET_IN_PROGRESS;
+            }
+        transferStatus = chunk[0] & 0x3;
+        return IPMI_CC_OK;
+    }
+
+    if (sysInfoParamStore == nullptr)
+    {
+        systemStoreInit();
+    }
+    // cache chunk data
+    rc = chunkHandler(paramRequested, chunk, chunkLen, info);
+    if (rc != IPMI_CC_OK)
+    {
+        return rc;
+    }
+    // only update after transfer complete
+    if (transferStatus != setComplete)
+    {
+        return IPMI_CC_OK;
+    }
+    if (info.stringLen > maxBytesPerParameter)
+    {
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    std::string s = (char*)info.stringDataN;
+
+    // these 2 are volatile
+    if ((paramRequested == IPMI_SYSINFO_OS_VERSION) ||
+        (paramRequested == IPMI_SYSINFO_OS_HYP_URL))
+    {
+        sysInfoParamStore->update(paramRequested, s, false);
+    }
+    else
+    {
+        sysInfoParamStore->update(paramRequested, s, true);
+    }
+
+    info.paramSelector = 0;
+    info.encoding = 0;
+    info.stringLen = 0;
+
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                     ipmi_request_t request,
                                     ipmi_response_t response,
@@ -1036,20 +1258,18 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         goto writeResponse;
     }
 
-    // The "Set In Progress" parameter can be used for rollback of parameter
-    // data and is not implemented.
+    // The "Set In Progress" parameter is implemented but rollback is not
+    // supported
     if (paramRequested == 0)
     {
-        resp.byteData = 0;
+        resp.byteData = transferStatus;
         respLen = 2;
         goto writeResponse;
     }
 
     if (sysInfoParamStore == nullptr)
     {
-        sysInfoParamStore = std::make_unique<SysInfoParamStore>();
-        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_NAME,
-                                  sysInfoReadSystemName);
+        systemStoreInit();
     }
 
     // Parameters other than Set In Progress are assumed to be strings.
@@ -1058,13 +1278,11 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     paramString = std::get<1>(ret);
     if (!found)
     {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "paramter can not found");
         return IPMI_CC_SYSTEM_INFO_PARAMETER_NOT_SUPPORTED;
     }
-    // TODO: Cache each parameter across multiple calls, until the whole string
-    // has been read out. Otherwise, it's possible for a parameter to change
-    // between requests for its chunks, returning chunks incoherent with each
-    // other. For now, the parameter store is simply required to have only
-    // idempotent callbacks.
+
     rc = packGetSysInfoResp(paramString, reqData[2], &resp);
     if (rc == -EINVAL)
     {
@@ -1147,6 +1365,9 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS, NULL,
                            ipmi_set_channel_access, PRIVILEGE_ADMIN);
 #endif
+    // <Set System Info Command>
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_SYSTEM_INFO, NULL,
+                           ipmi_app_set_system_info, PRIVILEGE_USER);
     // <Get System Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
                            ipmi_app_get_system_info, PRIVILEGE_USER);
