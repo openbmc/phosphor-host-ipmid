@@ -32,8 +32,10 @@ class SysInfoParamStoreIntf
      *
      * @param[in] paramSelector - the key to update.
      * @param[in] s - the value to set.
+     * @param[in] isNonVolatile - if data should be persistent.
      */
-    virtual void update(uint8_t paramSelector, const std::string& s) = 0;
+    virtual void update(uint8_t paramSelector, const std::string& s,
+                        bool isNonVolatile) = 0;
 
     /**
      * Update a parameter by its code with a callback that is called to retrieve
@@ -57,9 +59,11 @@ class SysInfoParamStore : public SysInfoParamStoreIntf
 {
   public:
     std::tuple<bool, std::string> lookup(uint8_t paramSelector) const override;
-    void update(uint8_t paramSelector, const std::string& s) override;
+    void update(uint8_t paramSelector, const std::string& s,
+                bool isNonVolatile) override;
     void update(uint8_t paramSelector,
                 const std::function<std::string()>& callback) override;
+    int restore(uint8_t paramSelector);
 
   private:
     std::map<uint8_t, std::function<std::string()>> params;
