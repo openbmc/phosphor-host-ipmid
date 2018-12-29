@@ -8,6 +8,7 @@
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
 {
+    IPMI_CMD_PLATFORM_EVENT = 0x2,
     IPMI_CMD_GET_DEVICE_SDR_INFO = 0x20,
     IPMI_CMD_GET_DEVICE_SDR = 0x21,
     IPMI_CMD_RESERVE_DEVICE_SDR_REPO = 0x22,
@@ -47,6 +48,31 @@ struct dbus_interface_t
     char path[MAX_DBUS_PATH];
     char interface[MAX_DBUS_PATH];
 };
+
+struct PlatformEventRequest
+{
+    uint8_t EvMRev;
+    uint8_t SensorType;
+    uint8_t SensorNo;
+    uint8_t EventDirType;
+    uint8_t Data[3];
+};
+
+
+static constexpr char const* ipmiSELObject =
+    "xyz.openbmc_project.Logging.IPMI";
+static constexpr char const* ipmiSELPath =
+    "/xyz/openbmc_project/Logging/IPMI";
+static constexpr char const* ipmiSELAddInterface =
+    "xyz.openbmc_project.Logging.IPMI";
+static const std::string ipmiSELAddMessage =
+    "SEL Entry";
+
+static constexpr int selSystemEventSize = 8;
+static constexpr int selIPMBEventSize = 7;
+static constexpr uint8_t directioMask = 0x80;
+static constexpr uint8_t byte3EnableMask = 0x30;
+static constexpr uint8_t byte2EnableMask = 0xC0;
 
 int set_sensor_dbus_state_s(uint8_t, const char*, const char*);
 int set_sensor_dbus_state_y(uint8_t, const char*, const uint8_t);
