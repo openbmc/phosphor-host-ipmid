@@ -982,6 +982,29 @@ static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
     return std::make_optional(buttonDisabled);
 }
 
+static bool setButtonEnabled(ipmi::Context::ptr& ctx,
+                             const std::string& buttonPath,
+                             const std::string& buttonIntf, bool enable)
+{
+    std::string service;
+    boost::system::error_code ec;
+    ec = ipmi::getService(ctx, buttonIntf, buttonPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, buttonPath, buttonIntf,
+                                   "Enabled", enable);
+    }
+    if (ec)
+    {
+        log<level::ERR>("Fail to set button Enabled property",
+                        entry("SERVICE=%s", service.c_str()),
+                        entry("PATH=%s", buttonPath.c_str()),
+                        entry("ERROR=%s", ec.message().c_str()));
+        return false;
+    }
+    return true;
+}
+
 //----------------------------------------------------------------------
 // Get Chassis Status commands
 //----------------------------------------------------------------------
@@ -1952,6 +1975,28 @@ ipmi::RspType<uint3_t, // policy support
     return ipmi::responseSuccess(power_policy::allSupport, reserved);
 }
 
+ipmi::RspType<> ipmiSetFrontPanelButtonEnables(
+    ipmi::Context::ptr ctx, bool disablePowerButton, bool disableResetButton,
+    bool disableDiagButton, bool disableSleepButton, uint4_t reserved)
+{
+    using namespace chassis::internal;
+
+    // set power button Enabled property
+    bool success = setButtonEnabled(ctx, powerButtonPath, powerButtonIntf,
+                                    !disablePowerButton);
+
+    // set reset button Enabled property
+    success &= setButtonEnabled(ctx, resetButtonPath, resetButtonIntf,
+                                !disableResetButton);
+
+    if (!success)
+    {
+        // not all buttons were successfully set
+        return ipmi::responseUnspecifiedError();
+    }
+    return ipmi::responseSuccess();
+}
+
 void register_netfn_chassis_functions()
 {
     createIdentifyTimer();
@@ -1960,6 +2005,12 @@ void register_netfn_chassis_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
                           ipmi::chassis::cmdGetChassisCapabilities,
                           ipmi::Privilege::User, ipmiGetChassisCap);
+
+    // Set Front Panel Button Enables
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdSetFrontPanelButtonEnables,
+                          ipmi::Privilege::Admin,
+                          ipmiSetFrontPanelButtonEnables);
 
     // Set Chassis Capabilities
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
