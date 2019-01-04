@@ -97,6 +97,14 @@ class ChannelConfig
      */
     bool isValidAuthType(const uint8_t chNum, const EAuthType& authType);
 
+    /** @brief function to get channel name from channel number
+     *
+     *  @param[in] chNum - channel number index
+     *
+     *  @return network channel interface name
+     */
+    std::string getChannelName(const uint8_t chNum);
+
     /** @brief determines supported session type of a channel
      *
      *  @param[in] chNum - channel number
@@ -396,14 +404,6 @@ class ChannelConfig
      *  @return channel protocol  type
      */
     EChannelProtocolType convertToProtocolTypeIndex(const std::string& value);
-
-    /** @brief function to convert channel name to network interface name
-     *
-     *  @param[in] value - channel interface name - ipmi centric
-     *
-     *  @return network channel interface name
-     */
-    std::string convertToNetInterface(const std::string& value);
 };
 
 } // namespace ipmi

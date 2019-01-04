@@ -111,7 +111,7 @@ static std::unordered_map<std::string, EChannelMediumType> mediumTypeMap = {
 
 static std::unordered_map<EInterfaceIndex, std::string> interfaceMap = {
     {interfaceKCS, "SMS"},
-    {interfaceLAN1, "LAN1"},
+    {interfaceLAN1, "eth0"},
     {interfaceUnknown, "unknown"}};
 
 static std::unordered_map<std::string, EChannelProtocolType> protocolTypeMap = {
@@ -137,33 +137,6 @@ static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
     "priv-reserved", "priv-callback", "priv-user",
     "priv-operator", "priv-admin",    "priv-oem"};
 
-static constexpr const char* LAN1_STR = "LAN1";
-static constexpr const char* LAN2_STR = "LAN2";
-static constexpr const char* LAN3_STR = "LAN3";
-static constexpr const char* ETH0_STR = "eth0";
-static constexpr const char* ETH1_STR = "eth1";
-static constexpr const char* ETH2_STR = "eth2";
-
-static std::unordered_map<std::string, std::string> channelToInterfaceMap = {
-    {LAN1_STR, ETH0_STR}, {LAN2_STR, ETH1_STR}, {LAN3_STR, ETH2_STR}};
-
-static std::unordered_map<std::string, std::string> interfaceToChannelMap = {
-    {ETH0_STR, LAN1_STR}, {ETH1_STR, LAN2_STR}, {ETH2_STR, LAN3_STR}};
-
-std::string convertToChannelName(const std::string& intfName)
-{
-
-    auto it = interfaceToChannelMap.find(intfName);
-    if (it == interfaceToChannelMap.end())
-    {
-        log<level::ERR>("Invalid network interface.",
-                        entry("INTF:%s", intfName.c_str()));
-        throw std::invalid_argument("Invalid network interface");
-    }
-
-    return it->second;
-}
-
 std::string getNetIntfFromPath(const std::string& path)
 {
     std::size_t pos = path.find(networkIntfObjectBasePath);
@@ -182,10 +155,10 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
                                const DbusChObjProperties& chProperties)
 {
     // Get interface name from path. ex: '/xyz/openbmc_project/network/eth0'
-    std::string intfName;
+    std::string channelName;
     try
     {
-        intfName = getNetIntfFromPath(path);
+        channelName = getNetIntfFromPath(path);
     }
     catch (const std::invalid_argument& e)
     {
@@ -215,17 +188,15 @@ void processChAccessPropChange(ChannelConfig& chConfig, const std::string& path,
     if (intfPrivStr.empty())
     {
         log<level::ERR>("Invalid privilege string.",
-                        entry("INTF:%s", intfName.c_str()));
+                        entry("INTF:%s", channelName.c_str()));
         return;
     }
 
     uint8_t intfPriv = 0;
-    std::string channelName;
     try
     {
         intfPriv =
             static_cast<uint8_t>(chConfig.convertToPrivLimitIndex(intfPrivStr));
-        channelName = convertToChannelName(intfName);
     }
     catch (const std::invalid_argument& e)
     {
@@ -409,6 +380,11 @@ bool ChannelConfig::isValidAuthType(const uint8_t chNum,
     }
 
     return true;
+}
+
+std::string ChannelConfig::getChannelName(const uint8_t chNum)
+{
+    return channelData[chNum].chName;
 }
 
 int ChannelConfig::getChannelActiveSessions(const uint8_t chNum)
@@ -624,18 +600,18 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
     if (setFlag & setPrivLimit)
     {
         // Send Update to network channel config interfaces over dbus
-        std::string intfName = convertToNetInterface(channelData[chNum].chName);
         std::string privStr = convertToPrivLimitString(chAccessData.privLimit);
-        std::string networkIntfObj =
-            std::string(networkIntfObjectBasePath) + "/" + intfName;
+        std::string networkIntfObj = std::string(networkIntfObjectBasePath) +
+                                     "/" + channelData[chNum].chName;
         try
         {
             if (0 != setDbusProperty(bus, networkIntfServiceName,
                                      networkIntfObj, networkChConfigIntfName,
                                      privilegePropertyString, privStr))
             {
-                log<level::DEBUG>("Network interface does not exist",
-                                  entry("INTERFACE:%s", intfName.c_str()));
+                log<level::DEBUG>(
+                    "Network interface does not exist",
+                    entry("INTERFACE:%s", channelData[chNum].chName.c_str()));
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
         }
@@ -839,19 +815,6 @@ uint8_t ChannelConfig::convertToChannelIndexNumber(const uint8_t chNum)
         }
     }
     return ((chNum == currentChNum) ? curChannel : chNum);
-}
-
-std::string ChannelConfig::convertToNetInterface(const std::string& value)
-{
-    auto it = channelToInterfaceMap.find(value);
-    if (it == channelToInterfaceMap.end())
-    {
-        log<level::DEBUG>("Invalid channel name.",
-                          entry("NAME:%s", value.c_str()));
-        throw std::invalid_argument("Invalid channel name.");
-    }
-
-    return it->second;
 }
 
 Json ChannelConfig::readJsonFile(const std::string& configFile)
@@ -1347,10 +1310,9 @@ int ChannelConfig::syncNetworkChannelConfig()
             std::string intfPrivStr;
             try
             {
-                std::string intfName =
-                    convertToNetInterface(channelData[chNum].chName);
                 std::string networkIntfObj =
-                    std::string(networkIntfObjectBasePath) + "/" + intfName;
+                    std::string(networkIntfObjectBasePath) + "/" +
+                    channelData[chNum].chName;
                 DbusVariant variant;
                 if (0 != getDbusProperty(bus, networkIntfServiceName,
                                          networkIntfObj,
@@ -1358,7 +1320,8 @@ int ChannelConfig::syncNetworkChannelConfig()
                                          privilegePropertyString, variant))
                 {
                     log<level::DEBUG>("Network interface does not exist",
-                                      entry("INTERFACE:%s", intfName.c_str()));
+                                      entry("INTERFACE:%s",
+                                            channelData[chNum].chName.c_str()));
                     continue;
                 }
                 intfPrivStr = variant_ns::get<std::string>(variant);
