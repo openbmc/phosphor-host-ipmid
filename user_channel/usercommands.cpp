@@ -37,6 +37,8 @@ static constexpr uint8_t disableUser = 0x00;
 static constexpr uint8_t enableUser = 0x01;
 static constexpr uint8_t setPassword = 0x02;
 static constexpr uint8_t testPassword = 0x03;
+static constexpr uint8_t passwordKeySize20 = 1;
+static constexpr uint8_t passwordKeySize16 = 0;
 
 /** @struct SetUserAccessReq
  *
@@ -432,9 +434,12 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
     // If set / test password then password length has to be 16 or 20 bytes
+    // based on the password size bit.
     if (((req->operation == setPassword) || (req->operation == testPassword)) &&
-        ((passwordLength != maxIpmi20PasswordSize) &&
-         (passwordLength != maxIpmi15PasswordSize)))
+        (((req->ipmi20 == passwordKeySize20) &&
+          (passwordLength != maxIpmi20PasswordSize)) ||
+         ((req->ipmi20 == passwordKeySize16) &&
+          (passwordLength != maxIpmi15PasswordSize))))
     {
         log<level::DEBUG>("Invalid Length");
         return IPMI_CC_REQ_DATA_LEN_INVALID;
