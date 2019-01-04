@@ -112,6 +112,8 @@ const static constexpr char chassisSMDevAddrProp[] = "SMDeviceAddress";
 const static constexpr char chassisBridgeDevAddrProp[] = "BridgeDeviceAddress";
 static constexpr uint8_t chassisCapFlagMask = 0x0f;
 static constexpr uint8_t chassisCapAddrMask = 0xfe;
+static constexpr uint8_t disableResetButton = 0x2;
+static constexpr uint8_t disablePowerButton = 0x1;
 
 typedef struct
 {
@@ -139,6 +141,19 @@ struct GetPOHCountResponse
     uint8_t minPerCount;       ///< Minutes per count
     uint8_t counterReading[4]; ///< Counter reading
 } __attribute__((packed));
+
+typedef struct
+{
+    uint8_t disables; // Front Panel Button Enables
+    //[7:4] - reserved
+    //[3] - 1b = disable Standby (sleep) button for entering standby (sleep)
+    //(control can still be used to wake the system)
+    //[2] - 1b = disable Diagnostic Interrupt button
+    //[1] - 1b = disable Reset button
+    //[0] - 1b = disable Power off button for power off only (in the case there
+    // is a single combined power/standby (sleep) button, then this also
+    // disables sleep requests via that button)
+} __attribute__((packed)) IPMISetFrontPanelButtonEnablesReq;
 
 // Phosphor Host State manager
 namespace State = sdbusplus::xyz::openbmc_project::State::server;
@@ -948,6 +963,8 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     //  Front Panel Button Capabilities and disable/enable status(Optional)
     //  set to 0,  for we don't support them.
+    // TODO, it is tracked by an issue:
+    // https://github.com/openbmc/phosphor-host-ipmid/issues/122
     chassis_status.front_panel_button_cap_status = 0;
 
     // Pack the actual response
@@ -1721,6 +1738,90 @@ ipmi_ret_t ipmi_chassis_set_power_restore_policy(
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t ipmiSetFrontPanelButtonEnables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                          ipmi_request_t request,
+                                          ipmi_response_t response,
+                                          ipmi_data_len_t data_len,
+                                          ipmi_context_t context)
+{
+    bool enable = false;
+    int ret = 0;
+    constexpr const char* powerButtonIntf =
+        "xyz.openbmc_project.Chassis.Buttons.Power";
+    constexpr const char* powerButtonPath =
+        "/xyz/openbmc_project/Chassis/Buttons/Power0";
+    constexpr const char* resetButtonIntf =
+        "xyz.openbmc_project.Chassis.Buttons.Reset";
+    constexpr const char* resetButtonPath =
+        "/xyz/openbmc_project/Chassis/Buttons/Reset0";
+    using namespace chassis::internal;
+
+    IPMISetFrontPanelButtonEnablesReq* req =
+        static_cast<IPMISetFrontPanelButtonEnablesReq*>(request);
+    if (*data_len != 1)
+    {
+        *data_len = 0;
+        log<level::ERR>("IPMI request len is invalid");
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    *data_len = 0;
+    if (req->disables & disablePowerButton)
+    {
+        // Disable power button
+        enable = false;
+    }
+    else
+    {
+        // Enable power button
+        enable = true;
+    }
+    // set power button Enabled property
+    try
+    {
+        auto service = ipmi::getService(dbus, powerButtonIntf, powerButtonPath);
+        ipmi::setDbusProperty(dbus, service, powerButtonPath, powerButtonIntf,
+                              "Enabled", enable);
+        ret++;
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>(e.what());
+        log<level::ERR>("Fail to set power button Enabled property");
+        ret--;
+    }
+
+    if (req->disables & disableResetButton)
+    {
+        // disable reset button
+        enable = false;
+    }
+    else
+    {
+        // enable reset button
+        enable = true;
+    }
+    // set reset button Enabled property
+    try
+    {
+        auto service = ipmi::getService(dbus, resetButtonIntf, resetButtonPath);
+        ipmi::setDbusProperty(dbus, service, resetButtonPath, resetButtonIntf,
+                              "Enabled", enable);
+        ret++;
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>(e.what());
+        log<level::ERR>("Fail to set reset button Enabled property");
+        ret--;
+    }
+    if (ret > 0) // It means one button is set successfully at least.
+                 // If the platform no reset button but just power button,
+                 // user could get error log message and success return
+                 // code for this command.
+        return IPMI_CC_OK;
+    return IPMI_CC_UNSPECIFIED_ERROR;
+}
+
 void register_netfn_chassis_functions()
 {
     createIdentifyTimer();
@@ -1732,6 +1833,11 @@ void register_netfn_chassis_functions()
     // Get Chassis Capabilities
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP, NULL,
                            ipmi_get_chassis_cap, PRIVILEGE_USER);
+
+    // Set Front Panel Button Enables
+    ipmi_register_callback(NETFUN_CHASSIS,
+                           IPMI_CMD_SET_FRONT_PANEL_BUTTON_ENABLES, NULL,
+                           ipmiSetFrontPanelButtonEnables, PRIVILEGE_ADMIN);
 
     // Set Chassis Capabilities
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_CHASSIS_CAP, NULL,
