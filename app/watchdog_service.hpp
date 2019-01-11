@@ -16,6 +16,8 @@ class WatchdogService
 
     using Action =
         sdbusplus::xyz::openbmc_project::State::server::Watchdog::Action;
+    using TimerUse =
+        sdbusplus::xyz::openbmc_project::State::server::Watchdog::TimerUse;
 
     /** @brief Resets the time remaining on the watchdog.
      *         Equivalent to setTimeRemaining(getInterval()).
@@ -33,6 +35,7 @@ class WatchdogService
         bool initialized;
         bool enabled;
         Action expireAction;
+        TimerUse timerUse;
         uint64_t interval;
         uint64_t timeRemaining;
     };
@@ -69,6 +72,12 @@ class WatchdogService
      *  @param[in] expireAction - The new expireAction value
      */
     void setExpireAction(Action expireAction);
+
+    /** @brief Sets the value of the timerUse property on the host watchdog
+     *
+     *  @param[in] timerUse - The new timerUse value
+     */
+    void setTimerUse(TimerUse timerUse);
 
     /** @brief Sets the value of the interval property on the host watchdog
      *
