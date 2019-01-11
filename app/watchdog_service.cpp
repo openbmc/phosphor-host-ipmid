@@ -80,6 +80,9 @@ WatchdogService::Properties WatchdogService::getProperties()
         wd_prop.enabled = get<bool>(properties.at("Enabled"));
         wd_prop.expireAction = Watchdog::convertActionFromString(
             get<std::string>(properties.at("ExpireAction")));
+        wd_prop.TimerUse = Watchdog::convertTimerUseFieldFromString(
+            get<std::string>(properties.at("TimerUse")));
+
         wd_prop.interval = get<uint64_t>(properties.at("Interval"));
         wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
         return wd_prop;
@@ -177,6 +180,11 @@ void WatchdogService::setEnabled(bool enabled)
 void WatchdogService::setExpireAction(Action expireAction)
 {
     setProperty("ExpireAction", convertForMessage(expireAction));
+}
+
+void WatchdogService::setTimerUse(TimerUseField timerUse)
+{
+    setProperty("TimerUse", convertForMessage(timerUse));
 }
 
 void WatchdogService::setInterval(uint64_t interval)
