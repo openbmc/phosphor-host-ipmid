@@ -88,6 +88,8 @@ ipmi_ret_t ipmi_app_watchdog_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 static constexpr uint8_t wd_dont_stop = 0x1 << 6;
 static constexpr uint8_t wd_timeout_action_mask = 0x3;
 
+static constexpr uint8_t wdTimerUseMask = 0x7;
+
 enum class IpmiAction : uint8_t
 {
     None = 0x0,
@@ -123,6 +125,51 @@ WatchdogService::Action ipmiActionToWdAction(IpmiAction ipmi_action)
         default:
         {
             throw std::domain_error("IPMI Action is invalid");
+        }
+    }
+}
+
+enum class IpmiTimerUse : uint8_t
+{
+    Reserved = 0x0,
+    BIOSFRB2 = 0x1,
+    BIOSPOST = 0x2,
+    OSLoad = 0x3,
+    SMSOS = 0x4,
+    OEM = 0x5,
+};
+
+WatchdogService::TimerUse ipmiTimerUseToWdTimerUse(IpmiTimerUse ipmiTimerUse)
+{
+    switch (ipmiTimerUse)
+    {
+        case IpmiTimerUse::Reserved:
+        {
+            return WatchdogService::TimerUse::Reserved;
+        }
+        case IpmiTimerUse::BIOSFRB2:
+        {
+            return WatchdogService::TimerUse::BIOSFRB2;
+        }
+        case IpmiTimerUse::BIOSPOST:
+        {
+            return WatchdogService::TimerUse::BIOSPOST;
+        }
+        case IpmiTimerUse::OSLoad:
+        {
+            return WatchdogService::TimerUse::OSLoad;
+        }
+        case IpmiTimerUse::SMSOS:
+        {
+            return WatchdogService::TimerUse::SMSOS;
+        }
+        case IpmiTimerUse::OEM:
+        {
+            return WatchdogService::TimerUse::OEM;
+        }
+        default:
+        {
+            return WatchdogService::TimerUse::Reserved;
         }
     }
 }
@@ -169,6 +216,10 @@ ipmi_ret_t ipmi_app_watchdog_set(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         const auto ipmi_action =
             static_cast<IpmiAction>(req.timer_action & wd_timeout_action_mask);
         wd_service.setExpireAction(ipmiActionToWdAction(ipmi_action));
+
+        const auto ipmiTimerUse =
+            static_cast<IpmiTimerUse>(req.timer_use & wdTimerUseMask);
+        wd_service.setTimerUse(ipmiTimerUseToWdTimerUse(ipmiTimerUse));
 
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = req.initial_countdown * 100;
@@ -239,6 +290,42 @@ IpmiAction wdActionToIpmiAction(WatchdogService::Action wd_action)
     }
 }
 
+IpmiTimerUse wdTimerUseToIpmiTimerUse(WatchdogService::TimerUse wdTimerUse)
+{
+    switch (wdTimerUse)
+    {
+        case WatchdogService::TimerUse::Reserved:
+        {
+            return IpmiTimerUse::Reserved;
+        }
+        case WatchdogService::TimerUse::BIOSFRB2:
+        {
+            return IpmiTimerUse::BIOSFRB2;
+        }
+        case WatchdogService::TimerUse::BIOSPOST:
+        {
+            return IpmiTimerUse::BIOSPOST;
+        }
+        case WatchdogService::TimerUse::OSLoad:
+        {
+            return IpmiTimerUse::OSLoad;
+        }
+
+        case WatchdogService::TimerUse::SMSOS:
+        {
+            return IpmiTimerUse::SMSOS;
+        }
+        case WatchdogService::TimerUse::OEM:
+        {
+            return IpmiTimerUse::OEM;
+        }
+        default:
+        {
+            return IpmiTimerUse::Reserved;
+        }
+    }
+}
+
 struct wd_get_res
 {
     uint8_t timer_use;
@@ -278,6 +365,10 @@ ipmi_ret_t ipmi_app_watchdog_get(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             res.timer_use |= wd_running;
         }
+
+        res.timer_use |=
+            static_cast<uint8_t>(wdTimerUseToIpmiTimerUse(wd_prop.timerUse));
+
         // TODO: Do something about having pretimeout support
         res.pretimeout = 0;
         res.expire_flags = 0;
