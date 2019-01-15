@@ -361,9 +361,17 @@ ipmi_ret_t ipmi_app_watchdog_get(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         res.timer_use = wd_dont_log;
         res.timer_action =
             static_cast<uint8_t>(wdActionToIpmiAction(wd_prop.expireAction));
+
+        // Interval and timeRemaining need converted from milli -> deci seconds
+        res.initial_countdown = htole16(wd_prop.interval / 100);
         if (wd_prop.enabled)
         {
             res.timer_use |= wd_running;
+            res.present_countdown = htole16(wd_prop.timeRemaining / 100);
+        }
+        else
+        {
+            res.present_countdown = res.initial_countdown;
         }
 
         res.timer_use |=
@@ -372,10 +380,6 @@ ipmi_ret_t ipmi_app_watchdog_get(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // TODO: Do something about having pretimeout support
         res.pretimeout = 0;
         res.expire_flags = 0;
-        // Interval and timeRemaining need converted from milli -> deci seconds
-        res.initial_countdown = htole16(wd_prop.interval / 100);
-        res.present_countdown = htole16(wd_prop.timeRemaining / 100);
-
         memcpy(response, &res, sizeof(res));
         *data_len = sizeof(res);
         lastCallSuccessful = true;
