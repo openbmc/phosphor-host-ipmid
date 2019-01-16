@@ -124,10 +124,19 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
             static_cast<uint8_t>(RAKP_ReturnCode::INSUFFICIENT_RESOURCE);
         return outPayload;
     }
-
+    // As stated in Set Session Privilege Level command in IPMI Spec, when
+    // creating a session through Activate command / RAKP 1 message, it must be
+    // established with CALLBACK privilege if requested for callback. All other
+    // sessions are initialy set to USER privilege, regardless of the requested
+    // maximum privilege.
+    session->curPrivLevel = session::Privilege::CALLBACK;
+    if (static_cast<session::Privilege>(request->req_max_privilege_level &
+                                        session::reqMaxPrivMask) >
+        session::Privilege::CALLBACK)
+    {
+        session->curPrivLevel = session::Privilege::USER;
+    }
     session->reqMaxPrivLevel = request->req_max_privilege_level;
-    session->curPrivLevel = static_cast<session::Privilege>(
-        request->req_max_privilege_level & session::reqMaxPrivMask);
     if (request->user_name_len == 0)
     {
         // Bail out, if user name is not specified.
@@ -178,8 +187,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
     session->chNum = chNum;
-    // minimum privilege of Channel / User / requested has to be used
-    // as session current privilege level
+    // minimum privilege of Channel / User / session::privilege::USER/CALLBACK /
+    // has to be used as session current privilege level
     uint8_t minPriv = 0;
     if (chAccess.privLimit < userAccess.privilege)
     {
