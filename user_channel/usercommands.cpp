@@ -183,6 +183,9 @@ struct SetUserPasswordReq
     uint8_t userPassword[maxIpmi20PasswordSize];
 } __attribute__((packed));
 
+
+bool pamUpdatePasswd(const char* username, const char* password);
+
 ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t dataLen, ipmi_context_t context)
@@ -342,64 +345,6 @@ ipmi_ret_t ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-int pamFunctionConversation(int numMsg, const struct pam_message** msg,
-                            struct pam_response** resp, void* appdataPtr)
-{
-    if (appdataPtr == nullptr)
-    {
-        return PAM_AUTH_ERR;
-    }
-    size_t passSize = std::strlen(reinterpret_cast<char*>(appdataPtr)) + 1;
-    char* pass = reinterpret_cast<char*>(malloc(passSize));
-    std::strncpy(pass, reinterpret_cast<char*>(appdataPtr), passSize);
-
-    *resp = reinterpret_cast<pam_response*>(
-        calloc(numMsg, sizeof(struct pam_response)));
-
-    for (int i = 0; i < numMsg; ++i)
-    {
-        if (msg[i]->msg_style != PAM_PROMPT_ECHO_OFF)
-        {
-            continue;
-        }
-        resp[i]->resp = pass;
-    }
-    return PAM_SUCCESS;
-}
-
-bool pamUpdatePasswd(const char* username, const char* password)
-{
-    const struct pam_conv localConversation = {pamFunctionConversation,
-                                               const_cast<char*>(password)};
-    pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
-
-    if (pam_start("passwd", username, &localConversation, &localAuthHandle) !=
-        PAM_SUCCESS)
-    {
-        return false;
-    }
-    int retval = pam_chauthtok(localAuthHandle, PAM_SILENT);
-
-    if (retval != PAM_SUCCESS)
-    {
-        if (retval == PAM_AUTHTOK_ERR)
-        {
-            log<level::DEBUG>("Authentication Failure");
-        }
-        else
-        {
-            log<level::DEBUG>("pam_chauthtok returned failure",
-                              entry("ERROR=%d", retval));
-        }
-        pam_end(localAuthHandle, retval);
-        return false;
-    }
-    if (pam_end(localAuthHandle, PAM_SUCCESS) != PAM_SUCCESS)
-    {
-        return false;
-    }
-    return true;
-}
 
 /** @brief implementes the set user password command
  *  @param[in] netfn - specifies netfn.

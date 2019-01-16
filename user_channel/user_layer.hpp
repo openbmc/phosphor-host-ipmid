@@ -35,6 +35,7 @@ static constexpr uint8_t reservedUserId = 0x0;
 static constexpr uint8_t ipmiMaxUserName = 16;
 static constexpr uint8_t ipmiMaxUsers = 15;
 static constexpr uint8_t ipmiMaxChannels = 16;
+static constexpr uint8_t ipmiDefaultUserId = 2;
 
 /** @struct PrivAccess
  *
@@ -134,6 +135,17 @@ ipmi_ret_t ipmiUserSetUserName(const uint8_t userId, const char* userName);
  *  @return IPMI_CC_OK for success, others for failure.
  */
 ipmi_ret_t ipmiUserGetUserName(const uint8_t userId, std::string& userName);
+
+
+/** @brief set user password
+ *
+ *  @param[in] user id
+ *  @param[in] userpassword
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+
+ipmi_ret_t ipmiUserSetUserPassword(const uint8_t userId,const char* userPassword);
 
 /** @brief provides available fixed, max, and enabled user counts
  *
