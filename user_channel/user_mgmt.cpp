@@ -17,6 +17,7 @@
 
 #include "apphandler.hpp"
 
+#include <security/pam_appl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -631,6 +632,94 @@ bool UserAccess::isValidUserName(const char* userNameInChar)
     }
 
     return true;
+}
+
+static int pamFunctionConversation(int numMsg, const struct pam_message** msg,
+                                   struct pam_response** resp, void* appdataPtr)
+{
+    if (appdataPtr == nullptr)
+    {
+        return PAM_AUTH_ERR;
+    }
+    size_t passSize = std::strlen(reinterpret_cast<char*>(appdataPtr)) + 1;
+    char* pass = reinterpret_cast<char*>(malloc(passSize));
+    std::strncpy(pass, reinterpret_cast<char*>(appdataPtr), passSize);
+
+    *resp = reinterpret_cast<pam_response*>(
+        calloc(numMsg, sizeof(struct pam_response)));
+
+    for (int i = 0; i < numMsg; ++i)
+    {
+        if (msg[i]->msg_style != PAM_PROMPT_ECHO_OFF)
+        {
+            continue;
+        }
+        resp[i]->resp = pass;
+    }
+    return PAM_SUCCESS;
+}
+
+bool pamUpdatePasswd(const char* username, const char* password)
+{
+    const struct pam_conv localConversation = {pamFunctionConversation,
+                                               const_cast<char*>(password)};
+    pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
+
+    if (pam_start("passwd", username, &localConversation, &localAuthHandle) !=
+        PAM_SUCCESS)
+    {
+        return false;
+    }
+    int retval = pam_chauthtok(localAuthHandle, PAM_SILENT);
+
+    if (retval != PAM_SUCCESS)
+    {
+        if (retval == PAM_AUTHTOK_ERR)
+        {
+            log<level::DEBUG>("Authentication Failure");
+        }
+        else
+        {
+            log<level::DEBUG>("pam_chauthtok returned failure",
+                              entry("ERROR=%d", retval));
+        }
+        pam_end(localAuthHandle, retval);
+        return false;
+    }
+    if (pam_end(localAuthHandle, PAM_SUCCESS) != PAM_SUCCESS)
+    {
+        return false;
+    }
+    return true;
+}
+
+ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
+                                       const char* userPassword)
+{
+    std::string userName;
+    if (ipmiUserGetUserName(userId, userName) != IPMI_CC_OK)
+    {
+        log<level::DEBUG>("User Name not found",
+                          entry("USER-ID:%d", (uint8_t)userId));
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    std::string passwd;
+    passwd.assign(reinterpret_cast<const char*>(userPassword), 0,
+                  maxIpmi20PasswordSize);
+    if (!std::regex_match(passwd.c_str(),
+                          std::regex("[a-zA-z_0-9][a-zA-Z_0-9,?:`!\"]*")))
+    {
+        log<level::DEBUG>("Invalid password fields",
+                          entry("USER-ID:%d", (uint8_t)userId));
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!pamUpdatePasswd(userName.c_str(), passwd.c_str()))
+    {
+        log<level::DEBUG>("Failed to update password",
+                          entry("USER-ID:%d", (uint8_t)userId));
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
 }
 
 ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
