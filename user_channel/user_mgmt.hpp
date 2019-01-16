@@ -208,6 +208,15 @@ class UserAccess
     ipmi_ret_t setUserEnabledState(const uint8_t userId,
                                    const bool& enabledState);
 
+    /** @brief to set user password
+     *
+     *  @param[in] userId - user id
+     *  @param[in] userPassword  - new password of the user
+     *
+     *  @return IPMI_CC_OK for success, others for failure.
+     */
+    ipmi_ret_t setUserPassword(const uint8_t userId, const char* userPassword);
+
     /** @brief to set user privilege and access details
      *
      *  @param[in] userId - user id
