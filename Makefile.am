@@ -126,7 +126,7 @@ libusercmds_la_SOURCES = \
 	user_channel/usercommands.cpp
 libusercmds_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
-	$(LIBS) \
+	$(libmapper_LIBS) \
 	-version-info 0:0:0 -shared
 libusercmds_la_CXXFLAGS = $(COMMON_CXX)
 
