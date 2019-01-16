@@ -11,6 +11,7 @@
 #include <fstream>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <set>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -135,17 +136,22 @@ namespace cipher
 
 /** @brief Get the supported Cipher records
  *
- * The cipher records are read from the JSON file and converted into cipher
- * suite record format mentioned in the IPMI specification. The records can be
- * either OEM or standard cipher. Each json entry is parsed and converted into
- * the cipher record format and pushed into the vector.
+ * The cipher records are read from the JSON file and converted into
+ * 1. cipher suite record format mentioned in the IPMI specification. The
+ * records can be either OEM or standard cipher. Each json entry is parsed and
+ * converted into the cipher record format and pushed into the vector.
+ * 2. Algorithms listed in vector format
  *
- * @return vector containing all the cipher suite records.
+ * @return pair of vector containing 1. all the cipher suite records. 2.
+ * Algorithms supported
  *
  */
-std::vector<uint8_t> getCipherRecords()
+std::pair<std::vector<uint8_t>, std::vector<uint8_t>> getCipherRecords()
 {
-    std::vector<uint8_t> records;
+    std::vector<uint8_t> cipherRecords;
+    std::vector<uint8_t> supportedAlgorithmRecords;
+    // create set to get the unique supported algorithms
+    std::set<uint8_t> supportedAlgorithmSet;
 
     std::ifstream jsonFile(configFile);
     if (!jsonFile.is_open())
@@ -166,31 +172,40 @@ std::vector<uint8_t> getCipherRecords()
         if (record.find(oem) != record.end())
         {
             // OEM cipher suite - 0xC1
-            records.push_back(oemCipherSuite);
+            cipherRecords.push_back(oemCipherSuite);
             // Cipher Suite ID
-            records.push_back(record.value(cipher, 0));
+            cipherRecords.push_back(record.value(cipher, 0));
             // OEM IANA - 3 bytes
-            records.push_back(record.value(oem, 0));
-            records.push_back(record.value(oem, 0) >> 8);
-            records.push_back(record.value(oem, 0) >> 16);
+            cipherRecords.push_back(record.value(oem, 0));
+            cipherRecords.push_back(record.value(oem, 0) >> 8);
+            cipherRecords.push_back(record.value(oem, 0) >> 16);
         }
         else
         {
-            // OEM cipher suite - 0xC0
-            records.push_back(stdCipherSuite);
+            // Standard cipher suite - 0xC0
+            cipherRecords.push_back(stdCipherSuite);
             // Cipher Suite ID
-            records.push_back(record.value(cipher, 0));
+            cipherRecords.push_back(record.value(cipher, 0));
         }
 
         // Authentication algorithm number
-        records.push_back(record.value(auth, 0));
+        cipherRecords.push_back(record.value(auth, 0));
+        supportedAlgorithmSet.insert(record.value(auth, 0));
+
         // Integrity algorithm number
-        records.push_back(record.value(integrity, 0) | integrityTag);
+        cipherRecords.push_back(record.value(integrity, 0) | integrityTag);
+        supportedAlgorithmSet.insert(record.value(integrity, 0) | integrityTag);
+
         // Confidentiality algorithm number
-        records.push_back(record.value(conf, 0) | confTag);
+        cipherRecords.push_back(record.value(conf, 0) | confTag);
+        supportedAlgorithmSet.insert(record.value(conf, 0) | confTag);
     }
 
-    return records;
+    // copy the set to supportedAlgorithmRecord which is vector based.
+    std::copy(supportedAlgorithmSet.begin(), supportedAlgorithmSet.end(),
+              std::back_inserter(supportedAlgorithmRecords));
+
+    return std::make_pair(cipherRecords, supportedAlgorithmRecords);
 }
 
 } // namespace cipher
@@ -201,7 +216,8 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_data_len_t data_len,
                                   ipmi_context_t context)
 {
-    static std::vector<uint8_t> records;
+    static std::vector<uint8_t> cipherRecords;
+    static std::vector<uint8_t> supportedAlgorithms;
     static auto recordInit = false;
 
     auto requestData =
@@ -215,18 +231,12 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     *data_len = 0;
 
-    // Support only for list algorithms by cipher suite
-    if (cipher::listCipherSuite !=
-        (requestData->listIndex & cipher::listTypeMask))
-    {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
     if (!recordInit)
     {
         try
         {
-            records = cipher::getCipherRecords();
+            std::tie(cipherRecords, supportedAlgorithms) =
+                cipher::getCipherRecords();
             recordInit = true;
         }
         catch (const std::exception& e)
@@ -234,6 +244,11 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
     }
+
+    const auto& records = (cipher::listCipherSuite ==
+                           (requestData->listIndex & cipher::listTypeMask))
+                              ? cipherRecords
+                              : supportedAlgorithms;
 
     // List index(00h-3Fh), 0h selects the first set of 16, 1h selects the next
     // set of 16 and so on.
