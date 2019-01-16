@@ -194,10 +194,10 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         session->curPrivLevel = static_cast<session::Privilege>(minPriv);
     }
     // For username / privilege lookup, fail with UNAUTH_NAME, if requested
-    // max privilege is greater than the user privilege.
+    // max privilege does not match user privilege
     if (((request->req_max_privilege_level & userNameOnlyLookupMask) ==
          userNamePrivLookup) &&
-        ((request->req_max_privilege_level & session::reqMaxPrivMask) >
+        ((request->req_max_privilege_level & session::reqMaxPrivMask) !=
          userAccess.privilege))
     {
         log<level::INFO>(
