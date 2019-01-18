@@ -1659,12 +1659,13 @@ ipmi_ret_t ipmi_chassis_set_power_restore_policy(
     }
 
     reqPolicy = *reqptr & power_policy::policyBitMask;
-    if (reqPolicy > power_policy::noChange)
+    if ((reqPolicy > power_policy::noChange) ||
+        (*reqptr & ~power_policy::policyBitMask))
     {
         phosphor::logging::log<level::ERR>("Reserved request parameter",
                                            entry("REQ=0x%x", reqPolicy));
         *data_len = 0;
-        return IPMI_CC_PARM_NOT_SUPPORTED;
+        return IPMI_CC_PARM_OUT_OF_RANGE;
     }
 
     if (reqPolicy == power_policy::noChange)
@@ -1717,6 +1718,7 @@ ipmi_ret_t ipmi_chassis_set_power_restore_policy(
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
+    *resptr = power_policy::allSupport;
     *data_len = power_policy::setPolicyReqLen;
     return IPMI_CC_OK;
 }
