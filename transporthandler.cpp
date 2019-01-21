@@ -393,6 +393,35 @@ struct set_lan_t
     uint8_t data[8]; // Per IPMI spec, not expecting more than this size
 } __attribute__((packed));
 
+ipmi_ret_t checkAndUpdateNetwork(int channel)
+{
+    auto channelConf = getChannelConfig(channel);
+    using namespace std::chrono_literals;
+    // time to wait before applying the network changes.
+    constexpr auto networkTimeout = 10000000us; // 10 sec
+
+    if (channelConf->lan_set_in_progress == SET_COMPLETE &&
+        channelConf->flushForSetComplete == false)
+    {
+        channelConf->flush = true;
+        if (!networkTimer)
+        {
+            log<level::ERR>("Network timer is not instantiated");
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+        // start the timer.
+        networkTimer->start(networkTimeout);
+    }
+    else if (channelConf->lan_set_in_progress == SET_COMPLETE &&
+             channelConf->flushForSetComplete == true)
+    {
+        // Apply the network changes immediately, if proper SET_IN_PROGRESS,
+        // followed by SET_COMPLETE is issued.
+        applyChanges(channel);
+    }
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_request_t request,
                                   ipmi_response_t response,
@@ -401,11 +430,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
-
-    using namespace std::chrono_literals;
-
-    // time to wait before applying the network changes.
-    constexpr auto networkTimeout = 10000000us; // 10 sec
 
     char ipaddr[INET_ADDRSTRLEN];
     char netmask[INET_ADDRSTRLEN];
@@ -505,20 +529,11 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                     entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
                     entry("GATEWAY=%s", channelConf->gateway.c_str()),
                     entry("VLAN=%d", channelConf->vlanID));
-
-                if (!networkTimer)
-                {
-                    log<level::ERR>("Network timer is not instantiated");
-                    return IPMI_CC_UNSPECIFIED_ERROR;
-                }
-
-                // start/restart the timer
-                networkTimer->start(networkTimeout);
             }
             else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
             {
                 channelConf->lan_set_in_progress = SET_IN_PROGRESS;
-                channelConf->flush = true;
+                channelConf->flushForSetComplete = true;
             }
         }
         break;
@@ -526,8 +541,10 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         default:
         {
             rc = IPMI_CC_PARM_NOT_SUPPORTED;
+            return rc;
         }
     }
+    rc = checkAndUpdateNetwork(channel);
 
     return rc;
 }

@@ -53,6 +53,7 @@ struct ChannelConfig_t
     // vlan id is in 12 bits and the 16th bit is for enable mask.
     uint32_t vlanID = ipmi::network::VLAN_ID_MASK;
     uint8_t lan_set_in_progress = SET_COMPLETE;
+    bool flushForSetComplete = false;
     bool flush = false;
 
     void clear()
@@ -64,6 +65,7 @@ struct ChannelConfig_t
         vlanID = ipmi::network::VLAN_ID_MASK;
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
         lan_set_in_progress = SET_COMPLETE;
+        flushForSetComplete = false;
         flush = false;
     }
 };
