@@ -213,16 +213,18 @@ std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
     auto status = std::get<sol::Manager&>(singletonPool)
                       .isPayloadActive(request->payloadInstance);
 
-    if (!status)
+    if (status)
     {
-        response->completionCode = IPMI_CC_RESPONSE_ERROR;
-        return outPayload;
+        auto& context = std::get<sol::Manager&>(singletonPool)
+                            .getContext(request->payloadInstance);
+        response->sessionID = context.sessionID;
     }
-
-    auto& context = std::get<sol::Manager&>(singletonPool)
-                        .getContext(request->payloadInstance);
-    response->sessionID = context.sessionID;
-
+    else
+    {
+        // No active payload - return session id as 0
+        response->sessionID = 0;
+    }
+    response->completionCode = IPMI_CC_OK;
     return outPayload;
 }
 
