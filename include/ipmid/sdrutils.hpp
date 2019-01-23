@@ -15,6 +15,7 @@
 */
 
 #include <boost/algorithm/string.hpp>
+#include <boost/bimap.hpp>
 #include <boost/container/flat_map.hpp>
 #include <cstring>
 #include <phosphor-logging/log.hpp>
@@ -51,9 +52,34 @@ using SensorSubTree = boost::container::flat_map<
     boost::container::flat_map<std::string, std::vector<std::string>>,
     CmpStrVersion>;
 
-inline static bool getSensorSubtree(SensorSubTree& subtree)
+using SensorNumMap = boost::bimap<int, std::string>;
+
+namespace sensor_details
 {
+inline static bool getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
+{
+    static std::shared_ptr<SensorSubTree> sensorTreePtr;
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default_system();
+    static sdbusplus::bus::match::match sensorAdded(
+        dbus,
+        "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
+        "sensors/'",
+        [](sdbusplus::message::message& m) { sensorTreePtr.reset(); });
+
+    static sdbusplus::bus::match::match sensorRemoved(
+        dbus,
+        "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
+        "openbmc_project/sensors/'",
+        [](sdbusplus::message::message& m) { sensorTreePtr.reset(); });
+
+    bool sensorTreeUpdated = false;
+    if (sensorTreePtr)
+    {
+        subtree = sensorTreePtr;
+        return sensorTreeUpdated;
+    }
+
+    sensorTreePtr = std::make_shared<SensorSubTree>();
 
     auto mapperCall =
         dbus.new_method_call("xyz.openbmc_project.ObjectMapper",
@@ -69,14 +95,60 @@ inline static bool getSensorSubtree(SensorSubTree& subtree)
     try
     {
         auto mapperReply = dbus.call(mapperCall);
-        subtree.clear();
-        mapperReply.read(subtree);
+        mapperReply.read(*sensorTreePtr);
     }
     catch (sdbusplus::exception_t& e)
     {
         log<level::ERR>(e.what());
+        return sensorTreeUpdated;
+    }
+    subtree = sensorTreePtr;
+    sensorTreeUpdated = true;
+    return sensorTreeUpdated;
+}
+
+inline static bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
+{
+    static std::shared_ptr<SensorNumMap> sensorNumMapPtr;
+    bool sensorNumMapUpated = false;
+
+    std::shared_ptr<SensorSubTree> sensorTree;
+    bool sensorTreeUpdated = getSensorSubtree(sensorTree);
+    if (!sensorTree)
+    {
+        return sensorNumMapUpated;
+    }
+
+    if (!sensorTreeUpdated && sensorNumMapPtr)
+    {
+        sensorNumMap = sensorNumMapPtr;
+        return sensorNumMapUpated;
+    }
+
+    sensorNumMapPtr = std::make_shared<SensorNumMap>();
+
+    uint8_t sensorNum = 1;
+    for (const auto& sensor : *sensorTree)
+    {
+        sensorNumMapPtr->insert(
+            SensorNumMap::value_type(sensorNum++, sensor.first));
+    }
+    sensorNumMap = sensorNumMapPtr;
+    sensorNumMapUpated = true;
+    return sensorNumMapUpated;
+}
+} // namespace sensor_details
+
+inline static bool getSensorSubtree(SensorSubTree& subtree)
+{
+    std::shared_ptr<SensorSubTree> sensorTree;
+    sensor_details::getSensorSubtree(sensorTree);
+    if (!sensorTree)
+    {
         return false;
     }
+
+    subtree = *sensorTree;
     return true;
 }
 
@@ -130,13 +202,22 @@ inline static uint8_t getSensorTypeFromPath(const std::string& path)
 
 inline static uint8_t getSensorNumberFromPath(const std::string& path)
 {
-    SensorSubTree sensorTree;
-    if (!getSensorSubtree(sensorTree))
+    std::shared_ptr<SensorNumMap> sensorNumMapPtr;
+    sensor_details::getSensorNumMap(sensorNumMapPtr);
+    if (!sensorNumMapPtr)
+    {
         return 0xFF;
-    uint8_t sensorNum = 0xFF;
+    }
 
-    sensorNum = std::distance(std::begin(sensorTree), sensorTree.find(path));
-    return sensorNum;
+    try
+    {
+        return sensorNumMapPtr->right.at(path);
+    }
+    catch (std::out_of_range& e)
+    {
+        log<level::ERR>(e.what());
+        return 0xFF;
+    }
 }
 
 inline static uint8_t getSensorEventTypeFromPath(const std::string& path)
@@ -147,25 +228,20 @@ inline static uint8_t getSensorEventTypeFromPath(const std::string& path)
 
 inline static std::string getPathFromSensorNumber(uint8_t sensorNum)
 {
-    SensorSubTree sensorTree;
-    std::string path;
-    if (!getSensorSubtree(sensorTree))
-        return path;
-
-    if (sensorTree.size() < sensorNum)
+    std::shared_ptr<SensorNumMap> sensorNumMapPtr;
+    sensor_details::getSensorNumMap(sensorNumMapPtr);
+    if (!sensorNumMapPtr)
     {
-        return path;
+        return std::string();
     }
 
-    uint8_t sensorIndex = sensorNum;
-    for (const auto& sensor : sensorTree)
+    try
     {
-        if (sensorIndex-- == 0)
-        {
-            path = sensor.first;
-            break;
-        }
+        return sensorNumMapPtr->left.at(sensorNum);
     }
-
-    return path;
+    catch (std::out_of_range& e)
+    {
+        log<level::ERR>(e.what());
+        return std::string();
+    }
 }
