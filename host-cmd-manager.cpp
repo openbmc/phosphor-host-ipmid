@@ -26,6 +26,8 @@ constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
 constexpr auto HOST_STATE_PATH = "/xyz/openbmc_project/state/host0";
 constexpr auto HOST_STATE_INTERFACE = "xyz.openbmc_project.State.Host";
 constexpr auto HOST_TRANS_PROP = "RequestedHostTransition";
+constexpr const char* IPMI_PATH = "/org/openbmc/HostIpmi/1";
+constexpr const char* IPMI_INTERFACE = "org.openbmc.HostIpmi";
 
 // For throwing exceptions
 using namespace phosphor::logging;
@@ -107,6 +109,20 @@ void Manager::clearQueue()
         // `false` indicating Failure
         std::get<CallBack>(command)(ipmiCmdData, false);
     }
+
+    auto host = ::ipmi::getService(this->bus, IPMI_INTERFACE, IPMI_PATH);
+    auto method = this->bus.new_method_call(host.c_str(), IPMI_PATH,
+                                            IPMI_INTERFACE, "clearAttention");
+
+    try
+    {
+        auto reply = this->bus.call(method);
+    }
+    catch (sdbusplus::exception_t&)
+    {
+        log<level::ERR>("Error in clearing SMS attention");
+        elog<InternalFailure>();
+    }
 }
 
 // Called for alerting the host
@@ -115,9 +131,6 @@ void Manager::checkQueueAndAlertHost()
     if (this->workQueue.size() >= 1)
     {
         log<level::DEBUG>("Asserting SMS Attention");
-
-        std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
-        std::string IPMI_INTERFACE("org.openbmc.HostIpmi");
 
         auto host = ::ipmi::getService(this->bus, IPMI_INTERFACE, IPMI_PATH);
 
@@ -132,9 +145,8 @@ void Manager::checkQueueAndAlertHost()
             return;
         }
 
-        auto method =
-            this->bus.new_method_call(host.c_str(), IPMI_PATH.c_str(),
-                                      IPMI_INTERFACE.c_str(), "setAttention");
+        auto method = this->bus.new_method_call(host.c_str(), IPMI_PATH,
+                                                IPMI_INTERFACE, "setAttention");
         auto reply = this->bus.call(method);
 
         if (reply.is_method_error())
