@@ -23,7 +23,8 @@ namespace variant_ns = sdbusplus::message::variant_ns;
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
-std::unique_ptr<sdbusplus::bus::match_t> matchPtr(nullptr);
+std::unique_ptr<sdbusplus::bus::match_t> matchPtr
+    __attribute__((init_priority(101)));
 
 static constexpr auto INV_INTF = "xyz.openbmc_project.Inventory.Manager";
 static constexpr auto OBJ_PATH = "/xyz/openbmc_project/inventory";

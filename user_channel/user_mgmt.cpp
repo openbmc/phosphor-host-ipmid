@@ -116,9 +116,12 @@ using NoResource =
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
-std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal(nullptr);
-std::unique_ptr<sdbusplus::bus::match_t> userMgrRenamedSignal(nullptr);
-std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal(nullptr);
+std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal
+    __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match_t> userMgrRenamedSignal
+    __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal
+    __attribute__((init_priority(101)));
 
 // TODO:  Below code can be removed once it is moved to common layer libmiscutil
 std::string getUserService(sdbusplus::bus::bus& bus, const std::string& intf,
