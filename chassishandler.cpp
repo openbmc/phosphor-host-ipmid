@@ -54,7 +54,8 @@ namespace filesystem = std::experimental::filesystem;
 #define SET_PARM_BOOT_FLAGS_VALID_ONE_TIME 0x80
 #define SET_PARM_BOOT_FLAGS_VALID_PERMANENT 0xC0
 
-std::unique_ptr<phosphor::Timer> identifyTimer = nullptr;
+std::unique_ptr<phosphor::Timer> identifyTimer
+    __attribute__((init_priority(101)));
 
 constexpr size_t SIZE_MAC = 18;
 constexpr size_t SIZE_BOOT_OPTION = (uint8_t)

@@ -89,7 +89,8 @@ static constexpr const uint8_t defaultAuthType =
 static constexpr const bool defaultIsIpmiState = false;
 static constexpr size_t smallChannelSize = 64;
 
-std::unique_ptr<sdbusplus::bus::match_t> chPropertiesSignal(nullptr);
+std::unique_ptr<sdbusplus::bus::match_t> chPropertiesSignal
+    __attribute__((init_priority(101)));
 
 // String mappings use in JSON config file
 static std::unordered_map<std::string, EChannelMediumType> mediumTypeMap = {
