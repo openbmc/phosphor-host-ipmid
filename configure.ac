@@ -85,10 +85,6 @@ AS_IF([test "x$SENSOR_YAML_GEN" == "x"], [SENSOR_YAML_GEN="sensor-example.yaml"]
 SENSORGEN="$PYTHON ${srcdir}/scripts/sensor_gen.py -i $SENSOR_YAML_GEN"
 AC_SUBST(SENSORGEN)
 
-AS_IF([test "x$INVSENSOR_YAML_GEN" == "x"], [INVSENSOR_YAML_GEN="inventory-sensor-example.yaml"])
-INVSENSORGEN="$PYTHON ${srcdir}/scripts/inventory-sensor.py -i $INVSENSOR_YAML_GEN"
-AC_SUBST(INVSENSORGEN)
-
 AS_IF([test "x$FRU_YAML_GEN" == "x"], [FRU_YAML_GEN="fru-read-example.yaml"])
 FRUGEN="$PYTHON $srcdir/scripts/fru_gen.py -i $FRU_YAML_GEN"
 AC_SUBST(FRUGEN)
