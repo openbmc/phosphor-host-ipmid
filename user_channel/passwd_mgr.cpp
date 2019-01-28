@@ -41,11 +41,6 @@ static const size_t maxKeySize = 8;
 
 #define META_PASSWD_SIG "=OPENBMC="
 
-static inline size_t blockRound(size_t odd, size_t blk)
-{
-    return ((odd) + (((blk) - ((odd) & ((blk)-1))) & ((blk)-1)));
-}
-
 /*
  * Meta data struct for encrypted password file
  */
@@ -389,10 +384,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
             }
             linePtr = strtok_r(NULL, "\n", &nToken);
         }
-
-        // Round of to block size and padding remaing bytes with zero.
-        inBytesLen = blockRound(bytesWritten, EVP_CIPHER_block_size(cipher));
-        std::memset(&inBytes[0] + bytesWritten, 0, inBytesLen - bytesWritten);
+        inBytesLen = bytesWritten;
     }
     if (!isUsrFound)
     {
