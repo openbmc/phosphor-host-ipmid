@@ -170,9 +170,9 @@ ipmi_ret_t ipmiSetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (!isValidChannel(chNum))
+    if (!isValidChannel(chNum) || req->reserved_1 != 0 || req->reserved_2 != 0)
     {
-        log<level::DEBUG>("Set channel access - Parameter out of range");
+        log<level::DEBUG>("Set channel access - Invalid field in request");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
@@ -275,9 +275,9 @@ ipmi_ret_t ipmiGetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (!isValidChannel(chNum))
+    if (!isValidChannel(chNum) || req->reserved_1 != 0 || req->reserved_2 != 0)
     {
-        log<level::DEBUG>("Get channel access - Parameter out of range");
+        log<level::DEBUG>("Get channel access - Invalid field in request");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
@@ -341,9 +341,9 @@ ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (!isValidChannel(chNum))
+    if (!isValidChannel(chNum) || req->reserved_1 != 0)
     {
-        log<level::DEBUG>("Get channel info - Parameter out of range");
+        log<level::DEBUG>("Get channel info - Invalid field in request");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
