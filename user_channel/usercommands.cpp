@@ -222,9 +222,8 @@ ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         privAccess.accessCallback = req->accessCallback;
     }
     privAccess.privilege = req->privilege;
-    ipmiUserSetPrivilegeAccess(req->userId, chNum, privAccess, req->bitsUpdate);
-
-    return IPMI_CC_OK;
+    return ipmiUserSetPrivilegeAccess(req->userId, chNum, privAccess,
+                                      req->bitsUpdate);
 }
 
 ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -233,6 +232,7 @@ ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     const GetUserAccessReq* req = static_cast<GetUserAccessReq*>(request);
     size_t reqLength = *dataLen;
+    ipmi_ret_t retStatus = IPMI_CC_OK;
 
     *dataLen = 0;
 
@@ -262,18 +262,26 @@ ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     std::fill(reinterpret_cast<uint8_t*>(resp),
               reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
 
-    ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers);
+    retStatus = ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers);
+    if (retStatus != IPMI_CC_OK)
+    {
+        return retStatus;
+    }
+
     resp->maxChUsers = maxChUsers;
     resp->enabledUsers = enabledUsers;
     resp->fixedUsers = fixedUsers;
 
-    ipmiUserCheckEnabled(req->userId, enabledState);
+    retStatus = ipmiUserCheckEnabled(req->userId, enabledState);
+    if (retStatus != IPMI_CC_OK)
+    {
+        return retStatus;
+    }
+
     resp->enabledStatus = enabledState ? userIdEnabledViaSetPassword
                                        : userIdDisabledViaSetPassword;
-    ipmiUserGetPrivilegeAccess(req->userId, chNum, resp->privAccess);
     *dataLen = sizeof(*resp);
-
-    return IPMI_CC_OK;
+    return ipmiUserGetPrivilegeAccess(req->userId, chNum, resp->privAccess);
 }
 
 ipmi_ret_t ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
