@@ -487,10 +487,12 @@ ipmi_ret_t
         return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
     }
 
-    if ((setFlag & setAccessMode) &&
-        (!isValidAccessMode(chAccessData.accessMode)))
+    if (((setFlag & setAccessMode) &&
+         (!isValidAccessMode(chAccessData.accessMode))) ||
+        ((setFlag & setPrivLimit) &&
+         (!isValidPrivLimit(chAccessData.privLimit))))
     {
-        log<level::DEBUG>("Invalid access mode specified");
+        log<level::DEBUG>("Invalid access mode / privilege limit specified");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
@@ -582,10 +584,12 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
         return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
     }
 
-    if ((setFlag & setAccessMode) &&
-        (!isValidAccessMode(chAccessData.accessMode)))
+    if (((setFlag & setAccessMode) &&
+         (!isValidAccessMode(chAccessData.accessMode))) ||
+        ((setFlag & setPrivLimit) &&
+         (!isValidPrivLimit(chAccessData.privLimit))))
     {
-        log<level::DEBUG>("Invalid access mode specified");
+        log<level::DEBUG>("Invalid access mode / privilege limit specified");
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
