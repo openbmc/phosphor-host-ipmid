@@ -222,9 +222,8 @@ ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         privAccess.accessCallback = req->accessCallback;
     }
     privAccess.privilege = req->privilege;
-    ipmiUserSetPrivilegeAccess(req->userId, chNum, privAccess, req->bitsUpdate);
-
-    return IPMI_CC_OK;
+    return ipmiUserSetPrivilegeAccess(req->userId, chNum, privAccess,
+                                      req->bitsUpdate);
 }
 
 ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -262,18 +261,25 @@ ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     std::fill(reinterpret_cast<uint8_t*>(resp),
               reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
 
-    ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers);
+    if (ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers) !=
+        IPMI_CC_OK)
+    {
+        log<level::DEBUG>("Get user access - Unspecified error");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
     resp->maxChUsers = maxChUsers;
     resp->enabledUsers = enabledUsers;
     resp->fixedUsers = fixedUsers;
 
-    ipmiUserCheckEnabled(req->userId, enabledState);
+    if (ipmiUserCheckEnabled(req->userId, enabledState) != IPMI_CC_OK)
+    {
+        log<level::DEBUG>("Get user access - Invalid user id");
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
     resp->enabledStatus = enabledState ? userIdEnabledViaSetPassword
                                        : userIdDisabledViaSetPassword;
-    ipmiUserGetPrivilegeAccess(req->userId, chNum, resp->privAccess);
     *dataLen = sizeof(*resp);
-
-    return IPMI_CC_OK;
+    return ipmiUserGetPrivilegeAccess(req->userId, chNum, resp->privAccess);
 }
 
 ipmi_ret_t ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
