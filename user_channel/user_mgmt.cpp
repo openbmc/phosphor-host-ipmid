@@ -686,10 +686,6 @@ ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
     }
     std::string priv = convertToSystemPrivilege(
         static_cast<CommandPrivilege>(privAccess.privilege));
-    if (priv.empty())
-    {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
-    }
     uint8_t syncIndex = getUsrMgmtSyncIndex();
     if (chNum == syncIndex &&
         privAccess.privilege != userInfo->userPrivAccess[syncIndex].privilege)
