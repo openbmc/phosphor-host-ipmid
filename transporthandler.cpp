@@ -196,9 +196,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getIPObject(
-                            bus, ipmi::network::IP_INTERFACE,
-                            ipmi::network::ROOT, ipmi::network::IP_TYPE);
+                        auto ipObjectInfo =
+                            ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
+                                              ipmi::network::ROOT, ethIP);
 
                         auto properties = ipmi::getAllDbusProperties(
                             bus, ipObjectInfo.second, ipObjectInfo.first,
