@@ -63,6 +63,7 @@ ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_context_t context);
 
 static const uint16_t FRU_RECORD_ID_START = 256;
+static const uint16_t ENTITY_RECORD_ID_START = 512;
 static const uint8_t SDR_VERSION = 0x51;
 static const uint16_t END_OF_RECORD = 0xFFFF;
 static const uint8_t LENGTH_MASK = 0x1F;
@@ -187,6 +188,7 @@ enum SensorDataRecordType
 {
     SENSOR_DATA_FULL_RECORD = 0x1,
     SENSOR_DATA_FRU_RECORD = 0x11,
+    SENSOR_DATA_ENTITY_RECORD = 0x8,
 };
 
 // Record key
@@ -207,6 +209,19 @@ struct SensorDataFruRecordKey
     uint8_t fruID;
     uint8_t accessLun;
     uint8_t channelNumber;
+} __attribute__((packed));
+
+/** @struct SensorDataEntityRecordKey
+ *
+ *  Entity Association Record(key) - SDR Type 8
+ */
+struct SensorDataEntityRecordKey
+{
+    uint8_t containerEntityId;
+    uint8_t containerEntityInstance;
+    uint8_t flags;
+    uint8_t entityId1;
+    uint8_t entityInstance1;
 } __attribute__((packed));
 
 namespace key
@@ -243,6 +258,17 @@ inline void set_owner_lun_channel(uint8_t channel, SensorDataRecordKey* key)
 {
     key->owner_lun &= 0x0f;
     key->owner_lun |= ((channel & 0xf) << 4);
+};
+
+inline void set_flags(bool isList, bool isLinked,
+                      SensorDataEntityRecordKey* key)
+{
+    key->flags = 0x00;
+    if (!isList)
+        key->flags |= 1 << 7;
+
+    if (isLinked)
+        key->flags |= 1 << 6;
 };
 
 } // namespace key
@@ -322,6 +348,22 @@ struct SensorDataFruRecordBody
     uint8_t oem;
     uint8_t deviceIDLen;
     char deviceID[FRU_RECORD_DEVICE_ID_MAX_LENGTH];
+} __attribute__((packed));
+
+/** @struct SensorDataEntityRecordBody
+ *
+ *  Entity Association Record(body) - SDR Type 8
+ */
+struct SensorDataEntityRecordBody
+{
+    uint8_t entityId2;
+    uint8_t entityInstance2;
+    ;
+    uint8_t entityId3;
+    ;
+    uint8_t entityInstance3;
+    uint8_t entityId4;
+    uint8_t entityInstance4;
 } __attribute__((packed));
 
 namespace body
@@ -569,6 +611,17 @@ struct SensorDataFruRecord
     SensorDataRecordHeader header;
     SensorDataFruRecordKey key;
     SensorDataFruRecordBody body;
+} __attribute__((packed));
+
+/** @struct SensorDataEntityRecord
+ *
+ *  Entity Association Record - SDR Type 8
+ */
+struct SensorDataEntityRecord
+{
+    SensorDataRecordHeader header;
+    SensorDataEntityRecordKey key;
+    SensorDataEntityRecordBody body;
 } __attribute__((packed));
 
 } // namespace get_sdr

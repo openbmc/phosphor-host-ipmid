@@ -1,0 +1,84 @@
+# Entity Record id is the key
+0x01:
+  containerEntityId: 0x13
+  containerEntityInstance: 0x81
+  isList: "true"
+  isLinked: "false"
+  entityId1: 0x0A
+  entityInstance1: 0x1
+  entityId2: 0x0A
+  entityInstance2: 0x3
+  entityId3: 0x0A
+  entityInstance3: 0x5
+  entityId4: 0x0A
+  entityInstance4: 0x7
+
+0x02:
+  containerEntityId: 0x18
+  containerEntityInstance: 0x02
+  isList: "true"
+  isLinked: "true"
+  entityId1: 0x1D
+  entityInstance1: 0x01
+  entityId2: 0x1D
+  entityInstance2: 0x04
+  entityId3: 0x1D
+  entityInstance3: 0x06
+  entityId4: 0x2B
+  entityInstance4: 0x01
+
+0x03:
+  containerEntityId: 0x18
+  containerEntityInstance: 0x2
+  isList: "true"
+  isLinked: "true"
+  entityId1: 0x2B
+  entityInstance1: 0x3
+  entityId2: 0x0F
+  entityInstance2: 0x1
+  entityId3: 0x0F
+  entityInstance3: 0x3
+  entityId4: 0x10
+  entityInstance4: 0x05
+
+0x04:
+  containerEntityId: 0x1E
+  containerEntityInstance: 0x01
+  isList: "false"
+  isLinked: "false"
+  entityId1: 0x20
+  entityInstance1: 0x01
+  entityId2: 0x20
+  entityInstance2: 0x06
+  entityId3: 0x20
+  entityInstance3: 0x19
+  entityId4: 0x20
+  entityInstance4: 0x1E
+
+0x05:
+  containerEntityId: 0x1E
+  containerEntityInstance: 0x03
+  isList: "false"
+  isLinked: "true"
+  entityId1: 0x20
+  entityInstance1: 0x07
+  entityId2: 0x20
+  entityInstance2: 0x0C
+  entityId3: 0x20
+  entityInstance3: 0x0D
+  entityId4: 0x20
+  entityInstance4: 0x12
+
+0x06:
+  containerEntityId: 0x1E
+  containerEntityInstance: 0x03
+  isList: "false"
+  isLinked: "true"
+  entityId1: 0x20
+  entityInstance1: 0x1F
+  entityId2: 0x20
+  entityInstance2: 0x23
+  entityId3: 0x20
+  entityInstance3: 0x24
+  entityId4: 0x20
+  entityInstance4: 0x2A

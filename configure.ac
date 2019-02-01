@@ -93,6 +93,10 @@ AS_IF([test "x$CHANNEL_YAML_GEN" == "x"], [CHANNEL_YAML_GEN="channel-example.yam
 CHANNELGEN="$PYTHON ${srcdir}/scripts/channel_gen.py -i $CHANNEL_YAML_GEN"
 AC_SUBST(CHANNELGEN)
 
+AS_IF([test "x$ENTITY_YAML_GEN" == "x"], [ENTITY_YAML_GEN="entity-example.yaml"])
+ENTITYGEN="$PYTHON ${srcdir}/scripts/entity_gen.py -i $ENTITY_YAML_GEN"
+AC_SUBST(ENTITYGEN)
+
 AC_DEFINE(CALLOUT_FWD_ASSOCIATION, "callout", [The name of the callout's forward association.])
 AC_DEFINE(BOARD_SENSOR, "/xyz/openbmc_project/inventory/system/chassis/motherboard", [The inventory path to the motherboard fault sensor.])
 AC_DEFINE(SYSTEM_SENSOR, "/xyz/openbmc_project/inventory/system", [The inventory path to the system event sensor.])

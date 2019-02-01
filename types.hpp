@@ -196,6 +196,24 @@ enum class ThresholdMask
     CRITICAL_HIGH_MASK = 0x10,
 };
 
+struct EntityInfo
+{
+    uint8_t containerEntityId;
+    uint8_t containerEntityInstance;
+    bool isList;
+    bool isLinked;
+    uint8_t entityId1;
+    uint8_t entityInstance1;
+    uint8_t entityId2;
+    uint8_t entityInstance2;
+    uint8_t entityId3;
+    uint8_t entityInstance3;
+    uint8_t entityId4;
+    uint8_t entityInstance4;
+};
+
+using EntityInfoMap = std::map<Id, EntityInfo>;
+
 } // namespace sensor
 
 namespace network

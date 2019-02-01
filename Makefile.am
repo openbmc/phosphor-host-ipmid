@@ -67,6 +67,9 @@ fru-read-gen.cpp:
 channel-gen.cpp:
 	$(AM_V_GEN)@CHANNELGEN@ -o $(top_builddir) generate-cpp
 
+entity-gen.cpp:
+	$(AM_V_GEN)@ENTITYGEN@ -o $(top_builddir) generate-cpp
+
 providers_LTLIBRARIES += libipmi20.la
 libipmi20_la_SOURCES = \
 	net.cpp \
