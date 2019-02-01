@@ -102,6 +102,7 @@ TESTS = $(check_PROGRAMS)
 
 libipmi20_la_LIBADD = \
 	libipmid/libipmid.la \
+	user_channel/libchannellayer.la \
 	user_channel/libuserlayer.la
 libipmi20_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
