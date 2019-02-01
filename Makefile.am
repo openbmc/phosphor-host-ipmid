@@ -76,6 +76,7 @@ channel-gen.cpp:
 
 providers_LTLIBRARIES += libipmi20.la
 libipmi20_la_LIBADD = \
+	user_channel/libuserlayer.la \
 	libipmid/libipmid.la
 libipmi20_la_SOURCES = \
 	net.cpp \
