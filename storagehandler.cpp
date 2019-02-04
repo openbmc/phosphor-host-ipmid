@@ -677,10 +677,6 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // procedure number.
         createProcedureLogEntry(p->sensortype);
     }
-    else
-    {
-        send_esel(recordid);
-    }
 
     return rc;
 }
