@@ -106,6 +106,12 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                       ipmi_request_t request, ipmi_response_t response,
                       ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (*data_len != 0)
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     std::vector<uint8_t> outPayload(sizeof(ipmi::sel::GetSELInfoResponse));
     auto responseData =
         reinterpret_cast<ipmi::sel::GetSELInfoResponse*>(outPayload.data());
@@ -158,6 +164,12 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                        ipmi_request_t request, ipmi_response_t response,
                        ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (*data_len != sizeof(ipmi::sel::GetSELEntryRequest))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     auto requestData =
         reinterpret_cast<const ipmi::sel::GetSELEntryRequest*>(request);
 
@@ -273,6 +285,12 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                           ipmi_request_t request, ipmi_response_t response,
                           ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    if (*data_len != sizeof(ipmi::sel::DeleteSELEntryRequest))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     namespace fs = std::filesystem;
     auto requestData =
         reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>(request);
@@ -371,6 +389,12 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
                     ipmi_response_t response, ipmi_data_len_t data_len,
                     ipmi_context_t context)
 {
+    if (*data_len != sizeof(ipmi::sel::ClearSELRequest))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     auto requestData =
         reinterpret_cast<const ipmi::sel::ClearSELRequest*>(request);
 
@@ -479,6 +503,12 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                      ipmi_data_len_t data_len,
                                      ipmi_context_t context)
 {
+    if (*data_len != 0)
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     using namespace std::chrono;
     uint64_t host_time_usec = 0;
     uint32_t resp = 0;
@@ -541,6 +571,11 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                      ipmi_data_len_t data_len,
                                      ipmi_context_t context)
 {
+    if (*data_len != sizeof(uint32_t))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
     using namespace std::chrono;
     ipmi_ret_t rc = IPMI_CC_OK;
     uint32_t secs = *static_cast<uint32_t*>(request);
@@ -589,6 +624,12 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                     ipmi_data_len_t data_len,
                                     ipmi_context_t context)
 {
+    if (*data_len != 0)
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     ipmi_ret_t rc = IPMI_CC_OK;
     unsigned short selResID = reserveSel();
 
@@ -606,6 +647,11 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_data_len_t data_len,
                                 ipmi_context_t context)
 {
+    if (*data_len != sizeof(ipmi_add_sel_request_t))
+    {
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
 
     ipmi_ret_t rc = IPMI_CC_OK;
     ipmi_add_sel_request_t* p = (ipmi_add_sel_request_t*)request;
