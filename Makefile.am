@@ -16,6 +16,7 @@ nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 
 libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
+	inventory-sensor-gen.cpp \
 	fru-read-gen.cpp \
 	channel-gen.cpp
 

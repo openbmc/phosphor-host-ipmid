@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+void send_esel(uint16_t recordid);
+
 /** @brief Read eSEL data into a string
  *
  *  @param[in] filename - filename of file containing eSEL
