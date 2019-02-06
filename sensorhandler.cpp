@@ -827,6 +827,9 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         record.body.sensor_type = sensor->second.sensorType;
         record.body.event_reading_type = sensor->second.sensorReadingType;
         record.body.entity_instance = sensor->second.instance;
+        if (ipmi::sensor::Mutability::Write ==
+            (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+          get_sdr::body::init_settable_state(true, &(record.body));
 
         // Set the type-specific details given the DBus interface
         ret = populate_record_from_dbus(&(record.body), &(sensor->second),
