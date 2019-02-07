@@ -229,12 +229,12 @@ enum class IPOrigin : uint8_t
 };
 enum class IPV6StaticAddrStatus : uint8_t
 {
-    ACTIVE = 0;
-    DISABLED = 1;
-    PENDING = 2;
-    FAILED = 3;
-    DEPRECATED = 4;
-    INVALID = 5;
+    ACTIVE = 0,
+    DISABLED = 1,
+    PENDING = 2,
+    FAILED = 3,
+    DEPRECATED = 4,
+    INVALID = 5,
 };
 } // namespace network
 } // namespace ipmi
