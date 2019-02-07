@@ -10,10 +10,13 @@ enum ipmi_netfn_storage_cmds
     IPMI_CMD_GET_LAN = 0x02,
 };
 
-// Command specific completion codes
+// Command specific completion codes, refer ipmi spec 23.1
 enum ipmi_transport_return_codes
 {
     IPMI_CC_PARM_NOT_SUPPORTED = 0x80,
+    IPMI_CC_PARM_ALREADY_CLAIMED = 0x81,
+    IPMI_CC_PARM_READ_ONLY = 0x82,
+    IPMI_CC_PARM_WRITE_ONLY = 0x83,
 };
 
 // Parameters
