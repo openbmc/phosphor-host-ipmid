@@ -32,7 +32,7 @@ std::vector<uint8_t>
     response->perMessageAuth = 0; // Per-message Authentication is enabled
     response->userAuth = 0;       // User Level Authentication is enabled
     response->nonNullUsers = 1;   // Non-null usernames enabled
-    response->nullUsers = 1;      // Null usernames enabled
+    response->nullUsers = 0;      // Null usernames disabled
     response->anonymousLogin = 0; // Anonymous Login disabled
 
     response->reserved4 = 0;
