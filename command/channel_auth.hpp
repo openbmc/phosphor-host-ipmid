@@ -57,31 +57,31 @@ struct GetChannelCapabilitiesResp
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    // Two key login status . only for IPMI V2.0 RMCP+ RAKP
-    uint8_t KGStatus : 1;
-    uint8_t perMessageAuth : 1; // Per-message authentication support
-    uint8_t userAuth : 1;       // User - level authentication status
-    // Anonymous login status for non_null usernames enabled/disabled
-    uint8_t nonNullUsers : 1;
-    // Anonymous login status for null user names enabled/disabled
-    uint8_t nullUsers : 1;
     // Anonymous login status for anonymous login enabled/disabled
     uint8_t anonymousLogin : 1;
+    // Anonymous login status for null usernames enabled/disabled
+    uint8_t nullUsers : 1;
+    // Anonymous login status for non-null usernames enabled/disabled
+    uint8_t nonNullUsers : 1;
+    uint8_t userAuth : 1;       // User level authentication status
+    uint8_t perMessageAuth : 1; // Per-message authentication support
+    // Two key login status . only for IPMI V2.0 RMCP+ RAKP
+    uint8_t KGStatus : 1;
     uint8_t reserved3 : 2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
     uint8_t reserved3 : 2;
-    // Anonymous login status for anonymous login enabled/disabled
-    uint8_t anonymousLogin : 1;
-    // Anonymous login status for null user names enabled/disabled
-    uint8_t nullUsers : 1;
-    // Anonymous login status for non_null usernames enabled/disabled
-    uint8_t nonNullUsers : 1;
-    uint8_t userAuth : 1;       // User - level authentication status
-    uint8_t perMessageAuth : 1; // Per-message authentication support
     // Two key login status . only for IPMI V2.0 RMCP+ RAKP
     uint8_t KGStatus : 1;
+    uint8_t perMessageAuth : 1; // Per-message authentication support
+    uint8_t userAuth : 1;       // User level authentication status
+    // Anonymous login status for non-null usernames enabled/disabled
+    uint8_t nonNullUsers : 1;
+    // Anonymous login status for null usernames enabled/disabled
+    uint8_t nullUsers : 1;
+    // Anonymous login status for anonymous login enabled/disabled
+    uint8_t anonymousLogin : 1;
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
