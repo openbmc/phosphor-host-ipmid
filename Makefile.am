@@ -20,7 +20,8 @@ nodist_ipmid_SOURCES = ipmiwhitelist.cpp
 libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
 	inventory-sensor-gen.cpp \
-	fru-read-gen.cpp
+	fru-read-gen.cpp \
+	entity-gen.cpp
 
 BUILT_SOURCES = \
 	ipmiwhitelist.cpp \
@@ -69,6 +70,9 @@ inventory-sensor-gen.cpp:
 
 fru-read-gen.cpp:
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
+
+entity-gen.cpp:
+	$(AM_V_GEN)@ENTITYGEN@ -o $(top_builddir) generate-cpp
 
 providers_LTLIBRARIES += libipmi20.la
 libipmi20_la_SOURCES = \
