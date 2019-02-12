@@ -136,7 +136,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     {
         session->curPrivLevel = session::Privilege::USER;
     }
-    session->reqMaxPrivLevel = request->req_max_privilege_level;
+    session->reqMaxPrivLevel =
+        static_cast<session::Privilege>(request->req_max_privilege_level);
     if (request->user_name_len == 0)
     {
         // Bail out, if user name is not specified.

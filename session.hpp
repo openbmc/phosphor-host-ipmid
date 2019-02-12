@@ -116,7 +116,7 @@ class Session
      * @param[in] priv - Privilege Level requested in the Command
      */
     Session(SessionID inRemoteConsoleSessID, Privilege priv) :
-        curPrivLevel(priv), bmcSessionID(crypto::prng::rand()),
+        reqMaxPrivLevel(priv), bmcSessionID(crypto::prng::rand()),
         remoteConsoleSessionID(inRemoteConsoleSessID)
     {
     }
@@ -270,7 +270,7 @@ class Session
     /**
      * @brief Session's Requested Maximum Privilege Level
      */
-    uint8_t reqMaxPrivLevel;
+    Privilege reqMaxPrivLevel;
 
     SequenceNumbers sequenceNums;  // Session Sequence Numbers
     State state = State::INACTIVE; // Session State

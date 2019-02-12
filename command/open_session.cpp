@@ -38,6 +38,22 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
+    session::Privilege priv;
+
+    // 0h in the requested maximum privilege role field indicates highest level
+    // matching proposed algorithms. The maximum privilege level the session
+    // can take is set to Administrator level. In the RAKP12 command sequence
+    // the session maximum privilege role is set again based on the user's
+    // permitted privilege level.
+    if (!request->maxPrivLevel)
+    {
+        priv = session::Privilege::ADMIN;
+    }
+    else
+    {
+        priv = static_cast<session::Privilege>(request->maxPrivLevel);
+    }
+
     // Check for valid Confidentiality Algorithms
     if (!cipher::crypt::Interface::isAlgorithmSupported(
             static_cast<cipher::crypt::Algorithms>(request->confAlgo)))
@@ -54,8 +70,7 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
         session =
             std::get<session::Manager&>(singletonPool)
                 .startSession(
-                    endian::from_ipmi<>(request->remoteConsoleSessionID),
-                    static_cast<session::Privilege>(request->maxPrivLevel),
+                    endian::from_ipmi<>(request->remoteConsoleSessionID), priv,
                     static_cast<cipher::rakp_auth::Algorithms>(
                         request->authAlgo),
                     static_cast<cipher::integrity::Algorithms>(
@@ -73,7 +88,7 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
 
     response->messageTag = request->messageTag;
     response->status_code = static_cast<uint8_t>(RAKP_ReturnCode::NO_ERROR);
-    response->maxPrivLevel = static_cast<uint8_t>(session->curPrivLevel);
+    response->maxPrivLevel = static_cast<uint8_t>(session->reqMaxPrivLevel);
     response->remoteConsoleSessionID = request->remoteConsoleSessionID;
     response->managedSystemSessionID =
         endian::to_ipmi<>(session->getBMCSessionID());

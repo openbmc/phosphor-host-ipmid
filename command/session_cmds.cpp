@@ -32,8 +32,8 @@ std::vector<uint8_t>
         response->newPrivLevel = static_cast<uint8_t>(session->curPrivLevel);
         return outPayload;
     }
-    if (reqPrivilegeLevel >
-        (session->reqMaxPrivLevel & session::reqMaxPrivMask))
+    if (reqPrivilegeLevel > (static_cast<uint8_t>(session->reqMaxPrivLevel) &
+                             session::reqMaxPrivMask))
     {
         // Requested level exceeds Channel and/or User Privilege Limit
         response->completionCode = IPMI_CC_EXCEEDS_USER_PRIV;

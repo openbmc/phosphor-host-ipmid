@@ -126,7 +126,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     auto rcSessionID = endian::to_ipmi(session->getRCSessionID());
 
     // Session Privilege Level
-    auto sessPrivLevel = session->reqMaxPrivLevel;
+    auto sessPrivLevel = static_cast<uint8_t>(session->reqMaxPrivLevel);
 
     // User Name Length Byte
     auto userLength = static_cast<uint8_t>(session->userName.size());
