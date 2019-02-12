@@ -114,7 +114,7 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
  *  @param[in] match - identifier for object.
  *  @return On success returns the object having objectpath and servicename.
  */
-DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
+DbusObjectInfo getIP46Object(sdbusplus::bus::bus& bus,
                            const std::string& interface,
                            const std::string& subtreePath,
                            const std::string& match);
@@ -245,16 +245,18 @@ namespace network
 
 constexpr auto ROOT = "/xyz/openbmc_project/network";
 constexpr auto SERVICE = "xyz.openbmc_project.Network";
-constexpr auto IP_TYPE = "ipv4";
+constexpr auto IPV4_TYPE = "ipv4";
+constexpr auto IPV6_TYPE = "ipv6";
 constexpr auto IPV4_PREFIX = "169.254";
 constexpr auto IPV6_PREFIX = "fe80";
-constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
+constexpr auto IP46_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 constexpr auto SYSTEMCONFIG_INTERFACE =
     "xyz.openbmc_project.Network.SystemConfiguration";
 constexpr auto ETHERNET_INTERFACE =
     "xyz.openbmc_project.Network.EthernetInterface";
 constexpr auto IP_CREATE_INTERFACE = "xyz.openbmc_project.Network.IP.Create";
+constexpr auto STATIC_ROUTER_INTERFACE = "xyz.openbmc_project.Network.Neighbor";
 constexpr auto VLAN_CREATE_INTERFACE =
     "xyz.openbmc_project.Network.VLAN.Create";
 constexpr auto VLAN_INTERFACE = "xyz.openbmc_project.Network.VLAN";
