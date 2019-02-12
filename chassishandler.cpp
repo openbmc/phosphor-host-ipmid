@@ -94,7 +94,7 @@ const char* identify_led_object_name =
 constexpr auto SETTINGS_ROOT = "/";
 constexpr auto SETTINGS_MATCH = "host0";
 
-constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
+constexpr auto IP46_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 
 static constexpr auto chassisStateRoot = "/xyz/openbmc_project/state";
@@ -216,14 +216,14 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        auto ipObjectInfo = ipmi::getDbusObject(bus, IP_INTERFACE,
+        auto ipObjectInfo = ipmi::getDbusObject(bus, IP46_INTERFACE,
                                                 SETTINGS_ROOT, SETTINGS_MATCH);
 
         auto macObjectInfo = ipmi::getDbusObject(bus, MAC_INTERFACE,
                                                  SETTINGS_ROOT, SETTINGS_MATCH);
 
         properties = ipmi::getAllDbusProperties(
-            bus, ipObjectInfo.second, ipObjectInfo.first, IP_INTERFACE);
+            bus, ipObjectInfo.second, ipObjectInfo.first, IP46_INTERFACE);
         auto variant = ipmi::getDbusProperty(bus, macObjectInfo.second,
                                              macObjectInfo.first, MAC_INTERFACE,
                                              "MACAddress");
@@ -470,21 +470,21 @@ int setHostNetworkData(set_sys_boot_options_t* reqptr)
 
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        auto ipObjectInfo = ipmi::getDbusObject(bus, IP_INTERFACE,
+        auto ipObjectInfo = ipmi::getDbusObject(bus, IP46_INTERFACE,
                                                 SETTINGS_ROOT, SETTINGS_MATCH);
         auto macObjectInfo = ipmi::getDbusObject(bus, MAC_INTERFACE,
                                                  SETTINGS_ROOT, SETTINGS_MATCH);
         // set the dbus property
         ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
-                              IP_INTERFACE, "Address", std::string(ipAddress));
+                              IP46_INTERFACE, "Address", std::string(ipAddress));
         ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
-                              IP_INTERFACE, "PrefixLength", prefix);
+                              IP46_INTERFACE, "PrefixLength", prefix);
         ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
-                              IP_INTERFACE, "Origin", addressOrigin);
+                              IP46_INTERFACE, "Origin", addressOrigin);
         ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
-                              IP_INTERFACE, "Gateway", std::string(gateway));
+                              IP46_INTERFACE, "Gateway", std::string(gateway));
         ipmi::setDbusProperty(
-            bus, ipObjectInfo.second, ipObjectInfo.first, IP_INTERFACE, "Type",
+            bus, ipObjectInfo.second, ipObjectInfo.first, IP46_INTERFACE, "Type",
             std::string("xyz.openbmc_project.Network.IP.Protocol.IPv4"));
         ipmi::setDbusProperty(bus, macObjectInfo.second, macObjectInfo.first,
                               MAC_INTERFACE, "MACAddress", std::string(mac));

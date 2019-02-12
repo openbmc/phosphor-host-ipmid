@@ -206,6 +206,9 @@ constexpr auto MAC_ADDRESS_FORMAT = "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx";
 constexpr auto IP_ADDRESS_FORMAT = "%u.%u.%u.%u";
 constexpr auto PREFIX_FORMAT = "%hhd";
 constexpr auto ADDR_TYPE_FORMAT = "%hhx";
+constexpr auto IPV6_ADDRESS_FORMAT =
+    "%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx: \
+    %02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:";
 
 constexpr auto IPV4_ADDRESS_SIZE_BYTE = 4;
 constexpr auto IPV6_ADDRESS_SIZE_BYTE = 16;

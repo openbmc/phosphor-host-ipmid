@@ -77,7 +77,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
         // TODO: return error from getNetworkData()
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
-    auto ethIP = ethdevice + "/" + ipmi::network::IP_TYPE;
+    auto ethIPv4 = ethdevice + "/" + ipmi::network::IPV4_TYPE;
+    auto ethIPv6 = ethdevice + "/" + ipmi::network::IPV6_TYPE;
     auto channelConf = getChannelConfig(channel);
 
     try
@@ -92,12 +93,12 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     try
                     {
                         auto ipObjectInfo =
-                            ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
-                                              ipmi::network::ROOT, ethIP);
+                            ipmi::getIP46Object(bus, ipmi::network::IP46_INTERFACE,
+                                              ipmi::network::ROOT, ethIPv4);
 
                         auto properties = ipmi::getAllDbusProperties(
                             bus, ipObjectInfo.second, ipObjectInfo.first,
-                            ipmi::network::IP_INTERFACE);
+                            ipmi::network::IP46_INTERFACE);
 
                         ipaddress =
                             variant_ns::get<std::string>(properties["Address"]);
@@ -131,8 +132,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         // if the system is having ip object,then
                         // get the IP object.
                         auto ipObject = ipmi::getDbusObject(
-                            bus, ipmi::network::IP_INTERFACE,
-                            ipmi::network::ROOT, ethIP);
+                            bus, ipmi::network::IP46_INTERFACE,
+                            ipmi::network::ROOT, ethIPv4);
 
                         // Get the parent interface of the IP object.
                         try
@@ -196,13 +197,13 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 {
                     try
                     {
-                        auto ipObjectInfo =
-                            ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
-                                              ipmi::network::ROOT, ethIP);
+                        auto ipObjectInfo = ipmi::getIP46Object(
+                            bus, ipmi::network::IP46_INTERFACE,
+                            ipmi::network::ROOT, ethIPv4);
 
                         auto properties = ipmi::getAllDbusProperties(
                             bus, ipObjectInfo.second, ipObjectInfo.first,
-                            ipmi::network::IP_INTERFACE);
+                            ipmi::network::IP46_INTERFACE);
 
                         auto prefix = variant_ns::get<uint8_t>(
                             properties["PrefixLength"]);
@@ -263,8 +264,11 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             break;
 
             case LanParam::MAC:
+            case LanParam::GATEWAY_MAC:
             {
                 std::string macAddress;
+
+
                 if (channelConf->lan_set_in_progress == SET_COMPLETE)
                 {
                     auto macObjectInfo =
@@ -273,13 +277,18 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
                     auto variant = ipmi::getDbusProperty(
                         bus, macObjectInfo.second, macObjectInfo.first,
-                        ipmi::network::MAC_INTERFACE, "MACAddress");
+                        ipmi::network::MAC_INTERFACE,
+                        (static_cast<LanParam>(lan_param) == LanParam::MAC)
+                        ? "MACAddress" : "GatewayMAC");
 
                     macAddress = variant_ns::get<std::string>(variant);
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
-                    macAddress = channelConf->macAddress;
+                    macAddress =
+                        (static_cast<LanParam>(lan_param) == LanParam::MAC)
+                            ? channelConf->macAddress
+                            : channelConf->gatewayMac;
                 }
 
                 sscanf(macAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
@@ -295,9 +304,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 {
                     try
                     {
-                        auto ipObjectInfo = ipmi::getIPObject(
-                            bus, ipmi::network::IP_INTERFACE,
-                            ipmi::network::ROOT, ipmi::network::IP_TYPE);
+                        auto ipObjectInfo = ipmi::getIP46Object(
+                            bus, ipmi::network::IP46_INTERFACE,
+                            ipmi::network::ROOT, ipmi::network::IPV4_TYPE);
 
                         vlanID = static_cast<uint16_t>(
                             ipmi::network::getVLAN(ipObjectInfo.first));
@@ -326,7 +335,91 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 }
             }
             break;
+            case LanParam::IPV6_STATIC_ADDRESSES:
+            {
+                std::string ipv6address;
+                if (channelConf->lan_set_in_progress == SET_COMPLETE)
+                {
+                    try
+                    {
+                        auto ipV6ObjectInfo =
+                            ipmi::getIP46Object(bus, ipmi::network::IP46_INTERFACE,
+                                              ipmi::network::ROOT, ethIPv6);
 
+                        auto properties = ipmi::getAllDbusProperties(
+                            bus, ipV6ObjectInfo.second, ipV6ObjectInfo.first,
+                            ipmi::network::IP46_INTERFACE);
+
+                        ipv6address =
+                            variant_ns::get<std::string>(properties["Address"]);
+                    }
+                    // ignore the exception, as it is a valid condition that
+                    // the system is not configured with any IP.
+                    catch (InternalFailure& e)
+                    {
+                        // nothing to do.
+                    }
+                }
+                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+                {
+                    ipv6address = channelConf->ipaddr;
+                }
+
+                inet_pton(AF_INET6, ipv6address.c_str(),
+                          reinterpret_cast<void*>(data));
+            }
+            break;
+            case LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR:
+            case LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR:
+            {
+              std::string staticRouterAddress;
+              if (channelConf->lan_set_in_progress == SET_COMPLETE)
+              {
+                  const char* dbusStaticRouterFieldToGet =
+                      (static_cast<LanParam>(lan_param) ==
+                       LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR)
+                        ? "IPV6StaticRouter1IpAddress"
+                        : "IPV6StaticRouter1MacAddr";
+
+                  auto staticRouterObjectInfo =
+                      ipmi::getDbusObject(bus, ipmi::network::NEIGHBOR_INTERFACE,
+                                          ipmi::network::ROOT, ethdevice);
+
+                  auto variant = ipmi::getDbusProperty(
+                      bus, staticRouterObjectInfo.second,
+                      staticRouterObjectInfo.first,
+                      ipmi::network::NEIGHBOR_INTERFACE,
+                      dbusStaticRouterFieldToGet);
+
+                  staticRouterAddress = variant_ns::get<std::string>(variant);
+              }
+              else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+              {
+                  staticRouterAddress =
+                      (static_cast<LanParam>(lan_param) ==
+                       LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR)
+                      ? channelConf->gateway
+                      : channelConf->gatewayMac;
+              }
+
+              if (static_cast<LanParam>(lan_param) ==
+                       LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR)
+              {
+                sscanf(staticRouterAddress.c_str(), ipmi::network::IPV6_ADDRESS_FORMAT,
+                       (data), (data + 1), (data + 2), (data + 3),
+                       (data + 4), (data + 5), (data + 6), (data + 7),
+                       (data + 8), (data + 9), (data + 10), (data + 11),
+                       (data + 12), (data + 13), (data + 14), (data + 15)
+                       );
+              }
+              else {
+                sscanf(staticRouterAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
+                       (data), (data + 1), (data + 2), (data + 3),
+                       (data + 4), (data + 5)
+                       );
+              }
+            }
+            break;
             default:
                 rc = IPMI_CC_PARM_OUT_OF_RANGE;
         }
@@ -444,6 +537,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         break;
 
         case LanParam::MAC:
+        // case LanParam::GATEWAY_MAC:
         {
             char mac[SIZE_MAC];
 
@@ -480,7 +574,16 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             channelConf->gateway.assign(gateway);
         }
         break;
+        /*
+        case LanParam::IPV6_AND_IPV4_SUPPORTED:{}
+        case LanParam::IPV6_AND_IPV4_ENABLES:{}
+        case LanParam::IPV6_STATUS:{}
+        case LanParam::IPV6_STATIC_ADDRESSES:
+        case LanParam::IPV6_ROUTER_ADDRESS_CONF_CTRL:
+        case LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR:
+        case LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR:
 
+        */
         case LanParam::VLAN:
         {
             uint16_t vlan{};
@@ -614,6 +717,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         case LanParam::SUBNET:
         case LanParam::GATEWAY:
         case LanParam::MAC:
+        case LanParam::GATEWAY_MAC:
         {
             uint8_t buf[ipmi::network::MAC_ADDRESS_SIZE_BYTE + 1] = {};
 
@@ -623,7 +727,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             if (getNetworkData(reqptr->parameter, &buf[1], channel) ==
                 IPMI_CC_OK)
             {
-                if (param == LanParam::MAC)
+                if (param == LanParam::MAC || param == LanParam::GATEWAY_MAC)
                 {
                     *data_len = sizeof(buf);
                 }
@@ -687,6 +791,57 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                         static_cast<uint8_t>(cipherList.size());
             break;
         }
+        // Hard code IPV6_AND_IPV4_SUPPORTED and IPV6_AND_IPV4_ENABLES to
+        // support both ipv4 and ipv6 network
+        case LanParam::IPV6_AND_IPV4_SUPPORTED:
+        {
+            uint8_t buf[] = {current_revision, 0x02};
+            *data_len = sizeof(buf);
+            std::memcpy(response, &buf, *data_len);
+            break;
+        }
+        case LanParam::IPV6_AND_IPV4_ENABLES:
+        {
+            uint8_t buf[] = {current_revision, 0x02};
+            *data_len = sizeof(buf);
+            std::memcpy(response, &buf, *data_len);
+            break;
+        }
+        case LanParam::IPV6_STATUS:
+        {
+            uint8_t buf[] = {current_revision, 0x02, 0x00, 0x01};
+            *data_len = sizeof(buf);
+            std::memcpy(response, &buf, *data_len);
+            break;
+        }
+        case LanParam::IPV6_STATIC_ADDRESSES:
+        case LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR:
+        case LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR:
+        {
+            uint8_t buf[ipmi::network::MAC_ADDRESS_SIZE_BYTE + 1] = {};
+            *data_len = sizeof(current_revision);
+            std::memcpy(buf, &current_revision, *data_len);
+
+            if (getNetworkData(reqptr->parameter, &buf[1], channel) ==
+                IPMI_CC_OK)
+            {
+                if (param == LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR)
+                {
+                    *data_len = sizeof(buf);
+                }
+                else
+                {
+                    *data_len = ipmi::network::IPV6_ADDRESS_SIZE_BYTE + 1;
+                }
+                std::memcpy(response, &buf, *data_len);
+            }
+            else
+            {
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            break;
+        }
+
         default:
             log<level::ERR>("Unsupported parameter",
                             entry("PARAMETER=0x%x", reqptr->parameter));
@@ -713,7 +868,7 @@ void applyChanges(int channel)
                         entry("CHANNEL=%d", channel));
         return;
     }
-    auto ethIp = ethdevice + "/" + ipmi::network::IP_TYPE;
+    auto ethIp = ethdevice + "/" + ipmi::network::IPV4_TYPE;
     auto channelConf = getChannelConfig(channel);
 
     try
@@ -755,7 +910,7 @@ void applyChanges(int channel)
 
                 // if the system is having ip object,then
                 // get the IP object.
-                ipObject = ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
+                ipObject = ipmi::getIP46Object(bus, ipmi::network::IP46_INTERFACE,
                                              ipmi::network::ROOT, ethIp);
 
                 // Get the parent interface of the IP object.
@@ -837,7 +992,7 @@ void applyChanges(int channel)
                 {
                     auto properties = ipmi::getAllDbusProperties(
                         bus, ipObject.second, ipObject.first,
-                        ipmi::network::IP_INTERFACE);
+                        ipmi::network::IP46_INTERFACE);
 
                     ipaddress = channelConf->ipaddr.empty()
                                     ? variant_ns::get<std::string>(
@@ -854,7 +1009,7 @@ void applyChanges(int channel)
                 {
                     log<level::INFO>(
                         "Failed to get IP object which matches",
-                        entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
+                        entry("INTERFACE=%s", ipmi::network::IP46_INTERFACE),
                         entry("MATCH=%s", ethIp.c_str()));
                 }
 
@@ -899,7 +1054,7 @@ void applyChanges(int channel)
 
         // delete all the ipv4 addresses
         ipmi::deleteAllDbusObjects(bus, ipmi::network::ROOT,
-                                   ipmi::network::IP_INTERFACE, ethIp);
+                                   ipmi::network::IP46_INTERFACE, ethIp);
 
         if (vlanID)
         {
