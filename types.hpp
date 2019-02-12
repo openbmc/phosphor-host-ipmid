@@ -221,9 +221,13 @@ constexpr auto MAC_ADDRESS_FORMAT = "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx";
 constexpr auto IP_ADDRESS_FORMAT = "%u.%u.%u.%u";
 constexpr auto PREFIX_FORMAT = "%hhd";
 constexpr auto ADDR_TYPE_FORMAT = "%hhx";
+constexpr auto IPV6_ADDRESS_FORMAT =
+    "%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx: \
+    %02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:";
 
 constexpr auto IPV4_ADDRESS_SIZE_BYTE = 4;
 constexpr auto IPV6_ADDRESS_SIZE_BYTE = 16;
+constexpr auto IPV6_STATIC_ADDRESS_SIZE_BYTE = 20;
 
 constexpr auto DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
 constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
@@ -242,6 +246,20 @@ enum class IPOrigin : uint8_t
     STATIC = 1,
     DHCP = 2,
 };
+
+enum class IPV6StaticOrigin : uint8_t
+{
+    DISABLED = 0,
+    ENABLESTATIC = 128,
+};
+
+enum class IPV46Addressing : uint8_t
+{
+    DISABLED = 0,
+    IPV6ONLY = 1,
+    IPV4ANDIPV6 =  2,
+};
+
 enum class IPV6StaticAddrStatus : uint8_t
 {
     ACTIVE = 0,

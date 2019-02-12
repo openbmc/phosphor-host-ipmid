@@ -93,7 +93,7 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
     return make_pair(found->first, std::move(found->second.begin()->first));
 }
 
-DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
+DbusObjectInfo getIP46Object(sdbusplus::bus::bus& bus,
                            const std::string& interface,
                            const std::string& serviceRoot,
                            const std::string& match)
@@ -517,7 +517,7 @@ uint32_t getVLAN(const std::string& path)
     uint32_t vlanID = 0;
     try
     {
-        auto intfObjectPath = path.substr(0, path.find(IP_TYPE) - 1);
+        auto intfObjectPath = path.substr(0, path.find(IPV4_TYPE) - 1);
 
         auto intfName = intfObjectPath.substr(intfObjectPath.rfind("/") + 1);
 
