@@ -221,9 +221,13 @@ constexpr auto MAC_ADDRESS_FORMAT = "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx";
 constexpr auto IP_ADDRESS_FORMAT = "%u.%u.%u.%u";
 constexpr auto PREFIX_FORMAT = "%hhd";
 constexpr auto ADDR_TYPE_FORMAT = "%hhx";
+constexpr auto IPV6_ADDRESS_FORMAT =
+    "%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx: \
+    %02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx:%02hhx%02hhx";
 
 constexpr auto IPV4_ADDRESS_SIZE_BYTE = 4;
 constexpr auto IPV6_ADDRESS_SIZE_BYTE = 16;
+constexpr auto IPV6_STATIC_ADDRESS_SIZE_BYTE = 20;
 
 constexpr auto DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
 constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
@@ -231,8 +235,13 @@ constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
 constexpr auto MAC_ADDRESS_SIZE_BYTE = 6;
 constexpr auto VLAN_SIZE_BYTE = 2;
 constexpr auto IPSRC_SIZE_BYTE = 1;
+constexpr auto IPV46ADDRESSING_SIZE_BYTE = 1;
+constexpr auto IPV6RADDRCONFCTRL_SIZE_BYTE = 1;
+constexpr auto PREFIXLEN_SIZE_BYTE = 1;
 constexpr auto BITS_32 = 32;
+constexpr auto BITS_64 = 64;
 constexpr auto MASK_32_BIT = 0xFFFFFFFF;
+constexpr auto MASK_64_BIT = 0xFFFFFFFFFFFFFFFF;
 constexpr auto VLAN_ID_MASK = 0x00000FFF;
 constexpr auto VLAN_ENABLE_MASK = 0x8000;
 
@@ -242,14 +251,36 @@ enum class IPOrigin : uint8_t
     STATIC = 1,
     DHCP = 2,
 };
+
+enum class IPV6StaticOrigin : uint8_t
+{
+    DISABLED = 0,
+    ENABLESTATIC = 128,
+};
+
+enum class IPV46Addressing : uint8_t
+{
+    DISABLED = 0,
+    IPV6ONLY = 1,
+    IPV4ANDIPV6 =  2,
+};
+
+enum class IPV6RAddrConfCtrl : uint8_t
+{
+    DISABLED = 0,
+    STATIC = 1,
+    DYNAMIC = 2,
+    BOTH = 3,
+};
+
 enum class IPV6StaticAddrStatus : uint8_t
 {
-    ACTIVE = 0;
-    DISABLED = 1;
-    PENDING = 2;
-    FAILED = 3;
-    DEPRECATED = 4;
-    INVALID = 5;
+    ACTIVE = 0,
+    DISABLED = 1,
+    PENDING = 2,
+    FAILED = 3,
+    DEPRECATED = 4,
+    INVALID = 5,
 };
 } // namespace network
 } // namespace ipmi

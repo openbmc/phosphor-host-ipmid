@@ -97,6 +97,7 @@ struct ChannelConfig_t
     std::string netmask;
     std::string gateway;
     std::string macAddress;
+    std::string gatewayMac;
     // IPMI stores the vlan info in 16 bits,32 bits is to aligned
     // with phosphor-dbus interfaces.
     // vlan id is in 12 bits and the 16th bit is for enable mask.
@@ -104,16 +105,38 @@ struct ChannelConfig_t
     uint8_t lan_set_in_progress = SET_COMPLETE;
     bool flush = false;
 
+    // IPv6 Only
+    // set selector -- address selector 0 represent 0 static address.
+    ipmi::network::IPV46Addressing ipv46_addressing =
+        ipmi::network::IPV46Addressing::DISABLED;
+    ipmi::network::IPV6RAddrConfCtrl ipv6_raddr_conf_ctrl =
+        ipmi::network::IPV6RAddrConfCtrl::DISABLED;
+    std::string ipv6_saddr; // 20 bytes
+    std::string ipv6_srouter1_ipaddr;
+    std::string ipv6_srouter1_macaddr;
+    uint8_t ipv6_srouter1_prefix_len;
+    std::string ipv6_srouter1_prefix_value;
+
     void clear()
     {
         ipaddr.clear();
         netmask.clear();
         gateway.clear();
+        gatewayMac.clear();
         macAddress.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
         lan_set_in_progress = SET_COMPLETE;
         flush = false;
+        ipv46_addressing =
+            ipmi::network::IPV46Addressing::DISABLED;
+        ipv6_raddr_conf_ctrl =
+            ipmi::network::IPV6RAddrConfCtrl::DISABLED;
+        ipv6_saddr.clear();
+        ipv6_srouter1_ipaddr.clear();
+        ipv6_srouter1_macaddr.clear();
+        ipv6_srouter1_prefix_len = 64;
+        ipv6_srouter1_prefix_value.clear();
     }
 };
 
