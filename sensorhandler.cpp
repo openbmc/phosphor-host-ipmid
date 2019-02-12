@@ -27,6 +27,7 @@ extern int updateSensorRecordFromSSRAESC(const void*);
 extern sd_bus* bus;
 extern const ipmi::sensor::IdInfoMap sensors;
 extern const FruMap frus;
+extern const ipmi::sensor::EntityInfoMap entities;
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -575,7 +576,7 @@ ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         get_sdr_info::request::get_count(request) == false)
     {
         // Get Sensor Count
-        resp->count = sensors.size() + frus.size();
+        resp->count = sensors.size() + frus.size() + entities.size();
     }
     else
     {
@@ -748,13 +749,87 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
 
     if (++fru == frus.end())
     {
+        // we have reached till end of fru, so assign the next record id to
+        // 512(Max fru ID = 511) + Entity Record ID(may start with 0).
+        auto next_record_id =
+            (entities.size()) ? entities.begin()->first + ENTITY_RECORD_ID_START
+                              : END_OF_RECORD;
+        get_sdr::response::set_next_record_id(next_record_id, resp);
+    }
+    else
+    {
+        get_sdr::response::set_next_record_id(
+            (FRU_RECORD_ID_START + fru->first), resp);
+    }
+
+    // Check for invalid offset size
+    if (req->offset > sizeof(record))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    dataLength = std::min(static_cast<size_t>(req->bytes_to_read),
+                          sizeof(record) - req->offset);
+
+    std::memcpy(resp->record_data,
+                reinterpret_cast<uint8_t*>(&record) + req->offset, dataLength);
+
+    *data_len = dataLength;
+    *data_len += 2; // additional 2 bytes for next record ID
+
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
+                               ipmi_data_len_t data_len)
+{
+    auto req = reinterpret_cast<get_sdr::GetSdrReq*>(request);
+    auto resp = reinterpret_cast<get_sdr::GetSdrResp*>(response);
+    get_sdr::SensorDataEntityRecord record{};
+    auto dataLength = 0;
+
+    auto entity = entities.begin();
+    uint8_t entityRecordID;
+    auto recordID = get_sdr::request::get_record_id(req);
+
+    entityRecordID = recordID - ENTITY_RECORD_ID_START;
+    entity = entities.find(entityRecordID);
+    if (entity == entities.end())
+    {
+        return IPMI_CC_SENSOR_INVALID;
+    }
+
+    /* Header */
+    get_sdr::header::set_record_id(recordID, &(record.header));
+    record.header.sdr_version = SDR_VERSION; // Based on IPMI Spec v2.0 rev 1.1
+    record.header.record_type = get_sdr::SENSOR_DATA_ENTITY_RECORD;
+    record.header.record_length = sizeof(record.key) + sizeof(record.body);
+
+    /* Key */
+    record.key.containerEntityId = entity->second.containerEntityId;
+    record.key.containerEntityInstance = entity->second.containerEntityInstance;
+    get_sdr::key::set_flags(entity->second.isList, entity->second.isLinked,
+                            &(record.key));
+    record.key.entityId1 = entity->second.containedEntities[0].first;
+    record.key.entityInstance1 = entity->second.containedEntities[0].second;
+
+    /* Body */
+    record.body.entityId2 = entity->second.containedEntities[1].first;
+    record.body.entityInstance2 = entity->second.containedEntities[1].second;
+    record.body.entityId3 = entity->second.containedEntities[2].first;
+    record.body.entityInstance3 = entity->second.containedEntities[2].second;
+    record.body.entityId4 = entity->second.containedEntities[3].first;
+    record.body.entityInstance4 = entity->second.containedEntities[3].second;
+
+    if (++entity == entities.end())
+    {
         get_sdr::response::set_next_record_id(END_OF_RECORD,
                                               resp); // last record
     }
     else
     {
         get_sdr::response::set_next_record_id(
-            (FRU_RECORD_ID_START + fru->first), resp);
+            (ENTITY_RECORD_ID_START + entity->first), resp);
     }
 
     // Check for invalid offset size
@@ -793,10 +868,17 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // At the beginning of a scan, the host side will send us id=0.
         if (recordID != 0)
         {
-            // recordID greater then 255,it means it is a FRU record.
-            // Currently we are supporting two record types either FULL record
-            // or FRU record.
-            if (recordID >= FRU_RECORD_ID_START)
+            // recordID 0 to 255 means it is a FULL record.
+            // recordID 256 to 511 means it is a FRU record.
+            // recordID greater then 511 means it is a Entity Association
+            // record. Currently we are supporting three record types: FULL
+            // record, FRU record and Enttiy Association record.
+            if (recordID >= ENTITY_RECORD_ID_START)
+            {
+                return ipmi_entity_get_sdr(request, response, data_len);
+            }
+            else if (recordID >= FRU_RECORD_ID_START &&
+                     recordID < ENTITY_RECORD_ID_START)
             {
                 return ipmi_fru_get_sdr(request, response, data_len);
             }
