@@ -105,6 +105,15 @@ struct ChannelConfig_t
     uint8_t lan_set_in_progress = SET_COMPLETE;
     bool flush = false;
 
+    // IPv6 Only
+    // set selector -- address selector 0 represent 0 static address.
+    //
+    std::string ipv6_saddr; // 20 bytes
+    std::string ipv6_srouter1_ipaddr;
+    std::string ipv6_srouter1_macaddr;
+    uint8_t ipv6_srouter1_prefix_len;
+    std::string ipv6_srouter1_prefix_value;
+
     void clear()
     {
         ipaddr.clear();
@@ -115,6 +124,11 @@ struct ChannelConfig_t
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
         lan_set_in_progress = SET_COMPLETE;
         flush = false;
+        ipv6_saddr.clear();
+        ipv6_srouter1_ipaddr.clear();
+        ipv6_srouter1_macaddr.clear();
+        ipv6_srouter1_prefix_len = 64;
+        ipv6_srouter1_prefix_value.clear();
     }
 };
 
