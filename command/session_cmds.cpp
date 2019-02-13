@@ -3,7 +3,7 @@
 #include "endian.hpp"
 #include "main.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <user_channel/channel_layer.hpp>
 #include <user_channel/user_layer.hpp>

@@ -2,7 +2,7 @@
 
 #include "message_handler.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <functional>
 #include <map>

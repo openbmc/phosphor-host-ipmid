@@ -4,7 +4,7 @@
 #include "sol/sol_manager.hpp"
 #include "sol_cmds.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 
 #include <phosphor-logging/log.hpp>
 

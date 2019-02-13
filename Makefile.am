@@ -70,6 +70,7 @@ netipmid_LDFLAGS = \
 	$(libmapper_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
+	$(LIBIPMID_LIBS) \
 	$(LIBADD_DLOPEN) \
 	-lchannellayer \
 	-luserlayer \
@@ -81,7 +82,8 @@ netipmid_CXXFLAGS = \
 	$(BOOST_CXX) \
 	$(libmapper_CFLAGS) \
 	$(PHOSPHOR_LOGGING_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
+	$(LIBIPMID_CFLAGS)
 
 SUBDIRS = test
 

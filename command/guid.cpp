@@ -1,6 +1,6 @@
 #include "guid.hpp"
 
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 #include <mapper.h>
 
 #include <phosphor-logging/log.hpp>

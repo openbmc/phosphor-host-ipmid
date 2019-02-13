@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <dirent.h>
 #include <dlfcn.h>
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 #include <systemd/sd-daemon.h>
 #include <systemd/sd-event.h>
 #include <unistd.h>

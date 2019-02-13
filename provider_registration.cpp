@@ -5,7 +5,7 @@
 
 #include <dirent.h>
 #include <dlfcn.h>
-#include <host-ipmid/ipmid-api.h>
+#include <ipmid/api.h>
 #include <stdlib.h>
 #include <string.h>
 
