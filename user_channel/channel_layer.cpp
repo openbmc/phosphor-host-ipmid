@@ -142,4 +142,8 @@ std::string getChannelName(const int chNum)
     return getChannelConfigObject().getChannelName(chNum);
 }
 
+uint8_t getChannelByName(const std::string& chName)
+{
+    return getChannelConfigObject().getChannelByName(chName);
+}
 } // namespace ipmi
