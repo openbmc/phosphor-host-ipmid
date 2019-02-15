@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <cerrno>
 #include <exception>
@@ -155,7 +156,7 @@ int ChannelConfig::convertToChannelNumberFromChannelName(
 {
     for (const auto& it : channelData)
     {
-        if (it.chName == chName)
+        if (boost::iequals(it.chName, chName))
         {
             return it.chID;
         }

@@ -21,9 +21,11 @@
 
 #include <algorithm>
 #include <any>
+#include <boost/algorithm/string.hpp>
 #include <exception>
 #include <forward_list>
 #include <host-cmd-manager.hpp>
+#include <iostream>
 #include <ipmid-host/cmd.hpp>
 #include <ipmid/api.hpp>
 #include <ipmid/handler.hpp>
@@ -335,13 +337,206 @@ message::Response::ptr executeIpmiCommand(message::Request::ptr request)
     return executeIpmiCommandCommon(handlerMap, netFn, request);
 }
 
+namespace utils
+{
+template <typename AssocContainer, typename UnaryPredicate>
+void assoc_erase_if(AssocContainer& c, UnaryPredicate p)
+{
+    typename AssocContainer::iterator next = c.begin();
+    typename AssocContainer::iterator last = c.end();
+    while ((next = std::find_if(next, last, p)) != last)
+    {
+        c.erase(next++);
+    }
+}
+} // namespace utils
+
+namespace
+{
+std::unordered_map<std::string, uint8_t> uniqueNameToChannelNumber;
+
+static constexpr const char ipmiDbusChannelPrefix[] =
+    "xyz.openbmc_project.Ipmi.Channel.";
+bool nameIsChannel(const std::string& name)
+{
+    return boost::algorithm::starts_with(name, ipmiDbusChannelPrefix);
+}
+
+void updateOwners(sdbusplus::asio::connection& conn, const std::string& newName)
+{
+    conn.async_method_call(
+        [newName](const boost::system::error_code ec,
+                  const std::string& nameOwner) {
+            if (ec)
+            {
+                log<level::ERR>("Error getting dbus owner",
+                                entry("INTERFACE=%s", newName.c_str()));
+                return;
+            }
+            std::string name =
+                newName.substr(sizeof(ipmiDbusChannelPrefix) - 1);
+            try
+            {
+                uint8_t channel = getChannelByName(name);
+                uniqueNameToChannelNumber[nameOwner] = channel;
+                log<level::INFO>("New interface mapping",
+                                 entry("INTERFACE=%s", newName.c_str()),
+                                 entry("CHANNEL=%u", channel));
+            }
+            catch (const std::exception& e)
+            {
+                log<level::INFO>("Failed interface mapping, no such name",
+                                 entry("INTERFACE=%s", newName.c_str()));
+            }
+        },
+        "org.freedesktop.DBus", "/", "org.freedesktop.DBus", "GetNameOwner",
+        newName);
+}
+
+void doListNames(boost::asio::io_service& io, sdbusplus::asio::connection& conn)
+{
+    conn.async_method_call(
+        [&io, &conn](const boost::system::error_code ec,
+                     std::vector<std::string> busNames) {
+            if (ec)
+            {
+                log<level::ERR>("Error getting dbus names");
+                std::exit(EXIT_FAILURE);
+                return;
+            }
+            // Try to make startup consistent
+            std::sort(busNames.begin(), busNames.end());
+            for (const std::string& busName : busNames)
+            {
+                if (nameIsChannel(busName))
+                {
+                    updateOwners(conn, busName);
+                }
+            }
+        },
+        "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
+        "ListNames");
+}
+
+void nameChangeHandler(sdbusplus::message::message& message)
+{
+    std::string name;
+    std::string oldOwner;
+    std::string newOwner;
+
+    message.read(name, oldOwner, newOwner);
+
+    if (!oldOwner.empty())
+    {
+        if (boost::starts_with(oldOwner, ":"))
+        {
+            // Connection removed
+            auto it = uniqueNameToChannelNumber.find(oldOwner);
+            if (it != uniqueNameToChannelNumber.end())
+            {
+                uniqueNameToChannelNumber.erase(it);
+            }
+        }
+    }
+    if (!newOwner.empty())
+    {
+        // New daemon added
+        if (nameIsChannel(name))
+        {
+            std::string chName = name.substr(sizeof(ipmiDbusChannelPrefix) - 1);
+            try
+            {
+                uint8_t channel = getChannelByName(chName);
+                uniqueNameToChannelNumber[newOwner] = channel;
+                log<level::INFO>("New interface mapping",
+                                 entry("INTERFACE=%s", name.c_str()),
+                                 entry("CHANNEL=%u", channel));
+            }
+            catch (const std::exception& e)
+            {
+                log<level::INFO>("Failed interface mapping, no such name",
+                                 entry("INTERFACE=%s", name.c_str()));
+            }
+        }
+    }
+};
+
+} // anonymous namespace
+
+static constexpr const char intraBmcName[] = "INTRABMC";
+uint8_t channelFromMessage(sdbusplus::message::message& msg)
+{
+    // channel name for ipmitool to resolve to
+    std::string sender = msg.get_sender();
+    auto chIter = uniqueNameToChannelNumber.find(sender);
+    if (chIter != uniqueNameToChannelNumber.end())
+    {
+        return chIter->second;
+    }
+    // FIXME: currently internal connections are ephemeral and hard to pin down
+    return getChannelByName(intraBmcName);
+} // namespace ipmi
+
 /* called from sdbus async server context */
-auto executionEntry(boost::asio::yield_context yield, NetFn netFn, uint8_t lun,
+auto executionEntry(boost::asio::yield_context yield,
+                    sdbusplus::message::message& m, NetFn netFn, uint8_t lun,
                     Cmd cmd, std::vector<uint8_t>& data,
                     std::map<std::string, ipmi::Value>& options)
 {
-    auto ctx = std::make_shared<ipmi::Context>(netFn, cmd, 0, 0,
-                                               ipmi::Privilege::Admin, &yield);
+    std::string sender = m.get_sender();
+    Privilege privilege = Privilege::None;
+    uint8_t userId = 0; // undefined user
+
+    // figure out what channel the request came in on
+    uint8_t channel = channelFromMessage(m);
+    if (channel == invalidChannel)
+    {
+        // unknown sender channel; refuse to service the request
+        std::vector<uint8_t> empty;
+        log<level::ERR>("ERROR determining source IPMI channel",
+                        entry("SENDER=%s", sender.c_str()),
+                        entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd));
+        netFn |= 0x01;
+        return std::make_tuple(netFn, lun, cmd, ipmi::ccUnspecifiedError,
+                               empty);
+    }
+    log<level::DEBUG>("NEW IPMI MESSAGE on sender IPMI channel",
+                      entry("SENDER=%s", sender.c_str()),
+                      entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd));
+    if (getChannelSessionSupport(channel) != EChannelSessSupported::none)
+    {
+        Value requestPriv;
+        Value requestUserId;
+        try
+        {
+            requestPriv = options.at("privilege");
+            requestUserId = options.at("userId");
+        }
+        catch (const std::out_of_range& e)
+        {
+            std::vector<uint8_t> empty;
+            log<level::ERR>("ERROR determining IPMI session credentials",
+                            entry("SENDER=%s", sender.c_str()),
+                            entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd));
+            netFn |= 0x01;
+            return std::make_tuple(netFn, lun, cmd, ipmi::ccUnspecifiedError,
+                                   empty);
+        }
+        privilege = static_cast<Privilege>(std::get<int>(requestPriv));
+        userId = static_cast<uint8_t>(std::get<uint8_t>(requestUserId));
+    }
+    if (channel == getChannelByName(intraBmcName))
+    {
+        privilege = Privilege::Admin;
+    }
+    // check to see if the requested priv/username is valid
+    log<level::DEBUG>("Set up ipmi context", entry("SENDER=%s", sender.c_str()),
+                      entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd),
+                      entry("CHANNEL=%u", channel), entry("USERID=%u", userId),
+                      entry("PRIVILEGE=%u", static_cast<uint8_t>(privilege)));
+
+    auto ctx = std::make_shared<ipmi::Context>(netFn, cmd, channel, userId,
+                                               privilege, &yield);
     auto request = std::make_shared<ipmi::message::Request>(
         ctx, std::forward<std::vector<uint8_t>>(data));
     message::Response::ptr response = executeIpmiCommand(request);
@@ -622,6 +817,11 @@ int main(int argc, char* argv[])
     sdbusplus::bus::match::match oldIpmiInterface(*sdbusp, FILTER,
                                                   handleLegacyIpmiCommand);
 #endif /* ALLOW_DEPRECATED_API */
+
+    sdbusplus::bus::match::match nameOwnerChanged(
+        *sdbusp, sdbusplus::bus::match::rules::nameOwnerChanged(),
+        ipmi::nameChangeHandler);
+    ipmi::doListNames(*io, *sdbusp);
 
     io->run();
 

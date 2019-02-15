@@ -105,6 +105,18 @@ class ChannelConfig
      */
     std::string getChannelName(const uint8_t chNum);
 
+    /** @brief function to get channel number from channel name
+     *
+     *  @param[in] chName - channel name
+     *
+     *  @return network channel interface number
+     */
+
+    uint8_t getChannelByName(const std::string& chName)
+    {
+        return convertToChannelNumberFromChannelName(chName);
+    }
+
     /** @brief determines supported session type of a channel
      *
      *  @param[in] chNum - channel number
