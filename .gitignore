@@ -62,6 +62,7 @@ Makefile
 /inventory-sensor-gen.cpp
 /fru-read-gen.cpp
 /channel-gen.cpp
+/entity-gen.cpp
 
 # test related
 /test/sample_unittest
