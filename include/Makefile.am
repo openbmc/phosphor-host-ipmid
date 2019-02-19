@@ -10,10 +10,10 @@ nobase_include_HEADERS = \
 # For now they will be the same during migration
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(includedir)/host-ipmid
-	$(LN_S) ../ipmid/iana.hpp $(DESTDIR)$(includedir)/host-ipmid/iana.hpp
-	$(LN_S) ../ipmid/api.h $(DESTDIR)$(includedir)/host-ipmid/ipmid-api.h
-	$(LN_S) ../ipmid/oemopenbmc.hpp $(DESTDIR)$(includedir)/host-ipmid/oemopenbmc.hpp
-	$(LN_S) ../ipmid/oemrouter.hpp $(DESTDIR)$(includedir)/host-ipmid/oemrouter.hpp
-	$(LN_S) ../ipmid-host/cmd.hpp $(DESTDIR)$(includedir)/host-ipmid/ipmid-host-cmd.hpp
-	$(LN_S) ../ipmid-host/cmd-utils.hpp $(DESTDIR)$(includedir)/host-ipmid/ipmid-host-cmd-utils.hpp
+	$(LN_S) -f ../ipmid/iana.hpp $(DESTDIR)$(includedir)/host-ipmid/iana.hpp
+	$(LN_S) -f ../ipmid/api.h $(DESTDIR)$(includedir)/host-ipmid/ipmid-api.h
+	$(LN_S) -f ../ipmid/oemopenbmc.hpp $(DESTDIR)$(includedir)/host-ipmid/oemopenbmc.hpp
+	$(LN_S) -f ../ipmid/oemrouter.hpp $(DESTDIR)$(includedir)/host-ipmid/oemrouter.hpp
+	$(LN_S) -f ../ipmid-host/cmd.hpp $(DESTDIR)$(includedir)/host-ipmid/ipmid-host-cmd.hpp
+	$(LN_S) -f ../ipmid-host/cmd-utils.hpp $(DESTDIR)$(includedir)/host-ipmid/ipmid-host-cmd-utils.hpp
 
