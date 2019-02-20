@@ -107,7 +107,8 @@ struct ChannelConfig_t
 
     // IPv6 Only
     // set selector -- address selector 0 represent 0 static address.
-    //
+    ipmi::network::IPV46Addressing ipv46_addressing =
+        ipmi::network::IPV46Addressing::DISABLED;
     std::string ipv6_saddr; // 20 bytes
     std::string ipv6_srouter1_ipaddr;
     std::string ipv6_srouter1_macaddr;
@@ -124,6 +125,8 @@ struct ChannelConfig_t
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
         lan_set_in_progress = SET_COMPLETE;
         flush = false;
+        ipv46_addressing =
+            ipmi::network::IPV46Addressing::DISABLED;
         ipv6_saddr.clear();
         ipv6_srouter1_ipaddr.clear();
         ipv6_srouter1_macaddr.clear();
