@@ -509,7 +509,7 @@ struct set_lan_t
 {
     uint8_t channel;
     uint8_t parameter;
-    uint8_t data[8]; // Per IPMI spec, not expecting more than this size
+    uint8_t data[20]; // Per IPMI spec, not expecting more than this size
 } __attribute__((packed));
 
 ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -527,8 +527,11 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     constexpr auto networkTimeout = 10000000us; // 10 sec
 
     char ipaddr[INET_ADDRSTRLEN];
+    char ipv6saddr[INET6_ADDRSTRLEN + 4];
     char netmask[INET_ADDRSTRLEN];
     char gateway[INET_ADDRSTRLEN];
+    char router1_ipv6[INET6_ADDRSTRLEN];
+    char router1_prefixval[INET6_ADDRSTRLEN];
 
     auto reqptr = reinterpret_cast<const set_lan_t*>(request);
     sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
@@ -563,23 +566,47 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         break;
 
         case LanParam::MAC:
-        // case LanParam::GATEWAY_MAC:
+        case LanParam::GATEWAY_MAC:
+        case LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR:
         {
             char mac[SIZE_MAC];
+            const char* DbusMACFieldToSet =
+                (reqptr->parameter == static_cast<int>(LanParam::GATEWAY_MAC))
+                    ? "GATEWAY_MAC"
+                    : "MACAddress";
 
             std::snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
                           reqptr->data[0], reqptr->data[1], reqptr->data[2],
                           reqptr->data[3], reqptr->data[4], reqptr->data[5]);
 
+            const char* intf =
+                (static_cast<LanParam>(reqptr->parameter) ==
+                 LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR)
+                ? ipmi::network::NEIGHBOR_INTERFACE
+                : ipmi::network::MAC_INTERFACE;
+
             auto macObjectInfo =
-                ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
+                ipmi::getDbusObject(bus, intf,
                                     ipmi::network::ROOT, ethdevice);
 
-            ipmi::setDbusProperty(
-                bus, macObjectInfo.second, macObjectInfo.first,
-                ipmi::network::MAC_INTERFACE, "MACAddress", std::string(mac));
+            ipmi::setDbusProperty(bus, macObjectInfo.second,
+                                  macObjectInfo.first,
+                                  intf,
+                                  DbusMACFieldToSet, std::string(mac));
 
-            channelConf->macAddress = mac;
+            if (reqptr->parameter == static_cast<int>(LanParam::MAC))
+            {
+                channelConf->macAddress = mac;
+            }
+            else if (reqptr->parameter ==
+                     static_cast<int>(LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR))
+            {
+                channelConf->ipv6_srouter1_macaddr = mac;
+            }
+            else // reqptr->paramter == LAN_PARM_GATEWAY_MAC
+            {
+                channelConf->gatewayMac = mac;
+            }
         }
         break;
 
@@ -600,17 +627,82 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             channelConf->gateway.assign(gateway);
         }
         break;
-        /*
-        case LanParam::IPV6_AND_IPV4_SUPPORTED:{}
-        case LanParam::IPV6_AND_IPV4_ENABLES:{}
-        case LanParam::IPV6_STATUS:{}
-        case LanParam::IPV6_STATIC_ADDRESSES:
-        // Enable dynamic router address conf / enable static rouer address
-        case LanParam::IPV6_ROUTER_ADDRESS_CONF_CTRL:
-        case LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR:
-        case LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR:
 
-        */
+        case LanParam::IPV6_ROUTER_ADDRESS_CONF_CTRL:
+        {
+            uint8_t ipv6radrconfctrl{};
+            std::memcpy(&ipv6radrconfctrl, reqptr->data,
+                          ipmi::network::IPV6RADDRCONFCTRL_SIZE_BYTE);
+            channelConf->ipv6_raddr_conf_ctrl =
+                static_cast<ipmi::network::IPV6RAddrConfCtrl>(ipv6radrconfctrl);
+        }
+        break;
+
+        case LanParam::IPV6_AND_IPV4_ENABLES:
+        {
+            uint8_t ipv46addressing{};
+            std::memcpy(&ipv46addressing, reqptr->data,
+                        ipmi::network::IPV46ADDRESSING_SIZE_BYTE);
+            channelConf->ipv46_addressing =
+                static_cast<ipmi::network::IPV46Addressing>(ipv46addressing);
+        }
+        break;
+
+        case LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR:
+        {
+            std::snprintf(router1_ipv6, INET6_ADDRSTRLEN,
+                          ipmi::network::IPV6_ADDRESS_FORMAT, reqptr->data[0],
+                          reqptr->data[1], reqptr->data[2], reqptr->data[3],
+                          reqptr->data[4], reqptr->data[5], reqptr->data[6],
+                          reqptr->data[7], reqptr->data[8], reqptr->data[9],
+                          reqptr->data[10], reqptr->data[11], reqptr->data[12],
+                          reqptr->data[13], reqptr->data[14], reqptr->data[15]);
+            channelConf->ipv6_srouter1_ipaddr.assign(router1_ipv6);
+        }
+        break;
+
+        case LanParam::IPV6_STATIC_ADDRESSES:
+        {
+            // 1 byte for set selector, 1 byte for addres source
+            std::memcpy(ipv6saddr, reqptr->data, 2);
+            *data_len = 2;
+            std::snprintf(ipv6saddr + *data_len,
+                          INET6_ADDRSTRLEN,
+                          ipmi::network::IPV6_ADDRESS_FORMAT,
+                          reqptr->data[2], reqptr->data[3], reqptr->data[4],
+                          reqptr->data[5], reqptr->data[6], reqptr->data[7],
+                          reqptr->data[8], reqptr->data[9], reqptr->data[10],
+                          reqptr->data[11], reqptr->data[12], reqptr->data[13],
+                          reqptr->data[14], reqptr->data[15], reqptr->data[16],
+                          reqptr->data[17]);
+            *data_len += INET6_ADDRSTRLEN;
+            // 1 byte for adress prefix lenght, 1 byte for address status.
+            std::memcpy(ipv6saddr + *data_len, reqptr->data + *data_len, 2);
+            channelConf->ipv6_saddr.assign(ipv6saddr);
+        }
+        break;
+
+        case LanParam::IPV6_STATIC_ROUTER_1_PREFIX_LEN:
+        {
+            uint8_t prefix_len{};
+            std::memcpy(&prefix_len, reqptr->data, ipmi::network::PREFIXLEN_SIZE_BYTE);
+            channelConf->ipv6_srouter1_prefix_len = prefix_len;
+        }
+        break;
+
+        case LanParam::IPV6_STATIC_ROUTER_1_PREFIX_VAL:
+        {
+            std::snprintf(router1_prefixval, INET6_ADDRSTRLEN,
+                          ipmi::network::IPV6_ADDRESS_FORMAT, reqptr->data[0],
+                          reqptr->data[1], reqptr->data[2], reqptr->data[3],
+                          reqptr->data[4], reqptr->data[5], reqptr->data[6],
+                          reqptr->data[7], reqptr->data[8], reqptr->data[9],
+                          reqptr->data[10], reqptr->data[11], reqptr->data[12],
+                          reqptr->data[13], reqptr->data[14], reqptr->data[15]);
+            channelConf->ipv6_srouter1_prefix_value.assign(router1_prefixval);
+        }
+        break;
+
         case LanParam::VLAN:
         {
             uint16_t vlan{};
