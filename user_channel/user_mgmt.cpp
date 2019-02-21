@@ -656,8 +656,8 @@ ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
     if (userInfo->userEnabled != enabledState)
     {
         std::string userPath = std::string(userObjBasePath) + "/" + userName;
-        setDbusProperty(bus, getUserServiceName().c_str(), userPath.c_str(),
-                        usersInterface, userEnabledProperty, enabledState);
+        setDbusProperty(bus, getUserServiceName(), userPath, usersInterface,
+                        userEnabledProperty, enabledState);
     }
     return IPMI_CC_OK;
 }
@@ -693,8 +693,8 @@ ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
         privAccess.privilege != userInfo->userPrivAccess[syncIndex].privilege)
     {
         std::string userPath = std::string(userObjBasePath) + "/" + userName;
-        setDbusProperty(bus, getUserServiceName().c_str(), userPath.c_str(),
-                        usersInterface, userPrivProperty, priv);
+        setDbusProperty(bus, getUserServiceName(), userPath, usersInterface,
+                        userPrivProperty, priv);
     }
     userInfo->userPrivAccess[chNum].privilege = privAccess.privilege;
 
