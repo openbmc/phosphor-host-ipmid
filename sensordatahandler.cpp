@@ -3,6 +3,7 @@
 #include "sensorhandler.hpp"
 
 #include <bitset>
+#include <filesystem>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <optional>
@@ -10,19 +11,6 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 
 namespace ipmi
 {

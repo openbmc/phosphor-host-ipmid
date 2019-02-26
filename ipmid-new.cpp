@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <any>
 #include <exception>
+#include <filesystem>
 #include <forward_list>
 #include <host-cmd-manager.hpp>
 #include <ipmid-host/cmd.hpp>
@@ -45,19 +46,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 
 namespace fs = std::filesystem;
 
