@@ -113,6 +113,12 @@ std::unique_ptr<sdbusplus::asio::connection> sdbusp
     __attribute__((init_priority(101)));
 } // namespace
 
+// this is used by openpower-host-ipmi-oem
+std::unique_ptr<sdbusplus::bus::bus>& ipmid_get_sdbus_plus_handler()
+{
+    return sdusp;
+}
+
 #include <unistd.h>
 void register_netfn_app_functions()
 {
