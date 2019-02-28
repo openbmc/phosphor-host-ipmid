@@ -1223,6 +1223,7 @@ ipmi_ret_t ipmi_chassis_identify(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             ? (static_cast<uint8_t*>(request))[forceIdentifyPos] & 0x01
             : false;
 
+    *data_len = 0; // response have complete code only
     if (identifyInterval || forceIdentify)
     {
         // stop the timer if already started, for force identify we should
