@@ -328,6 +328,6 @@ ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
  *
  *  @return the LAN channel name (i.e. eth0)
  */
-std::string getChannelName(const int chNum);
+std::string getChannelName(const uint8_t chNum);
 
 } // namespace ipmi
