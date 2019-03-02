@@ -221,8 +221,8 @@ static inline auto responseSuccess()
 
 } // namespace ipmi
 
-// any client can interact with the main asio service
-std::shared_ptr<boost::asio::io_service> getIoService();
+// any client can interact with the main asio context
+std::shared_ptr<boost::asio::io_context> getIoContext();
 
 // any client can interact with the main sdbus
 std::shared_ptr<sdbusplus::asio::connection> getSdBus();
@@ -239,5 +239,5 @@ std::shared_ptr<sdbusplus::asio::connection> getSdBus();
 template <typename WorkFn>
 static inline void post_work(WorkFn work)
 {
-    getIoService()->post(std::forward<WorkFn>(work));
+    getIoContext()->post(std::forward<WorkFn>(work));
 }
