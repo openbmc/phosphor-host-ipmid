@@ -146,17 +146,8 @@ std::unique_ptr<phosphor::host::command::Host> host
     __attribute__((init_priority(101)));
 std::unique_ptr<sdbusplus::server::manager::manager> objManager
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::asio::connection> sdbusp
-    __attribute__((init_priority(101)));
 } // namespace
 
-// this is used by openpower-host-ipmi-oem
-std::unique_ptr<sdbusplus::asio::connection>& ipmid_get_sdbus_plus_handler()
-{
-    return sdbusp;
-}
-
-#include <unistd.h>
 void register_netfn_app_functions()
 {
 
@@ -179,15 +170,8 @@ void register_netfn_app_functions()
     // Create new xyz.openbmc_project.host object on the bus
     auto objPath = std::string{CONTROL_HOST_OBJ_MGR} + '/' + HOST_NAME + '0';
 
-    // Create a new sdbus connection so it can have a well-known name
-    sd_bus* bus = nullptr;
-    sd_bus_open_system(&bus);
-    if (!bus)
-    {
-        return;
-    }
-    auto io = getIoService();
-    sdbusp = std::make_unique<sdbusplus::asio::connection>(*io, bus);
+    std::unique_ptr<sdbusplus::asio::connection>& sdbusp =
+        ipmid_get_sdbus_plus_handler();
 
     // Add sdbusplus ObjectManager.
     objManager = std::make_unique<sdbusplus::server::manager::manager>(
