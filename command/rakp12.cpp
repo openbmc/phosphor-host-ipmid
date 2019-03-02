@@ -187,6 +187,12 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
             static_cast<uint8_t>(RAKP_ReturnCode::INACTIVE_ROLE);
         return outPayload;
     }
+    if (userAccess.privilege > static_cast<uint8_t>(session::Privilege::OEM))
+    {
+        response->rmcpStatusCode =
+            static_cast<uint8_t>(RAKP_ReturnCode::INACTIVE_ROLE);
+        return outPayload;
+    }
     session->chNum = chNum;
     // minimum privilege of Channel / User / session::privilege::USER/CALLBACK /
     // has to be used as session current privilege level
