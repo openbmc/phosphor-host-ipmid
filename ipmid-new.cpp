@@ -458,18 +458,6 @@ std::forward_list<IpmiProvider> loadProviders(const fs::path& ipmiLibsPath)
 
 } // namespace ipmi
 
-static std::shared_ptr<boost::asio::io_service> io;
-std::shared_ptr<boost::asio::io_service> getIoService()
-{
-    return io;
-}
-
-static std::shared_ptr<sdbusplus::asio::connection> sdbusp;
-std::shared_ptr<sdbusplus::asio::connection> getSdBus()
-{
-    return sdbusp;
-}
-
 #ifdef ALLOW_DEPRECATED_API
 /* legacy registration */
 void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
@@ -559,6 +547,7 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
 
     dest = m.get_sender();
     path = m.get_path();
+    std::shared_ptr<sdbusplus::asio::connection> sdbusp = getSdBus();
     sdbusp->async_method_call([](boost::system::error_code ec) {}, dest, path,
                               DBUS_INTF, "sendMessage", seq, netFn, lun, cmd,
                               response->cc, response->payload.raw);
@@ -579,10 +568,16 @@ std::unique_ptr<phosphor::host::command::Manager>& ipmid_get_host_cmd_manager()
     return cmdManager;
 }
 
+// These are symbols that are present in libipmid, but not expected
+// to be used except here (or maybe a unit test), so declare them here
+extern void setIoContext(std::shared_ptr<boost::asio::io_context> other);
+extern void setSdBus(std::shared_ptr<sdbusplus::asio::connection> other);
+
 int main(int argc, char* argv[])
 {
     // Connect to system bus
-    io = std::make_shared<boost::asio::io_service>();
+    auto io = std::make_shared<boost::asio::io_context>();
+    setIoContext(io);
     if (argc > 1 && std::string(argv[1]) == "-session")
     {
         sd_bus_default_user(&bus);
@@ -591,7 +586,8 @@ int main(int argc, char* argv[])
     {
         sd_bus_default_system(&bus);
     }
-    sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
+    auto sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
+    setSdBus(sdbusp);
     sdbusp->request_name("xyz.openbmc_project.Ipmi.Host");
 
     // TODO: Hack to keep the sdEvents running.... Not sure why the sd_event
