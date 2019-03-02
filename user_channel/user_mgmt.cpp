@@ -658,6 +658,16 @@ ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
         std::string userPath = std::string(userObjBasePath) + "/" + userName;
         setDbusProperty(bus, getUserServiceName(), userPath, usersInterface,
                         userEnabledProperty, enabledState);
+        userInfo->userEnabled = enabledState;
+        try
+        {
+            writeUserData();
+        }
+        catch (const std::exception& e)
+        {
+            log<level::DEBUG>("Write user data failed");
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
     }
     return IPMI_CC_OK;
 }
