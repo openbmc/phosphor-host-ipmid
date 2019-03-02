@@ -138,7 +138,7 @@ static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
     "priv-reserved", "priv-callback", "priv-user",
     "priv-operator", "priv-admin",    "priv-oem"};
 
-std::string ChannelConfig::getChannelName(const int chNum)
+std::string ChannelConfig::getChannelName(const uint8_t chNum)
 {
     if (!isValidChannel(chNum))
     {
@@ -388,11 +388,6 @@ bool ChannelConfig::isValidAuthType(const uint8_t chNum,
     }
 
     return true;
-}
-
-std::string ChannelConfig::getChannelName(const uint8_t chNum)
-{
-    return channelData[chNum].chName;
 }
 
 int ChannelConfig::getChannelActiveSessions(const uint8_t chNum)

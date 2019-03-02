@@ -232,14 +232,6 @@ class ChannelConfig
      */
     int writeChannelVolatileData();
 
-    /** @brief function to get channel name from channel number
-     *
-     *  @param[in] chNum - channel number index
-     *
-     *  @return network channel interface name
-     */
-    std::string getChannelName(const int chNum);
-
   private:
     uint32_t signalFlag = 0;
     std::unique_ptr<boost::interprocess::named_recursive_mutex> channelMutex{
