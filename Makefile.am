@@ -13,6 +13,7 @@ ipmid_SOURCES = \
 	ipmid-new.cpp \
 	settings.cpp \
 	host-cmd-manager.cpp \
+	ipmi-exports.cpp \
 	utils.cpp
 
 libipmi20_BUILT_LIST = \
