@@ -122,7 +122,8 @@ libipmi20_la_CXXFLAGS = $(COMMON_CXX)
 providers_LTLIBRARIES += libusercmds.la
 libusercmds_la_LIBADD = \
 	libipmid/libipmid.la \
-	user_channel/libuserlayer.la
+	user_channel/libuserlayer.la \
+	user_channel/libchannellayer.la
 libusercmds_la_SOURCES = \
 	user_channel/usercommands.cpp
 libusercmds_la_LDFLAGS = \
