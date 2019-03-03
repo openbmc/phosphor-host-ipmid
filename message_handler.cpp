@@ -90,17 +90,31 @@ void Handler::executeCommand()
     auto command = inMessage->getCommand();
     if (inMessage->payloadType == PayloadType::IPMI)
     {
-        if (inMessage->payload.size() <
-            (sizeof(LAN::header::Request) + sizeof(LAN::trailer::Request)))
+        auto session =
+            std::get<session::Manager&>(singletonPool).getSession(sessionID);
+        // Process PayloadType::IPMI only if ipmi is enabled or for sessionless
+        // or for session establisbment command
+        if (this->sessionID == session::SESSION_ZERO ||
+            session->sessionUserPrivAccess.ipmiEnabled)
         {
-            return;
-        }
+            if (inMessage->payload.size() <
+                (sizeof(LAN::header::Request) + sizeof(LAN::trailer::Request)))
+            {
+                return;
+            }
 
-        auto start = inMessage->payload.begin() + sizeof(LAN::header::Request);
-        auto end = inMessage->payload.end() - sizeof(LAN::trailer::Request);
-        std::vector<uint8_t> inPayload(start, end);
-        std::get<command::Table&>(singletonPool)
-            .executeCommand(command, inPayload, shared_from_this());
+            auto start =
+                inMessage->payload.begin() + sizeof(LAN::header::Request);
+            auto end = inMessage->payload.end() - sizeof(LAN::trailer::Request);
+            std::vector<uint8_t> inPayload(start, end);
+            std::get<command::Table&>(singletonPool)
+                .executeCommand(command, inPayload, shared_from_this());
+        }
+        else
+        {
+            std::vector<uint8_t> payload{IPMI_CC_INSUFFICIENT_PRIVILEGE};
+            outPayload = std::move(payload);
+        }
     }
     else
     {
