@@ -12,6 +12,8 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <user_channel/channel_layer.hpp>
+#include <user_channel/user_layer.hpp>
 #include <vector>
 
 namespace session
@@ -271,6 +273,12 @@ class Session
      * @brief Session's Requested Maximum Privilege Level
      */
     Privilege reqMaxPrivLevel;
+
+    /**
+     * @brief session's user & channel access details
+     */
+    ipmi::PrivAccess sessionUserPrivAccess{};
+    ipmi::ChannelAccess sessionChannelAccess{};
 
     SequenceNumbers sequenceNums;  // Session Sequence Numbers
     State state = State::INACTIVE; // Session State

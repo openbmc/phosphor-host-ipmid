@@ -5,9 +5,6 @@
 
 #include <ipmid/api.h>
 
-#include <user_channel/channel_layer.hpp>
-#include <user_channel/user_layer.hpp>
-
 namespace command
 {
 
@@ -39,31 +36,16 @@ std::vector<uint8_t>
         response->completionCode = IPMI_CC_EXCEEDS_USER_PRIV;
         return outPayload;
     }
-
-    uint8_t userId = ipmi::ipmiUserGetUserId(session->userName);
-    if (userId == ipmi::invalidUserId)
-    {
-        response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
-        return outPayload;
-    }
-    ipmi::PrivAccess userAccess{};
-    ipmi::ChannelAccess chAccess{};
-    if ((ipmi::ipmiUserGetPrivilegeAccess(userId, session->chNum, userAccess) !=
-         IPMI_CC_OK) ||
-        (ipmi::getChannelAccessData(session->chNum, chAccess) != IPMI_CC_OK))
-    {
-        response->completionCode = IPMI_CC_INVALID_PRIV_LEVEL;
-        return outPayload;
-    }
     // Use the minimum privilege of user or channel
     uint8_t minPriv = 0;
-    if (chAccess.privLimit < userAccess.privilege)
+    if (session->sessionChannelAccess.privLimit <
+        session->sessionUserPrivAccess.privilege)
     {
-        minPriv = chAccess.privLimit;
+        minPriv = session->sessionChannelAccess.privLimit;
     }
     else
     {
-        minPriv = userAccess.privilege;
+        minPriv = session->sessionUserPrivAccess.privilege;
     }
     if (reqPrivilegeLevel > minPriv)
     {

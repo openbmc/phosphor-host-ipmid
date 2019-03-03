@@ -11,8 +11,6 @@
 #include <cstring>
 #include <iomanip>
 #include <phosphor-logging/log.hpp>
-#include <user_channel/channel_layer.hpp>
-#include <user_channel/user_layer.hpp>
 
 using namespace phosphor::logging;
 
@@ -174,20 +172,20 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
             static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
         return outPayload;
     }
-    ipmi::PrivAccess userAccess{};
-    ipmi::ChannelAccess chAccess{};
     // TODO Replace with proper calls.
     uint8_t chNum = static_cast<uint8_t>(ipmi::EChannelID::chanLan1);
     // Get channel based access information
-    if ((ipmi::ipmiUserGetPrivilegeAccess(userId, chNum, userAccess) !=
-         IPMI_CC_OK) ||
-        (ipmi::getChannelAccessData(chNum, chAccess) != IPMI_CC_OK))
+    if ((ipmi::ipmiUserGetPrivilegeAccess(
+             userId, chNum, session->sessionUserPrivAccess) != IPMI_CC_OK) ||
+        (ipmi::getChannelAccessData(chNum, session->sessionChannelAccess) !=
+         IPMI_CC_OK))
     {
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INACTIVE_ROLE);
         return outPayload;
     }
-    if (userAccess.privilege > static_cast<uint8_t>(session::Privilege::OEM))
+    if (session->sessionUserPrivAccess.privilege >
+        static_cast<uint8_t>(session::Privilege::OEM))
     {
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INACTIVE_ROLE);
@@ -197,13 +195,14 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     // minimum privilege of Channel / User / session::privilege::USER/CALLBACK /
     // has to be used as session current privilege level
     uint8_t minPriv = 0;
-    if (chAccess.privLimit < userAccess.privilege)
+    if (session->sessionChannelAccess.privLimit <
+        session->sessionUserPrivAccess.privilege)
     {
-        minPriv = chAccess.privLimit;
+        minPriv = session->sessionChannelAccess.privLimit;
     }
     else
     {
-        minPriv = userAccess.privilege;
+        minPriv = session->sessionUserPrivAccess.privilege;
     }
     if (session->curPrivLevel > static_cast<session::Privilege>(minPriv))
     {
@@ -214,7 +213,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     if (((request->req_max_privilege_level & userNameOnlyLookupMask) ==
          userNamePrivLookup) &&
         ((request->req_max_privilege_level & session::reqMaxPrivMask) !=
-         userAccess.privilege))
+         session->sessionUserPrivAccess.privilege))
     {
         log<level::INFO>(
             "Username/Privilege lookup failed for requested privilege");
