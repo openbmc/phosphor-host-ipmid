@@ -111,6 +111,24 @@ enum class EAuthType : uint8_t
     oem = (1 << 0x5),
 };
 
+// TODO: Remove duplicate 'PayloadType' definition from netipmid's message.hpp
+// to phosphor-ipmi-host/include
+/**
+ * @enum Payload Types (refer spec sec 13.27.3)
+ */
+enum class PayloadType : uint8_t
+{
+    IPMI = 0x00,
+    SOL = 0x01,
+    OPEN_SESSION_REQUEST = 0x10,
+    OPEN_SESSION_RESPONSE = 0x11,
+    RAKP1 = 0x12,
+    RAKP2 = 0x13,
+    RAKP3 = 0x14,
+    RAKP4 = 0x15,
+    INVALID = 0xFF,
+};
+
 /**
  * @enum Access mode for channel access set/get (refer spec
  * sec 22.22 - request byte 2[7:6])
