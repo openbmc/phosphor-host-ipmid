@@ -152,6 +152,36 @@ struct GetChannelInfoResp
     uint8_t auxChInfo[2];
 } __attribute__((packed));
 
+/** @struct GetChannelPayloadSupportReq
+ *
+ *  Structure for get channel payload support command request (refer spec
+ *  sec 24.8)
+ */
+struct GetChannelPayloadSupportReq
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t chNum : 4;
+    uint8_t reserved : 4;
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved : 4;
+    uint8_t chNum : 4;
+#endif
+} __attribute__((packed));
+
+/** @struct GetChannelPayloadSupportResp
+ *
+ *  Structure for get channel payload support command response (refer spec
+ *  sec 24.8)
+ */
+struct GetChannelPayloadSupportResp
+{
+    uint8_t stdPayloadType[2];
+    uint8_t sessSetupPayloadType[2];
+    uint8_t OEMPayloadType[2];
+    uint8_t reserved[2];
+} __attribute__((packed));
+
 ipmi_ret_t ipmiSetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                 ipmi_request_t request,
                                 ipmi_response_t response,
@@ -390,6 +420,81 @@ ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t ipmiGetChannelPayloadSupport(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                        ipmi_request_t request,
+                                        ipmi_response_t response,
+                                        ipmi_data_len_t data_len,
+                                        ipmi_context_t context)
+{
+    const auto req = static_cast<GetChannelPayloadSupportReq*>(request);
+    size_t reqLength = *data_len;
+
+    *data_len = 0;
+
+    if (reqLength != sizeof(*req))
+    {
+        log<level::DEBUG>("Get channel payload - Invalid Length");
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    uint8_t chNum = convertCurrentChannelNum(req->chNum);
+    if (!isValidChannel(chNum) || req->reserved != 0)
+    {
+        log<level::DEBUG>("Get channel payload - Invalid field in request");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    // Not supported on sessionless channels.
+    if (EChannelSessSupported::none == getChannelSessionSupport(chNum))
+    {
+        log<level::DEBUG>("Get channel payload - Sessionless Channel");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    // Session support is available in active LAN channels.
+    if ((EChannelSessSupported::none != getChannelSessionSupport(chNum)) &&
+        (!(doesDeviceExist(chNum))))
+    {
+        log<level::DEBUG>("Get channel payload - Device not exist");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    auto resp = static_cast<GetChannelPayloadSupportResp*>(response);
+
+    std::fill(reinterpret_cast<uint8_t*>(resp),
+              reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
+
+    // TODO: Hard coding for now.
+    // Mapping PayloadTypes to 'GetChannelPayloadSupportResp' fields:
+    // --------------------------------------------------------------
+    // Mask all except least 3 significant bits to get a value in the range of
+    // 0-7. This value maps to the bit position of given payload type in 'resp'
+    // fields.
+
+    static constexpr uint8_t payloadByteMask = 0x07;
+    static constexpr uint8_t stdPayloadTypeIPMI =
+        1 << (static_cast<uint8_t>(PayloadType::IPMI) & payloadByteMask);
+    static constexpr uint8_t stdPayloadTypeSOL =
+        1 << (static_cast<uint8_t>(PayloadType::SOL) & payloadByteMask);
+
+    static constexpr uint8_t sessPayloadTypeOpenReq =
+        1 << (static_cast<uint8_t>(PayloadType::OPEN_SESSION_REQUEST) &
+              payloadByteMask);
+    static constexpr uint8_t sessPayloadTypeRAKP1 =
+        1 << (static_cast<uint8_t>(PayloadType::RAKP1) & payloadByteMask);
+    static constexpr uint8_t sessPayloadTypeRAKP3 =
+        1 << (static_cast<uint8_t>(PayloadType::RAKP3) & payloadByteMask);
+
+    resp->stdPayloadType[0] = stdPayloadTypeIPMI | stdPayloadTypeSOL;
+    // RMCP+ Open Session request, RAKP Message1 and RAKP Message3.
+    resp->sessSetupPayloadType[0] =
+        sessPayloadTypeOpenReq | sessPayloadTypeRAKP1 | sessPayloadTypeRAKP3;
+
+    *data_len = sizeof(*resp);
+
+    return IPMI_CC_OK;
+}
+
 void registerChannelFunctions() __attribute__((constructor));
 void registerChannelFunctions()
 {
@@ -403,6 +508,10 @@ void registerChannelFunctions()
 
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_INFO, NULL,
                            ipmiGetChannelInfo, PRIVILEGE_USER);
+
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_PAYLOAD_SUPPORT,
+                           NULL, ipmiGetChannelPayloadSupport, PRIVILEGE_USER);
+
     return;
 }
 
