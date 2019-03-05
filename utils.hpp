@@ -1,11 +1,14 @@
 #pragma once
 #include "types.hpp"
 
+#include <chrono>
 #include <optional>
 #include <sdbusplus/server.hpp>
 
 namespace ipmi
 {
+
+using namespace std::literals::chrono_literals;
 
 constexpr auto MAPPER_BUS_NAME = "xyz.openbmc_project.ObjectMapper";
 constexpr auto MAPPER_OBJ = "/xyz/openbmc_project/object_mapper";
@@ -20,6 +23,10 @@ constexpr auto DELETE_INTERFACE = "xyz.openbmc_project.Object.Delete";
 constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
+
+/* Use a value of 5s which aligns with BT/KCS bridged timeouts, rather
+ * than the default 25s DBus timeout. */
+constexpr std::chrono::microseconds IPMI_DBUS_TIMEOUT = 5s;
 
 /** @class ServiceCache
  *  @brief Caches lookups of service names from the object mapper.
@@ -130,7 +137,8 @@ DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
  */
 Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
                       const std::string& objPath, const std::string& interface,
-                      const std::string& property);
+                      const std::string& property,
+                      std::chrono::microseconds timeout = IPMI_DBUS_TIMEOUT);
 
 /** @brief Gets all the properties associated with the given object
  *         and the interface.
@@ -140,10 +148,11 @@ Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
  *  @param[in] interface - Dbus interface.
  *  @return On success returns the map of name value pair.
  */
-PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
-                                 const std::string& service,
-                                 const std::string& objPath,
-                                 const std::string& interface);
+PropertyMap
+    getAllDbusProperties(sdbusplus::bus::bus& bus, const std::string& service,
+                         const std::string& objPath,
+                         const std::string& interface,
+                         std::chrono::microseconds timeout = IPMI_DBUS_TIMEOUT);
 
 /** @brief Gets all managed objects associated with the given object
  *         path and service.
@@ -166,7 +175,8 @@ ObjectValueTree getManagedObjects(sdbusplus::bus::bus& bus,
  */
 void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
                      const std::string& objPath, const std::string& interface,
-                     const std::string& property, const Value& value);
+                     const std::string& property, const Value& value,
+                     std::chrono::microseconds timeout = IPMI_DBUS_TIMEOUT);
 
 /** @brief  Gets all the dbus objects from the given service root
  *          which matches the object identifier.
