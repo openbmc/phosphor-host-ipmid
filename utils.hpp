@@ -21,6 +21,11 @@ constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
 constexpr auto METHOD_SET = "Set";
 
+/* Use a value of 5s which aligns with BT/KCS bridged timeouts, rather
+ * than the default 25s DBus timeout. */
+constexpr auto IPMI_DBUS_TIMEOUT_SEC = 5;
+constexpr auto IPMI_DBUS_TIMEOUT_US = (IPMI_DBUS_TIMEOUT_SEC * 1000000);
+
 /** @class ServiceCache
  *  @brief Caches lookups of service names from the object mapper.
  *  @details Most ipmi commands need to talk to other dbus daemons to perform
@@ -130,7 +135,8 @@ DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
  */
 Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
                       const std::string& objPath, const std::string& interface,
-                      const std::string& property);
+                      const std::string& property,
+                      uint64_t timeout_us = IPMI_DBUS_TIMEOUT_US);
 
 /** @brief Gets all the properties associated with the given object
  *         and the interface.
@@ -143,7 +149,8 @@ Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
 PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
                                  const std::string& service,
                                  const std::string& objPath,
-                                 const std::string& interface);
+                                 const std::string& interface,
+                                 uint64_t timeout_us = IPMI_DBUS_TIMEOUT_US);
 
 /** @brief Gets all managed objects associated with the given object
  *         path and service.
@@ -166,7 +173,8 @@ ObjectValueTree getManagedObjects(sdbusplus::bus::bus& bus,
  */
 void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
                      const std::string& objPath, const std::string& interface,
-                     const std::string& property, const Value& value);
+                     const std::string& property, const Value& value,
+                     uint64_t timeout_us = IPMI_DBUS_TIMEOUT_US);
 
 /** @brief  Gets all the dbus objects from the given service root
  *          which matches the object identifier.
