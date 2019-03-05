@@ -5,6 +5,7 @@
 #include <net/if.h>
 
 #include <algorithm>
+#include <chrono>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
@@ -132,7 +133,8 @@ DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
 
 Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
                       const std::string& objPath, const std::string& interface,
-                      const std::string& property)
+                      const std::string& property,
+                      std::chrono::microseconds timeout)
 {
 
     Value value;
@@ -142,7 +144,7 @@ Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
 
     method.append(interface, property);
 
-    auto reply = bus.call(method);
+    auto reply = bus.call(method, timeout.count());
 
     if (reply.is_method_error())
     {
@@ -161,7 +163,8 @@ Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
 PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
                                  const std::string& service,
                                  const std::string& objPath,
-                                 const std::string& interface)
+                                 const std::string& interface,
+                                 std::chrono::microseconds timeout)
 {
     PropertyMap properties;
 
@@ -170,7 +173,7 @@ PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
 
     method.append(interface);
 
-    auto reply = bus.call(method);
+    auto reply = bus.call(method, timeout.count());
 
     if (reply.is_method_error())
     {
@@ -209,14 +212,15 @@ ObjectValueTree getManagedObjects(sdbusplus::bus::bus& bus,
 
 void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
                      const std::string& objPath, const std::string& interface,
-                     const std::string& property, const Value& value)
+                     const std::string& property, const Value& value,
+                     std::chrono::microseconds timeout)
 {
     auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
                                       PROP_INTF, METHOD_SET);
 
     method.append(interface, property, value);
 
-    if (!bus.call(method))
+    if (!bus.call(method, timeout.count()))
     {
         log<level::ERR>("Failed to set property",
                         entry("PROPERTY=%s", property.c_str()),
