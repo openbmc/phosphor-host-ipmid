@@ -97,7 +97,8 @@ void WhitelistFilter::cacheRestrictedMode()
                                              : "Set restrictedMode = false"));
         },
         restrictionModeService.c_str(), restrictionModeSetting.c_str(),
-        "org.freedesktop.DBus.Properties", "Get", "RestrictionMode");
+        "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
+        "RestrictionMode");
 }
 
 void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message::message& m)
