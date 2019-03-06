@@ -427,7 +427,13 @@ std::forward_list<IpmiProvider> loadProviders(const fs::path& ipmiLibsPath)
     std::vector<fs::path> libs;
     for (const auto& libPath : fs::directory_iterator(ipmiLibsPath))
     {
+        std::error_code ec;
         fs::path fname = libPath.path();
+        if (fs::is_symlink(fname, ec) || ec)
+        {
+            // it's a symlink or some other error; skip it
+            continue;
+        }
         while (fname.has_extension())
         {
             fs::path extn = fname.extension();
