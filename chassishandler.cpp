@@ -801,6 +801,12 @@ static constexpr uint8_t policyBitMask = 0x07;
 static constexpr uint8_t setPolicyReqLen = 1;
 } // namespace power_policy
 
+namespace
+{
+constexpr char powerControlPath[] =
+    "/xyz/openbmc_project/Chassis/Control/Power0";
+constexpr char powerControlIntf[] = "xyz.openbmc_project.Chassis.Control.Power";
+} // namespace
 //----------------------------------------------------------------------
 // Get Chassis Status commands
 //----------------------------------------------------------------------
@@ -810,14 +816,8 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                    ipmi_data_len_t data_len,
                                    ipmi_context_t context)
 {
-    const char* objname = "/org/openbmc/control/power0";
-    const char* intf = "org.openbmc.control.Power";
 
-    sd_bus* bus = NULL;
-    sd_bus_message* reply = NULL;
-    int r = 0;
     int pgood = 0;
-    char* busname = NULL;
     ipmi_ret_t rc = IPMI_CC_OK;
     ipmi_get_chassis_status_t chassis_status{};
 
@@ -845,37 +845,23 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto powerRestore = RestorePolicy::convertPolicyFromString(
         variant_ns::get<std::string>(result));
 
+    try
+    {
+        std::string busname =
+            ipmi::getService(dbus, powerControlIntf, powerControlPath);
+        auto variant = ipmi::getDbusProperty(dbus, busname, powerControlPath,
+                                             powerControlIntf, "pgood");
+        pgood = std::get<int>(variant);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error fetching pgood property",
+                        entry("ERROR=%s", e.what()));
+        *data_len = 0;
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+
     *data_len = 4;
-
-    bus = ipmid_get_sd_bus_connection();
-
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0)
-    {
-        log<level::ERR>("Failed to get bus name", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
-
-    r = sd_bus_get_property(bus, busname, objname, intf, "pgood", NULL, &reply,
-                            "i");
-    if (r < 0)
-    {
-        log<level::ERR>("Failed to call sd_bus_get_property",
-                        entry("PROPERTY=%s", "pgood"), entry("ERRNO=0x%X", -r),
-                        entry("BUS=%s", busname), entry("PATH=%s", objname),
-                        entry("INTERFACE=%s", intf));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
-
-    r = sd_bus_message_read(reply, "i", &pgood);
-    if (r < 0)
-    {
-        log<level::ERR>("Failed to read sensor:", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
 
     s = dbusToIpmi.at(powerRestore);
 
@@ -953,10 +939,6 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Pack the actual response
     std::memcpy(response, &chassis_status, *data_len);
-
-finish:
-    free(busname);
-    reply = sd_bus_message_unref(reply);
 
     return rc;
 }
