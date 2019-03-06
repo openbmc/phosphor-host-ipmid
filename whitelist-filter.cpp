@@ -6,6 +6,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <settings.hpp>
+#include <utils.hpp>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
 
 using namespace phosphor::logging;
@@ -81,7 +82,7 @@ void WhitelistFilter::cacheRestrictedMode()
         return;
     }
     bus->async_method_call(
-        [this](boost::system::error_code ec, std::string mode) {
+        [this](boost::system::error_code ec, ipmi::Value v) {
             if (ec)
             {
                 log<level::ERR>("Error in RestrictionMode Get");
@@ -89,6 +90,7 @@ void WhitelistFilter::cacheRestrictedMode()
                 restrictedMode = true;
                 return;
             }
+            auto mode = std::get<std::string>(v);
             auto restrictionMode =
                 RestrictionMode::convertModesFromString(mode);
             restrictedMode =
@@ -96,8 +98,9 @@ void WhitelistFilter::cacheRestrictedMode()
             log<level::INFO>((restrictedMode ? "Set restrictedMode = true"
                                              : "Set restrictedMode = false"));
         },
-        restrictionModeService.c_str(), restrictionModeSetting.c_str(),
-        "org.freedesktop.DBus.Properties", "Get", "RestrictionMode");
+        restrictionModeService, restrictionModeSetting,
+        "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
+        "RestrictionMode");
 }
 
 void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message::message& m)
