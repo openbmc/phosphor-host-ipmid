@@ -101,6 +101,12 @@ std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
 
     response->completionCode = IPMI_CC_OK;
 
+    if (inPayload.size() != sizeof(DeactivatePayloadRequest))
+    {
+        response->completionCode = IPMI_CC_REQ_DATA_LEN_INVALID;
+        return outPayload;
+    }
+
     // SOL is the payload currently supported for deactivation
     if (static_cast<uint8_t>(message::PayloadType::SOL) != request->payloadType)
     {

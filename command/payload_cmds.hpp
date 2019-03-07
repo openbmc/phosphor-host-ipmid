@@ -144,6 +144,7 @@ struct DeactivatePayloadRequest
     uint8_t auxData1; //!< Auxiliary data 1
     uint8_t auxData2; //!< Auxiliary data 2
     uint8_t auxData3; //!< Auxiliary data 3
+    uint8_t auxData4; //!< Auxiliary data 4
 } __attribute__((packed));
 
 /** @struct DeactivatePayloadResponse
