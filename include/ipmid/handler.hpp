@@ -42,15 +42,15 @@ static inline message::Response::ptr
     errorResponse(message::Request::ptr request, ipmi::Cc cc, Args&&... args)
 {
     message::Response::ptr response = request->makeResponse();
-    auto payload = std::make_tuple(cc, args...);
-    response->pack(payload);
+    response->cc = cc;
+    response->pack(args...);
     return response;
 }
 static inline message::Response::ptr
     errorResponse(message::Request::ptr request, ipmi::Cc cc)
 {
     message::Response::ptr response = request->makeResponse();
-    response->pack(cc);
+    response->cc = cc;
     return response;
 }
 
