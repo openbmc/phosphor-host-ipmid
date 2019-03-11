@@ -3,12 +3,12 @@
 #include "transporthandler.hpp"
 #include "types.hpp"
 #include "user_channel/channel_layer.hpp"
-#include "utils.hpp"
 
 #include <arpa/inet.h>
 
 #include <boost/process/child.hpp>
 #include <fstream>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <set>

@@ -3,11 +3,11 @@
 #include "selutility.hpp"
 
 #include "types.hpp"
-#include "utils.hpp"
 
 #include <ipmid/api.h>
 
 #include <chrono>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>

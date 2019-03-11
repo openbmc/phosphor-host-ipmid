@@ -12,8 +12,7 @@ sbin_PROGRAMS = \
 ipmid_SOURCES = \
 	ipmid-new.cpp \
 	settings.cpp \
-	host-cmd-manager.cpp \
-	utils.cpp
+	host-cmd-manager.cpp
 
 libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
@@ -91,7 +90,6 @@ libipmi20_la_SOURCES = \
 	transporthandler.cpp \
 	globalhandler.cpp \
 	groupext.cpp \
-	utils.cpp \
 	selutility.cpp \
 	ipmi_fru_info_area.cpp \
 	read_fru_data.cpp \

@@ -2,9 +2,9 @@
 
 #include "sensorhandler.hpp"
 #include "types.hpp"
-#include "utils.hpp"
 
 #include <bitset>
+#include <ipmid/utils.hpp>
 #include <optional>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>

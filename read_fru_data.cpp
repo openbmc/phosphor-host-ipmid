@@ -2,11 +2,11 @@
 
 #include "fruread.hpp"
 #include "types.hpp"
-#include "utils.hpp"
 
 #include <ipmid/api.h>
 
 #include <algorithm>
+#include <ipmid/utils.hpp>
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>
 #include <sdbusplus/message/types.hpp>

@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
 	ipmid/oemopenbmc.hpp \
 	ipmid/oemrouter.hpp \
 	ipmid/utility.hpp \
+	ipmid/utils.hpp \
 	ipmid-host/cmd.hpp \
 	ipmid-host/cmd-utils.hpp
 

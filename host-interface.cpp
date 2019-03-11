@@ -3,11 +3,11 @@
 #include "host-interface.hpp"
 
 #include "systemintfcmds.hpp"
-#include "utils.hpp"
 
 #include <functional>
 #include <ipmid-host/cmd-utils.hpp>
 #include <ipmid-host/cmd.hpp>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
 
 namespace phosphor

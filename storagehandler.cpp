@@ -5,7 +5,6 @@
 #include "selutility.hpp"
 #include "sensorhandler.hpp"
 #include "storageaddsel.hpp"
-#include "utils.hpp"
 
 #include <arpa/inet.h>
 #include <ipmid/api.h>
@@ -16,6 +15,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
