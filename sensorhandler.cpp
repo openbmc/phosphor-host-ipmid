@@ -3,7 +3,7 @@
 #include "fruread.hpp"
 #include "ipmid.hpp"
 #include "types.hpp"
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <ipmid/api.h>
 #include <mapper.h>

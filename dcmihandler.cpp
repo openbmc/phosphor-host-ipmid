@@ -3,7 +3,7 @@
 #include "dcmihandler.hpp"
 
 #include "user_channel/channel_layer.hpp"
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <ipmid/api.h>
 

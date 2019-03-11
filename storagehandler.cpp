@@ -5,7 +5,7 @@
 #include "selutility.hpp"
 #include "sensorhandler.hpp"
 #include "storageaddsel.hpp"
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <arpa/inet.h>
 #include <ipmid/api.h>

@@ -5,7 +5,7 @@
 #include "ipmid.hpp"
 #include "settings.hpp"
 #include "types.hpp"
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <arpa/inet.h>
 #include <endian.h>

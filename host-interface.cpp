@@ -3,7 +3,7 @@
 #include "host-interface.hpp"
 
 #include "systemintfcmds.hpp"
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <functional>
 #include <ipmid-host/cmd-utils.hpp>

@@ -19,7 +19,7 @@
 
 #include <chrono>
 #include <phosphor-logging/log.hpp>
-#include <utils.hpp>
+#include <ipmid/utils.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 namespace phosphor
 {
