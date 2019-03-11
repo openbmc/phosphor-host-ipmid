@@ -18,8 +18,8 @@
 #include "softoff.hpp"
 
 #include <chrono>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
-#include <utils.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 namespace phosphor
 {

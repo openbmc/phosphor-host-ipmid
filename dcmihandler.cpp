@@ -3,13 +3,13 @@
 #include "dcmihandler.hpp"
 
 #include "user_channel/channel_layer.hpp"
-#include "utils.hpp"
 
 #include <ipmid/api.h>
 
 #include <bitset>
 #include <cmath>
 #include <fstream>
+#include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>

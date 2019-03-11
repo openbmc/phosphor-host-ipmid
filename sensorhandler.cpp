@@ -3,7 +3,6 @@
 #include "fruread.hpp"
 #include "ipmid.hpp"
 #include "types.hpp"
-#include "utils.hpp"
 
 #include <ipmid/api.h>
 #include <mapper.h>
@@ -12,6 +11,7 @@
 #include <bitset>
 #include <cmath>
 #include <cstring>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
