@@ -2,11 +2,11 @@
 #include <array>
 #include <ipmid/api.hpp>
 #include <ipmid/registration.hpp>
+#include <ipmid/utils.hpp>
 #include <ipmiwhitelist.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <settings.hpp>
-#include <utils.hpp>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
 
 using namespace phosphor::logging;

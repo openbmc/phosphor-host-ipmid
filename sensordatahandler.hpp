@@ -2,7 +2,7 @@
 
 #include "sensorhandler.hpp"
 #include "types.hpp"
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <ipmid/api.h>
 

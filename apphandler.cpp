@@ -6,7 +6,7 @@
 #include "sys_info_param.hpp"
 #include "transporthandler.hpp"
 #include "types.hpp"
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <arpa/inet.h>
 #include <ipmid/api.h>

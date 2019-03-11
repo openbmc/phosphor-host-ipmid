@@ -14,7 +14,8 @@ lib_LTLIBRARIES = libipmid.la
 libipmid_la_SOURCES = \
 	sdbus-asio.cpp \
 	signals.cpp \
-	systemintf-sdbus.cpp
+	systemintf-sdbus.cpp \
+	utils.cpp
 libipmid_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	-version-info 0:0:0 -shared

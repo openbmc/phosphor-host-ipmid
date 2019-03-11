@@ -1,6 +1,6 @@
 #include "globalhandler.hpp"
 
-#include "utils.hpp"
+#include <ipmid/utils.hpp>
 
 #include <ipmid/api.h>
 
