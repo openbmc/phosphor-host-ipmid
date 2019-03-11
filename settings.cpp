@@ -1,7 +1,6 @@
 #include "settings.hpp"
 
-#include "utils.hpp"
-
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>

@@ -1,6 +1,5 @@
 #pragma once
-#include "utils.hpp"
-
+#include <ipmid/utils.hpp>
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/State/Watchdog/server.hpp>
 

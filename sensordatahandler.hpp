@@ -2,11 +2,11 @@
 
 #include "sensorhandler.hpp"
 #include "types.hpp"
-#include "utils.hpp"
 
 #include <ipmid/api.h>
 
 #include <cmath>
+#include <ipmid/utils.hpp>
 #include <sdbusplus/message/types.hpp>
 
 namespace ipmi
