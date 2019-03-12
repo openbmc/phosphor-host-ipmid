@@ -3,7 +3,7 @@
 
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
 
-#include "types.hpp"
+#include <ipmid/types.hpp>
 using namespace ipmi::sensor;
 
 extern const InvObjectIDMap invSensors = {

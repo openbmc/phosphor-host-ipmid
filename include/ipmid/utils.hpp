@@ -1,7 +1,7 @@
 #pragma once
-#include "types.hpp"
 
 #include <chrono>
+#include <ipmid/types.hpp>
 #include <optional>
 #include <sdbusplus/server.hpp>
 

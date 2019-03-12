@@ -1,9 +1,8 @@
 #pragma once
 
-#include "types.hpp"
-
 #include <chrono>
 #include <cstdint>
+#include <ipmid/types.hpp>
 #include <sdbusplus/server.hpp>
 
 namespace ipmi
