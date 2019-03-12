@@ -2,11 +2,10 @@
 
 #include "selutility.hpp"
 
-#include "types.hpp"
-
 #include <ipmid/api.h>
 
 #include <chrono>
+#include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <vector>
