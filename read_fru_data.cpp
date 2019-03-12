@@ -1,11 +1,11 @@
 #include "read_fru_data.hpp"
 
 #include "fruread.hpp"
-#include "types.hpp"
 
 #include <ipmid/api.h>
 
 #include <algorithm>
+#include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>

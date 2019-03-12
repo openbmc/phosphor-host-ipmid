@@ -1,7 +1,6 @@
 #pragma once
 
-#include "types.hpp"
-
+#include <ipmid/types.hpp>
 #include <string>
 // IPMI commands for Transport net functions.
 enum ipmi_netfn_storage_cmds

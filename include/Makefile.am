@@ -11,6 +11,7 @@ nobase_include_HEADERS = \
 	ipmid/iana.hpp \
 	ipmid/oemopenbmc.hpp \
 	ipmid/oemrouter.hpp \
+	ipmid/types.hpp \
 	ipmid/utility.hpp \
 	ipmid/utils.hpp \
 	ipmid-host/cmd.hpp \

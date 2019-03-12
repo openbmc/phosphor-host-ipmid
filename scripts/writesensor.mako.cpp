@@ -24,9 +24,9 @@ interfaceDict = {}
 %>\
 % endfor
 
-#include "types.hpp"
 #include "sensordatahandler.hpp"
 
+#include <ipmid/types.hpp>
 using namespace ipmi::sensor;
 
 extern const IdInfoMap sensors = {
