@@ -4,8 +4,6 @@
 
 #include "ipmid.hpp"
 #include "settings.hpp"
-#include "types.hpp"
-#include <ipmid/utils.hpp>
 
 #include <arpa/inet.h>
 #include <endian.h>
@@ -19,6 +17,8 @@
 #include <cstring>
 #include <fstream>
 #include <future>
+#include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>

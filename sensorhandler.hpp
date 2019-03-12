@@ -1,9 +1,9 @@
 #pragma once
 
-#include "types.hpp"
-
 #include <ipmid/api.h>
 #include <stdint.h>
+
+#include <ipmid/types.hpp>
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds

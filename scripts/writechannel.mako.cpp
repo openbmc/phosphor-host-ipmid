@@ -2,7 +2,7 @@
 ## into the rendered file; feel free to edit this file.
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
 
-#include "types.hpp"
+#include <ipmid/types.hpp>
 
 namespace ipmi
 {

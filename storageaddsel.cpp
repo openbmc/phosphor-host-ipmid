@@ -2,7 +2,6 @@
 #include "error-HostEvent.hpp"
 #include "sensorhandler.hpp"
 #include "storagehandler.hpp"
-#include "types.hpp"
 
 #include <ipmid/api.h>
 #include <mapper.h>
@@ -13,6 +12,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <ipmid/types.hpp>
 #include <memory>
 #include <phosphor-logging/elog.hpp>
 #include <vector>

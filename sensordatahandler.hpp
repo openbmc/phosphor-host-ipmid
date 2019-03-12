@@ -1,12 +1,12 @@
 #pragma once
 
 #include "sensorhandler.hpp"
-#include "types.hpp"
-#include <ipmid/utils.hpp>
 
 #include <ipmid/api.h>
 
 #include <cmath>
+#include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <sdbusplus/message/types.hpp>
 
 namespace ipmi

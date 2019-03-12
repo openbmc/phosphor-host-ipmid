@@ -30,6 +30,7 @@
 #include <ipmid/message.hpp>
 #include <ipmid/oemrouter.hpp>
 #include <ipmid/registration.hpp>
+#include <ipmid/types.hpp>
 #include <map>
 #include <memory>
 #include <optional>
@@ -41,7 +42,6 @@
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/timer.hpp>
 #include <tuple>
-#include <types.hpp>
 #include <unordered_map>
 #include <utility>
 #include <vector>

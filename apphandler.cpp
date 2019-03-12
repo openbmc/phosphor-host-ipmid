@@ -5,8 +5,6 @@
 #include "ipmid.hpp"
 #include "sys_info_param.hpp"
 #include "transporthandler.hpp"
-#include "types.hpp"
-#include <ipmid/utils.hpp>
 
 #include <arpa/inet.h>
 #include <ipmid/api.h>
@@ -19,6 +17,8 @@
 #include <array>
 #include <cstddef>
 #include <fstream>
+#include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
