@@ -286,7 +286,7 @@ message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
 {
     // look up the group for this request
     Group group;
-    if (0 != request->unpack(group))
+    if (0 != request->payload.unpack(group))
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
@@ -306,7 +306,7 @@ message::Response::ptr executeIpmiOemCommand(message::Request::ptr request)
 {
     // look up the iana for this request
     Iana iana;
-    if (0 != request->unpack(iana))
+    if (0 != request->payload.unpack(iana))
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
