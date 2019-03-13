@@ -9,6 +9,8 @@ enum ipmi_netfn_storage_cmds
     // Get capability bits
     IPMI_CMD_SET_LAN = 0x01,
     IPMI_CMD_GET_LAN = 0x02,
+    IPMI_CMD_SET_SOL_CONF_PARAMS = 0x21,
+    IPMI_CMD_GET_SOL_CONF_PARAMS = 0x22,
 };
 
 // Command specific completion codes
@@ -137,3 +139,119 @@ void commitNetworkChanges();
  * @param[in] channel: channel number.
  */
 void applyChanges(int channel);
+
+enum class Parameter
+{
+    PROGRESS,       //!< Set In Progress.
+    ENABLE,         //!< SOL Enable.
+    AUTHENTICATION, //!< SOL Authentication.
+    ACCUMULATE,     //!< Character Accumulate Interval & Send Threshold.
+    RETRY,          //!< SOL Retry.
+    NVBITRATE,      //!< SOL non-volatile bit rate.
+    VBITRATE,       //!< SOL volatile bit rate.
+    CHANNEL,        //!< SOL payload channel.
+    PORT,           //!< SOL payload port.
+};
+
+enum class Privilege : uint8_t
+{
+    HIGHEST_MATCHING,
+    CALLBACK,
+    USER,
+    OPERATOR,
+    ADMIN,
+    OEM,
+};
+
+constexpr uint8_t progressMask = 0x03;
+constexpr uint8_t enableMask = 0x01;
+
+struct Auth
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t privilege : 4; //!< SOL privilege level.
+    uint8_t reserved : 2;  //!< Reserved.
+    uint8_t auth : 1;      //!< Force SOL payload Authentication.
+    uint8_t encrypt : 1;   //!< Force SOL payload encryption.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t encrypt : 1;   //!< Force SOL payload encryption.
+    uint8_t auth : 1;      //!< Force SOL payload Authentication.
+    uint8_t reserved : 2;  //!< Reserved.
+    uint8_t privilege : 4; //!< SOL privilege level.
+#endif
+} __attribute__((packed));
+
+struct Accumulate
+{
+    uint8_t interval;  //!< Character accumulate interval.
+    uint8_t threshold; //!< Character send threshold.
+} __attribute__((packed));
+
+struct Retry
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t count : 3;    //!< SOL retry count.
+    uint8_t reserved : 5; //!< Reserved.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved : 5; //!< Reserved.
+    uint8_t count : 3;    //!< SOL retry count.
+#endif
+
+    uint8_t interval; //!< SOL retry interval.
+} __attribute__((packed));
+
+struct SetConfParamsRequest
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t channelNumber : 4; //!< Channel number.
+    uint8_t reserved : 4;      //!< Reserved.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved : 4;      //!< Reserved.
+    uint8_t channelNumber : 4; //!< Channel number.
+#endif
+
+    uint8_t paramSelector; //!< Parameter selector.
+    union
+    {
+        uint8_t value;         //!< Represents one byte SOL parameters.
+        struct Accumulate acc; //!< Character accumulate values.
+        struct Retry retry;    //!< Retry values.
+        struct Auth auth;      //!< Authentication parameters.
+    };
+} __attribute__((packed));
+
+struct SetConfParamsResponse
+{
+    uint8_t completionCode; //!< Completion code.
+} __attribute__((packed));
+
+struct GetConfParamsRequest
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t channelNum : 4;  //!< Channel number.
+    uint8_t reserved : 3;    //!< Reserved.
+    uint8_t getParamRev : 1; //!< Get parameter or Get parameter revision
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t getParamRev : 1; //!< Get parameter or Get parameter revision
+    uint8_t reserved : 3;    //!< Reserved.
+    uint8_t channelNum : 4;  //!< Channel number.
+#endif
+
+    uint8_t paramSelector; //!< Parameter selector.
+    uint8_t setSelector;   //!< Set selector.
+    uint8_t blockSelector; //!< Block selector.
+} __attribute__((packed));
+
+struct GetConfParamsResponse
+{
+    uint8_t completionCode; //!< Completion code.
+    uint8_t paramRev;       //!< Parameter revision.
+} __attribute__((packed));
