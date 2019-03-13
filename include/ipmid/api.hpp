@@ -241,3 +241,23 @@ static inline void post_work(WorkFn work)
 {
     getIoContext()->post(std::forward<WorkFn>(work));
 }
+
+/**
+ * @brief add a signal handler
+ *
+ * This registers a handler to be called asynchronously via the execution
+ * queue when the specified signal is received.
+ *
+ * ORDER MATTERS. The order in which the registerSignalHandler calls are
+ * made is the order in which they are executed when the signal is called.
+ * To be a good citizen, do not call stop() on the execution loop; this
+ * is already done by the core when SIGINT and SIGTERM are received. Those
+ * registrations are called right before the queue execution run() is called
+ * to ensure that SIGINT and SIGTERM will, in the end, shut down the loop.
+ *
+ * @param int - signal number to wait for
+ * @param handler - the callback function to be executed
+ */
+void registerSignalHandler(
+    int signalNumber,
+    std::function<void(const boost::system::error_code&, int)> handler);
