@@ -63,9 +63,6 @@ namespace fs = std::filesystem;
 
 using namespace phosphor::logging;
 
-// Global timer for network changes
-std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
-
 // IPMI Spec, shared Reservation ID.
 static unsigned short selReservationID = 0xFFFF;
 static bool selReservationValid = false;
@@ -599,10 +596,19 @@ int main(int argc, char* argv[])
     //       until that is done, add the sd_event wrapper to the io object
     sdbusplus::asio::sd_event_wrapper sdEvents(*io);
 
+    // set up boost::asio signal handling
+    boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
+    signals.async_wait(
+        [io](const boost::system::error_code& error, int signalNumber) {
+            log<level::ERR>("Received signal; quitting",
+                            entry("SIGNAL=%d", signalNumber));
+            io->stop();
+        });
     cmdManager = std::make_unique<phosphor::host::command::Manager>(*sdbusp);
 
     // Register all command providers and filters
-    auto handles = ipmi::loadProviders(HOST_IPMI_LIB_PATH);
+    std::forward_list<ipmi::IpmiProvider> providers =
+        ipmi::loadProviders(HOST_IPMI_LIB_PATH);
 
     // Add bindings for inbound IPMI requests
     auto server = sdbusplus::asio::object_server(sdbusp);
@@ -621,7 +627,13 @@ int main(int argc, char* argv[])
 
     io->run();
 
-    // This avoids a warning about unused variables
-    handles.clear();
+    // destroy all the IPMI handlers so the providers can unload safely
+    ipmi::handlerMap.clear();
+    ipmi::groupHandlerMap.clear();
+    ipmi::oemHandlerMap.clear();
+    ipmi::filterList.clear();
+    // unload the provider libraries
+    providers.clear();
+
     return 0;
 }
