@@ -37,7 +37,8 @@ namespace filesystem = std::experimental::filesystem;
 #error filesystem not available
 #endif
 
-extern std::unique_ptr<phosphor::Timer> networkTimer;
+// timer for network changes
+std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 
 const int SIZE_MAC = 18; // xx:xx:xx:xx:xx:xx
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";

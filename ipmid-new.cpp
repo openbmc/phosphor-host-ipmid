@@ -63,9 +63,6 @@ namespace fs = std::filesystem;
 
 using namespace phosphor::logging;
 
-// Global timer for network changes
-std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
-
 // IPMI Spec, shared Reservation ID.
 static unsigned short selReservationID = 0xFFFF;
 static bool selReservationValid = false;
@@ -560,7 +557,7 @@ using CommandHandler = phosphor::host::command::CommandHandler;
 std::unique_ptr<phosphor::host::command::Manager> cmdManager;
 void ipmid_send_cmd_to_host(CommandHandler&& cmd)
 {
-    return cmdManager->execute(std::move(cmd));
+    return cmdManager->execute(std::forward<CommandHandler>(cmd));
 }
 
 std::unique_ptr<phosphor::host::command::Manager>& ipmid_get_host_cmd_manager()
@@ -619,9 +616,26 @@ int main(int argc, char* argv[])
                                                   handleLegacyIpmiCommand);
 #endif /* ALLOW_DEPRECATED_API */
 
+    // set up boost::asio signal handling
+    std::function<SignalResponse(int)> stopAsioRunLoop =
+        [io](int signalNumber) {
+            log<level::INFO>("Received signal; quitting",
+                             entry("SIGNAL=%d", signalNumber));
+            io->stop();
+            return SignalResponse::breakExecution;
+        };
+    registerSignalHandler(ipmi::prioOpenBmcBase, SIGINT, stopAsioRunLoop);
+    registerSignalHandler(ipmi::prioOpenBmcBase, SIGTERM, stopAsioRunLoop);
+
     io->run();
 
-    // This avoids a warning about unused variables
+    // destroy all the IPMI handlers so the providers can unload safely
+    ipmi::handlerMap.clear();
+    ipmi::groupHandlerMap.clear();
+    ipmi::oemHandlerMap.clear();
+    ipmi::filterList.clear();
+    // unload the provider libraries
     handles.clear();
+
     return 0;
 }
