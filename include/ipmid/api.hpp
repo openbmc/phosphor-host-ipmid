@@ -276,3 +276,30 @@ enum class SignalResponse : int
  */
 void registerSignalHandler(int priority, int signalNumber,
                            const std::function<SignalResponse(int)>& handler);
+
+namespace session
+{
+
+// Session Related macros
+constexpr auto sessionManagerRoot = "/xyz/openbmc_project/Ipmi/SessionInfo";
+constexpr auto sessionIntf = "xyz.openbmc_project.Ipmi.SessionInfo";
+constexpr auto sessionService = "xyz.openbmc_project.netipmid";
+constexpr uint8_t searchCurrentSession = 0x00;
+constexpr uint8_t searchSessionByHandle = 0xFE;
+constexpr uint8_t searchSessionByID = 0xFF;
+constexpr uint8_t ipmi20VerSession = 0x80;
+constexpr size_t maxSessionCount = 15;
+constexpr size_t sessionZero = 0;
+constexpr size_t maxSessionlessCount = 1;
+constexpr uint8_t invalidSessionID = 0;
+constexpr uint8_t macAddrLen = 6;
+
+enum class SessionState
+{
+    inActive,           // Session is not in use
+    setupInProgress,    // Session Setup Sequence is progressing
+    active,             // Session is active
+    tearDownInProgress, // When Closing Session
+};
+
+} // namespace session
