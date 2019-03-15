@@ -1,9 +1,15 @@
 #pragma once
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include <boost/asio/ip/udp.hpp>
 #include <memory>
+#include <optional>
+#include <phosphor-logging/log.hpp>
 #include <string>
 #include <tuple>
+#include <variant>
 #include <vector>
 
 namespace udpsocket
@@ -48,7 +54,27 @@ class Channel
      */
     std::string getRemoteAddress() const
     {
-        return endpoint.address().to_string();
+        const char* retval = nullptr;
+        if (sockAddrSize == sizeof(sockaddr_in))
+        {
+            char ipv4addr[INET_ADDRSTRLEN];
+            retval =
+                inet_ntop(AF_INET, &remoteSockAddr, ipv4addr, sizeof(ipv4addr));
+        }
+        else if (sockAddrSize == sizeof(sockaddr_in6))
+        {
+            char ipv6addr[INET6_ADDRSTRLEN];
+            retval = inet_ntop(AF_INET6, &remoteSockAddr, ipv6addr,
+                               sizeof(ipv6addr));
+        }
+        if (retval)
+        {
+            return retval;
+        }
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error in inet_ntop",
+            phosphor::logging::entry("ERROR=%s", strerror(errno)));
+        return std::string();
     }
 
     /**
@@ -59,9 +85,19 @@ class Channel
      * @return Port number
      *
      */
-    auto getPort() const
+    uint16_t getPort() const
     {
-        return endpoint.port();
+        if (sockAddrSize == sizeof(sockaddr_in))
+        {
+            return ntohs(reinterpret_cast<const sockaddr_in*>(&remoteSockAddr)
+                             ->sin_port);
+        }
+        if (sockAddrSize == sizeof(sockaddr_in6))
+        {
+            return ntohs(reinterpret_cast<const sockaddr_in6*>(&remoteSockAddr)
+                             ->sin6_port);
+        }
+        return 0;
     }
 
     /**
@@ -77,14 +113,43 @@ class Channel
      */
     std::tuple<int, std::vector<uint8_t>> read()
     {
+        // cannot use the standard asio reading mechanism because it does not
+        // provide a mechanism to reach down into the depths and use a msghdr
         std::vector<uint8_t> packet(socket->available());
-        try
+        iovec iov = {packet.data(), packet.size()};
+        char msgCtrl[1024];
+        msghdr msg = {&remoteSockAddr, sizeof(remoteSockAddr), &iov, 1,
+                      msgCtrl,         sizeof(msgCtrl),        0};
+
+        ssize_t bytesReceived = recvmsg(socket->native_handle(), &msg, 0);
+        // Read of the packet failed
+        if (bytesReceived < 0)
         {
-            socket->receive_from(boost::asio::buffer(packet), endpoint);
+            // something bad happened; bail
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Error in recvmsg",
+                phosphor::logging::entry("ERROR=%s", strerror(errno)));
+            return std::make_tuple(-errno, std::vector<uint8_t>());
         }
-        catch (const boost::system::system_error& e)
+        // save the size of either ipv4 or i4v6 sockaddr
+        sockAddrSize = msg.msg_namelen;
+
+        // extract the destination address from the message
+        cmsghdr* cmsg;
+        for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != 0;
+             cmsg = CMSG_NXTHDR(&msg, cmsg))
         {
-            return std::make_tuple(e.code().value(), std::vector<uint8_t>());
+            if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == IP_PKTINFO)
+            {
+                // save local address from the pktinfo4
+                pktinfo4 = *reinterpret_cast<in_pktinfo*>(CMSG_DATA(cmsg));
+            }
+            if (cmsg->cmsg_level == IPPROTO_IPV6 &&
+                cmsg->cmsg_type == IPV6_PKTINFO)
+            {
+                // save local address from the pktinfo6
+                pktinfo6 = *reinterpret_cast<in6_pktinfo*>(CMSG_DATA(cmsg));
+            }
         }
         return std::make_tuple(0, packet);
     }
@@ -97,20 +162,45 @@ class Channel
      *  @param [in] inBuffer
      *      The vector would be the buffer of data to write to the socket.
      *
-     *  @return In case of success the return code is 0 and return code is
-     *          < 0 in case of failure.
+     *  @return In case of success the return code is the number of bytes
+     *          written and return code is < 0 in case of failure.
      */
     int write(const std::vector<uint8_t>& inBuffer)
     {
-        try
+        // in order to make sure packets go back out from the same
+        // IP address they came in on, sendmsg must be used instead
+        // of the boost::asio::ip::send or sendto
+        iovec iov = {const_cast<uint8_t*>(inBuffer.data()), inBuffer.size()};
+        char msgCtrl[1024];
+        msghdr msg = {&remoteSockAddr, sockAddrSize,    &iov, 1,
+                      msgCtrl,         sizeof(msgCtrl), 0};
+        int cmsg_space = 0;
+        cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
+        if (pktinfo6)
         {
-            socket->send_to(boost::asio::buffer(inBuffer), endpoint);
+            cmsg->cmsg_level = IPPROTO_IPV6;
+            cmsg->cmsg_type = IPV6_PKTINFO;
+            cmsg->cmsg_len = CMSG_LEN(sizeof(in6_pktinfo));
+            *reinterpret_cast<in6_pktinfo*>(CMSG_DATA(cmsg)) = *pktinfo6;
+            cmsg_space += CMSG_SPACE(sizeof(in6_pktinfo));
         }
-        catch (const boost::system::system_error& e)
+        else if (pktinfo4)
         {
-            return e.code().value();
+            cmsg->cmsg_level = IPPROTO_IP;
+            cmsg->cmsg_type = IP_PKTINFO;
+            cmsg->cmsg_len = CMSG_LEN(sizeof(in_pktinfo));
+            *reinterpret_cast<in_pktinfo*>(CMSG_DATA(cmsg)) = *pktinfo4;
+            cmsg_space += CMSG_SPACE(sizeof(in_pktinfo));
         }
-        return 0;
+        msg.msg_controllen = cmsg_space;
+        int ret = sendmsg(socket->native_handle(), &msg, 0);
+        if (ret < 0)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Error in sendmsg",
+                phosphor::logging::entry("ERROR=%s", strerror(errno)));
+        }
+        return ret;
     }
 
     /**
@@ -123,7 +213,10 @@ class Channel
 
   private:
     std::shared_ptr<boost::asio::ip::udp::socket> socket;
-    boost::asio::ip::udp::endpoint endpoint{};
+    sockaddr_storage remoteSockAddr;
+    socklen_t sockAddrSize;
+    std::optional<in_pktinfo> pktinfo4;
+    std::optional<in6_pktinfo> pktinfo6;
 };
 
 } // namespace udpsocket

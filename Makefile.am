@@ -81,5 +81,11 @@ netipmid_CXXFLAGS = \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
 	$(LIBIPMID_CFLAGS)
 
+if HAVE_SYSTEMD
+SYSTEMD_UNIT = phosphor-ipmi-net@.service
+SYSTEMD_SOCKET = phosphor-ipmi-net@.socket
+systemdsystemunit_DATA = $(SYSTEMD_UNIT) $(SYSTEMD_SOCKET)
+endif  # HAVE_SYSTEMD
+
 SUBDIRS = test
 

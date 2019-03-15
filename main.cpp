@@ -16,6 +16,7 @@
 #include <systemd/sd-event.h>
 #include <unistd.h>
 
+#include <CLI/CLI.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <tuple>
@@ -58,8 +59,17 @@ EInterfaceIndex getInterfaceIndex(void)
     return interfaceLAN1;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    CLI::App app("KCS RMCP+ bridge");
+    std::string channel;
+    app.add_option("-c,--channel", channel, "channel name. e.g., eth0");
+    uint16_t port = ipmi::rmcpp::defaultPort;
+    app.add_option("-p,--port", port, "port number");
+    bool verbose = false;
+    app.add_option("-v,--verbose", verbose, "print more verbose output");
+    CLI11_PARSE(app, argc, argv);
+
     // Connect to system bus
     auto rc = sd_bus_default_system(&bus);
     if (rc < 0)
@@ -81,6 +91,12 @@ int main()
     // Register the phosphor-net-ipmid SOL commands
     sol::command::registerCommands();
 
+    auto& loop = std::get<eventloop::EventLoop&>(singletonPool);
+    if (loop.setupSocket(sdbusp, channel))
+    {
+        return EXIT_FAILURE;
+    }
+
     // Start Event Loop
-    return std::get<eventloop::EventLoop&>(singletonPool).startEventLoop();
+    return loop.startEventLoop();
 }

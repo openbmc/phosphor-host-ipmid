@@ -64,7 +64,8 @@ void Table::executeCommand(uint32_t inCommand,
             std::get<session::Manager&>(singletonPool)
                 .getSession(handler->sessionID);
         std::map<std::string, ipmi::Value> options = {
-            {"userId", ipmi::Value(ipmi::ipmiUserGetUserId(session->userName))},
+            {"userId", ipmi::Value(static_cast<int>(
+                           ipmi::ipmiUserGetUserId(session->userName)))},
             {"privilege", ipmi::Value(static_cast<int>(session->curPrivLevel))},
         };
         bus->async_method_call(
