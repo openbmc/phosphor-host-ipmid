@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <fstream>
+#include <iostream>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
@@ -41,6 +42,9 @@ extern std::unique_ptr<phosphor::Timer> networkTimer;
 
 const int SIZE_MAC = 18; // xx:xx:xx:xx:xx:xx
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
+
+constexpr const char* solInterface = "xyz.openbmc_project.Network.SOL";
+constexpr const char* solPath = "/xyz/openbmc_project/network/host0/sol";
 
 std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
 
@@ -977,6 +981,161 @@ void createNetworkTimer()
     }
 }
 
+static bool setSOLParameter(std::string property, ipmi::Value value)
+{
+    sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
+    static std::string solService{};
+    if (solService.empty())
+    {
+        try
+        {
+            solService = ipmi::getService(dbus, solInterface, solPath);
+        }
+        catch (const sdbusplus::exception::SdBusError& e)
+        {
+            solService.clear();
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Error: get SOL service failed");
+            return false;
+        }
+    }
+    try
+    {
+        ipmi::setDbusProperty(dbus, solService, solPath, solInterface, property,
+                              value);
+    }
+    catch (sdbusplus::exception_t&)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error setting sol parameter");
+        return false;
+    }
+
+    return true;
+}
+
+ipmi_ret_t setConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                         ipmi_request_t request, ipmi_response_t response,
+                         ipmi_data_len_t dataLen, ipmi_context_t context)
+{
+    auto reqData = reinterpret_cast<const SetConfParamsRequest*>(request);
+
+    // Check request length first
+    switch (static_cast<sol::Parameter>(reqData->paramSelector))
+    {
+        case sol::Parameter::progress:
+        case sol::Parameter::enable:
+        case sol::Parameter::authentication:
+        {
+            if (*dataLen != sizeof(SetConfParamsRequest) - 1)
+            {
+                *dataLen = 0;
+                return IPMI_CC_REQ_DATA_LEN_INVALID;
+            }
+            break;
+        }
+        case sol::Parameter::accumulate:
+        case sol::Parameter::retry:
+        {
+            if (*dataLen != sizeof(SetConfParamsRequest))
+            {
+                *dataLen = 0;
+                return IPMI_CC_REQ_DATA_LEN_INVALID;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    *dataLen = 0;
+
+    switch (static_cast<sol::Parameter>(reqData->paramSelector))
+    {
+        case sol::Parameter::progress:
+        {
+            uint8_t progress = reqData->value & progressMask;
+            if (!setSOLParameter("Progress", ipmi::Value(progress)))
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            break;
+        }
+        case sol::Parameter::enable:
+        {
+            bool enable = reqData->value & enableMask;
+            if (!setSOLParameter("Enable", ipmi::Value(enable)))
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            break;
+        }
+        case sol::Parameter::authentication:
+        {
+            if (reqData->auth.auth || !reqData->auth.encrypt)
+            {
+                return IPMI_CC_SYSTEM_INFO_PARAMETER_SET_READ_ONLY;
+            }
+            else if (reqData->auth.privilege <
+                         static_cast<uint8_t>(sol::Privilege::userPriv) ||
+                     reqData->auth.privilege >
+                         static_cast<uint8_t>(sol::Privilege::oemPriv))
+            {
+                return IPMI_CC_INVALID_FIELD_REQUEST;
+            }
+            if (!setSOLParameter("Authentication",
+                                 ipmi::Value(reqData->auth.privilege)))
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            break;
+        }
+        case sol::Parameter::accumulate:
+        {
+            if (reqData->acc.threshold == 0)
+            {
+                return IPMI_CC_INVALID_FIELD_REQUEST;
+            }
+            if (!setSOLParameter("Accumulate",
+                                 ipmi::Value(reqData->acc.interval)))
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            if (!setSOLParameter("Threshold",
+                                 ipmi::Value(reqData->acc.threshold)))
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            break;
+        }
+        case sol::Parameter::retry:
+        {
+            if (!setSOLParameter("RetryCount",
+                                 ipmi::Value(reqData->retry.count)))
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            if (!setSOLParameter("RetryInterval",
+                                 ipmi::Value(reqData->retry.interval)))
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            break;
+        }
+        case sol::Parameter::port:
+        {
+            return IPMI_CC_SYSTEM_INFO_PARAMETER_SET_READ_ONLY;
+        }
+        case sol::Parameter::nvbitrate:
+        case sol::Parameter::vbitrate:
+        case sol::Parameter::channel:
+        default:
+            return IPMI_CC_PARM_NOT_SUPPORTED;
+    }
+
+    return IPMI_CC_OK;
+}
+
 void register_netfn_transport_functions()
 {
     // As this timer is only for transport handler
@@ -993,6 +1152,9 @@ void register_netfn_transport_functions()
     // <Get LAN Configuration Parameters>
     ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_GET_LAN, NULL,
                            ipmi_transport_get_lan, PRIVILEGE_OPERATOR);
+
+    ipmi_register_callback(NETFUN_TRANSPORT, IPMI_CMD_SET_SOL_CONF_PARAMS, NULL,
+                           setConfParams, PRIVILEGE_ADMIN);
 
     return;
 }
