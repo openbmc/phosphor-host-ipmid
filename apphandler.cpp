@@ -17,6 +17,7 @@
 #include <array>
 #include <cstddef>
 #include <fstream>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <memory>
@@ -61,6 +62,42 @@ static constexpr auto versionIntf = "xyz.openbmc_project.Software.Version";
 static constexpr auto activationIntf =
     "xyz.openbmc_project.Software.Activation";
 static constexpr auto softwareRoot = "/xyz/openbmc_project/software";
+
+struct SessionInfoResponse
+{
+    uint8_t sessionHandle;
+    uint8_t totalSessionCount;
+    uint8_t activeSessioncount;
+    uint8_t userID;
+    uint8_t privLevel;
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t chanNum : 4;
+    uint8_t ipmiVer : 4;
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t ipmiVer : 4;
+    uint8_t chanNum : 4;
+#endif
+    uint32_t remoteIpAddr; // for channel private data
+    uint8_t remoteMACAddr[6];
+    uint16_t remotePort;
+} __attribute__((packed));
+
+struct SessionInfoRequest
+{
+    uint8_t sessionIndex;
+    union
+    {
+        uint8_t sessionHandle;
+        uint32_t sessionID;
+    };
+} __attribute__((packed));
+
+struct CloseSessionRequest
+{
+    uint32_t sessionID;
+    uint8_t sessionHandle;
+} __attribute__((packed));
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -906,6 +943,218 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+ipmi_ret_t ipmi_app_close_session(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                  ipmi_request_t request,
+                                  ipmi_response_t response,
+                                  ipmi_data_len_t data_len,
+                                  ipmi_context_t context)
+{
+    uint8_t sessionHandle = 0;
+    *data_len = 0;
+    auto* req = reinterpret_cast<CloseSessionRequest*>(request);
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto objValueTree = ipmi::getManagedObjects(
+        bus, "xyz.openbmc_project.netipmid", session::SESSION_MANAGER_ROOT);
+    for (const auto& objIter : objValueTree)
+    {
+        try
+        {
+            auto& intfMap = objIter.second;
+            auto& obj = objIter.first;
+            auto& sessionProps = intfMap.at(session::sessionIntf);
+            if (req->sessionID == 0)
+            {
+                sessionHandle =
+                    variant_ns::get<uint8_t>(sessionProps.at("SessionHandle"));
+                if (req->sessionHandle == sessionHandle &&
+                    req->sessionHandle != 0)
+                {
+                    // set the Object  state = Tear off state
+                    ipmi::setDbusProperty(
+                        bus, "xyz.openbmc_project.netipmid", obj.str,
+                        session::sessionIntf, "State",
+                        static_cast<uint8_t>(
+                            session::SessionState::TEAR_DOWN_IN_PROGRESS));
+                    return IPMI_CC_OK;
+                }
+            }
+            else
+            {
+                // extract the session id from object
+                std::stringstream sstream;
+                sstream << std::hex << req->sessionID;
+                std::string reqsessionIDStr = sstream.str();
+                std::size_t ptr = obj.str.rfind("/");
+                std::string sessionIDstr = obj.str.substr(ptr + 1);
+                if (sessionIDstr == reqsessionIDStr)
+                {
+                    // set the Dbus value of state
+                    ipmi::setDbusProperty(
+                        bus, "xyz.openbmc_project.netipmid", obj.str,
+                        session::sessionIntf, "State",
+                        static_cast<uint8_t>(
+                            session::SessionState::TEAR_DOWN_IN_PROGRESS));
+                    return IPMI_CC_OK;
+                }
+            }
+        }
+        catch (const std::exception& e)
+        {
+            log<level::ERR>(e.what());
+        }
+    }
+
+    // No session handle exist, returning Invalid field in request.
+    return IPMI_CC_INVALID_FIELD_REQUEST;
+}
+
+ipmi_ret_t ipmi_app_get_session_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                     ipmi_request_t request,
+                                     ipmi_response_t response,
+                                     ipmi_data_len_t data_len,
+                                     ipmi_context_t context)
+{
+    SessionInfoResponse resp = {};
+    auto* req = reinterpret_cast<SessionInfoRequest*>(request);
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto objValueTree = ipmi::getManagedObjects(
+        bus, "xyz.openbmc_project.netipmid", session::SESSION_MANAGER_ROOT);
+    resp.totalSessionCount = session::MAX_SESSION_COUNT;
+    resp.ipmiVer = session::ipmi20VerSession;
+
+    switch (req->sessionIndex)
+    {
+        case session::searchSessionByHandle:
+
+            if (req->sessionHandle >= session::MAX_SESSION_COUNT)
+            {
+                *data_len = 0;
+                return IPMI_CC_INVALID_FIELD_REQUEST;
+            }
+
+            req->sessionIndex = req->sessionHandle;
+            break;
+
+            // Searching the requested session Info based on session ID
+        case session::searchSessionByID:
+            if (*data_len != sizeof(SessionInfoRequest))
+            {
+                *data_len = 0;
+                return IPMI_CC_REQ_DATA_LEN_INVALID;
+            }
+
+            try
+            {
+                std::stringstream sstream;
+                sstream << std::hex << req->sessionID;
+                std::string reqsessionIDStr = sstream.str();
+                auto objPath = std::string(session::SESSION_MANAGER_ROOT) +
+                               "/" + reqsessionIDStr;
+                // Read the session properties
+                auto sessionProps = ipmi::getAllDbusProperties(
+                    bus, session::service, objPath, session::sessionIntf);
+                if ((variant_ns::get<uint8_t>(sessionProps.at("State"))) ==
+                    (static_cast<uint8_t>(session::SessionState::ACTIVE)))
+                {
+                    resp.chanNum =
+                        variant_ns::get<uint8_t>(sessionProps["ChannelNum"]);
+                    resp.userID =
+                        variant_ns::get<uint8_t>(sessionProps["UserID"]);
+                    resp.remotePort =
+                        variant_ns::get<uint16_t>(sessionProps["RemotePort"]);
+                    resp.privLevel = variant_ns::get<uint8_t>(
+                        sessionProps["CurrentPrivilege"]);
+                    resp.sessionHandle =
+                        variant_ns::get<uint8_t>(sessionProps["SessionHandle"]);
+                    *data_len = sizeof(resp);
+                    std::memcpy(response, &resp, sizeof(resp));
+                    return IPMI_CC_OK;
+                }
+            }
+            catch (std::exception& e)
+            {
+                *data_len = 0;
+                return IPMI_CC_INVALID_FIELD_REQUEST;
+            }
+            break;
+        default:
+            if (*data_len != sizeof(req->sessionIndex))
+            {
+                *data_len = 0;
+                return IPMI_CC_REQ_DATA_LEN_INVALID;
+            }
+            // We should not support the current session in host
+            // interface
+            if (req->sessionIndex == 0 ||
+                req->sessionIndex >= session::MAX_SESSION_COUNT)
+            {
+                *data_len = 0;
+                return IPMI_CC_INVALID_FIELD_REQUEST;
+            }
+    }
+    *data_len = 0;
+    // Calculating the active session in LAN RMCP+
+
+    for (const auto& objIter : objValueTree)
+    {
+        try
+        {
+            auto& intfMap = objIter.second;
+            auto& sessionProps = intfMap.at(session::sessionIntf);
+            if ((variant_ns::get<uint8_t>(sessionProps.at("State")) ==
+                 (static_cast<uint8_t>(session::SessionState::ACTIVE))))
+            {
+                resp.activeSessioncount++;
+            }
+        }
+
+        catch (const std::exception& e)
+        {
+            log<level::ERR>(e.what());
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+
+    // Getting the session info based on session handle / session index
+    for (const auto& objIter : objValueTree)
+    {
+        try
+        {
+            auto& intfMap = objIter.second;
+            auto& sessionProps = intfMap.at(session::sessionIntf);
+
+            resp.sessionHandle =
+                variant_ns::get<uint8_t>(sessionProps.at("SessionHandle"));
+            if ((req->sessionIndex == resp.sessionHandle) &&
+                (variant_ns::get<uint8_t>(sessionProps.at("State")) ==
+                 (static_cast<uint8_t>(session::SessionState::ACTIVE))))
+            {
+                resp.chanNum =
+                    variant_ns::get<uint8_t>(sessionProps.at("ChannelNum"));
+                resp.userID =
+                    variant_ns::get<uint8_t>(sessionProps.at("UserID"));
+                resp.remotePort =
+                    variant_ns::get<uint16_t>(sessionProps.at("RemotePort"));
+                resp.privLevel = variant_ns::get<uint8_t>(
+                    sessionProps.at("CurrentPrivilege"));
+                *data_len = sizeof(resp);
+                std::memcpy(response, &resp, sizeof(resp));
+                return IPMI_CC_OK;
+            }
+        }
+        catch (const std::exception& e)
+        {
+            log<level::ERR>(e.what());
+            return IPMI_CC_UNSPECIFIED_ERROR;
+        }
+    }
+    resp.sessionHandle = 0;
+    std::memcpy(response, &resp, sizeof(resp));
+    *data_len = sizeof(resp.sessionHandle) + sizeof(resp.totalSessionCount) +
+                sizeof(resp.activeSessioncount);
+    return IPMI_CC_OK;
+}
+
 static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
 static std::string sysInfoReadSystemName()
@@ -1138,6 +1387,12 @@ void register_netfn_app_functions()
     // <Get System GUID Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL,
                            ipmi_app_get_sys_guid, PRIVILEGE_USER);
+
+    // <Session commands>
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_CLOSE_SESSION, NULL,
+                           ipmi_app_close_session, PRIVILEGE_USER);
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SESSIONINFO, NULL,
+                           ipmi_app_get_session_info, PRIVILEGE_USER);
 
     // <Get Channel Cipher Suites Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
