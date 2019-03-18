@@ -11,6 +11,7 @@ nobase_include_HEADERS = \
 	ipmid/iana.hpp \
 	ipmid/oemopenbmc.hpp \
 	ipmid/oemrouter.hpp \
+	ipmid/utility.hpp \
 	ipmid-host/cmd.hpp \
 	ipmid-host/cmd-utils.hpp
 
@@ -20,6 +21,7 @@ install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(includedir)/host-ipmid
 	$(LN_S) -f ../ipmid/iana.hpp $(DESTDIR)$(includedir)/host-ipmid/iana.hpp
 	$(LN_S) -f ../ipmid/api.h $(DESTDIR)$(includedir)/host-ipmid/ipmid-api.h
+	$(LN_S) -f ../ipmid/api.hpp $(DESTDIR)$(includedir)/host-ipmid/ipmid-api.hpp
 	$(LN_S) -f ../ipmid/oemopenbmc.hpp $(DESTDIR)$(includedir)/host-ipmid/oemopenbmc.hpp
 	$(LN_S) -f ../ipmid/oemrouter.hpp $(DESTDIR)$(includedir)/host-ipmid/oemrouter.hpp
 	$(LN_S) -f ../ipmid-host/cmd.hpp $(DESTDIR)$(includedir)/host-ipmid/ipmid-host-cmd.hpp
