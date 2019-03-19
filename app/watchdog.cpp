@@ -83,6 +83,12 @@ static constexpr uint8_t wd_dont_stop = 0x1 << 6;
 static constexpr uint8_t wd_timeout_action_mask = 0x3;
 
 static constexpr uint8_t wdTimerUseMask = 0x7;
+static constexpr uint8_t wdTimerUseResTimer1 = 0x0;
+static constexpr uint8_t wdTimerUseResTimer2 = 0x6;
+static constexpr uint8_t wdTimerUseResTimer3 = 0x7;
+static constexpr uint8_t wdTimerUseRes = 0x38;
+static constexpr uint8_t wdTimerActionMask = 0xcc;
+static constexpr uint8_t wdTimerUseExpMask = 0xc1;
 
 enum class IpmiAction : uint8_t
 {
@@ -196,6 +202,21 @@ ipmi_ret_t ipmi_app_watchdog_set(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     memcpy(&req, request, sizeof(req));
     req.initial_countdown = le16toh(req.initial_countdown);
     *data_len = 0;
+
+    if (((req.timer_use & wdTimerUseMask) == wdTimerUseResTimer1) ||
+        ((req.timer_use & wdTimerUseMask) == wdTimerUseResTimer2) ||
+        ((req.timer_use & wdTimerUseMask) == wdTimerUseResTimer3) ||
+        (req.timer_use & wdTimerUseRes) ||
+        (req.timer_action & wdTimerActionMask) ||
+        (req.expire_flags & wdTimerUseExpMask))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    if (req.pretimeout >= (req.initial_countdown / 10))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
 
     try
     {
