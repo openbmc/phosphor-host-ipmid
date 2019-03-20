@@ -599,7 +599,8 @@ int main(int argc, char* argv[])
     cmdManager = std::make_unique<phosphor::host::command::Manager>(*sdbusp);
 
     // Register all command providers and filters
-    auto handles = ipmi::loadProviders(HOST_IPMI_LIB_PATH);
+    std::forward_list<ipmi::IpmiProvider> providers =
+        ipmi::loadProviders(HOST_IPMI_LIB_PATH);
 
     // Add bindings for inbound IPMI requests
     auto server = sdbusplus::asio::object_server(sdbusp);
@@ -635,7 +636,7 @@ int main(int argc, char* argv[])
     ipmi::oemHandlerMap.clear();
     ipmi::filterList.clear();
     // unload the provider libraries
-    handles.clear();
+    providers.clear();
 
     return 0;
 }
