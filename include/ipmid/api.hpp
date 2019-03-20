@@ -241,3 +241,38 @@ static inline void post_work(WorkFn work)
 {
     getIoContext()->post(std::forward<WorkFn>(work));
 }
+
+enum class SignalResponse : int
+{
+    breakExecution,
+    continueExecution,
+};
+
+/**
+ * @brief add a signal handler
+ *
+ * This registers a handler to be called asynchronously via the execution
+ * queue when the specified signal is received.
+ *
+ * Priority allows a signal handler to specify what order in the handler
+ * chain it gets called. Lower priority numbers will cause the handler to
+ * be executed later in the chain, while the highest priority numbers will cause
+ * the handler to be executed first.
+ *
+ * In order to facilitate a chain of handlers, each handler in the chain will be
+ * able to return breakExecution or continueExecution. Returning breakExecution
+ * will break the chain and no further handlers will execute for that signal.
+ * Returning continueExecution will allow lower-priority handlers to execute.
+ *
+ * By default, the main asio execution loop will register a low priority
+ * (prioOpenBmcBase) handler for SIGINT and SIGTERM to cause the process to stop
+ * on either of those signals. To prevent one of those signals from causing the
+ * process to stop, simply register a higher priority handler that returns
+ * breakExecution.
+ *
+ * @param int - priority of handler
+ * @param int - signal number to wait for
+ * @param handler - the callback function to be executed
+ */
+void registerSignalHandler(int priority, int signalNumber,
+                           const std::function<SignalResponse(int)>& handler);
