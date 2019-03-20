@@ -185,6 +185,62 @@ struct SetUserPasswordReq
     uint8_t userPassword[maxIpmi20PasswordSize];
 } __attribute__((packed));
 
+struct GetChannelAuthenticationReq
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t channelNumber : 4;
+    uint8_t reserved1 : 3;
+    uint8_t extData : 1;
+    uint8_t privLevel : 4;
+    uint8_t reserved2 : 4;
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t extData : 1;
+    uint8_t reserved1 : 3;
+    uint8_t channelNumber : 4;
+    uint8_t reserved2 : 4;
+    uint8_t privLevel : 4;
+#endif
+} __attribute__((packed));
+
+struct GetChannelAuthenticationResp
+{
+
+    uint8_t channelNumber;
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t privLevel : 6;
+    uint8_t reserved1 : 1;
+    uint8_t ipmiVersion : 1;
+    uint8_t anonymousLogin : 1;
+    uint8_t nullUsers : 1;    // null user names enabled/disabled
+    uint8_t nonNullUsers : 1; // non_null usernames enabled/disabled
+    uint8_t userAuth : 1;
+    uint8_t perMessageAuth : 1;
+    uint8_t KGStatus : 1;
+    uint8_t reserved2 : 2;
+    uint8_t extCapabilities : 2; // Channel support for IPMI V2.0 connections
+    uint8_t reserved3 : 6;
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t ipmiVersion : 1;
+    uint8_t reserved1 : 1;
+    uint8_t privLevel : 6;
+    uint8_t reserved2 : 2;
+    uint8_t KGStatus : 1;
+    uint8_t perMessageAuth : 1;
+    uint8_t userAuth : 1;
+    uint8_t nonNullUsers : 1; // non_null usernames enabled/disabled
+    uint8_t nullUsers : 1;    // null user names enabled/disabled
+    uint8_t anonymousLogin : 1;
+    uint8_t reserved3 : 6;
+    uint8_t extCapabilities : 2; // Channel support for IPMI V2.0 connections
+#endif
+    uint8_t oemID[3];
+    uint8_t oemAuxillary;
+
+} __attribute__((packed));
+
 ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                              ipmi_request_t request, ipmi_response_t response,
                              ipmi_data_len_t dataLen, ipmi_context_t context)
@@ -506,6 +562,68 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_INVALID_FIELD_REQUEST;
 }
 
+/** @brief implementes the get channel authentication command
+ *  @param[in] netfn - specifies netfn.
+ *  @param[in] cmd   - specifies cmd number.
+ *  @param[in] request - pointer to request data.
+ *  @param[in, out] dataLen - specifies request data length, and returns
+ * response data length.
+ *  @param[in] context - ipmi context.
+ *  @returns ipmi completion code.
+ */
+ipmi_ret_t ipmiGetChannelAuthenticationCapabilities(
+    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+    ipmi_response_t response, ipmi_data_len_t dataLen, ipmi_context_t context)
+{
+    const GetChannelAuthenticationReq* req =
+        static_cast<GetChannelAuthenticationReq*>(request);
+    size_t reqLength = *dataLen;
+
+    if (reqLength != sizeof(*req))
+    {
+        log<level::DEBUG>("Get Channel Authentication - Invalid Length");
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    uint8_t chNum = convertCurrentChannelNum(req->channelNumber);
+    uint8_t privLimit = req->privLevel;
+    if (!isValidChannel(chNum) || !isValidPrivLimit(privLimit) ||
+        req->reserved1 || req->reserved2)
+    {
+        log<level::DEBUG>("Get Channel Authentication - Invalid Parameter ");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    GetChannelAuthenticationResp* res =
+        static_cast<GetChannelAuthenticationResp*>(response);
+    std::fill(reinterpret_cast<uint8_t*>(res),
+              reinterpret_cast<uint8_t*>(res) + sizeof(*res), 0);
+    res->channelNumber = chNum;
+    res->ipmiVersion = 1; // IPMI v2.0 extended capabilities available.
+    res->reserved1 = 0;
+    res->privLevel = 1;
+    res->reserved2 = 0;
+    res->KGStatus = 0;
+    res->perMessageAuth = 0;
+    res->userAuth = 0;
+    res->anonymousLogin = 0;
+    res->reserved3 = 0;
+    res->extCapabilities = 0x2;
+    res->oemID[0] = 0;
+    res->oemID[1] = 0;
+    res->oemID[2] = 0;
+    res->oemAuxillary = 0;
+    uint8_t maxChUsers = 0;
+    uint8_t enabledUsers = 0;
+    uint8_t fixedUsers = 0;
+    ipmi::ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers);
+
+    res->nonNullUsers = enabledUsers > 0 ? 1 : 0; // Non-null usernames
+    res->nullUsers = 0;                           // Null usernames disabled
+    *dataLen = sizeof(*res);
+    return IPMI_CC_OK;
+}
+
 void registerUserIpmiFunctions() __attribute__((constructor));
 void registerUserIpmiFunctions()
 {
@@ -524,6 +642,10 @@ void registerUserIpmiFunctions()
 
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_PASSWORD, NULL,
                            ipmiSetUserPassword, PRIVILEGE_ADMIN);
+
+    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_AUTHENTICATION,
+                           NULL, ipmiGetChannelAuthenticationCapabilities,
+                           PRIVILEGE_CALLBACK);
 
     return;
 }

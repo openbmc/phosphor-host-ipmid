@@ -25,6 +25,7 @@ namespace ipmi
  */
 enum ipmi_netfn_user_cmds
 {
+    IPMI_CMD_GET_CHANNEL_AUTHENTICATION = 0x38,
     IPMI_CMD_SET_USER_ACCESS = 0x43,
     IPMI_CMD_GET_USER_ACCESS = 0x44,
     IPMI_CMD_SET_USER_NAME = 0x45,
