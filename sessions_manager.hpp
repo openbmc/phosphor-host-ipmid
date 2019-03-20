@@ -17,7 +17,7 @@ enum class RetrieveOption
 
 constexpr size_t SESSION_ZERO = 0;
 constexpr size_t MAX_SESSIONLESS_COUNT = 1;
-constexpr size_t MAX_SESSION_COUNT = 5;
+constexpr size_t MAX_SESSION_COUNT = 15;
 
 /**
  * @class Manager
