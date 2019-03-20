@@ -23,6 +23,8 @@
 #include <ipmid/api.h>
 #include <security/pam_appl.h>
 
+#include <ipmid/api.hpp>
+#include <ipmid/registration.hpp>
 #include <phosphor-logging/log.hpp>
 #include <regex>
 
@@ -430,6 +432,92 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_INVALID_FIELD_REQUEST;
 }
 
+/** @brief implements the get channel authentication command
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param extData - get IPMI 2.0 extended data
+ *  @param reserved1 - skip 3 bits
+ *  @param chNum - channel number to get info about
+ *  @param reserved2 - skip 4 bits
+ *  @param privLevel - requested privilege level
+
+ *  @returns ipmi completion code plus response data
+ *   - channel number
+ *   - extDataSupport - true for IPMI 2.0 extensions
+ *   - reserved1
+ *   - rmcpAuthTypes - RMCP auth types (IPMI 1.5)
+ *   - reserved2
+ *   - KGStatus - true for Kg required for authentication
+ *   - perMessageAuth - false for per message authentication enabled
+ *   - userAuth - false for user authentication enabled
+ *   - nonNullUsers - true for non-null usernames enabled
+ *   - nullUsers - true for null user names enabled
+ *   - anonymousLogin - true for anonymous login enabled
+ *   - reserved3
+ *   - rmcpp - RMCP+ (IPMI 2.0) connection support
+ *   - rmcp - RMCP (IPMI 1.5) connection support
+ *   - oemID - OEM IANA of any OEM auth support
+ *   - oemAuxillary - OEM data for auth
+ */
+ipmi::RspType<uint8_t,  // channel number
+              bool,     // extDataSupport
+              bool,     // reserved1
+              uint6_t,  // rmcpAuthTypes
+              uint2_t,  // reserved2
+              bool,     // KGStatus
+              bool,     // perMessageAuth
+              bool,     // userAuth
+              bool,     // nonNullUsers
+              bool,     // nullUsers
+              bool,     // anonymousLogin
+              uint6_t,  // reserved3
+              bool,     // rmcpp
+              bool,     // rmcp
+              uint24_t, // oemID
+              uint8_t   // oemAuxillary
+              >
+    ipmiGetChannelAuthenticationCapabilities(ipmi::Context::ptr ctx,
+                                             uint4_t chNum, uint3_t reserved1,
+                                             bool extData, uint4_t privLevel,
+                                             uint4_t reserved2)
+{
+
+    auto channel = static_cast<uint8_t>(chNum);
+    if (channel == ipmi::currentChNum)
+    {
+        channel = ctx->channel;
+    }
+    if (reserved1 || reserved2 || !isValidChannel(channel) ||
+        !isValidPrivLimit(static_cast<uint8_t>(privLevel)) ||
+        (EChannelSessSupported::none == getChannelSessionSupport(channel)))
+    {
+        return ipmi::response(ccInvalidFieldRequest);
+    }
+
+    constexpr bool extDataSupport = true;
+    constexpr bool reserved3 = false;
+    constexpr uint6_t rmcpAuthTypes = 0;
+    constexpr uint2_t reserved4 = 0;
+    constexpr bool KGStatus = false; // ideally this would be looked up...
+    constexpr bool perMessageAuth = false;
+    constexpr bool userAuth = false;
+    constexpr bool nullUsers = false;
+    bool nonNullUsers = 0;
+    uint8_t maxChUsers = 0, enabledUsers = 0, fixedUsers = 0;
+    ipmi::ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers);
+    nonNullUsers = enabledUsers > 0;
+    constexpr bool anonymousLogin = false;
+    constexpr uint6_t reserved5 = 0;
+    constexpr bool rmcpp = true;
+    constexpr bool rmcp = false;
+    constexpr uint24_t oemID = 0;
+    constexpr uint8_t oemAuxillary = 0;
+
+    return ipmi::responseSuccess(
+        channel, extDataSupport, reserved3, rmcpAuthTypes, reserved4, KGStatus,
+        perMessageAuth, userAuth, nonNullUsers, nullUsers, anonymousLogin,
+        reserved5, rmcpp, rmcp, oemID, oemAuxillary);
+}
+
 void registerUserIpmiFunctions() __attribute__((constructor));
 void registerUserIpmiFunctions()
 {
@@ -449,6 +537,10 @@ void registerUserIpmiFunctions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_PASSWORD, NULL,
                            ipmiSetUserPassword, PRIVILEGE_ADMIN);
 
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetChannelAuthCapabilities,
+                          ipmi::Privilege::Callback,
+                          ipmiGetChannelAuthenticationCapabilities);
     return;
 }
 } // namespace ipmi
