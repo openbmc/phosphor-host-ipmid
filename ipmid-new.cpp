@@ -461,7 +461,7 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
                             ipmi_context_t context, ipmid_callback_t handler,
                             ipmi_cmd_privilege_t priv)
 {
-    auto h = ipmi::makeLegacyHandler(handler);
+    auto h = ipmi::makeLegacyHandler(handler, context);
     // translate priv from deprecated enum to current
     ipmi::Privilege realPriv;
     switch (priv)

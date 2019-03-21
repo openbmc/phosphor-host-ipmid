@@ -278,12 +278,14 @@ template <>
 class IpmiHandler<ipmid_callback_t> final : public HandlerBase
 {
   public:
-    explicit IpmiHandler(const ipmid_callback_t& handler) : handler_(handler)
+    explicit IpmiHandler(const ipmid_callback_t& handler, void* ctx = nullptr) :
+        handler_(handler), handlerCtx(ctx)
     {
     }
 
   private:
     ipmid_callback_t handler_;
+    void* handlerCtx;
 
     /** @brief call the registered handler with the request
      *
@@ -315,7 +317,7 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         {
             ccRet = handler_(request->ctx->netFn, request->ctx->cmd,
                              request->payload.data(), response->payload.data(),
-                             &len, nullptr);
+                             &len, handlerCtx);
         }
         catch (const std::exception& e)
         {
@@ -453,9 +455,10 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
  *
  * @return A shared_ptr to the created handler object
  */
-inline auto makeLegacyHandler(const ipmid_callback_t& handler)
+inline auto makeLegacyHandler(const ipmid_callback_t& handler,
+                              void* ctx = nullptr)
 {
-    HandlerBase::ptr ptr(new IpmiHandler<ipmid_callback_t>(handler));
+    HandlerBase::ptr ptr(new IpmiHandler<ipmid_callback_t>(handler, ctx));
     return ptr;
 }
 
