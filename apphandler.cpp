@@ -763,23 +763,6 @@ auto ipmiAppGetBtCapabilities()
                                  outputBufferSize, transactionTime, nrRetries);
 }
 
-ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                     ipmi_request_t request,
-                                     ipmi_response_t response,
-                                     ipmi_data_len_t data_len,
-                                     ipmi_context_t context)
-{
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_INVALID;
-
-    *data_len = strlen("THIS IS WILDCARD");
-
-    // Now pack actual response
-    std::memcpy(response, "THIS IS WILDCARD", *data_len);
-
-    return rc;
-}
-
 auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
 {
     static constexpr auto uuidInterface = "xyz.openbmc_project.Common.UUID";
@@ -1007,10 +990,6 @@ void register_netfn_app_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetBtIfaceCapabilities,
                           ipmi::Privilege::User, ipmiAppGetBtCapabilities);
-
-    // <Wildcard Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_WILDCARD, NULL,
-                           ipmi_app_wildcard_handler, PRIVILEGE_USER);
 
     // <Reset Watchdog Timer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_RESET_WD, NULL,
