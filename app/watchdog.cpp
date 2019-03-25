@@ -38,15 +38,8 @@ void reportError()
     commit<InternalFailure>();
 }
 
-ipmi_ret_t ipmi_app_watchdog_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                   ipmi_request_t request,
-                                   ipmi_response_t response,
-                                   ipmi_data_len_t data_len,
-                                   ipmi_context_t context)
+ipmi::RspType<> ipmiAppResetWatchdogTimer()
 {
-    // We never return data with this command so immediately get rid of it
-    *data_len = 0;
-
     try
     {
         WatchdogService wd_service;
@@ -56,31 +49,33 @@ ipmi_ret_t ipmi_app_watchdog_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (!wd_service.getInitialized())
         {
             lastCallSuccessful = true;
-            return IPMI_WDOG_CC_NOT_INIT;
+
+            constexpr uint8_t ccWatchdogNotInit = 0x80;
+            return ipmi::response(ccWatchdogNotInit);
         }
 
         // The ipmi standard dictates we enable the watchdog during reset
         wd_service.resetTimeRemaining(true);
         lastCallSuccessful = true;
-        return IPMI_CC_OK;
+        return ipmi::responseSuccess();
     }
     catch (const InternalFailure& e)
     {
         reportError();
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
     catch (const std::exception& e)
     {
         const std::string e_str = std::string("wd_reset: ") + e.what();
         log<level::ERR>(e_str.c_str());
         reportError();
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
     catch (...)
     {
         log<level::ERR>("wd_reset: Unknown Error");
         reportError();
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 }
 
