@@ -769,28 +769,19 @@ finish:
     return rc;
 }
 
-ipmi_ret_t ipmi_app_get_bt_capabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                        ipmi_request_t request,
-                                        ipmi_response_t response,
-                                        ipmi_data_len_t data_len,
-                                        ipmi_context_t context)
+auto ipmiAppGetBtCapabilities()
+    -> ipmi::RspType<uint8_t, uint8_t, uint8_t, uint8_t, uint8_t>
 {
-
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-
     // Per IPMI 2.0 spec, the input and output buffer size must be the max
     // buffer size minus one byte to allocate space for the length byte.
-    uint8_t str[] = {0x01, MAX_IPMI_BUFFER - 1, MAX_IPMI_BUFFER - 1, 0x0A,
-                     0x01};
+    constexpr uint8_t nrOutstanding = 0x01;
+    constexpr uint8_t inputBufferSize = MAX_IPMI_BUFFER - 1;
+    constexpr uint8_t outputBufferSize = MAX_IPMI_BUFFER - 1;
+    constexpr uint8_t transactionTime = 0x0A;
+    constexpr uint8_t nrRetries = 0x01;
 
-    // Data length
-    *data_len = sizeof(str);
-
-    // Pack the actual response
-    std::memcpy(response, &str, *data_len);
-
-    return rc;
+    return ipmi::responseSuccess(nrOutstanding, inputBufferSize,
+                                 outputBufferSize, transactionTime, nrRetries);
 }
 
 ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -1058,8 +1049,9 @@ void register_netfn_app_functions()
                           ipmiAppGetDeviceId);
 
     // <Get BT Interface Capabilities>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CAP_BIT, NULL,
-                           ipmi_app_get_bt_capabilities, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetBtIfaceCapabilities,
+                          ipmi::Privilege::User, ipmiAppGetBtCapabilities);
 
     // <Wildcard Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_WILDCARD, NULL,
