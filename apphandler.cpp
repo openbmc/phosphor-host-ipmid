@@ -1035,8 +1035,9 @@ void register_netfn_app_functions()
                           ipmi::Privilege::User, ipmiAppGetBtCapabilities);
 
     // <Reset Watchdog Timer>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_RESET_WD, NULL,
-                           ipmi_app_watchdog_reset, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdResetWatchdogTimer,
+                          ipmi::Privilege::Operator, ipmiAppResetWatchdogTimer);
 
     // <Set Watchdog Timer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL,
