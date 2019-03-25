@@ -650,120 +650,111 @@ auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
     return ipmi::responseSuccess(notImplemented, zero);
 }
 
-ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                    ipmi_request_t request,
-                                    ipmi_response_t response,
-                                    ipmi_data_len_t data_len,
-                                    ipmi_context_t context)
+static constexpr size_t uuidBinaryLength = 16;
+static std::array<uint8_t, uuidBinaryLength> rfc4122ToIpmi(std::string rfc4122)
 {
-    const char* objname = "/org/openbmc/control/chassis0";
-    const char* iface = "org.freedesktop.DBus.Properties";
-    const char* chassis_iface = "org.openbmc.control.Chassis";
-    sd_bus_message* reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
-    char* uuid = NULL;
-    char* busname = NULL;
-
+    using Argument = xyz::openbmc_project::Common::InvalidArgument;
     // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
     // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte
     // order
     // Ex: 0x2332fc2c40e66298e511f2782395a361
-
-    const int resp_size = 16;     // Response is 16 hex bytes per IPMI Spec
-    uint8_t resp_uuid[resp_size]; // Array to hold the formatted response
-    // Point resp end of array to save in reverse order
-    int resp_loc = resp_size - 1;
-    int i = 0;
-    char* tokptr = NULL;
-    char* id_octet = NULL;
-    size_t total_uuid_size = 0;
-    // 1 byte of resp is built from 2 chars of uuid.
-    constexpr size_t max_uuid_size = 2 * resp_size;
-
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-    *data_len = 0;
-
-    // Call Get properties method with the interface and property name
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0)
+    constexpr size_t uuidHexLength = (2 * uuidBinaryLength);
+    constexpr size_t uuidRfc4122Length = (uuidHexLength + 4);
+    std::array<uint8_t, uuidBinaryLength> uuid;
+    if (rfc4122.size() != uuidRfc4122Length)
     {
-        log<level::ERR>("Failed to get bus name", entry("BUS=%s", objname),
-                        entry("ERRNO=0x%X", -r));
-        goto finish;
+        elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                              Argument::ARGUMENT_VALUE(rfc4122.c_str()));
     }
-    r = sd_bus_call_method(bus, busname, objname, iface, "Get", &error, &reply,
-                           "ss", chassis_iface, "uuid");
-    if (r < 0)
+    rfc4122.erase(std::remove(rfc4122.begin(), rfc4122.end(), '-'),
+                  rfc4122.end());
+    if (rfc4122.size() != uuidHexLength)
     {
-        log<level::ERR>("Failed to call Get Method", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+        elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                              Argument::ARGUMENT_VALUE(rfc4122.c_str()));
     }
-
-    r = sd_bus_message_read(reply, "v", "s", &uuid);
-    if (r < 0 || uuid == NULL)
+    for (size_t ind = 0; ind < uuidHexLength; ind += 2)
     {
-        log<level::ERR>("Failed to get a response", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto finish;
-    }
-
-    // Traverse the UUID
-    // Get the UUID octects separated by dash
-    id_octet = strtok_r(uuid, "-", &tokptr);
-
-    if (id_octet == NULL)
-    {
-        // Error
-        log<level::ERR>("Unexpected UUID format", entry("UUID=%s", uuid));
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto finish;
-    }
-
-    while (id_octet != NULL)
-    {
-        // Calculate the octet string size since it varies
-        // Divide it by 2 for the array size since 1 byte is built from 2 chars
-        int tmp_size = strlen(id_octet) / 2;
-
-        // Check if total UUID size has been exceeded
-        if ((total_uuid_size += strlen(id_octet)) > max_uuid_size)
+        char v[3];
+        v[0] = rfc4122[ind];
+        v[1] = rfc4122[ind + 1];
+        v[2] = 0;
+        size_t err;
+        long b;
+        try
         {
-            // Error - UUID too long to store
-            log<level::ERR>("UUID too long", entry("UUID=%s", uuid));
-            rc = IPMI_CC_RESPONSE_ERROR;
-            goto finish;
+            b = std::stoul(v, &err, 16);
         }
-
-        for (i = 0; i < tmp_size; i++)
+        catch (std::exception& e)
         {
-            // Holder of the 2 chars that will become a byte
-            char tmp_array[3] = {0};
-            strncpy(tmp_array, id_octet, 2); // 2 chars at a time
-
-            int resp_byte = strtoul(tmp_array, NULL, 16); // Convert to hex byte
-            // Copy end to first
-            std::memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1);
-            resp_loc--;
-            id_octet += 2; // Finished with the 2 chars, advance
+            elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                                  Argument::ARGUMENT_VALUE(rfc4122.c_str()));
         }
-        id_octet = strtok_r(NULL, "-", &tokptr); // Get next octet
+        // check that exactly two ascii bytes were converted
+        if (err != 2)
+        {
+            elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                                  Argument::ARGUMENT_VALUE(rfc4122.c_str()));
+        }
+        uuid[uuidBinaryLength - (ind / 2) - 1] = static_cast<uint8_t>(b);
+    }
+    return uuid;
+}
+
+auto ipmiAppGetDeviceGuid()
+    -> ipmi::RspType<std::array<uint8_t, uuidBinaryLength>>
+{
+    constexpr const char* uuidObject =
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/bmc";
+    constexpr const char* uuidIntf = "xyz.openbmc_project.Common.UUID";
+    auto busPtr = getSdBus();
+    std::string rfc4122Uuid;
+    try
+    {
+        auto service = ipmi::getService(*busPtr, uuidIntf, uuidObject);
+
+        ipmi::Value variant = ipmi::getDbusProperty(
+            *busPtr, service, uuidObject, uuidIntf, "UUID");
+        rfc4122Uuid = std::get<std::string>(variant);
+    }
+    catch (const std::exception& e)
+    {
+        try
+        {
+            // FIXME: some legacy modules use the older path; try that next
+            constexpr const char* legacyUuidIntf =
+                "org.openbmc.control.Chassis";
+            constexpr const char* legacyUuidProperty = "uuid";
+            auto objectInfo = ipmi::getDbusObject(*busPtr, legacyUuidIntf);
+
+            ipmi::Value variant = ipmi::getDbusProperty(
+                *busPtr, objectInfo.second, objectInfo.first, legacyUuidIntf,
+                legacyUuidProperty);
+            rfc4122Uuid = std::get<std::string>(variant);
+        }
+        catch (const std::exception& e)
+        {
+            log<level::ERR>("Failed to fetch device UUID property",
+                            entry("ERROR=%s", e.what()),
+                            entry("PATH=%s", uuidObject),
+                            entry("INTERFACE=%s", uuidIntf));
+            return ipmi::responseUnspecifiedError();
+        }
     }
 
-    // Data length
-    *data_len = resp_size;
-
-    // Pack the actual response
-    std::memcpy(response, &resp_uuid, *data_len);
-
-finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
-
-    return rc;
+    std::array<uint8_t, uuidBinaryLength> uuid;
+    try
+    {
+        // convert to IPMI format
+        uuid = rfc4122ToIpmi(rfc4122Uuid);
+    }
+    catch (const InvalidArgument& e)
+    {
+        log<level::ERR>("Failed in parsing BMC UUID property",
+                        entry("VALUE=%s", rfc4122Uuid.c_str()));
+        return ipmi::responseUnspecifiedError();
+    }
+    return ipmi::responseSuccess(uuid);
 }
 
 auto ipmiAppGetBtCapabilities()
@@ -1052,8 +1043,9 @@ void register_netfn_app_functions()
                           ipmi::Privilege::User, ipmiAppGetSelfTestResults);
 
     // <Get Device GUID>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL,
-                           ipmi_app_get_device_guid, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetDeviceGuid, ipmi::Privilege::User,
+                          ipmiAppGetDeviceGuid);
 
     // <Set ACPI Power State>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL,
