@@ -626,14 +626,8 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
         devId.addnDevSupport, devId.manufId, devId.prodId, devId.aux);
 }
 
-ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                          ipmi_request_t request,
-                                          ipmi_response_t response,
-                                          ipmi_data_len_t data_len,
-                                          ipmi_context_t context)
+auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-
     // Byte 2:
     //  55h - No error.
     //  56h - Self Test function not implemented in this controller.
@@ -654,17 +648,9 @@ ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     //      [2] 1b = Internal Use Area of BMC FRU corrupted.
     //      [1] 1b = controller update 'boot block' firmware corrupted.
     //      [0] 1b = controller operational firmware corrupted.
-
-    char selftestresults[2] = {0};
-
-    *data_len = 2;
-
-    selftestresults[0] = 0x56;
-    selftestresults[1] = 0;
-
-    std::memcpy(response, selftestresults, *data_len);
-
-    return rc;
+    constexpr uint8_t notImplemented = 0x56;
+    constexpr uint8_t zero = 0;
+    return ipmi::responseSuccess(notImplemented, zero);
 }
 
 ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -1092,8 +1078,9 @@ void register_netfn_app_functions()
                            ipmi_app_watchdog_get, PRIVILEGE_OPERATOR);
 
     // <Get Self Test Results>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS, NULL,
-                           ipmi_app_get_self_test_results, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetSelfTestResults,
+                          ipmi::Privilege::User, ipmiAppGetSelfTestResults);
 
     // <Get Device GUID>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL,
