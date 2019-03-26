@@ -74,14 +74,16 @@ struct CmpStr
     }
 };
 
-const static boost::container::flat_map<const char*, std::pair<ipmi_sensor_types, ipmi_event_types>, CmpStr>
-    sensorAndEventType{{{"temperature", std::make_pair(IPMI_SENSOR_TEMP, THRESHLOD)},
-                 {"voltage", std::make_pair(IPMI_SENSOR_VOLTAGE, THRESHLOD)},
-                 {"current", std::make_pair(IPMI_SENSOR_CURRENT, THRESHLOD)},
-                 {"fan_tach", std::make_pair(IPMI_SENSOR_FAN, THRESHLOD)},
-                 {"fan_pwm", std::make_pair(IPMI_SENSOR_FAN, THRESHLOD)},
-                 {"power", std::make_pair(IPMI_SENSOR_OTHER, THRESHLOD)},
-                 {"memory", std::make_pair(IPMI_SENSOR_MEMORY, SENSOR_SPECIFIC)}}};
+const static boost::container::flat_map<
+    const char*, std::pair<ipmi_sensor_types, ipmi_event_types>, CmpStr>
+    sensorAndEventType{
+        {{"temperature", std::make_pair(IPMI_SENSOR_TEMP, THRESHOLD)},
+         {"voltage", std::make_pair(IPMI_SENSOR_VOLTAGE, THRESHOLD)},
+         {"current", std::make_pair(IPMI_SENSOR_CURRENT, THRESHOLD)},
+         {"fan_tach", std::make_pair(IPMI_SENSOR_FAN, THRESHOLD)},
+         {"fan_pwm", std::make_pair(IPMI_SENSOR_FAN, THRESHOLD)},
+         {"power", std::make_pair(IPMI_SENSOR_OTHER, THRESHOLD)},
+         {"memory", std::make_pair(IPMI_SENSOR_MEMORY, SENSOR_SPECIFIC)}}};
 
 inline static std::string getSensorTypeStringFromPath(const std::string& path)
 {
