@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <any>
+#include <dcmihandler.hpp>
 #include <exception>
 #include <filesystem>
 #include <forward_list>
@@ -476,7 +477,19 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
             realPriv = ipmi::Privilege::Admin;
             break;
     }
-    ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv, h);
+    // The original ipmi_register_callback allowed for group OEM handlers
+    // to be registered via this same interface. It just so happened that
+    // all the handlers were part of the DCMI group, so default to that.
+    if (netFn == NETFUN_GRPEXT)
+    {
+        ipmi::impl::registerGroupHandler(ipmi::prioOpenBmcBase,
+                                         dcmi::groupExtId, cmd, realPriv, h);
+    }
+    else
+    {
+        ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv,
+                                    h);
+    }
 }
 
 namespace oem
