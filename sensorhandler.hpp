@@ -37,6 +37,14 @@ enum ipmi_sensor_types
     IPMI_SENSOR_FAN = 0x04,
     IPMI_SENSOR_OTHER = 0x0B,
     IPMI_SENSOR_TPM = 0xCC,
+    IPMI_SENSOR_MEMORY = 0x0C,
+};
+
+enum ipmi_event_types
+{
+    UNSPECIFIED = 0x00,
+    THRESHLOD = 0x01,
+    SENSOR_SPECIFIC = 0x6f,
 };
 
 #define MAX_DBUS_PATH 128
