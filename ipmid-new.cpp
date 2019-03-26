@@ -488,7 +488,18 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
             realPriv = ipmi::Privilege::Admin;
             break;
     }
-    ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv, h);
+    // The original ipmi_register_callback allowed for group OEM handlers
+    // to be registered via this same interface... pretend to do the same
+    if (netFn == NETFUN_OEM_GROUP)
+    {
+        ipmi::impl::registerGroupHandler(ipmi::prioOpenBmcBase, 0, cmd,
+                                         realPriv, h);
+    }
+    else
+    {
+        ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv,
+                                    h);
+    }
 }
 
 namespace oem
