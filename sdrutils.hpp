@@ -114,14 +114,18 @@ inline static uint8_t getSensorTypeFromPath(const std::string& path)
     return sensorType;
 }
 
+extern const ipmi::sensor::IdInfoMap sensors;
 inline static uint8_t getSensorNumberFromPath(const std::string& path)
 {
-    SensorSubTree sensorTree;
-    if (!getSensorSubtree(sensorTree))
-        return 0xFF;
     uint8_t sensorNum = 0xFF;
 
-    sensorNum = std::distance(std::begin(sensorTree), sensorTree.find(path));
+    for(auto sensor = sensors.begin(); sensor != sensors.end(); sensor++) {
+        if (sensor->second.sensorPath == path) {
+            sensorNum = sensor->first;
+            break;
+        }
+    }
+
     return sensorNum;
 }
 
