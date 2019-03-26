@@ -43,7 +43,7 @@ enum ipmi_sensor_types
 enum ipmi_event_types
 {
     UNSPECIFIED = 0x00,
-    THRESHLOD = 0x01,
+    THRESHOLD = 0x01,
     SENSOR_SPECIFIC = 0x6f,
 };
 
