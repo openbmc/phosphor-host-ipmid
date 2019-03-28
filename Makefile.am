@@ -6,7 +6,7 @@ export AM_CPPFLAGS
 providersdir = ${libdir}/ipmid-providers
 providers_LTLIBRARIES =
 
-sbin_PROGRAMS = \
+bin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
