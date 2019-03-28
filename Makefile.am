@@ -5,7 +5,7 @@ BOOST_CXX = \
 	-DBOOST_ASIO_DISABLE_THREADS \
 	-DBOOST_ALL_NO_LIB
 
-sbin_PROGRAMS = \
+bin_PROGRAMS = \
 	netipmid
 
 netipmid_SOURCES = \
