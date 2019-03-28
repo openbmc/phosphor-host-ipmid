@@ -1,5 +1,5 @@
 AM_DEFAULT_SOURCE_EXT = .cpp
-sbin_PROGRAMS = phosphor-softpoweroff
+bin_PROGRAMS = phosphor-softpoweroff
 
 # Using ../ instead of $(top_srcdir) due to automake bug in version 1.15.
 #  https://debbugs.gnu.org/cgi/bugreport.cgi?bug=13928
