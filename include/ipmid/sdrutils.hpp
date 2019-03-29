@@ -33,6 +33,14 @@ enum ipmi_sensor_types
     IPMI_SENSOR_FAN = 0x04,
     IPMI_SENSOR_OTHER = 0x0B,
     IPMI_SENSOR_TPM = 0xCC,
+    IPMI_SENSOR_MEMORY = 0x0C,
+};
+
+enum ipmi_event_types
+{
+    UNSPECIFIED = 0x00,
+    THRESHOLD = 0x01,
+    SENSOR_SPECIFIC = 0x6f,
 };
 
 struct CmpStrVersion
@@ -88,13 +96,16 @@ struct CmpStr
     }
 };
 
-const static boost::container::flat_map<const char*, ipmi_sensor_types, CmpStr>
-    sensorTypes{{{"temperature", IPMI_SENSOR_TEMP},
-                 {"voltage", IPMI_SENSOR_VOLTAGE},
-                 {"current", IPMI_SENSOR_CURRENT},
-                 {"fan_tach", IPMI_SENSOR_FAN},
-                 {"fan_pwm", IPMI_SENSOR_FAN},
-                 {"power", IPMI_SENSOR_OTHER}}};
+const static boost::container::flat_map<
+    const char*, std::pair<ipmi_sensor_types, ipmi_event_types>, CmpStr>
+    sensorAndEventType{
+        {{"temperature", std::make_pair(IPMI_SENSOR_TEMP, THRESHOLD)},
+         {"voltage", std::make_pair(IPMI_SENSOR_VOLTAGE, THRESHOLD)},
+         {"current", std::make_pair(IPMI_SENSOR_CURRENT, THRESHOLD)},
+         {"fan_tach", std::make_pair(IPMI_SENSOR_FAN, THRESHOLD)},
+         {"fan_pwm", std::make_pair(IPMI_SENSOR_FAN, THRESHOLD)},
+         {"power", std::make_pair(IPMI_SENSOR_OTHER, THRESHOLD)},
+         {"memory", std::make_pair(IPMI_SENSOR_MEMORY, SENSOR_SPECIFIC)}}};
 
 inline static std::string getSensorTypeStringFromPath(const std::string& path)
 {
@@ -119,10 +130,10 @@ inline static uint8_t getSensorTypeFromPath(const std::string& path)
 {
     uint8_t sensorType = 0;
     std::string type = getSensorTypeStringFromPath(path);
-    auto findSensor = sensorTypes.find(type.c_str());
-    if (findSensor != sensorTypes.end())
+    auto findSensor = sensorAndEventType.find(type.c_str());
+    if (findSensor != sensorAndEventType.end())
     {
-        sensorType = findSensor->second;
+        sensorType = findSensor->second.first;
     } // else default 0x0 RESERVED
 
     return sensorType;
@@ -141,8 +152,14 @@ inline static uint8_t getSensorNumberFromPath(const std::string& path)
 
 inline static uint8_t getSensorEventTypeFromPath(const std::string& path)
 {
-    // TODO: Add support for additional reading types as needed
-    return 0x1; // reading type = threshold
+    uint8_t eventType = 0x00;
+    std::string type = getSensorTypeStringFromPath(path);
+    auto findSensor = sensorAndEventType.find(type.c_str());
+    if (findSensor != sensorAndEventType.end())
+    {
+        eventType = findSensor->second.second;
+    }
+    return eventType;
 }
 
 inline static std::string getPathFromSensorNumber(uint8_t sensorNum)
