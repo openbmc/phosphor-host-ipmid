@@ -2,7 +2,6 @@
 
 #include "app/channel.hpp"
 #include "app/watchdog.hpp"
-#include "ipmid.hpp"
 #include "sys_info_param.hpp"
 #include "transporthandler.hpp"
 

@@ -1,5 +1,3 @@
-#include "ipmid.hpp"
-
 #include <ipmid/api.h>
 
 #include <cstdio>

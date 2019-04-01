@@ -2,7 +2,6 @@
 
 #include "chassishandler.hpp"
 
-#include "ipmid.hpp"
 #include "settings.hpp"
 
 #include <arpa/inet.h>

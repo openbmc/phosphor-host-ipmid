@@ -1,7 +1,6 @@
 #include "sensorhandler.hpp"
 
 #include "fruread.hpp"
-#include "ipmid.hpp"
 
 #include <ipmid/api.h>
 #include <mapper.h>

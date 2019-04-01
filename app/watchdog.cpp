@@ -1,6 +1,5 @@
 #include "watchdog.hpp"
 
-#include "ipmid.hpp"
 #include "watchdog_service.hpp"
 
 #include <endian.h>

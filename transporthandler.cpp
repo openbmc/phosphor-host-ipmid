@@ -1,7 +1,6 @@
 #include "transporthandler.hpp"
 
 #include "app/channel.hpp"
-#include "ipmid.hpp"
 #include "user_channel/channel_layer.hpp"
 
 #include <arpa/inet.h>
