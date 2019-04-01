@@ -37,6 +37,7 @@ enum ipmi_sensor_types
     IPMI_SENSOR_FAN = 0x04,
     IPMI_SENSOR_OTHER = 0x0B,
     IPMI_SENSOR_MEMORY = 0x0C,
+    IPMI_SENSOR_WATCHDOG2 = 0x23,
 };
 
 enum ipmi_event_types
