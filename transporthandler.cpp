@@ -5,11 +5,11 @@
 #include "user_channel/channel_layer.hpp"
 
 #include <arpa/inet.h>
-#include <ipmid/api.h>
 
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>

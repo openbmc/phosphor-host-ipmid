@@ -1,8 +1,8 @@
 #pragma once
 
-#include <ipmid/api.h>
 #include <stdint.h>
 
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 
 // IPMI commands for net functions.

@@ -8,7 +8,6 @@
 #include <cstring>
 #include <ipmid-host/cmd.hpp>
 #include <ipmid/api.hpp>
-#include <ipmid/registration.hpp>
 
 void register_netfn_app_functions() __attribute__((constructor));
 

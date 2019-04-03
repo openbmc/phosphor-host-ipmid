@@ -7,7 +7,6 @@
 #include "storageaddsel.hpp"
 
 #include <arpa/inet.h>
-#include <ipmid/api.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
@@ -16,6 +15,7 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
