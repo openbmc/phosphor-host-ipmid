@@ -72,7 +72,7 @@ struct PackSingle
      *  @param[in] p - Payload to pack into.
      *  @param[out] t - The reference to pack item into.
      */
-    static int op(Payload& p, T& t)
+    static int op(Payload& p, const T& t)
     {
         // if not on a byte boundary, must pack values LSbit/LSByte first
         if (p.bitCount)
@@ -96,7 +96,7 @@ struct PackSingle
 template <>
 struct PackSingle<std::string>
 {
-    static int op(Payload& p, std::string& t)
+    static int op(Payload& p, const std::string& t)
     {
         // check length first
         uint8_t len;
@@ -118,7 +118,7 @@ struct PackSingle<std::string>
 template <unsigned N>
 struct PackSingle<fixed_uint_t<N>>
 {
-    static int op(Payload& p, fixed_uint_t<N>& t)
+    static int op(Payload& p, const fixed_uint_t<N>& t)
     {
         size_t count = N;
         static_assert(N <= (details::bitStreamSize - CHAR_BIT));
@@ -138,7 +138,7 @@ struct PackSingle<fixed_uint_t<N>>
 template <>
 struct PackSingle<bool>
 {
-    static int op(Payload& p, bool& b)
+    static int op(Payload& p, const bool& b)
     {
         p.appendBits(1, b);
         return 0;
@@ -149,7 +149,7 @@ struct PackSingle<bool>
 template <size_t N>
 struct PackSingle<std::bitset<N>>
 {
-    static int op(Payload& p, std::bitset<N>& t)
+    static int op(Payload& p, const std::bitset<N>& t)
     {
         size_t count = N;
         static_assert(N <= (details::bitStreamSize - CHAR_BIT));
@@ -169,10 +169,10 @@ struct PackSingle<std::bitset<N>>
 template <typename T, size_t N>
 struct PackSingle<std::array<T, N>>
 {
-    static int op(Payload& p, std::array<T, N>& t)
+    static int op(Payload& p, const std::array<T, N>& t)
     {
         int ret = 0;
-        for (auto& v : t)
+        for (const auto& v : t)
         {
             int ret = PackSingle<T>::op(p, v);
             if (ret)
@@ -188,10 +188,10 @@ struct PackSingle<std::array<T, N>>
 template <typename T>
 struct PackSingle<std::vector<T>>
 {
-    static int op(Payload& p, std::vector<T>& t)
+    static int op(Payload& p, const std::vector<T>& t)
     {
         int ret = 0;
-        for (auto& v : t)
+        for (const auto& v : t)
         {
             int ret = PackSingle<T>::op(p, v);
             if (ret)
@@ -207,11 +207,25 @@ struct PackSingle<std::vector<T>>
 template <>
 struct PackSingle<std::vector<uint8_t>>
 {
-    static int op(Payload& p, std::vector<uint8_t>& t)
+    static int op(Payload& p, const std::vector<uint8_t>& t)
     {
         p.raw.reserve(p.raw.size() + t.size());
         p.raw.insert(p.raw.end(), t.begin(), t.end());
         return 0;
+    }
+};
+
+/** @brief Specialization of PackSingle for std::variant<T, N> */
+template <typename... T>
+struct PackSingle<std::variant<T...>>
+{
+    static int op(Payload& p, const std::variant<T...>& v)
+    {
+        return std::visit(
+            [&p](const auto& arg) {
+                return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
+            },
+            v);
     }
 };
 
