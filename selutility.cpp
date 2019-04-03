@@ -2,10 +2,9 @@
 
 #include "selutility.hpp"
 
-#include <ipmid/api.h>
-
 #include <chrono>
 #include <filesystem>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>

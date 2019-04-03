@@ -6,7 +6,6 @@
 
 #include <arpa/inet.h>
 #include <endian.h>
-#include <ipmid/api.h>
 #include <limits.h>
 #include <mapper.h>
 #include <netinet/in.h>
@@ -17,6 +16,7 @@
 #include <filesystem>
 #include <fstream>
 #include <future>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <map>

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <boost/asio/spawn.hpp>
 #include <cstdint>
+#include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
 #include <memory>
 #include <phosphor-logging/log.hpp>

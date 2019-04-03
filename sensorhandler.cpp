@@ -2,13 +2,13 @@
 
 #include "fruread.hpp"
 
-#include <ipmid/api.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
 #include <bitset>
 #include <cmath>
 #include <cstring>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
