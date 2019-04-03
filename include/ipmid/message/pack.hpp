@@ -18,6 +18,7 @@
 #include <array>
 #include <ipmid/message/types.hpp>
 #include <memory>
+#include <optional>
 #include <phosphor-logging/log.hpp>
 #include <tuple>
 #include <utility>
@@ -162,6 +163,21 @@ struct PackSingle<std::bitset<N>>
             count -= appendCount;
         }
         return 0;
+    }
+};
+
+/** @brief Specialization of PackSingle for std::optional<T> */
+template <typename T>
+struct PackSingle<std::optional<T>>
+{
+    static int op(Payload& p, const std::optional<T>& t)
+    {
+        int ret = 0;
+        if (t)
+        {
+            ret = PackSingle<T>::op(p, *t);
+        }
+        return ret;
     }
 };
 

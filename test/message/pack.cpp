@@ -222,6 +222,32 @@ TEST(PackBasics, VectorUint8)
     ASSERT_EQ(p.raw, k);
 }
 
+TEST(PackBasics, OptionalEmpty)
+{
+    // an optional will only pack if the value is present
+    ipmi::message::Payload p;
+    std::optional<uint32_t> v;
+    p.pack(v);
+    // check that the number of bytes matches
+    ASSERT_EQ(p.size(), 0);
+    // check that the bytes were correctly packed (in byte order)
+    std::vector<uint8_t> k = {};
+    ASSERT_EQ(p.raw, k);
+}
+
+TEST(PackBasics, OptionalContainsValue)
+{
+    // an optional will only pack if the value is present
+    ipmi::message::Payload p;
+    std::optional<uint32_t> v(0x04860002);
+    p.pack(v);
+    // check that the number of bytes matches
+    ASSERT_EQ(p.size(), sizeof(uint32_t));
+    // check that the bytes were correctly packed (in byte order)
+    std::vector<uint8_t> k = {0x02, 0x00, 0x86, 0x04};
+    ASSERT_EQ(p.raw, k);
+}
+
 TEST(PackAdvanced, Uints)
 {
     // all elements will be processed in order, with each multi-byte
