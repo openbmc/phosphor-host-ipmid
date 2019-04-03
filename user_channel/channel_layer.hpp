@@ -16,6 +16,8 @@
 #pragma once
 #include <ipmid/api.h>
 
+#include <ipmid/api.hpp>
+#include <ipmid/message.hpp>
 #include <string>
 
 namespace ipmi
@@ -257,6 +259,24 @@ ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo);
  */
 ipmi_ret_t getChannelAccessData(const uint8_t chNum,
                                 ChannelAccess& chAccessData);
+
+/** @brief provides function to convert current channel number (0xE)
+ *
+ *  @param[in] chNum - channel number as requested in commands.
+ *  @param[in] ipmi::context - ipmi context ptr, which has more details
+ *
+ *  @return same channel number or proper channel number for current channel
+ * number (0xE).
+ */
+inline uint8_t convertCurrentChannelNum(const uint8_t chNum,
+                                        ipmi::Context::ptr ctx)
+{
+    if (chNum == currentChNum)
+    {
+        return ctx->channel;
+    }
+    return chNum;
+}
 
 /** @brief provides function to convert current channel number (0xE)
  *
