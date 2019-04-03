@@ -3,9 +3,9 @@
 #include "watchdog_service.hpp"
 
 #include <endian.h>
-#include <ipmid/api.h>
 
 #include <cstdint>
+#include <ipmid/api.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>

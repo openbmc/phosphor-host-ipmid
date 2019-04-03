@@ -20,9 +20,9 @@
 #include "channel_layer.hpp"
 #include "user_layer.hpp"
 
-#include <ipmid/api.h>
 #include <security/pam_appl.h>
 
+#include <ipmid/api.hpp>
 #include <phosphor-logging/log.hpp>
 #include <regex>
 

@@ -16,7 +16,6 @@
 #pragma once
 #include <ipmid/api.h>
 
-#include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
 #include <string>
 

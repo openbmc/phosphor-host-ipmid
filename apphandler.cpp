@@ -1,5 +1,4 @@
 #include <arpa/inet.h>
-#include <ipmid/api.h>
 #include <limits.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
@@ -15,7 +14,6 @@
 #include <filesystem>
 #include <fstream>
 #include <ipmid/api.hpp>
-#include <ipmid/registration.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <memory>

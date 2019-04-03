@@ -19,7 +19,7 @@
 #include <boost/callable_traits.hpp>
 #include <cstdint>
 #include <exception>
-#include <ipmid/api.hpp>
+#include <ipmid/api-types.hpp>
 #include <ipmid/message.hpp>
 #include <memory>
 #include <optional>
@@ -502,4 +502,136 @@ inline auto makeHandler(Handler&& handler)
     return ptr;
 }
 
+namespace impl
+{
+
+// IPMI command handler registration implementation
+bool registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
+                     ::ipmi::HandlerBase::ptr handler);
+bool registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+                          ::ipmi::HandlerBase::ptr handler);
+bool registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+                        ::ipmi::HandlerBase::ptr handler);
+
+} // namespace impl
+
+/**
+ * @brief main IPMI handler registration function
+ *
+ * This function should be used to register all new-style IPMI handler
+ * functions. This function just passes the callback to makeHandler, which
+ * creates a new wrapper object that will automatically extract the appropriate
+ * parameters for the callback function as well as pack up the response.
+ *
+ * @param prio - priority at which to register; see api.hpp
+ * @param netFn - the IPMI net function number to register
+ * @param cmd - the IPMI command number to register
+ * @param priv - the IPMI user privilige required for this command
+ * @param handler - the callback function that will handle this request
+ *
+ * @return bool - success of registering the handler
+ */
+template <typename Handler>
+bool registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
+                     Handler&& handler)
+{
+    auto h = ipmi::makeHandler(std::forward<Handler>(handler));
+    return impl::registerHandler(prio, netFn, cmd, priv, h);
+}
+
+/**
+ * @brief register a IPMI OEM group handler
+ *
+ * From IPMI 2.0 spec Network Function Codes Table (Row 2Ch):
+ * The first data byte position in requests and responses under this network
+ * function identifies the defining body that specifies command functionality.
+ * Software assumes that the command and completion code field positions will
+ * hold command and completion code values.
+ *
+ * The following values are used to identify the defining body:
+ * 00h PICMG - PCI Industrial Computer Manufacturer’s Group.  (www.picmg.com)
+ * 01h DMTF Pre-OS Working Group ASF Specification (www.dmtf.org)
+ * 02h Server System Infrastructure (SSI) Forum (www.ssiforum.org)
+ * 03h VITA Standards Organization (VSO) (www.vita.com)
+ * DCh DCMI Specifications (www.intel.com/go/dcmi)
+ * all other Reserved
+ *
+ * When this network function is used, the ID for the defining body occupies
+ * the first data byte in a request, and the second data byte (following the
+ * completion code) in a response.
+ *
+ * @tparam Handler - implicitly specified callback function type
+ * @param prio - priority at which to register; see api.hpp
+ * @param netFn - the IPMI net function number to register
+ * @param cmd - the IPMI command number to register
+ * @param priv - the IPMI user privilige required for this command
+ * @param handler - the callback function that will handle this request
+ *
+ * @return bool - success of registering the handler
+ *
+ */
+template <typename Handler>
+void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
+                          Handler&& handler)
+{
+    auto h = ipmi::makeHandler(handler);
+    impl::registerGroupHandler(prio, group, cmd, priv, h);
+}
+
+/**
+ * @brief register a IPMI OEM IANA handler
+ *
+ * From IPMI spec Network Function Codes Table (Row 2Eh):
+ * The first three data bytes of requests and responses under this network
+ * function explicitly identify the OEM or non-IPMI group that specifies the
+ * command functionality. While the OEM or non-IPMI group defines the
+ * functional semantics for the cmd and remaining data fields, the cmd field
+ * is required to hold the same value in requests and responses for a given
+ * operation in order to be supported under the IPMI message handling and
+ * transport mechanisms.
+ *
+ * When this network function is used, the IANA Enterprise Number for the
+ * defining body occupies the first three data bytes in a request, and the
+ * first three data bytes following the completion code position in a
+ * response.
+ *
+ * @tparam Handler - implicitly specified callback function type
+ * @param prio - priority at which to register; see api.hpp
+ * @param netFn - the IPMI net function number to register
+ * @param cmd - the IPMI command number to register
+ * @param priv - the IPMI user privilige required for this command
+ * @param handler - the callback function that will handle this request
+ *
+ * @return bool - success of registering the handler
+ *
+ */
+template <typename Handler>
+void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
+                        Handler&& handler)
+{
+    auto h = ipmi::makeHandler(handler);
+    impl::registerOemHandler(prio, iana, cmd, priv, h);
+}
+
 } // namespace ipmi
+
+#ifdef ALLOW_DEPRECATED_API
+/**
+ * @brief legacy IPMI handler registration function
+ *
+ * This function should be used to register all legacy IPMI handler
+ * functions. This function just behaves just as the legacy registration
+ * mechanism did, silently replacing any existing handler with a new one.
+ *
+ * @param netFn - the IPMI net function number to register
+ * @param cmd - the IPMI command number to register
+ * @param context - ignored
+ * @param handler - the callback function that will handle this request
+ * @param priv - the IPMI user privilige required for this command
+ */
+// [[deprecated("Use ipmi::registerHandler() instead")]]
+void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
+                            ipmi_context_t context, ipmid_callback_t handler,
+                            ipmi_cmd_privilege_t priv);
+
+#endif /* ALLOW_DEPRECATED_API */
