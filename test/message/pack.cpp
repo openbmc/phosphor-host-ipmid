@@ -265,6 +265,21 @@ TEST(PackAdvanced, TupleInts)
     ASSERT_EQ(p.raw, k);
 }
 
+TEST(PackAdvanced, VariantArray)
+{
+    ipmi::message::Payload p;
+    std::variant<std::array<uint8_t, 2>, uint32_t> variant;
+    auto data = std::array<uint8_t, 2>{2, 4};
+    variant = data;
+
+    p.pack(variant);
+    ASSERT_EQ(p.size(), sizeof(data));
+
+    // check that the bytes were correctly packed packed (LSB first)
+    std::vector<uint8_t> k = {2, 4};
+    ASSERT_EQ(p.raw, k);
+}
+
 TEST(PackAdvanced, BoolsnBitfieldsnFixedIntsOhMy)
 {
     // each element will be added, filling the low-order bits first
