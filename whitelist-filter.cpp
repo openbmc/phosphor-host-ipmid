@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <array>
 #include <ipmid/api.hpp>
-#include <ipmid/registration.hpp>
 #include <ipmid/utils.hpp>
 #include <ipmiwhitelist.hpp>
 #include <phosphor-logging/elog-errors.hpp>

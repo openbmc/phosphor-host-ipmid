@@ -2,9 +2,8 @@
 
 #include "fruread.hpp"
 
-#include <ipmid/api.h>
-
 #include <algorithm>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <map>
