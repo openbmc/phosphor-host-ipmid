@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <boost/callable_traits.hpp>
 #include <cstdint>
-#include <ipmid/api.hpp>
+#include <ipmid/api-types.hpp>
 #include <ipmid/message.hpp>
 #include <memory>
 #include <tuple>
@@ -89,6 +89,47 @@ static inline auto makeFilter(const Filter& filter)
 {
     Filter lFilter = filter;
     return makeFilter(std::forward<Filter>(lFilter));
+}
+
+namespace impl
+{
+
+// IPMI command filter registration implementation
+void registerFilter(int prio, ::ipmi::FilterBase::ptr filter);
+
+} // namespace impl
+
+/**
+ * @brief IPMI command filter registration function
+ *
+ * This function should be used to register IPMI command filter functions.
+ * This function just passes the callback to makeFilter, which creates a
+ * wrapper functor object that ultimately calls the callback.
+ *
+ * Filters are called with a ipmi::message::Request shared_ptr on all IPMI
+ * commands in priority order and each filter has the opportunity to reject the
+ * command (by returning an IPMI error competion code.) If all the filters
+ * return success, the actual IPMI command will be executed. Filters can reject
+ * the command for any reason, based on system state, the context, the command
+ * payload, etc.
+ *
+ * @param prio - priority at which to register; see api.hpp
+ * @param filter - the callback function that will handle this request
+ *
+ * @return bool - success of registering the handler
+ */
+template <typename Filter>
+void registerFilter(int prio, Filter&& filter)
+{
+    auto f = ipmi::makeFilter(std::forward<Filter>(filter));
+    impl::registerFilter(prio, f);
+}
+
+template <typename Filter>
+void registerFilter(int prio, const Filter& filter)
+{
+    auto f = ipmi::makeFilter(filter);
+    impl::registerFilter(prio, f);
 }
 
 } // namespace ipmi

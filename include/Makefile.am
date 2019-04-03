@@ -1,12 +1,12 @@
 nobase_include_HEADERS = \
 	ipmid/api.hpp \
+	ipmid/api-types.hpp \
 	ipmid/filter.hpp \
 	ipmid/handler.hpp \
 	ipmid/message.hpp \
 	ipmid/message/pack.hpp \
 	ipmid/message/types.hpp \
 	ipmid/message/unpack.hpp \
-	ipmid/registration.hpp \
 	ipmid/api.h \
 	ipmid/iana.hpp \
 	ipmid/oemopenbmc.hpp \

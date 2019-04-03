@@ -4,11 +4,10 @@
 
 #include "user_channel/channel_layer.hpp"
 
-#include <ipmid/api.h>
-
 #include <bitset>
 #include <cmath>
 #include <fstream>
+#include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
