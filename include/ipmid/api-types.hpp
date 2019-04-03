@@ -445,12 +445,109 @@ static inline auto response(ipmi::Cc cc)
 template <typename... Args>
 static inline auto responseSuccess(Args&&... args)
 {
-    return std::make_tuple(ipmi::ccSuccess,
-                           std::make_optional(std::make_tuple(args...)));
+    return response(ipmi::ccSuccess, args...);
 }
 static inline auto responseSuccess()
 {
-    return std::make_tuple(ipmi::ccSuccess, std::nullopt);
+    return response(ipmi::ccSuccess);
+}
+
+/* helper functions for the various standard error response types */
+static inline auto responseBusy()
+{
+    return response(ccBusy);
+}
+static inline auto responseInvalidCommand()
+{
+    return response(ccInvalidCommand);
+}
+static inline auto responseInvalidCommandOnLun()
+{
+    return response(ccInvalidCommandOnLun);
+}
+static inline auto responseTimeout()
+{
+    return response(ccTimeout);
+}
+static inline auto responseOutOfSpace()
+{
+    return response(ccOutOfSpace);
+}
+static inline auto responseInvalidReservationId()
+{
+    return response(ccInvalidReservationId);
+}
+static inline auto responseReqDataTruncated()
+{
+    return response(ccReqDataTruncated);
+}
+static inline auto responseReqDataLenInvalid()
+{
+    return response(ccReqDataLenInvalid);
+}
+static inline auto responseReqDataLenExceeded()
+{
+    return response(ccReqDataLenExceeded);
+}
+static inline auto responseParmOutOfRange()
+{
+    return response(ccParmOutOfRange);
+}
+static inline auto responseRetBytesUnavailable()
+{
+    return response(ccRetBytesUnavailable);
+}
+static inline auto responseSensorInvalid()
+{
+    return response(ccSensorInvalid);
+}
+static inline auto responseInvalidFieldRequest()
+{
+    return response(ccInvalidFieldRequest);
+}
+static inline auto responseIllegalCommand()
+{
+    return response(ccIllegalCommand);
+}
+static inline auto responseResponseError()
+{
+    return response(ccResponseError);
+}
+static inline auto responseDuplicateRequest()
+{
+    return response(ccDuplicateRequest);
+}
+static inline auto responseCmdFailSdrMode()
+{
+    return response(ccCmdFailSdrMode);
+}
+static inline auto responseCmdFailFwUpdMode()
+{
+    return response(ccCmdFailFwUpdMode);
+}
+static inline auto responseCmdFailInitAgent()
+{
+    return response(ccCmdFailInitAgent);
+}
+static inline auto responseDestinationUnavailable()
+{
+    return response(ccDestinationUnavailable);
+}
+static inline auto responseInsufficientPrivilege()
+{
+    return response(ccInsufficientPrivilege);
+}
+static inline auto responseCommandNotAvailable()
+{
+    return response(ccCommandNotAvailable);
+}
+static inline auto responseCommandDisabled()
+{
+    return response(ccCommandDisabled);
+}
+static inline auto responseUnspecifiedError()
+{
+    return response(ccUnspecifiedError);
 }
 
 } // namespace ipmi
