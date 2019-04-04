@@ -38,86 +38,6 @@ static constexpr uint8_t testPassword = 0x03;
 static constexpr uint8_t passwordKeySize20 = 1;
 static constexpr uint8_t passwordKeySize16 = 0;
 
-/** @struct SetUserAccessReq
- *
- *  Structure for set user access request command (refer spec sec 22.26)
- */
-struct SetUserAccessReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t chNum : 4;
-    uint8_t ipmiEnabled : 1;
-    uint8_t linkAuthEnabled : 1;
-    uint8_t accessCallback : 1;
-    uint8_t bitsUpdate : 1;
-    uint8_t userId : 6;
-    uint8_t reserved1 : 2;
-    uint8_t privilege : 4;
-    uint8_t reserved2 : 4;
-    uint8_t sessLimit : 4; // optional byte 4
-    uint8_t reserved3 : 4;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t bitsUpdate : 1;
-    uint8_t accessCallback : 1;
-    uint8_t linkAuthEnabled : 1;
-    uint8_t ipmiEnabled : 1;
-    uint8_t chNum : 4;
-    uint8_t reserved1 : 2;
-    uint8_t userId : 6;
-    uint8_t reserved2 : 4;
-    uint8_t privilege : 4;
-    uint8_t reserved3 : 4;
-    uint8_t sessLimit : 4; // optional byte 4
-#endif
-
-} __attribute__((packed));
-
-/** @struct GetUserAccessReq
- *
- *  Structure for get user access request command (refer spec sec 22.27)
- */
-struct GetUserAccessReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t chNum : 4;
-    uint8_t reserved1 : 4;
-    uint8_t userId : 6;
-    uint8_t reserved2 : 2;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 4;
-    uint8_t chNum : 4;
-    uint8_t reserved2 : 2;
-    uint8_t userId : 6;
-#endif
-} __attribute__((packed));
-
-/** @struct GetUserAccessResp
- *
- *  Structure for get user access response command (refer spec sec 22.27)
- */
-struct GetUserAccessResp
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t maxChUsers : 6;
-    uint8_t reserved1 : 2;
-    uint8_t enabledUsers : 6;
-    uint8_t enabledStatus : 2;
-    uint8_t fixedUsers : 6;
-    uint8_t reserved2 : 2;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 2;
-    uint8_t maxChUsers : 6;
-    uint8_t enabledStatus : 2;
-    uint8_t enabledUsers : 6;
-    uint8_t reserved2 : 2;
-    uint8_t fixedUsers : 6;
-#endif
-    PrivAccess privAccess;
-} __attribute__((packed));
-
 /** @struct SetUserNameReq
  *
  *  Structure for set user name request command (refer spec sec 22.28)
@@ -183,103 +103,144 @@ struct SetUserPasswordReq
     uint8_t userPassword[maxIpmi20PasswordSize];
 } __attribute__((packed));
 
-ipmi_ret_t ipmiSetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t dataLen, ipmi_context_t context)
+/** @brief implements the set user access command
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param channel - channel number
+ *  @param ipmiEnabled - indicates ipmi messaging state
+ *  @param linkAuthEnabled - indicates link authentication state
+ *  @param accessCallback - indicates callback state
+ *  @param bitsUpdate - indicates update request
+ *  @param reserved1 - skip 2 bits
+ *  @param sessionLimit - unused for now
+ *
+ *  @returns ipmi completion code
+ */
+ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
+                                  uint1_t ipmiEnabled, uint1_t linkAuthEnabled,
+                                  uint1_t accessCallback, uint1_t bitsUpdate,
+                                  uint6_t userId, uint2_t reserved1,
+                                  uint4_t privilege, uint4_t reserved2,
+                                  std::optional<uint8_t> sessionLimit)
 {
-    const SetUserAccessReq* req = static_cast<SetUserAccessReq*>(request);
-    size_t reqLength = *dataLen;
-    *dataLen = 0;
-
-    if (!(reqLength == sizeof(*req) ||
-          (reqLength == (sizeof(*req) - sizeof(uint8_t) /* skip optional*/))))
-    {
-        log<level::DEBUG>("Set user access - Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-    uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (req->reserved1 != 0 || req->reserved2 != 0 || req->reserved3 != 0 ||
-        req->sessLimit != 0 || (!isValidChannel(chNum)) ||
-        (!ipmiUserIsValidPrivilege(req->privilege)) ||
+    uint8_t sessLimit = sessionLimit.value_or(0);
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx);
+    if (reserved1 != 0 || reserved2 != 0 || sessLimit != 0 ||
+        (!isValidChannel(chNum)) ||
+        (!ipmiUserIsValidPrivilege(static_cast<uint8_t>(privilege))) ||
         (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
     {
         log<level::DEBUG>("Set user access - Invalid field in request");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidFieldRequest();
     }
-    if (!ipmiUserIsValidUserId(req->userId))
+    if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
         log<level::DEBUG>("Set user access - Parameter out of range");
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
     }
 
     PrivAccess privAccess = {0};
-    if (req->bitsUpdate)
+    if (bitsUpdate)
     {
-        privAccess.ipmiEnabled = req->ipmiEnabled;
-        privAccess.linkAuthEnabled = req->linkAuthEnabled;
-        privAccess.accessCallback = req->accessCallback;
+        privAccess.ipmiEnabled = static_cast<uint8_t>(ipmiEnabled);
+        privAccess.linkAuthEnabled = static_cast<uint8_t>(linkAuthEnabled);
+        privAccess.accessCallback = static_cast<uint8_t>(accessCallback);
     }
-    privAccess.privilege = req->privilege;
-    return ipmiUserSetPrivilegeAccess(req->userId, chNum, privAccess,
-                                      req->bitsUpdate);
+    privAccess.privilege = static_cast<uint8_t>(privilege);
+    return ipmi::response(
+        ipmiUserSetPrivilegeAccess(static_cast<uint8_t>(userId), chNum,
+                                   privAccess, static_cast<bool>(bitsUpdate)));
 }
 
-ipmi_ret_t ipmiGetUserAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t dataLen, ipmi_context_t context)
+/** @brief implements the set user access command
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param channel - channel number
+ *  @param reserved1 - skip 4 bits
+ *  @param userId - user id
+ *  @param reserved2 - skip 2 bits
+ *
+ *  @returns ipmi completion code plus response data
+ *   - maxChUsers - max channel users
+ *   - reserved1 - skip 2 bits
+ *   - enabledUsers - enabled users count
+ *   - enabledStatus - enabled status
+ *   - fixedUsers - fixed users count
+ *   - reserved2 - skip 2 bits
+ *   - privilege - user privilege
+ *   - ipmiEnabled - ipmi messaging state
+ *   - linkAuthEnabled - link authenticatin state
+ *   - accessCallback - callback state
+ *   - reserved - skip 1 bit
+ */
+ipmi::RspType<uint6_t, // max channel users
+              uint2_t, // reserved1
+
+              uint6_t, // enabled users count
+              uint2_t, // enabled status
+
+              uint6_t, // fixed users count
+              uint2_t, // reserved2
+
+              uint4_t, // privilege
+              uint1_t, // ipmi messaging state
+              uint1_t, // link authentication state
+              uint1_t, // access callback state
+              uint1_t  // reserved3
+              >
+    ipmiGetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
+                      uint4_t reserved1, uint6_t userId, uint2_t reserved2)
 {
-    const GetUserAccessReq* req = static_cast<GetUserAccessReq*>(request);
-    size_t reqLength = *dataLen;
-    ipmi_ret_t retStatus = IPMI_CC_OK;
-
-    *dataLen = 0;
-
-    if (reqLength != sizeof(*req))
-    {
-        log<level::DEBUG>("Get user access - Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-    uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (req->reserved1 != 0 || req->reserved2 != 0 ||
-        (!isValidChannel(chNum)) ||
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx);
+    if (reserved1 != 0 || reserved2 != 0 || (!isValidChannel(chNum)) ||
         (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
     {
         log<level::DEBUG>("Get user access - Invalid field in request");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidFieldRequest();
     }
-    if (!ipmiUserIsValidUserId(req->userId))
+    if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
         log<level::DEBUG>("Get user access - Parameter out of range");
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
     }
 
-    uint8_t maxChUsers = 0, enabledUsers = 0, fixedUsers = 0;
+    uint8_t maxChUsersTmp = 0, enabledUsersTmp = 0, fixedUsersTmp = 0;
+    ipmi::Cc retStatus;
+    retStatus =
+        ipmiUserGetAllCounts(maxChUsersTmp, enabledUsersTmp, fixedUsersTmp);
+    if (retStatus != IPMI_CC_OK)
+    {
+        return ipmi::response(retStatus);
+    }
+
+    uint6_t maxChUsers = maxChUsersTmp;
+    uint6_t enabledUsers = enabledUsersTmp;
+    uint6_t fixedUsers = fixedUsersTmp;
     bool enabledState = false;
-    GetUserAccessResp* resp = static_cast<GetUserAccessResp*>(response);
-
-    std::fill(reinterpret_cast<uint8_t*>(resp),
-              reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
-
-    retStatus = ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers);
+    retStatus =
+        ipmiUserCheckEnabled(static_cast<uint8_t>(userId), enabledState);
     if (retStatus != IPMI_CC_OK)
     {
-        return retStatus;
+        return ipmi::response(retStatus);
     }
 
-    resp->maxChUsers = maxChUsers;
-    resp->enabledUsers = enabledUsers;
-    resp->fixedUsers = fixedUsers;
-
-    retStatus = ipmiUserCheckEnabled(req->userId, enabledState);
+    uint2_t enabledStatus = enabledState ? userIdEnabledViaSetPassword
+                                         : userIdDisabledViaSetPassword;
+    PrivAccess privAccess{};
+    retStatus = ipmiUserGetPrivilegeAccess(static_cast<uint8_t>(userId), chNum,
+                                           privAccess);
     if (retStatus != IPMI_CC_OK)
     {
-        return retStatus;
+        return ipmi::response(retStatus);
     }
-
-    resp->enabledStatus = enabledState ? userIdEnabledViaSetPassword
-                                       : userIdDisabledViaSetPassword;
-    *dataLen = sizeof(*resp);
-    return ipmiUserGetPrivilegeAccess(req->userId, chNum, resp->privAccess);
+    constexpr uint2_t res2Bits = 0;
+    return ipmi::responseSuccess(
+        maxChUsers, res2Bits, enabledUsers, enabledStatus, fixedUsers, res2Bits,
+        static_cast<uint4_t>(privAccess.privilege),
+        static_cast<uint1_t>(privAccess.ipmiEnabled),
+        static_cast<uint1_t>(privAccess.linkAuthEnabled),
+        static_cast<uint1_t>(privAccess.accessCallback),
+        static_cast<uint1_t>(privAccess.reserved));
 }
 
 ipmi_ret_t ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -519,11 +480,13 @@ void registerUserIpmiFunctions() __attribute__((constructor));
 void registerUserIpmiFunctions()
 {
     ipmiUserInit();
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_ACCESS, NULL,
-                           ipmiSetUserAccess, PRIVILEGE_ADMIN);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetUserAccessCommand,
+                          ipmi::Privilege::Admin, ipmiSetUserAccess);
 
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_USER_ACCESS, NULL,
-                           ipmiGetUserAccess, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetUserAccessCommand,
+                          ipmi::Privilege::Operator, ipmiGetUserAccess);
 
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_USER_NAME, NULL,
                            ipmiGetUserName, PRIVILEGE_OPERATOR);
