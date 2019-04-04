@@ -101,6 +101,14 @@ const static constexpr char chassisSMDevAddrProp[] = "SMDeviceAddress";
 const static constexpr char chassisBridgeDevAddrProp[] = "BridgeDeviceAddress";
 static constexpr uint8_t chassisCapFlagMask = 0x0f;
 static constexpr uint8_t chassisCapAddrMask = 0xfe;
+static constexpr const char* powerButtonIntf =
+    "xyz.openbmc_project.Chassis.Buttons.Power";
+static constexpr const char* powerButtonPath =
+    "/xyz/openbmc_project/Chassis/Buttons/Power0";
+static constexpr const char* resetButtonIntf =
+    "xyz.openbmc_project.Chassis.Buttons.Reset";
+static constexpr const char* resetButtonPath =
+    "/xyz/openbmc_project/Chassis/Buttons/Reset0";
 
 typedef struct
 {
@@ -792,161 +800,174 @@ static constexpr uint8_t setPolicyReqLen = 1;
 //----------------------------------------------------------------------
 // Get Chassis Status commands
 //----------------------------------------------------------------------
-ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                   ipmi_request_t request,
-                                   ipmi_response_t response,
-                                   ipmi_data_len_t data_len,
-                                   ipmi_context_t context)
+ipmi::RspType<bool,    // Power is on
+              bool,    // Power overload
+              bool,    // Interlock
+              bool,    // power fault
+              bool,    // power control fault
+              uint2_t, // power restore policy
+              bool,    // reserved
+
+              bool, // AC failed
+              bool, // last power down caused by a Power overload
+              bool, // last power down caused by a power interlock
+              bool, // last power down caused by power fault
+              bool, // last ‘Power is on’ state was entered via IPMI command
+              uint3_t, // reserved
+
+              bool,    // Chassis intrusion active
+              bool,    // Front Panel Lockout active
+              bool,    // Drive Fault
+              bool,    // Cooling/fan fault detected
+              uint2_t, // Chassis Identify State
+              bool,    // Chassis Identify command and state info supported
+              bool,    // reserved
+
+              bool, // Power off button disabled
+              bool, // Reset button disabled
+              bool, // Diagnostic Interrupt button disabled
+              bool, // Standby (sleep) button disabled
+              bool, // Power off button disable allowed
+              bool, // Reset button disable allowed
+              bool, // Diagnostic Interrupt button disable allowed
+              bool  // Standby (sleep) button disable allowed
+              >
+    ipmiGetChassisStatus()
 {
-    const char* objname = "/org/openbmc/control/power0";
-    const char* intf = "org.openbmc.control.Power";
-
-    sd_bus* bus = NULL;
-    sd_bus_message* reply = NULL;
-    int r = 0;
-    int pgood = 0;
-    char* busname = NULL;
-    ipmi_ret_t rc = IPMI_CC_OK;
-    ipmi_get_chassis_status_t chassis_status{};
-
-    uint8_t s = 0;
-
     using namespace chassis::internal;
-    using namespace chassis::internal::cache;
-    using namespace power_policy;
-
-    const auto& powerRestoreSetting = objects.map.at(powerRestoreIntf).front();
-    auto method = dbus.new_method_call(
-        objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
-        powerRestoreSetting.c_str(), ipmi::PROP_INTF, "Get");
-    method.append(powerRestoreIntf, "PowerRestorePolicy");
-    auto resp = dbus.call(method);
-    if (resp.is_method_error())
+    uint2_t restorePolicy = 0;
+    try
     {
-        log<level::ERR>("Error in PowerRestorePolicy Get");
-        report<InternalFailure>();
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        using namespace chassis::internal::cache;
+        using namespace power_policy;
+
+        const auto& powerRestoreSetting =
+            objects.map.at(powerRestoreIntf).front();
+        ipmi::Value result = ipmi::getDbusProperty(
+            dbus,
+            objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
+            powerRestoreSetting.c_str(), powerRestoreIntf,
+            "PowerRestorePolicy");
+        auto powerRestore = RestorePolicy::convertPolicyFromString(
+            std::get<std::string>(result));
+        restorePolicy = dbusToIpmi.at(powerRestore);
     }
-    sdbusplus::message::variant<std::string> result;
-    resp.read(result);
-    auto powerRestore = RestorePolicy::convertPolicyFromString(
-        variant_ns::get<std::string>(result));
-
-    *data_len = 4;
-
-    bus = ipmid_get_sd_bus_connection();
-
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0)
+    catch (const std::exception& e)
     {
-        log<level::ERR>("Failed to get bus name", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+        log<level::ERR>("Failed to fetch PowerRestorePolicy property",
+                        entry("ERROR=%s", e.what()));
+        return ipmi::response(ipmi::ccUnspecifiedError);
     }
 
-    r = sd_bus_get_property(bus, busname, objname, intf, "pgood", NULL, &reply,
-                            "i");
-    if (r < 0)
+    constexpr const char* powerControlObj =
+        "/xyz/openbmc_project/Chassis/Control/Power0";
+    constexpr const char* powerControlIntf =
+        "xyz.openbmc_project.Chassis.Control.Power";
+    bool powerGood = false;
+    try
     {
-        log<level::ERR>("Failed to call sd_bus_get_property",
-                        entry("PROPERTY=%s", "pgood"), entry("ERRNO=0x%X", -r),
-                        entry("BUS=%s", busname), entry("PATH=%s", objname),
-                        entry("INTERFACE=%s", intf));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
-    }
+        auto service =
+            ipmi::getService(dbus, powerControlIntf, powerControlObj);
 
-    r = sd_bus_message_read(reply, "i", &pgood);
-    if (r < 0)
+        ipmi::Value variant = ipmi::getDbusProperty(
+            dbus, service, powerControlObj, powerControlIntf, "pgood");
+        powerGood = static_cast<bool>(std::get<int>(variant));
+    }
+    catch (const std::exception& e)
     {
-        log<level::ERR>("Failed to read sensor:", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+        try
+        {
+            // FIXME: some legacy modules use the older path; try that next
+            constexpr const char* legacyPwrCtrlObj =
+                "/org/openbmc/control/power0";
+            constexpr const char* legacyPwrCtrlIntf =
+                "org.openbmc.control.Power";
+            auto service =
+                ipmi::getService(dbus, legacyPwrCtrlIntf, legacyPwrCtrlObj);
+
+            ipmi::Value variant = ipmi::getDbusProperty(
+                dbus, service, legacyPwrCtrlObj, legacyPwrCtrlIntf, "pgood");
+            powerGood = static_cast<bool>(std::get<int>(variant));
+        }
+        catch (const std::exception& e)
+        {
+            log<level::ERR>("Failed to fetch pgood property",
+                            entry("ERROR=%s", e.what()),
+                            entry("PATH=%s", powerControlObj),
+                            entry("INTERFACE=%s", powerControlIntf));
+            return ipmi::response(ipmi::ccUnspecifiedError);
+        }
     }
-
-    s = dbusToIpmi.at(powerRestore);
-
-    // Current Power State
-    // [7] reserved
-    // [6..5] power restore policy
-    //          00b = chassis stays powered off after AC/mains returns
-    //          01b = after AC returns, power is restored to the state that was
-    //          in effect when AC/mains was lost.
-    //          10b = chassis always powers up after AC/mains returns
-    //          11b = unknow
-    //        Set to 00b, by observing the hardware behavior.
-    //        Do we need to define a dbus property to identify the restore
-    //        policy?
-
-    // [4] power control fault
-    //       1b = controller attempted to turn system power on or off, but
-    //       system did not enter desired state.
-    //       Set to 0b, since We don't support it..
-
-    // [3] power fault
-    //       1b = fault detected in main power subsystem.
-    //       set to 0b. for we don't support it.
-
-    // [2] 1b = interlock (chassis is presently shut down because a chassis
-    //       panel interlock switch is active). (IPMI 1.5)
-    //       set to 0b,  for we don't support it.
-
-    // [1] power overload
-    //      1b = system shutdown because of power overload condition.
-    //       set to 0b,  for we don't support it.
-
-    // [0] power is on
-    //       1b = system power is on
-    //       0b = system power is off(soft-off S4/S5, or mechanical off)
-
-    chassis_status.cur_power_state = ((s & 0x3) << 5) | (pgood & 0x1);
-
-    // Last Power Event
-    // [7..5] – reserved
-    // [4] – 1b = last ‘Power is on’ state was entered via IPMI command
-    // [3] – 1b = last power down caused by power fault
-    // [2] – 1b = last power down caused by a power interlock being activated
-    // [1] – 1b = last power down caused by a Power overload
-    // [0] – 1b = AC failed
-    // set to 0x0,  for we don't support these fields.
-
-    chassis_status.last_power_event = 0;
-
-    // Misc. Chassis State
-    // [7] – reserved
-    // [6] – 1b = Chassis Identify command and state info supported (Optional)
-    //       0b = Chassis Identify command support unspecified via this command.
-    //       (The Get Command Support command , if implemented, would still
-    //       indicate support for the Chassis Identify command)
-    // [5..4] – Chassis Identify State. Mandatory when bit[6] =1b, reserved
-    // (return
-    //          as 00b) otherwise. Returns the present chassis identify state.
-    //           Refer to the Chassis Identify command for more info.
-    //         00b = chassis identify state = Off
-    //         01b = chassis identify state = Temporary(timed) On
-    //         10b = chassis identify state = Indefinite On
-    //         11b = reserved
-    // [3] – 1b = Cooling/fan fault detected
-    // [2] – 1b = Drive Fault
-    // [1] – 1b = Front Panel Lockout active (power off and reset via chassis
-    //       push-buttons disabled.)
-    // [0] – 1b = Chassis Intrusion active
-    //  set to 0,  for we don't support them.
-    chassis_status.misc_power_state = 0;
 
     //  Front Panel Button Capabilities and disable/enable status(Optional)
-    //  set to 0,  for we don't support them.
-    chassis_status.front_panel_button_cap_status = 0;
+    bool powerButtonDisabled = false;
+    constexpr bool powerButtonDisableAllow = true;
+    try
+    {
+        auto service = ipmi::getService(dbus, powerButtonIntf, powerButtonPath);
+        ipmi::Value enabled = ipmi::getDbusProperty(
+            dbus, service, powerButtonPath, powerButtonIntf, "Enabled");
+        powerButtonDisabled = !std::get<bool>(enabled);
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>(e.what());
+        log<level::ERR>("Fail to get power button Enabled property");
+    }
 
-    // Pack the actual response
-    std::memcpy(response, &chassis_status, *data_len);
+    bool resetButtonDisabled = false;
+    constexpr bool resetButtonDisableAllow = true;
+    try
+    {
+        auto service = ipmi::getService(dbus, resetButtonIntf, resetButtonPath);
+        ipmi::Value enabled = ipmi::getDbusProperty(
+            dbus, service, resetButtonPath, resetButtonIntf, "Enabled");
+        resetButtonDisabled = !std::get<bool>(enabled);
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>(e.what());
+        log<level::ERR>("Fail to get reset button Enabled property");
+    }
 
-finish:
-    free(busname);
-    reply = sd_bus_message_unref(reply);
+    // This response has a lot of hard-coded, unsupported fields
+    // They are set to false or 0
+    constexpr bool powerOverload = false;
+    constexpr bool chassisInterlock = false;
+    constexpr bool powerFault = false;
+    constexpr bool powerControlFault = false;
+    constexpr bool powerDownAcFailed = false;
+    constexpr bool powerDownOverload = false;
+    constexpr bool powerDownInterlock = false;
+    constexpr bool powerDownPowerFault = false;
+    constexpr bool powerStatusIPMI = false;
+    constexpr bool chassisIntrusionActive = false;
+    constexpr bool frontPanelLockoutActive = false;
+    constexpr bool driveFault = false;
+    constexpr bool coolingFanFault = false;
+    constexpr bool chassisIdentifySupport = true;
+    constexpr uint2_t chassisIdentifyState(0);
+    constexpr bool diagButtonDisabled = false;
+    constexpr bool sleepButtonDisabled = false;
+    constexpr bool diagButtonDisableAllow = false;
+    constexpr bool sleepButtonDisableAllow = false;
 
-    return rc;
+    return ipmi::responseSuccess(
+        powerGood, powerOverload, chassisInterlock, powerFault,
+        powerControlFault, restorePolicy,
+        false, // reserved
+
+        powerDownAcFailed, powerDownOverload, powerDownInterlock,
+        powerDownPowerFault, powerStatusIPMI,
+        uint3_t(0), // reserved
+
+        chassisIntrusionActive, frontPanelLockoutActive, driveFault,
+        coolingFanFault, chassisIdentifyState, chassisIdentifySupport,
+        false, // reserved
+
+        powerButtonDisabled, resetButtonDisabled, diagButtonDisabled,
+        sleepButtonDisabled, powerButtonDisableAllow, resetButtonDisableAllow,
+        diagButtonDisableAllow, sleepButtonDisableAllow);
 }
 
 //-------------------------------------------------------------
@@ -1705,8 +1726,9 @@ void register_netfn_chassis_functions()
                            PRIVILEGE_OPERATOR);
 
     // <Get Chassis Status>
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_STATUS, NULL,
-                           ipmi_get_chassis_status, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdGetChassisStatus,
+                          ipmi::Privilege::User, ipmiGetChassisStatus);
 
     // <Chassis Control>
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL,
