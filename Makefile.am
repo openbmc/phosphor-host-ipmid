@@ -3,6 +3,14 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 AM_CPPFLAGS = -I$(abs_srcdir) -I$(abs_srcdir)/include
 export AM_CPPFLAGS
 
+if AUTOCONF_CODE_COVERAGE_2019_01_06
+include $(top_srcdir)/aminclude_static.am
+clean-local: code-coverage-clean
+distclean-local: code-coverage-dist-clean
+else
+@CODE_COVERAGE_RULES@
+endif
+
 providersdir = ${libdir}/ipmid-providers
 providers_LTLIBRARIES =
 
@@ -96,8 +104,6 @@ libipmi20_la_SOURCES = \
 	sensordatahandler.cpp \
 	user_channel/channelcommands.cpp \
 	$(libipmi20_BUILT_LIST)
-
-@CODE_COVERAGE_RULES@
 
 check_PROGRAMS =
 XFAIL_TESTS =
