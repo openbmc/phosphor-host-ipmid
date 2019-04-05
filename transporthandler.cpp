@@ -16,6 +16,7 @@
 #include <sdbusplus/timer.hpp>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Network/IP/server.hpp>
 
 #define SYSTEMD_NETWORKD_DBUS 1
 
@@ -31,6 +32,8 @@ const int SIZE_MAC = 18; // xx:xx:xx:xx:xx:xx
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
 
 std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
+
+using sdbusplus::xyz::openbmc_project::Network::server::IP;
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
@@ -762,6 +765,145 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
             std::memcpy(response, &data, sizeof(data));
             *data_len = sizeof(data);
+            break;
+        }
+        case LanParam::IPV6_STATIC_ADDRESSES:
+        case LanParam::IPV6_DYNAMIC_ADDRESSES:
+        {
+            if ((param == LanParam::IPV6_STATIC_ADDRESSES &&
+                 reqptr->parameter_set >= SUPPORTED_V6_STATIC_ADDRS) ||
+                (param == LanParam::IPV6_DYNAMIC_ADDRESSES &&
+                 reqptr->parameter_set >= SUPPORTED_V6_DYNAMIC_ADDRS))
+            {
+                rc = IPMI_CC_PARM_NOT_SUPPORTED;
+                break;
+            }
+
+            enum class SourceType : uint8_t
+            {
+                Static = 0,
+                SLAAC = 1,
+                DHCP = 2,
+            };
+            enum class Status : uint8_t
+            {
+                Active = 0,
+                Disabled = 1,
+                Pending = 2,
+                Failed = 3,
+                Deprecated = 4,
+                Invalid = 5,
+            };
+            struct
+            {
+                uint8_t revision;
+                uint8_t set_selector;
+                uint8_t source_type;
+                uint8_t address[16];
+                uint8_t prefix_length;
+                Status status;
+            } __attribute__((packed)) data{};
+            data.revision = current_revision;
+            data.set_selector = reqptr->parameter_set;
+            data.status = Status::Disabled;
+
+            try
+            {
+                sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+                auto ethDevice = ipmi::getChannelName(channel);
+                if (ethDevice.empty())
+                {
+                    rc = IPMI_CC_INVALID_FIELD_REQUEST;
+                    break;
+                }
+
+                auto rootPath = std::string(ipmi::network::ROOT) + "/" +
+                                ethDevice + "/ipv6";
+                ipmi::ObjectTree objs = ipmi::getAllDbusObjects(
+                    bus, rootPath, ipmi::network::IP_INTERFACE, "");
+                uint8_t idx = 0;
+                for (const auto& obj : objs)
+                {
+                    ipmi::PropertyMap properties = ipmi::getAllDbusProperties(
+                        bus, obj.second.begin()->first, obj.first,
+                        ipmi::network::IP_INTERFACE);
+
+                    SourceType source_type;
+                    IP::AddressOrigin origin =
+                        IP::convertAddressOriginFromString(
+                            std::get<std::string>(properties.at("Origin")));
+                    // Always skip link local
+                    if (origin == IP::AddressOrigin::LinkLocal)
+                    {
+                        continue;
+                    }
+                    // Static requests should only accept static addresses
+                    if (param == LanParam::IPV6_STATIC_ADDRESSES)
+                    {
+                        if (origin == IP::AddressOrigin::Static)
+                        {
+                            source_type = SourceType::Static;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    // Dynamic requests should only accept dynamic addresses
+                    if (param == LanParam::IPV6_DYNAMIC_ADDRESSES)
+                    {
+                        if (origin == IP::AddressOrigin::DHCP)
+                        {
+                            source_type = SourceType::DHCP;
+                        }
+                        else if (origin == IP::AddressOrigin::SLAAC)
+                        {
+                            source_type = SourceType::SLAAC;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
+                    // Skip objects until our index matches
+                    if (idx < reqptr->parameter_set)
+                    {
+                        idx++;
+                        continue;
+                    }
+
+                    const auto& addr =
+                        std::get<std::string>(properties.at("Address"));
+                    if (inet_pton(AF_INET6, addr.c_str(), data.address) != 1)
+                    {
+                        throw std::runtime_error(
+                            "Failed to convert IPv6 string");
+                    }
+                    data.prefix_length =
+                        std::get<uint8_t>(properties.at("PrefixLength"));
+                    data.source_type |= 0b1000000; // Enabled
+                    data.source_type |= static_cast<uint8_t>(source_type);
+                    data.status = Status::Active;
+                    break;
+                }
+
+                std::memcpy(response, &data, sizeof(data));
+                *data_len = sizeof(data);
+            }
+            catch (const std::exception& e)
+            {
+                const std::string e_str =
+                    std::string("lan6_get_addr: ") + e.what();
+                log<level::ERR>(e_str.c_str());
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            catch (...)
+            {
+                log<level::ERR>("lan6_get_addr: Unknown error");
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
             break;
         }
         default:
