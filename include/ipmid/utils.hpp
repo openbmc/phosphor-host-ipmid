@@ -259,6 +259,7 @@ constexpr auto IP_TYPE = "ipv4";
 constexpr auto IPV4_PREFIX = "169.254";
 constexpr auto IPV6_PREFIX = "fe80";
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
+constexpr auto NEIGHBOR_INTERFACE = "xyz.openbmc_project.Network.Neighbor";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 constexpr auto SYSTEMCONFIG_INTERFACE =
     "xyz.openbmc_project.Network.SystemConfiguration";
