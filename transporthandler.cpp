@@ -906,6 +906,235 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             break;
         }
+        case LanParam::IPV6_ROUTER_ADDRESS_CONF_CTRL:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t status;
+            } __attribute__((packed)) data{};
+            data.revision = current_revision;
+            // Status Matrix
+            //   [0] Static Router Addressing enabled
+            //   [1] Dynamic Router Addressing via RA
+            // Static addressing is enabled if DHCP is off
+            try
+            {
+                sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+                auto ethDevice = ipmi::getChannelName(channel);
+                if (ethDevice.empty())
+                {
+                    rc = IPMI_CC_INVALID_FIELD_REQUEST;
+                    break;
+                }
+
+                auto path = std::string(ipmi::network::ROOT) + "/" + ethDevice;
+                auto service = ipmi::getService(
+                    bus, ipmi::network::ETHERNET_INTERFACE, path);
+                auto dhcpEnabled = std::get<bool>(ipmi::getDbusProperty(
+                    bus, service, path, ipmi::network::ETHERNET_INTERFACE,
+                    "DHCPEnabled"));
+                data.status |= dhcpEnabled ? 0b0 : 0b1;
+            }
+            catch (const std::exception& e)
+            {
+                const std::string e_str =
+                    std::string("lan6_router_addr_conf: ") + e.what();
+                log<level::ERR>(e_str.c_str());
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            catch (...)
+            {
+                log<level::ERR>("lan6_router_addr_conf: Unknown error");
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            // Dynamic RA is always on with current networkd
+            data.status |= 0b10;
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
+            break;
+        }
+        case LanParam::IPV6_STATIC_ROUTER_1_IP_ADDR:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t address[16];
+            } __attribute__((packed)) data{};
+            data.revision = current_revision;
+
+            try
+            {
+                sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+                auto ethDevice = ipmi::getChannelName(channel);
+                if (ethDevice.empty())
+                {
+                    rc = IPMI_CC_INVALID_FIELD_REQUEST;
+                    break;
+                }
+
+                auto ethPath =
+                    std::string(ipmi::network::ROOT) + "/" + ethDevice;
+                auto service = ipmi::getService(
+                    bus, ipmi::network::ETHERNET_INTERFACE, ethPath);
+                auto dhcpEnabled = std::get<bool>(ipmi::getDbusProperty(
+                    bus, service, ethPath, ipmi::network::ETHERNET_INTERFACE,
+                    "DHCPEnabled"));
+                if (!dhcpEnabled)
+                {
+                    auto confPath =
+                        std::string(ipmi::network::ROOT) + "/config";
+                    auto gateway6 = std::get<std::string>(ipmi::getDbusProperty(
+                        bus, service, confPath,
+                        ipmi::network::SYSTEMCONFIG_INTERFACE,
+                        "DefaultGateway6"));
+                    if (!gateway6.empty())
+                    {
+                        if (inet_pton(AF_INET6, gateway6.c_str(),
+                                      data.address) != 1)
+                        {
+                            throw std::runtime_error(
+                                "Failed to convert IPv6 string");
+                        }
+                    }
+                }
+            }
+            catch (const std::exception& e)
+            {
+                const std::string e_str =
+                    std::string("lan6_static_router_addr: ") + e.what();
+                log<level::ERR>(e_str.c_str());
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            catch (...)
+            {
+                log<level::ERR>("lan6_static_router_addr: Unknown error");
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
+            break;
+        }
+        case LanParam::IPV6_STATIC_ROUTER_1_MAC_ADDR:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t mac[6];
+            } __attribute__((packed)) data{};
+            data.revision = current_revision;
+
+            try
+            {
+                sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+                auto ethDevice = ipmi::getChannelName(channel);
+                if (ethDevice.empty())
+                {
+                    rc = IPMI_CC_INVALID_FIELD_REQUEST;
+                    break;
+                }
+
+                auto ethPath =
+                    std::string(ipmi::network::ROOT) + "/" + ethDevice;
+                auto service = ipmi::getService(
+                    bus, ipmi::network::ETHERNET_INTERFACE, ethPath);
+                auto dhcpEnabled = std::get<bool>(ipmi::getDbusProperty(
+                    bus, service, ethPath, ipmi::network::ETHERNET_INTERFACE,
+                    "DHCPEnabled"));
+                if (!dhcpEnabled)
+                {
+                    auto confPath =
+                        std::string(ipmi::network::ROOT) + "/config";
+                    auto gateway6 = std::get<std::string>(ipmi::getDbusProperty(
+                        bus, service, confPath,
+                        ipmi::network::SYSTEMCONFIG_INTERFACE,
+                        "DefaultGateway6"));
+                    if (!gateway6.empty())
+                    {
+                        ipmi::ObjectTree objs = ipmi::getAllDbusObjects(
+                            bus, ipmi::network::ROOT,
+                            ipmi::network::NEIGHBOR_INTERFACE,
+                            ethDevice + "/static_neighbor");
+                        for (const auto& obj : objs)
+                        {
+                            ipmi::PropertyMap properties =
+                                ipmi::getAllDbusProperties(
+                                    bus, obj.second.begin()->first, obj.first,
+                                    ipmi::network::NEIGHBOR_INTERFACE);
+
+                            const auto& ip = std::get<std::string>(
+                                properties.at("IPAddress"));
+                            if (ip != gateway6)
+                            {
+                                continue;
+                            }
+
+                            if (sscanf(std::get<std::string>(
+                                           properties.at("MACAddress"))
+                                           .c_str(),
+                                       ipmi::network::MAC_ADDRESS_FORMAT,
+                                       (data.mac), (data.mac + 1),
+                                       (data.mac + 2), (data.mac + 3),
+                                       (data.mac + 4), (data.mac + 5)) < 1)
+                            {
+                                throw std::runtime_error(
+                                    "Failed to parse MAC Address");
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (const std::exception& e)
+            {
+                const std::string e_str =
+                    std::string("lan6_static_router_mac: ") + e.what();
+                log<level::ERR>(e_str.c_str());
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+            catch (...)
+            {
+                log<level::ERR>("lan6_static_router_mac: Unknown error");
+                rc = IPMI_CC_UNSPECIFIED_ERROR;
+            }
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
+            break;
+        }
+        case LanParam::IPV6_STATIC_ROUTER_1_PREFIX_LEN:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t prefix_len;
+            } __attribute__((packed)) data{};
+            data.revision = current_revision;
+            // Prefix length is always 0 since we only support default gateways
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
+            break;
+        }
+        case LanParam::IPV6_STATIC_ROUTER_1_PREFIX_VAL:
+        {
+            struct
+            {
+                uint8_t revision;
+                uint8_t prefix[16];
+            } __attribute__((packed)) data{};
+            data.revision = current_revision;
+            // Prefix is :: since we only support setting default gateways
+
+            std::memcpy(response, &data, sizeof(data));
+            *data_len = sizeof(data);
+            break;
+        }
         default:
             log<level::ERR>("Unsupported parameter",
                             entry("PARAMETER=0x%x", reqptr->parameter));
