@@ -98,8 +98,9 @@ struct ChannelConfig_t
     // with phosphor-dbus interfaces.
     // vlan id is in 12 bits and the 16th bit is for enable mask.
     uint32_t vlanID = ipmi::network::VLAN_ID_MASK;
+    bool needsFlush = false;
+
     uint8_t lan_set_in_progress = SET_COMPLETE;
-    bool flush = false;
 
     void clear()
     {
@@ -109,8 +110,7 @@ struct ChannelConfig_t
         macAddress.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
-        lan_set_in_progress = SET_COMPLETE;
-        flush = false;
+        needsFlush = false;
     }
 };
 
