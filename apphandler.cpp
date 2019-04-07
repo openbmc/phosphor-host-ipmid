@@ -31,7 +31,6 @@
 #include <sdbusplus/message/types.hpp>
 #include <string>
 #include <sys_info_param.hpp>
-#include <transporthandler.hpp>
 #include <tuple>
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
