@@ -215,12 +215,7 @@ using EntityInfoMap = std::map<Id, EntityInfo>;
 
 namespace network
 {
-using ChannelEthMap = std::map<int, std::string>;
-
 constexpr auto MAC_ADDRESS_FORMAT = "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx";
-constexpr auto IP_ADDRESS_FORMAT = "%u.%u.%u.%u";
-constexpr auto PREFIX_FORMAT = "%hhd";
-constexpr auto ADDR_TYPE_FORMAT = "%hhx";
 
 constexpr auto IPV4_ADDRESS_SIZE_BYTE = 4;
 constexpr auto IPV6_ADDRESS_SIZE_BYTE = 16;
@@ -228,20 +223,6 @@ constexpr auto IPV6_ADDRESS_SIZE_BYTE = 16;
 constexpr auto DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
 constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
 
-constexpr auto MAC_ADDRESS_SIZE_BYTE = 6;
-constexpr auto VLAN_SIZE_BYTE = 2;
-constexpr auto IPSRC_SIZE_BYTE = 1;
-constexpr auto BITS_32 = 32;
-constexpr auto MASK_32_BIT = 0xFFFFFFFF;
-constexpr auto VLAN_ID_MASK = 0x00000FFF;
-constexpr auto VLAN_ENABLE_MASK = 0x8000;
-
-enum class IPOrigin : uint8_t
-{
-    UNSPECIFIED = 0,
-    STATIC = 1,
-    DHCP = 2,
-};
-
 } // namespace network
+
 } // namespace ipmi
