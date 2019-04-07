@@ -4,6 +4,7 @@
 #include "user_channel/channel_layer.hpp"
 
 #include <arpa/inet.h>
+#include <netinet/ether.h>
 
 #include <chrono>
 #include <filesystem>
@@ -20,7 +21,6 @@
 // timer for network changes
 std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 
-const int SIZE_MAC = 18; // xx:xx:xx:xx:xx:xx
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
 
 std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
@@ -218,27 +218,25 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 {
                     gateway = channelConf->gateway;
                 }
-
-                inet_pton(AF_INET, gateway.c_str(),
-                          reinterpret_cast<void*>(data));
+                inet_pton(AF_INET, gateway.c_str(), data);
             }
             break;
 
             case LanParam::MAC:
             {
-                auto macObjectInfo =
+                auto macObj =
                     ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
                                         ipmi::network::ROOT, ethdevice);
-
-                auto variant = ipmi::getDbusProperty(
-                    bus, macObjectInfo.second, macObjectInfo.first,
-                    ipmi::network::MAC_INTERFACE, "MACAddress");
-
-                std::string macAddress = variant_ns::get<std::string>(variant);
-
-                sscanf(macAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
-                       (data), (data + 1), (data + 2), (data + 3), (data + 4),
-                       (data + 5));
+                auto macStr = std::get<std::string>(ipmi::getDbusProperty(
+                    bus, macObj.second, macObj.first,
+                    ipmi::network::MAC_INTERFACE, "MACAddress"));
+                const struct ether_addr* mac = ether_aton(macStr.c_str());
+                if (mac == nullptr)
+                {
+                    log<level::ERR>("Got a bad MAC from network daemon");
+                    elog<InternalFailure>();
+                }
+                std::memcpy(data, mac, sizeof(struct ether_addr));
             }
             break;
 
@@ -440,19 +438,14 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         case LanParam::MAC:
         {
-            char mac[SIZE_MAC];
-
-            std::snprintf(mac, SIZE_MAC, ipmi::network::MAC_ADDRESS_FORMAT,
-                          reqptr->data[0], reqptr->data[1], reqptr->data[2],
-                          reqptr->data[3], reqptr->data[4], reqptr->data[5]);
-
-            auto macObjectInfo =
-                ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
-                                    ipmi::network::ROOT, ethdevice);
-
-            ipmi::setDbusProperty(
-                bus, macObjectInfo.second, macObjectInfo.first,
-                ipmi::network::MAC_INTERFACE, "MACAddress", std::string(mac));
+            struct ether_addr mac;
+            std::memcpy(&mac, reqptr->data, sizeof(mac));
+            std::string macStr = ether_ntoa(&mac);
+            auto macObj = ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
+                                              ipmi::network::ROOT, ethdevice);
+            ipmi::setDbusProperty(bus, macObj.second, macObj.first,
+                                  ipmi::network::MAC_INTERFACE, "MACAddress",
+                                  macStr);
         }
         break;
 
