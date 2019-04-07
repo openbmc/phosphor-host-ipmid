@@ -75,7 +75,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             case LanParam::IP:
             {
                 std::string ipaddress;
-                if (channelConf->lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->ipaddr.empty())
                 {
                     try
                     {
@@ -97,7 +97,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         // nothing to do.
                     }
                 }
-                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+                else
                 {
                     ipaddress = channelConf->ipaddr;
                 }
@@ -111,7 +111,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             {
                 std::string networkInterfacePath;
 
-                if (channelConf->lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->ipsrc == ipmi::network::IPOrigin::UNSPECIFIED)
                 {
                     try
                     {
@@ -169,7 +169,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
                     std::memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
                 }
-                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+                else
                 {
                     std::memcpy(data, &(channelConf->ipsrc),
                                 ipmi::network::IPSRC_SIZE_BYTE);
@@ -180,7 +180,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             case LanParam::SUBNET:
             {
                 unsigned long mask{};
-                if (channelConf->lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->netmask.empty())
                 {
                     try
                     {
@@ -206,7 +206,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     std::memcpy(data, &mask,
                                 ipmi::network::IPV4_ADDRESS_SIZE_BYTE);
                 }
-                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+                else
                 {
                     inet_pton(AF_INET, channelConf->netmask.c_str(),
                               reinterpret_cast<void*>(data));
@@ -218,7 +218,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             {
                 std::string gateway;
 
-                if (channelConf->lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->gateway.empty())
                 {
                     try
                     {
@@ -240,7 +240,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         // nothing to do
                     }
                 }
-                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+                else
                 {
                     gateway = channelConf->gateway;
                 }
@@ -253,7 +253,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             case LanParam::MAC:
             {
                 std::string macAddress;
-                if (channelConf->lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->macAddress.empty())
                 {
                     auto macObjectInfo =
                         ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
@@ -265,7 +265,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
                     macAddress = variant_ns::get<std::string>(variant);
                 }
-                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+                else
                 {
                     macAddress = channelConf->macAddress;
                 }
@@ -279,7 +279,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             case LanParam::VLAN:
             {
                 uint16_t vlanID{};
-                if (channelConf->lan_set_in_progress == SET_COMPLETE)
+                if (channelConf->vlanID == ipmi::network::VLAN_ID_MASK)
                 {
                     try
                     {
@@ -307,7 +307,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
                     std::memcpy(data, &vlanID, ipmi::network::VLAN_SIZE_BYTE);
                 }
-                else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+                else
                 {
                     std::memcpy(data, &(channelConf->vlanID),
                                 ipmi::network::VLAN_SIZE_BYTE);
