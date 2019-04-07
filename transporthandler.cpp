@@ -419,9 +419,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
-    char ipaddr[INET_ADDRSTRLEN];
-    char gateway[INET_ADDRSTRLEN];
-
     auto reqptr = reinterpret_cast<const set_lan_t*>(request);
     sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
@@ -438,11 +435,9 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         case LanParam::IP:
         {
-            std::snprintf(ipaddr, INET_ADDRSTRLEN,
-                          ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
-                          reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-
-            channelConf->ipaddr.assign(ipaddr);
+            char ipaddr[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, reqptr->data, ipaddr, sizeof(ipaddr));
+            channelConf->ipaddr = ipaddr;
         }
         break;
 
@@ -494,10 +489,9 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         case LanParam::GATEWAY:
         {
-            std::snprintf(gateway, INET_ADDRSTRLEN,
-                          ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
-                          reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-            channelConf->gateway.assign(gateway);
+            char gateway[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, reqptr->data, gateway, sizeof(gateway));
+            channelConf->gateway = gateway;
         }
         break;
 
