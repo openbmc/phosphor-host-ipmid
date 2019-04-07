@@ -89,10 +89,12 @@ constexpr uint8_t SET_IN_PROGRESS_RESERVED = 3; // Reserved
 const int CHANNEL_MASK = 0x0f;
 const int NUM_CHANNELS = 0x0f;
 
+constexpr uint8_t DEFAULT_PREFIX = 32;
+
 struct ChannelConfig_t
 {
     std::string ipaddr;
-    std::string netmask;
+    std::optional<uint8_t> prefix;
     std::optional<bool> dhcpEnabled;
     std::string gateway;
     // IPMI stores the vlan info in 16 bits,32 bits is to aligned
@@ -105,7 +107,7 @@ struct ChannelConfig_t
     void clear()
     {
         ipaddr.clear();
-        netmask.clear();
+        prefix.reset();
         dhcpEnabled.reset();
         gateway.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
