@@ -17,13 +17,6 @@
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 
-#define SYSTEMD_NETWORKD_DBUS 1
-
-#ifdef SYSTEMD_NETWORKD_DBUS
-#include <mapper.h>
-#include <systemd/sd-bus.h>
-#endif
-
 // timer for network changes
 std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 
