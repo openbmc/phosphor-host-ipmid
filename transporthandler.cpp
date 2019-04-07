@@ -51,6 +51,39 @@ struct ChannelConfig_t* getChannelConfig(int channel)
     return channelConfig[channel].get();
 }
 
+/** @brief Determines the ethernet interface name corresponding to a channel
+ *
+ *  @param[in] channel - The channel id corresponding to an ethernet interface
+ *  @return Ethernet interface name
+ */
+std::string getIntf(int channel)
+{
+    auto intf = ipmi::getChannelName(channel);
+    if (intf.empty())
+    {
+        log<level::ERR>("Missing ethernet interface for channel",
+                        entry("CHANNEL=%d", channel));
+        elog<InternalFailure>();
+    }
+    return intf;
+}
+
+/** @brief Determines if the ethernet interface is using DHCP
+ *
+ *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] channel - The channel id corresponding to an ethernet interface
+ *  @return True if DHCP is enabled, false otherwise
+ */
+bool getDHCPProperty(sdbusplus::bus::bus& bus, int channel)
+{
+    auto intf = getIntf(channel);
+    auto ethObj = ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
+                                      ipmi::network::ROOT, intf);
+    return std::get<bool>(ipmi::getDbusProperty(
+        bus, ethObj.second, ethObj.first, ipmi::network::ETHERNET_INTERFACE,
+        "DHCPEnabled"));
+}
+
 // Helper Function to get IP Address/NetMask/Gateway/MAC Address from Network
 // Manager or Cache based on Set-In-Progress State
 ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
@@ -109,63 +142,11 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::IPSRC:
             {
-                std::string networkInterfacePath;
-
                 if (channelConf->ipsrc == ipmi::network::IPOrigin::UNSPECIFIED)
                 {
-                    try
-                    {
-                        ipmi::ObjectTree ancestorMap;
-                        // if the system is having ip object,then
-                        // get the IP object.
-                        auto ipObject = ipmi::getDbusObject(
-                            bus, ipmi::network::IP_INTERFACE,
-                            ipmi::network::ROOT, ethIP);
-
-                        // Get the parent interface of the IP object.
-                        try
-                        {
-                            ipmi::InterfaceList interfaces;
-                            interfaces.emplace_back(
-                                ipmi::network::ETHERNET_INTERFACE);
-
-                            ancestorMap = ipmi::getAllAncestors(
-                                bus, ipObject.first, std::move(interfaces));
-                        }
-                        catch (InternalFailure& e)
-                        {
-                            // if unable to get the parent interface
-                            // then commit the error and return.
-                            log<level::ERR>(
-                                "Unable to get the parent interface",
-                                entry("PATH=%s", ipObject.first.c_str()),
-                                entry("INTERFACE=%s",
-                                      ipmi::network::ETHERNET_INTERFACE));
-                            break;
-                        }
-                        // for an ip object there would be single parent
-                        // interface.
-                        networkInterfacePath = ancestorMap.begin()->first;
-                    }
-                    catch (InternalFailure& e)
-                    {
-                        // if there is no ip configured on the system,then
-                        // get the network interface object.
-                        auto networkInterfaceObject = ipmi::getDbusObject(
-                            bus, ipmi::network::ETHERNET_INTERFACE,
-                            ipmi::network::ROOT, ethdevice);
-
-                        networkInterfacePath = networkInterfaceObject.first;
-                    }
-
-                    auto variant = ipmi::getDbusProperty(
-                        bus, ipmi::network::SERVICE, networkInterfacePath,
-                        ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled");
-
-                    auto dhcpEnabled = variant_ns::get<bool>(variant);
-                    // As per IPMI spec 2=>DHCP, 1=STATIC
-                    auto ipsrc = dhcpEnabled ? ipmi::network::IPOrigin::DHCP
-                                             : ipmi::network::IPOrigin::STATIC;
+                    auto ipsrc = getDHCPProperty(bus, channel)
+                                     ? ipmi::network::IPOrigin::DHCP
+                                     : ipmi::network::IPOrigin::STATIC;
 
                     std::memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
                 }
