@@ -93,7 +93,6 @@ struct ChannelConfig_t
     ipmi::network::IPOrigin ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
     std::string netmask;
     std::string gateway;
-    std::string macAddress;
     // IPMI stores the vlan info in 16 bits,32 bits is to aligned
     // with phosphor-dbus interfaces.
     // vlan id is in 12 bits and the 16th bit is for enable mask.
@@ -106,7 +105,6 @@ struct ChannelConfig_t
         ipaddr.clear();
         netmask.clear();
         gateway.clear();
-        macAddress.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
         ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
         lan_set_in_progress = SET_COMPLETE;
