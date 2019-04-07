@@ -269,13 +269,6 @@ constexpr auto VLAN_CREATE_INTERFACE =
     "xyz.openbmc_project.Network.VLAN.Create";
 constexpr auto VLAN_INTERFACE = "xyz.openbmc_project.Network.VLAN";
 
-/* @brief converts the given subnet into prefix notation.
- * @param[in] addressFamily - IP address family(AF_INET/AF_INET6).
- * @param[in] mask - Subnet Mask.
- * @returns prefix.
- */
-uint8_t toPrefix(int addressFamily, const std::string& subnetMask);
-
 /** @brief Sets the ip on the system.
  *  @param[in] bus - DBUS Bus Object.
  *  @param[in] service - Dbus service name.
