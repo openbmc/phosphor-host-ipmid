@@ -252,23 +252,15 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::MAC:
             {
-                std::string macAddress;
-                if (channelConf->macAddress.empty())
-                {
-                    auto macObjectInfo =
-                        ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
-                                            ipmi::network::ROOT, ethdevice);
+                auto macObjectInfo =
+                    ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
+                                        ipmi::network::ROOT, ethdevice);
 
-                    auto variant = ipmi::getDbusProperty(
-                        bus, macObjectInfo.second, macObjectInfo.first,
-                        ipmi::network::MAC_INTERFACE, "MACAddress");
+                auto variant = ipmi::getDbusProperty(
+                    bus, macObjectInfo.second, macObjectInfo.first,
+                    ipmi::network::MAC_INTERFACE, "MACAddress");
 
-                    macAddress = variant_ns::get<std::string>(variant);
-                }
-                else
-                {
-                    macAddress = channelConf->macAddress;
-                }
+                std::string macAddress = variant_ns::get<std::string>(variant);
 
                 sscanf(macAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
                        (data), (data + 1), (data + 2), (data + 3), (data + 4),
@@ -477,8 +469,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             ipmi::setDbusProperty(
                 bus, macObjectInfo.second, macObjectInfo.first,
                 ipmi::network::MAC_INTERFACE, "MACAddress", std::string(mac));
-
-            channelConf->macAddress = mac;
         }
         break;
 
