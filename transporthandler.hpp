@@ -1,7 +1,9 @@
 #pragma once
 
 #include <ipmid/types.hpp>
+#include <optional>
 #include <string>
+
 // IPMI commands for Transport net functions.
 enum ipmi_netfn_storage_cmds
 {
@@ -90,8 +92,8 @@ const int NUM_CHANNELS = 0x0f;
 struct ChannelConfig_t
 {
     std::string ipaddr;
-    ipmi::network::IPOrigin ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
     std::string netmask;
+    std::optional<bool> dhcpEnabled;
     std::string gateway;
     // IPMI stores the vlan info in 16 bits,32 bits is to aligned
     // with phosphor-dbus interfaces.
@@ -104,9 +106,9 @@ struct ChannelConfig_t
     {
         ipaddr.clear();
         netmask.clear();
+        dhcpEnabled.reset();
         gateway.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
-        ipsrc = ipmi::network::IPOrigin::UNSPECIFIED;
         lan_set_in_progress = SET_COMPLETE;
         flush = false;
     }

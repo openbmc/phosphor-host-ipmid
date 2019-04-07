@@ -135,19 +135,19 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::IPSRC:
             {
-                if (channelConf->ipsrc == ipmi::network::IPOrigin::UNSPECIFIED)
+                bool dhcpEnabled;
+                if (!channelConf->dhcpEnabled)
                 {
-                    auto ipsrc = getDHCPProperty(bus, channel)
-                                     ? ipmi::network::IPOrigin::DHCP
-                                     : ipmi::network::IPOrigin::STATIC;
-
-                    std::memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
+                    dhcpEnabled = getDHCPProperty(bus, channel);
                 }
                 else
                 {
-                    std::memcpy(data, &(channelConf->ipsrc),
-                                ipmi::network::IPSRC_SIZE_BYTE);
+                    dhcpEnabled = *channelConf->dhcpEnabled;
                 }
+
+                auto ipsrc = dhcpEnabled ? ipmi::network::IPOrigin::DHCP
+                                         : ipmi::network::IPOrigin::STATIC;
+                std::memcpy(data, &ipsrc, ipmi::network::IPSRC_SIZE_BYTE);
             }
             break;
 
@@ -422,9 +422,17 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         case LanParam::IPSRC:
         {
-            uint8_t ipsrc{};
+            ipmi::network::IPOrigin ipsrc;
             std::memcpy(&ipsrc, reqptr->data, ipmi::network::IPSRC_SIZE_BYTE);
-            channelConf->ipsrc = static_cast<ipmi::network::IPOrigin>(ipsrc);
+            switch (ipsrc)
+            {
+                case ipmi::network::IPOrigin::DHCP:
+                    channelConf->dhcpEnabled = true;
+                case ipmi::network::IPOrigin::STATIC:
+                    channelConf->dhcpEnabled = false;
+                default:
+                    return IPMI_CC_PARM_NOT_SUPPORTED;
+            }
         }
         break;
 
@@ -671,9 +679,24 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
+const char* boolToStr(bool b)
+{
+    return b ? "true" : "false";
+}
+
+const char* boolToStr(std::optional<bool> maybeB)
+{
+    if (maybeB)
+    {
+        return boolToStr(*maybeB);
+    }
+    return "unspecified";
+}
+
 void applyChanges(int channel)
 {
     std::string ipaddress;
+    bool dhcpEnabled{};
     std::string gateway;
     uint8_t prefix{};
     uint32_t vlanID{};
@@ -700,7 +723,7 @@ void applyChanges(int channel)
                          entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
                          entry("GATEWAY=%s", channelConf->gateway.c_str()),
                          entry("VLAN=%d", channelConf->vlanID),
-                         entry("IPSRC=%d", channelConf->ipsrc));
+                         entry("DHCP=%s", boolToStr(channelConf->dhcpEnabled)));
         if (channelConf->vlanID != ipmi::network::VLAN_ID_MASK)
         {
             // get the first twelve bits which is vlan id
@@ -711,7 +734,7 @@ void applyChanges(int channel)
 
         // if the asked ip src is DHCP then not interested in
         // any given data except vlan.
-        if (channelConf->ipsrc != ipmi::network::IPOrigin::DHCP)
+        if (!channelConf->dhcpEnabled.value_or(false))
         {
             // always get the system object
             systemObject =
@@ -770,18 +793,13 @@ void applyChanges(int channel)
             }
 
             // get the configured mode on the system.
-            auto enableDHCP = variant_ns::get<bool>(ipmi::getDbusProperty(
+            auto currentDHCP = variant_ns::get<bool>(ipmi::getDbusProperty(
                 bus, ipmi::network::SERVICE, networkInterfacePath,
                 ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled"));
 
             // if ip address source is not given then get the ip source mode
             // from the system so that it can be applied later.
-            if (channelConf->ipsrc == ipmi::network::IPOrigin::UNSPECIFIED)
-            {
-                channelConf->ipsrc = (enableDHCP)
-                                         ? ipmi::network::IPOrigin::DHCP
-                                         : ipmi::network::IPOrigin::STATIC;
-            }
+            dhcpEnabled = channelConf->dhcpEnabled.value_or(currentDHCP);
 
             // check whether user has given all the data
             // or the configured system interface is dhcp enabled,
@@ -789,7 +807,7 @@ void applyChanges(int channel)
             if ((!channelConf->ipaddr.empty() &&
                  !channelConf->netmask.empty() &&
                  !channelConf->gateway.empty()) ||
-                (enableDHCP)) // configured system interface mode = DHCP
+                currentDHCP) // configured system interface mode = DHCP
             {
                 // convert mask into prefix
                 ipaddress = channelConf->ipaddr;
@@ -887,7 +905,7 @@ void applyChanges(int channel)
             networkInterfacePath = networkInterfaceObject.first;
         }
 
-        if (channelConf->ipsrc == ipmi::network::IPOrigin::DHCP)
+        if (dhcpEnabled)
         {
             ipmi::setDbusProperty(
                 bus, ipmi::network::SERVICE, networkInterfacePath,
@@ -922,7 +940,7 @@ void applyChanges(int channel)
             "Failed to set network data", entry("PREFIX=%d", prefix),
             entry("ADDRESS=%s", ipaddress.c_str()),
             entry("GATEWAY=%s", gateway.c_str()), entry("VLANID=%d", vlanID),
-            entry("IPSRC=%d", channelConf->ipsrc));
+            entry("DHCP=%s", boolToStr(dhcpEnabled)));
 
         commit<InternalFailure>();
     }
