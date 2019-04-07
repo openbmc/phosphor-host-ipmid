@@ -251,40 +251,36 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::VLAN:
             {
-                uint16_t vlanID{};
-                if (channelConf->vlanID == ipmi::network::VLAN_ID_MASK)
+                uint16_t vlan;
+                if (!channelConf->vlan)
                 {
-                    try
+                    auto ipObjectInfo = ipmi::getIPObject(
+                        bus, ipmi::network::IP_INTERFACE, ipmi::network::ROOT,
+                        ipmi::network::IP_TYPE);
+
+                    uint32_t ret = ipmi::network::getVLAN(ipObjectInfo.first);
+                    if (ret > ipmi::network::VLAN_VALUE_MASK)
                     {
-                        auto ipObjectInfo = ipmi::getIPObject(
-                            bus, ipmi::network::IP_INTERFACE,
-                            ipmi::network::ROOT, ipmi::network::IP_TYPE);
-
-                        vlanID = static_cast<uint16_t>(
-                            ipmi::network::getVLAN(ipObjectInfo.first));
-
-                        vlanID = htole16(vlanID);
-
-                        if (vlanID)
-                        {
-                            // Enable the 16th bit
-                            vlanID |= htole16(ipmi::network::VLAN_ENABLE_MASK);
-                        }
+                        log<level::ERR>("DBUS returned an invalid VLAN",
+                                        entry("VLAN=%" PRIu32, ret));
+                        elog<InternalFailure>();
                     }
-                    // ignore the exception, as it is a valid condition that
-                    // the system is not configured with any IP.
-                    catch (InternalFailure& e)
+                    vlan = ret;
+                    if (vlan != 0)
                     {
-                        // nothing to do
+                        vlan |= ipmi::network::VLAN_ENABLE_FLAG;
                     }
-
-                    std::memcpy(data, &vlanID, ipmi::network::VLAN_SIZE_BYTE);
                 }
                 else
                 {
-                    std::memcpy(data, &(channelConf->vlanID),
-                                ipmi::network::VLAN_SIZE_BYTE);
+                    vlan = std::get<uint16_t>(*channelConf->vlan);
+                    if (std::get<bool>(*channelConf->vlan))
+                    {
+                        vlan |= ipmi::network::VLAN_ENABLE_FLAG;
+                    }
                 }
+                vlan = htole16(vlan);
+                std::memcpy(data, &vlan, sizeof(vlan));
             }
             break;
 
@@ -481,13 +477,11 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         case LanParam::VLAN:
         {
-            uint16_t vlan{};
-            std::memcpy(&vlan, reqptr->data, ipmi::network::VLAN_SIZE_BYTE);
-            // We are not storing the enable bit
-            // We assume that ipmitool always send enable
-            // bit as 1.
+            uint16_t vlan;
+            std::memcpy(&vlan, reqptr->data, sizeof(vlan));
             vlan = le16toh(vlan);
-            channelConf->vlanID = vlan;
+            channelConf->vlan.emplace(vlan & ipmi::network::VLAN_ENABLE_FLAG,
+                                      vlan & ipmi::network::VLAN_VALUE_MASK);
             return checkAndUpdateNetwork(channel);
         }
 
@@ -680,7 +674,7 @@ void applyChanges(int channel)
     std::string ipaddress;
     bool dhcpEnabled{};
     uint8_t prefix = DEFAULT_PREFIX;
-    uint32_t vlanID{};
+    uint16_t vlan{};
     std::string networkInterfacePath;
     ipmi::DbusObjectInfo ipObject;
 
@@ -698,12 +692,9 @@ void applyChanges(int channel)
     {
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        if (channelConf->vlanID != ipmi::network::VLAN_ID_MASK)
+        if (channelConf->vlan && std::get<bool>(*channelConf->vlan))
         {
-            // get the first twelve bits which is vlan id
-            // not interested in rest of the bits.
-            channelConf->vlanID = le32toh(channelConf->vlanID);
-            vlanID = channelConf->vlanID & ipmi::network::VLAN_ID_MASK;
+            vlan = std::get<uint16_t>(*channelConf->vlan);
         }
 
         // if the asked ip src is DHCP then not interested in
@@ -848,10 +839,10 @@ void applyChanges(int channel)
         ipmi::deleteAllDbusObjects(bus, ipmi::network::ROOT,
                                    ipmi::network::IP_INTERFACE, ethIp);
 
-        if (vlanID)
+        if (vlan)
         {
             ipmi::network::createVLAN(bus, ipmi::network::SERVICE,
-                                      ipmi::network::ROOT, ethdevice, vlanID);
+                                      ipmi::network::ROOT, ethdevice, vlan);
 
             auto networkInterfaceObject = ipmi::getDbusObject(
                 bus, ipmi::network::VLAN_INTERFACE, ipmi::network::ROOT);
@@ -882,10 +873,11 @@ void applyChanges(int channel)
     }
     catch (sdbusplus::exception::exception& e)
     {
-        log<level::ERR>(
-            "Failed to set network data", entry("PREFIX=%" PRIu8, prefix),
-            entry("ADDRESS=%s", ipaddress.c_str()), entry("VLANID=%d", vlanID),
-            entry("DHCP=%s", dhcpEnabled ? "true" : "false"));
+        log<level::ERR>("Failed to set network data",
+                        entry("PREFIX=%" PRIu8, prefix),
+                        entry("ADDRESS=%s", ipaddress.c_str()),
+                        entry("VLANID=%" PRIu16, vlan),
+                        entry("DHCP=%s", dhcpEnabled ? "true" : "false"));
 
         commit<InternalFailure>();
     }

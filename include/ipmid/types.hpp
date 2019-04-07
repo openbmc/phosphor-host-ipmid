@@ -228,8 +228,8 @@ constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
 constexpr auto MAC_ADDRESS_SIZE_BYTE = 6;
 constexpr auto VLAN_SIZE_BYTE = 2;
 constexpr auto IPSRC_SIZE_BYTE = 1;
-constexpr auto VLAN_ID_MASK = 0x00000FFF;
-constexpr auto VLAN_ENABLE_MASK = 0x8000;
+constexpr uint16_t VLAN_VALUE_MASK = 0x0FFF;
+constexpr uint16_t VLAN_ENABLE_FLAG = 0x8000;
 
 enum class IPOrigin : uint8_t
 {

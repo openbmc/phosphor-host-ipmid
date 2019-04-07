@@ -3,6 +3,7 @@
 #include <ipmid/types.hpp>
 #include <optional>
 #include <string>
+#include <tuple>
 
 // IPMI commands for Transport net functions.
 enum ipmi_netfn_storage_cmds
@@ -96,10 +97,7 @@ struct ChannelConfig_t
     std::string ipaddr;
     std::optional<uint8_t> prefix;
     std::optional<bool> dhcpEnabled;
-    // IPMI stores the vlan info in 16 bits,32 bits is to aligned
-    // with phosphor-dbus interfaces.
-    // vlan id is in 12 bits and the 16th bit is for enable mask.
-    uint32_t vlanID = ipmi::network::VLAN_ID_MASK;
+    std::optional<std::tuple<bool, uint16_t>> vlan;
     uint8_t lan_set_in_progress = SET_COMPLETE;
     bool flush = false;
 
@@ -108,7 +106,7 @@ struct ChannelConfig_t
         ipaddr.clear();
         prefix.reset();
         dhcpEnabled.reset();
-        vlanID = ipmi::network::VLAN_ID_MASK;
+        vlan.reset();
         lan_set_in_progress = SET_COMPLETE;
         flush = false;
     }
