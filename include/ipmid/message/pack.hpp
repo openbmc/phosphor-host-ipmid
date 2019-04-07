@@ -20,6 +20,7 @@
 #include <memory>
 #include <optional>
 #include <phosphor-logging/log.hpp>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -244,6 +245,18 @@ struct PackSingle<std::vector<uint8_t>>
     }
 };
 
+/** @brief Specialization of PackSingle for std::vector<uint8_t> */
+template <>
+struct PackSingle<std::string_view>
+{
+    static int op(Payload& p, const std::string_view& t)
+    {
+        p.raw.reserve(p.raw.size() + t.size());
+        p.raw.insert(p.raw.end(), t.begin(), t.end());
+        return 0;
+    }
+};
+
 /** @brief Specialization of PackSingle for std::variant<T, N> */
 template <typename... T>
 struct PackSingle<std::variant<T...>>
@@ -255,6 +268,18 @@ struct PackSingle<std::variant<T...>>
                 return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
             },
             v);
+    }
+};
+
+/** @brief Specialization of PackSingle for Payload */
+template <>
+struct PackSingle<Payload>
+{
+    static int op(Payload& p, const Payload& t)
+    {
+        p.raw.reserve(p.raw.size() + t.raw.size());
+        p.raw.insert(p.raw.end(), t.raw.begin(), t.raw.end());
+        return 0;
     }
 };
 
