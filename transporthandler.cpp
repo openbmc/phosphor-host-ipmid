@@ -4,6 +4,7 @@
 #include "user_channel/channel_layer.hpp"
 
 #include <arpa/inet.h>
+#include <endian.h>
 #include <netinet/ether.h>
 
 #include <chrono>
@@ -75,6 +76,37 @@ bool getDHCPProperty(sdbusplus::bus::bus& bus, int channel)
     return std::get<bool>(ipmi::getDbusProperty(
         bus, ethObj.second, ethObj.first, ipmi::network::ETHERNET_INTERFACE,
         "DHCPEnabled"));
+}
+
+/** @brief Turns a prefix into a netmask
+ *
+ *  @param[in] prefix - The prefix length
+ *  @return The netmask
+ */
+in_addr prefixToNetmask(uint8_t prefix)
+{
+    if (prefix > 32)
+    {
+        log<level::ERR>("Invalid prefix");
+        elog<InternalFailure>();
+    }
+    return {htobe32(~UINT32_C(0) << (32 - prefix))};
+}
+
+/** @brief Turns a a netmask into a prefix length
+ *
+ *  @param[in] netmask - The netmask in byte form
+ *  @return The prefix length
+ */
+uint8_t netmaskToPrefix(in_addr netmask)
+{
+    uint32_t x = be32toh(netmask.s_addr);
+    if ((~x & (~x + 1)) != 0)
+    {
+        log<level::ERR>("Invalid netmask");
+        elog<InternalFailure>();
+    }
+    return 32 - __builtin_ctz(x);
 }
 
 // Helper Function to get IP Address/NetMask/Gateway/MAC Address from Network
@@ -153,8 +185,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::SUBNET:
             {
-                unsigned long mask{};
-                if (channelConf->netmask.empty())
+                uint8_t prefix = 0;
+                if (channelConf->prefix == UNSET_PREFIX)
                 {
                     try
                     {
@@ -166,10 +198,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             bus, ipObjectInfo.second, ipObjectInfo.first,
                             ipmi::network::IP_INTERFACE);
 
-                        auto prefix = variant_ns::get<uint8_t>(
-                            properties["PrefixLength"]);
-                        mask = ipmi::network::MASK_32_BIT;
-                        mask = htonl(mask << (ipmi::network::BITS_32 - prefix));
+                        prefix = std::get<uint8_t>(properties["PrefixLength"]);
                     }
                     // ignore the exception, as it is a valid condition that
                     // the system is not configured with any IP.
@@ -177,14 +206,14 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     {
                         // nothing to do
                     }
-                    std::memcpy(data, &mask,
-                                ipmi::network::IPV4_ADDRESS_SIZE_BYTE);
                 }
                 else
                 {
-                    inet_pton(AF_INET, channelConf->netmask.c_str(),
-                              reinterpret_cast<void*>(data));
+                    prefix = channelConf->prefix;
                 }
+
+                in_addr netmask = prefixToNetmask(prefix);
+                std::memcpy(data, &netmask, sizeof(netmask));
             }
             break;
 
@@ -391,7 +420,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = 0;
 
     char ipaddr[INET_ADDRSTRLEN];
-    char netmask[INET_ADDRSTRLEN];
     char gateway[INET_ADDRSTRLEN];
 
     auto reqptr = reinterpret_cast<const set_lan_t*>(request);
@@ -449,10 +477,16 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         case LanParam::SUBNET:
         {
-            std::snprintf(netmask, INET_ADDRSTRLEN,
-                          ipmi::network::IP_ADDRESS_FORMAT, reqptr->data[0],
-                          reqptr->data[1], reqptr->data[2], reqptr->data[3]);
-            channelConf->netmask.assign(netmask);
+            try
+            {
+                in_addr netmask;
+                std::memcpy(&netmask, reqptr->data, sizeof(netmask));
+                channelConf->prefix = netmaskToPrefix(netmask);
+            }
+            catch (...)
+            {
+                return IPMI_CC_INVALID_FIELD_REQUEST;
+            }
         }
         break;
 
@@ -771,13 +805,13 @@ void applyChanges(int channel)
             // or the configured system interface is dhcp enabled,
             // in both of the cases get the values from the cache.
             if ((!channelConf->ipaddr.empty() &&
-                 !channelConf->netmask.empty() &&
+                 channelConf->prefix != UNSET_PREFIX &&
                  !channelConf->gateway.empty()) ||
                 currentDHCP) // configured system interface mode = DHCP
             {
                 // convert mask into prefix
                 ipaddress = channelConf->ipaddr;
-                prefix = ipmi::network::toPrefix(AF_INET, channelConf->netmask);
+                prefix = channelConf->prefix;
                 gateway = channelConf->gateway;
             }
             else // asked ip src = static and configured system src = static
@@ -803,11 +837,15 @@ void applyChanges(int channel)
                                           properties["Address"])
                                     : channelConf->ipaddr;
 
-                    prefix = channelConf->netmask.empty()
-                                 ? variant_ns::get<uint8_t>(
-                                       properties["PrefixLength"])
-                                 : ipmi::network::toPrefix(
-                                       AF_INET, channelConf->netmask);
+                    if (channelConf->prefix == UNSET_PREFIX)
+                    {
+                        prefix = variant_ns::get<uint8_t>(
+                            properties["PrefixLength"]);
+                    }
+                    else
+                    {
+                        prefix = channelConf->prefix;
+                    }
                 }
                 catch (InternalFailure& e)
                 {
@@ -903,7 +941,7 @@ void applyChanges(int channel)
     catch (sdbusplus::exception::exception& e)
     {
         log<level::ERR>(
-            "Failed to set network data", entry("PREFIX=%d", prefix),
+            "Failed to set network data", entry("PREFIX=%" PRIu8, prefix),
             entry("ADDRESS=%s", ipaddress.c_str()),
             entry("GATEWAY=%s", gateway.c_str()), entry("VLANID=%d", vlanID),
             entry("DHCP=%s", dhcpEnabled ? "true" : "false"));
