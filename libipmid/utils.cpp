@@ -481,38 +481,6 @@ void createVLAN(sdbusplus::bus::bus& bus, const std::string& service,
     }
 }
 
-uint8_t toPrefix(int addressFamily, const std::string& subnetMask)
-{
-    if (addressFamily == AF_INET6)
-    {
-        return 0;
-    }
-
-    uint32_t buff{};
-
-    auto rc = inet_pton(addressFamily, subnetMask.c_str(), &buff);
-    if (rc <= 0)
-    {
-        log<level::ERR>("inet_pton failed:",
-                        entry("SUBNETMASK=%s", subnetMask.c_str()));
-        return 0;
-    }
-
-    buff = be32toh(buff);
-    // total no of bits - total no of leading zero == total no of ones
-    if (((sizeof(buff) * 8) - (__builtin_ctz(buff))) ==
-        __builtin_popcount(buff))
-    {
-        return __builtin_popcount(buff);
-    }
-    else
-    {
-        log<level::ERR>("Invalid Mask",
-                        entry("SUBNETMASK=%s", subnetMask.c_str()));
-        return 0;
-    }
-}
-
 uint32_t getVLAN(const std::string& path)
 {
     // Path would be look like
