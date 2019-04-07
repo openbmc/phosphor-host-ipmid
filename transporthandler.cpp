@@ -416,7 +416,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_data_len_t data_len,
                                   ipmi_context_t context)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
 
     auto reqptr = reinterpret_cast<const set_lan_t*>(request);
@@ -438,8 +437,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             char ipaddr[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, reqptr->data, ipaddr, sizeof(ipaddr));
             channelConf->ipaddr = ipaddr;
+            return checkAndUpdateNetwork(channel);
         }
-        break;
 
         case LanParam::IPSRC:
         {
@@ -454,8 +453,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 default:
                     return IPMI_CC_PARM_NOT_SUPPORTED;
             }
+            return checkAndUpdateNetwork(channel);
         }
-        break;
 
         case LanParam::MAC:
         {
@@ -467,8 +466,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             ipmi::setDbusProperty(bus, macObj.second, macObj.first,
                                   ipmi::network::MAC_INTERFACE, "MACAddress",
                                   macStr);
+            return IPMI_CC_OK;
         }
-        break;
 
         case LanParam::SUBNET:
         {
@@ -477,21 +476,21 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 struct in_addr netmask;
                 std::memcpy(&netmask, reqptr->data, sizeof(netmask));
                 channelConf->prefix = netmaskToPrefix(netmask);
+                return checkAndUpdateNetwork(channel);
             }
             catch (...)
             {
                 return IPMI_CC_INVALID_FIELD_REQUEST;
             }
         }
-        break;
 
         case LanParam::GATEWAY:
         {
             char gateway[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, reqptr->data, gateway, sizeof(gateway));
             channelConf->gateway = gateway;
+            return checkAndUpdateNetwork(channel);
         }
-        break;
 
         case LanParam::VLAN:
         {
@@ -502,8 +501,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // bit as 1.
             vlan = le16toh(vlan);
             channelConf->vlanID = vlan;
+            return checkAndUpdateNetwork(channel);
         }
-        break;
 
         case LanParam::INPROGRESS:
         {
@@ -522,18 +521,14 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             {
                 channelConf->lan_set_in_progress = SET_IN_PROGRESS;
             }
+            return checkAndUpdateNetwork(channel);
         }
-        break;
 
         default:
-        {
-            rc = IPMI_CC_PARM_NOT_SUPPORTED;
-            return rc;
-        }
+            return IPMI_CC_PARM_NOT_SUPPORTED;
     }
-    rc = checkAndUpdateNetwork(channel);
 
-    return rc;
+    return IPMI_CC_UNSPECIFIED_ERROR;
 }
 
 struct get_lan_t
