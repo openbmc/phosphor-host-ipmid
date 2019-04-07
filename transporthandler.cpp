@@ -319,11 +319,18 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 rc = IPMI_CC_PARM_OUT_OF_RANGE;
         }
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         commit<InternalFailure>();
         rc = IPMI_CC_UNSPECIFIED_ERROR;
-        return rc;
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>(
+            "Failed to get network data", entry("PARAMETER=%" PRIu8, lan_param),
+            entry("CHANNEL=%d", channel), entry("ERROR=%s", e.what()));
+        commit<InternalFailure>();
+        rc = IPMI_CC_UNSPECIFIED_ERROR;
     }
     return rc;
 }
