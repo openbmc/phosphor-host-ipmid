@@ -97,7 +97,6 @@ struct ChannelConfig_t
     std::string ipaddr;
     uint8_t prefix = UNSET_PREFIX;
     std::optional<bool> dhcpEnabled;
-    std::string gateway;
     // IPMI stores the vlan info in 16 bits,32 bits is to aligned
     // with phosphor-dbus interfaces.
     // vlan id is in 12 bits and the 16th bit is for enable mask.
@@ -110,7 +109,6 @@ struct ChannelConfig_t
         ipaddr.clear();
         prefix = UNSET_PREFIX;
         dhcpEnabled.reset();
-        gateway.clear();
         vlanID = ipmi::network::VLAN_ID_MASK;
         lan_set_in_progress = SET_COMPLETE;
         flush = false;

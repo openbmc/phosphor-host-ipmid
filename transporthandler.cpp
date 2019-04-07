@@ -219,34 +219,14 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::GATEWAY:
             {
-                std::string gateway;
+                auto sysObj = ipmi::getDbusObject(
+                    bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
+                    ipmi::network::ROOT);
 
-                if (channelConf->gateway.empty())
-                {
-                    try
-                    {
-                        auto systemObject = ipmi::getDbusObject(
-                            bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
-                            ipmi::network::ROOT);
+                auto gateway = std::get<std::string>(ipmi::getDbusProperty(
+                    bus, sysObj.second, sysObj.first,
+                    ipmi::network::SYSTEMCONFIG_INTERFACE, "DefaultGateway"));
 
-                        auto systemProperties = ipmi::getAllDbusProperties(
-                            bus, systemObject.second, systemObject.first,
-                            ipmi::network::SYSTEMCONFIG_INTERFACE);
-
-                        gateway = variant_ns::get<std::string>(
-                            systemProperties["DefaultGateway"]);
-                    }
-                    // ignore the exception, as it is a valid condition that
-                    // the system is not configured with any IP.
-                    catch (InternalFailure& e)
-                    {
-                        // nothing to do
-                    }
-                }
-                else
-                {
-                    gateway = channelConf->gateway;
-                }
                 inet_pton(AF_INET, gateway.c_str(), data);
             }
             break;
@@ -490,8 +470,13 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             char gateway[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, reqptr->data, gateway, sizeof(gateway));
-            channelConf->gateway = gateway;
-            return checkAndUpdateNetwork(channel);
+            auto sysObj =
+                ipmi::getDbusObject(bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
+                                    ipmi::network::ROOT);
+            ipmi::setDbusProperty(bus, sysObj.second, sysObj.first,
+                                  ipmi::network::SYSTEMCONFIG_INTERFACE,
+                                  "DefaultGateway", std::string(gateway));
+            return IPMI_CC_OK;
         }
 
         case LanParam::VLAN:
@@ -694,12 +679,10 @@ void applyChanges(int channel)
 {
     std::string ipaddress;
     bool dhcpEnabled{};
-    std::string gateway;
     uint8_t prefix = DEFAULT_PREFIX;
     uint32_t vlanID{};
     std::string networkInterfacePath;
     ipmi::DbusObjectInfo ipObject;
-    ipmi::DbusObjectInfo systemObject;
 
     auto ethdevice = ipmi::getChannelName(channel);
     if (ethdevice.empty())
@@ -727,11 +710,6 @@ void applyChanges(int channel)
         // any given data except vlan.
         if (!channelConf->dhcpEnabled.value_or(false))
         {
-            // always get the system object
-            systemObject =
-                ipmi::getDbusObject(bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
-                                    ipmi::network::ROOT);
-
             // the below code is to determine the mode of the interface
             // as the handling is same, if the system is configured with
             // DHCP or user has given all the data.
@@ -796,14 +774,12 @@ void applyChanges(int channel)
             // or the configured system interface is dhcp enabled,
             // in both of the cases get the values from the cache.
             if ((!channelConf->ipaddr.empty() &&
-                 channelConf->prefix != UNSET_PREFIX &&
-                 !channelConf->gateway.empty()) ||
+                 channelConf->prefix != UNSET_PREFIX) ||
                 currentDHCP) // configured system interface mode = DHCP
             {
                 // convert mask into prefix
                 ipaddress = channelConf->ipaddr;
                 prefix = channelConf->prefix;
-                gateway = channelConf->gateway;
             }
             else // asked ip src = static and configured system src = static
                  // or partially given data.
@@ -845,15 +821,6 @@ void applyChanges(int channel)
                         entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
                         entry("MATCH=%s", ethIp.c_str()));
                 }
-
-                auto systemProperties = ipmi::getAllDbusProperties(
-                    bus, systemObject.second, systemObject.first,
-                    ipmi::network::SYSTEMCONFIG_INTERFACE);
-
-                gateway = channelConf->gateway.empty()
-                              ? variant_ns::get<std::string>(
-                                    systemProperties["DefaultGateway"])
-                              : channelConf->gateway;
             }
         }
 
@@ -919,22 +886,13 @@ void applyChanges(int channel)
                                         networkInterfacePath, ipv4Protocol,
                                         ipaddress, prefix);
             }
-
-            if (!gateway.empty())
-            {
-                ipmi::setDbusProperty(bus, systemObject.second,
-                                      systemObject.first,
-                                      ipmi::network::SYSTEMCONFIG_INTERFACE,
-                                      "DefaultGateway", std::string(gateway));
-            }
         }
     }
     catch (sdbusplus::exception::exception& e)
     {
         log<level::ERR>(
             "Failed to set network data", entry("PREFIX=%" PRIu8, prefix),
-            entry("ADDRESS=%s", ipaddress.c_str()),
-            entry("GATEWAY=%s", gateway.c_str()), entry("VLANID=%d", vlanID),
+            entry("ADDRESS=%s", ipaddress.c_str()), entry("VLANID=%d", vlanID),
             entry("DHCP=%s", dhcpEnabled ? "true" : "false"));
 
         commit<InternalFailure>();
