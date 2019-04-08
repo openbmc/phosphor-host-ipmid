@@ -48,12 +48,14 @@ enum class BootOptionParameter : size_t
 {
     BOOT_INFO = 0x4,
     BOOT_FLAGS = 0x5,
+    BOOT_INITIATOR_MBOX = 0x07,
     OPAL_NETWORK_SETTINGS = 0x61
 };
 
 enum class BootOptionResponseSize : size_t
 {
     BOOT_FLAGS = 5,
+    BOOT_INITIATOR_MBOX = 17,
     OPAL_NETWORK_SETTINGS = 50
 };
 
