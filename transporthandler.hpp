@@ -1,9 +1,12 @@
 #pragma once
 
 #include <ipmid/types.hpp>
+#include <map>
 #include <optional>
+#include <set>
 #include <string>
 #include <tuple>
+#include <xyz/openbmc_project/Network/IP/server.hpp>
 
 // IPMI commands for Transport net functions.
 enum ipmi_netfn_storage_cmds
@@ -92,6 +95,22 @@ const int NUM_CHANNELS = 0x0f;
 
 constexpr uint8_t UNSET_PREFIX = 0xff;
 constexpr uint8_t DEFAULT_PREFIX = 32;
+
+struct IfAddr
+{
+    std::string address;
+    sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin origin;
+    uint8_t prefix;
+};
+
+struct IfAddrSelector
+{
+    int family;
+    std::set<
+        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>
+        origins;
+    uint8_t idx;
+};
 
 struct ChannelConfig_t
 {
