@@ -62,6 +62,36 @@ std::string getIntf(int channel)
     return intf;
 }
 
+/** @brief Gets the vlan ID configured on the interface
+ *
+ *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] channel - The channel id corresponding to an ethernet interface
+ *  @return VLAN id or the standard 0 for no VLAN
+ */
+uint16_t getVLAN(sdbusplus::bus::bus& bus, int channel)
+{
+    auto vlanObjs = ipmi::getAllDbusObjects(bus, ipmi::network::ROOT,
+                                            ipmi::network::VLAN_INTERFACE,
+                                            getIntf(channel));
+    if (vlanObjs.empty())
+    {
+        return 0;
+    }
+
+    const auto& service = vlanObjs.begin()->second.begin()->first;
+    const auto& obj = vlanObjs.begin()->first;
+    auto vlan = std::get<uint32_t>(ipmi::getDbusProperty(
+        bus, service, obj, ipmi::network::VLAN_INTERFACE, "Id"));
+    if ((vlan & ipmi::network::VLAN_VALUE_MASK) != vlan)
+    {
+        log<level::ERR>("networkd returned an invalid vlan",
+                        entry("CHANNEL=%d", channel),
+                        entry("VLAN=%" PRIu32, vlan));
+        elog<InternalFailure>();
+    }
+    return vlan;
+}
+
 /** @brief Determines if the ethernet interface is using DHCP
  *
  *  @param[in] bus     - The bus object used for lookups
@@ -254,18 +284,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 uint16_t vlan;
                 if (!channelConf->vlan)
                 {
-                    auto ipObjectInfo = ipmi::getIPObject(
-                        bus, ipmi::network::IP_INTERFACE, ipmi::network::ROOT,
-                        ipmi::network::IP_TYPE);
-
-                    uint32_t ret = ipmi::network::getVLAN(ipObjectInfo.first);
-                    if (ret > ipmi::network::VLAN_VALUE_MASK)
-                    {
-                        log<level::ERR>("DBUS returned an invalid VLAN",
-                                        entry("VLAN=%" PRIu32, ret));
-                        elog<InternalFailure>();
-                    }
-                    vlan = ret;
+                    vlan = getVLAN(bus, channel);
                     if (vlan != 0)
                     {
                         vlan |= ipmi::network::VLAN_ENABLE_FLAG;
@@ -692,9 +711,16 @@ void applyChanges(int channel)
     {
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        if (channelConf->vlan && std::get<bool>(*channelConf->vlan))
+        if (channelConf->vlan)
         {
-            vlan = std::get<uint16_t>(*channelConf->vlan);
+            if (std::get<bool>(*channelConf->vlan))
+            {
+                vlan = std::get<uint16_t>(*channelConf->vlan);
+            }
+        }
+        else
+        {
+            vlan = getVLAN(bus, channel);
         }
 
         // if the asked ip src is DHCP then not interested in

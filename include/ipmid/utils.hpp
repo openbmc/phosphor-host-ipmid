@@ -292,10 +292,5 @@ void createVLAN(sdbusplus::bus::bus& bus, const std::string& service,
                 const std::string& objPath, const std::string& interface,
                 uint32_t vlanID);
 
-/** @brief Gets the vlan id from the given object path.
- *  @param[in] path - Dbus object path.
- */
-uint32_t getVLAN(const std::string& path);
-
 } // namespace network
 } // namespace ipmi

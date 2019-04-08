@@ -481,33 +481,5 @@ void createVLAN(sdbusplus::bus::bus& bus, const std::string& service,
     }
 }
 
-uint32_t getVLAN(const std::string& path)
-{
-    // Path would be look like
-    // /xyz/openbmc_project/network/eth0_443/ipv4
-
-    uint32_t vlanID = 0;
-    try
-    {
-        auto intfObjectPath = path.substr(0, path.find(IP_TYPE) - 1);
-
-        auto intfName = intfObjectPath.substr(intfObjectPath.rfind("/") + 1);
-
-        auto index = intfName.find("_");
-        if (index != std::string::npos)
-        {
-            auto str = intfName.substr(index + 1);
-            vlanID = std::stoul(str);
-        }
-    }
-    catch (std::exception& e)
-    {
-        log<level::ERR>("Exception occurred during getVLAN",
-                        entry("PATH=%s", path.c_str()),
-                        entry("EXCEPTION=%s", e.what()));
-    }
-    return vlanID;
-}
-
 } // namespace network
 } // namespace ipmi
