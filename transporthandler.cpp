@@ -314,8 +314,19 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                     ipaddress = channelConf->ipaddr;
                 }
 
-                inet_pton(AF_INET, ipaddress.c_str(),
-                          reinterpret_cast<void*>(data));
+                if (ipaddress.empty())
+                {
+                    // There is no return code for empty values so return
+                    // an empty address.
+                    break;
+                }
+                if (inet_pton(AF_INET, ipaddress.c_str(), data) != 1)
+                {
+                    logWithChannel<level::ERR>(
+                        params, "Got a bad ip from network daemon",
+                        entry("IP=%s", ipaddress.c_str()));
+                    elog<InternalFailure>();
+                }
             }
             break;
 
@@ -374,7 +385,19 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             case LanParam::GATEWAY:
             {
                 auto gateway = getGatewayProperty(bus, *params, AF_INET);
-                inet_pton(AF_INET, gateway.c_str(), data);
+                if (gateway.empty())
+                {
+                    // There is no return code for empty values so return
+                    // an empty address.
+                    break;
+                }
+                if (inet_pton(AF_INET, gateway.c_str(), data) != 1)
+                {
+                    logWithChannel<level::ERR>(
+                        params, "Got a bad gateway from network daemon",
+                        entry("GATEWAY=%s", gateway.c_str()));
+                    elog<InternalFailure>();
+                }
             }
             break;
 
