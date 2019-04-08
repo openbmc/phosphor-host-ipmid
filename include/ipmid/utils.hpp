@@ -260,6 +260,7 @@ constexpr auto IPV4_PREFIX = "169.254";
 constexpr auto IPV6_PREFIX = "fe80";
 constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
 constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
+constexpr auto SYSTEMCONFIG_PATH = "/xyz/openbmc_project/network/config";
 constexpr auto SYSTEMCONFIG_INTERFACE =
     "xyz.openbmc_project.Network.SystemConfiguration";
 constexpr auto ETHERNET_INTERFACE =

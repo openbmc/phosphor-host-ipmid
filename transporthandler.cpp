@@ -202,6 +202,36 @@ bool getDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
         ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled"));
 }
 
+/** @brief Retrieves the current gateway for the address family on the system
+ *         NOTE: The gateway is currently system wide and not per channel
+ *
+ *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] params - The parameters for the channel on the ethernet interface
+ *  @param[in] family - The address family of the gateway
+ *  @return A string representing the gateway address
+ */
+std::string getGatewayProperty(sdbusplus::bus::bus& bus,
+                               const ChannelParams& params, int family)
+{
+    std::string member;
+    switch (family)
+    {
+        case AF_INET:
+            member = "DefaultGateway";
+            break;
+        case AF_INET6:
+            member = "DefaultGateway6";
+            break;
+        default:
+            log<level::ERR>("Bad Gateway Family", entry("FAMILY=%d", family));
+            elog<InternalFailure>();
+    }
+
+    return std::get<std::string>(ipmi::getDbusProperty(
+        bus, params.service, ipmi::network::SYSTEMCONFIG_PATH,
+        ipmi::network::SYSTEMCONFIG_INTERFACE, member));
+}
+
 /** @brief Turns a prefix into a netmask
  *
  *  @param[in] prefix - The prefix length
@@ -343,14 +373,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::GATEWAY:
             {
-                auto sysObj = ipmi::getDbusObject(
-                    bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
-                    ipmi::network::ROOT);
-
-                auto gateway = std::get<std::string>(ipmi::getDbusProperty(
-                    bus, sysObj.second, sysObj.first,
-                    ipmi::network::SYSTEMCONFIG_INTERFACE, "DefaultGateway"));
-
+                auto gateway = getGatewayProperty(bus, *params, AF_INET);
                 inet_pton(AF_INET, gateway.c_str(), data);
             }
             break;
