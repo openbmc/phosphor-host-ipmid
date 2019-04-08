@@ -93,6 +93,17 @@ struct PackSingle
     }
 };
 
+/** @brief Specialization of PackSingle for std::tuple<T> */
+template <typename... T>
+struct PackSingle<std::tuple<T...>>
+{
+    static int op(Payload& p, const std::tuple<T...>& v)
+    {
+        return std::apply([&p](const T&... args) { return p.pack(args...); },
+                          v);
+    }
+};
+
 /** @brief Specialization of PackSingle for std::string
  *  represented as a UCSD-Pascal style string
  */

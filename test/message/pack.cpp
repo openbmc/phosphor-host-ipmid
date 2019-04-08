@@ -156,6 +156,19 @@ TEST(PackBasics, Bitset32)
     ASSERT_EQ(p.raw, k);
 }
 
+TEST(PackBasics, Tuple)
+{
+    // tuples are the new struct, pack a tuple
+    ipmi::message::Payload p;
+    auto v = std::make_tuple(static_cast<uint16_t>(0x8604), 'A');
+    p.pack(v);
+    // check that the number of bytes matches
+    ASSERT_EQ(p.size(), sizeof(uint16_t) + sizeof(char));
+    // check that the bytes were correctly packed (LSB first)
+    std::vector<uint8_t> k = {0x04, 0x86, 0x41};
+    ASSERT_EQ(p.raw, k);
+}
+
 TEST(PackBasics, Array4xUint8)
 {
     // an array of bytes will be output verbatim, low-order element first
@@ -361,5 +374,53 @@ TEST(PackAdvanced, UnalignedBitPacking)
     ASSERT_EQ(p.size(), sizeof(uint64_t));
     // check that the bytes were correctly packed (LSB first)
     std::vector<uint8_t> k = {0x96, 0xd2, 0x2a, 0xcd, 0xd3, 0x3b, 0xbc, 0x9d};
+    ASSERT_EQ(p.raw, k);
+}
+
+TEST(PackAdvanced, ComplexOptionalTuple)
+{
+    constexpr size_t macSize = 6;
+    // inspired from a real-world case of Get Session Info
+    constexpr uint8_t handle = 0x23;       // handle for active session
+    constexpr uint8_t maxSessions = 15;    // number of possible active sessions
+    constexpr uint8_t currentSessions = 4; // number of current active sessions
+    std::optional<                         // only returned for active session
+        std::tuple<uint8_t,                // user ID
+                   uint8_t,                // privilege
+                   uint4_t,                // channel number
+                   uint4_t                 // protocol (RMCP+)
+                   >>
+        activeSession;
+    std::optional<           // only returned for channel type LAN
+        std::tuple<uint32_t, // IPv4 address
+                   std::array<uint8_t, macSize>, // MAC address
+                   uint16_t                      // port
+                   >>
+        lanSession;
+
+    constexpr uint8_t userID = 7;
+    constexpr uint8_t priv = 4;
+    constexpr uint4_t channel = 2;
+    constexpr uint4_t protocol = 1;
+    activeSession.emplace(userID, priv, channel, protocol);
+    constexpr std::array<uint8_t, macSize> macAddr{0};
+    lanSession.emplace(0x0a010105, macAddr, 55327);
+
+    ipmi::message::Payload p;
+    p.pack(handle, maxSessions, currentSessions, activeSession, lanSession);
+    ASSERT_EQ(p.size(), sizeof(handle) + sizeof(maxSessions) +
+                            sizeof(currentSessions) + 3 * sizeof(uint8_t) +
+                            sizeof(uint32_t) + sizeof(uint8_t) * macSize +
+                            sizeof(uint16_t));
+    uint8_t protocol_channel =
+        (static_cast<uint8_t>(protocol) << 4) | static_cast<uint8_t>(channel);
+    std::vector<uint8_t> k = {handle, maxSessions, currentSessions, userID,
+                              priv, protocol_channel,
+                              // ip addr
+                              0x05, 0x01, 0x01, 0x0a,
+                              // mac addr
+                              0, 0, 0, 0, 0, 0,
+                              // port
+                              0x1f, 0xd8};
     ASSERT_EQ(p.raw, k);
 }
