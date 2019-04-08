@@ -75,6 +75,8 @@ struct PackSingle
      */
     static int op(Payload& p, const T& t)
     {
+        static_assert(std::is_integral_v<T>,
+                      "Attempt to pack a type that has no IPMI pack operation");
         // if not on a byte boundary, must pack values LSbit/LSByte first
         if (p.bitCount)
         {
