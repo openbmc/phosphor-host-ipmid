@@ -45,48 +45,145 @@ struct ChannelConfig_t* getChannelConfig(int channel)
     return channelConfig[channel].get();
 }
 
-/** @brief Determines the ethernet interface name corresponding to a channel
- *
- *  @param[in] channel - The channel id corresponding to an ethernet interface
- *  @return Ethernet interface name
+/** @brief The dbus parameters for the interface corresponding to a channel
+ *         This helps reduce the number of mapper lookups we need for each
+ *         query and simplifies finding the VLAN interface if needed.
  */
-std::string getIntf(int channel)
+struct ChannelParams
 {
-    auto intf = ipmi::getChannelName(channel);
-    if (intf.empty())
+    /** @brief The channel ID */
+    int id;
+    /** @brief channel name for the interface */
+    std::string ifname;
+    /** @brief Name of the service on the bus */
+    std::string service;
+    /** @brief Lower level adapter path that is guaranteed to not be a VLAN */
+    std::string ifPath;
+    /** @brief Logical adapter path used for address assignment */
+    std::string logicalPath;
+};
+
+/** @brief Determines the ethernet interface name corresponding to a channel
+ *         Tries to map a VLAN object first so that the address information
+ *         is accurate. Otherwise it gets the standard ethernet interface.
+ *
+ *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] channel - The channel id corresponding to an ethernet interface
+ *  @return Ethernet interface service and object path if it exists
+ */
+std::optional<ChannelParams> getChannelParams(sdbusplus::bus::bus& bus,
+                                              int channel)
+{
+    auto ifname = ipmi::getChannelName(channel);
+    if (ifname.empty())
     {
-        log<level::ERR>("Missing ethernet interface for channel",
-                        entry("CHANNEL=%d", channel));
-        elog<InternalFailure>();
+        return std::nullopt;
     }
-    return intf;
+
+    // Enumerate all VLAN + ETHERNET interfaces
+    auto req = bus.new_method_call(ipmi::MAPPER_BUS_NAME, ipmi::MAPPER_OBJ,
+                                   ipmi::MAPPER_INTF, "GetSubTree");
+    req.append(ipmi::network::ROOT, 0,
+               std::vector<std::string>{ipmi::network::VLAN_INTERFACE,
+                                        ipmi::network::ETHERNET_INTERFACE});
+    auto reply = bus.call(req);
+    ipmi::ObjectTree objs;
+    reply.read(objs);
+
+    ChannelParams params;
+    for (const auto& [path, impls] : objs)
+    {
+        if (path.find(ifname) == path.npos)
+        {
+            continue;
+        }
+        for (const auto& [service, intfs] : impls)
+        {
+            bool vlan = false;
+            bool ethernet = false;
+            for (const auto& intf : intfs)
+            {
+                if (intf == ipmi::network::VLAN_INTERFACE)
+                {
+                    vlan = true;
+                }
+                else if (intf == ipmi::network::ETHERNET_INTERFACE)
+                {
+                    ethernet = true;
+                }
+            }
+            if (params.service.empty() && (vlan || ethernet))
+            {
+                params.service = service;
+            }
+            if (params.ifPath.empty() && !vlan && ethernet)
+            {
+                params.ifPath = path;
+            }
+            if (params.logicalPath.empty() && vlan)
+            {
+                params.logicalPath = path;
+            }
+        }
+    }
+    // We must have a path for the underlying interface
+    if (params.ifPath.empty())
+    {
+        return std::nullopt;
+    }
+    // We don't have a VLAN so the logical path is the same
+    if (params.logicalPath.empty())
+    {
+        params.logicalPath = params.ifPath;
+    }
+
+    params.id = channel;
+    params.ifname = std::move(ifname);
+    return std::move(params);
+}
+
+/** @brief Wraps the phosphor logging method to insert some additional metadata
+ *
+ *  @param[in] params - The parameters for the channel on the ethernet interface
+ *  ...
+ */
+template <auto level, typename... Args>
+auto logWithChannel(const ChannelParams& params, Args&&... args)
+{
+    return log<level>(std::forward<Args>(args)...,
+                      entry("CHANNEL=%d", params.id),
+                      entry("IFNAME=%s", params.ifname.c_str()));
+}
+template <auto level, typename... Args>
+auto logWithChannel(const std::optional<ChannelParams>& params, Args&&... args)
+{
+    if (params)
+    {
+        return logWithChannel<level>(*params, std::forward<Args>(args)...);
+    }
+    return log<level>(std::forward<Args>(args)...);
 }
 
 /** @brief Gets the vlan ID configured on the interface
  *
- *  @param[in] bus     - The bus object used for lookups
- *  @param[in] channel - The channel id corresponding to an ethernet interface
+ *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] params - The parameters for the channel on the ethernet interface
  *  @return VLAN id or the standard 0 for no VLAN
  */
-uint16_t getVLAN(sdbusplus::bus::bus& bus, int channel)
+uint16_t getVLAN(sdbusplus::bus::bus& bus, const ChannelParams& params)
 {
-    auto vlanObjs = ipmi::getAllDbusObjects(bus, ipmi::network::ROOT,
-                                            ipmi::network::VLAN_INTERFACE,
-                                            getIntf(channel));
-    if (vlanObjs.empty())
+    if (params.ifPath == params.logicalPath)
     {
         return 0;
     }
 
-    const auto& service = vlanObjs.begin()->second.begin()->first;
-    const auto& obj = vlanObjs.begin()->first;
-    auto vlan = std::get<uint32_t>(ipmi::getDbusProperty(
-        bus, service, obj, ipmi::network::VLAN_INTERFACE, "Id"));
+    auto vlan = std::get<uint32_t>(
+        ipmi::getDbusProperty(bus, params.service, params.logicalPath,
+                              ipmi::network::VLAN_INTERFACE, "Id"));
     if ((vlan & ipmi::network::VLAN_VALUE_MASK) != vlan)
     {
-        log<level::ERR>("networkd returned an invalid vlan",
-                        entry("CHANNEL=%d", channel),
-                        entry("VLAN=%" PRIu32, vlan));
+        logWithChannel<level::ERR>(params, "networkd returned an invalid vlan",
+                                   entry("VLAN=%" PRIu32, vlan));
         elog<InternalFailure>();
     }
     return vlan;
@@ -94,18 +191,15 @@ uint16_t getVLAN(sdbusplus::bus::bus& bus, int channel)
 
 /** @brief Determines if the ethernet interface is using DHCP
  *
- *  @param[in] bus     - The bus object used for lookups
- *  @param[in] channel - The channel id corresponding to an ethernet interface
+ *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] params - The parameters for the channel on the ethernet interface
  *  @return True if DHCP is enabled, false otherwise
  */
-bool getDHCPProperty(sdbusplus::bus::bus& bus, int channel)
+bool getDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
 {
-    auto intf = getIntf(channel);
-    auto ethObj = ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
-                                      ipmi::network::ROOT, intf);
     return std::get<bool>(ipmi::getDbusProperty(
-        bus, ethObj.second, ethObj.first, ipmi::network::ETHERNET_INTERFACE,
-        "DHCPEnabled"));
+        bus, params.service, params.logicalPath,
+        ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled"));
 }
 
 /** @brief Turns a prefix into a netmask
@@ -144,20 +238,20 @@ uint8_t netmaskToPrefix(in_addr netmask)
 ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
-
-    auto ethdevice = ipmi::getChannelName(channel);
-    // if ethdevice is an empty string they weren't expecting this channel.
-    if (ethdevice.empty())
-    {
-        // TODO: return error from getNetworkData()
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-    auto ethIP = ethdevice + "/" + ipmi::network::IP_TYPE;
-    auto channelConf = getChannelConfig(channel);
+    std::optional<ChannelParams> params;
 
     try
     {
+        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+        params = getChannelParams(bus, channel);
+        if (!params)
+        {
+            // TODO: return error from getNetworkData()
+            return IPMI_CC_INVALID_FIELD_REQUEST;
+        }
+        auto channelConf = getChannelConfig(channel);
+
         switch (static_cast<LanParam>(lan_param))
         {
             case LanParam::IP:
@@ -167,9 +261,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 {
                     try
                     {
-                        auto ipObjectInfo =
-                            ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
-                                              ipmi::network::ROOT, ethIP);
+                        auto ipObjectInfo = ipmi::getIPObject(
+                            bus, ipmi::network::IP_INTERFACE,
+                            params->logicalPath, ipmi::network::IP_TYPE);
 
                         auto properties = ipmi::getAllDbusProperties(
                             bus, ipObjectInfo.second, ipObjectInfo.first,
@@ -200,7 +294,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 bool dhcpEnabled;
                 if (!channelConf->dhcpEnabled)
                 {
-                    dhcpEnabled = getDHCPProperty(bus, channel);
+                    dhcpEnabled = getDHCPProperty(bus, *params);
                 }
                 else
                 {
@@ -220,9 +314,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 {
                     try
                     {
-                        auto ipObjectInfo =
-                            ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
-                                              ipmi::network::ROOT, ethIP);
+                        auto ipObjectInfo = ipmi::getIPObject(
+                            bus, ipmi::network::IP_INTERFACE,
+                            params->logicalPath, ipmi::network::IP_TYPE);
 
                         auto properties = ipmi::getAllDbusProperties(
                             bus, ipObjectInfo.second, ipObjectInfo.first,
@@ -263,11 +357,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
 
             case LanParam::MAC:
             {
-                auto macObj =
-                    ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
-                                        ipmi::network::ROOT, ethdevice);
                 auto macStr = std::get<std::string>(ipmi::getDbusProperty(
-                    bus, macObj.second, macObj.first,
+                    bus, params->service, params->ifPath,
                     ipmi::network::MAC_INTERFACE, "MACAddress"));
                 const struct ether_addr* mac = ether_aton(macStr.c_str());
                 if (mac == nullptr)
@@ -284,7 +375,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 uint16_t vlan;
                 if (!channelConf->vlan)
                 {
-                    vlan = getVLAN(bus, channel);
+                    vlan = getVLAN(bus, *params);
                     if (vlan != 0)
                     {
                         vlan |= ipmi::network::VLAN_ENABLE_FLAG;
@@ -314,9 +405,9 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(
-            "Failed to get network data", entry("PARAMETER=%" PRIu8, lan_param),
-            entry("CHANNEL=%d", channel), entry("ERROR=%s", e.what()));
+        logWithChannel<level::ERR>(params, "Failed to get network data",
+                                   entry("PARAMETER=%" PRIu8, lan_param),
+                                   entry("ERROR=%s", e.what()));
         commit<InternalFailure>();
         rc = IPMI_CC_UNSPECIFIED_ERROR;
     }
@@ -418,11 +509,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // channel number is the lower nibble
     int channel = reqptr->channel & CHANNEL_MASK;
-    auto ethdevice = ipmi::getChannelName(channel);
-    if (ethdevice.empty())
-    {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
     auto channelConf = getChannelConfig(channel);
 
     switch (static_cast<LanParam>(reqptr->parameter))
@@ -458,12 +544,22 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             struct ether_addr mac;
             std::memcpy(&mac, reqptr->data, sizeof(mac));
             std::string macStr = ether_ntoa(&mac);
-            auto macObj = ipmi::getDbusObject(bus, ipmi::network::MAC_INTERFACE,
-                                              ipmi::network::ROOT, ethdevice);
-            ipmi::setDbusProperty(bus, macObj.second, macObj.first,
-                                  ipmi::network::MAC_INTERFACE, "MACAddress",
-                                  macStr);
-            return IPMI_CC_OK;
+            try
+            {
+                auto params = getChannelParams(bus, channel);
+                if (!params)
+                {
+                    return IPMI_CC_INVALID_FIELD_REQUEST;
+                }
+                ipmi::setDbusProperty(bus, params->service, params->ifPath,
+                                      ipmi::network::MAC_INTERFACE,
+                                      "MACAddress", macStr);
+                return IPMI_CC_OK;
+            }
+            catch (...)
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
         }
 
         case LanParam::SUBNET:
@@ -570,18 +666,12 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    auto ethdevice = ipmi::getChannelName(channel);
-    if (ethdevice.empty())
-    {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-    auto channelConf = getChannelConfig(channel);
-
     LanParam param = static_cast<LanParam>(reqptr->parameter);
     switch (param)
     {
         case LanParam::INPROGRESS:
         {
+            auto channelConf = getChannelConfig(channel);
             uint8_t buf[] = {current_revision,
                              channelConf->lan_set_in_progress};
             *data_len = sizeof(buf);
@@ -697,19 +787,19 @@ void applyChanges(int channel)
     std::string networkInterfacePath;
     ipmi::DbusObjectInfo ipObject;
 
-    auto ethdevice = ipmi::getChannelName(channel);
-    if (ethdevice.empty())
-    {
-        log<level::ERR>("Unable to get the interface name",
-                        entry("CHANNEL=%d", channel));
-        return;
-    }
-    auto ethIp = ethdevice + "/" + ipmi::network::IP_TYPE;
     auto channelConf = getChannelConfig(channel);
+    std::optional<ChannelParams> params;
 
     try
     {
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+        params = getChannelParams(bus, channel);
+        if (!params)
+        {
+            log<level::ERR>("Unable to get the interface name",
+                            entry("CHANNEL=%d", channel));
+            return;
+        }
 
         if (channelConf->vlan)
         {
@@ -720,7 +810,7 @@ void applyChanges(int channel)
         }
         else
         {
-            vlan = getVLAN(bus, channel);
+            vlan = getVLAN(bus, *params);
         }
 
         // if the asked ip src is DHCP then not interested in
@@ -740,7 +830,8 @@ void applyChanges(int channel)
                 // if the system is having ip object,then
                 // get the IP object.
                 ipObject = ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
-                                             ipmi::network::ROOT, ethIp);
+                                             params->logicalPath,
+                                             ipmi::network::IP_TYPE);
 
                 // Get the parent interface of the IP object.
                 try
@@ -752,10 +843,11 @@ void applyChanges(int channel)
                 {
                     // if unable to get the parent interface
                     // then commit the error and return.
-                    log<level::ERR>("Unable to get the parent interface",
-                                    entry("PATH=%s", ipObject.first.c_str()),
-                                    entry("INTERFACE=%s",
-                                          ipmi::network::ETHERNET_INTERFACE));
+                    logWithChannel<level::ERR>(
+                        params, "Unable to get the parent interface",
+                        entry("PATH=%s", ipObject.first.c_str()),
+                        entry("INTERFACE=%s",
+                              ipmi::network::ETHERNET_INTERFACE));
                     commit<InternalFailure>();
                     channelConf->clear();
                     return;
@@ -773,7 +865,7 @@ void applyChanges(int channel)
                 // get the network interface object.
                 auto networkInterfaceObject =
                     ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
-                                        ipmi::network::ROOT, ethdevice);
+                                        ipmi::network::ROOT, params->ifname);
 
                 networkInterfacePath = std::move(networkInterfaceObject.first);
             }
@@ -836,7 +928,7 @@ void applyChanges(int channel)
                     log<level::INFO>(
                         "Failed to get IP object which matches",
                         entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
-                        entry("MATCH=%s", ethIp.c_str()));
+                        entry("MATCH=%s", ipObject.first.c_str()));
                 }
             }
         }
@@ -860,23 +952,24 @@ void applyChanges(int channel)
         // set the interface mode  to static
         auto networkInterfaceObject =
             ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
-                                ipmi::network::ROOT, ethdevice);
+                                ipmi::network::ROOT, params->ifname);
 
         // setting the physical interface mode to static.
-        ipmi::setDbusProperty(
-            bus, ipmi::network::SERVICE, networkInterfaceObject.first,
-            ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled", false);
+        ipmi::setDbusProperty(bus, params->service, params->ifPath,
+                              ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled",
+                              false);
 
         networkInterfacePath = networkInterfaceObject.first;
 
         // delete all the ipv4 addresses
-        ipmi::deleteAllDbusObjects(bus, ipmi::network::ROOT,
-                                   ipmi::network::IP_INTERFACE, ethIp);
+        ipmi::deleteAllDbusObjects(bus, ipmi::network::IP_INTERFACE,
+                                   params->ifPath, ipmi::network::IP_TYPE);
 
         if (vlan)
         {
             ipmi::network::createVLAN(bus, ipmi::network::SERVICE,
-                                      ipmi::network::ROOT, ethdevice, vlan);
+                                      ipmi::network::ROOT, params->ifname,
+                                      vlan);
 
             auto networkInterfaceObject = ipmi::getDbusObject(
                 bus, ipmi::network::VLAN_INTERFACE, ipmi::network::ROOT);
@@ -907,11 +1000,12 @@ void applyChanges(int channel)
     }
     catch (sdbusplus::exception::exception& e)
     {
-        log<level::ERR>("Failed to set network data",
-                        entry("PREFIX=%" PRIu8, prefix),
-                        entry("ADDRESS=%s", ipaddress.c_str()),
-                        entry("VLANID=%" PRIu16, vlan),
-                        entry("DHCP=%s", dhcpEnabled ? "true" : "false"));
+        logWithChannel<level::ERR>(
+            params, "Failed to set network data",
+            entry("PREFIX=%" PRIu8, prefix),
+            entry("ADDRESS=%s", ipaddress.c_str()),
+            entry("VLANID=%" PRIu16, vlan),
+            entry("DHCP=%s", dhcpEnabled ? "true" : "false"));
 
         commit<InternalFailure>();
     }
