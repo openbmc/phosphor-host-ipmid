@@ -17,8 +17,6 @@ namespace ipmi
 namespace sensor
 {
 
-namespace variant_ns = sdbusplus::message::variant_ns;
-
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
@@ -340,8 +338,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     {
                         return IPMI_CC_OK;
                     }
-                    result =
-                        result && variant_ns::get<bool>(value.second.assert);
+                    result = result && std::get<bool>(value.second.assert);
                     valid = true;
                 }
                 else if (deassertionSet.test(value.first))
@@ -351,8 +348,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     {
                         return IPMI_CC_OK;
                     }
-                    result =
-                        result && variant_ns::get<bool>(value.second.deassert);
+                    result = result && std::get<bool>(value.second.deassert);
                     valid = true;
                 }
             }
@@ -361,13 +357,11 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
             {
                 if (assertionSet.test(value.first))
                 {
-                    result =
-                        result && variant_ns::get<bool>(value.second.assert);
+                    result = result && std::get<bool>(value.second.assert);
                 }
                 else if (deassertionSet.test(value.first))
                 {
-                    result =
-                        result && variant_ns::get<bool>(value.second.deassert);
+                    result = result && std::get<bool>(value.second.deassert);
                 }
             }
             if (valid)
