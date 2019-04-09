@@ -480,6 +480,7 @@ auto executionEntry(boost::asio::yield_context yield,
         };
     std::string sender = m.get_sender();
     Privilege privilege = Privilege::None;
+    int rqSA = 0;
     uint8_t userId = 0; // undefined user
 
     // figure out what channel the request came in on
@@ -516,15 +517,32 @@ auto executionEntry(boost::asio::yield_context yield,
         // get max privilege for session-less channels
         // For now, there is not a way to configure this, default to Admin
         privilege = Privilege::Admin;
+
+        // ipmb should supply rqSA
+        ChannelInfo chInfo;
+        getChannelInfo(channel, chInfo);
+        if (static_cast<EChannelMediumType>(chInfo.mediumType) ==
+            EChannelMediumType::ipmb)
+        {
+            const auto iter = options.find("rqSA");
+            if (iter != options.end())
+            {
+                if (std::holds_alternative<int>(iter->second))
+                {
+                    rqSA = std::get<int>(iter->second);
+                }
+            }
+        }
     }
     // check to see if the requested priv/username is valid
     log<level::DEBUG>("Set up ipmi context", entry("SENDER=%s", sender.c_str()),
                       entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd),
                       entry("CHANNEL=%u", channel), entry("USERID=%u", userId),
-                      entry("PRIVILEGE=%u", static_cast<uint8_t>(privilege)));
+                      entry("PRIVILEGE=%u", static_cast<uint8_t>(privilege)),
+                      entry("RQSA=%x", rqSA));
 
     auto ctx = std::make_shared<ipmi::Context>(netFn, cmd, channel, userId,
-                                               privilege, &yield);
+                                               privilege, rqSA, &yield);
     auto request = std::make_shared<ipmi::message::Request>(
         ctx, std::forward<std::vector<uint8_t>>(data));
     message::Response::ptr response = executeIpmiCommand(request);
