@@ -481,13 +481,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             if (reqptr->data[0] == SET_COMPLETE)
             {
                 channelConf->lan_set_in_progress = SET_COMPLETE;
-
-                log<level::INFO>(
-                    "Network data from Cache",
-                    entry("PREFIX=%s", channelConf->netmask.c_str()),
-                    entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
-                    entry("GATEWAY=%s", channelConf->gateway.c_str()),
-                    entry("VLAN=%d", channelConf->vlanID));
             }
             else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
             {
@@ -695,12 +688,6 @@ void applyChanges(int channel)
     {
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
 
-        log<level::INFO>("Network data from Cache",
-                         entry("PREFIX=%s", channelConf->netmask.c_str()),
-                         entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
-                         entry("GATEWAY=%s", channelConf->gateway.c_str()),
-                         entry("VLAN=%d", channelConf->vlanID),
-                         entry("IPSRC=%d", channelConf->ipsrc));
         if (channelConf->vlanID != ipmi::network::VLAN_ID_MASK)
         {
             // get the first twelve bits which is vlan id
