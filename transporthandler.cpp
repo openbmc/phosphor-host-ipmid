@@ -23,8 +23,6 @@
 // timer for network changes
 std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 
-constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
-
 std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
 
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
@@ -865,249 +863,172 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-void applyChanges(int channel)
+/** @brief Populates configuration information for the channel if it is missing
+ *         and is going to be used for the state transition.
+ *
+ *  @param[in]     bus      - The bus object used for lookups
+ *  @param[in]     params   - The parameters for the channel
+ *  @param[in,out] conf     - The current configuration which will be updated
+ */
+void populateChannelConf(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                         ChannelConfig_t& conf)
 {
-    std::string ipaddress;
-    bool dhcpEnabled{};
-    uint8_t prefix = DEFAULT_PREFIX;
-    uint16_t vlan{};
-    std::string networkInterfacePath;
-    ipmi::DbusObjectInfo ipObject;
-
-    auto channelConf = getChannelConfig(channel);
-    std::optional<ChannelParams> params;
-
-    try
+    if (!conf.vlan)
     {
-        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
-        params = getChannelParams(bus, channel);
-        if (!params)
-        {
-            log<level::ERR>("Unable to get the interface name",
-                            entry("CHANNEL=%d", channel));
-            return;
-        }
+        conf.vlan.emplace(true, getVLAN(bus, params));
+    }
 
-        if (channelConf->vlan)
+    if (!conf.dhcpEnabled)
+    {
+        conf.dhcpEnabled = getDHCPProperty(bus, params);
+    }
+
+    // Only populate address info if we are going to use it
+    if (!*conf.dhcpEnabled)
+    {
+        IfAddrSelector selector;
+        selector.family = AF_INET;
+        // We only want to copy bits from previous static configs
+        selector.origins = {IP::AddressOrigin::Static};
+        selector.idx = 0;
+        auto ifaddr = getIfAddr(params, selector);
+
+        if (ifaddr)
         {
-            if (std::get<bool>(*channelConf->vlan))
+            if (conf.ipaddr.empty())
             {
-                vlan = std::get<uint16_t>(*channelConf->vlan);
+                conf.ipaddr = ifaddr->address;
             }
-        }
-        else
-        {
-            vlan = getVLAN(bus, *params);
-        }
-
-        // if the asked ip src is DHCP then not interested in
-        // any given data except vlan.
-        if (!channelConf->dhcpEnabled.value_or(false))
-        {
-            // the below code is to determine the mode of the interface
-            // as the handling is same, if the system is configured with
-            // DHCP or user has given all the data.
-            try
+            if (conf.prefix == UNSET_PREFIX)
             {
-                ipmi::ObjectTree ancestorMap;
-
-                ipmi::InterfaceList interfaces{
-                    ipmi::network::ETHERNET_INTERFACE};
-
-                // if the system is having ip object,then
-                // get the IP object.
-                ipObject = ipmi::getIPObject(bus, ipmi::network::IP_INTERFACE,
-                                             params->logicalPath,
-                                             ipmi::network::IP_TYPE);
-
-                // Get the parent interface of the IP object.
-                try
-                {
-                    ancestorMap = ipmi::getAllAncestors(bus, ipObject.first,
-                                                        std::move(interfaces));
-                }
-                catch (InternalFailure& e)
-                {
-                    // if unable to get the parent interface
-                    // then commit the error and return.
-                    logWithChannel<level::ERR>(
-                        params, "Unable to get the parent interface",
-                        entry("PATH=%s", ipObject.first.c_str()),
-                        entry("INTERFACE=%s",
-                              ipmi::network::ETHERNET_INTERFACE));
-                    commit<InternalFailure>();
-                    channelConf->clear();
-                    return;
-                }
-
-                networkInterfacePath = ancestorMap.begin()->first;
-            }
-            catch (InternalFailure& e)
-            {
-                // TODO Currently IPMI supports single interface,need to handle
-                // Multiple interface through
-                // https://github.com/openbmc/openbmc/issues/2138
-
-                // if there is no ip configured on the system,then
-                // get the network interface object.
-                auto networkInterfaceObject =
-                    ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
-                                        ipmi::network::ROOT, params->ifname);
-
-                networkInterfacePath = std::move(networkInterfaceObject.first);
-            }
-
-            // get the configured mode on the system.
-            auto currentDHCP = variant_ns::get<bool>(ipmi::getDbusProperty(
-                bus, ipmi::network::SERVICE, networkInterfacePath,
-                ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled"));
-
-            // if ip address source is not given then get the ip source mode
-            // from the system so that it can be applied later.
-            dhcpEnabled = channelConf->dhcpEnabled.value_or(currentDHCP);
-
-            // check whether user has given all the data
-            // or the configured system interface is dhcp enabled,
-            // in both of the cases get the values from the cache.
-            if ((!channelConf->ipaddr.empty() &&
-                 channelConf->prefix != UNSET_PREFIX) ||
-                currentDHCP) // configured system interface mode = DHCP
-            {
-                // convert mask into prefix
-                ipaddress = channelConf->ipaddr;
-                prefix = channelConf->prefix;
-            }
-            else // asked ip src = static and configured system src = static
-                 // or partially given data.
-            {
-                // We have partial filled cache so get the remaining
-                // info from the system.
-
-                // Get the network data from the system as user has
-                // not given all the data then use the data fetched from the
-                // system but it is implementation dependent,IPMI spec doesn't
-                // force it.
-
-                // if system is not having any ip object don't throw error,
-                try
-                {
-                    auto properties = ipmi::getAllDbusProperties(
-                        bus, ipObject.second, ipObject.first,
-                        ipmi::network::IP_INTERFACE);
-
-                    ipaddress = channelConf->ipaddr.empty()
-                                    ? variant_ns::get<std::string>(
-                                          properties["Address"])
-                                    : channelConf->ipaddr;
-
-                    if (channelConf->prefix == UNSET_PREFIX)
-                    {
-                        prefix = variant_ns::get<uint8_t>(
-                            properties["PrefixLength"]);
-                    }
-                    else
-                    {
-                        prefix = channelConf->prefix;
-                    }
-                }
-                catch (InternalFailure& e)
-                {
-                    log<level::INFO>(
-                        "Failed to get IP object which matches",
-                        entry("INTERFACE=%s", ipmi::network::IP_INTERFACE),
-                        entry("MATCH=%s", ipObject.first.c_str()));
-                }
-            }
-        }
-
-        // Currently network manager doesn't support purging of all the
-        // ip addresses and the vlan interfaces from the parent interface,
-        // TODO once the support is there, will make the change here.
-        // https://github.com/openbmc/openbmc/issues/2141.
-
-        // TODO Currently IPMI supports single interface,need to handle
-        // Multiple interface through
-        // https://github.com/openbmc/openbmc/issues/2138
-
-        // instead of deleting all the vlan interfaces and
-        // all the ipv4 address,we will call reset method.
-        // delete all the vlan interfaces
-
-        ipmi::deleteAllDbusObjects(bus, ipmi::network::ROOT,
-                                   ipmi::network::VLAN_INTERFACE);
-
-        // set the interface mode  to static
-        auto networkInterfaceObject =
-            ipmi::getDbusObject(bus, ipmi::network::ETHERNET_INTERFACE,
-                                ipmi::network::ROOT, params->ifname);
-
-        // setting the physical interface mode to static.
-        ipmi::setDbusProperty(bus, params->service, params->ifPath,
-                              ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled",
-                              false);
-
-        networkInterfacePath = networkInterfaceObject.first;
-
-        // delete all the ipv4 addresses
-        ipmi::deleteAllDbusObjects(bus, ipmi::network::IP_INTERFACE,
-                                   params->ifPath, ipmi::network::IP_TYPE);
-
-        if (vlan)
-        {
-            ipmi::network::createVLAN(bus, ipmi::network::SERVICE,
-                                      ipmi::network::ROOT, params->ifname,
-                                      vlan);
-
-            auto networkInterfaceObject = ipmi::getDbusObject(
-                bus, ipmi::network::VLAN_INTERFACE, ipmi::network::ROOT);
-
-            networkInterfacePath = networkInterfaceObject.first;
-        }
-
-        if (dhcpEnabled)
-        {
-            ipmi::setDbusProperty(
-                bus, ipmi::network::SERVICE, networkInterfacePath,
-                ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled", true);
-        }
-        else
-        {
-            // change the mode to static
-            ipmi::setDbusProperty(
-                bus, ipmi::network::SERVICE, networkInterfacePath,
-                ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled", false);
-
-            if (!ipaddress.empty())
-            {
-                ipmi::network::createIP(bus, ipmi::network::SERVICE,
-                                        networkInterfacePath, ipv4Protocol,
-                                        ipaddress, prefix);
+                conf.prefix = ifaddr->prefix;
             }
         }
     }
-    catch (sdbusplus::exception::exception& e)
-    {
-        logWithChannel<level::ERR>(
-            params, "Failed to set network data",
-            entry("PREFIX=%" PRIu8, prefix),
-            entry("ADDRESS=%s", ipaddress.c_str()),
-            entry("VLANID=%" PRIu16, vlan),
-            entry("DHCP=%s", dhcpEnabled ? "true" : "false"));
+}
 
-        commit<InternalFailure>();
+/** @brief Deletes all customizations from an interface
+ *
+ *  @param[in]     bus    - The bus object used for reset
+ *  @param[in,out] params - The parameters for the channel
+ */
+void resetChannel(sdbusplus::bus::bus& bus, ChannelParams& params)
+{
+    // First clear out configured properties
+    ipmi::setDbusProperty(bus, params.service, params.ifPath,
+                          ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled",
+                          false);
+
+    // Delete all objects associated with the interface
+    auto objreq = bus.new_method_call(ipmi::MAPPER_BUS_NAME, ipmi::MAPPER_OBJ,
+                                      ipmi::MAPPER_INTF, "GetSubTree");
+    objreq.append(ipmi::network::ROOT, 0,
+                  std::vector<std::string>{ipmi::DELETE_INTERFACE});
+    auto objreply = bus.call(objreq);
+    ipmi::ObjectTree objs;
+    objreply.read(objs);
+    for (const auto& [path, impls] : objs)
+    {
+        if (path.find(params.ifname) == path.npos)
+        {
+            continue;
+        }
+        for (const auto& [service, intfs] : impls)
+        {
+            auto delreq = bus.new_method_call(service.c_str(), path.c_str(),
+                                              ipmi::DELETE_INTERFACE, "Delete");
+            bus.call_noreply(delreq);
+        }
+        // Update params to reflect the deletion of vlan
+        if (path == params.logicalPath)
+        {
+            params.logicalPath = params.ifPath;
+        }
+    }
+}
+
+/** @brief Applies the configuration information for the channel
+ *
+ *  @param[in]     bus    - The bus object used for reset
+ *  @param[in,out] params - The parameters for the channel
+ *  @param[in]     conf   - The new configuration for the channel
+ */
+void applyConfig(sdbusplus::bus::bus& bus, ChannelParams& params,
+                 const ChannelConfig_t& conf)
+{
+    // We need the new VLAN interface first
+    const auto& vlan = conf.vlan.value();
+    if (std::get<bool>(vlan) && std::get<uint16_t>(vlan) != 0)
+    {
+        ipmi::network::createVLAN(bus, ipmi::network::SERVICE,
+                                  ipmi::network::ROOT, params.ifname,
+                                  std::get<uint16_t>(vlan));
     }
 
-    channelConf->clear();
+    // Ensure we are up to date with VLAN interface changes
+    auto newParams = getChannelParams(params.id);
+    if (!newParams)
+    {
+        logWithChannel<level::ERR>(params,
+                                   "Failed to get new channel parameters");
+        elog<InternalFailure>();
+    }
+    params = *newParams;
+
+    // Configure the interface
+    ipmi::setDbusProperty(bus, params.service, params.logicalPath,
+                          ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled",
+                          conf.dhcpEnabled.value());
+
+    if (!conf.ipaddr.empty() && !conf.dhcpEnabled.value())
+    {
+        auto prefix =
+            conf.prefix == UNSET_PREFIX ? DEFAULT_PREFIX : conf.prefix;
+        auto protocol =
+            sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+                IP::Protocol::IPv4);
+        ipmi::network::createIP(bus, params.service, params.logicalPath,
+                                protocol, conf.ipaddr, prefix);
+    }
 }
 
 void commitNetworkChanges()
 {
-    for (const auto& channel : channelConfig)
+    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+    std::optional<ChannelParams> params;
+
+    for (const auto& [channel, conf] : channelConfig)
     {
-        if (channel.second->flush)
+        if (!conf->flush)
         {
-            applyChanges(channel.first);
+            continue;
         }
+
+        try
+        {
+            params = getChannelParams(channel);
+            if (!params)
+            {
+                log<level::ERR>("Unable to get channel params for commit",
+                                entry("CHANNEL=%d", channel));
+                elog<InternalFailure>();
+            }
+
+            populateChannelConf(bus, *params, *conf);
+            resetChannel(bus, *params);
+            applyConfig(bus, *params, *conf);
+        }
+        catch (const InternalFailure&)
+        {
+            commit<InternalFailure>();
+        }
+        catch (const std::exception& e)
+        {
+            logWithChannel<level::ERR>(params, "Failed to commit network data",
+                                       entry("ERROR=%s", e.what()));
+            commit<InternalFailure>();
+        }
+        conf->clear();
     }
 }
 
@@ -1115,10 +1036,7 @@ void createNetworkTimer()
 {
     if (!networkTimer)
     {
-        std::function<void()> networkTimerCallback(
-            std::bind(&commitNetworkChanges));
-
-        networkTimer = std::make_unique<phosphor::Timer>(networkTimerCallback);
+        networkTimer = std::make_unique<phosphor::Timer>(&commitNetworkChanges);
     }
 }
 
