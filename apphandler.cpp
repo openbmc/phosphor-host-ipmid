@@ -602,13 +602,13 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
             else
             {
                 log<level::ERR>("Device ID JSON parser failure");
-                return ipmi::response(ipmi::ccUnspecifiedError);
+                return ipmi::responseUnspecifiedError();
             }
         }
         else
         {
             log<level::ERR>("Device ID file not found");
-            return ipmi::response(ipmi::ccUnspecifiedError);
+            return ipmi::responseUnspecifiedError();
         }
     }
 
