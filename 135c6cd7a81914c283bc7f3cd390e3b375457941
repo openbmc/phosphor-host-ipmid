@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c623a89e_16df0835",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000100
+      },
+      "writtenOn": "2019-04-09T15:55:23Z",
+      "side": 0,
+      "message": "Why is TPM being dropped?  It is not supported?  I don\u0027t see it in the map above, so maybe it isn\u0027t, but just wanted to ask directly.",
+      "revId": "135c6cd7a81914c283bc7f3cd390e3b375457941",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
