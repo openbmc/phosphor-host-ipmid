@@ -57,7 +57,6 @@ using Activation =
     sdbusplus::xyz::openbmc_project::Software::server::Activation;
 using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -106,14 +105,14 @@ std::string getActiveSoftwareVersionInfo()
                 auto& redundancyPriorityProps = intfMap.at(redundancyIntf);
                 auto& versionProps = intfMap.at(versionIntf);
                 auto& activationProps = intfMap.at(activationIntf);
-                auto priority = variant_ns::get<uint8_t>(
+                auto priority = std::get<uint8_t>(
                     redundancyPriorityProps.at("Priority"));
                 auto purpose =
-                    variant_ns::get<std::string>(versionProps.at("Purpose"));
-                auto activation = variant_ns::get<std::string>(
+                    std::get<std::string>(versionProps.at("Purpose"));
+                auto activation = std::get<std::string>(
                     activationProps.at("Activation"));
                 auto version =
-                    variant_ns::get<std::string>(versionProps.at("Version"));
+                    std::get<std::string>(versionProps.at("Version"));
                 if ((Version::convertVersionPurposeFromString(purpose) ==
                      Version::VersionPurpose::BMC) &&
                     (Activation::convertActivationsFromString(activation) ==
@@ -154,9 +153,9 @@ bool getCurrentBmcState()
         ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
                               bmc_state_interface, bmc_state_property);
 
-    return variant_ns::holds_alternative<std::string>(variant) &&
+    return std::holds_alternative<std::string>(variant) &&
            BMC::convertBMCStateFromString(
-               variant_ns::get<std::string>(variant)) == BMC::BMCState::Ready;
+               std::get<std::string>(variant)) == BMC::BMCState::Ready;
 }
 
 namespace acpi_state
@@ -407,7 +406,7 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::sysACPIProp);
         auto sysACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            variant_ns::get<std::string>(sysACPIVal));
+            std::get<std::string>(sysACPIVal));
         res->sysACPIState =
             static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
 
@@ -415,7 +414,7 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::devACPIProp);
         auto devACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            variant_ns::get<std::string>(devACPIVal));
+            std::get<std::string>(devACPIVal));
         res->devACPIState =
             static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
 
@@ -803,7 +802,7 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto variant =
             ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
                                   bmc_guid_interface, bmc_guid_property);
-        std::string guidProp = variant_ns::get<std::string>(variant);
+        std::string guidProp = std::get<std::string>(variant);
 
         // Erase "-" characters from the property value
         guidProp.erase(std::remove(guidProp.begin(), guidProp.end(), '-'),

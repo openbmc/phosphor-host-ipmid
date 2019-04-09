@@ -103,7 +103,6 @@ static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-custom"    // PRIVILEGE_OEM - 5
 };
 
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 using namespace phosphor::logging;
 using Json = nlohmann::json;
@@ -376,17 +375,17 @@ void userUpdatedSignalHandler(UserAccess& usrAccess,
             std::string member = prop.first;
             if (member == userPrivProperty)
             {
-                priv = variant_ns::get<std::string>(prop.second);
+                priv = std::get<std::string>(prop.second);
                 userEvent = UserUpdateEvent::userPrivUpdated;
             }
             else if (member == userGrpProperty)
             {
-                groups = variant_ns::get<std::vector<std::string>>(prop.second);
+                groups = std::get<std::vector<std::string>>(prop.second);
                 userEvent = UserUpdateEvent::userGrpUpdated;
             }
             else if (member == userEnabledProperty)
             {
-                enabled = variant_ns::get<bool>(prop.second);
+                enabled = std::get<bool>(prop.second);
                 userEvent = UserUpdateEvent::userStateUpdated;
             }
             // Process based on event type.
@@ -1253,12 +1252,12 @@ void UserAccess::getSystemPrivAndGroups()
         if (key == allPrivProperty)
         {
             availablePrivileges =
-                variant_ns::get<std::vector<std::string>>(t.second);
+                std::get<std::vector<std::string>>(t.second);
         }
         else if (key == allGrpProperty)
         {
             availableGroups =
-                variant_ns::get<std::vector<std::string>>(t.second);
+                std::get<std::vector<std::string>>(t.second);
         }
     }
     // TODO: Implement Supported Privilege & Groups verification logic
@@ -1285,15 +1284,15 @@ void UserAccess::getUserProperties(const DbusUserObjProperties& properties,
         std::string key = t.first;
         if (key == userPrivProperty)
         {
-            usrPriv = variant_ns::get<std::string>(t.second);
+            usrPriv = std::get<std::string>(t.second);
         }
         else if (key == userGrpProperty)
         {
-            usrGrps = variant_ns::get<std::vector<std::string>>(t.second);
+            usrGrps = std::get<std::vector<std::string>>(t.second);
         }
         else if (key == userEnabledProperty)
         {
-            usrEnabled = variant_ns::get<bool>(t.second);
+            usrEnabled = std::get<bool>(t.second);
         }
     }
     return;

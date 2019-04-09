@@ -34,7 +34,6 @@
 namespace ipmi
 {
 
-namespace variant_ns = sdbusplus::message::variant_ns;
 using namespace phosphor::logging;
 
 static constexpr const char* channelAccessDefaultFilename =
@@ -204,7 +203,7 @@ void ChannelConfig::processChAccessPropChange(
         if (prop.first == privilegePropertyString)
         {
             propName = privilegePropertyString;
-            intfPrivStr = variant_ns::get<std::string>(prop.second);
+            intfPrivStr = std::get<std::string>(prop.second);
             break;
         }
     }
@@ -1309,9 +1308,9 @@ int ChannelConfig::syncNetworkChannelConfig()
                                             channelData[chNum].chName.c_str()));
                     continue;
                 }
-                intfPrivStr = variant_ns::get<std::string>(variant);
+                intfPrivStr = std::get<std::string>(variant);
             }
-            catch (const variant_ns::bad_variant_access& e)
+            catch (const std::bad_variant_access& e)
             {
                 log<level::DEBUG>(
                     "exception: Network interface does not exist");

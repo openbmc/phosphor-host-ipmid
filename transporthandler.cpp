@@ -36,7 +36,6 @@ using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
 namespace fs = std::filesystem;
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 void register_netfn_transport_functions() __attribute__((constructor));
 
@@ -88,7 +87,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             ipmi::network::IP_INTERFACE);
 
                         ipaddress =
-                            variant_ns::get<std::string>(properties["Address"]);
+                            std::get<std::string>(properties["Address"]);
                     }
                     // ignore the exception, as it is a valid condition that
                     // the system is not configured with any IP.
@@ -162,7 +161,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         bus, ipmi::network::SERVICE, networkInterfacePath,
                         ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled");
 
-                    auto dhcpEnabled = variant_ns::get<bool>(variant);
+                    auto dhcpEnabled = std::get<bool>(variant);
                     // As per IPMI spec 2=>DHCP, 1=STATIC
                     auto ipsrc = dhcpEnabled ? ipmi::network::IPOrigin::DHCP
                                              : ipmi::network::IPOrigin::STATIC;
@@ -192,7 +191,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             bus, ipObjectInfo.second, ipObjectInfo.first,
                             ipmi::network::IP_INTERFACE);
 
-                        auto prefix = variant_ns::get<uint8_t>(
+                        auto prefix = std::get<uint8_t>(
                             properties["PrefixLength"]);
                         mask = ipmi::network::MASK_32_BIT;
                         mask = htonl(mask << (ipmi::network::BITS_32 - prefix));
@@ -230,7 +229,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             bus, systemObject.second, systemObject.first,
                             ipmi::network::SYSTEMCONFIG_INTERFACE);
 
-                        gateway = variant_ns::get<std::string>(
+                        gateway = std::get<std::string>(
                             systemProperties["DefaultGateway"]);
                     }
                     // ignore the exception, as it is a valid condition that
@@ -263,7 +262,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         bus, macObjectInfo.second, macObjectInfo.first,
                         ipmi::network::MAC_INTERFACE, "MACAddress");
 
-                    macAddress = variant_ns::get<std::string>(variant);
+                    macAddress = std::get<std::string>(variant);
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
@@ -799,7 +798,7 @@ void applyChanges(int channel)
             }
 
             // get the configured mode on the system.
-            auto enableDHCP = variant_ns::get<bool>(ipmi::getDbusProperty(
+            auto enableDHCP = std::get<bool>(ipmi::getDbusProperty(
                 bus, ipmi::network::SERVICE, networkInterfacePath,
                 ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled"));
 
@@ -844,12 +843,12 @@ void applyChanges(int channel)
                         ipmi::network::IP_INTERFACE);
 
                     ipaddress = channelConf->ipaddr.empty()
-                                    ? variant_ns::get<std::string>(
+                                    ? std::get<std::string>(
                                           properties["Address"])
                                     : channelConf->ipaddr;
 
                     prefix = channelConf->netmask.empty()
-                                 ? variant_ns::get<uint8_t>(
+                                 ? std::get<uint8_t>(
                                        properties["PrefixLength"])
                                  : ipmi::network::toPrefix(
                                        AF_INET, channelConf->netmask);
@@ -867,7 +866,7 @@ void applyChanges(int channel)
                     ipmi::network::SYSTEMCONFIG_INTERFACE);
 
                 gateway = channelConf->gateway.empty()
-                              ? variant_ns::get<std::string>(
+                              ? std::get<std::string>(
                                     systemProperties["DefaultGateway"])
                               : channelConf->gateway;
             }

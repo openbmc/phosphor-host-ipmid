@@ -59,7 +59,7 @@ GetSELEntryResponse
     }
 
     record.recordID = static_cast<uint16_t>(
-        sdbusplus::message::variant_ns::get<uint32_t>(iterId->second));
+        std::get<uint32_t>(iterId->second));
 
     // Read Timestamp from the log entry.
     static constexpr auto propTimeStamp = "Timestamp";
@@ -71,7 +71,7 @@ GetSELEntryResponse
     }
 
     std::chrono::milliseconds chronoTimeStamp(
-        sdbusplus::message::variant_ns::get<uint64_t>(iterTimeStamp->second));
+        std::get<uint64_t>(iterTimeStamp->second));
     record.timeStamp = static_cast<uint32_t>(
         std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp)
             .count());
@@ -100,7 +100,7 @@ GetSELEntryResponse
     static constexpr auto deassertEvent = 0x80;
 
     // Evaluate if the event is assertion or deassertion event
-    if (sdbusplus::message::variant_ns::get<bool>(iterResolved->second))
+    if (std::get<bool>(iterResolved->second))
     {
         record.eventType = deassertEvent | iter->second.eventReadingType;
     }
@@ -142,7 +142,7 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     sdbusplus::message::variant<AssociationList> list;
     reply.read(list);
 
-    auto& assocs = sdbusplus::message::variant_ns::get<AssociationList>(list);
+    auto& assocs = std::get<AssociationList>(list);
 
     /*
      * Check if the log entry has any callout associations, if there is a
@@ -205,7 +205,7 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
     reply.read(timeStamp);
 
     std::chrono::milliseconds chronoTimeStamp(
-        sdbusplus::message::variant_ns::get<uint64_t>(timeStamp));
+        std::get<uint64_t>(timeStamp));
 
     return std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp);
 }

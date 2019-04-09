@@ -17,7 +17,6 @@ namespace ipmi
 namespace fru
 {
 
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -141,7 +140,7 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
                 {
                     data[properties.second.section].emplace(
                         properties.first,
-                        std::move(variant_ns::get<std::string>(
+                        std::move(std::get<std::string>(
                             allProp[properties.first])));
                 }
             }

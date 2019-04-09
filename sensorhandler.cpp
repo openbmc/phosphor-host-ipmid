@@ -32,7 +32,6 @@ using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 void register_netfn_sen_functions() __attribute__((constructor));
 
@@ -443,9 +442,9 @@ void getSensorThresholds(uint8_t sensorNum,
     auto warnThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, warningThreshIntf);
 
-    double warnLow = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+    double warnLow = std::visit(ipmi::VariantToDoubleVisitor(),
                                        warnThresholds["WarningLow"]);
-    double warnHigh = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+    double warnHigh = std::visit(ipmi::VariantToDoubleVisitor(),
                                         warnThresholds["WarningHigh"]);
 
     if (warnLow != 0)
@@ -468,9 +467,9 @@ void getSensorThresholds(uint8_t sensorNum,
 
     auto critThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, criticalThreshIntf);
-    double critLow = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+    double critLow = std::visit(ipmi::VariantToDoubleVisitor(),
                                        critThresholds["CriticalLow"]);
-    double critHigh = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
+    double critHigh = std::visit(ipmi::VariantToDoubleVisitor(),
                                         critThresholds["CriticalHigh"]);
 
     if (critLow != 0)
