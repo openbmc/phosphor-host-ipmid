@@ -136,7 +136,6 @@ namespace fs = std::filesystem;
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace sdbusplus::xyz::openbmc_project::Control::Boot::server;
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 namespace chassis
 {
@@ -216,19 +215,19 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
                                              macObjectInfo.first, MAC_INTERFACE,
                                              "MACAddress");
 
-        auto ipAddress = variant_ns::get<std::string>(properties["Address"]);
+        auto ipAddress = std::get<std::string>(properties["Address"]);
 
-        auto gateway = variant_ns::get<std::string>(properties["Gateway"]);
+        auto gateway = std::get<std::string>(properties["Gateway"]);
 
-        auto prefix = variant_ns::get<uint8_t>(properties["PrefixLength"]);
+        auto prefix = std::get<uint8_t>(properties["PrefixLength"]);
 
         uint8_t isStatic =
-            (variant_ns::get<std::string>(properties["Origin"]) ==
+            (std::get<std::string>(properties["Origin"]) ==
              "xyz.openbmc_project.Network.IP.AddressOrigin.Static")
                 ? 1
                 : 0;
 
-        auto MACAddress = variant_ns::get<std::string>(variant);
+        auto MACAddress = std::get<std::string>(variant);
 
         // it is expected here that we should get the valid data
         // but we may also get the default values.
@@ -266,11 +265,10 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         std::memcpy(respptr->data + ADDRTYPE_OFFSET, &isStatic,
                     sizeof(isStatic));
 
-        uint8_t addressFamily =
-            (variant_ns::get<std::string>(properties["Type"]) ==
-             "xyz.openbmc_project.Network.IP.Protocol.IPv4")
-                ? AF_INET
-                : AF_INET6;
+        uint8_t addressFamily = (std::get<std::string>(properties["Type"]) ==
+                                 "xyz.openbmc_project.Network.IP.Protocol.IPv4")
+                                    ? AF_INET
+                                    : AF_INET6;
 
         addrSize = (addressFamily == AF_INET)
                        ? ipmi::network::IPV4_ADDRESS_SIZE_BYTE
@@ -504,7 +502,7 @@ uint32_t getPOHCounter()
         ipmi::getDbusProperty(bus, service, chassisStateObj.first,
                               chassisPOHStateIntf, pOHCounterProperty);
 
-    return variant_ns::get<uint32_t>(propValue);
+    return std::get<uint32_t>(propValue);
 }
 
 ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -558,38 +556,37 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         ipmi::Value variant = ipmi::getDbusProperty(
             bus, chassisCapObject.second, chassisCapObject.first,
             chassisCapIntf, chassisCapFlagsProp);
-        chassis_cap.cap_flags = variant_ns::get<uint8_t>(variant);
+        chassis_cap.cap_flags = std::get<uint8_t>(variant);
 
         variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
                                         chassisCapObject.first, chassisCapIntf,
                                         chassisFRUDevAddrProp);
         // Chassis FRU info Device Address.
-        chassis_cap.fru_info_dev_addr = variant_ns::get<uint8_t>(variant);
+        chassis_cap.fru_info_dev_addr = std::get<uint8_t>(variant);
 
         variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
                                         chassisCapObject.first, chassisCapIntf,
                                         chassisSDRDevAddrProp);
         // Chassis SDR Device Address.
-        chassis_cap.sdr_dev_addr = variant_ns::get<uint8_t>(variant);
+        chassis_cap.sdr_dev_addr = std::get<uint8_t>(variant);
 
         variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
                                         chassisCapObject.first, chassisCapIntf,
                                         chassisSELDevAddrProp);
         // Chassis SEL Device Address.
-        chassis_cap.sel_dev_addr = variant_ns::get<uint8_t>(variant);
+        chassis_cap.sel_dev_addr = std::get<uint8_t>(variant);
 
         variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
                                         chassisCapObject.first, chassisCapIntf,
                                         chassisSMDevAddrProp);
         // Chassis System Management Device Address.
-        chassis_cap.system_management_dev_addr =
-            variant_ns::get<uint8_t>(variant);
+        chassis_cap.system_management_dev_addr = std::get<uint8_t>(variant);
 
         variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
                                         chassisCapObject.first, chassisCapIntf,
                                         chassisBridgeDevAddrProp);
         // Chassis Bridge Device Address.
-        chassis_cap.bridge_dev_addr = variant_ns::get<uint8_t>(variant);
+        chassis_cap.bridge_dev_addr = std::get<uint8_t>(variant);
         uint8_t* respP = reinterpret_cast<uint8_t*>(response);
         uint8_t* chassisP = reinterpret_cast<uint8_t*>(&chassis_cap);
         std::copy(chassisP, chassisP + *data_len, respP);
@@ -829,8 +826,8 @@ ipmi_ret_t ipmi_get_chassis_status(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     sdbusplus::message::variant<std::string> result;
     resp.read(result);
-    auto powerRestore = RestorePolicy::convertPolicyFromString(
-        variant_ns::get<std::string>(result));
+    auto powerRestore =
+        RestorePolicy::convertPolicyFromString(std::get<std::string>(result));
 
     *data_len = 4;
 
@@ -1366,8 +1363,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             }
             sdbusplus::message::variant<std::string> result;
             reply.read(result);
-            auto bootSource = Source::convertSourcesFromString(
-                variant_ns::get<std::string>(result));
+            auto bootSource =
+                Source::convertSourcesFromString(std::get<std::string>(result));
 
             bootSetting = settings::boot::setting(objects, bootModeIntf);
             const auto& bootModeSetting = std::get<settings::Path>(bootSetting);
@@ -1384,8 +1381,8 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
             reply.read(result);
-            auto bootMode = Mode::convertModesFromString(
-                variant_ns::get<std::string>(result));
+            auto bootMode =
+                Mode::convertModesFromString(std::get<std::string>(result));
 
             bootOption = sourceDbusToIpmi.at(bootSource);
             if ((Mode::Modes::Regular == bootMode) &&

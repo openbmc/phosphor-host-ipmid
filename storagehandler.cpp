@@ -62,8 +62,6 @@ ipmi::sel::ObjectPaths paths;
 
 } // namespace cache
 
-namespace variant_ns = sdbusplus::message::variant_ns;
-
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using namespace phosphor::logging;
@@ -522,7 +520,7 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
         reply.read(value);
-        host_time_usec = variant_ns::get<uint64_t>(value);
+        host_time_usec = std::get<uint64_t>(value);
     }
     catch (InternalFailure& e)
     {

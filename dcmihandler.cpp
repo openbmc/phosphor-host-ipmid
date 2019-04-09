@@ -54,7 +54,6 @@ constexpr auto SENSOR_VALUE_PROP = "Value";
 constexpr auto SENSOR_SCALE_PROP = "Scale";
 
 using namespace phosphor::logging;
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 namespace dcmi
 {
@@ -89,7 +88,7 @@ uint32_t getPcap(sdbusplus::bus::bus& bus)
     sdbusplus::message::variant<uint32_t> pcap;
     reply.read(pcap);
 
-    return variant_ns::get<uint32_t>(pcap);
+    return std::get<uint32_t>(pcap);
 }
 
 bool getPcapEnabled(sdbusplus::bus::bus& bus)
@@ -110,7 +109,7 @@ bool getPcapEnabled(sdbusplus::bus::bus& bus)
     sdbusplus::message::variant<bool> pcapEnabled;
     reply.read(pcapEnabled);
 
-    return variant_ns::get<bool>(pcapEnabled);
+    return std::get<bool>(pcapEnabled);
 }
 
 void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap)
@@ -209,7 +208,7 @@ std::string readAssetTag()
     sdbusplus::message::variant<std::string> assetTag;
     reply.read(assetTag);
 
-    return variant_ns::get<std::string>(assetTag);
+    return std::get<std::string>(assetTag);
 }
 
 void writeAssetTag(const std::string& assetTag)
@@ -244,7 +243,7 @@ std::string getHostName(void)
     auto value = ipmi::getDbusProperty(bus, service, networkConfigObj,
                                        networkConfigIntf, hostNameProp);
 
-    return variant_ns::get<std::string>(value);
+    return std::get<std::string>(value);
 }
 
 bool getDHCPEnabled()
@@ -258,7 +257,7 @@ bool getDHCPEnabled()
     auto value = ipmi::getDbusProperty(bus, service, ethernetObj.first,
                                        ethernetIntf, "DHCPEnabled");
 
-    return variant_ns::get<bool>(value);
+    return std::get<bool>(value);
 }
 
 bool getDHCPOption(std::string prop)
@@ -268,7 +267,7 @@ bool getDHCPOption(std::string prop)
     auto service = ipmi::getService(bus, dhcpIntf, dhcpObj);
     auto value = ipmi::getDbusProperty(bus, service, dhcpObj, dhcpIntf, prop);
 
-    return variant_ns::get<bool>(value);
+    return std::get<bool>(value);
 }
 
 void setDHCPOption(std::string prop, bool value)
@@ -834,16 +833,15 @@ Temperature readTemp(const std::string& dbusService,
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     auto result = ipmi::getAllDbusProperties(
         bus, dbusService, dbusPath, "xyz.openbmc_project.Sensor.Value");
-    auto temperature = sdbusplus::message::variant_ns::visit(
-        ipmi::VariantToDoubleVisitor(), result.at("Value"));
+    auto temperature =
+        std::visit(ipmi::VariantToDoubleVisitor(), result.at("Value"));
     double absTemp = std::abs(temperature);
 
     auto findFactor = result.find("Scale");
     double factor = 0.0;
     if (findFactor != result.end())
     {
-        factor = sdbusplus::message::variant_ns::visit(
-            ipmi::VariantToDoubleVisitor(), findFactor->second);
+        factor = std::visit(ipmi::VariantToDoubleVisitor(), findFactor->second);
     }
     double scale = std::pow(10, factor);
 
@@ -1084,8 +1082,8 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
         // Read the sensor value and scale properties
         auto properties = ipmi::getAllDbusProperties(bus, service, objectPath,
                                                      SENSOR_VALUE_INTF);
-        auto value = variant_ns::get<int64_t>(properties[SENSOR_VALUE_PROP]);
-        auto scale = variant_ns::get<int64_t>(properties[SENSOR_SCALE_PROP]);
+        auto value = std::get<int64_t>(properties[SENSOR_VALUE_PROP]);
+        auto scale = std::get<int64_t>(properties[SENSOR_SCALE_PROP]);
 
         // Power reading needs to be scaled with the Scale value using the
         // formula Value * 10^Scale.
