@@ -16,6 +16,24 @@
       "revId": "135c6cd7a81914c283bc7f3cd390e3b375457941",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "574f77ef_cf35e76d",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000322
+      },
+      "writtenOn": "2019-04-10T03:18:58Z",
+      "side": 0,
+      "message": "Sorry, this is my fault. I have added it back and rebase the latest code.",
+      "parentUuid": "c623a89e_16df0835",
+      "revId": "135c6cd7a81914c283bc7f3cd390e3b375457941",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
