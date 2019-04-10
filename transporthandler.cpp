@@ -18,6 +18,7 @@
 #include <sdbusplus/timer.hpp>
 #include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Network/IP/server.hpp>
 
 // timer for network changes
 std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
@@ -25,6 +26,8 @@ std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 constexpr auto ipv4Protocol = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
 
 std::map<int, std::unique_ptr<struct ChannelConfig_t>> channelConfig;
+
+using sdbusplus::xyz::openbmc_project::Network::server::IP;
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
@@ -232,6 +235,67 @@ std::string getGatewayProperty(sdbusplus::bus::bus& bus,
         ipmi::network::SYSTEMCONFIG_INTERFACE, member));
 }
 
+/** @brief Gets the address info configured for the interface at the specified
+ *         index. NOTE: This lacks stability across address changes since
+ *         the network daemon has no notion of stable indicies.
+ *
+ *  @param[in] bus      - The bus object used for lookups
+ *  @param[in] params   - The parameters for the channel on the ethernet
+ *                        interface
+ *  @param[in] selector - Determines which address to lookup
+ *  @return The address and prefix if it was found
+ */
+std::optional<IfAddr> getIfAddr(sdbusplus::bus::bus& bus,
+                                const ChannelParams& params,
+                                const IfAddrSelector& selector)
+{
+    std::string filter;
+    switch (selector.family)
+    {
+        case AF_INET:
+            filter = "ipv4";
+            break;
+        case AF_INET6:
+            filter = "ipv6";
+            break;
+        default:
+            log<level::ERR>("Bad IP Origin",
+                            entry("FAMILY=%d", selector.family));
+            elog<InternalFailure>();
+    }
+
+    ipmi::ObjectTree objs = ipmi::getAllDbusObjects(
+        bus, params.logicalPath, ipmi::network::IP_INTERFACE, filter);
+    uint8_t idx = 0;
+    for (const auto& obj : objs)
+    {
+        ipmi::PropertyMap properties =
+            ipmi::getAllDbusProperties(bus, obj.second.begin()->first,
+                                       obj.first, ipmi::network::IP_INTERFACE);
+
+        IP::AddressOrigin origin = IP::convertAddressOriginFromString(
+            std::get<std::string>(properties.at("Origin")));
+        if (selector.origins.find(origin) == selector.origins.end())
+        {
+            continue;
+        }
+
+        if (idx < selector.idx)
+        {
+            idx++;
+            continue;
+        }
+
+        IfAddr ifaddr;
+        ifaddr.address = std::get<std::string>(properties.at("Address"));
+        ifaddr.prefix = std::get<uint8_t>(properties.at("PrefixLength"));
+        ifaddr.origin = origin;
+        return std::move(ifaddr);
+    }
+
+    return std::nullopt;
+}
+
 /** @brief Turns a prefix into a netmask
  *
  *  @param[in] prefix - The prefix length
@@ -281,6 +345,10 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
             return IPMI_CC_INVALID_FIELD_REQUEST;
         }
         auto channelConf = getChannelConfig(channel);
+        IfAddrSelector selector;
+        selector.family = AF_INET;
+        selector.origins = {IP::AddressOrigin::Static, IP::AddressOrigin::DHCP};
+        selector.idx = 0;
 
         switch (static_cast<LanParam>(lan_param))
         {
@@ -289,24 +357,10 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 std::string ipaddress;
                 if (channelConf->ipaddr.empty())
                 {
-                    try
+                    auto ifaddr = getIfAddr(bus, *params, selector);
+                    if (ifaddr)
                     {
-                        auto ipObjectInfo = ipmi::getIPObject(
-                            bus, ipmi::network::IP_INTERFACE,
-                            params->logicalPath, ipmi::network::IP_TYPE);
-
-                        auto properties = ipmi::getAllDbusProperties(
-                            bus, ipObjectInfo.second, ipObjectInfo.first,
-                            ipmi::network::IP_INTERFACE);
-
-                        ipaddress =
-                            variant_ns::get<std::string>(properties["Address"]);
-                    }
-                    // ignore the exception, as it is a valid condition that
-                    // the system is not configured with any IP.
-                    catch (InternalFailure& e)
-                    {
-                        // nothing to do.
+                        ipaddress = ifaddr->address;
                     }
                 }
                 else
@@ -353,23 +407,10 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                 uint8_t prefix = DEFAULT_PREFIX;
                 if (!channelConf->prefix)
                 {
-                    try
+                    auto ifaddr = getIfAddr(bus, *params, selector);
+                    if (ifaddr)
                     {
-                        auto ipObjectInfo = ipmi::getIPObject(
-                            bus, ipmi::network::IP_INTERFACE,
-                            params->logicalPath, ipmi::network::IP_TYPE);
-
-                        auto properties = ipmi::getAllDbusProperties(
-                            bus, ipObjectInfo.second, ipObjectInfo.first,
-                            ipmi::network::IP_INTERFACE);
-
-                        prefix = std::get<uint8_t>(properties["PrefixLength"]);
-                    }
-                    // ignore the exception, as it is a valid condition that
-                    // the system is not configured with any IP.
-                    catch (InternalFailure& e)
-                    {
-                        // nothing to do
+                        prefix = ifaddr->prefix;
                     }
                 }
                 else
