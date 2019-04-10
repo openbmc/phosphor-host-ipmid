@@ -596,41 +596,42 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     int channel = reqptr->channel & CHANNEL_MASK;
     auto channelConf = getChannelConfig(channel);
 
-    switch (static_cast<LanParam>(reqptr->parameter))
+    try
     {
-        case LanParam::IP:
+        switch (static_cast<LanParam>(reqptr->parameter))
         {
-            char ipaddr[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, reqptr->data, ipaddr, sizeof(ipaddr));
-            channelConf->ipaddr = ipaddr;
-            return checkAndUpdateNetwork(channel);
-        }
-
-        case LanParam::IPSRC:
-        {
-            ipmi::network::IPOrigin ipsrc;
-            std::memcpy(&ipsrc, reqptr->data, ipmi::network::IPSRC_SIZE_BYTE);
-            switch (ipsrc)
+            case LanParam::IP:
             {
-                case ipmi::network::IPOrigin::DHCP:
-                    channelConf->dhcpEnabled = true;
-                    break;
-                case ipmi::network::IPOrigin::STATIC:
-                    channelConf->dhcpEnabled = false;
-                    break;
-                default:
-                    return IPMI_CC_PARM_NOT_SUPPORTED;
+                char ipaddr[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, reqptr->data, ipaddr, sizeof(ipaddr));
+                channelConf->ipaddr = ipaddr;
+                return checkAndUpdateNetwork(channel);
             }
-            return checkAndUpdateNetwork(channel);
-        }
 
-        case LanParam::MAC:
-        {
-            ether_addr mac;
-            std::memcpy(&mac, reqptr->data, sizeof(mac));
-            std::string macStr = ether_ntoa(&mac);
-            try
+            case LanParam::IPSRC:
             {
+                ipmi::network::IPOrigin ipsrc;
+                std::memcpy(&ipsrc, reqptr->data,
+                            ipmi::network::IPSRC_SIZE_BYTE);
+                switch (ipsrc)
+                {
+                    case ipmi::network::IPOrigin::DHCP:
+                        channelConf->dhcpEnabled = true;
+                        break;
+                    case ipmi::network::IPOrigin::STATIC:
+                        channelConf->dhcpEnabled = false;
+                        break;
+                    default:
+                        return IPMI_CC_PARM_NOT_SUPPORTED;
+                }
+                return checkAndUpdateNetwork(channel);
+            }
+
+            case LanParam::MAC:
+            {
+                ether_addr mac;
+                std::memcpy(&mac, reqptr->data, sizeof(mac));
+                std::string macStr = ether_ntoa(&mac);
                 auto params = getChannelParams(bus, channel);
                 if (!params)
                 {
@@ -641,65 +642,74 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                       "MACAddress", macStr);
                 return IPMI_CC_OK;
             }
-            catch (...)
-            {
-                return IPMI_CC_UNSPECIFIED_ERROR;
-            }
-        }
 
-        case LanParam::SUBNET:
-        {
-            try
+            case LanParam::SUBNET:
             {
-                in_addr netmask;
-                std::memcpy(&netmask, reqptr->data, sizeof(netmask));
-                channelConf->prefix = netmaskToPrefix(netmask);
+                try
+                {
+                    in_addr netmask;
+                    std::memcpy(&netmask, reqptr->data, sizeof(netmask));
+                    channelConf->prefix = netmaskToPrefix(netmask);
+                    return checkAndUpdateNetwork(channel);
+                }
+                catch (...)
+                {
+                    return IPMI_CC_INVALID_FIELD_REQUEST;
+                }
+            }
+
+            case LanParam::GATEWAY:
+            {
+                char gateway[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, reqptr->data, gateway, sizeof(gateway));
+                auto sysObj = ipmi::getDbusObject(
+                    bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
+                    ipmi::network::ROOT);
+                ipmi::setDbusProperty(bus, sysObj.second, sysObj.first,
+                                      ipmi::network::SYSTEMCONFIG_INTERFACE,
+                                      "DefaultGateway", std::string(gateway));
+                return IPMI_CC_OK;
+            }
+
+            case LanParam::VLAN:
+            {
+                uint16_t vlan;
+                std::memcpy(&vlan, reqptr->data, sizeof(vlan));
+                vlan = le16toh(vlan);
+                channelConf->vlan.emplace(
+                    vlan & ipmi::network::VLAN_ENABLE_FLAG,
+                    vlan & ipmi::network::VLAN_VALUE_MASK);
                 return checkAndUpdateNetwork(channel);
             }
-            catch (...)
+
+            case LanParam::INPROGRESS:
             {
-                return IPMI_CC_INVALID_FIELD_REQUEST;
+                if (reqptr->data[0] == SET_COMPLETE)
+                {
+                    channelConf->lan_set_in_progress = SET_COMPLETE;
+                }
+                else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
+                {
+                    channelConf->lan_set_in_progress = SET_IN_PROGRESS;
+                }
+                return checkAndUpdateNetwork(channel);
             }
-        }
 
-        case LanParam::GATEWAY:
-        {
-            char gateway[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, reqptr->data, gateway, sizeof(gateway));
-            auto sysObj =
-                ipmi::getDbusObject(bus, ipmi::network::SYSTEMCONFIG_INTERFACE,
-                                    ipmi::network::ROOT);
-            ipmi::setDbusProperty(bus, sysObj.second, sysObj.first,
-                                  ipmi::network::SYSTEMCONFIG_INTERFACE,
-                                  "DefaultGateway", std::string(gateway));
-            return IPMI_CC_OK;
+            default:
+                return IPMI_CC_PARM_NOT_SUPPORTED;
         }
-
-        case LanParam::VLAN:
-        {
-            uint16_t vlan;
-            std::memcpy(&vlan, reqptr->data, sizeof(vlan));
-            vlan = le16toh(vlan);
-            channelConf->vlan.emplace(vlan & ipmi::network::VLAN_ENABLE_FLAG,
-                                      vlan & ipmi::network::VLAN_VALUE_MASK);
-            return checkAndUpdateNetwork(channel);
-        }
-
-        case LanParam::INPROGRESS:
-        {
-            if (reqptr->data[0] == SET_COMPLETE)
-            {
-                channelConf->lan_set_in_progress = SET_COMPLETE;
-            }
-            else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
-            {
-                channelConf->lan_set_in_progress = SET_IN_PROGRESS;
-            }
-            return checkAndUpdateNetwork(channel);
-        }
-
-        default:
-            return IPMI_CC_PARM_NOT_SUPPORTED;
+    }
+    catch (const InternalFailure& e)
+    {
+        commit<InternalFailure>();
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failed to set network data",
+                        entry("PARAMETER=%" PRIu8, reqptr->parameter),
+                        entry("CHANNEL=%d", channel),
+                        entry("ERROR=%s", e.what()));
+        commit<InternalFailure>();
     }
 
     return IPMI_CC_UNSPECIFIED_ERROR;
