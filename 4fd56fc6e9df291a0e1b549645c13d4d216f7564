@@ -22,6 +22,30 @@
       "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "508a7240_900a3e59",
+        "filename": "include/ipmid/sdrutils.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000322
+      },
+      "writtenOn": "2019-04-12T02:40:23Z",
+      "side": 1,
+      "message": "This change requires Json to review.\nI can add the new type for power but needs Json to agree.",
+      "parentUuid": "c26db45d_0d78ee3b",
+      "range": {
+        "startLine": 107,
+        "startChar": 34,
+        "endLine": 107,
+        "endChar": 51
+      },
+      "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
