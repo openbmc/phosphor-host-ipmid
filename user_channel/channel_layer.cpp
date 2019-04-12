@@ -146,4 +146,15 @@ uint8_t getChannelByName(const std::string& chName)
 {
     return getChannelConfigObject().getChannelByName(chName);
 }
+
+bool isValidPayloadType(const PayloadType payloadType)
+{
+    return (
+        payloadType == PayloadType::IPMI || payloadType == PayloadType::SOL ||
+        payloadType == PayloadType::OPEN_SESSION_REQUEST ||
+        payloadType == PayloadType::OPEN_SESSION_RESPONSE ||
+        payloadType == PayloadType::RAKP1 ||
+        payloadType == PayloadType::RAKP2 ||
+        payloadType == PayloadType::RAKP3 || payloadType == PayloadType::RAKP4);
+}
 } // namespace ipmi
