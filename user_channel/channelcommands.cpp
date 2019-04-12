@@ -342,6 +342,43 @@ RspType<uint16_t, // stdPayloadType
                            rspRsvd1);
 }
 
+/** @brief implements the get channel payload version command
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param chNum - channel number to get info about
+ *  @param reserved - skip 4 bits
+ *  @param payloadTypeNum - to get payload type info
+
+ *  @returns IPMI completion code plus response data
+ *   - formatVersion - BCD encoded format version info
+ */
+
+RspType<uint8_t> // formatVersion
+    ipmiGetChannelPayloadVersion(Context::ptr ctx, uint4_t chNum,
+                                 uint4_t reserved, uint8_t payloadTypeNum)
+{
+    uint8_t channel =
+        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
+
+    if (reserved || !isValidChannel(channel) ||
+        (getChannelSessionSupport(channel)) == EChannelSessSupported::none)
+    {
+        return responseInvalidFieldRequest();
+    }
+
+    if (!isValidPayloadType(static_cast<PayloadType>(payloadTypeNum)))
+    {
+        log<level::ERR>("Channel payload version - Payload type unavailable");
+
+        constexpr uint8_t systemInfoParameterNotSupported = 0x80;
+        return response(systemInfoParameterNotSupported);
+    }
+
+    // BCD encoded version representation - 1.0
+    static constexpr uint8_t formatVersion = 0x10;
+
+    return responseSuccess(formatVersion);
+}
+
 void registerChannelFunctions() __attribute__((constructor));
 void registerChannelFunctions()
 {
@@ -358,6 +395,9 @@ void registerChannelFunctions()
 
     registerHandler(prioOpenBmcBase, netFnApp, app::cmdGetChannelPayloadSupport,
                     Privilege::User, ipmiGetChannelPayloadSupport);
+
+    registerHandler(prioOpenBmcBase, netFnApp, app::cmdGetChannelPayloadVersion,
+                    Privilege::User, ipmiGetChannelPayloadVersion);
 }
 
 } // namespace ipmi
