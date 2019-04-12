@@ -376,4 +376,12 @@ std::string getChannelName(const uint8_t chNum);
  */
 uint8_t getChannelByName(const std::string& chName);
 
+/** @brief determines whether payload type is valid
+ *
+ *	@param[in] payload type - Payload Type
+ *
+ *	@return true if valid, false otherwise
+ */
+bool isValidPayloadType(const PayloadType payloadType);
+
 } // namespace ipmi

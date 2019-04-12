@@ -19,6 +19,7 @@
 #include "apphandler.hpp"
 #include "channel_layer.hpp"
 
+#include <ipmid/api.hpp>
 #include <phosphor-logging/log.hpp>
 #include <regex>
 
@@ -495,6 +496,44 @@ ipmi_ret_t ipmiGetChannelPayloadSupport(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
+/** @brief implements the get channel payload version command
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param chNum - channel number to get info about
+ *  @param reserved - skip 4 bits
+ *  @param payloadTypeNo - to get payload type info
+
+ *  @returns IPMI completion code plus response data
+ *   - formatVersion - BCD encoded format version info
+ */
+
+ipmi::RspType<uint8_t> // formatVersion
+
+    ipmiGetChannelPayloadVersionCommand(ipmi::Context::ptr ctx, uint4_t chNum,
+                                        uint4_t reserved, uint8_t payloadTypeNo)
+{
+    uint8_t channel =
+        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx);
+
+    if (reserved || !isValidChannel(channel) ||
+        (EChannelSessSupported::none == getChannelSessionSupport(channel)))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (!isValidPayloadType(static_cast<PayloadType>(payloadTypeNo)))
+    {
+        log<level::ERR>("Channel payload version - Payload type unavailable");
+
+        constexpr uint8_t systemInfoParameterNotSupported = 0x80;
+        return ipmi::response(systemInfoParameterNotSupported);
+    }
+
+    // BCD encoded version representation - 1.0
+    static constexpr uint8_t formatVersion = 0x10;
+
+    return ipmi::responseSuccess(formatVersion);
+}
+
 void registerChannelFunctions() __attribute__((constructor));
 void registerChannelFunctions()
 {
@@ -512,6 +551,10 @@ void registerChannelFunctions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_PAYLOAD_SUPPORT,
                            NULL, ipmiGetChannelPayloadSupport, PRIVILEGE_USER);
 
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetChannelPayloadVersion,
+                          ipmi::Privilege::User,
+                          ipmiGetChannelPayloadVersionCommand);
     return;
 }
 
