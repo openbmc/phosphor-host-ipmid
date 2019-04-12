@@ -70,6 +70,30 @@
       "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3fcb557b_bbeb764f",
+        "filename": "include/ipmid/sdrutils.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000164
+      },
+      "writtenOn": "2019-04-12T18:15:37Z",
+      "side": 1,
+      "message": "I got confused with sensorUnits: https://github.com/openbmc/intel-ipmi-oem/blob/master/src/sensorcommands.cpp#L64\n\nThis looks fine.",
+      "parentUuid": "1655b167_b0e4f22d",
+      "range": {
+        "startLine": 107,
+        "startChar": 34,
+        "endLine": 107,
+        "endChar": 51
+      },
+      "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
