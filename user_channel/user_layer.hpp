@@ -138,6 +138,16 @@ ipmi_ret_t ipmiUserSetUserName(const uint8_t userId, const char* userName);
 ipmi_ret_t ipmiUserSetUserPassword(const uint8_t userId,
                                    const char* userPassword);
 
+/** @brief set special user password (non-ipmi accounts)
+ *
+ *  @param[in] userName - user name
+ *  @param[in] userPassword - New Password
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiSetSpecialUserPassword(const std::string& userName,
+                                      const std::string& userPassword);
+
 /** @brief get user name
  *
  *  @param[in] userId - user id

@@ -717,6 +717,17 @@ bool pamUpdatePasswd(const char* username, const char* password)
     return true;
 }
 
+ipmi_ret_t UserAccess::setSpecialUserPassword(const std::string& userName,
+                                              const std::string& userPassword)
+{
+    if (!pamUpdatePasswd(userName.c_str(), userPassword.c_str()))
+    {
+        log<level::DEBUG>("Failed to update password");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
                                        const char* userPassword)
 {
