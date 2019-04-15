@@ -28,6 +28,7 @@
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Network/IP/server.hpp>
+#include <xyz/openbmc_project/Network/Neighbor/server.hpp>
 
 namespace ipmi
 {
@@ -41,6 +42,7 @@ using phosphor::logging::level;
 using phosphor::logging::log;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
+using sdbusplus::xyz::openbmc_project::Network::server::Neighbor;
 
 // LAN Handler specific response codes
 constexpr Cc ccParamNotSupported = 0x80;
@@ -61,6 +63,9 @@ constexpr auto INTF_ETHERNET = "xyz.openbmc_project.Network.EthernetInterface";
 constexpr auto INTF_IP = "xyz.openbmc_project.Network.IP";
 constexpr auto INTF_IP_CREATE = "xyz.openbmc_project.Network.IP.Create";
 constexpr auto INTF_MAC = "xyz.openbmc_project.Network.MACAddress";
+constexpr auto INTF_NEIGHBOR = "xyz.openbmc_project.Network.Neighbor";
+constexpr auto INTF_NEIGHBOR_CREATE_STATIC =
+    "xyz.openbmc_project.Network.Neighbor.CreateStatic";
 constexpr auto INTF_VLAN = "xyz.openbmc_project.Network.VLAN";
 constexpr auto INTF_VLAN_CREATE = "xyz.openbmc_project.Network.VLAN.Create";
 
@@ -97,6 +102,15 @@ struct IfAddr
     uint8_t prefix;
 };
 
+/** @brief Interface Neighbor configuration parameters */
+template <int family>
+struct IfNeigh
+{
+    std::string path;
+    typename AddrFamily<family>::addr ip;
+    ether_addr mac;
+};
+
 /** @brief IPMI LAN Parameters */
 enum class LanParam : uint8_t
 {
@@ -108,6 +122,7 @@ enum class LanParam : uint8_t
     MAC = 5,
     SubnetMask = 6,
     Gateway1 = 12,
+    Gateway1MAC = 13,
     VLANId = 20,
     CiphersuiteSupport = 22,
     CiphersuiteEntries = 23,
@@ -130,6 +145,19 @@ enum class SetStatus : uint8_t
     InProgress = 1,
     Commit = 2,
 };
+
+/** @brief A trivial helper used to determine if two PODs are equal
+ *
+ *  @params[in] a - The first object to compare
+ *  @params[in] b - The second object to compare
+ *  @return True if the objects are the same bytewise
+ */
+template <typename T>
+bool equal(const T& a, const T& b)
+{
+    static_assert(std::is_trivially_copyable_v<T>);
+    return std::memcmp(&a, &b, sizeof(T)) == 0;
+}
 
 /** @brief Copies bytes from an array into a trivially copyable container
  *
@@ -449,21 +477,6 @@ std::optional<typename AddrFamily<family>::addr>
     return stringToAddr<family>(gatewayStr.c_str());
 }
 
-/** @brief Sets the system wide value for the default gateway
- *
- *  @param[in] bus     - The bus object used for lookups
- *  @param[in] params  - The parameters for the channel
- *  @param[in] gateway - Gateway address to apply
- */
-template <int family>
-void setGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
-                        const typename AddrFamily<family>::addr& address)
-{
-    setDbusProperty(bus, params.service, PATH_SYSTEMCONFIG, INTF_SYSTEMCONFIG,
-                    AddrFamily<family>::propertyGateway,
-                    addrToString<family>(address));
-}
-
 /** @brief A lazy lookup mechanism for iterating over object properties stored
  *         in DBus. This will only perform the object lookup when needed, and
  *         retains a cache of previous lookups to speed up future iterations.
@@ -711,6 +724,131 @@ void reconfigureIfAddr4(sdbusplus::bus::bus& bus, const ChannelParams& params,
                           prefix.value_or(fallbackPrefix));
 }
 
+template <int family>
+std::optional<IfNeigh<family>>
+    findStaticNeighbor(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                       const typename AddrFamily<family>::addr& ip,
+                       ObjectLookupCache& neighbors)
+{
+    const auto state =
+        sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+            Neighbor::State::Permanent);
+    for (const auto& [path, neighbor] : neighbors)
+    {
+        const auto& ipStr = std::get<std::string>(neighbor.at("IPAddress"));
+        auto neighIP = maybeStringToAddr<family>(ipStr.c_str());
+        if (!neighIP)
+        {
+            continue;
+        }
+        if (!equal(*neighIP, ip))
+        {
+            continue;
+        }
+        if (state != std::get<std::string>(neighbor.at("State")))
+        {
+            continue;
+        }
+
+        IfNeigh<family> ret;
+        ret.path = path;
+        ret.ip = ip;
+        const auto& macStr = std::get<std::string>(neighbor.at("MACAddress"));
+        ret.mac = stringToMAC(macStr.c_str());
+        return std::move(ret);
+    }
+
+    return std::nullopt;
+}
+
+template <int family>
+void createNeighbor(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                    const typename AddrFamily<family>::addr& address,
+                    const ether_addr& mac)
+{
+    auto newreq =
+        bus.new_method_call(params.service.c_str(), params.logicalPath.c_str(),
+                            INTF_NEIGHBOR_CREATE_STATIC, "Neighbor");
+    std::string macStr = ether_ntoa(&mac);
+    newreq.append(addrToString<family>(address), macStr);
+    bus.call_noreply(newreq);
+}
+
+/** @brief Sets the system wide value for the default gateway
+ *
+ *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] params  - The parameters for the channel
+ *  @param[in] gateway - Gateway address to apply
+ */
+template <int family>
+void setGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                        const typename AddrFamily<family>::addr& address)
+{
+    // Save the old gateway MAC address if it exists so we can recreate it
+    auto gateway = getGatewayProperty<family>(bus, params);
+    std::optional<IfNeigh<family>> neighbor;
+    if (gateway)
+    {
+        ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
+        neighbor = findStaticNeighbor<family>(bus, params, *gateway, neighbors);
+    }
+
+    setDbusProperty(bus, params.service, PATH_SYSTEMCONFIG, INTF_SYSTEMCONFIG,
+                    AddrFamily<family>::propertyGateway,
+                    addrToString<family>(address));
+
+    // Restore the gateway MAC if we had one
+    if (neighbor)
+    {
+        deleteObjectIfExists(bus, params.service, neighbor->path);
+        createNeighbor<family>(bus, params, address, neighbor->mac);
+    }
+}
+
+template <int family>
+std::optional<IfNeigh<family>> findGatewayNeighbor(sdbusplus::bus::bus& bus,
+                                                   const ChannelParams& params,
+                                                   ObjectLookupCache& neighbors)
+{
+    auto gateway = getGatewayProperty<family>(bus, params);
+    if (!gateway)
+    {
+        return std::nullopt;
+    }
+
+    return findStaticNeighbor<family>(bus, params, *gateway, neighbors);
+}
+
+template <int family>
+std::optional<IfNeigh<family>> getGatewayNeighbor(sdbusplus::bus::bus& bus,
+                                                  const ChannelParams& params)
+{
+    ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
+    return findGatewayNeighbor<family>(bus, params, neighbors);
+}
+
+template <int family>
+void reconfigureGatewayMAC(sdbusplus::bus::bus& bus,
+                           const ChannelParams& params, const ether_addr& mac)
+{
+    auto gateway = getGatewayProperty<family>(bus, params);
+    if (!gateway)
+    {
+        log<level::ERR>("Tried to set Gateway MAC without Gateway");
+        elog<InternalFailure>();
+    }
+
+    ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
+    auto neighbor =
+        findStaticNeighbor<family>(bus, params, *gateway, neighbors);
+    if (neighbor)
+    {
+        deleteObjectIfExists(bus, params.service, neighbor->path);
+    }
+
+    createNeighbor<family>(bus, params, *gateway, mac);
+}
+
 /** @brief Gets the vlan ID configured on the interface
  *
  *  @param[in] bus    - The bus object used for lookups
@@ -811,6 +949,8 @@ void reconfigureVLAN(sdbusplus::bus::bus& bus, ChannelParams& params,
     ObjectLookupCache ips(bus, params, INTF_IP);
     auto ifaddr4 = findIfAddr<AF_INET>(bus, params, 0, originsV4, ips);
     auto dhcp = getDHCPProperty(bus, params);
+    ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
+    auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
 
     deconfigureChannel(bus, params);
     createVLAN(bus, params, vlan);
@@ -820,6 +960,10 @@ void reconfigureVLAN(sdbusplus::bus::bus& bus, ChannelParams& params,
     if (ifaddr4)
     {
         createIfAddr<AF_INET>(bus, params, ifaddr4->address, ifaddr4->prefix);
+    }
+    if (neighbor4)
+    {
+        createNeighbor<AF_INET>(bus, params, neighbor4->ip, neighbor4->mac);
     }
 }
 
@@ -1019,6 +1163,18 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             channelCall<setGatewayProperty<AF_INET>>(channel, gateway);
             return responseSuccess();
         }
+        case LanParam::Gateway1MAC:
+        {
+            ether_addr gatewayMAC;
+            std::array<uint8_t, sizeof(gatewayMAC)> bytes;
+            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+            copyInto(gatewayMAC, bytes);
+            channelCall<reconfigureGatewayMAC<AF_INET>>(channel, gatewayMAC);
+            return responseSuccess();
+        }
         case LanParam::VLANId:
         {
             uint16_t vlanData;
@@ -1141,6 +1297,17 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
                 channelCall<getGatewayProperty<AF_INET>>(channel).value_or(
                     in_addr{});
             ret.pack(dataRef(gateway));
+            return responseSuccess(std::move(ret));
+        }
+        case LanParam::Gateway1MAC:
+        {
+            ether_addr mac{};
+            auto neighbor = channelCall<getGatewayNeighbor<AF_INET>>(channel);
+            if (neighbor)
+            {
+                mac = neighbor->mac;
+            }
+            ret.pack(dataRef(mac));
             return responseSuccess(std::move(ret));
         }
         case LanParam::VLANId:
