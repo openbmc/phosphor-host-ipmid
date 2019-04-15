@@ -22,6 +22,7 @@
 #include <phosphor-logging/log.hpp>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace ipmi
