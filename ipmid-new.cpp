@@ -270,13 +270,12 @@ message::Response::ptr executeIpmiCommandCommon(
 message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
 {
     // look up the group for this request
-    Group group;
-    if (0 != request->payload.unpack(group))
+    uint24_t bytes;
+    if (0 != request->payload.unpack(bytes))
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
-    // The handler will need to unpack group as well; we just need it for lookup
-    request->payload.reset();
+    auto group = static_cast<Group>(bytes);
     message::Response::ptr response =
         executeIpmiCommandCommon(groupHandlerMap, group, request);
     // if the handler should add the group; executeIpmiCommandCommon does not
@@ -290,12 +289,12 @@ message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
 message::Response::ptr executeIpmiOemCommand(message::Request::ptr request)
 {
     // look up the iana for this request
-    Iana iana;
-    if (0 != request->payload.unpack(iana))
+    uint24_t bytes;
+    if (0 != request->payload.unpack(bytes))
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
-    request->payload.reset();
+    auto iana = static_cast<Iana>(bytes);
     message::Response::ptr response =
         executeIpmiCommandCommon(oemHandlerMap, iana, request);
     // if the handler should add the iana; executeIpmiCommandCommon does not

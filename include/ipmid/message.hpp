@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <boost/asio/spawn.hpp>
 #include <cstdint>
+#include <exception>
 #include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
 #include <memory>
@@ -99,15 +100,15 @@ struct Payload
     Payload(Payload&&) = default;
     Payload& operator=(Payload&&) = default;
 
-    explicit Payload(std::vector<uint8_t>&& data) :
-        raw(std::move(data)), unpackCheck(false)
+    explicit Payload(std::vector<uint8_t>&& data) : raw(std::move(data))
     {
     }
 
     ~Payload()
     {
         using namespace phosphor::logging;
-        if (trailingOk && !unpackCheck && !fullyUnpacked())
+        if (raw.size() != 0 && std::uncaught_exceptions() == 0 && !trailingOk &&
+            !unpackCheck && !unpackError)
         {
             log<level::ERR>("Failed to check request for full unpack");
         }
@@ -445,8 +446,8 @@ struct Payload
     size_t bitCount = 0;
     std::vector<uint8_t> raw;
     size_t rawIndex = 0;
-    bool trailingOk = false;
-    bool unpackCheck = true;
+    bool trailingOk = true;
+    bool unpackCheck = false;
     bool unpackError = false;
 };
 
@@ -569,7 +570,6 @@ struct Request
                     // not all bits were consumed by requested parameters
                     return ipmi::ccReqDataLenInvalid;
                 }
-                payload.unpackCheck = false;
             }
         }
         return unpackRet;

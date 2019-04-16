@@ -153,6 +153,7 @@ class IpmiHandler final : public HandlerBase
         using ResultType = boost::callable_traits::return_type_t<Handler>;
 
         UnpackArgsType unpackArgs;
+        request->payload.trailingOk = false;
         ipmi::Cc unpackError = request->unpack(unpackArgs);
         if (unpackError != ipmi::ccSuccess)
         {
@@ -178,45 +179,47 @@ class IpmiHandler final : public HandlerBase
          * parameter selector. All the remaining data can be extracted using
          * the Payload class and the unpack API available to the Payload class.
          */
-        std::optional<InputArgsType> inputArgs;
-        if constexpr (std::tuple_size<InputArgsType>::value > 0)
-        {
-            if constexpr (std::is_same<std::tuple_element_t<0, InputArgsType>,
-                                       boost::asio::yield_context>::value)
-            {
-                inputArgs.emplace(std::tuple_cat(
-                    std::forward_as_tuple(*(request->ctx->yield)),
-                    std::move(unpackArgs)));
-            }
-            else if constexpr (std::is_same<
-                                   std::tuple_element_t<0, InputArgsType>,
-                                   ipmi::Context::ptr>::value)
-            {
-                inputArgs.emplace(
-                    std::tuple_cat(std::forward_as_tuple(request->ctx),
-                                   std::move(unpackArgs)));
-            }
-            else if constexpr (std::is_same<
-                                   std::tuple_element_t<0, InputArgsType>,
-                                   ipmi::message::Request::ptr>::value)
-            {
-                inputArgs.emplace(std::tuple_cat(std::forward_as_tuple(request),
-                                                 std::move(unpackArgs)));
-            }
-            else
-            {
-                // no special parameters were requested (but others were)
-                inputArgs.emplace(std::move(unpackArgs));
-            }
-        }
-        else
-        {
-            // no parameters were requested
-            inputArgs = std::move(unpackArgs);
-        }
         ResultType result;
         try
         {
+            std::optional<InputArgsType> inputArgs;
+            if constexpr (std::tuple_size<InputArgsType>::value > 0)
+            {
+                if constexpr (std::is_same<
+                                  std::tuple_element_t<0, InputArgsType>,
+                                  boost::asio::yield_context>::value)
+                {
+                    inputArgs.emplace(std::tuple_cat(
+                        std::forward_as_tuple(*(request->ctx->yield)),
+                        std::move(unpackArgs)));
+                }
+                else if constexpr (std::is_same<
+                                       std::tuple_element_t<0, InputArgsType>,
+                                       ipmi::Context::ptr>::value)
+                {
+                    inputArgs.emplace(
+                        std::tuple_cat(std::forward_as_tuple(request->ctx),
+                                       std::move(unpackArgs)));
+                }
+                else if constexpr (std::is_same<
+                                       std::tuple_element_t<0, InputArgsType>,
+                                       ipmi::message::Request::ptr>::value)
+                {
+                    inputArgs.emplace(std::tuple_cat(
+                        std::forward_as_tuple(request), std::move(unpackArgs)));
+                }
+                else
+                {
+                    // no special parameters were requested (but others were)
+                    inputArgs.emplace(std::move(unpackArgs));
+                }
+            }
+            else
+            {
+                // no parameters were requested
+                inputArgs = std::move(unpackArgs);
+            }
+
             // execute the registered callback function and get the
             // ipmi::RspType<>
             result = std::apply(handler_, *inputArgs);
@@ -307,7 +310,7 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         executeCallback(message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
-        size_t len = request->payload.size();
+        size_t len = request->payload.size() - request->payload.rawIndex;
         // allocate a big response buffer here
         response->payload.resize(
             getChannelMaxTransferSize(request->ctx->channel));
@@ -315,9 +318,10 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         Cc ccRet{ccSuccess};
         try
         {
-            ccRet = handler_(request->ctx->netFn, request->ctx->cmd,
-                             request->payload.data(), response->payload.data(),
-                             &len, handlerCtx);
+            ccRet =
+                handler_(request->ctx->netFn, request->ctx->cmd,
+                         request->payload.data() + request->payload.rawIndex,
+                         response->payload.data(), &len, handlerCtx);
         }
         catch (const std::exception& e)
         {
@@ -396,7 +400,7 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
         executeCallback(message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
-        size_t len = request->payload.size();
+        size_t len = request->payload.size() - request->payload.rawIndex;
         // allocate a big response buffer here
         response->payload.resize(
             getChannelMaxTransferSize(request->ctx->channel));
@@ -404,8 +408,10 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
         Cc ccRet{ccSuccess};
         try
         {
-            ccRet = handler_(request->ctx->cmd, request->payload.data(),
-                             response->payload.data(), &len);
+            ccRet =
+                handler_(request->ctx->cmd,
+                         request->payload.data() + request->payload.rawIndex,
+                         response->payload.data(), &len);
         }
         catch (const std::exception& e)
         {
