@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "57e3c5ee_ace19628",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2019-04-18T20:11:28Z",
+      "side": 1,
+      "message": "Can you add your full name?\n\n$ git config --global user.name \"John Doe\"\nFrom https://git-scm.com/docs/git-commit \n    Add Signed-off-by line by the committer at the end of the commit log message. The meaning of a signoff depends on the project, but it typically certifies that committer has the rights to submit this work under the same license and agrees to a Developer Certificate of Origin (see http://developercertificate.org/ for more information).\n\nLittle more information here if you want to know the history, https://stackoverflow.com/questions/1962094/what-is-the-sign-off-feature-in-git-for",
+      "range": {
+        "startLine": 12,
+        "startChar": 15,
+        "endLine": 12,
+        "endChar": 20
+      },
+      "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c26db45d_0d78ee3b",
         "filename": "include/ipmid/sdrutils.hpp",
         "patchSetId": 4
