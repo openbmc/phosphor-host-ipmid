@@ -71,28 +71,16 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 // Called by Host on seeing a SMS_ATN bit set. Return a hardcoded
 // value of 0x2 indicating we need Host read some data.
 //-------------------------------------------------------------------
-ipmi_ret_t ipmi_app_get_msg_flags(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                  ipmi_request_t request,
-                                  ipmi_response_t response,
-                                  ipmi_data_len_t data_len,
-                                  ipmi_context_t context)
+ipmi::RspType<uint8_t> ipmiAppGetMessageFlags()
 {
-    // Generic return from IPMI commands.
-    ipmi_ret_t rc = IPMI_CC_OK;
-
     // From IPMI spec V2.0 for Get Message Flags Command :
     // bit:[1] from LSB : 1b = Event Message Buffer Full.
     // Return as 0 if Event Message Buffer is not supported,
     // or when the Event Message buffer is disabled.
-    // For now, it is not supported.
-
-    uint8_t set_event_msg_buffer_full = 0x0;
-    *data_len = sizeof(set_event_msg_buffer_full);
-
-    // Pack the actual response
-    std::memcpy(response, &set_event_msg_buffer_full, *data_len);
-
-    return rc;
+    // This path is used to communicate messages to the host
+    // from within the phosphor::host::command::Manager
+    constexpr uint8_t setEventMsgBufferFull = 0x2;
+    return ipmi::responseSuccess(setEventMsgBufferFull);
 }
 
 ipmi_ret_t ipmi_app_get_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -163,8 +151,9 @@ void register_netfn_app_functions()
                            ipmi_app_get_bmc_global_enables, SYSTEM_INTERFACE);
 
     // <Get Message Flags>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_MSG_FLAGS, NULL,
-                           ipmi_app_get_msg_flags, SYSTEM_INTERFACE);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetMessageFlags, ipmi::Privilege::Admin,
+                          ipmiAppGetMessageFlags);
 
     // Create new xyz.openbmc_project.host object on the bus
     auto objPath = std::string{CONTROL_HOST_OBJ_MGR} + '/' + HOST_NAME + '0';
