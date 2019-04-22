@@ -84,9 +84,9 @@ ipmi_ret_t ipmi_app_get_msg_flags(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // bit:[1] from LSB : 1b = Event Message Buffer Full.
     // Return as 0 if Event Message Buffer is not supported,
     // or when the Event Message buffer is disabled.
-    // For now, it is not supported.
-
-    uint8_t set_event_msg_buffer_full = 0x0;
+    // This path is used to communicate messages to the host
+    // from within the phosphor::host::command::Manager
+    uint8_t set_event_msg_buffer_full = 0x2;
     *data_len = sizeof(set_event_msg_buffer_full);
 
     // Pack the actual response
