@@ -3,10 +3,18 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 AM_CPPFLAGS = -I$(abs_srcdir) -I$(abs_srcdir)/include
 export AM_CPPFLAGS
 
+if AUTOCONF_CODE_COVERAGE_2019_01_06
+include $(top_srcdir)/aminclude_static.am
+clean-local: code-coverage-clean
+distclean-local: code-coverage-dist-clean
+else
+@CODE_COVERAGE_RULES@
+endif
+
 providersdir = ${libdir}/ipmid-providers
 providers_LTLIBRARIES =
 
-sbin_PROGRAMS = \
+bin_PROGRAMS = \
 	ipmid
 
 ipmid_SOURCES = \
@@ -97,8 +105,6 @@ libipmi20_la_SOURCES = \
 	user_channel/channelcommands.cpp \
 	$(libipmi20_BUILT_LIST)
 
-@CODE_COVERAGE_RULES@
-
 check_PROGRAMS =
 XFAIL_TESTS =
 
@@ -126,7 +132,7 @@ libusercmds_la_SOURCES = \
 	user_channel/usercommands.cpp
 libusercmds_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
-	$(LIBS) \
+	$(libmapper_LIBS) \
 	-version-info 0:0:0 -shared
 libusercmds_la_CXXFLAGS = $(COMMON_CXX)
 

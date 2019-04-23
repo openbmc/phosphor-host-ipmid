@@ -1,7 +1,6 @@
 #include "globalhandler.hpp"
 
-#include <ipmid/api.h>
-
+#include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>

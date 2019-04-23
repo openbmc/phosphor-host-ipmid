@@ -7,7 +7,6 @@
 #include "storageaddsel.hpp"
 
 #include <arpa/inet.h>
-#include <ipmid/api.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
@@ -16,6 +15,8 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
+#include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
@@ -25,19 +26,6 @@
 #include <string>
 #include <string_view>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -78,8 +66,6 @@ ipmi::sel::ObjectPaths paths;
 
 } // namespace cache
 #endif
-
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
@@ -1007,7 +993,7 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
         reply.read(value);
-        host_time_usec = variant_ns::get<uint64_t>(value);
+        host_time_usec = std::get<uint64_t>(value);
     }
     catch (InternalFailure& e)
     {

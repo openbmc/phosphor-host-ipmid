@@ -42,6 +42,7 @@ Makefile.in
 *.la
 *.so*
 *.pc
+/aminclude_static.am
 /config.h
 /config.h.in~
 /config.log

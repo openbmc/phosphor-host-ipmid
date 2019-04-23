@@ -207,7 +207,9 @@ struct UnpackSingle<std::bitset<N>>
         {
             return -1;
         }
-        fixed_uint_t<details::bitStreamSize> bitmask = ((1 << count) - 1);
+        fixed_uint_t<details::bitStreamSize> bitmask =
+            ~fixed_uint_t<details::bitStreamSize>(0) >>
+            (details::bitStreamSize - count);
         t |= (p.bitStream & bitmask).convert_to<unsigned long long>();
         p.bitStream >>= count;
         p.bitCount -= count;
@@ -322,13 +324,9 @@ struct UnpackSingle<Payload>
 {
     static int op(Payload& p, Payload& t)
     {
+        t = p;
         // mark that this payload is being included in the args
         p.trailingOk = true;
-        t = p;
-        // reset the unpacking flags so it can be properly checked
-        t.trailingOk = false;
-        t.unpackCheck = true;
-        t.unpackError = false;
         return 0;
     }
 };

@@ -15,7 +15,6 @@ namespace ipmi
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 namespace network
 {
@@ -118,7 +117,7 @@ DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
         objectInfo = std::make_pair(object.first, object.second.begin()->first);
 
         // if LinkLocalIP found look for Non-LinkLocalIP
-        if (ipmi::network::isLinkLocalIP(variant_ns::get<std::string>(variant)))
+        if (ipmi::network::isLinkLocalIP(std::get<std::string>(variant)))
         {
             continue;
         }
@@ -358,9 +357,10 @@ void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
                                            "Delete");
         }
     }
-    catch (InternalFailure& e)
+    catch (sdbusplus::exception::exception& e)
     {
-        log<level::INFO>("Unable to delete the objects having",
+        log<level::INFO>("sdbusplus exception - Unable to delete the objects",
+                         entry("ERROR=%s", e.what()),
                          entry("INTERFACE=%s", interface.c_str()),
                          entry("SERVICE=%s", serviceRoot.c_str()));
     }

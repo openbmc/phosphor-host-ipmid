@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <boost/asio/spawn.hpp>
 #include <cstdint>
+#include <exception>
+#include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
 #include <memory>
 #include <phosphor-logging/log.hpp>
@@ -98,15 +100,15 @@ struct Payload
     Payload(Payload&&) = default;
     Payload& operator=(Payload&&) = default;
 
-    explicit Payload(std::vector<uint8_t>&& data) :
-        raw(std::move(data)), unpackCheck(false)
+    explicit Payload(std::vector<uint8_t>&& data) : raw(std::move(data))
     {
     }
 
     ~Payload()
     {
         using namespace phosphor::logging;
-        if (trailingOk && !unpackCheck && !fullyUnpacked())
+        if (raw.size() != 0 && std::uncaught_exceptions() == 0 && !trailingOk &&
+            !unpackCheck && !unpackError)
         {
             log<level::ERR>("Failed to check request for full unpack");
         }
@@ -249,24 +251,6 @@ struct Payload
         packRet = pack(std::forward<Args>(args)...);
         drain();
         return packRet;
-    }
-
-    /**
-     * @brief pack a tuple of values (of any supported type) into the buffer
-     *
-     * This will pack the elements of the tuple as if each one was passed in
-     * individually, as if passed into the above variadic function.
-     *
-     * @tparam Types - the implicitly declared list of the tuple element types
-     *
-     * @param t - the tuple of values to pack
-     *
-     * @return int - non-zero on pack errors
-     */
-    template <typename... Types>
-    int pack(std::tuple<Types...>& t)
-    {
-        return std::apply([this](Types&... args) { return pack(args...); }, t);
     }
 
     /******************************************************************
@@ -462,8 +446,8 @@ struct Payload
     size_t bitCount = 0;
     std::vector<uint8_t> raw;
     size_t rawIndex = 0;
-    bool trailingOk = false;
-    bool unpackCheck = true;
+    bool trailingOk = true;
+    bool unpackCheck = false;
     bool unpackError = false;
 };
 
@@ -586,7 +570,6 @@ struct Request
                     // not all bits were consumed by requested parameters
                     return ipmi::ccReqDataLenInvalid;
                 }
-                payload.unpackCheck = false;
             }
         }
         return unpackRet;

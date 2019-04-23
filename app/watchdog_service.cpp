@@ -1,8 +1,7 @@
 #include "watchdog_service.hpp"
 
-#include <ipmid/api.h>
-
 #include <exception>
+#include <ipmid/api.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
@@ -17,8 +16,6 @@ using phosphor::logging::elog;
 using phosphor::logging::entry;
 using phosphor::logging::level;
 using phosphor::logging::log;
-using sdbusplus::message::variant_ns::get;
-using sdbusplus::message::variant_ns::variant;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using sdbusplus::xyz::openbmc_project::State::server::convertForMessage;
 using sdbusplus::xyz::openbmc_project::State::server::Watchdog;
@@ -73,18 +70,20 @@ WatchdogService::Properties WatchdogService::getProperties()
     }
     try
     {
-        std::map<std::string, variant<bool, uint64_t, std::string>> properties;
+        std::map<std::string, std::variant<bool, uint64_t, std::string>>
+            properties;
         response.read(properties);
         Properties wd_prop;
-        wd_prop.initialized = get<bool>(properties.at("Initialized"));
-        wd_prop.enabled = get<bool>(properties.at("Enabled"));
+        wd_prop.initialized = std::get<bool>(properties.at("Initialized"));
+        wd_prop.enabled = std::get<bool>(properties.at("Enabled"));
         wd_prop.expireAction = Watchdog::convertActionFromString(
-            get<std::string>(properties.at("ExpireAction")));
+            std::get<std::string>(properties.at("ExpireAction")));
         wd_prop.timerUse = Watchdog::convertTimerUseFromString(
-            get<std::string>(properties.at("CurrentTimerUse")));
+            std::get<std::string>(properties.at("CurrentTimerUse")));
 
-        wd_prop.interval = get<uint64_t>(properties.at("Interval"));
-        wd_prop.timeRemaining = get<uint64_t>(properties.at("TimeRemaining"));
+        wd_prop.interval = std::get<uint64_t>(properties.at("Interval"));
+        wd_prop.timeRemaining =
+            std::get<uint64_t>(properties.at("TimeRemaining"));
         return wd_prop;
     }
     catch (const std::exception& e)
@@ -122,9 +121,9 @@ T WatchdogService::getProperty(const std::string& key)
     }
     try
     {
-        variant<T> value;
+        std::variant<T> value;
         response.read(value);
-        return get<T>(value);
+        return std::get<T>(value);
     }
     catch (const std::exception& e)
     {
@@ -146,7 +145,7 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
 {
     bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, prop_intf, "Set");
-    request.append(wd_intf, key, variant<T>(val));
+    request.append(wd_intf, key, std::variant<T>(val));
     auto response = bus.call(request);
     if (response.is_method_error())
     {

@@ -1,22 +1,19 @@
-#include "apphandler.hpp"
-
-#include "app/channel.hpp"
-#include "app/watchdog.hpp"
-#include "ipmid.hpp"
-#include "sys_info_param.hpp"
-#include "transporthandler.hpp"
-
 #include <arpa/inet.h>
-#include <ipmid/api.h>
 #include <limits.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
 
 #include <algorithm>
+#include <app/channel.hpp>
+#include <app/watchdog.hpp>
+#include <apphandler.hpp>
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <filesystem>
 #include <fstream>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <memory>
@@ -25,6 +22,8 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <string>
+#include <sys_info_param.hpp>
+#include <transporthandler.hpp>
 #include <tuple>
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -32,19 +31,6 @@
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
 #include <xyz/openbmc_project/State/BMC/server.hpp>
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 
 extern sd_bus* bus;
 
@@ -71,20 +57,6 @@ using Activation =
     sdbusplus::xyz::openbmc_project::Software::server::Activation;
 using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
-namespace variant_ns = sdbusplus::message::variant_ns;
-
-// Offset in get device id command.
-typedef struct
-{
-    uint8_t id;
-    uint8_t revision;
-    uint8_t fw[2];
-    uint8_t ipmi_ver;
-    uint8_t addn_dev_support;
-    uint8_t manuf_id[3];
-    uint8_t prod_id[2];
-    uint8_t aux[4];
-} __attribute__((packed)) ipmi_device_id_t;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -99,23 +71,30 @@ typedef struct
  */
 std::string getActiveSoftwareVersionInfo()
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    auto busp = getSdBus();
 
     std::string revision{};
-    auto objectTree =
-        ipmi::getAllDbusObjects(bus, softwareRoot, redundancyIntf, "");
-    if (objectTree.empty())
+    ipmi::ObjectTree objectTree;
+    try
     {
-        log<level::ERR>("No Obj has implemented the s/w redundancy interface",
-                        entry("INTERFACE=%s", redundancyIntf));
+        objectTree =
+            ipmi::getAllDbusObjects(*busp, softwareRoot, redundancyIntf);
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to fetch redundancy object from dbus",
+                        entry("INTERFACE=%s", redundancyIntf),
+                        entry("ERRMSG=%s", e.what()));
         elog<InternalFailure>();
     }
 
     auto objectFound = false;
     for (auto& softObject : objectTree)
     {
-        auto service = ipmi::getService(bus, redundancyIntf, softObject.first);
-        auto objValueTree = ipmi::getManagedObjects(bus, service, softwareRoot);
+        auto service =
+            ipmi::getService(*busp, redundancyIntf, softObject.first);
+        auto objValueTree =
+            ipmi::getManagedObjects(*busp, service, softwareRoot);
 
         auto minPriority = 0xFF;
         for (const auto& objIter : objValueTree)
@@ -126,14 +105,14 @@ std::string getActiveSoftwareVersionInfo()
                 auto& redundancyPriorityProps = intfMap.at(redundancyIntf);
                 auto& versionProps = intfMap.at(versionIntf);
                 auto& activationProps = intfMap.at(activationIntf);
-                auto priority = variant_ns::get<uint8_t>(
-                    redundancyPriorityProps.at("Priority"));
+                auto priority =
+                    std::get<uint8_t>(redundancyPriorityProps.at("Priority"));
                 auto purpose =
-                    variant_ns::get<std::string>(versionProps.at("Purpose"));
-                auto activation = variant_ns::get<std::string>(
-                    activationProps.at("Activation"));
+                    std::get<std::string>(versionProps.at("Purpose"));
+                auto activation =
+                    std::get<std::string>(activationProps.at("Activation"));
                 auto version =
-                    variant_ns::get<std::string>(versionProps.at("Version"));
+                    std::get<std::string>(versionProps.at("Version"));
                 if ((Version::convertVersionPurposeFromString(purpose) ==
                      Version::VersionPurpose::BMC) &&
                     (Activation::convertActivationsFromString(activation) ==
@@ -174,9 +153,9 @@ bool getCurrentBmcState()
         ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
                               bmc_state_interface, bmc_state_property);
 
-    return variant_ns::holds_alternative<std::string>(variant) &&
-           BMC::convertBMCStateFromString(
-               variant_ns::get<std::string>(variant)) == BMC::BMCState::Ready;
+    return std::holds_alternative<std::string>(variant) &&
+           BMC::convertBMCStateFromString(std::get<std::string>(variant)) ==
+               BMC::BMCState::Ready;
 }
 
 namespace acpi_state
@@ -427,7 +406,7 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::sysACPIProp);
         auto sysACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            variant_ns::get<std::string>(sysACPIVal));
+            std::get<std::string>(sysACPIVal));
         res->sysACPIState =
             static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
 
@@ -435,7 +414,7 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::devACPIProp);
         auto devACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            variant_ns::get<std::string>(devACPIVal));
+            std::get<std::string>(devACPIVal));
         res->devACPIState =
             static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
 
@@ -454,7 +433,7 @@ typedef struct
     char major;
     char minor;
     uint16_t d[2];
-} rev_t;
+} Revision;
 
 /* Currently supports the vx.x-x-[-x] and v1.x.x-x-[-x] format. It will     */
 /* return -1 if not in those formats, this routine knows how to parse       */
@@ -471,9 +450,8 @@ typedef struct
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
-int convert_version(const char* p, rev_t* rev)
+int convertVersion(std::string s, Revision& rev)
 {
-    std::string s(p);
     std::string token;
     uint16_t commits;
 
@@ -488,7 +466,7 @@ int convert_version(const char* p, rev_t* rev)
         location = s.find_first_of(".");
         if (location != std::string::npos)
         {
-            rev->major =
+            rev.major =
                 static_cast<char>(std::stoi(s.substr(0, location), 0, 16));
             token = s.substr(location + 1);
         }
@@ -498,7 +476,7 @@ int convert_version(const char* p, rev_t* rev)
             location = token.find_first_of(".-");
             if (location != std::string::npos)
             {
-                rev->minor = static_cast<char>(
+                rev.minor = static_cast<char>(
                     std::stoi(token.substr(0, location), 0, 16));
                 token = token.substr(location + 1);
             }
@@ -510,7 +488,7 @@ int convert_version(const char* p, rev_t* rev)
         if (!token.empty())
         {
             commits = std::stoi(token.substr(0, location), 0, 16);
-            rev->d[0] = (commits >> 8) | (commits << 8);
+            rev.d[0] = (commits >> 8) | (commits << 8);
 
             // commit number we skip
             location = token.find_first_of(".-");
@@ -521,7 +499,7 @@ int convert_version(const char* p, rev_t* rev)
         }
         else
         {
-            rev->d[0] = 0;
+            rev.d[0] = 0;
         }
 
         if (location != std::string::npos)
@@ -539,36 +517,47 @@ int convert_version(const char* p, rev_t* rev)
 
         // We do this operation to get this displayed in least significant bytes
         // of ipmitool device id command.
-        rev->d[1] = (commits >> 8) | (commits << 8);
+        rev.d[1] = (commits >> 8) | (commits << 8);
     }
 
     return 0;
 }
 
-ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                  ipmi_request_t request,
-                                  ipmi_response_t response,
-                                  ipmi_data_len_t data_len,
-                                  ipmi_context_t context)
+auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
+                                           uint8_t, // Device Revision
+                                           uint8_t, // Firmware Revision Major
+                                           uint8_t, // Firmware Revision minor
+                                           uint8_t, // IPMI version
+                                           uint8_t, // Additional device support
+                                           uint24_t, // MFG ID
+                                           uint16_t, // Product ID
+                                           uint32_t  // AUX info
+                                           >
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
     int r = -1;
-    rev_t rev = {0};
-    static ipmi_device_id_t dev_id{};
+    Revision rev = {0};
+    static struct
+    {
+        uint8_t id;
+        uint8_t revision;
+        uint8_t fw[2];
+        uint8_t ipmiVer;
+        uint8_t addnDevSupport;
+        uint24_t manufId;
+        uint16_t prodId;
+        uint32_t aux;
+    } devId;
     static bool dev_id_initialized = false;
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
     constexpr auto ipmiDevIdStateShift = 7;
     constexpr auto ipmiDevIdFw1Mask = ~(1 << ipmiDevIdStateShift);
-
-    // Data length
-    *data_len = sizeof(dev_id);
 
     if (!dev_id_initialized)
     {
         try
         {
             auto version = getActiveSoftwareVersionInfo();
-            r = convert_version(version.c_str(), &rev);
+            r = convertVersion(version, rev);
         }
         catch (const std::exception& e)
         {
@@ -583,34 +572,28 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // or self-initialization in progress.
             // The availability may change in run time, so mask here
             // and initialize later.
-            dev_id.fw[0] = rev.major & ipmiDevIdFw1Mask;
+            devId.fw[0] = rev.major & ipmiDevIdFw1Mask;
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
-            dev_id.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            std::memcpy(&dev_id.aux, rev.d, 4);
+            devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
+            std::memcpy(&devId.aux, rev.d, 4);
         }
 
         // IPMI Spec version 2.0
-        dev_id.ipmi_ver = 2;
+        devId.ipmiVer = 2;
 
-        std::ifstream dev_id_file(filename);
-        if (dev_id_file.is_open())
+        std::ifstream devIdFile(filename);
+        if (devIdFile.is_open())
         {
-            auto data = nlohmann::json::parse(dev_id_file, nullptr, false);
+            auto data = nlohmann::json::parse(devIdFile, nullptr, false);
             if (!data.is_discarded())
             {
-                dev_id.id = data.value("id", 0);
-                dev_id.revision = data.value("revision", 0);
-                dev_id.addn_dev_support = data.value("addn_dev_support", 0);
-                dev_id.manuf_id[2] = data.value("manuf_id", 0) >> 16;
-                dev_id.manuf_id[1] = data.value("manuf_id", 0) >> 8;
-                dev_id.manuf_id[0] = data.value("manuf_id", 0);
-                dev_id.prod_id[1] = data.value("prod_id", 0) >> 8;
-                dev_id.prod_id[0] = data.value("prod_id", 0);
-                dev_id.aux[3] = data.value("aux", 0);
-                dev_id.aux[2] = data.value("aux", 0) >> 8;
-                dev_id.aux[1] = data.value("aux", 0) >> 16;
-                dev_id.aux[0] = data.value("aux", 0) >> 24;
+                devId.id = data.value("id", 0);
+                devId.revision = data.value("revision", 0);
+                devId.addnDevSupport = data.value("addn_dev_support", 0);
+                devId.manufId = data.value("manuf_id", 0);
+                devId.prodId = data.value("prod_id", 0);
+                devId.aux = data.value("aux", 0);
 
                 // Don't read the file every time if successful
                 dev_id_initialized = true;
@@ -618,37 +601,30 @@ ipmi_ret_t ipmi_app_get_device_id(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             else
             {
                 log<level::ERR>("Device ID JSON parser failure");
-                rc = IPMI_CC_UNSPECIFIED_ERROR;
+                return ipmi::responseUnspecifiedError();
             }
         }
         else
         {
             log<level::ERR>("Device ID file not found");
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
+            return ipmi::responseUnspecifiedError();
         }
     }
 
     // Set availability to the actual current BMC state
-    dev_id.fw[0] &= ipmiDevIdFw1Mask;
+    devId.fw[0] &= ipmiDevIdFw1Mask;
     if (!getCurrentBmcState())
     {
-        dev_id.fw[0] |= (1 << ipmiDevIdStateShift);
+        devId.fw[0] |= (1 << ipmiDevIdStateShift);
     }
 
-    // Pack the actual response
-    std::memcpy(response, &dev_id, *data_len);
-
-    return rc;
+    return ipmi::responseSuccess(
+        devId.id, devId.revision, devId.fw[0], devId.fw[1], devId.ipmiVer,
+        devId.addnDevSupport, devId.manufId, devId.prodId, devId.aux);
 }
 
-ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                          ipmi_request_t request,
-                                          ipmi_response_t response,
-                                          ipmi_data_len_t data_len,
-                                          ipmi_context_t context)
+auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-
     // Byte 2:
     //  55h - No error.
     //  56h - Self Test function not implemented in this controller.
@@ -669,17 +645,9 @@ ipmi_ret_t ipmi_app_get_self_test_results(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     //      [2] 1b = Internal Use Area of BMC FRU corrupted.
     //      [1] 1b = controller update 'boot block' firmware corrupted.
     //      [0] 1b = controller operational firmware corrupted.
-
-    char selftestresults[2] = {0};
-
-    *data_len = 2;
-
-    selftestresults[0] = 0x56;
-    selftestresults[1] = 0;
-
-    std::memcpy(response, selftestresults, *data_len);
-
-    return rc;
+    constexpr uint8_t notImplemented = 0x56;
+    constexpr uint8_t zero = 0;
+    return ipmi::responseSuccess(notImplemented, zero);
 }
 
 ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -798,45 +766,19 @@ finish:
     return rc;
 }
 
-ipmi_ret_t ipmi_app_get_bt_capabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                        ipmi_request_t request,
-                                        ipmi_response_t response,
-                                        ipmi_data_len_t data_len,
-                                        ipmi_context_t context)
+auto ipmiAppGetBtCapabilities()
+    -> ipmi::RspType<uint8_t, uint8_t, uint8_t, uint8_t, uint8_t>
 {
-
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-
     // Per IPMI 2.0 spec, the input and output buffer size must be the max
     // buffer size minus one byte to allocate space for the length byte.
-    uint8_t str[] = {0x01, MAX_IPMI_BUFFER - 1, MAX_IPMI_BUFFER - 1, 0x0A,
-                     0x01};
+    constexpr uint8_t nrOutstanding = 0x01;
+    constexpr uint8_t inputBufferSize = MAX_IPMI_BUFFER - 1;
+    constexpr uint8_t outputBufferSize = MAX_IPMI_BUFFER - 1;
+    constexpr uint8_t transactionTime = 0x0A;
+    constexpr uint8_t nrRetries = 0x01;
 
-    // Data length
-    *data_len = sizeof(str);
-
-    // Pack the actual response
-    std::memcpy(response, &str, *data_len);
-
-    return rc;
-}
-
-ipmi_ret_t ipmi_app_wildcard_handler(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                     ipmi_request_t request,
-                                     ipmi_response_t response,
-                                     ipmi_data_len_t data_len,
-                                     ipmi_context_t context)
-{
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_INVALID;
-
-    *data_len = strlen("THIS IS WILDCARD");
-
-    // Now pack actual response
-    std::memcpy(response, "THIS IS WILDCARD", *data_len);
-
-    return rc;
+    return ipmi::responseSuccess(nrOutstanding, inputBufferSize,
+                                 outputBufferSize, transactionTime, nrRetries);
 }
 
 ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -860,7 +802,7 @@ ipmi_ret_t ipmi_app_get_sys_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         auto variant =
             ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
                                   bmc_guid_interface, bmc_guid_property);
-        std::string guidProp = variant_ns::get<std::string>(variant);
+        std::string guidProp = std::get<std::string>(variant);
 
         // Erase "-" characters from the property value
         guidProp.erase(std::remove(guidProp.begin(), guidProp.end(), '-'),
@@ -1081,17 +1023,20 @@ writeResponse:
 
 void register_netfn_app_functions()
 {
-    // <Get BT Interface Capabilities>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CAP_BIT, NULL,
-                           ipmi_app_get_bt_capabilities, PRIVILEGE_USER);
+    // <Get Device ID>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetDeviceId, ipmi::Privilege::User,
+                          ipmiAppGetDeviceId);
 
-    // <Wildcard Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_WILDCARD, NULL,
-                           ipmi_app_wildcard_handler, PRIVILEGE_USER);
+    // <Get BT Interface Capabilities>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetBtIfaceCapabilities,
+                          ipmi::Privilege::User, ipmiAppGetBtCapabilities);
 
     // <Reset Watchdog Timer>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_RESET_WD, NULL,
-                           ipmi_app_watchdog_reset, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdResetWatchdogTimer,
+                          ipmi::Privilege::Operator, ipmiAppResetWatchdogTimer);
 
     // <Set Watchdog Timer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL,
@@ -1101,13 +1046,10 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_WD, NULL,
                            ipmi_app_watchdog_get, PRIVILEGE_OPERATOR);
 
-    // <Get Device ID>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_ID, NULL,
-                           ipmi_app_get_device_id, PRIVILEGE_USER);
-
     // <Get Self Test Results>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SELF_TEST_RESULTS, NULL,
-                           ipmi_app_get_self_test_results, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetSelfTestResults,
+                          ipmi::Privilege::User, ipmiAppGetSelfTestResults);
 
     // <Get Device GUID>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL,
@@ -1121,20 +1063,6 @@ void register_netfn_app_functions()
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_ACPI, NULL,
                            ipmi_app_get_acpi_power_state, PRIVILEGE_ADMIN);
 
-// TODO: Below code and associated api's need to be removed later.
-// Its commented for now to avoid merge conflicts with upstream
-// changes and smooth upstream upgrades.
-#if 0
->>>>>>> IPMI Channel commands implementation
-    // <Get Channel Access>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
-                           ipmi_get_channel_access, PRIVILEGE_USER);
-
-    // <Get Channel Info Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_INFO, NULL,
-                           ipmi_app_channel_info, PRIVILEGE_USER);
-#endif
-
     // <Get System GUID Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL,
                            ipmi_app_get_sys_guid, PRIVILEGE_USER);
@@ -1142,11 +1070,7 @@ void register_netfn_app_functions()
     // <Get Channel Cipher Suites Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
                            getChannelCipherSuites, PRIVILEGE_CALLBACK);
-#if 0
-    // <Set Channel Access Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHAN_ACCESS, NULL,
-                           ipmi_set_channel_access, PRIVILEGE_ADMIN);
-#endif
+
     // <Get System Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
                            ipmi_app_get_system_info, PRIVILEGE_USER);

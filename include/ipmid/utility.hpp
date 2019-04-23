@@ -27,7 +27,12 @@
 namespace ipmi
 {
 
+// forward declare Context and Request for NonIpmiArgsCount
 struct Context;
+namespace message
+{
+struct Request;
+}
 
 namespace utility
 {
@@ -86,7 +91,11 @@ struct NonIpmiArgsCount<std::tuple<FirstArg, OtherArgs...>>
 {
     constexpr static std::size_t size()
     {
-        if constexpr (std::is_same<FirstArg, ipmi::Context>::value ||
+        if constexpr (std::is_same<
+                          FirstArg,
+                          std::shared_ptr<ipmi::message::Request>>::value ||
+                      std::is_same<FirstArg,
+                                   std::shared_ptr<ipmi::Context>>::value ||
                       std::is_same<FirstArg, boost::asio::yield_context>::value)
         {
             return 1 + NonIpmiArgsCount<std::tuple<OtherArgs...>>::size();

@@ -2,9 +2,8 @@
 
 #include "fruread.hpp"
 
-#include <ipmid/api.h>
-
 #include <algorithm>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <map>
@@ -17,8 +16,6 @@ namespace ipmi
 {
 namespace fru
 {
-
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -141,9 +138,8 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
                 if (iter != allProp.end())
                 {
                     data[properties.second.section].emplace(
-                        properties.first,
-                        std::move(variant_ns::get<std::string>(
-                            allProp[properties.first])));
+                        properties.first, std::move(std::get<std::string>(
+                                              allProp[properties.first])));
                 }
             }
         }

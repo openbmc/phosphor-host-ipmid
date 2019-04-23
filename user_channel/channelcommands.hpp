@@ -28,6 +28,7 @@ enum ipmi_netfn_channel_cmds
     IPMI_CMD_SET_CHANNEL_ACCESS = 0x40,
     IPMI_CMD_GET_CHANNEL_ACCESS = 0x41,
     IPMI_CMD_GET_CHANNEL_INFO = 0x42,
+    IPMI_CMD_GET_CHANNEL_PAYLOAD_SUPPORT = 0x4E,
 };
 
 void registerChannelFunctions();

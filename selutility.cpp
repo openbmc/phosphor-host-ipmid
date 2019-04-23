@@ -2,27 +2,14 @@
 
 #include "selutility.hpp"
 
-#include <ipmid/api.h>
-
 #include <chrono>
+#include <filesystem>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 
 extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;
@@ -71,8 +58,7 @@ GetSELEntryResponse
         elog<InternalFailure>();
     }
 
-    record.recordID = static_cast<uint16_t>(
-        sdbusplus::message::variant_ns::get<uint32_t>(iterId->second));
+    record.recordID = static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
 
     // Read Timestamp from the log entry.
     static constexpr auto propTimeStamp = "Timestamp";
@@ -84,7 +70,7 @@ GetSELEntryResponse
     }
 
     std::chrono::milliseconds chronoTimeStamp(
-        sdbusplus::message::variant_ns::get<uint64_t>(iterTimeStamp->second));
+        std::get<uint64_t>(iterTimeStamp->second));
     record.timeStamp = static_cast<uint32_t>(
         std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp)
             .count());
@@ -113,7 +99,7 @@ GetSELEntryResponse
     static constexpr auto deassertEvent = 0x80;
 
     // Evaluate if the event is assertion or deassertion event
-    if (sdbusplus::message::variant_ns::get<bool>(iterResolved->second))
+    if (std::get<bool>(iterResolved->second))
     {
         record.eventType = deassertEvent | iter->second.eventReadingType;
     }
@@ -155,7 +141,7 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     sdbusplus::message::variant<AssociationList> list;
     reply.read(list);
 
-    auto& assocs = sdbusplus::message::variant_ns::get<AssociationList>(list);
+    auto& assocs = std::get<AssociationList>(list);
 
     /*
      * Check if the log entry has any callout associations, if there is a
@@ -217,8 +203,7 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
     sdbusplus::message::variant<uint64_t> timeStamp;
     reply.read(timeStamp);
 
-    std::chrono::milliseconds chronoTimeStamp(
-        sdbusplus::message::variant_ns::get<uint64_t>(timeStamp));
+    std::chrono::milliseconds chronoTimeStamp(std::get<uint64_t>(timeStamp));
 
     return std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp);
 }

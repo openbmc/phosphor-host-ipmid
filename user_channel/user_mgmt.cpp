@@ -17,6 +17,7 @@
 
 #include "apphandler.hpp"
 
+#include <security/pam_appl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -101,8 +102,6 @@ static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-admin",    // PRIVILEGE_ADMIN - 4
     "priv-custom"    // PRIVILEGE_OEM - 5
 };
-
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 using namespace phosphor::logging;
 using Json = nlohmann::json;
@@ -375,17 +374,17 @@ void userUpdatedSignalHandler(UserAccess& usrAccess,
             std::string member = prop.first;
             if (member == userPrivProperty)
             {
-                priv = variant_ns::get<std::string>(prop.second);
+                priv = std::get<std::string>(prop.second);
                 userEvent = UserUpdateEvent::userPrivUpdated;
             }
             else if (member == userGrpProperty)
             {
-                groups = variant_ns::get<std::vector<std::string>>(prop.second);
+                groups = std::get<std::vector<std::string>>(prop.second);
                 userEvent = UserUpdateEvent::userGrpUpdated;
             }
             else if (member == userEnabledProperty)
             {
-                enabled = variant_ns::get<bool>(prop.second);
+                enabled = std::get<bool>(prop.second);
                 userEvent = UserUpdateEvent::userStateUpdated;
             }
             // Process based on event type.
@@ -633,6 +632,127 @@ bool UserAccess::isValidUserName(const char* userNameInChar)
     }
 
     return true;
+}
+
+/** @brief Information exchanged by pam module and application.
+ *
+ *  @param[in] numMsg - length of the array of pointers,msg.
+ *
+ *  @param[in] msg -  pointer  to an array of pointers to pam_message structure
+ *
+ *  @param[out] resp - struct pam response array
+ *
+ *  @param[in] appdataPtr - member of pam_conv structure
+ *
+ *  @return the response in pam response structure.
+ */
+
+static int pamFunctionConversation(int numMsg, const struct pam_message** msg,
+                                   struct pam_response** resp, void* appdataPtr)
+{
+    if (appdataPtr == nullptr)
+    {
+        return PAM_AUTH_ERR;
+    }
+    size_t passSize = std::strlen(reinterpret_cast<char*>(appdataPtr)) + 1;
+    char* pass = reinterpret_cast<char*>(malloc(passSize));
+    std::strncpy(pass, reinterpret_cast<char*>(appdataPtr), passSize);
+
+    *resp = reinterpret_cast<pam_response*>(
+        calloc(numMsg, sizeof(struct pam_response)));
+
+    for (int i = 0; i < numMsg; ++i)
+    {
+        if (msg[i]->msg_style != PAM_PROMPT_ECHO_OFF)
+        {
+            continue;
+        }
+        resp[i]->resp = pass;
+    }
+    return PAM_SUCCESS;
+}
+
+/** @brief Updating the PAM password
+ *
+ *  @param[in] username - username in string
+ *
+ *  @param[in] password  - new password in string
+ *
+ *  @return status
+ */
+
+bool pamUpdatePasswd(const char* username, const char* password)
+{
+    const struct pam_conv localConversation = {pamFunctionConversation,
+                                               const_cast<char*>(password)};
+    pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
+
+    if (pam_start("passwd", username, &localConversation, &localAuthHandle) !=
+        PAM_SUCCESS)
+    {
+        return false;
+    }
+    int retval = pam_chauthtok(localAuthHandle, PAM_SILENT);
+
+    if (retval != PAM_SUCCESS)
+    {
+        if (retval == PAM_AUTHTOK_ERR)
+        {
+            log<level::DEBUG>("Authentication Failure");
+        }
+        else
+        {
+            log<level::DEBUG>("pam_chauthtok returned failure",
+                              entry("ERROR=%d", retval));
+        }
+        pam_end(localAuthHandle, retval);
+        return false;
+    }
+    if (pam_end(localAuthHandle, PAM_SUCCESS) != PAM_SUCCESS)
+    {
+        return false;
+    }
+    return true;
+}
+
+ipmi_ret_t UserAccess::setSpecialUserPassword(const std::string& userName,
+                                              const std::string& userPassword)
+{
+    if (!pamUpdatePasswd(userName.c_str(), userPassword.c_str()))
+    {
+        log<level::DEBUG>("Failed to update password");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
+ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
+                                       const char* userPassword)
+{
+    std::string userName;
+    if (ipmiUserGetUserName(userId, userName) != IPMI_CC_OK)
+    {
+        log<level::DEBUG>("User Name not found",
+                          entry("USER-ID:%d", (uint8_t)userId));
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    std::string passwd;
+    passwd.assign(reinterpret_cast<const char*>(userPassword), 0,
+                  maxIpmi20PasswordSize);
+    if (!std::regex_match(passwd.c_str(),
+                          std::regex("[a-zA-z_0-9][a-zA-Z_0-9,?:`!\"]*")))
+    {
+        log<level::DEBUG>("Invalid password fields",
+                          entry("USER-ID:%d", (uint8_t)userId));
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!pamUpdatePasswd(userName.c_str(), passwd.c_str()))
+    {
+        log<level::DEBUG>("Failed to update password",
+                          entry("USER-ID:%d", (uint8_t)userId));
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
 }
 
 ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
@@ -1141,13 +1261,11 @@ void UserAccess::getSystemPrivAndGroups()
         auto key = t.first;
         if (key == allPrivProperty)
         {
-            availablePrivileges =
-                variant_ns::get<std::vector<std::string>>(t.second);
+            availablePrivileges = std::get<std::vector<std::string>>(t.second);
         }
         else if (key == allGrpProperty)
         {
-            availableGroups =
-                variant_ns::get<std::vector<std::string>>(t.second);
+            availableGroups = std::get<std::vector<std::string>>(t.second);
         }
     }
     // TODO: Implement Supported Privilege & Groups verification logic
@@ -1174,15 +1292,15 @@ void UserAccess::getUserProperties(const DbusUserObjProperties& properties,
         std::string key = t.first;
         if (key == userPrivProperty)
         {
-            usrPriv = variant_ns::get<std::string>(t.second);
+            usrPriv = std::get<std::string>(t.second);
         }
         else if (key == userGrpProperty)
         {
-            usrGrps = variant_ns::get<std::vector<std::string>>(t.second);
+            usrGrps = std::get<std::vector<std::string>>(t.second);
         }
         else if (key == userEnabledProperty)
         {
-            usrEnabled = variant_ns::get<bool>(t.second);
+            usrEnabled = std::get<bool>(t.second);
         }
     }
     return;

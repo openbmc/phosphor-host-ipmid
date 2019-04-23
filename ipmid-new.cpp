@@ -21,7 +21,9 @@
 
 #include <algorithm>
 #include <any>
+#include <dcmihandler.hpp>
 #include <exception>
+#include <filesystem>
 #include <forward_list>
 #include <host-cmd-manager.hpp>
 #include <ipmid-host/cmd.hpp>
@@ -29,7 +31,6 @@
 #include <ipmid/handler.hpp>
 #include <ipmid/message.hpp>
 #include <ipmid/oemrouter.hpp>
-#include <ipmid/registration.hpp>
 #include <ipmid/types.hpp>
 #include <map>
 #include <memory>
@@ -45,19 +46,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
 
 namespace fs = std::filesystem;
 
@@ -282,19 +270,18 @@ message::Response::ptr executeIpmiCommandCommon(
 message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
 {
     // look up the group for this request
-    Group group;
-    if (0 != request->payload.unpack(group))
+    uint8_t bytes;
+    if (0 != request->payload.unpack(bytes))
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
-    // The handler will need to unpack group as well; we just need it for lookup
-    request->payload.reset();
+    auto group = static_cast<Group>(bytes);
     message::Response::ptr response =
         executeIpmiCommandCommon(groupHandlerMap, group, request);
     // if the handler should add the group; executeIpmiCommandCommon does not
     if (response->cc != ccSuccess && response->payload.size() == 0)
     {
-        response->pack(group);
+        response->pack(bytes);
     }
     return response;
 }
@@ -302,18 +289,18 @@ message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
 message::Response::ptr executeIpmiOemCommand(message::Request::ptr request)
 {
     // look up the iana for this request
-    Iana iana;
-    if (0 != request->payload.unpack(iana))
+    uint24_t bytes;
+    if (0 != request->payload.unpack(bytes))
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
-    request->payload.reset();
+    auto iana = static_cast<Iana>(bytes);
     message::Response::ptr response =
         executeIpmiCommandCommon(oemHandlerMap, iana, request);
     // if the handler should add the iana; executeIpmiCommandCommon does not
     if (response->cc != ccSuccess && response->payload.size() == 0)
     {
-        response->pack(iana);
+        response->pack(bytes);
     }
     return response;
 }
@@ -427,7 +414,13 @@ std::forward_list<IpmiProvider> loadProviders(const fs::path& ipmiLibsPath)
     std::vector<fs::path> libs;
     for (const auto& libPath : fs::directory_iterator(ipmiLibsPath))
     {
+        std::error_code ec;
         fs::path fname = libPath.path();
+        if (fs::is_symlink(fname, ec) || ec)
+        {
+            // it's a symlink or some other error; skip it
+            continue;
+        }
         while (fname.has_extension())
         {
             fs::path extn = fname.extension();
@@ -488,7 +481,19 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
             realPriv = ipmi::Privilege::Admin;
             break;
     }
-    ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv, h);
+    // The original ipmi_register_callback allowed for group OEM handlers
+    // to be registered via this same interface. It just so happened that
+    // all the handlers were part of the DCMI group, so default to that.
+    if (netFn == NETFUN_GRPEXT)
+    {
+        ipmi::impl::registerGroupHandler(ipmi::prioOpenBmcBase,
+                                         dcmi::groupExtId, cmd, realPriv, h);
+    }
+    else
+    {
+        ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv,
+                                    h);
+    }
 }
 
 namespace oem

@@ -1,14 +1,14 @@
 #include "transporthandler.hpp"
 
 #include "app/channel.hpp"
-#include "ipmid.hpp"
 #include "user_channel/channel_layer.hpp"
 
 #include <arpa/inet.h>
-#include <ipmid/api.h>
 
 #include <chrono>
+#include <filesystem>
 #include <fstream>
+#include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
@@ -24,19 +24,6 @@
 #include <systemd/sd-bus.h>
 #endif
 
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
-
 // timer for network changes
 std::unique_ptr<phosphor::Timer> networkTimer = nullptr;
 
@@ -49,7 +36,6 @@ using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
 namespace fs = std::filesystem;
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 void register_netfn_transport_functions() __attribute__((constructor));
 
@@ -101,7 +87,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             ipmi::network::IP_INTERFACE);
 
                         ipaddress =
-                            variant_ns::get<std::string>(properties["Address"]);
+                            std::get<std::string>(properties["Address"]);
                     }
                     // ignore the exception, as it is a valid condition that
                     // the system is not configured with any IP.
@@ -175,7 +161,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         bus, ipmi::network::SERVICE, networkInterfacePath,
                         ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled");
 
-                    auto dhcpEnabled = variant_ns::get<bool>(variant);
+                    auto dhcpEnabled = std::get<bool>(variant);
                     // As per IPMI spec 2=>DHCP, 1=STATIC
                     auto ipsrc = dhcpEnabled ? ipmi::network::IPOrigin::DHCP
                                              : ipmi::network::IPOrigin::STATIC;
@@ -205,8 +191,8 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             bus, ipObjectInfo.second, ipObjectInfo.first,
                             ipmi::network::IP_INTERFACE);
 
-                        auto prefix = variant_ns::get<uint8_t>(
-                            properties["PrefixLength"]);
+                        auto prefix =
+                            std::get<uint8_t>(properties["PrefixLength"]);
                         mask = ipmi::network::MASK_32_BIT;
                         mask = htonl(mask << (ipmi::network::BITS_32 - prefix));
                     }
@@ -243,7 +229,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                             bus, systemObject.second, systemObject.first,
                             ipmi::network::SYSTEMCONFIG_INTERFACE);
 
-                        gateway = variant_ns::get<std::string>(
+                        gateway = std::get<std::string>(
                             systemProperties["DefaultGateway"]);
                     }
                     // ignore the exception, as it is a valid condition that
@@ -276,7 +262,7 @@ ipmi_ret_t getNetworkData(uint8_t lan_param, uint8_t* data, int channel)
                         bus, macObjectInfo.second, macObjectInfo.first,
                         ipmi::network::MAC_INTERFACE, "MACAddress");
 
-                    macAddress = variant_ns::get<std::string>(variant);
+                    macAddress = std::get<std::string>(variant);
                 }
                 else if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
                 {
@@ -394,6 +380,35 @@ struct set_lan_t
     uint8_t data[8]; // Per IPMI spec, not expecting more than this size
 } __attribute__((packed));
 
+ipmi_ret_t checkAndUpdateNetwork(int channel)
+{
+    auto channelConf = getChannelConfig(channel);
+    using namespace std::chrono_literals;
+    // time to wait before applying the network changes.
+    constexpr auto networkTimeout = 10000000us; // 10 sec
+
+    // Skip the timer. Expecting more update as we are in SET_IN_PROGRESS
+    if (channelConf->lan_set_in_progress == SET_IN_PROGRESS)
+    {
+        return IPMI_CC_OK;
+    }
+
+    // Start the timer, if it is direct single param update without
+    // SET_IN_PROGRESS or many params updated through SET_IN_PROGRESS to
+    // SET_COMPLETE Note: Even for update with SET_IN_PROGRESS, don't apply the
+    // changes immediately, as ipmitool sends each param individually
+    // through SET_IN_PROGRESS to SET_COMPLETE.
+    channelConf->flush = true;
+    if (!networkTimer)
+    {
+        log<level::ERR>("Network timer is not instantiated");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    // start the timer.
+    networkTimer->start(networkTimeout);
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_request_t request,
                                   ipmi_response_t response,
@@ -402,11 +417,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     ipmi_ret_t rc = IPMI_CC_OK;
     *data_len = 0;
-
-    using namespace std::chrono_literals;
-
-    // time to wait before applying the network changes.
-    constexpr auto networkTimeout = 10000000us; // 10 sec
 
     char ipaddr[INET_ADDRSTRLEN];
     char netmask[INET_ADDRSTRLEN];
@@ -506,20 +516,10 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                     entry("ADDRESS=%s", channelConf->ipaddr.c_str()),
                     entry("GATEWAY=%s", channelConf->gateway.c_str()),
                     entry("VLAN=%d", channelConf->vlanID));
-
-                if (!networkTimer)
-                {
-                    log<level::ERR>("Network timer is not instantiated");
-                    return IPMI_CC_UNSPECIFIED_ERROR;
-                }
-
-                // start/restart the timer
-                networkTimer->start(networkTimeout);
             }
             else if (reqptr->data[0] == SET_IN_PROGRESS) // Set In Progress
             {
                 channelConf->lan_set_in_progress = SET_IN_PROGRESS;
-                channelConf->flush = true;
             }
         }
         break;
@@ -527,8 +527,10 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         default:
         {
             rc = IPMI_CC_PARM_NOT_SUPPORTED;
+            return rc;
         }
     }
+    rc = checkAndUpdateNetwork(channel);
 
     return rc;
 }
@@ -796,7 +798,7 @@ void applyChanges(int channel)
             }
 
             // get the configured mode on the system.
-            auto enableDHCP = variant_ns::get<bool>(ipmi::getDbusProperty(
+            auto enableDHCP = std::get<bool>(ipmi::getDbusProperty(
                 bus, ipmi::network::SERVICE, networkInterfacePath,
                 ipmi::network::ETHERNET_INTERFACE, "DHCPEnabled"));
 
@@ -840,14 +842,13 @@ void applyChanges(int channel)
                         bus, ipObject.second, ipObject.first,
                         ipmi::network::IP_INTERFACE);
 
-                    ipaddress = channelConf->ipaddr.empty()
-                                    ? variant_ns::get<std::string>(
-                                          properties["Address"])
-                                    : channelConf->ipaddr;
+                    ipaddress =
+                        channelConf->ipaddr.empty()
+                            ? std::get<std::string>(properties["Address"])
+                            : channelConf->ipaddr;
 
                     prefix = channelConf->netmask.empty()
-                                 ? variant_ns::get<uint8_t>(
-                                       properties["PrefixLength"])
+                                 ? std::get<uint8_t>(properties["PrefixLength"])
                                  : ipmi::network::toPrefix(
                                        AF_INET, channelConf->netmask);
                 }
@@ -864,7 +865,7 @@ void applyChanges(int channel)
                     ipmi::network::SYSTEMCONFIG_INTERFACE);
 
                 gateway = channelConf->gateway.empty()
-                              ? variant_ns::get<std::string>(
+                              ? std::get<std::string>(
                                     systemProperties["DefaultGateway"])
                               : channelConf->gateway;
             }
@@ -942,7 +943,7 @@ void applyChanges(int channel)
             }
         }
     }
-    catch (InternalFailure& e)
+    catch (sdbusplus::exception::exception& e)
     {
         log<level::ERR>(
             "Failed to set network data", entry("PREFIX=%d", prefix),

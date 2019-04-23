@@ -1,5 +1,6 @@
-#include "ipmid.hpp"
 #include "nlohmann/json.hpp"
+
+#include <ipmid/api.h>
 
 /** @brief The set channel access IPMI command.
  *
