@@ -3,6 +3,7 @@
 #include "sensorhandler.hpp"
 
 #include <bitset>
+#include <filesystem>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <optional>
@@ -11,25 +12,10 @@
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
-#if __has_include(<filesystem>)
-#include <filesystem>
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace std
-{
-// splice experimental::filesystem into std
-namespace filesystem = std::experimental::filesystem;
-} // namespace std
-#else
-#error filesystem not available
-#endif
-
 namespace ipmi
 {
 namespace sensor
 {
-
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -352,8 +338,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     {
                         return IPMI_CC_OK;
                     }
-                    result =
-                        result && variant_ns::get<bool>(value.second.assert);
+                    result = result && std::get<bool>(value.second.assert);
                     valid = true;
                 }
                 else if (deassertionSet.test(value.first))
@@ -363,8 +348,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     {
                         return IPMI_CC_OK;
                     }
-                    result =
-                        result && variant_ns::get<bool>(value.second.deassert);
+                    result = result && std::get<bool>(value.second.deassert);
                     valid = true;
                 }
             }
@@ -373,13 +357,11 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
             {
                 if (assertionSet.test(value.first))
                 {
-                    result =
-                        result && variant_ns::get<bool>(value.second.assert);
+                    result = result && std::get<bool>(value.second.assert);
                 }
                 else if (deassertionSet.test(value.first))
                 {
-                    result =
-                        result && variant_ns::get<bool>(value.second.deassert);
+                    result = result && std::get<bool>(value.second.deassert);
                 }
             }
             if (valid)

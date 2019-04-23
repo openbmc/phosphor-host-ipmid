@@ -2,9 +2,8 @@
 
 #include "sensorhandler.hpp"
 
-#include <ipmid/api.h>
-
 #include <cmath>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <sdbusplus/message/types.hpp>
@@ -13,8 +12,6 @@ namespace ipmi
 {
 namespace sensor
 {
-
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 using Assertion = uint16_t;
 using Deassertion = uint16_t;
@@ -167,7 +164,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    setAssertionBytes(static_cast<uint16_t>(variant_ns::get<T>(propValue)),
+    setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)),
                       responseData);
 
     return response;
@@ -198,7 +195,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    double value = variant_ns::get<T>(propValue) *
+    double value = std::get<T>(propValue) *
                    std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
 
     auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /

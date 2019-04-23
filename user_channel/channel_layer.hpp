@@ -16,6 +16,7 @@
 #pragma once
 #include <ipmid/api.h>
 
+#include <ipmid/message.hpp>
 #include <string>
 
 namespace ipmi
@@ -109,6 +110,24 @@ enum class EAuthType : uint8_t
     reserved = (1 << 0x3),
     straightPasswd = (1 << 0x4),
     oem = (1 << 0x5),
+};
+
+// TODO: Remove duplicate 'PayloadType' definition from netipmid's message.hpp
+// to phosphor-ipmi-host/include
+/**
+ * @enum Payload Types (refer spec sec 13.27.3)
+ */
+enum class PayloadType : uint8_t
+{
+    IPMI = 0x00,
+    SOL = 0x01,
+    OPEN_SESSION_REQUEST = 0x10,
+    OPEN_SESSION_RESPONSE = 0x11,
+    RAKP1 = 0x12,
+    RAKP2 = 0x13,
+    RAKP3 = 0x14,
+    RAKP4 = 0x15,
+    INVALID = 0xFF,
 };
 
 /**
@@ -257,6 +276,24 @@ ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo);
  */
 ipmi_ret_t getChannelAccessData(const uint8_t chNum,
                                 ChannelAccess& chAccessData);
+
+/** @brief provides function to convert current channel number (0xE)
+ *
+ *  @param[in] chNum - channel number as requested in commands.
+ *  @param[in] ipmi::context - ipmi context ptr, which has more details
+ *
+ *  @return same channel number or proper channel number for current channel
+ * number (0xE).
+ */
+inline uint8_t convertCurrentChannelNum(const uint8_t chNum,
+                                        ipmi::Context::ptr ctx)
+{
+    if (chNum == currentChNum)
+    {
+        return ctx->channel;
+    }
+    return chNum;
+}
 
 /** @brief provides function to convert current channel number (0xE)
  *

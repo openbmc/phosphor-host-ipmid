@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <array>
 #include <ipmid/api.hpp>
-#include <ipmid/registration.hpp>
 #include <ipmid/utils.hpp>
 #include <ipmiwhitelist.hpp>
 #include <phosphor-logging/elog-errors.hpp>
@@ -106,13 +105,23 @@ void WhitelistFilter::cacheRestrictedMode()
 void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message::message& m)
 {
     using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
-    std::string mode;
-    m.read(mode);
-    RestrictionMode::Modes restrictionMode =
-        RestrictionMode::convertModesFromString(mode);
-    restrictedMode = (restrictionMode == RestrictionMode::Modes::Whitelist);
-    log<level::INFO>((restrictedMode ? "Updated restrictedMode = true"
-                                     : "Updated restrictedMode = false"));
+    std::string intf;
+    std::vector<std::pair<std::string, ipmi::Value>> propertyList;
+    m.read(intf, propertyList);
+    for (const auto& property : propertyList)
+    {
+        if (property.first == "RestrictionMode")
+        {
+            RestrictionMode::Modes restrictionMode =
+                RestrictionMode::convertModesFromString(
+                    std::get<std::string>(property.second));
+            restrictedMode =
+                (restrictionMode == RestrictionMode::Modes::Whitelist);
+            log<level::INFO>((restrictedMode
+                                  ? "Updated restrictedMode = true"
+                                  : "Updated restrictedMode = false"));
+        }
+    }
 }
 
 void WhitelistFilter::postInit()

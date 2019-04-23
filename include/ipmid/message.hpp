@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <boost/asio/spawn.hpp>
 #include <cstdint>
+#include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
 #include <memory>
 #include <phosphor-logging/log.hpp>
@@ -249,24 +250,6 @@ struct Payload
         packRet = pack(std::forward<Args>(args)...);
         drain();
         return packRet;
-    }
-
-    /**
-     * @brief pack a tuple of values (of any supported type) into the buffer
-     *
-     * This will pack the elements of the tuple as if each one was passed in
-     * individually, as if passed into the above variadic function.
-     *
-     * @tparam Types - the implicitly declared list of the tuple element types
-     *
-     * @param t - the tuple of values to pack
-     *
-     * @return int - non-zero on pack errors
-     */
-    template <typename... Types>
-    int pack(std::tuple<Types...>& t)
-    {
-        return std::apply([this](Types&... args) { return pack(args...); }, t);
     }
 
     /******************************************************************

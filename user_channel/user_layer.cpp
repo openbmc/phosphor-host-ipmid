@@ -82,6 +82,18 @@ ipmi_ret_t ipmiUserGetUserName(const uint8_t userId, std::string& userName)
     return getUserAccessObject().getUserName(userId, userName);
 }
 
+ipmi_ret_t ipmiUserSetUserPassword(const uint8_t userId,
+                                   const char* userPassword)
+{
+    return getUserAccessObject().setUserPassword(userId, userPassword);
+}
+
+ipmi_ret_t ipmiSetSpecialUserPassword(const std::string& userName,
+                                      const std::string& userPassword)
+{
+    return getUserAccessObject().setSpecialUserPassword(userName, userPassword);
+}
+
 ipmi_ret_t ipmiUserGetAllCounts(uint8_t& maxChUsers, uint8_t& enabledUsers,
                                 uint8_t& fixedUsers)
 {

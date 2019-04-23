@@ -1,15 +1,14 @@
 #include "sensorhandler.hpp"
 
 #include "fruread.hpp"
-#include "ipmid.hpp"
 
-#include <ipmid/api.h>
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
 #include <bitset>
 #include <cmath>
 #include <cstring>
+#include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
@@ -32,8 +31,6 @@ extern const ipmi::sensor::EntityInfoMap entities;
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
-
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 void register_netfn_sen_functions() __attribute__((constructor));
 
@@ -444,10 +441,10 @@ void getSensorThresholds(uint8_t sensorNum,
     auto warnThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, warningThreshIntf);
 
-    double warnLow = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
-                                       warnThresholds["WarningLow"]);
-    double warnHigh = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
-                                        warnThresholds["WarningHigh"]);
+    double warnLow = std::visit(ipmi::VariantToDoubleVisitor(),
+                                warnThresholds["WarningLow"]);
+    double warnHigh = std::visit(ipmi::VariantToDoubleVisitor(),
+                                 warnThresholds["WarningHigh"]);
 
     if (warnLow != 0)
     {
@@ -469,10 +466,10 @@ void getSensorThresholds(uint8_t sensorNum,
 
     auto critThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, criticalThreshIntf);
-    double critLow = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
-                                       critThresholds["CriticalLow"]);
-    double critHigh = variant_ns::visit(ipmi::VariantToDoubleVisitor(),
-                                        critThresholds["CriticalHigh"]);
+    double critLow = std::visit(ipmi::VariantToDoubleVisitor(),
+                                critThresholds["CriticalLow"]);
+    double critHigh = std::visit(ipmi::VariantToDoubleVisitor(),
+                                 critThresholds["CriticalHigh"]);
 
     if (critLow != 0)
     {

@@ -33,7 +33,6 @@ using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
-namespace variant_ns = sdbusplus::message::variant_ns;
 
 Manager::Manager(sdbusplus::bus::bus& bus) :
     bus(bus), timer(std::bind(&Manager::hostTimeout, this)),
@@ -183,7 +182,7 @@ void Manager::clearQueueOnPowerOn(sdbusplus::message::message& msg)
     }
 
     auto& requestedState =
-        variant_ns::get<std::string>(properties.at(HOST_TRANS_PROP));
+        std::get<std::string>(properties.at(HOST_TRANS_PROP));
 
     if (server::Host::convertTransitionFromString(requestedState) ==
         server::Host::Transition::On)

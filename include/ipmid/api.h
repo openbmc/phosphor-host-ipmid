@@ -152,4 +152,8 @@ sd_bus* ipmid_get_sd_bus_connection(void);
 sd_event* ipmid_get_sd_event_connection(void);
 sd_bus_slot* ipmid_get_sd_bus_slot(void);
 
+// move this from ipmid.hpp, which is now gone
+// this should not be used. Use the channel API to get the channel size
+#define MAX_IPMI_BUFFER 64
+
 #endif

@@ -207,7 +207,9 @@ struct UnpackSingle<std::bitset<N>>
         {
             return -1;
         }
-        fixed_uint_t<details::bitStreamSize> bitmask = ((1 << count) - 1);
+        fixed_uint_t<details::bitStreamSize> bitmask =
+            ~fixed_uint_t<details::bitStreamSize>(0) >>
+            (details::bitStreamSize - count);
         t |= (p.bitStream & bitmask).convert_to<unsigned long long>();
         p.bitStream >>= count;
         p.bitCount -= count;
