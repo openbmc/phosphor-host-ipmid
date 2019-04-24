@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define SD_JOURNAL_SUPPRESS_LOCATION
+
+#include <systemd/sd-journal.h>
+
 #include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
 
@@ -305,4 +309,108 @@ TEST(PayloadRequest, PartialPayload)
     ASSERT_TRUE(localPayload.fullyUnpacked());
     uint32_t k2 = 0x02008604;
     ASSERT_EQ(v2, k2);
+}
+
+std::vector<std::string> logs;
+
+extern "C" {
+int sd_journal_send(const char* format, ...)
+{
+    logs.push_back(format);
+    return 0;
+}
+
+int sd_journal_send_with_location(const char* file, const char* line,
+                                  const char* func, const char* format, ...)
+{
+    logs.push_back(format);
+    return 0;
+}
+}
+
+class PayloadLogging : public testing::Test
+{
+  public:
+    void SetUp()
+    {
+        logs.clear();
+    }
+};
+
+TEST_F(PayloadLogging, TrailingOk)
+{
+    {
+        ipmi::message::Payload p({1, 2});
+    }
+    EXPECT_EQ(logs.size(), 0);
+}
+
+TEST_F(PayloadLogging, EnforcingUnchecked)
+{
+    {
+        ipmi::message::Payload p({1, 2});
+        p.trailingOk = false;
+    }
+    EXPECT_EQ(logs.size(), 1);
+}
+
+TEST_F(PayloadLogging, EnforcingUncheckedUnpacked)
+{
+    {
+        ipmi::message::Payload p({1, 2});
+        p.trailingOk = false;
+        uint8_t out;
+        p.unpack(out, out);
+    }
+    EXPECT_EQ(logs.size(), 1);
+}
+
+TEST_F(PayloadLogging, EnforcingChecked)
+{
+    {
+        ipmi::message::Payload p({1, 2});
+        p.trailingOk = false;
+        EXPECT_FALSE(p.fullyUnpacked());
+    }
+    EXPECT_EQ(logs.size(), 0);
+}
+
+TEST_F(PayloadLogging, EnforcingCheckedUnpacked)
+{
+    {
+        ipmi::message::Payload p({1, 2});
+        p.trailingOk = false;
+        uint8_t out;
+        p.unpack(out, out);
+        EXPECT_TRUE(p.fullyUnpacked());
+    }
+    EXPECT_EQ(logs.size(), 0);
+}
+
+TEST_F(PayloadLogging, EnforcingUnpackPayload)
+{
+    {
+        ipmi::message::Payload p;
+        {
+            ipmi::message::Payload q({1, 2});
+            q.trailingOk = false;
+            q.unpack(p);
+        }
+        EXPECT_EQ(logs.size(), 0);
+    }
+    EXPECT_EQ(logs.size(), 1);
+}
+
+TEST_F(PayloadLogging, EnforcingMove)
+{
+    {
+        ipmi::message::Payload p;
+        {
+            ipmi::message::Payload q({1, 2});
+            q.trailingOk = false;
+            p = std::move(q);
+        }
+        EXPECT_EQ(logs.size(), 0);
+    }
+    EXPECT_EQ(logs.size(), 1);
 }
