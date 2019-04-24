@@ -153,6 +153,7 @@ class IpmiHandler final : public HandlerBase
         using ResultType = boost::callable_traits::return_type_t<Handler>;
 
         UnpackArgsType unpackArgs;
+        request->payload.trailingOk = false;
         ipmi::Cc unpackError = request->unpack(unpackArgs);
         if (unpackError != ipmi::ccSuccess)
         {
