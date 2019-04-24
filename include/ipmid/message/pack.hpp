@@ -280,6 +280,22 @@ struct PackSingle<std::variant<T...>>
     }
 };
 
+/** @brief Specialization of PackSingle for Payload */
+template <>
+struct PackSingle<Payload>
+{
+    static int op(Payload& p, const Payload& t)
+    {
+        if (p.bitCount != 0 || t.bitCount != 0)
+        {
+            return 1;
+        }
+        p.raw.reserve(p.raw.size() + t.raw.size());
+        p.raw.insert(p.raw.end(), t.raw.begin(), t.raw.end());
+        return 0;
+    }
+};
+
 } // namespace details
 
 } // namespace message
