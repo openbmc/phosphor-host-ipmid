@@ -235,6 +235,13 @@ TEST(PackBasics, VectorUint8)
     ASSERT_EQ(p.raw, k);
 }
 
+TEST(PackBasics, VectorUnaligned)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true, std::vector<uint8_t>{1}), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>{0b1});
+}
+
 TEST(PackBasics, OptionalEmpty)
 {
     // an optional will only pack if the value is present
