@@ -324,13 +324,9 @@ struct UnpackSingle<Payload>
 {
     static int op(Payload& p, Payload& t)
     {
+        t = p;
         // mark that this payload is being included in the args
         p.trailingOk = true;
-        t = p;
-        // reset the unpacking flags so it can be properly checked
-        t.trailingOk = false;
-        t.unpackCheck = true;
-        t.unpackError = false;
         return 0;
     }
 };
