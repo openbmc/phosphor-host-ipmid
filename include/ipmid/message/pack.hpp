@@ -20,6 +20,7 @@
 #include <memory>
 #include <optional>
 #include <phosphor-logging/log.hpp>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <variant>
@@ -238,6 +239,22 @@ template <>
 struct PackSingle<std::vector<uint8_t>>
 {
     static int op(Payload& p, const std::vector<uint8_t>& t)
+    {
+        if (p.bitCount != 0)
+        {
+            return 1;
+        }
+        p.raw.reserve(p.raw.size() + t.size());
+        p.raw.insert(p.raw.end(), t.begin(), t.end());
+        return 0;
+    }
+};
+
+/** @brief Specialization of PackSingle for std::string_view */
+template <>
+struct PackSingle<std::string_view>
+{
+    static int op(Payload& p, const std::string_view& t)
     {
         if (p.bitCount != 0)
         {
