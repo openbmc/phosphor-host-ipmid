@@ -242,6 +242,20 @@ TEST(PackBasics, VectorUnaligned)
     EXPECT_EQ(p.raw, std::vector<uint8_t>{0b1});
 }
 
+TEST(PackBasics, StringView)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(std::string_view{"\x24\x30\x11"}), 0);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0x24, 0x30, 0x11}));
+}
+
+TEST(PackBasics, StringViewUnaligned)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true, std::string_view{"abc"}), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+}
+
 TEST(PackBasics, OptionalEmpty)
 {
     // an optional will only pack if the value is present
