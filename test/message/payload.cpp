@@ -19,6 +19,7 @@
 
 #include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
+#include <stdexcept>
 
 #include <gtest/gtest.h>
 
@@ -413,4 +414,18 @@ TEST_F(PayloadLogging, EnforcingMove)
         EXPECT_EQ(logs.size(), 0);
     }
     EXPECT_EQ(logs.size(), 1);
+}
+
+TEST_F(PayloadLogging, EnforcingException)
+{
+    try
+    {
+        ipmi::message::Payload p({1, 2});
+        p.trailingOk = false;
+        throw std::runtime_error("test");
+    }
+    catch (...)
+    {
+    }
+    EXPECT_EQ(logs.size(), 0);
 }
