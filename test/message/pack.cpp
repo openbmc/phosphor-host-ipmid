@@ -306,6 +306,32 @@ TEST(PackBasics, PayloadOtherUnaligned)
     EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
 }
 
+TEST(PackBasics, PrependPayload)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true), 0);
+    EXPECT_EQ(p.prepend(ipmi::message::Payload({0x24, 0x30})), 0);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0x24, 0x30, 0b1}));
+}
+
+TEST(PackBasics, PrependPayloadUnaligned)
+{
+    ipmi::message::Payload p;
+    p.appendBits(1, 1);
+    EXPECT_EQ(p.prepend(ipmi::message::Payload({0x24})), 1);
+    p.drain();
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+}
+
+TEST(PackBasics, PrependPayloadOtherUnaligned)
+{
+    ipmi::message::Payload p, q;
+    q.appendBits(1, 1);
+    EXPECT_EQ(p.pack(true), 0);
+    EXPECT_EQ(p.prepend(q), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+}
+
 TEST(PackAdvanced, Uints)
 {
     // all elements will be processed in order, with each multi-byte
