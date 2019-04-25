@@ -35,4 +35,5 @@ enum ipmi_app_sysinfo_params
     IPMI_SYSINFO_BMC_URL = 0x06,
     IPMI_SYSINFO_OS_HYP_URL = 0x07,
     IPMI_SYSINFO_OEM_START = 0xC0, // Start of range of OEM parameters
+    IPMI_SYSINFO_OEM_END = 0xFF,
 };
