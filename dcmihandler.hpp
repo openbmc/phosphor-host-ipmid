@@ -129,9 +129,8 @@ static constexpr size_t maxCtrlIdStrLen = 63;
  */
 struct GetAssetTagRequest
 {
-    uint8_t groupID; //!< Group extension identification.
-    uint8_t offset;  //!< Offset to read.
-    uint8_t bytes;   //!< Number of bytes to read.
+    uint8_t offset; //!< Offset to read.
+    uint8_t bytes;  //!< Number of bytes to read.
 } __attribute__((packed));
 
 /** @struct GetAssetTagResponse
@@ -140,7 +139,6 @@ struct GetAssetTagRequest
  */
 struct GetAssetTagResponse
 {
-    uint8_t groupID;   //!< Group extension identification.
     uint8_t tagLength; //!< Total asset tag length.
 } __attribute__((packed));
 
@@ -150,9 +148,8 @@ struct GetAssetTagResponse
  */
 struct SetAssetTagRequest
 {
-    uint8_t groupID; //!< Group extension identification.
-    uint8_t offset;  //!< Offset to write.
-    uint8_t bytes;   //!< Number of bytes to write.
+    uint8_t offset; //!< Offset to write.
+    uint8_t bytes;  //!< Number of bytes to write.
 } __attribute__((packed));
 
 /** @struct SetAssetTagResponse
@@ -161,7 +158,6 @@ struct SetAssetTagRequest
  */
 struct SetAssetTagResponse
 {
-    uint8_t groupID;   //!< Group extension identification.
     uint8_t tagLength; //!< Total asset tag length.
 } __attribute__((packed));
 
@@ -211,23 +207,12 @@ uint32_t getPcap(sdbusplus::bus::bus& bus);
  */
 bool getPcapEnabled(sdbusplus::bus::bus& bus);
 
-/** @struct GetPowerLimitRequest
- *
- *  DCMI payload for Get Power Limit command request.
- */
-struct GetPowerLimitRequest
-{
-    uint8_t groupID;   //!< Group extension identification.
-    uint16_t reserved; //!< Reserved
-} __attribute__((packed));
-
 /** @struct GetPowerLimitResponse
  *
  *  DCMI payload for Get Power Limit command response.
  */
 struct GetPowerLimitResponse
 {
-    uint8_t groupID;         //!< Group extension identification.
     uint16_t reserved;       //!< Reserved.
     uint8_t exceptionAction; //!< Exception action.
     uint16_t powerLimit;     //!< Power limit requested in watts.
@@ -249,7 +234,6 @@ void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap);
  */
 struct SetPowerLimitRequest
 {
-    uint8_t groupID;         //!< Group extension identification.
     uint16_t reserved;       //!< Reserved
     uint8_t reserved1;       //!< Reserved
     uint8_t exceptionAction; //!< Exception action.
@@ -257,15 +241,6 @@ struct SetPowerLimitRequest
     uint32_t correctionTime; //!< Correction time limit in milliseconds.
     uint16_t reserved2;      //!< Reserved.
     uint16_t samplingPeriod; //!< Statistics sampling period in seconds.
-} __attribute__((packed));
-
-/** @struct SetPowerLimitResponse
- *
- *  DCMI payload for Set Power Limit command response.
- */
-struct SetPowerLimitResponse
-{
-    uint8_t groupID; //!< Group extension identification.
 } __attribute__((packed));
 
 /** @brief Enable or disable the power capping
@@ -281,18 +256,8 @@ void setPcapEnable(sdbusplus::bus::bus& bus, bool enabled);
  */
 struct ApplyPowerLimitRequest
 {
-    uint8_t groupID;          //!< Group extension identification.
     uint8_t powerLimitAction; //!< Power limit activation
     uint16_t reserved;        //!< Reserved
-} __attribute__((packed));
-
-/** @struct ApplyPowerLimitResponse
- *
- *  DCMI payload for Acticate/Deactivate Power Limit command response.
- */
-struct ApplyPowerLimitResponse
-{
-    uint8_t groupID; //!< Group extension identification.
 } __attribute__((packed));
 
 /** @struct GetMgmntCtrlIdStrRequest
@@ -301,9 +266,8 @@ struct ApplyPowerLimitResponse
  */
 struct GetMgmntCtrlIdStrRequest
 {
-    uint8_t groupID; //!< Group extension identification.
-    uint8_t offset;  //!< Offset to read.
-    uint8_t bytes;   //!< Number of bytes to read.
+    uint8_t offset; //!< Offset to read.
+    uint8_t bytes;  //!< Number of bytes to read.
 } __attribute__((packed));
 
 /** @struct GetMgmntCtrlIdStrResponse
@@ -312,9 +276,8 @@ struct GetMgmntCtrlIdStrRequest
  */
 struct GetMgmntCtrlIdStrResponse
 {
-    uint8_t groupID; //!< Group extension identification.
-    uint8_t strLen;  //!< ID string length.
-    char data[];     //!< ID string
+    uint8_t strLen; //!< ID string length.
+    char data[];    //!< ID string
 } __attribute__((packed));
 
 /** @struct SetMgmntCtrlIdStrRequest
@@ -323,10 +286,9 @@ struct GetMgmntCtrlIdStrResponse
  */
 struct SetMgmntCtrlIdStrRequest
 {
-    uint8_t groupID; //!< Group extension identification.
-    uint8_t offset;  //!< Offset to write.
-    uint8_t bytes;   //!< Number of bytes to read.
-    char data[];     //!< ID string
+    uint8_t offset; //!< Offset to write.
+    uint8_t bytes;  //!< Number of bytes to read.
+    char data[];    //!< ID string
 } __attribute__((packed));
 
 /** @struct GetMgmntCtrlIdStrResponse
@@ -335,8 +297,7 @@ struct SetMgmntCtrlIdStrRequest
  */
 struct SetMgmntCtrlIdStrResponse
 {
-    uint8_t groupID; //!< Group extension identification.
-    uint8_t offset;  //!< Last Offset Written.
+    uint8_t offset; //!< Last Offset Written.
 } __attribute__((packed));
 
 /** @enum DCMICapParameters
@@ -357,8 +318,7 @@ enum class DCMICapParameters
  */
 struct GetDCMICapRequest
 {
-    uint8_t groupID; //!< Group extension identification.
-    uint8_t param;   //!< Capability parameter selector.
+    uint8_t param; //!< Capability parameter selector.
 } __attribute__((packed));
 
 /** @struct GetDCMICapRequest
@@ -367,7 +327,6 @@ struct GetDCMICapRequest
  */
 struct GetDCMICapResponse
 {
-    uint8_t groupID;       //!< Group extension identification.
     uint8_t major;         //!< DCMI Specification Conformance - major ver
     uint8_t minor;         //!< DCMI Specification Conformance - minor ver
     uint8_t paramRevision; //!< Parameter Revision = 02h
@@ -406,7 +365,6 @@ using DCMICaps = std::map<DCMICapParameters, DCMICapEntry>;
  */
 struct GetTempReadingsRequest
 {
-    uint8_t groupID;        //!< Group extension identification.
     uint8_t sensorType;     //!< Type of the sensor
     uint8_t entityId;       //!< Entity ID
     uint8_t entityInstance; //!< Entity Instance (0 means all instances)
@@ -419,7 +377,6 @@ struct GetTempReadingsRequest
  */
 struct GetTempReadingsResponseHdr
 {
-    uint8_t groupID;      //!< Group extension identification.
     uint8_t numInstances; //!< No. of instances for requested id
     uint8_t numDataSets;  //!< No. of sets of temperature data
 } __attribute__((packed));
@@ -526,7 +483,6 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus);
  */
 struct GetPowerReadingRequest
 {
-    uint8_t groupID;       //!< Group extension identification.
     uint8_t mode;          //!< Mode
     uint8_t modeAttribute; //!< Mode Attributes
 } __attribute__((packed));
@@ -538,7 +494,6 @@ struct GetPowerReadingRequest
  */
 struct GetPowerReadingResponse
 {
-    uint8_t groupID;           //!< Group extension identification.
     uint16_t currentPower;     //!< Current power in watts
     uint16_t minimumPower;     //!< Minimum power over sampling duration
                                //!< in watts
@@ -558,7 +513,6 @@ struct GetPowerReadingResponse
  */
 struct GetSensorInfoRequest
 {
-    uint8_t groupID;        //!< Group extension identification.
     uint8_t sensorType;     //!< Type of the sensor
     uint8_t entityId;       //!< Entity ID
     uint8_t entityInstance; //!< Entity Instance (0 means all instances)
@@ -571,7 +525,6 @@ struct GetSensorInfoRequest
  */
 struct GetSensorInfoResponseHdr
 {
-    uint8_t groupID;      //!< Group extension identification.
     uint8_t numInstances; //!< No. of instances for requested id
     uint8_t numRecords;   //!< No. of record ids in the response
 } __attribute__((packed));
@@ -594,21 +547,10 @@ enum class DCMIConfigParameters : uint8_t
  */
 struct SetConfParamsRequest
 {
-    uint8_t groupID;     //!< Group extension identification.
     uint8_t paramSelect; //!< Parameter selector.
     uint8_t setSelect;   //!< Set Selector (use 00h for parameters that only
                          //!< have one set).
     uint8_t data[];      //!< Configuration parameter data.
-} __attribute__((packed));
-
-/** @struct SetConfParamsResponse
- *
- *  DCMI Set DCMI Configuration Parameters Command response.
- *  Refer DCMI specification Version 1.1 Section 6.1.2
- */
-struct SetConfParamsResponse
-{
-    uint8_t groupID; //!< Group extension identification.
 } __attribute__((packed));
 
 /** @struct GetConfParamsRequest
@@ -618,7 +560,6 @@ struct SetConfParamsResponse
  */
 struct GetConfParamsRequest
 {
-    uint8_t groupID;     //!< Group extension identification.
     uint8_t paramSelect; //!< Parameter selector.
     uint8_t setSelect;   //!< Set Selector. Selects a given set of parameters
                          //!< under a given Parameter selector value. 00h if
@@ -632,7 +573,6 @@ struct GetConfParamsRequest
  */
 struct GetConfParamsResponse
 {
-    uint8_t groupID;       //!< Group extension identification.
     uint8_t major;         //!< DCMI Spec Conformance - major ver = 01h.
     uint8_t minor;         //!< DCMI Spec Conformance - minor ver = 05h.
     uint8_t paramRevision; //!< Parameter Revision = 01h.
