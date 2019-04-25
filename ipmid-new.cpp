@@ -276,16 +276,12 @@ message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
-    // The handler will need to unpack group as well; we just need it for lookup
-    request->payload.reset();
     auto group = static_cast<Group>(bytes);
     message::Response::ptr response =
         executeIpmiCommandCommon(groupHandlerMap, group, request);
-    // if the handler should add the group; executeIpmiCommandCommon does not
-    if (response->cc != ccSuccess && response->payload.size() == 0)
-    {
-        response->pack(bytes);
-    }
+    ipmi::message::Payload prefix;
+    prefix.pack(bytes);
+    response->prepend(prefix);
     return response;
 }
 
@@ -297,15 +293,12 @@ message::Response::ptr executeIpmiOemCommand(message::Request::ptr request)
     {
         return errorResponse(request, ccReqDataLenInvalid);
     }
-    request->payload.reset();
     auto iana = static_cast<Iana>(bytes);
     message::Response::ptr response =
         executeIpmiCommandCommon(oemHandlerMap, iana, request);
-    // if the handler should add the iana; executeIpmiCommandCommon does not
-    if (response->cc != ccSuccess && response->payload.size() == 0)
-    {
-        response->pack(bytes);
-    }
+    ipmi::message::Payload prefix;
+    prefix.pack(bytes);
+    response->prepend(prefix);
     return response;
 }
 
