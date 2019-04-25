@@ -257,6 +257,27 @@ struct Payload
         return packRet;
     }
 
+    /**
+     * @brief Prepends another payload to this one
+     *
+     * Avoid using this unless absolutely required since it inserts into the
+     * front of the response payload.
+     *
+     * @param p - The payload to prepend
+     *
+     * @retunr int - non-zero on prepend errors
+     */
+    int prepend(const ipmi::message::Payload& p)
+    {
+        if (bitCount != 0 || p.bitCount != 0)
+        {
+            return 1;
+        }
+        raw.reserve(raw.size() + p.raw.size());
+        raw.insert(raw.begin(), p.raw.begin(), p.raw.end());
+        return 0;
+    }
+
     /******************************************************************
      * Request operations
      *****************************************************************/
@@ -516,6 +537,21 @@ struct Response
     int pack(std::tuple<Types...>& t)
     {
         return payload.pack(t);
+    }
+
+    /**
+     * @brief Prepends another payload to this one
+     *
+     * Avoid using this unless absolutely required since it inserts into the
+     * front of the response payload.
+     *
+     * @param p - The payload to prepend
+     *
+     * @retunr int - non-zero on prepend errors
+     */
+    int prepend(const ipmi::message::Payload& p)
+    {
+        return payload.prepend(p);
     }
 
     Payload payload;
