@@ -310,17 +310,18 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         executeCallback(message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
-        size_t len = request->payload.size();
         // allocate a big response buffer here
         response->payload.resize(
             getChannelMaxTransferSize(request->ctx->channel));
 
+        size_t len = request->payload.size() - request->payload.rawIndex;
         Cc ccRet{ccSuccess};
         try
         {
-            ccRet = handler_(request->ctx->netFn, request->ctx->cmd,
-                             request->payload.data(), response->payload.data(),
-                             &len, handlerCtx);
+            ccRet =
+                handler_(request->ctx->netFn, request->ctx->cmd,
+                         request->payload.data() + request->payload.rawIndex,
+                         response->payload.data(), &len, handlerCtx);
         }
         catch (const std::exception& e)
         {
@@ -399,16 +400,18 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
         executeCallback(message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
-        size_t len = request->payload.size();
         // allocate a big response buffer here
         response->payload.resize(
             getChannelMaxTransferSize(request->ctx->channel));
 
+        size_t len = request->payload.size() - request->payload.rawIndex;
         Cc ccRet{ccSuccess};
         try
         {
-            ccRet = handler_(request->ctx->cmd, request->payload.data(),
-                             response->payload.data(), &len);
+            ccRet =
+                handler_(request->ctx->cmd,
+                         request->payload.data() + request->payload.rawIndex,
+                         response->payload.data(), &len);
         }
         catch (const std::exception& e)
         {
