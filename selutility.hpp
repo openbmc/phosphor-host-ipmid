@@ -90,19 +90,6 @@ static constexpr auto initiateErase = 0xAA;
 static constexpr auto getEraseStatus = 0x00;
 static constexpr auto eraseComplete = 0x01;
 
-/** @struct ClearSELRequest
- *
- *  IPMI payload for Clear SEL command request.
- */
-struct ClearSELRequest
-{
-    uint16_t reservationID; //!< Reservation ID.
-    uint8_t charC;          //!< Char 'C'(0x43h).
-    uint8_t charL;          //!< Char 'L'(0x4Ch).
-    uint8_t charR;          //!< Char 'R'(0x52h).
-    uint8_t eraseOperation; //!< Erase operation.
-} __attribute__((packed));
-
 /** @brief Convert logging entry to SEL
  *
  *  @param[in] objPath - DBUS object path of the logging entry.
