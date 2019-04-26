@@ -371,43 +371,45 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-                    ipmi_response_t response, ipmi_data_len_t data_len,
-                    ipmi_context_t context)
+// Clear SEL
+/** @brief implements the Clear SEL command
+ * @request
+ *   - reservationID   // Reservation ID.
+ *   - charC;          // Char 'C'(0x43h).
+ *   - charL;          // Char 'L'(0x4Ch).
+ *   - charR;          // Char 'R'(0x52h).
+ *   - eraseOperation; // requested operation.
+ *
+ *  @returns ipmi completion code plus response data
+ *   - erase status
+ */
+
+ipmi::RspType<uint8_t // erase status
+              >
+    clearSEL(uint16_t reservationID, uint8_t charC, uint8_t charL,
+             uint8_t charR, uint8_t eraseOperation)
+
 {
-    if (*data_len != sizeof(ipmi::sel::ClearSELRequest))
+
+    if (!checkSELReservation(reservationID))
     {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ipmi::responseInvalidReservationId();
     }
 
-    auto requestData =
-        reinterpret_cast<const ipmi::sel::ClearSELRequest*>(request);
-
-    if (!checkSELReservation(requestData->reservationID))
+    if (charC != 'C' || charL != 'L' || charR != 'R')
     {
-        *data_len = 0;
-        return IPMI_CC_INVALID_RESERVATION_ID;
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (requestData->charC != 'C' || requestData->charL != 'L' ||
-        requestData->charR != 'R')
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
-    uint8_t eraseProgress = ipmi::sel::eraseComplete;
+    constexpr uint8_t eraseProgress = ipmi::sel::eraseComplete;
 
     /*
      * Erasure status cannot be fetched from DBUS, so always return erasure
      * status as `erase completed`.
      */
-    if (requestData->eraseOperation == ipmi::sel::getEraseStatus)
+    if (eraseOperation == ipmi::sel::getEraseStatus)
     {
-        std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-        *data_len = sizeof(eraseProgress);
-        return IPMI_CC_OK;
+        return ipmi::responseSuccess(eraseProgress);
     }
 
     // Per the IPMI spec, need to cancel any reservation when the SEL is cleared
@@ -429,24 +431,18 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         auto reply = bus.call(mapperCall);
         if (reply.is_method_error())
         {
-            std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-            *data_len = sizeof(eraseProgress);
-            return IPMI_CC_OK;
+            return ipmi::responseSuccess(eraseProgress);
         }
 
         reply.read(objectPaths);
         if (objectPaths.empty())
         {
-            std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-            *data_len = sizeof(eraseProgress);
-            return IPMI_CC_OK;
+            return ipmi::responseSuccess(eraseProgress);
         }
     }
     catch (const sdbusplus::exception::SdBusError& e)
     {
-        std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-        *data_len = sizeof(eraseProgress);
-        return IPMI_CC_OK;
+        return ipmi::responseSuccess(eraseProgress);
     }
 
     std::string service;
@@ -459,8 +455,7 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     catch (const std::runtime_error& e)
     {
         log<level::ERR>(e.what());
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     for (const auto& iter : objectPaths)
@@ -471,16 +466,13 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         auto reply = bus.call(methodCall);
         if (reply.is_method_error())
         {
-            *data_len = 0;
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ipmi::responseUnspecifiedError();
         }
     }
 
     // Invalidate the cache of dbus entry objects.
     cache::paths.clear();
-    std::memcpy(response, &eraseProgress, sizeof(eraseProgress));
-    *data_len = sizeof(eraseProgress);
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(eraseProgress);
 }
 
 ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -820,8 +812,10 @@ void register_netfn_storage_functions()
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
                            ipmi_storage_add_sel, PRIVILEGE_OPERATOR);
     // <Clear SEL>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL, NULL, clearSEL,
-                           PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdClearSel, ipmi::Privilege::Operator,
+                          clearSEL);
+
     // <Get FRU Inventory Area Info>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_FRU_INV_AREA_INFO, NULL,
                            ipmi_storage_get_fru_inv_area_info,
