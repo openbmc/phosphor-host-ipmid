@@ -86,16 +86,6 @@ struct GetSELEntryResponse
     uint8_t eventData3;       //!< Event Data 3.
 } __attribute__((packed));
 
-/** @struct DeleteSELEntryRequest
- *
- *  IPMI payload for Delete SEL Entry command request.
- */
-struct DeleteSELEntryRequest
-{
-    uint16_t reservationID; //!< Reservation ID.
-    uint16_t selRecordID;   //!< SEL Record ID.
-} __attribute__((packed));
-
 static constexpr auto initiateErase = 0xAA;
 static constexpr auto getEraseStatus = 0x00;
 static constexpr auto eraseComplete = 0x01;

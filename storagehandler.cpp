@@ -267,24 +267,25 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                          ipmi_request_t request, ipmi_response_t response,
-                          ipmi_data_len_t data_len, ipmi_context_t context)
+// Delete SEL Entry
+/** @brief implements the delete SEL entry command
+ * @request
+ *   - reservationID; // reservation ID.
+ *   - selRecordID;   // SEL record ID.
+ *
+ *  @returns ipmi completion code plus response data
+ *   - Record ID of the deleted record
+ */
+ipmi::RspType<uint16_t // deleted record ID
+              >
+    deleteSELEntry(uint16_t reservationID, uint16_t selRecordID)
 {
-    if (*data_len != sizeof(ipmi::sel::DeleteSELEntryRequest))
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
 
     namespace fs = std::filesystem;
-    auto requestData =
-        reinterpret_cast<const ipmi::sel::DeleteSELEntryRequest*>(request);
 
-    if (!checkSELReservation(requestData->reservationID))
+    if (!checkSELReservation(reservationID))
     {
-        *data_len = 0;
-        return IPMI_CC_INVALID_RESERVATION_ID;
+        return ipmi::responseInvalidReservationId();
     }
 
     // Per the IPMI spec, need to cancel the reservation when a SEL entry is
@@ -299,27 +300,25 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         // readLoggingObjectPaths will throw exception if there are no error
         // log entries.
-        *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
 
     if (cache::paths.empty())
     {
-        *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
 
     ipmi::sel::ObjectPaths::const_iterator iter;
     uint16_t delRecordID = 0;
 
-    if (requestData->selRecordID == ipmi::sel::firstEntry)
+    if (selRecordID == ipmi::sel::firstEntry)
     {
         iter = cache::paths.begin();
         fs::path path(*iter);
         delRecordID = static_cast<uint16_t>(
             std::stoul(std::string(path.filename().c_str())));
     }
-    else if (requestData->selRecordID == ipmi::sel::lastEntry)
+    else if (selRecordID == ipmi::sel::lastEntry)
     {
         iter = cache::paths.end();
         fs::path path(*iter);
@@ -329,15 +328,14 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     else
     {
         std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
-                              std::to_string(requestData->selRecordID);
+                              std::to_string(selRecordID);
 
         iter = std::find(cache::paths.begin(), cache::paths.end(), objPath);
         if (iter == cache::paths.end())
         {
-            *data_len = 0;
-            return IPMI_CC_SENSOR_INVALID;
+            return ipmi::responseSensorInvalid();
         }
-        delRecordID = requestData->selRecordID;
+        delRecordID = selRecordID;
     }
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
@@ -350,8 +348,7 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     catch (const std::runtime_error& e)
     {
         log<level::ERR>(e.what());
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     auto methodCall = bus.new_method_call(service.c_str(), (*iter).c_str(),
@@ -359,16 +356,13 @@ ipmi_ret_t deleteSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto reply = bus.call(methodCall);
     if (reply.is_method_error())
     {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     // Invalidate the cache of dbus entry objects.
     cache::paths.clear();
-    std::memcpy(response, &delRecordID, sizeof(delRecordID));
-    *data_len = sizeof(delRecordID);
 
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(delRecordID);
 }
 
 // Clear SEL
@@ -805,8 +799,9 @@ void register_netfn_storage_functions()
                            getSELEntry, PRIVILEGE_USER);
 
     // <Delete SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_DELETE_SEL, NULL,
-                           deleteSELEntry, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdDeleteSelEntry,
+                          ipmi::Privilege::Operator, deleteSELEntry);
 
     // <Add SEL Entry>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
