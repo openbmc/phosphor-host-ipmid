@@ -1015,25 +1015,16 @@ void indicate_no_softoff_needed()
     std::ofstream(path.c_str());
 }
 
-//----------------------------------------------------------------------
-// Chassis Control commands
-//----------------------------------------------------------------------
-ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief This command is used to control chassis
+ *
+ *  @param - chassisControl command byte
+ *
+ *  @return  Success or InvalidFieldRequest.
+ */
+ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
 {
-    // Error from power off.
     int rc = 0;
-
-    // No response for this command.
-    *data_len = 0;
-
-    // Catch the actual operaton by peeking into request buffer
-    uint8_t chassis_ctrl_cmd = *(uint8_t*)request;
-
-    switch (chassis_ctrl_cmd)
+    switch (chassisControl)
     {
         case CMD_POWER_ON:
             rc = initiate_state_transition(State::Host::Transition::On);
@@ -1096,12 +1087,13 @@ ipmi_ret_t ipmi_chassis_control(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         default:
         {
             log<level::ERR>("Invalid Chassis Control command",
-                            entry("CMD=0x%X", chassis_ctrl_cmd));
-            rc = -1;
+                            entry("CMD=0x%X", chassisControl));
+            return ipmi::responseInvalidFieldRequest();
         }
     }
 
-    return ((rc < 0) ? IPMI_CC_INVALID : IPMI_CC_OK);
+    return ((rc < 0) ? ipmi::responseUnspecifiedError()
+                     : ipmi::responseSuccess());
 }
 
 /** @brief Return D-Bus connection string to enclosure identify LED object
@@ -1723,8 +1715,9 @@ void register_netfn_chassis_functions()
                            ipmi_get_chassis_status, PRIVILEGE_USER);
 
     // <Chassis Control>
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_CHASSIS_CONTROL, NULL,
-                           ipmi_chassis_control, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdChassisControl,
+                          ipmi::Privilege::Operator, ipmiChassisControl);
 
     // <Chassis Identify>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
