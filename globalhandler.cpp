@@ -32,9 +32,11 @@ void resetBMC()
                           convertForMessage(BMC::Transition::Reboot));
 }
 
-ipmi_ret_t ipmi_global_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+/** @brief implements cold and warm reset commands
+ *  @param - None
+ *  @returns IPMI completion code.
+ */
+ipmi::RspType<> ipmiGlobalReset()
 {
     try
     {
@@ -43,24 +45,23 @@ ipmi_ret_t ipmi_global_reset(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     catch (std::exception& e)
     {
         log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-    *data_len = 0;
-    return rc;
+    return ipmi::responseSuccess();
 }
 
 void register_netfn_global_functions()
 {
+
     // Cold Reset
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_COLD_RESET, NULL,
-                           ipmi_global_reset, PRIVILEGE_ADMIN);
-
-    // <Warm Reset>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_WARM_RESET, NULL,
-                           ipmi_global_reset, PRIVILEGE_ADMIN);
-
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdColdReset, ipmi::Privilege::Admin,
+                          ipmiGlobalReset);
+    // Warm Reset
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdWarmReset, ipmi::Privilege::Admin,
+                          ipmiGlobalReset);
     return;
 }
