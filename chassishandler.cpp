@@ -1585,33 +1585,29 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmiGetPOHCounter(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+/** @brief implements Get POH counter command
+ *  @parameter
+ *   -  none
+ *  @returns ipmi completion code plus response data
+ *   - minPerCount - Minutes per count
+ *   - counterReading - counter reading
+ */
+ipmi::RspType<uint8_t, // Minutes per count
+              uint32_t // Counter reading
+              >
+    ipmiGetPOHCounter()
 {
     // sd_bus error
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    auto resptr = reinterpret_cast<GetPOHCountResponse*>(response);
-
     try
     {
-        auto pohCounter = getPOHCounter();
-        resptr->counterReading[0] = pohCounter;
-        resptr->counterReading[1] = pohCounter >> 8;
-        resptr->counterReading[2] = pohCounter >> 16;
-        resptr->counterReading[3] = pohCounter >> 24;
+        return ipmi::responseSuccess(static_cast<uint8_t>(poh::minutesPerCount),
+                                     getPOHCounter());
     }
     catch (std::exception& e)
     {
         log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
-
-    resptr->minPerCount = poh::minutesPerCount;
-    *data_len = sizeof(GetPOHCountResponse);
-
-    return rc;
 }
 
 ipmi_ret_t ipmi_chassis_set_power_restore_policy(
@@ -1736,8 +1732,9 @@ void register_netfn_chassis_functions()
                            ipmi_chassis_set_sys_boot_options,
                            PRIVILEGE_OPERATOR);
     // <Get POH Counter>
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_POH_COUNTER, NULL,
-                           ipmiGetPOHCounter, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdGetPohCounter,
+                          ipmi::Privilege::User, ipmiGetPOHCounter);
 
     // <Set Power Restore Policy>
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_RESTORE_POLICY, NULL,
