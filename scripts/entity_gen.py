@@ -8,7 +8,7 @@ from mako.template import Template
 
 
 def generate_cpp(entity_yaml, output_dir):
-    with open(os.path.join(script_dir, entity_yaml), 'r') as f:
+    with open(entity_yaml, 'r') as f:
         ifile = yaml.safe_load(f)
         if not isinstance(ifile, dict):
             ifile = {}
@@ -48,7 +48,7 @@ def main():
 
     args = parser.parse_args()
 
-    if (not (os.path.isfile(os.path.join(script_dir, args.entity_yaml)))):
+    if (not (os.path.isfile(args.entity_yaml))):
         sys.exit("Can not find input yaml file " + args.entity_yaml)
 
     function = valid_commands[args.command]
