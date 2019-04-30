@@ -142,20 +142,29 @@ std::string getActiveSoftwareVersionInfo()
     return revision;
 }
 
-bool getCurrentBmcState()
+bool getCurrentBmcState(const bool defaultAvailability)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    try
+    {
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-    // Get the Inventory object implementing the BMC interface
-    ipmi::DbusObjectInfo bmcObject =
-        ipmi::getDbusObject(bus, bmc_state_interface);
-    auto variant =
-        ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
-                              bmc_state_interface, bmc_state_property);
+        // Get the Inventory object implementing the BMC interface
+        ipmi::DbusObjectInfo bmcObject =
+            ipmi::getDbusObject(bus, bmc_state_interface);
+        auto variant =
+            ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
+                                  bmc_state_interface, bmc_state_property);
 
-    return std::holds_alternative<std::string>(variant) &&
-           BMC::convertBMCStateFromString(std::get<std::string>(variant)) ==
-               BMC::BMCState::Ready;
+        return std::holds_alternative<std::string>(variant) &&
+               BMC::convertBMCStateFromString(std::get<std::string>(variant)) ==
+                   BMC::BMCState::Ready;
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        // Nothing provided the BMC interface, therefore return whatever was
+        // configured as the default.
+        return defaultAvailability;
+    }
 }
 
 namespace acpi_state
@@ -548,6 +557,7 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
         uint32_t aux;
     } devId;
     static bool dev_id_initialized = false;
+    static bool defaultActivationSetting = true;
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
     constexpr auto ipmiDevIdStateShift = 7;
     constexpr auto ipmiDevIdFw1Mask = ~(1 << ipmiDevIdStateShift);
@@ -595,6 +605,9 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
                 devId.prodId = data.value("prod_id", 0);
                 devId.aux = data.value("aux", 0);
 
+                // Set the availablitity of the BMC.
+                defaultActivationSetting = data.value("availability", true);
+
                 // Don't read the file every time if successful
                 dev_id_initialized = true;
             }
@@ -613,7 +626,7 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
 
     // Set availability to the actual current BMC state
     devId.fw[0] &= ipmiDevIdFw1Mask;
-    if (!getCurrentBmcState())
+    if (!getCurrentBmcState(defaultActivationSetting))
     {
         devId.fw[0] |= (1 << ipmiDevIdStateShift);
     }
