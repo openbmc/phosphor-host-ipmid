@@ -70,16 +70,16 @@ ipmid_LDFLAGS = \
 ipmiwhitelist.cpp: ${srcdir}/generate_whitelist.sh $(WHITELIST_CONF)
 	$(SHELL) $^ > $@
 
-sensor-gen.cpp:
+sensor-gen.cpp: scripts/writesensor.mako.cpp scripts/sensor_gen.py @SENSOR_YAML_GEN@
 	$(AM_V_GEN)@SENSORGEN@ -o $(top_builddir) generate-cpp
 
-inventory-sensor-gen.cpp:
+inventory-sensor-gen.cpp: scripts/inventorysensor.mako.cpp scripts/inventory-sensor.py @INVSENSOR_YAML_GEN@
 	$(AM_V_GEN)@INVSENSORGEN@ -o $(top_builddir) generate-cpp
 
-fru-read-gen.cpp:
+fru-read-gen.cpp: scripts/readfru.mako.cpp scripts/fru_gen.py @FRU_YAML_GEN@
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
 
-entity-gen.cpp:
+entity-gen.cpp: scripts/writeentity.mako.cpp scripts/entity_gen.py @ENTITY_YAML_GEN@
 	$(AM_V_GEN)@ENTITYGEN@ -o $(top_builddir) generate-cpp
 
 providers_LTLIBRARIES += libipmi20.la
