@@ -74,67 +74,69 @@ extern const IdInfoMap sensors = {
         ${updateFunc},${getFunc},Mutability(${mutability}),${sensorNameFunc},{
     % for interface,properties in interfaces.items():
             {"${interface}",{
-            % for dbus_property,property_value in properties.items():
-                {"${dbus_property}",{
+            % if properties:
+                % for dbus_property,property_value in properties.items():
+                    {"${dbus_property}",{
 <%
 try:
     preReq = property_value["Prereqs"]
 except KeyError, e:
     preReq = dict()
 %>\
-                {
-                    % for preOffset,preValues in preReq.items():
-                    { ${preOffset},{
-                        % for name,value in preValues.items():
-                            % if name == "type":
+                    {
+                        % for preOffset,preValues in preReq.items():
+                        { ${preOffset},{
+                            % for name,value in preValues.items():
+                                % if name == "type":
 <%                              continue %>\
-                            % endif
+                                % endif
 <%                          value = str(value).lower() %>\
-                            ${value},
+                                ${value},
+                            % endfor
+                            }
+                        },
                         % endfor
-                        }
                     },
-                    % endfor
-                },
-                {
-                % for offset,values in property_value["Offsets"].items():
-                    { ${offset},{
-                        % if offset == 0xFF:
-                            }},
+                    {
+                    % for offset,values in property_value["Offsets"].items():
+                        { ${offset},{
+                            % if offset == 0xFF:
+                                }},
 <%                          continue %>\
-                        % endif
+                            % endif
 <%                          valueType = values["type"] %>\
 <%
 try:
     skip = values["skipOn"]
     if skip == "assert":
-         skipVal = "SkipAssertion::ASSERT"
+        skipVal = "SkipAssertion::ASSERT"
     elif skip == "deassert":
-         skipVal = "SkipAssertion::DEASSERT"
+        skipVal = "SkipAssertion::DEASSERT"
     else:
-         assert "Unknown skip value " + str(skip)
+        assert "Unknown skip value " + str(skip)
 except KeyError, e:
     skipVal = "SkipAssertion::NONE"
 %>\
-                            ${skipVal},
-                    % for name,value in values.items():
-                        % if name == "type" or name == "skipOn":
+                                ${skipVal},
+                        % for name,value in values.items():
+                            % if name == "type" or name == "skipOn":
 <%                          continue %>\
-                        % endif
-                        % if valueType == "string":
-                           std::string("${value}"),
-                        % elif valueType == "bool":
+                            % endif
+                            % if valueType == "string":
+                            std::string("${value}"),
+                            % elif valueType == "bool":
 <%                         value = str(value).lower() %>\
-                           ${value},
-                        % else:
-                           ${value},
-                        % endif
-                     % endfor
-                        }
-                    },
+                            ${value},
+                            % else:
+                            ${value},
+                            % endif
+                        % endfor
+                            }
+                        },
+                    % endfor
+                    }}},
                 % endfor
-                }}},
-            % endfor
+            % endif
             }},
     % endfor
      },

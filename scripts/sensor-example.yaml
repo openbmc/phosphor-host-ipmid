@@ -154,3 +154,41 @@
             #the update will be skipped.
             skipOn: deassert
             type: bool
+
+0xC5:
+  sensorType: 0x17
+  path: /system/chassis/motherboard/gv100card0
+  sensorReadingType: 1
+  serviceInterface: xyz.openbmc_project.Inventory.Manager
+  readingType: assertion
+  mutability: Mutability::Write|Mutability::Read
+  sensorNamePattern: nameLeaf
+  interfaces:
+    xyz.openbmc_project.Inventory.Decorator.Replaceable:
+      FieldReplaceable:
+        Offsets:
+          7:
+            assert: true
+            deassert: true
+            type: bool
+    xyz.openbmc_project.Inventory.Item:
+      Present:
+        Offsets:
+          7:
+            assert: true
+            deassert: false
+            type: bool
+    # Example of an interface with no attached properties
+    xyz.openbmc_project.Inventory.Item.Accelerator:
+    xyz.openbmc_project.State.Decorator.OperationalStatus:
+      Functional:
+        Offsets:
+          8:
+            assert: false
+            deassert: true
+            type: bool
+        Prereqs:
+          7:
+            assert: true
+            deassert: false
+            type: bool
