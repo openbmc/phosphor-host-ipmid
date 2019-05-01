@@ -250,7 +250,7 @@ ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
     for (const auto& property : interface->second)
     {
         msg.append(property.first);
-        sdbusplus::message::variant<T> value =
+        std::variant<T> value =
             (cmdData.assertOffset8_14 << 8) | cmdData.assertOffset0_7;
         msg.append(value);
     }
@@ -281,7 +281,7 @@ ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
     for (const auto& property : interface->second)
     {
         msg.append(property.first);
-        sdbusplus::message::variant<T> value = raw_value;
+        std::variant<T> value = raw_value;
         msg.append(value);
     }
     return updateToDbus(msg);

@@ -28,8 +28,8 @@ using Id = uint32_t;
 using Timestamp = uint64_t;
 using Message = std::string;
 using AdditionalData = std::vector<std::string>;
-using PropertyType = sdbusplus::message::variant<Resolved, Id, Timestamp,
-                                                 Message, AdditionalData>;
+using PropertyType =
+    std::variant<Resolved, Id, Timestamp, Message, AdditionalData>;
 
 static constexpr auto selVersion = 0x51;
 static constexpr auto invalidTimeStamp = 0xFFFFFFFF;

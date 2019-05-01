@@ -5,6 +5,7 @@
 #include <map>
 #include <sdbusplus/server.hpp>
 #include <string>
+#include <variant>
 
 namespace ipmi
 {
@@ -15,9 +16,8 @@ using DbusInterface = std::string;
 using DbusObjectInfo = std::pair<DbusObjectPath, DbusService>;
 using DbusProperty = std::string;
 
-using Value = sdbusplus::message::variant<bool, uint8_t, int16_t, uint16_t,
-                                          int32_t, uint32_t, int64_t, uint64_t,
-                                          double, std::string>;
+using Value = std::variant<bool, uint8_t, int16_t, uint16_t, int32_t, uint32_t,
+                           int64_t, uint64_t, double, std::string>;
 
 using PropertyMap = std::map<DbusProperty, Value>;
 

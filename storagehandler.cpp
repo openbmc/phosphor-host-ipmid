@@ -19,9 +19,9 @@
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
-#include <sdbusplus/message/types.hpp>
 #include <sdbusplus/server.hpp>
 #include <string>
+#include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
@@ -488,7 +488,7 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
         auto service = ipmi::getService(bus, TIME_INTERFACE, HOST_TIME_PATH);
-        sdbusplus::message::variant<uint64_t> value;
+        std::variant<uint64_t> value;
 
         // Get host time
         auto method = bus.new_method_call(service.c_str(), HOST_TIME_PATH,
@@ -558,7 +558,7 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
         auto service = ipmi::getService(bus, TIME_INTERFACE, HOST_TIME_PATH);
-        sdbusplus::message::variant<uint64_t> value{usec.count()};
+        std::variant<uint64_t> value{usec.count()};
 
         // Set host time
         auto method = bus.new_method_call(service.c_str(), HOST_TIME_PATH,

@@ -23,14 +23,14 @@
 #include <ctime>
 #include <nlohmann/json.hpp>
 #include <sdbusplus/bus.hpp>
+#include <variant>
 
 namespace ipmi
 {
 
 using Json = nlohmann::json;
 
-using DbusVariant =
-    sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
+using DbusVariant = std::variant<std::vector<std::string>, std::string, bool>;
 
 using DbusChObjProperties = std::vector<std::pair<std::string, DbusVariant>>;
 

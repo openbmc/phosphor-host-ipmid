@@ -13,7 +13,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
-#include <sdbusplus/message/types.hpp>
+#include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 using namespace phosphor::logging;
@@ -85,7 +85,7 @@ uint32_t getPcap(sdbusplus::bus::bus& bus)
         log<level::ERR>("Error in getPcap prop");
         elog<InternalFailure>();
     }
-    sdbusplus::message::variant<uint32_t> pcap;
+    std::variant<uint32_t> pcap;
     reply.read(pcap);
 
     return std::get<uint32_t>(pcap);
@@ -106,7 +106,7 @@ bool getPcapEnabled(sdbusplus::bus::bus& bus)
         log<level::ERR>("Error in getPcapEnabled prop");
         elog<InternalFailure>();
     }
-    sdbusplus::message::variant<bool> pcapEnabled;
+    std::variant<bool> pcapEnabled;
     reply.read(pcapEnabled);
 
     return std::get<bool>(pcapEnabled);
@@ -120,7 +120,7 @@ void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap)
                                       "org.freedesktop.DBus.Properties", "Set");
 
     method.append(PCAP_INTERFACE, POWER_CAP_PROP);
-    method.append(sdbusplus::message::variant<uint32_t>(powerCap));
+    method.append(std::variant<uint32_t>(powerCap));
 
     auto reply = bus.call(method);
 
@@ -139,7 +139,7 @@ void setPcapEnable(sdbusplus::bus::bus& bus, bool enabled)
                                       "org.freedesktop.DBus.Properties", "Set");
 
     method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
-    method.append(sdbusplus::message::variant<bool>(enabled));
+    method.append(std::variant<bool>(enabled));
 
     auto reply = bus.call(method);
 
@@ -205,7 +205,7 @@ std::string readAssetTag()
         elog<InternalFailure>();
     }
 
-    sdbusplus::message::variant<std::string> assetTag;
+    std::variant<std::string> assetTag;
     reply.read(assetTag);
 
     return std::get<std::string>(assetTag);
@@ -225,7 +225,7 @@ void writeAssetTag(const std::string& assetTag)
         (objectTree.begin()->first).c_str(), dcmi::propIntf, "Set");
     method.append(dcmi::assetTagIntf);
     method.append(dcmi::assetTagProp);
-    method.append(sdbusplus::message::variant<std::string>(assetTag));
+    method.append(std::variant<std::string>(assetTag));
 
     auto reply = bus.call(method);
     if (reply.is_method_error())
