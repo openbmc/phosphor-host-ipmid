@@ -322,6 +322,12 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
     ipmi::sensor::InterfaceMap interfaces;
     for (const auto& interface : sensorInfo.propertyInterfaces)
     {
+        // An interface with no properties.
+        if (interface.second.empty())
+        {
+            interfaces.emplace(interface.first, ipmi::sensor::PropertyMap{});
+            continue;
+        }
         // For a property like functional state the result will be
         // calculated based on the true value of all conditions.
         for (const auto& property : interface.second)
