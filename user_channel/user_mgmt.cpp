@@ -31,6 +31,7 @@
 #include <regex>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/server/object.hpp>
+#include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/User/Common/error.hpp>
 
@@ -106,8 +107,7 @@ static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
 using namespace phosphor::logging;
 using Json = nlohmann::json;
 
-using PrivAndGroupType =
-    sdbusplus::message::variant<std::string, std::vector<std::string>>;
+using PrivAndGroupType = std::variant<std::string, std::vector<std::string>>;
 
 using NoResource =
     sdbusplus::xyz::openbmc_project::User::Common::Error::NoResource;

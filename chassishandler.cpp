@@ -1139,7 +1139,7 @@ void enclosureIdentifyLed(bool flag)
         dbus.new_method_call(connection.c_str(), identify_led_object_name,
                              "org.freedesktop.DBus.Properties", "Set");
     led.append("xyz.openbmc_project.Led.Group", "Asserted",
-               sdbusplus::message::variant<bool>(flag));
+               std::variant<bool>(flag));
     auto ledReply = dbus.call(led);
     if (ledReply.is_method_error())
     {
@@ -1251,8 +1251,7 @@ static ipmi_ret_t setBootSource(const Source::Sources& source)
 {
     using namespace chassis::internal;
     using namespace chassis::internal::cache;
-    sdbusplus::message::variant<std::string> property =
-        convertForMessage(source);
+    std::variant<std::string> property = convertForMessage(source);
     auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
     const auto& bootSourceSetting = std::get<settings::Path>(bootSetting);
     auto method = dbus.new_method_call(
@@ -1277,7 +1276,7 @@ static ipmi_ret_t setBootMode(const Mode::Modes& mode)
 {
     using namespace chassis::internal;
     using namespace chassis::internal::cache;
-    sdbusplus::message::variant<std::string> property = convertForMessage(mode);
+    std::variant<std::string> property = convertForMessage(mode);
     auto bootSetting = settings::boot::setting(objects, bootModeIntf);
     const auto& bootModeSetting = std::get<settings::Path>(bootSetting);
     auto method = dbus.new_method_call(
@@ -1344,7 +1343,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 *data_len = 0;
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
-            sdbusplus::message::variant<std::string> result;
+            std::variant<std::string> result;
             reply.read(result);
             auto bootSource =
                 Source::convertSourcesFromString(std::get<std::string>(result));
@@ -1644,8 +1643,7 @@ ipmi_ret_t ipmi_chassis_set_power_restore_policy(
             chassis::internal::cache::objects.map
                 .at(chassis::internal::powerRestoreIntf)
                 .front();
-        sdbusplus::message::variant<std::string> property =
-            convertForMessage(value);
+        std::variant<std::string> property = convertForMessage(value);
 
         auto method = chassis::internal::dbus.new_method_call(
             chassis::internal::cache::objects
