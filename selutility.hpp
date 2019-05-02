@@ -33,26 +33,20 @@ using PropertyType =
 
 static constexpr auto selVersion = 0x51;
 static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
-static constexpr auto operationSupport = 0x0A;
-
-/** @struct GetSELInfoResponse
- *
- *  IPMI payload for Get SEL Info command response.
- */
-struct GetSELInfoResponse
-{
-    uint8_t selVersion;       //!< SEL revision.
-    uint16_t entries;         //!< Number of log entries in SEL.
-    uint16_t freeSpace;       //!< Free Space in bytes.
-    uint32_t addTimeStamp;    //!< Most recent addition timestamp.
-    uint32_t eraseTimeStamp;  //!< Most recent erase timestamp.
-    uint8_t operationSupport; //!< Operation support.
-} __attribute__((packed));
 
 static constexpr auto firstEntry = 0x0000;
 static constexpr auto lastEntry = 0xFFFF;
 static constexpr auto entireRecord = 0xFF;
 static constexpr auto selRecordSize = 16;
+
+namespace operationSupport
+{
+static constexpr bool overflow = false;
+static constexpr bool deleteSel = true;
+static constexpr bool partialAddSelEntry = false;
+static constexpr bool reserveSel = true;
+static constexpr bool getSelAllocationInfo = false;
+} // namespace operationSupport
 
 /** @struct GetSELEntryRequest
  *
