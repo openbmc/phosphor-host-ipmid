@@ -81,24 +81,34 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                      ipmi_request_t request, ipmi_response_t response,
-                      ipmi_data_len_t data_len, ipmi_context_t context)
+/** @brief implements the get SEL Info command
+ *  @returns IPMI completion code plus response data
+ *   - selVersion - SEL revision
+ *   - entries    - Number of log entries in SEL.
+ *   - freeSpace  - Free Space in bytes.
+ *   - addTimeStamp - Most recent addition timestamp
+ *   - eraseTimeStamp - Most recent erase timestamp
+ *   - operationSupport - Operation support.
+ */
+
+ipmi::RspType<uint8_t,  // SEL revision.
+              uint16_t, // number of log entries in SEL.
+              uint16_t, // free Space in bytes.
+              uint32_t, // most recent addition timestamp
+              uint32_t, // most recent erase timestamp.
+
+              bool,    // SEL allocation info supported
+              bool,    // reserve SEL supported
+              bool,    // partial Add SEL Entry supported
+              bool,    // delete SEL supported
+              uint3_t, // reserved
+              bool     // overflow flag
+              >
+    ipmiStorageGetSelInfo()
 {
-    if (*data_len != 0)
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    std::vector<uint8_t> outPayload(sizeof(ipmi::sel::GetSELInfoResponse));
-    auto responseData =
-        reinterpret_cast<ipmi::sel::GetSELInfoResponse*>(outPayload.data());
-
-    responseData->selVersion = ipmi::sel::selVersion;
-    // Last erase timestamp is not available from log manager.
-    responseData->eraseTimeStamp = ipmi::sel::invalidTimeStamp;
-    responseData->operationSupport = ipmi::sel::operationSupport;
+    uint16_t entries = 0;
+    // Most recent addition timestamp.
+    uint32_t addTimeStamp = ipmi::sel::invalidTimeStamp;
 
     try
     {
@@ -112,16 +122,13 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // as 0.
     }
 
-    responseData->entries = 0;
-    responseData->addTimeStamp = ipmi::sel::invalidTimeStamp;
-
     if (!cache::paths.empty())
     {
-        responseData->entries = static_cast<uint16_t>(cache::paths.size());
+        entries = static_cast<uint16_t>(cache::paths.size());
 
         try
         {
-            responseData->addTimeStamp = static_cast<uint32_t>(
+            addTimeStamp = static_cast<uint32_t>(
                 (ipmi::sel::getEntryTimeStamp(cache::paths.back()).count()));
         }
         catch (InternalFailure& e)
@@ -133,10 +140,18 @@ ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    std::memcpy(response, outPayload.data(), outPayload.size());
-    *data_len = outPayload.size();
+    constexpr uint8_t selVersion = ipmi::sel::selVersion;
+    constexpr uint16_t freeSpace = 0xFFFF;
+    constexpr uint32_t eraseTimeStamp = ipmi::sel::invalidTimeStamp;
+    constexpr uint3_t reserved{0};
 
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(
+        selVersion, entries, freeSpace, addTimeStamp, eraseTimeStamp,
+        ipmi::sel::operationSupport::getSelAllocationInfo,
+        ipmi::sel::operationSupport::reserveSel,
+        ipmi::sel::operationSupport::partialAddSelEntry,
+        ipmi::sel::operationSupport::deleteSel, reserved,
+        ipmi::sel::operationSupport::overflow);
 }
 
 ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -559,27 +574,13 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
     return ipmi::responseSuccess();
 }
 
-ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                    ipmi_request_t request,
-                                    ipmi_response_t response,
-                                    ipmi_data_len_t data_len,
-                                    ipmi_context_t context)
+/** @brief implements the reserve SEL command
+ *  @returns IPMI completion code plus response data
+ *   - SEL reservation ID.
+ */
+ipmi::RspType<uint16_t> ipmiStorageReserveSel()
 {
-    if (*data_len != 0)
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    ipmi_ret_t rc = IPMI_CC_OK;
-    unsigned short selResID = reserveSel();
-
-    *data_len = sizeof(selResID);
-
-    // Pack the actual response
-    std::memcpy(response, &selResID, *data_len);
-
-    return rc;
+    return ipmi::responseSuccess(reserveSel());
 }
 
 /** @brief implements the Add SEL entry command
@@ -741,8 +742,9 @@ void register_netfn_storage_functions()
                            ipmi_storage_wildcard, PRIVILEGE_USER);
 
     // <Get SEL Info>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL,
-                           getSELInfo, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
+                          ipmiStorageGetSelInfo);
 
     // <Get SEL Time>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
@@ -755,9 +757,9 @@ void register_netfn_storage_functions()
                           ipmi::Privilege::Operator, ipmiStorageSetSelTime);
 
     // <Reserve SEL>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL,
-                           ipmi_storage_reserve_sel, PRIVILEGE_USER);
-
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdReserveSel, ipmi::Privilege::User,
+                          ipmiStorageReserveSel);
     // <Get SEL Entry>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
                            getSELEntry, PRIVILEGE_USER);
