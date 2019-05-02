@@ -19,6 +19,7 @@
 #include "apphandler.hpp"
 #include "channel_layer.hpp"
 
+#include <ipmid/api.hpp>
 #include <phosphor-logging/log.hpp>
 #include <regex>
 
@@ -26,39 +27,6 @@ using namespace phosphor::logging;
 
 namespace ipmi
 {
-
-/** @struct SetChannelAccessReq
- *
- *  Structure for set channel access request command (refer spec sec 22.22)
- */
-struct SetChannelAccessReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t chNum : 4;
-    uint8_t reserved_1 : 4;
-    uint8_t accessMode : 3;
-    uint8_t usrAuthDisabled : 1;
-    uint8_t msgAuthDisabled : 1;
-    uint8_t alertDisabled : 1;
-    uint8_t accessSetMode : 2;
-    uint8_t privLimit : 4;
-    uint8_t reserved_2 : 2;
-    uint8_t privSetMode : 2;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved_1 : 4;
-    uint8_t chNum : 4;
-    uint8_t accessSetMode : 2;
-    uint8_t alertDisabled : 1;
-    uint8_t msgAuthDisabled : 1;
-    uint8_t usrAuthDisabled : 1;
-    uint8_t accessMode : 3;
-    uint8_t privSetMode : 2;
-    uint8_t reserved_2 : 2;
-    uint8_t privLimit : 4;
-#endif
-
-} __attribute__((packed));
 
 /** @struct GetChannelAccessReq
  *
@@ -182,86 +150,95 @@ struct GetChannelPayloadSupportResp
     uint8_t reserved[2];
 } __attribute__((packed));
 
-ipmi_ret_t ipmiSetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief implements the set user access command
+ *  @ param ctx - context pointer
+ *  @ param chNum - channel nsumber
+ *  @ param reserved_2 - skip 4 bits
+ *  @ param accessMode - access mode for IPMI messaging
+ *  @ param usrAuth - user level authentication (enable/disable)
+ *  @ param msgAuth - per message authentication (enable/disable)
+ *  @ param alertDisabled - PEF alerting (enable/disable)
+ *  @ param chanAccess - channel access
+ *  @ param chaneelPrivLimit - channel priviledge limit
+ *  @ param reserved_3 - skip 3 bits
+ *  @ param channelPrivMode - channel priviledge mode
+ *
+ *  @ returns IPMI completion code
+ **/
+ipmi::RspType<> ipmiSetChannelAccess(ipmi::Context::ptr ctx, uint4_t channel,
+                                     uint4_t reserved_2, uint2_t accessMode,
+                                     bool usrAuth, bool msgAuth,
+                                     bool alertDisabled, uint3_t chanAccess,
+                                     uint4_t channelPrivLimit,
+                                     uint2_t reserved_3,
+                                     uint2_t channelPrivMode)
 {
-    const SetChannelAccessReq* req = static_cast<SetChannelAccessReq*>(request);
-    size_t reqLength = *data_len;
 
-    *data_len = 0;
+    const uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx);
 
-    if (reqLength != sizeof(*req))
-    {
-        log<level::DEBUG>("Set channel access - Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (!isValidChannel(chNum) || req->reserved_1 != 0 || req->reserved_2 != 0)
+    if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Set channel access - Invalid field in request");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidFieldRequest();
     }
 
     if (EChannelSessSupported::none == getChannelSessionSupport(chNum))
     {
         log<level::DEBUG>("Set channel access - No support on channel");
-        return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
+        return ipmi::responseInvalidFieldRequest();
     }
 
     ChannelAccess chActData;
     ChannelAccess chNVData;
     uint8_t setActFlag = 0;
     uint8_t setNVFlag = 0;
-    ipmi_ret_t compCode = IPMI_CC_OK;
+    ipmi::Cc compCode;
 
-    switch (req->accessSetMode)
+    switch (static_cast<uint8_t>(chanAccess))
     {
         case doNotSet:
-            // Do nothing
             break;
         case nvData:
-            chNVData.accessMode = req->accessMode;
-            chNVData.userAuthDisabled = req->usrAuthDisabled;
-            chNVData.perMsgAuthDisabled = req->msgAuthDisabled;
-            chNVData.alertingDisabled = req->alertDisabled;
+            chNVData.accessMode = static_cast<uint8_t>(accessMode);
+            chNVData.userAuthDisabled = usrAuth;
+            chNVData.perMsgAuthDisabled = msgAuth;
+            chNVData.alertingDisabled = alertDisabled;
             setNVFlag |= (setAccessMode | setUserAuthEnabled |
                           setMsgAuthEnabled | setAlertingEnabled);
             break;
+
         case activeData:
-            chActData.accessMode = req->accessMode;
-            chActData.userAuthDisabled = req->usrAuthDisabled;
-            chActData.perMsgAuthDisabled = req->msgAuthDisabled;
-            chActData.alertingDisabled = req->alertDisabled;
+            chActData.accessMode = static_cast<uint8_t>(accessMode);
+            chActData.userAuthDisabled = usrAuth;
+            chActData.perMsgAuthDisabled = msgAuth;
+            chActData.alertingDisabled = alertDisabled;
             setActFlag |= (setAccessMode | setUserAuthEnabled |
                            setMsgAuthEnabled | setAlertingEnabled);
             break;
+
         case reserved:
         default:
             log<level::DEBUG>("Set channel access - Invalid access set mode");
-            return IPMI_CC_INVALID_FIELD_REQUEST;
+            return ipmi::responseInvalidFieldRequest();
     }
-
-    switch (req->privSetMode)
+    switch (static_cast<uint8_t>(channelPrivMode))
     {
         case doNotSet:
-            // Do nothing
             break;
         case nvData:
-            chNVData.privLimit = req->privLimit;
+            chNVData.privLimit = static_cast<uint8_t>(channelPrivLimit);
             setNVFlag |= setPrivLimit;
             break;
         case activeData:
-            chActData.privLimit = req->privLimit;
+            chActData.privLimit = static_cast<uint8_t>(channelPrivLimit);
+
             setActFlag |= setPrivLimit;
             break;
         case reserved:
         default:
             log<level::DEBUG>("Set channel access - Invalid access priv mode");
-            return IPMI_CC_INVALID_FIELD_REQUEST;
+            return ipmi::responseInvalidFieldRequest();
     }
 
     if (setNVFlag != 0)
@@ -270,7 +247,7 @@ ipmi_ret_t ipmiSetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (compCode != IPMI_CC_OK)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
-            return compCode;
+            return ipmi::response(compCode);
         }
     }
 
@@ -280,11 +257,11 @@ ipmi_ret_t ipmiSetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (compCode != IPMI_CC_OK)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
-            return compCode;
+            return ipmi::response(compCode);
         }
     }
 
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
 ipmi_ret_t ipmiGetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -500,8 +477,9 @@ void registerChannelFunctions()
 {
     ipmiChannelInit();
 
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_CHANNEL_ACCESS, NULL,
-                           ipmiSetChannelAccess, PRIVILEGE_ADMIN);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetChannelAccess,
+                          ipmi::Privilege::Admin, ipmiSetChannelAccess);
 
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
                            ipmiGetChannelAccess, PRIVILEGE_USER);
