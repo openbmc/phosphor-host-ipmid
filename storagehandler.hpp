@@ -57,24 +57,6 @@ struct ReadFruDataResponse
 } __attribute__((packed));
 
 /**
- * @struct Get FRU inventory area info command request data
- */
-struct FruInvenAreaInfoRequest
-{
-    uint8_t fruID; ///< FRU Device ID. FFH = reserved.
-} __attribute__((packed));
-
-/**
- * @struct Get FRU inventory area info command response
- */
-struct FruInvenAreaInfoResponse
-{
-    uint8_t sizels; ///< Fru Inventory area size in bytes, LS Byte
-    uint8_t sizems; ///< Fru Inventory are size in bytes, MS Byte
-    uint8_t access; ///< 0b Devices is accessed by bytes, 1b - by words
-} __attribute__((packed));
-
-/**
  * @struct Get Repository info command response
  */
 struct GetRepositoryInfoResponse

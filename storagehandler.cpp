@@ -667,43 +667,35 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-// Read FRU info area
-ipmi_ret_t ipmi_storage_get_fru_inv_area_info(
-    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-    ipmi_response_t response, ipmi_data_len_t data_len, ipmi_context_t context)
+/** @brief implements the get FRU Inventory Area Info command
+ *
+ *  @returns IPMI completion code plus response data
+ *   - FRU Inventory area size in bytes,
+ *   - access bit
+ **/
+ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
+              uint8_t   // access size (bytes / words)
+              >
+    ipmiStorageGetFruInvAreaInfo(uint8_t fruID)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-    const FruInvenAreaInfoRequest* reqptr =
-        reinterpret_cast<const FruInvenAreaInfoRequest*>(request);
 
-    auto iter = frus.find(reqptr->fruID);
+    auto iter = frus.find(fruID);
     if (iter == frus.end())
     {
-        *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
 
     try
     {
-        const auto& fruArea = getFruAreaData(reqptr->fruID);
-        auto size = static_cast<uint16_t>(fruArea.size());
-        FruInvenAreaInfoResponse resp;
-        resp.sizems = size >> 8;
-        resp.sizels = size;
-        resp.access = static_cast<uint8_t>(AccessMode::bytes);
-
-        *data_len = sizeof(resp);
-
-        // Pack the actual response
-        std::memcpy(response, &resp, *data_len);
+        return ipmi::responseSuccess(
+            static_cast<uint16_t>(getFruAreaData(fruID).size()),
+            static_cast<uint8_t>(AccessMode::bytes));
     }
     catch (const InternalFailure& e)
     {
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        *data_len = 0;
         log<level::ERR>(e.what());
+        return ipmi::responseUnspecifiedError();
     }
-    return rc;
 }
 
 // Read FRU data
@@ -823,9 +815,9 @@ void register_netfn_storage_functions()
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_CLEAR_SEL, NULL, clearSEL,
                            PRIVILEGE_OPERATOR);
     // <Get FRU Inventory Area Info>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_FRU_INV_AREA_INFO, NULL,
-                           ipmi_storage_get_fru_inv_area_info,
-                           PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdGetFruInventoryAreaInfo,
+                          ipmi::Privilege::User, ipmiStorageGetFruInvAreaInfo);
 
     // <Add READ FRU Data
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
