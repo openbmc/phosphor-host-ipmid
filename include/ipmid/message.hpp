@@ -601,18 +601,20 @@ struct Request
     int unpack(Args&&... args)
     {
         int unpackRet = payload.unpack(std::forward<Args>(args)...);
-        if (unpackRet == ipmi::ccSuccess)
+        if (unpackRet != ipmi::ccSuccess)
         {
-            if (!payload.trailingOk)
+            // not all bits were consumed by requested parameters
+            return ipmi::ccReqDataLenInvalid;
+        }
+        if (!payload.trailingOk)
+        {
+            if (!payload.fullyUnpacked())
             {
-                if (!payload.fullyUnpacked())
-                {
-                    // not all bits were consumed by requested parameters
-                    return ipmi::ccReqDataLenInvalid;
-                }
+                // not all bits were consumed by requested parameters
+                return ipmi::ccReqDataLenInvalid;
             }
         }
-        return unpackRet;
+        return ipmi::ccSuccess;
     }
 
     /**
