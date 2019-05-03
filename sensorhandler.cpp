@@ -69,13 +69,6 @@ struct sensor_data_t
     uint8_t sennum;
 } __attribute__((packed));
 
-struct sensorreadingresp_t
-{
-    uint8_t value;
-    uint8_t operation;
-    uint8_t indication[2];
-} __attribute__((packed));
-
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -385,46 +378,56 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ipmiRC;
 }
 
-ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                       ipmi_request_t request,
-                                       ipmi_response_t response,
-                                       ipmi_data_len_t data_len,
-                                       ipmi_context_t context)
+/** @brief implements the get sensor reading command
+ *  @param sensorNum - sensor number
+ *
+ *  @returns IPMI completion code plus response data
+ *   - reading          - sensor reading
+ *   - operation        - sensor scanning status / reading state.
+ *   - assertOffset0_7  - discrete assertion states(0-7).
+ *   - assertOffset8_14 - discrete assertion states(8-14).
+ */
+ipmi::RspType<uint8_t,               // sensor reading
+              uint8_t,               // sensor scanning status / reading state.
+              uint8_t,               // discrete assertion states(0-7).
+              std::optional<uint8_t> // discrete assertion states(7-14)
+              >
+    ipmiSensorGetSensorReading(uint8_t sensorNum)
 {
-    auto reqptr = static_cast<sensor_data_t*>(request);
-    auto resp = static_cast<sensorreadingresp_t*>(response);
     ipmi::sensor::GetSensorResponse getResponse{};
-    static constexpr auto scanningEnabledBit = 6;
 
-    const auto iter = sensors.find(reqptr->sennum);
+    static constexpr auto scanningEnabledBit = 6;
+    const auto iter = sensors.find(sensorNum);
+
     if (iter == sensors.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
     if (ipmi::sensor::Mutability::Read !=
         (iter->second.mutability & ipmi::sensor::Mutability::Read))
     {
-        return IPMI_CC_ILLEGAL_COMMAND;
+        return ipmi::responseIllegalCommand();
     }
 
     try
     {
         getResponse = iter->second.getFunc(iter->second);
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        resp->operation = 1 << scanningEnabledBit;
-        return IPMI_CC_OK;
+        getResponse.data()[1] = 1 << scanningEnabledBit;
+        return ipmi::responseSuccess(
+            getResponse.data()[0], getResponse.data()[1], getResponse.data()[2],
+            getResponse.data()[3]);
     }
     catch (const std::exception& e)
     {
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        return IPMI_CC_OK;
+        return ipmi::responseUnspecifiedError();
     }
 }
 
-void getSensorThresholds(uint8_t sensorNum,
-                         get_sdr::GetSensorThresholdsResponse* response)
+void getSensorThresholds(uint8_t sensorNum, uint8_t& validMask,
+                         uint8_t& lowerNonCritical, uint8_t& lowerCritical,
+                         uint8_t& lowerNonRecoverable,
+                         uint8_t& upperNonCritical, uint8_t& upperCritical,
+                         uint8_t& upperNonRecoverable)
 {
     constexpr auto warningThreshIntf =
         "xyz.openbmc_project.Sensor.Threshold.Warning";
@@ -449,18 +452,18 @@ void getSensorThresholds(uint8_t sensorNum,
     if (warnLow != 0)
     {
         warnLow *= std::pow(10, info.scale - info.exponentR);
-        response->lowerNonCritical = static_cast<uint8_t>(
-            (warnLow - info.scaledOffset) / info.coefficientM);
-        response->validMask |= static_cast<uint8_t>(
+        lowerNonCritical = static_cast<uint8_t>((warnLow - info.scaledOffset) /
+                                                info.coefficientM);
+        validMask |= static_cast<uint8_t>(
             ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK);
     }
 
     if (warnHigh != 0)
     {
         warnHigh *= std::pow(10, info.scale - info.exponentR);
-        response->upperNonCritical = static_cast<uint8_t>(
-            (warnHigh - info.scaledOffset) / info.coefficientM);
-        response->validMask |= static_cast<uint8_t>(
+        upperNonCritical = static_cast<uint8_t>((warnHigh - info.scaledOffset) /
+                                                info.coefficientM);
+        validMask |= static_cast<uint8_t>(
             ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK);
     }
 
@@ -474,43 +477,59 @@ void getSensorThresholds(uint8_t sensorNum,
     if (critLow != 0)
     {
         critLow *= std::pow(10, info.scale - info.exponentR);
-        response->lowerCritical = static_cast<uint8_t>(
-            (critLow - info.scaledOffset) / info.coefficientM);
-        response->validMask |= static_cast<uint8_t>(
+        lowerCritical = static_cast<uint8_t>((critLow - info.scaledOffset) /
+                                             info.coefficientM);
+        validMask |= static_cast<uint8_t>(
             ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK);
     }
 
     if (critHigh != 0)
     {
         critHigh *= std::pow(10, info.scale - info.exponentR);
-        response->upperCritical = static_cast<uint8_t>(
-            (critHigh - info.scaledOffset) / info.coefficientM);
-        response->validMask |= static_cast<uint8_t>(
+        upperCritical = static_cast<uint8_t>((critHigh - info.scaledOffset) /
+                                             info.coefficientM);
+        validMask |= static_cast<uint8_t>(
             ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK);
     }
 }
 
-ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                          ipmi_request_t request,
-                                          ipmi_response_t response,
-                                          ipmi_data_len_t data_len,
-                                          ipmi_context_t context)
+/** @brief implements the get sensor thresholds command
+ *  @param sensorNum - sensor number
+ *
+ *  @returns IPMI completion code plus response data
+ *   - validMask - threshold mask
+ *   - lower non-critical threshold - IPMI messaging state
+ *   - lower critical threshold - link authentication state
+ *   - lower non-recoverable threshold - callback state
+ *   - upper non-critical threshold
+ *   - upper critical
+ *   - upper non-recoverable
+ */
+ipmi::RspType<uint8_t, // mask
+              uint8_t, // lower non-critical threshold
+              uint8_t, // lower critical threshold
+              uint8_t, // lower non-recoverable threshold
+              uint8_t, // upper non-critical threshold
+              uint8_t, // upper critical
+              uint8_t  // upper non-recoverable
+              >
+    ipmiSensorGetSensorThresholds(uint8_t sensorNum)
 {
     constexpr auto valueInterface = "xyz.openbmc_project.Sensor.Value";
+    uint8_t validMask = 0;
+    uint8_t lowerNonCritical = 0;
+    uint8_t lowerCritical = 0;
+    uint8_t lowerNonRecoverable = 0;
+    uint8_t upperNonCritical = 0;
+    uint8_t upperCritical = 0;
+    uint8_t upperNonRecoverable = 0;
 
-    if (*data_len != sizeof(uint8_t))
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    auto sensorNum = *(reinterpret_cast<const uint8_t*>(request));
-    *data_len = 0;
-
+    ipmi::Cc retStatus = IPMI_CC_OK;
     const auto iter = sensors.find(sensorNum);
+
     if (iter == sensors.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
 
     const auto info = iter->second;
@@ -520,24 +539,25 @@ ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         info.propertyInterfaces.end())
     {
         // return with valid mask as 0
-        return IPMI_CC_OK;
+        return ipmi::response(retStatus);
     }
-
-    auto responseData =
-        reinterpret_cast<get_sdr::GetSensorThresholdsResponse*>(response);
 
     try
     {
-        getSensorThresholds(sensorNum, responseData);
+        getSensorThresholds(sensorNum, validMask, lowerNonCritical,
+                            lowerCritical, lowerNonRecoverable,
+                            upperNonCritical, upperCritical,
+                            upperNonRecoverable);
     }
     catch (std::exception& e)
     {
         // Mask if the property is not present
-        responseData->validMask = 0;
+        validMask = 0;
     }
 
-    *data_len = sizeof(get_sdr::GetSensorThresholdsResponse);
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(validMask, lowerNonCritical, lowerCritical,
+                                 lowerNonRecoverable, upperNonCritical,
+                                 upperCritical, upperNonRecoverable);
 }
 
 ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -1051,8 +1071,9 @@ void register_netfn_sen_functions()
                            ipmi_sen_set_sensor, PRIVILEGE_OPERATOR);
 
     // <Get Sensor Reading>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, nullptr,
-                           ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorReading,
+                          ipmi::Privilege::User, ipmiSensorGetSensorReading);
 
     // <Reserve Device SDR Repository>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_RESERVE_DEVICE_SDR_REPO,
@@ -1067,9 +1088,9 @@ void register_netfn_sen_functions()
                            ipmi_sen_get_sdr, PRIVILEGE_USER);
 
     // <Get Sensor Thresholds>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_THRESHOLDS,
-                           nullptr, ipmi_sen_get_sensor_thresholds,
-                           PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorThreshold,
+                          ipmi::Privilege::User, ipmiSensorGetSensorThresholds);
 
     return;
 }
