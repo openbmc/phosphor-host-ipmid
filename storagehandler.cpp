@@ -483,21 +483,15 @@ ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                     ipmi_request_t request,
-                                     ipmi_response_t response,
-                                     ipmi_data_len_t data_len,
-                                     ipmi_context_t context)
+/** @brief implements the get SEL time command
+ *  @returns IPMI completion code plus response data
+ *   -current time
+ */
+ipmi::RspType<uint32_t> // current time
+    ipmiStorageGetSelTime()
 {
-    if (*data_len != 0)
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
     using namespace std::chrono;
     uint64_t host_time_usec = 0;
-    uint32_t resp = 0;
     std::stringstream hostTime;
 
     try
@@ -517,7 +511,7 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             log<level::ERR>("Error getting time",
                             entry("SERVICE=%s", service.c_str()),
                             entry("PATH=%s", HOST_TIME_PATH));
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ipmi::responseUnspecifiedError();
         }
         reply.read(value);
         host_time_usec = std::get<uint64_t>(value);
@@ -525,12 +519,12 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     catch (InternalFailure& e)
     {
         log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
     catch (const std::runtime_error& e)
     {
         log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     hostTime << "Host time:" << getTimeString(host_time_usec);
@@ -539,36 +533,19 @@ ipmi_ret_t ipmi_storage_get_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // Time is really long int but IPMI wants just uint32. This works okay until
     // the number of seconds since 1970 overflows uint32 size.. Still a whole
     // lot of time here to even think about that.
-    resp = duration_cast<seconds>(microseconds(host_time_usec)).count();
-    resp = htole32(resp);
-
-    // From the IPMI Spec 2.0, response should be a 32-bit value
-    *data_len = sizeof(resp);
-
-    // Pack the actual response
-    std::memcpy(response, &resp, *data_len);
-
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(
+        duration_cast<seconds>(microseconds(host_time_usec)).count());
 }
 
-ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                     ipmi_request_t request,
-                                     ipmi_response_t response,
-                                     ipmi_data_len_t data_len,
-                                     ipmi_context_t context)
+/** @brief implements the set SEL time command
+ *  @param selDeviceTime - Time in four-byte format
+ *  @returns IPMI completion code
+ */
+ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
 {
-    if (*data_len != sizeof(uint32_t))
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
     using namespace std::chrono;
-    ipmi_ret_t rc = IPMI_CC_OK;
-    uint32_t secs = *static_cast<uint32_t*>(request);
-    *data_len = 0;
-
-    secs = le32toh(secs);
-    microseconds usec{seconds(secs)};
+    ipmi::Cc retStatus = IPMI_CC_OK;
+    microseconds usec{seconds(selDeviceTime)};
 
     try
     {
@@ -587,21 +564,21 @@ ipmi_ret_t ipmi_storage_set_sel_time(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             log<level::ERR>("Error setting time",
                             entry("SERVICE=%s", service.c_str()),
                             entry("PATH=%s", HOST_TIME_PATH));
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
+            return ipmi::responseUnspecifiedError();
         }
     }
     catch (InternalFailure& e)
     {
         log<level::ERR>(e.what());
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
     catch (const std::runtime_error& e)
     {
         log<level::ERR>(e.what());
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    return rc;
+    return ipmi::response(retStatus);
 }
 
 ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -797,12 +774,14 @@ void register_netfn_storage_functions()
                            getSELInfo, PRIVILEGE_USER);
 
     // <Get SEL Time>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_TIME, NULL,
-                           ipmi_storage_get_sel_time, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdGetSelTime, ipmi::Privilege::User,
+                          ipmiStorageGetSelTime);
 
     // <Set SEL Time>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_SET_SEL_TIME, NULL,
-                           ipmi_storage_set_sel_time, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdSetSelTime,
+                          ipmi::Privilege::Operator, ipmiStorageSetSelTime);
 
     // <Reserve SEL>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SEL, NULL,
