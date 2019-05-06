@@ -42,16 +42,3 @@ struct ReadFruDataResponse
     uint8_t data[]; ///< Response data.
 } __attribute__((packed));
 
-/**
- * @struct Get Repository info command response
- */
-struct GetRepositoryInfoResponse
-{
-    uint8_t sdrVersion;           //< SDR version
-    uint8_t recordCountLs;        //< Record count LS byte
-    uint8_t recordCountMs;        //< Record count MS bte
-    uint8_t freeSpace[2];         //< Free space in bytes, LS first
-    uint8_t additionTimestamp[4]; //< Most recent addition timestamp LS first
-    uint8_t deletionTimestamp[4]; //< Most recent deletion timestamp LS first
-    uint8_t operationSupport;     //< Operation support
-} __attribute__((packed));
