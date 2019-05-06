@@ -1267,6 +1267,7 @@ std::map<IpmiValue, Source::Sources> sourceIpmiToDbus = {
     {0x01, Source::Sources::Network},
     {0x02, Source::Sources::Disk},
     {0x05, Source::Sources::ExternalMedia},
+    {0x0f, Source::Sources::RemovableMedia},
     {ipmiDefault, Source::Sources::Default}};
 
 std::map<IpmiValue, Mode::Modes> modeIpmiToDbus = {
@@ -1278,6 +1279,7 @@ std::map<Source::Sources, IpmiValue> sourceDbusToIpmi = {
     {Source::Sources::Network, 0x01},
     {Source::Sources::Disk, 0x02},
     {Source::Sources::ExternalMedia, 0x05},
+    {Source::Sources::RemovableMedia, 0x0f},
     {Source::Sources::Default, ipmiDefault}};
 
 std::map<Mode::Modes, IpmiValue> modeDbusToIpmi = {
@@ -1571,6 +1573,13 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 {
                     setBootSource(Source::Sources::Default);
                 }
+            }
+            if ((modeIpmiToDbus.end() == modeItr) &&
+                (sourceIpmiToDbus.end() == sourceItr))
+            {
+                // return error if boot option is not supported
+                *data_len = 0;
+                return IPMI_CC_INVALID_FIELD_REQUEST;
             }
         }
         catch (InternalFailure& e)
