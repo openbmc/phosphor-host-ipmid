@@ -43,15 +43,19 @@ struct ReadFruDataResponse
 } __attribute__((packed));
 
 /**
- * @struct Get Repository info command response
+ * @struct Get FRU inventory area info command request data
  */
-struct GetRepositoryInfoResponse
+struct FruInvenAreaInfoRequest
 {
-    uint8_t sdrVersion;           //< SDR version
-    uint8_t recordCountLs;        //< Record count LS byte
-    uint8_t recordCountMs;        //< Record count MS bte
-    uint8_t freeSpace[2];         //< Free space in bytes, LS first
-    uint8_t additionTimestamp[4]; //< Most recent addition timestamp LS first
-    uint8_t deletionTimestamp[4]; //< Most recent deletion timestamp LS first
-    uint8_t operationSupport;     //< Operation support
+    uint8_t fruID; ///< FRU Device ID. FFH = reserved.
+} __attribute__((packed));
+
+/**
+ * @struct Get FRU inventory area info command response
+ */
+struct FruInvenAreaInfoResponse
+{
+    uint8_t sizels; ///< Fru Inventory area size in bytes, LS Byte
+    uint8_t sizems; ///< Fru Inventory are size in bytes, MS Byte
+    uint8_t access; ///< 0b Devices is accessed by bytes, 1b - by words
 } __attribute__((packed));
