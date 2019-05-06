@@ -709,29 +709,26 @@ ipmi_ret_t ipmi_storage_read_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_get_repository_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                    ipmi_request_t request,
-                                    ipmi_response_t response,
-                                    ipmi_data_len_t data_len,
-                                    ipmi_context_t context)
+ipmi::RspType<uint8_t,  // SDR version
+              uint16_t, // record count LS first
+              uint16_t, // free space in bytes, LS first
+              uint32_t, // addition timestamp LS first
+              uint32_t, // deletion timestamp LS first
+              uint8_t>  // operation Support
+    ipmiGetRepositoryInfo()
 {
-    constexpr auto sdrVersion = 0x51;
-    auto responseData = reinterpret_cast<GetRepositoryInfoResponse*>(response);
 
-    std::memset(responseData, 0, sizeof(GetRepositoryInfoResponse));
-
-    responseData->sdrVersion = sdrVersion;
+    constexpr uint8_t sdrVersion = 0x51;
+    constexpr uint16_t freeSpace = 0xFFFF;
+    constexpr uint32_t additionTimestamp = 0x0;
+    constexpr uint32_t deletionTimestamp = 0x0;
+    constexpr uint8_t operationSupport = 0;
 
     uint16_t records = frus.size() + sensors.size();
-    responseData->recordCountMs = records >> 8;
-    responseData->recordCountLs = records;
 
-    responseData->freeSpace[0] = 0xFF;
-    responseData->freeSpace[1] = 0xFF;
-
-    *data_len = sizeof(GetRepositoryInfoResponse);
-
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(sdrVersion, records, freeSpace,
+                                 additionTimestamp, deletionTimestamp,
+                                 operationSupport);
 }
 
 void register_netfn_storage_functions()
@@ -787,8 +784,9 @@ void register_netfn_storage_functions()
                            ipmi_storage_read_fru_data, PRIVILEGE_USER);
 
     // <Get Repository Info>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_REPOSITORY_INFO,
-                           nullptr, ipmi_get_repository_info, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdGetSdrRepositoryInfo,
+                          ipmi::Privilege::User, ipmiGetRepositoryInfo);
 
     // <Reserve SDR Repository>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_RESERVE_SDR, nullptr,
