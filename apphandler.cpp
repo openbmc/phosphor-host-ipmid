@@ -431,19 +431,22 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                         ipmi_request_t request,
-                                         ipmi_response_t response,
-                                         ipmi_data_len_t data_len,
-                                         ipmi_context_t context)
+/**
+ *  @brief implements the get ACPI power state command
+ *
+ *  @return IPMI completion code plus response data on success.
+ *   -  ACPI system power state
+ *   -  ACPI device power state
+ **/
+ipmi::RspType<uint8_t, // acpiSystemPowerState
+              uint8_t  // acpiDevicePowerState
+              >
+    ipmiGetAcpiPowerState()
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    auto* res = reinterpret_cast<acpi_state::ACPIState*>(response);
+    uint8_t sysAcpiState;
+    uint8_t devAcpiState;
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-
-    *data_len = 0;
 
     try
     {
@@ -454,25 +457,21 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             acpi_state::sysACPIProp);
         auto sysACPI = acpi_state::ACPIPowerState::convertACPIFromString(
             std::get<std::string>(sysACPIVal));
-        res->sysACPIState =
-            static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
+        sysAcpiState = static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
 
         auto devACPIVal = ipmi::getDbusProperty(
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::devACPIProp);
         auto devACPI = acpi_state::ACPIPowerState::convertACPIFromString(
             std::get<std::string>(devACPIVal));
-        res->devACPIState =
-            static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
-
-        *data_len = sizeof(acpi_state::ACPIState);
+        devAcpiState = static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
     }
     catch (const InternalFailure& e)
     {
-        log<level::ERR>("Failed in get ACPI property");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
-    return rc;
+
+    return ipmi::responseSuccess(sysAcpiState, devAcpiState);
 }
 
 typedef struct
@@ -1348,8 +1347,9 @@ void register_netfn_app_functions()
                            ipmi_app_set_acpi_power_state, PRIVILEGE_ADMIN);
 
     // <Get ACPI Power State>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_ACPI, NULL,
-                           ipmi_app_get_acpi_power_state, PRIVILEGE_ADMIN);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetAcpiPowerState,
+                          ipmi::Privilege::Admin, ipmiGetAcpiPowerState);
 
     // Note: For security reason, this command will be registered only when
     // there are proper I2C Master write read whitelist
