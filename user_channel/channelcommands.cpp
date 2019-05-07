@@ -28,52 +28,6 @@ using namespace phosphor::logging;
 namespace ipmi
 {
 
-/** @struct GetChannelAccessReq
- *
- *  Structure for get channel access request command (refer spec sec 22.23)
- */
-struct GetChannelAccessReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t chNum : 4;
-    uint8_t reserved_1 : 4;
-    uint8_t reserved_2 : 6;
-    uint8_t accessSetMode : 2;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved_1 : 4;
-    uint8_t chNum : 4;
-    uint8_t accessSetMode : 2;
-    uint8_t reserved_2 : 6;
-#endif
-} __attribute__((packed));
-
-/** @struct GetChannelAccessResp
- *
- *  Structure for get channel access response command (refer spec sec 22.23)
- */
-struct GetChannelAccessResp
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t accessMode : 3;
-    uint8_t usrAuthDisabled : 1;
-    uint8_t msgAuthDisabled : 1;
-    uint8_t alertDisabled : 1;
-    uint8_t reserved_1 : 2;
-    uint8_t privLimit : 4;
-    uint8_t reserved_2 : 4;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved_1 : 2;
-    uint8_t alertDisabled : 1;
-    uint8_t msgAuthDisabled : 1;
-    uint8_t usrAuthDisabled : 1;
-    uint8_t accessMode : 3;
-    uint8_t reserved_2 : 4;
-    uint8_t privLimit : 4;
-#endif
-} __attribute__((packed));
-
 /** @struct GetChannelInfoReq
  *
  *  Structure for get channel info request command (refer spec sec 22.24)
@@ -266,72 +220,80 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
     return responseSuccess();
 }
 
-ipmi_ret_t ipmiGetChannelAccess(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief implements the get channel access command
+ *  @ param ctx - context pointer
+ *  @ param channel - channel number
+ *  @ param reserved1 - skip 4 bits
+ *  @ param reserved2 - skip 6 bits
+ *  @ param accessMode - get access mode
+ *
+ *  @returns ipmi completion code plus response data
+ *  - accessMode - get access mode
+ *  - usrAuthDisabled - user level authentication status
+ *  - msgAuthDisabled - message mevel authentication status
+ *  - alertDisabled - alerting status
+ *  - reserved - skip 2 bits
+ *  - privLimit - channel privilege limit
+ *  - reserved - skip 4 bits
+ * */
+ipmi ::RspType<uint3_t, // access mode,
+               bool,    // user authentication status,
+               bool,    // message authentication status,
+               bool,    // alerting status,
+               uint2_t, // reserved,
+
+               uint4_t, // channel privilege,
+               uint4_t  // reserved
+               >
+    ipmiGetChannelAccess(Context::ptr ctx, uint4_t channel, uint4_t reserved1,
+                         uint6_t reserved2, uint2_t accessSetMode)
 {
-    const GetChannelAccessReq* req = static_cast<GetChannelAccessReq*>(request);
-    size_t reqLength = *data_len;
+    const uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
 
-    *data_len = 0;
-
-    if (reqLength != sizeof(*req))
-    {
-        log<level::DEBUG>("Get channel access - Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (!isValidChannel(chNum) || req->reserved_1 != 0 || req->reserved_2 != 0)
+    if (!isValidChannel(chNum) || reserved1 != 0 || reserved2 != 0)
     {
         log<level::DEBUG>("Get channel access - Invalid field in request");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return responseInvalidFieldRequest();
     }
 
-    if ((req->accessSetMode == doNotSet) || (req->accessSetMode == reserved))
+    if ((accessSetMode == doNotSet) || (accessSetMode == reserved))
     {
         log<level::DEBUG>("Get channel access - Invalid Access mode");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return responseInvalidFieldRequest();
     }
 
-    if (EChannelSessSupported::none == getChannelSessionSupport(chNum))
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
         log<level::DEBUG>("Get channel access - No support on channel");
-        return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
+        return response(IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL);
     }
 
-    GetChannelAccessResp* resp = static_cast<GetChannelAccessResp*>(response);
-
-    std::fill(reinterpret_cast<uint8_t*>(resp),
-              reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
-
     ChannelAccess chAccess;
-    ipmi_ret_t compCode = IPMI_CC_OK;
 
-    if (req->accessSetMode == nvData)
+    Cc compCode;
+
+    if (accessSetMode == nvData)
     {
         compCode = getChannelAccessPersistData(chNum, chAccess);
     }
-    else if (req->accessSetMode == activeData)
+    else if (accessSetMode == activeData)
     {
         compCode = getChannelAccessData(chNum, chAccess);
     }
 
     if (compCode != IPMI_CC_OK)
     {
-        return compCode;
+        return response(compCode);
     }
 
-    resp->accessMode = chAccess.accessMode;
-    resp->usrAuthDisabled = chAccess.userAuthDisabled;
-    resp->msgAuthDisabled = chAccess.perMsgAuthDisabled;
-    resp->alertDisabled = chAccess.alertingDisabled;
-    resp->privLimit = chAccess.privLimit;
+    constexpr uint2_t reservedOut1 = 0;
+    constexpr uint4_t reservedOut2 = 0;
 
-    *data_len = sizeof(*resp);
-    return IPMI_CC_OK;
+    return responseSuccess(
+        static_cast<uint3_t>(chAccess.accessMode), chAccess.userAuthDisabled,
+        chAccess.perMsgAuthDisabled, chAccess.alertingDisabled, reservedOut1,
+        static_cast<uint4_t>(chAccess.privLimit), reservedOut2);
 }
 
 ipmi_ret_t ipmiGetChannelInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -482,8 +444,8 @@ void registerChannelFunctions()
     registerHandler(prioOpenBmcBase, netFnApp, app::cmdSetChannelAccess,
                     Privilege::Admin, ipmiSetChannelAccess);
 
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_ACCESS, NULL,
-                           ipmiGetChannelAccess, PRIVILEGE_USER);
+    registerHandler(prioOpenBmcBase, netFnApp, app::cmdGetChannelAccess,
+                    Privilege::User, ipmiGetChannelAccess);
 
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_INFO, NULL,
                            ipmiGetChannelInfo, PRIVILEGE_USER);
