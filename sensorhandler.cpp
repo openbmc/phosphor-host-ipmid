@@ -286,33 +286,29 @@ uint8_t find_type_for_sensor_number(uint8_t num)
     return get_type_from_interface(dbus_if);
 }
 
-ipmi_ret_t ipmi_sen_get_sensor_type(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                    ipmi_request_t request,
-                                    ipmi_response_t response,
-                                    ipmi_data_len_t data_len,
-                                    ipmi_context_t context)
+/**
+ *  @brief implements the get sensor type command.
+ *  @param - sensorNumber
+ *
+ *  @return IPMI completion code plus response data on success.
+ *   - sensorType
+ *   - eventType
+ **/
+
+ipmi::RspType<uint8_t, // sensorType
+              uint8_t  // eventType
+              >
+    ipmiGetSensorType(uint8_t sensorNumber)
 {
-    auto reqptr = static_cast<sensor_data_t*>(request);
-    ipmi_ret_t rc = IPMI_CC_OK;
+    uint8_t sensorType = find_type_for_sensor_number(sensorNumber);
 
-    printf("IPMI GET_SENSOR_TYPE [0x%02X]\n", reqptr->sennum);
-
-    // TODO Not sure what the System-event-sensor is suppose to return
-    // need to ask Hostboot team
-    unsigned char buf[] = {0x00, 0x6F};
-
-    buf[0] = find_type_for_sensor_number(reqptr->sennum);
-
-    // HACK UNTIL Dbus gets updated or we find a better way
-    if (buf[0] == 0)
+    if (sensorType == 0)
     {
-        rc = IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
 
-    *data_len = sizeof(buf);
-    std::memcpy(response, &buf, *data_len);
-
-    return rc;
+    constexpr uint8_t eventType = 0x6F;
+    return ipmi::responseSuccess(sensorType, eventType);
 }
 
 const std::set<std::string> analogSensorInterfaces = {
@@ -1097,9 +1093,11 @@ void register_netfn_sen_functions()
     // <Platform Event Message>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_PLATFORM_EVENT, nullptr,
                            ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
+
     // <Get Sensor Type>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_TYPE, nullptr,
-                           ipmi_sen_get_sensor_type, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorType,
+                          ipmi::Privilege::User, ipmiGetSensorType);
 
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
