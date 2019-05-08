@@ -739,29 +739,42 @@ Router* mutableRouter()
 /* legacy alternative to executionEntry */
 void handleLegacyIpmiCommand(sdbusplus::message::message& m)
 {
-    unsigned char seq, netFn, lun, cmd;
-    std::vector<uint8_t> data;
+    // make a copy so the next two moves don't wreak havoc on the stack
+    sdbusplus::message::message b{m};
+    boost::asio::spawn(*getIoContext(), [b = std::move(b)](
+                                            boost::asio::yield_context yield) {
+        sdbusplus::message::message m{std::move(b)};
+        unsigned char seq, netFn, lun, cmd;
+        std::vector<uint8_t> data;
 
-    m.read(seq, netFn, lun, cmd, data);
+        m.read(seq, netFn, lun, cmd, data);
+        auto ctx = std::make_shared<ipmi::Context>(
+            netFn, cmd, 0, 0, ipmi::Privilege::Admin, 0, &yield);
+        auto request = std::make_shared<ipmi::message::Request>(
+            ctx, std::forward<std::vector<uint8_t>>(data));
+        ipmi::message::Response::ptr response =
+            ipmi::executeIpmiCommand(request);
 
-    auto ctx = std::make_shared<ipmi::Context>(netFn, cmd, 0, 0,
-                                               ipmi::Privilege::Admin);
-    auto request = std::make_shared<ipmi::message::Request>(
-        ctx, std::forward<std::vector<uint8_t>>(data));
-    ipmi::message::Response::ptr response = ipmi::executeIpmiCommand(request);
+        // Responses in IPMI require a bit set.  So there ya go...
+        netFn |= 0x01;
 
-    // Responses in IPMI require a bit set.  So there ya go...
-    netFn |= 0x01;
+        const char *dest, *path;
+        constexpr const char* DBUS_INTF = "org.openbmc.HostIpmi";
 
-    const char *dest, *path;
-    constexpr const char* DBUS_INTF = "org.openbmc.HostIpmi";
-
-    dest = m.get_sender();
-    path = m.get_path();
-    getSdBus()->async_method_call([](boost::system::error_code ec) {}, dest,
-                                  path, DBUS_INTF, "sendMessage", seq, netFn,
-                                  lun, cmd, response->cc,
-                                  response->payload.raw);
+        dest = m.get_sender();
+        path = m.get_path();
+        boost::system::error_code ec;
+        getSdBus()->yield_method_call(yield, ec, dest, path, DBUS_INTF,
+                                      "sendMessage", seq, netFn, lun, cmd,
+                                      response->cc, response->payload.raw);
+        if (ec)
+        {
+            log<level::ERR>("Failed to send response to requestor",
+                            entry("ERROR=%s", ec.message().c_str()),
+                            entry("SENDER=%s", dest),
+                            entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd));
+        }
+    });
 }
 
 #endif /* ALLOW_DEPRECATED_API */
