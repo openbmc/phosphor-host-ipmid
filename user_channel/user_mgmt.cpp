@@ -1365,7 +1365,7 @@ void UserAccess::initUserDataFile()
                           entry("PATH=%s", userMgrObjBasePath));
         return;
     }
-
+    bool updateRequired = false;
     UsersTbl* userData = &usersTbl;
     // user index 0 is reserved, starts with 1
     for (size_t usrIdx = 1; usrIdx <= ipmiMaxUsers; ++usrIdx)
@@ -1392,6 +1392,7 @@ void UserAccess::initUserDataFile()
                 if (std::find(usrGrps.begin(), usrGrps.end(), ipmiGrpName) ==
                     usrGrps.end())
                 {
+                    updateRequired = true;
                     // Group "ipmi" is removed so lets remove user in IPMI
                     deleteUserIndex(usrIdx);
                 }
@@ -1407,6 +1408,7 @@ void UserAccess::initUserDataFile()
                             .userPrivAccess[getUsrMgmtSyncIndex()]
                             .privilege != priv)
                     {
+                        updateRequired = true;
                         for (size_t chIndex = 0; chIndex < ipmiMaxChannels;
                              ++chIndex)
                         {
@@ -1417,6 +1419,7 @@ void UserAccess::initUserDataFile()
                     }
                     if (userData->user[usrIdx].userEnabled != usrEnabled)
                     {
+                        updateRequired = true;
                         userData->user[usrIdx].userEnabled = usrEnabled;
                     }
                 }
@@ -1426,6 +1429,7 @@ void UserAccess::initUserDataFile()
             }
             else
             {
+                updateRequired = true;
                 deleteUserIndex(usrIdx);
             }
         }
@@ -1449,6 +1453,7 @@ void UserAccess::initUserDataFile()
         if (std::find(usrGrps.begin(), usrGrps.end(), ipmiGrpName) !=
             usrGrps.end())
         {
+            updateRequired = true;
             // CREATE NEW USER
             if (true != addUserEntry(userName, usrPriv, usrEnabled))
             {
@@ -1457,8 +1462,11 @@ void UserAccess::initUserDataFile()
         }
     }
 
-    // All userData slots update done. Lets write the data
-    writeUserData();
+    if (updateRequired)
+    {
+        // All userData slots update done. Lets write the data
+        writeUserData();
+    }
 
     return;
 }
