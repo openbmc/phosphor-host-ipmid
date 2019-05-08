@@ -20,6 +20,7 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <tuple>
+#include <user_channel/channel_layer.hpp>
 
 using namespace phosphor::logging;
 
@@ -54,9 +55,24 @@ std::shared_ptr<sdbusplus::asio::connection> getSdBus()
     return sdbusp;
 }
 
+static EInterfaceIndex currentInterfaceIndex = interfaceUnknown;
+static void setInterfaceIndex(const std::string& channel)
+{
+    try
+    {
+        currentInterfaceIndex =
+            static_cast<EInterfaceIndex>(ipmi::getChannelByName(channel));
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Requested channel name is not a valid channel name",
+                        entry("ERROR=%s", e.what()),
+                        entry("CHANNEL=%s", channel.c_str()));
+    }
+}
 EInterfaceIndex getInterfaceIndex(void)
 {
-    return interfaceLAN1;
+    return currentInterfaceIndex;
 }
 
 int main(int argc, char* argv[])
@@ -78,8 +94,13 @@ int main(int argc, char* argv[])
                         entry("ERROR=%s", strerror(-rc)));
         return rc;
     }
-
     sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
+
+    ipmi::ipmiChannelInit();
+    if (channel.size())
+    {
+        setInterfaceIndex(channel);
+    }
 
     // Register callback to update cache for a GUID change and cache the GUID
     command::registerGUIDChangeCallback();
