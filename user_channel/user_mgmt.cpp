@@ -1087,15 +1087,6 @@ void UserAccess::writeUserData()
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         userLock{*userMutex};
 
-    static std::string tmpFile{std::string(ipmiUserDataFile) + "_tmp"};
-    std::ofstream oUsrData(tmpFile, std::ios::out | std::ios::binary);
-    if (!oUsrData.good())
-    {
-        log<level::ERR>("Error in creating temporary IPMI user data file");
-        throw std::ios_base::failure(
-            "Error in creating temporary IPMI user data file");
-    }
-
     Json jsonUsersTbl = Json::array();
     // user index 0 is reserved, starts with 1
     for (size_t usrIndex = 1; usrIndex <= ipmiMaxUsers; ++usrIndex)
@@ -1130,9 +1121,25 @@ void UserAccess::writeUserData()
         jsonUsersTbl.push_back(jsonUserInfo);
     }
 
-    oUsrData << jsonUsersTbl;
-    oUsrData.flush();
-    oUsrData.close();
+    static std::string tmpFile{std::string(ipmiUserDataFile) + "_tmp"};
+    int fd = open(tmpFile.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_SYNC,
+                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd < 0)
+    {
+        log<level::ERR>("Error in creating temporary IPMI user data file");
+        throw std::ios_base::failure(
+            "Error in creating temporary IPMI user data file");
+    }
+    const auto& writeStr = jsonUsersTbl.dump();
+    if (write(fd, writeStr.c_str(), writeStr.size()) !=
+        static_cast<ssize_t>(writeStr.size()))
+    {
+        close(fd);
+        log<level::ERR>("Error in writing temporary IPMI user data file");
+        throw std::ios_base::failure(
+            "Error in writing temporary IPMI user data file");
+    }
+    close(fd);
 
     if (std::rename(tmpFile.c_str(), ipmiUserDataFile) != 0)
     {
