@@ -1134,6 +1134,19 @@ void UserAccess::writeUserData()
     oUsrData.flush();
     oUsrData.close();
 
+    // Do fsync() to flush temporary file data to disk,
+    // followed by rename() of temporary file to proper one (which will be
+    // atomic).
+    FILE* fp = fopen(tmpFile.c_str(), "a");
+    if (!fp)
+    {
+        log<level::ERR>("Error in re-opening temporary IPMI user data file");
+        throw std::runtime_error(
+            "Error in re-opening temporary IPMI user data file");
+    }
+    fsync(fileno(fp));
+    fclose(fp);
+
     if (std::rename(tmpFile.c_str(), ipmiUserDataFile) != 0)
     {
         log<level::ERR>("Error in renaming temporary IPMI user data file");
