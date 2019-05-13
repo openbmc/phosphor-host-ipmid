@@ -536,8 +536,8 @@ auto executionEntry(boost::asio::yield_context yield,
                       entry("PRIVILEGE=%u", static_cast<uint8_t>(privilege)),
                       entry("RQSA=%x", rqSA));
 
-    auto ctx = std::make_shared<ipmi::Context>(netFn, cmd, channel, userId,
-                                               privilege, rqSA, &yield);
+    auto ctx = std::make_shared<ipmi::Context>(getSdBus(), netFn, cmd, channel,
+                                               userId, privilege, rqSA, &yield);
     auto request = std::make_shared<ipmi::message::Request>(
         ctx, std::forward<std::vector<uint8_t>>(data));
     message::Response::ptr response = executeIpmiCommand(request);
@@ -748,8 +748,9 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         std::vector<uint8_t> data;
 
         m.read(seq, netFn, lun, cmd, data);
+        std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
         auto ctx = std::make_shared<ipmi::Context>(
-            netFn, cmd, 0, 0, ipmi::Privilege::Admin, 0, &yield);
+            bus, netFn, cmd, 0, 0, ipmi::Privilege::Admin, 0, &yield);
         auto request = std::make_shared<ipmi::message::Request>(
             ctx, std::forward<std::vector<uint8_t>>(data));
         ipmi::message::Response::ptr response =
@@ -764,9 +765,9 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         dest = m.get_sender();
         path = m.get_path();
         boost::system::error_code ec;
-        getSdBus()->yield_method_call(yield, ec, dest, path, DBUS_INTF,
-                                      "sendMessage", seq, netFn, lun, cmd,
-                                      response->cc, response->payload.raw);
+        bus->yield_method_call(yield, ec, dest, path, DBUS_INTF, "sendMessage",
+                               seq, netFn, lun, cmd, response->cc,
+                               response->payload.raw);
         if (ec)
         {
             log<level::ERR>("Failed to send response to requestor",
