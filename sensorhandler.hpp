@@ -79,11 +79,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             ipmi_request_t request, ipmi_response_t response,
                             ipmi_data_len_t data_len, ipmi_context_t context);
 
-ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context);
+ipmi::RspType<uint16_t> ipmiSensorReserveSdr();
 
 static const uint16_t FRU_RECORD_ID_START = 256;
 static const uint16_t ENTITY_RECORD_ID_START = 512;
@@ -106,34 +102,6 @@ inline bool get_count(void* req)
     return (bool)((uint64_t)(req)&1);
 }
 } // namespace request
-
-namespace response
-{
-#define SDR_INFO_RESP_SIZE 2
-inline void set_lun_present(int lun, uint8_t* resp)
-{
-    *resp |= 1 << lun;
-}
-inline void set_lun_not_present(int lun, uint8_t* resp)
-{
-    *resp &= ~(1 << lun);
-}
-inline void set_dynamic_population(uint8_t* resp)
-{
-    *resp |= 1 << 7;
-}
-inline void set_static_population(uint8_t* resp)
-{
-    *resp &= ~(1 << 7);
-}
-} // namespace response
-
-struct GetSdrInfoResp
-{
-    uint8_t count;
-    uint8_t luns_and_dynamic_population;
-};
-
 } // namespace get_sdr_info
 
 /**
