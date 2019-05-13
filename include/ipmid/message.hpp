@@ -23,6 +23,7 @@
 #include <ipmid/message/types.hpp>
 #include <memory>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/asio/connection.hpp>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -34,27 +35,32 @@ struct Context
 {
     using ptr = std::shared_ptr<Context>;
 
-    Context() = default;
+    Context() = delete;
+    Context(const Context&) = default;
+    Context& operator=(const Context&) = default;
+    Context(Context&&) = delete;
+    Context& operator=(Context&&) = delete;
 
-    Context(NetFn netFn, Cmd cmd, int channel, int userId, Privilege priv,
-            int rqSA = 0, boost::asio::yield_context* yield = nullptr) :
-        netFn(netFn),
-        cmd(cmd), channel(channel), userId(userId), priv(priv), rqSA(rqSA),
-        yield(yield)
+    Context(std::shared_ptr<sdbusplus::asio::connection> bus, NetFn netFn,
+            Cmd cmd, int channel, int userId, Privilege priv, int rqSA,
+            boost::asio::yield_context* yield) :
+        bus(bus),
+        netFn(netFn), cmd(cmd), channel(channel), userId(userId), priv(priv),
+        rqSA(rqSA), yield(yield)
     {
     }
 
+    std::shared_ptr<sdbusplus::asio::connection> bus;
     // normal IPMI context (what call is this, from whence it came...)
-    NetFn netFn = 0;
-    Cmd cmd = 0;
-    int channel = 0;
-    int userId = 0;
-    Privilege priv = Privilege::None;
+    NetFn netFn;
+    Cmd cmd;
+    int channel;
+    int userId;
+    Privilege priv;
     // srcAddr is only set on IPMB requests because
     // Platform Event Message needs it to determine the incoming format
-    int rqSA = 0;
-    // if non-null, use this to do blocking asynchronous asio calls
-    boost::asio::yield_context* yield = nullptr;
+    int rqSA;
+    boost::asio::yield_context* yield;
 };
 
 namespace message
