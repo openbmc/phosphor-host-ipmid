@@ -133,10 +133,6 @@ static std::array<std::string, 4> accessModeList = {
 static std::array<std::string, 4> sessionSupportList = {
     "session-less", "single-session", "multi-session", "session-based"};
 
-static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
-    "priv-reserved", "priv-callback", "priv-user",
-    "priv-operator", "priv-admin",    "priv-oem"};
-
 std::string ChannelConfig::getChannelName(const uint8_t chNum)
 {
     if (!isValidChannel(chNum))
@@ -718,26 +714,27 @@ std::string ChannelConfig::convertToAccessModeString(const uint8_t value)
 CommandPrivilege
     ChannelConfig::convertToPrivLimitIndex(const std::string& value)
 {
-    auto iter = std::find(privList.begin(), privList.end(), value);
-    if (iter == privList.end())
+    auto iter = std::find(ipmi::privList.begin(), ipmi::privList.end(), value);
+    if (iter == ipmi::privList.end())
     {
         log<level::ERR>("Invalid privilege.",
                         entry("PRIV_STR=%s", value.c_str()));
         throw std::invalid_argument("Invalid privilege.");
     }
 
-    return static_cast<CommandPrivilege>(std::distance(privList.begin(), iter));
+    return static_cast<CommandPrivilege>(
+        std::distance(ipmi::privList.begin(), iter));
 }
 
 std::string ChannelConfig::convertToPrivLimitString(const uint8_t value)
 {
-    if (privList.size() <= value)
+    if (ipmi::privList.size() <= value)
     {
         log<level::ERR>("Invalid privilege.", entry("PRIV_IDX=%d", value));
         throw std::invalid_argument("Invalid privilege.");
     }
 
-    return privList.at(value);
+    return ipmi::privList.at(value);
 }
 
 EChannelSessSupported

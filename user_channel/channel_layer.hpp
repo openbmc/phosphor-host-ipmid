@@ -16,6 +16,7 @@
 #pragma once
 #include <ipmid/api.h>
 
+#include <array>
 #include <string>
 
 namespace ipmi
@@ -24,6 +25,13 @@ namespace ipmi
 static constexpr uint8_t maxIpmiChannels = 16;
 static constexpr uint8_t currentChNum = 0xE;
 static constexpr uint8_t invalidChannel = 0xff;
+
+/**
+ * @array of privilege levels
+ */
+static const std::array<std::string, PRIVILEGE_OEM + 1> privList = {
+    "priv-reserved", "priv-callback", "priv-user",
+    "priv-operator", "priv-admin",    "priv-oem"};
 
 /**
  * @enum IPMI return codes specific to channel (refer spec se 22.22 response
