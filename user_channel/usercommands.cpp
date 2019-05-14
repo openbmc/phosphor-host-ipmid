@@ -130,7 +130,7 @@ ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
 {
     uint8_t sessLimit = sessionLimit.value_or(0);
     uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx);
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
     if (reserved1 != 0 || reserved2 != 0 || sessLimit != 0 ||
         (!isValidChannel(chNum)) ||
         (!ipmiUserIsValidPrivilege(static_cast<uint8_t>(privilege))) ||
@@ -199,7 +199,7 @@ ipmi::RspType<uint6_t, // max channel users
                       uint6_t userId, uint2_t reserved2)
 {
     uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx);
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
     if (reserved1 != 0 || reserved2 != 0 || (!isValidChannel(chNum)) ||
         (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
     {
@@ -450,7 +450,7 @@ ipmi::RspType<uint8_t,  // channel number
 {
 
     uint8_t channel =
-        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx);
+        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
 
     if (reserved1 || reserved2 || !isValidChannel(channel) ||
         !isValidPrivLimit(static_cast<uint8_t>(privLevel)) ||
