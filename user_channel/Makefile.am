@@ -32,7 +32,8 @@ libuserlayer_la_CXXFLAGS = \
 
 libchannellayer_la_SOURCES = \
 	channel_mgmt.cpp \
-	channel_layer.cpp
+	channel_layer.cpp \
+	cipher_mgmt.cpp
 libchannellayer_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
