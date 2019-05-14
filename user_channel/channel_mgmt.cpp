@@ -133,7 +133,7 @@ static std::array<std::string, 4> accessModeList = {
 static std::array<std::string, 4> sessionSupportList = {
     "session-less", "single-session", "multi-session", "session-based"};
 
-static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
+const std::array<std::string, PRIVILEGE_OEM + 1> privList = {
     "priv-reserved", "priv-callback", "priv-user",
     "priv-operator", "priv-admin",    "priv-oem"};
 
