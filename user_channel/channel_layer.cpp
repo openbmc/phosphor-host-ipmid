@@ -17,6 +17,7 @@
 #include "channel_layer.hpp"
 
 #include "channel_mgmt.hpp"
+#include "cipher_mgmt.hpp"
 
 #include <phosphor-logging/log.hpp>
 
@@ -81,6 +82,7 @@ size_t getChannelMaxTransferSize(uint8_t chNum)
 ipmi_ret_t ipmiChannelInit()
 {
     getChannelConfigObject();
+    getCipherConfigObject(csPrivFileName);
     return IPMI_CC_OK;
 }
 
