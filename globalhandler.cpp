@@ -59,9 +59,5 @@ void register_netfn_global_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdColdReset, ipmi::Privilege::Admin,
                           ipmiGlobalReset);
-    // Warm Reset
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
-                          ipmi::app::cmdWarmReset, ipmi::Privilege::Admin,
-                          ipmiGlobalReset);
     return;
 }
