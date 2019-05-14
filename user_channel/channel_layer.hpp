@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 #pragma once
+#include <array>
 #include <ipmid/api.hpp>
 #include <string>
 
@@ -23,6 +24,11 @@ namespace ipmi
 static constexpr uint8_t maxIpmiChannels = 16;
 static constexpr uint8_t currentChNum = 0xE;
 static constexpr uint8_t invalidChannel = 0xff;
+
+/**
+ * @array of privilege levels
+ */
+extern const std::array<std::string, PRIVILEGE_OEM + 1> privList;
 
 /**
  * @enum IPMI return codes specific to channel (refer spec se 22.22 response
