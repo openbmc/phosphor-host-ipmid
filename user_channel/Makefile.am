@@ -39,7 +39,8 @@ endif
 lib_LTLIBRARIES += libchannellayer.la
 libchannellayer_la_SOURCES = \
 	channel_mgmt.cpp \
-	channel_layer.cpp
+	channel_layer.cpp \
+	cipher_mgmt.cpp
 libchannellayer_la_LDFLAGS = \
 	$(SYSTEMD_LIBS) \
 	$(libmapper_LIBS) \
