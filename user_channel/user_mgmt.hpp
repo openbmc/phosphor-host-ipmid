@@ -87,6 +87,17 @@ struct UsersTbl
     UserInfo user[ipmiMaxUsers + 1];
 };
 
+/** @brief PAM User Authentication check
+ *
+ *  @param[in] username - username in string
+ *
+ *  @param[in] password	- password in string
+ *
+ *  @return status
+ */
+bool pamUserCheckAuthenticate(const std::string_view username,
+                              const std::string_view password);
+
 class UserAccess;
 
 UserAccess& getUserAccessObject();

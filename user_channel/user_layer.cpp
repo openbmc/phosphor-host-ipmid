@@ -170,4 +170,10 @@ ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
         userId, chNum, userPrivAccess, otherPrivUpdates);
 }
 
+bool ipmiUserPamAuthenticate(const std::string_view userName,
+                             const std::string_view userPassword)
+{
+    return pamUserCheckAuthenticate(userName, userPassword);
+}
+
 } // namespace ipmi
