@@ -715,6 +715,47 @@ bool pamUpdatePasswd(const char* username, const char* password)
     return true;
 }
 
+bool pamUserCheckAuthenticate(std::string_view username,
+                              std::string_view password)
+{
+    const struct pam_conv localConversation = {
+        pamFunctionConversation, const_cast<char*>(password.data())};
+
+    pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
+
+    if (pam_start("dropbear", username.data(), &localConversation,
+                  &localAuthHandle) != PAM_SUCCESS)
+    {
+        log<level::ERR>("User Authentication Failure");
+        return false;
+    }
+
+    int retval = pam_authenticate(localAuthHandle,
+                                  PAM_SILENT | PAM_DISALLOW_NULL_AUTHTOK);
+
+    if (retval != PAM_SUCCESS)
+    {
+        log<level::DEBUG>("pam_authenticate returned failure",
+                          entry("ERROR=%d", retval));
+
+        pam_end(localAuthHandle, retval);
+        return false;
+    }
+
+    if (pam_acct_mgmt(localAuthHandle, PAM_DISALLOW_NULL_AUTHTOK) !=
+        PAM_SUCCESS)
+    {
+        pam_end(localAuthHandle, PAM_SUCCESS);
+        return false;
+    }
+
+    if (pam_end(localAuthHandle, PAM_SUCCESS) != PAM_SUCCESS)
+    {
+        return false;
+    }
+    return true;
+}
+
 ipmi_ret_t UserAccess::setSpecialUserPassword(const std::string& userName,
                                               const std::string& userPassword)
 {
