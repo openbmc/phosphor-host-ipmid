@@ -176,4 +176,51 @@ bool ipmiUserPamAuthenticate(std::string_view userName,
     return pamUserCheckAuthenticate(userName, userPassword);
 }
 
+ipmi_ret_t ipmiUserSetUserPayloadAccess(const uint8_t chNum,
+                                        const uint8_t operation,
+                                        const uint8_t userId,
+                                        const PayloadAccess& payloadAccess)
+{
+
+    if (!UserAccess::isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    return getUserAccessObject().setUserPayloadAccess(userId, chNum,
+                                                      payloadAccess, operation);
+}
+
+ipmi_ret_t ipmiUserGetUserPayloadAccess(const uint8_t chNum,
+                                        const uint8_t userId,
+                                        PayloadAccess& payloadAccess)
+{
+
+    if (!UserAccess::isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    UserInfo* userInfo = getUserAccessObject().getUserInfo(userId);
+
+    payloadAccess.stdPayloadEnables1 =
+        userInfo->payloadAccess[chNum].stdPayloadEnables1;
+    payloadAccess.stdPayloadEnables2Reserved =
+        userInfo->payloadAccess[chNum].stdPayloadEnables2Reserved;
+    payloadAccess.oemPayloadEnables1 =
+        userInfo->payloadAccess[chNum].oemPayloadEnables1;
+    payloadAccess.oemPayloadEnables2Reserved =
+        userInfo->payloadAccess[chNum].oemPayloadEnables2Reserved;
+
+    return IPMI_CC_OK;
+}
+
 } // namespace ipmi
