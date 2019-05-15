@@ -16,6 +16,7 @@
 #pragma once
 #include <ipmid/api.h>
 
+#include <bitset>
 #include <string>
 
 namespace ipmi
@@ -37,6 +38,7 @@ static constexpr uint8_t ipmiMaxUsers = 15;
 static constexpr uint8_t ipmiMaxChannels = 16;
 static constexpr uint8_t maxIpmi20PasswordSize = 20;
 static constexpr uint8_t maxIpmi15PasswordSize = 16;
+static constexpr uint8_t payloadsPerByte = 8;
 
 /** @struct PrivAccess
  *
@@ -60,6 +62,19 @@ struct PrivAccess
     uint8_t privilege : 4;
 #endif
 } __attribute__((packed));
+
+/** @struct UserPayloadAccess
+ *
+ *  Structure to denote payload access restrictions applicable for a
+ *  given user and channel. (refer spec sec 24.6)
+ */
+struct PayloadAccess
+{
+    std::bitset<payloadsPerByte> stdPayloadEnables1;
+    std::bitset<payloadsPerByte> stdPayloadEnables2Reserved;
+    std::bitset<payloadsPerByte> oemPayloadEnables1;
+    std::bitset<payloadsPerByte> oemPayloadEnables2Reserved;
+};
 
 /** @brief initializes user management
  *
@@ -220,5 +235,31 @@ ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
  */
 bool ipmiUserPamAuthenticate(std::string_view userName,
                              std::string_view userPassword);
+
+/** @brief sets user payload access data
+ *
+ *  @param[in] userId - user id
+ *  @param[in] chNum - channel number
+ *  @param[in] operation - ENABLE / DISABLE operation
+ *  @param[in] payloadAccess - payload access data
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserSetUserPayloadAccess(const uint8_t chNum,
+                                        const uint8_t operation,
+                                        const uint8_t userId,
+                                        const PayloadAccess& payloadAccess);
+
+/** @brief provides user payload access data
+ *
+ *  @param[in] userId - user id
+ *  @param[in] chNum - channel number
+ *  @param[out] payloadAccess - payload access data
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserGetUserPayloadAccess(const uint8_t chNum,
+                                        const uint8_t userId,
+                                        PayloadAccess& payloadAccess);
 
 } // namespace ipmi
