@@ -210,4 +210,16 @@ ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const PrivAccess& privAccess,
                                       const bool& otherPrivUpdate);
 
+/** @brief check for user pam authentication. This is to determine, whether user
+ * is already locked out for failed login attempt
+ *
+ *  @param[in] username - username
+ *
+ *  @param[in] password - password
+ *
+ *  @return status
+ */
+bool ipmiUserPamAuthenticate(const std::string& userName,
+                             const std::string& userPassword);
+
 } // namespace ipmi
