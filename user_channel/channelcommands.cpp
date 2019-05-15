@@ -15,10 +15,8 @@
 */
 
 #include "channelcommands.hpp"
-
 #include "apphandler.hpp"
 #include "channel_layer.hpp"
-
 #include <phosphor-logging/log.hpp>
 #include <regex>
 
