@@ -210,4 +210,14 @@ ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const PrivAccess& privAccess,
                                       const bool& otherPrivUpdate);
 
+/** @brief check for User Authentication
+ *
+ *  @param[in] username - username
+ *
+ *  @param[in] password - password
+ *
+ *  @return status
+ */
+bool ipmiUserAuthentication(const char* userName, const char* userPassword);
+
 } // namespace ipmi
