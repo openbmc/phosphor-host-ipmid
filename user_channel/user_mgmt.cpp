@@ -833,6 +833,60 @@ ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t UserAccess::setUserPayloadAccess(const uint8_t userId,
+                                            const uint8_t chNum,
+                                            const PayloadAccess& payloadAccess,
+                                            const uint8_t& operation)
+{
+    constexpr uint8_t enable = 0x0;
+    constexpr uint8_t disable = 0x1;
+
+    if (!isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    if (operation != enable && operation != disable)
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    // Check operation & payloadAccess if required.
+    boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
+        userLock{*userMutex};
+    UserInfo* userInfo = getUserInfo(userId);
+
+    if (operation == enable)
+    {
+        userInfo->payloadAccess[chNum].stdPayloadEnables1 |=
+            payloadAccess.stdPayloadEnables1;
+
+        userInfo->payloadAccess[chNum].oemPayloadEnables1 |=
+            payloadAccess.oemPayloadEnables1;
+    }
+    else
+    {
+        userInfo->payloadAccess[chNum].stdPayloadEnables1 &=
+            ~(payloadAccess.stdPayloadEnables1);
+
+        userInfo->payloadAccess[chNum].oemPayloadEnables1 &=
+            ~(payloadAccess.oemPayloadEnables1);
+    }
+
+    try
+    {
+        writeUserData();
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Write user data failed");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
                                               const uint8_t chNum,
                                               const UserPrivAccess& privAccess,
@@ -1040,6 +1094,85 @@ static constexpr const char* jsonAccCallbk = "access_callback";
 static constexpr const char* jsonUserEnabled = "user_enabled";
 static constexpr const char* jsonUserInSys = "user_in_system";
 static constexpr const char* jsonFixedUser = "fixed_user_name";
+static constexpr const char* payloadEnabledStr = "payload_enabled";
+static constexpr const char* stdPayloadStr = "std_payload";
+static constexpr const char* oemPayloadStr = "OEM_payload";
+
+/** @brief to construct a JSON object with payload access details.
+ *
+ *  @param[in] stdPayload - stdPayloadEnables1 in a 2D-array. (input)
+ *  @param[in] oemPayload - oemPayloadEnables1 in a 2D-array. (input)
+ */
+static const Json constructJsonPayloadEnables(
+    const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+        stdPayload,
+    const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+        oemPayload)
+{
+    Json jsonPayloadEnabled;
+
+    for (auto payloadNum = 0; payloadNum < payloadsPerByte; payloadNum++)
+    {
+        std::ostringstream stdPayloadStream;
+        std::ostringstream oemPayloadStream;
+
+        stdPayloadStream << stdPayloadStr << payloadNum;
+        oemPayloadStream << oemPayloadStr << payloadNum;
+
+        jsonPayloadEnabled.push_back(Json::object_t::value_type(
+            stdPayloadStream.str(), stdPayload[payloadNum]));
+
+        jsonPayloadEnabled.push_back(Json::object_t::value_type(
+            oemPayloadStream.str(), oemPayload[payloadNum]));
+    }
+    return jsonPayloadEnabled;
+}
+
+void UserAccess::readPayloadAccessFromUserInfo(
+    const UserInfo& userInfo,
+    std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>& stdPayload,
+    std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>& oemPayload)
+{
+    for (auto payloadNum = 0; payloadNum < payloadsPerByte; payloadNum++)
+    {
+        for (auto chIndex = 0; chIndex < ipmiMaxChannels; chIndex++)
+        {
+            stdPayload[payloadNum][chIndex] =
+                userInfo.payloadAccess[chIndex].stdPayloadEnables1[payloadNum];
+
+            oemPayload[payloadNum][chIndex] =
+                userInfo.payloadAccess[chIndex].oemPayloadEnables1[payloadNum];
+        }
+    }
+}
+
+void UserAccess::updatePayloadAccessInUserInfo(
+    UserInfo& userInfo,
+    const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+        stdPayload,
+    const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+        oemPayload)
+{
+    for (auto payloadNum = 0; payloadNum < payloadsPerByte; payloadNum++)
+    {
+        for (auto chIndex = 0; chIndex < ipmiMaxChannels; chIndex++)
+        {
+            userInfo.payloadAccess[chIndex].stdPayloadEnables1[payloadNum] =
+                stdPayload[payloadNum][chIndex];
+
+            userInfo.payloadAccess[chIndex].oemPayloadEnables1[payloadNum] =
+                oemPayload[payloadNum][chIndex];
+        }
+    }
+    // Ensure that reserved values are marked to zero.
+    for (size_t chIndex = 0; chIndex < ipmiMaxChannels; ++chIndex)
+    {
+        userInfo.payloadAccess[chIndex].stdPayloadEnables1.reset(
+            0); // IPMI payload.
+        userInfo.payloadAccess[chIndex].stdPayloadEnables2Reserved.reset();
+        userInfo.payloadAccess[chIndex].oemPayloadEnables2Reserved.reset();
+    }
+}
 
 void UserAccess::readUserData()
 {
@@ -1063,6 +1196,15 @@ void UserAccess::readUserData()
         throw std::runtime_error(
             "Corrupted IPMI user data file - invalid user count");
     }
+
+    // Construct a JSON object with default payload access values.
+    std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte> stdPayload =
+        {};
+    std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte> oemPayload =
+        {};
+    static const Json jsonPayloadEnabledDefault =
+        constructJsonPayloadEnables(stdPayload, oemPayload);
+
     // user index 0 is reserved, starts with 1
     for (size_t usrIndex = 1; usrIndex <= ipmiMaxUsers; ++usrIndex)
     {
@@ -1086,6 +1228,36 @@ void UserAccess::readUserData()
             userInfo[jsonLinkAuthEnabled].get<std::vector<bool>>();
         std::vector<bool> accessCallback =
             userInfo[jsonAccCallbk].get<std::vector<bool>>();
+
+        // Payload Enables Processing.
+        auto jsonPayloadEnabled =
+            userInfo.value<Json>(payloadEnabledStr, jsonPayloadEnabledDefault);
+
+        for (auto payloadNum = 0; payloadNum < payloadsPerByte; payloadNum++)
+        {
+            std::ostringstream stdPayloadStream;
+            std::ostringstream oemPayloadStream;
+
+            stdPayloadStream << stdPayloadStr << payloadNum;
+            oemPayloadStream << oemPayloadStr << payloadNum;
+
+            stdPayload[payloadNum] =
+                jsonPayloadEnabled[stdPayloadStream.str()]
+                    .get<std::array<bool, ipmiMaxChannels>>();
+            oemPayload[payloadNum] =
+                jsonPayloadEnabled[oemPayloadStream.str()]
+                    .get<std::array<bool, ipmiMaxChannels>>();
+
+            if (stdPayload[payloadNum].size() != ipmiMaxChannels ||
+                oemPayload[payloadNum].size() != ipmiMaxChannels)
+            {
+                log<level::ERR>("Error in reading IPMI user data file - "
+                                "payload properties corrupted");
+                throw std::runtime_error(
+                    "Corrupted IPMI user data file - payload properties");
+            }
+        }
+
         if (privilege.size() != ipmiMaxChannels ||
             ipmiEnabled.size() != ipmiMaxChannels ||
             linkAuthEnabled.size() != ipmiMaxChannels ||
@@ -1108,6 +1280,8 @@ void UserAccess::readUserData()
             usersTbl.user[usrIndex].userPrivAccess[chIndex].accessCallback =
                 accessCallback[chIndex];
         }
+        updatePayloadAccessInUserInfo(usersTbl.user[usrIndex], stdPayload,
+                                      oemPayload);
         usersTbl.user[usrIndex].userEnabled =
             userInfo[jsonUserEnabled].get<bool>();
         usersTbl.user[usrIndex].userInSystem =
@@ -1140,6 +1314,12 @@ void UserAccess::writeUserData()
         std::vector<bool> ipmiEnabled(ipmiMaxChannels);
         std::vector<bool> linkAuthEnabled(ipmiMaxChannels);
         std::vector<bool> accessCallback(ipmiMaxChannels);
+
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>
+            stdPayload;
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>
+            oemPayload;
+
         for (size_t chIndex = 0; chIndex < ipmiMaxChannels; chIndex++)
         {
             privilege[chIndex] =
@@ -1159,6 +1339,13 @@ void UserAccess::writeUserData()
         jsonUserInfo[jsonUserEnabled] = usersTbl.user[usrIndex].userEnabled;
         jsonUserInfo[jsonUserInSys] = usersTbl.user[usrIndex].userInSystem;
         jsonUserInfo[jsonFixedUser] = usersTbl.user[usrIndex].fixedUserName;
+
+        readPayloadAccessFromUserInfo(usersTbl.user[usrIndex], stdPayload,
+                                      oemPayload);
+        Json jsonPayloadEnabledInfo =
+            constructJsonPayloadEnables(stdPayload, oemPayload);
+        jsonUserInfo[payloadEnabledStr] = jsonPayloadEnabledInfo;
+
         jsonUsersTbl.push_back(jsonUserInfo);
     }
 
