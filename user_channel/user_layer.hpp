@@ -61,6 +61,64 @@ struct PrivAccess
 #endif
 } __attribute__((packed));
 
+/** @struct UserPayloadAccess
+ *
+ *  Structure to denote payload access restrictions applicable for a
+ *  given user and channel. (refer spec sec 24.6)
+ */
+struct PayloadAccess
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    // Standard Payload enables 1
+    uint8_t stdPayload0ipmiReserved : 1;
+    uint8_t stdPayload1SOL : 1;
+    uint8_t stdPayload2 : 1;
+    uint8_t stdPayload3 : 1;
+    uint8_t stdPayload4 : 1;
+    uint8_t stdPayload5 : 1;
+    uint8_t stdPayload6 : 1;
+    uint8_t stdPayload7 : 1;
+    // Standard Payload enables 2
+    uint8_t stdPayloadEnables2Reserved;
+    // OEM Payload enables 1
+    uint8_t oemPayload0 : 1;
+    uint8_t oemPayload1 : 1;
+    uint8_t oemPayload2 : 1;
+    uint8_t oemPayload3 : 1;
+    uint8_t oemPayload4 : 1;
+    uint8_t oemPayload5 : 1;
+    uint8_t oemPayload6 : 1;
+    uint8_t oemPayload7 : 1;
+    // OEM Payload enables 2
+    uint8_t oemPayloadEnables2Reserved;
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    // Standard Payload enables 1
+    uint8_t stdPayload7 : 1;
+    uint8_t stdPayload6 : 1;
+    uint8_t stdPayload5 : 1;
+    uint8_t stdPayload4 : 1;
+    uint8_t stdPayload3 : 1;
+    uint8_t stdPayload2 : 1;
+    uint8_t stdPayload1SOL : 1;
+    uint8_t stdPayload0ipmiReserved : 1;
+    // Standard Payload enables 2
+    uint8_t stdPayloadEnables2Reserved;
+    // OEM Payload enables 1
+    uint8_t oemPayload7 : 1;
+    uint8_t oemPayload6 : 1;
+    uint8_t oemPayload5 : 1;
+    uint8_t oemPayload4 : 1;
+    uint8_t oemPayload3 : 1;
+    uint8_t oemPayload2 : 1;
+    uint8_t oemPayload1 : 1;
+    uint8_t oemPayload0 : 1;
+    // OEM Payload enables 2
+    uint8_t oemPayloadEnables2Reserved;
+#endif
+};
+
 /** @brief initializes user management
  *
  *  @return IPMI_CC_OK for success, others for failure.
@@ -209,5 +267,29 @@ ipmi_ret_t ipmiUserGetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
 ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const PrivAccess& privAccess,
                                       const bool& otherPrivUpdate);
+
+/** @brief sets user payload access data
+ *
+ *  @param[in] userId - user id
+ *  @param[in] chNum - channel number
+ *  @param[in] operation - ENABLE / DISABLE operation
+ *  @param[in] payloadAccess - payload access data
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserSetPayloadAccess(const uint8_t userId, const uint8_t chNum,
+                                    const uint8_t operation,
+                                    PayloadAccess& payloadAccess);
+
+/** @brief provides user payload access data
+ *
+ *  @param[in] userId - user id
+ *  @param[in] chNum - channel number
+ *  @param[out] payloadAccess - payload access data
+ *
+ *  @return IPMI_CC_OK for success, others for failure.
+ */
+ipmi_ret_t ipmiUserGetPayloadAccess(const uint8_t userId, const uint8_t chNum,
+                                    PayloadAccess& payloadAccess);
 
 } // namespace ipmi

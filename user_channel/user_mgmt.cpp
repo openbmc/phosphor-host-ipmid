@@ -792,6 +792,98 @@ ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
     return IPMI_CC_OK;
 }
 
+ipmi_ret_t UserAccess::setUserPayloadAccess(const uint8_t userId,
+                                            const uint8_t chNum,
+                                            const PayloadAccess& payloadAccess,
+                                            const uint8_t& operation)
+{
+    constexpr uint8_t enable = 0x0;
+    constexpr uint8_t disable = 0x1;
+
+    if (!isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+    if (operation != enable && operation != disable)
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    // Check operation & payloadAccess if required.
+    boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
+        userLock{*userMutex};
+    UserInfo* userInfo = getUserInfo(userId);
+
+    if (operation == enable)
+    {
+        userInfo->payloadAccess[chNum].stdPayload1SOL |=
+            payloadAccess.stdPayload1SOL;
+        userInfo->payloadAccess[chNum].stdPayload2 |= payloadAccess.stdPayload2;
+        userInfo->payloadAccess[chNum].stdPayload3 |= payloadAccess.stdPayload3;
+        userInfo->payloadAccess[chNum].stdPayload4 |= payloadAccess.stdPayload4;
+        userInfo->payloadAccess[chNum].stdPayload5 |= payloadAccess.stdPayload5;
+        userInfo->payloadAccess[chNum].stdPayload6 |= payloadAccess.stdPayload6;
+        userInfo->payloadAccess[chNum].stdPayload7 |= payloadAccess.stdPayload7;
+
+        userInfo->payloadAccess[chNum].oemPayload0 |= payloadAccess.oemPayload0;
+        userInfo->payloadAccess[chNum].oemPayload1 |= payloadAccess.oemPayload1;
+        userInfo->payloadAccess[chNum].oemPayload2 |= payloadAccess.oemPayload2;
+        userInfo->payloadAccess[chNum].oemPayload3 |= payloadAccess.oemPayload3;
+        userInfo->payloadAccess[chNum].oemPayload4 |= payloadAccess.oemPayload4;
+        userInfo->payloadAccess[chNum].oemPayload5 |= payloadAccess.oemPayload5;
+        userInfo->payloadAccess[chNum].oemPayload6 |= payloadAccess.oemPayload6;
+        userInfo->payloadAccess[chNum].oemPayload7 |= payloadAccess.oemPayload7;
+    }
+    else
+    {
+        userInfo->payloadAccess[chNum].stdPayload1SOL &=
+            ~(payloadAccess.stdPayload1SOL);
+        userInfo->payloadAccess[chNum].stdPayload2 &=
+            ~(payloadAccess.stdPayload2);
+        userInfo->payloadAccess[chNum].stdPayload3 &=
+            ~(payloadAccess.stdPayload3);
+        userInfo->payloadAccess[chNum].stdPayload4 &=
+            ~(payloadAccess.stdPayload4);
+        userInfo->payloadAccess[chNum].stdPayload5 &=
+            ~(payloadAccess.stdPayload5);
+        userInfo->payloadAccess[chNum].stdPayload6 &=
+            ~(payloadAccess.stdPayload6);
+        userInfo->payloadAccess[chNum].stdPayload7 &=
+            ~(payloadAccess.stdPayload7);
+
+        userInfo->payloadAccess[chNum].oemPayload0 &=
+            ~(payloadAccess.oemPayload0);
+        userInfo->payloadAccess[chNum].oemPayload1 &=
+            ~(payloadAccess.oemPayload1);
+        userInfo->payloadAccess[chNum].oemPayload2 &=
+            ~(payloadAccess.oemPayload2);
+        userInfo->payloadAccess[chNum].oemPayload3 &=
+            ~(payloadAccess.oemPayload3);
+        userInfo->payloadAccess[chNum].oemPayload4 &=
+            ~(payloadAccess.oemPayload4);
+        userInfo->payloadAccess[chNum].oemPayload5 &=
+            ~(payloadAccess.oemPayload5);
+        userInfo->payloadAccess[chNum].oemPayload6 &=
+            ~(payloadAccess.oemPayload6);
+        userInfo->payloadAccess[chNum].oemPayload7 &=
+            ~(payloadAccess.oemPayload7);
+    }
+
+    try
+    {
+        writeUserData();
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Write user data failed");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    return IPMI_CC_OK;
+}
+
 ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
                                               const uint8_t chNum,
                                               const UserPrivAccess& privAccess,
@@ -1000,10 +1092,49 @@ static constexpr const char* jsonUserEnabled = "user_enabled";
 static constexpr const char* jsonUserInSys = "user_in_system";
 static constexpr const char* jsonFixedUser = "fixed_user_name";
 
+static constexpr const char* jsonPayloadEnabled = "payload_enabled";
+static constexpr const char* jsonStdPayload1SOL = "std_payload1_SOL";
+static constexpr const char* jsonStdPayload2 = "std_payload2";
+static constexpr const char* jsonStdPayload3 = "std_payload3";
+static constexpr const char* jsonStdPayload4 = "std_payload4";
+static constexpr const char* jsonStdPayload5 = "std_payload5";
+static constexpr const char* jsonStdPayload6 = "std_payload6";
+static constexpr const char* jsonStdPayload7 = "std_payload7";
+
+static constexpr const char* jsonOEMPayload0 = "OEM_payload0";
+static constexpr const char* jsonOEMPayload1 = "OEM_payload1";
+static constexpr const char* jsonOEMPayload2 = "OEM_payload2";
+static constexpr const char* jsonOEMPayload3 = "OEM_payload3";
+static constexpr const char* jsonOEMPayload4 = "OEM_payload4";
+static constexpr const char* jsonOEMPayload5 = "OEM_payload5";
+static constexpr const char* jsonOEMPayload6 = "OEM_payload6";
+static constexpr const char* jsonOEMPayload7 = "OEM_payload7";
+
 void UserAccess::readUserData()
 {
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         userLock{*userMutex};
+
+    std::array<bool, ipmiMaxChannels> payloadAccessDefault;
+    payloadAccessDefault.fill(false);
+
+    Json payloadEnabledDefault = {
+        {jsonStdPayload1SOL, payloadAccessDefault},
+        {jsonStdPayload2, payloadAccessDefault},
+        {jsonStdPayload3, payloadAccessDefault},
+        {jsonStdPayload4, payloadAccessDefault},
+        {jsonStdPayload5, payloadAccessDefault},
+        {jsonStdPayload6, payloadAccessDefault},
+        {jsonStdPayload7, payloadAccessDefault},
+        {jsonOEMPayload0, payloadAccessDefault},
+        {jsonOEMPayload1, payloadAccessDefault},
+        {jsonOEMPayload2, payloadAccessDefault},
+        {jsonOEMPayload3, payloadAccessDefault},
+        {jsonOEMPayload4, payloadAccessDefault},
+        {jsonOEMPayload5, payloadAccessDefault},
+        {jsonOEMPayload6, payloadAccessDefault},
+        {jsonOEMPayload7, payloadAccessDefault},
+    };
 
     std::ifstream iUsrData(ipmiUserDataFile, std::ios::in | std::ios::binary);
     if (!iUsrData.good())
@@ -1045,10 +1176,63 @@ void UserAccess::readUserData()
             userInfo[jsonLinkAuthEnabled].get<std::vector<bool>>();
         std::vector<bool> accessCallback =
             userInfo[jsonAccCallbk].get<std::vector<bool>>();
+
+        // Payload Access processing.
+        Json payloadEnabled =
+            userInfo.value<Json>(jsonPayloadEnabled, payloadEnabledDefault);
+
+        std::array<bool, ipmiMaxChannels> stdPayload1SOL =
+            payloadEnabled[jsonStdPayload1SOL]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> stdPayload2 =
+            payloadEnabled[jsonStdPayload2]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> stdPayload3 =
+            payloadEnabled[jsonStdPayload3]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> stdPayload4 =
+            payloadEnabled[jsonStdPayload4]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> stdPayload5 =
+            payloadEnabled[jsonStdPayload5]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> stdPayload6 =
+            payloadEnabled[jsonStdPayload6]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> stdPayload7 =
+            payloadEnabled[jsonStdPayload7]
+                .get<std::array<bool, ipmiMaxChannels>>();
+
+        std::array<bool, ipmiMaxChannels> oemPayload0 =
+            payloadEnabled[jsonOEMPayload0]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> oemPayload1 =
+            payloadEnabled[jsonOEMPayload1]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> oemPayload2 =
+            payloadEnabled[jsonOEMPayload2]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> oemPayload3 =
+            payloadEnabled[jsonOEMPayload3]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> oemPayload4 =
+            payloadEnabled[jsonOEMPayload4]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> oemPayload5 =
+            payloadEnabled[jsonOEMPayload5]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> oemPayload6 =
+            payloadEnabled[jsonOEMPayload6]
+                .get<std::array<bool, ipmiMaxChannels>>();
+        std::array<bool, ipmiMaxChannels> oemPayload7 =
+            payloadEnabled[jsonOEMPayload7]
+                .get<std::array<bool, ipmiMaxChannels>>();
+
         if (privilege.size() != ipmiMaxChannels ||
             ipmiEnabled.size() != ipmiMaxChannels ||
             linkAuthEnabled.size() != ipmiMaxChannels ||
-            accessCallback.size() != ipmiMaxChannels)
+            accessCallback.size() != ipmiMaxChannels ||
+            stdPayload1SOL.size() != ipmiMaxChannels)
         {
             log<level::ERR>("Error in reading IPMI user data file - "
                             "properties corrupted");
@@ -1066,6 +1250,50 @@ void UserAccess::readUserData()
                 linkAuthEnabled[chIndex];
             usersTbl.user[usrIndex].userPrivAccess[chIndex].accessCallback =
                 accessCallback[chIndex];
+
+            // Mark reserved values to zero.
+            usersTbl.user[usrIndex]
+                .payloadAccess[chIndex]
+                .stdPayload0ipmiReserved = 0;
+            usersTbl.user[usrIndex]
+                .payloadAccess[chIndex]
+                .stdPayloadEnables2Reserved = 0;
+            usersTbl.user[usrIndex]
+                .payloadAccess[chIndex]
+                .oemPayloadEnables2Reserved = 0;
+
+            // Mark other values based on 'payload_enabled' read from JSON file
+            usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload1SOL =
+                stdPayload1SOL[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload2 =
+                stdPayload2[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload3 =
+                stdPayload3[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload4 =
+                stdPayload4[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload5 =
+                stdPayload5[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload6 =
+                stdPayload6[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload7 =
+                stdPayload7[chIndex];
+
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload0 =
+                oemPayload0[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload1 =
+                oemPayload1[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload2 =
+                oemPayload2[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload3 =
+                oemPayload3[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload4 =
+                oemPayload4[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload5 =
+                oemPayload5[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload6 =
+                oemPayload6[chIndex];
+            usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload7 =
+                oemPayload7[chIndex];
         }
         usersTbl.user[usrIndex].userEnabled =
             userInfo[jsonUserEnabled].get<bool>();
@@ -1099,6 +1327,24 @@ void UserAccess::writeUserData()
         std::vector<bool> ipmiEnabled(ipmiMaxChannels);
         std::vector<bool> linkAuthEnabled(ipmiMaxChannels);
         std::vector<bool> accessCallback(ipmiMaxChannels);
+
+        std::array<bool, ipmiMaxChannels> stdPayload1SOL;
+        std::array<bool, ipmiMaxChannels> stdPayload2;
+        std::array<bool, ipmiMaxChannels> stdPayload3;
+        std::array<bool, ipmiMaxChannels> stdPayload4;
+        std::array<bool, ipmiMaxChannels> stdPayload5;
+        std::array<bool, ipmiMaxChannels> stdPayload6;
+        std::array<bool, ipmiMaxChannels> stdPayload7;
+
+        std::array<bool, ipmiMaxChannels> oemPayload0;
+        std::array<bool, ipmiMaxChannels> oemPayload1;
+        std::array<bool, ipmiMaxChannels> oemPayload2;
+        std::array<bool, ipmiMaxChannels> oemPayload3;
+        std::array<bool, ipmiMaxChannels> oemPayload4;
+        std::array<bool, ipmiMaxChannels> oemPayload5;
+        std::array<bool, ipmiMaxChannels> oemPayload6;
+        std::array<bool, ipmiMaxChannels> oemPayload7;
+
         for (size_t chIndex = 0; chIndex < ipmiMaxChannels; chIndex++)
         {
             privilege[chIndex] =
@@ -1110,6 +1356,38 @@ void UserAccess::writeUserData()
                 usersTbl.user[usrIndex].userPrivAccess[chIndex].linkAuthEnabled;
             accessCallback[chIndex] =
                 usersTbl.user[usrIndex].userPrivAccess[chIndex].accessCallback;
+
+            stdPayload1SOL[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload1SOL;
+            stdPayload2[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload2;
+            stdPayload3[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload3;
+            stdPayload4[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload4;
+            stdPayload5[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload5;
+            stdPayload6[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload6;
+            stdPayload7[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].stdPayload7;
+
+            oemPayload0[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload0;
+            oemPayload1[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload1;
+            oemPayload2[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload2;
+            oemPayload3[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload3;
+            oemPayload4[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload4;
+            oemPayload5[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload5;
+            oemPayload6[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload6;
+            oemPayload7[chIndex] =
+                usersTbl.user[usrIndex].payloadAccess[chIndex].oemPayload7;
         }
         jsonUserInfo[jsonPriv] = privilege;
         jsonUserInfo[jsonIpmiEnabled] = ipmiEnabled;
@@ -1118,6 +1396,27 @@ void UserAccess::writeUserData()
         jsonUserInfo[jsonUserEnabled] = usersTbl.user[usrIndex].userEnabled;
         jsonUserInfo[jsonUserInSys] = usersTbl.user[usrIndex].userInSystem;
         jsonUserInfo[jsonFixedUser] = usersTbl.user[usrIndex].fixedUserName;
+
+        Json jsonPayloadEnabledInfo;
+
+        jsonPayloadEnabledInfo[jsonStdPayload1SOL] = stdPayload1SOL;
+        jsonPayloadEnabledInfo[jsonStdPayload2] = stdPayload2;
+        jsonPayloadEnabledInfo[jsonStdPayload3] = stdPayload3;
+        jsonPayloadEnabledInfo[jsonStdPayload4] = stdPayload4;
+        jsonPayloadEnabledInfo[jsonStdPayload5] = stdPayload5;
+        jsonPayloadEnabledInfo[jsonStdPayload6] = stdPayload6;
+        jsonPayloadEnabledInfo[jsonStdPayload7] = stdPayload7;
+
+        jsonPayloadEnabledInfo[jsonOEMPayload0] = oemPayload0;
+        jsonPayloadEnabledInfo[jsonOEMPayload1] = oemPayload1;
+        jsonPayloadEnabledInfo[jsonOEMPayload2] = oemPayload2;
+        jsonPayloadEnabledInfo[jsonOEMPayload3] = oemPayload3;
+        jsonPayloadEnabledInfo[jsonOEMPayload4] = oemPayload4;
+        jsonPayloadEnabledInfo[jsonOEMPayload5] = oemPayload5;
+        jsonPayloadEnabledInfo[jsonOEMPayload6] = oemPayload6;
+        jsonPayloadEnabledInfo[jsonOEMPayload7] = oemPayload7;
+
+        jsonUserInfo[jsonPayloadEnabled] = jsonPayloadEnabledInfo;
         jsonUsersTbl.push_back(jsonUserInfo);
     }
 
