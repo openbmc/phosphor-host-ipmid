@@ -75,6 +75,7 @@ struct UserInfo
     bool userEnabled;
     bool userInSystem;
     bool fixedUserName;
+    PayloadAccess payloadAccess[ipmiMaxChannels];
 };
 
 /** @struct UsersTbl
@@ -251,6 +252,47 @@ class UserAccess
     ipmi_ret_t setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const UserPrivAccess& privAccess,
                                       const bool& otherPrivUpdates);
+
+    /** @brief to get user payload access details.
+     *
+     *  @param[in] userInfo   - userInfo entry in usersTbl.
+     *  @param[in,out] stdPayload - stdPayloadEnables1 in a 2D-array.
+     *  @param[in,out] oemPayload - oemPayloadEnables1 in a 2D-array.
+     *
+     */
+    void readPayloadAccessFromUserInfo(
+        const UserInfo& userInfo,
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            stdPayload,
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            oemPayload);
+
+    /** @brief to set user payload access details.
+     *
+     *  @param[in,out] userInfo   - userInfo entry in usersTbl.
+     *  @param[in] stdPayload - stdPayloadEnables1 in a 2D-array.
+     *  @param[in] oemPayload - oemPayloadEnables1 in a 2D-array.
+     *
+     */
+    void updatePayloadAccessInUserInfo(
+        UserInfo& userInfo,
+        const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            stdPayload,
+        const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            oemPayload);
+
+    /** @brief to set user payload access details
+     *
+     *  @param[in] userId - user id
+     *  @param[in] chNum - channel number
+     *  @param[in] payloadAccess - payload access
+     *  @param[in] operation - Enable / Disable
+     *
+     *  @return IPMI_CC_OK for success, others for failure.
+     */
+    ipmi_ret_t setUserPayloadAccess(const uint8_t userId, const uint8_t chNum,
+                                    const PayloadAccess& payloadAccess,
+                                    const uint8_t operation);
 
     /** @brief reads user management related data from configuration file
      *

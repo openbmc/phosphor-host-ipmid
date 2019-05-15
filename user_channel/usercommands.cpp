@@ -37,6 +37,8 @@ static constexpr uint8_t setPassword = 0x02;
 static constexpr uint8_t testPassword = 0x03;
 static constexpr uint8_t passwordKeySize20 = 1;
 static constexpr uint8_t passwordKeySize16 = 0;
+static constexpr uint8_t enableOperation = 0x00;
+static constexpr uint8_t disableOperation = 0x01;
 
 /** @struct SetUserNameReq
  *
@@ -485,6 +487,199 @@ ipmi::RspType<uint8_t,  // channel number
         rmcp, rmcpp, reserved5, oemID, oemAuxillary);
 }
 
+/** @brief implements the set user payload access command.
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param channel - channel number (4 bits)
+ *  @param reserved1 - skip 4 bits
+ *  @param userId - user id (6 bits)
+ *  @param operation - access ENABLE /DISABLE. (2 bits)
+ *  @param stdPayload0 - IPMI - reserved. (1 bit)
+ *  @param stdPayload1 - SOL.             (1 bit)
+ *  @param stdPayload2 -                  (1 bit)
+ *  @param stdPayload3 -                  (1 bit)
+ *  @param stdPayload4 -                  (1 bit)
+ *  @param stdPayload5 -                  (1 bit)
+ *  @param stdPayload6 -                  (1 bit)
+ *  @param stdPayload7 -                  (1 bit)
+ *  @param stdPayloadEnables2 - reserved. (8 bits)
+ *  @param oemPayload0 -                  (1 bit)
+ *  @param oemPayload1 -                  (1 bit)
+ *  @param oemPayload2 -                  (1 bit)
+ *  @param oemPayload3 -                  (1 bit)
+ *  @param oemPayload4 -                  (1 bit)
+ *  @param oemPayload5 -                  (1 bit)
+ *  @param oemPayload6 -                  (1 bit)
+ *  @param oemPayload7 -                  (1 bit)
+ *  @param oemPayloadEnables2 - reserved. (8 bits)
+ *
+ *  @returns IPMI completion code
+ */
+ipmi::RspType<> ipmiSetUserPayloadAccess(
+    ipmi::Context::ptr ctx,
+
+    uint4_t channel, uint4_t reserved,
+
+    uint6_t userId, uint2_t operation,
+
+    bool stdPayload0ipmiReserved, bool stdPayload1SOL, bool stdPayload2,
+    bool stdPayload3, bool stdPayload4, bool stdPayload5, bool stdPayload6,
+    bool stdPayload7,
+
+    uint8_t stdPayloadEnables2Reserved,
+
+    bool oemPayload0, bool oemPayload1, bool oemPayload2, bool oemPayload3,
+    bool oemPayload4, bool oemPayload5, bool oemPayload6, bool oemPayload7,
+
+    uint8_t oemPayloadEnables2Reserved)
+{
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    if (reserved != 0 || stdPayload0ipmiReserved != 0 ||
+        stdPayloadEnables2Reserved != 0 || oemPayloadEnables2Reserved != 0 ||
+        (operation != enableOperation && operation != disableOperation) ||
+        (!isValidChannel(chNum)) ||
+        (getChannelSessionSupport(chNum) == EChannelSessSupported::none))
+    {
+        log<level::DEBUG>("Set user payload access - Invalid field in request");
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
+    {
+        log<level::DEBUG>("Set user payload access - Parameter out of range");
+        return ipmi::responseParmOutOfRange();
+    }
+
+    PayloadAccess payloadAccess = {0};
+    payloadAccess.stdPayloadEnables1[1] = stdPayload1SOL;
+    payloadAccess.stdPayloadEnables1[2] = stdPayload2;
+    payloadAccess.stdPayloadEnables1[3] = stdPayload3;
+    payloadAccess.stdPayloadEnables1[4] = stdPayload4;
+    payloadAccess.stdPayloadEnables1[5] = stdPayload5;
+    payloadAccess.stdPayloadEnables1[6] = stdPayload6;
+    payloadAccess.stdPayloadEnables1[7] = stdPayload7;
+
+    payloadAccess.oemPayloadEnables1[0] = oemPayload0;
+    payloadAccess.oemPayloadEnables1[1] = oemPayload1;
+    payloadAccess.oemPayloadEnables1[2] = oemPayload2;
+    payloadAccess.oemPayloadEnables1[3] = oemPayload3;
+    payloadAccess.oemPayloadEnables1[4] = oemPayload4;
+    payloadAccess.oemPayloadEnables1[5] = oemPayload5;
+    payloadAccess.oemPayloadEnables1[6] = oemPayload6;
+    payloadAccess.oemPayloadEnables1[7] = oemPayload7;
+
+    return ipmi::response(ipmiUserSetPayloadAccess(
+        static_cast<uint8_t>(userId), chNum, static_cast<uint8_t>(operation),
+        payloadAccess));
+}
+
+/** @brief implements the get user payload access command
+ *  This command returns information about user payload enable settings
+ *  that were set using the 'Set User Payload Access' Command.
+ *
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param channel - channel number
+ *  @param reserved1 - skip 4 bits
+ *  @param userId - user id
+ *  @param reserved2 - skip 2 bits
+ *
+ *  @returns IPMI completion code plus response data
+ *   - stdPayload0ipmiReserved - IPMI payload (reserved).
+ *   - stdPayload1SOL - SOL payload
+ *   - stdPayload2
+ *   - stdPayload3
+ *   - stdPayload4
+ *   - stdPayload5
+ *   - stdPayload6
+ *   - stdPayload7
+
+ *   - stdPayloadEnables2Reserved - Reserved.
+
+ *   - oemPayload0
+ *   - oemPayload1
+ *   - oemPayload2
+ *   - oemPayload3
+ *   - oemPayload4
+ *   - oemPayload5
+ *   - oemPayload6
+ *   - oemPayload7
+
+ *  - oemPayloadEnables2Reserved - Reserved
+ */
+ipmi::RspType<bool, // stdPayload0ipmiReserved
+              bool, // stdPayload1SOL
+              bool, // stdPayload2
+              bool, // stdPayload3
+              bool, // stdPayload4
+              bool, // stdPayload5
+              bool, // stdPayload6
+              bool, // stdPayload7
+
+              uint8_t, // stdPayloadEnables2Reserved
+
+              bool, // oemPayload0
+              bool, // oemPayload1
+              bool, // oemPayload2
+              bool, // oemPayload3
+              bool, // oemPayload4
+              bool, // oemPayload5
+              bool, // oemPayload6
+              bool, // oemPayload7
+
+              uint8_t // oemPayloadEnables2Reserved
+              >
+    ipmiGetUserPayloadAccess(ipmi::Context::ptr ctx,
+
+                             uint4_t channel, uint4_t reserved1,
+
+                             uint6_t userId, uint2_t reserved2)
+{
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    if (reserved1 != 0 || reserved2 != 0 || (!isValidChannel(chNum)) ||
+        (getChannelSessionSupport(chNum) == EChannelSessSupported::none))
+    {
+        log<level::DEBUG>("Get user payload access - Invalid field in request");
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
+    {
+        log<level::DEBUG>("Get user payload access - Parameter out of range");
+        return ipmi::responseParmOutOfRange();
+    }
+
+    ipmi::Cc retStatus;
+    PayloadAccess payloadAccess = {};
+    retStatus = ipmiUserGetPayloadAccess(static_cast<uint8_t>(userId), chNum,
+                                         payloadAccess);
+    if (retStatus != IPMI_CC_OK)
+    {
+        return ipmi::response(retStatus);
+    }
+    constexpr uint8_t res8bits = 0;
+    return ipmi::responseSuccess(payloadAccess.stdPayloadEnables1.test(0),
+                                 payloadAccess.stdPayloadEnables1.test(1),
+                                 payloadAccess.stdPayloadEnables1.test(2),
+                                 payloadAccess.stdPayloadEnables1.test(3),
+                                 payloadAccess.stdPayloadEnables1.test(4),
+                                 payloadAccess.stdPayloadEnables1.test(5),
+                                 payloadAccess.stdPayloadEnables1.test(6),
+                                 payloadAccess.stdPayloadEnables1.test(7),
+
+                                 res8bits,
+
+                                 payloadAccess.oemPayloadEnables1.test(0),
+                                 payloadAccess.oemPayloadEnables1.test(1),
+                                 payloadAccess.oemPayloadEnables1.test(2),
+                                 payloadAccess.oemPayloadEnables1.test(3),
+                                 payloadAccess.oemPayloadEnables1.test(4),
+                                 payloadAccess.oemPayloadEnables1.test(5),
+                                 payloadAccess.oemPayloadEnables1.test(6),
+                                 payloadAccess.oemPayloadEnables1.test(7),
+
+                                 res8bits);
+}
+
 void registerUserIpmiFunctions() __attribute__((constructor));
 void registerUserIpmiFunctions()
 {
@@ -510,6 +705,15 @@ void registerUserIpmiFunctions()
                           ipmi::app::cmdGetChannelAuthCapabilities,
                           ipmi::Privilege::Callback,
                           ipmiGetChannelAuthenticationCapabilities);
+
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetUserPayloadAccess,
+                          ipmi::Privilege::Admin, ipmiSetUserPayloadAccess);
+
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetUserPayloadAccess,
+                          ipmi::Privilege::Operator, ipmiGetUserPayloadAccess);
+
     return;
 }
 } // namespace ipmi
