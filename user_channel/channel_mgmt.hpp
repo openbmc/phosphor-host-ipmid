@@ -224,14 +224,6 @@ class ChannelConfig
      */
     CommandPrivilege convertToPrivLimitIndex(const std::string& value);
 
-    /** @brief function to convert channel number to channel index
-     *
-     *  @param[in] chNum - channel number
-     *
-     *  @return channel index
-     */
-    uint8_t convertToChannelIndexNumber(const uint8_t chNum);
-
     /** @brief function to write persistent channel configuration to config file
      *
      *  @return 0 for success, -errno for failure.
