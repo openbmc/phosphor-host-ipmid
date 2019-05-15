@@ -170,4 +170,65 @@ ipmi_ret_t ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
         userId, chNum, userPrivAccess, otherPrivUpdates);
 }
 
+ipmi_ret_t ipmiUserSetPayloadAccess(const uint8_t userId, const uint8_t chNum,
+                                    const uint8_t operation,
+                                    PayloadAccess& payloadAccess)
+{
+
+    if (!UserAccess::isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    return getUserAccessObject().setUserPayloadAccess(userId, chNum,
+                                                      payloadAccess, operation);
+}
+
+ipmi_ret_t ipmiUserGetPayloadAccess(const uint8_t userId, const uint8_t chNum,
+                                    PayloadAccess& payloadAccess)
+{
+
+    if (!UserAccess::isValidChannel(chNum))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    UserInfo* userInfo = getUserAccessObject().getUserInfo(userId);
+    payloadAccess.stdPayload0ipmiReserved =
+        userInfo->payloadAccess[chNum].stdPayload0ipmiReserved;
+    payloadAccess.stdPayload1SOL =
+        userInfo->payloadAccess[chNum].stdPayload1SOL;
+    payloadAccess.stdPayload2 = userInfo->payloadAccess[chNum].stdPayload2;
+    payloadAccess.stdPayload3 = userInfo->payloadAccess[chNum].stdPayload3;
+    payloadAccess.stdPayload4 = userInfo->payloadAccess[chNum].stdPayload4;
+    payloadAccess.stdPayload5 = userInfo->payloadAccess[chNum].stdPayload5;
+    payloadAccess.stdPayload6 = userInfo->payloadAccess[chNum].stdPayload6;
+    payloadAccess.stdPayload7 = userInfo->payloadAccess[chNum].stdPayload7;
+
+    payloadAccess.stdPayloadEnables2Reserved =
+        userInfo->payloadAccess[chNum].stdPayloadEnables2Reserved;
+
+    payloadAccess.oemPayload0 = userInfo->payloadAccess[chNum].oemPayload0;
+    payloadAccess.oemPayload1 = userInfo->payloadAccess[chNum].oemPayload1;
+    payloadAccess.oemPayload2 = userInfo->payloadAccess[chNum].oemPayload2;
+    payloadAccess.oemPayload3 = userInfo->payloadAccess[chNum].oemPayload3;
+    payloadAccess.oemPayload4 = userInfo->payloadAccess[chNum].oemPayload4;
+    payloadAccess.oemPayload5 = userInfo->payloadAccess[chNum].oemPayload5;
+    payloadAccess.oemPayload6 = userInfo->payloadAccess[chNum].oemPayload6;
+    payloadAccess.oemPayload7 = userInfo->payloadAccess[chNum].oemPayload7;
+
+    payloadAccess.oemPayloadEnables2Reserved =
+        userInfo->payloadAccess[chNum].oemPayloadEnables2Reserved;
+
+    return IPMI_CC_OK;
+}
+
 } // namespace ipmi

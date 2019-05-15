@@ -75,6 +75,7 @@ struct UserInfo
     bool userEnabled;
     bool userInSystem;
     bool fixedUserName;
+    PayloadAccess payloadAccess[ipmiMaxChannels];
 };
 
 /** @struct UsersTbl
@@ -242,6 +243,18 @@ class UserAccess
                                       const UserPrivAccess& privAccess,
                                       const bool& otherPrivUpdates);
 
+    /** @brief to set user payload access details
+     *
+     *  @param[in] userId - user id
+     *  @param[in] chNum - channel number
+     *  @param[in] payloadAccess - payload access
+     *  @param[in] operation - Enable / Disable
+     *
+     *  @return IPMI_CC_OK for success, others for failure.
+     */
+    ipmi_ret_t setUserPayloadAccess(const uint8_t userId, const uint8_t chNum,
+                                    const PayloadAccess& payloadAccess,
+                                    const uint8_t& operation);
     /** @brief reads user management related data from configuration file
      *
      */
