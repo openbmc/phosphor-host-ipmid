@@ -936,17 +936,28 @@ ipmi::RspType<bool,    // Power is on
     }
 
     //  Front Panel Button Capabilities and disable/enable status(Optional)
-    std::optional<bool> powerButtonDisabled =
+    std::optional<bool> powerButtonReading =
         getButtonEnabled(powerButtonPath, powerButtonIntf);
-    constexpr bool powerButtonDisableAllow = true;
-
-    std::optional<bool> resetButtonDisabled =
-        getButtonEnabled(resetButtonPath, resetButtonIntf);
-    constexpr bool resetButtonDisableAllow = true;
-
-    if (!powerButtonDisabled || !resetButtonDisabled)
+    // allow disable if the interface is present
+    bool powerButtonDisableAllow = static_cast<bool>(powerButtonReading);
+    // default return the button is enabled (not disabled)
+    bool powerButtonDisabled = false;
+    if (powerButtonDisableAllow)
     {
-        return ipmi::responseUnspecifiedError();
+        // return the real value of the button status, if present
+        powerButtonDisabled = *powerButtonReading;
+    }
+
+    std::optional<bool> resetButtonReading =
+        getButtonEnabled(resetButtonPath, resetButtonIntf);
+    // allow disable if the interface is present
+    bool resetButtonDisableAllow = static_cast<bool>(resetButtonReading);
+    // default return the button is enabled (not disabled)
+    bool resetButtonDisabled = false;
+    if (resetButtonDisableAllow)
+    {
+        // return the real value of the button status, if present
+        resetButtonDisabled = *resetButtonReading;
     }
 
     // This response has a lot of hard-coded, unsupported fields
@@ -985,7 +996,7 @@ ipmi::RspType<bool,    // Power is on
         coolingFanFault, chassisIdentifyState, chassisIdentifySupport,
         false, // reserved
 
-        *powerButtonDisabled, *resetButtonDisabled, diagButtonDisabled,
+        powerButtonDisabled, resetButtonDisabled, diagButtonDisabled,
         sleepButtonDisabled, powerButtonDisableAllow, resetButtonDisableAllow,
         diagButtonDisableAllow, sleepButtonDisableAllow);
 }
