@@ -865,6 +865,37 @@ std::optional<bool> getPowerStatus()
     return std::make_optional(powerGood);
 }
 
+/*
+ * getACFailStatus
+ * helper function for Get Chassis Status Command
+ * return - optional value for ACFail (false on error)
+ */
+std::optional<bool> getACFailStatus()
+{
+    constexpr const char* powerControlObj =
+        "/xyz/openbmc_project/Chassis/Control/Power0";
+    constexpr const char* powerControlIntf =
+        "xyz.openbmc_project.Chassis.Control.Power";
+    bool ACFail = false;
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+    try
+    {
+        auto service =
+            ipmi::getService(*busp, powerControlIntf, powerControlObj);
+
+        ipmi::Value variant = ipmi::getDbusProperty(
+            *busp, service, powerControlObj, powerControlIntf, "PFail");
+        ACFail = std::get<bool>(variant);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failed to fetch PFail property",
+                        entry("ERROR=%s", e.what()),
+                        entry("PATH=%s", powerControlObj),
+                        entry("INTERFACE=%s", powerControlIntf));
+    }
+    return std::make_optional(ACFail);
+}
 } // namespace power_policy
 
 static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
@@ -949,13 +980,14 @@ ipmi::RspType<bool,    // Power is on
         return ipmi::responseUnspecifiedError();
     }
 
+    std::optional<bool> powerDownAcFailed = power_policy::getACFailStatus();
+
     // This response has a lot of hard-coded, unsupported fields
     // They are set to false or 0
     constexpr bool powerOverload = false;
     constexpr bool chassisInterlock = false;
     constexpr bool powerFault = false;
     constexpr bool powerControlFault = false;
-    constexpr bool powerDownAcFailed = false;
     constexpr bool powerDownOverload = false;
     constexpr bool powerDownInterlock = false;
     constexpr bool powerDownPowerFault = false;
@@ -977,7 +1009,7 @@ ipmi::RspType<bool,    // Power is on
         powerControlFault, *restorePolicy,
         false, // reserved
 
-        powerDownAcFailed, powerDownOverload, powerDownInterlock,
+        *powerDownAcFailed, powerDownOverload, powerDownInterlock,
         powerDownPowerFault, powerStatusIPMI,
         uint3_t(0), // reserved
 
