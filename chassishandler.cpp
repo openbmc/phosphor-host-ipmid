@@ -865,6 +865,37 @@ std::optional<bool> getPowerStatus()
     return std::make_optional(powerGood);
 }
 
+/*
+ * getACFailStatus
+ * helper function for Get Chassis Status Command
+ * return - bool value for ACFail (false on error)
+ */
+bool getACFailStatus()
+{
+    constexpr const char* powerControlObj =
+        "/xyz/openbmc_project/Chassis/Control/Power0";
+    constexpr const char* powerControlIntf =
+        "xyz.openbmc_project.Chassis.Control.Power";
+    bool acFail = false;
+    std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
+    try
+    {
+        auto service =
+            ipmi::getService(*bus, powerControlIntf, powerControlObj);
+
+        ipmi::Value variant = ipmi::getDbusProperty(
+            *bus, service, powerControlObj, powerControlIntf, "PFail");
+        acFail = std::get<bool>(variant);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failed to fetch PFail property",
+                        entry("ERROR=%s", e.what()),
+                        entry("PATH=%s", powerControlObj),
+                        entry("INTERFACE=%s", powerControlIntf));
+    }
+    return acFail;
+}
 } // namespace power_policy
 
 static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
@@ -960,13 +991,14 @@ ipmi::RspType<bool,    // Power is on
         resetButtonDisabled = *resetButtonReading;
     }
 
+    bool powerDownAcFailed = power_policy::getACFailStatus();
+
     // This response has a lot of hard-coded, unsupported fields
     // They are set to false or 0
     constexpr bool powerOverload = false;
     constexpr bool chassisInterlock = false;
     constexpr bool powerFault = false;
     constexpr bool powerControlFault = false;
-    constexpr bool powerDownAcFailed = false;
     constexpr bool powerDownOverload = false;
     constexpr bool powerDownInterlock = false;
     constexpr bool powerDownPowerFault = false;
