@@ -187,7 +187,7 @@ ipmi_ret_t ipmi_app_watchdog_set(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                  ipmi_context_t context)
 {
     // Extract the request data
-    if (*data_len < sizeof(wd_set_req))
+    if (*data_len != sizeof(wd_set_req))
     {
         *data_len = 0;
         return IPMI_CC_REQ_DATA_LEN_INVALID;
