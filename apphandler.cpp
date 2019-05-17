@@ -241,12 +241,6 @@ enum class PowerState : uint8_t
 
 static constexpr uint8_t stateChanged = 0x80;
 
-struct ACPIState
-{
-    uint8_t sysACPIState;
-    uint8_t devACPIState;
-} __attribute__((packed));
-
 std::map<ACPIPowerState::ACPI, PowerState> dbusToIPMI = {
     {ACPIPowerState::ACPI::S0_G0_D0, PowerState::s0G0D0},
     {ACPIPowerState::ACPI::S1_D1, PowerState::s1D1},
@@ -302,41 +296,32 @@ bool isValidACPIState(acpi_state::PowerStateType type, uint8_t state)
 }
 } // namespace acpi_state
 
-ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                         ipmi_request_t request,
-                                         ipmi_response_t response,
-                                         ipmi_data_len_t data_len,
-                                         ipmi_context_t context)
+/** @brief implements Set ACPI Power State command
+ * @param sysAcpiState - ACPI system power state to set
+ * @param devAcpiState - ACPI device power state to set
+ *
+ * @return IPMI completion code on success
+ **/
+ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
+                                      uint8_t devAcpiState)
 {
     auto s = static_cast<uint8_t>(acpi_state::PowerState::unknown);
-    ipmi_ret_t rc = IPMI_CC_OK;
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
     auto value = acpi_state::ACPIPowerState::ACPI::Unknown;
 
-    auto* req = reinterpret_cast<acpi_state::ACPIState*>(request);
-
-    if (*data_len != sizeof(acpi_state::ACPIState))
-    {
-        log<level::ERR>("set_acpi invalid len");
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    *data_len = 0;
-
-    if (req->sysACPIState & acpi_state::stateChanged)
+    if (sysAcpiState & acpi_state::stateChanged)
     {
         // set system power state
-        s = req->sysACPIState & ~acpi_state::stateChanged;
+        s = sysAcpiState & ~acpi_state::stateChanged;
 
         if (!acpi_state::isValidACPIState(
                 acpi_state::PowerStateType::sysPowerState, s))
         {
             log<level::ERR>("set_acpi_power sys invalid input",
                             entry("S=%x", s));
-            return IPMI_CC_PARM_OUT_OF_RANGE;
+            return ipmi::responseParmOutOfRange();
         }
 
         // valid input
@@ -367,7 +352,7 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             {
                 log<level::ERR>("Failed in set ACPI system property",
                                 entry("EXCEPTION=%s", e.what()));
-                return IPMI_CC_UNSPECIFIED_ERROR;
+                return ipmi::responseUnspecifiedError();
             }
         }
     }
@@ -376,16 +361,16 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::DEBUG>("Do not change system power state");
     }
 
-    if (req->devACPIState & acpi_state::stateChanged)
+    if (devAcpiState & acpi_state::stateChanged)
     {
         // set device power state
-        s = req->devACPIState & ~acpi_state::stateChanged;
+        s = devAcpiState & ~acpi_state::stateChanged;
         if (!acpi_state::isValidACPIState(
                 acpi_state::PowerStateType::devPowerState, s))
         {
             log<level::ERR>("set_acpi_power dev invalid input",
                             entry("S=%x", s));
-            return IPMI_CC_PARM_OUT_OF_RANGE;
+            return ipmi::responseParmOutOfRange();
         }
 
         // valid input
@@ -416,7 +401,7 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             {
                 log<level::ERR>("Failed in set ACPI device property",
                                 entry("EXCEPTION=%s", e.what()));
-                return IPMI_CC_UNSPECIFIED_ERROR;
+                return ipmi::responseUnspecifiedError();
             }
         }
     }
@@ -424,8 +409,7 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         log<level::DEBUG>("Do not change device power state");
     }
-
-    return rc;
+    return ipmi::responseSuccess();
 }
 
 /**
@@ -1391,9 +1375,9 @@ void register_netfn_app_functions()
                           ipmiAppGetDeviceGuid);
 
     // <Set ACPI Power State>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL,
-                           ipmi_app_set_acpi_power_state, PRIVILEGE_ADMIN);
-
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetAcpiPowerState,
+                          ipmi::Privilege::Admin, ipmiSetAcpiPowerState);
     // <Get ACPI Power State>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetAcpiPowerState,
