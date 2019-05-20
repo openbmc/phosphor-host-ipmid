@@ -6,35 +6,39 @@
  */
 ipmi::RspType<> ipmiAppResetWatchdogTimer();
 
-/** @brief The SET watchdog IPMI command.
+/**@brief The setWatchdogTimer ipmi command.
  *
- *  @param[in] netfn
- *  @param[in] cmd
- *  @param[in] request
- *  @param[in,out] response
- *  @param[out] data_len
- *  @param[in] context
+ * @param
+ * - timerUse
+ * - stopOnSet
+ * - shouldLog
+ * - timerAction
+ * - pretimeout
+ * - expireFlags
+ * - initialCountdown
  *
- *  @return IPMI_CC_OK on success, an IPMI error code otherwise.
- */
-ipmi_ret_t ipmi_app_watchdog_set(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                 ipmi_request_t request,
-                                 ipmi_response_t response,
-                                 ipmi_data_len_t data_len,
-                                 ipmi_context_t context);
+ * @return completion code on success.
+ **/
+ipmi::RspType<> ipmiSetWatchdogTimer(
+    uint3_t timerUse, uint3_t reserved, bool stopOnSet, bool log,
+    uint3_t timeoutAction, uint1_t reserved1, uint3_t preTimeoutInterrupt,
+    uint1_t reserved2, uint8_t preTimeoutInterval, uint1_t reserved3,
+    uint5_t expFlagValue, uint2_t reserved4, uint16_t initialCountdown)
 
-/** @brief The GET watchdog IPMI command.
- *  @param[in] netfn
- *  @param[in] cmd
- *  @param[in] request
- *  @param[in,out] response
- *  @param[out] data_len
- *  @param[in] context
- *
- *  @return IPMI_CC_OK on success, an IPMI error code otherwise.
- */
-ipmi_ret_t ipmi_app_watchdog_get(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                 ipmi_request_t request,
-                                 ipmi_response_t response,
-                                 ipmi_data_len_t data_len,
-                                 ipmi_context_t context);
+    /**@brief The getWatchdogTimer ipmi command.
+     *
+     * @return
+     * - timerUse
+     * - timerActions
+     * - pretimeout
+     * - timeruseFlags
+     * - initialCountdown
+     * - presentCountdown
+     **/
+    ipmi::RspType<uint8_t,  // timerUse
+                  uint8_t,  // timerAction
+                  uint8_t,  // pretimeout
+                  uint8_t,  // expireFlags
+                  uint16_t, // initial Countdown - Little Endian (deciseconds)
+                  uint16_t  // present Countdown - Little Endian (deciseconds)
+                  > ipmiGetWatchdogTimer();
