@@ -35,6 +35,7 @@ class WatchdogService
         bool enabled;
         Action expireAction;
         TimerUse timerUse;
+        TimerUse expiredTimerUse;
         uint64_t interval;
         uint64_t timeRemaining;
     };
@@ -77,6 +78,13 @@ class WatchdogService
      *  @param[in] timerUse - The new timerUse value
      */
     void setTimerUse(TimerUse timerUse);
+
+    /** @brief Sets the value of the ExpiredTimerUse property on the host
+     * watchdog
+     *
+     *  @param[in] timerUse - The new timerUse value
+     */
+    void setExpiredTimerUse(TimerUse timerUse);
 
     /** @brief Sets the value of the interval property on the host watchdog
      *
