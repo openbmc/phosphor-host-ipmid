@@ -601,28 +601,6 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
     }
     if (setFlag & setPrivLimit)
     {
-        // Send Update to network channel config interfaces over dbus
-        std::string privStr = convertToPrivLimitString(chAccessData.privLimit);
-        std::string networkIntfObj = std::string(networkIntfObjectBasePath) +
-                                     "/" + channelData[chNum].chName;
-        try
-        {
-            if (0 != setDbusProperty(networkIntfServiceName, networkIntfObj,
-                                     networkChConfigIntfName,
-                                     privilegePropertyString, privStr))
-            {
-                log<level::DEBUG>(
-                    "Network interface does not exist",
-                    entry("INTERFACE:%s", channelData[chNum].chName.c_str()));
-                return IPMI_CC_UNSPECIFIED_ERROR;
-            }
-        }
-        catch (const sdbusplus::exception::SdBusError& e)
-        {
-            log<level::ERR>("Exception: Network interface does not exist");
-            return IPMI_CC_INVALID_FIELD_REQUEST;
-        }
-        signalFlag |= (1 << chNum);
         channelData[chNum].chAccess.chNonVolatileData.privLimit =
             chAccessData.privLimit;
     }
