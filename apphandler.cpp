@@ -1268,12 +1268,14 @@ void register_netfn_app_functions()
                           ipmi::Privilege::Operator, ipmiAppResetWatchdogTimer);
 
     // <Set Watchdog Timer>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL,
-                           ipmi_app_watchdog_set, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetWatchdogTimer,
+                          ipmi::Privilege::Operator, ipmiSetWatchdogTimer);
 
     // <Get Watchdog Timer>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_WD, NULL,
-                           ipmi_app_watchdog_get, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetWatchdogTimer,
+                          ipmi::Privilege::Operator, ipmiGetWatchdogTimer);
 
     // <Get Self Test Results>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
