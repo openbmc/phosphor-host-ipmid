@@ -186,6 +186,11 @@ void WatchdogService::setTimerUse(TimerUse timerUse)
     setProperty("CurrentTimerUse", convertForMessage(timerUse));
 }
 
+void WatchdogService::setExpiredTimerUse(TimerUse timerUse)
+{
+    setProperty("ExpiredTimerUse", convertForMessage(timerUse));
+}
+
 void WatchdogService::setInterval(uint64_t interval)
 {
     setProperty("Interval", interval);
