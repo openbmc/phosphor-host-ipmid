@@ -822,20 +822,22 @@ std::optional<uint2_t> getPowerRestorePolicy()
  */
 std::optional<bool> getPowerStatus()
 {
-    constexpr const char* powerControlObj =
-        "/xyz/openbmc_project/Chassis/Control/Power0";
-    constexpr const char* powerControlIntf =
-        "xyz.openbmc_project.Chassis.Control.Power";
     bool powerGood = false;
     std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
     try
     {
+        constexpr const char* chassisStatePath =
+            "/xyz/openbmc_project/state/chassis0";
+        constexpr const char* chassisStateIntf =
+            "xyz.openbmc_project.State.Chassis";
         auto service =
-            ipmi::getService(*busp, powerControlIntf, powerControlObj);
+            ipmi::getService(*busp, chassisStateIntf, chassisStatePath);
 
-        ipmi::Value variant = ipmi::getDbusProperty(
-            *busp, service, powerControlObj, powerControlIntf, "pgood");
-        powerGood = static_cast<bool>(std::get<int>(variant));
+        ipmi::Value powerState =
+            ipmi::getDbusProperty(*busp, service, chassisStatePath,
+                                  chassisStateIntf, "CurrentPowerState");
+        powerGood = std::get<std::string>(powerState) ==
+                    "xyz.openbmc_project.State.Chassis.PowerState.On";
     }
     catch (const std::exception& e)
     {
@@ -856,9 +858,7 @@ std::optional<bool> getPowerStatus()
         catch (const std::exception& e)
         {
             log<level::ERR>("Failed to fetch pgood property",
-                            entry("ERROR=%s", e.what()),
-                            entry("PATH=%s", powerControlObj),
-                            entry("INTERFACE=%s", powerControlIntf));
+                            entry("ERROR=%s", e.what()));
             return std::nullopt;
         }
     }
