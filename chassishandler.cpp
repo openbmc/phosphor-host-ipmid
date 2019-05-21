@@ -43,6 +43,8 @@
 std::unique_ptr<phosphor::Timer> identifyTimer
     __attribute__((init_priority(101)));
 
+static ChassisIDState chassisIDState = ChassisIDState::reserved;
+
 constexpr size_t SIZE_MAC = 18;
 constexpr size_t SIZE_BOOT_OPTION = (uint8_t)
     BootOptionResponseSize::OPAL_NETWORK_SETTINGS; // Maximum size of the boot
@@ -1009,7 +1011,7 @@ ipmi::RspType<bool,    // Power is on
     constexpr bool coolingFanFault = false;
     // chassisIdentifySupport set because this command is implemented
     constexpr bool chassisIdentifySupport = true;
-    constexpr uint2_t chassisIdentifyState(0);
+    uint2_t chassisIdentifyState = static_cast<uint2_t>(chassisIDState);
     constexpr bool diagButtonDisabled = false;
     constexpr bool sleepButtonDisabled = false;
     constexpr bool diagButtonDisableAllow = false;
@@ -1252,6 +1254,7 @@ void enclosureIdentifyLedOff()
 {
     try
     {
+        chassisIDState = ChassisIDState::off;
         enclosureIdentifyLed(false);
     }
     catch (const InternalFailure& e)
@@ -1284,6 +1287,7 @@ ipmi::RspType<> ipmiChassisIdentify(std::optional<uint8_t> interval,
         identifyTimer->stop();
         try
         {
+            chassisIDState = ChassisIDState::temporaryOn;
             enclosureIdentifyLed(true);
         }
         catch (const InternalFailure& e)
@@ -1294,6 +1298,7 @@ ipmi::RspType<> ipmiChassisIdentify(std::optional<uint8_t> interval,
 
         if (forceIdentify)
         {
+            chassisIDState = ChassisIDState::indefiniteOn;
             return ipmi::responseSuccess();
         }
         // start the timer
