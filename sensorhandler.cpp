@@ -329,16 +329,54 @@ bool isAnalogSensor(const std::string& interface)
     return (analogSensorInterfaces.count(interface));
 }
 
-ipmi_ret_t setSensorReading(void* request)
+/**
+@brief This command is used to set sensorReading.
+
+@param
+    -  sensorNumber
+    -  operation
+    -  reading
+    -  assertOffset0_7
+    -  assertOffset8_14
+    -  deassertOffset0_7
+    -  deassertOffset8_14
+    -  eventData1
+    -  eventData2
+    -  eventData3
+
+@return completion code on success.
+**/
+
+ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
+                                     uint8_t reading, uint8_t assertOffset0_7,
+                                     uint8_t assertOffset8_14,
+                                     uint8_t deassertOffset0_7,
+                                     uint8_t deassertOffset8_14,
+                                     uint8_t eventData1, uint8_t eventData2,
+                                     uint8_t eventData3)
 {
-    ipmi::sensor::SetSensorReadingReq cmdData =
-        *(static_cast<ipmi::sensor::SetSensorReadingReq*>(request));
+    log<level::DEBUG>("IPMI SET_SENSOR",
+                      entry("SENSOR_NUM=0x%02x", sensorNumber));
+
+    ipmi::sensor::SetSensorReadingReq cmdData;
+
+    cmdData.number = sensorNumber;
+    cmdData.operation = operation;
+    cmdData.reading = reading;
+    cmdData.assertOffset0_7 = assertOffset0_7;
+    cmdData.assertOffset8_14 = assertOffset8_14;
+    cmdData.deassertOffset0_7 = deassertOffset0_7;
+    cmdData.deassertOffset8_14 = deassertOffset8_14;
+    cmdData.eventData1 = eventData1;
+    cmdData.eventData2 = eventData2;
+    cmdData.eventData3 = eventData3;
 
     // Check if the Sensor Number is present
-    const auto iter = sensors.find(cmdData.number);
+    const auto iter = sensors.find(sensorNumber);
     if (iter == sensors.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        updateSensorRecordFromSSRAESC(&sensorNumber);
+        return ipmi::responseSuccess();
     }
 
     try
@@ -347,49 +385,24 @@ ipmi_ret_t setSensorReading(void* request)
             (iter->second.mutability & ipmi::sensor::Mutability::Write))
         {
             log<level::ERR>("Sensor Set operation is not allowed",
-                            entry("SENSOR_NUM=%d", cmdData.number));
-            return IPMI_CC_ILLEGAL_COMMAND;
+                            entry("SENSOR_NUM=%d", sensorNumber));
+            return ipmi::responseIllegalCommand();
         }
-        return iter->second.updateFunc(cmdData, iter->second);
+        auto ipmiRC = iter->second.updateFunc(cmdData, iter->second);
+        return ipmi::response(ipmiRC);
     }
     catch (InternalFailure& e)
     {
         log<level::ERR>("Set sensor failed",
-                        entry("SENSOR_NUM=%d", cmdData.number));
+                        entry("SENSOR_NUM=%d", sensorNumber));
         commit<InternalFailure>();
+        return ipmi::responseUnspecifiedError();
     }
     catch (const std::runtime_error& e)
     {
         log<level::ERR>(e.what());
+        return ipmi::responseUnspecifiedError();
     }
-
-    return IPMI_CC_UNSPECIFIED_ERROR;
-}
-
-ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                               ipmi_request_t request, ipmi_response_t response,
-                               ipmi_data_len_t data_len, ipmi_context_t context)
-{
-    auto reqptr = static_cast<sensor_data_t*>(request);
-
-    log<level::DEBUG>("IPMI SET_SENSOR",
-                      entry("SENSOR_NUM=0x%02x", reqptr->sennum));
-
-    /*
-     * This would support the Set Sensor Reading command for the presence
-     * and functional state of Processor, Core & DIMM. For the remaining
-     * sensors the existing support is invoked.
-     */
-    auto ipmiRC = setSensorReading(request);
-
-    if (ipmiRC == IPMI_CC_SENSOR_INVALID)
-    {
-        updateSensorRecordFromSSRAESC(reqptr);
-        ipmiRC = IPMI_CC_OK;
-    }
-
-    *data_len = 0;
-    return ipmiRC;
 }
 
 ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -1066,9 +1079,9 @@ void register_netfn_sen_functions()
                            ipmi_sen_get_sensor_type, PRIVILEGE_USER);
 
     // <Set Sensor Reading and Event Status>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR, nullptr,
-                           ipmi_sen_set_sensor, PRIVILEGE_OPERATOR);
-
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
+                          ipmi::Privilege::Operator, ipmiSetSensorReading);
     // <Get Sensor Reading>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, nullptr,
                            ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
