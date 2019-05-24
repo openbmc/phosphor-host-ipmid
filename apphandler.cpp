@@ -102,16 +102,14 @@ static constexpr int base_16 = 16;
  * @return On success returns the Version info from primary s/w object.
  *
  */
-std::string getActiveSoftwareVersionInfo()
+std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
 {
-    auto busp = getSdBus();
-
     std::string revision{};
     ipmi::ObjectTree objectTree;
     try
     {
         objectTree =
-            ipmi::getAllDbusObjects(*busp, softwareRoot, redundancyIntf);
+            ipmi::getAllDbusObjects(*ctx->bus, softwareRoot, redundancyIntf);
     }
     catch (sdbusplus::exception::SdBusError& e)
     {
@@ -125,9 +123,9 @@ std::string getActiveSoftwareVersionInfo()
     for (auto& softObject : objectTree)
     {
         auto service =
-            ipmi::getService(*busp, redundancyIntf, softObject.first);
+            ipmi::getService(*ctx->bus, redundancyIntf, softObject.first);
         auto objValueTree =
-            ipmi::getManagedObjects(*busp, service, softwareRoot);
+            ipmi::getManagedObjects(*ctx->bus, service, softwareRoot);
 
         auto minPriority = 0xFF;
         for (const auto& objIter : objValueTree)
@@ -569,16 +567,31 @@ int convertVersion(std::string s, Revision& rev)
     return 0;
 }
 
-auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
-                                           uint8_t, // Device Revision
-                                           uint8_t, // Firmware Revision Major
-                                           uint8_t, // Firmware Revision minor
-                                           uint8_t, // IPMI version
-                                           uint8_t, // Additional device support
-                                           uint24_t, // MFG ID
-                                           uint16_t, // Product ID
-                                           uint32_t  // AUX info
-                                           >
+/* @brief: Implement the Get Device ID IPMI command per the IPMI spec
+ *  @param[in] ctx - shared_ptr to an IPMI context struct
+ *
+ *  @returns IPMI completion code plus response data
+ *   - Device ID (manufacturer defined)
+ *   - Device revision[4 bits]; reserved[3 bits]; SDR support[1 bit]
+ *   - FW revision major[7 bits] (binary encoded); available[1 bit]
+ *   - FW Revision minor (BCD encoded)
+ *   - IPMI version (0x02 for IPMI 2.0)
+ *   - device support (bitfield of supported options)
+ *   - MFG IANA ID (3 bytes)
+ *   - product ID (2 bytes)
+ *   - AUX info (4 bytes)
+ */
+ipmi::RspType<uint8_t,  // Device ID
+              uint8_t,  // Device Revision
+              uint8_t,  // Firmware Revision Major
+              uint8_t,  // Firmware Revision minor
+              uint8_t,  // IPMI version
+              uint8_t,  // Additional device support
+              uint24_t, // MFG ID
+              uint16_t, // Product ID
+              uint32_t  // AUX info
+              >
+    ipmiAppGetDeviceId(ipmi::Context::ptr ctx)
 {
     int r = -1;
     Revision rev = {0};
@@ -603,7 +616,7 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
     {
         try
         {
-            auto version = getActiveSoftwareVersionInfo();
+            auto version = getActiveSoftwareVersionInfo(ctx);
             r = convertVersion(version, rev);
         }
         catch (const std::exception& e)
