@@ -602,68 +602,78 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_set_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief implements set chassis capalibities command
+ *  @param intrusion        -
+ *  @param FPLockout        -
+ *  @param reserved1        - skip one bit
+ *  @param FRUDeviceAddr    - chassis FRU info Device Address
+ *  @param SDRDeviceAddr    - chassis SDR device address
+ *  @param SELDeviceAddr    - chassis SEL device address
+ *  @param SMDeviceAddr     - chassis system management device address
+ *  @param BridgeDeviceAddr - chassis bridge device address
+ *
+ *  @returns IPMI completion code
+ */
+ipmi::RspType<> ipmiSetChassisCap(uint1_t intrusion, uint1_t FPLockout,
+                                  uint6_t reserved1, uint8_t FRUDeviceAddr,
+                                  uint8_t SDRDeviceAddr, uint8_t SELDeviceAddr,
+                                  uint8_t SMDeviceAddr,
+                                  uint8_t BridgeDeviceAddr)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
 
-    if (*data_len != sizeof(ipmi_chassis_cap_t))
-    {
-        log<level::ERR>("Unsupported request length",
-                        entry("LEN=0x%x", *data_len));
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    ipmi_chassis_cap_t* chassisCap = static_cast<ipmi_chassis_cap_t*>(request);
-
-    *data_len = 0;
-
+    constexpr uint8_t reserveMaskbit = 2;
+    ipmi_chassis_cap_t chassisCap{};
+    chassisCap.cap_flags = static_cast<uint8_t>(
+        (static_cast<uint8_t>(intrusion)) |
+        ((static_cast<uint8_t>(FPLockout)) << 1) |
+        (static_cast<uint8_t>(reserved1) << reserveMaskbit));
+    chassisCap.fru_info_dev_addr = static_cast<uint8_t>(FRUDeviceAddr);
+    chassisCap.sel_dev_addr = static_cast<uint8_t>(SELDeviceAddr);
+    chassisCap.sdr_dev_addr = static_cast<uint8_t>(SDRDeviceAddr);
+    chassisCap.system_management_dev_addr = static_cast<uint8_t>(SMDeviceAddr);
+    chassisCap.bridge_dev_addr = static_cast<uint8_t>(BridgeDeviceAddr);
     // check input data
-    if (0 != (chassisCap->cap_flags & ~chassisCapFlagMask))
+    if (0 != (chassisCap.cap_flags & ~chassisCapFlagMask))
     {
         log<level::ERR>("Unsupported request parameter(CAP Flags)",
-                        entry("REQ=0x%x", chassisCap->cap_flags));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+                        entry("REQ=0x%x", chassisCap.cap_flags));
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (0 != (chassisCap->fru_info_dev_addr & ~chassisCapAddrMask))
+    if (0 != (chassisCap.fru_info_dev_addr & ~chassisCapAddrMask))
     {
         log<level::ERR>("Unsupported request parameter(FRU Addr)",
-                        entry("REQ=0x%x", chassisCap->fru_info_dev_addr));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+                        entry("REQ=0x%x", chassisCap.fru_info_dev_addr));
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (0 != (chassisCap->sdr_dev_addr & ~chassisCapAddrMask))
+    if (0 != (chassisCap.sdr_dev_addr & ~chassisCapAddrMask))
     {
         log<level::ERR>("Unsupported request parameter(SDR Addr)",
-                        entry("REQ=0x%x", chassisCap->sdr_dev_addr));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+                        entry("REQ=0x%x", chassisCap.sdr_dev_addr));
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (0 != (chassisCap->sel_dev_addr & ~chassisCapAddrMask))
+    if (0 != (chassisCap.sel_dev_addr & ~chassisCapAddrMask))
     {
         log<level::ERR>("Unsupported request parameter(SEL Addr)",
-                        entry("REQ=0x%x", chassisCap->sel_dev_addr));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+                        entry("REQ=0x%x", chassisCap.sel_dev_addr));
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (0 != (chassisCap->system_management_dev_addr & ~chassisCapAddrMask))
+    if (0 != (chassisCap.system_management_dev_addr & ~chassisCapAddrMask))
     {
         log<level::ERR>(
             "Unsupported request parameter(SM Addr)",
-            entry("REQ=0x%x", chassisCap->system_management_dev_addr));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+            entry("REQ=0x%x", chassisCap.system_management_dev_addr));
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (0 != (chassisCap->bridge_dev_addr & ~chassisCapAddrMask))
+    if (0 != (chassisCap.bridge_dev_addr & ~chassisCapAddrMask))
     {
         log<level::ERR>("Unsupported request parameter(Bridge Addr)",
-                        entry("REQ=0x%x", chassisCap->bridge_dev_addr));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+                        entry("REQ=0x%x", chassisCap.bridge_dev_addr));
+        return ipmi::responseInvalidFieldRequest();
     }
 
     try
@@ -674,39 +684,36 @@ ipmi_ret_t ipmi_set_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
-                              chassisCapFlagsProp, chassisCap->cap_flags);
+                              chassisCapFlagsProp, chassisCap.cap_flags);
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
                               chassisFRUDevAddrProp,
-                              chassisCap->fru_info_dev_addr);
+                              chassisCap.fru_info_dev_addr);
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
-                              chassisSDRDevAddrProp, chassisCap->sdr_dev_addr);
-
+                              chassisSDRDevAddrProp, chassisCap.sdr_dev_addr);
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
-                              chassisSELDevAddrProp, chassisCap->sel_dev_addr);
+                              chassisSELDevAddrProp, chassisCap.sel_dev_addr);
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
                               chassisSMDevAddrProp,
-                              chassisCap->system_management_dev_addr);
+                              chassisCap.system_management_dev_addr);
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
                               chassisBridgeDevAddrProp,
-                              chassisCap->bridge_dev_addr);
+                              chassisCap.bridge_dev_addr);
     }
     catch (std::exception& e)
     {
         log<level::ERR>(e.what());
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        return rc;
+        return ipmi::responseUnspecifiedError();
     }
-
-    return rc;
+    return ipmi::responseSuccess();
 }
 
 //------------------------------------------
@@ -1781,8 +1788,9 @@ void register_netfn_chassis_functions()
                            ipmi_get_chassis_cap, PRIVILEGE_USER);
 
     // Set Chassis Capabilities
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_SET_CHASSIS_CAP, NULL,
-                           ipmi_set_chassis_cap, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdSetChassisCapabilities,
+                          ipmi::Privilege::User, ipmiSetChassisCap);
 
     // <Get System Boot Options>
     ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL,
