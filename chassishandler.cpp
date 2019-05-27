@@ -110,24 +110,6 @@ static constexpr const char* resetButtonIntf =
 static constexpr const char* resetButtonPath =
     "/xyz/openbmc_project/Chassis/Buttons/Reset0";
 
-typedef struct
-{
-    uint8_t cap_flags;
-    uint8_t fru_info_dev_addr;
-    uint8_t sdr_dev_addr;
-    uint8_t sel_dev_addr;
-    uint8_t system_management_dev_addr;
-    uint8_t bridge_dev_addr;
-} __attribute__((packed)) ipmi_chassis_cap_t;
-
-typedef struct
-{
-    uint8_t cur_power_state;
-    uint8_t last_power_event;
-    uint8_t misc_power_state;
-    uint8_t front_panel_button_cap_status;
-} __attribute__((packed)) ipmi_get_chassis_status_t;
-
 // Phosphor Host State manager
 namespace State = sdbusplus::xyz::openbmc_project::State::server;
 
@@ -527,24 +509,26 @@ ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief Implements the get chassis capabilities command
+ *
+ *  @returns IPMI completion code plus response data
+ *  chassisCapFlags        - chassis capability flag
+ *  chassisFRUInfoDevAddr  - chassis FRU info Device Address
+ *  chassisSDRDevAddr      - chassis SDR device address
+ *  chassisSELDevAddr      - chassis SEL device address
+ *  chassisSMDevAddr       - chassis system management device address
+ *  chassisBridgeDevAddr   - chassis bridge device address
+ */
+ipmi::RspType<uint8_t, // chassis capabilities flag
+              uint8_t, // chassis FRU info Device Address
+              uint8_t, // chassis SDR device address
+              uint8_t, // chassis SEL device address
+              uint8_t, // chassis system management device address
+              uint8_t  // chassis bridge device address
+              >
+    ipmiGetChassisCap()
 {
-    // sd_bus error
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    ipmi_chassis_cap_t chassis_cap{};
-
-    if (*data_len != 0)
-    {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    *data_len = sizeof(ipmi_chassis_cap_t);
-
+    ipmi::PropertyMap properties;
     try
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
@@ -563,53 +547,64 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         //            interfaces).
         // [0] -1b = Chassis provides intrusion (physical security) sensor.
         // set to default value 0x0.
-        ipmi::Value variant = ipmi::getDbusProperty(
-            bus, chassisCapObject.second, chassisCapObject.first,
-            chassisCapIntf, chassisCapFlagsProp);
-        chassis_cap.cap_flags = std::get<uint8_t>(variant);
 
-        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
-                                        chassisCapObject.first, chassisCapIntf,
-                                        chassisFRUDevAddrProp);
-        // Chassis FRU info Device Address.
-        chassis_cap.fru_info_dev_addr = std::get<uint8_t>(variant);
-
-        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
-                                        chassisCapObject.first, chassisCapIntf,
-                                        chassisSDRDevAddrProp);
-        // Chassis SDR Device Address.
-        chassis_cap.sdr_dev_addr = std::get<uint8_t>(variant);
-
-        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
-                                        chassisCapObject.first, chassisCapIntf,
-                                        chassisSELDevAddrProp);
-        // Chassis SEL Device Address.
-        chassis_cap.sel_dev_addr = std::get<uint8_t>(variant);
-
-        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
-                                        chassisCapObject.first, chassisCapIntf,
-                                        chassisSMDevAddrProp);
-        // Chassis System Management Device Address.
-        chassis_cap.system_management_dev_addr = std::get<uint8_t>(variant);
-
-        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
-                                        chassisCapObject.first, chassisCapIntf,
-                                        chassisBridgeDevAddrProp);
-        // Chassis Bridge Device Address.
-        chassis_cap.bridge_dev_addr = std::get<uint8_t>(variant);
-        uint8_t* respP = reinterpret_cast<uint8_t*>(response);
-        uint8_t* chassisP = reinterpret_cast<uint8_t*>(&chassis_cap);
-        std::copy(chassisP, chassisP + *data_len, respP);
+        properties =
+            ipmi::getAllDbusProperties(bus, chassisCapObject.second,
+                                       chassisCapObject.first, chassisCapIntf);
     }
     catch (std::exception& e)
     {
-        log<level::ERR>(e.what());
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        *data_len = 0;
-        return rc;
+        log<level::ERR>("Failed to fetch Chassis Capability properties",
+                        entry("ERROR=%s", e.what()));
+        return ipmi::responseUnspecifiedError();
     }
 
-    return rc;
+    uint8_t* chassisCapFlags =
+        std::get_if<uint8_t>(&properties[chassisCapFlagsProp]);
+    if (chassisCapFlags == nullptr)
+    {
+        log<level::ERR>("Error to get chassis capability flags");
+        return ipmi::responseUnspecifiedError();
+    }
+    uint8_t* chassisFRUInfoDevAddr =
+        std::get_if<uint8_t>(&properties[chassisFRUDevAddrProp]);
+    if (chassisFRUInfoDevAddr == nullptr)
+    {
+        log<level::ERR>("Error to get chassis FRU info device address");
+        return ipmi::responseUnspecifiedError();
+    }
+    uint8_t* chassisSDRDevAddr =
+        std::get_if<uint8_t>(&properties[chassisSDRDevAddrProp]);
+    if (chassisSDRDevAddr == nullptr)
+    {
+        log<level::ERR>("Error to get chassis SDR device address");
+        return ipmi::responseUnspecifiedError();
+    }
+    uint8_t* chassisSELDevAddr =
+        std::get_if<uint8_t>(&properties[chassisSELDevAddrProp]);
+    if (chassisSELDevAddr == nullptr)
+    {
+        log<level::ERR>("Error to get chassis SEL device address");
+        return ipmi::responseUnspecifiedError();
+    }
+    uint8_t* chassisSMDevAddr =
+        std::get_if<uint8_t>(&properties[chassisSMDevAddrProp]);
+    if (chassisSMDevAddr == nullptr)
+    {
+        log<level::ERR>("Error to get chassis SM device address");
+        return ipmi::responseUnspecifiedError();
+    }
+    uint8_t* chassisBridgeDevAddr =
+        std::get_if<uint8_t>(&properties[chassisBridgeDevAddrProp]);
+    if (chassisBridgeDevAddr == nullptr)
+    {
+        log<level::ERR>("Error to get chassis bridge device address");
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess(*chassisCapFlags, *chassisFRUInfoDevAddr,
+                                 *chassisSDRDevAddr, *chassisSELDevAddr,
+                                 *chassisSMDevAddr, *chassisBridgeDevAddr);
 }
 
 /** @brief implements set chassis capalibities command
@@ -1834,8 +1829,9 @@ void register_netfn_chassis_functions()
                            ipmi_chassis_wildcard, PRIVILEGE_USER);
 
     // Get Chassis Capabilities
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_CHASSIS_CAP, NULL,
-                           ipmi_get_chassis_cap, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdGetChassisCapabilities,
+                          ipmi::Privilege::User, ipmiGetChassisCap);
 
     // Set Chassis Capabilities
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
