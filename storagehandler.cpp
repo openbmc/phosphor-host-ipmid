@@ -611,44 +611,44 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief implements the Add SEL entry command
+ * @request
+ *   - SEL Record Data // uint8_t array 16 bytes.
+ *
+ *  @returns ipmi completion code plus response data
+ *   - RecordID of the Added SEL entry
+ */
+ipmi::RspType<uint16_t // RecordID of the Added SEL entry
+              >
+    ipmiStorageAddSEL(std::array<uint8_t, 16>& recordData)
 {
-    if (*data_len != sizeof(ipmi_add_sel_request_t))
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    ipmi_ret_t rc = IPMI_CC_OK;
-    ipmi_add_sel_request_t* p = (ipmi_add_sel_request_t*)request;
-    uint16_t recordid;
 
     // Per the IPMI spec, need to cancel the reservation when a SEL entry is
     // added
     cancelSELReservation();
 
-    recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
+    static constexpr auto eventData2ByteInSEL = 14;
+    static constexpr auto eventData3ByteInSEL = 15;
 
-    *data_len = sizeof(recordid);
-
-    // Pack the actual response
-    std::memcpy(response, &p->eventdata[1], 2);
+    uint16_t recordId = ((uint16_t)recordData[eventData3ByteInSEL] << 8) |
+                        recordData[eventData2ByteInSEL];
 
     // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
     // a maintenance procedure associated with eSEL record.
     static constexpr auto procedureType = 0xDE;
-    if (p->recordtype == procedureType)
+    static constexpr auto recordTypeByteInSEL = 2;
+    static constexpr auto sensorTypeByteInSEL = 10;
+
+    if (recordData[recordTypeByteInSEL] ==
+        procedureType) // recordType is 3rd byte in SEL Record format
     {
         // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
         // procedure number.
-        createProcedureLogEntry(p->sensortype);
+        createProcedureLogEntry(
+            recordData[sensorTypeByteInSEL]); // sensorType is 11th byte in SEL
+                                              // Record format
     }
-
-    return rc;
+    return ipmi::responseSuccess(recordId);
 }
 
 /** @brief implements the get FRU Inventory Area Info command
@@ -794,8 +794,10 @@ void register_netfn_storage_functions()
                           ipmi::Privilege::Operator, deleteSELEntry);
 
     // <Add SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
-                           ipmi_storage_add_sel, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdAddSelEntry,
+                          ipmi::Privilege::Operator, ipmiStorageAddSEL);
+
     // <Clear SEL>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdClearSel, ipmi::Privilege::Operator,
