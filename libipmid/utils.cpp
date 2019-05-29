@@ -400,6 +400,215 @@ void callDbusMethod(sdbusplus::bus::bus& bus, const std::string& service,
 }
 
 } // namespace method_no_args
+
+/********* Begin co-routine yielding alternatives ***************/
+
+boost::system::error_code getService(Context::ptr ctx, std::string& service,
+                                     const std::string& intf,
+                                     const std::string& path)
+{
+    boost::system::error_code ec;
+    std::map<std::string, std::vector<std::string>> mapperResponse =
+        ctx->bus->yield_method_call<decltype(mapperResponse)>(
+            ctx->yield, ec, "xyz.openbmc_project.ObjectMapper",
+            "/xyz/openbmc_project/object_mapper",
+            "xyz.openbmc_project.ObjectMapper", "GetObject",
+            std::vector<std::string>({intf}));
+
+    if (!ec)
+    {
+        service = mapperResponse.begin()->first;
+    }
+    return ec;
+}
+
+boost::system::error_code getDbusObject(Context::ptr ctx,
+                                        DbusObjectInfo& dbusObject,
+                                        const std::string& interface,
+                                        const std::string& subtreePath,
+                                        const std::string& match)
+{
+    std::vector<DbusInterface> interfaces;
+    interfaces.emplace_back(interface);
+
+    auto depth = 0;
+    boost::system::error_code ec;
+    ObjectTree objectTree = ctx->bus->yield_method_call<ObjectTree>(
+        ctx->yield, ec, MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF, "GetSubTree",
+        subtreePath, depth, interfaces);
+
+    if (ec)
+    {
+        return ec;
+    }
+
+    if (objectTree.empty())
+    {
+        log<level::ERR>("No Object has implemented the interface",
+                        entry("INTERFACE=%s", interface.c_str()),
+                        entry("NETFN=%x", ctx->netFn),
+                        entry("CMD=%xx,", ctx->cmd));
+        return boost::system::errc::make_error_code(
+            boost::system::errc::no_such_process);
+    }
+
+    // if match is empty then return the first object
+    if (match == "")
+    {
+        dbusObject = std::make_pair(
+            objectTree.begin()->first,
+            std::move(objectTree.begin()->second.begin()->first));
+        return ec;
+    }
+
+    // else search the match string in the object path
+    auto found = std::find_if(
+        objectTree.begin(), objectTree.end(), [&match](const auto& object) {
+            return (object.first.find(match) != std::string::npos);
+        });
+
+    if (found == objectTree.end())
+    {
+        log<level::ERR>("Failed to find object which matches",
+                        entry("MATCH=%s", match.c_str()),
+                        entry("NETFN=%x", ctx->netFn),
+                        entry("CMD=%xx,", ctx->cmd));
+        // set ec
+        return boost::system::errc::make_error_code(
+            boost::system::errc::no_such_file_or_directory);
+    }
+
+    dbusObject =
+        make_pair(found->first, std::move(found->second.begin()->first));
+    return ec;
+}
+
+boost::system::error_code
+    getAllDbusProperties(Context::ptr ctx, PropertyMap& properties,
+                         const std::string& service, const std::string& objPath,
+                         const std::string& interface,
+                         std::chrono::microseconds timeout)
+{
+    boost::system::error_code ec;
+    properties = ctx->bus->yield_method_call<PropertyMap>(
+        ctx->yield, ec, service.c_str(), objPath.c_str(), PROP_INTF,
+        METHOD_GET_ALL, interface);
+    return ec;
+}
+
+boost::system::error_code
+    setDbusProperty(Context::ptr ctx, const std::string& service,
+                    const std::string& objPath, const std::string& interface,
+                    const std::string& property, const Value& value,
+                    std::chrono::microseconds timeout)
+{
+    boost::system::error_code ec;
+    ctx->bus->yield_method_call(ctx->yield, ec, service.c_str(),
+                                objPath.c_str(), PROP_INTF, METHOD_SET,
+                                interface, property, value);
+    return ec;
+}
+
+boost::system::error_code getAllDbusObjects(Context::ptr ctx,
+                                            ObjectTree& objectTree,
+                                            const std::string& serviceRoot,
+                                            const std::string& interface,
+                                            const std::string& match)
+{
+    boost::system::error_code ec;
+    std::vector<std::string> interfaces;
+    interfaces.emplace_back(interface);
+
+    auto depth = 0;
+
+    objectTree = ctx->bus->yield_method_call<ObjectTree>(
+        ctx->yield, ec, MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF, "GetSubTree",
+        serviceRoot, depth, interfaces);
+
+    if (ec)
+    {
+        return ec;
+    }
+
+    for (auto it = objectTree.begin(); it != objectTree.end();)
+    {
+        if (it->first.find(match) == std::string::npos)
+        {
+            it = objectTree.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    return ec;
+}
+
+boost::system::error_code deleteAllDbusObjects(Context::ptr ctx,
+                                               const std::string& serviceRoot,
+                                               const std::string& interface,
+                                               const std::string& match)
+{
+    ObjectTree objectTree;
+    boost::system::error_code ec =
+        getAllDbusObjects(ctx, objectTree, serviceRoot, interface, match);
+    if (ec)
+    {
+        return ec;
+    }
+
+    for (auto& object : objectTree)
+    {
+        ctx->bus->yield_method_call(ctx->yield, ec,
+                                    object.second.begin()->first, object.first,
+                                    DELETE_INTERFACE, "Delete");
+        if (ec)
+        {
+            break;
+        }
+    }
+    return ec;
+}
+
+boost::system::error_code getManagedObjects(Context::ptr ctx,
+                                            ObjectValueTree& objects,
+                                            const std::string& service,
+                                            const std::string& objPath)
+{
+    boost::system::error_code ec;
+    objects = ctx->bus->yield_method_call<ipmi::ObjectValueTree>(
+        ctx->yield, ec, service.c_str(), objPath.c_str(),
+        "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
+    return ec;
+}
+
+boost::system::error_code getAllAncestors(Context::ptr ctx,
+                                          ObjectTree& objectTree,
+                                          const std::string& path,
+                                          InterfaceList&& interfaces)
+{
+    boost::system::error_code ec;
+    objectTree = ctx->bus->yield_method_call<ObjectTree>(
+        ctx->yield, ec, MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
+        "GetAncestors", path, interfaces);
+
+    if (ec)
+    {
+        return ec;
+    }
+
+    if (objectTree.empty())
+    {
+        ec = boost::system::errc::make_error_code(
+            boost::system::errc::no_such_file_or_directory);
+    }
+
+    return ec;
+}
+
+/********* End co-routine yielding alternatives ***************/
+
 ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
                       std::vector<uint8_t> writeData,
                       std::vector<uint8_t>& readBuf)
