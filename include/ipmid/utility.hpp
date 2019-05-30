@@ -214,6 +214,13 @@ struct is_tuple<std::tuple<T...>> : std::true_type
 {
 };
 
+/** @brief used for static_assert in a constexpr-if else statement
+ */
+template <typename T>
+struct dependent_false : std::false_type
+{
+};
+
 } // namespace utility
 
 } // namespace ipmi
