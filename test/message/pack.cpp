@@ -235,6 +235,27 @@ TEST(PackBasics, VectorUint8)
     ASSERT_EQ(p.raw, k);
 }
 
+TEST(PackBasics, VectorUnaligned)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true, std::vector<uint8_t>{1}), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>{0b1});
+}
+
+TEST(PackBasics, StringView)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(std::string_view{"\x24\x30\x11"}), 0);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0x24, 0x30, 0x11}));
+}
+
+TEST(PackBasics, StringViewUnaligned)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true, std::string_view{"abc"}), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+}
+
 TEST(PackBasics, OptionalEmpty)
 {
     // an optional will only pack if the value is present
@@ -259,6 +280,56 @@ TEST(PackBasics, OptionalContainsValue)
     // check that the bytes were correctly packed (in byte order)
     std::vector<uint8_t> k = {0x02, 0x00, 0x86, 0x04};
     ASSERT_EQ(p.raw, k);
+}
+
+TEST(PackBasics, Payload)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true), 0);
+    EXPECT_EQ(p.pack(ipmi::message::Payload({0x24, 0x30})), 0);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1, 0x24, 0x30}));
+}
+
+TEST(PackBasics, PayloadUnaligned)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true, ipmi::message::Payload({0x24})), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+}
+
+TEST(PackBasics, PayloadOtherUnaligned)
+{
+    ipmi::message::Payload p, q;
+    q.appendBits(1, 1);
+    EXPECT_EQ(p.pack(true), 0);
+    EXPECT_EQ(p.pack(q), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+}
+
+TEST(PackBasics, PrependPayload)
+{
+    ipmi::message::Payload p;
+    EXPECT_EQ(p.pack(true), 0);
+    EXPECT_EQ(p.prepend(ipmi::message::Payload({0x24, 0x30})), 0);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0x24, 0x30, 0b1}));
+}
+
+TEST(PackBasics, PrependPayloadUnaligned)
+{
+    ipmi::message::Payload p;
+    p.appendBits(1, 1);
+    EXPECT_EQ(p.prepend(ipmi::message::Payload({0x24})), 1);
+    p.drain();
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+}
+
+TEST(PackBasics, PrependPayloadOtherUnaligned)
+{
+    ipmi::message::Payload p, q;
+    q.appendBits(1, 1);
+    EXPECT_EQ(p.pack(true), 0);
+    EXPECT_EQ(p.prepend(q), 1);
+    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
 }
 
 TEST(PackAdvanced, Uints)

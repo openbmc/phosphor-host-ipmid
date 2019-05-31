@@ -129,7 +129,7 @@ std::tuple<Path, OneTimeEnabled> setting(const Objects& objects,
         elog<InternalFailure>();
     }
 
-    sdbusplus::message::variant<bool> enabled;
+    std::variant<bool> enabled;
     reply.read(enabled);
     auto oneTimeEnabled = std::get<bool>(enabled);
     const Path& setting = oneTimeEnabled ? oneTimeSetting : regularSetting;

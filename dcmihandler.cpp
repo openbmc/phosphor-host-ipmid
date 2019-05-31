@@ -13,7 +13,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
-#include <sdbusplus/message/types.hpp>
+#include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 using namespace phosphor::logging;
@@ -37,8 +37,8 @@ constexpr auto DCMI_OPTION_60_43_MASK = 0x02;
 constexpr auto DCMI_OPTION_12_MASK = 0x01;
 constexpr auto DCMI_ACTIVATE_DHCP_MASK = 0x01;
 constexpr auto DCMI_ACTIVATE_DHCP_REPLY = 0x00;
-constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE = 0x05;
-constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE = 0x04;
+constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE = 0x04;
+constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE = 0x03;
 constexpr auto DHCP_TIMING1 = 0x04;       // 4 sec
 constexpr auto DHCP_TIMING2_UPPER = 0x00; // 2 min
 constexpr auto DHCP_TIMING2_LOWER = 0x78;
@@ -85,7 +85,7 @@ uint32_t getPcap(sdbusplus::bus::bus& bus)
         log<level::ERR>("Error in getPcap prop");
         elog<InternalFailure>();
     }
-    sdbusplus::message::variant<uint32_t> pcap;
+    std::variant<uint32_t> pcap;
     reply.read(pcap);
 
     return std::get<uint32_t>(pcap);
@@ -106,7 +106,7 @@ bool getPcapEnabled(sdbusplus::bus::bus& bus)
         log<level::ERR>("Error in getPcapEnabled prop");
         elog<InternalFailure>();
     }
-    sdbusplus::message::variant<bool> pcapEnabled;
+    std::variant<bool> pcapEnabled;
     reply.read(pcapEnabled);
 
     return std::get<bool>(pcapEnabled);
@@ -120,7 +120,7 @@ void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap)
                                       "org.freedesktop.DBus.Properties", "Set");
 
     method.append(PCAP_INTERFACE, POWER_CAP_PROP);
-    method.append(sdbusplus::message::variant<uint32_t>(powerCap));
+    method.append(std::variant<uint32_t>(powerCap));
 
     auto reply = bus.call(method);
 
@@ -139,7 +139,7 @@ void setPcapEnable(sdbusplus::bus::bus& bus, bool enabled)
                                       "org.freedesktop.DBus.Properties", "Set");
 
     method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
-    method.append(sdbusplus::message::variant<bool>(enabled));
+    method.append(std::variant<bool>(enabled));
 
     auto reply = bus.call(method);
 
@@ -205,7 +205,7 @@ std::string readAssetTag()
         elog<InternalFailure>();
     }
 
-    sdbusplus::message::variant<std::string> assetTag;
+    std::variant<std::string> assetTag;
     reply.read(assetTag);
 
     return std::get<std::string>(assetTag);
@@ -225,7 +225,7 @@ void writeAssetTag(const std::string& assetTag)
         (objectTree.begin()->first).c_str(), dcmi::propIntf, "Set");
     method.append(dcmi::assetTagIntf);
     method.append(dcmi::assetTagProp);
-    method.append(sdbusplus::message::variant<std::string>(assetTag));
+    method.append(std::variant<std::string>(assetTag));
 
     auto reply = bus.call(method);
     if (reply.is_method_error())
@@ -310,17 +310,9 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID;
     }
 
-    auto requestData =
-        reinterpret_cast<const dcmi::GetPowerLimitRequest*>(request);
     std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerLimitResponse));
     auto responseData =
         reinterpret_cast<dcmi::GetPowerLimitResponse*>(outPayload.data());
-
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
 
     sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
     uint32_t pcapValue = 0;
@@ -336,8 +328,6 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-
-    responseData->groupID = dcmi::groupExtId;
 
     /*
      * Exception action if power limit is exceeded and cannot be controlled
@@ -380,15 +370,6 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     auto requestData =
         reinterpret_cast<const dcmi::SetPowerLimitRequest*>(request);
-    std::vector<uint8_t> outPayload(sizeof(dcmi::SetPowerLimitResponse));
-    auto responseData =
-        reinterpret_cast<dcmi::SetPowerLimitResponse*>(outPayload.data());
-
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
 
     sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
@@ -406,10 +387,7 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     log<level::INFO>("Set Power Cap",
                      entry("POWERCAP=%u", requestData->powerLimit));
 
-    responseData->groupID = dcmi::groupExtId;
-    memcpy(response, outPayload.data(), outPayload.size());
-    *data_len = outPayload.size();
-
+    *data_len = 0;
     return IPMI_CC_OK;
 }
 
@@ -426,15 +404,6 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     auto requestData =
         reinterpret_cast<const dcmi::ApplyPowerLimitRequest*>(request);
-    std::vector<uint8_t> outPayload(sizeof(dcmi::ApplyPowerLimitResponse));
-    auto responseData =
-        reinterpret_cast<dcmi::ApplyPowerLimitResponse*>(outPayload.data());
-
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
 
     sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
@@ -452,10 +421,7 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     log<level::INFO>("Set Power Cap Enable",
                      entry("POWERCAPENABLE=%u", requestData->powerLimitAction));
 
-    responseData->groupID = dcmi::groupExtId;
-    memcpy(response, outPayload.data(), outPayload.size());
-    *data_len = outPayload.size();
-
+    *data_len = 0;
     return IPMI_CC_OK;
 }
 
@@ -468,12 +434,6 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     std::vector<uint8_t> outPayload(sizeof(dcmi::GetAssetTagResponse));
     auto responseData =
         reinterpret_cast<dcmi::GetAssetTagResponse*>(outPayload.data());
-
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
 
     // Verify offset to read and number of bytes to read are not exceeding the
     // range.
@@ -496,8 +456,6 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-
-    responseData->groupID = dcmi::groupExtId;
 
     // Return if the asset tag is not populated.
     if (!assetTag.size())
@@ -544,12 +502,6 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto responseData =
         reinterpret_cast<dcmi::SetAssetTagResponse*>(outPayload.data());
 
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
     // Verify offset to read and number of bytes to read are not exceeding the
     // range.
     if ((requestData->offset > dcmi::assetTagMaxOffset) ||
@@ -580,7 +532,6 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         dcmi::writeAssetTag(assetTag);
 
-        responseData->groupID = dcmi::groupExtId;
         responseData->tagLength = assetTag.size();
         memcpy(response, outPayload.data(), outPayload.size());
         *data_len = outPayload.size();
@@ -606,8 +557,7 @@ ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     *data_len = 0;
 
-    if (requestData->groupID != dcmi::groupExtId ||
-        requestData->bytes > dcmi::maxBytes ||
+    if (requestData->bytes > dcmi::maxBytes ||
         requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen)
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -629,7 +579,6 @@ ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto responseStr = hostName.substr(requestData->offset, requestData->bytes);
     auto responseStrLen = std::min(static_cast<std::size_t>(requestData->bytes),
                                    responseStr.length() + 1);
-    responseData->groupID = dcmi::groupExtId;
     responseData->strLen = hostName.length();
     std::copy(begin(responseStr), end(responseStr), responseData->data);
 
@@ -650,8 +599,7 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     *data_len = 0;
 
-    if (requestData->groupID != dcmi::groupExtId ||
-        requestData->bytes > dcmi::maxBytes ||
+    if (requestData->bytes > dcmi::maxBytes ||
         requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen + 1 ||
         (requestData->offset + requestData->bytes ==
              dcmi::maxCtrlIdStrLen + 1 &&
@@ -700,7 +648,6 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    responseData->groupID = dcmi::groupExtId;
     responseData->offset = requestData->offset + requestData->bytes;
     *data_len = sizeof(*responseData);
     return IPMI_CC_OK;
@@ -767,12 +714,6 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
     auto responseData = reinterpret_cast<dcmi::GetDCMICapResponse*>(response);
 
     // For each capabilities in a parameter fill the data from
@@ -807,7 +748,6 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    responseData->groupID = dcmi::groupExtId;
     responseData->major = DCMI_SPEC_MAJOR_VERSION;
     responseData->minor = DCMI_SPEC_MINOR_VERSION;
     responseData->paramRevision = DCMI_PARAMETER_REVISION;
@@ -995,13 +935,6 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        log<level::ERR>("Invalid Group ID",
-                        entry("GROUP_ID=%d", requestData->groupID));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
     if (requestData->sensorType != dcmi::temperatureSensorType)
     {
         log<level::ERR>("Invalid sensor type",
@@ -1034,7 +967,6 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    responseData->groupID = dcmi::groupExtId;
     size_t payloadSize = temps.size() * sizeof(dcmi::temp_readings::Response);
     if (!temps.empty())
     {
@@ -1104,19 +1036,15 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     auto requestData =
         reinterpret_cast<const dcmi::SetConfParamsRequest*>(request);
-    auto responseData =
-        reinterpret_cast<dcmi::SetConfParamsResponse*>(response);
 
-    if (requestData->groupID != dcmi::groupExtId ||
-        *data_len < DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE ||
+    if (*data_len < DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE ||
         *data_len > DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE)
     {
-        log<level::ERR>("Invalid Group ID or Invalid Requested Packet size",
-                        entry("GROUP_ID=%d", requestData->groupID),
+        log<level::ERR>("Invalid Requested Packet size",
                         entry("PACKET SIZE=%d", *data_len));
+        *data_len = 0;
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
-
     *data_len = 0;
 
     try
@@ -1168,9 +1096,6 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    responseData->groupID = dcmi::groupExtId;
-    *data_len = sizeof(dcmi::SetConfParamsResponse);
-
     return IPMI_CC_OK;
 }
 
@@ -1186,11 +1111,9 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     responseData->data[0] = 0x00;
 
-    if (requestData->groupID != dcmi::groupExtId ||
-        *data_len != sizeof(dcmi::GetConfParamsRequest))
+    if (*data_len != sizeof(dcmi::GetConfParamsRequest))
     {
-        log<level::ERR>("Invalid Group ID or Invalid Requested Packet size",
-                        entry("GROUP_ID=%d", requestData->groupID),
+        log<level::ERR>("Invalid Requested Packet size",
                         entry("PACKET SIZE=%d", *data_len));
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
@@ -1240,7 +1163,6 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    responseData->groupID = dcmi::groupExtId;
     responseData->major = DCMI_SPEC_MAJOR_VERSION;
     responseData->minor = DCMI_SPEC_MINOR_VERSION;
     responseData->paramRevision = DCMI_CONFIG_PARAMETER_REVISION;
@@ -1260,16 +1182,8 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     ipmi_ret_t rc = IPMI_CC_OK;
-    auto requestData =
-        reinterpret_cast<const dcmi::GetPowerReadingRequest*>(request);
     auto responseData =
         reinterpret_cast<dcmi::GetPowerReadingResponse*>(response);
-
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     int64_t power = 0;
@@ -1284,7 +1198,6 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                         entry("PROPERTY=%s", SENSOR_VALUE_PROP));
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    responseData->groupID = dcmi::groupExtId;
 
     // TODO: openbmc/openbmc#2819
     // Minimum, Maximum, Average power, TimeFrame, TimeStamp,
@@ -1425,13 +1338,6 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    if (requestData->groupID != dcmi::groupExtId)
-    {
-        log<level::ERR>("Invalid Group ID",
-                        entry("GROUP_ID=%d", requestData->groupID));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
     if (requestData->sensorType != dcmi::temperatureSensorType)
     {
         log<level::ERR>("Invalid sensor type",
@@ -1473,7 +1379,6 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
-    responseData->groupID = dcmi::groupExtId;
     size_t payloadSize = sensors.size() * sizeof(dcmi::sensor_info::Response);
     if (!sensors.empty())
     {

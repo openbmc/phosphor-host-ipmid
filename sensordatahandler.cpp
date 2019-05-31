@@ -322,6 +322,15 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
     ipmi::sensor::InterfaceMap interfaces;
     for (const auto& interface : sensorInfo.propertyInterfaces)
     {
+        // An interface with no properties - It is possible that the sensor
+        // object on DBUS implements a DBUS interface with no properties.
+        // Make sure we add the interface to the list if interfaces on the
+        // object with an empty property map.
+        if (interface.second.empty())
+        {
+            interfaces.emplace(interface.first, ipmi::sensor::PropertyMap{});
+            continue;
+        }
         // For a property like functional state the result will be
         // calculated based on the true value of all conditions.
         for (const auto& property : interface.second)

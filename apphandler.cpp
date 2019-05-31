@@ -1,6 +1,12 @@
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <limits.h>
+#include <linux/i2c-dev.h>
+#include <linux/i2c.h>
 #include <mapper.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
 
@@ -57,6 +63,33 @@ using Activation =
     sdbusplus::xyz::openbmc_project::Software::server::Activation;
 using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
+
+typedef struct
+{
+    uint8_t busId;
+    uint8_t slaveAddr;
+    uint8_t slaveAddrMask;
+    std::vector<uint8_t> data;
+    std::vector<uint8_t> dataMask;
+} i2cMasterWRWhitelist;
+
+static std::vector<i2cMasterWRWhitelist>& getWRWhitelist()
+{
+    static std::vector<i2cMasterWRWhitelist> wrWhitelist;
+    return wrWhitelist;
+}
+
+static constexpr const char* i2cMasterWRWhitelistFile =
+    "/usr/share/ipmi-providers/master_write_read_white_list.json";
+
+static constexpr uint8_t maxIPMIWriteReadSize = 144;
+static constexpr const char* filtersStr = "filters";
+static constexpr const char* busIdStr = "busId";
+static constexpr const char* slaveAddrStr = "slaveAddr";
+static constexpr const char* slaveAddrMaskStr = "slaveAddrMask";
+static constexpr const char* cmdStr = "command";
+static constexpr const char* cmdMaskStr = "commandMask";
+static constexpr int base_16 = 16;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -156,6 +189,20 @@ bool getCurrentBmcState()
     return std::holds_alternative<std::string>(variant) &&
            BMC::convertBMCStateFromString(std::get<std::string>(variant)) ==
                BMC::BMCState::Ready;
+}
+
+bool getCurrentBmcStateWithFallback(const bool fallbackAvailability)
+{
+    try
+    {
+        return getCurrentBmcState();
+    }
+    catch (...)
+    {
+        // Nothing provided the BMC interface, therefore return whatever was
+        // configured as the default.
+        return fallbackAvailability;
+    }
 }
 
 namespace acpi_state
@@ -384,19 +431,22 @@ ipmi_ret_t ipmi_app_set_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                         ipmi_request_t request,
-                                         ipmi_response_t response,
-                                         ipmi_data_len_t data_len,
-                                         ipmi_context_t context)
+/**
+ *  @brief implements the get ACPI power state command
+ *
+ *  @return IPMI completion code plus response data on success.
+ *   -  ACPI system power state
+ *   -  ACPI device power state
+ **/
+ipmi::RspType<uint8_t, // acpiSystemPowerState
+              uint8_t  // acpiDevicePowerState
+              >
+    ipmiGetAcpiPowerState()
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    auto* res = reinterpret_cast<acpi_state::ACPIState*>(response);
+    uint8_t sysAcpiState;
+    uint8_t devAcpiState;
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-
-    *data_len = 0;
 
     try
     {
@@ -407,25 +457,21 @@ ipmi_ret_t ipmi_app_get_acpi_power_state(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             acpi_state::sysACPIProp);
         auto sysACPI = acpi_state::ACPIPowerState::convertACPIFromString(
             std::get<std::string>(sysACPIVal));
-        res->sysACPIState =
-            static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
+        sysAcpiState = static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
 
         auto devACPIVal = ipmi::getDbusProperty(
             bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
             acpi_state::devACPIProp);
         auto devACPI = acpi_state::ACPIPowerState::convertACPIFromString(
             std::get<std::string>(devACPIVal));
-        res->devACPIState =
-            static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
-
-        *data_len = sizeof(acpi_state::ACPIState);
+        devAcpiState = static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
     }
     catch (const InternalFailure& e)
     {
-        log<level::ERR>("Failed in get ACPI property");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
-    return rc;
+
+    return ipmi::responseSuccess(sysAcpiState, devAcpiState);
 }
 
 typedef struct
@@ -548,6 +594,7 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
         uint32_t aux;
     } devId;
     static bool dev_id_initialized = false;
+    static bool defaultActivationSetting = true;
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
     constexpr auto ipmiDevIdStateShift = 7;
     constexpr auto ipmiDevIdFw1Mask = ~(1 << ipmiDevIdStateShift);
@@ -595,6 +642,9 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
                 devId.prodId = data.value("prod_id", 0);
                 devId.aux = data.value("aux", 0);
 
+                // Set the availablitity of the BMC.
+                defaultActivationSetting = data.value("availability", true);
+
                 // Don't read the file every time if successful
                 dev_id_initialized = true;
             }
@@ -613,7 +663,7 @@ auto ipmiAppGetDeviceId() -> ipmi::RspType<uint8_t, // Device ID
 
     // Set availability to the actual current BMC state
     devId.fw[0] &= ipmiDevIdFw1Mask;
-    if (!getCurrentBmcState())
+    if (!getCurrentBmcStateWithFallback(defaultActivationSetting))
     {
         devId.fw[0] |= (1 << ipmiDevIdStateShift);
     }
@@ -650,120 +700,75 @@ auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
     return ipmi::responseSuccess(notImplemented, zero);
 }
 
-ipmi_ret_t ipmi_app_get_device_guid(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                    ipmi_request_t request,
-                                    ipmi_response_t response,
-                                    ipmi_data_len_t data_len,
-                                    ipmi_context_t context)
+static constexpr size_t uuidBinaryLength = 16;
+static std::array<uint8_t, uuidBinaryLength> rfc4122ToIpmi(std::string rfc4122)
 {
-    const char* objname = "/org/openbmc/control/chassis0";
-    const char* iface = "org.freedesktop.DBus.Properties";
-    const char* chassis_iface = "org.openbmc.control.Chassis";
-    sd_bus_message* reply = NULL;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    int r = 0;
-    char* uuid = NULL;
-    char* busname = NULL;
-
+    using Argument = xyz::openbmc_project::Common::InvalidArgument;
     // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
     // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte
     // order
     // Ex: 0x2332fc2c40e66298e511f2782395a361
-
-    const int resp_size = 16;     // Response is 16 hex bytes per IPMI Spec
-    uint8_t resp_uuid[resp_size]; // Array to hold the formatted response
-    // Point resp end of array to save in reverse order
-    int resp_loc = resp_size - 1;
-    int i = 0;
-    char* tokptr = NULL;
-    char* id_octet = NULL;
-    size_t total_uuid_size = 0;
-    // 1 byte of resp is built from 2 chars of uuid.
-    constexpr size_t max_uuid_size = 2 * resp_size;
-
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_OK;
-    *data_len = 0;
-
-    // Call Get properties method with the interface and property name
-    r = mapper_get_service(bus, objname, &busname);
-    if (r < 0)
+    constexpr size_t uuidHexLength = (2 * uuidBinaryLength);
+    constexpr size_t uuidRfc4122Length = (uuidHexLength + 4);
+    std::array<uint8_t, uuidBinaryLength> uuid;
+    if (rfc4122.size() == uuidRfc4122Length)
     {
-        log<level::ERR>("Failed to get bus name", entry("BUS=%s", objname),
-                        entry("ERRNO=0x%X", -r));
-        goto finish;
+        rfc4122.erase(std::remove(rfc4122.begin(), rfc4122.end(), '-'),
+                      rfc4122.end());
     }
-    r = sd_bus_call_method(bus, busname, objname, iface, "Get", &error, &reply,
-                           "ss", chassis_iface, "uuid");
-    if (r < 0)
+    if (rfc4122.size() != uuidHexLength)
     {
-        log<level::ERR>("Failed to call Get Method", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        goto finish;
+        elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                              Argument::ARGUMENT_VALUE(rfc4122.c_str()));
     }
-
-    r = sd_bus_message_read(reply, "v", "s", &uuid);
-    if (r < 0 || uuid == NULL)
+    for (size_t ind = 0; ind < uuidHexLength; ind += 2)
     {
-        log<level::ERR>("Failed to get a response", entry("ERRNO=0x%X", -r));
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto finish;
-    }
-
-    // Traverse the UUID
-    // Get the UUID octects separated by dash
-    id_octet = strtok_r(uuid, "-", &tokptr);
-
-    if (id_octet == NULL)
-    {
-        // Error
-        log<level::ERR>("Unexpected UUID format", entry("UUID=%s", uuid));
-        rc = IPMI_CC_RESPONSE_ERROR;
-        goto finish;
-    }
-
-    while (id_octet != NULL)
-    {
-        // Calculate the octet string size since it varies
-        // Divide it by 2 for the array size since 1 byte is built from 2 chars
-        int tmp_size = strlen(id_octet) / 2;
-
-        // Check if total UUID size has been exceeded
-        if ((total_uuid_size += strlen(id_octet)) > max_uuid_size)
+        char v[3];
+        v[0] = rfc4122[ind];
+        v[1] = rfc4122[ind + 1];
+        v[2] = 0;
+        size_t err;
+        long b;
+        try
         {
-            // Error - UUID too long to store
-            log<level::ERR>("UUID too long", entry("UUID=%s", uuid));
-            rc = IPMI_CC_RESPONSE_ERROR;
-            goto finish;
+            b = std::stoul(v, &err, 16);
         }
-
-        for (i = 0; i < tmp_size; i++)
+        catch (std::exception& e)
         {
-            // Holder of the 2 chars that will become a byte
-            char tmp_array[3] = {0};
-            strncpy(tmp_array, id_octet, 2); // 2 chars at a time
-
-            int resp_byte = strtoul(tmp_array, NULL, 16); // Convert to hex byte
-            // Copy end to first
-            std::memcpy((void*)&resp_uuid[resp_loc], &resp_byte, 1);
-            resp_loc--;
-            id_octet += 2; // Finished with the 2 chars, advance
+            elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                                  Argument::ARGUMENT_VALUE(rfc4122.c_str()));
         }
-        id_octet = strtok_r(NULL, "-", &tokptr); // Get next octet
+        // check that exactly two ascii bytes were converted
+        if (err != 2)
+        {
+            elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                                  Argument::ARGUMENT_VALUE(rfc4122.c_str()));
+        }
+        uuid[uuidBinaryLength - (ind / 2) - 1] = static_cast<uint8_t>(b);
     }
+    return uuid;
+}
 
-    // Data length
-    *data_len = resp_size;
+auto ipmiAppGetDeviceGuid()
+    -> ipmi::RspType<std::array<uint8_t, uuidBinaryLength>>
+{
+    // return a fixed GUID based on /etc/machine-id
+    // This should match the /redfish/v1/Managers/bmc's UUID data
 
-    // Pack the actual response
-    std::memcpy(response, &resp_uuid, *data_len);
+    // machine specific application ID (for BMC ID)
+    // generated by systemd-id128 -p new as per man page
+    static constexpr sd_id128_t bmcUuidAppId = SD_ID128_MAKE(
+        e0, e1, 73, 76, 64, 61, 47, da, a5, 0c, d0, cc, 64, 12, 45, 78);
 
-finish:
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
+    sd_id128_t bmcUuid;
+    // create the UUID from /etc/machine-id via the systemd API
+    sd_id128_get_machine_app_specific(bmcUuidAppId, &bmcUuid);
 
-    return rc;
+    char bmcUuidCstr[SD_ID128_STRING_MAX];
+    std::string systemUuid = sd_id128_to_string(bmcUuid, bmcUuidCstr);
+
+    std::array<uint8_t, uuidBinaryLength> uuid = rfc4122ToIpmi(systemUuid);
+    return ipmi::responseSuccess(uuid);
 }
 
 auto ipmiAppGetBtCapabilities()
@@ -1021,6 +1026,243 @@ writeResponse:
     return IPMI_CC_OK;
 }
 
+inline std::vector<uint8_t> convertStringToData(const std::string& command)
+{
+    std::istringstream iss(command);
+    std::string token;
+    std::vector<uint8_t> dataValue;
+    while (std::getline(iss, token, ' '))
+    {
+        dataValue.emplace_back(
+            static_cast<uint8_t>(std::stoul(token, nullptr, base_16)));
+    }
+    return dataValue;
+}
+
+static bool populateI2CMasterWRWhitelist()
+{
+    nlohmann::json data = nullptr;
+    std::ifstream jsonFile(i2cMasterWRWhitelistFile);
+
+    if (!jsonFile.good())
+    {
+        log<level::WARNING>("i2c white list file not found!",
+                            entry("FILE_NAME: %s", i2cMasterWRWhitelistFile));
+        return false;
+    }
+
+    try
+    {
+        data = nlohmann::json::parse(jsonFile, nullptr, false);
+    }
+    catch (nlohmann::json::parse_error& e)
+    {
+        log<level::ERR>("Corrupted i2c white list config file",
+                        entry("FILE_NAME: %s", i2cMasterWRWhitelistFile),
+                        entry("MSG: %s", e.what()));
+        return false;
+    }
+
+    try
+    {
+        // Example JSON Structure format
+        // "filters": [
+        //    {
+        //      "Description": "Allow full read - ignore first byte write value
+        //      for 0x40 to 0x4F",
+        //      "busId": "0x01",
+        //      "slaveAddr": "0x40",
+        //      "slaveAddrMask": "0x0F",
+        //      "command": "0x00",
+        //      "commandMask": "0xFF"
+        //    },
+        //    {
+        //      "Description": "Allow full read - first byte match 0x05 and
+        //      ignore second byte",
+        //      "busId": "0x01",
+        //      "slaveAddr": "0x57",
+        //      "slaveAddrMask": "0x00",
+        //      "command": "0x05 0x00",
+        //      "commandMask": "0x00 0xFF"
+        //    },]
+
+        nlohmann::json filters = data[filtersStr].get<nlohmann::json>();
+        std::vector<i2cMasterWRWhitelist>& whitelist = getWRWhitelist();
+        for (const auto& it : filters.items())
+        {
+            nlohmann::json filter = it.value();
+            if (filter.is_null())
+            {
+                log<level::ERR>(
+                    "Corrupted I2C master write read whitelist config file",
+                    entry("FILE_NAME: %s", i2cMasterWRWhitelistFile));
+                return false;
+            }
+            const std::vector<uint8_t>& writeData =
+                convertStringToData(filter[cmdStr].get<std::string>());
+            const std::vector<uint8_t>& writeDataMask =
+                convertStringToData(filter[cmdMaskStr].get<std::string>());
+            if (writeDataMask.size() != writeData.size())
+            {
+                log<level::ERR>("I2C master write read whitelist filter "
+                                "mismatch for command & mask size");
+                return false;
+            }
+            whitelist.push_back(
+                {static_cast<uint8_t>(std::stoul(
+                     filter[busIdStr].get<std::string>(), nullptr, base_16)),
+                 static_cast<uint8_t>(
+                     std::stoul(filter[slaveAddrStr].get<std::string>(),
+                                nullptr, base_16)),
+                 static_cast<uint8_t>(
+                     std::stoul(filter[slaveAddrMaskStr].get<std::string>(),
+                                nullptr, base_16)),
+                 writeData, writeDataMask});
+        }
+        if (whitelist.size() != filters.size())
+        {
+            log<level::ERR>(
+                "I2C master write read whitelist filter size mismatch");
+            return false;
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>("I2C master write read whitelist unexpected exception",
+                        entry("ERROR=%s", e.what()));
+        return false;
+    }
+    return true;
+}
+
+static inline bool isWriteDataWhitelisted(const std::vector<uint8_t>& data,
+                                          const std::vector<uint8_t>& dataMask,
+                                          const std::vector<uint8_t>& writeData)
+{
+    std::vector<uint8_t> processedDataBuf(data.size());
+    std::vector<uint8_t> processedReqBuf(dataMask.size());
+    std::transform(writeData.begin(), writeData.end(), dataMask.begin(),
+                   processedReqBuf.begin(), std::bit_or<uint8_t>());
+    std::transform(data.begin(), data.end(), dataMask.begin(),
+                   processedDataBuf.begin(), std::bit_or<uint8_t>());
+
+    return (processedDataBuf == processedReqBuf);
+}
+
+static bool isCmdWhitelisted(uint8_t busId, uint8_t slaveAddr,
+                             std::vector<uint8_t>& writeData)
+{
+    std::vector<i2cMasterWRWhitelist>& whiteList = getWRWhitelist();
+    for (const auto& wlEntry : whiteList)
+    {
+        if ((busId == wlEntry.busId) &&
+            ((slaveAddr | wlEntry.slaveAddrMask) ==
+             (wlEntry.slaveAddr | wlEntry.slaveAddrMask)))
+        {
+            const std::vector<uint8_t>& dataMask = wlEntry.dataMask;
+            // Skip as no-match, if requested write data is more than the
+            // write data mask size
+            if (writeData.size() > dataMask.size())
+            {
+                continue;
+            }
+            if (isWriteDataWhitelisted(wlEntry.data, dataMask, writeData))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/** @brief implements master write read IPMI command which can be used for
+ * low-level I2C/SMBus write, read or write-read access
+ *  @param isPrivateBus -to indicate private bus usage
+ *  @param busId - bus id
+ *  @param channelNum - channel number
+ *  @param reserved - skip 1 bit
+ *  @param slaveAddr - slave address
+ *  @param read count - number of bytes to be read
+ *  @param writeData - data to be written
+ *
+ *  @returns IPMI completion code plus response data
+ *   - readData - i2c response data
+ */
+ipmi::RspType<std::vector<uint8_t>>
+    ipmiMasterWriteRead(bool isPrivateBus, uint3_t busId, uint4_t channelNum,
+                        bool reserved, uint7_t slaveAddr, uint8_t readCount,
+                        std::vector<uint8_t> writeData)
+{
+    i2c_rdwr_ioctl_data msgReadWrite = {0};
+    i2c_msg i2cmsg[2] = {0};
+
+    if (readCount > maxIPMIWriteReadSize)
+    {
+        log<level::ERR>("Master write read command: Read count exceeds limit");
+        return ipmi::responseParmOutOfRange();
+    }
+    const size_t writeCount = writeData.size();
+    if (!readCount && !writeCount)
+    {
+        log<level::ERR>("Master write read command: Read & write count are 0");
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if (!isCmdWhitelisted(static_cast<uint8_t>(busId),
+                          static_cast<uint8_t>(slaveAddr), writeData))
+    {
+        log<level::ERR>("Master write read request blocked!",
+                        entry("BUS=%d", static_cast<uint8_t>(busId)),
+                        entry("ADDR=0x%x", static_cast<uint8_t>(slaveAddr)));
+        return ipmi::responseInvalidFieldRequest();
+    }
+    std::vector<uint8_t> readBuf(readCount);
+    std::string i2cBus =
+        "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
+
+    int i2cDev = ::open(i2cBus.c_str(), O_RDWR | O_CLOEXEC);
+    if (i2cDev < 0)
+    {
+        log<level::ERR>("Failed to open i2c bus",
+                        entry("BUS=%s", i2cBus.c_str()));
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    int msgCount = 0;
+    if (writeCount)
+    {
+        i2cmsg[msgCount].addr = static_cast<uint8_t>(slaveAddr);
+        i2cmsg[msgCount].flags = 0x00;
+        i2cmsg[msgCount].len = writeCount;
+        i2cmsg[msgCount].buf = writeData.data();
+        msgCount++;
+    }
+    if (readCount)
+    {
+        i2cmsg[msgCount].addr = static_cast<uint8_t>(slaveAddr);
+        i2cmsg[msgCount].flags = I2C_M_RD;
+        i2cmsg[msgCount].len = readCount;
+        i2cmsg[msgCount].buf = readBuf.data();
+        msgCount++;
+    }
+
+    msgReadWrite.msgs = i2cmsg;
+    msgReadWrite.nmsgs = msgCount;
+
+    int ret = ::ioctl(i2cDev, I2C_RDWR, &msgReadWrite);
+    ::close(i2cDev);
+
+    if (ret < 0)
+    {
+        log<level::ERR>("Master write read: Failed", entry("RET=%d", ret));
+        return ipmi::responseUnspecifiedError();
+    }
+    if (readCount)
+    {
+        readBuf.resize(msgReadWrite.msgs[msgCount - 1].len);
+    }
+    return ipmi::responseSuccess(readBuf);
+}
+
 void register_netfn_app_functions()
 {
     // <Get Device ID>
@@ -1052,16 +1294,30 @@ void register_netfn_app_functions()
                           ipmi::Privilege::User, ipmiAppGetSelfTestResults);
 
     // <Get Device GUID>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_DEVICE_GUID, NULL,
-                           ipmi_app_get_device_guid, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetDeviceGuid, ipmi::Privilege::User,
+                          ipmiAppGetDeviceGuid);
 
     // <Set ACPI Power State>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_ACPI, NULL,
                            ipmi_app_set_acpi_power_state, PRIVILEGE_ADMIN);
 
     // <Get ACPI Power State>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_ACPI, NULL,
-                           ipmi_app_get_acpi_power_state, PRIVILEGE_ADMIN);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetAcpiPowerState,
+                          ipmi::Privilege::Admin, ipmiGetAcpiPowerState);
+
+    // Note: For security reason, this command will be registered only when
+    // there are proper I2C Master write read whitelist
+    if (populateI2CMasterWRWhitelist())
+    {
+        // Note: For security reasons, registering master write read as admin
+        // privilege command, even though IPMI 2.0 specification allows it as
+        // operator privilege.
+        ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                              ipmi::app::cmdMasterWriteRead,
+                              ipmi::Privilege::Admin, ipmiMasterWriteRead);
+    }
 
     // <Get System GUID Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYS_GUID, NULL,

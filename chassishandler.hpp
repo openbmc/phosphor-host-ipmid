@@ -58,3 +58,11 @@ enum class BootOptionResponseSize : size_t
     BOOT_FLAGS = 5,
     OPAL_NETWORK_SETTINGS = 50
 };
+
+enum class ChassisIDState : uint8_t
+{
+    off = 0x0,
+    temporaryOn = 0x1,
+    indefiniteOn = 0x2,
+    reserved = 0x3
+};

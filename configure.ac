@@ -111,20 +111,24 @@ if test -z "$WHITELIST_CONF"; then
         WHITELIST_CONF=${srcdir}/host-ipmid-whitelist.conf
 fi
 
-AS_IF([test "x$SENSOR_YAML_GEN" == "x"], [SENSOR_YAML_GEN="sensor-example.yaml"])
+AS_IF([test "x$SENSOR_YAML_GEN" == "x"], [SENSOR_YAML_GEN="scripts/sensor-example.yaml"])
 SENSORGEN="$PYTHON ${srcdir}/scripts/sensor_gen.py -i $SENSOR_YAML_GEN"
+AC_SUBST(SENSOR_YAML_GEN)
 AC_SUBST(SENSORGEN)
 
-AS_IF([test "x$INVSENSOR_YAML_GEN" == "x"], [INVSENSOR_YAML_GEN="inventory-sensor-example.yaml"])
+AS_IF([test "x$INVSENSOR_YAML_GEN" == "x"], [INVSENSOR_YAML_GEN="scripts/inventory-sensor-example.yaml"])
 INVSENSORGEN="$PYTHON ${srcdir}/scripts/inventory-sensor.py -i $INVSENSOR_YAML_GEN"
+AC_SUBST(INVSENSOR_YAML_GEN)
 AC_SUBST(INVSENSORGEN)
 
-AS_IF([test "x$FRU_YAML_GEN" == "x"], [FRU_YAML_GEN="fru-read-example.yaml"])
+AS_IF([test "x$FRU_YAML_GEN" == "x"], [FRU_YAML_GEN="scripts/fru-read-example.yaml"])
 FRUGEN="$PYTHON $srcdir/scripts/fru_gen.py -i $FRU_YAML_GEN"
+AC_SUBST(FRU_YAML_GEN)
 AC_SUBST(FRUGEN)
 
-AS_IF([test "x$ENTITY_YAML_GEN" == "x"], [ENTITY_YAML_GEN="entity-example.yaml"])
+AS_IF([test "x$ENTITY_YAML_GEN" == "x"], [ENTITY_YAML_GEN="scripts/entity-example.yaml"])
 ENTITYGEN="$PYTHON $srcdir/scripts/entity_gen.py -i $ENTITY_YAML_GEN"
+AC_SUBST(ENTITY_YAML_GEN)
 AC_SUBST(ENTITYGEN)
 
 AC_DEFINE(CALLOUT_FWD_ASSOCIATION, "callout", [The name of the callout's forward association.])

@@ -28,8 +28,22 @@ using Id = uint32_t;
 using Timestamp = uint64_t;
 using Message = std::string;
 using AdditionalData = std::vector<std::string>;
-using PropertyType = sdbusplus::message::variant<Resolved, Id, Timestamp,
-                                                 Message, AdditionalData>;
+using PropertyType =
+    std::variant<Resolved, Id, Timestamp, Message, AdditionalData>;
+
+// ID string generated using journalctl to include in the MESSAGE_ID field for
+// SEL entries.  Helps with filtering SEL entries in the journal.
+static constexpr const char* selMessageId = "b370836ccf2f4850ac5bee185b77893a";
+static constexpr uint8_t selOperationSupport = 0x02;
+static constexpr uint8_t systemEvent = 0x02;
+static constexpr size_t systemEventSize = 3;
+static constexpr uint8_t oemTsEventFirst = 0xC0;
+static constexpr uint8_t oemTsEventLast = 0xDF;
+static constexpr size_t oemTsEventSize = 9;
+static constexpr uint8_t oemEventFirst = 0xE0;
+static constexpr uint8_t oemEventLast = 0xFF;
+static constexpr size_t oemEventSize = 13;
+static constexpr uint8_t eventMsgRev = 0x04;
 
 // ID string generated using journalctl to include in the MESSAGE_ID field for
 // SEL entries.  Helps with filtering SEL entries in the journal.
@@ -179,19 +193,6 @@ struct DeleteSELEntryRequest
 static constexpr auto initiateErase = 0xAA;
 static constexpr auto getEraseStatus = 0x00;
 static constexpr auto eraseComplete = 0x01;
-
-/** @struct ClearSELRequest
- *
- *  IPMI payload for Clear SEL command request.
- */
-struct ClearSELRequest
-{
-    uint16_t reservationID; //!< Reservation ID.
-    uint8_t charC;          //!< Char 'C'(0x43h).
-    uint8_t charL;          //!< Char 'L'(0x4Ch).
-    uint8_t charR;          //!< Char 'R'(0x52h).
-    uint8_t eraseOperation; //!< Erase operation.
-} __attribute__((packed));
 
 /** @brief Convert logging entry to SEL
  *

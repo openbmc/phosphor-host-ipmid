@@ -23,12 +23,13 @@
 #include <cstdint>
 #include <ctime>
 #include <sdbusplus/bus.hpp>
+#include <variant>
 
 namespace ipmi
 {
 
 using DbusUserPropVariant =
-    sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
+    std::variant<std::vector<std::string>, std::string, bool>;
 
 using DbusUserObjPath = sdbusplus::message::object_path;
 

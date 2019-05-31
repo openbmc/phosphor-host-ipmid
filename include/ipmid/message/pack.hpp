@@ -240,6 +240,26 @@ struct PackSingle<std::vector<uint8_t>>
 {
     static int op(Payload& p, const std::vector<uint8_t>& t)
     {
+        if (p.bitCount != 0)
+        {
+            return 1;
+        }
+        p.raw.reserve(p.raw.size() + t.size());
+        p.raw.insert(p.raw.end(), t.begin(), t.end());
+        return 0;
+    }
+};
+
+/** @brief Specialization of PackSingle for std::string_view */
+template <>
+struct PackSingle<std::string_view>
+{
+    static int op(Payload& p, const std::string_view& t)
+    {
+        if (p.bitCount != 0)
+        {
+            return 1;
+        }
         p.raw.reserve(p.raw.size() + t.size());
         p.raw.insert(p.raw.end(), t.begin(), t.end());
         return 0;
@@ -278,6 +298,10 @@ struct PackSingle<Payload>
 {
     static int op(Payload& p, const Payload& t)
     {
+        if (p.bitCount != 0 || t.bitCount != 0)
+        {
+            return 1;
+        }
         p.raw.reserve(p.raw.size() + t.raw.size());
         p.raw.insert(p.raw.end(), t.raw.begin(), t.raw.end());
         return 0;

@@ -16,7 +16,6 @@
 #pragma once
 #include <ipmid/api.h>
 
-#include <ipmid/message.hpp>
 #include <string>
 
 namespace ipmi
@@ -24,6 +23,7 @@ namespace ipmi
 
 static constexpr uint8_t maxIpmiChannels = 16;
 static constexpr uint8_t currentChNum = 0xE;
+static constexpr uint8_t invalidChannel = 0xff;
 
 /**
  * @enum IPMI return codes specific to channel (refer spec se 22.22 response
@@ -280,17 +280,17 @@ ipmi_ret_t getChannelAccessData(const uint8_t chNum,
 /** @brief provides function to convert current channel number (0xE)
  *
  *  @param[in] chNum - channel number as requested in commands.
- *  @param[in] ipmi::context - ipmi context ptr, which has more details
+ *  @param[in] devChannel - channel number as provided by device (not 0xE)
  *
  *  @return same channel number or proper channel number for current channel
  * number (0xE).
  */
-inline uint8_t convertCurrentChannelNum(const uint8_t chNum,
-                                        ipmi::Context::ptr ctx)
+static inline uint8_t convertCurrentChannelNum(const uint8_t chNum,
+                                               const uint8_t devChannel)
 {
     if (chNum == currentChNum)
     {
-        return ctx->channel;
+        return devChannel;
     }
     return chNum;
 }
@@ -366,5 +366,13 @@ ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
  *  @return the LAN channel name (i.e. eth0)
  */
 std::string getChannelName(const uint8_t chNum);
+
+/** @brief Retrieves the LAN channel number from the IPMI channel name
+ *
+ *  @param[in] chName - IPMI channel name (i.e. eth0)
+ *
+ *  @return the LAN channel number
+ */
+uint8_t getChannelByName(const std::string& chName);
 
 } // namespace ipmi

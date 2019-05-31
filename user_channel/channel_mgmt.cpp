@@ -824,17 +824,33 @@ Json ChannelConfig::readJsonFile(const std::string& configFile)
 int ChannelConfig::writeJsonFile(const std::string& configFile,
                                  const Json& jsonData)
 {
-    std::ofstream jsonFile(configFile);
-    if (!jsonFile.good())
+    const std::string tmpFile = configFile + "_tmp";
+    int fd = open(tmpFile.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_SYNC,
+                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd < 0)
     {
-        log<level::ERR>("JSON file not found");
+        log<level::ERR>("Error in creating json file",
+                        entry("FILE_NAME = %s", tmpFile.c_str()));
+        return -EIO;
+    }
+    const auto& writeData = jsonData.dump();
+    if (write(fd, writeData.c_str(), writeData.size()) !=
+        static_cast<ssize_t>(writeData.size()))
+    {
+        close(fd);
+        log<level::ERR>("Error in writing configuration file",
+                        entry("FILE_NAME = %s", tmpFile.c_str()));
+        return -EIO;
+    }
+    close(fd);
+
+    if (std::rename(tmpFile.c_str(), configFile.c_str()) != 0)
+    {
+        log<level::ERR>("Error in renaming temporary data file",
+                        entry("FILE_NAME = %s", tmpFile.c_str()));
         return -EIO;
     }
 
-    // Write JSON to file
-    jsonFile << jsonData;
-
-    jsonFile.flush();
     return 0;
 }
 

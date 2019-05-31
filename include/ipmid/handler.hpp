@@ -310,12 +310,11 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         executeCallback(message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
-
-        size_t len = request->payload.size() - request->payload.rawIndex;
         // allocate a big response buffer here
         response->payload.resize(
             getChannelMaxTransferSize(request->ctx->channel));
 
+        size_t len = request->payload.size() - request->payload.rawIndex;
         Cc ccRet{ccSuccess};
         try
         {
@@ -401,29 +400,18 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
         executeCallback(message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
-
-        // We need to provide the IANA in the response
-        request->payload.reset();
-        uint24_t iana;
-        if (request->payload.unpack(iana) != 0)
-        {
-            return errorResponse(request, ccReqDataLenInvalid);
-        }
-        response->payload.pack(iana);
-        size_t responseKept = response->payload.size();
-
-        size_t len = request->payload.size() - request->payload.rawIndex;
         // allocate a big response buffer here
         response->payload.resize(
             getChannelMaxTransferSize(request->ctx->channel));
 
+        size_t len = request->payload.size() - request->payload.rawIndex;
         Cc ccRet{ccSuccess};
         try
         {
-            ccRet = handler_(
-                request->ctx->cmd,
-                request->payload.data() + request->payload.rawIndex,
-                response->payload.data() + request->payload.rawIndex, &len);
+            ccRet =
+                handler_(request->ctx->cmd,
+                         request->payload.data() + request->payload.rawIndex,
+                         response->payload.data(), &len);
         }
         catch (const std::exception& e)
         {

@@ -23,14 +23,14 @@
 #include <ctime>
 #include <nlohmann/json.hpp>
 #include <sdbusplus/bus.hpp>
+#include <variant>
 
 namespace ipmi
 {
 
 using Json = nlohmann::json;
 
-using DbusVariant =
-    sdbusplus::message::variant<std::vector<std::string>, std::string, bool>;
+using DbusVariant = std::variant<std::vector<std::string>, std::string, bool>;
 
 using DbusChObjProperties = std::vector<std::pair<std::string, DbusVariant>>;
 
@@ -104,6 +104,18 @@ class ChannelConfig
      *  @return network channel interface name
      */
     std::string getChannelName(const uint8_t chNum);
+
+    /** @brief function to get channel number from channel name
+     *
+     *  @param[in] chName - channel name
+     *
+     *  @return network channel interface number
+     */
+
+    uint8_t getChannelByName(const std::string& chName)
+    {
+        return convertToChannelNumberFromChannelName(chName);
+    }
 
     /** @brief determines supported session type of a channel
      *

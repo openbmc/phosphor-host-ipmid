@@ -138,7 +138,7 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 
-    sdbusplus::message::variant<AssociationList> list;
+    std::variant<AssociationList> list;
     reply.read(list);
 
     auto& assocs = std::get<AssociationList>(list);
@@ -200,7 +200,7 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
         elog<InternalFailure>();
     }
 
-    sdbusplus::message::variant<uint64_t> timeStamp;
+    std::variant<uint64_t> timeStamp;
     reply.read(timeStamp);
 
     std::chrono::milliseconds chronoTimeStamp(std::get<uint64_t>(timeStamp));
