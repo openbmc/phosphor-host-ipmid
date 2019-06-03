@@ -87,6 +87,51 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 }
 
 #ifdef JOURNAL_SEL
+
+namespace ipmi::sel::erase_time
+{
+static constexpr const char* selEraseTimestamp = "/var/lib/ipmi/sel_erase_time";
+
+void save()
+{
+    // open the file, creating it if necessary
+    int fd = open(selEraseTimestamp, O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
+    if (fd < 0)
+    {
+        std::cerr << "Failed to open file\n";
+        return;
+    }
+
+    // update the file timestamp to the current time
+    if (futimens(fd, NULL) < 0)
+    {
+        std::cerr << "Failed to update timestamp: "
+                  << std::string(strerror(errno));
+    }
+    close(fd);
+}
+
+int get()
+{
+    struct stat st;
+    // default to an invalid timestamp
+    int timestamp = ::ipmi::sel::invalidTimeStamp;
+
+    int fd = open(selEraseTimestamp, O_RDWR | O_CLOEXEC, 0644);
+    if (fd < 0)
+    {
+        return timestamp;
+    }
+
+    if (fstat(fd, &st) >= 0)
+    {
+        timestamp = st.st_mtime;
+    }
+
+    return timestamp;
+}
+} // namespace ipmi::sel::erase_time
+
 ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                       ipmi_request_t request, ipmi_response_t response,
                       ipmi_data_len_t data_len, ipmi_context_t context)
@@ -497,61 +542,53 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t clearSEL(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-                    ipmi_response_t response, ipmi_data_len_t data_len,
-                    ipmi_context_t context)
+ipmi::RspType<uint8_t // erase status
+              >
+    clearSEL(uint16_t reservationID, const std::array<char, 3>& clr,
+             uint8_t eraseOperation)
 {
-    if (*data_len != sizeof(ipmi::sel::ClearSELRequest))
+    static constexpr std::array<char, 3> clrOk = {'C', 'L', 'R'};
+    if (clr != clrOk)
     {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-    auto requestData = static_cast<const ipmi::sel::ClearSELRequest*>(request);
-
-    if (!checkSELReservation(requestData->reservationID))
-    {
-        *data_len = 0;
-        return IPMI_CC_INVALID_RESERVATION_ID;
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (requestData->charC != 'C' || requestData->charL != 'L' ||
-        requestData->charR != 'R')
+    if (!checkSELReservation(reservationID))
     {
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidReservationId();
     }
-
-    uint8_t eraseProgress = ipmi::sel::eraseComplete;
 
     /*
      * Erasure status cannot be fetched from DBUS, so always return erasure
      * status as `erase completed`.
      */
-    if (requestData->eraseOperation == ipmi::sel::getEraseStatus)
+    if (eraseOperation == ipmi::sel::getEraseStatus)
     {
-        *static_cast<uint8_t*>(response) = eraseProgress;
-        *data_len = sizeof(eraseProgress);
-        return IPMI_CC_OK;
+        return ipmi::responseSuccess(
+            static_cast<uint8_t>(ipmi::sel::eraseComplete));
     }
 
     // Per the IPMI spec, need to cancel any reservation when the SEL is cleared
     cancelSELReservation();
 
+    // Save the erase time
+    ipmi::sel::erase_time::save();
+
     // Clear the SEL by by rotating the journal to start a new file then
     // vacuuming to keep only the new file
     if (boost::process::system("/bin/journalctl", "--rotate") != 0)
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
     if (boost::process::system("/bin/journalctl", "--vacuum-files=1") != 0)
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    *static_cast<uint8_t*>(response) = eraseProgress;
-    *data_len = sizeof(eraseProgress);
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(
+        static_cast<uint8_t>(ipmi::sel::eraseComplete));
 }
+
 #else  // JOURNAL_SEL not used
 ipmi_ret_t getSELInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                       ipmi_request_t request, ipmi_response_t response,
