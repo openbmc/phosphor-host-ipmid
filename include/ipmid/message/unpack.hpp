@@ -117,8 +117,8 @@ struct UnpackSingle
                     p.bitCount = priorBitCount;
                     p.unpackError = priorError;
                 }
-                return 0;
             }
+            return 0;
         }
     }
 };

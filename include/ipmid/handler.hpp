@@ -444,7 +444,7 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
             }
         }
         response->cc = ccRet;
-        response->payload.resize(responseKept + len);
+        response->payload.resize(len);
         return response;
     }
 };
