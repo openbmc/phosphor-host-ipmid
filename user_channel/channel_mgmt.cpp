@@ -824,7 +824,8 @@ Json ChannelConfig::readJsonFile(const std::string& configFile)
     std::ifstream jsonFile(configFile);
     if (!jsonFile.good())
     {
-        log<level::ERR>("JSON file not found");
+        log<level::INFO>("JSON file not found",
+                         entry("FILE_NAME=%s", configFile.c_str()));
         return nullptr;
     }
 
