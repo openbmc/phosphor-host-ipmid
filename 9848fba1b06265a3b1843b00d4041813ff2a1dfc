@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "765cb152_12e73839",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1443,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-06-04T23:17:56Z",
+      "side": 1,
+      "message": "The sdbusplus code never makes it to this point, it will throw first, so there is no point in using this function.",
+      "range": {
+        "startLine": 1441,
+        "startChar": 1,
+        "endLine": 1443,
+        "endChar": 3
+      },
+      "revId": "9848fba1b06265a3b1843b00d4041813ff2a1dfc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b42da4eb_32642cc3",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1463,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-06-04T23:17:56Z",
+      "side": 1,
+      "message": "since we aren\u0027t really returning any actual return codes with information, the return of this function is either valid or invalid. This makes std::optional\u003cTYPE\u003e ideal for this.\n\nstatic std::optional\u003cuint32_t\u003e getBootMboxIANA()\n{\n    if (\u003cerror\u003e)\n    {\n        return std::nullopt;\n    }\n    return valid_value;\n}\n\nfn()\n{\n    std::optional\u003cuint32_t\u003e maybeIANA \u003d getBootMboxIANA();\n    if (!maybeIANA)\n    {\n        // error path....\n    }\n    uint32_t actualIANA \u003d *maybeIANA;\n}",
+      "range": {
+        "startLine": 1461,
+        "startChar": 0,
+        "endLine": 1463,
+        "endChar": 28
+      },
+      "revId": "9848fba1b06265a3b1843b00d4041813ff2a1dfc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7e9225e_4f5e538e",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1501,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-06-04T23:17:56Z",
+      "side": 1,
+      "message": "same std::optional comment here.",
+      "range": {
+        "startLine": 1499,
+        "startChar": 0,
+        "endLine": 1501,
+        "endChar": 28
+      },
+      "revId": "9848fba1b06265a3b1843b00d4041813ff2a1dfc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43978a55_983cacf8",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1539,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-06-04T23:17:56Z",
+      "side": 1,
+      "message": "please just return the value",
+      "range": {
+        "startLine": 1536,
+        "startChar": 0,
+        "endLine": 1539,
+        "endChar": 28
+      },
+      "revId": "9848fba1b06265a3b1843b00d4041813ff2a1dfc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a6c8f62_077d380b",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-06-04T23:17:56Z",
+      "side": 1,
+      "message": "any interest in rewriting this to use the new provider API? :)",
+      "range": {
+        "startLine": 1574,
+        "startChar": 11,
+        "endLine": 1574,
+        "endChar": 34
+      },
+      "revId": "9848fba1b06265a3b1843b00d4041813ff2a1dfc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5d405e1_a6da9502",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1728,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-06-04T23:17:56Z",
+      "side": 1,
+      "message": "the new provider API provides endian-safe packing for multi-byte integers (including uint24_t, defined in ipmid/message/types.hpp)",
+      "range": {
+        "startLine": 1726,
+        "startChar": 14,
+        "endLine": 1728,
+        "endChar": 73
+      },
+      "revId": "9848fba1b06265a3b1843b00d4041813ff2a1dfc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
