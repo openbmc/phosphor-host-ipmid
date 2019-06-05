@@ -1,0 +1,153 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ea7f232_653fd2b0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-06-05T01:15:35Z",
+      "side": 1,
+      "message": "It looks like this was the preexisting verbiage, but \"regular\" doesn\u0027t mean very much to me. Is it clearer to say \"persistent\" and \"one-time\" rather than \"regular\" and \"one-time\"?\n\nWhile you\u0027re changing the subject, please also prepend \"settings:\" to indicate which component the change will touch.",
+      "range": {
+        "startLine": 7,
+        "startChar": 16,
+        "endLine": 7,
+        "endChar": 23
+      },
+      "revId": "f11c3c8c06c45a7fcd5845c3f4b1f1fe0e129063",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd23dc11_3169b04f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-06-05T01:15:35Z",
+      "side": 1,
+      "message": "Please add a Tested: line.",
+      "revId": "f11c3c8c06c45a7fcd5845c3f4b1f1fe0e129063",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29c29a0e_becb3a20",
+        "filename": "settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-06-05T01:15:35Z",
+      "side": 1,
+      "message": "I\u0027m thinking. Maybe this sounds better as \"ambiguousOperationCount\" - as having more than one interface object means there is some question of which types of set are supported?\n\nI don\u0027t think this matters very much, but I\u0027m trying to futureproof against the idea of some third setting type (I don\u0027t know, maybe \"factory reset default\"???) presenting itself that we want to support. Since we expect no more updates to the IPMI spec, it probably doesn\u0027t matter and is fine the way it is.",
+      "range": {
+        "startLine": 98,
+        "startChar": 19,
+        "endLine": 98,
+        "endChar": 40
+      },
+      "revId": "f11c3c8c06c45a7fcd5845c3f4b1f1fe0e129063",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e11cde59_c8e350f0",
+        "filename": "settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-06-05T01:15:35Z",
+      "side": 1,
+      "message": "nit: s/is/are/ to agree with plural \"objects\"",
+      "range": {
+        "startLine": 107,
+        "startChar": 20,
+        "endLine": 107,
+        "endChar": 22
+      },
+      "revId": "f11c3c8c06c45a7fcd5845c3f4b1f1fe0e129063",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4cb8987d_118ecd09",
+        "filename": "settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-06-05T01:15:35Z",
+      "side": 1,
+      "message": "Hmm. I think that this logic would also \"just work\" if for some reason we had a setting that exposed only the one-time object, and not the persistent object. So maybe it makes sense to generalize the comment here to say something more like \"If there\u0027s just one object, that\u0027s the only kind of setting mode this interface supports, so just return that setting path.\"",
+      "revId": "f11c3c8c06c45a7fcd5845c3f4b1f1fe0e129063",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea23f4d1_651403b8",
+        "filename": "settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-06-05T01:15:35Z",
+      "side": 1,
+      "message": "Again, maybe \"persistent\".",
+      "range": {
+        "startLine": 133,
+        "startChar": 48,
+        "endLine": 133,
+        "endChar": 55
+      },
+      "revId": "f11c3c8c06c45a7fcd5845c3f4b1f1fe0e129063",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ee93fcc_afbcdb61",
+        "filename": "settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-06-05T01:15:35Z",
+      "side": 1,
+      "message": "\"persistent\"?",
+      "range": {
+        "startLine": 143,
+        "startChar": 48,
+        "endLine": 143,
+        "endChar": 55
+      },
+      "revId": "f11c3c8c06c45a7fcd5845c3f4b1f1fe0e129063",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
