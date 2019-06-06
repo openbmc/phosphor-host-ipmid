@@ -29,6 +29,7 @@ void register_netfn_storage_functions() __attribute__((constructor));
 unsigned int g_sel_time = 0xFFFFFFFF;
 extern const ipmi::sensor::IdInfoMap sensors;
 extern const FruMap frus;
+constexpr uint8_t  eventDataSize = 3;
 
 namespace
 {
@@ -613,42 +614,43 @@ ipmi_ret_t ipmi_storage_reserve_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 /** @brief implements the Add SEL entry command
  * @request
- *   - SEL Record Data // uint8_t array 16 bytes.
+ *
+ *   - recordID      ID used for SEL Record access  
+ *   - recordType    Record Type
+ *   - timeStamp     Time when event was logged. LS byte first
+ *   - generatorID   software ID if event was generated from 
+ *                   system software
+ *   - evmRev        event message format version
+ *   - sensorType    sensor type code for service that generated
+ *                   the event 
+ *   - sensorNumber  number of sensors that generated the event
+ *   - eventDir     event dir
+ *   - eventData    event data field contents
  *
  *  @returns ipmi completion code plus response data
  *   - RecordID of the Added SEL entry
  */
-ipmi::RspType<uint16_t // RecordID of the Added SEL entry
+ipmi::RspType<uint16_t // recordID of the Added SEL entry
               >
-    ipmiStorageAddSEL(std::array<uint8_t, 16>& recordData)
+    ipmiStorageAddSEL(uint16_t recordID, uint8_t recordType, uint32_t timeStamp,
+		      uint16_t generatorID, uint8_t evmRev, uint8_t sensorType,
+		      uint8_t sensorNumber, uint8_t eventDir, 
+		      std::array<uint8_t, eventDataSize> eventData)  
 {
-
     // Per the IPMI spec, need to cancel the reservation when a SEL entry is
     // added
     cancelSELReservation();
-
-    static constexpr auto eventData2ByteInSEL = 14;
-    static constexpr auto eventData3ByteInSEL = 15;
-
-    uint16_t recordId = ((uint16_t)recordData[eventData3ByteInSEL] << 8) |
-                        recordData[eventData2ByteInSEL];
-
     // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
     // a maintenance procedure associated with eSEL record.
     static constexpr auto procedureType = 0xDE;
-    static constexpr auto recordTypeByteInSEL = 2;
-    static constexpr auto sensorTypeByteInSEL = 10;
-
-    if (recordData[recordTypeByteInSEL] ==
-        procedureType) // recordType is 3rd byte in SEL Record format
+    if (recordType == procedureType)
     {
         // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
         // procedure number.
-        createProcedureLogEntry(
-            recordData[sensorTypeByteInSEL]); // sensorType is 11th byte in SEL
-                                              // Record format
+        createProcedureLogEntry(sensorType);
     }
-    return ipmi::responseSuccess(recordId);
+
+    return ipmi::responseSuccess(recordID);
 }
 
 /** @brief implements the get FRU Inventory Area Info command
