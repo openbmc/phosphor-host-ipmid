@@ -192,6 +192,12 @@ AC_ARG_VAR(HOST_IPMI_LIB_PATH, [The file path to search for libraries.])
 AS_IF([test "x$HOST_IPMI_LIB_PATH" == "x"], [HOST_IPMI_LIB_PATH="/usr/lib/ipmid-providers/"])
 AC_DEFINE_UNQUOTED([HOST_IPMI_LIB_PATH], ["$HOST_IPMI_LIB_PATH"], [The file path to search for libraries.])
 
+# When disable-libuserlayer flag is set, libuserlayer won't be included in the build.
+AC_ARG_ENABLE([libuserlayer],
+    AS_HELP_STRING([--disable-libuserlayer], [Set a flag to exclude libuserlayer])
+)
+AM_CONDITIONAL(FEATURE_LIBUSERLAYER, [test "x$enable_libuserlayer" != "xno"])
+
 # Create configured output
 AC_CONFIG_FILES([
     Makefile
