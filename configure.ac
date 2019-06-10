@@ -192,6 +192,24 @@ AC_ARG_VAR(HOST_IPMI_LIB_PATH, [The file path to search for libraries.])
 AS_IF([test "x$HOST_IPMI_LIB_PATH" == "x"], [HOST_IPMI_LIB_PATH="/usr/lib/ipmid-providers/"])
 AC_DEFINE_UNQUOTED([HOST_IPMI_LIB_PATH], ["$HOST_IPMI_LIB_PATH"], [The file path to search for libraries.])
 
+# When disable-libuserlayer flag is set, so include libuserlayer in the build
+AC_ARG_ENABLE([libuserlayer],
+    AS_HELP_STRING([--disable-libuserlayer], [Set a flag to exclude libuserlayer])
+)
+AM_CONDITIONAL(FEATURE_LIBUSERLAYER, [test "x$enable_libuserlayer" != "xno"])
+
+
+# When a sensor read fails, set the Value on dbus with -errno.
+# Incompatible with remove-from-dbus-on-fail.
+AC_ARG_ENABLE([negative-errno-on-fail],
+    AS_HELP_STRING([--enable-negative-errno-on-fail], [Set sensor value to -errno on read failures])
+)
+AC_ARG_VAR(NEGATIVE_ERRNO_ON_FAIL, [Set sensor value to -errno on read failures])
+AS_IF([test "x$enable_negative_errno_on_fail" == "xyes"],
+      [NEGATIVE_ERRNO_ON_FAIL="yes"]
+      AC_DEFINE_UNQUOTED([NEGATIVE_ERRNO_ON_FAIL], ["$NEGATIVE_ERRNO_ON_FAIL"], [Set sensor value to -errno on read failures])
+)
+
 # Create configured output
 AC_CONFIG_FILES([
     Makefile
