@@ -2,6 +2,8 @@
 
 #include "session.hpp"
 
+#include <ipmid/api.hpp>
+#include <ipmid/sessiondef.hpp>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -14,10 +16,6 @@ enum class RetrieveOption
     BMC_SESSION_ID,
     RC_SESSION_ID,
 };
-
-constexpr size_t SESSION_ZERO = 0;
-constexpr size_t MAX_SESSIONLESS_COUNT = 1;
-constexpr size_t MAX_SESSION_COUNT = 15;
 
 /**
  * @class Manager
@@ -82,20 +80,35 @@ class Manager
     std::shared_ptr<Session>
         getSession(SessionID sessionID,
                    RetrieveOption option = RetrieveOption::BMC_SESSION_ID);
+    uint8_t getActiveSessionCount() const;
+    uint8_t getSessionHandle(SessionID bmcSessionID) const;
+    uint8_t storeSessionHandle(SessionID bmcSessionID);
+    uint32_t getSessionIDbyHandle(uint8_t sessionHandle) const;
+
+    void managerInit(const std::string& channel);
+
+    uint8_t getNetworkInstance(void);
 
   private:
+    //+1 for session, as 0 is reserved for sessionless command
+    std::array<uint32_t, session::maxSessionCountPerChannel + 1>
+        sessionHandleMap = {0};
+
     /**
      * @brief Session Manager keeps the session objects as a sorted
      *        associative container with Session ID as the unique key
      */
     SessionMap sessionsMap;
-
+    std::unique_ptr<sdbusplus::server::manager::manager> objManager = nullptr;
+    std::string chName{}; // Channel Name
+    uint8_t ipmiNetworkInstance;
     /**
      * @brief Clean Session Stale Entries
      *
      *  Removes the inactive sessions entries from the Session Map
      */
     void cleanStaleEntries();
+    void setNetworkInstance(void);
 };
 
 } // namespace session

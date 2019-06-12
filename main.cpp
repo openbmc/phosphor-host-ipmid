@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
         setInterfaceIndex(channel);
     }
 
+    std::get<session::Manager&>(singletonPool).managerInit(channel);
     // Register callback to update cache for a GUID change and cache the GUID
     command::registerGUIDChangeCallback();
     cache::guid = command::getSystemGUID();

@@ -85,7 +85,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
 
     // Session ID zero is reserved for Session Setup
     if (endian::from_ipmi(request->managedSystemSessionID) ==
-        session::SESSION_ZERO)
+        session::sessionZero)
     {
         log<level::INFO>("RAKP34: BMC invalid Session ID");
         response->rmcpStatusCode =
@@ -272,7 +272,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     // Set the Confidentiality Algorithm
     applyCryptAlgo(session->getBMCSessionID());
 
-    session->state = session::State::ACTIVE;
+    session->state(static_cast<uint8_t>(session::State::active));
     return outPayload;
 }
 

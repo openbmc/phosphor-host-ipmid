@@ -43,6 +43,8 @@ bool Handler::receive()
     sessionID = inMessage->bmcSessionID;
     inMessage->rcSessionID = session->getRCSessionID();
     session->updateLastTransactionTime();
+    session->channelPtr = channel;
+    session->remotePort(channel->getPort());
 
     return true;
 }
@@ -94,7 +96,7 @@ void Handler::executeCommand()
             std::get<session::Manager&>(singletonPool).getSession(sessionID);
         // Process PayloadType::IPMI only if ipmi is enabled or for sessionless
         // or for session establisbment command
-        if (this->sessionID == session::SESSION_ZERO ||
+        if (this->sessionID == session::sessionZero ||
             session->sessionUserPrivAccess.ipmiEnabled)
         {
             if (inMessage->payload.size() <

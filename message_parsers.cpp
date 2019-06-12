@@ -250,7 +250,7 @@ void addSequenceNumber(std::vector<uint8_t>& packet,
 {
     SessionHeader_t* header = reinterpret_cast<SessionHeader_t*>(packet.data());
 
-    if (header->sessId == session::SESSION_ZERO)
+    if (header->sessId == session::sessionZero)
     {
         header->sessSeqNum = 0x00;
     }

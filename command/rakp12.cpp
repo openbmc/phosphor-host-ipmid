@@ -26,7 +26,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
 
     // Session ID zero is reserved for Session Setup
     if (endian::from_ipmi(request->managedSystemSessionID) ==
-        session::SESSION_ZERO)
+        session::sessionZero)
     {
         log<level::INFO>("RAKP12: BMC invalid Session ID");
         response->rmcpStatusCode =
@@ -127,12 +127,14 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     // established with CALLBACK privilege if requested for callback. All other
     // sessions are initialy set to USER privilege, regardless of the requested
     // maximum privilege.
-    session->curPrivLevel = session::Privilege::CALLBACK;
+    session->currentPrivilege(
+        static_cast<uint8_t>(session::Privilege::CALLBACK));
     if (static_cast<session::Privilege>(request->req_max_privilege_level &
                                         session::reqMaxPrivMask) >
         session::Privilege::CALLBACK)
     {
-        session->curPrivLevel = session::Privilege::USER;
+        session->currentPrivilege(
+            static_cast<uint8_t>(session::Privilege::USER));
     }
     session->reqMaxPrivLevel =
         static_cast<session::Privilege>(request->req_max_privilege_level);
@@ -201,7 +203,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
             static_cast<uint8_t>(RAKP_ReturnCode::INACTIVE_ROLE);
         return outPayload;
     }
-    session->chNum = chNum;
+    session->channelNum(chNum);
+    session->userID(userId);
     // minimum privilege of Channel / User / session::privilege::USER/CALLBACK /
     // has to be used as session current privilege level
     uint8_t minPriv = 0;
@@ -214,9 +217,9 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     {
         minPriv = session->sessionUserPrivAccess.privilege;
     }
-    if (session->curPrivLevel > static_cast<session::Privilege>(minPriv))
+    if (session->currentPrivilege() > minPriv)
     {
-        session->curPrivLevel = static_cast<session::Privilege>(minPriv);
+        session->currentPrivilege(static_cast<uint8_t>(minPriv));
     }
     // For username / privilege lookup, fail with UNAUTH_NAME, if requested
     // max privilege does not match user privilege

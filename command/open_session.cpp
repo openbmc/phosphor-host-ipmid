@@ -108,7 +108,7 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     session->updateLastTransactionTime();
 
     // Session state is Setup in progress
-    session->state = session::State::SETUP_IN_PROGRESS;
+    session->state(static_cast<uint8_t>(session::State::setupInProgress));
     return outPayload;
 }
 

@@ -66,7 +66,8 @@ void Table::executeCommand(uint32_t inCommand,
         std::map<std::string, ipmi::Value> options = {
             {"userId", ipmi::Value(static_cast<int>(
                            ipmi::ipmiUserGetUserId(session->userName)))},
-            {"privilege", ipmi::Value(static_cast<int>(session->curPrivLevel))},
+            {"privilege",
+             ipmi::Value(static_cast<int>(session->currentPrivilege()))},
         };
         bus->async_method_call(
             [handler, this](const boost::system::error_code& ec,
@@ -123,7 +124,7 @@ std::vector<uint8_t>
     std::vector<uint8_t> errResponse;
 
     // Check if the command qualifies to be run prior to establishing a session
-    if (!sessionless && (handler->sessionID == session::SESSION_ZERO))
+    if (!sessionless && (handler->sessionID == session::sessionZero))
     {
         errResponse.resize(1);
         errResponse[0] = IPMI_CC_INSUFFICIENT_PRIVILEGE;
