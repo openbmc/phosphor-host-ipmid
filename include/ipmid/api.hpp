@@ -84,3 +84,4 @@ enum class SignalResponse : int
  */
 void registerSignalHandler(int priority, int signalNumber,
                            const std::function<SignalResponse(int)>& handler);
+
