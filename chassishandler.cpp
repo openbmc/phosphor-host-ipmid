@@ -781,8 +781,6 @@ const std::map<DbusValue, IpmiValue> dbusToIpmi = {
 
 static constexpr uint8_t noChange = 0x03;
 static constexpr uint8_t allSupport = 0x01 | 0x02 | 0x04;
-static constexpr uint8_t policyBitMask = 0x07;
-static constexpr uint8_t setPolicyReqLen = 1;
 
 /* helper function for Get Chassis Status Command
  */
@@ -1703,26 +1701,27 @@ ipmi::RspType<uint8_t, // Minutes per count
     }
 }
 
-ipmi::RspType<uint8_t>
+ipmi::RspType<uint3_t, // policy support
+              uint5_t  // reserved
+              >
     ipmiChassisSetPowerRestorePolicy(boost::asio::yield_context yield,
-                                     uint8_t policy)
+                                     uint3_t policy, uint5_t reserved)
 {
-    constexpr uint8_t ccParamNotSupported = 0x80;
     power_policy::DbusValue value =
         power_policy::RestorePolicy::Policy::AlwaysOff;
 
-    if (policy & ~power_policy::policyBitMask)
+    if (reserved || policy > power_policy::noChange)
     {
         phosphor::logging::log<level::ERR>(
             "Reserved request parameter",
             entry("REQ=0x%x", static_cast<int>(policy)));
-        return ipmi::response(ccParamNotSupported);
+        return ipmi::responseInvalidFieldRequest();
     }
 
     if (policy == power_policy::noChange)
     {
         // just return the supported policy
-        return ipmi::responseSuccess(power_policy::allSupport);
+        return ipmi::responseSuccess(power_policy::allSupport, reserved);
     }
 
     for (auto const& it : power_policy::dbusToIpmi)
@@ -1765,7 +1764,7 @@ ipmi::RspType<uint8_t>
         return ipmi::responseUnspecifiedError();
     }
 
-    return ipmi::responseSuccess(power_policy::allSupport);
+    return ipmi::responseSuccess(power_policy::allSupport, reserved);
 }
 
 void register_netfn_chassis_functions()
