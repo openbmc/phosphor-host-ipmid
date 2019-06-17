@@ -14,8 +14,6 @@ enum ipmi_netfn_chassis_cmds
     IPMI_CMD_CHASSIS_CONTROL = 0x02,
     IPMI_CMD_CHASSIS_IDENTIFY = 0x04,
     IPMI_CMD_SET_CHASSIS_CAP = 0x05,
-    // Set Power Restore Policy
-    IPMI_CMD_SET_RESTORE_POLICY = 0x06,
     // Get capability bits
     IPMI_CMD_SET_SYS_BOOT_OPTIONS = 0x08,
     IPMI_CMD_GET_SYS_BOOT_OPTIONS = 0x09,
