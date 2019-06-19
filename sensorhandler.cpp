@@ -415,6 +415,10 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         resp->operation = 1 << scanningEnabledBit;
         return IPMI_CC_OK;
     }
+    catch (const SensorFunctionalError& e)
+    {
+        return IPMI_CC_SENSOR_INVALID;
+    }
     catch (const std::exception& e)
     {
         *data_len = getResponse.size();
