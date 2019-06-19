@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <exception>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 
@@ -36,6 +37,16 @@ enum ipmi_sensor_types
     IPMI_SENSOR_CURRENT = 0x03,
     IPMI_SENSOR_FAN = 0x04,
     IPMI_SENSOR_TPM = 0xCC,
+};
+
+/** @brief Custom exception for reading sensors that are not funcitonal.
+ */
+struct SensorFunctionalError : public std::exception
+{
+    const char* what() const throw()
+    {
+        return "Sensor not functional";
+    }
 };
 
 #define MAX_DBUS_PATH 128
