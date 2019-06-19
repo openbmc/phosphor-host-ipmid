@@ -1,5 +1,8 @@
 #pragma once
 
+// This config include allows checking for UPDATE_FUNCTIONAL_ON_FAIL defiintion
+#include "config.h"
+
 #include "sensorhandler.hpp"
 
 #include <cmath>
@@ -194,6 +197,32 @@ GetSensorResponse readingData(const Info& sensorInfo)
         bus, service, sensorInfo.sensorPath,
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    // Check the OperationalStatus interface for functional property
+    if (sensorInfo.propertyInterfaces.begin()->first ==
+        "xyz.openbmc_project.Sensor.Value")
+    {
+        bool functional = true;
+        try
+        {
+            auto propValue = ipmi::getDbusProperty(
+                bus, service, sensorInfo.sensorPath,
+                "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "Functional");
+            functional = std::get<bool>(propValue);
+        }
+        catch (...)
+        {
+            // No-op if Functional property could not be found since this
+            // check is only valid for Sensor.Value read for hwmonio
+        }
+        if (!functional)
+        {
+            throw SensorFunctionalError();
+        }
+    }
+#endif
 
     double value = std::get<T>(propValue) *
                    std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
