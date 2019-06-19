@@ -1,5 +1,7 @@
 #pragma once
 
+#include "config.h"
+
 #include "sensorhandler.hpp"
 
 #include <cmath>
@@ -189,6 +191,32 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
+
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    // Check the OperationalStatus interface for functional property
+    if (sensorInfo.propertyInterfaces.begin()->first ==
+        "xyz.openbmc_project.Sensor.Value")
+    {
+        bool functional = true;
+        try
+        {
+            auto funcValue = ipmi::getDbusProperty(
+                bus, service, sensorInfo.sensorPath,
+                "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "Functional");
+            functional = std::get<bool>(funcValue);
+        }
+        catch (...)
+        {
+            // No-op if Functional property could not be found since this
+            // check is only valid for Sensor.Value read for hwmonio
+        }
+        if (!functional)
+        {
+            throw SensorFunctionalError();
+        }
+    }
+#endif
 
     auto propValue = ipmi::getDbusProperty(
         bus, service, sensorInfo.sensorPath,
