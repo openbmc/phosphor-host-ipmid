@@ -1,3 +1,6 @@
+// This config include allows checking for UPDATE_FUNCTIONAL_ON_FAIL definition
+#include "config.h"
+
 #include "sensorhandler.hpp"
 
 #include "fruread.hpp"
@@ -420,6 +423,12 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         resp->operation = 1 << scanningEnabledBit;
         return IPMI_CC_OK;
     }
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    catch (const SensorFunctionalError& e)
+    {
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+#endif
     catch (const std::exception& e)
     {
         *data_len = getResponse.size();
