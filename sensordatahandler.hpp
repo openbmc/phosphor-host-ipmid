@@ -195,6 +195,21 @@ GetSensorResponse readingData(const Info& sensorInfo)
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
+    // Check the OperationalStatus interface for functional property
+    if (sensorInfo.propertyInterfaces.begin()->first ==
+        "xyz.openbmc_project.Sensor.Value")
+    {
+        auto propValue = ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            "xyz.openbmc_project.State.Decorator.OperationalStatus",
+            "Functional");
+        auto functional = std::get<bool>(propValue);
+        if (!functional)
+        {
+            throw std::runtime_error("sensor not functional");
+        }
+    }
+
     double value = std::get<T>(propValue) *
                    std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
 
