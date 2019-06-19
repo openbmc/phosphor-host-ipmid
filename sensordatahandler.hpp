@@ -7,6 +7,7 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <sdbusplus/message/types.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 namespace ipmi
 {
@@ -26,6 +27,9 @@ using ServicePath = std::pair<Path, Service>;
 using Interfaces = std::vector<Interface>;
 
 using MapperResponseType = std::map<Path, std::map<Service, Interfaces>>;
+
+using InternalFailure =
+    ::sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
 /** @brief get the D-Bus service and service path
  *  @param[in] bus - The Dbus bus object
@@ -194,6 +198,30 @@ GetSensorResponse readingData(const Info& sensorInfo)
         bus, service, sensorInfo.sensorPath,
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+
+    // Check the OperationalStatus interface for functional property
+    if (sensorInfo.propertyInterfaces.begin()->first ==
+        "xyz.openbmc_project.Sensor.Value")
+    {
+        bool functional = true;
+        try
+        {
+            auto propValue = ipmi::getDbusProperty(
+                bus, service, sensorInfo.sensorPath,
+                "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "Functional");
+            functional = std::get<bool>(propValue);
+        }
+        catch (...)
+        {
+            // No-op if Functional property could not be found since this
+            // check is only valid for Sensor.Value read for hwmonio
+        }
+        if (!functional)
+        {
+            throw std::runtime_error("Sensor not functional");
+        }
+    }
 
     double value = std::get<T>(propValue) *
                    std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
