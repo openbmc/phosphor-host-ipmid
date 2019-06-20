@@ -164,20 +164,20 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
             static_cast<uint8_t>(RAKP_ReturnCode::INACTIVE_ROLE);
         return outPayload;
     }
+    // Get the user password for RAKP message authenticate
+    passwd = ipmi::ipmiUserGetPassword(userName);
+    if (passwd.empty())
+    {
+        response->rmcpStatusCode =
+            static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
+        return outPayload;
+    }
     // Check whether user is already locked for failed attempts
     if (!ipmi::ipmiUserPamAuthenticate(userName, passwd))
     {
         log<level::ERR>("Authentication failed - user already locked out",
                         entry("USER-ID=%d", static_cast<uint8_t>(userId)));
 
-        response->rmcpStatusCode =
-            static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
-        return outPayload;
-    }
-    // Get the user password for RAKP message authenticate
-    passwd = ipmi::ipmiUserGetPassword(userName);
-    if (passwd.empty())
-    {
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
         return outPayload;
