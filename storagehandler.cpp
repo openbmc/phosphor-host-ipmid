@@ -782,9 +782,9 @@ void register_netfn_storage_functions()
                           ipmi::storage::cmdGetFruInventoryAreaInfo,
                           ipmi::Privilege::User, ipmiStorageGetFruInvAreaInfo);
 
-    // <Add READ FRU Data
+    // <READ FRU Data>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
-                           ipmi_storage_read_fru_data, PRIVILEGE_OPERATOR);
+                           ipmi_storage_read_fru_data, PRIVILEGE_USER);
 
     // <Get Repository Info>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_REPOSITORY_INFO,
