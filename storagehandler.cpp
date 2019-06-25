@@ -1379,12 +1379,16 @@ void register_netfn_storage_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdDeleteSelEntry,
                           ipmi::Privilege::Operator, deleteSELEntry);
-#endif
 
     // <Add SEL Entry>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdAddSelEntry,
                           ipmi::Privilege::Operator, ipmiStorageAddSEL);
+#else
+    // <Add SEL Entry>
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
+                           ipmi_storage_add_sel, PRIVILEGE_OPERATOR);
+#endif
 
     // <Clear SEL>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
