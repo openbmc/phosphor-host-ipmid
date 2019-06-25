@@ -764,45 +764,13 @@ EChannelProtocolType
     return static_cast<EChannelProtocolType>(it->second);
 }
 
-uint8_t ChannelConfig::convertToChannelIndexNumber(const uint8_t chNum)
-{
-
-    // TODO: There is limitation in current design. we cannot detect exact
-    // LAN interface(eth0 or eth1) so Implementation may be updated
-    // when there is any design update to figure out all the interfaces
-    // independently based on the message.
-
-    static uint8_t curChannel = 0xFF;
-
-    if (curChannel == 0xFF)
-    {
-        auto it = interfaceMap.find(getInterfaceIndex());
-        if (it == interfaceMap.end())
-        {
-            log<level::ERR>("Invalid Interface type ",
-                            entry("InterfaceIndex: %d", getInterfaceIndex()));
-            throw std::invalid_argument("Invalid interface type.");
-        }
-
-        for (auto& channel : channelData)
-        {
-            std::string& interfaceName = it->second;
-            if (channel.chName == interfaceName)
-            {
-                curChannel = channel.chID;
-                break;
-            }
-        }
-    }
-    return ((chNum == currentChNum) ? curChannel : chNum);
-}
-
 Json ChannelConfig::readJsonFile(const std::string& configFile)
 {
     std::ifstream jsonFile(configFile);
     if (!jsonFile.good())
     {
-        log<level::ERR>("JSON file not found");
+        log<level::INFO>("JSON file not found",
+                         entry("FILE_NAME=%s", configFile.c_str()));
         return nullptr;
     }
 

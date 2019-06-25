@@ -781,8 +781,6 @@ const std::map<DbusValue, IpmiValue> dbusToIpmi = {
 
 static constexpr uint8_t noChange = 0x03;
 static constexpr uint8_t allSupport = 0x01 | 0x02 | 0x04;
-static constexpr uint8_t policyBitMask = 0x07;
-static constexpr uint8_t setPolicyReqLen = 1;
 
 /* helper function for Get Chassis Status Command
  */
@@ -824,20 +822,22 @@ std::optional<uint2_t> getPowerRestorePolicy()
  */
 std::optional<bool> getPowerStatus()
 {
-    constexpr const char* powerControlObj =
-        "/xyz/openbmc_project/Chassis/Control/Power0";
-    constexpr const char* powerControlIntf =
-        "xyz.openbmc_project.Chassis.Control.Power";
     bool powerGood = false;
     std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
     try
     {
+        constexpr const char* chassisStatePath =
+            "/xyz/openbmc_project/state/chassis0";
+        constexpr const char* chassisStateIntf =
+            "xyz.openbmc_project.State.Chassis";
         auto service =
-            ipmi::getService(*busp, powerControlIntf, powerControlObj);
+            ipmi::getService(*busp, chassisStateIntf, chassisStatePath);
 
-        ipmi::Value variant = ipmi::getDbusProperty(
-            *busp, service, powerControlObj, powerControlIntf, "pgood");
-        powerGood = static_cast<bool>(std::get<int>(variant));
+        ipmi::Value powerState =
+            ipmi::getDbusProperty(*busp, service, chassisStatePath,
+                                  chassisStateIntf, "CurrentPowerState");
+        powerGood = std::get<std::string>(powerState) ==
+                    "xyz.openbmc_project.State.Chassis.PowerState.On";
     }
     catch (const std::exception& e)
     {
@@ -858,9 +858,7 @@ std::optional<bool> getPowerStatus()
         catch (const std::exception& e)
         {
             log<level::ERR>("Failed to fetch pgood property",
-                            entry("ERROR=%s", e.what()),
-                            entry("PATH=%s", powerControlObj),
-                            entry("INTERFACE=%s", powerControlIntf));
+                            entry("ERROR=%s", e.what()));
             return std::nullopt;
         }
     }
@@ -1703,26 +1701,27 @@ ipmi::RspType<uint8_t, // Minutes per count
     }
 }
 
-ipmi::RspType<uint8_t>
+ipmi::RspType<uint3_t, // policy support
+              uint5_t  // reserved
+              >
     ipmiChassisSetPowerRestorePolicy(boost::asio::yield_context yield,
-                                     uint8_t policy)
+                                     uint3_t policy, uint5_t reserved)
 {
-    constexpr uint8_t ccParamNotSupported = 0x80;
     power_policy::DbusValue value =
         power_policy::RestorePolicy::Policy::AlwaysOff;
 
-    if (policy & ~power_policy::policyBitMask)
+    if (reserved || (policy > power_policy::noChange))
     {
         phosphor::logging::log<level::ERR>(
             "Reserved request parameter",
             entry("REQ=0x%x", static_cast<int>(policy)));
-        return ipmi::response(ccParamNotSupported);
+        return ipmi::responseInvalidFieldRequest();
     }
 
     if (policy == power_policy::noChange)
     {
         // just return the supported policy
-        return ipmi::responseSuccess(power_policy::allSupport);
+        return ipmi::responseSuccess(power_policy::allSupport, reserved);
     }
 
     for (auto const& it : power_policy::dbusToIpmi)
@@ -1765,7 +1764,7 @@ ipmi::RspType<uint8_t>
         return ipmi::responseUnspecifiedError();
     }
 
-    return ipmi::responseSuccess(power_policy::allSupport);
+    return ipmi::responseSuccess(power_policy::allSupport, reserved);
 }
 
 void register_netfn_chassis_functions()

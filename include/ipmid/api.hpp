@@ -47,7 +47,7 @@ std::shared_ptr<sdbusplus::asio::connection> getSdBus();
 template <typename WorkFn>
 static inline void post_work(WorkFn work)
 {
-    getIoContext()->post(std::forward<WorkFn>(work));
+    boost::asio::post(*getIoContext(), std::forward<WorkFn>(work));
 }
 
 enum class SignalResponse : int
