@@ -67,3 +67,23 @@ message_unittest_SOURCES = \
     %reldir%/message/unpack.cpp \
     %reldir%/message/pack.cpp
 check_PROGRAMS += %reldir%/message_unittest
+
+# Build/add sensorhandler_unittest to test suite
+sensorhandler_unittest_CPPFLAGS = \
+    -Igtest \
+    $(GTEST_CPPFLAGS) \
+    $(AM_CPPFLAGS)
+sensorhandler_unittest_CXXFLAGS = \
+    $(PTHREAD_CFLAGS) \
+    $(CODE_COVERAGE_CXXFLAGS) \
+    $(CODE_COVERAGE_CFLAGS) \
+    -DBOOST_COROUTINES_NO_DEPRECATION_WARNING
+sensorhandler_unittest_LDFLAGS = \
+    -lgtest_main \
+    -lgtest \
+    -pthread \
+    $(OESDK_TESTCASE_FLAGS) \
+    $(CODE_COVERAGE_LDFLAGS)
+sensorhandler_unittest_SOURCES = \
+    %reldir%/sensorhandler_unittest.cpp
+check_PROGRAMS += %reldir%/sensorhandler_unittest
