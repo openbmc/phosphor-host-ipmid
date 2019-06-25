@@ -32,7 +32,7 @@ void register_netfn_storage_functions() __attribute__((constructor));
 unsigned int g_sel_time = 0xFFFFFFFF;
 extern const ipmi::sensor::IdInfoMap sensors;
 extern const FruMap frus;
-
+constexpr uint8_t eventDataSize = 3;
 namespace
 {
 constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
@@ -1193,44 +1193,45 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 #else  // JOURNAL_SEL not used
-ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief implements the Add SEL entry command
+ * @request
+ *
+ *   - recordID      ID used for SEL Record access
+ *   - recordType    Record Type
+ *   - timeStamp     Time when event was logged. LS byte first
+ *   - generatorID   software ID if event was generated from
+ *                   system software
+ *   - evmRev        event message format version
+ *   - sensorType    sensor type code for service that generated
+ *                   the event
+ *   - sensorNumber  number of sensors that generated the event
+ *   - eventDir     event dir
+ *   - eventData    event data field contents
+ *
+ *  @returns ipmi completion code plus response data
+ *   - RecordID of the Added SEL entry
+ */
+ipmi::RspType<uint16_t // recordID of the Added SEL entry
+              >
+    ipmiStorageAddSEL(uint16_t recordID, uint8_t recordType, uint32_t timeStamp,
+                      uint16_t generatorID, uint8_t evmRev, uint8_t sensorType,
+                      uint8_t sensorNumber, uint8_t eventDir,
+                      std::array<uint8_t, eventDataSize> eventData)
 {
-    if (*data_len != sizeof(ipmi_add_sel_request_t))
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    ipmi_ret_t rc = IPMI_CC_OK;
-    ipmi_add_sel_request_t* p = (ipmi_add_sel_request_t*)request;
-    uint16_t recordid;
-
     // Per the IPMI spec, need to cancel the reservation when a SEL entry is
     // added
     cancelSELReservation();
-
-    recordid = ((uint16_t)p->eventdata[1] << 8) | p->eventdata[2];
-
-    *data_len = sizeof(recordid);
-
-    // Pack the actual response
-    std::memcpy(response, &p->eventdata[1], 2);
-
     // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
     // a maintenance procedure associated with eSEL record.
     static constexpr auto procedureType = 0xDE;
-    if (p->recordtype == procedureType)
+    if (recordType == procedureType)
     {
         // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
         // procedure number.
-        createProcedureLogEntry(p->sensortype);
+        createProcedureLogEntry(sensorType);
     }
 
-    return rc;
+    return ipmi::responseSuccess(recordID);
 }
 #endif // JOURNAL_SEL
 
@@ -1381,8 +1382,10 @@ void register_netfn_storage_functions()
 #endif
 
     // <Add SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
-                           ipmi_storage_add_sel, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdAddSelEntry,
+                          ipmi::Privilege::Operator, ipmiStorageAddSEL);
+
     // <Clear SEL>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdClearSel, ipmi::Privilege::Operator,

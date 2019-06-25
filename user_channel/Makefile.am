@@ -12,7 +12,12 @@ COMMON_CXX = \
 	-DBOOST_ASIO_DISABLE_THREADS \
 	-DBOOST_ALL_NO_LIB
 
-lib_LTLIBRARIES = libuserlayer.la libchannellayer.la
+
+lib_LTLIBRARIES =
+
+if FEATURE_LIBUSERLAYER
+
+lib_LTLIBRARIES += libuserlayer.la
 libuserlayer_la_SOURCES = \
 	user_layer.cpp \
 	user_mgmt.cpp \
@@ -29,7 +34,9 @@ libuserlayer_la_LDFLAGS = \
 libuserlayer_la_CXXFLAGS = \
 	-I$(top_srcdir) \
 	$(COMMON_CXX)
+endif
 
+lib_LTLIBRARIES += libchannellayer.la
 libchannellayer_la_SOURCES = \
 	channel_mgmt.cpp \
 	channel_layer.cpp

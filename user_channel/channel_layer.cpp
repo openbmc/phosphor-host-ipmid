@@ -58,11 +58,6 @@ bool isValidChannel(const uint8_t chNum)
     return getChannelConfigObject().isValidChannel(chNum);
 }
 
-uint8_t convertCurrentChannelNum(const uint8_t chNum)
-{
-    return getChannelConfigObject().convertToChannelIndexNumber(chNum);
-}
-
 bool isValidAuthType(const uint8_t chNum, const EAuthType& authType)
 {
     return getChannelConfigObject().isValidAuthType(chNum, authType);
@@ -145,5 +140,16 @@ std::string getChannelName(const uint8_t chNum)
 uint8_t getChannelByName(const std::string& chName)
 {
     return getChannelConfigObject().getChannelByName(chName);
+}
+
+bool isValidPayloadType(const PayloadType payloadType)
+{
+    return (
+        payloadType == PayloadType::IPMI || payloadType == PayloadType::SOL ||
+        payloadType == PayloadType::OPEN_SESSION_REQUEST ||
+        payloadType == PayloadType::OPEN_SESSION_RESPONSE ||
+        payloadType == PayloadType::RAKP1 ||
+        payloadType == PayloadType::RAKP2 ||
+        payloadType == PayloadType::RAKP3 || payloadType == PayloadType::RAKP4);
 }
 } // namespace ipmi

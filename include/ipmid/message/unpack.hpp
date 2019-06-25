@@ -99,26 +99,29 @@ struct UnpackSingle
             }
             return 0;
         }
-        else
+        else if constexpr (utility::is_tuple<T>::value)
         {
-            if constexpr (utility::is_tuple<T>::value)
+            bool priorError = p.unpackError;
+            size_t priorIndex = p.rawIndex;
+            // more stuff to unroll if partial bytes are out
+            size_t priorBitCount = p.bitCount;
+            fixed_uint_t<details::bitStreamSize> priorBits = p.bitStream;
+            int ret = p.unpack(t);
+            if (ret != 0)
             {
-                bool priorError = p.unpackError;
-                size_t priorIndex = p.rawIndex;
-                // more stuff to unroll if partial bytes are out
-                size_t priorBitCount = p.bitCount;
-                fixed_uint_t<details::bitStreamSize> priorBits = p.bitStream;
-                int ret = p.unpack(t);
-                if (ret != 0)
-                {
-                    t = T();
-                    p.rawIndex = priorIndex;
-                    p.bitStream = priorBits;
-                    p.bitCount = priorBitCount;
-                    p.unpackError = priorError;
-                }
+                t = T();
+                p.rawIndex = priorIndex;
+                p.bitStream = priorBits;
+                p.bitCount = priorBitCount;
+                p.unpackError = priorError;
             }
             return 0;
+        }
+        else
+        {
+            static_assert(
+                utility::dependent_false<T>::value,
+                "Attempt to unpack a type that has no IPMI unpack operation");
         }
     }
 };

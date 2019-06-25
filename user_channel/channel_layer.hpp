@@ -295,15 +295,6 @@ static inline uint8_t convertCurrentChannelNum(const uint8_t chNum,
     return chNum;
 }
 
-/** @brief provides function to convert current channel number (0xE)
- *
- *  @param[in] chNum - channel number as requested in commands.
- *
- *  @return same channel number or proper channel number for current channel
- * number (0xE).
- */
-uint8_t convertCurrentChannelNum(const uint8_t chNum);
-
 /** @brief to set channel access data
  *
  *  @param[in] chNum - channel number
@@ -374,5 +365,13 @@ std::string getChannelName(const uint8_t chNum);
  *  @return the LAN channel number
  */
 uint8_t getChannelByName(const std::string& chName);
+
+/** @brief determines whether payload type is valid
+ *
+ *	@param[in] payload type - Payload Type
+ *
+ *	@return true if valid, false otherwise
+ */
+bool isValidPayloadType(const PayloadType payloadType);
 
 } // namespace ipmi

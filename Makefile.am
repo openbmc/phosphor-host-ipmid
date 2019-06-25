@@ -123,6 +123,7 @@ libipmi20_la_LDFLAGS = \
 	-version-info 0:0:0 -shared
 libipmi20_la_CXXFLAGS = $(COMMON_CXX)
 
+if FEATURE_LIBUSERLAYER
 providers_LTLIBRARIES += libusercmds.la
 libusercmds_la_LIBADD = \
 	libipmid/libipmid.la \
@@ -135,6 +136,7 @@ libusercmds_la_LDFLAGS = \
 	$(libmapper_LIBS) \
 	-version-info 0:0:0 -shared
 libusercmds_la_CXXFLAGS = $(COMMON_CXX)
+endif
 
 providers_LTLIBRARIES += libsysintfcmds.la
 libsysintfcmds_la_LIBADD = \

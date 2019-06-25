@@ -14,8 +14,6 @@
 // limitations under the License.
 */
 
-#include "channelcommands.hpp"
-
 #include "apphandler.hpp"
 #include "channel_layer.hpp"
 
@@ -27,36 +25,6 @@ using namespace phosphor::logging;
 
 namespace ipmi
 {
-
-/** @struct GetChannelPayloadSupportReq
- *
- *  Structure for get channel payload support command request (refer spec
- *  sec 24.8)
- */
-struct GetChannelPayloadSupportReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t chNum : 4;
-    uint8_t reserved : 4;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved : 4;
-    uint8_t chNum : 4;
-#endif
-} __attribute__((packed));
-
-/** @struct GetChannelPayloadSupportResp
- *
- *  Structure for get channel payload support command response (refer spec
- *  sec 24.8)
- */
-struct GetChannelPayloadSupportResp
-{
-    uint8_t stdPayloadType[2];
-    uint8_t sessSetupPayloadType[2];
-    uint8_t OEMPayloadType[2];
-    uint8_t reserved[2];
-} __attribute__((packed));
 
 /** @brief implements the set channel access command
  *  @ param ctx - context pointer
@@ -311,79 +279,106 @@ RspType<uint4_t,  // chNum
                            sessionType, vendorId, auxChInfo);
 }
 
-ipmi_ret_t ipmiGetChannelPayloadSupport(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                        ipmi_request_t request,
-                                        ipmi_response_t response,
-                                        ipmi_data_len_t data_len,
-                                        ipmi_context_t context)
+namespace
 {
-    const auto req = static_cast<GetChannelPayloadSupportReq*>(request);
-    size_t reqLength = *data_len;
+constexpr uint16_t standardPayloadBit(PayloadType p)
+{
+    return (1 << static_cast<size_t>(p));
+}
 
-    *data_len = 0;
+constexpr uint16_t sessionPayloadBit(PayloadType p)
+{
+    constexpr size_t sessionShift =
+        static_cast<size_t>(PayloadType::OPEN_SESSION_REQUEST);
+    return ((1 << static_cast<size_t>(p)) >> sessionShift);
+}
+} // namespace
 
-    if (reqLength != sizeof(*req))
+/** @brief implements get channel payload support command
+ *  @ param ctx - ipmi context pointer
+ *  @ param chNum - channel number
+ *  @ param reserved - skip 4 bits
+ *
+ *  @ returns IPMI completion code plus response data
+ *  - stdPayloadType - bitmask of supported standard payload types
+ *  - sessSetupPayloadType - bitmask of supported session setup payload types
+ *  - OEMPayloadType - bitmask of supported OEM payload types
+ *  - reserved - 2 bytes of 0
+ **/
+RspType<uint16_t, // stdPayloadType
+        uint16_t, // sessSetupPayloadType
+        uint16_t, // OEMPayloadType
+        uint16_t  // reserved
+        >
+    ipmiGetChannelPayloadSupport(Context::ptr ctx, uint4_t channel,
+                                 uint4_t reserved)
+{
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    if (!isValidChannel(chNum) || reserved)
     {
-        log<level::DEBUG>("Get channel payload - Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    uint8_t chNum = convertCurrentChannelNum(req->chNum);
-    if (!isValidChannel(chNum) || req->reserved != 0)
-    {
-        log<level::DEBUG>("Get channel payload - Invalid field in request");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
-    // Not supported on sessionless channels.
-    if (EChannelSessSupported::none == getChannelSessionSupport(chNum))
-    {
-        log<level::DEBUG>("Get channel payload - Sessionless Channel");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        log<level::DEBUG>("Get channel access - Invalid field in request");
+        return responseInvalidFieldRequest();
     }
 
     // Session support is available in active LAN channels.
-    if ((EChannelSessSupported::none != getChannelSessionSupport(chNum)) &&
-        (!(doesDeviceExist(chNum))))
+    if ((getChannelSessionSupport(chNum) == EChannelSessSupported::none) ||
+        !(doesDeviceExist(chNum)))
     {
         log<level::DEBUG>("Get channel payload - Device not exist");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return responseInvalidFieldRequest();
     }
 
-    auto resp = static_cast<GetChannelPayloadSupportResp*>(response);
+    constexpr uint16_t stdPayloadType = standardPayloadBit(PayloadType::IPMI) |
+                                        standardPayloadBit(PayloadType::SOL);
+    constexpr uint16_t sessSetupPayloadType =
+        sessionPayloadBit(PayloadType::OPEN_SESSION_REQUEST) |
+        sessionPayloadBit(PayloadType::OPEN_SESSION_RESPONSE) |
+        sessionPayloadBit(PayloadType::RAKP1) |
+        sessionPayloadBit(PayloadType::RAKP2) |
+        sessionPayloadBit(PayloadType::RAKP3) |
+        sessionPayloadBit(PayloadType::RAKP4);
+    constexpr uint16_t OEMPayloadType = 0;
+    constexpr uint16_t rspRsvd = 0;
+    return responseSuccess(stdPayloadType, sessSetupPayloadType, OEMPayloadType,
+                           rspRsvd);
+}
 
-    std::fill(reinterpret_cast<uint8_t*>(resp),
-              reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
+/** @brief implements the get channel payload version command
+ *  @param ctx - IPMI context pointer (for channel)
+ *  @param chNum - channel number to get info about
+ *  @param reserved - skip 4 bits
+ *  @param payloadTypeNum - to get payload type info
 
-    // TODO: Hard coding for now.
-    // Mapping PayloadTypes to 'GetChannelPayloadSupportResp' fields:
-    // --------------------------------------------------------------
-    // Mask all except least 3 significant bits to get a value in the range of
-    // 0-7. This value maps to the bit position of given payload type in 'resp'
-    // fields.
+ *  @returns IPMI completion code plus response data
+ *   - formatVersion - BCD encoded format version info
+ */
 
-    static constexpr uint8_t payloadByteMask = 0x07;
-    static constexpr uint8_t stdPayloadTypeIPMI =
-        1 << (static_cast<uint8_t>(PayloadType::IPMI) & payloadByteMask);
-    static constexpr uint8_t stdPayloadTypeSOL =
-        1 << (static_cast<uint8_t>(PayloadType::SOL) & payloadByteMask);
+RspType<uint8_t> // formatVersion
+    ipmiGetChannelPayloadVersion(Context::ptr ctx, uint4_t chNum,
+                                 uint4_t reserved, uint8_t payloadTypeNum)
+{
+    uint8_t channel =
+        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
 
-    static constexpr uint8_t sessPayloadTypeOpenReq =
-        1 << (static_cast<uint8_t>(PayloadType::OPEN_SESSION_REQUEST) &
-              payloadByteMask);
-    static constexpr uint8_t sessPayloadTypeRAKP1 =
-        1 << (static_cast<uint8_t>(PayloadType::RAKP1) & payloadByteMask);
-    static constexpr uint8_t sessPayloadTypeRAKP3 =
-        1 << (static_cast<uint8_t>(PayloadType::RAKP3) & payloadByteMask);
+    if (reserved || !isValidChannel(channel) ||
+        (getChannelSessionSupport(channel)) == EChannelSessSupported::none)
+    {
+        return responseInvalidFieldRequest();
+    }
 
-    resp->stdPayloadType[0] = stdPayloadTypeIPMI | stdPayloadTypeSOL;
-    // RMCP+ Open Session request, RAKP Message1 and RAKP Message3.
-    resp->sessSetupPayloadType[0] =
-        sessPayloadTypeOpenReq | sessPayloadTypeRAKP1 | sessPayloadTypeRAKP3;
+    if (!isValidPayloadType(static_cast<PayloadType>(payloadTypeNum)))
+    {
+        log<level::ERR>("Channel payload version - Payload type unavailable");
 
-    *data_len = sizeof(*resp);
+        constexpr uint8_t payloadTypeNotSupported = 0x80;
+        return response(payloadTypeNotSupported);
+    }
 
-    return IPMI_CC_OK;
+    // BCD encoded version representation - 1.0
+    constexpr uint8_t formatVersion = 0x10;
+
+    return responseSuccess(formatVersion);
 }
 
 void registerChannelFunctions() __attribute__((constructor));
@@ -400,10 +395,11 @@ void registerChannelFunctions()
     registerHandler(prioOpenBmcBase, netFnApp, app::cmdGetChannelInfoCommand,
                     Privilege::User, ipmiGetChannelInfo);
 
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHANNEL_PAYLOAD_SUPPORT,
-                           NULL, ipmiGetChannelPayloadSupport, PRIVILEGE_USER);
+    registerHandler(prioOpenBmcBase, netFnApp, app::cmdGetChannelPayloadSupport,
+                    Privilege::User, ipmiGetChannelPayloadSupport);
 
-    return;
+    registerHandler(prioOpenBmcBase, netFnApp, app::cmdGetChannelPayloadVersion,
+                    Privilege::User, ipmiGetChannelPayloadVersion);
 }
 
 } // namespace ipmi
