@@ -155,7 +155,7 @@ struct GetSdrReq
 namespace request
 {
 
-inline uint8_t get_reservation_id(GetSdrReq* req)
+inline uint16_t get_reservation_id(GetSdrReq* req)
 {
     return (req->reservation_id_lsb + (req->reservation_id_msb << 8));
 };
