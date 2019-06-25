@@ -4,5 +4,5 @@
 
 TEST(FactorialTest, Zero)
 {
-    EXPECT_EQ(1, Factorial(0));
+    EXPECT_EQ(13, Factorial(0));
 }
