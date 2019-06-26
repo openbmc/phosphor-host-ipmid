@@ -424,9 +424,46 @@ message, you can state that you ran the new unit tests written.
 
 # Reviewing Tests
 
+Tests are written primarily to be read. So when you review a test, you're the
+first customer of that test!
+
 ## Best Practices
 
+First, all the best practices listed above for writing tests are things you
+should check for and encourage when you're reading tests.
+
+Next, you should ensure that you can tell what's going on when you read the
+test. If it's not clear to you, it's not going to be clear to someone else, and
+the test is more prone to error - ask!
+
+Finally, think about what's _not_ being tested. If there's a case you're curious
+about and it isn't covered, you should mention it to the committer.
+
 ## Quickly Running At Home
+
+Now that you've got a handy setup as described earlier in this document, you can
+quickly download and run the tests yourself. Within the Gerrit change, you
+should be able to find a button that says "Download", which will give you
+commands for various types of downloads into an existing Git repo. Use
+"Checkout", for example:
+
+```shell
+cd openbmc-ci-tests/phosphor-host-ipmid
+git fetch "https://gerrit.openbmc-project.xyz/openbmc/phosphor-host-ipmid" \
+  refs/changes/43/23043/1 && git checkout FETCH_HEAD
+```
+
+This won't disturb the rest of your Git repo state, and will put your CI
+worktree into detached-HEAD mode pointing to the commit that's under review. You
+can then run your tests normally, and even make changes and push again if the
+commit was abandoned or otherwise left to rot by its author.
+
+Doing so can be handy in a number of scenarios:
+
+- Jenkins isn't responding
+- The Jenkins build is broken for a reason beyond the committer's control
+- The committer doesn't have "Ok-To-Test" permission, and you don't have
+  permission to grant it to them
 
 # Credits
 
