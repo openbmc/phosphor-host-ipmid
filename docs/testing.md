@@ -137,11 +137,282 @@ human-readable and can be examined to determine why something failed
 
 # Writing Tests
 
+Now that you've got an easy working environment for running tests, let's write
+some new ones.
+
 ## Setting Up Your Environment
+
+In `/my/dir/for/phosphor-host-ipmid`, create a new branch based on `master` (or
+your current patchset). For this tutorial, let's call it `sensorhandler-tests`.
+
+```shell
+git checkout -b sensorhandler-tests master
+```
+
+This creates a new branch `sensorhandler-tests` which is based on `master`, then
+checks out that branch for you to start hacking.
+
+## Write Some Tests
+
+For this tutorial, we'll be adding some basic unit testing of the struct
+accessors for `get_sdr::GetSdrReq`, just because they're fairly simple. The text
+of the struct and accessors is recreated here:
+
+```c++
+/**
+ * Get SDR
+ */
+namespace get_sdr
+{
+
+struct GetSdrReq
+{
+    uint8_t reservation_id_lsb;
+    uint8_t reservation_id_msb;
+    uint8_t record_id_lsb;
+    uint8_t record_id_msb;
+    uint8_t offset;
+    uint8_t bytes_to_read;
+} __attribute__((packed));
+
+namespace request
+{
+
+inline uint8_t get_reservation_id(GetSdrReq* req)
+{
+    return (req->reservation_id_lsb + (req->reservation_id_msb << 8));
+};
+
+inline uint16_t get_record_id(GetSdrReq* req)
+{
+    return (req->record_id_lsb + (req->record_id_msb << 8));
+};
+
+} // namespace request
+
+...
+} // namespace get_sdr
+```
+
+We'll create the tests in `test/sensorhandler_unittest.cpp`; go ahead and start
+that file with your editor.
+
+First, include the header you want to test, as well as the GTest header:
+
+```c++
+#include <sensorhandler.hpp>
+
+#include <gtest/gtest.h>
+```
+
+Let's plan the test cases we care about before we build any additional
+scaffolding. We've only got two functions - `get_reservation_id()` and
+`get_record_id()`. We want to test:
+
+- "Happy path" - in an ideal case, everything works correctly
+- Error handling - when given bad input, things break as expected
+- Edge cases - when given extremes (e.g. very large or very small numbers),
+  things work correctly or break as expected
+
+For `get_reservation_id()`:
+
+```c++
+TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_HappyPath)
+{
+}
+
+TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_NullInputDies)
+{
+}
+
+TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_Uint16MaxWorksCorrectly)
+{
+}
+```
+
+For `get_record_id()`, we have pretty much the same set of tests:
+
+```c++
+TEST(SensorHandlerTest, GetSdrReq_get_record_id_HappyPath)
+{
+}
+
+TEST(SensorHandlerTest, GetSdrReq_get_record_id_NullInputDies)
+{
+}
+
+TEST(SensorHandlerTest, GetSdrReq_get_record_id_Uint16MaxWorksCorrectly)
+{
+}
+```
+
+In the case of these two methods, there's really not much else to test. Some
+types of edge cases - like overflow/underflow - are prevented by C++'s strong
+typing; other types - like passing the incorrect type - are impossible to
+insulate against because it's possible to cast anything to a `GetSdrReq*` if we
+want. Since these are particularly boring, they make a good example for a
+tutorial like this; in practice, tests you write will likely be for more
+complicated code! We'll talk more about this in the Best Practices section
+below.
+
+Let's implement the `get_reservation_id()` items first. The implementations for
+`get_record_id()` will be identical, so we won't cover them here.
+
+For the happy path, we want to make it very clear that the test value we're
+using is within range, so we express it in binary. We also want to be able to
+ensure that the MSB and LSB are being combined in the correct order, so we make
+sure that the MSB and LSB values are different (don't use `0x3333` as the
+expected ID here). Finally, we want it to be obvious to the reader if we have
+populated the `GetSdrReq` incorrectly, so we've labeled all the fields. Since we
+are only testing one operation, it's okay to use either `ASSERT_EQ` or
+`EXPECT_EQ`; more on that in the Best Practices section.
+
+```c++
+TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_HappyPath)
+{
+    uint16_t expected_id = 0x1234; // Expected ID spans both bytes.
+    GetSdrReq input = {0x34,  // Reservation ID LSB
+                       0x12,  // Reservation ID MSB
+                       0x00,  // Record ID LSB
+                       0x00,  // Record ID MSB
+                       0x00,  // Offset
+                       0x00}; // Bytes to Read
+
+    uint16_t actual = get_sdr::request::get_reservation_id(&input);
+    ASSERT_EQ(actual, expected_id);
+}
+```
+
+We don't expect that our `GetSdrReq` pointer will ever be null; in this case,
+the null pointer validation is done much, much earlier. So it's okay for us to
+specify that in the unlikely case we're given a null pointer, we die. We don't
+really care what the output message is.
+
+```c++
+TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_NullInputDies)
+{
+    ASSERT_DEATH(get_sdr::request::get_reservation_id(nullptr), ".*");
+}
+```
+
+Finally, while negative values are taken care of by C++'s type system, we can at
+least check that our code still works happily with `UINT16_MAX`. This test is
+similar to the happy path test, but uses an edge value instead.
+
+```c++
+TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_Uint16MaxWorksCorrectly)
+{
+    uint16_t expected_id = 0xFFFF; // Expected ID spans both bytes.
+    GetSdrReq input = {0xFF,  // Reservation ID LSB
+                       0xFF,  // Reservation ID MSB
+                       0x00,  // Record ID LSB
+                       0x00,  // Record ID MSB
+                       0x00,  // Offset
+                       0x00}; // Bytes to Read
+
+    uint16_t actual = get_sdr::request::get_reservation_id(&input);
+    ASSERT_EQ(actual, expected_id);
+}
+```
+
+The `get_record_id()` tests are identical, except that they are testing the
+Record ID field. They will not be duplicated here.
+
+Finally, we'll need to add the new tests to `test/Makefile.am`. You can mimic other
+existing test setups:
+
+```make
+# Build/add sensorhandler_unittest to test suite
+sensorhandler_unittest_CPPFLAGS = \
+    -Igtest \
+    $(GTEST_CPPFLAGS) \
+    $(AM_CPPFLAGS)
+sensorhandler_unittest_CXXFLAGS = \
+    $(PTHREAD_CFLAGS) \
+    $(CODE_COVERAGE_CXXFLAGS) \
+    $(CODE_COVERAGE_CFLAGS) \
+    -DBOOST_COROUTINES_NO_DEPRECATION_WARNING
+sensorhandler_unittest_LDFLAGS = \
+    -lgtest_main \
+    -lgtest \
+    -pthread \
+    $(OESDK_TESTCASE_FLAGS) \
+    $(CODE_COVERAGE_LDFLAGS)
+sensorhandler_unittest_SOURCES = \
+    %reldir%/sensorhandler_unittest.cpp
+check_PROGRAMS += %reldir%/sensorhandler_unittest
+```
+
+## Run the New Tests
+
+Commit your test changes. Then, you'll want to checkout the
+`sensorhandler-tests` branch in your CI worktree, which will involve releasing
+it from your main worktree:
+
+```shell
+cd /my/dir/for/phosphor-host-ipmid
+git add test/sensorhandler_unittest.cpp
+git commit -s
+git checkout master   # Here you can use any branch except sensorhandler-tests
+cd /path/to/openbmc-ci-tests/phosphor-host-ipmid
+git checkout sensorhandler-tests
+```
+
+Now you can run the test suite as described earlier in the document. If you see
+a linter error when you run, you can actually apply the cleaned-up code easily:
+
+```shell
+cd ./phosphor-host-ipmid
+git diff    # Examine the proposed changes
+git add -u  # Apply the proposed changes
+git commit --amend
+```
+
+(If you will need to apply the proposed changes to multiple commits, you can do
+this with interactive rebase, which won't be described here.)
 
 ## Best Practices
 
+While a good unit test can ensure your code's stability, a flaky or
+poorly-written unit test can make life harder for contributors down the road.
+Some things to remember:
+
+Include both positive (happy-path) and negative (error) testing in your
+testbench. It's not enough to know that the code works when it's supposed to; we
+also need to know that it fails gracefully when something goes wrong. Applying
+edge-case testing helps us find bugs that may take years to occur (and
+reproduce!) in the field.
+
+Keep your tests small. Avoid branching - if you feel a desire to, instead
+explore that codepath in another test. The best tests are easy to read and
+understand.
+
+Don't test other people's code. Make sure to limit the test assertions to the
+code under test. For example, don't test what happens if you give a bad input to
+`sdbusplus` when you're supposed to be testing `phosphor-host-ipmid`.
+
+However, don't trust other people's code, either! Try to test _how you respond_
+when a service fails unexpectedly. Rather than checking if `sdbusplus` fails on
+bad inputs, check whether you handle an `sdbusplus` failure gracefully. You can
+use GMock for this kind of testing.
+
+Think about testing when you write your business logic code. Concepts like
+dependency injection and small functions make your code more testable - you'll
+be thanking yourself later when you're writing tests.
+
+Finally, you're very likely to find bugs while writing tests, especially if it's
+for code that wasn't previously unit-tested. It's okay to check in a bugfix
+along with a test that verifies the fix worked, if you're only doing one test
+and one bugfix. If you're checking in a large suite of tests, do the bugfixes in
+independent commits which your test suite commit is based on:
+
+master -> fix Foo.Abc() -> fix Foo.Def() -> Fix Foo.Ghi() -> test Foo class
+
 ## Sending for Review
+
+You can send your test update and any associated bugfixes for review to Gerrit
+as you would send any other change. For the `Tested:` field in the commit
+message, you can state that you ran the new unit tests written.
 
 # Reviewing Tests
 
