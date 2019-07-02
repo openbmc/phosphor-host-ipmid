@@ -59,7 +59,7 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
         log<level::DEBUG>("Set channel access - No support on channel");
-        return responseInvalidFieldRequest();
+        return response(IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL);
     }
 
     ChannelAccess chActData;
