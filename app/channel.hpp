@@ -73,7 +73,6 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 namespace cipher
 {
 
-static constexpr auto defaultChannelNumber = 1;
 static constexpr auto listTypeMask = 0x80;
 static constexpr auto listCipherSuite = 0x80;
 static constexpr auto listIndexMask = 0x3F;

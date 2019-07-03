@@ -149,7 +149,9 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto size = end - start;
 
     auto responseData = reinterpret_cast<GetChannelCipherRespHeader*>(response);
-    responseData->channelNumber = cipher::defaultChannelNumber;
+
+    constexpr uint8_t chanNumMask = 0x0F;
+    responseData->channelNumber = (requestData->channelNumber) & chanNumMask;
 
     if (!size)
     {
