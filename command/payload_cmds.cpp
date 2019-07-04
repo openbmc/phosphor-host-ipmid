@@ -218,6 +218,11 @@ std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
     auto response =
         reinterpret_cast<GetPayloadInfoResponse*>(outPayload.data());
 
+    if (inPayload.size() != sizeof(GetPayloadInfoRequest))
+    {
+        response->completionCode = IPMI_CC_REQ_DATA_LEN_INVALID;
+        return outPayload;
+    }
     // SOL is the payload currently supported for payload status & only one
     // instance of SOL is supported.
     if (static_cast<uint8_t>(message::PayloadType::SOL) !=
@@ -227,7 +232,6 @@ std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
         response->completionCode = IPMI_CC_INVALID_FIELD_REQUEST;
         return outPayload;
     }
-
     auto status = std::get<sol::Manager&>(singletonPool)
                       .isPayloadActive(request->payloadInstance);
 
