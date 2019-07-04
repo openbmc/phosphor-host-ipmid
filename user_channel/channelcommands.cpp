@@ -26,6 +26,8 @@ using namespace phosphor::logging;
 namespace ipmi
 {
 
+static constexpr const uint8_t ccActionNotSupportedForChannel = 0x82;
+
 /** @brief implements the set channel access command
  *  @ param ctx - context pointer
  *  @ param channel - channel number
@@ -59,7 +61,7 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
         log<level::DEBUG>("Set channel access - No support on channel");
-        return responseInvalidFieldRequest();
+        return response(ccActionNotSupportedForChannel);
     }
 
     ChannelAccess chActData;
