@@ -67,3 +67,21 @@ message_unittest_SOURCES = \
     %reldir%/message/unpack.cpp \
     %reldir%/message/pack.cpp
 check_PROGRAMS += %reldir%/message_unittest
+
+# Build/add closesession_unittest to test suite
+session_unittest_CPPFLAGS = \
+    -Igtest \
+    $(GTEST_CPPFLAGS) \
+    $(AM_CPPFLAGS)
+session_unittest_CXXFLAGS = \
+    $(PTHREAD_CFLAGS) \
+    $(CODE_COVERAGE_CXXFLAGS) \
+    $(CODE_COVERAGE_CFLAGS)
+session_unittest_LDFLAGS = \
+    -lgtest_main \
+    -lgtest \
+    -pthread \
+    $(OESDK_TESTCASE_FLAGS) \
+    $(CODE_COVERAGE_LDFLAGS)
+session_unittest_SOURCES = %reldir%/session/closesession_unittest.cpp
+check_PROGRAMS += %reldir%/session_unittest
