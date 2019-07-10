@@ -28,7 +28,10 @@ static constexpr size_t sessionZero = 0;
 static constexpr size_t maxSessionlessCount = 1;
 static constexpr uint8_t invalidSessionID = 0;
 static constexpr uint8_t invalidSessionHandle = 0;
+static constexpr uint8_t defaultSessionHandle = 0xFF;
 static constexpr uint8_t maxNetworkInstanceSupported = 4;
+static constexpr uint8_t ccInvalidSessionId = 0x87;
+static constexpr uint8_t ccInvalidSessionHandle = 0x88;
 
 // MSB BIT 7 BIT 6 assigned for netipmid instance in session handle.
 static constexpr uint8_t multiIntfaceSessionHandleMask = 0x3F;
