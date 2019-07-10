@@ -2,6 +2,7 @@ nobase_include_HEADERS = \
 	ipmid/api.hpp \
 	ipmid/api-types.hpp \
 	ipmid/sessiondef.hpp \
+	ipmid/sessionhelper.hpp \
 	ipmid/filter.hpp \
 	ipmid/handler.hpp \
 	ipmid/message.hpp \
