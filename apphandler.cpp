@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <fstream>
 #include <ipmid/api.hpp>
+#include <ipmid/sessiondef.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <memory>
@@ -840,6 +841,184 @@ auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
     return ipmi::responseSuccess(uuid);
 }
 
+/**
+ * @brief Parse Session Input payload.
+ *
+ * This finction retrives the session id and session handle from the session
+ object path.
+ * A valid object path will be in the form
+ "/xyz/openbmc_project/ipmi/session/channel/sessionId_sessionHandle"
+ *
+ * Ex: "/xyz/openbmc_project/ipmi/session/eth0/12345678_01"
+ * SessionId	: 0X12345678
+ * SessionHandle: 0X01
+
+ * @param[in] objectPath - Sessoin object path
+ * @param[in] sessionID - Retrived session Id will be asigned to it
+ * @param[in] sessionHandle - Retrived session handle will be asigned to it
+ *
+ * @return true if session id and session handle are retrived else returns
+ false.
+ */
+bool parseCloseSessionInputPayload(const std::string& objectPath,
+                                   uint32_t& sessionId, uint8_t& sessionHandle)
+{
+    std::size_t ptrPosition = objectPath.rfind("/");
+    uint16_t tempSessionHandle = 0;
+
+    if (ptrPosition != std::string::npos)
+    {
+        std::string sessionIdString = objectPath.substr(ptrPosition + 1);
+        std::size_t pos = sessionIdString.rfind("_");
+
+        if (pos != std::string::npos)
+        {
+            std::string sessionHandleString = sessionIdString.substr(pos + 1);
+            sessionIdString = sessionIdString.substr(0, pos);
+            std::stringstream handle(sessionHandleString);
+            handle >> std::hex >> tempSessionHandle;
+            sessionHandle = tempSessionHandle & 0xFF;
+            std::stringstream idString(sessionIdString);
+            idString >> std::hex >> sessionId;
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Is session object matched.
+ *
+ * This function is used to check if the session object is matched or not.
+ *
+ * @param[in] objectPath - Sessoin object path
+ * @param[in] reqSessionID - request session Id
+ * @param[in] reqSessionHandle - request session Handle
+ *
+ *@return true if the object is matched elase returns false
+ **/
+bool isSessionObjectMatched(const std::string objectPath,
+                            const uint32_t reqSessionId,
+                            const uint8_t reqSessionHandle)
+{
+    uint32_t sessionId = 0;
+    uint8_t sessionHandle = 0;
+
+    if (parseCloseSessionInputPayload(objectPath, sessionId, sessionHandle))
+    {
+        return (reqSessionId == sessionId) ||
+               (reqSessionHandle == sessionHandle);
+    }
+
+    return false;
+}
+
+/**
+ * @brief Sets the session state
+ *
+ * This function is to set the session state to tear down in progress if the
+ *state is active.
+ *
+ * @param[in] busp - Dbus obj
+ * @param[in] service - service name
+ * @param[in] obj - object path
+ *
+ *@return success completion code if it sests the session state to
+ *tearDownInProgress else returns the correcponding error completion code.
+ **/
+uint8_t setSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
+                        const std::string& service, const std::string& obj)
+{
+    try
+    {
+        uint8_t sessionState = std::get<uint8_t>(ipmi::getDbusProperty(
+            *busp, service, obj, session::sessionIntf, "State"));
+
+        if (sessionState == static_cast<uint8_t>(session::State::active))
+        {
+            ipmi::setDbusProperty(
+                *busp, service, obj, session::sessionIntf, "State",
+                static_cast<uint8_t>(session::State::tearDownInProgress));
+            return ipmi::ccSuccess;
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>("Failed in getting session State property",
+                        entry("service=%s", service.c_str()),
+                        entry("Object path=%s", obj.c_str()),
+                        entry("interface=%s", session::sessionIntf));
+        return ipmi::ccUnspecifiedError;
+    }
+
+    return ipmi::ccInvalidFieldRequest;
+}
+
+ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
+                                    std::optional<uint8_t> requestSessionHandle)
+{
+    auto busp = getSdBus();
+    uint8_t reqSessionHandle =
+        requestSessionHandle.value_or(session::defaultSessionHandle);
+
+    if (reqSessionId == session::sessionZero &&
+        reqSessionHandle == session::defaultSessionHandle)
+    {
+        return ipmi::response(session::ccInvalidSessionId);
+    }
+
+    if (reqSessionId == session::sessionZero &&
+        reqSessionHandle == session::invalidSessionHandle)
+    {
+        return ipmi::response(session::ccInvalidSessionHandle);
+    }
+
+    if (reqSessionId != session::sessionZero &&
+        reqSessionHandle != session::defaultSessionHandle)
+    {
+        return ipmi::response(ipmi::ccInvalidFieldRequest);
+    }
+
+    try
+    {
+        ipmi::ObjectTree objectTree = ipmi::getAllDbusObjects(
+            *busp, session::sessionManagerRootPath, session::sessionIntf);
+
+        for (auto& objectTreeItr : objectTree)
+        {
+            const std::string obj = objectTreeItr.first;
+
+            if (isSessionObjectMatched(obj, reqSessionId, reqSessionHandle))
+            {
+                auto& serviceMap = objectTreeItr.second;
+
+                // Session id and session handle are unique for each session.
+                // Session id and handler are retrived from the object path and
+                // object path will be unique for each session. checking if
+                // multiple objects exist with same object path under multiple
+                // services.
+                if (serviceMap.size() != 1)
+                {
+                    return ipmi::responseUnspecifiedError();
+                }
+
+                auto itr = serviceMap.begin();
+                const std::string service = itr->first;
+                return ipmi::response(setSessionState(busp, service, obj));
+            }
+        }
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to fetch object from dbus",
+                        entry("INTERFACE=%s", session::sessionIntf),
+                        entry("ERRMSG=%s", e.what()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseInvalidFieldRequest();
+}
+
 static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
 static std::string sysInfoReadSystemName()
@@ -1270,6 +1449,10 @@ void register_netfn_app_functions()
     // <Set Watchdog Timer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL,
                            ipmi_app_watchdog_set, PRIVILEGE_OPERATOR);
+
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdCloseSession, ipmi::Privilege::Callback,
+                          ipmiAppCloseSession);
 
     // <Get Watchdog Timer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_WD, NULL,
