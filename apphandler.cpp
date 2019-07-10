@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <fstream>
 #include <ipmid/api.hpp>
+#include <ipmid/sessiondef.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <memory>
@@ -839,6 +840,129 @@ auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
     }
     return ipmi::responseSuccess(uuid);
 }
+bool parseCloseSessionInputPayload(const std::string& objectPath,
+                                   uint32_t& sessionID, uint8_t& sessionHandle)
+{
+    std::size_t ptrPosition = objectPath.rfind("/");
+    uint16_t tempSessionHandle = 0;
+
+    if (ptrPosition != std::string::npos)
+    {
+        std::string sessionIdString = objectPath.substr(ptrPosition + 1);
+        std::size_t pos = sessionIdString.rfind("_");
+
+        if (pos != std::string::npos)
+        {
+            std::string sessionHandleString = sessionIdString.substr(pos + 1);
+            sessionIdString = sessionIdString.substr(0, pos);
+            std::stringstream handle(sessionHandleString);
+            handle >> std::hex >> tempSessionHandle;
+            sessionHandle = tempSessionHandle & 0xFF;
+            std::stringstream ID(sessionIdString);
+            ID >> std::hex >> sessionID;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isSessionObjectMatched(const std::string objectPath,
+                            const uint32_t reqSessionID,
+                            const uint8_t reqSessionHandle)
+{
+    uint32_t sessionID = 0;
+    uint8_t sessionHandle = 0;
+
+    if (parseCloseSessionInputPayload(objectPath, sessionID, sessionHandle) ==
+        true)
+    {
+        if ((reqSessionID == session::sessionZero &&
+             reqSessionHandle == sessionHandle) ||
+            (reqSessionID != session::sessionZero && reqSessionID == sessionID))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+uint8_t setSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
+                        const std::string& service, const std::string& obj)
+{
+    try
+    {
+        uint8_t sessionState = std::get<uint8_t>(ipmi::getDbusProperty(
+            *busp, service, obj, session::sessionIntf, "State"));
+
+        if (sessionState == static_cast<uint8_t>(session::State::active))
+        {
+            ipmi::setDbusProperty(
+                *busp, service, obj, session::sessionIntf, "State",
+                static_cast<uint8_t>(session::State::tearDownInProgress));
+            return ipmi::ccSuccess;
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>("Failed in getting session State property",
+                        entry("service=%s", service.c_str()),
+                        entry("Object path=%s", obj.c_str()),
+                        entry("interface=%s", session::sessionIntf));
+        return ipmi::ccUnspecifiedError;
+    }
+
+    return ipmi::ccInvalidFieldRequest;
+}
+
+ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionID,
+                                    uint8_t reqSessionHandle)
+{
+    auto busp = getSdBus();
+    ipmi::ObjectTree objectTree;
+
+    if (reqSessionID == session::sessionZero &&
+        reqSessionHandle == session::invalidSessionHandle)
+    {
+        return ipmi::response(session::ccInvalidSessionHandle);
+    }
+
+    try
+    {
+        objectTree = ipmi::getAllDbusObjects(
+            *busp, session::sessionManagerRootPath, session::sessionIntf);
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to fetch object from dbus",
+                        entry("INTERFACE=%s", session::sessionIntf),
+                        entry("ERRMSG=%s", e.what()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    for (auto& objectTreeItr : objectTree)
+    {
+        const std::string obj = objectTreeItr.first;
+
+        if (isSessionObjectMatched(obj, reqSessionID, reqSessionHandle) == true)
+        {
+            auto& serviceMap = objectTreeItr.second;
+
+            // check if multiple objects exist with same object path under
+            // multiple services.
+            if (serviceMap.size() != 1)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            auto itr = serviceMap.begin();
+            const std::string service = itr->first;
+            return ipmi::response(setSessionState(busp, service, obj));
+        }
+    }
+
+    return ipmi::responseInvalidFieldRequest();
+}
 
 static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
@@ -1270,6 +1394,10 @@ void register_netfn_app_functions()
     // <Set Watchdog Timer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL,
                            ipmi_app_watchdog_set, PRIVILEGE_OPERATOR);
+
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdCloseSession, ipmi::Privilege::Callback,
+                          ipmiAppCloseSession);
 
     // <Get Watchdog Timer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_WD, NULL,
