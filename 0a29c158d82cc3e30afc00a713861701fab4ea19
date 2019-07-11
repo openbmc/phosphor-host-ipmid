@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2114d222_35cfb00a",
+        "filename": "test/sensorhandler_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-07-11T19:44:00Z",
+      "side": 1,
+      "message": "wow, gtest. That\u0027s dark.",
+      "range": {
+        "startLine": 21,
+        "startChar": 11,
+        "endLine": 21,
+        "endChar": 16
+      },
+      "revId": "0a29c158d82cc3e30afc00a713861701fab4ea19",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
