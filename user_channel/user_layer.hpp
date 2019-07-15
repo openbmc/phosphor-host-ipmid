@@ -14,6 +14,8 @@
 // limitations under the License.
 */
 #pragma once
+#include "ipmid/api-types.hpp"
+
 #include <ipmid/api.h>
 
 #include <string>
