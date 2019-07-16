@@ -70,13 +70,6 @@ struct sensor_data_t
     uint8_t sennum;
 } __attribute__((packed));
 
-struct sensorreadingresp_t
-{
-    uint8_t value;
-    uint8_t operation;
-    uint8_t indication[2];
-} __attribute__((packed));
-
 namespace ipmi
 {
 namespace sensor
@@ -413,47 +406,91 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
     }
 }
 
-ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                       ipmi_request_t request,
-                                       ipmi_response_t response,
-                                       ipmi_data_len_t data_len,
-                                       ipmi_context_t context)
-{
-    auto reqptr = static_cast<sensor_data_t*>(request);
-    auto resp = static_cast<sensorreadingresp_t*>(response);
-    ipmi::sensor::GetSensorResponse getResponse{};
-    static constexpr auto scanningEnabledBit = 6;
+/** @brief implements the get sensor reading command
+ *  @param sensorNum - sensor number
+ *
+ *  @returns IPMI completion code plus response data
+ *   - senReading           - sensor reading
+ *   - reserved
+ *   - readState            - sensor reading state enabled
+ *   - senScanState         - sensor scan state disabled
+ *   - allEventMessageState - all Event message state disabled
+ *   - assertionStatesLsb   - threshold levels states
+ *   - assertionStatesMsb   - discrete reading sensor states
+ */
+ipmi::RspType<uint8_t, // sensor reading
 
-    const auto iter = sensors.find(reqptr->sennum);
+              uint5_t, // reserved
+              bool,    // reading state
+              bool,    // sensor scanning state disabled
+              bool,    // all event message state disabled
+
+              uint8_t, // threshold levels states
+              uint8_t  // discrete reading sensor states
+              >
+    ipmiSensorGetSensorReading(uint8_t sensorNum)
+{
+    const auto iter = sensors.find(sensorNum);
+
     if (iter == sensors.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
     if (ipmi::sensor::Mutability::Read !=
         (iter->second.mutability & ipmi::sensor::Mutability::Read))
     {
-        return IPMI_CC_ILLEGAL_COMMAND;
+        return ipmi::responseIllegalCommand();
     }
 
     try
     {
+        ipmi::sensor::GetSensorResponse getResponse{};
         getResponse = iter->second.getFunc(iter->second);
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        resp->operation = 1 << scanningEnabledBit;
-        return IPMI_CC_OK;
+
+        constexpr uint8_t senReadingResp = 0;
+        constexpr uint8_t senScanStateResp = 1;
+        constexpr uint8_t assertionStatesLsbResp = 2;
+        constexpr uint8_t assertionStatesMsbResp = 3;
+        constexpr uint8_t senReadStateMask = 0x20;
+        constexpr uint8_t senScanStateMask = 0x40;
+        constexpr uint8_t allEventMessageStateMask = 0x80;
+
+        uint8_t senReading = getResponse[senReadingResp];
+        constexpr uint5_t reserved{0};
+        bool readState =
+            static_cast<bool>(getResponse[senScanStateResp] & senReadStateMask);
+        bool senScanState =
+            static_cast<bool>(getResponse[senScanStateResp] & senScanStateMask);
+        bool allEventMessageState = static_cast<bool>(
+            getResponse[senScanStateResp] & allEventMessageStateMask);
+
+        uint8_t assertionStatesLsb = getResponse[assertionStatesLsbResp];
+        uint8_t assertionStatesMsb = getResponse[assertionStatesMsbResp];
+
+        return ipmi::responseSuccess(senReading, reserved, readState,
+                                     senScanState, allEventMessageState,
+                                     assertionStatesLsb, assertionStatesMsb);
     }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     catch (const SensorFunctionalError& e)
     {
-        return IPMI_CC_RESPONSE_ERROR;
+        return ipmi::responseResponseError();
     }
 #endif
     catch (const std::exception& e)
     {
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        return IPMI_CC_OK;
+        // Intitilizing with default values
+        constexpr uint8_t senReading = 0;
+        constexpr uint5_t reserved{0};
+        constexpr bool readState = true;
+        constexpr bool senScanState = false;
+        constexpr bool allEventMessageState = false;
+        constexpr uint8_t assertionStatesLsb = 0;
+        constexpr uint8_t assertionStatesMsb = 0;
+
+        return ipmi::responseSuccess(senReading, reserved, readState,
+                                     senScanState, allEventMessageState,
+                                     assertionStatesLsb, assertionStatesMsb);
     }
 }
 
@@ -1088,8 +1125,9 @@ void register_netfn_sen_functions()
                           ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
                           ipmi::Privilege::Operator, ipmiSetSensorReading);
     // <Get Sensor Reading>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, nullptr,
-                           ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorReading,
+                          ipmi::Privilege::User, ipmiSensorGetSensorReading);
 
     // <Reserve Device SDR Repository>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
