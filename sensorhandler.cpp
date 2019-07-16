@@ -69,13 +69,6 @@ struct sensor_data_t
     uint8_t sennum;
 } __attribute__((packed));
 
-struct sensorreadingresp_t
-{
-    uint8_t value;
-    uint8_t operation;
-    uint8_t indication[2];
-} __attribute__((packed));
-
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -385,41 +378,68 @@ ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return ipmiRC;
 }
 
-ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                       ipmi_request_t request,
-                                       ipmi_response_t response,
-                                       ipmi_data_len_t data_len,
-                                       ipmi_context_t context)
+/** @brief implements the get sensor reading command
+ *  @param sensorNum - sensor number
+ *
+ *  @returns IPMI completion code plus response data
+ *   - senReading           - sensor reading
+ *   - reserved
+ *   - readState            - sensor reading state enabled
+ *   - senScanState         - sensor scan state disabled
+ *   - allEventMessageState - all Event message state disabled
+ *   - assertionStatesLsb   - threshold levels states
+ *   - assertionStatesMsb   - discrete reading sensor states
+ */
+ipmi::RspType<uint8_t, // sensor reading
+              uint5_t, // reserved
+              bool,    // reading state
+              bool,    // sensor scanning state disabled
+              bool,    // all event message state disabled
+              uint8_t, // threshold levels states
+              uint8_t  // discrete reading sensor states
+              >
+    ipmiSensorGetSensorReading(uint8_t sensorNum)
 {
-    auto reqptr = static_cast<sensor_data_t*>(request);
-    auto resp = static_cast<sensorreadingresp_t*>(response);
-    ipmi::sensor::GetSensorResponse getResponse{};
-    static constexpr auto scanningEnabledBit = 6;
+    const auto iter = sensors.find(sensorNum);
 
-    const auto iter = sensors.find(reqptr->sennum);
     if (iter == sensors.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
     if (ipmi::sensor::Mutability::Read !=
         (iter->second.mutability & ipmi::sensor::Mutability::Read))
     {
-        return IPMI_CC_ILLEGAL_COMMAND;
+        return ipmi::responseIllegalCommand();
     }
 
     try
     {
-        getResponse = iter->second.getFunc(iter->second);
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        resp->operation = 1 << scanningEnabledBit;
-        return IPMI_CC_OK;
+        auto getResponse = iter->second.getFunc(iter->second);
+        if (getResponse.size() < 5)
+        {
+            return ipmi::responseResponseError();
+        }
+        uint8_t senReading = getResponse[0];
+        uint5_t reserved{0};
+        bool readState = true;
+        bool senScanState = false;
+        bool allEventMessageState = false;
+        uint8_t assertionStatesLsb = getResponse[2];
+        uint8_t assertionStatesMsb = getResponse[3];
+
+        return ipmi::responseSuccess(senReading, reserved, readState,
+                                     senScanState, allEventMessageState,
+                                     assertionStatesLsb, assertionStatesMsb);
     }
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    catch (const SensorFunctionalError& e)
+    {
+        return ipmi::responseSensorInvalid();
+    }
+#endif
     catch (const std::exception& e)
     {
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        return IPMI_CC_OK;
+        return ipmi::responseUnspecifiedError();
     }
 }
 
@@ -1051,8 +1071,9 @@ void register_netfn_sen_functions()
                            ipmi_sen_set_sensor, PRIVILEGE_OPERATOR);
 
     // <Get Sensor Reading>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, nullptr,
-                           ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorReading,
+                          ipmi::Privilege::User, ipmiSensorGetSensorReading);
 
     // <Reserve Device SDR Repository>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_RESERVE_DEVICE_SDR_REPO,
