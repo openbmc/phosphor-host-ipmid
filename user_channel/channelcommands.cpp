@@ -26,8 +26,6 @@ using namespace phosphor::logging;
 namespace ipmi
 {
 
-static constexpr const uint8_t ccActionNotSupportedForChannel = 0x82;
-
 /** @brief implements the set channel access command
  *  @ param ctx - context pointer
  *  @ param channel - channel number
@@ -124,7 +122,7 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
     if (setNVFlag != 0)
     {
         compCode = setChannelAccessPersistData(chNum, chNVData, setNVFlag);
-        if (compCode != IPMI_CC_OK)
+        if (compCode != ccSuccess)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
             return response(compCode);
@@ -134,7 +132,7 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
     if (setActFlag != 0)
     {
         compCode = setChannelAccessData(chNum, chActData, setActFlag);
-        if (compCode != IPMI_CC_OK)
+        if (compCode != ccSuccess)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
             return response(compCode);
@@ -206,7 +204,7 @@ ipmi ::RspType<uint3_t, // access mode,
         compCode = getChannelAccessData(chNum, chAccess);
     }
 
-    if (compCode != IPMI_CC_OK)
+    if (compCode != ccSuccess)
     {
         return response(compCode);
     }
