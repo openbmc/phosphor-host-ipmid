@@ -756,26 +756,25 @@ bool pamUserCheckAuthenticate(std::string_view username,
     return true;
 }
 
-ipmi_ret_t UserAccess::setSpecialUserPassword(const std::string& userName,
-                                              const std::string& userPassword)
+Cc UserAccess::setSpecialUserPassword(const std::string& userName,
+                                      const std::string& userPassword)
 {
     if (!pamUpdatePasswd(userName.c_str(), userPassword.c_str()))
     {
         log<level::DEBUG>("Failed to update password");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ccUnspecifiedError;
     }
-    return IPMI_CC_OK;
+    return ccSuccess;
 }
 
-ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
-                                       const char* userPassword)
+Cc UserAccess::setUserPassword(const uint8_t userId, const char* userPassword)
 {
     std::string userName;
-    if (ipmiUserGetUserName(userId, userName) != IPMI_CC_OK)
+    if (ipmiUserGetUserName(userId, userName) != ccSuccess)
     {
         log<level::DEBUG>("User Name not found",
                           entry("USER-ID:%d", (uint8_t)userId));
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
     std::string passwd;
     passwd.assign(reinterpret_cast<const char*>(userPassword), 0,
@@ -785,23 +784,23 @@ ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
     {
         log<level::DEBUG>("Invalid password fields",
                           entry("USER-ID:%d", (uint8_t)userId));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ccInvalidFieldRequest;
     }
     if (!pamUpdatePasswd(userName.c_str(), passwd.c_str()))
     {
         log<level::DEBUG>("Failed to update password",
                           entry("USER-ID:%d", (uint8_t)userId));
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ccUnspecifiedError;
     }
-    return IPMI_CC_OK;
+    return ccSuccess;
 }
 
-ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
-                                           const bool& enabledState)
+Cc UserAccess::setUserEnabledState(const uint8_t userId,
+                                   const bool& enabledState)
 {
     if (!isValidUserId(userId))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         userLock{*userMutex};
@@ -812,7 +811,7 @@ ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
     if (userName.empty())
     {
         log<level::DEBUG>("User name not set / invalid");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ccUnspecifiedError;
     }
     if (userInfo->userEnabled != enabledState)
     {
@@ -827,24 +826,24 @@ ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
         catch (const std::exception& e)
         {
             log<level::DEBUG>("Write user data failed");
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ccUnspecifiedError;
         }
     }
-    return IPMI_CC_OK;
+
+    return ccSuccess;
 }
 
-ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
-                                              const uint8_t chNum,
-                                              const UserPrivAccess& privAccess,
-                                              const bool& otherPrivUpdates)
+Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
+                                      const UserPrivAccess& privAccess,
+                                      const bool& otherPrivUpdates)
 {
     if (!isValidChannel(chNum))
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ccInvalidFieldRequest;
     }
     if (!isValidUserId(userId))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         userLock{*userMutex};
@@ -855,7 +854,7 @@ ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
     if (userName.empty())
     {
         log<level::DEBUG>("User name not set / invalid");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ccUnspecifiedError;
     }
     std::string priv = convertToSystemPrivilege(
         static_cast<CommandPrivilege>(privAccess.privilege));
@@ -884,9 +883,9 @@ ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
     catch (const std::exception& e)
     {
         log<level::DEBUG>("Write user data failed");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ccUnspecifiedError;
     }
-    return IPMI_CC_OK;
+    return ccSuccess;
 }
 
 uint8_t UserAccess::getUserId(const std::string& userName)
@@ -916,24 +915,23 @@ uint8_t UserAccess::getUserId(const std::string& userName)
     return usrIndex;
 }
 
-ipmi_ret_t UserAccess::getUserName(const uint8_t userId, std::string& userName)
+Cc UserAccess::getUserName(const uint8_t userId, std::string& userName)
 {
     if (!isValidUserId(userId))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
     UserInfo* userInfo = getUserInfo(userId);
     userName.assign(reinterpret_cast<char*>(userInfo->userName), 0,
                     ipmiMaxUserName);
-    return IPMI_CC_OK;
+    return ccSuccess;
 }
 
-ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
-                                   const char* userNameInChar)
+Cc UserAccess::setUserName(const uint8_t userId, const char* userNameInChar)
 {
     if (!isValidUserId(userId))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
@@ -945,7 +943,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
     if (oldUser == newUser)
     {
         // requesting to set the same user name, return success.
-        return IPMI_CC_OK;
+        return ccSuccess;
     }
     bool validUser = isValidUserName(userNameInChar);
     UserInfo* userInfo = getUserInfo(userId);
@@ -965,7 +963,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", deleteUserMethod),
                               entry("PATH=%s", userPath.c_str()));
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ccUnspecifiedError;
         }
         deleteUserIndex(userId);
     }
@@ -985,7 +983,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", createUserMethod),
                               entry("PATH=%s", userMgrObjBasePath));
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ccUnspecifiedError;
         }
         std::memcpy(userInfo->userName, userNameInChar, ipmiMaxUserName);
         userInfo->userInSystem = true;
@@ -1006,7 +1004,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", renameUserMethod),
                               entry("PATH=%s", userMgrObjBasePath));
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ccUnspecifiedError;
         }
         std::fill(static_cast<uint8_t*>(userInfo->userName),
                   static_cast<uint8_t*>(userInfo->userName) +
@@ -1018,7 +1016,7 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
     }
     else if (!validUser)
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ccInvalidFieldRequest;
     }
     try
     {
@@ -1027,9 +1025,10 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
     catch (const std::exception& e)
     {
         log<level::DEBUG>("Write user data failed");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+
+        return ccUnspecifiedError;
     }
-    return IPMI_CC_OK;
+    return ccSuccess;
 }
 
 static constexpr const char* jsonUserName = "user_name";

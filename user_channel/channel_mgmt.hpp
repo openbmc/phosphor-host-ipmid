@@ -16,6 +16,7 @@
 
 #pragma once
 #include "channel_layer.hpp"
+#include "ipmid/api-types.hpp"
 
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/named_recursive_mutex.hpp>
@@ -148,7 +149,7 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo);
+    Cc getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo);
 
     /** @brief provides channel access data
      *
@@ -157,8 +158,7 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelAccessData(const uint8_t chNum,
-                                    ChannelAccess& chAccessData);
+    Cc getChannelAccessData(const uint8_t chNum, ChannelAccess& chAccessData);
 
     /** @brief to set channel access data
      *
@@ -168,9 +168,9 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setChannelAccessData(const uint8_t chNum,
-                                    const ChannelAccess& chAccessData,
-                                    const uint8_t setFlag);
+    Cc setChannelAccessData(const uint8_t chNum,
+                            const ChannelAccess& chAccessData,
+                            const uint8_t setFlag);
 
     /** @brief to get channel access data persistent data
      *
@@ -179,8 +179,8 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelAccessPersistData(const uint8_t chNum,
-                                           ChannelAccess& chAccessData);
+    Cc getChannelAccessPersistData(const uint8_t chNum,
+                                   ChannelAccess& chAccessData);
 
     /** @brief to set channel access data persistent data
      *
@@ -190,9 +190,9 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setChannelAccessPersistData(const uint8_t chNum,
-                                           const ChannelAccess& chAccessData,
-                                           const uint8_t setFlag);
+    Cc setChannelAccessPersistData(const uint8_t chNum,
+                                   const ChannelAccess& chAccessData,
+                                   const uint8_t setFlag);
 
     /** @brief provides supported authentication type for the channel
      *
@@ -201,8 +201,8 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelAuthTypeSupported(const uint8_t chNum,
-                                           uint8_t& authTypeSupported);
+    Cc getChannelAuthTypeSupported(const uint8_t chNum,
+                                   uint8_t& authTypeSupported);
 
     /** @brief provides enabled authentication type for the channel
      *
@@ -212,9 +212,8 @@ class ChannelConfig
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum,
-                                         const uint8_t priv,
-                                         EAuthType& authType);
+    Cc getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
+                                 EAuthType& authType);
 
     /** @brief conver to channel privilege from system privilege
      *

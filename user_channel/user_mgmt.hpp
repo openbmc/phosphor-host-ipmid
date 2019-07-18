@@ -198,7 +198,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t getUserName(const uint8_t userId, std::string& userName);
+    Cc getUserName(const uint8_t userId, std::string& userName);
 
     /** @brief to set user name
      *
@@ -207,7 +207,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setUserName(const uint8_t userId, const char* userNameInChar);
+    Cc setUserName(const uint8_t userId, const char* userNameInChar);
 
     /** @brief to set user enabled state
      *
@@ -216,8 +216,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setUserEnabledState(const uint8_t userId,
-                                   const bool& enabledState);
+    Cc setUserEnabledState(const uint8_t userId, const bool& enabledState);
 
     /** @brief to set user password
      *
@@ -226,7 +225,7 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setUserPassword(const uint8_t userId, const char* userPassword);
+    Cc setUserPassword(const uint8_t userId, const char* userPassword);
 
     /** @brief to set special user password
      *
@@ -235,8 +234,8 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setSpecialUserPassword(const std::string& userName,
-                                      const std::string& userPassword);
+    Cc setSpecialUserPassword(const std::string& userName,
+                              const std::string& userPassword);
 
     /** @brief to set user privilege and access details
      *
@@ -248,9 +247,9 @@ class UserAccess
      *
      *  @return IPMI_CC_OK for success, others for failure.
      */
-    ipmi_ret_t setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
-                                      const UserPrivAccess& privAccess,
-                                      const bool& otherPrivUpdates);
+    Cc setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
+                              const UserPrivAccess& privAccess,
+                              const bool& otherPrivUpdates);
 
     /** @brief reads user management related data from configuration file
      *
