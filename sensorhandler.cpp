@@ -76,6 +76,11 @@ struct sensorreadingresp_t
     uint8_t indication[2];
 } __attribute__((packed));
 
+const ipmi::sensor::EntityInfoMap& getIpmiEntityRecords()
+{
+    return entities;
+}
+
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -563,7 +568,8 @@ ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         get_sdr_info::request::get_count(request) == false)
     {
         // Get Sensor Count
-        resp->count = sensors.size() + frus.size() + entities.size();
+        const auto& entityRecords = getIpmiEntityRecords();
+        resp->count = sensors.size() + frus.size() + entityRecords.size();
     }
     else
     {
@@ -738,9 +744,11 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     {
         // we have reached till end of fru, so assign the next record id to
         // 512(Max fru ID = 511) + Entity Record ID(may start with 0).
+        const auto& entityRecords = getIpmiEntityRecords();
         auto next_record_id =
-            (entities.size()) ? entities.begin()->first + ENTITY_RECORD_ID_START
-                              : END_OF_RECORD;
+            (entityRecords.size())
+                ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
+                : END_OF_RECORD;
         get_sdr::response::set_next_record_id(next_record_id, resp);
     }
     else
@@ -775,13 +783,14 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     get_sdr::SensorDataEntityRecord record{};
     auto dataLength = 0;
 
-    auto entity = entities.begin();
+    const auto& entityRecords = getIpmiEntityRecords();
+    auto entity = entityRecords.begin();
     uint8_t entityRecordID;
     auto recordID = get_sdr::request::get_record_id(req);
 
     entityRecordID = recordID - ENTITY_RECORD_ID_START;
-    entity = entities.find(entityRecordID);
-    if (entity == entities.end())
+    entity = entityRecords.find(entityRecordID);
+    if (entity == entityRecords.end())
     {
         return IPMI_CC_SENSOR_INVALID;
     }
@@ -808,7 +817,7 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     record.body.entityId4 = entity->second.containedEntities[3].first;
     record.body.entityInstance4 = entity->second.containedEntities[3].second;
 
-    if (++entity == entities.end())
+    if (++entity == entityRecords.end())
     {
         get_sdr::response::set_next_record_id(END_OF_RECORD,
                                               resp); // last record
