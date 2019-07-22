@@ -157,16 +157,46 @@ void WhitelistFilter::postInit()
 
 ipmi::Cc WhitelistFilter::filterMessage(ipmi::message::Request::ptr request)
 {
-    if (request->ctx->channel == ipmi::channelSystemIface && restrictedMode)
+    if (restrictedMode)
     {
-        if (!std::binary_search(
-                whitelist.cbegin(), whitelist.cend(),
-                std::make_pair(request->ctx->netFn, request->ctx->cmd)))
+        if (int(whitelist.size()) ==
+            std::count_if(whitelist.cbegin(), whitelist.cend(),
+                          [](const netfncmd_tuple& first) {
+                              return std::get<2>(first) ? false : true;
+                          }))
         {
-            log<level::ERR>("Net function not whitelisted",
-                            entry("NETFN=0x%X", int(request->ctx->netFn)),
-                            entry("CMD=0x%X", int(request->ctx->cmd)));
-            return ipmi::ccInsufficientPrivilege;
+            if (request->ctx->channel == ipmi::channelSystemIface &&
+                !std::binary_search(whitelist.cbegin(), whitelist.cend(),
+                                    std::make_tuple(request->ctx->netFn,
+                                                    request->ctx->cmd, NULL)))
+            {
+                log<level::ERR>("Net function not whitelisted",
+                                entry("NETFN=0x%X", int(request->ctx->netFn)),
+                                entry("CMD=0x%X", int(request->ctx->cmd)));
+                return ipmi::ccInsufficientPrivilege;
+            }
+        }
+        else
+        {
+            if (!std::binary_search(
+                    whitelist.cbegin(), whitelist.cend(),
+                    std::make_tuple(request->ctx->netFn, request->ctx->cmd,
+                                    0x1 << request->ctx->channel),
+                    [](const netfncmd_tuple& first,
+                       const netfncmd_tuple& value) {
+                        return (std::get<2>(first) & std::get<2>(value))
+                                   ? first < std::make_tuple(std::get<0>(value),
+                                                             std::get<1>(value),
+                                                             std::get<2>(first))
+                                   : first < value;
+                    }))
+            {
+                log<level::ERR>("Net function not whitelisted",
+                                entry("CHANNEL=0x%X", request->ctx->channel),
+                                entry("NETFN=0x%X", int(request->ctx->netFn)),
+                                entry("CMD=0x%X", int(request->ctx->cmd)));
+                return ipmi::ccInsufficientPrivilege;
+            }
         }
     }
     return ipmi::ccSuccess;
