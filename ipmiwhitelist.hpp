@@ -1,8 +1,9 @@
 #pragma once
 
+#include <tuple>
 #include <utility>
 #include <vector>
 
-using netfncmd_pair = std::pair<unsigned char, unsigned char>;
+using netfncmd_tuple = std::tuple<unsigned char, unsigned char, unsigned short>;
 
-extern const std::vector<netfncmd_pair> whitelist;
+extern const std::vector<netfncmd_tuple> whitelist;
