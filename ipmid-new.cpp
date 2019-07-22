@@ -750,7 +750,8 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         m.read(seq, netFn, lun, cmd, data);
         std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
         auto ctx = std::make_shared<ipmi::Context>(
-            bus, netFn, cmd, 0, 0, ipmi::Privilege::Admin, 0, &yield);
+            bus, netFn, cmd, ipmi::channelSystemIface, 0,
+            ipmi::Privilege::Admin, 0, &yield);
         auto request = std::make_shared<ipmi::message::Request>(
             ctx, std::forward<std::vector<uint8_t>>(data));
         ipmi::message::Response::ptr response =
