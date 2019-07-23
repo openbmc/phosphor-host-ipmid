@@ -661,14 +661,9 @@ TEST(Vectors, VectorUint32NonIntegralBytes)
     ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
     std::vector<uint32_t> v;
     // check that the number of bytes matches
-    ASSERT_NE(p.unpack(v), 0);
+    ASSERT_EQ(p.unpack(v), 0);
     // check that the payload was not fully unpacked
     ASSERT_FALSE(p.fullyUnpacked());
-    // arrays of uint32_t will be unpacked one at a time, so the
-    // last entry should not get unpacked properly
-    std::vector<uint32_t> k = {0x11223344, 0x22446688, 0x33557799};
-    // check that the bytes were correctly unpacked (in byte order)
-    ASSERT_EQ(v, k);
 }
 
 TEST(Vectors, VectorUint8)
@@ -716,7 +711,7 @@ TEST(UnpackAdvanced, OptionalInsufficientBytes)
     ASSERT_EQ(p.unpack(v), 0);
     // check that the payload was fully unpacked
     ASSERT_FALSE(p.fullyUnpacked());
-    std::optional<std::tuple<uint8_t, uint32_t>> k = {{0, 0}};
+    std::optional<std::tuple<uint8_t, uint32_t>> k = std::nullopt;
     // check that the bytes were correctly unpacked (in byte order)
     ASSERT_EQ(v, k);
 }
