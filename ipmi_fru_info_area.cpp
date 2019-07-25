@@ -13,12 +13,12 @@ namespace fru
 using namespace phosphor::logging;
 
 // Property variables
-static constexpr auto partNumber = "PartNumber";
-static constexpr auto serialNumber = "SerialNumber";
+static constexpr auto partNumber = "Part Number";
+static constexpr auto serialNumber = "Serial Number";
 static constexpr auto manufacturer = "Manufacturer";
-static constexpr auto buildDate = "BuildDate";
+static constexpr auto buildDate = "Mfg Date";
 static constexpr auto model = "Model";
-static constexpr auto prettyName = "PrettyName";
+static constexpr auto prettyName = "Name";
 static constexpr auto version = "Version";
 static constexpr auto type = "Type";
 
