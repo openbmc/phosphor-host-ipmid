@@ -2,9 +2,11 @@
 
 #include <algorithm>
 #include <ctime>
+#include <iomanip>
 #include <map>
 #include <numeric>
 #include <phosphor-logging/elog.hpp>
+#include <sstream>
 
 namespace ipmi
 {
@@ -205,9 +207,33 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
     auto iter = propMap.find(buildDate);
     if ((iter != propMap.end()) && (iter->second.size() > 0))
     {
-        tm time = {};
-        strptime(iter->second.c_str(), "%F - %H:%M:%S", &time);
-        time_t raw = mktime(&time);
+        std::tm time = {};
+        time_t raw = {};
+
+        std::istringstream timeStream(iter->second);
+
+        // 2017-02-24 - 13:59:00
+        timeStream >> std::get_time(&time, "%Y-%m-%d - %H:%M:%S");
+        if (!timeStream.fail())
+        {
+            raw = mktime(&time);
+        }
+        else
+        {
+            // Support the two formats seen. TODO: abstract
+            std::istringstream timeStream2(iter->second);
+            // Tue Nov 20 23:08:00 2018
+            timeStream2 >> std::get_time(&time, "%a %b %d %H:%M:%S %Y");
+            if (timeStream2.fail())
+            {
+                log<level::ERR>("MfgDate unable to be parsed",
+                                entry("VALUE=%s", iter->second.c_str()));
+            }
+            else
+            {
+                raw = mktime(&time);
+            }
+        }
 
         // From FRU Spec:
         // "Mfg. Date / Time
