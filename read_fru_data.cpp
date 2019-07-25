@@ -138,8 +138,9 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
                 if (iter != allProp.end())
                 {
                     data[properties.second.section].emplace(
-                        properties.first, std::move(std::get<std::string>(
-                                              allProp[properties.first])));
+                        properties.second.property,
+                        std::move(
+                            std::get<std::string>(allProp[properties.first])));
                 }
             }
         }
