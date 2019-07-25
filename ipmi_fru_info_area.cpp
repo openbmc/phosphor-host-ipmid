@@ -13,12 +13,12 @@ namespace fru
 using namespace phosphor::logging;
 
 // Property variables
-static constexpr auto partNumber = "PartNumber";
-static constexpr auto serialNumber = "SerialNumber";
+static constexpr auto partNumber = "Part Number";
+static constexpr auto serialNumber = "Serial Number";
 static constexpr auto manufacturer = "Manufacturer";
-static constexpr auto buildDate = "BuildDate";
+static constexpr auto buildDate = "Mfg Date";
 static constexpr auto model = "Model";
-static constexpr auto prettyName = "PrettyName";
+static constexpr auto prettyName = "Name";
 static constexpr auto version = "Version";
 static constexpr auto type = "Type";
 
@@ -201,10 +201,13 @@ void appendData(const Property& key, const PropertyMap& propMap,
  */
 void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
 {
+    std::fprintf(stderr, "%s\n", __FUNCTION__);
+
     // MFG Date/Time
     auto iter = propMap.find(buildDate);
     if ((iter != propMap.end()) && (iter->second.size() > 0))
     {
+        std::fprintf(stderr, "time property found\n");
         tm time = {};
         strptime(iter->second.c_str(), "%F - %H:%M:%S", &time);
         time_t raw = mktime(&time);
@@ -386,6 +389,8 @@ FruAreaData buildProductInfoArea(const PropertyMap& propMap)
 
 FruAreaData buildFruAreaData(const FruInventoryData& inventory)
 {
+    std::fprintf(stderr, "%s\n", __FUNCTION__);
+
     FruAreaData combFruArea{};
     // Now build common header with data for this FRU Inv Record
     // Use this variable to increment size of header as we go along to determine
@@ -412,6 +417,7 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
     auto boardIt = inventory.find(board);
     if (boardIt != inventory.end())
     {
+        std::fprintf(stderr, "inventory has board data\n");
         boardArea = std::move(buildBoardInfoArea(boardIt->second));
     }
     // update the offset to the board data.

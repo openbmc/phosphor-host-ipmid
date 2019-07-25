@@ -23,6 +23,7 @@ using InternalFailure =
 std::unique_ptr<sdbusplus::bus::match_t> matchPtr
     __attribute__((init_priority(101)));
 
+static constexpr auto XYZ_PREFIX = "/xyz/openbmc_project/";
 static constexpr auto INV_INTF = "xyz.openbmc_project.Inventory.Manager";
 static constexpr auto OBJ_PATH = "/xyz/openbmc_project/inventory";
 static constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
@@ -47,23 +48,44 @@ FRUAreaMap fruMap;
 ipmi::PropertyMap readAllProperties(const std::string& intf,
                                     const std::string& path)
 {
+    std::fprintf(stderr, "%s(%s, %s)\n", __FUNCTION__, intf.c_str(), path.c_str());
     ipmi::PropertyMap properties;
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    auto service = ipmi::getService(bus, INV_INTF, OBJ_PATH);
-    std::string objPath = OBJ_PATH + path;
+    std::string service;
+    std::string objPath;
+
+    // Is the path the full path?
+    if (path.find(XYZ_PREFIX) != std::string::npos)
+    {
+        service = ipmi::getService(bus, intf, path);
+        objPath = path;
+    }
+    else
+    {
+        service = ipmi::getService(bus, INV_INTF, OBJ_PATH);
+        objPath = OBJ_PATH + path;
+    }
+
+    std::fprintf(stderr, "service: %s\n", service.c_str());
     auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
                                       PROP_INTF, "GetAll");
     method.append(intf);
-    auto reply = bus.call(method);
-    if (reply.is_method_error())
+
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(properties);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
     {
         // If property is not found simply return empty value
-        log<level::ERR>("Error in reading property values from inventory",
+        log<level::ERR>("Error in reading property values",
+                        entry("EXCEPTION=%s", e.what()),
                         entry("INTERFACE=%s", intf.c_str()),
                         entry("PATH=%s", objPath.c_str()));
-        return properties;
     }
-    reply.read(properties);
+
+    std::fprintf(stderr, "returning properties\n");
     return properties;
 }
 
@@ -117,6 +139,7 @@ int registerCallbackHandler()
  */
 FruInventoryData readDataFromInventory(const FRUId& fruNum)
 {
+    std::fprintf(stderr, "%s, %d\n", __FUNCTION__, fruNum);
     auto iter = frus.find(fruNum);
     if (iter == frus.end())
     {
@@ -130,15 +153,23 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     {
         for (auto& intf : instance.interfaces)
         {
+            std::fprintf(stderr,
+                         "reading intf: %s, path: %s\n",
+                         intf.first.c_str(),
+                         instance.path.c_str());
             ipmi::PropertyMap allProp =
                 readAllProperties(intf.first, instance.path);
             for (auto& properties : intf.second)
             {
+                std::fprintf(stderr, "properties.first: %s\n", properties.first.c_str());
                 auto iter = allProp.find(properties.first);
                 if (iter != allProp.end())
                 {
+                    std::fprintf(stderr, "[%s].emplace(%s, %s)\n", properties.second.section.c_str(), properties.second.property.c_str(), std::get<std::string>(
+                                              allProp[properties.first]).c_str());
+
                     data[properties.second.section].emplace(
-                        properties.first, std::move(std::get<std::string>(
+                        properties.second.property, std::move(std::get<std::string>(
                                               allProp[properties.first])));
                 }
             }
@@ -149,6 +180,7 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
 
 const FruAreaData& getFruAreaData(const FRUId& fruNum)
 {
+    std::fprintf(stderr, "%s\n", __FUNCTION__);
     auto iter = cache::fruMap.find(fruNum);
     if (iter != cache::fruMap.end())
     {
