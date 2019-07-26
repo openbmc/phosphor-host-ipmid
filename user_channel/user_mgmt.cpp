@@ -1211,14 +1211,6 @@ void UserAccess::readUserData()
             "Corrupted IPMI user data file - invalid user count");
     }
 
-    // Construct a JSON object with default payload access values.
-    std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte> stdPayload =
-        {};
-    std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte> oemPayload =
-        {};
-    static const Json jsonPayloadEnabledDefault =
-        constructJsonPayloadEnables(stdPayload, oemPayload);
-
     // user index 0 is reserved, starts with 1
     for (size_t usrIndex = 1; usrIndex <= ipmiMaxUsers; ++usrIndex)
     {
@@ -1244,32 +1236,44 @@ void UserAccess::readUserData()
             userInfo[jsonAccCallbk].get<std::vector<bool>>();
 
         // Payload Enables Processing.
-        auto jsonPayloadEnabled =
-            userInfo.value<Json>(payloadEnabledStr, jsonPayloadEnabledDefault);
-
-        for (auto payloadNum = 0; payloadNum < payloadsPerByte; payloadNum++)
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>
+            stdPayload = {};
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>
+            oemPayload = {};
+        try
         {
-            std::ostringstream stdPayloadStream;
-            std::ostringstream oemPayloadStream;
-
-            stdPayloadStream << stdPayloadStr << payloadNum;
-            oemPayloadStream << oemPayloadStr << payloadNum;
-
-            stdPayload[payloadNum] =
-                jsonPayloadEnabled[stdPayloadStream.str()]
-                    .get<std::array<bool, ipmiMaxChannels>>();
-            oemPayload[payloadNum] =
-                jsonPayloadEnabled[oemPayloadStream.str()]
-                    .get<std::array<bool, ipmiMaxChannels>>();
-
-            if (stdPayload[payloadNum].size() != ipmiMaxChannels ||
-                oemPayload[payloadNum].size() != ipmiMaxChannels)
+            const auto jsonPayloadEnabled = userInfo.at(payloadEnabledStr);
+            for (auto payloadNum = 0; payloadNum < payloadsPerByte;
+                 payloadNum++)
             {
-                log<level::ERR>("Error in reading IPMI user data file - "
-                                "payload properties corrupted");
-                throw std::runtime_error(
-                    "Corrupted IPMI user data file - payload properties");
+                std::ostringstream stdPayloadStream;
+                std::ostringstream oemPayloadStream;
+
+                stdPayloadStream << stdPayloadStr << payloadNum;
+                oemPayloadStream << oemPayloadStr << payloadNum;
+
+                stdPayload[payloadNum] =
+                    jsonPayloadEnabled[stdPayloadStream.str()]
+                        .get<std::array<bool, ipmiMaxChannels>>();
+                oemPayload[payloadNum] =
+                    jsonPayloadEnabled[oemPayloadStream.str()]
+                        .get<std::array<bool, ipmiMaxChannels>>();
+
+                if (stdPayload[payloadNum].size() != ipmiMaxChannels ||
+                    oemPayload[payloadNum].size() != ipmiMaxChannels)
+                {
+                    log<level::ERR>("Error in reading IPMI user data file - "
+                                    "payload properties corrupted");
+                    throw std::runtime_error(
+                        "Corrupted IPMI user data file - payload properties");
+                }
             }
+        }
+        catch (Json::out_of_range& e)
+        {
+            // Key not found in 'userInfo'; possibly an old JSON file. Use
+            // default values for all payloads, and SOL payload default is true.
+            stdPayload[static_cast<uint8_t>(ipmi::PayloadType::SOL)].fill(true);
         }
 
         if (privilege.size() != ipmiMaxChannels ||
