@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "447c5226_30270e0b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2019-07-26T08:27:26Z",
+      "side": 1,
+      "message": "1. We don\u0027t need whitelist configuration mechanism for session channels, as session channels already provide a mechanism to control the same using user privilege and privilege of the commands.\nLet me know if you find any reason why this whitelist configuration must exist for session based channel.\n\n2. For session-less channels, currently we want to have this filtering mechanism to host interface alone, as other we assume it is trusted. So, question here is why we need this restriction on that interface?\n\nBasically, trying to understand why it is require? or in which scenario we are trying to address here?",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 6
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a02d3580_7b85addf",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2019-07-26T08:27:26Z",
+      "side": 1,
+      "message": "Have  you checked the time delay which got introduced because of this? Basically all commands are going to go through this one, irrespective of what channel it comes from. Earlier loop was running only for system interface channel and not for anything else, now all commands are forced to do this. \nReason: If we want to implement for all the channel, then probably we need to see how we can embed the same under the command handler structure itself, so that there itself we can check the mask \u0026 apply it, rather than doing separate search here. \nBut before that, need to understand the reason for implementing this in all channels",
+      "range": {
+        "startLine": 162,
+        "startChar": 6,
+        "endLine": 200,
+        "endChar": 9
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    }
+  ]
+}
