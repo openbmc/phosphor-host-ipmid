@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5ba7d9b5_17826c0b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000317
+      },
+      "writtenOn": "2019-07-26T09:21:08Z",
+      "side": 1,
+      "message": "In some cases, vendors need to mask access to certain commands for certain channels, just as commands does not exist, not just the user privilege, and the whitelisting mechanism works well.",
+      "parentUuid": "447c5226_30270e0b",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 6
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a02d3580_7b85addf",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 4
