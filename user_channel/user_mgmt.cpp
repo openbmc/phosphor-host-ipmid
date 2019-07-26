@@ -1216,6 +1216,12 @@ void UserAccess::readUserData()
         {};
     std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte> oemPayload =
         {};
+    // SOL payload is enabled by default for all users and all channels.
+    for (auto& solPayload :
+         stdPayload[static_cast<uint8_t>(ipmi::PayloadType::SOL)])
+    {
+        solPayload = true;
+    }
     static const Json jsonPayloadEnabledDefault =
         constructJsonPayloadEnables(stdPayload, oemPayload);
 
