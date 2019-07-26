@@ -47,6 +47,10 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
                                uint2_t chanAccess, uint4_t channelPrivLimit,
                                uint2_t reserved2, uint2_t channelPrivMode)
 {
+    if (channel == 0x00)
+    {
+        return response(IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL);
+    }
     const uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
 
