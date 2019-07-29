@@ -73,6 +73,52 @@
     },
     {
       "key": {
+        "uuid": "fa4800f6_77dab083",
+        "filename": "generate_whitelist.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-07-29T16:07:20Z",
+      "side": 1,
+      "message": "0? NULL is usually used for pointers, this field is an unsigned short.",
+      "range": {
+        "startLine": 27,
+        "startChar": 58,
+        "endLine": 27,
+        "endChar": 62
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c775b94_fd6a24c3",
+        "filename": "ipmiwhitelist.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-07-29T16:07:20Z",
+      "side": 1,
+      "message": "this can be removed; it is where std::pair is defined",
+      "range": {
+        "startLine": 4,
+        "startChar": 10,
+        "endLine": 4,
+        "endChar": 17
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a02d3580_7b85addf",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 4
