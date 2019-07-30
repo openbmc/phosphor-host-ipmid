@@ -853,103 +853,105 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t ret = IPMI_CC_OK;
+    if (request == NULL)
+    {
+        return ret;
+    }
+
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
     get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
     get_sdr::SensorDataFullRecord record = {0};
-    if (req != NULL)
+
+    // Note: we use an iterator so we can provide the next ID at the end of
+    // the call.
+    auto sensor = sensors.begin();
+    auto recordID = get_sdr::request::get_record_id(req);
+
+    // At the beginning of a scan, the host side will send us id=0.
+    if (recordID != 0)
     {
-        // Note: we use an iterator so we can provide the next ID at the end of
-        // the call.
-        auto sensor = sensors.begin();
-        auto recordID = get_sdr::request::get_record_id(req);
-
-        // At the beginning of a scan, the host side will send us id=0.
-        if (recordID != 0)
+        // recordID 0 to 255 means it is a FULL record.
+        // recordID 256 to 511 means it is a FRU record.
+        // recordID greater then 511 means it is a Entity Association
+        // record. Currently we are supporting three record types: FULL
+        // record, FRU record and Enttiy Association record.
+        if (recordID >= ENTITY_RECORD_ID_START)
         {
-            // recordID 0 to 255 means it is a FULL record.
-            // recordID 256 to 511 means it is a FRU record.
-            // recordID greater then 511 means it is a Entity Association
-            // record. Currently we are supporting three record types: FULL
-            // record, FRU record and Enttiy Association record.
-            if (recordID >= ENTITY_RECORD_ID_START)
-            {
-                return ipmi_entity_get_sdr(request, response, data_len);
-            }
-            else if (recordID >= FRU_RECORD_ID_START &&
-                     recordID < ENTITY_RECORD_ID_START)
-            {
-                return ipmi_fru_get_sdr(request, response, data_len);
-            }
-            else
-            {
-                sensor = sensors.find(recordID);
-                if (sensor == sensors.end())
-                {
-                    return IPMI_CC_SENSOR_INVALID;
-                }
-            }
+            return ipmi_entity_get_sdr(request, response, data_len);
         }
-
-        uint8_t sensor_id = sensor->first;
-
-        /* Header */
-        get_sdr::header::set_record_id(sensor_id, &(record.header));
-        record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
-        record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
-        record.header.record_length = sizeof(get_sdr::SensorDataFullRecord);
-
-        /* Key */
-        get_sdr::key::set_owner_id_bmc(&(record.key));
-        record.key.sensor_number = sensor_id;
-
-        /* Body */
-        record.body.entity_id = sensor->second.entityType;
-        record.body.sensor_type = sensor->second.sensorType;
-        record.body.event_reading_type = sensor->second.sensorReadingType;
-        record.body.entity_instance = sensor->second.instance;
-        if (ipmi::sensor::Mutability::Write ==
-            (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+        else if (recordID >= FRU_RECORD_ID_START &&
+                 recordID < ENTITY_RECORD_ID_START)
         {
-            get_sdr::body::init_settable_state(true, &(record.body));
-        }
-
-        // Set the type-specific details given the DBus interface
-        ret = populate_record_from_dbus(&(record.body), &(sensor->second),
-                                        data_len);
-
-        if (++sensor == sensors.end())
-        {
-            // we have reached till end of sensor, so assign the next record id
-            // to 256(Max Sensor ID = 255) + FRU ID(may start with 0).
-            auto next_record_id =
-                (frus.size()) ? frus.begin()->first + FRU_RECORD_ID_START
-                              : END_OF_RECORD;
-
-            get_sdr::response::set_next_record_id(next_record_id, resp);
+            return ipmi_fru_get_sdr(request, response, data_len);
         }
         else
         {
-            get_sdr::response::set_next_record_id(sensor->first, resp);
+            sensor = sensors.find(recordID);
+            if (sensor == sensors.end())
+            {
+                return IPMI_CC_SENSOR_INVALID;
+            }
         }
-
-        if (req->offset > sizeof(record))
-        {
-            return IPMI_CC_PARM_OUT_OF_RANGE;
-        }
-
-        // data_len will ultimately be the size of the record, plus
-        // the size of the next record ID:
-        *data_len = std::min(static_cast<size_t>(req->bytes_to_read),
-                             sizeof(record) - req->offset);
-
-        std::memcpy(resp->record_data,
-                    reinterpret_cast<uint8_t*>(&record) + req->offset,
-                    *data_len);
-
-        // data_len should include the LSB and MSB:
-        *data_len +=
-            sizeof(resp->next_record_id_lsb) + sizeof(resp->next_record_id_msb);
     }
+
+    uint8_t sensor_id = sensor->first;
+
+    /* Header */
+    get_sdr::header::set_record_id(sensor_id, &(record.header));
+    record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
+    record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
+    record.header.record_length = sizeof(get_sdr::SensorDataFullRecord);
+
+    /* Key */
+    get_sdr::key::set_owner_id_bmc(&(record.key));
+    record.key.sensor_number = sensor_id;
+
+    /* Body */
+    record.body.entity_id = sensor->second.entityType;
+    record.body.sensor_type = sensor->second.sensorType;
+    record.body.event_reading_type = sensor->second.sensorReadingType;
+    record.body.entity_instance = sensor->second.instance;
+    if (ipmi::sensor::Mutability::Write ==
+        (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+    {
+        get_sdr::body::init_settable_state(true, &(record.body));
+    }
+
+    // Set the type-specific details given the DBus interface
+    ret =
+        populate_record_from_dbus(&(record.body), &(sensor->second), data_len);
+
+    if (++sensor == sensors.end())
+    {
+        // we have reached till end of sensor, so assign the next record id
+        // to 256(Max Sensor ID = 255) + FRU ID(may start with 0).
+        auto next_record_id = (frus.size())
+                                  ? frus.begin()->first + FRU_RECORD_ID_START
+                                  : END_OF_RECORD;
+
+        get_sdr::response::set_next_record_id(next_record_id, resp);
+    }
+    else
+    {
+        get_sdr::response::set_next_record_id(sensor->first, resp);
+    }
+
+    if (req->offset > sizeof(record))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    // data_len will ultimately be the size of the record, plus
+    // the size of the next record ID:
+    *data_len = std::min(static_cast<size_t>(req->bytes_to_read),
+                         sizeof(record) - req->offset);
+
+    std::memcpy(resp->record_data,
+                reinterpret_cast<uint8_t*>(&record) + req->offset, *data_len);
+
+    // data_len should include the LSB and MSB:
+    *data_len +=
+        sizeof(resp->next_record_id_lsb) + sizeof(resp->next_record_id_msb);
 
     return ret;
 }
