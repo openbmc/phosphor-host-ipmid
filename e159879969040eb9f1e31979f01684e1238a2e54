@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "086974cf_c42dcf64",
+        "filename": "generate_whitelist.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000317
+      },
+      "writtenOn": "2019-07-30T07:11:36Z",
+      "side": 1,
+      "message": "Yes, NULL was used to distinguish between two or three elements in development, but it could cause confusion in data types, so I had changed NULL to 0x0000 in Patchset 5.",
+      "parentUuid": "fa4800f6_77dab083",
+      "range": {
+        "startLine": 27,
+        "startChar": 58,
+        "endLine": 27,
+        "endChar": 62
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0c775b94_fd6a24c3",
         "filename": "ipmiwhitelist.hpp",
         "patchSetId": 4
@@ -116,6 +140,30 @@
       "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "126cd431_06e56913",
+        "filename": "ipmiwhitelist.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000317
+      },
+      "writtenOn": "2019-07-30T07:11:36Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "0c775b94_fd6a24c3",
+      "range": {
+        "startLine": 4,
+        "startChar": 10,
+        "endLine": 4,
+        "endChar": 17
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
