@@ -31,6 +31,15 @@ using AdditionalData = std::vector<std::string>;
 using PropertyType =
     std::variant<Resolved, Id, Timestamp, Message, AdditionalData>;
 
+static constexpr auto selVersion = 0x51;
+static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
+
+static constexpr auto firstEntry = 0x0000;
+static constexpr auto lastEntry = 0xFFFF;
+static constexpr auto entireRecord = 0xFF;
+static constexpr auto selRecordSize = 16;
+
+#ifdef JOURNAL_SEL
 // ID string generated using journalctl to include in the MESSAGE_ID field for
 // SEL entries.  Helps with filtering SEL entries in the journal.
 static constexpr const char* selMessageId = "b370836ccf2f4850ac5bee185b77893a";
@@ -44,10 +53,8 @@ static constexpr uint8_t oemEventFirst = 0xE0;
 static constexpr uint8_t oemEventLast = 0xFF;
 static constexpr size_t oemEventSize = 13;
 static constexpr uint8_t eventMsgRev = 0x04;
-
-static constexpr auto selVersion = 0x51;
-static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
 static constexpr auto operationSupport = 0x0A;
+
 constexpr static const uint8_t deassertionEvent = 0x80;
 
 /** @struct GetSELInfoResponse
@@ -62,43 +69,6 @@ struct GetSELInfoResponse
     uint32_t addTimeStamp;    //!< Most recent addition timestamp.
     uint32_t eraseTimeStamp;  //!< Most recent erase timestamp.
     uint8_t operationSupport; //!< Operation support.
-} __attribute__((packed));
-
-static constexpr auto firstEntry = 0x0000;
-static constexpr auto lastEntry = 0xFFFF;
-static constexpr auto entireRecord = 0xFF;
-static constexpr auto selRecordSize = 16;
-
-/** @struct GetSELEntryRequest
- *
- *  IPMI payload for Get SEL Entry command request.
- */
-struct GetSELEntryRequest
-{
-    uint16_t reservationID; //!< Reservation ID.
-    uint16_t selRecordID;   //!< SEL Record ID.
-    uint8_t offset;         //!< Offset into record.
-    uint8_t readLength;     //!< Bytes to read.
-} __attribute__((packed));
-
-/** @struct GetSELEntryResponse
- *
- *  IPMI payload for Get SEL Entry command response.
- */
-struct GetSELEntryResponse
-{
-    uint16_t nextRecordID;    //!< Next RecordID.
-    uint16_t recordID;        //!< Record ID.
-    uint8_t recordType;       //!< Record Type.
-    uint32_t timeStamp;       //!< Timestamp.
-    uint16_t generatorID;     //!< Generator ID.
-    uint8_t eventMsgRevision; //!< Event Message Revision.
-    uint8_t sensorType;       //!< Sensor Type.
-    uint8_t sensorNum;        //!< Sensor Number.
-    uint8_t eventType;        //!< Event Dir | Event Type.
-    uint8_t eventData1;       //!< Event Data 1.
-    uint8_t eventData2;       //!< Event Data 2.
-    uint8_t eventData3;       //!< Event Data 3.
 } __attribute__((packed));
 
 /** @struct GetSELEntryResponseOEMTimestamped
@@ -174,6 +144,49 @@ struct DeleteSELEntryRequest
 {
     uint16_t reservationID; //!< Reservation ID.
     uint16_t selRecordID;   //!< SEL Record ID.
+} __attribute__((packed));
+
+#else //JOURNAL_SEL
+namespace operationSupport
+{
+static constexpr bool overflow = false;
+static constexpr bool deleteSel = true;
+static constexpr bool partialAddSelEntry = false;
+static constexpr bool reserveSel = true;
+static constexpr bool getSelAllocationInfo = false;
+} // namespace operationSupport
+#endif //JOURNAL_SEL
+
+/** @struct GetSELEntryRequest
+ *
+ *  IPMI payload for Get SEL Entry command request.
+ */
+struct GetSELEntryRequest
+{
+    uint16_t reservationID; //!< Reservation ID.
+    uint16_t selRecordID;   //!< SEL Record ID.
+    uint8_t offset;         //!< Offset into record.
+    uint8_t readLength;     //!< Bytes to read.
+} __attribute__((packed));
+
+/** @struct GetSELEntryResponse
+ *
+ *  IPMI payload for Get SEL Entry command response.
+ */
+struct GetSELEntryResponse
+{
+    uint16_t nextRecordID;    //!< Next RecordID.
+    uint16_t recordID;        //!< Record ID.
+    uint8_t recordType;       //!< Record Type.
+    uint32_t timeStamp;       //!< Timestamp.
+    uint16_t generatorID;     //!< Generator ID.
+    uint8_t eventMsgRevision; //!< Event Message Revision.
+    uint8_t sensorType;       //!< Sensor Type.
+    uint8_t sensorNum;        //!< Sensor Number.
+    uint8_t eventType;        //!< Event Dir | Event Type.
+    uint8_t eventData1;       //!< Event Data 1.
+    uint8_t eventData2;       //!< Event Data 2.
+    uint8_t eventData3;       //!< Event Data 3.
 } __attribute__((packed));
 
 static constexpr auto initiateErase = 0xAA;

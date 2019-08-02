@@ -75,6 +75,7 @@ struct UserInfo
     bool userEnabled;
     bool userInSystem;
     bool fixedUserName;
+    PayloadAccess payloadAccess[ipmiMaxChannels];
 };
 
 /** @struct UsersTbl
@@ -251,6 +252,56 @@ class UserAccess
     ipmi_ret_t setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                                       const UserPrivAccess& privAccess,
                                       const bool& otherPrivUpdates);
+
+    /** @brief to get user payload access details from userInfo entry.
+     *
+     *  @param[in] userInfo    - userInfo entry in usersTbl.
+     *  @param[out] stdPayload - stdPayloadEnables1 in a 2D-array.
+     *  @param[out] oemPayload - oemPayloadEnables1 in a 2D-array.
+     *
+     *  @details Update the given 2D-arrays using the payload access details
+     *  available in the given userInfo entry (from usersTbl).
+     *  This 2D-array will be mapped to a JSON object (which will be written to
+     *  a JSON file subsequently).
+     */
+    void readPayloadAccessFromUserInfo(
+        const UserInfo& userInfo,
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            stdPayload,
+        std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            oemPayload);
+
+    /** @brief to update user payload access details in userInfo entry.
+     *
+     *  @param[in] stdPayload - stdPayloadEnables1 in a 2D-array.
+     *  @param[in] oemPayload - oemPayloadEnables1 in a 2D-array.
+     *  @param[out] userInfo  - userInfo entry in usersTbl.
+     *
+     *  @details Update user payload access details of a given userInfo
+     *  entry (in usersTbl) with the information provided in given 2D-arrays.
+     *  This 2D-array was created out of a JSON object (which was created by
+     *  parsing a JSON file).
+     */
+    void updatePayloadAccessInUserInfo(
+        const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            stdPayload,
+        const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
+            oemPayload,
+        UserInfo& userInfo);
+
+    /** @brief to set user payload access details
+     *
+     *  @param[in] chNum - channel number
+     *  @param[in] operation - Enable / Disable
+     *  @param[in] userId - user id
+     *  @param[in] payloadAccess - payload access
+     *
+     *  @return IPMI_CC_OK for success, others for failure.
+     */
+    ipmi_ret_t setUserPayloadAccess(const uint8_t chNum,
+                                    const uint8_t operation,
+                                    const uint8_t userId,
+                                    const PayloadAccess& payloadAccess);
 
     /** @brief reads user management related data from configuration file
      *
