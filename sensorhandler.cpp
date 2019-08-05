@@ -76,6 +76,11 @@ struct sensorreadingresp_t
     uint8_t indication[2];
 } __attribute__((packed));
 
+const ipmi::sensor::EntityInfoMap& getIpmiEntityRecords()
+{
+    return entities;
+}
+
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -552,50 +557,53 @@ ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_sen_get_sdr_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                 ipmi_request_t request,
-                                 ipmi_response_t response,
-                                 ipmi_data_len_t data_len,
-                                 ipmi_context_t context)
+/** @brief implements the get SDR Info command
+ *  @param count - Operation
+ *
+ *  @returns IPMI completion code plus response data
+ *   - sdrCount - sensor/SDR count
+ *   - lunsAndDynamicPopulation - static/Dynamic sensor population flag
+ */
+ipmi::RspType<uint8_t, // respcount
+              uint8_t  // dynamic population flags
+              >
+    ipmiSensorGetDeviceSdrInfo(std::optional<uint8_t> count)
 {
-    auto resp = static_cast<get_sdr_info::GetSdrInfoResp*>(response);
-    if (request == nullptr ||
-        get_sdr_info::request::get_count(request) == false)
+    uint8_t sdrCount;
+    // multiple LUNs not supported.
+    constexpr uint8_t lunsAndDynamicPopulation = 1;
+    constexpr uint8_t getSdrCount = 0x01;
+    constexpr uint8_t getSensorCount = 0x00;
+
+    if (count.value_or(0) == getSdrCount)
     {
-        // Get Sensor Count
-        resp->count = sensors.size() + frus.size() + entities.size();
+        // Get SDR count. This returns the total number of SDRs in the device.
+        const auto& entityRecords = getIpmiEntityRecords();
+        sdrCount = sensors.size() + frus.size() + entityRecords.size();
+    }
+    else if (count.value_or(0) == getSensorCount)
+    {
+        // Get Sensor count. This returns the number of sensors
+        sdrCount = sensors.size();
     }
     else
     {
-        resp->count = 1;
+        return ipmi::responseInvalidCommandOnLun();
     }
 
-    // Multiple LUNs not supported.
-    namespace response = get_sdr_info::response;
-    response::set_lun_present(0, &(resp->luns_and_dynamic_population));
-    response::set_lun_not_present(1, &(resp->luns_and_dynamic_population));
-    response::set_lun_not_present(2, &(resp->luns_and_dynamic_population));
-    response::set_lun_not_present(3, &(resp->luns_and_dynamic_population));
-    response::set_static_population(&(resp->luns_and_dynamic_population));
-
-    *data_len = SDR_INFO_RESP_SIZE;
-
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(sdrCount, lunsAndDynamicPopulation);
 }
 
-ipmi_ret_t ipmi_sen_reserve_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t data_len,
-                                ipmi_context_t context)
+/** @brief implements the reserve SDR command
+ *  @returns IPMI completion code plus response data
+ *   - reservationID - reservation ID
+ */
+ipmi::RspType<uint16_t> ipmiSensorReserveSdr()
 {
     // A constant reservation ID is okay until we implement add/remove SDR.
-    const uint16_t reservation_id = 1;
-    *(uint16_t*)response = reservation_id;
-    *data_len = sizeof(uint16_t);
+    constexpr uint16_t reservationID = 1;
 
-    printf("Created new IPMI SDR reservation ID %d\n", *(uint16_t*)response);
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(reservationID);
 }
 
 void setUnitFieldsForObject(const ipmi::sensor::Info* info,
@@ -738,9 +746,11 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     {
         // we have reached till end of fru, so assign the next record id to
         // 512(Max fru ID = 511) + Entity Record ID(may start with 0).
+        const auto& entityRecords = getIpmiEntityRecords();
         auto next_record_id =
-            (entities.size()) ? entities.begin()->first + ENTITY_RECORD_ID_START
-                              : END_OF_RECORD;
+            (entityRecords.size())
+                ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
+                : END_OF_RECORD;
         get_sdr::response::set_next_record_id(next_record_id, resp);
     }
     else
@@ -775,13 +785,14 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     get_sdr::SensorDataEntityRecord record{};
     auto dataLength = 0;
 
-    auto entity = entities.begin();
+    const auto& entityRecords = getIpmiEntityRecords();
+    auto entity = entityRecords.begin();
     uint8_t entityRecordID;
     auto recordID = get_sdr::request::get_record_id(req);
 
     entityRecordID = recordID - ENTITY_RECORD_ID_START;
-    entity = entities.find(entityRecordID);
-    if (entity == entities.end())
+    entity = entityRecords.find(entityRecordID);
+    if (entity == entityRecords.end())
     {
         return IPMI_CC_SENSOR_INVALID;
     }
@@ -808,7 +819,7 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     record.body.entityId4 = entity->second.containedEntities[3].first;
     record.body.entityInstance4 = entity->second.containedEntities[3].second;
 
-    if (++entity == entities.end())
+    if (++entity == entityRecords.end())
     {
         get_sdr::response::set_next_record_id(END_OF_RECORD,
                                               resp); // last record
@@ -1055,12 +1066,14 @@ void register_netfn_sen_functions()
                            ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
 
     // <Reserve Device SDR Repository>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_RESERVE_DEVICE_SDR_REPO,
-                           nullptr, ipmi_sen_reserve_sdr, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdReserveDeviceSdrRepository,
+                          ipmi::Privilege::User, ipmiSensorReserveSdr);
 
     // <Get Device SDR Info>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR_INFO, nullptr,
-                           ipmi_sen_get_sdr_info, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetDeviceSdrInfo,
+                          ipmi::Privilege::User, ipmiSensorGetDeviceSdrInfo);
 
     // <Get Device SDR>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
