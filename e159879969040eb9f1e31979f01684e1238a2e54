@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "bc864762_0454b87c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000317
+      },
+      "writtenOn": "2019-08-06T02:39:39Z",
+      "side": 1,
+      "message": "A case is when the BMC manages storage devices, the vendor needs to mask some commands that even the administrator can\u0027t execute, and this case cannot be controlled with user privilege or channel privilege. This situation is similar to the firmware firewall in the specification. However, the most similar firmware firewall in OpenBMC is the whitelist filtering mechanism. Due to actual needs, the static whitelist mechanism is currently implemented.",
+      "parentUuid": "0a947f81_e12c5903",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 6
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa4800f6_77dab083",
         "filename": "generate_whitelist.sh",
         "patchSetId": 4
@@ -178,6 +202,30 @@
       "writtenOn": "2019-07-26T08:27:26Z",
       "side": 1,
       "message": "Have  you checked the time delay which got introduced because of this? Basically all commands are going to go through this one, irrespective of what channel it comes from. Earlier loop was running only for system interface channel and not for anything else, now all commands are forced to do this. \nReason: If we want to implement for all the channel, then probably we need to see how we can embed the same under the command handler structure itself, so that there itself we can check the mask \u0026 apply it, rather than doing separate search here. \nBut before that, need to understand the reason for implementing this in all channels",
+      "range": {
+        "startLine": 162,
+        "startChar": 6,
+        "endLine": 200,
+        "endChar": 9
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d368aad_8e8cb546",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000317
+      },
+      "writtenOn": "2019-08-06T02:39:39Z",
+      "side": 1,
+      "message": "Based on the current filter mechanism in ipmid-new, using the filter list seems to be the best way to do it now. The time complexity of the binary search is O(log n), and the content of the whitelist is not much. After running for a few weeks, this function has not encountered any problems in our environment.",
+      "parentUuid": "a02d3580_7b85addf",
       "range": {
         "startLine": 162,
         "startChar": 6,
