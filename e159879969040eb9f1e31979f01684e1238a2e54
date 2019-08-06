@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "66964a75_0e09050f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2019-08-06T04:31:00Z",
+      "side": 1,
+      "message": "ok got it. Please capture the why part in the commit message",
+      "parentUuid": "bc864762_0454b87c",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 6
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa4800f6_77dab083",
         "filename": "generate_whitelist.sh",
         "patchSetId": 4
@@ -191,6 +215,29 @@
     },
     {
       "key": {
+        "uuid": "1cf0c414_2b530888",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2019-08-06T04:31:00Z",
+      "side": 1,
+      "message": "better to make this check as static variable, such that this is executed only once for every BMC reset.",
+      "range": {
+        "startLine": 163,
+        "startChar": 12,
+        "endLine": 165,
+        "endChar": 71
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a02d3580_7b85addf",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 4
@@ -226,6 +273,30 @@
       "side": 1,
       "message": "Based on the current filter mechanism in ipmid-new, using the filter list seems to be the best way to do it now. The time complexity of the binary search is O(log n), and the content of the whitelist is not much. After running for a few weeks, this function has not encountered any problems in our environment.",
       "parentUuid": "a02d3580_7b85addf",
+      "range": {
+        "startLine": 162,
+        "startChar": 6,
+        "endLine": 200,
+        "endChar": 9
+      },
+      "revId": "e159879969040eb9f1e31979f01684e1238a2e54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b9a1f17_a3299dec",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000168
+      },
+      "writtenOn": "2019-08-06T04:31:00Z",
+      "side": 1,
+      "message": "if it has to be processed for all the commands, then wondered whether it can be combined with the command level search itself. Probably it\u0027s not needed now, We can revisit this when it is really required.",
+      "parentUuid": "2d368aad_8e8cb546",
       "range": {
         "startLine": 162,
         "startChar": 6,
