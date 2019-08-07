@@ -66,14 +66,14 @@ Makefile
 /entity-gen.cpp
 
 # test related
-/test/sample_unittest
 /test/*.log
 /test/*.trs
 /test-suite.log
 *-1.0-coverage*
-test/*.gcda
-test/*.gcno
+*.gcda
+*.gcno
 softoff/test
+test/*_unittest
 
 # ignore vim swap files
 .*.sw*
