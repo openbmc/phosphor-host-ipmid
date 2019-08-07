@@ -1591,6 +1591,10 @@ void UserAccess::initUserDataFile()
             {
                 usersTbl.user[userIndex].userPrivAccess[chIndex].privilege =
                     privNoAccess;
+                usersTbl.user[userIndex]
+                    .payloadAccess[chIndex]
+                    .stdPayloadEnables1[static_cast<uint8_t>(
+                        ipmi::PayloadType::SOL)] = true;
             }
         }
         writeUserData();
