@@ -184,8 +184,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
             static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
         return outPayload;
     }
-    // TODO Replace with proper calls.
-    uint8_t chNum = static_cast<uint8_t>(ipmi::EChannelID::chanLan1);
+
+    uint8_t chNum = static_cast<uint8_t>(getInterfaceIndex());
     // Get channel based access information
     if ((ipmi::ipmiUserGetPrivilegeAccess(
              userId, chNum, session->sessionUserPrivAccess) != IPMI_CC_OK) ||
