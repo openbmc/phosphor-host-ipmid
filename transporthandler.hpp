@@ -79,6 +79,8 @@ enum class LanParam : uint8_t
     IPV6_NEIGHBOR_TIMING_CONFIGURATION = 80,
 };
 
+// Data length of parameters
+constexpr size_t lanParamVLANSize = 4;
 constexpr uint8_t SET_COMPLETE = 0;
 constexpr uint8_t SET_IN_PROGRESS = 1;
 constexpr uint8_t SET_COMMIT_WRITE = 2;         // Optional
@@ -136,3 +138,4 @@ void commitNetworkChanges();
  * @param[in] channel: channel number.
  */
 void applyChanges(int channel);
+constexpr uint16_t maxValidVLANIDValue = 4095;
