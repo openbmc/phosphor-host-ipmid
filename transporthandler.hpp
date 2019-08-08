@@ -136,3 +136,4 @@ void commitNetworkChanges();
  * @param[in] channel: channel number.
  */
 void applyChanges(int channel);
+constexpr uint16_t maxValidVLANIDValue = 4095;

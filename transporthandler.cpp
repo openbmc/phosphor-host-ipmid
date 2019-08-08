@@ -416,7 +416,6 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
-    *data_len = 0;
 
     char ipaddr[INET_ADDRSTRLEN];
     char netmask[INET_ADDRSTRLEN];
@@ -424,6 +423,9 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     auto reqptr = reinterpret_cast<const set_lan_t*>(request);
     sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+    size_t reqLen = *data_len;
+    *data_len = 0;
 
     // channel number is the lower nibble
     int channel = reqptr->channel & CHANNEL_MASK;
@@ -494,12 +496,21 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         case LanParam::VLAN:
         {
+            if (reqLen != LAN_PARAM_VLAN_SIZE)
+            {
+                return IPMI_CC_REQ_DATA_LEN_INVALID;
+            }
+
             uint16_t vlan{};
             std::memcpy(&vlan, reqptr->data, ipmi::network::VLAN_SIZE_BYTE);
             // We are not storing the enable bit
             // We assume that ipmitool always send enable
             // bit as 1.
             vlan = le16toh(vlan);
+            if (vlan == 0 || vlan > maxValidVLANIDValue)
+            {
+                return IPMI_CC_INVALID_FIELD_REQUEST;
+            }
             channelConf->vlanID = vlan;
         }
         break;
