@@ -428,7 +428,12 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // channel number is the lower nibble
     int channel = reqptr->channel & CHANNEL_MASK;
     auto ethdevice = ipmi::getChannelName(channel);
-    if (ethdevice.empty())
+    ipmi::ChannelInfo chInfo;
+    ipmi::getChannelInfo(channel, chInfo);
+
+    if (ethdevice.empty() ||
+        chInfo.mediumType !=
+            static_cast<uint8_t>(ipmi::EChannelMediumType::lan8032))
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
@@ -556,6 +561,13 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     get_lan_t* reqptr = (get_lan_t*)request;
     // channel number is the lower nibble
     int channel = reqptr->rev_channel & CHANNEL_MASK;
+    ipmi::ChannelInfo chInfo;
+    ipmi::getChannelInfo(channel, chInfo);
+    if (chInfo.mediumType !=
+        static_cast<uint8_t>(ipmi::EChannelMediumType::lan8032))
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
 
     if (reqptr->rev_channel & 0x80) // Revision is bit 7
     {
