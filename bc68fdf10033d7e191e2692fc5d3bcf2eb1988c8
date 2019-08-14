@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10d263a4_08d2c49d",
+        "filename": "generate_whitelist.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-08-14T01:55:12Z",
+      "side": 1,
+      "message": "I think the bash fu has gotten complicated enough that it\u0027s useful to give an example of how the line would look _without_ placeholders:\n\n# Turn \"0x00:0x00 // Chassis:Get Chassis Capabilities\" -\u003e \"{ 0x00, 0x00, 0x0000 }, // Chassis:Get Chassis Capabilities\"",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 92
+      },
+      "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8090bca5_9fa2ffd8",
+        "filename": "generate_whitelist.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-08-14T01:55:12Z",
+      "side": 1,
+      "message": "Hmm. I don\u0027t know how many people are fluent in awk. It\u0027s probably OK to put a comment over this line saying something like:\n\n# Count how many instances of 0x exist by splitting on \u00270x\u0027 and counting the number of fields created, then reducing the count by one.\n\nThat means that \"0xab:0xcd // foobar\" must split into \"\", \"ab:\", and \"cd // foobar\" (NF\u003d3).\n\nI don\u0027t think this is very obvious. \"number of separators \u003d (number of separated areas) - 1\" is already not very obvious, and the fact that awk will make an empty field in front of a separator given with -F is also not obvious.\n\nI think there are some other ways you could do this:\n\n1)\nYou could trim the comment and then count the number of fields you see when you split on \u0027:\u0027:\necho $line | grep -Po \"0x..(:0x[0-9a-f]+)+\" | awk -F \u0027:\u0027 \u0027{print NF}\u0027\nor\necho $line | grep -Po \".*(?\u003d//)\" | awk -F \u0027:\u0027 \u0027{print NF}\u0027\n\nThis approach is nice because the awk part is obvious, but the regular expression is not obvious - especially if you use the one with backreferences.\n\n2)\nYou could ask grep to print the matched sections (one per newline) and count them, to more explicitly count \u00270x\u0027 sections:\necho $line | grep -o 0x | wc -l\n\nThis approach is nice because the regex is very obvious and it avoids use of awk. However, the method is a little confusing (print each 0x match to a new line, then count the number of lines produced).\n\nSince you\u0027re piping anyways, I\u0027d say that approach #2 is most concise for what you\u0027re really doing (counting the number of hex fields provided in the line).",
+      "range": {
+        "startLine": 26,
+        "startChar": 41,
+        "endLine": 26,
+        "endChar": 53
+      },
+      "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31d511fd_4077033a",
+        "filename": "generate_whitelist.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-08-14T01:55:12Z",
+      "side": 1,
+      "message": "Do we know that the command will always be a 16b hex, like in the above case (0x0000)?\n\nI\u0027d prefer to see the regex more restrictive, i.e. \"0x[a-f0-9]{4}\".  Especially because, for me, six \u0027.\u0027 strung together is kind of hard to read :) I have to get my face really close to the monitor and count to see how many characters we expect...",
+      "range": {
+        "startLine": 28,
+        "startChar": 47,
+        "endLine": 28,
+        "endChar": 53
+      },
+      "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97b46bc3_ff2d698c",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-08-14T01:55:12Z",
+      "side": 1,
+      "message": "This line wants a comment; it takes a lot of thinking to understand what you\u0027re doing here.\n\nI guess you\u0027re getting the number of entries in the whitelist which don\u0027t have a channel set, and then comparing it to the total size of the whitelist; if you have entries in the whitelist that don\u0027t have a channel set, then you need to process channel restrictions.\n\nThere are a few problems:\n\n- Why are you casting whitelist.size() to an int? I think you\u0027d be able to compare size_t to a count_if output (although I\u0027m having trouble telling from the docs what that type would end up being)....?\n- You shouldn\u0027t be doing a C-style cast ( \"(int)foo\" or \"int(foo)\" ) anyways.\n- Why are you implicitly casting the channel value to a bool? That\u0027s confusing to follow too.\n- The logic seems inverted; you\u0027re comparing \"total list size\" to \"total list size where a condition isn\u0027t true\".  This is a little convoluted and difficult to follow...\n\nUltimately you\u0027re trying to say:\n\n\"bool channelsRestriction \u003d (are there entries in the whitelist which have a channel besides 0x0000?)\"\n\nYou could just use find_if() for this, right? Something like the following:\n\n```\n// If any whitelist members specify a channel, we need to check channel restrictions.\nchannelsRestriction \u003d std::find_if(whitelist.cbegin(), whitelist.cend(), [](const netfncmd_tuple\u0026 first) { return std::get\u003c2\u003e(first) !\u003d 0x0000; });\n```\n\nIt\u0027s probably tempting to leave it at \"return std::get\u003c2\u003e(first)\" but I think the implicit cast to bool is a little confusing, when you\u0027re really looking for \"no channel set\". Better yet, if there is a constant somewhere which names 0x0000 as \"no channel\" then you should compare to that.",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 0
+      },
+      "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a73421d7_017867bb",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-08-14T01:55:12Z",
+      "side": 1,
+      "message": "Hmm, isn\u0027t this logic duplicated, except that in the \"channelsRestriction \u003d\u003d false\" case it\u0027s assumed that channel # is 0x0000?\n\nWhy don\u0027t you combine the logic and do a check at the time that you\u0027re building the tuple instead?\n\nWith all the lambdas and \u003calgorithms\u003e methods flying around it\u0027s a little confusing to read, so I suggest you create some helpers to make this method a little more functional and readable, and try to combine the two cases here. Otherwise, I think we will run into trouble trying to fix both of them when our handling requirements change.",
+      "range": {
+        "startLine": 172,
+        "startChar": 1,
+        "endLine": 205,
+        "endChar": 5
+      },
+      "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
