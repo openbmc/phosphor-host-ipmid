@@ -26,6 +26,11 @@ AM_LDFLAGS = $(GTEST_MAIN_LIBS) $(OESDK_TESTCASE_FLAGS)
 check_PROGRAMS =
 TESTS = $(check_PROGRAMS)
 
+entitymap_json_unittest_SOURCES = entitymap_json_unittest.cpp
+entitymap_json_unittest_LDADD = $(top_builddir)/entity_map_json.o -lgmock
+
+check_PROGRAMS += entitymap_json_unittest
+
 # Build/add sample_unittest to test suite
 sample_unittest_CPPFLAGS = -Igtest $(GTEST_CPPFLAGS) $(AM_CPPFLAGS)
 sample_unittest_CXXFLAGS = $(PTHREAD_CFLAGS) $(CODE_COVERAGE_CXXFLAGS) \
