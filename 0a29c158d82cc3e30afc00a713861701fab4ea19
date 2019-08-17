@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "bd1f339e_43749425",
+        "filename": "test/Makefile.am",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000100
+      },
+      "writtenOn": "2019-08-17T15:41:11Z",
+      "side": 1,
+      "message": "GTEST_CFLAGS \u003d -DGTEST_HAS_PTHREAD\u003d1 -pthread -I/usr/local/lib/pkgconfig/../../include\nGTEST_LIBS \u003d -L/usr/local/lib/pkgconfig/../../lib -lgtest -pthread\n\nGTEST_MAIN_CFLAGS \u003d -DGTEST_HAS_PTHREAD\u003d1 -pthread -DGTEST_HAS_PTHREAD\u003d1 -pthread -I/usr/local/lib/pkgconfig/../../include\n\nGTEST_MAIN_LIBS \u003d -L/usr/local/lib/pkgconfig/../../lib -lgtest_main -pthread -lgtest -pthread\n\nYou can just include $(GTEST_MAIN_LIBS) and $(GEST_LIBS) instead of specifying them explicitly, since the configure script is finding them.",
+      "revId": "0a29c158d82cc3e30afc00a713861701fab4ea19",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2114d222_35cfb00a",
         "filename": "test/sensorhandler_unittest.cpp",
         "patchSetId": 1
