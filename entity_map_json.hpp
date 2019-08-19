@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ipmid/types.hpp>
+#include <memory>
 #include <nlohmann/json.hpp>
 
 namespace ipmi
@@ -32,6 +33,25 @@ EntityInfoMap buildEntityMapFromFile();
  * @return the map
  */
 EntityInfoMap buildJsonEntityMap(const nlohmann::json& data);
+
+/**
+ * @brief Owner of the EntityInfoMap.
+ */
+class EntityInfoMapContainer
+{
+  public:
+    /** Get ahold of the owner. */
+    static EntityInfoMapContainer* getContainer();
+    /** Get ahold of the records. */
+    const EntityInfoMap& getIpmiEntityRecords();
+
+  private:
+    EntityInfoMapContainer(const EntityInfoMap& entityRecords) :
+        entityRecords(entityRecords)
+    {
+    }
+    EntityInfoMap entityRecords;
+};
 
 } // namespace sensor
 } // namespace ipmi
