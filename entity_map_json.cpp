@@ -1,6 +1,7 @@
 #include "entity_map_json.hpp"
 
 #include <exception>
+#include <fstream>
 #include <ipmid/types.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -10,6 +11,27 @@ namespace ipmi
 {
 namespace sensor
 {
+
+EntityInfoMap buildEntityMapFromFile()
+{
+    const char* entityMapJsonFilename =
+        "/usr/share/ipmi-providers/entity-map.json";
+    EntityInfoMap builtMap;
+
+    std::ifstream mapFile(entityMapJsonFilename);
+    if (!mapFile.is_open())
+    {
+        return builtMap;
+    }
+
+    auto data = nlohmann::json::parse(mapFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        return builtMap;
+    }
+
+    return buildJsonEntityMap(data);
+}
 
 EntityInfoMap buildJsonEntityMap(const nlohmann::json& data)
 {
