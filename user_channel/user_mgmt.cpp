@@ -307,7 +307,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess,
 {
     static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
     std::string signal = msg.get_member();
-    std::string userName, update, priv, newUserName;
+    std::string userName, priv, newUserName;
     std::vector<std::string> groups;
     bool enabled = false;
     UserUpdateEvent userEvent = UserUpdateEvent::reservedEvent;
@@ -1625,7 +1625,6 @@ void UserAccess::initUserDataFile()
         {
             std::vector<std::string> usrGrps;
             std::string usrPriv;
-            bool usrEnabled;
 
             std::string userName(
                 reinterpret_cast<char*>(userData->user[usrIdx].userName), 0,
@@ -1636,6 +1635,8 @@ void UserAccess::initUserDataFile()
             auto usrObj = managedObjs.find(usersPath);
             if (usrObj != managedObjs.end())
             {
+                bool usrEnabled;
+
                 // User exist. Lets check and update other fileds
                 getUserObjProperties(usrObj->second, usrGrps, usrPriv,
                                      usrEnabled);
