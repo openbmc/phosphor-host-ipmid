@@ -3,6 +3,7 @@
 #include <exception>
 #include <fstream>
 #include <ipmid/types.hpp>
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <utility>
@@ -14,9 +15,35 @@ namespace sensor
 
 extern const EntityInfoMap entities;
 
-const EntityInfoMap& getIpmiEntityRecords()
+EntityInfoMapContainer* EntityInfoMapContainer::getContainer()
 {
-    return entities;
+    static std::unique_ptr<EntityInfoMapContainer> instance;
+
+    if (!instance)
+    {
+        /* TODO: With multi-threading this would all need to be locked so
+         * the first thread to hit it would set it up.
+         */
+        EntityInfoMap builtEntityMap = buildEntityMapFromFile();
+        if (!builtEntityMap.empty())
+        {
+            instance = std::unique_ptr<EntityInfoMapContainer>(
+                new EntityInfoMapContainer(builtEntityMap));
+        }
+        else
+        {
+            instance = std::unique_ptr<EntityInfoMapContainer>(
+                new EntityInfoMapContainer(entities));
+        }
+    }
+
+    return instance.get();
+}
+
+const EntityInfoMap& EntityInfoMapContainer::getIpmiEntityRecords()
+{
+    /* TODO: This should periodically rebuild the records. */
+    return entities_;
 }
 
 EntityInfoMap buildEntityMapFromFile()
