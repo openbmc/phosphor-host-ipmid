@@ -13,8 +13,6 @@ namespace ipmi
 namespace sensor
 {
 
-extern const EntityInfoMap entities;
-
 EntityInfoMapContainer* EntityInfoMapContainer::getContainer()
 {
     static std::unique_ptr<EntityInfoMapContainer> instance;
@@ -25,16 +23,8 @@ EntityInfoMapContainer* EntityInfoMapContainer::getContainer()
          * the first thread to hit it would set it up.
          */
         EntityInfoMap builtEntityMap = buildEntityMapFromFile();
-        if (!builtEntityMap.empty())
-        {
-            instance = std::unique_ptr<EntityInfoMapContainer>(
-                new EntityInfoMapContainer(builtEntityMap));
-        }
-        else
-        {
-            instance = std::unique_ptr<EntityInfoMapContainer>(
-                new EntityInfoMapContainer(entities));
-        }
+        instance = std::unique_ptr<EntityInfoMapContainer>(
+            new EntityInfoMapContainer(builtEntityMap));
     }
 
     return instance.get();
