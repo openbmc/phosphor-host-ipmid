@@ -2,6 +2,7 @@
 
 #include "sensorhandler.hpp"
 
+#include "entity_map_json.hpp"
 #include "fruread.hpp"
 
 #include <mapper.h>
@@ -78,8 +79,27 @@ struct sensorreadingresp_t
     uint8_t indication[2];
 } __attribute__((packed));
 
+bool entityMapParsed = false;
+ipmi::sensor::EntityInfoMap builtEntityMap;
+
 const ipmi::sensor::EntityInfoMap& getIpmiEntityRecords()
 {
+    /* TODO: This can be locked behind a mutex to avoid future multi-threaded
+     * access possibilities.
+     */
+    if (!entityMapParsed)
+    {
+        builtEntityMap = ipmi::sensor::buildEntityMapFromFile();
+        entityMapParsed = true;
+    }
+
+    /* If the json file had data, return the data. */
+    if (!builtEntityMap.empty())
+    {
+        return builtEntityMap;
+    }
+
+    /* Return the list that's built currently from the example YAML. */
     return entities;
 }
 
