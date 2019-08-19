@@ -9,6 +9,14 @@ namespace sensor
 {
 
 /**
+ * @brief Open the default entity map json file, and if present and valid json,
+ * return a built entity map.
+ *
+ * @return the map
+ */
+EntityInfoMap buildEntityMapFromFile();
+
+/**
  * @brief Given json data validate the data matches the expected format for the
  * entity map configuration and parse the data into a map of the entities.
  *
