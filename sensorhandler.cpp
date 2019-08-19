@@ -874,11 +874,6 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             ipmi_data_len_t data_len, ipmi_context_t context)
 {
     ipmi_ret_t ret = IPMI_CC_OK;
-    if (request == NULL)
-    {
-        return ret;
-    }
-
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
     get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
     get_sdr::SensorDataFullRecord record = {0};
