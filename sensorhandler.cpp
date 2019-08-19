@@ -602,7 +602,9 @@ ipmi::RspType<uint8_t, // respcount
     if (count.value_or(0) == getSdrCount)
     {
         // Get SDR count. This returns the total number of SDRs in the device.
-        const auto& entityRecords = ipmi::sensor::getIpmiEntityRecords();
+        const auto& entityRecords =
+            ipmi::sensor::EntityInfoMapContainer::getContainer()
+                ->getIpmiEntityRecords();
         sdrCount =
             ipmi::sensor::sensors.size() + frus.size() + entityRecords.size();
     }
@@ -771,7 +773,9 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     {
         // we have reached till end of fru, so assign the next record id to
         // 512(Max fru ID = 511) + Entity Record ID(may start with 0).
-        const auto& entityRecords = ipmi::sensor::getIpmiEntityRecords();
+        const auto& entityRecords =
+            ipmi::sensor::EntityInfoMapContainer::getContainer()
+                ->getIpmiEntityRecords();
         auto next_record_id =
             (entityRecords.size())
                 ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
@@ -810,7 +814,9 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     get_sdr::SensorDataEntityRecord record{};
     auto dataLength = 0;
 
-    const auto& entityRecords = ipmi::sensor::getIpmiEntityRecords();
+    const auto& entityRecords =
+        ipmi::sensor::EntityInfoMapContainer::getContainer()
+            ->getIpmiEntityRecords();
     auto entity = entityRecords.begin();
     uint8_t entityRecordID;
     auto recordID = get_sdr::request::get_record_id(req);
