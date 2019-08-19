@@ -25,8 +25,7 @@ ipmid_SOURCES = \
 libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
 	inventory-sensor-gen.cpp \
-	fru-read-gen.cpp \
-	entity-gen.cpp
+	fru-read-gen.cpp
 
 BUILT_SOURCES = \
 	ipmiwhitelist.cpp \
@@ -78,9 +77,6 @@ inventory-sensor-gen.cpp: scripts/inventorysensor.mako.cpp scripts/inventory-sen
 
 fru-read-gen.cpp: scripts/readfru.mako.cpp scripts/fru_gen.py @FRU_YAML_GEN@
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
-
-entity-gen.cpp: scripts/writeentity.mako.cpp scripts/entity_gen.py @ENTITY_YAML_GEN@
-	$(AM_V_GEN)@ENTITYGEN@ -o $(top_builddir) generate-cpp
 
 providers_LTLIBRARIES += libipmi20.la
 libipmi20_la_SOURCES = \
