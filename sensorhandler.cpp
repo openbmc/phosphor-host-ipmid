@@ -29,7 +29,6 @@ extern int updateSensorRecordFromSSRAESC(const void*);
 extern sd_bus* bus;
 extern const ipmi::sensor::IdInfoMap sensors;
 extern const FruMap frus;
-extern const ipmi::sensor::EntityInfoMap entities;
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -87,23 +86,16 @@ ipmi::sensor::EntityInfoMap builtEntityMap;
 
 const ipmi::sensor::EntityInfoMap& getIpmiEntityRecords()
 {
-    /* TODO: This can be locked behind a mutex to avoid future multi-threaded
-     * access possibilities.
-     */
+    // TODO: This can be locked behind a mutex to avoid future multi-threaded
+    // access possibilities.
     if (!entityMapParsed)
     {
         builtEntityMap = ipmi::sensor::buildEntityMapFromFile();
         entityMapParsed = true;
     }
 
-    /* If the json file had data, return the data. */
-    if (!builtEntityMap.empty())
-    {
-        return builtEntityMap;
-    }
-
-    /* Return the list that's built currently from the example YAML. */
-    return entities;
+    // Return even if empty.
+    return builtEntityMap;
 }
 
 int get_bus_for_path(const char* path, char** busname)
