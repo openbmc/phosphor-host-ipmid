@@ -39,6 +39,48 @@ namespace fs = std::filesystem;
 
 void register_netfn_transport_functions() __attribute__((constructor));
 
+/******************************************************************************
+ * Define placeholder command handlers for the OEM Extension bytes for the Set
+ * LAN Configuration Parameters and Get LAN Configuration Parameters commands.
+ * To create handlers for your own proprietary command set:
+ *   Create/modify a phosphor-ipmi-host Bitbake append file within your Yocto
+ *   recipe
+ *   Insert EXTRA_OEMAKE lines
+ *      EXTRA_OEMAKE += "ipmid_OEM_OVERRIDE=-DOVERRIDE_TRANSPORT_OEM_EXTENSIONS"
+ *      EXTRA_OEMAKE += "libipmi20_la_SOURCES+=transporthandler_oem.cpp"
+ *      ... repeat as necessary
+ *   Create C++ file(s) that define IPMI handler functions matching the
+ *     function names below (i.e. ipmi_transport_set_lan_oem)
+ *   Place the new file(s) into your Bitbake append SRC_URI list
+ ******************************************************************************/
+#ifndef OVERRIDE_TRANSPORT_OEM_EXTENSIONS
+static ipmi_ret_t ipmi_transport_set_lan_oem(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                             ipmi_request_t request,
+                                             ipmi_response_t response,
+                                             ipmi_data_len_t data_len,
+                                             ipmi_context_t context)
+{
+    auto reqptr = reinterpret_cast<unsigned char*>(request);
+    phosphor::logging::log<phosphor::logging::level::ERR>(
+        "Unsupported parameter",
+        phosphor::logging::entry("PARAM=0x%x", *(reqptr + 1)));
+    return IPMI_CC_INVALID;
+}
+
+static ipmi_ret_t ipmi_transport_get_lan_oem(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                                             ipmi_request_t request,
+                                             ipmi_response_t response,
+                                             ipmi_data_len_t data_len,
+                                             ipmi_context_t context)
+{
+    auto reqptr = reinterpret_cast<unsigned char*>(request);
+    phosphor::logging::log<phosphor::logging::level::ERR>(
+        "Unsupported parameter",
+        phosphor::logging::entry("PARAM=0x%x", *(reqptr + 1)));
+    return IPMI_CC_INVALID;
+}
+#endif
+
 struct ChannelConfig_t* getChannelConfig(int channel)
 {
     auto item = channelConfig.find(channel);
@@ -540,6 +582,79 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         break;
 
+        case LanParam::LAN_OEM1:
+        case LanParam::LAN_OEM2:
+        case LanParam::LAN_OEM3:
+        case LanParam::LAN_OEM4:
+        case LanParam::LAN_OEM5:
+        case LanParam::LAN_OEM6:
+        case LanParam::LAN_OEM7:
+        case LanParam::LAN_OEM8:
+        case LanParam::LAN_OEM9:
+        case LanParam::LAN_OEM10:
+        case LanParam::LAN_OEM11:
+        case LanParam::LAN_OEM12:
+        case LanParam::LAN_OEM13:
+        case LanParam::LAN_OEM14:
+        case LanParam::LAN_OEM15:
+        case LanParam::LAN_OEM16:
+        case LanParam::LAN_OEM17:
+        case LanParam::LAN_OEM18:
+        case LanParam::LAN_OEM19:
+        case LanParam::LAN_OEM20:
+        case LanParam::LAN_OEM21:
+        case LanParam::LAN_OEM22:
+        case LanParam::LAN_OEM23:
+        case LanParam::LAN_OEM24:
+        case LanParam::LAN_OEM25:
+        case LanParam::LAN_OEM26:
+        case LanParam::LAN_OEM27:
+        case LanParam::LAN_OEM28:
+        case LanParam::LAN_OEM29:
+        case LanParam::LAN_OEM30:
+        case LanParam::LAN_OEM31:
+        case LanParam::LAN_OEM32:
+        case LanParam::LAN_OEM33:
+        case LanParam::LAN_OEM34:
+        case LanParam::LAN_OEM35:
+        case LanParam::LAN_OEM36:
+        case LanParam::LAN_OEM37:
+        case LanParam::LAN_OEM38:
+        case LanParam::LAN_OEM39:
+        case LanParam::LAN_OEM40:
+        case LanParam::LAN_OEM41:
+        case LanParam::LAN_OEM42:
+        case LanParam::LAN_OEM43:
+        case LanParam::LAN_OEM44:
+        case LanParam::LAN_OEM45:
+        case LanParam::LAN_OEM46:
+        case LanParam::LAN_OEM47:
+        case LanParam::LAN_OEM48:
+        case LanParam::LAN_OEM49:
+        case LanParam::LAN_OEM50:
+        case LanParam::LAN_OEM51:
+        case LanParam::LAN_OEM52:
+        case LanParam::LAN_OEM53:
+        case LanParam::LAN_OEM54:
+        case LanParam::LAN_OEM55:
+        case LanParam::LAN_OEM56:
+        case LanParam::LAN_OEM57:
+        case LanParam::LAN_OEM58:
+        case LanParam::LAN_OEM59:
+        case LanParam::LAN_OEM60:
+        case LanParam::LAN_OEM61:
+        case LanParam::LAN_OEM62:
+        case LanParam::LAN_OEM63:
+        case LanParam::LAN_OEM64:
+        {
+            // restore parameter count before handing off the input to an OEM
+            // handler
+            *data_len = reqLen;
+            return ipmi_transport_set_lan_oem(netfn, cmd, request, response,
+                                              data_len, context);
+            break;
+        }
+
         default:
         {
             rc = IPMI_CC_PARM_NOT_SUPPORTED;
@@ -566,6 +681,7 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   ipmi_context_t context)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
+    size_t paraLen = *data_len;
     *data_len = 0;
     const uint8_t current_revision = 0x11; // Current rev per IPMI Spec 2.0
 
@@ -713,6 +829,77 @@ ipmi_ret_t ipmi_transport_get_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                         static_cast<uint8_t>(cipherList.size());
             break;
         }
+        case LanParam::LAN_OEM1:
+        case LanParam::LAN_OEM2:
+        case LanParam::LAN_OEM3:
+        case LanParam::LAN_OEM4:
+        case LanParam::LAN_OEM5:
+        case LanParam::LAN_OEM6:
+        case LanParam::LAN_OEM7:
+        case LanParam::LAN_OEM8:
+        case LanParam::LAN_OEM9:
+        case LanParam::LAN_OEM10:
+        case LanParam::LAN_OEM11:
+        case LanParam::LAN_OEM12:
+        case LanParam::LAN_OEM13:
+        case LanParam::LAN_OEM14:
+        case LanParam::LAN_OEM15:
+        case LanParam::LAN_OEM16:
+        case LanParam::LAN_OEM17:
+        case LanParam::LAN_OEM18:
+        case LanParam::LAN_OEM19:
+        case LanParam::LAN_OEM20:
+        case LanParam::LAN_OEM21:
+        case LanParam::LAN_OEM22:
+        case LanParam::LAN_OEM23:
+        case LanParam::LAN_OEM24:
+        case LanParam::LAN_OEM25:
+        case LanParam::LAN_OEM26:
+        case LanParam::LAN_OEM27:
+        case LanParam::LAN_OEM28:
+        case LanParam::LAN_OEM29:
+        case LanParam::LAN_OEM30:
+        case LanParam::LAN_OEM31:
+        case LanParam::LAN_OEM32:
+        case LanParam::LAN_OEM33:
+        case LanParam::LAN_OEM34:
+        case LanParam::LAN_OEM35:
+        case LanParam::LAN_OEM36:
+        case LanParam::LAN_OEM37:
+        case LanParam::LAN_OEM38:
+        case LanParam::LAN_OEM39:
+        case LanParam::LAN_OEM40:
+        case LanParam::LAN_OEM41:
+        case LanParam::LAN_OEM42:
+        case LanParam::LAN_OEM43:
+        case LanParam::LAN_OEM44:
+        case LanParam::LAN_OEM45:
+        case LanParam::LAN_OEM46:
+        case LanParam::LAN_OEM47:
+        case LanParam::LAN_OEM48:
+        case LanParam::LAN_OEM49:
+        case LanParam::LAN_OEM50:
+        case LanParam::LAN_OEM51:
+        case LanParam::LAN_OEM52:
+        case LanParam::LAN_OEM53:
+        case LanParam::LAN_OEM54:
+        case LanParam::LAN_OEM55:
+        case LanParam::LAN_OEM56:
+        case LanParam::LAN_OEM57:
+        case LanParam::LAN_OEM58:
+        case LanParam::LAN_OEM59:
+        case LanParam::LAN_OEM60:
+        case LanParam::LAN_OEM61:
+        case LanParam::LAN_OEM62:
+        case LanParam::LAN_OEM63:
+        case LanParam::LAN_OEM64:
+        {
+            *data_len = paraLen;
+            rc = ipmi_transport_get_lan_oem(netfn, cmd, request, response,
+                                            data_len, context);
+            break;
+        }
+
         default:
             log<level::ERR>("Unsupported parameter",
                             entry("PARAMETER=0x%x", reqptr->parameter));

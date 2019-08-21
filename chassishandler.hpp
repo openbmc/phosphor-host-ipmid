@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <cstddef>
+#include <ipmid/api.hpp>
 
 // IPMI commands for Chassis net functions.
 enum ipmi_netfn_chassis_cmds
@@ -48,7 +49,39 @@ enum class BootOptionParameter : size_t
 {
     BOOT_INFO = 0x4,
     BOOT_FLAGS = 0x5,
-    OPAL_NETWORK_SETTINGS = 0x61
+    OPAL_NETWORK_SETTINGS = 0x61,
+    CHAS_BOOT_OEM1 = 96,
+    CHAS_BOOT_OEM2 = 97,
+    CHAS_BOOT_OEM3 = 98,
+    CHAS_BOOT_OEM4 = 99,
+    CHAS_BOOT_OEM5 = 100,
+    CHAS_BOOT_OEM6 = 101,
+    CHAS_BOOT_OEM7 = 102,
+    CHAS_BOOT_OEM8 = 103,
+    CHAS_BOOT_OEM9 = 104,
+    CHAS_BOOT_OEM10 = 105,
+    CHAS_BOOT_OEM11 = 106,
+    CHAS_BOOT_OEM12 = 107,
+    CHAS_BOOT_OEM13 = 108,
+    CHAS_BOOT_OEM14 = 109,
+    CHAS_BOOT_OEM15 = 110,
+    CHAS_BOOT_OEM16 = 111,
+    CHAS_BOOT_OEM17 = 112,
+    CHAS_BOOT_OEM18 = 113,
+    CHAS_BOOT_OEM19 = 114,
+    CHAS_BOOT_OEM20 = 115,
+    CHAS_BOOT_OEM21 = 116,
+    CHAS_BOOT_OEM22 = 117,
+    CHAS_BOOT_OEM23 = 118,
+    CHAS_BOOT_OEM24 = 119,
+    CHAS_BOOT_OEM25 = 120,
+    CHAS_BOOT_OEM26 = 121,
+    CHAS_BOOT_OEM27 = 122,
+    CHAS_BOOT_OEM28 = 123,
+    CHAS_BOOT_OEM29 = 124,
+    CHAS_BOOT_OEM30 = 125,
+    CHAS_BOOT_OEM31 = 126,
+    CHAS_BOOT_OEM32 = 127
 };
 
 enum class BootOptionResponseSize : size_t
@@ -64,3 +97,39 @@ enum class ChassisIDState : uint8_t
     indefiniteOn = 0x2,
     reserved = 0x3
 };
+
+/** @brief Handle Set System Boot Options OEM Parameters
+ *
+ *  The Set System Boot Options IPMI command includes a byte range for OEM
+ *  Parameters.
+ *
+ *  @param[in] netfn
+ *  @param[in] cmd
+ *  @param[in] request
+ *  @param[in,out] response
+ *  @param[out] data_len
+ *  @param[in] context
+ *
+ *  @return IPMI_CC_OK on success, non-zero otherwise.
+ */
+ipmi_ret_t ipmi_chassis_set_sys_boot_options_oem(
+    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+    ipmi_response_t response, ipmi_data_len_t data_len, ipmi_context_t context);
+
+/** @brief Handle Get System Boot Options OEM Parameters
+ *
+ *  The Get System Boot Options IPMI command includes a byte range for OEM
+ *  Parameters.
+ *
+ *  @param[in] netfn
+ *  @param[in] cmd
+ *  @param[in] request
+ *  @param[in,out] response
+ *  @param[out] data_len
+ *  @param[in] context
+ *
+ *  @return IPMI_CC_OK on success, non-zero otherwise.
+ */
+ipmi_ret_t ipmi_chassis_get_sys_boot_options_oem(
+    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+    ipmi_response_t response, ipmi_data_len_t data_len, ipmi_context_t context);

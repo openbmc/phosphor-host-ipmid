@@ -185,6 +185,44 @@ struct set_sys_boot_options_t
     uint8_t data[SIZE_BOOT_OPTION];
 } __attribute__((packed));
 
+/******************************************************************************
+ * Define placeholder command handlers for the OEM Extension bytes for the Set
+ * System Boot Options and Get System Boot Options commands.
+ * To create handlers for your own proprietary command set:
+ *   Create/modify a phosphor-ipmi-host Bitbake append file within your Yocto
+ *   recipe
+ *   Insert EXTRA_OEMAKE lines
+ *      EXTRA_OEMAKE += "ipmid_OEM_OVERRIDE=-DOVERRIDE_CHASSIS_OEM_EXTENSIONS"
+ *      EXTRA_OEMAKE += "libipmi20_la_SOURCES+=chassishandler_oem.cpp"
+ *      ... repeat as necessary
+ *   Create C++ file(s) that define IPMI handler functions matching the
+ *     function names below (i.e. ipmi_chassis_set_sys_boot_options_oem)
+ *   Place the new file(s) into your Bitbake append SRC_URI list
+ ******************************************************************************/
+#ifndef OVERRIDE_CHASSIS_OEM_EXTENSIONS
+ipmi_ret_t ipmi_chassis_set_sys_boot_options_oem(
+    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+    ipmi_response_t response, ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto reqptr = reinterpret_cast<unsigned char*>(request);
+    phosphor::logging::log<phosphor::logging::level::ERR>(
+        "Unsupported parameter",
+        phosphor::logging::entry("PARAM=0x%x", *(reqptr + 1)));
+    return IPMI_CC_INVALID;
+}
+
+ipmi_ret_t ipmi_chassis_get_sys_boot_options_oem(
+    ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+    ipmi_response_t response, ipmi_data_len_t data_len, ipmi_context_t context)
+{
+    auto reqptr = reinterpret_cast<unsigned char*>(request);
+    phosphor::logging::log<phosphor::logging::level::ERR>(
+        "Unsupported parameter",
+        phosphor::logging::entry("PARAM=0x%x", *(reqptr + 1)));
+    return IPMI_CC_INVALID;
+}
+#endif
+
 int getHostNetworkData(get_sys_boot_options_response_t* respptr)
 {
     ipmi::PropertyMap properties;
@@ -1403,6 +1441,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     using namespace boot_options;
     ipmi_ret_t rc = IPMI_CC_PARM_NOT_SUPPORTED;
+    size_t paraLen = *data_len;
     char* p = NULL;
     get_sys_boot_options_response_t* resp =
         (get_sys_boot_options_response_t*)response;
@@ -1515,7 +1554,15 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         else
             rc = IPMI_CC_OK;
     }
-
+    else if ((reqptr->parameter >=
+              (uint8_t)BootOptionParameter::CHAS_BOOT_OEM1) &&
+             (reqptr->parameter <=
+              (uint8_t)BootOptionParameter::CHAS_BOOT_OEM32))
+    {
+        *data_len = paraLen;
+        rc = ipmi_chassis_get_sys_boot_options_oem(netfn, cmd, request,
+                                                   response, data_len, context);
+    }
     else
     {
         log<level::ERR>("Unsupported parameter",
@@ -1541,6 +1588,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 {
     using namespace boot_options;
     ipmi_ret_t rc = IPMI_CC_OK;
+    size_t paraLen = *data_len;
     set_sys_boot_options_t* reqptr = (set_sys_boot_options_t*)request;
 
     std::printf("IPMI SET_SYS_BOOT_OPTIONS reqptr->parameter =[%d]\n",
@@ -1665,6 +1713,15 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // bootdev` which sends set on parameter #4, before setting the boot
         // flags.
         rc = IPMI_CC_OK;
+    }
+    else if ((reqptr->parameter >=
+              (uint8_t)BootOptionParameter::CHAS_BOOT_OEM1) &&
+             (reqptr->parameter <=
+              (uint8_t)BootOptionParameter::CHAS_BOOT_OEM32))
+    {
+        *data_len = paraLen;
+        return ipmi_chassis_set_sys_boot_options_oem(
+            netfn, cmd, request, response, data_len, context);
     }
     else
     {

@@ -83,7 +83,10 @@ entity-gen.cpp: scripts/writeentity.mako.cpp scripts/entity_gen.py @ENTITY_YAML_
 	$(AM_V_GEN)@ENTITYGEN@ -o $(top_builddir) generate-cpp
 
 providers_LTLIBRARIES += libipmi20.la
-libipmi20_la_SOURCES = \
+# Initialize the libipmi20_la_SOURCES to an empty list to allow Bitbake append
+# files to insert new files without worrying about insertion order.
+libipmi20_la_SOURCES :=
+libipmi20_la_SOURCES += \
 	app/channel.cpp \
 	app/watchdog.cpp \
 	app/watchdog_service.cpp \
@@ -122,7 +125,14 @@ libipmi20_la_LDFLAGS = \
 	-lstdc++fs \
 	-lboost_coroutine \
 	-version-info 0:0:0 -shared
-libipmi20_la_CXXFLAGS = $(COMMON_CXX)
+
+# ipmid_OEM_OVERRIDE is defined in the phosphor-ipmi-host Bitbake append
+# file. Add
+# EXTRA_OEMAKE += "ipmid_OEM_OVERRIDE=-DOVERRIDE_CHASSIS_OEM_EXTENSIONS \
+                   -DOVERRIDE_TRANSPORT_OEM_EXTENSIONS"
+# to define the variable, and to selectively enable OEM command extensions for
+# those IPMI commands that include "OEM Parameters".
+libipmi20_la_CXXFLAGS = $(COMMON_CXX) $(ipmid_OEM_OVERRIDE)
 
 if FEATURE_LIBUSERLAYER
 providers_LTLIBRARIES += libusercmds.la
