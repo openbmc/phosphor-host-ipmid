@@ -25,6 +25,16 @@ AM_PROG_AR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+# Add an option to enable/disable i2c master write read command white list checking
+AC_ARG_ENABLE([i2c-whitelist-check],
+    AS_HELP_STRING([--enable-i2c-whitelist-check], [Enable I2C master WR command white list check])
+)
+AS_IF([test "x$enable_i2c_whitelist_check" != "xno"],
+    AC_MSG_NOTICE([Enabling I2C master WR command white list check])
+    [cpp_flags="-DENABLE_I2C_WHITELIST_CHECK"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags])
+)
+
 # softoff dir specific ones
 AC_ARG_ENABLE([softoff],
     AS_HELP_STRING([--enable-softoff], [Builds soft power off])
