@@ -267,6 +267,7 @@ class IpmiHandler final : public HandlerBase
 };
 
 #ifdef ALLOW_DEPRECATED_API
+static constexpr size_t maxLegacyBufferSize = 64 * 1024;
 /**
  * @brief Legacy IPMI handler class
  *
@@ -311,8 +312,7 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
     {
         message::Response::ptr response = request->makeResponse();
         // allocate a big response buffer here
-        response->payload.resize(
-            getChannelMaxTransferSize(request->ctx->channel));
+        response->payload.resize(maxLegacyBufferSize);
 
         size_t len = request->payload.size() - request->payload.rawIndex;
         Cc ccRet{ccSuccess};
@@ -401,8 +401,7 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
     {
         message::Response::ptr response = request->makeResponse();
         // allocate a big response buffer here
-        response->payload.resize(
-            getChannelMaxTransferSize(request->ctx->channel));
+        response->payload.resize(maxLegacyBufferSize);
 
         size_t len = request->payload.size() - request->payload.rawIndex;
         Cc ccRet{ccSuccess};
