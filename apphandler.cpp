@@ -23,7 +23,6 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
@@ -37,6 +36,9 @@
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
 #include <xyz/openbmc_project/State/BMC/server.hpp>
+#ifdef ENABLE_I2C_WHITELIST_CHECK
+#include <nlohmann/json.hpp>
+#endif // ENABLE_I2C_WHITELIST_CHECK
 
 extern sd_bus* bus;
 
@@ -60,6 +62,7 @@ using Activation =
 using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
 
+#ifdef ENABLE_I2C_WHITELIST_CHECK
 typedef struct
 {
     uint8_t busId;
@@ -78,7 +81,6 @@ static std::vector<i2cMasterWRWhitelist>& getWRWhitelist()
 static constexpr const char* i2cMasterWRWhitelistFile =
     "/usr/share/ipmi-providers/master_write_read_white_list.json";
 
-static constexpr uint8_t maxIPMIWriteReadSize = 144;
 static constexpr const char* filtersStr = "filters";
 static constexpr const char* busIdStr = "busId";
 static constexpr const char* slaveAddrStr = "slaveAddr";
@@ -86,6 +88,8 @@ static constexpr const char* slaveAddrMaskStr = "slaveAddrMask";
 static constexpr const char* cmdStr = "command";
 static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
+#endif // ENABLE_I2C_WHITELIST_CHECK
+static constexpr uint8_t maxIPMIWriteReadSize = 144;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -1013,6 +1017,7 @@ writeResponse:
     return IPMI_CC_OK;
 }
 
+#ifdef ENABLE_I2C_WHITELIST_CHECK
 inline std::vector<uint8_t> convertStringToData(const std::string& command)
 {
     std::istringstream iss(command);
@@ -1161,6 +1166,7 @@ static bool isCmdWhitelisted(uint8_t busId, uint8_t slaveAddr,
     }
     return false;
 }
+#endif // ENABLE_I2C_WHITELIST_CHECK
 
 /** @brief implements master write read IPMI command which can be used for
  * low-level I2C/SMBus write, read or write-read access
@@ -1194,6 +1200,7 @@ ipmi::RspType<std::vector<uint8_t>>
         log<level::ERR>("Master write read command: Read & write count are 0");
         return ipmi::responseInvalidFieldRequest();
     }
+#ifdef ENABLE_I2C_WHITELIST_CHECK
     if (!isCmdWhitelisted(static_cast<uint8_t>(busId),
                           static_cast<uint8_t>(slaveAddr), writeData))
     {
@@ -1202,6 +1209,7 @@ ipmi::RspType<std::vector<uint8_t>>
                         entry("ADDR=0x%x", static_cast<uint8_t>(slaveAddr)));
         return ipmi::responseInvalidFieldRequest();
     }
+#endif // ENABLE_I2C_WHITELIST_CHECK
     std::vector<uint8_t> readBuf(readCount);
     std::string i2cBus =
         "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
@@ -1294,9 +1302,12 @@ void register_netfn_app_functions()
                           ipmi::app::cmdGetAcpiPowerState,
                           ipmi::Privilege::Admin, ipmiGetAcpiPowerState);
 
+#ifdef ENABLE_I2C_WHITELIST_CHECK
+    log<level::INFO>("Populate whitelist");
     // Note: For security reason, this command will be registered only when
     // there are proper I2C Master write read whitelist
     if (populateI2CMasterWRWhitelist())
+#endif // ENABLE_I2C_WHITELIST_CHECK
     {
         // Note: For security reasons, registering master write read as admin
         // privilege command, even though IPMI 2.0 specification allows it as
