@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <ipmid/api-types.hpp>
 #include <ipmid/types.hpp>
 #include <optional>
 #include <sdbusplus/server.hpp>
@@ -305,4 +306,14 @@ void createVLAN(sdbusplus::bus::bus& bus, const std::string& service,
 uint32_t getVLAN(const std::string& path);
 
 } // namespace network
+
+/** @brief Perform the low-level i2c bus write-read.
+ *  @param[in] i2cBus - i2c bus device node name, such as /dev/i2c-2.
+ *  @param[in] slaveAddr - i2c device slave address.
+ *  @param[in] writeData - The data written to i2c device.
+ *  @param[out] readBuf - Data read from the i2c device.
+ */
+ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
+                      std::vector<uint8_t> writeData,
+                      std::vector<uint8_t>& readBuf);
 } // namespace ipmi
