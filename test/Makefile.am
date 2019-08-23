@@ -27,7 +27,7 @@ check_PROGRAMS =
 TESTS = $(check_PROGRAMS)
 
 entitymap_json_unittest_SOURCES = entitymap_json_unittest.cpp
-entitymap_json_unittest_LDADD = $(top_builddir)/entity_map_json.o -lgmock
+entitymap_json_unittest_LDADD = $(top_builddir)/entity_map_json.o -lgmock $(top_builddir)/entity-gen.o
 
 check_PROGRAMS += entitymap_json_unittest
 
