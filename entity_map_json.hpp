@@ -9,6 +9,11 @@ namespace sensor
 {
 
 /**
+ * @brief Grab a handle to the entity map.
+ */
+const EntityInfoMap& getIpmiEntityRecords();
+
+/**
  * @brief Open the default entity map json file, and if present and valid json,
  * return a built entity map.
  *
