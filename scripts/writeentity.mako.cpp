@@ -3,6 +3,8 @@
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
 
 #include <ipmid/types.hpp>
+#include <utility>
+
 using namespace ipmi::sensor;
 
 extern const EntityInfoMap entities = {
