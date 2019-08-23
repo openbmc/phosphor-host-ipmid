@@ -1,6 +1,12 @@
 #include <arpa/inet.h>
 #include <dirent.h>
+#include <fcntl.h>
+#include <linux/i2c-dev.h>
+#include <linux/i2c.h>
 #include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <chrono>
@@ -541,4 +547,62 @@ uint32_t getVLAN(const std::string& path)
 }
 
 } // namespace network
+
+ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
+                      std::vector<uint8_t> writeData,
+                      std::vector<uint8_t>& readBuf)
+{
+    int msgCount = 0;
+    int ret = 0;
+    i2c_rdwr_ioctl_data msgReadWrite = {0};
+    i2c_msg i2cmsg[2] = {0};
+    const size_t writeCount = writeData.size();
+    const size_t readCount = readBuf.size();
+
+    int i2cDev = ::open(i2cBus.c_str(), O_RDWR | O_CLOEXEC);
+    if (i2cDev < 0)
+    {
+        log<level::ERR>("Failed to open i2c bus",
+                        phosphor::logging::entry("BUS=%s", i2cBus.c_str()));
+        return ipmi::ccInvalidFieldRequest;
+    }
+
+    msgCount = 0;
+    if (writeCount)
+    {
+        i2cmsg[msgCount].addr = slaveAddr;
+        i2cmsg[msgCount].flags = 0x00;
+        i2cmsg[msgCount].len = writeCount;
+        i2cmsg[msgCount].buf = writeData.data();
+        msgCount++;
+    }
+    if (readCount)
+    {
+        i2cmsg[msgCount].addr = slaveAddr;
+        i2cmsg[msgCount].flags = I2C_M_RD;
+        i2cmsg[msgCount].len = readCount;
+        i2cmsg[msgCount].buf = readBuf.data();
+        msgCount++;
+    }
+
+    msgReadWrite.msgs = i2cmsg;
+    msgReadWrite.nmsgs = msgCount;
+
+    ret = ::ioctl(i2cDev, I2C_RDWR, &msgReadWrite);
+    ::close(i2cDev);
+
+    if (ret < 0)
+    {
+        log<level::ERR>("I2C WR Failed!",
+                        phosphor::logging::entry("RET=%d", ret));
+        return ipmi::ccUnspecifiedError;
+    }
+    if (readCount)
+    {
+        readBuf.resize(msgReadWrite.msgs[msgCount - 1].len);
+    }
+
+    return ipmi::ccSuccess;
+}
+
 } // namespace ipmi
