@@ -5,7 +5,8 @@
 #include <ipmid/types.hpp>
 #include <utility>
 
-using namespace ipmi::sensor;
+namespace ipmi {
+namespace sensor {
 
 extern const EntityInfoMap entities = {
 % for key in entityDict.iterkeys():
@@ -34,3 +35,6 @@ extern const EntityInfoMap entities = {
 }},
 % endfor
 };
+
+} // namespace sensor
+} // namespace ipmi
