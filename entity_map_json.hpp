@@ -33,5 +33,24 @@ EntityInfoMap buildEntityMapFromFile();
  */
 EntityInfoMap buildJsonEntityMap(const nlohmann::json& data);
 
+/**
+ * @brief Owner of the EntityInfoMap.
+ */
+class EntityInfoMapContainer
+{
+  public:
+    /** Get ahold of the owner. */
+    static EntityInfoMapContainer* getContainer();
+    /** Get ahold of the records. */
+    const EntityInfoMap& getIpmiEntityRecords();
+
+  private:
+    EntityInfoMapContainer(const EntityInfoMap& entities) : entities_(entities)
+    {
+    }
+    static std::unique_ptr<EntityInfoMapContainer> instance_;
+    EntityInfoMap entities_;
+};
+
 } // namespace sensor
 } // namespace ipmi

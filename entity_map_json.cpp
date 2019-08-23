@@ -13,38 +13,26 @@ namespace ipmi
 namespace sensor
 {
 
-class EntityInfoMapContainer
+EntityInfoMapContainer* EntityInfoMapContainer::getContainer()
 {
-  public:
-    static EntityInfoMapContainer* getContainer()
+    if (!instance_)
     {
-        if (!instance_)
-        {
-            /* TODO: With multi-threading this would all need to be locked so
-             * the first thread to hit it would set it up.
-             */
-            EntityInfoMap builtEntityMap = buildEntityMapFromFile();
-            instance_ = std::unique_ptr<EntityInfoMapContainer>(
-                new EntityInfoMapContainer(builtEntityMap));
-        }
-
-        return instance_.get();
+        /* TODO: With multi-threading this would all need to be locked so
+         * the first thread to hit it would set it up.
+         */
+        EntityInfoMap builtEntityMap = buildEntityMapFromFile();
+        instance_ = std::unique_ptr<EntityInfoMapContainer>(
+            new EntityInfoMapContainer(builtEntityMap));
     }
 
-    const EntityInfoMap& getIpmiEntityRecords()
-    {
-        /* TODO: This should periodically rebuild the records. */
-        return entities_;
-    }
+    return instance_.get();
+}
 
-  private:
-    EntityInfoMapContainer(const EntityInfoMap& entities) : entities_(entities)
-    {
-    }
-
-    static std::unique_ptr<EntityInfoMapContainer> instance_;
-    EntityInfoMap entities_;
-};
+const EntityInfoMap& EntityInfoMapContainer::getIpmiEntityRecords()
+{
+    /* TODO: This should periodically rebuild the records. */
+    return entities_;
+}
 
 EntityInfoMap buildEntityMapFromFile()
 {
