@@ -2,6 +2,7 @@
 
 #include "sensorhandler.hpp"
 
+#include "entity_map_json.hpp"
 #include "fruread.hpp"
 
 #include <mapper.h>
@@ -76,20 +77,6 @@ struct sensorreadingresp_t
     uint8_t operation;
     uint8_t indication[2];
 } __attribute__((packed));
-
-namespace ipmi
-{
-namespace sensor
-{
-extern const EntityInfoMap entities;
-
-const EntityInfoMap& getIpmiEntityRecords()
-{
-    return entities;
-}
-
-} // namespace sensor
-} // namespace ipmi
 
 int get_bus_for_path(const char* path, char** busname)
 {
