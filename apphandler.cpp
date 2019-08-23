@@ -1180,9 +1180,6 @@ ipmi::RspType<std::vector<uint8_t>>
                         bool reserved, uint7_t slaveAddr, uint8_t readCount,
                         std::vector<uint8_t> writeData)
 {
-    i2c_rdwr_ioctl_data msgReadWrite = {0};
-    i2c_msg i2cmsg[2] = {0};
-
     if (readCount > maxIPMIWriteReadSize)
     {
         log<level::ERR>("Master write read command: Read count exceeds limit");
@@ -1206,46 +1203,11 @@ ipmi::RspType<std::vector<uint8_t>>
     std::string i2cBus =
         "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
 
-    int i2cDev = ::open(i2cBus.c_str(), O_RDWR | O_CLOEXEC);
-    if (i2cDev < 0)
+    ipmi::Cc ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(slaveAddr),
+                                      writeData, readBuf);
+    if (ret != ipmi::ccSuccess)
     {
-        log<level::ERR>("Failed to open i2c bus",
-                        entry("BUS=%s", i2cBus.c_str()));
-        return ipmi::responseInvalidFieldRequest();
-    }
-
-    int msgCount = 0;
-    if (writeCount)
-    {
-        i2cmsg[msgCount].addr = static_cast<uint8_t>(slaveAddr);
-        i2cmsg[msgCount].flags = 0x00;
-        i2cmsg[msgCount].len = writeCount;
-        i2cmsg[msgCount].buf = writeData.data();
-        msgCount++;
-    }
-    if (readCount)
-    {
-        i2cmsg[msgCount].addr = static_cast<uint8_t>(slaveAddr);
-        i2cmsg[msgCount].flags = I2C_M_RD;
-        i2cmsg[msgCount].len = readCount;
-        i2cmsg[msgCount].buf = readBuf.data();
-        msgCount++;
-    }
-
-    msgReadWrite.msgs = i2cmsg;
-    msgReadWrite.nmsgs = msgCount;
-
-    int ret = ::ioctl(i2cDev, I2C_RDWR, &msgReadWrite);
-    ::close(i2cDev);
-
-    if (ret < 0)
-    {
-        log<level::ERR>("Master write read: Failed", entry("RET=%d", ret));
-        return ipmi::responseUnspecifiedError();
-    }
-    if (readCount)
-    {
-        readBuf.resize(msgReadWrite.msgs[msgCount - 1].len);
+        return ipmi::response(ret);
     }
     return ipmi::responseSuccess(readBuf);
 }
