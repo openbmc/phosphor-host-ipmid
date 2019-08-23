@@ -12,6 +12,13 @@ namespace ipmi
 namespace sensor
 {
 
+extern const EntityInfoMap entities;
+
+const EntityInfoMap& getIpmiEntityRecords()
+{
+    return entities;
+}
+
 EntityInfoMap buildEntityMapFromFile()
 {
     const char* entityMapJsonFilename =
