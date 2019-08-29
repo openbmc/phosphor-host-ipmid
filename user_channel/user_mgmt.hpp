@@ -16,12 +16,11 @@
 #pragma once
 #include "user_layer.hpp"
 
-#include <ipmid/api.h>
-
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/named_recursive_mutex.hpp>
 #include <cstdint>
 #include <ctime>
+#include <ipmid/api.hpp>
 #include <sdbusplus/bus.hpp>
 #include <variant>
 
