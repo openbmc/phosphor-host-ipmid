@@ -55,9 +55,7 @@ netipmid_SOURCES = \
 	command/payload_cmds.hpp \
 	command/payload_cmds.cpp \
 	sol_module.hpp \
-	sol_module.cpp \
-	settings.hpp \
-	settings.cpp
+	sol_module.cpp
 
 netipmid_CPPFLAGS = -DNET_IPMID_LIB_PATH=\"/usr/lib/net-ipmid/\"
 
