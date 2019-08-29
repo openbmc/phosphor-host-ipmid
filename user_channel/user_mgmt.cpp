@@ -682,38 +682,28 @@ static int pamFunctionConversation(int numMsg, const struct pam_message** msg,
  *  @return status
  */
 
-bool pamUpdatePasswd(const char* username, const char* password)
+int pamUpdatePasswd(const char* username, const char* password)
 {
     const struct pam_conv localConversation = {pamFunctionConversation,
                                                const_cast<char*>(password)};
     pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
 
-    if (pam_start("passwd", username, &localConversation, &localAuthHandle) !=
-        PAM_SUCCESS)
-    {
-        return false;
-    }
-    int retval = pam_chauthtok(localAuthHandle, PAM_SILENT);
+    int retval =
+        pam_start("passwd", username, &localConversation, &localAuthHandle);
 
-    if (retval != PAM_SUCCESS)
+    if (retval == PAM_SUCCESS)
     {
-        if (retval == PAM_AUTHTOK_ERR)
+        retval = pam_chauthtok(localAuthHandle, PAM_SILENT);
+        if (pam_end(localAuthHandle, PAM_SUCCESS) != PAM_SUCCESS)
         {
-            log<level::DEBUG>("Authentication Failure");
+            return PAM_INCOMPLETE;
         }
-        else
-        {
-            log<level::DEBUG>("pam_chauthtok returned failure",
-                              entry("ERROR=%d", retval));
-        }
-        pam_end(localAuthHandle, retval);
-        return false;
+        return retval;
     }
-    if (pam_end(localAuthHandle, PAM_SUCCESS) != PAM_SUCCESS)
+    else
     {
-        return false;
+        return PAM_OPEN_ERR;
     }
-    return true;
 }
 
 bool pamUserCheckAuthenticate(std::string_view username,
@@ -760,7 +750,7 @@ bool pamUserCheckAuthenticate(std::string_view username,
 ipmi_ret_t UserAccess::setSpecialUserPassword(const std::string& userName,
                                               const std::string& userPassword)
 {
-    if (!pamUpdatePasswd(userName.c_str(), userPassword.c_str()))
+    if (pamUpdatePasswd(userName.c_str(), userPassword.c_str()) != PAM_SUCCESS)
     {
         log<level::DEBUG>("Failed to update password");
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -781,19 +771,46 @@ ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
     std::string passwd;
     passwd.assign(reinterpret_cast<const char*>(userPassword), 0,
                   maxIpmi20PasswordSize);
-    if (!std::regex_match(passwd.c_str(),
-                          std::regex("[a-zA-z_0-9][a-zA-Z_0-9,?:`!\"]*")))
+    int retval = pamUpdatePasswd(userName.c_str(), passwd.c_str());
+
+    if (retval == PAM_USER_UNKNOWN)
     {
-        log<level::DEBUG>("Invalid password fields",
+        log<level::DEBUG>("User is unknown",
                           entry("USER-ID=%d", (uint8_t)userId));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    if (!pamUpdatePasswd(userName.c_str(), passwd.c_str()))
+    if (retval == PAM_OPEN_ERR)
+    {
+        log<level::DEBUG>("Failed to open pam service");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    if (retval == PAM_AUTH_ERR)
+    {
+        log<level::DEBUG>("Pam authentication failed");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    if (retval == PAM_AUTHTOK_ERR)
+    {
+        log<level::DEBUG>("Bad authentication token");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    if (retval == PAM_INCOMPLETE)
+    {
+        log<level::DEBUG>("Failed to end pam service");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    if (retval == PAM_ABORT)
+    {
+        log<level::DEBUG>("Failed to end pam service");
+        return IPMI_CC_UNSPECIFIED_ERROR;
+    }
+    if (retval != PAM_SUCCESS)
     {
         log<level::DEBUG>("Failed to update password",
                           entry("USER-ID=%d", (uint8_t)userId));
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
+
     return IPMI_CC_OK;
 }
 
