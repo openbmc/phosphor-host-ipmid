@@ -97,26 +97,29 @@ std::pair<std::vector<uint8_t>, std::vector<uint8_t>> getCipherRecords()
 
 } // namespace cipher
 
-ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                  ipmi_request_t request,
-                                  ipmi_response_t response,
-                                  ipmi_data_len_t data_len,
-                                  ipmi_context_t context)
+/** @brief this command is used to look up what authentication, integrity,
+ *  confidentiality algorithms are supported.
+ *
+ *  @ param ctx - context pointer
+ *  @ param channelNumber - channel number
+ *  @ param payloadType - payload type
+ *  @ param listIndex - list index
+ *
+ *  @returns ipmi completion code plus response data
+ *  - rspChannel - channel number for authentication algorithm.
+ *  - rspRecords - cipher suite records.
+ **/
+ipmi::RspType<uint8_t,             // Channel Number
+              std::vector<uint8_t> // Cipher Records
+              >
+    getChannelCipherSuites(ipmi::Context::ptr ctx, uint4_t channelNumber,
+                           uint4_t reserved1, uint8_t payloadType,
+                           uint6_t listIndex, uint1_t reserved2,
+                           uint1_t algoSelectBit)
 {
     static std::vector<uint8_t> cipherRecords;
     static std::vector<uint8_t> supportedAlgorithms;
     static auto recordInit = false;
-
-    auto requestData =
-        reinterpret_cast<const GetChannelCipherRequest*>(request);
-
-    if (*data_len < sizeof(GetChannelCipherRequest))
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    *data_len = 0;
 
     if (!recordInit)
     {
@@ -128,41 +131,45 @@ ipmi_ret_t getChannelCipherSuites(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         catch (const std::exception& e)
         {
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ipmi::responseUnspecifiedError();
         }
     }
 
-    const auto& records = (cipher::listCipherSuite ==
-                           (requestData->listIndex & cipher::listTypeMask))
-                              ? cipherRecords
-                              : supportedAlgorithms;
+    const auto& records = algoSelectBit ? cipherRecords : supportedAlgorithms;
+    uint8_t rspChannel = ipmi::convertCurrentChannelNum(
+        static_cast<uint8_t>(channelNumber), ctx->channel);
+
+    if (!ipmi::isValidChannel(rspChannel) || reserved1 != 0 || reserved2 != 0)
+    {
+        log<level::DEBUG>(
+            "Get channel cipher suites - Invalid field in request");
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    // Session support is available in active LAN channels.
+    if ((ipmi::getChannelSessionSupport(rspChannel) ==
+         ipmi::EChannelSessSupported::none) ||
+        !(ipmi::doesDeviceExist(rspChannel)))
+    {
+        log<level::DEBUG>("Get channel cipher suites - Device does not exist");
+        return ipmi::responseInvalidFieldRequest();
+    }
 
     // List index(00h-3Fh), 0h selects the first set of 16, 1h selects the next
     // set of 16 and so on.
-    auto index =
-        static_cast<size_t>(requestData->listIndex & cipher::listIndexMask);
 
     // Calculate the number of record data bytes to be returned.
-    auto start = std::min(index * cipher::respSize, records.size());
-    auto end =
-        std::min((index * cipher::respSize) + cipher::respSize, records.size());
+    auto start = std::min(static_cast<size_t>(listIndex) * cipher::respSize,
+                          records.size());
+    auto end = std::min((static_cast<size_t>(listIndex) * cipher::respSize) +
+                            cipher::respSize,
+                        records.size());
     auto size = end - start;
 
-    auto responseData = reinterpret_cast<GetChannelCipherRespHeader*>(response);
-    responseData->channelNumber = cipher::defaultChannelNumber;
+    std::vector<uint8_t> rspRecords;
+    std::copy_n(records.data() + start, size, std::back_inserter(rspRecords));
 
-    if (!size)
-    {
-        *data_len = sizeof(GetChannelCipherRespHeader);
-    }
-    else
-    {
-        std::copy_n(records.data() + start, size,
-                    static_cast<uint8_t*>(response) + 1);
-        *data_len = size + sizeof(GetChannelCipherRespHeader);
-    }
-
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(rspChannel, rspRecords);
 }
 
 template <typename... ArgTypes>
