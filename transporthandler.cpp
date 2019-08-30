@@ -50,6 +50,8 @@ constexpr Cc ccParamReadOnly = 0x82;
 // VLANs are a 12-bit value
 constexpr uint16_t VLAN_VALUE_MASK = 0x0fff;
 constexpr uint16_t VLAN_ENABLE_FLAG = 0x8000;
+constexpr uint16_t maxValidVLANIDValue = 4095;
+constexpr uint16_t maxValidVLANIDMask = 0x7FFF;
 
 // D-Bus Network Daemon definitions
 constexpr auto PATH_ROOT = "/xyz/openbmc_project/network";
@@ -1026,6 +1028,12 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             {
                 return responseReqDataLenInvalid();
             }
+            if ((vlanData & maxValidVLANIDMask) == 0 ||
+                ((vlanData & maxValidVLANIDMask) > maxValidVLANIDValue))
+            {
+                return responseInvalidFieldRequest();
+            }
+
             if ((vlanData & VLAN_ENABLE_FLAG) == 0)
             {
                 lastDisabledVlan[channel] = vlanData & VLAN_VALUE_MASK;
