@@ -1497,17 +1497,30 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
         }
         case LanParam::VLANId:
         {
-            uint16_t vlanData;
-            if (req.unpack(vlanData) != 0 || !req.fullyUnpacked())
+            uint12_t vlanData = 0;
+            uint3_t reserved = 0;
+            bool vlanEnable = 0;
+
+            if (req.unpack(vlanData) || req.unpack(reserved) ||
+                req.unpack(vlanEnable) || !req.fullyUnpacked())
             {
                 return responseReqDataLenInvalid();
             }
-            if ((vlanData & VLAN_ENABLE_FLAG) == 0)
+
+            if (reserved)
             {
-                lastDisabledVlan[channel] = vlanData & VLAN_VALUE_MASK;
-                vlanData = 0;
+                return responseInvalidFieldRequest();
             }
-            channelCall<reconfigureVLAN>(channel, vlanData & VLAN_VALUE_MASK);
+
+            uint16_t vlan = static_cast<uint16_t>(vlanData);
+
+            if (!vlanEnable)
+            {
+                lastDisabledVlan[channel] = vlan;
+                vlan = 0;
+            }
+            channelCall<reconfigureVLAN>(channel, vlan);
+
             return responseSuccess();
         }
         case LanParam::CiphersuiteSupport:
