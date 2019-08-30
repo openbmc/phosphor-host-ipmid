@@ -992,10 +992,27 @@ void reconfigureVLAN(sdbusplus::bus::bus& bus, ChannelParams& params,
     auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
 
     deconfigureChannel(bus, params);
-    createVLAN(bus, params, vlan);
+    try
+    {
+        createVLAN(bus, params, vlan);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error: creating VLAN failed");
+    }
 
-    // Re-establish the saved settings
-    setDHCPProperty(bus, params, dhcp);
+    try
+    {
+        // Re-establish the saved settings
+        setDHCPProperty(bus, params, dhcp);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error: setDHCPProperty failed");
+    }
+
     if (ifaddr4)
     {
         createIfAddr<AF_INET>(bus, params, ifaddr4->address, ifaddr4->prefix);
@@ -1270,17 +1287,30 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
         }
         case LanParam::VLANId:
         {
-            uint16_t vlanData;
-            if (req.unpack(vlanData) != 0 || !req.fullyUnpacked())
+            uint12_t vlanData = 0;
+            uint3_t reserved = 0;
+            uint1_t vlanEnable = 0;
+
+            if (req.unpack(vlanData) || req.unpack(reserved) ||
+                req.unpack(vlanEnable) || !req.fullyUnpacked())
             {
                 return responseReqDataLenInvalid();
             }
-            if ((vlanData & VLAN_ENABLE_FLAG) == 0)
+
+            if (reserved || !vlanData)
             {
-                lastDisabledVlan[channel] = vlanData & VLAN_VALUE_MASK;
-                vlanData = 0;
+                return responseInvalidFieldRequest();
             }
-            channelCall<reconfigureVLAN>(channel, vlanData & VLAN_VALUE_MASK);
+
+            uint16_t vlan = static_cast<uint16_t>(vlanData);
+
+            if (vlanEnable)
+            {
+                lastDisabledVlan[channel] = vlan;
+                vlan = 0;
+            }
+            channelCall<reconfigureVLAN>(channel, vlan);
+
             return responseSuccess();
         }
         case LanParam::CiphersuiteSupport:
