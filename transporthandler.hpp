@@ -139,3 +139,4 @@ void commitNetworkChanges();
  */
 void applyChanges(int channel);
 constexpr uint16_t maxValidVLANIDValue = 4095;
+constexpr uint16_t maxValidVLANIDMask = 0x7FFF;

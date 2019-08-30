@@ -512,7 +512,8 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             // We assume that ipmitool always send enable
             // bit as 1.
             vlan = le16toh(vlan);
-            if (vlan == 0 || vlan > maxValidVLANIDValue)
+            if (vlan == 0 ||
+                ((vlan & maxValidVLANIDMask) > maxValidVLANIDValue))
             {
                 return IPMI_CC_INVALID_FIELD_REQUEST;
             }
