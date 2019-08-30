@@ -1289,8 +1289,9 @@ void register_netfn_app_functions()
                           ipmiAppGetSystemGuid);
 
     // <Get Channel Cipher Suites Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
-                           getChannelCipherSuites, PRIVILEGE_CALLBACK);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetChannelCipherSuites,
+                          ipmi::Privilege::Callback, getChannelCipherSuites);
 
     // <Get System Info Command>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
