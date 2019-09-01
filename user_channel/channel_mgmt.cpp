@@ -1341,6 +1341,9 @@ int ChannelConfig::syncNetworkChannelConfig()
 
 void ChannelConfig::initChannelPersistData()
 {
+    boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
+        channelLock{*channelMutex};
+
     /* Always read the channel config */
     if (loadChannelConfig() != 0)
     {
