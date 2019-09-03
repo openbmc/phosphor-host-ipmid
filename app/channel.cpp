@@ -148,6 +148,15 @@ ipmi::RspType<uint8_t,             // Channel Number
         algoSelectBit ? cipherRecords : supportedAlgorithms;
     static constexpr auto respSize = 16;
 
+    // Session support is available in active LAN channels.
+    if ((ipmi::getChannelSessionSupport(rspChannel) ==
+         ipmi::EChannelSessSupported::none) ||
+        !(ipmi::doesDeviceExist(rspChannel)))
+    {
+        log<level::DEBUG>("Get channel cipher suites - Device does not exist");
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     // List index(00h-3Fh), 0h selects the first set of 16, 1h selects the next
     // set of 16 and so on.
 
