@@ -855,130 +855,49 @@ static std::string sysInfoReadSystemName()
     return hostname;
 }
 
-struct IpmiSysInfoResp
-{
-    uint8_t paramRevision;
-    uint8_t setSelector;
-    union
-    {
-        struct
-        {
-            uint8_t encoding;
-            uint8_t stringLen;
-            uint8_t stringData0[14];
-        } __attribute__((packed));
-        uint8_t stringDataN[16];
-        uint8_t byteData;
-    };
-} __attribute__((packed));
+static constexpr uint8_t revisionOnly = 0x80;
+static constexpr uint8_t paramRevision = 0x11;
+static constexpr size_t configParameterLength = 16;
 
-/**
- * Split a string into (up to) 16-byte chunks as expected in response for get
- * system info parameter.
- *
- * @param[in] fullString: Input string to be split
- * @param[in] chunkIndex: Index of the chunk to be written out
- * @param[in,out] chunk: Output data buffer; must have 14 byte capacity if
- *          chunk_index = 0 and 16-byte capacity otherwise
- * @return the number of bytes written into the output buffer, or -EINVAL for
- * invalid arguments.
- */
-static int splitStringParam(const std::string& fullString, int chunkIndex,
-                            uint8_t* chunk)
-{
-    constexpr int maxChunk = 255;
-    constexpr int smallChunk = 14;
-    constexpr int chunkSize = 16;
-    if (chunkIndex > maxChunk || chunk == nullptr)
-    {
-        return -EINVAL;
-    }
-    try
-    {
-        std::string output;
-        if (chunkIndex == 0)
-        {
-            // Output must have 14 byte capacity.
-            output = fullString.substr(0, smallChunk);
-        }
-        else
-        {
-            // Output must have 16 byte capacity.
-            output = fullString.substr((chunkIndex * chunkSize) - 2, chunkSize);
-        }
+static constexpr size_t smallChunkSize = 14;
+static constexpr size_t fullChunkSize = 16;
 
-        std::memcpy(chunk, output.c_str(), output.length());
-        return output.length();
-    }
-    catch (const std::out_of_range& e)
-    {
-        // The position was beyond the end.
-        return -EINVAL;
-    }
+static constexpr uint8_t setComplete = 0x0;
+static constexpr uint8_t setInProgress = 0x1;
+static constexpr uint8_t commitWrite = 0x2;
+static uint8_t transferStatus = setComplete;
+
+namespace ipmi
+{
+constexpr Cc ccParmNotSupported = 0x80;
+
+static inline auto responseParmNotSupported()
+{
+    return response(ccParmNotSupported);
 }
+} // namespace ipmi
 
-/**
- * Packs the Get Sys Info Request Item into the response.
- *
- * @param[in] paramString - the parameter.
- * @param[in] setSelector - the selector
- * @param[in,out] resp - the System info response.
- * @return The number of bytes packed or failure from splitStringParam().
- */
-static int packGetSysInfoResp(const std::string& paramString,
-                              uint8_t setSelector, IpmiSysInfoResp* resp)
+ipmi::RspType<
+    uint8_t,                // Parameter revision
+    std::optional<uint8_t>, // data1 / setSelector / ProgressStatus
+    std::optional<std::array<uint8_t, configParameterLength>>> // data2-17
+    ipmiAppGetSystemInfo(uint8_t getRevision, uint8_t paramSelector,
+                         uint8_t setSelector, uint8_t BlockSelector)
 {
-    uint8_t* dataBuffer = resp->stringDataN;
-    resp->setSelector = setSelector;
-    if (resp->setSelector == 0) // First chunk has only 14 bytes.
+    if (getRevision & revisionOnly)
     {
-        resp->encoding = 0;
-        resp->stringLen = paramString.length();
-        dataBuffer = resp->stringData0;
-    }
-    return splitStringParam(paramString, resp->setSelector, dataBuffer);
-}
-
-ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                    ipmi_request_t request,
-                                    ipmi_response_t response,
-                                    ipmi_data_len_t dataLen,
-                                    ipmi_context_t context)
-{
-    IpmiSysInfoResp resp = {};
-    size_t respLen = 0;
-    uint8_t* const reqData = static_cast<uint8_t*>(request);
-    std::string paramString;
-    bool found;
-    std::tuple<bool, std::string> ret;
-    constexpr int minRequestSize = 4;
-    constexpr int paramSelector = 1;
-    constexpr uint8_t revisionOnly = 0x80;
-    const uint8_t paramRequested = reqData[paramSelector];
-    int rc;
-
-    if (*dataLen < minRequestSize)
-    {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ipmi::responseSuccess(paramRevision, std::nullopt, std::nullopt);
     }
 
-    *dataLen = 0; // default to 0.
-
-    // Parameters revision as of IPMI spec v2.0 rev. 1.1 (Feb 11, 2014 E6)
-    resp.paramRevision = 0x11;
-    if (reqData[0] & revisionOnly) // Get parameter revision only
+    if (paramSelector == 0)
     {
-        respLen = 1;
-        goto writeResponse;
+        return ipmi::responseSuccess(paramRevision, transferStatus,
+                                     std::nullopt);
     }
 
-    // The "Set In Progress" parameter can be used for rollback of parameter
-    // data and is not implemented.
-    if (paramRequested == 0)
+    if (BlockSelector != 0) // 00h if parameter does not require a block number
     {
-        resp.byteData = 0;
-        respLen = 2;
-        goto writeResponse;
+        return ipmi::responseParmNotSupported();
     }
 
     if (sysInfoParamStore == nullptr)
@@ -989,30 +908,39 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     // Parameters other than Set In Progress are assumed to be strings.
-    ret = sysInfoParamStore->lookup(paramRequested);
-    found = std::get<0>(ret);
-    paramString = std::get<1>(ret);
+    std::tuple<bool, std::string> ret =
+        sysInfoParamStore->lookup(paramSelector);
+    bool found = std::get<0>(ret);
     if (!found)
     {
-        return IPMI_CC_SYSTEM_INFO_PARAMETER_NOT_SUPPORTED;
+        return ipmi::responseParmNotSupported();
     }
-    // TODO: Cache each parameter across multiple calls, until the whole string
-    // has been read out. Otherwise, it's possible for a parameter to change
-    // between requests for its chunks, returning chunks incoherent with each
-    // other. For now, the parameter store is simply required to have only
-    // idempotent callbacks.
-    rc = packGetSysInfoResp(paramString, reqData[2], &resp);
-    if (rc == -EINVAL)
+    std::string& paramString = std::get<1>(ret);
+    std::array<uint8_t, configParameterLength> configData;
+    size_t count = 0;
+    if (setSelector == 0)
+    {                         // First chunk has only 14 bytes.
+        configData.at(0) = 0; // encoding
+        configData.at(1) = paramString.length(); // string length
+        count = (paramString.length() > smallChunkSize) ? smallChunkSize
+                                                        : paramString.length();
+        std::copy_n(paramString.begin(), count,
+                    configData.begin() + 2); // 14 bytes thunk
+    }
+    else
     {
-        return IPMI_CC_RESPONSE_ERROR;
+        size_t offset = (setSelector * fullChunkSize) - 2;
+        if (offset >= paramString.length())
+        {
+            return ipmi::responseParmOutOfRange();
+        }
+        count = ((paramString.length() - offset) > fullChunkSize)
+                    ? fullChunkSize
+                    : (paramString.length() - offset);
+        std::copy_n(paramString.begin() + offset, count,
+                    configData.begin()); // 16 bytes chunk
     }
-
-    respLen = sizeof(resp); // Write entire string data chunk in response.
-
-writeResponse:
-    std::memcpy(response, &resp, sizeof(resp));
-    *dataLen = respLen;
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(paramRevision, setSelector, configData);
 }
 
 #ifdef ENABLE_I2C_WHITELIST_CHECK
@@ -1293,7 +1221,8 @@ void register_netfn_app_functions()
                            getChannelCipherSuites, PRIVILEGE_CALLBACK);
 
     // <Get System Info Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
-                           ipmi_app_get_system_info, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetSystemInfoParameters,
+                          ipmi::Privilege::User, ipmiAppGetSystemInfo);
     return;
 }
