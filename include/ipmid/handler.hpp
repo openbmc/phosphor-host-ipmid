@@ -190,7 +190,7 @@ class IpmiHandler final : public HandlerBase
                                   boost::asio::yield_context>::value)
                 {
                     inputArgs.emplace(std::tuple_cat(
-                        std::forward_as_tuple(*(request->ctx->yield)),
+                        std::forward_as_tuple(request->ctx->yield),
                         std::move(unpackArgs)));
                 }
                 else if constexpr (std::is_same<
