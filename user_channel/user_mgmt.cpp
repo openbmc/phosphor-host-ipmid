@@ -1635,7 +1635,7 @@ void UserAccess::initUserDataFile()
             auto usrObj = managedObjs.find(usersPath);
             if (usrObj != managedObjs.end())
             {
-                bool usrEnabled;
+                bool usrEnabled = false;
 
                 // User exist. Lets check and update other fileds
                 getUserObjProperties(usrObj->second, usrGrps, usrPriv,
@@ -1692,7 +1692,7 @@ void UserAccess::initUserDataFile()
     {
         std::vector<std::string> usrGrps;
         std::string usrPriv, userName;
-        bool usrEnabled;
+        bool usrEnabled = false;
         std::string usrObjPath = std::string(usrObj.first);
         if (getUserNameFromPath(usrObj.first.str, userName) != 0)
         {
