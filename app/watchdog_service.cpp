@@ -153,7 +153,8 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
         if (wasValid)
         {
             // Retry the request once in case the cached service was stale
-            return setProperty(key, val);
+            setProperty(key, val);
+            return;
         }
         log<level::ERR>("WatchdogService: Method error setting property",
                         entry("PROPERTY=%s", key.c_str()));

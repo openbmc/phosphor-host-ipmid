@@ -54,7 +54,7 @@ void Host::execute(Base::Host::Command command)
                                          std::placeholders::_1,
                                          std::placeholders::_2));
 
-    return ipmid_send_cmd_to_host(std::move(cmd));
+    ipmid_send_cmd_to_host(std::move(cmd));
 }
 
 // Called into by Command Manager
