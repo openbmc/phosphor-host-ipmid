@@ -26,7 +26,15 @@ static constexpr uint8_t BMCSlaveAddress = 0x20;
 
 extern int updateSensorRecordFromSSRAESC(const void*);
 extern sd_bus* bus;
-extern const ipmi::sensor::IdInfoMap sensors;
+
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+} // namespace sensor
+} // namespace ipmi
+
 extern const FruMap frus;
 
 using namespace phosphor::logging;
@@ -103,8 +111,8 @@ int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
 {
     int rc;
 
-    const auto& sensor_it = sensors.find(num);
-    if (sensor_it == sensors.end())
+    const auto& sensor_it = ipmi::sensor::sensors.find(num);
+    if (sensor_it == ipmi::sensor::sensors.end())
     {
         // The sensor map does not contain the sensor requested
         return -EINVAL;
@@ -380,8 +388,8 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
     cmdData.eventData3 = eventData3;
 
     // Check if the Sensor Number is present
-    const auto iter = sensors.find(sensorNumber);
-    if (iter == sensors.end())
+    const auto iter = ipmi::sensor::sensors.find(sensorNumber);
+    if (iter == ipmi::sensor::sensors.end())
     {
         updateSensorRecordFromSSRAESC(&sensorNumber);
         return ipmi::responseSuccess();
@@ -424,8 +432,8 @@ ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi::sensor::GetSensorResponse getResponse{};
     static constexpr auto scanningEnabledBit = 6;
 
-    const auto iter = sensors.find(reqptr->sennum);
-    if (iter == sensors.end())
+    const auto iter = ipmi::sensor::sensors.find(reqptr->sennum);
+    if (iter == ipmi::sensor::sensors.end())
     {
         return IPMI_CC_SENSOR_INVALID;
     }
@@ -467,7 +475,7 @@ void getSensorThresholds(uint8_t sensorNum,
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-    const auto iter = sensors.find(sensorNum);
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
     const auto info = iter->second;
 
     auto service = ipmi::getService(bus, info.sensorInterface, info.sensorPath);
@@ -541,8 +549,8 @@ ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto sensorNum = *(reinterpret_cast<const uint8_t*>(request));
     *data_len = 0;
 
-    const auto iter = sensors.find(sensorNum);
-    if (iter == sensors.end())
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
+    if (iter == ipmi::sensor::sensors.end())
     {
         return IPMI_CC_SENSOR_INVALID;
     }
@@ -608,12 +616,13 @@ ipmi::RspType<uint8_t, // respcount
     {
         // Get SDR count. This returns the total number of SDRs in the device.
         const auto& entityRecords = ipmi::sensor::getIpmiEntityRecords();
-        sdrCount = sensors.size() + frus.size() + entityRecords.size();
+        sdrCount =
+            ipmi::sensor::sensors.size() + frus.size() + entityRecords.size();
     }
     else if (count.value_or(0) == getSensorCount)
     {
         // Get Sensor count. This returns the number of sensors
-        sdrCount = sensors.size();
+        sdrCount = ipmi::sensor::sensors.size();
     }
     else
     {
@@ -888,7 +897,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Note: we use an iterator so we can provide the next ID at the end of
     // the call.
-    auto sensor = sensors.begin();
+    auto sensor = ipmi::sensor::sensors.begin();
     auto recordID = get_sdr::request::get_record_id(req);
 
     // At the beginning of a scan, the host side will send us id=0.
@@ -910,8 +919,8 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         else
         {
-            sensor = sensors.find(recordID);
-            if (sensor == sensors.end())
+            sensor = ipmi::sensor::sensors.find(recordID);
+            if (sensor == ipmi::sensor::sensors.end())
             {
                 return IPMI_CC_SENSOR_INVALID;
             }
@@ -945,7 +954,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ret =
         populate_record_from_dbus(&(record.body), &(sensor->second), data_len);
 
-    if (++sensor == sensors.end())
+    if (++sensor == ipmi::sensor::sensors.end())
     {
         // we have reached till end of sensor, so assign the next record id
         // to 256(Max Sensor ID = 255) + FRU ID(may start with 0).
