@@ -27,7 +27,14 @@
 void register_netfn_storage_functions() __attribute__((constructor));
 
 unsigned int g_sel_time = 0xFFFFFFFF;
-extern const ipmi::sensor::IdInfoMap sensors;
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+} // namespace sensor
+} // namespace ipmi
+
 extern const FruMap frus;
 constexpr uint8_t eventDataSize = 3;
 namespace
@@ -725,7 +732,7 @@ ipmi::RspType<uint8_t,  // SDR version
     constexpr uint32_t deletionTimestamp = 0x0;
     constexpr uint8_t operationSupport = 0;
 
-    uint16_t records = frus.size() + sensors.size();
+    uint16_t records = frus.size() + ipmi::sensor::sensors.size();
 
     return ipmi::responseSuccess(sdrVersion, records, freeSpace,
                                  additionTimestamp, deletionTimestamp,
