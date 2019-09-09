@@ -27,7 +27,9 @@ interfaceDict = {}
 #include "sensordatahandler.hpp"
 
 #include <ipmid/types.hpp>
-using namespace ipmi::sensor;
+
+namespace ipmi {
+namespace sensor {
 
 extern const IdInfoMap sensors = {
 % for key in sensorDict.iterkeys():
@@ -145,3 +147,5 @@ except KeyError, e:
 % endfor
 };
 
+} // namespace sensor
+} // namespace ipmi
