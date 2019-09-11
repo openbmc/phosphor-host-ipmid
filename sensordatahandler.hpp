@@ -156,7 +156,6 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
-    auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
@@ -167,7 +166,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
     setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)),
-                      responseData);
+                      &response);
 
     return response;
 }
@@ -184,10 +183,10 @@ template <typename T>
 GetSensorResponse readingData(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    GetSensorResponse response{};
-    auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
 
-    enableScanning(responseData);
+    GetSensorResponse response{};
+
+    enableScanning(&response);
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
@@ -228,8 +227,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
     auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
                                         sensorInfo.coefficientM);
-
-    setReading(rawData, responseData);
+    setReading(rawData, &response);
 
     return response;
 }
