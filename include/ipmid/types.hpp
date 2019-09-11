@@ -100,7 +100,15 @@ struct GetReadingResponse
 
 constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory";
 
-using GetSensorResponse = std::array<uint8_t, sizeof(GetReadingResponse)>;
+struct GetSensorResponse
+{
+  uint8_t reading;                   // sensor reading
+  bool    readingOrStateUnavailable; // 1 = reading/state unavailable
+  bool    scanningEnabled;           // 0 = sensor scanning disabled
+  bool    allEventMessagesEnabled;   // 0 = All Event Messages disabled
+  uint8_t thresholdLevelsStates;     // threshold/discrete sensor states
+  uint8_t discreteReadingSensorStates; // discrete-only, optional sensor states
+};
 
 using OffsetValueMap = std::map<Offset, Values>;
 

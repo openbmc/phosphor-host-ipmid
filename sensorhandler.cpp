@@ -79,20 +79,6 @@ struct sensor_data_t
     uint8_t sennum;
 } __attribute__((packed));
 
-<<<<<<< HEAD
-struct sensorreadingresp_t
-{
-    uint8_t value;
-    uint8_t operation;
-    uint8_t indication[2];
-} __attribute__((packed));
-=======
-const ipmi::sensor::EntityInfoMap& getIpmiEntityRecords()
-{
-    return entities;
-}
->>>>>>> sensorhandler: move get sensor reading to new API
-
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -431,15 +417,15 @@ ipmi::RspType<uint8_t, // sensor reading
 
               uint5_t, // reserved
               bool,    // reading state
-              bool,    // sensor scanning state disabled
-              bool,    // all event message state disabled
+              bool,    // 0 = sensor scanning state disabled
+              bool,    // 0 = all event messages disabled
 
               uint8_t, // threshold levels states
               uint8_t  // discrete reading sensor states
               >
     ipmiSensorGetSensorReading(uint8_t sensorNum)
 {
-    const auto iter = ipmi::sensor::sensors.find(reqptr->sennum);
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
     if (iter == ipmi::sensor::sensors.end())
     {
         return ipmi::responseSensorInvalid();
@@ -452,32 +438,17 @@ ipmi::RspType<uint8_t, // sensor reading
 
     try
     {
-        ipmi::sensor::GetSensorResponse getResponse{};
-        getResponse = iter->second.getFunc(iter->second);
+        ipmi::sensor::GetSensorResponse getResponse = iter->second.getFunc(iter->second);
 
-        constexpr uint8_t senReadingResp = 0;
-        constexpr uint8_t senScanStateResp = 1;
-        constexpr uint8_t assertionStatesLsbResp = 2;
-        constexpr uint8_t assertionStatesMsbResp = 3;
-        constexpr uint8_t senReadStateMask = 0x20;
-        constexpr uint8_t senScanStateMask = 0x40;
-        constexpr uint8_t allEventMessageStateMask = 0x80;
-
-        uint8_t senReading = getResponse[senReadingResp];
-        constexpr uint5_t reserved{0};
-        bool readState =
-            static_cast<bool>(getResponse[senScanStateResp] & senReadStateMask);
-        bool senScanState =
-            static_cast<bool>(getResponse[senScanStateResp] & senScanStateMask);
-        bool allEventMessageState = static_cast<bool>(
-            getResponse[senScanStateResp] & allEventMessageStateMask);
-
-        uint8_t assertionStatesLsb = getResponse[assertionStatesLsbResp];
-        uint8_t assertionStatesMsb = getResponse[assertionStatesMsbResp];
-
-        return ipmi::responseSuccess(senReading, reserved, readState,
-                                     senScanState, allEventMessageState,
-                                     assertionStatesLsb, assertionStatesMsb);
+        return ipmi::responseSuccess(
+            getResponse.reading,
+            uint5_t(0),
+            getResponse.readingOrStateUnavailable,
+            getResponse.scanningEnabled,
+            getResponse.allEventMessagesEnabled,
+            getResponse.thresholdLevelsStates,
+            getResponse.thresholdLevelsStates
+        );
     }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     catch (const SensorFunctionalError& e)
