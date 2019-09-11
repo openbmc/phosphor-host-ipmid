@@ -7,6 +7,13 @@
 #include <string>
 #include <variant>
 
+#include <boost/multiprecision/cpp_int.hpp>
+template <unsigned N>
+using fixed_uint_t =
+    boost::multiprecision::number<boost::multiprecision::cpp_int_backend<
+        N, N, boost::multiprecision::unsigned_magnitude,
+        boost::multiprecision::unchecked, void>>;
+
 namespace ipmi
 {
 
@@ -100,7 +107,25 @@ struct GetReadingResponse
 
 constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory";
 
-using GetSensorResponse = std::array<uint8_t, sizeof(GetReadingResponse)>;
+// Refer to the Spec, Table "Get Sensor Reading Command"
+using GetSensorResponse = std::tuple<
+    uint8_t,         // Sensor reading
+    fixed_uint_t<5>, // Reserved. Ignore on read.
+    bool,            // 1 = reading/state unavailable
+    bool,            // 0 = sensor scanning disabled
+    bool,            // 0 = All Event Messages disabled from this sensor
+    uint8_t,         // threshold/discrete sensor states
+    uint8_t          // discrete-only, optional sensor states
+>;
+enum GetSensorResponseFields {
+    SensorReading,
+    Reserved,
+    ReadingState,
+    ScanningState,
+    AllEventMessageState,
+    ThresholdLevelsStates,
+    DiscreteReadingSensorStates,
+};
 
 using OffsetValueMap = std::map<Offset, Values>;
 
