@@ -644,15 +644,15 @@ namespace sensor
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setOffset(uint8_t offset, ipmi::sensor::GetReadingResponse* resp)
+inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse* resp)
 {
     if (offset > 7)
     {
-        resp->assertOffset8_14 |= 1 << (offset - 8);
+        std::get<ThresholdLevelsStates>(*resp)       |= 1 << (offset - 8);
     }
     else
     {
-        resp->assertOffset0_7 |= 1 << offset;
+        std::get<DiscreteReadingSensorStates>(*resp) |= 1 << offset;
     }
 }
 
@@ -662,9 +662,9 @@ inline void setOffset(uint8_t offset, ipmi::sensor::GetReadingResponse* resp)
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setReading(uint8_t value, ipmi::sensor::GetReadingResponse* resp)
+inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse* resp)
 {
-    resp->reading = value;
+    std::get<SensorReading>(*resp) = value;
 }
 
 /**
@@ -675,10 +675,10 @@ inline void setReading(uint8_t value, ipmi::sensor::GetReadingResponse* resp)
  * @param[in/out] resp - get sensor reading response.
  */
 inline void setAssertionBytes(uint16_t value,
-                              ipmi::sensor::GetReadingResponse* resp)
+                              ipmi::sensor::GetSensorResponse* resp)
 {
-    resp->assertOffset0_7 = static_cast<uint8_t>(value & 0x00FF);
-    resp->assertOffset8_14 = static_cast<uint8_t>(value >> 8);
+    std::get<ThresholdLevelsStates>(*resp)       = static_cast<uint8_t>(value & 0x00FF);
+    std::get<DiscreteReadingSensorStates>(*resp) = static_cast<uint8_t>(value >> 8);
 }
 
 /**
@@ -686,9 +686,12 @@ inline void setAssertionBytes(uint16_t value,
  *
  * @param[in/out] resp - get sensor reading response.
  */
-inline void enableScanning(ipmi::sensor::GetReadingResponse* resp)
+inline void enableScanning(ipmi::sensor::GetSensorResponse* resp)
 {
-    resp->operation = 1 << 6;
+    // The following are bits at offset 5, 6 and 7 in the `operation' byte.
+    std::get<ReadingState>(*resp)         = false;
+    std::get<ScanningState>(*resp)        = true;
+    std::get<AllEventMessageState>(*resp) = false;
 }
 
 } // namespace sensor
