@@ -436,32 +436,17 @@ ipmi::RspType<uint8_t, // sensor reading
 
     try
     {
-        ipmi::sensor::GetSensorResponse getResponse{};
-        getResponse = iter->second.getFunc(iter->second);
+        ipmi::sensor::GetSensorResponse getResponse = iter->second.getFunc(iter->second);
 
-        constexpr uint8_t senReadingResp = 0;
-        constexpr uint8_t senScanStateResp = 1;
-        constexpr uint8_t assertionStatesLsbResp = 2;
-        constexpr uint8_t assertionStatesMsbResp = 3;
-        constexpr uint8_t senReadStateMask = 0x20;
-        constexpr uint8_t senScanStateMask = 0x40;
-        constexpr uint8_t allEventMessageStateMask = 0x80;
-
-        uint8_t senReading = getResponse[senReadingResp];
-        constexpr uint5_t reserved{0};
-        bool readState =
-            static_cast<bool>(getResponse[senScanStateResp] & senReadStateMask);
-        bool senScanState =
-            static_cast<bool>(getResponse[senScanStateResp] & senScanStateMask);
-        bool allEventMessageState = static_cast<bool>(
-            getResponse[senScanStateResp] & allEventMessageStateMask);
-
-        uint8_t assertionStatesLsb = getResponse[assertionStatesLsbResp];
-        uint8_t assertionStatesMsb = getResponse[assertionStatesMsbResp];
-
-        return ipmi::responseSuccess(senReading, reserved, readState,
-                                     senScanState, allEventMessageState,
-                                     assertionStatesLsb, assertionStatesMsb);
+        return ipmi::responseSuccess(
+            std::get<0>(getResponse),
+            std::get<1>(getResponse),
+            std::get<2>(getResponse),
+            std::get<3>(getResponse),
+            std::get<4>(getResponse),
+            std::get<5>(getResponse),
+            std::get<6>(getResponse)
+        );
     }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     catch (const SensorFunctionalError& e)
