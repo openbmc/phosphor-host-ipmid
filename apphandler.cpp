@@ -861,19 +861,33 @@ static constexpr size_t configParameterLength = 16;
 
 static constexpr size_t smallChunkSize = 14;
 static constexpr size_t fullChunkSize = 16;
+static constexpr uint8_t progressMask = 0x3;
 
 static constexpr uint8_t setComplete = 0x0;
 static constexpr uint8_t setInProgress = 0x1;
 static constexpr uint8_t commitWrite = 0x2;
 static uint8_t transferStatus = setComplete;
 
+// For EFI based system, 256 bytes is recommended.
+static constexpr size_t maxBytesPerParameter = 256;
+
 namespace ipmi
 {
 constexpr Cc ccParmNotSupported = 0x80;
+constexpr Cc ccSetInProgressActive = 0x81;
+constexpr Cc ccSystemInfoParameterSetReadOnly = 0x82;
 
 static inline auto responseParmNotSupported()
 {
     return response(ccParmNotSupported);
+}
+static inline auto responseSetInProgressActive()
+{
+    return response(ccSetInProgressActive);
+}
+static inline auto responseSystemInfoParameterSetReadOnly()
+{
+    return response(ccSystemInfoParameterSetReadOnly);
 }
 } // namespace ipmi
 
@@ -941,6 +955,80 @@ ipmi::RspType<
                     configData.begin()); // 16 bytes chunk
     }
     return ipmi::responseSuccess(paramRevision, setSelector, configData);
+}
+
+ipmi::RspType<> ipmiAppSetSystemInfo(
+    uint8_t paramSelector, uint8_t data1,
+    std::optional<std::array<uint8_t, configParameterLength>> dataN)
+{
+    if (paramSelector == 0)
+    {
+        // attempt to set the 'set in progress' value (in parameter #0)
+        // when not in the set complete state.
+        if ((transferStatus != setComplete) && (data1 == setInProgress))
+        {
+            return ipmi::responseSetInProgressActive();
+        }
+        // only following 2 states are supported
+        if (data1 > setInProgress)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "illegal SetInProgress status");
+            return ipmi::responseInvalidFieldRequest();
+        }
+
+        transferStatus = data1.value() & progressMask;
+        return ipmi::responseSuccess();
+    }
+
+    if (!dataN)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    std::array<uint8_t, configParameterLength>& configData = dataN.value();
+    if (!sysInfoParamStore)
+    {
+        sysInfoParamStore = std::make_unique<SysInfoParamStore>();
+        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_NAME,
+                                  sysInfoReadSystemName);
+    }
+
+    // lookup
+    std::tuple<bool, std::string> ret =
+        sysInfoParamStore->lookup(paramSelector);
+    bool found = std::get<0>(ret);
+    std::string& paramString = std::get<1>(ret);
+    if (!found)
+    {
+        // parameter does not exist. Init new
+        paramString = "";
+    }
+
+    uint8_t setSelector = data1.value();
+    size_t count = 0;
+    static constexpr uint8_t overhead = 2;
+    if (setSelector == 0) // First chunk has only 14 bytes.
+    {
+        size_t stringLen = configData.at(1); // string length
+        stringLen = std::min(stringLen, maxBytesPerParameter);
+        count = std::max(stringLen, smallChunkSize);
+        paramString.resize(stringLen); // reserve space
+        std::copy_n(configData.begin() + overhead, count, paramString.begin());
+    }
+    else
+    {
+        size_t offset = (setSelector * fullChunkSize) - overhead;
+        if (offset >= paramString.length())
+        {
+            return ipmi::responseParmOutOfRange();
+        }
+        count = std::min(paramString.length() - offset, fullChunkSize);
+        std::copy_n(configData.begin(), count, paramString.begin() + offset);
+    }
+
+    sysInfoParamStore->update(paramSelector, paramString);
+    return ipmi::responseSuccess();
 }
 
 #ifdef ENABLE_I2C_WHITELIST_CHECK
@@ -1224,5 +1312,9 @@ void register_netfn_app_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetSystemInfoParameters,
                           ipmi::Privilege::User, ipmiAppGetSystemInfo);
+    // <Set System Info Command>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetSystemInfoParameters,
+                          ipmi::Privilege::Admin, ipmiAppSetSystemInfo);
     return;
 }
