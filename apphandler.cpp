@@ -844,18 +844,17 @@ auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
 
 static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
-static std::string sysInfoReadSystemName()
-{
-    // Use the BMC hostname as the "System Name."
-    char hostname[HOST_NAME_MAX + 1] = {};
-    if (gethostname(hostname, HOST_NAME_MAX) != 0)
-    {
-        perror("System info parameter: system name");
-    }
-    return hostname;
-}
+static constexpr uint8_t sysInfoSetState = 0x0;
+static constexpr uint8_t sysInfoSystemFwVersion = 0x1;
+static constexpr uint8_t sysInfoSystemName = 0x2;
+static constexpr uint8_t sysInfoPromaryOSName = 0x3;
+static constexpr uint8_t sysInfoOSName = 0x04;
+static constexpr uint8_t sysInfoOSVersion = 0x05;
+static constexpr uint8_t sysInfoBMCURL = 0x06;
+static constexpr uint8_t sysInfoOSHypURL = 0x07;
+static constexpr uint8_t sysInfoOEMStart = 0xC0;
+static constexpr uint8_t sysInfoOEMEnd = 0xFF;
 
-static constexpr uint8_t revisionOnly = 0x80;
 static constexpr uint8_t paramRevision = 0x11;
 static constexpr size_t configParameterLength = 16;
 
@@ -868,8 +867,9 @@ static constexpr uint8_t setInProgress = 0x1;
 static constexpr uint8_t commitWrite = 0x2;
 static uint8_t transferStatus = setComplete;
 
-// For EFI based system, 256 bytes is recommended.
-static constexpr size_t maxBytesPerParameter = 256;
+static constexpr uint8_t encodingASCII = 0x0; // ASCII+Latin1
+static constexpr uint8_t encodingUTF8 = 0x1;
+static constexpr uint8_t encodingUNICODE = 0x2;
 
 namespace ipmi
 {
@@ -891,17 +891,75 @@ static inline auto responseSystemInfoParameterSetReadOnly()
 }
 } // namespace ipmi
 
+static IpmiSysInfo sysInfoReadSystemName()
+{
+    IpmiSysInfo sysname;
+    // Use the BMC hostname as the "System Name."
+    char hostname[HOST_NAME_MAX + 1] = {};
+    if (gethostname(hostname, HOST_NAME_MAX) != 0)
+    {
+        perror("System info parameter: system name");
+    }
+    std::string host = hostname;
+    sysname.encoding = encodingASCII;
+    sysname.stringLen = host.size();
+
+    std::copy_n(host.begin(), host.size(), sysname.stringDataN.begin());
+
+    return sysname;
+}
+
+/**
+ * Initialize the systemStore
+ * non-volatile paramters are restored from file/storage
+ */
+static void systemStoreInit()
+{
+    sysInfoParamStore = std::make_unique<SysInfoParamStore>();
+    IpmiSysInfo dummy = {0};
+    for (uint8_t paramRequested = sysInfoSystemFwVersion;
+         paramRequested <= sysInfoOSHypURL; paramRequested++)
+    {
+        // these 2 are volatile
+        if ((paramRequested == sysInfoOSVersion) ||
+            (paramRequested == sysInfoOSHypURL))
+        {
+            sysInfoParamStore->update(paramRequested, dummy, false);
+        }
+        else if (sysInfoSystemName == paramRequested)
+        {
+            sysInfoParamStore->update(paramRequested, sysInfoReadSystemName);
+        }
+        else
+        { // if fail to restore from file, create empty file
+            if (0 != sysInfoParamStore->restore(paramRequested))
+            {
+                sysInfoParamStore->update(paramRequested, dummy, true);
+            }
+        }
+    }
+
+    for (uint8_t paramRequested = sysInfoOEMStart;
+         paramRequested <= sysInfoOEMEnd; paramRequested++)
+    {
+        if (0 != sysInfoParamStore->restore((uint8_t)paramRequested))
+        {
+            sysInfoParamStore->update((uint8_t)paramRequested, dummy, true);
+        }
+    }
+    phosphor::logging::log<phosphor::logging::level::INFO>(
+        "systemStoreInit done");
+}
+
 ipmi::RspType<
     uint8_t,                // Parameter revision
     std::optional<uint8_t>, // data1 / setSelector / ProgressStatus
     std::optional<std::array<uint8_t, configParameterLength>>> // data2-17
-    ipmiAppGetSystemInfo(uint8_t getRevision, uint8_t paramSelector,
-                         uint8_t setSelector, uint8_t BlockSelector)
+    ipmiAppGetSystemInfo(uint1_t getRevision, uint7_t reserved,
+                         uint8_t paramSelector, uint8_t setSelector,
+                         uint8_t BlockSelector)
 {
-    std::tuple<bool, std::string> ret;
-    std::array<uint8_t, configParameterLength> configData;
-    size_t count = 0;
-    if (getRevision & revisionOnly)
+    if (getRevision)
     {
         return ipmi::responseSuccess(paramRevision, std::nullopt, std::nullopt);
     }
@@ -912,38 +970,44 @@ ipmi::RspType<
                                      std::nullopt);
     }
 
-    if (sysInfoParamStore == nullptr)
-    {
-        sysInfoParamStore = std::make_unique<SysInfoParamStore>();
-        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_NAME,
-                                  sysInfoReadSystemName);
-    }
-
-    // Parameters other than Set In Progress are assumed to be strings.
-    ret = sysInfoParamStore->lookup(paramSelector);
-    bool found = std::get<0>(ret);
-    std::string& paramString = std::get<1>(ret);
-    if (!found)
+    if (BlockSelector != 0) // 00h if parameter does not require a block number
     {
         return ipmi::responseParmNotSupported();
     }
+    if (sysInfoParamStore == nullptr)
+    {
+        systemStoreInit();
+    }
 
+    // Parameters other than Set In Progress are assumed to be strings.
+    std::optional<IpmiSysInfo> data = sysInfoParamStore->lookup(paramSelector);
+    if (data.has_value() == false)
+    {
+        return ipmi::responseParmNotSupported();
+    }
+    IpmiSysInfo& info = data.value();
+    std::array<uint8_t, configParameterLength> configData;
+    size_t count = 0;
     if (setSelector == 0)
-    {                         // First chunk has only 14 bytes.
-        configData.at(0) = 0; // encoding
-        configData.at(1) = paramString.length(); // string length
-        count = (paramString.length() > smallChunkSize) ? smallChunkSize
-                                                        : paramString.length();
-        std::copy_n(paramString.begin(), count,
+    {                                      // First chunk has only 14 bytes.
+        configData.at(0) = info.encoding;  // encoding
+        configData.at(1) = info.stringLen; // string length
+        count =
+            (info.stringLen > smallChunkSize) ? smallChunkSize : info.stringLen;
+        std::copy_n(info.stringDataN.begin(), count,
                     configData.begin() + 2); // 14 bytes thunk
     }
     else
     {
-        uint32_t offset = (setSelector * fullChunkSize) - 2;
-        count = ((paramString.length() - offset) > fullChunkSize)
+        size_t offset = (setSelector * fullChunkSize) - 2;
+        if (offset >= info.stringLen)
+        {
+            return ipmi::responseParmOutOfRange();
+        }
+        count = ((info.stringLen - offset) > fullChunkSize)
                     ? fullChunkSize
-                    : (paramString.length() - offset);
-        std::copy_n(paramString.begin() + offset, count,
+                    : (info.stringLen - offset);
+        std::copy_n(info.stringDataN.begin() + offset, count,
                     configData.begin()); // 16 bytes chunk
     }
     return ipmi::responseSuccess(paramRevision, setSelector, configData);
@@ -961,15 +1025,13 @@ ipmi::RspType<> ipmiAppSetSystemInfo(
         }
         // attempt to set the 'set in progress' value (in parameter #0)
         // when not in the set complete state.
-        if ((transferStatus != setComplete) && (setInProgress == data1))
+        if ((transferStatus != setComplete) && (data1 == setInProgress))
         {
             return ipmi::responseSetInProgressActive();
         }
         // only following 2 states are supported
-        if ((setComplete != data1) && (setInProgress != data1))
+        if ((data1 != setComplete) && (data1 != setInProgress))
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "illegal status");
             return ipmi::responseInvalidFieldRequest();
         }
 
@@ -977,56 +1039,68 @@ ipmi::RspType<> ipmiAppSetSystemInfo(
         return ipmi::responseSuccess();
     }
 
-    if ((false == data1.has_value()) || (false == dataN.has_value()) ||
+    if (!data1) || !dataN ||
         (dataN.value().size() != configParameterLength))
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "invalid paramter length");
-        return ipmi::responseInvalidFieldRequest();
-    }
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
 
     std::array<uint8_t, configParameterLength>& configData = dataN.value();
     if (sysInfoParamStore == nullptr)
     {
-        sysInfoParamStore = std::make_unique<SysInfoParamStore>();
-        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_NAME,
-                                  sysInfoReadSystemName);
+        systemStoreInit();
     }
 
     // lookup
-    std::tuple<bool, std::string> ret =
-        sysInfoParamStore->lookup(paramSelector);
-    bool found = std::get<0>(ret);
-    std::string& paramString = std::get<1>(ret);
-    if (!found)
+    std::optional<IpmiSysInfo> param = sysInfoParamStore->lookup(paramSelector);
+    if (!param)
     {
-        // paramter does not exist. Init new
-        paramString = "";
+        return ipmi::responseParmNotSupported();
     }
 
+    IpmiSysInfo& info = param.value();
     uint8_t setSelector = data1.value();
     size_t count = 0;
     if (setSelector == 0)
-    {                                        // First chunk has only 14 bytes.
-        size_t stringLen = configData.at(1); // string length
-        if (stringLen > maxBytesPerParameter)
-        { // length check
-            stringLen = maxBytesPerParameter;
+    { // First chunk has only 14 bytes.
+        info.encoding = configData.at(0);
+        if (info.encoding > encodingUNICODE)
+        {
+            return ipmi::responseInvalidFieldRequest();
         }
-        count = (stringLen > smallChunkSize) ? smallChunkSize : stringLen;
-        paramString.resize(stringLen); // reserve space
-        std::copy_n(configData.begin() + 2, count, paramString.begin());
+        info.stringLen = configData.at(1); // string length
+        if (info.stringLen > maxBytesPerParameter)
+        { // length check
+            info.stringLen = maxBytesPerParameter;
+        }
+        count =
+            (info.stringLen > smallChunkSize) ? smallChunkSize : info.stringLen;
+        std::copy_n(configData.begin() + 2, count, info.stringDataN.begin());
     }
     else
     {
-        uint32_t offset = (setSelector * fullChunkSize) - 2;
-        count = ((paramString.length() - offset) > fullChunkSize)
+        size_t offset = (setSelector * fullChunkSize) - 2;
+        if (offset >= info.stringLen)
+        {
+            return ipmi::responseParmOutOfRange();
+        }
+        count = ((info.stringLen - offset) > fullChunkSize)
                     ? fullChunkSize
-                    : (paramString.length() - offset);
-        std::copy_n(configData.begin(), count, paramString.begin() + offset);
+                    : (info.stringLen - offset);
+        std::copy_n(configData.begin(), count,
+                    info.stringDataN.begin() + offset);
     }
 
-    sysInfoParamStore->update(paramSelector, paramString);
+    // update
+    if ((paramSelector == sysInfoOSVersion) ||
+        (paramSelector == sysInfoOSHypURL))
+    { // these 2 are volatile
+        sysInfoParamStore->update(paramSelector, info, false);
+    }
+    else
+    {
+        sysInfoParamStore->update(paramSelector, info, true);
+    }
     return ipmi::responseSuccess();
 }
 
