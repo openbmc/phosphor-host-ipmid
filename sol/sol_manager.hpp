@@ -12,7 +12,6 @@
 namespace sol
 {
 
-constexpr size_t MAX_PAYLOAD_INSTANCES = 16;
 constexpr size_t MAX_PAYLOAD_SIZE = 255;
 constexpr uint8_t MAJOR_VERSION = 0x01;
 constexpr uint8_t MINOR_VERSION = 0x00;
