@@ -86,7 +86,7 @@ static constexpr uint8_t wdTimerUseResTimer1 = 0x0;
 static constexpr uint8_t wdTimerUseResTimer2 = 0x6;
 static constexpr uint8_t wdTimerUseResTimer3 = 0x7;
 
-static constexpr uint8_t wdTimeoutActionTimer = 0x40;
+static constexpr uint8_t wdTimeoutActionMax = 3;
 static constexpr uint8_t wdTimeoutInterruptTimer = 0x04;
 
 enum class IpmiAction : uint8_t
@@ -199,9 +199,9 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
     if ((timerUse == wdTimerUseResTimer1) ||
         (timerUse == wdTimerUseResTimer2) ||
         (timerUse == wdTimerUseResTimer3) ||
-        (timeoutAction == wdTimeoutActionTimer) ||
+        (timeoutAction > wdTimeoutActionMax) ||
         (preTimeoutInterrupt == wdTimeoutInterruptTimer) ||
-        (reserved1 | reserved2 | reserved3 | reserved4))
+        (reserved | reserved1 | reserved2 | reserved3 | reserved4))
     {
         return ipmi::responseInvalidFieldRequest();
     }
@@ -211,9 +211,9 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
         return ipmi::responseInvalidFieldRequest();
     }
 
-    timerLogFlags = static_cast<uint8_t>(dontLog);
-    timerActions &= static_cast<uint8_t>(timeoutAction) |
-                    static_cast<uint8_t>(preTimeoutInterrupt) << 4;
+    timerLogFlags = static_cast<uint8_t>(dontLog) << 7;
+    timerActions = static_cast<uint8_t>(timeoutAction) |
+                   static_cast<uint8_t>(preTimeoutInterrupt) << 4;
 
     try
     {
