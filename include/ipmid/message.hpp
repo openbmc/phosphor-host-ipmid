@@ -410,6 +410,18 @@ struct Payload
         return raw.size() == rawIndex && bitCount == 0 && !unpackError;
     }
 
+    /**
+     * @brief check to see if the stream has been fully unpacked
+     *
+     * @return bool - true if the stream has been unpacked and has no errors
+     */
+    bool fullyUnpacked(size_t& bytesUnpacked)
+    {
+        unpackCheck = true;
+        bytesUnpacked = raw.size();
+        return !unpackError;
+    }
+
     // base empty unpack
     int unpack()
     {
