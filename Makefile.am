@@ -79,6 +79,12 @@ fru-read-gen.cpp: scripts/readfru.mako.cpp scripts/fru_gen.py @FRU_YAML_GEN@
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
 
 providers_LTLIBRARIES += libipmi20.la
+if FEATURE_TRANSPORT_OEM
+libipmi20_la_TRANSPORTOEM = transporthandler_oem.cpp
+else
+libipmi20_la_TRANSPORTOEM = 
+endif
+
 libipmi20_la_SOURCES = \
 	app/channel.cpp \
 	app/watchdog.cpp \
@@ -100,6 +106,7 @@ libipmi20_la_SOURCES = \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
 	user_channel/channelcommands.cpp \
+	$(libipmi20_la_TRANSPORTOEM) \
 	$(libipmi20_BUILT_LIST)
 
 check_PROGRAMS =
