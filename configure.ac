@@ -229,6 +229,21 @@ AC_ARG_ENABLE([libuserlayer],
 )
 AM_CONDITIONAL(FEATURE_LIBUSERLAYER, [test "x$enable_libuserlayer" != "xno"])
 
+# When enable-transport-oem flag is set, the transporthandler_oem.cpp contents
+# are compiled and added to the project. The transporthandler_oem.cpp file is
+# copied from your own customization layer in the
+# phosphor-ipmi-host_%.bbappend file. It is not necessary to create this file
+# unless OEM Parameter extensions are required.
+AC_ARG_ENABLE([transport_oem],
+    [  --enable-transport-oem   Enable/disable OEM Parameter extensions],
+    [case "${enableval}" in
+      yes) transport_oem=true ;;
+      no) transport_oem=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-transport_oem]) ;;
+      esac],[transport_oem=false]
+      )
+AM_CONDITIONAL([FEATURE_TRANSPORT_OEM], [test x$transport_oem = xtrue])
+
 # Create configured output
 AC_CONFIG_FILES([
     Makefile
