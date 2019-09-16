@@ -1,3 +1,5 @@
+#include "transporthandler.hpp"
+
 #include <arpa/inet.h>
 #include <netinet/ether.h>
 
@@ -41,11 +43,6 @@ using phosphor::logging::level;
 using phosphor::logging::log;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
-
-// LAN Handler specific response codes
-constexpr Cc ccParamNotSupported = 0x80;
-constexpr Cc ccParamSetLocked = 0x81;
-constexpr Cc ccParamReadOnly = 0x82;
 
 // VLANs are a 12-bit value
 constexpr uint16_t VLAN_VALUE_MASK = 0x0fff;
@@ -95,22 +92,6 @@ struct IfAddr
     typename AddrFamily<family>::addr address;
     IP::AddressOrigin origin;
     uint8_t prefix;
-};
-
-/** @brief IPMI LAN Parameters */
-enum class LanParam : uint8_t
-{
-    SetStatus = 0,
-    AuthSupport = 1,
-    AuthEnables = 2,
-    IP = 3,
-    IPSrc = 4,
-    MAC = 5,
-    SubnetMask = 6,
-    Gateway1 = 12,
-    VLANId = 20,
-    CiphersuiteSupport = 22,
-    CiphersuiteEntries = 23,
 };
 
 /** @brief IPMI IP Origin Types */
@@ -887,6 +868,48 @@ SetStatus& getSetStatus(uint8_t channel)
     return setStatus[channel] = SetStatus::Complete;
 }
 
+#ifndef OVERRIDE_TRANSPORT_OEM_EXTENSIONS
+/******************************************************************************
+ * Define placeholder command handlers for the OEM Extension bytes for the Set
+ * LAN Configuration Parameters and Get LAN Configuration Parameters commands.
+ * To create handlers for your own proprietary command set:
+ *   Create/modify a phosphor-ipmi-host Bitbake append file within your Yocto
+ *   recipe
+ *   Insert EXTRA_OEMAKE lines
+ *      EXTRA_OEMAKE += "ipmid_OEM_OVERRIDE=-DOVERRIDE_TRANSPORT_OEM_EXTENSIONS"
+ *   Create C++ file(s) that define IPMI handler functions matching the
+ *     function names below (i.e. setLanOem)
+ *   Create a do_compile_prepend()/do_install_append method in your
+ *   bbappend file to copy the file, and update the Makefile.am prior
+ *   to compiling, and after compilation is complete.
+
+ *   Ex:
+ *   do_compile_prepend(){
+ *      cp -f ${WORKDIR}/transporthandler_oem.cpp ${S}
+ *      sed -i -e 's/libipmi20_la_TRANSPORTOEM := ""/ \
+ *      libipmi20_la_TRANSPORTOEM := transporthandler_oem.cpp/' ${S}/Makefile.am
+ *   }
+ *
+ *  do_install_append(){
+ *     sed -i -e 's/libipmi20_la_TRANSPORTOEM := transporthandler_oem.cpp \
+ *     /libipmi20_la_TRANSPORTOEM := ""/' ${S}/Makefile.am
+ *  }
+ *
+ ******************************************************************************/
+RspType<> setLanOem(uint8_t channel, uint8_t parameter, message::Payload& req)
+{
+    req.trailingOk = true;
+    return response(ccParamNotSupported);
+}
+
+RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
+                                    uint8_t set, uint8_t block)
+{
+    return response(ccParamNotSupported);
+}
+
+#endif
+
 RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                  message::Payload& req)
 {
@@ -1040,6 +1063,71 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             req.trailingOk = true;
             return response(ccParamReadOnly);
         }
+        case LanParam::oemCmd192:
+        case LanParam::oemCmd193:
+        case LanParam::oemCmd194:
+        case LanParam::oemCmd195:
+        case LanParam::oemCmd196:
+        case LanParam::oemCmd197:
+        case LanParam::oemCmd198:
+        case LanParam::oemCmd199:
+        case LanParam::oemCmd200:
+        case LanParam::oemCmd201:
+        case LanParam::oemCmd202:
+        case LanParam::oemCmd203:
+        case LanParam::oemCmd204:
+        case LanParam::oemCmd205:
+        case LanParam::oemCmd206:
+        case LanParam::oemCmd207:
+        case LanParam::oemCmd208:
+        case LanParam::oemCmd209:
+        case LanParam::oemCmd210:
+        case LanParam::oemCmd211:
+        case LanParam::oemCmd212:
+        case LanParam::oemCmd213:
+        case LanParam::oemCmd214:
+        case LanParam::oemCmd215:
+        case LanParam::oemCmd216:
+        case LanParam::oemCmd217:
+        case LanParam::oemCmd218:
+        case LanParam::oemCmd219:
+        case LanParam::oemCmd220:
+        case LanParam::oemCmd221:
+        case LanParam::oemCmd222:
+        case LanParam::oemCmd223:
+        case LanParam::oemCmd224:
+        case LanParam::oemCmd225:
+        case LanParam::oemCmd226:
+        case LanParam::oemCmd227:
+        case LanParam::oemCmd228:
+        case LanParam::oemCmd229:
+        case LanParam::oemCmd230:
+        case LanParam::oemCmd231:
+        case LanParam::oemCmd232:
+        case LanParam::oemCmd233:
+        case LanParam::oemCmd234:
+        case LanParam::oemCmd235:
+        case LanParam::oemCmd236:
+        case LanParam::oemCmd237:
+        case LanParam::oemCmd238:
+        case LanParam::oemCmd239:
+        case LanParam::oemCmd240:
+        case LanParam::oemCmd241:
+        case LanParam::oemCmd242:
+        case LanParam::oemCmd243:
+        case LanParam::oemCmd244:
+        case LanParam::oemCmd245:
+        case LanParam::oemCmd246:
+        case LanParam::oemCmd247:
+        case LanParam::oemCmd248:
+        case LanParam::oemCmd249:
+        case LanParam::oemCmd250:
+        case LanParam::oemCmd251:
+        case LanParam::oemCmd252:
+        case LanParam::oemCmd253:
+        case LanParam::oemCmd254:
+        case LanParam::oemCmd255:
+            return setLanOem(channel, parameter, req);
     }
 
     req.trailingOk = true;
@@ -1160,6 +1248,71 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         case LanParam::CiphersuiteSupport:
         case LanParam::CiphersuiteEntries:
             return response(ccParamNotSupported);
+        case LanParam::oemCmd192:
+        case LanParam::oemCmd193:
+        case LanParam::oemCmd194:
+        case LanParam::oemCmd195:
+        case LanParam::oemCmd196:
+        case LanParam::oemCmd197:
+        case LanParam::oemCmd198:
+        case LanParam::oemCmd199:
+        case LanParam::oemCmd200:
+        case LanParam::oemCmd201:
+        case LanParam::oemCmd202:
+        case LanParam::oemCmd203:
+        case LanParam::oemCmd204:
+        case LanParam::oemCmd205:
+        case LanParam::oemCmd206:
+        case LanParam::oemCmd207:
+        case LanParam::oemCmd208:
+        case LanParam::oemCmd209:
+        case LanParam::oemCmd210:
+        case LanParam::oemCmd211:
+        case LanParam::oemCmd212:
+        case LanParam::oemCmd213:
+        case LanParam::oemCmd214:
+        case LanParam::oemCmd215:
+        case LanParam::oemCmd216:
+        case LanParam::oemCmd217:
+        case LanParam::oemCmd218:
+        case LanParam::oemCmd219:
+        case LanParam::oemCmd220:
+        case LanParam::oemCmd221:
+        case LanParam::oemCmd222:
+        case LanParam::oemCmd223:
+        case LanParam::oemCmd224:
+        case LanParam::oemCmd225:
+        case LanParam::oemCmd226:
+        case LanParam::oemCmd227:
+        case LanParam::oemCmd228:
+        case LanParam::oemCmd229:
+        case LanParam::oemCmd230:
+        case LanParam::oemCmd231:
+        case LanParam::oemCmd232:
+        case LanParam::oemCmd233:
+        case LanParam::oemCmd234:
+        case LanParam::oemCmd235:
+        case LanParam::oemCmd236:
+        case LanParam::oemCmd237:
+        case LanParam::oemCmd238:
+        case LanParam::oemCmd239:
+        case LanParam::oemCmd240:
+        case LanParam::oemCmd241:
+        case LanParam::oemCmd242:
+        case LanParam::oemCmd243:
+        case LanParam::oemCmd244:
+        case LanParam::oemCmd245:
+        case LanParam::oemCmd246:
+        case LanParam::oemCmd247:
+        case LanParam::oemCmd248:
+        case LanParam::oemCmd249:
+        case LanParam::oemCmd250:
+        case LanParam::oemCmd251:
+        case LanParam::oemCmd252:
+        case LanParam::oemCmd253:
+        case LanParam::oemCmd254:
+        case LanParam::oemCmd255:
+            return getLanOem(channel, parameter, set, block);
     }
 
     return response(ccParamNotSupported);
