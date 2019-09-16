@@ -1,3 +1,5 @@
+#include "transporthandler.hpp"
+
 #include <arpa/inet.h>
 #include <netinet/ether.h>
 
@@ -41,11 +43,6 @@ using phosphor::logging::level;
 using phosphor::logging::log;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
-
-// LAN Handler specific response codes
-constexpr Cc ccParamNotSupported = 0x80;
-constexpr Cc ccParamSetLocked = 0x81;
-constexpr Cc ccParamReadOnly = 0x82;
 
 // VLANs are a 12-bit value
 constexpr uint16_t VLAN_VALUE_MASK = 0x0fff;
@@ -95,22 +92,6 @@ struct IfAddr
     typename AddrFamily<family>::addr address;
     IP::AddressOrigin origin;
     uint8_t prefix;
-};
-
-/** @brief IPMI LAN Parameters */
-enum class LanParam : uint8_t
-{
-    SetStatus = 0,
-    AuthSupport = 1,
-    AuthEnables = 2,
-    IP = 3,
-    IPSrc = 4,
-    MAC = 5,
-    SubnetMask = 6,
-    Gateway1 = 12,
-    VLANId = 20,
-    CiphersuiteSupport = 22,
-    CiphersuiteEntries = 23,
 };
 
 /** @brief IPMI IP Origin Types */
@@ -887,6 +868,55 @@ SetStatus& getSetStatus(uint8_t channel)
     return setStatus[channel] = SetStatus::Complete;
 }
 
+/**
+ * Define placeholder command handlers for the OEM Extension bytes for the Set
+ * LAN Configuration Parameters and Get LAN Configuration Parameters
+ * commands. Using "weak" linking allows the placeholder setLanOem/getLanOem
+ * functions below to be overridden.
+ * To create handlers for your own proprietary command set:
+ *   Create/modify a phosphor-ipmi-host Bitbake append file within your Yocto
+ *   recipe
+ *   Create C++ file(s) that define IPMI handler functions matching the
+ *     function names below (i.e. setLanOem)
+ *   Create a do_compile_prepend()/do_install_append method in your
+ *   bbappend file to copy the file, and update the Makefile.am prior
+ *   to compiling, and after compilation is complete.
+ *   Ex:
+ *   PROJECT_SRC_DIR := "${THISDIR}/${PN}"
+ *   # Copy the "strong" functions into the working directory, overriding the
+ *   # placeholder functions.
+ *   do_compile_prepend(){
+ *      cp -f ${PROJECT_SRC_DIR}/transporthandler_oem.cpp ${S}
+ *      sed -i -e 's/libipmi20_la_TRANSPORTOEM := ""/ \
+ *      libipmi20_la_TRANSPORTOEM := transporthandler_oem.cpp/' ${S}/Makefile.am
+ *   }
+ *
+ *  # Clean up after complilation has completed
+ *  do_install_append(){
+ *     rm -f ${S}/transporthandler_oem.cpp
+ *     sed -i -e 's/libipmi20_la_TRANSPORTOEM := transporthandler_oem.cpp \
+ *     /libipmi20_la_TRANSPORTOEM := ""/' ${S}/Makefile.am
+ *  }
+ *
+ */
+RspType<> setLanOem(uint8_t channel, uint8_t parameter, message::Payload& req)
+    __attribute__((weak));
+RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
+                                    uint8_t set, uint8_t block)
+    __attribute__((weak));
+
+RspType<> setLanOem(uint8_t channel, uint8_t parameter, message::Payload& req)
+{
+    req.trailingOk = true;
+    return response(ccParamNotSupported);
+}
+
+RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
+                                    uint8_t set, uint8_t block)
+{
+    return response(ccParamNotSupported);
+}
+
 RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                  message::Payload& req)
 {
@@ -897,7 +927,8 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
         return responseInvalidFieldRequest();
     }
 
-    switch (static_cast<LanParam>(parameter))
+    LanParam cmd = static_cast<LanParam>(parameter);
+    switch (cmd)
     {
         case LanParam::SetStatus:
         {
@@ -1040,8 +1071,12 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             req.trailingOk = true;
             return response(ccParamReadOnly);
         }
+        default:
+            if ((cmd >= LanParam::oemCmd192) && (cmd <= LanParam::oemCmd255))
+            {
+                return setLanOem(channel, parameter, req);
+            }
     }
-
     req.trailingOk = true;
     return response(ccParamNotSupported);
 }
@@ -1064,7 +1099,8 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         return responseInvalidFieldRequest();
     }
 
-    switch (static_cast<LanParam>(parameter))
+    LanParam cmd = static_cast<LanParam>(parameter);
+    switch (cmd)
     {
         case LanParam::SetStatus:
         {
@@ -1160,8 +1196,12 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         case LanParam::CiphersuiteSupport:
         case LanParam::CiphersuiteEntries:
             return response(ccParamNotSupported);
+        default:
+            if ((cmd >= LanParam::oemCmd192) && (cmd <= LanParam::oemCmd255))
+            {
+                return getLanOem(channel, parameter, set, block);
+            }
     }
-
     return response(ccParamNotSupported);
 }
 
