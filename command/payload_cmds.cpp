@@ -6,6 +6,7 @@
 
 #include <ipmid/api.h>
 
+#include <ipmid/api-types.hpp>
 #include <phosphor-logging/log.hpp>
 
 namespace sol
@@ -24,6 +25,13 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         reinterpret_cast<const ActivatePayloadRequest*>(inPayload.data());
     auto response =
         reinterpret_cast<ActivatePayloadResponse*>(outPayload.data());
+
+    if (inPayload.size() != sizeof(ActivatePayloadRequest))
+    {
+        response->completionCode = ipmi::ccReqDataLenInvalid;
+        outPayload.resize(sizeof(response->completionCode));
+        return outPayload;
+    }
 
     response->completionCode = IPMI_CC_OK;
 
