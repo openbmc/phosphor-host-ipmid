@@ -13,6 +13,8 @@ void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace sdbusplus::xyz::openbmc_project::Control::server;
 
+struct eventMessageFlag eventMsgBufFullFlag;
+
 // For accessing Host command manager
 using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
 extern cmdManagerPtr& ipmid_get_host_cmd_manager();
@@ -64,6 +66,11 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     // Pack the actual response
     std::memcpy(response, &oem_sel, *data_len);
+
+    // Clear Event Message Buffer Full Flag
+    constexpr uint8_t value = 0;
+    eventMsgBufFullFlag.set(value);
+
     return rc;
 }
 
@@ -79,7 +86,9 @@ ipmi::RspType<uint8_t> ipmiAppGetMessageFlags()
     // or when the Event Message buffer is disabled.
     // This path is used to communicate messages to the host
     // from within the phosphor::host::command::Manager
-    constexpr uint8_t setEventMsgBufferFull = 0x2;
+
+    uint8_t setEventMsgBufferFull = eventMsgBufFullFlag.get();
+
     return ipmi::responseSuccess(setEventMsgBufferFull);
 }
 

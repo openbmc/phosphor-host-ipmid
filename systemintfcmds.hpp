@@ -42,3 +42,22 @@ struct oem_sel_timestamped
     uint8_t cmd;
     uint8_t data[4];
 };
+
+// Event Message Buffer Full Flag
+struct eventMessageFlag
+{
+    uint8_t flag;
+
+    eventMessageFlag()
+    {
+        flag = 0x02;
+    }
+    constexpr uint8_t get()
+    {
+        return flag;
+    }
+    constexpr void set(uint8_t value)
+    {
+        flag = value;
+    }
+} __attribute__((packed));
