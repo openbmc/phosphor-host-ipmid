@@ -542,7 +542,7 @@ ipmi_ret_t ipmi_transport_set_lan(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         default:
         {
-            rc = IPMI_CC_PARM_NOT_SUPPORTED;
+            rc = IPMI_CC_SYSTEM_INFO_PARAMETER_SET_READ_ONLY;
             return rc;
         }
     }
