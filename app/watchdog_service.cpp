@@ -80,6 +80,8 @@ WatchdogService::Properties WatchdogService::getProperties()
             std::get<std::string>(properties.at("ExpireAction")));
         wd_prop.timerUse = Watchdog::convertTimerUseFromString(
             std::get<std::string>(properties.at("CurrentTimerUse")));
+        wd_prop.expiredTimerUse = Watchdog::convertTimerUseFromString(
+            std::get<std::string>(properties.at("ExpiredTimerUse")));
 
         wd_prop.interval = std::get<uint64_t>(properties.at("Interval"));
         wd_prop.timeRemaining =
