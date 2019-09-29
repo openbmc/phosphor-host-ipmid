@@ -86,7 +86,7 @@ static constexpr uint8_t wdTimerUseResTimer1 = 0x0;
 static constexpr uint8_t wdTimerUseResTimer2 = 0x6;
 static constexpr uint8_t wdTimerUseResTimer3 = 0x7;
 
-static constexpr uint8_t wdTimeoutActionTimer = 0x40;
+static constexpr uint8_t wdTimeoutActionMax = 3;
 static constexpr uint8_t wdTimeoutInterruptTimer = 0x04;
 
 enum class IpmiAction : uint8_t
@@ -173,9 +173,9 @@ WatchdogService::TimerUse ipmiTimerUseToWdTimerUse(IpmiTimerUse ipmiTimerUse)
     }
 }
 
-static uint8_t timerLogFlags = 0;
-static uint8_t timerActions = 0;
+static bool timerNotLogFlags = false;
 static uint8_t timerUseExpirationFlags = 0;
+static uint3_t timerPreTimeoutInterrupt = 0;
 
 /**@brief The Set Watchdog Timer ipmi command.
  *
@@ -199,9 +199,9 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
     if ((timerUse == wdTimerUseResTimer1) ||
         (timerUse == wdTimerUseResTimer2) ||
         (timerUse == wdTimerUseResTimer3) ||
-        (timeoutAction == wdTimeoutActionTimer) ||
+        (timeoutAction > wdTimeoutActionMax) ||
         (preTimeoutInterrupt == wdTimeoutInterruptTimer) ||
-        (reserved1 | reserved2 | reserved3 | reserved4))
+        (reserved | reserved1 | reserved2 | reserved3 | reserved4))
     {
         return ipmi::responseInvalidFieldRequest();
     }
@@ -211,9 +211,8 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
         return ipmi::responseInvalidFieldRequest();
     }
 
-    timerLogFlags = static_cast<uint8_t>(dontLog);
-    timerActions &= static_cast<uint8_t>(timeoutAction) |
-                    static_cast<uint8_t>(preTimeoutInterrupt) << 4;
+    timerNotLogFlags = dontLog;
+    timerPreTimeoutInterrupt = preTimeoutInterrupt;
 
     try
     {
@@ -354,8 +353,14 @@ static constexpr uint8_t wd_running = 0x1 << 6;
  * - initialCountdown
  * - presentCountdown
  **/
-ipmi::RspType<uint8_t,  // timerUse
-              uint8_t,  // timerAction
+ipmi::RspType<uint3_t,  // timerUse - timer use
+              uint3_t,  // timerUse - reserved
+              bool,     // timerUse - timer is started
+              bool,     // timerUse - don't log
+              uint3_t,  // timerAction - timeout action
+              uint1_t,  // timerAction - reserved
+              uint3_t,  // timerAction - pre-timeout interrupt
+              uint1_t,  // timerAction - reserved
               uint8_t,  // pretimeout
               uint8_t,  // expireFlags
               uint16_t, // initial Countdown - Little Endian (deciseconds)
@@ -373,11 +378,6 @@ ipmi::RspType<uint8_t,  // timerUse
         WatchdogService::Properties wd_prop = wd_service.getProperties();
 
         // Build and return the response
-        uint8_t timerUse = 0;
-        timerUse |= timerLogFlags;
-
-        uint8_t timerAction = timerActions;
-
         // Interval and timeRemaining need converted from milli -> deci seconds
         uint16_t initialCountdown = htole16(wd_prop.interval / 100);
 
@@ -390,7 +390,6 @@ ipmi::RspType<uint8_t,  // timerUse
 
         if (wd_prop.enabled)
         {
-            timerUse |= wd_running;
             presentCountdown = htole16(wd_prop.timeRemaining / 100);
             expireFlags = 0;
         }
@@ -405,19 +404,21 @@ ipmi::RspType<uint8_t,  // timerUse
             {
                 presentCountdown = 0;
                 expireFlags = timerUseExpirationFlags;
+                // Automatically clear it whenever a timer expiration occurs.
+                timerNotLogFlags = false;
             }
         }
-
-        timerUse |=
-            static_cast<uint8_t>(wdTimerUseToIpmiTimerUse(wd_prop.timerUse));
 
         // TODO: Do something about having pretimeout support
         pretimeout = 0;
 
         lastCallSuccessful = true;
-        return ipmi::responseSuccess(timerUse, timerAction, pretimeout,
-                                     expireFlags, initialCountdown,
-                                     presentCountdown);
+        return ipmi::responseSuccess(
+            static_cast<uint3_t>(wdTimerUseToIpmiTimerUse(wd_prop.timerUse)), 0,
+            wd_prop.enabled, timerNotLogFlags,
+            static_cast<uint3_t>(wdActionToIpmiAction(wd_prop.expireAction)), 0,
+            timerPreTimeoutInterrupt, 0, pretimeout, expireFlags,
+            initialCountdown, presentCountdown);
     }
     catch (const InternalFailure& e)
     {
