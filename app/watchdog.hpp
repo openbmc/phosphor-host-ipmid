@@ -35,10 +35,10 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
  * - initialCountdown
  * - presentCountdown
  **/
-ipmi::RspType<uint8_t,  // timerUse
-              uint8_t,  // timerAction
-              uint8_t,  // pretimeout
-              uint8_t,  // expireFlags
+ipmi::RspType<uint3_t, uint3_t, bool, bool,       // timerUse
+              uint3_t, uint1_t, uint3_t, uint1_t, // timerAction
+              uint8_t,                            // pretimeout
+              uint8_t,                            // expireFlags
               uint16_t, // initial Countdown - Little Endian (deciseconds)
               uint16_t  // present Countdown - Little Endian (deciseconds)
               >
