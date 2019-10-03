@@ -128,6 +128,13 @@ ipmi::RspType<uint8_t,             // Channel Number
     {
         return ipmi::responseInvalidFieldRequest();
     }
+    if (!ipmi::isValidPayloadType(static_cast<ipmi::PayloadType>(payloadType)))
+    {
+        log<level::DEBUG>(
+            "Get channel cipher suites - Payload type unavailable");
+        constexpr uint8_t ccPayloadTypeNotSupported = 0x80;
+        return ipmi::response(ccPayloadTypeNotSupported);
+    }
 
     if (!recordInit)
     {
