@@ -1,3 +1,5 @@
+#include "app/channel.hpp"
+
 #include <arpa/inet.h>
 #include <netinet/ether.h>
 
@@ -6,6 +8,7 @@
 #include <cinttypes>
 #include <cstdint>
 #include <cstring>
+#include <fstream>
 #include <functional>
 #include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
@@ -29,11 +32,6 @@
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Network/IP/server.hpp>
 
-namespace ipmi
-{
-namespace transport
-{
-
 using phosphor::logging::commit;
 using phosphor::logging::elog;
 using phosphor::logging::entry;
@@ -41,6 +39,44 @@ using phosphor::logging::level;
 using phosphor::logging::log;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
+
+namespace cipher
+{
+
+std::vector<uint8_t> getCipherList()
+{
+    std::vector<uint8_t> cipherList;
+
+    std::ifstream jsonFile(cipher::configFile);
+    if (!jsonFile.is_open())
+    {
+        log<level::ERR>("Channel Cipher suites file not found");
+        elog<InternalFailure>();
+    }
+
+    auto data = Json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Parsing channel cipher suites JSON failed");
+        elog<InternalFailure>();
+    }
+
+    // Byte 1 is reserved
+    cipherList.push_back(0x00);
+
+    for (const auto& record : data)
+    {
+        cipherList.push_back(record.value(cipher, 0));
+    }
+
+    return cipherList;
+}
+} // namespace cipher
+
+namespace ipmi
+{
+namespace transport
+{
 
 // LAN Handler specific response codes
 constexpr Cc ccParamNotSupported = 0x80;
@@ -1064,6 +1100,20 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         return responseInvalidFieldRequest();
     }
 
+    static std::vector<uint8_t> cipherList;
+    static bool listInit = false;
+    if (!listInit)
+    {
+        try
+        {
+            cipherList = cipher::getCipherList();
+            listInit = true;
+        }
+        catch (const std::exception& e)
+        {
+        }
+    }
+
     switch (static_cast<LanParam>(parameter))
     {
         case LanParam::SetStatus:
@@ -1158,8 +1208,23 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
             return responseSuccess(std::move(ret));
         }
         case LanParam::CiphersuiteSupport:
+        {
+            if (!listInit)
+            {
+                return responseUnspecifiedError();
+            }
+            ret.pack(static_cast<uint8_t>(cipherList.size() - 1));
+            return responseSuccess(std::move(ret));
+        }
         case LanParam::CiphersuiteEntries:
-            return response(ccParamNotSupported);
+        {
+            if (!listInit)
+            {
+                return responseUnspecifiedError();
+            }
+            ret.pack(cipherList);
+            return responseSuccess(std::move(ret));
+        }
     }
 
     return response(ccParamNotSupported);
