@@ -234,7 +234,7 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
 
         wd_service.setExpiredTimerUse(WatchdogService::TimerUse::Reserved);
 
-        timerUseExpirationFlags &= static_cast<uint8_t>(~expFlagValue) << 2;
+        timerUseExpirationFlags &= static_cast<uint8_t>(~expFlagValue) << 1;
 
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = initialCountdown * 100;
@@ -390,22 +390,21 @@ ipmi::RspType<uint3_t, // timerUse - timer use
                     wdTimerUseToIpmiTimerUse(wd_prop.expiredTimerUse));
         }
 
+        expireFlags = timerUseExpirationFlags;
+
         if (wd_prop.enabled)
         {
             presentCountdown = htole16(wd_prop.timeRemaining / 100);
-            expireFlags = 0;
         }
         else
         {
             if (wd_prop.expiredTimerUse == WatchdogService::TimerUse::Reserved)
             {
                 presentCountdown = initialCountdown;
-                expireFlags = 0;
             }
             else
             {
                 presentCountdown = 0;
-                expireFlags = timerUseExpirationFlags;
                 // Automatically clear it whenever a timer expiration occurs.
                 timerNotLogFlags = false;
             }
