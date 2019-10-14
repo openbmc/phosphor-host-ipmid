@@ -4,6 +4,7 @@
 
 #include <endian.h>
 
+#include <bitset>
 #include <cstdint>
 #include <ipmid/api.hpp>
 #include <phosphor-logging/elog-errors.hpp>
@@ -174,8 +175,11 @@ WatchdogService::TimerUse ipmiTimerUseToWdTimerUse(IpmiTimerUse ipmiTimerUse)
 }
 
 static bool timerNotLogFlags = false;
-static uint8_t timerUseExpirationFlags = 0;
+static std::bitset<8> timerUseExpirationFlags = 0;
 static uint3_t timerPreTimeoutInterrupt = 0;
+static constexpr uint8_t wdExpirationFlagReservedBit0 = 0x0;
+static constexpr uint8_t wdExpirationFlagReservedBit6 = 0x6;
+static constexpr uint8_t wdExpirationFlagReservedBit7 = 0x7;
 
 /**@brief The Set Watchdog Timer ipmi command.
  *
@@ -190,18 +194,22 @@ static uint3_t timerPreTimeoutInterrupt = 0;
  *
  * @return completion code on success.
  **/
-ipmi::RspType<> ipmiSetWatchdogTimer(
-    uint3_t timerUse, uint3_t reserved, bool dontStopTimer, bool dontLog,
-    uint3_t timeoutAction, uint1_t reserved1, uint3_t preTimeoutInterrupt,
-    uint1_t reserved2, uint8_t preTimeoutInterval, uint1_t reserved3,
-    uint5_t expFlagValue, uint2_t reserved4, uint16_t initialCountdown)
+ipmi::RspType<>
+    ipmiSetWatchdogTimer(uint3_t timerUse, uint3_t reserved, bool dontStopTimer,
+                         bool dontLog, uint3_t timeoutAction, uint1_t reserved1,
+                         uint3_t preTimeoutInterrupt, uint1_t reserved2,
+                         uint8_t preTimeoutInterval,
+                         std::bitset<8> expFlagValue, uint16_t initialCountdown)
 {
     if ((timerUse == wdTimerUseResTimer1) ||
         (timerUse == wdTimerUseResTimer2) ||
         (timerUse == wdTimerUseResTimer3) ||
         (timeoutAction > wdTimeoutActionMax) ||
         (preTimeoutInterrupt == wdTimeoutInterruptTimer) ||
-        (reserved | reserved1 | reserved2 | reserved3 | reserved4))
+        (reserved | reserved1 | reserved2 |
+         expFlagValue.test(wdExpirationFlagReservedBit0) |
+         expFlagValue.test(wdExpirationFlagReservedBit6) |
+         expFlagValue.test(wdExpirationFlagReservedBit7)))
     {
         return ipmi::responseInvalidFieldRequest();
     }
@@ -234,7 +242,7 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
 
         wd_service.setExpiredTimerUse(WatchdogService::TimerUse::Reserved);
 
-        timerUseExpirationFlags &= static_cast<uint8_t>(~expFlagValue) << 2;
+        timerUseExpirationFlags &= ~expFlagValue;
 
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = initialCountdown * 100;
@@ -363,14 +371,13 @@ ipmi::RspType<uint3_t, // timerUse - timer use
               uint3_t, // timerAction - pre-timeout interrupt
               uint1_t, // timerAction - reserved
 
-              uint8_t,  // pretimeout
-              uint8_t,  // expireFlags
-              uint16_t, // initial Countdown - Little Endian (deciseconds)
-              uint16_t  // present Countdown - Little Endian (deciseconds)
+              uint8_t,        // pretimeout
+              std::bitset<8>, // expireFlags
+              uint16_t,       // initial Countdown - Little Endian (deciseconds)
+              uint16_t        // present Countdown - Little Endian (deciseconds)
               >
     ipmiGetWatchdogTimer()
 {
-    uint8_t expireFlags = 0;
     uint16_t presentCountdown = 0;
     uint8_t pretimeout = 0;
 
@@ -385,27 +392,23 @@ ipmi::RspType<uint3_t, // timerUse - timer use
 
         if (wd_prop.expiredTimerUse != WatchdogService::TimerUse::Reserved)
         {
-            timerUseExpirationFlags |=
-                1 << static_cast<uint8_t>(
-                    wdTimerUseToIpmiTimerUse(wd_prop.expiredTimerUse));
+            timerUseExpirationFlags.set(static_cast<uint8_t>(
+                wdTimerUseToIpmiTimerUse(wd_prop.expiredTimerUse)));
         }
 
         if (wd_prop.enabled)
         {
             presentCountdown = htole16(wd_prop.timeRemaining / 100);
-            expireFlags = 0;
         }
         else
         {
             if (wd_prop.expiredTimerUse == WatchdogService::TimerUse::Reserved)
             {
                 presentCountdown = initialCountdown;
-                expireFlags = 0;
             }
             else
             {
                 presentCountdown = 0;
-                expireFlags = timerUseExpirationFlags;
                 // Automatically clear it whenever a timer expiration occurs.
                 timerNotLogFlags = false;
             }
@@ -419,7 +422,7 @@ ipmi::RspType<uint3_t, // timerUse - timer use
             static_cast<uint3_t>(wdTimerUseToIpmiTimerUse(wd_prop.timerUse)), 0,
             wd_prop.enabled, timerNotLogFlags,
             static_cast<uint3_t>(wdActionToIpmiAction(wd_prop.expireAction)), 0,
-            timerPreTimeoutInterrupt, 0, pretimeout, expireFlags,
+            timerPreTimeoutInterrupt, 0, pretimeout, timerUseExpirationFlags,
             initialCountdown, presentCountdown);
     }
     catch (const InternalFailure& e)
