@@ -309,7 +309,7 @@ ipmi_ret_t ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (ipmiUserGetUserName(req->userId, userName) != IPMI_CC_OK)
     { // Invalid User ID
         log<level::DEBUG>("User Name not found",
-                          entry("USER-ID:%d", (uint8_t)req->userId));
+                          entry("USER-ID=%d", (uint8_t)req->userId));
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
     GetUserNameResp* resp = static_cast<GetUserNameResp*>(response);
@@ -368,7 +368,7 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (ipmiUserGetUserName(req->userId, userName) != IPMI_CC_OK)
     {
         log<level::DEBUG>("User Name not found",
-                          entry("USER-ID:%d", (uint8_t)req->userId));
+                          entry("USER-ID=%d", (uint8_t)req->userId));
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
     if (req->operation == setPassword)
@@ -393,7 +393,7 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (password != testPassword)
         {
             log<level::DEBUG>("Test password failed",
-                              entry("USER-ID:%d", (uint8_t)req->userId));
+                              entry("USER-ID=%d", (uint8_t)req->userId));
             return static_cast<ipmi_ret_t>(
                 IPMISetPasswordReturnCodes::ipmiCCPasswdFailMismatch);
         }
