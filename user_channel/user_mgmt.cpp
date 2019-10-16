@@ -775,7 +775,7 @@ ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
     if (ipmiUserGetUserName(userId, userName) != IPMI_CC_OK)
     {
         log<level::DEBUG>("User Name not found",
-                          entry("USER-ID:%d", (uint8_t)userId));
+                          entry("USER-ID=%d", (uint8_t)userId));
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
     std::string passwd;
@@ -785,13 +785,13 @@ ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
                           std::regex("[a-zA-z_0-9][a-zA-Z_0-9,?:`!\"]*")))
     {
         log<level::DEBUG>("Invalid password fields",
-                          entry("USER-ID:%d", (uint8_t)userId));
+                          entry("USER-ID=%d", (uint8_t)userId));
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
     if (!pamUpdatePasswd(userName.c_str(), passwd.c_str()))
     {
         log<level::DEBUG>("Failed to update password",
-                          entry("USER-ID:%d", (uint8_t)userId));
+                          entry("USER-ID=%d", (uint8_t)userId));
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     return IPMI_CC_OK;
