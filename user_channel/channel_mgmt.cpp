@@ -142,7 +142,7 @@ std::string ChannelConfig::getChannelName(const uint8_t chNum)
     if (!isValidChannel(chNum))
     {
         log<level::ERR>("Invalid channel number.",
-                        entry("ChannelID:%d", chNum));
+                        entry("ChannelID=%d", chNum));
         throw std::invalid_argument("Invalid channel number");
     }
 
@@ -160,7 +160,7 @@ int ChannelConfig::convertToChannelNumberFromChannelName(
         }
     }
     log<level::ERR>("Invalid channel name.",
-                    entry("Channel:%s", chName.c_str()));
+                    entry("Channel=%s", chName.c_str()));
     throw std::invalid_argument("Invalid channel name");
 
     return -1;
@@ -172,7 +172,7 @@ std::string ChannelConfig::getChannelNameFromPath(const std::string& path)
     if (pos == std::string::npos)
     {
         log<level::ERR>("Invalid interface path.",
-                        entry("PATH:%s", path.c_str()));
+                        entry("PATH=%s", path.c_str()));
         throw std::invalid_argument("Invalid interface path");
     }
     std::string chName =
@@ -191,7 +191,7 @@ void ChannelConfig::processChAccessPropChange(
     }
     catch (const std::invalid_argument& e)
     {
-        log<level::ERR>("Exception: ", entry("MSG: %s", e.what()));
+        log<level::ERR>("Exception: ", entry("MSG= %s", e.what()));
         return;
     }
 
@@ -217,7 +217,7 @@ void ChannelConfig::processChAccessPropChange(
     if (intfPrivStr.empty())
     {
         log<level::ERR>("Invalid privilege string.",
-                        entry("INTF:%s", chName.c_str()));
+                        entry("INTF=%s", chName.c_str()));
         return;
     }
 
@@ -230,7 +230,7 @@ void ChannelConfig::processChAccessPropChange(
     }
     catch (const std::invalid_argument& e)
     {
-        log<level::ERR>("Exception: ", entry("MSG: %s", e.what()));
+        log<level::ERR>("Exception: ", entry("MSG= %s", e.what()));
         return;
     }
 
@@ -613,7 +613,7 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
             {
                 log<level::DEBUG>(
                     "Network interface does not exist",
-                    entry("INTERFACE:%s", channelData[chNum].chName.c_str()));
+                    entry("INTERFACE=%s", channelData[chNum].chName.c_str()));
                 return IPMI_CC_UNSPECIFIED_ERROR;
             }
         }
@@ -804,7 +804,7 @@ Json ChannelConfig::readJsonFile(const std::string& configFile)
     catch (Json::parse_error& e)
     {
         log<level::DEBUG>("Corrupted channel config.",
-                          entry("MSG: %s", e.what()));
+                          entry("MSG= %s", e.what()));
         throw std::runtime_error("Corrupted channel config file");
     }
 
@@ -883,7 +883,7 @@ int ChannelConfig::loadChannelConfig()
             {
                 log<level::WARNING>(
                     "Channel not configured so loading default.",
-                    entry("CHANNEL_NUM:%d", chNum));
+                    entry("CHANNEL_NUM=%d", chNum));
                 // If user didn't want to configure specific channel (say
                 // reserved channel), then load that index with default values.
                 setDefaultChannelConfig(chNum, defaultChannelName);
@@ -921,12 +921,12 @@ int ChannelConfig::loadChannelConfig()
         catch (const Json::exception& e)
         {
             log<level::DEBUG>("Json Exception caught.",
-                              entry("MSG:%s", e.what()));
+                              entry("MSG=%s", e.what()));
             return -EBADMSG;
         }
         catch (const std::invalid_argument& e)
         {
-            log<level::ERR>("Corrupted config.", entry("MSG:%s", e.what()));
+            log<level::ERR>("Corrupted config.", entry("MSG=%s", e.what()));
             return -EBADMSG;
         }
     }
@@ -980,7 +980,7 @@ int ChannelConfig::readChannelVolatileData()
             {
                 log<level::ERR>(
                     "Invalid/corrupted volatile channel access file",
-                    entry("FILE: %s", channelVolatileDataFilename));
+                    entry("FILE= %s", channelVolatileDataFilename));
                 throw std::runtime_error(
                     "Corrupted volatile channel access file");
             }
@@ -988,12 +988,12 @@ int ChannelConfig::readChannelVolatileData()
     }
     catch (const Json::exception& e)
     {
-        log<level::DEBUG>("Json Exception caught.", entry("MSG:%s", e.what()));
+        log<level::DEBUG>("Json Exception caught.", entry("MSG=%s", e.what()));
         throw std::runtime_error("Corrupted volatile channel access file");
     }
     catch (const std::invalid_argument& e)
     {
-        log<level::ERR>("Corrupted config.", entry("MSG:%s", e.what()));
+        log<level::ERR>("Corrupted config.", entry("MSG=%s", e.what()));
         throw std::runtime_error("Corrupted volatile channel access file");
     }
 
@@ -1048,19 +1048,19 @@ int ChannelConfig::readChannelPersistData()
             else
             {
                 log<level::ERR>("Invalid/corrupted nv channel access file",
-                                entry("FILE:%s", channelNvDataFilename));
+                                entry("FILE=%s", channelNvDataFilename));
                 throw std::runtime_error("Corrupted nv channel access file");
             }
         }
     }
     catch (const Json::exception& e)
     {
-        log<level::DEBUG>("Json Exception caught.", entry("MSG:%s", e.what()));
+        log<level::DEBUG>("Json Exception caught.", entry("MSG=%s", e.what()));
         throw std::runtime_error("Corrupted nv channel access file");
     }
     catch (const std::invalid_argument& e)
     {
-        log<level::ERR>("Corrupted config.", entry("MSG: %s", e.what()));
+        log<level::ERR>("Corrupted config.", entry("MSG= %s", e.what()));
         throw std::runtime_error("Corrupted nv channel access file");
     }
 
@@ -1103,7 +1103,7 @@ int ChannelConfig::writeChannelVolatileData()
     }
     catch (const std::invalid_argument& e)
     {
-        log<level::ERR>("Corrupted config.", entry("MSG: %s", e.what()));
+        log<level::ERR>("Corrupted config.", entry("MSG= %s", e.what()));
         return -EINVAL;
     }
 
@@ -1154,7 +1154,7 @@ int ChannelConfig::writeChannelPersistData()
     }
     catch (const std::invalid_argument& e)
     {
-        log<level::ERR>("Corrupted config.", entry("MSG: %s", e.what()));
+        log<level::ERR>("Corrupted config.", entry("MSG= %s", e.what()));
         return -EINVAL;
     }
 
@@ -1228,10 +1228,10 @@ int ChannelConfig::setDbusProperty(const std::string& service,
     catch (const sdbusplus::exception::SdBusError& e)
     {
         log<level::DEBUG>("set-property failed",
-                          entry("SERVICE:%s", service.c_str()),
-                          entry("OBJPATH:%s", objPath.c_str()),
-                          entry("INTERFACE:%s", interface.c_str()),
-                          entry("PROP:%s", property.c_str()));
+                          entry("SERVICE=%s", service.c_str()),
+                          entry("OBJPATH=%s", objPath.c_str()),
+                          entry("INTERFACE=%s", interface.c_str()),
+                          entry("PROP=%s", property.c_str()));
         return -EIO;
     }
 
@@ -1258,10 +1258,10 @@ int ChannelConfig::getDbusProperty(const std::string& service,
     catch (const sdbusplus::exception::SdBusError& e)
     {
         log<level::DEBUG>("get-property failed",
-                          entry("SERVICE:%s", service.c_str()),
-                          entry("OBJPATH:%s", objPath.c_str()),
-                          entry("INTERFACE:%s", interface.c_str()),
-                          entry("PROP:%s", property.c_str()));
+                          entry("SERVICE=%s", service.c_str()),
+                          entry("OBJPATH=%s", objPath.c_str()),
+                          entry("INTERFACE=%s", interface.c_str()),
+                          entry("PROP=%s", property.c_str()));
         return -EIO;
     }
     return 0;
@@ -1288,7 +1288,7 @@ int ChannelConfig::syncNetworkChannelConfig()
                                          privilegePropertyString, variant))
                 {
                     log<level::DEBUG>("Network interface does not exist",
-                                      entry("INTERFACE:%s",
+                                      entry("INTERFACE=%s",
                                             channelData[chNum].chName.c_str()));
                     continue;
                 }
