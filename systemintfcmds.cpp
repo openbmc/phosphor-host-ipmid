@@ -100,30 +100,39 @@ ipmi_ret_t ipmi_app_get_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return rc;
 }
 
-ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                           ipmi_request_t request,
-                                           ipmi_response_t response,
-                                           ipmi_data_len_t data_len,
-                                           ipmi_context_t context)
+ipmi::RspType<> ipmiAppSetBMCGlobalEnable(ipmi::Context::ptr ctx,
+                                          uint8_t reqMask)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-
-    uint8_t reqMask = *reinterpret_cast<uint8_t*>(request);
-    if (sizeof(reqMask) != *data_len)
+    ipmi::ChannelInfo chInfo;
+    try
     {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        ipmi::getChannelInfo(ctx->channel, chInfo);
+    }
+    catch (sdbusplus::exception_t& e)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Failed to get Channel Info",
+            phosphor::logging::entry("MSG: %s", e.description()));
+        return ipmi::responseUnspecifiedError();
     }
 
-    *data_len = 0;
+    if (chInfo.mediumType !=
+        static_cast<uint8_t>(ipmi::EChannelMediumType::systemInterface))
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error - supported only in system interface");
+        return ipmi::responseCommandNotAvailable();
+    }
+
     // Recv Message Queue and SEL are enabled by default.
     // Event Message buffer are disabled by default (not supported).
     // Any request that try to change the mask will be rejected
     if (reqMask != (selEnable | recvMsgQueueEnable))
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidFieldRequest();
     }
-    return rc;
+
+    return ipmi::responseSuccess();
 }
 
 namespace
@@ -143,8 +152,9 @@ void register_netfn_app_functions()
                            ipmi_app_read_event, SYSTEM_INTERFACE);
 
     // <Set BMC Global Enables>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_BMC_GLOBAL_ENABLES, NULL,
-                           ipmi_app_set_bmc_global_enables, SYSTEM_INTERFACE);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetBmcGlobalEnables,
+                          ipmi::Privilege::Admin, ipmiAppSetBMCGlobalEnable);
 
     // <Get BMC Global Enables>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_BMC_GLOBAL_ENABLES, NULL,
