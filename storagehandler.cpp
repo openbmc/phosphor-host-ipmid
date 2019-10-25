@@ -314,7 +314,7 @@ ipmi::RspType<uint16_t // deleted record ID
     {
         // readLoggingObjectPaths will throw exception if there are no error
         // log entries.
-        return ipmi::responseSensorInvalid();
+        return ipmi::responseInvalidCommand();
     }
 
     if (cache::paths.empty())
