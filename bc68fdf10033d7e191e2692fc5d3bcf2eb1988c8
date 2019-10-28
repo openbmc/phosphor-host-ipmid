@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "a3ced37c_d457b2f7",
+        "filename": "generate_whitelist.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2019-10-28T16:29:59Z",
+      "side": 1,
+      "message": "Given the complexities of parsing the config lines into code, it might be a good idea to use python instead of a giant pipeline of bash-executed text editing executables. It would be more readable and easier to maintain.",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 17
+      },
+      "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "31d511fd_4077033a",
         "filename": "generate_whitelist.sh",
         "patchSetId": 7
