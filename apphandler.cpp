@@ -1043,25 +1043,20 @@ uint8_t getSessionInfoRequestData(const ipmi::Context::ptr ctx,
     return ipmi::ccSuccess;
 }
 
-uint8_t getSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
-                        const std::string& service, const std::string& objPath,
-                        uint8_t& sessionState)
+uint8_t getSessionState(ipmi::Context::ptr ctx, const std::string& service,
+                        const std::string& objPath, uint8_t& sessionState)
 {
-    try
-    {
-        sessionState = std::get<uint8_t>(ipmi::getDbusProperty(
-            *busp, service, objPath, session::sessionIntf, "State"));
-    }
-    catch (sdbusplus::exception::SdBusError& e)
+    boost::system::error_code ec = ipmi::getDbusProperty(
+        ctx, sessionState, service, objPath, session::sessionIntf, "State");
+    if (ec)
     {
         log<level::ERR>("Failed to fetch state property ",
                         entry("SERVICE=%s", service.c_str()),
                         entry("OBJECTPATH=%s", objPath.c_str()),
                         entry("INTERFACE=%s", session::sessionIntf),
-                        entry("ERRMSG=%s", e.what()));
+                        entry("ERRMSG=%s", ec.message().c_str()));
         return ipmi::ccUnspecifiedError;
     }
-
     return ipmi::ccSuccess;
 }
 
@@ -1079,38 +1074,33 @@ struct GetSessionInfoRes
     uint16_t remotePort;
 };
 
-uint8_t
-    fillGetSessionInfoRes(std::shared_ptr<sdbusplus::asio::connection>& busp,
-                          const std::string& service,
-                          const std::string& objPath,
-                          struct GetSessionInfoRes& resp, uint8_t& sessionState)
+uint8_t fillGetSessionInfoRes(ipmi::Context::ptr ctx,
+                              const std::string& service,
+                              const std::string& objPath,
+                              struct GetSessionInfoRes& resp,
+                              uint8_t& sessionState)
 {
-    try
-    {
-        ipmi::PropertyMap sessionProps = ipmi::getAllDbusProperties(
-            *busp, service, objPath, session::sessionIntf);
+    ipmi::PropertyMap sessionProps;
+    boost::system::error_code ec = ipmi::getAllDbusProperties(
+        ctx, sessionProps, service, objPath, session::sessionIntf);
 
-        sessionState = std::get<uint8_t>(sessionProps.at("State"));
-        if (sessionState == static_cast<uint8_t>(session::State::active))
-        {
-            resp.sessionHandle =
-                std::get<uint8_t>(sessionProps["SessionHandle"]);
-            resp.userID = std::get<uint8_t>(sessionProps["UserID"]);
-            resp.privLevel =
-                std::get<uint8_t>(sessionProps["CurrentPrivilege"]);
-            resp.channelNumber = std::get<uint8_t>(sessionProps["ChannelNum"]);
-            resp.remoteIpAddr =
-                std::get<uint32_t>(sessionProps["RemoteIPAddr"]);
-            resp.remotePort = std::get<uint16_t>(sessionProps["RemotePort"]);
-        }
+    sessionState = std::get<uint8_t>(sessionProps.at("State"));
+    if (sessionState == static_cast<uint8_t>(session::State::active))
+    {
+        resp.sessionHandle = std::get<uint8_t>(sessionProps["SessionHandle"]);
+        resp.userID = std::get<uint8_t>(sessionProps["UserID"]);
+        resp.privLevel = std::get<uint8_t>(sessionProps["CurrentPrivilege"]);
+        resp.channelNumber = std::get<uint8_t>(sessionProps["ChannelNum"]);
+        resp.remoteIpAddr = std::get<uint32_t>(sessionProps["RemoteIPAddr"]);
+        resp.remotePort = std::get<uint16_t>(sessionProps["RemotePort"]);
     }
-    catch (sdbusplus::exception::SdBusError& e)
+    if (ec)
     {
         log<level::ERR>("Failed to fetch state property ",
                         entry("SERVICE=%s", service.c_str()),
                         entry("OBJECTPATH=%s", objPath.c_str()),
                         entry("INTERFACE=%s", session::sessionIntf),
-                        entry("ERRMSG=%s", e.what()));
+                        entry("ERRMSG=%s", ec.message().c_str()));
         return ipmi::ccUnspecifiedError;
     }
 
@@ -1146,70 +1136,66 @@ ipmi::RspType<
     struct GetSessionInfoRes res = {0};
     res.totalSessionCount = getTotalSessionCount();
     res.activeSessionCount = 0;
-    auto busp = getSdBus();
 
-    try
-    {
-        uint8_t index = 0;
-        ipmi::ObjectTree objectTree = ipmi::getAllDbusObjects(
-            *busp, session::sessionManagerRootPath, session::sessionIntf);
-
-        for (auto& objectTreeItr : objectTree)
-        {
-            uint32_t sessionId = 0;
-            uint8_t sessionHandle = session::defaultSessionHandle;
-            std::string objectPath = objectTreeItr.first;
-
-            if (!parseCloseSessionInputPayload(objectPath, sessionId,
-                                               sessionHandle))
-            {
-                continue;
-            }
-            index++;
-            auto& serviceMap = objectTreeItr.second;
-            auto itr = serviceMap.begin();
-
-            if (serviceMap.size() != 1)
-            {
-                return ipmi::responseUnspecifiedError();
-            }
-
-            std::string service = itr->first;
-            uint8_t sessionState = 0;
-            completionCode =
-                getSessionState(busp, service, objectPath, sessionState);
-            if (completionCode)
-            {
-                return ipmi::response(completionCode);
-            }
-
-            if (sessionState == static_cast<uint8_t>(session::State::active))
-            {
-                res.activeSessionCount++;
-            }
-
-            if (index != sessionIndex && reqSessionId != sessionId &&
-                reqSessionHandle != sessionHandle)
-            {
-                continue;
-            }
-
-            completionCode =
-                fillGetSessionInfoRes(busp, service, objectPath, res, state);
-
-            if (completionCode)
-            {
-                return ipmi::response(completionCode);
-            }
-        }
-    }
-
-    catch (sdbusplus::exception::SdBusError& e)
+    ipmi::ObjectTree objectTree;
+    boost::system::error_code ec = ipmi::getAllDbusObjects(
+        ctx, objectTree, session::sessionManagerRootPath, session::sessionIntf);
+    if (ec)
     {
         log<level::ERR>("Failed to fetch object from dbus",
                         entry("INTERFACE=%s", session::sessionIntf),
-                        entry("ERRMSG=%s", e.what()));
+                        entry("ERRMSG=%s", ec.message().c_str()));
         return ipmi::responseUnspecifiedError();
+    }
+
+    uint8_t index = 0;
+    for (auto& objectTreeItr : objectTree)
+    {
+        uint32_t sessionId = 0;
+        uint8_t sessionHandle = session::defaultSessionHandle;
+        std::string objectPath = objectTreeItr.first;
+
+        if (!parseCloseSessionInputPayload(objectPath, sessionId,
+                                           sessionHandle))
+        {
+            continue;
+        }
+        index++;
+        auto& serviceMap = objectTreeItr.second;
+        auto itr = serviceMap.begin();
+
+        if (serviceMap.size() != 1)
+        {
+            return ipmi::responseUnspecifiedError();
+        }
+
+        std::string service = itr->first;
+        uint8_t sessionState = 0;
+        completionCode =
+            getSessionState(ctx, service, objectPath, sessionState);
+        if (completionCode)
+        {
+            return ipmi::response(completionCode);
+        }
+
+        if (sessionState == static_cast<uint8_t>(session::State::active))
+        {
+            res.activeSessionCount++;
+        }
+
+        if (index != sessionIndex && reqSessionId != sessionId &&
+            reqSessionHandle != sessionHandle)
+        {
+            continue;
+        }
+
+        completionCode =
+            fillGetSessionInfoRes(ctx, service, objectPath, res, state);
+
+        if (completionCode)
+        {
+            return ipmi::response(completionCode);
+        }
     }
 
     if (state == static_cast<uint8_t>(session::State::active))
