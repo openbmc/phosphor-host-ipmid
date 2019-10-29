@@ -103,6 +103,27 @@ ipmi_ret_t ipmi_app_get_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 ipmi::RspType<> ipmiAppSetBMCGlobalEnable(ipmi::Context::ptr ctx,
                                           uint8_t reqMask)
 {
+    ipmi::ChannelInfo chInfo;
+    try
+    {
+        ipmi::getChannelInfo(ctx->channel, chInfo);
+    }
+    catch (sdbusplus::exception_t& e)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Failed to get Channel Info",
+            phosphor::logging::entry("MSG: %s", e.description()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (chInfo.mediumType !=
+        static_cast<uint8_t>(ipmi::EChannelMediumType::systemInterface))
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error - supported only in system interface");
+        return ipmi::responseCommandNotAvailable();
+    }
+
     // Recv Message Queue and SEL are enabled by default.
     // Event Message buffer are disabled by default (not supported).
     // Any request that try to change the mask will be rejected
