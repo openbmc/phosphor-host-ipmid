@@ -25,6 +25,17 @@ AM_PROG_AR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+# Add an option to enable/disable safe mode in boot flags
+AC_ARG_ENABLE([boot-flag-safe-mode-support],
+    AS_HELP_STRING([--disable-boot-flag-safe-mode-support], [Disable safe mode option in boot flags. [default=enable]])
+)
+AS_IF([test "x$enable_boot_flag_safe_mode_support" != "xno"],
+    AC_MSG_NOTICE([Enabling safe mode option in boot flags])
+    [cpp_flags="-DENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling safe mode option in boot flags])
+)
+
 # Add an option to enable/disable i2c master write read command white list checking
 AC_ARG_ENABLE([i2c-whitelist-check],
     AS_HELP_STRING([--disable-i2c-whitelist-check], [Disable I2C master write read command white list check. [default=enable]])
