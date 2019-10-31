@@ -708,9 +708,8 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
     {
-
-        body->sensor_units_1 = 0; // unsigned, no rate, no modifier, not a %
-
+        body->sensor_units_1 = info->sensorUnits1; // default is 0. unsigned, no
+                                                   // rate, no modifier, not a %
         /* Unit info */
         setUnitFieldsForObject(info, body);
 

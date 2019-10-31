@@ -8,6 +8,8 @@
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 
 namespace ipmi
@@ -28,6 +30,7 @@ using ServicePath = std::pair<Path, Service>;
 using Interfaces = std::vector<Interface>;
 
 using MapperResponseType = std::map<Path, std::map<Service, Interfaces>>;
+using namespace phosphor::logging;
 
 /** @brief get the D-Bus service and service path
  *  @param[in] bus - The Dbus bus object
@@ -223,10 +226,32 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
     double value = std::get<T>(propValue) *
                    std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+    int32_t rawData =
+        (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
 
-    auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
-                                        sensorInfo.coefficientM);
-    setReading(rawData, &response);
+    constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
+    constexpr uint8_t singedDataFormat = 0x80;
+    // if sensorUnits1 [7:6] = 10b, sensor is signed
+    if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) == singedDataFormat)
+    {
+        if (rawData > std::numeric_limits<int8_t>::max() ||
+            rawData < std::numeric_limits<int8_t>::lowest())
+        {
+            log<level::ERR>("Value out of range");
+            throw std::out_of_range("Value out of range");
+        }
+        setReading(static_cast<int8_t>(rawData), &response);
+    }
+    else
+    {
+        if (rawData > std::numeric_limits<uint8_t>::max() ||
+            rawData < std::numeric_limits<uint8_t>::lowest())
+        {
+            log<level::ERR>("Value out of range");
+            throw std::out_of_range("Value out of range");
+        }
+        setReading(static_cast<uint8_t>(rawData), &response);
+    }
 
     return response;
 }
