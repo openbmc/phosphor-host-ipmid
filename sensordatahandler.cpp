@@ -7,8 +7,6 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <optional>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 

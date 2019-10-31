@@ -134,6 +134,7 @@ using Unit = std::string;
 using EntityType = uint8_t;
 using EntityInst = uint8_t;
 using SensorName = std::string;
+using SensorUnits1 = uint8_t;
 
 enum class Mutability
 {
@@ -168,6 +169,7 @@ struct Info
     Exponent exponentR;
     bool hasScale;
     Scale scale;
+    SensorUnits1 sensorUnits1;
     Unit unit;
     std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
     std::function<GetSensorResponse(const Info&)> getFunc;

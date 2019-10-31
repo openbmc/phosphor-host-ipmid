@@ -112,6 +112,8 @@
   # Applies for analog sensors, the actual reading value for the sensor is
   # Value * 10^N
   scale: -3
+  # Indicate Analog Data Format, Rate unit, Modifier unit and Percentage
+  sensorUnits1 : 0x80
   mutability: Mutability::Write|Mutability::Read
   serviceInterface: org.freedesktop.DBus.Properties
   readingType: readingData
