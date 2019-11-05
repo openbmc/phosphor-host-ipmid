@@ -178,6 +178,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
  *
  *  @return Response for get sensor reading command.
  */
+
 template <typename T>
 GetSensorResponse readingData(const Info& sensorInfo)
 {
@@ -186,47 +187,66 @@ GetSensorResponse readingData(const Info& sensorInfo)
     GetSensorResponse response{};
 
     enableScanning(&response);
+    bool ok = false;
+    const int ATTEMPT_LIMIT = 2; // Make 2 attempts at most
 
-    auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
-                                    sensorInfo.sensorPath);
+    for (int attempt = 0; attempt < ATTEMPT_LIMIT && !ok; attempt++)
+    {
+
+        if (sensorInfo.cachedService == std::nullopt)
+        {
+            sensorInfo.cachedService = ipmi::getService(
+                bus, sensorInfo.sensorInterface, sensorInfo.sensorPath);
+        }
 
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
-    // Check the OperationalStatus interface for functional property
-    if (sensorInfo.propertyInterfaces.begin()->first ==
-        "xyz.openbmc_project.Sensor.Value")
-    {
-        bool functional = true;
+        // Check the OperationalStatus interface for functional property
+        if (sensorInfo.propertyInterfaces.begin()->first ==
+            "xyz.openbmc_project.Sensor.Value")
+        {
+            bool functional = true;
+            try
+            {
+                auto funcValue = ipmi::getDbusProperty(
+                    bus, sensorInfo.cachedService.value(),
+                    sensorInfo.sensorPath,
+                    "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                    "Functional");
+                functional = std::get<bool>(funcValue);
+            }
+            catch (...)
+            {
+                // No-op if Functional property could not be found since this
+                // check is only valid for Sensor.Value read for hwmonio
+            }
+            if (!functional)
+            {
+                throw SensorFunctionalError();
+            }
+        }
+#endif
         try
         {
-            auto funcValue = ipmi::getDbusProperty(
-                bus, service, sensorInfo.sensorPath,
-                "xyz.openbmc_project.State.Decorator.OperationalStatus",
-                "Functional");
-            functional = std::get<bool>(funcValue);
+            auto propValue = ipmi::getDbusProperty(
+                bus, sensorInfo.cachedService.value(), sensorInfo.sensorPath,
+                sensorInfo.propertyInterfaces.begin()->first,
+                sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+
+            double value =
+                std::get<T>(propValue) *
+                std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+
+            auto rawData = static_cast<uint8_t>(
+                (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM);
+            setReading(rawData, &response);
+
+            ok = true;
         }
-        catch (...)
+        catch (const std::exception& e)
         {
-            // No-op if Functional property could not be found since this
-            // check is only valid for Sensor.Value read for hwmonio
-        }
-        if (!functional)
-        {
-            throw SensorFunctionalError();
+            sensorInfo.cachedService = std::nullopt; // invalidate cache
         }
     }
-#endif
-
-    auto propValue = ipmi::getDbusProperty(
-        bus, service, sensorInfo.sensorPath,
-        sensorInfo.propertyInterfaces.begin()->first,
-        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
-
-    double value = std::get<T>(propValue) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-
-    auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
-                                        sensorInfo.coefficientM);
-    setReading(rawData, &response);
 
     return response;
 }

@@ -170,6 +170,11 @@ struct Info
     Mutability mutability;
     std::function<SensorName(const Info&)> sensorNameFunc;
     DbusInterfaceMap propertyInterfaces;
+
+    // readingData(const Info& sensorInfo) takes a constant reference to
+    // Info as input, reads and modifies cachedService. The mutable
+    // qualifier enables write to cachedService in that function.
+    mutable std::optional<std::string> cachedService;
 };
 
 using Id = uint8_t;
