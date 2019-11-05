@@ -178,6 +178,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
  *
  *  @return Response for get sensor reading command.
  */
+
 template <typename T>
 GetSensorResponse readingData(const Info& sensorInfo)
 {
@@ -186,9 +187,14 @@ GetSensorResponse readingData(const Info& sensorInfo)
     GetSensorResponse response{};
 
     enableScanning(&response);
+    bool retried = false;
 
-    auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
-                                    sensorInfo.sensorPath);
+RETRY:
+    if (sensorInfo.cachedService == std::nullopt)
+    {
+        sensorInfo.cachedService = ipmi::getService(
+            bus, sensorInfo.sensorInterface, sensorInfo.sensorPath);
+    }
 
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     // Check the OperationalStatus interface for functional property
@@ -199,7 +205,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
         try
         {
             auto funcValue = ipmi::getDbusProperty(
-                bus, service, sensorInfo.sensorPath,
+                bus, sensorInfo.cachedService.value(), sensorInfo.sensorPath,
                 "xyz.openbmc_project.State.Decorator.OperationalStatus",
                 "Functional");
             functional = std::get<bool>(funcValue);
@@ -215,18 +221,33 @@ GetSensorResponse readingData(const Info& sensorInfo)
         }
     }
 #endif
+    try
+    {
+        auto propValue = ipmi::getDbusProperty(
+            bus, sensorInfo.cachedService.value(), sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    auto propValue = ipmi::getDbusProperty(
-        bus, service, sensorInfo.sensorPath,
-        sensorInfo.propertyInterfaces.begin()->first,
-        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+        double value = std::get<T>(propValue) *
+                       std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
 
-    double value = std::get<T>(propValue) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-
-    auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
-                                        sensorInfo.coefficientM);
-    setReading(rawData, &response);
+        auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
+                                            sensorInfo.coefficientM);
+        setReading(rawData, &response);
+    }
+    catch (...)
+    {
+        if (!retried)
+        {
+            sensorInfo.cachedService = std::nullopt; // invalidate cache
+            retried = true;
+            goto RETRY;
+        }
+        else
+        {
+            throw SensorFunctionalError();
+        }
+    }
 
     return response;
 }
