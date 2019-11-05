@@ -170,6 +170,8 @@ struct Info
     Mutability mutability;
     std::function<SensorName(const Info&)> sensorNameFunc;
     DbusInterfaceMap propertyInterfaces;
+
+    mutable std::optional<std::string> cachedService;
 };
 
 using Id = uint8_t;
