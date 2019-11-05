@@ -90,6 +90,48 @@ class ServiceCache
 };
 
 /**
+ *  @class SensorServiceCache
+ *  @brief Caches lookups of service names corresponding to sensor paths.
+ *  @details A sensor has a sensor path and a service name. For example,
+ *           path "/xyz/openbmc_project/sensors/temperature/cpu0temp"
+ *           maps to "xyz.openbmc_project.Hwmon-123456789.Hwmon1".
+ *           During a call to readingData(), the service name must be
+ *           known by calling getService(), such that ipmid can use the
+ *           service name to fetch the reading for the sensor being read.
+ *           This class caches calls to getService() for all sensors
+ *           accessed in readingData().
+ */
+class SensorServiceCache
+{
+  public:
+    /** @brief Creates a new sensor service cache for all sensors. The cache
+     *         is initially empty.
+     */
+    SensorServiceCache();
+
+    /** @brief Gets the service name that corresponds to a sensor path.
+     *         If the service name has not been cached, this function will call
+     *         getService() and cache the name. Otherwise the cached name is
+     *         returned.
+     */
+    const std::string& getService(sdbusplus::bus::bus& bus,
+                                  const ipmi::sensor::Info& sensorInfo);
+
+    /** @brief Invalidates all cached sensor names. */
+    void invalidateAll();
+
+  private:
+    /** @brief The mapping from sensor path to service name */
+    std::unordered_map<std::string, std::string> cachedServices;
+
+    /** @brief The mapping from sensor name to sensor interface. This map
+     *         is used to determine any changes in a sensor's interface
+     *         name.
+     */
+    std::unordered_map<std::string, std::string> sensorInterfaces;
+};
+
+/**
  * @brief Get the DBUS Service name for the input dbus path
  *
  * @param[in] bus - DBUS Bus Object
@@ -246,4 +288,8 @@ void callDbusMethod(sdbusplus::bus::bus& bus, const std::string& service,
 ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
                       std::vector<uint8_t> writeData,
                       std::vector<uint8_t>& readBuf);
+
+/** @brief Get the service cache used by GetSensor functions.
+ */
+ipmi::SensorServiceCache& getSensorServiceCache();
 } // namespace ipmi
