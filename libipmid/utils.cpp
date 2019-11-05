@@ -238,6 +238,48 @@ bool ServiceCache::isValid(sdbusplus::bus::bus& bus) const
     return cachedService && cachedBusName == bus.get_unique_name();
 }
 
+SensorServiceCache::SensorServiceCache()
+{
+}
+
+const std::string&
+    SensorServiceCache::getService(sdbusplus::bus::bus& bus,
+                                   const ipmi::sensor::Info& sensorInfo)
+{
+    const std::string &path = sensorInfo.sensorPath,
+                      &intf = sensorInfo.sensorInterface;
+
+    // Make sure the sensor's interface name is the same as when
+    // its service name was cached
+    auto interfaceIter = sensorInterfaces.find(path);
+    if (interfaceIter == sensorInterfaces.end())
+    {
+        sensorInterfaces[path] = intf;
+    }
+    else
+    {
+        if (interfaceIter->second != intf)
+        {
+            interfaceIter->second = sensorInfo.sensorInterface;
+            cachedServices.erase(path);
+        }
+    }
+
+    auto cacheIter = cachedServices.find(path);
+    if (cacheIter == cachedServices.end())
+    {
+        cachedServices[path] = ipmi::getService(bus, intf, path);
+        cacheIter = cachedServices.find(path);
+    }
+    return cacheIter->second;
+}
+
+void SensorServiceCache::invalidateAll()
+{
+    sensorInterfaces.clear();
+    cachedServices.clear();
+}
+
 std::string getService(sdbusplus::bus::bus& bus, const std::string& intf,
                        const std::string& path)
 {
@@ -456,6 +498,13 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
     }
 
     return ipmi::ccSuccess;
+}
+
+ipmi::SensorServiceCache sensorServiceCache;
+
+ipmi::SensorServiceCache& getSensorServiceCache()
+{
+    return sensorServiceCache;
 }
 
 } // namespace ipmi
