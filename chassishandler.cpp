@@ -767,6 +767,39 @@ int initiate_state_transition(State::Host::Transition transition)
     return rc;
 }
 
+//------------------------------------------
+// Set Enabled property to inform NMI source
+// handling to trigger a NMI_OUT BSOD.
+//------------------------------------------
+int setNmiProperty(bool value)
+{
+    constexpr auto nmiSourceObjPath = "/xyz/openbmc_project/Chassis/Control/NMISource";
+    constexpr auto nmiSourceIntf = "xyz.openbmc_project.Chassis.Control.NMISource";
+    std::string bmcSourceSignal =
+        "xyz.openbmc_project.Chassis.Control.NMISource.BMCSourceSignal.ChassisCmd";
+    auto service =
+        ipmi::getService(*getSdBus(), nmiSourceIntf, nmiSourceObjPath);
+
+    try
+    {
+        ipmi::setDbusProperty(*getSdBus(), service, nmiSourceObjPath,
+                              nmiSourceIntf, "BMCSource",
+                              bmcSourceSignal);
+        ipmi::setDbusProperty(*getSdBus(), service, nmiSourceObjPath,
+                              nmiSourceIntf, "Enabled",
+                              value);
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>(
+            "Failed to trigger NMI_OUT",
+            entry("EXCEPTION=%s", e.what()));
+        return -1;
+    }
+
+    return 0;
+}
+
 namespace power_policy
 {
 
@@ -1170,6 +1203,10 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
         case CMD_SOFT_OFF_VIA_OVER_TEMP:
             // Request Host State Manager to do a soft power off
             rc = initiate_state_transition(State::Host::Transition::Off);
+            break;
+
+        case CMD_PULSE_DIAGNOSTIC_INTR:
+            rc = setNmiProperty(true);
             break;
 
         default:
