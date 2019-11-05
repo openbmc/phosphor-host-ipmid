@@ -33,6 +33,7 @@
 #include <ipmid/message.hpp>
 #include <ipmid/oemrouter.hpp>
 #include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <map>
 #include <memory>
 #include <optional>
@@ -876,4 +877,11 @@ int main(int argc, char* argv[])
     providers.clear();
 
     return 0;
+}
+
+ipmi::SensorServiceCache sensorServiceCache;
+
+ipmi::SensorServiceCache* getSensorServiceCache()
+{
+	return &sensorServiceCache;
 }
