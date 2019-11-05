@@ -8,7 +8,10 @@
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
+
+extern ipmi::SensorServiceCache* getSensorServiceCache();
 
 namespace ipmi
 {
@@ -183,12 +186,13 @@ GetSensorResponse readingData(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
+    using namespace phosphor::logging;
+
     GetSensorResponse response{};
 
     enableScanning(&response);
 
-    auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
-                                    sensorInfo.sensorPath);
+    std::string service = getSensorServiceCache()->getService(bus, sensorInfo);
 
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     // Check the OperationalStatus interface for functional property
@@ -204,10 +208,11 @@ GetSensorResponse readingData(const Info& sensorInfo)
                 "Functional");
             functional = std::get<bool>(funcValue);
         }
-        catch (...)
+        catch (const std::exception& e)
         {
             // No-op if Functional property could not be found since this
             // check is only valid for Sensor.Value read for hwmonio
+            log<level::ERR>(e.what());
         }
         if (!functional)
         {
