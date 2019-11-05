@@ -33,6 +33,7 @@
 #include <ipmid/message.hpp>
 #include <ipmid/oemrouter.hpp>
 #include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <map>
 #include <memory>
 #include <optional>
