@@ -8,7 +8,10 @@
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
+
+extern ipmi::SensorServiceCache* getSensorServiceCache();
 
 namespace ipmi
 {
@@ -178,17 +181,18 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
  *
  *  @return Response for get sensor reading command.
  */
+
 template <typename T>
 GetSensorResponse readingData(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
+    using namespace phosphor::logging;
+
     GetSensorResponse response{};
 
     enableScanning(&response);
-
-    auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
-                                    sensorInfo.sensorPath);
+    std::string service = getSensorServiceCache()->getService(bus, sensorInfo);
 
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     // Check the OperationalStatus interface for functional property
@@ -204,10 +208,11 @@ GetSensorResponse readingData(const Info& sensorInfo)
                 "Functional");
             functional = std::get<bool>(funcValue);
         }
-        catch (...)
+        catch (const std::exception& e)
         {
             // No-op if Functional property could not be found since this
             // check is only valid for Sensor.Value read for hwmonio
+            log<level::ERR>(e.what());
         }
         if (!functional)
         {
@@ -215,18 +220,24 @@ GetSensorResponse readingData(const Info& sensorInfo)
         }
     }
 #endif
+    try
+    {
+        auto propValue = ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    auto propValue = ipmi::getDbusProperty(
-        bus, service, sensorInfo.sensorPath,
-        sensorInfo.propertyInterfaces.begin()->first,
-        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+        double value = std::get<T>(propValue) *
+                       std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
 
-    double value = std::get<T>(propValue) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-
-    auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
-                                        sensorInfo.coefficientM);
-    setReading(rawData, &response);
+        auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
+                                            sensorInfo.coefficientM);
+        setReading(rawData, &response);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>(e.what());
+    }
 
     return response;
 }
