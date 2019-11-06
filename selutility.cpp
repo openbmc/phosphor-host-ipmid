@@ -117,8 +117,9 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-    static constexpr auto assocIntf = "org.openbmc.Associations";
-    static constexpr auto assocProp = "associations";
+    static constexpr auto assocIntf =
+        "xyz.openbmc_project.Association.Definitions";
+    static constexpr auto assocProp = "Associations";
 
     auto service = ipmi::getService(bus, assocIntf, objPath);
 
