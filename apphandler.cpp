@@ -1694,7 +1694,7 @@ void register_netfn_app_functions()
     // <Get Channel Cipher Suites Command>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetChannelCipherSuites,
-                          ipmi::Privilege::Callback, getChannelCipherSuites);
+                          ipmi::Privilege::None, getChannelCipherSuites);
 
     // <Get System Info Command>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
