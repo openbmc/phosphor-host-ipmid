@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "fee3ce6f_37e160ac",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2019-11-07T17:54:22Z",
+      "side": 1,
+      "message": "50/72 rule for commit messages - that is, the subject line should not exceed 50 characters and the body should not exceed 72 characters.\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/docs/contributing.md",
+      "range": {
+        "startLine": 9,
+        "startChar": 3,
+        "endLine": 14,
+        "endChar": 90
+      },
+      "revId": "bcf67346b570895cd67861ec6f66f0308065ae29",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55880e11_2d0c1e21",
+        "filename": "sensordatahandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2019-11-07T17:54:22Z",
+      "side": 1,
+      "message": "Can be removed as included in sensordatahandler.hpp.",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 35
+      },
+      "revId": "bcf67346b570895cd67861ec6f66f0308065ae29",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f22ea806_0544b883",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2019-11-07T17:54:22Z",
+      "side": 1,
+      "message": "\u003e Can be declared at line#233. And need to declare without static. (Since only using in single API, better to declare before using first time.\n\n\u003e SENSOR_UNITS_BIT7 should be in lowCamelCase. Can be sensorUnitBit7?\n\n\u003eEven Instead int, use unit8_t?",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 48
+      },
+      "revId": "bcf67346b570895cd67861ec6f66f0308065ae29",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a1934e7e_e67173b2",
         "filename": "sensordatahandler.hpp",
         "patchSetId": 1
