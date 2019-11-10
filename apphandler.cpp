@@ -1638,8 +1638,8 @@ void register_netfn_app_functions()
                           ipmi::Privilege::Operator, ipmiAppResetWatchdogTimer);
 
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
-                          ipmi::app::cmdGetSessionInfo,
-                          ipmi::Privilege::Callback, ipmiAppGetSessionInfo);
+                          ipmi::app::cmdGetSessionInfo, ipmi::Privilege::User,
+                          ipmiAppGetSessionInfo);
 
     // <Set Watchdog Timer>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
@@ -1652,8 +1652,8 @@ void register_netfn_app_functions()
 
     // <Get Watchdog Timer>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
-                          ipmi::app::cmdGetWatchdogTimer,
-                          ipmi::Privilege::Operator, ipmiGetWatchdogTimer);
+                          ipmi::app::cmdGetWatchdogTimer, ipmi::Privilege::User,
+                          ipmiGetWatchdogTimer);
 
     // <Get Self Test Results>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
@@ -1672,7 +1672,7 @@ void register_netfn_app_functions()
     // <Get ACPI Power State>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetAcpiPowerState,
-                          ipmi::Privilege::Admin, ipmiGetAcpiPowerState);
+                          ipmi::Privilege::User, ipmiGetAcpiPowerState);
 
     // Note: For security reason, this command will be registered only when
     // there are proper I2C Master write read whitelist
