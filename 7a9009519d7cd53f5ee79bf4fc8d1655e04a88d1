@@ -22,6 +22,30 @@
       "revId": "7a9009519d7cd53f5ee79bf4fc8d1655e04a88d1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44debbfd_8df2ad67",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000335
+      },
+      "writtenOn": "2019-11-11T09:02:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db235e39_61bbb737",
+      "range": {
+        "startLine": 233,
+        "startChar": 22,
+        "endLine": 233,
+        "endChar": 28
+      },
+      "revId": "7a9009519d7cd53f5ee79bf4fc8d1655e04a88d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
