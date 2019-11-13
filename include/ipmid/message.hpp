@@ -42,11 +42,11 @@ struct Context
     Context& operator=(Context&&) = delete;
 
     Context(std::shared_ptr<sdbusplus::asio::connection> bus, NetFn netFn,
-            Cmd cmd, int channel, int userId, Privilege priv, int rqSA,
-            boost::asio::yield_context& yield) :
+            Cmd cmd, int channel, int userId, uint32_t sessionId,
+            Privilege priv, int rqSA, boost::asio::yield_context& yield) :
         bus(bus),
-        netFn(netFn), cmd(cmd), channel(channel), userId(userId), priv(priv),
-        rqSA(rqSA), yield(yield)
+        netFn(netFn), cmd(cmd), channel(channel), userId(userId),
+        sessionId(sessionId), priv(priv), rqSA(rqSA), yield(yield)
     {
     }
 
@@ -56,6 +56,7 @@ struct Context
     Cmd cmd;
     int channel;
     int userId;
+    uint32_t sessionId;
     Privilege priv;
     // srcAddr is only set on IPMB requests because
     // Platform Event Message needs it to determine the incoming format
