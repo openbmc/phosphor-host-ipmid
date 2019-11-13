@@ -982,20 +982,29 @@ uint8_t getTotalSessionCount()
  * @return success completion code if request data is valid
  * else return the correcponding error completion code.
  **/
-uint8_t getSessionInfoRequestData(const uint8_t sessionIndex,
+uint8_t getSessionInfoRequestData(const ipmi::Context::ptr& ctx,
+                                  const uint8_t sessionIndex,
                                   ipmi::message::Payload& payload,
                                   uint32_t& reqSessionId,
                                   uint8_t& reqSessionHandle)
 {
-    if (sessionIndex == session::sessionZero ||
-        ((sessionIndex > session::maxSessionCountPerChannel) &&
-         (sessionIndex < session::searchSessionByHandle)))
+    if ((sessionIndex > session::maxSessionCountPerChannel) &&
+        (sessionIndex < session::searchSessionByHandle))
     {
         return ipmi::ccInvalidFieldRequest;
     }
 
     switch (sessionIndex)
     {
+        case session::searchCurrentSession:
+
+            if (!payload.fullyUnpacked())
+            {
+                return ipmi::ccReqDataLenInvalid;
+            }
+            reqSessionId = ctx->sessionId;
+            break;
+
         case session::searchSessionByHandle:
 
             if ((payload.unpack(reqSessionHandle)) ||
@@ -1120,7 +1129,8 @@ ipmi::RspType<
                              std::array<uint8_t, macAddrLen>, // mac address
                              uint16_t                         // remote port
                              >>>
-    ipmiAppGetSessionInfo(uint8_t sessionIndex, ipmi::message::Payload& payload)
+    ipmiAppGetSessionInfo(ipmi::Context::ptr ctx, uint8_t sessionIndex,
+                          ipmi::message::Payload& payload)
 {
     uint32_t reqSessionId = 0;
     uint8_t reqSessionHandle = session::defaultSessionHandle;
@@ -1128,7 +1138,7 @@ ipmi::RspType<
     uint8_t state = 0xFF;
 
     uint8_t completionCode = getSessionInfoRequestData(
-        sessionIndex, payload, reqSessionId, reqSessionHandle);
+        ctx, sessionIndex, payload, reqSessionId, reqSessionHandle);
 
     if (completionCode)
     {
