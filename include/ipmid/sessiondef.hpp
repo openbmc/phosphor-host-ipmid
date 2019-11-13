@@ -32,6 +32,7 @@ static constexpr uint8_t defaultSessionHandle = 0xFF;
 static constexpr uint8_t maxNetworkInstanceSupported = 4;
 static constexpr uint8_t ccInvalidSessionId = 0x87;
 static constexpr uint8_t ccInvalidSessionHandle = 0x88;
+static constexpr uint8_t searchCurrentSession = 0;
 static constexpr uint8_t searchSessionByHandle = 0xFE;
 static constexpr uint8_t searchSessionById = 0xFF;
 // MSB BIT 7 BIT 6 assigned for netipmid instance in session handle.
