@@ -68,6 +68,8 @@ void Table::executeCommand(uint32_t inCommand,
                            ipmi::ipmiUserGetUserId(session->userName)))},
             {"privilege",
              ipmi::Value(static_cast<int>(session->currentPrivilege()))},
+            {"currentSessionId",
+             ipmi::Value(static_cast<uint32_t>(session->getBMCSessionID()))},
         };
         bus->async_method_call(
             [handler, this](const boost::system::error_code& ec,
