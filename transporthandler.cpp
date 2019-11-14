@@ -105,6 +105,15 @@ constexpr auto INTF_NEIGHBOR_CREATE_STATIC =
 constexpr auto INTF_VLAN = "xyz.openbmc_project.Network.VLAN";
 constexpr auto INTF_VLAN_CREATE = "xyz.openbmc_project.Network.VLAN.Create";
 
+static constexpr auto dhcpv4v6 =
+    "xyz.openbmc_project.Network.EthernetInterface.DHCPConf.both";
+static constexpr auto dhcpv6 =
+    "xyz.openbmc_project.Network.EthernetInterface.DHCPConf.v6";
+static constexpr auto dhcpv4 =
+    "xyz.openbmc_project.Network.EthernetInterface.DHCPConf.v4";
+static constexpr auto dhcpoff =
+    "xyz.openbmc_project.Network.EthernetInterface.DHCPConf.none";
+
 /** @brief Generic paramters for different address families */
 template <int family>
 struct AddrFamily
@@ -381,23 +390,44 @@ auto channelCall(uint8_t channel, Args&&... args)
  *  @param[in] params - The parameters for the channel
  *  @return True if DHCP is enabled, false otherwise
  */
-bool getDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
+std::string getDHCPProperty(sdbusplus::bus::bus& bus,
+                            const ChannelParams& params)
 {
-    return std::get<bool>(getDbusProperty(
+    return std::get<std::string>(getDbusProperty(
         bus, params.service, params.logicalPath, INTF_ETHERNET, "DHCPEnabled"));
 }
 
 /** @brief Sets the system value for DHCP on the given interface
  *
- *  @param[in] bus    - The bus object used for lookups
- *  @param[in] params - The parameters for the channel
- *  @param[in] on     - Whether or not to enable DHCP
+ *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] params  - The parameters for the channel
+ *  @param[in] setting - DHCP state to assign (none, v4, v6, both)
  */
 void setDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
-                     bool on)
+                     const std::string& setting)
 {
+    auto dhcp = getDHCPProperty(bus, params);
+    std::string nextDhcp{};
+
+    if (((dhcp == dhcpv4) && (setting == dhcpv6)) ||
+        ((dhcp == dhcpv6) && (setting == dhcpv4)))
+    {
+        // DHCP is enabled independently for IPv4 and IPv6. If IPv4
+        // DHCP is enabled, and a request to add IPv6 is received,
+        // change the DHCPEnabled enum to "both" active. The same
+        // logic is applied if IPV6 is already enabled, and an IPv4
+        // enable request is made.
+        nextDhcp = dhcpv4v6;
+    }
+    else
+    {
+        // "both" enabled -> ipv4 only
+        // "both" enabled -> ipv6 only
+        // "ip4v", "ipv6", or "both" enabled -> no DHCP
+        nextDhcp = setting;
+    }
     setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
-                    "DHCPEnabled", on);
+                    "DHCPEnabled", nextDhcp);
 }
 
 /** @brief Converts a human readable MAC string into MAC bytes
@@ -945,7 +975,7 @@ void deconfigureChannel(sdbusplus::bus::bus& bus, ChannelParams& params)
     }
 
     // Clear out any settings on the lower physical interface
-    setDHCPProperty(bus, params, false);
+    setDHCPProperty(bus, params, dhcpoff);
 }
 
 /** @brief Creates a new VLAN on the specified interface
@@ -1205,7 +1235,11 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             {
                 case IPSrc::DHCP:
                 {
-                    channelCall<setDHCPProperty>(channel, true);
+                    // The IPSrc IPMI command is only for IPv4
+                    // management. Modifying IPv6 state is done using
+                    // a completely different Set LAN Configuration
+                    // subcommand.
+                    channelCall<setDHCPProperty>(channel, dhcpv4);
                     return responseSuccess();
                 }
                 case IPSrc::Unspecified:
@@ -1213,7 +1247,7 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                 case IPSrc::BIOS:
                 case IPSrc::BMC:
                 {
-                    channelCall<setDHCPProperty>(channel, false);
+                    channelCall<setDHCPProperty>(channel, dhcpoff);
                     return responseSuccess();
                 }
             }
@@ -1378,7 +1412,8 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         case LanParam::IPSrc:
         {
             auto src = IPSrc::Static;
-            if (channelCall<getDHCPProperty>(channel))
+            std::string dhcpSetting = channelCall<getDHCPProperty>(channel);
+            if ((dhcpSetting == dhcpv4) || (dhcpSetting == dhcpv4v6))
             {
                 src = IPSrc::DHCP;
             }
