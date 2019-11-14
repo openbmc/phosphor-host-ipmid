@@ -1179,7 +1179,7 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
         case LanParam::AuthEnables:
         {
             req.trailingOk = true;
-            return response(ccParamNotSupported);
+            return response(ccParamReadOnly);
         }
         case LanParam::IP:
         {
