@@ -30,6 +30,7 @@
 #include <utility>
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
 #include <xyz/openbmc_project/Network/IP/server.hpp>
 #include <xyz/openbmc_project/Network/Neighbor/server.hpp>
 
@@ -39,6 +40,7 @@ using phosphor::logging::entry;
 using phosphor::logging::level;
 using phosphor::logging::log;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+using sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface;
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
 using sdbusplus::xyz::openbmc_project::Network::server::Neighbor;
 
@@ -456,25 +458,116 @@ auto channelCall(uint8_t channel, Args&&... args)
  *
  *  @param[in] bus    - The bus object used for lookups
  *  @param[in] params - The parameters for the channel
- *  @return True if DHCP is enabled, false otherwise
+ *  @return DHCPConf enumeration
  */
-bool getDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
+EthernetInterface::DHCPConf getDHCPProperty(sdbusplus::bus::bus& bus,
+                                            const ChannelParams& params)
 {
-    return std::get<bool>(getDbusProperty(
+    std::string dhcpstr = std::get<std::string>(getDbusProperty(
         bus, params.service, params.logicalPath, INTF_ETHERNET, "DHCPEnabled"));
+    return EthernetInterface::convertDHCPConfFromString(dhcpstr);
 }
 
-/** @brief Sets the system value for DHCP on the given interface
+/** @brief Sets the DHCP v4 state on the given interface
  *
- *  @param[in] bus    - The bus object used for lookups
- *  @param[in] params - The parameters for the channel
- *  @param[in] on     - Whether or not to enable DHCP
+ *  @param[in] bus           - The bus object used for lookups
+ *  @param[in] params        - The parameters for the channel
+ *  @param[in] requestedDhcp - DHCP state to assign (none, v4)
  */
-void setDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
-                     bool on)
+void setDHCPv4Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                       const EthernetInterface::DHCPConf requestedDhcp)
 {
+    EthernetInterface::DHCPConf currentDhcp = getDHCPProperty(bus, params);
+    EthernetInterface::DHCPConf nextDhcp = EthernetInterface::DHCPConf::none;
+
+    if ((currentDhcp == EthernetInterface::DHCPConf::v6) &&
+        (requestedDhcp == EthernetInterface::DHCPConf::v4))
+    {
+        nextDhcp = EthernetInterface::DHCPConf::both;
+    }
+    else if ((currentDhcp == EthernetInterface::DHCPConf::none) &&
+             (requestedDhcp == EthernetInterface::DHCPConf::v4))
+
+    {
+        nextDhcp = requestedDhcp;
+    }
+    else if (requestedDhcp == EthernetInterface::DHCPConf::none)
+    {
+        if (currentDhcp == EthernetInterface::DHCPConf::both)
+        {
+            nextDhcp = EthernetInterface::DHCPConf::v6;
+        }
+        else if (currentDhcp == EthernetInterface::DHCPConf::v4)
+        {
+            nextDhcp = EthernetInterface::DHCPConf::none;
+        }
+    }
+    else
+    {
+        nextDhcp = currentDhcp;
+    }
+    std::string newDhcp =
+        sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+            nextDhcp);
     setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
-                    "DHCPEnabled", on);
+                    "DHCPEnabled", newDhcp);
+}
+
+/** @brief Sets the DHCP v6 state on the given interface
+ *
+ *  @param[in] bus           - The bus object used for lookups
+ *  @param[in] params        - The parameters for the channel
+ *  @param[in] requestedDhcp - DHCP state to assign (none, v6, both)
+ *  @param[in] defaultMode   - True: Use algorithmic assignment
+ *                             False: requestedDhcp assigned unconditionally
+ */
+void setDHCPv6Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                       const EthernetInterface::DHCPConf requestedDhcp,
+                       const bool defaultMode = true)
+{
+    EthernetInterface::DHCPConf currentDhcp = getDHCPProperty(bus, params);
+    EthernetInterface::DHCPConf nextDhcp = EthernetInterface::DHCPConf::none;
+
+    if (defaultMode)
+    {
+        if ((currentDhcp == EthernetInterface::DHCPConf::v4) &&
+            (requestedDhcp == EthernetInterface::DHCPConf::v6))
+        {
+            nextDhcp = EthernetInterface::DHCPConf::both;
+        }
+        else if ((currentDhcp == EthernetInterface::DHCPConf::none) &&
+                 (requestedDhcp == EthernetInterface::DHCPConf::v6))
+
+        {
+            nextDhcp = requestedDhcp;
+        }
+        else if (requestedDhcp == EthernetInterface::DHCPConf::none)
+        {
+            if (currentDhcp == EthernetInterface::DHCPConf::both)
+            {
+                nextDhcp = EthernetInterface::DHCPConf::v4;
+            }
+            else if (currentDhcp == EthernetInterface::DHCPConf::v6)
+            {
+                nextDhcp = EthernetInterface::DHCPConf::none;
+            }
+        }
+        else
+        {
+            nextDhcp = currentDhcp;
+        }
+    }
+    else
+    {
+        // allow the v6 call to set any value
+        nextDhcp = requestedDhcp;
+    }
+
+    std::string newDhcp =
+        sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+            nextDhcp);
+    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
+                    "DHCPEnabled", newDhcp);
 }
 
 /** @brief Converts a human readable MAC string into MAC bytes
@@ -1113,7 +1206,7 @@ void deconfigureChannel(sdbusplus::bus::bus& bus, ChannelParams& params)
     }
 
     // Clear out any settings on the lower physical interface
-    setDHCPProperty(bus, params, false);
+    setDHCPv6Property(bus, params, EthernetInterface::DHCPConf::none, false);
 }
 
 /** @brief Creates a new VLAN on the specified interface
@@ -1166,7 +1259,7 @@ void reconfigureVLAN(sdbusplus::bus::bus& bus, ChannelParams& params,
         }
         ifaddrs6.push_back(std::move(*ifaddr6));
     }
-    auto dhcp = getDHCPProperty(bus, params);
+    EthernetInterface::DHCPConf dhcp = getDHCPProperty(bus, params);
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
     auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
     auto neighbor6 = findGatewayNeighbor<AF_INET6>(bus, params, neighbors);
@@ -1175,7 +1268,7 @@ void reconfigureVLAN(sdbusplus::bus::bus& bus, ChannelParams& params,
     createVLAN(bus, params, vlan);
 
     // Re-establish the saved settings
-    setDHCPProperty(bus, params, dhcp);
+    setDHCPv6Property(bus, params, dhcp, false);
     if (ifaddr4)
     {
         createIfAddr<AF_INET>(bus, params, ifaddr4->address, ifaddr4->prefix);
@@ -1395,7 +1488,12 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             {
                 case IPSrc::DHCP:
                 {
-                    channelCall<setDHCPProperty>(channel, true);
+                    // The IPSrc IPMI command is only for IPv4
+                    // management. Modifying IPv6 state is done using
+                    // a completely different Set LAN Configuration
+                    // subcommand.
+                    channelCall<setDHCPv4Property>(
+                        channel, EthernetInterface::DHCPConf::v4);
                     return responseSuccess();
                 }
                 case IPSrc::Unspecified:
@@ -1403,7 +1501,8 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                 case IPSrc::BIOS:
                 case IPSrc::BMC:
                 {
-                    channelCall<setDHCPProperty>(channel, false);
+                    channelCall<setDHCPv4Property>(
+                        channel, EthernetInterface::DHCPConf::none);
                     return responseSuccess();
                 }
             }
@@ -1540,7 +1639,10 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                 return responseReqDataLenInvalid();
             }
             std::bitset<8> expected;
-            if (channelCall<getDHCPProperty>(channel))
+            EthernetInterface::DHCPConf dhcp =
+                channelCall<getDHCPProperty>(channel);
+            if ((dhcp == EthernetInterface::DHCPConf::both) |
+                (dhcp == EthernetInterface::DHCPConf::v6))
             {
                 expected[IPv6RouterControlFlag::Dynamic] = 1;
             }
@@ -1690,7 +1792,10 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         case LanParam::IPSrc:
         {
             auto src = IPSrc::Static;
-            if (channelCall<getDHCPProperty>(channel))
+            EthernetInterface::DHCPConf dhcpSetting =
+                channelCall<getDHCPProperty>(channel);
+            if ((dhcpSetting == EthernetInterface::DHCPConf::v4) ||
+                (dhcpSetting == EthernetInterface::DHCPConf::both))
             {
                 src = IPSrc::DHCP;
             }
@@ -1811,7 +1916,10 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         case LanParam::IPv6RouterControl:
         {
             std::bitset<8> control;
-            if (channelCall<getDHCPProperty>(channel))
+            EthernetInterface::DHCPConf dhcp =
+                channelCall<getDHCPProperty>(channel);
+            if ((dhcp == EthernetInterface::DHCPConf::both) ||
+                (dhcp == EthernetInterface::DHCPConf::v6))
             {
                 control[IPv6RouterControlFlag::Dynamic] = 1;
             }
@@ -1825,7 +1933,10 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         case LanParam::IPv6StaticRouter1IP:
         {
             in6_addr gateway{};
-            if (!channelCall<getDHCPProperty>(channel))
+            EthernetInterface::DHCPConf dhcp =
+                channelCall<getDHCPProperty>(channel);
+            if ((dhcp == EthernetInterface::DHCPConf::v4) ||
+                (dhcp == EthernetInterface::DHCPConf::none))
             {
                 gateway =
                     channelCall<getGatewayProperty<AF_INET6>>(channel).value_or(
