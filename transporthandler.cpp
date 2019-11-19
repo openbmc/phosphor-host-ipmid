@@ -1304,6 +1304,13 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
                                  uint8_t parameter, uint8_t set, uint8_t block)
 {
     message::Payload ret;
+    auto channel = static_cast<uint8_t>(channelBits);
+
+    if (!ipmi::isValidChannel(static_cast<uint8_t>(channel)))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     constexpr uint8_t current_revision = 0x11;
     ret.pack(current_revision);
 
@@ -1312,7 +1319,6 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         return responseSuccess(std::move(ret));
     }
 
-    auto channel = static_cast<uint8_t>(channelBits);
     if (!doesDeviceExist(channel))
     {
         return responseInvalidFieldRequest();
@@ -1476,5 +1482,5 @@ void register_netfn_transport_functions()
                           ipmi::Privilege::Admin, ipmi::transport::setLan);
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
                           ipmi::transport::cmdGetLanConfigParameters,
-                          ipmi::Privilege::Admin, ipmi::transport::getLan);
+                          ipmi::Privilege::Operator, ipmi::transport::getLan);
 }
