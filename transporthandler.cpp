@@ -1476,5 +1476,5 @@ void register_netfn_transport_functions()
                           ipmi::Privilege::Admin, ipmi::transport::setLan);
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
                           ipmi::transport::cmdGetLanConfigParameters,
-                          ipmi::Privilege::Admin, ipmi::transport::getLan);
+                          ipmi::Privilege::Operator, ipmi::transport::getLan);
 }
