@@ -173,13 +173,6 @@ std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
              */
             return outPayload;
         }
-
-        auto check =
-            std::get<session::Manager&>(singletonPool).stopSession(sessionID);
-        if (!check)
-        {
-            response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
-        }
     }
     catch (std::exception& e)
     {
