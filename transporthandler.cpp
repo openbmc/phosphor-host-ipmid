@@ -759,6 +759,7 @@ void reconfigureIfAddr4(sdbusplus::bus::bus& bus, const ChannelParams& params,
         fallbackPrefix = ifaddr->prefix;
         deleteObjectIfExists(bus, params.service, ifaddr->path);
     }
+
     createIfAddr<AF_INET>(bus, params, address.value_or(ifaddr->address),
                           prefix.value_or(fallbackPrefix));
 }
@@ -1041,7 +1042,9 @@ uint8_t netmaskToPrefix(in_addr netmask)
         log<level::ERR>("Invalid netmask", entry("NETMASK=%s", maskStr));
         elog<InternalFailure>();
     }
-    return 32 - __builtin_ctz(x);
+    return static_cast<bool>(x)
+               ? AddrFamily<AF_INET>::defaultPrefix - __builtin_ctz(x)
+               : 0;
 }
 
 // We need to store this value so it can be returned to the client
