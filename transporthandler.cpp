@@ -1041,7 +1041,8 @@ uint8_t netmaskToPrefix(in_addr netmask)
         log<level::ERR>("Invalid netmask", entry("NETMASK=%s", maskStr));
         elog<InternalFailure>();
     }
-    return 32 - __builtin_ctz(x);
+    return x ? AddrFamily<AF_INET>::defaultPrefix - __builtin_ctz(x)
+             : AddrFamily<AF_INET>::defaultPrefix;
 }
 
 // We need to store this value so it can be returned to the client
