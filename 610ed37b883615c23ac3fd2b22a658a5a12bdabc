@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1ef592dc_f29594c4",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2019-11-21T19:15:50Z",
+      "side": 1,
+      "message": "The mutable is needed because cachedService is modified in readingData(const Info\u0026 sensorInfo), where the structure is passed in as a const reference.",
+      "parentUuid": "716161fe_adfbbf03",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 11
+      },
+      "revId": "610ed37b883615c23ac3fd2b22a658a5a12bdabc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5e8fec84_db5b20f5",
         "filename": "sensordatahandler.hpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "41dc6280_b25c4784",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2019-11-21T19:15:50Z",
+      "side": 1,
+      "message": "Added a logging statment.",
+      "parentUuid": "5e8fec84_db5b20f5",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 238,
+        "endChar": 15
+      },
+      "revId": "610ed37b883615c23ac3fd2b22a658a5a12bdabc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f716d5a2_63e0c78d",
         "filename": "sensordatahandler.hpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2019-11-15T01:16:59Z",
       "side": 1,
       "message": "Hm, I don\u0027t think this is a good idea. We are OK with using goto to do some cleanup and return, in some cases when the cleanup is nontrivial, but this is not a good place to use goto.",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 244,
+        "endChar": 23
+      },
+      "revId": "610ed37b883615c23ac3fd2b22a658a5a12bdabc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a1629d0_2923e280",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2019-11-21T19:15:50Z",
+      "side": 1,
+      "message": "Switched to a for loop.",
+      "parentUuid": "f716d5a2_63e0c78d",
       "range": {
         "startLine": 244,
         "startChar": 0,
