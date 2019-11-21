@@ -1,6 +1,12 @@
 #include <arpa/inet.h>
 #include <dirent.h>
+#include <fcntl.h>
+#include <linux/i2c-dev.h>
+#include <linux/i2c.h>
 #include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <chrono>
@@ -90,43 +96,6 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
     }
 
     return make_pair(found->first, std::move(found->second.begin()->first));
-}
-
-DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
-                           const std::string& interface,
-                           const std::string& serviceRoot,
-                           const std::string& match)
-{
-    auto objectTree = getAllDbusObjects(bus, serviceRoot, interface, match);
-
-    if (objectTree.empty())
-    {
-        log<level::ERR>("No Object has implemented the IP interface",
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-
-    DbusObjectInfo objectInfo;
-
-    for (auto& object : objectTree)
-    {
-        auto variant = ipmi::getDbusProperty(
-            bus, object.second.begin()->first, object.first,
-            ipmi::network::IP_INTERFACE, "Address");
-
-        objectInfo = std::make_pair(object.first, object.second.begin()->first);
-
-        // if LinkLocalIP found look for Non-LinkLocalIP
-        if (ipmi::network::isLinkLocalIP(std::get<std::string>(variant)))
-        {
-            continue;
-        }
-        else
-        {
-            break;
-        }
-    }
-    return objectInfo;
 }
 
 Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
@@ -431,114 +400,62 @@ void callDbusMethod(sdbusplus::bus::bus& bus, const std::string& service,
 }
 
 } // namespace method_no_args
-
-namespace network
+ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
+                      std::vector<uint8_t> writeData,
+                      std::vector<uint8_t>& readBuf)
 {
+    // Open the i2c device, for low-level combined data write/read
+    int i2cDev = ::open(i2cBus.c_str(), O_RDWR | O_CLOEXEC);
+    if (i2cDev < 0)
+    {
+        log<level::ERR>("Failed to open i2c bus",
+                        phosphor::logging::entry("BUS=%s", i2cBus.c_str()));
+        return ipmi::ccInvalidFieldRequest;
+    }
 
-bool isLinkLocalIP(const std::string& address)
-{
-    return address.find(IPV4_PREFIX) == 0 || address.find(IPV6_PREFIX) == 0;
+    const size_t writeCount = writeData.size();
+    const size_t readCount = readBuf.size();
+    int msgCount = 0;
+    i2c_msg i2cmsg[2] = {0};
+    if (writeCount)
+    {
+        // Data will be writtern to the slave address
+        i2cmsg[msgCount].addr = slaveAddr;
+        i2cmsg[msgCount].flags = 0x00;
+        i2cmsg[msgCount].len = writeCount;
+        i2cmsg[msgCount].buf = writeData.data();
+        msgCount++;
+    }
+    if (readCount)
+    {
+        // Data will be read into the buffer from the slave address
+        i2cmsg[msgCount].addr = slaveAddr;
+        i2cmsg[msgCount].flags = I2C_M_RD;
+        i2cmsg[msgCount].len = readCount;
+        i2cmsg[msgCount].buf = readBuf.data();
+        msgCount++;
+    }
+
+    i2c_rdwr_ioctl_data msgReadWrite = {0};
+    msgReadWrite.msgs = i2cmsg;
+    msgReadWrite.nmsgs = msgCount;
+
+    // Perform the combined write/read
+    int ret = ::ioctl(i2cDev, I2C_RDWR, &msgReadWrite);
+    ::close(i2cDev);
+
+    if (ret < 0)
+    {
+        log<level::ERR>("I2C WR Failed!",
+                        phosphor::logging::entry("RET=%d", ret));
+        return ipmi::ccUnspecifiedError;
+    }
+    if (readCount)
+    {
+        readBuf.resize(msgReadWrite.msgs[msgCount - 1].len);
+    }
+
+    return ipmi::ccSuccess;
 }
 
-void createIP(sdbusplus::bus::bus& bus, const std::string& service,
-              const std::string& objPath, const std::string& protocolType,
-              const std::string& ipaddress, uint8_t prefix)
-{
-    std::string gateway = "";
-
-    auto busMethod = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                         IP_CREATE_INTERFACE, "IP");
-
-    busMethod.append(protocolType, ipaddress, prefix, gateway);
-
-    auto reply = bus.call(busMethod);
-
-    if (reply.is_method_error())
-    {
-        log<level::ERR>("Failed to execute method", entry("METHOD=%s", "IP"),
-                        entry("PATH=%s", objPath.c_str()));
-        elog<InternalFailure>();
-    }
-}
-
-void createVLAN(sdbusplus::bus::bus& bus, const std::string& service,
-                const std::string& objPath, const std::string& interfaceName,
-                uint32_t vlanID)
-{
-    auto busMethod = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                         VLAN_CREATE_INTERFACE, "VLAN");
-
-    busMethod.append(interfaceName, vlanID);
-
-    auto reply = bus.call(busMethod);
-
-    if (reply.is_method_error())
-    {
-        log<level::ERR>("Failed to execute method", entry("METHOD=%s", "VLAN"),
-                        entry("PATH=%s", objPath.c_str()));
-        elog<InternalFailure>();
-    }
-}
-
-uint8_t toPrefix(int addressFamily, const std::string& subnetMask)
-{
-    if (addressFamily == AF_INET6)
-    {
-        return 0;
-    }
-
-    uint32_t buff{};
-
-    auto rc = inet_pton(addressFamily, subnetMask.c_str(), &buff);
-    if (rc <= 0)
-    {
-        log<level::ERR>("inet_pton failed:",
-                        entry("SUBNETMASK=%s", subnetMask.c_str()));
-        return 0;
-    }
-
-    buff = be32toh(buff);
-    // total no of bits - total no of leading zero == total no of ones
-    if (((sizeof(buff) * 8) - (__builtin_ctz(buff))) ==
-        __builtin_popcount(buff))
-    {
-        return __builtin_popcount(buff);
-    }
-    else
-    {
-        log<level::ERR>("Invalid Mask",
-                        entry("SUBNETMASK=%s", subnetMask.c_str()));
-        return 0;
-    }
-}
-
-uint32_t getVLAN(const std::string& path)
-{
-    // Path would be look like
-    // /xyz/openbmc_project/network/eth0_443/ipv4
-
-    uint32_t vlanID = 0;
-    try
-    {
-        auto intfObjectPath = path.substr(0, path.find(IP_TYPE) - 1);
-
-        auto intfName = intfObjectPath.substr(intfObjectPath.rfind("/") + 1);
-
-        auto index = intfName.find("_");
-        if (index != std::string::npos)
-        {
-            auto str = intfName.substr(index + 1);
-            vlanID = std::stoul(str);
-        }
-    }
-    catch (std::exception& e)
-    {
-        log<level::ERR>("Exception occurred during getVLAN",
-                        entry("PATH=%s", path.c_str()),
-                        entry("EXCEPTION=%s", e.what()));
-    }
-    return vlanID;
-}
-
-} // namespace network
 } // namespace ipmi

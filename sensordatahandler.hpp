@@ -1,5 +1,7 @@
 #pragma once
 
+#include "config.h"
+
 #include "sensorhandler.hpp"
 
 #include <cmath>
@@ -154,7 +156,6 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
-    auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
@@ -164,8 +165,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)),
-                      responseData);
+    setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)), &response);
 
     return response;
 }
@@ -182,13 +182,39 @@ template <typename T>
 GetSensorResponse readingData(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    GetSensorResponse response{};
-    auto responseData = reinterpret_cast<GetReadingResponse*>(response.data());
 
-    enableScanning(responseData);
+    GetSensorResponse response{};
+
+    enableScanning(&response);
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
+
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    // Check the OperationalStatus interface for functional property
+    if (sensorInfo.propertyInterfaces.begin()->first ==
+        "xyz.openbmc_project.Sensor.Value")
+    {
+        bool functional = true;
+        try
+        {
+            auto funcValue = ipmi::getDbusProperty(
+                bus, service, sensorInfo.sensorPath,
+                "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "Functional");
+            functional = std::get<bool>(funcValue);
+        }
+        catch (...)
+        {
+            // No-op if Functional property could not be found since this
+            // check is only valid for Sensor.Value read for hwmonio
+        }
+        if (!functional)
+        {
+            throw SensorFunctionalError();
+        }
+    }
+#endif
 
     auto propValue = ipmi::getDbusProperty(
         bus, service, sensorInfo.sensorPath,
@@ -200,8 +226,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
     auto rawData = static_cast<uint8_t>((value - sensorInfo.scaledOffset) /
                                         sensorInfo.coefficientM);
-
-    setReading(rawData, responseData);
+    setReading(rawData, &response);
 
     return response;
 }

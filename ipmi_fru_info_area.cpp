@@ -2,9 +2,11 @@
 
 #include <algorithm>
 #include <ctime>
+#include <iomanip>
 #include <map>
 #include <numeric>
 #include <phosphor-logging/elog.hpp>
+#include <sstream>
 
 namespace ipmi
 {
@@ -13,12 +15,12 @@ namespace fru
 using namespace phosphor::logging;
 
 // Property variables
-static constexpr auto partNumber = "PartNumber";
-static constexpr auto serialNumber = "SerialNumber";
+static constexpr auto partNumber = "Part Number";
+static constexpr auto serialNumber = "Serial Number";
 static constexpr auto manufacturer = "Manufacturer";
-static constexpr auto buildDate = "BuildDate";
+static constexpr auto buildDate = "Mfg Date";
 static constexpr auto model = "Model";
-static constexpr auto prettyName = "PrettyName";
+static constexpr auto prettyName = "Name";
 static constexpr auto version = "Version";
 static constexpr auto type = "Type";
 
@@ -193,6 +195,29 @@ void appendData(const Property& key, const PropertyMap& propMap,
     }
 }
 
+std::time_t timeStringToRaw(const std::string& input)
+{
+    // TODO: For non-US region timestamps, pass in region information for the
+    // FRU to avoid the month/day swap.
+    // 2017-02-24 - 13:59:00, Tue Nov 20 23:08:00 2018
+    static const std::vector<std::string> patterns = {"%Y-%m-%d - %H:%M:%S",
+                                                      "%a %b %d %H:%M:%S %Y"};
+
+    std::tm time = {};
+
+    for (const auto& pattern : patterns)
+    {
+        std::istringstream timeStream(input);
+        timeStream >> std::get_time(&time, pattern.c_str());
+        if (!timeStream.fail())
+        {
+            break;
+        }
+    }
+
+    return std::mktime(&time);
+}
+
 /**
  * @brief Appends Build Date
  *
@@ -205,9 +230,7 @@ void appendMfgDate(const PropertyMap& propMap, FruAreaData& data)
     auto iter = propMap.find(buildDate);
     if ((iter != propMap.end()) && (iter->second.size() > 0))
     {
-        tm time = {};
-        strptime(iter->second.c_str(), "%F - %H:%M:%S", &time);
-        time_t raw = mktime(&time);
+        std::time_t raw = timeStringToRaw(iter->second);
 
         // From FRU Spec:
         // "Mfg. Date / Time

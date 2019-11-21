@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <ipmid/api-types.hpp>
 #include <ipmid/types.hpp>
 #include <optional>
 #include <sdbusplus/server.hpp>
@@ -111,20 +112,6 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
                              const std::string& interface,
                              const std::string& subtreePath = ROOT,
                              const std::string& match = {});
-
-/** @brief Get the ipObject of first dbus IP object of Non-LinkLocalIPAddress
- *         type from the given subtree, if not available gets IP object of
- *         LinkLocalIPAddress type.
- *  @param[in] bus - DBUS Bus Object.
- *  @param[in] interface - Dbus interface.
- *  @param[in] subtreePath - subtree from where the search should start.
- *  @param[in] match - identifier for object.
- *  @return On success returns the object having objectpath and servicename.
- */
-DbusObjectInfo getIPObject(sdbusplus::bus::bus& bus,
-                           const std::string& interface,
-                           const std::string& subtreePath,
-                           const std::string& match);
 
 /** @brief Gets the value associated with the given object
  *         and the interface.
@@ -250,59 +237,13 @@ void callDbusMethod(sdbusplus::bus::bus& bus, const std::string& service,
 
 } // namespace method_no_args
 
-namespace network
-{
-
-constexpr auto ROOT = "/xyz/openbmc_project/network";
-constexpr auto SERVICE = "xyz.openbmc_project.Network";
-constexpr auto IP_TYPE = "ipv4";
-constexpr auto IPV4_PREFIX = "169.254";
-constexpr auto IPV6_PREFIX = "fe80";
-constexpr auto IP_INTERFACE = "xyz.openbmc_project.Network.IP";
-constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
-constexpr auto SYSTEMCONFIG_INTERFACE =
-    "xyz.openbmc_project.Network.SystemConfiguration";
-constexpr auto ETHERNET_INTERFACE =
-    "xyz.openbmc_project.Network.EthernetInterface";
-constexpr auto IP_CREATE_INTERFACE = "xyz.openbmc_project.Network.IP.Create";
-constexpr auto VLAN_CREATE_INTERFACE =
-    "xyz.openbmc_project.Network.VLAN.Create";
-constexpr auto VLAN_INTERFACE = "xyz.openbmc_project.Network.VLAN";
-
-/* @brief converts the given subnet into prefix notation.
- * @param[in] addressFamily - IP address family(AF_INET/AF_INET6).
- * @param[in] mask - Subnet Mask.
- * @returns prefix.
+/** @brief Perform the low-level i2c bus write-read.
+ *  @param[in] i2cBus - i2c bus device node name, such as /dev/i2c-2.
+ *  @param[in] slaveAddr - i2c device slave address.
+ *  @param[in] writeData - The data written to i2c device.
+ *  @param[out] readBuf - Data read from the i2c device.
  */
-uint8_t toPrefix(int addressFamily, const std::string& subnetMask);
-
-/** @brief Sets the ip on the system.
- *  @param[in] bus - DBUS Bus Object.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] protocolType - Protocol type
- *  @param[in] ipaddress - IPaddress.
- *  @param[in] prefix - Prefix length.
- */
-void createIP(sdbusplus::bus::bus& bus, const std::string& service,
-              const std::string& objPath, const std::string& protocolType,
-              const std::string& ipaddress, uint8_t prefix);
-
-/** @brief Creates the VLAN on the given interface.
- *  @param[in] bus - DBUS Bus Object.
- *  @param[in] service - Dbus service name.
- *  @param[in] objPath - Dbus object path.
- *  @param[in] interface - EthernetInterface.
- *  @param[in] vlanID - Vlan ID.
- */
-void createVLAN(sdbusplus::bus::bus& bus, const std::string& service,
-                const std::string& objPath, const std::string& interface,
-                uint32_t vlanID);
-
-/** @brief Gets the vlan id from the given object path.
- *  @param[in] path - Dbus object path.
- */
-uint32_t getVLAN(const std::string& path);
-
-} // namespace network
+ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
+                      std::vector<uint8_t> writeData,
+                      std::vector<uint8_t>& readBuf);
 } // namespace ipmi

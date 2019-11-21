@@ -767,6 +767,38 @@ int initiate_state_transition(State::Host::Transition transition)
     return rc;
 }
 
+//------------------------------------------
+// Set Enabled property to inform NMI source
+// handling to trigger a NMI_OUT BSOD.
+//------------------------------------------
+int setNmiProperty(const bool value)
+{
+    constexpr const char* nmiSourceObjPath =
+        "/xyz/openbmc_project/Chassis/Control/NMISource";
+    constexpr const char* nmiSourceIntf =
+        "xyz.openbmc_project.Chassis.Control.NMISource";
+    std::string bmcSourceSignal = "xyz.openbmc_project.Chassis.Control."
+                                  "NMISource.BMCSourceSignal.ChassisCmd";
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+
+    try
+    {
+        auto service = ipmi::getService(*busp, nmiSourceIntf, nmiSourceObjPath);
+        ipmi::setDbusProperty(*busp, service, nmiSourceObjPath, nmiSourceIntf,
+                              "BMCSource", bmcSourceSignal);
+        ipmi::setDbusProperty(*busp, service, nmiSourceObjPath, nmiSourceIntf,
+                              "Enabled", value);
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>("Failed to trigger NMI_OUT",
+                        entry("EXCEPTION=%s", e.what()));
+        return -1;
+    }
+
+    return 0;
+}
+
 namespace power_policy
 {
 
@@ -1172,6 +1204,10 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
             rc = initiate_state_transition(State::Host::Transition::Off);
             break;
 
+        case CMD_PULSE_DIAGNOSTIC_INTR:
+            rc = setNmiProperty(true);
+            break;
+
         default:
         {
             log<level::ERR>("Invalid Chassis Control command",
@@ -1327,7 +1363,9 @@ std::map<IpmiValue, Source::Sources> sourceIpmiToDbus = {
     {ipmiDefault, Source::Sources::Default}};
 
 std::map<IpmiValue, Mode::Modes> modeIpmiToDbus = {
+#ifdef ENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT
     {0x03, Mode::Modes::Safe},
+#endif // ENABLE_BOOT_SAFE_MODE_SUPPORT
     {0x06, Mode::Modes::Setup},
     {ipmiDefault, Mode::Modes::Regular}};
 
@@ -1339,7 +1377,9 @@ std::map<Source::Sources, IpmiValue> sourceDbusToIpmi = {
     {Source::Sources::Default, ipmiDefault}};
 
 std::map<Mode::Modes, IpmiValue> modeDbusToIpmi = {
+#ifdef ENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT
     {Mode::Modes::Safe, 0x03},
+#endif // ENABLE_BOOT_SAFE_MODE_SUPPORT
     {Mode::Modes::Setup, 0x06},
     {Mode::Modes::Regular, ipmiDefault}};
 

@@ -1,4 +1,4 @@
-#Device ID Configuration#
+# Device ID Configuration
 
 There is a default dev_id.json file provided by
 meta-phosphor/common/recipes-phosphor/ipmi/phosphor-ipmi-host.bb

@@ -217,9 +217,10 @@ void PasswdMgr::initPasswordMap(void)
         char* outPtr = reinterpret_cast<char*>(dataBuf.data());
         char* nToken = NULL;
         char* linePtr = strtok_r(outPtr, "\n", &nToken);
-        size_t userEPos = 0, lineSize = 0;
+        size_t lineSize = 0;
         while (linePtr != NULL)
         {
+            size_t userEPos = 0;
             std::string lineStr(linePtr);
             if ((userEPos = lineStr.find(":")) != std::string::npos)
             {
@@ -355,11 +356,12 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     if (inBytesLen != 0)
     {
         char* outPtr = reinterpret_cast<char*>(dataBuf.data());
-        size_t userEPos = 0;
         char* nToken = NULL;
         char* linePtr = strtok_r(outPtr, "\n", &nToken);
         while (linePtr != NULL)
         {
+            size_t userEPos = 0;
+
             std::string lineStr(linePtr);
             if ((userEPos = lineStr.find(":")) != std::string::npos)
             {
@@ -441,7 +443,6 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
         log<level::DEBUG>("Error creating temp file");
         return -EIO;
     }
-    fd = -1; // don't use fd anymore, as the File object owns it
 
     // Set the file mode as of actual ipmi-pass file.
     if (fchmod(fileno((temp)()), st.st_mode) < 0)

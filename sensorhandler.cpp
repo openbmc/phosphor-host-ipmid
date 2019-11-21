@@ -1,5 +1,8 @@
+#include "config.h"
+
 #include "sensorhandler.hpp"
 
+#include "entity_map_json.hpp"
 #include "fruread.hpp"
 
 #include <mapper.h>
@@ -24,9 +27,16 @@ static constexpr uint8_t BMCSlaveAddress = 0x20;
 
 extern int updateSensorRecordFromSSRAESC(const void*);
 extern sd_bus* bus;
-extern const ipmi::sensor::IdInfoMap sensors;
+
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+} // namespace sensor
+} // namespace ipmi
+
 extern const FruMap frus;
-extern const ipmi::sensor::EntityInfoMap entities;
 
 using namespace phosphor::logging;
 using InternalFailure =
@@ -69,18 +79,6 @@ struct sensor_data_t
     uint8_t sennum;
 } __attribute__((packed));
 
-struct sensorreadingresp_t
-{
-    uint8_t value;
-    uint8_t operation;
-    uint8_t indication[2];
-} __attribute__((packed));
-
-const ipmi::sensor::EntityInfoMap& getIpmiEntityRecords()
-{
-    return entities;
-}
-
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -93,8 +91,8 @@ int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
 {
     int rc;
 
-    const auto& sensor_it = sensors.find(num);
-    if (sensor_it == sensors.end())
+    const auto& sensor_it = ipmi::sensor::sensors.find(num);
+    if (sensor_it == ipmi::sensor::sensors.end())
     {
         // The sensor map does not contain the sensor requested
         return -EINVAL;
@@ -327,16 +325,54 @@ bool isAnalogSensor(const std::string& interface)
     return (analogSensorInterfaces.count(interface));
 }
 
-ipmi_ret_t setSensorReading(void* request)
+/**
+@brief This command is used to set sensorReading.
+
+@param
+    -  sensorNumber
+    -  operation
+    -  reading
+    -  assertOffset0_7
+    -  assertOffset8_14
+    -  deassertOffset0_7
+    -  deassertOffset8_14
+    -  eventData1
+    -  eventData2
+    -  eventData3
+
+@return completion code on success.
+**/
+
+ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
+                                     uint8_t reading, uint8_t assertOffset0_7,
+                                     uint8_t assertOffset8_14,
+                                     uint8_t deassertOffset0_7,
+                                     uint8_t deassertOffset8_14,
+                                     uint8_t eventData1, uint8_t eventData2,
+                                     uint8_t eventData3)
 {
-    ipmi::sensor::SetSensorReadingReq cmdData =
-        *(static_cast<ipmi::sensor::SetSensorReadingReq*>(request));
+    log<level::DEBUG>("IPMI SET_SENSOR",
+                      entry("SENSOR_NUM=0x%02x", sensorNumber));
+
+    ipmi::sensor::SetSensorReadingReq cmdData;
+
+    cmdData.number = sensorNumber;
+    cmdData.operation = operation;
+    cmdData.reading = reading;
+    cmdData.assertOffset0_7 = assertOffset0_7;
+    cmdData.assertOffset8_14 = assertOffset8_14;
+    cmdData.deassertOffset0_7 = deassertOffset0_7;
+    cmdData.deassertOffset8_14 = deassertOffset8_14;
+    cmdData.eventData1 = eventData1;
+    cmdData.eventData2 = eventData2;
+    cmdData.eventData3 = eventData3;
 
     // Check if the Sensor Number is present
-    const auto iter = sensors.find(cmdData.number);
-    if (iter == sensors.end())
+    const auto iter = ipmi::sensor::sensors.find(sensorNumber);
+    if (iter == ipmi::sensor::sensors.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        updateSensorRecordFromSSRAESC(&sensorNumber);
+        return ipmi::responseSuccess();
     }
 
     try
@@ -345,86 +381,98 @@ ipmi_ret_t setSensorReading(void* request)
             (iter->second.mutability & ipmi::sensor::Mutability::Write))
         {
             log<level::ERR>("Sensor Set operation is not allowed",
-                            entry("SENSOR_NUM=%d", cmdData.number));
-            return IPMI_CC_ILLEGAL_COMMAND;
+                            entry("SENSOR_NUM=%d", sensorNumber));
+            return ipmi::responseIllegalCommand();
         }
-        return iter->second.updateFunc(cmdData, iter->second);
+        auto ipmiRC = iter->second.updateFunc(cmdData, iter->second);
+        return ipmi::response(ipmiRC);
     }
     catch (InternalFailure& e)
     {
         log<level::ERR>("Set sensor failed",
-                        entry("SENSOR_NUM=%d", cmdData.number));
+                        entry("SENSOR_NUM=%d", sensorNumber));
         commit<InternalFailure>();
+        return ipmi::responseUnspecifiedError();
     }
     catch (const std::runtime_error& e)
     {
         log<level::ERR>(e.what());
+        return ipmi::responseUnspecifiedError();
     }
-
-    return IPMI_CC_UNSPECIFIED_ERROR;
 }
 
-ipmi_ret_t ipmi_sen_set_sensor(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                               ipmi_request_t request, ipmi_response_t response,
-                               ipmi_data_len_t data_len, ipmi_context_t context)
+/** @brief implements the get sensor reading command
+ *  @param sensorNum - sensor number
+ *
+ *  @returns IPMI completion code plus response data
+ *   - senReading           - sensor reading
+ *   - reserved
+ *   - readState            - sensor reading state enabled
+ *   - senScanState         - sensor scan state disabled
+ *   - allEventMessageState - all Event message state disabled
+ *   - assertionStatesLsb   - threshold levels states
+ *   - assertionStatesMsb   - discrete reading sensor states
+ */
+ipmi::RspType<uint8_t, // sensor reading
+
+              uint5_t, // reserved
+              bool,    // reading state
+              bool,    // 0 = sensor scanning state disabled
+              bool,    // 0 = all event messages disabled
+
+              uint8_t, // threshold levels states
+              uint8_t  // discrete reading sensor states
+              >
+    ipmiSensorGetSensorReading(uint8_t sensorNum)
 {
-    auto reqptr = static_cast<sensor_data_t*>(request);
-
-    log<level::DEBUG>("IPMI SET_SENSOR",
-                      entry("SENSOR_NUM=0x%02x", reqptr->sennum));
-
-    /*
-     * This would support the Set Sensor Reading command for the presence
-     * and functional state of Processor, Core & DIMM. For the remaining
-     * sensors the existing support is invoked.
-     */
-    auto ipmiRC = setSensorReading(request);
-
-    if (ipmiRC == IPMI_CC_SENSOR_INVALID)
+    if (sensorNum == 0xFF)
     {
-        updateSensorRecordFromSSRAESC(reqptr);
-        ipmiRC = IPMI_CC_OK;
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    *data_len = 0;
-    return ipmiRC;
-}
-
-ipmi_ret_t ipmi_sen_get_sensor_reading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                       ipmi_request_t request,
-                                       ipmi_response_t response,
-                                       ipmi_data_len_t data_len,
-                                       ipmi_context_t context)
-{
-    auto reqptr = static_cast<sensor_data_t*>(request);
-    auto resp = static_cast<sensorreadingresp_t*>(response);
-    ipmi::sensor::GetSensorResponse getResponse{};
-    static constexpr auto scanningEnabledBit = 6;
-
-    const auto iter = sensors.find(reqptr->sennum);
-    if (iter == sensors.end())
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
+    if (iter == ipmi::sensor::sensors.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
     if (ipmi::sensor::Mutability::Read !=
         (iter->second.mutability & ipmi::sensor::Mutability::Read))
     {
-        return IPMI_CC_ILLEGAL_COMMAND;
+        return ipmi::responseIllegalCommand();
     }
 
     try
     {
-        getResponse = iter->second.getFunc(iter->second);
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        resp->operation = 1 << scanningEnabledBit;
-        return IPMI_CC_OK;
+        ipmi::sensor::GetSensorResponse getResponse =
+            iter->second.getFunc(iter->second);
+
+        return ipmi::responseSuccess(getResponse.reading, uint5_t(0),
+                                     getResponse.readingOrStateUnavailable,
+                                     getResponse.scanningEnabled,
+                                     getResponse.allEventMessagesEnabled,
+                                     getResponse.thresholdLevelsStates,
+                                     getResponse.discreteReadingSensorStates);
     }
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    catch (const SensorFunctionalError& e)
+    {
+        return ipmi::responseResponseError();
+    }
+#endif
     catch (const std::exception& e)
     {
-        *data_len = getResponse.size();
-        std::memcpy(resp, getResponse.data(), *data_len);
-        return IPMI_CC_OK;
+        // Intitilizing with default values
+        constexpr uint8_t senReading = 0;
+        constexpr uint5_t reserved{0};
+        constexpr bool readState = true;
+        constexpr bool senScanState = false;
+        constexpr bool allEventMessageState = false;
+        constexpr uint8_t assertionStatesLsb = 0;
+        constexpr uint8_t assertionStatesMsb = 0;
+
+        return ipmi::responseSuccess(senReading, reserved, readState,
+                                     senScanState, allEventMessageState,
+                                     assertionStatesLsb, assertionStatesMsb);
     }
 }
 
@@ -438,7 +486,7 @@ void getSensorThresholds(uint8_t sensorNum,
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
 
-    const auto iter = sensors.find(sensorNum);
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
     const auto info = iter->second;
 
     auto service = ipmi::getService(bus, info.sensorInterface, info.sensorPath);
@@ -512,8 +560,8 @@ ipmi_ret_t ipmi_sen_get_sensor_thresholds(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto sensorNum = *(reinterpret_cast<const uint8_t*>(request));
     *data_len = 0;
 
-    const auto iter = sensors.find(sensorNum);
-    if (iter == sensors.end())
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
+    if (iter == ipmi::sensor::sensors.end())
     {
         return IPMI_CC_SENSOR_INVALID;
     }
@@ -578,13 +626,16 @@ ipmi::RspType<uint8_t, // respcount
     if (count.value_or(0) == getSdrCount)
     {
         // Get SDR count. This returns the total number of SDRs in the device.
-        const auto& entityRecords = getIpmiEntityRecords();
-        sdrCount = sensors.size() + frus.size() + entityRecords.size();
+        const auto& entityRecords =
+            ipmi::sensor::EntityInfoMapContainer::getContainer()
+                ->getIpmiEntityRecords();
+        sdrCount =
+            ipmi::sensor::sensors.size() + frus.size() + entityRecords.size();
     }
     else if (count.value_or(0) == getSensorCount)
     {
         // Get Sensor count. This returns the number of sensors
-        sdrCount = sensors.size();
+        sdrCount = ipmi::sensor::sensors.size();
     }
     else
     {
@@ -746,7 +797,9 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     {
         // we have reached till end of fru, so assign the next record id to
         // 512(Max fru ID = 511) + Entity Record ID(may start with 0).
-        const auto& entityRecords = getIpmiEntityRecords();
+        const auto& entityRecords =
+            ipmi::sensor::EntityInfoMapContainer::getContainer()
+                ->getIpmiEntityRecords();
         auto next_record_id =
             (entityRecords.size())
                 ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
@@ -785,7 +838,9 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     get_sdr::SensorDataEntityRecord record{};
     auto dataLength = 0;
 
-    const auto& entityRecords = getIpmiEntityRecords();
+    const auto& entityRecords =
+        ipmi::sensor::EntityInfoMapContainer::getContainer()
+            ->getIpmiEntityRecords();
     auto entity = entityRecords.begin();
     uint8_t entityRecordID;
     auto recordID = get_sdr::request::get_record_id(req);
@@ -856,100 +911,97 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
     get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
     get_sdr::SensorDataFullRecord record = {0};
-    if (req != NULL)
+
+    // Note: we use an iterator so we can provide the next ID at the end of
+    // the call.
+    auto sensor = ipmi::sensor::sensors.begin();
+    auto recordID = get_sdr::request::get_record_id(req);
+
+    // At the beginning of a scan, the host side will send us id=0.
+    if (recordID != 0)
     {
-        // Note: we use an iterator so we can provide the next ID at the end of
-        // the call.
-        auto sensor = sensors.begin();
-        auto recordID = get_sdr::request::get_record_id(req);
-
-        // At the beginning of a scan, the host side will send us id=0.
-        if (recordID != 0)
+        // recordID 0 to 255 means it is a FULL record.
+        // recordID 256 to 511 means it is a FRU record.
+        // recordID greater then 511 means it is a Entity Association
+        // record. Currently we are supporting three record types: FULL
+        // record, FRU record and Enttiy Association record.
+        if (recordID >= ENTITY_RECORD_ID_START)
         {
-            // recordID 0 to 255 means it is a FULL record.
-            // recordID 256 to 511 means it is a FRU record.
-            // recordID greater then 511 means it is a Entity Association
-            // record. Currently we are supporting three record types: FULL
-            // record, FRU record and Enttiy Association record.
-            if (recordID >= ENTITY_RECORD_ID_START)
-            {
-                return ipmi_entity_get_sdr(request, response, data_len);
-            }
-            else if (recordID >= FRU_RECORD_ID_START &&
-                     recordID < ENTITY_RECORD_ID_START)
-            {
-                return ipmi_fru_get_sdr(request, response, data_len);
-            }
-            else
-            {
-                sensor = sensors.find(recordID);
-                if (sensor == sensors.end())
-                {
-                    return IPMI_CC_SENSOR_INVALID;
-                }
-            }
+            return ipmi_entity_get_sdr(request, response, data_len);
         }
-
-        uint8_t sensor_id = sensor->first;
-
-        /* Header */
-        get_sdr::header::set_record_id(sensor_id, &(record.header));
-        record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
-        record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
-        record.header.record_length = sizeof(get_sdr::SensorDataFullRecord);
-
-        /* Key */
-        get_sdr::key::set_owner_id_bmc(&(record.key));
-        record.key.sensor_number = sensor_id;
-
-        /* Body */
-        record.body.entity_id = sensor->second.entityType;
-        record.body.sensor_type = sensor->second.sensorType;
-        record.body.event_reading_type = sensor->second.sensorReadingType;
-        record.body.entity_instance = sensor->second.instance;
-        if (ipmi::sensor::Mutability::Write ==
-            (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+        else if (recordID >= FRU_RECORD_ID_START &&
+                 recordID < ENTITY_RECORD_ID_START)
         {
-            get_sdr::body::init_settable_state(true, &(record.body));
-        }
-
-        // Set the type-specific details given the DBus interface
-        ret = populate_record_from_dbus(&(record.body), &(sensor->second),
-                                        data_len);
-
-        if (++sensor == sensors.end())
-        {
-            // we have reached till end of sensor, so assign the next record id
-            // to 256(Max Sensor ID = 255) + FRU ID(may start with 0).
-            auto next_record_id =
-                (frus.size()) ? frus.begin()->first + FRU_RECORD_ID_START
-                              : END_OF_RECORD;
-
-            get_sdr::response::set_next_record_id(next_record_id, resp);
+            return ipmi_fru_get_sdr(request, response, data_len);
         }
         else
         {
-            get_sdr::response::set_next_record_id(sensor->first, resp);
+            sensor = ipmi::sensor::sensors.find(recordID);
+            if (sensor == ipmi::sensor::sensors.end())
+            {
+                return IPMI_CC_SENSOR_INVALID;
+            }
         }
-
-        if (req->offset > sizeof(record))
-        {
-            return IPMI_CC_PARM_OUT_OF_RANGE;
-        }
-
-        // data_len will ultimately be the size of the record, plus
-        // the size of the next record ID:
-        *data_len = std::min(static_cast<size_t>(req->bytes_to_read),
-                             sizeof(record) - req->offset);
-
-        std::memcpy(resp->record_data,
-                    reinterpret_cast<uint8_t*>(&record) + req->offset,
-                    *data_len);
-
-        // data_len should include the LSB and MSB:
-        *data_len +=
-            sizeof(resp->next_record_id_lsb) + sizeof(resp->next_record_id_msb);
     }
+
+    uint8_t sensor_id = sensor->first;
+
+    /* Header */
+    get_sdr::header::set_record_id(sensor_id, &(record.header));
+    record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
+    record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
+    record.header.record_length = sizeof(get_sdr::SensorDataFullRecord);
+
+    /* Key */
+    get_sdr::key::set_owner_id_bmc(&(record.key));
+    record.key.sensor_number = sensor_id;
+
+    /* Body */
+    record.body.entity_id = sensor->second.entityType;
+    record.body.sensor_type = sensor->second.sensorType;
+    record.body.event_reading_type = sensor->second.sensorReadingType;
+    record.body.entity_instance = sensor->second.instance;
+    if (ipmi::sensor::Mutability::Write ==
+        (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+    {
+        get_sdr::body::init_settable_state(true, &(record.body));
+    }
+
+    // Set the type-specific details given the DBus interface
+    ret =
+        populate_record_from_dbus(&(record.body), &(sensor->second), data_len);
+
+    if (++sensor == ipmi::sensor::sensors.end())
+    {
+        // we have reached till end of sensor, so assign the next record id
+        // to 256(Max Sensor ID = 255) + FRU ID(may start with 0).
+        auto next_record_id = (frus.size())
+                                  ? frus.begin()->first + FRU_RECORD_ID_START
+                                  : END_OF_RECORD;
+
+        get_sdr::response::set_next_record_id(next_record_id, resp);
+    }
+    else
+    {
+        get_sdr::response::set_next_record_id(sensor->first, resp);
+    }
+
+    if (req->offset > sizeof(record))
+    {
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+    }
+
+    // data_len will ultimately be the size of the record, plus
+    // the size of the next record ID:
+    *data_len = std::min(static_cast<size_t>(req->bytes_to_read),
+                         sizeof(record) - req->offset);
+
+    std::memcpy(resp->record_data,
+                reinterpret_cast<uint8_t*>(&record) + req->offset, *data_len);
+
+    // data_len should include the LSB and MSB:
+    *data_len +=
+        sizeof(resp->next_record_id_lsb) + sizeof(resp->next_record_id_msb);
 
     return ret;
 }
@@ -1058,12 +1110,13 @@ void register_netfn_sen_functions()
                            ipmi_sen_get_sensor_type, PRIVILEGE_USER);
 
     // <Set Sensor Reading and Event Status>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_SET_SENSOR, nullptr,
-                           ipmi_sen_set_sensor, PRIVILEGE_OPERATOR);
-
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
+                          ipmi::Privilege::Operator, ipmiSetSensorReading);
     // <Get Sensor Reading>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_SENSOR_READING, nullptr,
-                           ipmi_sen_get_sensor_reading, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorReading,
+                          ipmi::Privilege::User, ipmiSensorGetSensorReading);
 
     // <Reserve Device SDR Repository>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,

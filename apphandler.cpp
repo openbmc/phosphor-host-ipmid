@@ -20,6 +20,8 @@
 #include <filesystem>
 #include <fstream>
 #include <ipmid/api.hpp>
+#include <ipmid/sessiondef.hpp>
+#include <ipmid/sessionhelper.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <memory>
@@ -29,7 +31,6 @@
 #include <sdbusplus/message/types.hpp>
 #include <string>
 #include <sys_info_param.hpp>
-#include <transporthandler.hpp>
 #include <tuple>
 #include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -60,6 +61,7 @@ using Activation =
 using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
 
+#ifdef ENABLE_I2C_WHITELIST_CHECK
 typedef struct
 {
     uint8_t busId;
@@ -78,7 +80,6 @@ static std::vector<i2cMasterWRWhitelist>& getWRWhitelist()
 static constexpr const char* i2cMasterWRWhitelistFile =
     "/usr/share/ipmi-providers/master_write_read_white_list.json";
 
-static constexpr uint8_t maxIPMIWriteReadSize = 144;
 static constexpr const char* filtersStr = "filters";
 static constexpr const char* busIdStr = "busId";
 static constexpr const char* slaveAddrStr = "slaveAddr";
@@ -86,6 +87,8 @@ static constexpr const char* slaveAddrMaskStr = "slaveAddrMask";
 static constexpr const char* cmdStr = "command";
 static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
+#endif // ENABLE_I2C_WHITELIST_CHECK
+static constexpr uint8_t maxIPMIWriteReadSize = 144;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -840,6 +843,408 @@ auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
     return ipmi::responseSuccess(uuid);
 }
 
+/**
+ * @brief set the session state as teardown
+ *
+ * This function is to set the session state to tear down in progress if the
+ * state is active.
+ *
+ * @param[in] busp - Dbus obj
+ * @param[in] service - service name
+ * @param[in] obj - object path
+ *
+ * @return success completion code if it sets the session state to
+ * tearDownInProgress else return the corresponding error completion code.
+ **/
+uint8_t setSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
+                        const std::string& service, const std::string& obj)
+{
+    try
+    {
+        uint8_t sessionState = std::get<uint8_t>(ipmi::getDbusProperty(
+            *busp, service, obj, session::sessionIntf, "State"));
+
+        if (sessionState == static_cast<uint8_t>(session::State::active))
+        {
+            ipmi::setDbusProperty(
+                *busp, service, obj, session::sessionIntf, "State",
+                static_cast<uint8_t>(session::State::tearDownInProgress));
+            return ipmi::ccSuccess;
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>("Failed in getting session state property",
+                        entry("service=%s", service.c_str()),
+                        entry("object path=%s", obj.c_str()),
+                        entry("interface=%s", session::sessionIntf));
+        return ipmi::ccUnspecifiedError;
+    }
+
+    return ipmi::ccInvalidFieldRequest;
+}
+
+ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
+                                    std::optional<uint8_t> requestSessionHandle)
+{
+    auto busp = getSdBus();
+    uint8_t reqSessionHandle =
+        requestSessionHandle.value_or(session::defaultSessionHandle);
+
+    if (reqSessionId == session::sessionZero &&
+        reqSessionHandle == session::defaultSessionHandle)
+    {
+        return ipmi::response(session::ccInvalidSessionId);
+    }
+
+    if (reqSessionId == session::sessionZero &&
+        reqSessionHandle == session::invalidSessionHandle)
+    {
+        return ipmi::response(session::ccInvalidSessionHandle);
+    }
+
+    if (reqSessionId != session::sessionZero &&
+        reqSessionHandle != session::defaultSessionHandle)
+    {
+        return ipmi::response(ipmi::ccInvalidFieldRequest);
+    }
+
+    try
+    {
+        ipmi::ObjectTree objectTree = ipmi::getAllDbusObjects(
+            *busp, session::sessionManagerRootPath, session::sessionIntf);
+
+        for (auto& objectTreeItr : objectTree)
+        {
+            const std::string obj = objectTreeItr.first;
+
+            if (isSessionObjectMatched(obj, reqSessionId, reqSessionHandle))
+            {
+                auto& serviceMap = objectTreeItr.second;
+
+                // Session id and session handle are unique for each session.
+                // Session id and handler are retrived from the object path and
+                // object path will be unique for each session. Checking if
+                // multiple objects exist with same object path under multiple
+                // services.
+                if (serviceMap.size() != 1)
+                {
+                    return ipmi::responseUnspecifiedError();
+                }
+
+                auto itr = serviceMap.begin();
+                const std::string service = itr->first;
+                return ipmi::response(setSessionState(busp, service, obj));
+            }
+        }
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to fetch object from dbus",
+                        entry("INTERFACE=%s", session::sessionIntf),
+                        entry("ERRMSG=%s", e.what()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseInvalidFieldRequest();
+}
+
+uint8_t getTotalSessionCount()
+{
+    uint8_t count = 0, ch = 1;
+
+    while (ch < ipmi::maxIpmiChannels &&
+           count < session::maxNetworkInstanceSupported)
+    {
+        ipmi::ChannelInfo chInfo;
+        ipmi::getChannelInfo(ch, chInfo);
+        if (static_cast<ipmi::EChannelMediumType>(chInfo.mediumType) ==
+            ipmi::EChannelMediumType::lan8032)
+        {
+            count++;
+        }
+        ch++;
+    }
+    return count * session::maxSessionCountPerChannel;
+}
+
+/**
+ * @brief get session info request data.
+ *
+ * This function validates the request data and retrive request session id,
+ * session handle.
+ *
+ * @param[in] ctx - context of current session.
+ * @param[in] sessionIndex - request session index
+ * @param[in] payload - input payload
+ * @param[in] reqSessionId - unpacked session Id will be asigned
+ * @param[in] reqSessionHandle - unpacked session handle will be asigned
+ *
+ * @return success completion code if request data is valid
+ * else return the correcponding error completion code.
+ **/
+uint8_t getSessionInfoRequestData(const ipmi::Context::ptr ctx,
+                                  const uint8_t sessionIndex,
+                                  ipmi::message::Payload& payload,
+                                  uint32_t& reqSessionId,
+                                  uint8_t& reqSessionHandle)
+{
+    if ((sessionIndex > session::maxSessionCountPerChannel) &&
+        (sessionIndex < session::searchSessionByHandle))
+    {
+        return ipmi::ccInvalidFieldRequest;
+    }
+
+    switch (sessionIndex)
+    {
+        case session::searchCurrentSession:
+
+            ipmi::ChannelInfo chInfo;
+            ipmi::getChannelInfo(ctx->channel, chInfo);
+
+            if (static_cast<ipmi::EChannelMediumType>(chInfo.mediumType) !=
+                ipmi::EChannelMediumType::lan8032)
+            {
+                return ipmi::ccInvalidFieldRequest;
+            }
+
+            if (!payload.fullyUnpacked())
+            {
+                return ipmi::ccReqDataLenInvalid;
+            }
+            // Check if current sessionId is 0, sessionId 0 is reserved.
+            if (ctx->sessionId == session::sessionZero)
+            {
+                return session::ccInvalidSessionId;
+            }
+            reqSessionId = ctx->sessionId;
+            break;
+
+        case session::searchSessionByHandle:
+
+            if ((payload.unpack(reqSessionHandle)) ||
+                (!payload.fullyUnpacked()))
+            {
+                return ipmi::ccReqDataLenInvalid;
+            }
+
+            if ((reqSessionHandle == session::sessionZero) ||
+                ((reqSessionHandle & session::multiIntfaceSessionHandleMask) >
+                 session::maxSessionCountPerChannel))
+            {
+                return session::ccInvalidSessionHandle;
+            }
+            break;
+
+        case session::searchSessionById:
+
+            if ((payload.unpack(reqSessionId)) || (!payload.fullyUnpacked()))
+            {
+                return ipmi::ccReqDataLenInvalid;
+            }
+
+            if (reqSessionId == session::sessionZero)
+            {
+                return session::ccInvalidSessionId;
+            }
+            break;
+
+        default:
+            if (!payload.fullyUnpacked())
+            {
+                return ipmi::ccReqDataLenInvalid;
+            }
+            break;
+    }
+    return ipmi::ccSuccess;
+}
+
+uint8_t getSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
+                        const std::string& service, const std::string& objPath,
+                        uint8_t& sessionState)
+{
+    try
+    {
+        sessionState = std::get<uint8_t>(ipmi::getDbusProperty(
+            *busp, service, objPath, session::sessionIntf, "State"));
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to fetch state property ",
+                        entry("SERVICE=%s", service.c_str()),
+                        entry("OBJECTPATH=%s", objPath.c_str()),
+                        entry("INTERFACE=%s", session::sessionIntf),
+                        entry("ERRMSG=%s", e.what()));
+        return ipmi::ccUnspecifiedError;
+    }
+
+    return ipmi::ccSuccess;
+}
+
+static constexpr uint8_t macAddrLen = 6;
+struct GetSessionInfoRes
+{
+    uint8_t sessionHandle;
+    uint8_t totalSessionCount;
+    uint8_t activeSessionCount;
+    uint8_t userID;
+    uint8_t privLevel;
+    uint8_t channelNumber;
+    uint32_t remoteIpAddr;
+    std::array<uint8_t, macAddrLen> macAddr = {0};
+    uint16_t remotePort;
+};
+
+uint8_t
+    fillGetSessionInfoRes(std::shared_ptr<sdbusplus::asio::connection>& busp,
+                          const std::string& service,
+                          const std::string& objPath,
+                          struct GetSessionInfoRes& resp, uint8_t& sessionState)
+{
+    try
+    {
+        ipmi::PropertyMap sessionProps = ipmi::getAllDbusProperties(
+            *busp, service, objPath, session::sessionIntf);
+
+        sessionState = std::get<uint8_t>(sessionProps.at("State"));
+        if (sessionState == static_cast<uint8_t>(session::State::active))
+        {
+            resp.sessionHandle =
+                std::get<uint8_t>(sessionProps["SessionHandle"]);
+            resp.userID = std::get<uint8_t>(sessionProps["UserID"]);
+            resp.privLevel =
+                std::get<uint8_t>(sessionProps["CurrentPrivilege"]);
+            resp.channelNumber = std::get<uint8_t>(sessionProps["ChannelNum"]);
+            resp.remoteIpAddr =
+                std::get<uint32_t>(sessionProps["RemoteIPAddr"]);
+            resp.remotePort = std::get<uint16_t>(sessionProps["RemotePort"]);
+        }
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to fetch state property ",
+                        entry("SERVICE=%s", service.c_str()),
+                        entry("OBJECTPATH=%s", objPath.c_str()),
+                        entry("INTERFACE=%s", session::sessionIntf),
+                        entry("ERRMSG=%s", e.what()));
+        return ipmi::ccUnspecifiedError;
+    }
+
+    return ipmi::ccSuccess;
+}
+
+ipmi::RspType<
+    uint8_t,                           // session handle,
+    uint8_t,                           // total session count
+    uint8_t,                           // active session count
+    std::optional<std::tuple<uint8_t,  // user ID
+                             uint8_t,  // privilege level
+                             uint8_t,  // channel number
+                             uint32_t, // remote ip address,
+                             std::array<uint8_t, macAddrLen>, // mac address
+                             uint16_t                         // remote port
+                             >>>
+    ipmiAppGetSessionInfo(ipmi::Context::ptr ctx, uint8_t sessionIndex,
+                          ipmi::message::Payload& payload)
+{
+    uint32_t reqSessionId = 0;
+    uint8_t reqSessionHandle = session::defaultSessionHandle;
+    // initializing state to 0xff as 0 represents state as inactive.
+    uint8_t state = 0xFF;
+
+    uint8_t completionCode = getSessionInfoRequestData(
+        ctx, sessionIndex, payload, reqSessionId, reqSessionHandle);
+
+    if (completionCode)
+    {
+        return ipmi::response(completionCode);
+    }
+    struct GetSessionInfoRes res = {0};
+    res.totalSessionCount = getTotalSessionCount();
+    res.activeSessionCount = 0;
+    auto busp = getSdBus();
+
+    try
+    {
+        uint8_t index = 0;
+        ipmi::ObjectTree objectTree = ipmi::getAllDbusObjects(
+            *busp, session::sessionManagerRootPath, session::sessionIntf);
+
+        for (auto& objectTreeItr : objectTree)
+        {
+            uint32_t sessionId = 0;
+            uint8_t sessionHandle = session::defaultSessionHandle;
+            std::string objectPath = objectTreeItr.first;
+
+            if (!parseCloseSessionInputPayload(objectPath, sessionId,
+                                               sessionHandle))
+            {
+                continue;
+            }
+            index++;
+            auto& serviceMap = objectTreeItr.second;
+            auto itr = serviceMap.begin();
+
+            if (serviceMap.size() != 1)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            std::string service = itr->first;
+            uint8_t sessionState = 0;
+            completionCode =
+                getSessionState(busp, service, objectPath, sessionState);
+            if (completionCode)
+            {
+                return ipmi::response(completionCode);
+            }
+
+            if (sessionState == static_cast<uint8_t>(session::State::active))
+            {
+                res.activeSessionCount++;
+            }
+
+            if (index != sessionIndex && reqSessionId != sessionId &&
+                reqSessionHandle != sessionHandle)
+            {
+                continue;
+            }
+
+            completionCode =
+                fillGetSessionInfoRes(busp, service, objectPath, res, state);
+
+            if (completionCode)
+            {
+                return ipmi::response(completionCode);
+            }
+        }
+    }
+
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to fetch object from dbus",
+                        entry("INTERFACE=%s", session::sessionIntf),
+                        entry("ERRMSG=%s", e.what()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (state == static_cast<uint8_t>(session::State::active))
+    {
+        return ipmi::responseSuccess(
+            res.sessionHandle, res.totalSessionCount, res.activeSessionCount,
+            std::make_tuple(res.userID, res.privLevel, res.channelNumber,
+                            res.remoteIpAddr, res.macAddr, res.remotePort));
+    }
+    else if (state == static_cast<uint8_t>(session::State::tearDownInProgress))
+    {
+        res.sessionHandle = 0;
+        return ipmi::responseSuccess(res.sessionHandle, res.totalSessionCount,
+                                     res.activeSessionCount, std::nullopt);
+    }
+
+    return ipmi::responseInvalidFieldRequest();
+}
+
 static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
 static std::string sysInfoReadSystemName()
@@ -853,130 +1258,64 @@ static std::string sysInfoReadSystemName()
     return hostname;
 }
 
-struct IpmiSysInfoResp
-{
-    uint8_t paramRevision;
-    uint8_t setSelector;
-    union
-    {
-        struct
-        {
-            uint8_t encoding;
-            uint8_t stringLen;
-            uint8_t stringData0[14];
-        } __attribute__((packed));
-        uint8_t stringDataN[16];
-        uint8_t byteData;
-    };
-} __attribute__((packed));
+static constexpr uint8_t revisionOnly = 0x80;
+static constexpr uint8_t paramRevision = 0x11;
+static constexpr size_t configParameterLength = 16;
 
-/**
- * Split a string into (up to) 16-byte chunks as expected in response for get
- * system info parameter.
- *
- * @param[in] fullString: Input string to be split
- * @param[in] chunkIndex: Index of the chunk to be written out
- * @param[in,out] chunk: Output data buffer; must have 14 byte capacity if
- *          chunk_index = 0 and 16-byte capacity otherwise
- * @return the number of bytes written into the output buffer, or -EINVAL for
- * invalid arguments.
- */
-static int splitStringParam(const std::string& fullString, int chunkIndex,
-                            uint8_t* chunk)
-{
-    constexpr int maxChunk = 255;
-    constexpr int smallChunk = 14;
-    constexpr int chunkSize = 16;
-    if (chunkIndex > maxChunk || chunk == nullptr)
-    {
-        return -EINVAL;
-    }
-    try
-    {
-        std::string output;
-        if (chunkIndex == 0)
-        {
-            // Output must have 14 byte capacity.
-            output = fullString.substr(0, smallChunk);
-        }
-        else
-        {
-            // Output must have 16 byte capacity.
-            output = fullString.substr((chunkIndex * chunkSize) - 2, chunkSize);
-        }
+static constexpr size_t smallChunkSize = 14;
+static constexpr size_t fullChunkSize = 16;
+static constexpr uint8_t progressMask = 0x3;
 
-        std::memcpy(chunk, output.c_str(), output.length());
-        return output.length();
-    }
-    catch (const std::out_of_range& e)
-    {
-        // The position was beyond the end.
-        return -EINVAL;
-    }
+static constexpr uint8_t setComplete = 0x0;
+static constexpr uint8_t setInProgress = 0x1;
+static constexpr uint8_t commitWrite = 0x2;
+static uint8_t transferStatus = setComplete;
+
+static constexpr uint8_t configDataOverhead = 2;
+
+// For EFI based system, 256 bytes is recommended.
+static constexpr size_t maxBytesPerParameter = 256;
+
+namespace ipmi
+{
+constexpr Cc ccParmNotSupported = 0x80;
+constexpr Cc ccSetInProgressActive = 0x81;
+constexpr Cc ccSystemInfoParameterSetReadOnly = 0x82;
+
+static inline auto responseParmNotSupported()
+{
+    return response(ccParmNotSupported);
 }
-
-/**
- * Packs the Get Sys Info Request Item into the response.
- *
- * @param[in] paramString - the parameter.
- * @param[in] setSelector - the selector
- * @param[in,out] resp - the System info response.
- * @return The number of bytes packed or failure from splitStringParam().
- */
-static int packGetSysInfoResp(const std::string& paramString,
-                              uint8_t setSelector, IpmiSysInfoResp* resp)
+static inline auto responseSetInProgressActive()
 {
-    uint8_t* dataBuffer = resp->stringDataN;
-    resp->setSelector = setSelector;
-    if (resp->setSelector == 0) // First chunk has only 14 bytes.
-    {
-        resp->encoding = 0;
-        resp->stringLen = paramString.length();
-        dataBuffer = resp->stringData0;
-    }
-    return splitStringParam(paramString, resp->setSelector, dataBuffer);
+    return response(ccSetInProgressActive);
 }
-
-ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                    ipmi_request_t request,
-                                    ipmi_response_t response,
-                                    ipmi_data_len_t dataLen,
-                                    ipmi_context_t context)
+static inline auto responseSystemInfoParameterSetReadOnly()
 {
-    IpmiSysInfoResp resp = {};
-    size_t respLen = 0;
-    uint8_t* const reqData = static_cast<uint8_t*>(request);
-    std::string paramString;
-    bool found;
-    std::tuple<bool, std::string> ret;
-    constexpr int minRequestSize = 4;
-    constexpr int paramSelector = 1;
-    constexpr uint8_t revisionOnly = 0x80;
-    const uint8_t paramRequested = reqData[paramSelector];
-    int rc;
+    return response(ccSystemInfoParameterSetReadOnly);
+}
+} // namespace ipmi
 
-    if (*dataLen < minRequestSize)
+ipmi::RspType<uint8_t,                // Parameter revision
+              std::optional<uint8_t>, // data1 / setSelector / ProgressStatus
+              std::optional<std::vector<uint8_t>>> // data2-17
+    ipmiAppGetSystemInfo(uint8_t getRevision, uint8_t paramSelector,
+                         uint8_t setSelector, uint8_t BlockSelector)
+{
+    if (getRevision & revisionOnly)
     {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ipmi::responseSuccess(paramRevision, std::nullopt, std::nullopt);
     }
 
-    *dataLen = 0; // default to 0.
-
-    // Parameters revision as of IPMI spec v2.0 rev. 1.1 (Feb 11, 2014 E6)
-    resp.paramRevision = 0x11;
-    if (reqData[0] & revisionOnly) // Get parameter revision only
+    if (paramSelector == 0)
     {
-        respLen = 1;
-        goto writeResponse;
+        return ipmi::responseSuccess(paramRevision, transferStatus,
+                                     std::nullopt);
     }
 
-    // The "Set In Progress" parameter can be used for rollback of parameter
-    // data and is not implemented.
-    if (paramRequested == 0)
+    if (BlockSelector != 0) // 00h if parameter does not require a block number
     {
-        resp.byteData = 0;
-        respLen = 2;
-        goto writeResponse;
+        return ipmi::responseParmNotSupported();
     }
 
     if (sysInfoParamStore == nullptr)
@@ -987,32 +1326,116 @@ ipmi_ret_t ipmi_app_get_system_info(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 
     // Parameters other than Set In Progress are assumed to be strings.
-    ret = sysInfoParamStore->lookup(paramRequested);
-    found = std::get<0>(ret);
-    paramString = std::get<1>(ret);
+    std::tuple<bool, std::string> ret =
+        sysInfoParamStore->lookup(paramSelector);
+    bool found = std::get<0>(ret);
     if (!found)
     {
-        return IPMI_CC_SYSTEM_INFO_PARAMETER_NOT_SUPPORTED;
+        return ipmi::responseParmNotSupported();
     }
-    // TODO: Cache each parameter across multiple calls, until the whole string
-    // has been read out. Otherwise, it's possible for a parameter to change
-    // between requests for its chunks, returning chunks incoherent with each
-    // other. For now, the parameter store is simply required to have only
-    // idempotent callbacks.
-    rc = packGetSysInfoResp(paramString, reqData[2], &resp);
-    if (rc == -EINVAL)
+    std::string& paramString = std::get<1>(ret);
+    std::vector<uint8_t> configData;
+    size_t count = 0;
+    if (setSelector == 0)
+    {                               // First chunk has only 14 bytes.
+        configData.emplace_back(0); // encoding
+        configData.emplace_back(paramString.length()); // string length
+        count = std::min(paramString.length(), smallChunkSize);
+        configData.resize(count + configDataOverhead);
+        std::copy_n(paramString.begin(), count,
+                    configData.begin() + configDataOverhead); // 14 bytes thunk
+    }
+    else
     {
-        return IPMI_CC_RESPONSE_ERROR;
+        size_t offset = (setSelector * fullChunkSize) - configDataOverhead;
+        if (offset >= paramString.length())
+        {
+            return ipmi::responseParmOutOfRange();
+        }
+        count = std::min(paramString.length() - offset, fullChunkSize);
+        configData.resize(count);
+        std::copy_n(paramString.begin() + offset, count,
+                    configData.begin()); // 16 bytes chunk
     }
-
-    respLen = sizeof(resp); // Write entire string data chunk in response.
-
-writeResponse:
-    std::memcpy(response, &resp, sizeof(resp));
-    *dataLen = respLen;
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(paramRevision, setSelector, configData);
 }
 
+ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
+                                     std::vector<uint8_t> configData)
+{
+    if (paramSelector == 0)
+    {
+        // attempt to set the 'set in progress' value (in parameter #0)
+        // when not in the set complete state.
+        if ((transferStatus != setComplete) && (data1 == setInProgress))
+        {
+            return ipmi::responseSetInProgressActive();
+        }
+        // only following 2 states are supported
+        if (data1 > setInProgress)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "illegal SetInProgress status");
+            return ipmi::responseInvalidFieldRequest();
+        }
+
+        transferStatus = data1 & progressMask;
+        return ipmi::responseSuccess();
+    }
+
+    if (configData.size() > configParameterLength)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (!sysInfoParamStore)
+    {
+        sysInfoParamStore = std::make_unique<SysInfoParamStore>();
+        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_NAME,
+                                  sysInfoReadSystemName);
+    }
+
+    // lookup
+    std::tuple<bool, std::string> ret =
+        sysInfoParamStore->lookup(paramSelector);
+    bool found = std::get<0>(ret);
+    std::string& paramString = std::get<1>(ret);
+    if (!found)
+    {
+        // parameter does not exist. Init new
+        paramString = "";
+    }
+
+    uint8_t setSelector = data1;
+    size_t count = 0;
+    if (setSelector == 0) // First chunk has only 14 bytes.
+    {
+        size_t stringLen = configData.at(1); // string length
+        // maxBytesPerParamter is 256. It will always be greater than stringLen
+        // (unit8_t) if maxBytes changes in future, then following line is
+        // needed.
+        // stringLen = std::min(stringLen, maxBytesPerParameter);
+        count = std::min(stringLen, smallChunkSize);
+        count = std::min(count, configData.size());
+        paramString.resize(stringLen); // reserve space
+        std::copy_n(configData.begin() + configDataOverhead, count,
+                    paramString.begin());
+    }
+    else
+    {
+        size_t offset = (setSelector * fullChunkSize) - configDataOverhead;
+        if (offset >= paramString.length())
+        {
+            return ipmi::responseParmOutOfRange();
+        }
+        count = std::min(paramString.length() - offset, configData.size());
+        std::copy_n(configData.begin(), count, paramString.begin() + offset);
+    }
+    sysInfoParamStore->update(paramSelector, paramString);
+    return ipmi::responseSuccess();
+}
+
+#ifdef ENABLE_I2C_WHITELIST_CHECK
 inline std::vector<uint8_t> convertStringToData(const std::string& command)
 {
     std::istringstream iss(command);
@@ -1161,6 +1584,14 @@ static bool isCmdWhitelisted(uint8_t busId, uint8_t slaveAddr,
     }
     return false;
 }
+#else
+static bool populateI2CMasterWRWhitelist()
+{
+    log<level::INFO>(
+        "I2C_WHITELIST_CHECK is disabled, do not populate whitelist");
+    return true;
+}
+#endif // ENABLE_I2C_WHITELIST_CHECK
 
 /** @brief implements master write read IPMI command which can be used for
  * low-level I2C/SMBus write, read or write-read access
@@ -1180,9 +1611,6 @@ ipmi::RspType<std::vector<uint8_t>>
                         bool reserved, uint7_t slaveAddr, uint8_t readCount,
                         std::vector<uint8_t> writeData)
 {
-    i2c_rdwr_ioctl_data msgReadWrite = {0};
-    i2c_msg i2cmsg[2] = {0};
-
     if (readCount > maxIPMIWriteReadSize)
     {
         log<level::ERR>("Master write read command: Read count exceeds limit");
@@ -1194,6 +1622,7 @@ ipmi::RspType<std::vector<uint8_t>>
         log<level::ERR>("Master write read command: Read & write count are 0");
         return ipmi::responseInvalidFieldRequest();
     }
+#ifdef ENABLE_I2C_WHITELIST_CHECK
     if (!isCmdWhitelisted(static_cast<uint8_t>(busId),
                           static_cast<uint8_t>(slaveAddr), writeData))
     {
@@ -1202,50 +1631,16 @@ ipmi::RspType<std::vector<uint8_t>>
                         entry("ADDR=0x%x", static_cast<uint8_t>(slaveAddr)));
         return ipmi::responseInvalidFieldRequest();
     }
+#endif // ENABLE_I2C_WHITELIST_CHECK
     std::vector<uint8_t> readBuf(readCount);
     std::string i2cBus =
         "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
 
-    int i2cDev = ::open(i2cBus.c_str(), O_RDWR | O_CLOEXEC);
-    if (i2cDev < 0)
+    ipmi::Cc ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(slaveAddr),
+                                      writeData, readBuf);
+    if (ret != ipmi::ccSuccess)
     {
-        log<level::ERR>("Failed to open i2c bus",
-                        entry("BUS=%s", i2cBus.c_str()));
-        return ipmi::responseInvalidFieldRequest();
-    }
-
-    int msgCount = 0;
-    if (writeCount)
-    {
-        i2cmsg[msgCount].addr = static_cast<uint8_t>(slaveAddr);
-        i2cmsg[msgCount].flags = 0x00;
-        i2cmsg[msgCount].len = writeCount;
-        i2cmsg[msgCount].buf = writeData.data();
-        msgCount++;
-    }
-    if (readCount)
-    {
-        i2cmsg[msgCount].addr = static_cast<uint8_t>(slaveAddr);
-        i2cmsg[msgCount].flags = I2C_M_RD;
-        i2cmsg[msgCount].len = readCount;
-        i2cmsg[msgCount].buf = readBuf.data();
-        msgCount++;
-    }
-
-    msgReadWrite.msgs = i2cmsg;
-    msgReadWrite.nmsgs = msgCount;
-
-    int ret = ::ioctl(i2cDev, I2C_RDWR, &msgReadWrite);
-    ::close(i2cDev);
-
-    if (ret < 0)
-    {
-        log<level::ERR>("Master write read: Failed", entry("RET=%d", ret));
-        return ipmi::responseUnspecifiedError();
-    }
-    if (readCount)
-    {
-        readBuf.resize(msgReadWrite.msgs[msgCount - 1].len);
+        return ipmi::response(ret);
     }
     return ipmi::responseSuccess(readBuf);
 }
@@ -1267,13 +1662,23 @@ void register_netfn_app_functions()
                           ipmi::app::cmdResetWatchdogTimer,
                           ipmi::Privilege::Operator, ipmiAppResetWatchdogTimer);
 
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetSessionInfo, ipmi::Privilege::User,
+                          ipmiAppGetSessionInfo);
+
     // <Set Watchdog Timer>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_WD, NULL,
-                           ipmi_app_watchdog_set, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetWatchdogTimer,
+                          ipmi::Privilege::Operator, ipmiSetWatchdogTimer);
+
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdCloseSession, ipmi::Privilege::Callback,
+                          ipmiAppCloseSession);
 
     // <Get Watchdog Timer>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_WD, NULL,
-                           ipmi_app_watchdog_get, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetWatchdogTimer, ipmi::Privilege::User,
+                          ipmiGetWatchdogTimer);
 
     // <Get Self Test Results>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
@@ -1292,7 +1697,7 @@ void register_netfn_app_functions()
     // <Get ACPI Power State>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetAcpiPowerState,
-                          ipmi::Privilege::Admin, ipmiGetAcpiPowerState);
+                          ipmi::Privilege::User, ipmiGetAcpiPowerState);
 
     // Note: For security reason, this command will be registered only when
     // there are proper I2C Master write read whitelist
@@ -1312,11 +1717,17 @@ void register_netfn_app_functions()
                           ipmiAppGetSystemGuid);
 
     // <Get Channel Cipher Suites Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_CHAN_CIPHER_SUITES, NULL,
-                           getChannelCipherSuites, PRIVILEGE_CALLBACK);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetChannelCipherSuites,
+                          ipmi::Privilege::None, getChannelCipherSuites);
 
     // <Get System Info Command>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_SYSTEM_INFO, NULL,
-                           ipmi_app_get_system_info, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetSystemInfoParameters,
+                          ipmi::Privilege::User, ipmiAppGetSystemInfo);
+    // <Set System Info Command>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetSystemInfoParameters,
+                          ipmi::Privilege::Admin, ipmiAppSetSystemInfo);
     return;
 }

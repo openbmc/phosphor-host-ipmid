@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <exception>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 
@@ -45,6 +46,16 @@ enum ipmi_event_types
     UNSPECIFIED = 0x00,
     THRESHOLD = 0x01,
     SENSOR_SPECIFIC = 0x6f,
+};
+
+/** @brief Custom exception for reading sensors that are not funcitonal.
+ */
+struct SensorFunctionalError : public std::exception
+{
+    const char* what() const noexcept
+    {
+        return "Sensor not functional";
+    }
 };
 
 #define MAX_DBUS_PATH 128
@@ -642,15 +653,15 @@ namespace sensor
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setOffset(uint8_t offset, ipmi::sensor::GetReadingResponse* resp)
+inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse* resp)
 {
     if (offset > 7)
     {
-        resp->assertOffset8_14 |= 1 << (offset - 8);
+        resp->discreteReadingSensorStates |= 1 << (offset - 8);
     }
     else
     {
-        resp->assertOffset0_7 |= 1 << offset;
+        resp->thresholdLevelsStates |= 1 << offset;
     }
 }
 
@@ -660,7 +671,7 @@ inline void setOffset(uint8_t offset, ipmi::sensor::GetReadingResponse* resp)
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setReading(uint8_t value, ipmi::sensor::GetReadingResponse* resp)
+inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse* resp)
 {
     resp->reading = value;
 }
@@ -673,10 +684,10 @@ inline void setReading(uint8_t value, ipmi::sensor::GetReadingResponse* resp)
  * @param[in/out] resp - get sensor reading response.
  */
 inline void setAssertionBytes(uint16_t value,
-                              ipmi::sensor::GetReadingResponse* resp)
+                              ipmi::sensor::GetSensorResponse* resp)
 {
-    resp->assertOffset0_7 = static_cast<uint8_t>(value & 0x00FF);
-    resp->assertOffset8_14 = static_cast<uint8_t>(value >> 8);
+    resp->thresholdLevelsStates = static_cast<uint8_t>(value & 0x00FF);
+    resp->discreteReadingSensorStates = static_cast<uint8_t>(value >> 8);
 }
 
 /**
@@ -684,9 +695,11 @@ inline void setAssertionBytes(uint16_t value,
  *
  * @param[in/out] resp - get sensor reading response.
  */
-inline void enableScanning(ipmi::sensor::GetReadingResponse* resp)
+inline void enableScanning(ipmi::sensor::GetSensorResponse* resp)
 {
-    resp->operation = 1 << 6;
+    resp->readingOrStateUnavailable = false;
+    resp->scanningEnabled = true;
+    resp->allEventMessagesEnabled = false;
 }
 
 } // namespace sensor
