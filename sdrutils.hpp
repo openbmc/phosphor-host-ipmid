@@ -24,6 +24,14 @@
 #pragma once
 
 #ifdef JOURNAL_SEL
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+} // namespace sensor
+} // namespace ipmi
+
 struct CmpStrVersion
 {
     bool operator()(std::string a, std::string b) const
@@ -117,14 +125,16 @@ inline static uint8_t getSensorTypeFromPath(const std::string& path)
     return sensorType;
 }
 
-extern const ipmi::sensor::IdInfoMap sensors;
 inline static uint8_t getSensorNumberFromPath(const std::string& path)
 {
     uint8_t sensorNum = 0xFF;
 
-    //Refer to sensor.yaml
-    for(auto sensor = sensors.begin(); sensor != sensors.end(); sensor++) {
-        if (sensor->second.sensorPath == path) {
+    // Refer to sensor.yaml
+    for (auto sensor = ipmi::sensor::sensors.begin();
+         sensor != ipmi::sensor::sensors.end(); sensor++)
+    {
+        if (sensor->second.sensorPath == path)
+        {
             sensorNum = sensor->first;
             break;
         }
@@ -143,7 +153,7 @@ inline static uint8_t getSensorEventTypeFromPath(const std::string& path)
         eventType = findSensor->second.second;
     }
 
-    return eventType; 
+    return eventType;
 }
 
 inline static std::string getPathFromSensorNumber(uint8_t sensorNum)

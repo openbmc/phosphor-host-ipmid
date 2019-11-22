@@ -25,6 +25,28 @@ AM_PROG_AR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
+# Add an option to enable/disable safe mode in boot flags
+AC_ARG_ENABLE([boot-flag-safe-mode-support],
+    AS_HELP_STRING([--disable-boot-flag-safe-mode-support], [Disable safe mode option in boot flags. [default=enable]])
+)
+AS_IF([test "x$enable_boot_flag_safe_mode_support" != "xno"],
+    AC_MSG_NOTICE([Enabling safe mode option in boot flags])
+    [cpp_flags="-DENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling safe mode option in boot flags])
+)
+
+# Add an option to enable/disable i2c master write read command white list checking
+AC_ARG_ENABLE([i2c-whitelist-check],
+    AS_HELP_STRING([--disable-i2c-whitelist-check], [Disable I2C master write read command white list check. [default=enable]])
+)
+AS_IF([test "x$enable_i2c_whitelist_check" != "xno"],
+    AC_MSG_NOTICE([Enabling I2C master write read command white list check])
+    [cpp_flags="-DENABLE_I2C_WHITELIST_CHECK"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling I2C master write read command white list check])
+)
+
 # softoff dir specific ones
 AC_ARG_ENABLE([softoff],
     AS_HELP_STRING([--enable-softoff], [Builds soft power off])
@@ -200,11 +222,46 @@ AC_ARG_VAR(HOST_IPMI_LIB_PATH, [The file path to search for libraries.])
 AS_IF([test "x$HOST_IPMI_LIB_PATH" == "x"], [HOST_IPMI_LIB_PATH="/usr/lib/ipmid-providers/"])
 AC_DEFINE_UNQUOTED([HOST_IPMI_LIB_PATH], ["$HOST_IPMI_LIB_PATH"], [The file path to search for libraries.])
 
+# When a sensor read fails, hwmon will update the OperationalState interface's Functional property.
+# This will mark the sensor as not functional and we will skip reading from that sensor.
+AC_ARG_ENABLE([update-functional-on-fail],
+    AS_HELP_STRING(
+        [--enable-update-functional-on-fail],
+        [Check functional property to skip reading from faulty sensors.]
+    )
+)
+
+AC_ARG_VAR(UPDATE_FUNCTIONAL_ON_FAIL, [Check functional property to skip reading from faulty sensors.])
+AS_IF(
+    [test "x$enable_update_functional_on_fail" == "xyes"],
+    [UPDATE_FUNCTIONAL_ON_FAIL="yes"]
+    AC_DEFINE_UNQUOTED(
+        [UPDATE_FUNCTIONAL_ON_FAIL],
+        ["$UPDATE_FUNCTIONAL_ON_FAIL"],
+        [Check functional property to skip reading from faulty sensors.]
+    )
+)
+
 # When disable-libuserlayer flag is set, libuserlayer won't be included in the build.
 AC_ARG_ENABLE([libuserlayer],
     AS_HELP_STRING([--disable-libuserlayer], [Set a flag to exclude libuserlayer])
 )
 AM_CONDITIONAL(FEATURE_LIBUSERLAYER, [test "x$enable_libuserlayer" != "xno"])
+
+# When enable-transport-oem flag is set, the transporthandler_oem.cpp contents
+# are compiled and added to the project. The transporthandler_oem.cpp file is
+# copied from your own customization layer in the
+# phosphor-ipmi-host_%.bbappend file. It is not necessary to create this file
+# unless OEM Parameter extensions are required.
+AC_ARG_ENABLE([transport_oem],
+    [  --enable-transport-oem   Enable/disable OEM Parameter extensions],
+    [case "${enableval}" in
+      yes) transport_oem=true ;;
+      no) transport_oem=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-transport_oem]) ;;
+      esac],[transport_oem=false]
+      )
+AM_CONDITIONAL([FEATURE_TRANSPORT_OEM], [test x$transport_oem = xtrue])
 
 # Create configured output
 AC_CONFIG_FILES([

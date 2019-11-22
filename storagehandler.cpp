@@ -23,14 +23,21 @@
 #include <sdbusplus/server.hpp>
 #include <sdrutils.hpp>
 #include <string>
-#include <variant>
 #include <string_view>
+#include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
 unsigned int g_sel_time = 0xFFFFFFFF;
-extern const ipmi::sensor::IdInfoMap sensors;
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+} // namespace sensor
+} // namespace ipmi
+
 extern const FruMap frus;
 constexpr uint8_t eventDataSize = 3;
 namespace
@@ -85,9 +92,7 @@ ipmi_ret_t ipmi_storage_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     *data_len = 0;
     return rc;
 }
-
 #ifdef JOURNAL_SEL
-
 namespace ipmi::sel::erase_time
 {
 static constexpr const char* selEraseTimestamp = "/var/lib/ipmi/sel_erase_time";
@@ -589,8 +594,7 @@ ipmi::RspType<uint8_t // erase status
         static_cast<uint8_t>(ipmi::sel::eraseComplete));
 }
 
-#else  // JOURNAL_SEL not used
-
+#else // JOURNAL_SEL not used
 /** @brief implements the get SEL Info command
  *  @returns IPMI completion code plus response data
  *   - selVersion - SEL revision
@@ -984,7 +988,7 @@ ipmi::RspType<uint8_t // erase status
     return ipmi::responseSuccess(
         static_cast<uint8_t>(ipmi::sel::eraseComplete));
 }
-#endif // JOURNAL_SEL
+#endif
 
 /** @brief implements the get SEL time command
  *  @returns IPMI completion code plus response data
@@ -1024,7 +1028,7 @@ ipmi::RspType<uint32_t> // current time
         log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();
     }
-    catch (const std::runtime_error& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();
@@ -1076,7 +1080,7 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
         log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();
     }
-    catch (const std::runtime_error& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();
@@ -1338,7 +1342,7 @@ ipmi::RspType<uint8_t,  // SDR version
     constexpr uint32_t deletionTimestamp = 0x0;
     constexpr uint8_t operationSupport = 0;
 
-    uint16_t records = frus.size() + sensors.size();
+    uint16_t records = frus.size() + ipmi::sensor::sensors.size();
 
     return ipmi::responseSuccess(sdrVersion, records, freeSpace,
                                  additionTimestamp, deletionTimestamp,
@@ -1350,7 +1354,6 @@ void register_netfn_storage_functions()
     // <Wildcard Command>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_WILDCARD, NULL,
                            ipmi_storage_wildcard, PRIVILEGE_USER);
-
 #ifdef JOURNAL_SEL
     // <Get SEL Info>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_INFO, NULL,
@@ -1362,7 +1365,6 @@ void register_netfn_storage_functions()
                           ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
                           ipmiStorageGetSelInfo);
 #endif
-
     // <Get SEL Time>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelTime, ipmi::Privilege::User,
@@ -1386,7 +1388,6 @@ void register_netfn_storage_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdDeleteSelEntry,
                           ipmi::Privilege::Operator, deleteSELEntry);
-
     // <Add SEL Entry>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdAddSelEntry,
@@ -1396,7 +1397,6 @@ void register_netfn_storage_functions()
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_ADD_SEL, NULL,
                            ipmi_storage_add_sel, PRIVILEGE_OPERATOR);
 #endif
-
     // <Clear SEL>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdClearSel, ipmi::Privilege::Operator,

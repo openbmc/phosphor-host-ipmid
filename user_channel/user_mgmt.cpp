@@ -307,7 +307,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess,
 {
     static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
     std::string signal = msg.get_member();
-    std::string userName, update, priv, newUserName;
+    std::string userName, priv, newUserName;
     std::vector<std::string> groups;
     bool enabled = false;
     UserUpdateEvent userEvent = UserUpdateEvent::reservedEvent;
@@ -682,38 +682,28 @@ static int pamFunctionConversation(int numMsg, const struct pam_message** msg,
  *  @return status
  */
 
-bool pamUpdatePasswd(const char* username, const char* password)
+int pamUpdatePasswd(const char* username, const char* password)
 {
     const struct pam_conv localConversation = {pamFunctionConversation,
                                                const_cast<char*>(password)};
     pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
 
-    if (pam_start("passwd", username, &localConversation, &localAuthHandle) !=
-        PAM_SUCCESS)
-    {
-        return false;
-    }
-    int retval = pam_chauthtok(localAuthHandle, PAM_SILENT);
+    int retval =
+        pam_start("passwd", username, &localConversation, &localAuthHandle);
 
     if (retval != PAM_SUCCESS)
     {
-        if (retval == PAM_AUTHTOK_ERR)
-        {
-            log<level::DEBUG>("Authentication Failure");
-        }
-        else
-        {
-            log<level::DEBUG>("pam_chauthtok returned failure",
-                              entry("ERROR=%d", retval));
-        }
-        pam_end(localAuthHandle, retval);
-        return false;
+        return retval;
     }
-    if (pam_end(localAuthHandle, PAM_SUCCESS) != PAM_SUCCESS)
+
+    retval = pam_chauthtok(localAuthHandle, PAM_SILENT);
+    if (retval != PAM_SUCCESS)
     {
-        return false;
+        pam_end(localAuthHandle, retval);
+        return retval;
     }
-    return true;
+
+    return pam_end(localAuthHandle, PAM_SUCCESS);
 }
 
 bool pamUserCheckAuthenticate(std::string_view username,
@@ -760,7 +750,7 @@ bool pamUserCheckAuthenticate(std::string_view username,
 ipmi_ret_t UserAccess::setSpecialUserPassword(const std::string& userName,
                                               const std::string& userPassword)
 {
-    if (!pamUpdatePasswd(userName.c_str(), userPassword.c_str()))
+    if (pamUpdatePasswd(userName.c_str(), userPassword.c_str()) != PAM_SUCCESS)
     {
         log<level::DEBUG>("Failed to update password");
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -772,29 +762,36 @@ ipmi_ret_t UserAccess::setUserPassword(const uint8_t userId,
                                        const char* userPassword)
 {
     std::string userName;
-    if (ipmiUserGetUserName(userId, userName) != IPMI_CC_OK)
+    if (ipmiUserGetUserName(userId, userName) != ipmi::ccSuccess)
     {
         log<level::DEBUG>("User Name not found",
-                          entry("USER-ID:%d", (uint8_t)userId));
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+                          entry("USER-ID=%d", (uint8_t)userId));
+        return ipmi::ccParmOutOfRange;
     }
     std::string passwd;
     passwd.assign(reinterpret_cast<const char*>(userPassword), 0,
                   maxIpmi20PasswordSize);
-    if (!std::regex_match(passwd.c_str(),
-                          std::regex("[a-zA-z_0-9][a-zA-Z_0-9,?:`!\"]*")))
+
+    int retval = pamUpdatePasswd(userName.c_str(), passwd.c_str());
+
+    switch (retval)
     {
-        log<level::DEBUG>("Invalid password fields",
-                          entry("USER-ID:%d", (uint8_t)userId));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        case PAM_SUCCESS:
+        {
+            return ipmi::ccSuccess;
+        }
+        case PAM_AUTHTOK_ERR:
+        {
+            log<level::DEBUG>("Bad authentication token");
+            return ipmi::ccInvalidFieldRequest;
+        }
+        default:
+        {
+            log<level::DEBUG>("Failed to update password",
+                              entry("USER-ID=%d", (uint8_t)userId));
+            return ipmi::ccUnspecifiedError;
+        }
     }
-    if (!pamUpdatePasswd(userName.c_str(), passwd.c_str()))
-    {
-        log<level::DEBUG>("Failed to update password",
-                          entry("USER-ID:%d", (uint8_t)userId));
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-    return IPMI_CC_OK;
 }
 
 ipmi_ret_t UserAccess::setUserEnabledState(const uint8_t userId,
@@ -1591,6 +1588,10 @@ void UserAccess::initUserDataFile()
             {
                 usersTbl.user[userIndex].userPrivAccess[chIndex].privilege =
                     privNoAccess;
+                usersTbl.user[userIndex]
+                    .payloadAccess[chIndex]
+                    .stdPayloadEnables1[static_cast<uint8_t>(
+                        ipmi::PayloadType::SOL)] = true;
             }
         }
         writeUserData();
@@ -1621,7 +1622,6 @@ void UserAccess::initUserDataFile()
         {
             std::vector<std::string> usrGrps;
             std::string usrPriv;
-            bool usrEnabled;
 
             std::string userName(
                 reinterpret_cast<char*>(userData->user[usrIdx].userName), 0,
@@ -1632,6 +1632,8 @@ void UserAccess::initUserDataFile()
             auto usrObj = managedObjs.find(usersPath);
             if (usrObj != managedObjs.end())
             {
+                bool usrEnabled = false;
+
                 // User exist. Lets check and update other fileds
                 getUserObjProperties(usrObj->second, usrGrps, usrPriv,
                                      usrEnabled);
@@ -1687,7 +1689,7 @@ void UserAccess::initUserDataFile()
     {
         std::vector<std::string> usrGrps;
         std::string usrPriv, userName;
-        bool usrEnabled;
+        bool usrEnabled = false;
         std::string usrObjPath = std::string(usrObj.first);
         if (getUserNameFromPath(usrObj.first.str, userName) != 0)
         {

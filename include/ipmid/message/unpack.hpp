@@ -115,7 +115,7 @@ struct UnpackSingle
                 p.bitCount = priorBitCount;
                 p.unpackError = priorError;
             }
-            return 0;
+            return ret;
         }
         else
         {
@@ -292,18 +292,21 @@ struct UnpackSingle<std::vector<T>>
 {
     static int op(Payload& p, std::vector<T>& t)
     {
-        int ret = 0;
         while (p.rawIndex < p.raw.size())
         {
             t.emplace_back();
-            ret = UnpackSingle<T>::op(p, t.back());
-            if (ret)
+            if (UnpackSingle<T>::op(p, t.back()))
             {
                 t.pop_back();
                 break;
             }
         }
-        return ret;
+        // unpacking a vector is always successful:
+        // either stuff was unpacked successfully (return 0)
+        // or stuff was not unpacked, but should still return
+        // success because an empty vector or a not-fully-unpacked
+        // payload is not a failure.
+        return 0;
     }
 };
 

@@ -25,8 +25,7 @@ ipmid_SOURCES = \
 libipmi20_BUILT_LIST = \
 	sensor-gen.cpp \
 	inventory-sensor-gen.cpp \
-	fru-read-gen.cpp \
-	entity-gen.cpp
+	fru-read-gen.cpp
 
 BUILT_SOURCES = \
 	ipmiwhitelist.cpp \
@@ -79,10 +78,13 @@ inventory-sensor-gen.cpp: scripts/inventorysensor.mako.cpp scripts/inventory-sen
 fru-read-gen.cpp: scripts/readfru.mako.cpp scripts/fru_gen.py @FRU_YAML_GEN@
 	$(AM_V_GEN)@FRUGEN@ -o $(top_builddir) generate-cpp
 
-entity-gen.cpp: scripts/writeentity.mako.cpp scripts/entity_gen.py @ENTITY_YAML_GEN@
-	$(AM_V_GEN)@ENTITYGEN@ -o $(top_builddir) generate-cpp
-
 providers_LTLIBRARIES += libipmi20.la
+if FEATURE_TRANSPORT_OEM
+libipmi20_la_TRANSPORTOEM = transporthandler_oem.cpp
+else
+libipmi20_la_TRANSPORTOEM =
+endif
+
 libipmi20_la_SOURCES = \
 	app/channel.cpp \
 	app/watchdog.cpp \
@@ -90,6 +92,7 @@ libipmi20_la_SOURCES = \
 	apphandler.cpp \
 	sys_info_param.cpp \
 	sensorhandler.cpp \
+	entity_map_json.cpp \
 	storagehandler.cpp \
 	chassishandler.cpp \
 	dcmihandler.cpp \
@@ -103,6 +106,7 @@ libipmi20_la_SOURCES = \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
 	user_channel/channelcommands.cpp \
+	$(libipmi20_la_TRANSPORTOEM) \
 	$(libipmi20_BUILT_LIST)
 
 check_PROGRAMS =

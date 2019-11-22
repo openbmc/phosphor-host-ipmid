@@ -660,8 +660,8 @@ TEST(Vectors, VectorUint32NonIntegralBytes)
                               0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34};
     ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
     std::vector<uint32_t> v;
-    // check that the number of bytes matches
-    ASSERT_NE(p.unpack(v), 0);
+    // check that the vector unpacks successfully
+    ASSERT_EQ(p.unpack(v), 0);
     // check that the payload was not fully unpacked
     ASSERT_FALSE(p.fullyUnpacked());
     // arrays of uint32_t will be unpacked one at a time, so the
@@ -682,6 +682,51 @@ TEST(Vectors, VectorUint8)
     // check that the payload was fully unpacked
     ASSERT_TRUE(p.fullyUnpacked());
     std::vector<uint8_t> k = {0x02, 0x00, 0x86, 0x04};
+    // check that the bytes were correctly unpacked (in byte order)
+    ASSERT_EQ(v, k);
+}
+
+TEST(Vectors, VectorEmptyOk)
+{
+    // an empty input vector to show that unpacking elements is okay
+    std::vector<uint8_t> i{};
+    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    std::vector<uint32_t> v;
+    // check that the number of bytes matches
+    ASSERT_EQ(p.unpack(v), 0);
+    // check that the payload was fully unpacked
+    ASSERT_TRUE(p.fullyUnpacked());
+    std::vector<uint32_t> k{};
+    // check that the unpacked vector is empty as expected
+    ASSERT_EQ(v, k);
+}
+
+TEST(Vectors, VectorOfTuplesOk)
+{
+    // a vector of bytes will be unpacked verbatim, low-order element first
+    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    std::vector<std::tuple<uint8_t, uint8_t>> v;
+    // check that the number of bytes matches
+    ASSERT_EQ(p.unpack(v), 0);
+    // check that the payload was fully unpacked
+    ASSERT_TRUE(p.fullyUnpacked());
+    std::vector<std::tuple<uint8_t, uint8_t>> k = {{0x02, 0x00}, {0x86, 0x04}};
+    // check that the bytes were correctly unpacked (in byte order)
+    ASSERT_EQ(v, k);
+}
+
+TEST(Vectors, VectorOfTuplesInsufficientBytes)
+{
+    // a vector of bytes will be unpacked verbatim, low-order element first
+    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04, 0xb4};
+    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    std::vector<std::tuple<uint8_t, uint8_t>> v;
+    // check that the number of bytes matches
+    ASSERT_EQ(p.unpack(v), 0);
+    // check that the payload was not fully unpacked
+    ASSERT_FALSE(p.fullyUnpacked());
+    std::vector<std::tuple<uint8_t, uint8_t>> k = {{0x02, 0x00}, {0x86, 0x04}};
     // check that the bytes were correctly unpacked (in byte order)
     ASSERT_EQ(v, k);
 }
@@ -716,7 +761,7 @@ TEST(UnpackAdvanced, OptionalInsufficientBytes)
     ASSERT_EQ(p.unpack(v), 0);
     // check that the payload was fully unpacked
     ASSERT_FALSE(p.fullyUnpacked());
-    std::optional<std::tuple<uint8_t, uint32_t>> k = {{0, 0}};
+    std::optional<std::tuple<uint8_t, uint32_t>> k;
     // check that the bytes were correctly unpacked (in byte order)
     ASSERT_EQ(v, k);
 }

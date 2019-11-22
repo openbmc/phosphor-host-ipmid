@@ -146,7 +146,7 @@ struct DeleteSELEntryRequest
     uint16_t selRecordID;   //!< SEL Record ID.
 } __attribute__((packed));
 
-#else //JOURNAL_SEL
+#else  // JOURNAL_SEL
 namespace operationSupport
 {
 static constexpr bool overflow = false;
@@ -155,7 +155,7 @@ static constexpr bool partialAddSelEntry = false;
 static constexpr bool reserveSel = true;
 static constexpr bool getSelAllocationInfo = false;
 } // namespace operationSupport
-#endif //JOURNAL_SEL
+#endif // JOURNAL_SEL
 
 /** @struct GetSELEntryRequest
  *

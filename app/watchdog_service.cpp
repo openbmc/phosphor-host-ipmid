@@ -80,6 +80,8 @@ WatchdogService::Properties WatchdogService::getProperties()
             std::get<std::string>(properties.at("ExpireAction")));
         wd_prop.timerUse = Watchdog::convertTimerUseFromString(
             std::get<std::string>(properties.at("CurrentTimerUse")));
+        wd_prop.expiredTimerUse = Watchdog::convertTimerUseFromString(
+            std::get<std::string>(properties.at("ExpiredTimerUse")));
 
         wd_prop.interval = std::get<uint64_t>(properties.at("Interval"));
         wd_prop.timeRemaining =
@@ -153,7 +155,8 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
         if (wasValid)
         {
             // Retry the request once in case the cached service was stale
-            return setProperty(key, val);
+            setProperty(key, val);
+            return;
         }
         log<level::ERR>("WatchdogService: Method error setting property",
                         entry("PROPERTY=%s", key.c_str()));
@@ -184,6 +187,11 @@ void WatchdogService::setExpireAction(Action expireAction)
 void WatchdogService::setTimerUse(TimerUse timerUse)
 {
     setProperty("CurrentTimerUse", convertForMessage(timerUse));
+}
+
+void WatchdogService::setExpiredTimerUse(TimerUse timerUse)
+{
+    setProperty("ExpiredTimerUse", convertForMessage(timerUse));
 }
 
 void WatchdogService::setInterval(uint64_t interval)

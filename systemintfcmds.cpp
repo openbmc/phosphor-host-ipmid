@@ -17,17 +17,6 @@ using namespace sdbusplus::xyz::openbmc_project::Control::server;
 using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
 extern cmdManagerPtr& ipmid_get_host_cmd_manager();
 
-// global enables
-// bit0   - Message Receive Queue enable
-// bit1   - Enable Event Message Buffer Full Interrupt
-// bit2   - Enable Event Message Buffer
-// bit3   - Enable System Event Logging
-// bit4   - reserved
-// bit5-7 - OEM 0~2 enables
-static constexpr uint8_t selEnable = 0x08;
-static constexpr uint8_t recvMsgQueueEnable = 0x01;
-static constexpr uint8_t globalEnablesDefault = selEnable | recvMsgQueueEnable;
-
 //-------------------------------------------------------------------
 // Called by Host post response from Get_Message_Flags
 //-------------------------------------------------------------------
@@ -83,47 +72,56 @@ ipmi::RspType<uint8_t> ipmiAppGetMessageFlags()
     return ipmi::responseSuccess(setEventMsgBufferFull);
 }
 
-ipmi_ret_t ipmi_app_get_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                           ipmi_request_t request,
-                                           ipmi_response_t response,
-                                           ipmi_data_len_t data_len,
-                                           ipmi_context_t context)
+ipmi::RspType<bool,    // Receive Message Queue Interrupt Enabled
+              bool,    // Event Message Buffer Full Interrupt Enabled
+              bool,    // Event Message Buffer Enabled
+              bool,    // System Event Logging Enabled
+              uint1_t, // Reserved
+              bool,    // OEM 0 enabled
+              bool,    // OEM 1 enabled
+              bool     // OEM 2 enabled
+              >
+    ipmiAppGetBMCGlobalEnable()
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-    if (0 != *data_len)
-    {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-    *data_len = sizeof(globalEnablesDefault);
-    *reinterpret_cast<uint8_t*>(response) = globalEnablesDefault;
-    return rc;
+    return ipmi::responseSuccess(true, false, false, true, 0, false, false,
+                                 false);
 }
 
-ipmi_ret_t ipmi_app_set_bmc_global_enables(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                           ipmi_request_t request,
-                                           ipmi_response_t response,
-                                           ipmi_data_len_t data_len,
-                                           ipmi_context_t context)
+ipmi::RspType<> ipmiAppSetBMCGlobalEnable(
+    ipmi::Context::ptr ctx, bool receiveMessageQueueInterruptEnabled,
+    bool eventMessageBufferFullInterruptEnabled, bool eventMessageBufferEnabled,
+    bool systemEventLogEnable, uint1_t reserved, bool OEM0Enabled,
+    bool OEM1Enabled, bool OEM2Enabled)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
+    ipmi::ChannelInfo chInfo;
 
-    uint8_t reqMask = *reinterpret_cast<uint8_t*>(request);
-    if (sizeof(reqMask) != *data_len)
+    if (ipmi::getChannelInfo(ctx->channel, chInfo) != ipmi::ccSuccess)
     {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Failed to get Channel Info",
+            phosphor::logging::entry("CHANNEL=%d", ctx->channel));
+        return ipmi::responseUnspecifiedError();
     }
 
-    *data_len = 0;
+    if (chInfo.mediumType !=
+        static_cast<uint8_t>(ipmi::EChannelMediumType::systemInterface))
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error - supported only in system interface");
+        return ipmi::responseCommandNotAvailable();
+    }
+
     // Recv Message Queue and SEL are enabled by default.
     // Event Message buffer are disabled by default (not supported).
     // Any request that try to change the mask will be rejected
-    if (reqMask != (selEnable | recvMsgQueueEnable))
+    if (!receiveMessageQueueInterruptEnabled || !systemEventLogEnable ||
+        eventMessageBufferFullInterruptEnabled || eventMessageBufferEnabled ||
+        OEM0Enabled || OEM1Enabled || OEM2Enabled || reserved)
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidFieldRequest();
     }
-    return rc;
+
+    return ipmi::responseSuccess();
 }
 
 namespace
@@ -143,12 +141,14 @@ void register_netfn_app_functions()
                            ipmi_app_read_event, SYSTEM_INTERFACE);
 
     // <Set BMC Global Enables>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_BMC_GLOBAL_ENABLES, NULL,
-                           ipmi_app_set_bmc_global_enables, SYSTEM_INTERFACE);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetBmcGlobalEnables,
+                          ipmi::Privilege::Admin, ipmiAppSetBMCGlobalEnable);
 
     // <Get BMC Global Enables>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_BMC_GLOBAL_ENABLES, NULL,
-                           ipmi_app_get_bmc_global_enables, SYSTEM_INTERFACE);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetBmcGlobalEnables,
+                          ipmi::Privilege::User, ipmiAppGetBMCGlobalEnable);
 
     // <Get Message Flags>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
