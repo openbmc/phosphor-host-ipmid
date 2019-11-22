@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "9a582b6c_ca5d5fd6",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2019-11-22T22:51:50Z",
+      "side": 1,
+      "message": "As far as I know this one is one typical usage of the \"mutable\" keyword (with a cached service name, the object is \"logically\" constant, but \"physically\" non-constant, and \"mutable\" sets an exception for the cached value in a \"const\" scope), but I think it is also okay to remove \"const\" from readingData so someone reading the code would be watchful for any changes to the structure.",
+      "parentUuid": "0ca606a3_68af3a3c",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 11
+      },
+      "revId": "610ed37b883615c23ac3fd2b22a658a5a12bdabc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5e8fec84_db5b20f5",
         "filename": "sensordatahandler.hpp",
         "patchSetId": 3
