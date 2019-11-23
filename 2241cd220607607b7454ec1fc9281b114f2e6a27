@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e6db239_85644d35",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-11-23T01:40:16Z",
+      "side": 1,
+      "message": "spurious newline.\n\nYou can check for these kinds of things by staging your changes via \u0027git add -p\u0027 which gives you an overview of each chunk you\u0027re adding to the diff.",
+      "revId": "2241cd220607607b7454ec1fc9281b114f2e6a27",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34eb13be_02ab1948",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-11-23T01:40:16Z",
+      "side": 1,
+      "message": "The comment doesn\u0027t add much here. More useful would be \"why 2\".",
+      "revId": "2241cd220607607b7454ec1fc9281b114f2e6a27",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65f33aac_d905ddcd",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-11-23T01:40:16Z",
+      "side": 1,
+      "message": "Yeah, the way you\u0027re using this, you shouldn\u0027t be taking sensorInfo as const anymore. Please get rid of \u0027mutable\u0027 and pass in sensorInfo by reference.",
+      "range": {
+        "startLine": 196,
+        "startChar": 12,
+        "endLine": 196,
+        "endChar": 36
+      },
+      "revId": "2241cd220607607b7454ec1fc9281b114f2e6a27",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4dadb089_c16bcb11",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1000099
+      },
+      "writtenOn": "2019-11-23T01:40:16Z",
+      "side": 1,
+      "message": "Hmmm. The catch (...) came in the original code... I don\u0027t like it, but it\u0027s not your fault, I guess.",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 13
+      },
+      "revId": "2241cd220607607b7454ec1fc9281b114f2e6a27",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
