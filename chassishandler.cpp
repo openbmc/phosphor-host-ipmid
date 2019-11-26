@@ -93,7 +93,11 @@ static constexpr auto pOHCounterProperty = "POHCounter";
 static constexpr auto match = "chassis0";
 const static constexpr char chassisCapIntf[] =
     "xyz.openbmc_project.Control.ChassisCapabilities";
-const static constexpr char chassisCapFlagsProp[] = "CapabilitiesFlags";
+const static constexpr char chassisCFIntrusionProp[] = "CapFlagIntrusion";
+const static constexpr char chassisCFFrontPanelProp[] = "CapFlagFrontPanel";
+const static constexpr char chassisCFNMIProp[] = "CapFlagNMI";
+const static constexpr char chassisCFPowerInterlockProp[] =
+    "CapFlagPowerInterlock";
 const static constexpr char chassisFRUDevAddrProp[] = "FRUDeviceAddress";
 const static constexpr char chassisSDRDevAddrProp[] = "SDRDeviceAddress";
 const static constexpr char chassisSELDevAddrProp[] = "SELDeviceAddress";
@@ -555,8 +559,20 @@ ipmi_ret_t ipmi_get_chassis_cap(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         // set to default value 0x0.
         ipmi::Value variant = ipmi::getDbusProperty(
             bus, chassisCapObject.second, chassisCapObject.first,
-            chassisCapIntf, chassisCapFlagsProp);
-        chassis_cap.cap_flags = std::get<uint8_t>(variant);
+            chassisCapIntf, chassisCFIntrusionProp);
+        chassis_cap.cap_flags = std::get<bool>(variant) << 0;
+        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
+                                        chassisCapObject.first, chassisCapIntf,
+                                        chassisCFFrontPanelProp);
+        chassis_cap.cap_flags |= std::get<bool>(variant) << 1;
+        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
+                                        chassisCapObject.first, chassisCapIntf,
+                                        chassisCFNMIProp);
+        chassis_cap.cap_flags |= std::get<bool>(variant) << 2;
+        variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
+                                        chassisCapObject.first, chassisCapIntf,
+                                        chassisCFPowerInterlockProp);
+        chassis_cap.cap_flags |= std::get<bool>(variant) << 3;
 
         variant = ipmi::getDbusProperty(bus, chassisCapObject.second,
                                         chassisCapObject.first, chassisCapIntf,
@@ -669,8 +685,6 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
         return ipmi::responseInvalidFieldRequest();
     }
 
-    uint8_t capFlags = (static_cast<uint8_t>(intrusion)) |
-                       ((static_cast<uint8_t>(fpLockout)) << 1);
     try
     {
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
@@ -679,7 +693,11 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
-                              chassisCapFlagsProp, capFlags);
+                              chassisCFIntrusionProp, intrusion);
+
+        ipmi::setDbusProperty(bus, chassisCapObject.second,
+                              chassisCapObject.first, chassisCapIntf,
+                              chassisCFFrontPanelProp, fpLockout);
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
