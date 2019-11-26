@@ -861,12 +861,14 @@ int main(int argc, char* argv[])
         ipmi::nameChangeHandler);
     ipmi::doListNames(*io, *sdbusp);
 
+    int exitCode = 0;
     // set up boost::asio signal handling
     std::function<SignalResponse(int)> stopAsioRunLoop =
-        [&io](int signalNumber) {
+        [&io, &exitCode](int signalNumber) {
             log<level::INFO>("Received signal; quitting",
                              entry("SIGNAL=%d", signalNumber));
             io->stop();
+            exitCode = signalNumber;
             return SignalResponse::breakExecution;
         };
     registerSignalHandler(ipmi::prioOpenBmcBase, SIGINT, stopAsioRunLoop);
@@ -882,5 +884,5 @@ int main(int argc, char* argv[])
     // unload the provider libraries
     providers.clear();
 
-    return 0;
+    std::exit(exitCode);
 }
