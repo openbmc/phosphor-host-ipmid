@@ -7,8 +7,6 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <optional>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -132,6 +130,8 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
+
+    enableScanning(&response);
 
     auto service = ipmi::getService(bus, interface, path);
 
