@@ -93,7 +93,12 @@ static constexpr auto pOHCounterProperty = "POHCounter";
 static constexpr auto match = "chassis0";
 const static constexpr char chassisCapIntf[] =
     "xyz.openbmc_project.Control.ChassisCapabilities";
-const static constexpr char chassisCapFlagsProp[] = "CapabilitiesFlags";
+const static constexpr char chassisIntrusionProp[] = "ChassisIntrusionEnabled";
+const static constexpr char chassisFrontPanelLockoutProp[] =
+    "ChassisFrontPanelLockoutEnabled";
+const static constexpr char chassisNMIProp[] = "ChassisNMIEnabled";
+const static constexpr char chassisPowerInterlockProp[] =
+    "ChassisPowerInterlockEnabled";
 const static constexpr char chassisFRUDevAddrProp[] = "FRUDeviceAddress";
 const static constexpr char chassisSDRDevAddrProp[] = "SDRDeviceAddress";
 const static constexpr char chassisSELDevAddrProp[] = "SELDeviceAddress";
@@ -507,7 +512,11 @@ uint32_t getPOHCounter()
  *  chassisSMDevAddr       - chassis system management device address
  *  chassisBridgeDevAddr   - chassis bridge device address
  */
-ipmi::RspType<uint8_t, // chassis capabilities flag
+ipmi::RspType<bool,    // chassis intrusion sensor
+              bool,    // chassis Front panel lockout
+              bool,    // chassis NMI
+              bool,    // chassis power interlock
+              uint4_t, // reserved
               uint8_t, // chassis FRU info Device Address
               uint8_t, // chassis SDR device address
               uint8_t, // chassis SEL device address
@@ -547,11 +556,31 @@ ipmi::RspType<uint8_t, // chassis capabilities flag
         return ipmi::responseUnspecifiedError();
     }
 
-    uint8_t* chassisCapFlags =
-        std::get_if<uint8_t>(&properties[chassisCapFlagsProp]);
-    if (chassisCapFlags == nullptr)
+    bool* chassisIntrusionFlag =
+        std::get_if<bool>(&properties[chassisIntrusionProp]);
+    if (chassisIntrusionFlag == nullptr)
     {
-        log<level::ERR>("Error to get chassis capability flags");
+        log<level::ERR>("Error to get chassis Intrusion flags");
+        return ipmi::responseUnspecifiedError();
+    }
+    bool* chassisFrontPanelFlag =
+        std::get_if<bool>(&properties[chassisFrontPanelLockoutProp]);
+    if (chassisFrontPanelFlag == nullptr)
+    {
+        log<level::ERR>("Error to get chassis intrusion flags");
+        return ipmi::responseUnspecifiedError();
+    }
+    bool* chassisNMIFlag = std::get_if<bool>(&properties[chassisNMIProp]);
+    if (chassisNMIFlag == nullptr)
+    {
+        log<level::ERR>("Error to get chassis NMI flags");
+        return ipmi::responseUnspecifiedError();
+    }
+    bool* chassisPowerInterlockFlag =
+        std::get_if<bool>(&properties[chassisPowerInterlockProp]);
+    if (chassisPowerInterlockFlag == nullptr)
+    {
+        log<level::ERR>("Error to get chassis power interlock flags");
         return ipmi::responseUnspecifiedError();
     }
     uint8_t* chassisFRUInfoDevAddr =
@@ -590,9 +619,11 @@ ipmi::RspType<uint8_t, // chassis capabilities flag
         return ipmi::responseUnspecifiedError();
     }
 
-    return ipmi::responseSuccess(*chassisCapFlags, *chassisFRUInfoDevAddr,
-                                 *chassisSDRDevAddr, *chassisSELDevAddr,
-                                 *chassisSMDevAddr, *chassisBridgeDevAddr);
+    return ipmi::responseSuccess(*chassisIntrusionFlag, *chassisFrontPanelFlag,
+                                 *chassisNMIFlag, *chassisPowerInterlockFlag, 0,
+                                 *chassisFRUInfoDevAddr, *chassisSDRDevAddr,
+                                 *chassisSELDevAddr, *chassisSMDevAddr,
+                                 *chassisBridgeDevAddr);
 }
 
 /** @brief implements set chassis capalibities command
@@ -662,8 +693,6 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
         return ipmi::responseInvalidFieldRequest();
     }
 
-    uint8_t capFlags = (static_cast<uint8_t>(intrusion)) |
-                       ((static_cast<uint8_t>(fpLockout)) << 1);
     try
     {
         sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
@@ -672,7 +701,11 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
-                              chassisCapFlagsProp, capFlags);
+                              chassisIntrusionProp, intrusion);
+
+        ipmi::setDbusProperty(bus, chassisCapObject.second,
+                              chassisCapObject.first, chassisCapIntf,
+                              chassisFrontPanelLockoutProp, fpLockout);
 
         ipmi::setDbusProperty(bus, chassisCapObject.second,
                               chassisCapObject.first, chassisCapIntf,
