@@ -151,8 +151,18 @@ sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
 namespace cache
 {
 
-settings::Objects objects(dbus,
-                          {bootModeIntf, bootSourceIntf, powerRestoreIntf});
+std::unique_ptr<settings::Objects> objectsPtr = nullptr;
+
+settings::Objects& getObjects()
+{
+    if (objectsPtr == nullptr)
+    {
+        objectsPtr = std::make_unique<settings::Objects>(
+            dbus, std::vector<std::string>{bootModeIntf, bootSourceIntf,
+                                           powerRestoreIntf});
+    }
+    return *objectsPtr;
+}
 
 } // namespace cache
 } // namespace internal
@@ -821,14 +831,15 @@ std::optional<uint2_t> getPowerRestorePolicy()
     uint2_t restorePolicy = 0;
     using namespace chassis::internal;
 
+    settings::Objects& objects = cache::getObjects();
+
     try
     {
         const auto& powerRestoreSetting =
-            cache::objects.map.at(powerRestoreIntf).front();
+            objects.map.at(powerRestoreIntf).front();
         ipmi::Value result = ipmi::getDbusProperty(
             *getSdBus(),
-            cache::objects.service(powerRestoreSetting, powerRestoreIntf)
-                .c_str(),
+            objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
             powerRestoreSetting.c_str(), powerRestoreIntf,
             "PowerRestorePolicy");
         auto powerRestore = RestorePolicy::convertPolicyFromString(
@@ -839,9 +850,9 @@ std::optional<uint2_t> getPowerRestorePolicy()
     {
         log<level::ERR>(
             "Failed to fetch pgood property", entry("ERROR=%s", e.what()),
-            entry("PATH=%s",
-                  cache::objects.map.at(powerRestoreIntf).front().c_str()),
+            entry("PATH=%s", objects.map.at(powerRestoreIntf).front().c_str()),
             entry("INTERFACE=%s", powerRestoreIntf));
+        cache::objectsPtr.reset();
         return std::nullopt;
     }
     return std::make_optional(restorePolicy);
@@ -1394,6 +1405,7 @@ static ipmi_ret_t setBootSource(const Source::Sources& source)
     using namespace chassis::internal;
     using namespace chassis::internal::cache;
     std::variant<std::string> property = convertForMessage(source);
+    settings::Objects& objects = getObjects();
     auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
     const auto& bootSourceSetting = std::get<settings::Path>(bootSetting);
     auto method = dbus.new_method_call(
@@ -1419,6 +1431,7 @@ static ipmi_ret_t setBootMode(const Mode::Modes& mode)
     using namespace chassis::internal;
     using namespace chassis::internal::cache;
     std::variant<std::string> property = convertForMessage(mode);
+    settings::Objects& objects = getObjects();
     auto bootSetting = settings::boot::setting(objects, bootModeIntf);
     const auto& bootModeSetting = std::get<settings::Path>(bootSetting);
     auto method = dbus.new_method_call(
@@ -1468,6 +1481,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         try
         {
+            settings::Objects& objects = getObjects();
             auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
             const auto& bootSourceSetting =
                 std::get<settings::Path>(bootSetting);
@@ -1528,6 +1542,7 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         catch (InternalFailure& e)
         {
+            cache::objectsPtr.reset();
             report<InternalFailure>();
             *data_len = 0;
             return IPMI_CC_UNSPECIFIED_ERROR;
@@ -1610,6 +1625,8 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 (reqptr->data[0] & SET_PARM_BOOT_FLAGS_PERMANENT) ==
                 SET_PARM_BOOT_FLAGS_PERMANENT;
 
+            settings::Objects& objects = getObjects();
+
             auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
 
             oneTimeEnabled =
@@ -1679,6 +1696,7 @@ ipmi_ret_t ipmi_chassis_set_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         catch (InternalFailure& e)
         {
+            objectsPtr.reset();
             report<InternalFailure>();
             *data_len = 0;
             return IPMI_CC_UNSPECIFIED_ERROR;
@@ -1775,17 +1793,16 @@ ipmi::RspType<uint3_t, // policy support
 
     try
     {
+        settings::Objects& objects = chassis::internal::cache::getObjects();
         const settings::Path& powerRestoreSetting =
-            chassis::internal::cache::objects.map
-                .at(chassis::internal::powerRestoreIntf)
-                .front();
+            objects.map.at(chassis::internal::powerRestoreIntf).front();
         std::variant<std::string> property = convertForMessage(value);
 
         auto sdbusp = getSdBus();
         boost::system::error_code ec;
         sdbusp->yield_method_call<void>(
             yield, ec,
-            chassis::internal::cache::objects
+            objects
                 .service(powerRestoreSetting,
                          chassis::internal::powerRestoreIntf)
                 .c_str(),
@@ -1800,6 +1817,7 @@ ipmi::RspType<uint3_t, // policy support
     }
     catch (InternalFailure& e)
     {
+        chassis::internal::cache::objectsPtr.reset();
         report<InternalFailure>();
         return ipmi::responseUnspecifiedError();
     }
