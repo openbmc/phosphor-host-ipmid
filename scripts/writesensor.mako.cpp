@@ -48,6 +48,7 @@ extern const IdInfoMap sensors = {
        offsetB = sensor.get("offsetB", 0)
        bExp = sensor.get("bExp", 0)
        rExp = sensor.get("rExp", 0)
+       sensorUnits1 = sensor.get("sensorUnits1", 0)
        unit = sensor.get("unit", "")
        scale = sensor.get("scale", 0)
        hasScale = "true" if "scale" in sensor.keys() else "false"
@@ -72,7 +73,7 @@ extern const IdInfoMap sensors = {
 %>
         ${entityID},${instance},${sensorType},"${path}","${sensorInterface}",
         ${readingType},${multiplier},${offsetB},${bExp},
-        ${offsetB * pow(10,bExp)}, ${rExp}, ${hasScale},${scale},"${unit}",
+        ${offsetB * pow(10,bExp)}, ${rExp}, ${hasScale},${scale},${sensorUnits1},"${unit}",
         ${updateFunc},${getFunc},Mutability(${mutability}),${sensorNameFunc},{
     % for interface,properties in interfaces.items():
             {"${interface}",{
