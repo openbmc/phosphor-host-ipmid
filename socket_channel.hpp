@@ -58,14 +58,20 @@ class Channel
         if (sockAddrSize == sizeof(sockaddr_in))
         {
             char ipv4addr[INET_ADDRSTRLEN];
-            retval =
-                inet_ntop(AF_INET, &remoteSockAddr, ipv4addr, sizeof(ipv4addr));
+            retval = inet_ntop(
+                AF_INET,
+                &(reinterpret_cast<const sockaddr_in*>(&remoteSockAddr)
+                      ->sin_addr),
+                ipv4addr, sizeof(ipv4addr));
         }
         else if (sockAddrSize == sizeof(sockaddr_in6))
         {
             char ipv6addr[INET6_ADDRSTRLEN];
-            retval = inet_ntop(AF_INET6, &remoteSockAddr, ipv6addr,
-                               sizeof(ipv6addr));
+            retval = inet_ntop(
+                AF_INET6,
+                &(reinterpret_cast<const sockaddr_in6*>(&remoteSockAddr)
+                      ->sin6_addr),
+                ipv6addr, sizeof(ipv6addr));
         }
         if (retval)
         {
