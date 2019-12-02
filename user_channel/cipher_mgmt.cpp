@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
-
 #include "cipher_mgmt.hpp"
 
 #include <fcntl.h>
@@ -23,6 +22,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <include/ipmid/api-types.hpp>
 #include <phosphor-logging/log.hpp>
 
 namespace ipmi
@@ -30,6 +30,10 @@ namespace ipmi
 
 using namespace phosphor::logging;
 namespace fs = std::filesystem;
+
+static std::array<std::string, PRIVILEGE_OEM + 1> privList = {
+    "priv-unspecified", "priv-callback", "priv-user",
+    "priv-operator",    "priv-admin",    "priv-oem"};
 
 CipherConfig& getCipherConfigObject(std::string csFileName)
 {
@@ -113,6 +117,8 @@ void CipherConfig::initCSPrivilegeLevelsPersistData()
 {
     Json initData;
 
+    const char* privAdmin = "priv-admin";
+
     for (uint8_t chNum = 0; chNum < ipmi::maxIpmiChannels; chNum++)
     {
         Json privData;
@@ -135,6 +141,126 @@ void CipherConfig::initCSPrivilegeLevelsPersistData()
 
     log<level::DEBUG>("Initialised CS Privilege Levles");
     return;
+}
+
+uint8_t CipherConfig::convertToPrivLimitIndex(const std::string& value)
+{
+    auto iter = std::find(privList.begin(), privList.end(), value);
+    if (iter == privList.end())
+    {
+        log<level::ERR>("Invalid privilege.",
+                        entry("PRIV_STR=%s", value.c_str()));
+        return ccUnspecifiedError;
+    }
+
+    return static_cast<uint8_t>(std::distance(privList.begin(), iter));
+}
+
+std::string CipherConfig::convertToPrivLimitString(const uint8_t value)
+{
+    return privList.at(value);
+}
+
+bool CipherConfig::getCSPrivilegeLevels(
+    uint8_t chNum, std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
+                       csPrivilegeLevels)
+{
+    Json jsonData = readCSPrivilegeLevels();
+
+    if (jsonData == nullptr)
+    {
+        return false;
+    }
+    else
+    {
+        std::string chKey = "Channel" + std::to_string(chNum);
+        Json jsonDataForInputChannel = jsonData[chKey];
+
+        constexpr uint8_t responseDataMask = 0x04;
+        constexpr uint8_t reserved = 0;
+        csPrivilegeLevels[reserved] = 0x00;
+        uint8_t csNum = 0;
+        uint8_t responseData = 0;
+        uint8_t nextPriv = 0;
+        std::string csKey;
+
+        for (size_t index = 1; index < lanParamCipherSuitePrivilegeLevelsSize;
+             ++index)
+        {
+            csKey = "CipherID" + std::to_string(csNum);
+            responseData = convertToPrivLimitIndex(
+                static_cast<std::string>(jsonData[chKey][csKey]));
+
+            if (responseData == ccUnspecifiedError)
+            {
+                return false;
+            }
+            ++csNum;
+
+            csKey = "CipherID" + std::to_string(csNum);
+            nextPriv = convertToPrivLimitIndex(
+                static_cast<std::string>(jsonData[chKey][csKey]));
+
+            if (nextPriv == ccUnspecifiedError)
+            {
+                return false;
+            }
+            responseData = responseData | (nextPriv << responseDataMask);
+            ++csNum;
+
+            csPrivilegeLevels[index] = responseData;
+        }
+        return true;
+    }
+}
+
+bool CipherConfig::setCSPrivilegeLevels(
+    uint8_t chNum,
+    const std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
+        requestData)
+{
+    Json jsonData = readCSPrivilegeLevels();
+
+    if (jsonData == nullptr)
+    {
+        return false;
+    }
+    else
+    {
+        Json privData;
+        std::string csKey;
+        uint8_t csNum = 0;
+
+        constexpr uint8_t requestDataLowerMask = 0x0F;
+        constexpr uint8_t requestDataUpperMask = 0xF0;
+        constexpr uint8_t requestDataShift = 0x04;
+
+        for (size_t index = 1; index < lanParamCipherSuitePrivilegeLevelsSize;
+             ++index)
+        {
+            csKey = "CipherID" + std::to_string(csNum);
+            privData[csKey] = convertToPrivLimitString(requestData[index] &
+                                                       requestDataLowerMask);
+            ++csNum;
+
+            csKey = "CipherID" + std::to_string(csNum);
+            privData[csKey] = convertToPrivLimitString(
+                ((requestData[index] & requestDataUpperMask) >>
+                 requestDataShift));
+            ++csNum;
+        }
+
+        std::string chKey = "Channel" + std::to_string(chNum);
+
+        jsonData[chKey] = privData;
+
+        if (writeCSPrivilegeLevels(jsonData))
+        {
+            log<level::ERR>("Error in setting CS Privilege Levels.");
+            return false;
+        }
+        return true;
+    }
 }
 
 } // namespace ipmi

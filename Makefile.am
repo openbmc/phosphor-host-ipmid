@@ -106,6 +106,7 @@ libipmi20_la_SOURCES = \
 	read_fru_data.cpp \
 	sensordatahandler.cpp \
 	user_channel/channelcommands.cpp \
+        user_channel/cipher_mgmt.cpp \
 	$(libipmi20_la_TRANSPORTOEM) \
 	$(libipmi20_BUILT_LIST)
 
