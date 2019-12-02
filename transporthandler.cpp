@@ -1,4 +1,5 @@
 #include "app/channel.hpp"
+#include "user_channel/cipher_mgmt.hpp"
 
 #include <arpa/inet.h>
 #include <netinet/ether.h>
@@ -185,6 +186,7 @@ enum class LanParam : uint8_t
     VLANId = 20,
     CiphersuiteSupport = 22,
     CiphersuiteEntries = 23,
+    cipherSuitePrivilegeLevels = 24,
     IPFamilySupport = 50,
     IPFamilyEnables = 51,
     IPv6Status = 55,
@@ -1613,6 +1615,44 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             // Accept any prefix value since our prefix length has to be 0
             return responseSuccess();
         }
+        case LanParam::cipherSuitePrivilegeLevels:
+        {
+            std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>
+                requestBytes;
+
+            if (req.unpack(requestBytes) || !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+            constexpr uint8_t reserved = 0;
+            if (requestBytes[reserved])
+            {
+                return responseInvalidFieldRequest();
+            }
+
+            constexpr uint8_t dataLowerMask = 0x0F;
+            constexpr uint8_t dataUpperMask = 0xF0;
+            constexpr uint8_t dataLowerMaxSize = 0x05;
+            constexpr uint8_t dataUpperMaxSize = 0x50;
+
+            for (auto& data : requestBytes)
+            {
+                if (((data & dataLowerMask) > dataLowerMaxSize) ||
+                    ((data & dataUpperMask) > dataUpperMaxSize))
+                {
+                    return responseInvalidFieldRequest();
+                }
+            }
+            if (!getCipherConfigObject(csPrivFileName)
+                     .setCSPrivilegeLevels(channel, requestBytes))
+            {
+                return responseUnspecifiedError();
+            }
+            else
+            {
+                return responseSuccess();
+            }
+        }
     }
 
     if ((parameter >= oemCmdStart) && (parameter <= oemCmdEnd))
@@ -1867,6 +1907,22 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
             in6_addr prefix{};
             ret.pack(dataRef(prefix));
             return responseSuccess(std::move(ret));
+        }
+        case LanParam::cipherSuitePrivilegeLevels:
+        {
+            std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>
+                csPrivilegeLevels;
+
+            if (!getCipherConfigObject(csPrivFileName)
+                     .getCSPrivilegeLevels(channel, csPrivilegeLevels))
+            {
+                return responseUnspecifiedError();
+            }
+            else
+            {
+                ret.pack(csPrivilegeLevels);
+                return responseSuccess(std::move(ret));
+            }
         }
     }
 
