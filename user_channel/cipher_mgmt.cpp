@@ -193,4 +193,99 @@ std::string CipherConfig::convertToPrivLimitString(const uint8_t value)
     return privList.at(value);
 }
 
+uint8_t CipherConfig::getCSPrivilegeLevels(
+    uint8_t chNum, std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
+                       csPrivilegeLevels)
+{
+    if (!doesDeviceExist(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return ccInvalidFieldRequest;
+    }
+
+    constexpr uint8_t responseDataMask = 0x04;
+    uint8_t csNum = 0;
+    uint8_t responseData = 0;
+    uint8_t nextPriv = 0;
+
+    // index 0 of csPrivilegeLevels must be reseved byte
+    constexpr uint8_t reserved = 0;
+    csPrivilegeLevels[reserved] = 0x00;
+    for (size_t index = 1; index < lanParamCipherSuitePrivilegeLevelsSize;
+         ++index)
+    {
+        responseData = csPrivilegeMap[{chNum, csNum}];
+        ++csNum;
+
+        nextPriv = csPrivilegeMap[{chNum, csNum}];
+        responseData = responseData | (nextPriv << responseDataMask);
+        ++csNum;
+
+        csPrivilegeLevels[index] = responseData;
+    }
+    return ccSuccess;
+}
+
+uint8_t CipherConfig::setCSPrivilegeLevels(
+    uint8_t chNum,
+    const std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
+        requestData)
+{
+    if (!doesDeviceExist(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return ccInvalidFieldRequest;
+    }
+
+    Json jsonData;
+    if (!fs::exists(csPrivFileName))
+    {
+        log<level::INFO>("CS privilege levels user settings file does not "
+                         "exist. Creating...");
+        cipherSuitePrivFileName = csPrivFileName;
+    }
+    else
+    {
+        jsonData = readCSPrivilegeLevels(csPrivFileName);
+        if (jsonData == nullptr)
+        {
+            return ccUnspecifiedError;
+        }
+    }
+    Json privData;
+    std::string csKey;
+    uint8_t csNum = 0;
+
+    constexpr uint8_t requestDataLowerMask = 0x0F;
+    constexpr uint8_t requestDataUpperMask = 0xF0;
+    constexpr uint8_t requestDataShift = 0x04;
+
+    for (size_t index = 1; index < lanParamCipherSuitePrivilegeLevelsSize;
+         ++index)
+    {
+        csKey = "CipherID" + std::to_string(csNum);
+        privData[csKey] =
+            convertToPrivLimitString(requestData[index] & requestDataLowerMask);
+        ++csNum;
+
+        csKey = "CipherID" + std::to_string(csNum);
+        privData[csKey] = convertToPrivLimitString(
+            ((requestData[index] & requestDataUpperMask) >> requestDataShift));
+        ++csNum;
+    }
+
+    std::string chKey = "Channel" + std::to_string(chNum);
+
+    jsonData[chKey] = privData;
+
+    if (writeCSPrivilegeLevels(jsonData))
+    {
+        log<level::ERR>("Error in setting CS Privilege Levels.");
+        return ccUnspecifiedError;
+    }
+
+    updateCSPrivilegesMap(jsonData);
+    return ccSuccess;
+}
+
 } // namespace ipmi

@@ -20,6 +20,8 @@
 #include <map>
 #include <nlohmann/json.hpp>
 
+constexpr size_t lanParamCipherSuitePrivilegeLevelsSize = 9;
+
 namespace ipmi
 {
 using Json = nlohmann::json;
@@ -37,6 +39,36 @@ class CipherConfig
   public:
     ~CipherConfig() = default;
     CipherConfig(const std::string& csFileName);
+
+    /** @brief function to get cipher suite privileges from config file
+     *
+     *  @param[in] chNum - channel number for which we want to get cipher suite
+     * privilege levels
+     *
+     *  @param[in] csPrivilegeLevels - gets filled by cipher suite privilege
+     * levels
+     *
+     *  @return 0 for success, non zero value for failure
+     */
+    uint8_t getCSPrivilegeLevels(
+        uint8_t chNum,
+        std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
+            csPrivilegeLevels);
+
+    /** @brief function to set/update cipher suite privileges in config file
+     *
+     *  @param[in] chNum - channel number for which we want to update cipher
+     * suite privilege levels
+     *
+     *  @param[in] csPrivilegeLevels - cipher suite privilege levels to update
+     * in config file
+     *
+     *  @return 0 for success, non zero value for failure
+     */
+    uint8_t setCSPrivilegeLevels(
+        uint8_t chNum,
+        const std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
+            csPrivilegeLevels);
 
   private:
     std::string cipherSuitePrivFileName;
