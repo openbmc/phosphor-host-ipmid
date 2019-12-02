@@ -16,6 +16,7 @@
 #pragma once
 #include "channel_layer.hpp"
 
+#include <include/ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -43,6 +44,33 @@ class CipherConfig
     explicit CipherConfig(const std::string& csFileName,
                           const std::string& csDefaultFileName);
     CipherConfig() = delete;
+
+    /** @brief function to get cipher suite privileges from config file
+     *
+     *  @param[in] chNum - channel number for which we want to get cipher suite
+     * privilege levels
+     *
+     *  @param[in] csPrivilegeLevels - gets filled by cipher suite privilege
+     * levels
+     *
+     *  @return 0 for success, non zero value for failure
+     */
+    ipmi::Cc getCSPrivilegeLevels(
+        uint8_t chNum, std::array<uint4_t, maxCSRecords>& csPrivilegeLevels);
+
+    /** @brief function to set/update cipher suite privileges in config file
+     *
+     *  @param[in] chNum - channel number for which we want to update cipher
+     * suite privilege levels
+     *
+     *  @param[in] csPrivilegeLevels - cipher suite privilege levels to update
+     * in config file
+     *
+     *  @return 0 for success, non zero value for failure
+     */
+    ipmi::Cc setCSPrivilegeLevels(
+        uint8_t chNum,
+        const std::array<uint4_t, maxCSRecords>& csPrivilegeLevels);
 
   private:
     std::string cipherSuitePrivFileName, cipherSuiteDefaultPrivFileName;
