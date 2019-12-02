@@ -160,7 +160,7 @@ int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
     return 0;
 }
 
-uint8_t CipherConfig::convertToPrivLimitIndex(const std::string& value)
+uint4_t CipherConfig::convertToPrivLimitIndex(const std::string& value)
 {
     auto iter = std::find(privList.begin(), privList.end(), value);
     if (iter == privList.end())
@@ -170,12 +170,85 @@ uint8_t CipherConfig::convertToPrivLimitIndex(const std::string& value)
         return ccUnspecifiedError;
     }
 
-    return static_cast<uint8_t>(std::distance(privList.begin(), iter));
+    return static_cast<uint4_t>(std::distance(privList.begin(), iter));
 }
 
-std::string CipherConfig::convertToPrivLimitString(const uint8_t value)
+std::string CipherConfig::convertToPrivLimitString(const uint4_t value)
 {
-    return privList.at(value);
+    return privList.at(static_cast<uint8_t>(value));
+}
+
+uint8_t CipherConfig::getCSPrivilegeLevels(
+    uint8_t chNum, std::array<uint4_t, maxCSRecords>& csPrivilegeLevels)
+{
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return ccInvalidFieldRequest;
+    }
+
+    for (uint8_t csNum = 0; csNum < maxCSRecords; ++csNum)
+    {
+        csPrivilegeLevels[csNum] = csPrivilegeMap[{chNum, csNum}];
+    }
+    return ccSuccess;
+}
+
+uint8_t CipherConfig::setCSPrivilegeLevels(
+    uint8_t chNum, const std::array<uint4_t, maxCSRecords>& requestData)
+{
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return ccInvalidFieldRequest;
+    }
+
+    Json jsonData;
+    if (!fs::exists(csPrivFileName))
+    {
+        log<level::INFO>("CS privilege levels user settings file does not "
+                         "exist. Creating...");
+        cipherSuitePrivFileName = csPrivFileName;
+    }
+    else
+    {
+        jsonData = readCSPrivilegeLevels(csPrivFileName);
+        if (jsonData == nullptr)
+        {
+            return ccUnspecifiedError;
+        }
+    }
+
+    Json privData;
+    std::string csKey;
+    constexpr uint8_t requestDataMask = 0x0F;
+    constexpr uint8_t dataMaxValue = 0x05;
+
+    for (uint8_t csNum = 0; csNum < maxCSRecords; ++csNum)
+    {
+        csKey = "CipherID" + std::to_string(csNum);
+
+        if ((static_cast<uint8_t>(requestData[csNum]) & requestDataMask) >
+            dataMaxValue)
+        {
+            return ccInvalidFieldRequest;
+        }
+        privData[csKey] =
+            convertToPrivLimitString(static_cast<uint8_t>(requestData[csNum]));
+    }
+
+    std::string chKey = "Channel" + std::to_string(chNum);
+
+    jsonData[chKey] = privData;
+
+    if (writeCSPrivilegeLevels(jsonData))
+    {
+        log<level::ERR>("Error in setting CS Privilege Levels.");
+        return ccUnspecifiedError;
+    }
+
+    updateCSPrivilegesMap(jsonData);
+    return ccSuccess;
 }
 
 } // namespace ipmi

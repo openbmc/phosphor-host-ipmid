@@ -13,10 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
-
 #pragma once
 #include "channel_layer.hpp"
 
+#include <ipmid/message/types.hpp>
 #include <map>
 #include <nlohmann/json.hpp>
 
@@ -28,6 +28,8 @@ static const std::string csPrivDefaultFileName =
 static const std::string csPrivFileName =
     "/var/lib/ipmi/cs_privilege_levels.json";
 
+static const uint8_t maxCSRecords = 16;
+
 /** @class CipherConfig
  *  @brief Class to provide cipher suite functionalities
  */
@@ -38,12 +40,37 @@ class CipherConfig
     explicit CipherConfig(const std::string& csFileName);
     CipherConfig() = delete;
 
+    /** @brief function to get cipher suite privileges from config file
+     *
+     *  @param[in] chNum - channel number for which we want to get cipher suite
+     * privilege levels
+     *
+     *  @param[in] csPrivilegeLevels - gets filled by cipher suite privilege
+     * levels
+     *
+     *  @return 0 for success, non zero value for failure
+     */
+    uint8_t getCSPrivilegeLevels(
+        uint8_t chNum, std::array<uint4_t, maxCSRecords>& csPrivilegeLevels);
+
+    /** @brief function to set/update cipher suite privileges in config file
+     *
+     *  @param[in] chNum - channel number for which we want to update cipher
+     * suite privilege levels
+     *
+     *  @param[in] csPrivilegeLevels - cipher suite privilege levels to update
+     * in config file
+     *
+     *  @return 0 for success, non zero value for failure
+     */
+    uint8_t setCSPrivilegeLevels(
+        uint8_t chNum,
+        const std::array<uint4_t, maxCSRecords>& csPrivilegeLevels);
+
   private:
     std::string cipherSuitePrivFileName;
 
-    const uint8_t maxCSRecords = 16;
-
-    std::map<std::pair<uint8_t, uint8_t>, uint8_t> csPrivilegeMap;
+    std::map<std::pair<uint8_t, uint8_t>, uint4_t> csPrivilegeMap;
 
     /** @brief function to read json config file
      *
@@ -65,7 +92,7 @@ class CipherConfig
      *
      *  @return cipher suite privilege index
      */
-    uint8_t convertToPrivLimitIndex(const std::string& value);
+    uint4_t convertToPrivLimitIndex(const std::string& value);
 
     /** @brief function to convert privilege value to string
      *
@@ -73,7 +100,7 @@ class CipherConfig
      *
      *  @return privilege in string
      */
-    std::string convertToPrivLimitString(const uint8_t value);
+    std::string convertToPrivLimitString(const uint4_t value);
 
     /** @brief function to load CS Privilege Levels from json file/files to map
      *

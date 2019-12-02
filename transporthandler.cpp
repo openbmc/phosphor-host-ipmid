@@ -1,4 +1,5 @@
 #include "app/channel.hpp"
+#include "user_channel/cipher_mgmt.hpp"
 
 #include <arpa/inet.h>
 #include <netinet/ether.h>
@@ -185,6 +186,7 @@ enum class LanParam : uint8_t
     VLANId = 20,
     CiphersuiteSupport = 22,
     CiphersuiteEntries = 23,
+    cipherSuitePrivilegeLevels = 24,
     IPFamilySupport = 50,
     IPFamilyEnables = 51,
     IPv6Status = 55,
@@ -1672,6 +1674,33 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             // Accept any prefix value since our prefix length has to be 0
             return responseSuccess();
         }
+        case LanParam::cipherSuitePrivilegeLevels:
+        {
+            uint8_t reserved;
+            std::array<uint4_t, ipmi::maxCSRecords> cipherSuitePrivs;
+
+            if (req.unpack(reserved, cipherSuitePrivs) || !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+
+            if (reserved)
+            {
+                return responseInvalidFieldRequest();
+            }
+
+            uint8_t resp = getCipherConfigObject(csPrivFileName)
+                               .setCSPrivilegeLevels(channel, cipherSuitePrivs);
+            if (!resp)
+            {
+                return responseSuccess();
+            }
+            else
+            {
+                req.trailingOk = true;
+                return response(resp);
+            }
+        }
     }
 
     if ((parameter >= oemCmdStart) && (parameter <= oemCmdEnd))
@@ -1929,6 +1958,24 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             in6_addr prefix{};
             ret.pack(dataRef(prefix));
             return responseSuccess(std::move(ret));
+        }
+        case LanParam::cipherSuitePrivilegeLevels:
+        {
+            std::array<uint4_t, ipmi::maxCSRecords> csPrivilegeLevels;
+
+            uint8_t resp =
+                getCipherConfigObject(csPrivFileName)
+                    .getCSPrivilegeLevels(channel, csPrivilegeLevels);
+            if (!resp)
+            {
+                constexpr uint8_t reserved1 = 0x00;
+                ret.pack(reserved1, csPrivilegeLevels);
+                return responseSuccess(std::move(ret));
+            }
+            else
+            {
+                return response(resp);
+            }
         }
     }
 
