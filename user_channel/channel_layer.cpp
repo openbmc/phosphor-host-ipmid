@@ -81,8 +81,6 @@ size_t getChannelMaxTransferSize(uint8_t chNum)
 
 ipmi_ret_t ipmiChannelInit()
 {
-    std::string csPrivFileName = "/var/lib/ipmi/cs_privilege_levels.json";
-
     getChannelConfigObject();
     getCipherConfigObject(csPrivFileName);
     return IPMI_CC_OK;
