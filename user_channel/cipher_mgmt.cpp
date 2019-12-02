@@ -22,7 +22,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <include/ipmid/api-types.hpp>
 #include <phosphor-logging/log.hpp>
 
 namespace ipmi
@@ -172,6 +171,74 @@ uint4_t CipherConfig::convertToPrivLimitIndex(const std::string& value)
 std::string CipherConfig::convertToPrivLimitString(const uint4_t& value)
 {
     return ipmi::privList.at(static_cast<size_t>(value));
+}
+
+ipmi::Cc CipherConfig::getCSPrivilegeLevels(
+    uint8_t chNum, std::array<uint4_t, maxCSRecords>& csPrivilegeLevels)
+{
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return ccInvalidFieldRequest;
+    }
+
+    for (size_t csNum = 0; csNum < maxCSRecords; ++csNum)
+    {
+        csPrivilegeLevels[csNum] = csPrivilegeMap[{chNum, csNum}];
+    }
+    return ccSuccess;
+}
+
+ipmi::Cc CipherConfig::setCSPrivilegeLevels(
+    uint8_t chNum, const std::array<uint4_t, maxCSRecords>& requestData)
+{
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return ccInvalidFieldRequest;
+    }
+
+    Json jsonData;
+    if (!fs::exists(cipherSuitePrivFileName))
+    {
+        log<level::INFO>("CS privilege levels user settings file does not "
+                         "exist. Creating...");
+    }
+    else
+    {
+        jsonData = readCSPrivilegeLevels(cipherSuitePrivFileName);
+        if (jsonData == nullptr)
+        {
+            return ccUnspecifiedError;
+        }
+    }
+
+    Json privData;
+    std::string csKey;
+    constexpr auto privMaxValue = static_cast<uint8_t>(ipmi::Privilege::Oem);
+    for (size_t csNum = 0; csNum < maxCSRecords; ++csNum)
+    {
+        csKey = "CipherID" + std::to_string(csNum);
+        auto priv = static_cast<uint8_t>(requestData[csNum]);
+
+        if (priv > privMaxValue)
+        {
+            return ccInvalidFieldRequest;
+        }
+        privData[csKey] = convertToPrivLimitString(priv);
+    }
+
+    std::string chKey = "Channel" + std::to_string(chNum);
+    jsonData[chKey] = privData;
+
+    if (writeCSPrivilegeLevels(jsonData))
+    {
+        log<level::ERR>("Error in setting CS Privilege Levels.");
+        return ccUnspecifiedError;
+    }
+
+    updateCSPrivilegesMap(jsonData);
+    return ccSuccess;
 }
 
 } // namespace ipmi
