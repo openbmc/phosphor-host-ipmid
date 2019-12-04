@@ -67,6 +67,7 @@ netipmid_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(LIBIPMID_LIBS) \
+	-lboost_coroutine \
 	-lchannellayer \
 	-luserlayer
 
