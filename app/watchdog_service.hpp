@@ -92,13 +92,6 @@ class WatchdogService
      */
     void setInterval(uint64_t interval);
 
-    /** @brief Sets the value of the timeRemaining property on the host
-     *         watchdog
-     *
-     *  @param[in] timeRemaining - The new timeRemaining value
-     */
-    void setTimeRemaining(uint64_t timeRemaining);
-
   private:
     /** @brief sdbusplus handle */
     sdbusplus::bus::bus bus;
