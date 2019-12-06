@@ -247,7 +247,7 @@ ipmi::RspType<>
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = initialCountdown * 100;
         wd_service.setInterval(interval);
-        wd_service.setTimeRemaining(interval);
+        wd_service.resetTimeRemaining(false);
 
         // Mark as initialized so that future resets behave correctly
         wd_service.setInitialized(true);
