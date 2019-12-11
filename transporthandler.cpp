@@ -1391,6 +1391,10 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
             {
                 return responseReqDataLenInvalid();
             }
+            if (rsvd)
+            {
+                return responseInvalidFieldRequest();
+            }
             switch (static_cast<IPSrc>(static_cast<uint8_t>(flag)))
             {
                 case IPSrc::DHCP:
