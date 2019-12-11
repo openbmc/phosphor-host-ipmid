@@ -20,6 +20,11 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
         reinterpret_cast<const OpenSessionRequest*>(inPayload.data());
     auto response = reinterpret_cast<OpenSessionResponse*>(outPayload.data());
 
+    // Per the IPMI Spec, messageTag and remoteConsoleSessionID are always
+    // returned
+    response->messageTag = request->messageTag;
+    response->remoteConsoleSessionID = request->remoteConsoleSessionID;
+
     // Check for valid Authentication Algorithms
     if (!cipher::rakp_auth::Interface::isAlgorithmSupported(
             static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo)))
@@ -86,10 +91,8 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    response->messageTag = request->messageTag;
     response->status_code = static_cast<uint8_t>(RAKP_ReturnCode::NO_ERROR);
     response->maxPrivLevel = static_cast<uint8_t>(session->reqMaxPrivLevel);
-    response->remoteConsoleSessionID = request->remoteConsoleSessionID;
     response->managedSystemSessionID =
         endian::to_ipmi<>(session->getBMCSessionID());
 
