@@ -1690,6 +1690,10 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         }
         case LanParam::IP:
         {
+            if (channelCall<getDHCPProperty>(channel))
+            {
+                return responseCommandNotAvailable();
+            }
             auto ifaddr = channelCall<getIfAddr4>(channel);
             in_addr addr{};
             if (ifaddr)
@@ -1717,6 +1721,10 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         }
         case LanParam::SubnetMask:
         {
+            if (channelCall<getDHCPProperty>(channel))
+            {
+                return responseCommandNotAvailable();
+            }
             auto ifaddr = channelCall<getIfAddr4>(channel);
             uint8_t prefix = AddrFamily<AF_INET>::defaultPrefix;
             if (ifaddr)
@@ -1729,6 +1737,10 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         }
         case LanParam::Gateway1:
         {
+            if (channelCall<getDHCPProperty>(channel))
+            {
+                return responseCommandNotAvailable();
+            }
             auto gateway =
                 channelCall<getGatewayProperty<AF_INET>>(channel).value_or(
                     in_addr{});
