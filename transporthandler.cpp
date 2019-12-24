@@ -1313,6 +1313,54 @@ RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
 {
     return response(ccParamNotSupported);
 }
+/**
+ * @brief is MAC address empty.
+ *
+ * This function checks whether the MAC address is empty.
+ *
+ * @param[in] mac - MAC address.
+ * @return true if MAC address is empty else retun false.
+ **/
+bool isEmpty(const ether_addr& mac)
+{
+    return equal(mac, ether_addr{});
+}
+
+/**
+ * @brief is MAC address multicast.
+ *
+ * This function checks whether the MAC address is multicast.
+ * IEEE has specified that the most significant bit of the most significant byte
+ * is used to identify whether the addr is unicast or multi cast. If its a 1,
+ * that means multicast, 0 means unicast. The most significant byte is the left
+ * most byte in the address, and the most significant bit is the right most bit
+ * of the byte (this is counter intuitive to most binary implementations where
+ * the left most bit usually labeled most significant).
+ * Eample of multicast mac address 01:00:CC:CC:06:08, 09:00:FF:12:04:02
+ *
+ * @param[in] mac - MAC address.
+ * @return true if MAC address is multicast else retun false.
+ **/
+bool isMulticast(const ether_addr& mac)
+{
+    constexpr uint8_t macAddrMSByte = 0;
+    constexpr uint8_t macAddrMSBit = 0b1;
+    return mac.ether_addr_octet[macAddrMSByte] & macAddrMSBit;
+}
+
+/**
+ * @brief is MAC address unicast.
+ *
+ * This function checks whether the MAC address is unicast.
+ * Eample of unicast mac address 00:01:44:55:66:FF, 08:12:34:01:23:19
+ *
+ * @param[in] mac - MAC address.
+ * @return true if MAC address is unicast else retun false.
+ **/
+bool isUnicast(const ether_addr& mac)
+{
+    return !isEmpty(mac) && !isMulticast(mac);
+}
 
 RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                  message::Payload& req)
@@ -1426,6 +1474,11 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                 return responseReqDataLenInvalid();
             }
             copyInto(mac, bytes);
+
+            if (!isUnicast(mac))
+            {
+                return responseInvalidFieldRequest();
+            }
             channelCall<setMACProperty>(channel, mac);
             return responseSuccess();
         }
