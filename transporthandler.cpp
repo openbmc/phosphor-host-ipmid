@@ -1426,6 +1426,11 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                 return responseReqDataLenInvalid();
             }
             copyInto(mac, bytes);
+            // check if the MAC address is empty or multi cast
+            if (equal(mac, ether_addr{}) || (mac.ether_addr_octet[0] & 0b1))
+            {
+                return responseInvalidFieldRequest();
+            }
             channelCall<setMACProperty>(channel, mac);
             return responseSuccess();
         }
