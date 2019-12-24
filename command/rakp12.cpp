@@ -123,19 +123,20 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
     // As stated in Set Session Privilege Level command in IPMI Spec, when
-    // creating a session through Activate command / RAKP 1 message, it must be
-    // established with CALLBACK privilege if requested for callback. All other
-    // sessions are initialy set to USER privilege, regardless of the requested
-    // maximum privilege.
-    session->currentPrivilege(
-        static_cast<uint8_t>(session::Privilege::CALLBACK));
-    if (static_cast<session::Privilege>(request->req_max_privilege_level &
-                                        session::reqMaxPrivMask) >
-        session::Privilege::CALLBACK)
+    // creating a session through Activate command / RAKP 1 message, it must
+    // be established with USER privilege as well as all other sessions are
+    // initially set to USER privilege, regardless of the requested maximum
+    // privilege.
+    if (!(static_cast<session::Privilege>(request->req_max_privilege_level &
+                                          session::reqMaxPrivMask) >
+          session::Privilege::CALLBACK))
     {
-        session->currentPrivilege(
-            static_cast<uint8_t>(session::Privilege::USER));
+        response->rmcpStatusCode =
+            static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_ROLE_PRIV);
+        return outPayload;
     }
+    session->currentPrivilege(static_cast<uint8_t>(session::Privilege::USER));
+
     session->reqMaxPrivLevel =
         static_cast<session::Privilege>(request->req_max_privilege_level);
     if (request->user_name_len == 0)
@@ -205,7 +206,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     }
     session->channelNum(chNum);
     session->userID(userId);
-    // minimum privilege of Channel / User / session::privilege::USER/CALLBACK /
+    // minimum privilege of Channel / User / session::privilege::USER
     // has to be used as session current privilege level
     uint8_t minPriv = 0;
     if (session->sessionChannelAccess.privLimit <
