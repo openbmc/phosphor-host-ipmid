@@ -1313,6 +1313,30 @@ RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
 {
     return response(ccParamNotSupported);
 }
+/**
+ * @brief is MAC address valid.
+ *
+ * This function checks whether the MAC address is valid or not.
+ *
+ * @param[in] mac - MAC address.
+ * @return true if MAC address is valid else retun false.
+ **/
+bool isValidMACAddress(const ether_addr& mac)
+{
+    // check if mac address is empty
+    if (equal(mac, ether_addr{}))
+    {
+        return false;
+    }
+    // we accept only unicast MAC addresses and  same thing has been checked in
+    // phosphor-network layer. If the least significant bit of the first octet
+    // is set to 1, it is multicast MAC else it is unicast MAC address.
+    if (mac.ether_addr_octet[0] & 1)
+    {
+        return false;
+    }
+    return true;
+}
 
 RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                  message::Payload& req)
@@ -1426,6 +1450,11 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                 return responseReqDataLenInvalid();
             }
             copyInto(mac, bytes);
+
+            if (!isValidMACAddress(mac))
+            {
+                return responseInvalidFieldRequest();
+            }
             channelCall<setMACProperty>(channel, mac);
             return responseSuccess();
         }
