@@ -1406,13 +1406,16 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
                     channelCall<setDHCPProperty>(channel, true);
                     return responseSuccess();
                 }
-                case IPSrc::Unspecified:
                 case IPSrc::Static:
-                case IPSrc::BIOS:
-                case IPSrc::BMC:
+                case IPSrc::Unspecified:
                 {
                     channelCall<setDHCPProperty>(channel, false);
                     return responseSuccess();
+                }
+                case IPSrc::BIOS:
+                case IPSrc::BMC:
+                {
+                    return responseInvalidFieldRequest();
                 }
             }
             return response(ccParamNotSupported);
