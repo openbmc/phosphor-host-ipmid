@@ -27,6 +27,7 @@ namespace ipmi
 {
 
 static constexpr const uint8_t ccActionNotSupportedForChannel = 0x82;
+static constexpr const uint8_t ccAccessModeNotSupportedForChannel = 0x83;
 
 /** @brief implements the set channel access command
  *  @ param ctx - context pointer
@@ -52,13 +53,19 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
     const uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
 
-    if (!isValidChannel(chNum) || reserved1 != 0 || reserved2 != 0)
+    if (reserved1 || reserved2)
     {
         log<level::DEBUG>("Set channel access - Invalid field in request");
         return responseInvalidFieldRequest();
     }
+    if (!isValidPrivLimit(static_cast<uint8_t>(channelPrivLimit)))
+    {
+        log<level::DEBUG>("Invalid privilege specified.");
+        return responseInvalidFieldRequest();
+    }
 
-    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    if ((getChannelSessionSupport(chNum) == EChannelSessSupported::none) ||
+        (!isValidChannel(chNum)))
     {
         log<level::DEBUG>("Set channel access - No support on channel");
         return response(ccActionNotSupportedForChannel);
@@ -97,7 +104,7 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
         case reserved:
         default:
             log<level::DEBUG>("Set channel access - Invalid access set mode");
-            return responseInvalidFieldRequest();
+            return response(ccAccessModeNotSupportedForChannel);
     }
 
     // cannot static cast directly from uint2_t to enum; must go via int
@@ -118,26 +125,26 @@ RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
         case reserved:
         default:
             log<level::DEBUG>("Set channel access - Invalid access priv mode");
-            return responseInvalidFieldRequest();
+            return response(ccAccessModeNotSupportedForChannel);
     }
 
     if (setNVFlag != 0)
     {
         compCode = setChannelAccessPersistData(chNum, chNVData, setNVFlag);
-        if (compCode != IPMI_CC_OK)
+        if (compCode != ccSuccess)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
-            return response(compCode);
+            return response(ccActionNotSupportedForChannel);
         }
     }
 
     if (setActFlag != 0)
     {
         compCode = setChannelAccessData(chNum, chActData, setActFlag);
-        if (compCode != IPMI_CC_OK)
+        if (compCode != ccSuccess)
         {
             log<level::DEBUG>("Set channel access - Failed to set access data");
-            return response(compCode);
+            return response(ccActionNotSupportedForChannel);
         }
     }
 
@@ -175,7 +182,7 @@ ipmi ::RspType<uint3_t, // access mode,
     const uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
 
-    if (!isValidChannel(chNum) || reserved1 != 0 || reserved2 != 0)
+    if (reserved1 || reserved2)
     {
         log<level::DEBUG>("Get channel access - Invalid field in request");
         return responseInvalidFieldRequest();
@@ -184,10 +191,11 @@ ipmi ::RspType<uint3_t, // access mode,
     if ((accessSetMode == doNotSet) || (accessSetMode == reserved))
     {
         log<level::DEBUG>("Get channel access - Invalid Access mode");
-        return responseInvalidFieldRequest();
+        return response(ccAccessModeNotSupportedForChannel);
     }
 
-    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    if ((getChannelSessionSupport(chNum) == EChannelSessSupported::none) ||
+        !isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel access - No support on channel");
         return response(ccActionNotSupportedForChannel);
@@ -206,7 +214,7 @@ ipmi ::RspType<uint3_t, // access mode,
         compCode = getChannelAccessData(chNum, chAccess);
     }
 
-    if (compCode != IPMI_CC_OK)
+    if (compCode != ccSuccess)
     {
         return response(compCode);
     }
