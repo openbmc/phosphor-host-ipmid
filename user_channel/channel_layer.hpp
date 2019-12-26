@@ -24,18 +24,13 @@ namespace ipmi
 static constexpr uint8_t maxIpmiChannels = 16;
 static constexpr uint8_t currentChNum = 0xE;
 static constexpr uint8_t invalidChannel = 0xff;
+static constexpr const uint8_t ccActionNotSupportedForChannel = 0x82;
+static constexpr const uint8_t ccAccessModeNotSupportedForChannel = 0x83;
 
 /**
  * @array of privilege levels
  */
 extern const std::array<std::string, PRIVILEGE_OEM + 1> privList;
-
-/**
- * @enum IPMI return codes specific to channel (refer spec se 22.22 response
- * data)
- */
-constexpr Cc ccActionNotSupportedForChannel = 0x82;
-constexpr Cc ccAccessModeNotSupportedForChannel = 0x83;
 
 /**
  * @enum Channel Protocol Type (refer spec sec 6.4)
