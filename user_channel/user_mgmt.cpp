@@ -537,7 +537,8 @@ bool UserAccess::isValidUserId(const uint8_t userId)
 
 bool UserAccess::isValidPrivilege(const uint8_t priv)
 {
-    return ((priv >= PRIVILEGE_CALLBACK && priv <= PRIVILEGE_OEM) ||
+    // Callback privilege is deprecated in OpenBMC
+    return ((priv > PRIVILEGE_CALLBACK && priv <= PRIVILEGE_OEM) ||
             priv == privNoAccess);
 }
 
@@ -841,7 +842,7 @@ ipmi_ret_t UserAccess::setUserPayloadAccess(const uint8_t chNum,
 
     if (!isValidChannel(chNum))
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ccCommandNotAvailable;
     }
     if (!isValidUserId(userId))
     {
@@ -892,7 +893,7 @@ ipmi_ret_t UserAccess::setUserPrivilegeAccess(const uint8_t userId,
 {
     if (!isValidChannel(chNum))
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ccCommandNotAvailable;
     }
     if (!isValidUserId(userId))
     {
