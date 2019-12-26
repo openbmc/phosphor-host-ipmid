@@ -131,15 +131,24 @@ ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
                                   std::optional<uint8_t> sessionLimit)
 {
     uint8_t sessLimit = sessionLimit.value_or(0);
-    uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if (reserved1 != 0 || reserved2 != 0 || sessLimit != 0 ||
-        (!isValidChannel(chNum)) ||
-        (!ipmiUserIsValidPrivilege(static_cast<uint8_t>(privilege))) ||
-        (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
+    if (reserved1 || reserved2 || sessLimit ||
+        !ipmiUserIsValidPrivilege(static_cast<uint8_t>(privilege)))
     {
         log<level::DEBUG>("Set user access - Invalid field in request");
         return ipmi::responseInvalidFieldRequest();
+    }
+
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    if (!isValidChannel(chNum))
+    {
+        log<level::DEBUG>("Set user access - Invalid channel request");
+        return ipmi::response(invalidChannel);
+    }
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        log<level::DEBUG>("Set user access - No support on channel");
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -202,11 +211,17 @@ ipmi::RspType<uint6_t, // max channel users
 {
     uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if (reserved1 != 0 || reserved2 != 0 || (!isValidChannel(chNum)) ||
-        (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
+
+    if (reserved1 || reserved2 || !isValidChannel(chNum))
     {
         log<level::DEBUG>("Get user access - Invalid field in request");
         return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        log<level::DEBUG>("Get user access - No support on channel");
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -450,15 +465,22 @@ ipmi::RspType<uint8_t,  // channel number
                                              bool extData, uint4_t privLevel,
                                              uint4_t reserved2)
 {
-
     uint8_t channel =
         convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
 
     if (reserved1 || reserved2 || !isValidChannel(channel) ||
-        !isValidPrivLimit(static_cast<uint8_t>(privLevel)) ||
-        (EChannelSessSupported::none == getChannelSessionSupport(channel)))
+        !isValidPrivLimit(static_cast<uint8_t>(privLevel)))
     {
-        return ipmi::response(ccInvalidFieldRequest);
+        log<level::DEBUG>(
+            "Get channel auth capabilities - Invalid field in request");
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (getChannelSessionSupport(channel) == EChannelSessSupported::none)
+    {
+        log<level::DEBUG>(
+            "Get channel auth capabilities - No support on channel");
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
 
     constexpr bool extDataSupport = true; // true for IPMI 2.0 extensions
@@ -532,25 +554,27 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
 
     uint8_t oemPayloadEnables2Reserved)
 {
+    auto chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
     // Validate the reserved args. Only SOL payload is supported as on date.
     if (reserved || stdPayload0ipmiReserved || stdPayload2 || stdPayload3 ||
         stdPayload4 || stdPayload5 || stdPayload6 || stdPayload7 ||
         oemPayload0 || oemPayload1 || oemPayload2 || oemPayload3 ||
         oemPayload4 || oemPayload5 || oemPayload6 || oemPayload7 ||
-        stdPayloadEnables2Reserved || oemPayloadEnables2Reserved)
+        stdPayloadEnables2Reserved || oemPayloadEnables2Reserved ||
+        !isValidChannel(chNum))
     {
         return ipmi::responseInvalidFieldRequest();
     }
 
-    auto chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if ((operation != enableOperation && operation != disableOperation) ||
-        (!isValidChannel(chNum)) ||
-        (getChannelSessionSupport(chNum) == EChannelSessSupported::none))
+    if ((operation != enableOperation && operation != disableOperation))
     {
         return ipmi::responseInvalidFieldRequest();
     }
-
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        return ipmi::response(ccActionNotSupportedForChannel);
+    }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
         return ipmi::responseParmOutOfRange();
@@ -627,10 +651,14 @@ ipmi::RspType<bool, // stdPayload0ipmiReserved
 {
     uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if (reserved1 != 0 || reserved2 != 0 || (!isValidChannel(chNum)) ||
-        (getChannelSessionSupport(chNum) == EChannelSessSupported::none))
+
+    if (reserved1 || reserved2 || !isValidChannel(chNum))
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
