@@ -465,13 +465,16 @@ ipmi_ret_t
         return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
     }
 
-    if (((setFlag & setAccessMode) &&
-         (!isValidAccessMode(chAccessData.accessMode))) ||
-        ((setFlag & setPrivLimit) &&
-         (!isValidPrivLimit(chAccessData.privLimit))))
+    if ((setFlag & setAccessMode) &&
+        (!isValidAccessMode(chAccessData.accessMode)))
     {
-        log<level::DEBUG>("Invalid access mode / privilege limit specified");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        log<level::DEBUG>("Invalid access mode specified");
+        return IPMI_CC_ACCESS_MODE_NOT_SUPPORTED_FOR_CHANEL;
+    }
+    if ((setFlag & setPrivLimit) && (!isValidPrivLimit(chAccessData.privLimit)))
+    {
+        log<level::DEBUG>("Invalid privilege limit specified");
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
     }
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
@@ -562,13 +565,16 @@ ipmi_ret_t ChannelConfig::setChannelAccessPersistData(
         return IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL;
     }
 
-    if (((setFlag & setAccessMode) &&
-         (!isValidAccessMode(chAccessData.accessMode))) ||
-        ((setFlag & setPrivLimit) &&
-         (!isValidPrivLimit(chAccessData.privLimit))))
+    if ((setFlag & setAccessMode) &&
+        (!isValidAccessMode(chAccessData.accessMode)))
     {
-        log<level::DEBUG>("Invalid access mode / privilege limit specified");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        log<level::DEBUG>("Invalid access mode specified");
+        return IPMI_CC_ACCESS_MODE_NOT_SUPPORTED_FOR_CHANEL;
+    }
+    if ((setFlag & setPrivLimit) && (!isValidPrivLimit(chAccessData.privLimit)))
+    {
+        log<level::DEBUG>("Invalid privilege limit specified");
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
     }
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
@@ -668,8 +674,8 @@ ipmi_ret_t ChannelConfig::getChannelEnabledAuthType(const uint8_t chNum,
 
     if (!isValidPrivLimit(priv))
     {
-        log<level::DEBUG>("Invalid privilege specified.");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        log<level::DEBUG>("Invalid privilege limit specified");
+        return IPMI_CC_INSUFFICIENT_PRIVILEGE;
     }
 
     // TODO: Hardcoded for now. Need to implement.
