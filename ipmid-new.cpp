@@ -820,7 +820,6 @@ int main(int argc, char* argv[])
     }
     auto sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
     setSdBus(sdbusp);
-    sdbusp->request_name("xyz.openbmc_project.Ipmi.Host");
 
     // TODO: Hack to keep the sdEvents running.... Not sure why the sd_event
     //       queue stops running if we don't have a timer that keeps re-arming
@@ -836,13 +835,6 @@ int main(int argc, char* argv[])
     // Register all command providers and filters
     std::forward_list<ipmi::IpmiProvider> providers =
         ipmi::loadProviders(HOST_IPMI_LIB_PATH);
-
-    // Add bindings for inbound IPMI requests
-    auto server = sdbusplus::asio::object_server(sdbusp);
-    auto iface = server.add_interface("/xyz/openbmc_project/Ipmi",
-                                      "xyz.openbmc_project.Ipmi.Server");
-    iface->register_method("execute", ipmi::executionEntry);
-    iface->initialize();
 
 #ifdef ALLOW_DEPRECATED_API
     // listen on deprecated signal interface for kcs/bt commands
@@ -873,6 +865,14 @@ int main(int argc, char* argv[])
         };
     registerSignalHandler(ipmi::prioOpenBmcBase, SIGINT, stopAsioRunLoop);
     registerSignalHandler(ipmi::prioOpenBmcBase, SIGTERM, stopAsioRunLoop);
+
+    sdbusp->request_name("xyz.openbmc_project.Ipmi.Host");
+    // Add bindings for inbound IPMI requests
+    auto server = sdbusplus::asio::object_server(sdbusp);
+    auto iface = server.add_interface("/xyz/openbmc_project/Ipmi",
+                                      "xyz.openbmc_project.Ipmi.Server");
+    iface->register_method("execute", ipmi::executionEntry);
+    iface->initialize();
 
     io->run();
 
