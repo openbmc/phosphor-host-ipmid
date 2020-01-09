@@ -198,7 +198,7 @@ UserAccess& getUserAccessObject()
 int getUserNameFromPath(const std::string& path, std::string& userName)
 {
     static size_t pos = strlen(userObjBasePath) + 1;
-    if (path.find(userObjBasePath) == std::string::npos)
+    if (path.find(userObjBasePath) == std::string::npos || pos > path.size())
     {
         return -EINVAL;
     }
