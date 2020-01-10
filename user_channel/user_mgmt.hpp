@@ -392,8 +392,9 @@ class UserAccess
     void getSystemPrivAndGroups();
 
     /** @brief function to init user data from configuration & D-Bus objects
+     * and to register for signals
      *
      */
-    void initUserDataFile();
+    void cacheUserDataFile();
 };
 } // namespace ipmi
