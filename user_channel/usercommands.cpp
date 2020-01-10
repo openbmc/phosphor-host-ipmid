@@ -672,7 +672,7 @@ ipmi::RspType<bool, // stdPayload0ipmiReserved
 void registerUserIpmiFunctions() __attribute__((constructor));
 void registerUserIpmiFunctions()
 {
-    ipmiUserInit();
+    post_work([]() { ipmiUserInit(); });
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdSetUserAccessCommand,
                           ipmi::Privilege::Admin, ipmiSetUserAccess);
