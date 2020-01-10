@@ -394,6 +394,6 @@ class UserAccess
     /** @brief function to init user data from configuration & D-Bus objects
      *
      */
-    void initUserDataFile();
+    void cacheUserDataFile();
 };
 } // namespace ipmi
