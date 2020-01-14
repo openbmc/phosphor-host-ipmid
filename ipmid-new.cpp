@@ -233,17 +233,18 @@ message::Response::ptr executeIpmiCommandCommon(
 {
     // filter the command first; a non-null message::Response::ptr
     // means that the message has been rejected for some reason
-    message::Response::ptr response = filterIpmiCommand(request);
-    if (response)
-    {
-        return response;
-    }
+    message::Response::ptr filterResponse = filterIpmiCommand(request);
 
     Cmd cmd = request->ctx->cmd;
     unsigned int key = makeCmdKey(keyCommon, cmd);
     auto cmdIter = handlers.find(key);
     if (cmdIter != handlers.end())
     {
+        // only return the filter response if the command is found
+        if (filterResponse)
+        {
+            return filterResponse;
+        }
         HandlerTuple& chosen = cmdIter->second;
         if (request->ctx->priv < std::get<Privilege>(chosen))
         {
@@ -257,6 +258,11 @@ message::Response::ptr executeIpmiCommandCommon(
         cmdIter = handlers.find(wildcard);
         if (cmdIter != handlers.end())
         {
+            // only return the filter response if the command is found
+            if (filterResponse)
+            {
+                return filterResponse;
+            }
             HandlerTuple& chosen = cmdIter->second;
             if (request->ctx->priv < std::get<Privilege>(chosen))
             {
