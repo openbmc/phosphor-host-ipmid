@@ -142,7 +142,7 @@ std::string ChannelConfig::getChannelName(const uint8_t chNum)
     if (!isValidChannel(chNum))
     {
         log<level::ERR>("Invalid channel number.",
-                        entry("ChannelID=%d", chNum));
+                        entry("CHANNEL_ID=%d", chNum));
         throw std::invalid_argument("Invalid channel number");
     }
 
@@ -160,7 +160,7 @@ int ChannelConfig::convertToChannelNumberFromChannelName(
         }
     }
     log<level::ERR>("Invalid channel name.",
-                    entry("Channel=%s", chName.c_str()));
+                    entry("CHANNEL=%s", chName.c_str()));
     throw std::invalid_argument("Invalid channel name");
 
     return -1;
