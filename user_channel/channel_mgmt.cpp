@@ -168,15 +168,15 @@ int ChannelConfig::convertToChannelNumberFromChannelName(
 
 std::string ChannelConfig::getChannelNameFromPath(const std::string& path)
 {
-    std::size_t pos = path.find(networkIntfObjectBasePath);
-    if (pos == std::string::npos)
+
+    constexpr size_t length = strlen(networkIntfObjectBasePath);
+    if (((length + 1) >= path.size()) ||
+        path.compare(0, length, networkIntfObjectBasePath))
     {
-        log<level::ERR>("Invalid interface path.",
-                        entry("PATH=%s", path.c_str()));
-        throw std::invalid_argument("Invalid interface path");
+        log<level::ERR>("Invalid object path.", entry("PATH=%s", path.c_str()));
+        throw std::invalid_argument("Invalid object path");
     }
-    std::string chName =
-        path.substr(pos + strlen(networkIntfObjectBasePath) + 1);
+    std::string chName(path, length + 1);
     return chName;
 }
 
