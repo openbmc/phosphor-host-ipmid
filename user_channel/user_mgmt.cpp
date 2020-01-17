@@ -980,6 +980,26 @@ ipmi_ret_t UserAccess::getUserName(const uint8_t userId, std::string& userName)
     return IPMI_CC_OK;
 }
 
+bool UserAccess::isIpmiInAvailableGroupList()
+{
+    if (std::find(availableGroups.begin(), availableGroups.end(),
+                  ipmiGrpName) != availableGroups.end())
+    {
+        return true;
+    }
+    if (availableGroups.empty())
+    {
+        // avaialble groups shouldn't be empty, re-query
+        getSystemPrivAndGroups();
+        if (std::find(availableGroups.begin(), availableGroups.end(),
+                      ipmiGrpName) != availableGroups.end())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
                                    const char* userNameInChar)
 {
@@ -1025,6 +1045,10 @@ ipmi_ret_t UserAccess::setUserName(const uint8_t userId,
     {
         try
         {
+            if (!isIpmiInAvailableGroupList())
+            {
+                return IPMI_CC_UNSPECIFIED_ERROR;
+            }
             // Create new user
             auto method = bus.new_method_call(
                 getUserServiceName().c_str(), userMgrObjBasePath,
