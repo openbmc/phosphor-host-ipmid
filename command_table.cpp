@@ -106,7 +106,7 @@ void Table::executeCommand(uint32_t inCommand,
 
         auto end = std::chrono::steady_clock::now();
 
-        auto elapsedSeconds =
+        std::chrono::duration<size_t> elapsedSeconds =
             std::chrono::duration_cast<std::chrono::seconds>(end - start);
 
         // If command time execution time exceeds 2 seconds, log a time
@@ -114,7 +114,7 @@ void Table::executeCommand(uint32_t inCommand,
         if (elapsedSeconds > 2s)
         {
             log<level::ERR>("IPMI command timed out",
-                            entry("DELAY=%d", elapsedSeconds.count()));
+                            entry("DELAY=%zu", elapsedSeconds.count()));
         }
     }
 }
