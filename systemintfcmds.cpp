@@ -12,6 +12,7 @@
 void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace sdbusplus::xyz::openbmc_project::Control::server;
+using namespace phosphor::logging;
 
 // For accessing Host command manager
 using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;
@@ -47,6 +48,8 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto hostCmd = ipmid_get_host_cmd_manager()->getNextCommand();
     oem_sel.cmd = hostCmd.first;
     oem_sel.data[0] = hostCmd.second;
+    log<level::DEBUG>("Sending Event to Host", entry("MAJOR=%x", hostCmd.first),
+                      entry("MINOR=%x", hostCmd.second));
 
     // All '0xFF' since unused.
     std::memset(&oem_sel.data[1], 0xFF, 3);
@@ -68,7 +71,17 @@ ipmi::RspType<uint8_t> ipmiAppGetMessageFlags()
     // or when the Event Message buffer is disabled.
     // This path is used to communicate messages to the host
     // from within the phosphor::host::command::Manager
-    constexpr uint8_t setEventMsgBufferFull = 0x2;
+    uint8_t setEventMsgBufferFull = 0;
+    if (ipmid_get_host_cmd_manager()->isQueueEmpty())
+    {
+        log<level::DEBUG>("Tell host no messages are available");
+        setEventMsgBufferFull = 0;
+    }
+    else
+    {
+        log<level::DEBUG>("Tell host that messages are available");
+        setEventMsgBufferFull = 0x2;
+    }
     return ipmi::responseSuccess(setEventMsgBufferFull);
 }
 

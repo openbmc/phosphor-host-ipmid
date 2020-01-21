@@ -44,6 +44,12 @@ Manager::Manager(sdbusplus::bus::bus& bus) :
     // Nothing to do here.
 }
 
+// Let caller know if anything is in the queue
+bool Manager::isQueueEmpty()
+{
+    return this->workQueue.empty();
+}
+
 // Called as part of READ_MSG_DATA command
 IpmiCmdData Manager::getNextCommand()
 {
