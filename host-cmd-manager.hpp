@@ -34,6 +34,10 @@ class Manager
      */
     explicit Manager(sdbusplus::bus::bus& bus);
 
+    /** @brief  Return whether anything is waiting in the queue
+     */
+    bool isQueueEmpty();
+
     /** @brief  Extracts the next entry in the queue and returns
      *          Command and data part of it.
      *
