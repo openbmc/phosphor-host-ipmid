@@ -1659,6 +1659,35 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
 
     if ((parameter >= oemCmdStart) && (parameter <= oemCmdEnd))
     {
+        /*
+         *  Byte 1: Channel number
+         *  Byte 2: Parameter selector
+         *  Byte 3:N :
+            * Byte 3
+                   -Block selector (01h – 04h)
+            * Byte 4
+                   - Set host-name in-progress indicator
+                   - [7:1] – reserved
+                   - [0] - in progress
+                   - 0h = Update in progress.
+                   - 1h = Update is completed with this request
+             * Byte 5:20 = Block data length
+         */
+        constexpr size_t IpmiHostnameLen =
+            20; // Channel number +Parameter selector+Block selector+Set
+                // host-name in-progress indicator+ Block of data (16 bytes)
+        uint8_t* hostname = req.data();
+        constexpr uint8_t setHostnameInProgressIndicator = 3;
+
+        // Extract LSB bit only
+        bool progressIndicator =
+            (hostname[setHostnameInProgressIndicator] & 0x01) ? true : false;
+
+        // Check Byte2 - host name in-progress indicator
+        if (!progressIndicator && req.size() != IpmiHostnameLen)
+        {
+            return responseReqDataLenInvalid();
+        }
         return setLanOem(channel, parameter, req);
     }
 
