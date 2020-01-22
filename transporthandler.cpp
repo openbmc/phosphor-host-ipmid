@@ -108,6 +108,10 @@ constexpr auto INTF_NEIGHBOR_CREATE_STATIC =
     "xyz.openbmc_project.Network.Neighbor.CreateStatic";
 constexpr auto INTF_VLAN = "xyz.openbmc_project.Network.VLAN";
 constexpr auto INTF_VLAN_CREATE = "xyz.openbmc_project.Network.VLAN.Create";
+constexpr ipmi::Cc ccUnprintable = 0x90;
+constexpr auto validHostnameChars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX"
+    "YZ0123456789-";
 
 /** @brief Generic paramters for different address families */
 template <int family>
@@ -1659,6 +1663,48 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
 
     if ((parameter >= oemCmdStart) && (parameter <= oemCmdEnd))
     {
+        /*
+         *  Byte 1: Channel number
+         *  Byte 2: Parameter selector
+         *  Byte 3:N :
+            * Byte 3
+                   -Block selector (01h – 04h)
+            * Byte 4
+                   - Set host-name in-progress indicator
+                   - [7:1] – reserved
+                   - [0] - in progress
+                   - 0h = Update in progress.
+                   - 1h = Update is completed with this request
+             * Byte 5:20 = Block data length
+         */
+        constexpr size_t IpmiHostnameLen =
+            20; // Channel number +Parameter selector+Block selector+Set
+                // host-name in-progress indicator+ Block of data (16 bytes)
+        uint8_t* hostname = req.data();
+        constexpr uint8_t setHostnameInProgressIndicator = 3;
+
+        // Extract LSB bit only
+        bool progressIndicator =
+            (hostname[setHostnameInProgressIndicator] & 0x01) ? true : false;
+
+        // Check Byte2 - host name in-progress indicator
+        if (!progressIndicator)
+        {
+            if (req.size() != IpmiHostnameLen)
+            {
+                return responseReqDataLenInvalid();
+            }
+
+            // Check printable character
+            std::string newHostname(reinterpret_cast<char*>(req.data() + 4),
+                                    IpmiHostnameLen - 4);
+            size_t firstNull = newHostname.find_first_of('\0');
+            if (newHostname.find_first_not_of(validHostnameChars) != firstNull)
+            {
+                return response(ccUnprintable);
+            }
+        }
+
         return setLanOem(channel, parameter, req);
     }
 
