@@ -70,6 +70,11 @@ class CipherConfig
         const std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
             csPrivilegeLevels);
 
+    /** @brief function to get highest level matching proposed algorithm
+     *
+     */
+    uint8_t getHighestLevelMatchProposedAlgorithm(uint8_t chNum);
+
   private:
     std::string cipherSuitePrivFileName;
 
