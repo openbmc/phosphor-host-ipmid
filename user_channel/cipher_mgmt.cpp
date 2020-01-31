@@ -15,6 +15,8 @@
 */
 #include "cipher_mgmt.hpp"
 
+#include "channel_layer.hpp"
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -239,6 +241,82 @@ ipmi::Cc CipherConfig::setCSPrivilegeLevels(
 
     updateCSPrivilegesMap(jsonData);
     return ccSuccess;
+}
+
+std::string CipherConfig::getCipherID(uint8_t auth, uint8_t integrity,
+                                      uint8_t confidentiality)
+{
+    std::map<uint8_t, std::array<uint8_t, 3>> cipherSuiteIDS = {
+        {0, {0, 0, 0}},  {1, {0, 1, 0}},  {2, {1, 1, 0}},  {3, {1, 1, 1}},
+        {4, {1, 1, 2}},  {5, {1, 1, 3}},  {6, {2, 0, 0}},  {7, {2, 2, 0}},
+        {8, {2, 2, 1}},  {9, {2, 2, 2}},  {10, {2, 2, 3}}, {11, {2, 3, 0}},
+        {12, {2, 3, 1}}, {13, {2, 3, 2}}, {14, {2, 3, 3}}, {15, {3, 0, 0}},
+        {16, {3, 4, 0}}, {17, {3, 4, 1}}, {18, {3, 4, 2}}, {19, {3, 4, 3}},
+    };
+
+    for (auto it = cipherSuiteIDS.begin(); it != cipherSuiteIDS.end(); ++it)
+    {
+        if ((it->second[0] == auth) && (it->second[1] == integrity) &&
+            (it->second[2] == confidentiality))
+        {
+            return ("CipherID" + std::to_string(it->first));
+        }
+    }
+
+    return "Invalid";
+}
+
+uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
+    const uint8_t chNum, const uint8_t auth, const uint8_t integrity,
+    const uint8_t confidentiality)
+{
+    uint8_t priv = 0x00;
+    std::string cipherID;
+    std::string channelNum = "Channel" + std::to_string(chNum);
+    std::string configFile;
+
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return PRIVILEGE_ERROR;
+    }
+
+    if (fs::exists(cipherSuitePrivFileName))
+    {
+        configFile = "cs_privilege_levels.json";
+    }
+    else
+    {
+        configFile = "cs_privilege_levels_default.json";
+    }
+
+    Json data = nullptr;
+
+    data = readCSPrivilegeLevels(configFile);
+
+    cipherID = getCipherID(auth, integrity, confidentiality);
+    if (cipherID == "Invalid")
+    {
+        log<level::ERR>("Error in getting Cipher Suite ID");
+        return PRIVILEGE_ERROR;
+    }
+    if (data == nullptr)
+    {
+        log<level::ERR>(
+            "Error in getting cipher records from cipher list json");
+        return PRIVILEGE_ERROR;
+    }
+    try
+    {
+        priv = static_cast<uint8_t>(convertToPrivLimitIndex(
+            static_cast<std::string>(data[channelNum][cipherID])));
+    }
+    catch (...)
+    {
+        log<level::ERR>("Error in getting cipher ID");
+        return PRIVILEGE_ERROR;
+    }
+    return priv;
 }
 
 } // namespace ipmi

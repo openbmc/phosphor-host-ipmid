@@ -34,6 +34,8 @@ static const size_t maxCSRecords = 16;
 using ChannelNumCipherIDPair = std::pair<uint8_t, uint8_t>;
 using privMap = std::map<ChannelNumCipherIDPair, uint4_t>;
 
+constexpr uint8_t PRIVILEGE_ERROR = 0xFF;
+
 /** @class CipherConfig
  *  @brief Class to provide cipher suite functionalities
  */
@@ -71,6 +73,20 @@ class CipherConfig
     ipmi::Cc setCSPrivilegeLevels(
         uint8_t chNum,
         const std::array<uint4_t, maxCSRecords>& csPrivilegeLevels);
+
+    /** @brief returns Cipher suite ID for given payload information
+     *
+     */
+    std::string getCipherID(uint8_t auth, uint8_t integrity,
+                            uint8_t confidentiality);
+
+    /** @brief function to get highest level matching proposed algorithm
+     *
+     */
+    uint8_t getHighestLevelMatchProposedAlgorithm(const uint8_t chNum,
+                                                  uint8_t auth,
+                                                  uint8_t integrity,
+                                                  uint8_t confidentiality);
 
   private:
     std::string cipherSuitePrivFileName, cipherSuiteDefaultPrivFileName;
