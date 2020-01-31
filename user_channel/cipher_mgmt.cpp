@@ -288,7 +288,7 @@ uint8_t CipherConfig::setCSPrivilegeLevels(
     updateCSPrivilegesMap(jsonData);
     return ccSuccess;
 }
-uint8_t CipherConfig::getHighestLevelMatchPropAlgo(uint8_t chNum)
+uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(uint8_t chNum)
 {
     if (!doesDeviceExist(chNum))
     {
