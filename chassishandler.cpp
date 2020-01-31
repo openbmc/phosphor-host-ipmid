@@ -815,59 +815,36 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
 //------------------------------------------
 // Calls into Host State Manager Dbus object
 //------------------------------------------
-int initiate_state_transition(State::Host::Transition transition)
+int initiateHostStateTransition(ipmi::Context::ptr& ctx,
+                                State::Host::Transition transition)
 {
     // OpenBMC Host State Manager dbus framework
-    constexpr auto HOST_STATE_MANAGER_ROOT = "/xyz/openbmc_project/state/host0";
-    constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
-    constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
-    constexpr auto PROPERTY = "RequestedHostTransition";
-
-    // sd_bus error
-    int rc = 0;
-    char* busname = NULL;
-
-    // SD Bus error report mechanism.
-    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
-
-    // Gets a hook onto either a SYSTEM or SESSION bus
-    sd_bus* bus_type = ipmid_get_sd_bus_connection();
-    rc = mapper_get_service(bus_type, HOST_STATE_MANAGER_ROOT, &busname);
-    if (rc < 0)
-    {
-        log<level::ERR>(
-            "Failed to get bus name",
-            entry("ERRNO=0x%X, OBJPATH=%s", -rc, HOST_STATE_MANAGER_ROOT));
-        return rc;
-    }
+    constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
+    constexpr auto hostStateIntf = "xyz.openbmc_project.State.Host";
 
     // Convert to string equivalent of the passed in transition enum.
     auto request = State::convertForMessage(transition);
 
-    rc = sd_bus_call_method(bus_type,                // On the system bus
-                            busname,                 // Service to contact
-                            HOST_STATE_MANAGER_ROOT, // Object path
-                            DBUS_PROPERTY_IFACE,     // Interface name
-                            "Set",                   // Method to be called
-                            &bus_error,              // object to return error
-                            nullptr,                 // Response buffer if any
-                            "ssv",                   // Takes 3 arguments
-                            HOST_STATE_MANAGER_IFACE, PROPERTY, "s",
-                            request.c_str());
-    if (rc < 0)
+    std::string service;
+    boost::system::error_code ec =
+        ipmi::getService(ctx, hostStateIntf, hostStatePath, service);
+
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, hostStatePath, hostStateIntf,
+                                   "RequestedHostTransition", request);
+    }
+    if (ec)
     {
         log<level::ERR>("Failed to initiate transition",
-                        entry("ERRNO=0x%X, REQUEST=%s", -rc, request.c_str()));
+                        entry("EXCEPTION=%s, REQUEST=%s", ec.message().c_str(),
+                              request.c_str()));
+        return -1;
     }
-    else
-    {
-        log<level::INFO>("Transition request initiated successfully");
-    }
-
-    sd_bus_error_free(&bus_error);
-    free(busname);
-
-    return rc;
+    log<level::INFO>(
+        "Transition request initiated successfully",
+        entry("USERID=%d, REQUEST=%s", ctx->userId, request.c_str()));
+    return 0;
 }
 
 //------------------------------------------
@@ -1378,13 +1355,14 @@ void indicate_no_softoff_needed()
  *
  *  @return  Success or InvalidFieldRequest.
  */
-ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
+ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
+                                   uint8_t chassisControl)
 {
     int rc = 0;
     switch (chassisControl)
     {
         case CMD_POWER_ON:
-            rc = initiate_state_transition(State::Host::Transition::On);
+            rc = initiateHostStateTransition(ctx, State::Host::Transition::On);
             break;
         case CMD_POWER_OFF:
             // This path would be hit in 2 conditions.
@@ -1412,7 +1390,8 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
                 indicate_no_softoff_needed();
 
                 // Now request the shutdown
-                rc = initiate_state_transition(State::Host::Transition::Off);
+                rc = initiateHostStateTransition(ctx,
+                                                 State::Host::Transition::Off);
             }
             else
             {
@@ -1422,8 +1401,8 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
             break;
 
         case CMD_HARD_RESET:
-            rc = initiate_state_transition(
-                State::Host::Transition::ForceWarmReboot);
+            rc = initiateHostStateTransition(
+                ctx, State::Host::Transition::ForceWarmReboot);
             break;
         case CMD_POWER_CYCLE:
             // SPEC has a section that says certain implementations can trigger
@@ -1436,12 +1415,13 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
             // originating via a soft power off SMS request)
             indicate_no_softoff_needed();
 
-            rc = initiate_state_transition(State::Host::Transition::Reboot);
+            rc = initiateHostStateTransition(ctx,
+                                             State::Host::Transition::Reboot);
             break;
 
         case CMD_SOFT_OFF_VIA_OVER_TEMP:
             // Request Host State Manager to do a soft power off
-            rc = initiate_state_transition(State::Host::Transition::Off);
+            rc = initiateHostStateTransition(ctx, State::Host::Transition::Off);
             break;
 
         case CMD_PULSE_DIAGNOSTIC_INTR:
