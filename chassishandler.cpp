@@ -32,6 +32,7 @@
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Type/server.hpp>
 #include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
+#include <xyz/openbmc_project/State/Chassis/server.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
 #include <xyz/openbmc_project/State/PowerOnHours/server.hpp>
 
@@ -844,6 +845,40 @@ int initiateHostStateTransition(ipmi::Context::ptr& ctx,
     log<level::INFO>(
         "Transition request initiated successfully",
         entry("USERID=%d, REQUEST=%s", ctx->userId, request.c_str()));
+    return 0;
+}
+
+//------------------------------------------
+// Calls into Chassis State Manager Dbus object
+//------------------------------------------
+int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
+                                   State::Chassis::Transition transition)
+{
+    // OpenBMC Chassis State Manager dbus framework
+    constexpr auto chassisStatePath = "/xyz/openbmc_project/state/chassis0";
+    constexpr auto chassisStateIntf = "xyz.openbmc_project.State.Chassis";
+
+    std::string service;
+    boost::system::error_code ec =
+        ipmi::getService(ctx, chassisStateIntf, chassisStatePath, service);
+
+    // Convert to string equivalent of the passed in transition enum.
+    auto request = State::convertForMessage(transition);
+
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, chassisStatePath,
+                                   chassisStateIntf, "RequestedPowerTransition",
+                                   request);
+    }
+    if (ec)
+    {
+        log<level::ERR>("Failed to initiate transition",
+                        entry("EXCEPTION=%s, REQUEST=%s", ec.message().c_str(),
+                              request.c_str()));
+        return -1;
+    }
+
     return 0;
 }
 
