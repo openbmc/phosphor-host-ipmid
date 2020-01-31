@@ -14,7 +14,6 @@
 // limitations under the License.
 */
 #pragma once
-#include "channel_layer.hpp"
 
 #include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
@@ -33,6 +32,8 @@ static const size_t maxCSRecords = 16;
 
 using ChannelNumCipherIDPair = std::pair<uint8_t, uint8_t>;
 using privMap = std::map<ChannelNumCipherIDPair, uint4_t>;
+
+constexpr uint8_t PRIVILEGE_ERROR = 0xFF;
 
 /** @class CipherConfig
  *  @brief Class to provide cipher suite functionalities
@@ -72,10 +73,17 @@ class CipherConfig
         uint8_t chNum,
         const std::array<uint4_t, maxCSRecords>& csPrivilegeLevels);
 
+    /** @brief function to get highest level matching proposed algorithm
+     *
+     */
+    uint8_t getHighestLevelMatchProposedAlgorithm(const uint8_t chNum);
+
   private:
     std::string cipherSuitePrivFileName, cipherSuiteDefaultPrivFileName;
 
     privMap csPrivilegeMap;
+
+    std::time_t fileLastUpdatedTime;
 
     /** @brief function to read json config file
      *
@@ -117,6 +125,21 @@ class CipherConfig
      *
      */
     void updateCSPrivilegesMap(const nlohmann::json& jsonData);
+
+    /** @brief function to retrieve last modification time for the named file
+     *
+     *  @param[in] fileName - the name of the file for which to acquire
+     *  timestamp data
+     *
+     *  @return time the file was last modified
+     */
+    std::time_t getUpdatedFileTime(const std::string& fileName);
+
+    /** @brief function to check and reload cipher suite data
+     *
+     *  @return 0 for success, -errno for failure.
+     */
+    int checkAndReloadData();
 };
 
 /** @brief function to create static CipherConfig object

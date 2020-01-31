@@ -15,6 +15,8 @@
 */
 #include "cipher_mgmt.hpp"
 
+#include "channel_layer.hpp"
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -23,6 +25,7 @@
 #include <filesystem>
 #include <fstream>
 #include <phosphor-logging/log.hpp>
+#include <vector>
 
 namespace ipmi
 {
@@ -152,6 +155,7 @@ int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
         return -EIO;
     }
 
+    fileLastUpdatedTime = getUpdatedFileTime(cipherSuitePrivFileName);
     return 0;
 }
 
@@ -239,6 +243,94 @@ ipmi::Cc CipherConfig::setCSPrivilegeLevels(
 
     updateCSPrivilegesMap(jsonData);
     return ccSuccess;
+}
+
+std::time_t CipherConfig::getUpdatedFileTime(const std::string& fileName)
+{
+    struct stat fileStat;
+    if (stat(fileName.c_str(), &fileStat))
+    {
+        log<level::DEBUG>("Error in getting last updated time stamp");
+        return -EIO;
+    }
+    return fileStat.st_mtime;
+}
+
+int CipherConfig::checkAndReloadData()
+{
+    std::time_t updateTime = getUpdatedFileTime(cipherSuitePrivFileName);
+    int ret = 0;
+    if (updateTime != fileLastUpdatedTime || updateTime == -EIO)
+    {
+        try
+        {
+            loadCSPrivilegesToMap();
+        }
+        catch (const std::exception& e)
+        {
+            log<level::ERR>("Exception caught in loadCSPrivilegesToMap",
+                            entry("MSG=%s", e.what()));
+            ret = -EIO;
+        }
+    }
+    return ret;
+}
+
+uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(const uint8_t chNum)
+{
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return PRIVILEGE_ERROR;
+    }
+
+    if (fs::exists(cipherSuitePrivFileName) && checkAndReloadData())
+    {
+        return PRIVILEGE_ERROR;
+    }
+
+    constexpr auto configFile = "/usr/share/ipmi-providers/cipher_list.json";
+    std::ifstream jsonFile(configFile);
+    if (!jsonFile.good())
+    {
+        log<level::ERR>("Error in channel Cipher suites file");
+        return PRIVILEGE_ERROR;
+    }
+
+    Json data;
+    try
+    {
+        data = Json::parse(jsonFile, nullptr, false);
+    }
+    catch (Json::parse_error& e)
+    {
+        log<level::ERR>("Parsing channel cipher suites JSON failed",
+                        entry("MSG: %s", e.what()));
+        return PRIVILEGE_ERROR;
+    }
+
+    std::vector<uint4_t> csPriv;
+    try
+    {
+        size_t cipherSize = data.size();
+        for (size_t cipherIndex = 0; cipherIndex < cipherSize; ++cipherIndex)
+        {
+            csPriv.push_back(csPrivilegeMap[{chNum, cipherIndex}]);
+        }
+    }
+    catch (...)
+    {
+        log<level::ERR>(
+            "Error in getting cipher records from cipher list json");
+        return PRIVILEGE_ERROR;
+    }
+
+    if (csPriv.empty())
+    {
+        return PRIVILEGE_ERROR;
+    }
+    std::sort(csPriv.begin(), csPriv.end());
+    return static_cast<uint8_t>(csPriv.front());
 }
 
 } // namespace ipmi
