@@ -37,12 +37,16 @@ class WhitelistFilter
     void postInit();
     void cacheRestrictedMode();
     void handleRestrictedModeChange(sdbusplus::message::message& m);
+    void updateRestrictionMode(const std::string& value);
     ipmi::Cc filterMessage(ipmi::message::Request::ptr request);
 
-    bool restrictedMode = true;
+    sdbusplus::xyz::openbmc_project::Control::Security::server::
+        RestrictionMode::Modes restrictionMode =
+            sdbusplus::xyz::openbmc_project::Control::Security::server::
+                RestrictionMode::Modes::ProvisionedHostWhitelist;
     std::shared_ptr<sdbusplus::asio::connection> bus;
-    std::unique_ptr<settings::Objects> objects;
     std::unique_ptr<sdbusplus::bus::match::match> modeChangeMatch;
+    std::unique_ptr<sdbusplus::bus::match::match> modeIntfAddedMatch;
 
     static constexpr const char restrictionModeIntf[] =
         "xyz.openbmc_project.Control.Security.RestrictionMode";
@@ -70,103 +74,144 @@ void WhitelistFilter::cacheRestrictedMode()
     std::string restrictionModeService;
     try
     {
-        restrictionModeSetting = objects->map.at(restrictionModeIntf).at(0);
+        auto objects = settings::Objects(
+            *bus, std::vector<settings::Interface>({restrictionModeIntf}));
+        restrictionModeSetting = objects.map.at(restrictionModeIntf).at(0);
         restrictionModeService =
-            objects->service(restrictionModeSetting, restrictionModeIntf);
+            objects.service(restrictionModeSetting, restrictionModeIntf);
     }
     catch (const std::out_of_range& e)
     {
-        log<level::ERR>(
-            "Could not look up restriction mode interface from cache");
+        log<level::INFO>(
+            "Could not initialize provisioning mode, defaulting to restricted");
         return;
     }
+    catch (const std::exception&)
+    {
+        log<level::INFO>(
+            "Could not initialize provisioning mode, defaulting to restricted");
+        return;
+    }
+
     bus->async_method_call(
         [this](boost::system::error_code ec, ipmi::Value v) {
             if (ec)
             {
-                log<level::ERR>("Error in RestrictionMode Get");
-                // Fail-safe to true.
-                restrictedMode = true;
+                log<level::ERR>(
+                    "Could not initialize provisioning mode, "
+                    "defaulting to restricted",
+                    entry("VALUE=%d", static_cast<int>(restrictionMode)));
                 return;
             }
             auto mode = std::get<std::string>(v);
-            auto restrictionMode =
-                RestrictionMode::convertModesFromString(mode);
-            restrictedMode =
-                (restrictionMode == RestrictionMode::Modes::Whitelist);
-            log<level::INFO>((restrictedMode ? "Set restrictedMode = true"
-                                             : "Set restrictedMode = false"));
+            restrictionMode = RestrictionMode::convertModesFromString(mode);
+            log<level::INFO>(
+                "Read restriction mode",
+                entry("VALUE=%d", static_cast<int>(restrictionMode)));
         },
         restrictionModeService, restrictionModeSetting,
         "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
         "RestrictionMode");
 }
 
+void WhitelistFilter::updateRestrictionMode(const std::string& value)
+{
+    restrictionMode = sdbusplus::xyz::openbmc_project::Control::Security::
+        server::RestrictionMode::convertModesFromString(value);
+    log<level::INFO>("Updated restriction mode",
+                     entry("VALUE=%d", static_cast<int>(restrictionMode)));
+}
+
 void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message::message& m)
 {
     using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
-    std::string intf;
-    std::vector<std::pair<std::string, ipmi::Value>> propertyList;
-    m.read(intf, propertyList);
-    for (const auto& property : propertyList)
+    std::string signal = m.get_member();
+    if (signal == "PropertiesChanged")
     {
-        if (property.first == "RestrictionMode")
+        std::string intf;
+        std::vector<std::pair<std::string, ipmi::Value>> propertyList;
+        m.read(intf, propertyList);
+        for (const auto& property : propertyList)
         {
-            RestrictionMode::Modes restrictionMode =
-                RestrictionMode::convertModesFromString(
-                    std::get<std::string>(property.second));
-            restrictedMode =
-                (restrictionMode == RestrictionMode::Modes::Whitelist);
-            log<level::INFO>((restrictedMode
-                                  ? "Updated restrictedMode = true"
-                                  : "Updated restrictedMode = false"));
+            if (property.first == "RestrictionMode")
+            {
+                updateRestrictionMode(std::get<std::string>(property.second));
+            }
         }
+    }
+    else if (signal == "InterfacesAdded")
+    {
+        sdbusplus::message::object_path path;
+        DbusInterfaceMap restModeObj;
+        m.read(path, restModeObj);
+        auto intfItr = restModeObj.find(restrictionModeIntf);
+        if (intfItr == restModeObj.end())
+        {
+            return;
+        }
+        PropertyMap& propertyList = intfItr->second;
+        auto itr = propertyList.find("RestrictionMode");
+        if (itr == propertyList.end())
+        {
+            return;
+        }
+        updateRestrictionMode(std::get<std::string>(itr->second));
     }
 }
 
 void WhitelistFilter::postInit()
 {
-    objects = std::make_unique<settings::Objects>(
-        *bus, std::vector<settings::Interface>({restrictionModeIntf}));
-    if (!objects)
-    {
-        log<level::ERR>(
-            "Failed to create settings object; defaulting to restricted mode");
-        return;
-    }
+    // Wait for changes on Restricted mode
+    namespace rules = sdbusplus::bus::match::rules;
+    const std::string filterStrModeChange =
+        rules::type::signal() + rules::member("PropertiesChanged") +
+        rules::interface("org.freedesktop.DBus.Properties") +
+        rules::argN(0, restrictionModeIntf);
+
+    const std::string filterStrModeIntfAdd =
+        rules::interfacesAdded() +
+        rules::argNpath(
+            0, "/xyz/openbmc_project/control/security/restriction_mode");
+
+    modeChangeMatch = std::make_unique<sdbusplus::bus::match::match>(
+        *bus, filterStrModeChange, [this](sdbusplus::message::message& m) {
+            handleRestrictedModeChange(m);
+        });
+    modeIntfAddedMatch = std::make_unique<sdbusplus::bus::match::match>(
+        *bus, filterStrModeIntfAdd, [this](sdbusplus::message::message& m) {
+            handleRestrictedModeChange(m);
+        });
 
     // Initialize restricted mode
     cacheRestrictedMode();
-    // Wait for changes on Restricted mode
-    std::string filterStr;
-    try
-    {
-        filterStr = sdbusplus::bus::match::rules::propertiesChanged(
-            objects->map.at(restrictionModeIntf).at(0), restrictionModeIntf);
-    }
-    catch (const std::out_of_range& e)
-    {
-        log<level::ERR>("Failed to determine restriction mode filter string");
-        return;
-    }
-    modeChangeMatch = std::make_unique<sdbusplus::bus::match::match>(
-        *bus, filterStr, [this](sdbusplus::message::message& m) {
-            handleRestrictedModeChange(m);
-        });
 }
 
 ipmi::Cc WhitelistFilter::filterMessage(ipmi::message::Request::ptr request)
 {
-    if (request->ctx->channel == ipmi::channelSystemIface && restrictedMode)
+    using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
+
+    if (request->ctx->channel == ipmi::channelSystemIface &&
+        (restrictionMode != RestrictionMode::Modes::None &&
+         restrictionMode != RestrictionMode::Modes::Provisioning))
     {
-        if (!std::binary_search(
-                whitelist.cbegin(), whitelist.cend(),
-                std::make_pair(request->ctx->netFn, request->ctx->cmd)))
+        switch (restrictionMode)
         {
-            log<level::ERR>("Net function not whitelisted",
-                            entry("NETFN=0x%X", int(request->ctx->netFn)),
-                            entry("CMD=0x%X", int(request->ctx->cmd)));
-            return ipmi::ccInsufficientPrivilege;
+            case RestrictionMode::Modes::ProvisionedHostWhitelist:
+            {
+                if (!std::binary_search(
+                        whitelist.cbegin(), whitelist.cend(),
+                        std::make_pair(request->ctx->netFn, request->ctx->cmd)))
+                {
+                    log<level::ERR>(
+                        "Net function not whitelisted",
+                        entry("NETFN=0x%X", int(request->ctx->netFn)),
+                        entry("CMD=0x%X", int(request->ctx->cmd)));
+                    return ipmi::ccInsufficientPrivilege;
+                }
+                break;
+            }
+            default: // for blacklist & HostDisabled
+                return ipmi::ccInsufficientPrivilege;
         }
     }
     return ipmi::ccSuccess;
