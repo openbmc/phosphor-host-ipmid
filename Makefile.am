@@ -182,7 +182,8 @@ endif
 
 nobase_include_HEADERS = \
 	user_channel/channel_layer.hpp \
-	user_channel/user_layer.hpp
+	user_channel/user_layer.hpp \
+	user_channel/cipher_mgmt.hpp
 
 # Forcing the build of self and then subdir
 SUBDIRS = include libipmid libipmid-host user_channel . test softoff
