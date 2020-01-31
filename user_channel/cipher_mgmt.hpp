@@ -70,6 +70,11 @@ class CipherConfig
         const std::array<uint8_t, lanParamCipherSuitePrivilegeLevelsSize>&
             csPrivilegeLevels);
 
+    /** @brief function to get highest level matching proposed algorithm
+     *
+     */
+    uint8_t getHighestLevelMatchProposedAlgorithm(uint8_t chNum);
+
   private:
     std::string cipherSuitePrivFileName;
 
@@ -90,6 +95,7 @@ class CipherConfig
      *  @return 0 for success, -errno for failure.
      */
     int writeCSPrivilegeLevels(const Json& jsonData);
+
     /** @brief convert to cipher suite privilege from string to value
      *
      *  @param[in] value - privilege value

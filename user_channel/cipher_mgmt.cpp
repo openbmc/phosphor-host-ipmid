@@ -24,6 +24,7 @@
 #include <fstream>
 #include <include/ipmid/api-types.hpp>
 #include <phosphor-logging/log.hpp>
+#include <vector>
 
 namespace ipmi
 {
@@ -286,6 +287,46 @@ uint8_t CipherConfig::setCSPrivilegeLevels(
 
     updateCSPrivilegesMap(jsonData);
     return ccSuccess;
+}
+uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(uint8_t chNum)
+{
+    if (!doesDeviceExist(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return ccInvalidFieldRequest;
+    }
+
+    static constexpr auto configFile =
+        "/usr/share/ipmi-providers/cipher_list.json";
+    std::ifstream jsonFile(configFile);
+
+    if (!jsonFile.is_open())
+    {
+        log<level::ERR>("Channel Cipher suites file not found");
+        return ccUnspecifiedError;
+    }
+
+    auto data = Json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Parsing channel cipher suites JSON failed");
+        return ccUnspecifiedError;
+    }
+
+    std::vector<uint8_t> csPriv;
+    for (const auto& record : data)
+    {
+        if (record["cipher"] < maxCSRecords)
+        {
+            csPriv.push_back(csPrivilegeMap[{chNum, record["cipher"]}]);
+        }
+    }
+    if (csPriv.empty())
+    {
+        return ccUnspecifiedError;
+    }
+    std::sort(csPriv.begin(), csPriv.end());
+    return csPriv.front();
 }
 
 } // namespace ipmi
