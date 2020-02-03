@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37d67008_fab337eb",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000479
+      },
+      "writtenOn": "2020-02-03T18:24:56Z",
+      "side": 1,
+      "message": "Use \"jsonFile.good()\". It will check for all error state flags rather than just checking the file is opened or not.",
+      "range": {
+        "startLine": 303,
+        "startChar": 3,
+        "endLine": 304,
+        "endChar": 5
+      },
+      "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "925c3ef8_702c5047",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1000479
+      },
+      "writtenOn": "2020-02-03T18:24:56Z",
+      "side": 1,
+      "message": "Json::parse can throw exception.\nUse something like\ntry\n    {\n        data \u003d Json::parse(jsonFile, nullptr, false);\n    }\n    catch (Json::parse_error\u0026 e)\n    {\n\n    }",
+      "range": {
+        "startLine": 309,
+        "startChar": 3,
+        "endLine": 311,
+        "endChar": 5
+      },
+      "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    }
+  ]
+}
