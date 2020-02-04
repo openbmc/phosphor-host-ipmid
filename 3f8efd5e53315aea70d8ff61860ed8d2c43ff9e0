@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "dd639516_a8e4ea7e",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-02-04T15:35:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37d67008_fab337eb",
+      "range": {
+        "startLine": 303,
+        "startChar": 3,
+        "endLine": 304,
+        "endChar": 5
+      },
+      "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "925c3ef8_702c5047",
         "filename": "user_channel/cipher_mgmt.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2020-02-03T18:24:56Z",
       "side": 1,
       "message": "Json::parse can throw exception.\nUse something like\ntry\n    {\n        data \u003d Json::parse(jsonFile, nullptr, false);\n    }\n    catch (Json::parse_error\u0026 e)\n    {\n\n    }",
+      "range": {
+        "startLine": 309,
+        "startChar": 3,
+        "endLine": 311,
+        "endChar": 5
+      },
+      "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d195c78d_660afe77",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-02-04T15:35:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "925c3ef8_702c5047",
       "range": {
         "startLine": 309,
         "startChar": 3,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3bce16eb_ac21636c",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-02-04T15:35:24Z",
+      "side": 1,
+      "message": "Yes. As per IPMI spec.section 23.2, Table 23, parameter 24, user can update cipher ID only up to 16 (So default and user settings CS privilege file have 16 cipher IDs for each channel). However as per cipher list, it can be more than 16. So we may have to consider default value if supported cipher ID more than 16.",
+      "parentUuid": "dea9d550_d55ccbac",
+      "range": {
+        "startLine": 319,
+        "startChar": 7,
+        "endLine": 319,
+        "endChar": 44
+      },
+      "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6246daef_1dd35f5a",
         "filename": "user_channel/cipher_mgmt.hpp",
         "patchSetId": 1
@@ -82,6 +154,24 @@
       "writtenOn": "2020-02-04T12:15:03Z",
       "side": 1,
       "message": "nit: please remove this empty line",
+      "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec3967cd_c3cf73e8",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-02-04T15:35:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6246daef_1dd35f5a",
       "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
