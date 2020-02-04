@@ -45,6 +45,29 @@
       "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dea9d550_d55ccbac",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1000479
+      },
+      "writtenOn": "2020-02-04T09:22:09Z",
+      "side": 1,
+      "message": "Here why are we ignoring cipher which is greater than maxCSRecords(16)? Because I can see cipher value greater than 16 in cipher_list.json.",
+      "range": {
+        "startLine": 319,
+        "startChar": 7,
+        "endLine": 319,
+        "endChar": 44
+      },
+      "revId": "3f8efd5e53315aea70d8ff61860ed8d2c43ff9e0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
