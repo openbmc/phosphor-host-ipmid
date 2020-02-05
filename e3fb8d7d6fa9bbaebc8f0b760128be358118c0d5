@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9cfcfa1c_d0f06648",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2020-02-05T16:30:59Z",
+      "side": 1,
+      "message": "So the problem I see is with this paths implementation:\nGracefulShutdown \tsoft off \tHost.Off\n\nThis path sends a message to the host. Once the host has shutdown, the host sends an inband IPMI CMD_POWER_OFF. To implement the GracefulShutdown path, we had to have this if/else in here to differentiate between when the real IPMI_CMD_POWER_OFF from an external user is sent vs. from the host as a part of the GracefulShutdown. I feel like we still need this timer, to ensure we handle the situations where the host never shuts itself down properly on a GracefulShutdown.\n\nI\u0027ve never really liked the complexity of this so looking for other ideas on how to address this issue. But as-is, this would break us due to the dual use of CMD_POWER_OFF.",
+      "revId": "e3fb8d7d6fa9bbaebc8f0b760128be358118c0d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
