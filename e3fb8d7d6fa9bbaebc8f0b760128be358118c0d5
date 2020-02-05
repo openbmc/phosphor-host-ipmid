@@ -16,6 +16,24 @@
       "revId": "e3fb8d7d6fa9bbaebc8f0b760128be358118c0d5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c34c4dc_dd078e0c",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2020-02-05T19:24:19Z",
+      "side": 1,
+      "message": "I see.  This has been confusing to me, so it\u0027s good to understand the history a little better.\n\nIf I understand correctly, the issue is isolated to just the GracefulShutdown/Soft Off case?  \n\nUnfortunately, the Redfish and IPMI specs aren\u0027t very clear on what should happen if a graceful shutdown fails and whether the BMC should take further action on its own.\n\nWhat we usually do is lean toward doing exactly what the user requested. If the user requests a graceful shutdown, it\u0027s up to the host software to turn off and the BMC shouldn\u0027t take any further action.  If the host software hangs on a graceful shutdown, then the user can request a forced shutdown to resolve it.\n\nThis approach would also remove the complexity of the dual CMD_POWER_OFF behavior so it can behave as specified.",
+      "parentUuid": "9cfcfa1c_d0f06648",
+      "revId": "e3fb8d7d6fa9bbaebc8f0b760128be358118c0d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
