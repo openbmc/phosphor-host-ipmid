@@ -16,6 +16,24 @@
       "revId": "f3e71beebbe8ee0595b188ea23277d5de26bc7cb",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "863166de_a64886e5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2020-02-05T18:50:35Z",
+      "side": 1,
+      "message": "Yep, this wording was very confusing.  I clarified that this is only changing the function to use the new DBus APIs.  Let me know if I need to clarify further.  Thanks!",
+      "parentUuid": "2722da93_3c99e284",
+      "revId": "f3e71beebbe8ee0595b188ea23277d5de26bc7cb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
