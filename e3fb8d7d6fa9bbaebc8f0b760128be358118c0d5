@@ -34,6 +34,24 @@
       "revId": "e3fb8d7d6fa9bbaebc8f0b760128be358118c0d5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65566386_a96fca99",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2020-02-05T19:51:41Z",
+      "side": 1,
+      "message": "I\u0027m pretty sure due to the expected behavior of our systems from our customers, we\u0027ll need to continue with the timeout concept. It\u0027s a fair point though that this is not the desired behavior of all systems and this code impacts the complexity and behavior of a common path. I\u0027ll talk with the team about alternatives on our part here.",
+      "parentUuid": "4c34c4dc_dd078e0c",
+      "revId": "e3fb8d7d6fa9bbaebc8f0b760128be358118c0d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
