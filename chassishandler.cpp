@@ -497,18 +497,6 @@ uint32_t getPOHCounter()
     return std::get<uint32_t>(propValue);
 }
 
-ipmi_ret_t ipmi_chassis_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                 ipmi_request_t request,
-                                 ipmi_response_t response,
-                                 ipmi_data_len_t data_len,
-                                 ipmi_context_t context)
-{
-    // Status code.
-    ipmi_ret_t rc = IPMI_CC_INVALID;
-    *data_len = 0;
-    return rc;
-}
-
 /** @brief Implements the get chassis capabilities command
  *
  *  @returns IPMI completion code plus response data
@@ -1823,10 +1811,6 @@ ipmi::RspType<uint3_t, // policy support
 void register_netfn_chassis_functions()
 {
     createIdentifyTimer();
-
-    // <Wildcard Command>
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_WILDCARD, NULL,
-                           ipmi_chassis_wildcard, PRIVILEGE_USER);
 
     // Get Chassis Capabilities
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,

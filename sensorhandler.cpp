@@ -601,18 +601,6 @@ ipmi::RspType<uint8_t, // validMask
                                  resp.upperNonRecoverable);
 }
 
-ipmi_ret_t ipmi_sen_wildcard(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
-{
-    ipmi_ret_t rc = IPMI_CC_INVALID;
-
-    printf("IPMI S/E Wildcard Netfn:[0x%X], Cmd:[0x%X]\n", netfn, cmd);
-    *data_len = 0;
-
-    return rc;
-}
-
 /** @brief implements the get SDR Info command
  *  @param count - Operation
  *
@@ -1106,10 +1094,6 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_sen_functions()
 {
-    // <Wildcard Command>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_WILDCARD, nullptr,
-                           ipmi_sen_wildcard, PRIVILEGE_USER);
-
     // <Platform Event Message>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_PLATFORM_EVENT, nullptr,
                            ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
