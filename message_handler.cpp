@@ -45,6 +45,9 @@ bool Handler::receive()
     session->updateLastTransactionTime();
     session->channelPtr = channel;
     session->remotePort(channel->getPort());
+    uint32_t ipAddr = 0;
+    channel->getRemoteAddress(ipAddr);
+    session->remoteIPAddr(ipAddr);
 
     return true;
 }

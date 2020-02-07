@@ -14,6 +14,7 @@
 
 namespace udpsocket
 {
+static constexpr uint8_t v4v6Index = 12;
 
 /** @class Channel
  *
@@ -43,36 +44,57 @@ class Channel
         socket(socket)
     {
     }
-
+    /**
+     * @brief Check if ip address is ipv4 mapped ipv6
+     *
+     *  @param v6Addr : in6_addr obj
+     *
+     * @return true if ipv4 mapped ipv6 else return false
+     */
+    bool isIpv4InIpv6(const struct in6_addr& v6Addr) const
+    {
+        constexpr uint8_t prefix[v4v6Index] = {0, 0, 0, 0, 0,    0,
+                                               0, 0, 0, 0, 0xff, 0xff};
+        return 0 == std::memcmp(&v6Addr.s6_addr[0], &prefix[0], sizeof(prefix));
+    }
     /**
      * @brief Fetch the IP address of the remote peer
+     *
+     *  @param remoteIpv4Addr : ipv4 address is assigned to it.
      *
      * Returns the IP address of the remote peer which is connected to this
      * socket
      *
      * @return IP address of the remote peer
      */
-    std::string getRemoteAddress() const
+    std::string getRemoteAddress(uint32_t& remoteIpv4Addr) const
     {
         const char* retval = nullptr;
         if (sockAddrSize == sizeof(sockaddr_in))
         {
             char ipv4addr[INET_ADDRSTRLEN];
-            retval = inet_ntop(
-                AF_INET,
-                &(reinterpret_cast<const sockaddr_in*>(&remoteSockAddr)
-                      ->sin_addr),
-                ipv4addr, sizeof(ipv4addr));
+            const sockaddr_in* sa =
+                reinterpret_cast<const sockaddr_in*>(&remoteSockAddr);
+            remoteIpv4Addr = sa->sin_addr.s_addr;
+            retval =
+                inet_ntop(AF_INET, &(sa->sin_addr), ipv4addr, sizeof(ipv4addr));
         }
         else if (sockAddrSize == sizeof(sockaddr_in6))
         {
             char ipv6addr[INET6_ADDRSTRLEN];
-            retval = inet_ntop(
-                AF_INET6,
-                &(reinterpret_cast<const sockaddr_in6*>(&remoteSockAddr)
-                      ->sin6_addr),
-                ipv6addr, sizeof(ipv6addr));
+            const sockaddr_in6* sa =
+                reinterpret_cast<const sockaddr_in6*>(&remoteSockAddr);
+
+            if (isIpv4InIpv6(sa->sin6_addr))
+            {
+                std::copy_n(&sa->sin6_addr.s6_addr[v4v6Index],
+                            sizeof(remoteIpv4Addr),
+                            reinterpret_cast<uint8_t*>(&remoteIpv4Addr));
+            }
+            retval = inet_ntop(AF_INET6, &(sa->sin6_addr), ipv6addr,
+                               sizeof(ipv6addr));
         }
+
         if (retval)
         {
             return retval;
