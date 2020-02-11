@@ -198,8 +198,3 @@ void WatchdogService::setInterval(uint64_t interval)
 {
     setProperty("Interval", interval);
 }
-
-void WatchdogService::setTimeRemaining(uint64_t timeRemaining)
-{
-    setProperty("TimeRemaining", timeRemaining);
-}

@@ -14,6 +14,12 @@ endif
 providersdir = ${libdir}/ipmid-providers
 providers_LTLIBRARIES =
 
+if FEATURE_IPMI_WHITELIST
+IPMI_WHITELIST_SOURCE = ipmiwhitelist.cpp
+else
+IPMI_WHITELIST_SOURCE =
+endif
+
 bin_PROGRAMS = \
 	ipmid
 
@@ -28,7 +34,7 @@ libipmi20_BUILT_LIST = \
 	fru-read-gen.cpp
 
 BUILT_SOURCES = \
-	ipmiwhitelist.cpp \
+	$(IPMI_WHITELIST_SOURCE) \
 	$(libipmi20_BUILT_LIST)
 
 CLEANFILES = $(BUILT_SOURCES)
@@ -158,6 +164,7 @@ libsysintfcmds_la_LDFLAGS = \
 	-version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = $(COMMON_CXX)
 
+if FEATURE_IPMI_WHITELIST
 libwhitelistdir = ${libdir}/ipmid-providers
 libwhitelist_LTLIBRARIES = libwhitelist.la
 libwhitelist_la_SOURCES = \
@@ -170,6 +177,7 @@ libwhitelist_la_LDFLAGS = \
 	-version-info 0:0:0 -shared
 libwhitelist_la_CXXFLAGS = $(COMMON_CXX)
 nodist_libwhitelist_la_SOURCES = ipmiwhitelist.cpp
+endif
 
 nobase_include_HEADERS = \
 	user_channel/channel_layer.hpp \

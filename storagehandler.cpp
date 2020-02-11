@@ -1272,59 +1272,62 @@ ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
     }
 }
 
-// Read FRU data
-ipmi_ret_t ipmi_storage_read_fru_data(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                      ipmi_request_t request,
-                                      ipmi_response_t response,
-                                      ipmi_data_len_t data_len,
-                                      ipmi_context_t context)
+/**@brief implements the Read FRU Data command
+ * @param fruDeviceId - FRU device ID. FFh = reserved
+ * @param offset      - FRU inventory offset to read
+ * @param readCount   - count to read
+ *
+ * @return IPMI completion code plus response data
+ * - returnCount - response data count.
+ * - data        -  response data
+ */
+ipmi::RspType<uint8_t,              // count returned
+              std::vector<uint8_t>> // FRU data
+    ipmiStorageReadFruData(uint8_t fruDeviceId, uint16_t offset,
+                           uint8_t readCount)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
-    const ReadFruDataRequest* reqptr =
-        reinterpret_cast<const ReadFruDataRequest*>(request);
-    auto resptr = reinterpret_cast<ReadFruDataResponse*>(response);
-
-    auto iter = frus.find(reqptr->fruID);
-    if (iter == frus.end())
+    if (fruDeviceId == 0xFF)
     {
-        *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    auto offset =
-        static_cast<uint16_t>(reqptr->offsetMS << 8 | reqptr->offsetLS);
+    auto iter = frus.find(fruDeviceId);
+    if (iter == frus.end())
+    {
+        return ipmi::responseSensorInvalid();
+    }
+
     try
     {
-        const auto& fruArea = getFruAreaData(reqptr->fruID);
+        const auto& fruArea = getFruAreaData(fruDeviceId);
         auto size = fruArea.size();
 
         if (offset >= size)
         {
-            return IPMI_CC_PARM_OUT_OF_RANGE;
+            return ipmi::responseParmOutOfRange();
         }
 
         // Write the count of response data.
-        if ((offset + reqptr->count) <= size)
+        uint8_t returnCount;
+        if ((offset + readCount) <= size)
         {
-            resptr->count = reqptr->count;
+            returnCount = readCount;
         }
         else
         {
-            resptr->count = size - offset;
+            returnCount = size - offset;
         }
 
-        std::copy((fruArea.begin() + offset),
-                  (fruArea.begin() + offset + resptr->count), resptr->data);
+        std::vector<uint8_t> fruData((fruArea.begin() + offset),
+                                     (fruArea.begin() + offset + returnCount));
 
-        *data_len = resptr->count + 1; // additional one byte for count
+        return ipmi::responseSuccess(returnCount, fruData);
     }
     catch (const InternalFailure& e)
     {
-        rc = IPMI_CC_UNSPECIFIED_ERROR;
-        *data_len = 0;
         log<level::ERR>(e.what());
+        return ipmi::responseUnspecifiedError();
     }
-    return rc;
 }
 
 ipmi::RspType<uint8_t,  // SDR version
@@ -1408,8 +1411,9 @@ void register_netfn_storage_functions()
                           ipmi::Privilege::User, ipmiStorageGetFruInvAreaInfo);
 
     // <READ FRU Data>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_READ_FRU_DATA, NULL,
-                           ipmi_storage_read_fru_data, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdReadFruData,
+                          ipmi::Privilege::Operator, ipmiStorageReadFruData);
 
     // <Get Repository Info>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
