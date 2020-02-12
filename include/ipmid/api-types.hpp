@@ -54,6 +54,7 @@ constexpr int channelPrimaryIpmb = 0x00;
 // 0x0C-0x0D reserved
 constexpr int channelCurrentIface = 0x0E; // 'Present I/F'
 constexpr int channelSystemIface = 0x0F;
+constexpr int channelSMM = 0x07;
 
 /*
  * Specifies the minimum privilege level required to execute the command
