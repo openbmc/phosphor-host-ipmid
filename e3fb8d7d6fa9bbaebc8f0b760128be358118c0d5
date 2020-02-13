@@ -52,6 +52,24 @@
       "revId": "e3fb8d7d6fa9bbaebc8f0b760128be358118c0d5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b81451e_427828d1",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2020-02-13T21:43:01Z",
+      "side": 1,
+      "message": "I thought I had a pretty easy solution to this one. It worked fine for the normal power off path. But the GracefulWarmReboot now breaks :(  The basic issue is that it feels like we\u0027ve combined two separate events from the host into one. There is the indication that the host has completed it\u0027s shutdown and there is a command to power off the system. They both are represented by CMD_POWER_OFF and without some sort of state machine logic to know whether it\u0027s a real power off or GracefulWarmReboot flow I\u0027m not sure what to do here? How do others handle this?",
+      "parentUuid": "65566386_a96fca99",
+      "revId": "e3fb8d7d6fa9bbaebc8f0b760128be358118c0d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
