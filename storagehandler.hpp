@@ -21,23 +21,3 @@ enum ipmi_netfn_storage_cmds
     IPMI_CMD_SET_SEL_TIME = 0x49,
 
 };
-
-/**
- * @struct Read FRU Data command request data
- */
-struct ReadFruDataRequest
-{
-    uint8_t fruID;    ///< FRU Device ID. FFh = reserved
-    uint8_t offsetLS; ///< FRU Inventory Offset to read, LS Byte
-    uint8_t offsetMS; ///< FRU Inventory Offset ro read, MS Byte
-    uint8_t count;    ///< Count to read
-} __attribute__((packed));
-
-/**
- * @struct Read FRU Data command response data
- */
-struct ReadFruDataResponse
-{
-    uint8_t count;  ///< Response data Count.
-    uint8_t data[]; ///< Response data.
-} __attribute__((packed));

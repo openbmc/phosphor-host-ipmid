@@ -166,6 +166,12 @@ class UserAccess
      */
     bool isValidUserName(const char* userNameInChar);
 
+    /** @brief determines whether ipmi is in available groups list
+     *
+     * @return true if ipmi group is present, false otherwise
+     */
+    bool isIpmiInAvailableGroupList();
+
     /** @brief provides user id of the user
      *
      *  @param[in] userName - user name
@@ -392,8 +398,9 @@ class UserAccess
     void getSystemPrivAndGroups();
 
     /** @brief function to init user data from configuration & D-Bus objects
+     * and to register for signals
      *
      */
-    void initUserDataFile();
+    void cacheUserDataFile();
 };
 } // namespace ipmi

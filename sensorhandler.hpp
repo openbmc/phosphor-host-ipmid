@@ -39,6 +39,7 @@ enum ipmi_sensor_types
     IPMI_SENSOR_OTHER = 0x0B,
     IPMI_SENSOR_TPM = 0xCC,
     IPMI_SENSOR_MEMORY = 0x0C,
+    IPMI_SENSOR_CABLE = 0x1B,
 };
 
 enum ipmi_event_types

@@ -263,6 +263,17 @@ AC_ARG_ENABLE([transport_oem],
       )
 AM_CONDITIONAL([FEATURE_TRANSPORT_OEM], [test x$transport_oem = xtrue])
 
+# IPMI whitelist mechanism is not needed by everyone; offer a way to disable it
+AC_ARG_ENABLE([ipmi-whitelist],
+    [ --enable-ipmi-whitelist   Enable/disable IPMI whitelist filtering],
+    [case "${enableval}" in
+      yes) ipmi_whitelist=true ;;
+      no) ipmi_whitelist=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-ipmi-whitelist]) ;;
+      esac],[ipmi_whitelist=true]
+      )
+AM_CONDITIONAL([FEATURE_IPMI_WHITELIST], [test x$ipmi_whitelist = xtrue])
+
 # Create configured output
 AC_CONFIG_FILES([
     Makefile

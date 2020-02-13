@@ -69,13 +69,11 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
     {
         const std::string e_str = std::string("wd_reset: ") + e.what();
         log<level::ERR>(e_str.c_str());
-        reportError();
         return ipmi::responseUnspecifiedError();
     }
     catch (...)
     {
         log<level::ERR>("wd_reset: Unknown Error");
-        reportError();
         return ipmi::responseUnspecifiedError();
     }
 }
@@ -247,7 +245,7 @@ ipmi::RspType<>
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = initialCountdown * 100;
         wd_service.setInterval(interval);
-        wd_service.setTimeRemaining(interval);
+        wd_service.resetTimeRemaining(false);
 
         // Mark as initialized so that future resets behave correctly
         wd_service.setInitialized(true);
@@ -268,13 +266,11 @@ ipmi::RspType<>
     {
         const std::string e_str = std::string("wd_set: ") + e.what();
         log<level::ERR>(e_str.c_str());
-        reportError();
         return ipmi::responseUnspecifiedError();
     }
     catch (...)
     {
         log<level::ERR>("wd_set: Unknown Error");
-        reportError();
         return ipmi::responseUnspecifiedError();
     }
 }
@@ -434,13 +430,11 @@ ipmi::RspType<uint3_t, // timerUse - timer use
     {
         const std::string e_str = std::string("wd_get: ") + e.what();
         log<level::ERR>(e_str.c_str());
-        reportError();
         return ipmi::responseUnspecifiedError();
     }
     catch (...)
     {
         log<level::ERR>("wd_get: Unknown Error");
-        reportError();
         return ipmi::responseUnspecifiedError();
     }
 }

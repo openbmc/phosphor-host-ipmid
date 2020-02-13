@@ -91,7 +91,9 @@ const static boost::container::flat_map<
          {"fan_tach", std::make_pair(IPMI_SENSOR_FAN, THRESHOLD)},
          {"fan_pwm", std::make_pair(IPMI_SENSOR_FAN, THRESHOLD)},
          {"power", std::make_pair(IPMI_SENSOR_OTHER, THRESHOLD)},
-         {"memory", std::make_pair(IPMI_SENSOR_MEMORY, SENSOR_SPECIFIC)}}};
+         {"memory", std::make_pair(IPMI_SENSOR_MEMORY, SENSOR_SPECIFIC)},
+         {"cable", std::make_pair(IPMI_SENSOR_CABLE, SENSOR_SPECIFIC)}} 
+         };
 
 inline static std::string getSensorTypeStringFromPath(const std::string& path)
 {
