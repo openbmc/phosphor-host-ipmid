@@ -164,7 +164,7 @@ class UserAccess
      *
      *  @return true if valid, false otherwise
      */
-    bool isValidUserName(const char* userNameInChar);
+    bool isValidUserName(const std::string& userName);
 
     /** @brief determines whether ipmi is in available groups list
      *
@@ -213,7 +213,7 @@ class UserAccess
      *
      *  @return ccSuccess for success, others for failure.
      */
-    Cc setUserName(const uint8_t userId, const char* userNameInChar);
+    Cc setUserName(const uint8_t userId, const std::string& userName);
 
     /** @brief to set user enabled state
      *
