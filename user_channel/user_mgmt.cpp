@@ -554,15 +554,13 @@ std::string UserAccess::convertToSystemPrivilege(const CommandPrivilege& value)
     }
 }
 
-bool UserAccess::isValidUserName(const char* userNameInChar)
+bool UserAccess::isValidUserName(const std::string& userName)
 {
-    if (!userNameInChar)
+    if (userName.empty())
     {
-        log<level::ERR>("null ptr");
+        log<level::ERR>("userName is empty");
         return false;
     }
-
-    std::string userName(userNameInChar, 0, ipmiMaxUserName);
     if (!std::regex_match(userName.c_str(),
                           std::regex("[a-zA-z_][a-zA-Z_0-9]*")))
     {
@@ -965,7 +963,8 @@ bool UserAccess::isIpmiInAvailableGroupList()
     return false;
 }
 
-Cc UserAccess::setUserName(const uint8_t userId, const char* userNameInChar)
+Cc UserAccess::setUserName(const uint8_t userId,
+                           const std::string& userNameInStr)
 {
     if (!isValidUserId(userId))
     {
@@ -977,13 +976,14 @@ Cc UserAccess::setUserName(const uint8_t userId, const char* userNameInChar)
     std::string oldUser;
     getUserName(userId, oldUser);
 
-    std::string newUser(userNameInChar, 0, ipmiMaxUserName);
+    std::string newUser(userNameInStr, 0, ipmiMaxUserName);
     if (oldUser == newUser)
     {
         // requesting to set the same user name, return success.
         return ccSuccess;
     }
-    bool validUser = isValidUserName(userNameInChar);
+
+    bool validUser = isValidUserName(newUser);
     UserInfo* userInfo = getUserInfo(userId);
     if (newUser.empty() && !oldUser.empty())
     {
@@ -1027,7 +1027,10 @@ Cc UserAccess::setUserName(const uint8_t userId, const char* userNameInChar)
                               entry("PATH=%s", userMgrObjBasePath));
             return ccUnspecifiedError;
         }
-        std::memcpy(userInfo->userName, userNameInChar, ipmiMaxUserName);
+
+        std::memcpy(userInfo->userName,
+                    static_cast<const void*>(userNameInStr.data()),
+                    ipmiMaxUserName);
         userInfo->userInSystem = true;
     }
     else if (oldUser != newUser && validUser)
@@ -1053,7 +1056,9 @@ Cc UserAccess::setUserName(const uint8_t userId, const char* userNameInChar)
                       sizeof(userInfo->userName),
                   0);
 
-        std::memcpy(userInfo->userName, userNameInChar, ipmiMaxUserName);
+        std::memcpy(userInfo->userName,
+                    static_cast<const void*>(userNameInStr.data()),
+                    ipmiMaxUserName);
 
         ipmiRenameUserEntryPassword(oldUser, newUser);
         userInfo->userInSystem = true;
