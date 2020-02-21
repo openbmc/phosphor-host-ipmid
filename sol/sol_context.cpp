@@ -19,7 +19,17 @@ Context::Context(std::shared_ptr<boost::asio::io_context> io,
     sessionID(sessionID)
 {
     session = std::get<session::Manager&>(singletonPool).getSession(sessionID);
-    enableAccumulateTimer(true);
+}
+
+std::shared_ptr<Context>
+    Context::makeContext(std::shared_ptr<boost::asio::io_context> io,
+                         uint8_t maxRetryCount, uint8_t sendThreshold,
+                         uint8_t instance, session::SessionID sessionID)
+{
+    auto ctx = std::make_shared<Context>(io, maxRetryCount, sendThreshold,
+                                         instance, sessionID);
+    ctx->enableAccumulateTimer(true);
+    return ctx;
 }
 
 void Context::enableAccumulateTimer(bool enable)
@@ -30,12 +40,15 @@ void Context::enableAccumulateTimer(bool enable)
     if (enable)
     {
         accumulateTimer.expires_after(interval);
-        accumulateTimer.async_wait([this](const boost::system::error_code& ec) {
-            if (!ec)
-            {
-                charAccTimerHandler();
-            }
-        });
+        std::weak_ptr<Context> weakRef = weak_from_this();
+        accumulateTimer.async_wait(
+            [weakRef](const boost::system::error_code& ec) {
+                std::shared_ptr<Context> self = weakRef.lock();
+                if (!ec && self)
+                {
+                    self->charAccTimerHandler();
+                }
+            });
     }
     else
     {
@@ -51,10 +64,12 @@ void Context::enableRetryTimer(bool enable)
         std::chrono::microseconds interval =
             std::get<sol::Manager&>(singletonPool).retryInterval;
         retryTimer.expires_after(interval);
-        retryTimer.async_wait([this](const boost::system::error_code& ec) {
-            if (!ec)
+        std::weak_ptr<Context> weakRef = weak_from_this();
+        retryTimer.async_wait([weakRef](const boost::system::error_code& ec) {
+            std::shared_ptr<Context> self = weakRef.lock();
+            if (!ec && self)
             {
-                retryTimerHandler();
+                self->retryTimerHandler();
             }
         });
     }

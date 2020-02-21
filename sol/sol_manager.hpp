@@ -38,7 +38,7 @@ class Manager
     /** @brief SOL Payload Instance is the key for the map, the value is the
      *         SOL context.
      */
-    using SOLPayloadMap = std::map<Instance, std::unique_ptr<Context>>;
+    using SOLPayloadMap = std::map<Instance, std::shared_ptr<Context>>;
 
     Manager() = delete;
     ~Manager() = default;

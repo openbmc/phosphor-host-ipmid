@@ -149,7 +149,7 @@ struct SequenceNumbers
  *  interfaces to handle incoming SOL payload, send response and send outbound
  *  SOL payload.
  */
-class Context
+class Context : std::enable_shared_from_this<Context>
 {
   public:
     Context() = delete;
@@ -159,10 +159,28 @@ class Context
     Context(Context&&) = delete;
     Context& operator=(Context&&) = delete;
 
+    /** @brief Context Factory
+     *
+     *  This is called by the SOL Manager when a SOL payload instance is
+     *  started for the activate payload command. Its purpose is to be able
+     *  to perform post-creation tasks on the object without changing the
+     *  code flow
+     *
+     *  @param[in] io  - boost::asio io context for event scheduling.
+     *  @param[in] maxRetryCount  - Retry count max value.
+     *  @param[in] sendThreshold - Character send threshold.
+     *  @param[in] instance - SOL payload instance.
+     *  @param[in] sessionID - BMC session ID.
+     */
+    static std::shared_ptr<Context>
+        makeContext(std::shared_ptr<boost::asio::io_context> io,
+                    uint8_t maxRetryCount, uint8_t sendThreshold,
+                    uint8_t instance, session::SessionID sessionID);
+
     /** @brief Context Constructor.
      *
-     *  This is issued by the SOL Manager when a SOL payload instance is
-     *  started for the activate payload command.
+     *  This should only be used by the Context factory makeContext
+     *  or the accumulate timer will not be initialized properly
      *
      *  @param[in] io  - boost::asio io context for event scheduling.
      *  @param[in] maxRetryCount  - Retry count max value.
@@ -248,6 +266,12 @@ class Context
      */
     void resendPayload(bool clear);
 
+    /** @brief accumlate timer handler called by timer */
+    void charAccTimerHandler();
+
+    /** @brief retry timer handler called by timer */
+    void retryTimerHandler();
+
   private:
     /** @brief Expected character count.
      *
@@ -281,12 +305,6 @@ class Context
      *  @param[in] out - buffer containing the SOL payload.
      */
     void sendPayload(const std::vector<uint8_t>& out) const;
-
-    /** @brief accumlate timer handler called by timer */
-    void charAccTimerHandler();
-
-    /** @brief retry timer handler called by timer */
-    void retryTimerHandler();
 };
 
 } // namespace sol
