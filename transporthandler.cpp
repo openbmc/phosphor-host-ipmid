@@ -1938,7 +1938,297 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
 } // namespace transport
 } // namespace ipmi
 
+constexpr const char* solInterface = "xyz.openbmc_project.Ipmi.SOL";
+constexpr const char* solPath = "/xyz/openbmc_project/ipmi/sol/";
+
 void register_netfn_transport_functions() __attribute__((constructor));
+
+static std::string
+    getSOLService(std::shared_ptr<sdbusplus::asio::connection> dbus,
+                  const std::string& solPathWitheEthName)
+{
+    static std::string solService{};
+    if (solService.empty())
+    {
+        try
+        {
+            solService =
+                ipmi::getService(*dbus, solInterface, solPathWitheEthName);
+        }
+        catch (const sdbusplus::exception::SdBusError& e)
+        {
+            solService.clear();
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Error: get SOL service failed");
+            return solService;
+        }
+    }
+    return solService;
+}
+
+static int setSOLParameter(const std::string& property,
+                           const ipmi::Value& value, const uint8_t& channelNum)
+{
+    auto dbus = getSdBus();
+
+    std::string ethdevice = ipmi::getChannelName(channelNum);
+
+    std::string solPathWitheEthName = std::string(solPath) + ethdevice;
+
+    std::string service = getSOLService(dbus, solPathWitheEthName);
+    if (service.empty())
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Unable to get SOL service failed");
+        return -1;
+    }
+    try
+    {
+        ipmi::setDbusProperty(*dbus, service, solPathWitheEthName, solInterface,
+                              property, value);
+    }
+    catch (sdbusplus::exception_t&)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error setting sol parameter");
+        return -1;
+    }
+
+    return 0;
+}
+
+static int getSOLParameter(const std::string& property, ipmi::Value& value,
+                           const uint8_t& channelNum)
+{
+    auto dbus = getSdBus();
+
+    std::string ethdevice = ipmi::getChannelName(channelNum);
+
+    std::string solPathWitheEthName = std::string(solPath) + ethdevice;
+
+    std::string service = getSOLService(dbus, solPathWitheEthName);
+    if (service.empty())
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Unable to get SOL service failed");
+        return -1;
+    }
+    try
+    {
+        value = ipmi::getDbusProperty(*dbus, service, solPathWitheEthName,
+                                      solInterface, property);
+    }
+    catch (sdbusplus::exception_t&)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error getting sol parameter");
+        return -1;
+    }
+
+    return 0;
+}
+
+static const constexpr uint8_t encryptMask = 0x80;
+static const constexpr uint8_t encryptShift = 7;
+static const constexpr uint8_t authMask = 0x40;
+static const constexpr uint8_t authShift = 6;
+static const constexpr uint8_t privilegeMask = 0xf;
+
+namespace ipmi
+{
+constexpr Cc ccParmNotSupported = 0x80;
+constexpr Cc ccSetInProgressActive = 0x81;
+constexpr Cc ccSystemInfoParameterSetReadOnly = 0x82;
+
+static inline auto responseParmNotSupported()
+{
+    return response(ccParmNotSupported);
+}
+static inline auto responseSetInProgressActive()
+{
+    return response(ccSetInProgressActive);
+}
+static inline auto responseSystemInfoParameterSetReadOnly()
+{
+    return response(ccSystemInfoParameterSetReadOnly);
+}
+
+} // namespace ipmi
+
+namespace sol
+{
+enum class Parameter
+{
+    progress,       //!< Set In Progress.
+    enable,         //!< SOL Enable.
+    authentication, //!< SOL Authentication.
+    accumulate,     //!< Character Accumulate Interval & Send Threshold.
+    retry,          //!< SOL Retry.
+    nvbitrate,      //!< SOL non-volatile bit rate.
+    vbitrate,       //!< SOL volatile bit rate.
+    channel,        //!< SOL payload channel.
+    port,           //!< SOL payload port.
+};
+
+enum class Privilege : uint8_t
+{
+    highestPriv,
+    callbackPriv,
+    userPriv,
+    operatorPriv,
+    adminPriv,
+    oemPriv,
+};
+
+} // namespace sol
+
+constexpr uint8_t progressMask = 0x03;
+constexpr uint8_t enableMask = 0x01;
+constexpr uint8_t retryMask = 0x07;
+
+ipmi::RspType<> setSOLConfParams(ipmi::Context::ptr ctx, uint4_t chNum,
+                                 uint4_t reserved, uint8_t paramSelector,
+                                 uint8_t configParamData1,
+                                 std::optional<uint8_t> configParamData2)
+{
+    ipmi::ChannelInfo chInfo;
+    uint8_t channelNum = ipmi::convertCurrentChannelNum(
+        static_cast<uint8_t>(chNum), ctx->channel);
+    if (reserved != 0 ||
+        (!ipmi::isValidChannel(static_cast<uint8_t>(channelNum))))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    ipmi_ret_t compCode =
+        ipmi::getChannelInfo(static_cast<uint8_t>(channelNum), chInfo);
+    if (compCode != IPMI_CC_OK ||
+        chInfo.mediumType !=
+            static_cast<uint8_t>(ipmi::EChannelMediumType::lan8032))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    switch (static_cast<sol::Parameter>(paramSelector))
+    {
+        case sol::Parameter::progress:
+        {
+            if (configParamData2)
+            {
+                return ipmi::responseReqDataLenInvalid();
+            }
+            uint8_t progress = configParamData1 & progressMask;
+            ipmi::Value currentProgress = 0;
+            if (getSOLParameter("Progress", currentProgress, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            if ((std::get<uint8_t>(currentProgress) == 1) && (progress == 1))
+            {
+                return ipmi::responseSetInProgressActive();
+            }
+
+            if (setSOLParameter("Progress", progress, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            break;
+        }
+        case sol::Parameter::enable:
+        {
+            if (configParamData2)
+            {
+                return ipmi::responseReqDataLenInvalid();
+            }
+            bool enable = configParamData1 & enableMask;
+            if (setSOLParameter("Enable", enable, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            break;
+        }
+        case sol::Parameter::authentication:
+        {
+            if (configParamData2)
+            {
+                return ipmi::responseReqDataLenInvalid();
+            }
+            uint8_t encrypt = (configParamData1 & encryptMask) >> encryptShift;
+            uint8_t auth = (configParamData1 & authMask) >> authShift;
+            uint8_t privilege = configParamData1 & privilegeMask;
+            // For security considering encryption and authentication must be
+            // true.
+            if (!encrypt || !auth)
+            {
+                return ipmi::responseSystemInfoParameterSetReadOnly();
+            }
+            else if (privilege <
+                         static_cast<uint8_t>(sol::Privilege::userPriv) ||
+                     privilege > static_cast<uint8_t>(sol::Privilege::oemPriv))
+            {
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            if (setSOLParameter("Privilege", privilege, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            break;
+        }
+        case sol::Parameter::accumulate:
+        {
+            if (!configParamData2)
+            {
+                return ipmi::responseReqDataLenInvalid();
+            }
+            if (*configParamData2 == 0)
+            {
+                return ipmi::responseInvalidFieldRequest();
+            }
+            if (setSOLParameter("AccumulateIntervalMS", configParamData1,
+                                channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            if (setSOLParameter("Threshold", *configParamData2, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            break;
+        }
+        case sol::Parameter::retry:
+        {
+            if (!configParamData2)
+            {
+                return ipmi::responseReqDataLenInvalid();
+            }
+            if ((setSOLParameter(
+                     "RetryCount",
+                     static_cast<uint8_t>(configParamData1 & retryMask),
+                     channelNum) < 0) ||
+                (setSOLParameter("RetryIntervalMS", *configParamData2,
+                                 channelNum) < 0))
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            break;
+        }
+        case sol::Parameter::port:
+        {
+            return ipmi::responseSystemInfoParameterSetReadOnly();
+        }
+        case sol::Parameter::nvbitrate:
+        case sol::Parameter::vbitrate:
+        case sol::Parameter::channel:
+        default:
+            return ipmi::responseParmNotSupported();
+    }
+
+    return ipmi::responseSuccess();
+}
 
 void register_netfn_transport_functions()
 {
@@ -1948,4 +2238,8 @@ void register_netfn_transport_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
                           ipmi::transport::cmdGetLanConfigParameters,
                           ipmi::Privilege::Operator, ipmi::transport::getLan);
+
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
+                          ipmi::transport::cmdSetSolConfigParameters,
+                          ipmi::Privilege::Admin, setSOLConfParams);
 }
