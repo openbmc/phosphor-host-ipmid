@@ -1338,12 +1338,14 @@ bool isValidMACAddress(const ether_addr& mac)
     return true;
 }
 
-RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
-                 message::Payload& req)
+RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
+                 uint8_t parameter, message::Payload& req)
 {
-    auto channel = static_cast<uint8_t>(channelBits);
-    if (!doesDeviceExist(channel))
+    const uint8_t channel = convertCurrentChannelNum(
+        static_cast<uint8_t>(channelBits), ctx->channel);
+    if (reserved1 || !isValidChannel(channel))
     {
+        log<level::ERR>("Set Lan - Invalid field in request");
         req.trailingOk = true;
         return responseInvalidFieldRequest();
     }
@@ -1681,7 +1683,8 @@ RspType<> setLan(uint4_t channelBits, uint4_t, uint8_t parameter,
     return response(ccParamNotSupported);
 }
 
-RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
+RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
+                                 uint3_t reserved, bool revOnly,
                                  uint8_t parameter, uint8_t set, uint8_t block)
 {
     message::Payload ret;
@@ -1693,9 +1696,11 @@ RspType<message::Payload> getLan(uint4_t channelBits, uint3_t, bool revOnly,
         return responseSuccess(std::move(ret));
     }
 
-    auto channel = static_cast<uint8_t>(channelBits);
-    if (!doesDeviceExist(channel))
+    const uint8_t channel = convertCurrentChannelNum(
+        static_cast<uint8_t>(channelBits), ctx->channel);
+    if (reserved || !isValidChannel(channel))
     {
+        log<level::ERR>("Get Lan - Invalid field in request");
         return responseInvalidFieldRequest();
     }
 
