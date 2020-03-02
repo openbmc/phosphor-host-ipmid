@@ -351,15 +351,15 @@ boost::system::error_code deleteAllDbusObjects(Context::ptr ctx,
 /** @brief Gets all managed objects associated with the given object
  *         path and service.
  *  @param[in] ctx - ipmi::Context::ptr
- *  @param[out] objects - map of name value pair.
  *  @param[in] service - D-Bus service name.
  *  @param[in] objPath - D-Bus object path.
+ *  @param[out] objects - map of name value pair.
  *  @return - boost error code object
  */
 boost::system::error_code getManagedObjects(Context::ptr ctx,
-                                            ObjectValueTree& objects,
                                             const std::string& service,
-                                            const std::string& objPath);
+                                            const std::string& objPath,
+                                            ObjectValueTree& objects);
 
 /** @brief Gets the ancestor objects of the given object
            which implements the given interface.
