@@ -158,28 +158,18 @@ inline static uint8_t getSensorEventTypeFromPath(const std::string& path)
     return eventType;
 }
 
-inline static std::string getPathFromSensorNumber(uint8_t sensorNum)
+static std::string getPathFromSensorNumber(uint8_t sensorNum)
 {
-    SensorSubTree sensorTree;
     std::string path;
-    if (!getSensorSubtree(sensorTree))
-        return path;
 
-    if (sensorTree.size() < sensorNum)
-    {
+    auto _search = ipmi::sensor::sensors.find(sensorNum);
+
+    if(_search == ipmi::sensor::sensors.end()){
+        phosphor::logging::log<phosphor::logging::level::ERR>("Sensor number invalid.");
         return path;
     }
 
-    uint8_t sensorIndex = sensorNum;
-    for (const auto& sensor : sensorTree)
-    {
-        if (sensorIndex-- == 0)
-        {
-            path = sensor.first;
-            break;
-        }
-    }
-
+    path = _search->second.sensorPath;
     return path;
 }
 #endif // JOURNAL_SEL
