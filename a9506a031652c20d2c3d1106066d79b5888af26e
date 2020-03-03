@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e3796a5_e6d8e334",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1470,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "ret is unused",
+      "range": {
+        "startLine": 1470,
+        "startChar": 32,
+        "endLine": 1470,
+        "endChar": 47
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51224e30_1153beca",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1494,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "This should be done using the standard logging idioms:\nlog\u003clevel::ERR\u003e(\"Error getting Boot/Mailbox/Supported\", entry(\"ERROR\u003d%s\", e.what()));",
+      "range": {
+        "startLine": 1492,
+        "startChar": 8,
+        "endLine": 1494,
+        "endChar": 64
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5753d449_dd2d9d8f",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1502,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "go ahead and delete the comments on the functions that don\u0027t pass ret in as a reference anymore.",
+      "range": {
+        "startLine": 1500,
+        "startChar": 0,
+        "endLine": 1502,
+        "endChar": 28
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e112977_79740524",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1503,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "ret is unused in this function",
+      "range": {
+        "startLine": 1503,
+        "startChar": 47,
+        "endLine": 1503,
+        "endChar": 62
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2feb40b4_c9a6af9d",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1527,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "This should be done using the standard logging idioms:\nlog\u003clevel::ERR\u003e(\"Error getting Boot/Mailbox/IANAEnterpriseNumber\", entry(\"ERROR\u003d%s\", e.what()));",
+      "range": {
+        "startLine": 1525,
+        "startChar": 19,
+        "endLine": 1527,
+        "endChar": 75
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ebc6621c_725a3cc2",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1536,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "ret is unused",
+      "range": {
+        "startLine": 1536,
+        "startChar": 42,
+        "endLine": 1536,
+        "endChar": 57
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec0cd880_c985cbd9",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1560,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "This should be done using the standard logging idioms:\nlog\u003clevel::ERR\u003e(\"Error getting Boot/Mailbox/Data\", entry(\"ERROR\u003d%s\", e.what()));",
+      "range": {
+        "startLine": 1558,
+        "startChar": 8,
+        "endLine": 1560,
+        "endChar": 59
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "386a565f_66590832",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1569,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "ret is unused",
+      "range": {
+        "startLine": 1569,
+        "startChar": 24,
+        "endLine": 1569,
+        "endChar": 39
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4bce41f3_b4520482",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1592,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-03T22:44:21Z",
+      "side": 1,
+      "message": "This should be done using the standard logging idioms:\nlog\u003clevel::ERR\u003e(\"Error getting Boot/Mailbox/Data\", entry(\"ERROR\u003d%s\", e.what()));",
+      "range": {
+        "startLine": 1590,
+        "startChar": 8,
+        "endLine": 1592,
+        "endChar": 59
+      },
+      "revId": "a9506a031652c20d2c3d1106066d79b5888af26e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
