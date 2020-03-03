@@ -66,6 +66,9 @@ static constexpr size_t MAC_OFFSET = 9;
 static constexpr size_t ADDRTYPE_OFFSET = 16;
 static constexpr size_t IPADDR_OFFSET = 17;
 
+static constexpr uint4_t RESERVED = 0;
+static constexpr uint8_t CHANNEL_NOT_SUPPORTED = 0;
+
 static constexpr size_t encIdentifyObjectsSize = 1;
 static constexpr size_t chassisIdentifyReqLength = 2;
 static constexpr size_t identifyIntervalPos = 0;
@@ -1092,6 +1095,58 @@ ipmi::RspType<bool,    // Power is on
         diagButtonDisableAllow, sleepButtonDisableAllow);
 }
 
+/*
+ * getRestartCause
+ * helper function for Get Host restart cause Command
+ * return - optional value for RestartCause (no value on error)
+ */
+static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
+{
+    constexpr const char* restartCausePath =
+        "/xyz/openbmc_project/control/host0/restart_cause";
+    constexpr const char* restartCauseIntf =
+        "xyz.openbmc_project.Control.Host.RestartCause";
+
+    std::string service;
+    boost::system::error_code ec =
+        ipmi::getService(ctx, restartCauseIntf, restartCausePath, service);
+    if (!ec)
+    {
+        std::string restartCauseStr;
+        ec = ipmi::getDbusProperty<std::string>(
+            ctx, service, restartCausePath, restartCauseIntf, "RestartCause",
+            restartCauseStr);
+        if (!ec)
+        {
+            uint4_t restartCause =
+                State::Host::convertRestartCauseFromString(restartCauseStr);
+            return restartCause;
+        }
+    }
+
+    log<level::ERR>("Failed to fetch RestartCause property",
+                    entry("ERROR=%s", ec.message().c_str()),
+                    entry("PATH=%s", restartCausePath),
+                    entry("INTERFACE=%s", restartCauseIntf));
+    return std::nullopt;
+}
+
+ipmi::RspType<uint4_t, // Restart Cause
+              uint4_t, // reserved
+              uint8_t  // channel number (not supported)
+              >
+    ipmiGetSystemRestartCause(ipmi::Context::ptr ctx)
+{
+    std::optional<uint4_t> restartCause = getRestartCause(ctx);
+    if (!restartCause)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess(restartCause.value(), RESERVED,
+                                 CHANNEL_NOT_SUPPORTED);
+}
+
 //-------------------------------------------------------------
 // Send a command to SoftPowerOff application to stop any timer
 //-------------------------------------------------------------
@@ -1864,6 +1919,11 @@ void register_netfn_chassis_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
                           ipmi::chassis::cmdGetChassisStatus,
                           ipmi::Privilege::User, ipmiGetChassisStatus);
+
+    // <Chassis Get System Restart Cause>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdGetSystemRestartCause,
+                          ipmi::Privilege::User, ipmiGetSystemRestartCause);
 
     // <Chassis Control>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
