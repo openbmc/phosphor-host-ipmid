@@ -158,7 +158,7 @@ inline static uint8_t getSensorEventTypeFromPath(const std::string& path)
     return eventType;
 }
 
-static std::string getPathFromSensorNumber(uint8_t sensorNum)
+inline static std::string getPathFromSensorNumber(uint8_t sensorNum)
 {
     std::string path;
 
