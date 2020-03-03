@@ -66,6 +66,9 @@ static constexpr size_t MAC_OFFSET = 9;
 static constexpr size_t ADDRTYPE_OFFSET = 16;
 static constexpr size_t IPADDR_OFFSET = 17;
 
+static constexpr uint4_t RESERVED = 0;
+static constexpr uint8_t CHANNEL_NOT_SUPPORTED = 0;
+
 static constexpr size_t encIdentifyObjectsSize = 1;
 static constexpr size_t chassisIdentifyReqLength = 2;
 static constexpr size_t identifyIntervalPos = 0;
@@ -1092,6 +1095,114 @@ ipmi::RspType<bool,    // Power is on
         diagButtonDisableAllow, sleepButtonDisableAllow);
 }
 
+enum class IpmiRestartCause
+{
+    Unknown = 0x0,
+    RemoteCommand = 0x1,
+    ResetButton = 0x2,
+    PowerButton = 0x3,
+    WatchdogTimer = 0x4,
+    PowerPolicyAlwaysOn = 0x6,
+    PowerPolicyPreviousState = 0x7,
+    SoftReset = 0xa,
+};
+
+static IpmiRestartCause
+    restartCauseToIpmiRestartCause(State::Host::RestartCause cause)
+{
+    switch (cause)
+    {
+        case State::Host::RestartCause::Unknown:
+        {
+            return IpmiRestartCause::Unknown;
+        }
+        case State::Host::RestartCause::RemoteCommand:
+        {
+            return IpmiRestartCause::RemoteCommand;
+        }
+        case State::Host::RestartCause::ResetButton:
+        {
+            return IpmiRestartCause::ResetButton;
+        }
+        case State::Host::RestartCause::PowerButton:
+        {
+            return IpmiRestartCause::PowerButton;
+        }
+        case State::Host::RestartCause::WatchdogTimer:
+        {
+            return IpmiRestartCause::WatchdogTimer;
+        }
+        case State::Host::RestartCause::PowerPolicyAlwaysOn:
+        {
+            return IpmiRestartCause::PowerPolicyAlwaysOn;
+        }
+        case State::Host::RestartCause::PowerPolicyPreviousState:
+        {
+            return IpmiRestartCause::PowerPolicyPreviousState;
+        }
+        case State::Host::RestartCause::SoftReset:
+        {
+            return IpmiRestartCause::SoftReset;
+        }
+        default:
+        {
+            return IpmiRestartCause::Unknown;
+        }
+    }
+}
+
+/*
+ * getRestartCause
+ * helper function for Get Host restart cause Command
+ * return - optional value for RestartCause (no value on error)
+ */
+static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
+{
+    constexpr const char* restartCausePath =
+        "/xyz/openbmc_project/control/host0/restart_cause";
+    constexpr const char* restartCauseIntf =
+        "xyz.openbmc_project.Control.Host.RestartCause";
+
+    std::string service;
+    boost::system::error_code ec =
+        ipmi::getService(ctx, restartCauseIntf, restartCausePath, service);
+    if (!ec)
+    {
+        std::string restartCauseStr;
+        ec = ipmi::getDbusProperty<std::string>(
+            ctx, service, restartCausePath, restartCauseIntf, "RestartCause",
+            restartCauseStr);
+        if (!ec)
+        {
+            auto cause =
+                State::Host::convertRestartCauseFromString(restartCauseStr);
+            return restartCauseToIpmiRestartCause(cause);
+        }
+    }
+
+    log<level::ERR>("Failed to fetch RestartCause property",
+                    entry("ERROR=%s", ec.message().c_str()),
+                    entry("PATH=%s", restartCausePath),
+                    entry("INTERFACE=%s", restartCauseIntf));
+    return std::nullopt;
+}
+
+ipmi::RspType<uint4_t, // Restart Cause
+              uint4_t, // reserved
+              uint8_t  // channel number (not supported)
+              >
+    ipmiGetSystemRestartCause(ipmi::Context::ptr ctx)
+{
+    std::optional<uint4_t> cause = getRestartCause(ctx);
+    if (!cause)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess(cause.value(), RESERVED,
+                                 CHANNEL_NOT_SUPPORTED);
+}
+
 //-------------------------------------------------------------
 // Send a command to SoftPowerOff application to stop any timer
 //-------------------------------------------------------------
@@ -1864,6 +1975,11 @@ void register_netfn_chassis_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
                           ipmi::chassis::cmdGetChassisStatus,
                           ipmi::Privilege::User, ipmiGetChassisStatus);
+
+    // <Chassis Get System Restart Cause>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdGetSystemRestartCause,
+                          ipmi::Privilege::User, ipmiGetSystemRestartCause);
 
     // <Chassis Control>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
