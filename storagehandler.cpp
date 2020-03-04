@@ -1131,6 +1131,10 @@ ipmi_ret_t ipmi_storage_add_sel(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (req->recordType == ipmi::sel::systemEvent)
     {
         std::string sensorPath = getPathFromSensorNumber(req->sensorNum);
+        if(sensorPath.length() == 0){
+            return IPMI_CC_SENSOR_INVALID;
+        }
+
         std::vector<uint8_t> eventData(
             req->eventData, req->eventData + ipmi::sel::systemEventSize);
         bool assert =
