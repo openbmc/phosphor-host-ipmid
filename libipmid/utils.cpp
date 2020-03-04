@@ -404,9 +404,9 @@ void callDbusMethod(sdbusplus::bus::bus& bus, const std::string& service,
 
 /********* Begin co-routine yielding alternatives ***************/
 
-boost::system::error_code getService(Context::ptr ctx, std::string& service,
-                                     const std::string& intf,
-                                     const std::string& path)
+boost::system::error_code getService(Context::ptr ctx, const std::string& intf,
+                                     const std::string& path,
+                                     std::string& service)
 {
     boost::system::error_code ec;
     std::map<std::string, std::vector<std::string>> mapperResponse =
