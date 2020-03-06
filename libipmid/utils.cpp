@@ -413,7 +413,7 @@ boost::system::error_code getService(Context::ptr ctx, const std::string& intf,
         ctx->bus->yield_method_call<decltype(mapperResponse)>(
             ctx->yield, ec, "xyz.openbmc_project.ObjectMapper",
             "/xyz/openbmc_project/object_mapper",
-            "xyz.openbmc_project.ObjectMapper", "GetObject",
+            "xyz.openbmc_project.ObjectMapper", "GetObject", path,
             std::vector<std::string>({intf}));
 
     if (!ec)
