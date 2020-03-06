@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9537ead9_a1abe663",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2033,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-06T22:39:27Z",
+      "side": 1,
+      "message": "require the ipmi::Context::ptr for this so it can make yielding calls and then getSdBus is not needed below.",
+      "range": {
+        "startLine": 2033,
+        "startChar": 26,
+        "endLine": 2033,
+        "endChar": 30
+      },
+      "revId": "a3183f6eb70c06f121d6984d7d3e602cabd982d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc92a186_1b74f335",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2048,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-06T22:39:27Z",
+      "side": 1,
+      "message": "make this a yielding call",
+      "range": {
+        "startLine": 2037,
+        "startChar": 3,
+        "endLine": 2048,
+        "endChar": 5
+      },
+      "revId": "a3183f6eb70c06f121d6984d7d3e602cabd982d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2f1f43ef_7db86af5",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2258,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-06T22:39:27Z",
+      "side": 1,
+      "message": "same as the setter, it may make sense to follow the get lan configuration parameter call and return a payload that has been packed manually for each selector type.",
+      "range": {
+        "startLine": 2258,
+        "startChar": 14,
+        "endLine": 2258,
+        "endChar": 69
+      },
+      "revId": "a3183f6eb70c06f121d6984d7d3e602cabd982d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5bb9af3_26229eda",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2407,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-06T22:39:27Z",
+      "side": 1,
+      "message": "give these magic numbers constexper names.",
+      "range": {
+        "startLine": 2394,
+        "startChar": 13,
+        "endLine": 2407,
+        "endChar": 35
+      },
+      "revId": "a3183f6eb70c06f121d6984d7d3e602cabd982d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
