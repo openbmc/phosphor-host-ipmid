@@ -14,6 +14,11 @@
 #include <cmath>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
+
+constexpr const char* solInterface = "xyz.openbmc_project.Ipmi.SOL";
+constexpr const char* solPath = "/xyz/openbmc_project/ipmi/sol/";
+constexpr const char* PROP_INTF = "org.freedesktop.DBus.Properties";
 
 namespace sol
 {
@@ -101,6 +106,66 @@ void Manager::stopHostConsole()
         consoleSocket->cancel();
         consoleSocket.reset();
     }
+}
+
+void Manager::updateSOLParameter(uint8_t channelNum)
+{
+    std::variant<uint8_t, bool> value;
+    sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
+    static std::string solService{};
+    ipmi::PropertyMap properties;
+    std::string ethdevice = ipmi::getChannelName(channelNum);
+    std::string solPathWitheEthName = solPath + ethdevice;
+    if (solService.empty())
+    {
+        try
+        {
+            solService =
+                ipmi::getService(dbus, solInterface, solPathWitheEthName);
+        }
+        catch (const std::runtime_error& e)
+        {
+            solService.clear();
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Error: get SOL service failed");
+            return;
+        }
+    }
+    try
+    {
+        properties = ipmi::getAllDbusProperties(
+            dbus, solService, solPathWitheEthName, solInterface);
+    }
+    catch (const std::runtime_error&)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error setting sol parameter");
+        return;
+    }
+
+    progress = std::get<uint8_t>(properties["Progress"]);
+
+    enable = std::get<bool>(properties["Enable"]);
+
+    forceEncrypt = std::get<bool>(properties["ForceEncryption"]);
+
+    forceAuth = std::get<bool>(properties["ForceAuthentication"]);
+
+    solMinPrivilege = static_cast<session::Privilege>(
+        std::get<uint8_t>(properties["Privilege"]));
+
+    accumulateInterval =
+        std::get<uint8_t>((properties["AccumulateIntervalMS"])) *
+        sol::accIntervalFactor * 1ms;
+
+    sendThreshold = std::get<uint8_t>(properties["Threshold"]);
+
+    retryCount = std::get<uint8_t>(properties["RetryCount"]);
+
+    retryInterval = std::get<uint8_t>(properties["RetryIntervalMS"]) *
+                    sol::retryIntervalFactor * 1ms;
+
+    return;
 }
 
 void Manager::startPayloadInstance(uint8_t payloadInstance,
