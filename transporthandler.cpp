@@ -2016,6 +2016,23 @@ static int getSOLParameter(ipmi::Context::ptr ctx, const std::string& property,
     return 0;
 }
 
+constexpr const char* consoleInterface = "xyz.openbmc_project.console";
+constexpr const char* consolePath = "/xyz/openbmc_project/console";
+static int getSOLBaudRate(ipmi::Context::ptr ctx, uint32_t& value)
+{
+    boost::system::error_code ec =
+        getDbusProperty(ctx, "xyz.openbmc_project.console", consolePath,
+                        consoleInterface, "baudrate", value);
+    if (ec)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Error getting sol baud rate");
+        return -1;
+    }
+
+    return 0;
+}
+
 static const constexpr uint8_t encryptMask = 0x80;
 static const constexpr uint8_t encryptShift = 7;
 static const constexpr uint8_t authMask = 0x40;
@@ -2232,6 +2249,182 @@ ipmi::RspType<> setSOLConfParams(ipmi::Context::ptr ctx, uint4_t chNum,
     return ipmi::responseSuccess();
 }
 
+static const constexpr uint32_t b9600 = 9600;
+static const constexpr uint32_t b19200 = 19200;
+static const constexpr uint32_t b38400 = 38400;
+static const constexpr uint32_t b57600 = 57600;
+static const constexpr uint32_t b115200 = 115200;
+static const constexpr uint8_t bitRate9600 = 0x06;
+static const constexpr uint8_t bitRate19200 = 0x07;
+static const constexpr uint8_t bitRate38400 = 0x08;
+static const constexpr uint8_t bitRate57600 = 0x09;
+static const constexpr uint8_t bitRate115200 = 0x0a;
+static const constexpr uint8_t retryCountMask = 0x07;
+static constexpr uint16_t ipmiStdPort = 623;
+static constexpr uint8_t solParameterRevision = 0x11;
+ipmi::RspType<ipmi::message::Payload>
+    getSOLConfParams(ipmi::Context::ptr ctx, uint4_t chNum, uint3_t reserved,
+                     bool getParamRev, uint8_t paramSelector,
+                     uint8_t setSelector, uint8_t blockSelector)
+{
+    ipmi::message::Payload ret;
+    ipmi::ChannelInfo chInfo;
+    uint8_t channelNum = ipmi::convertCurrentChannelNum(
+        static_cast<uint8_t>(chNum), ctx->channel);
+    if (reserved != 0 ||
+        (!ipmi::isValidChannel(static_cast<uint8_t>(channelNum))) ||
+        (ipmi::EChannelSessSupported::none ==
+         ipmi::getChannelSessionSupport(static_cast<uint8_t>(channelNum))))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    ipmi_ret_t compCode =
+        ipmi::getChannelInfo(static_cast<uint8_t>(channelNum), chInfo);
+    if (compCode != IPMI_CC_OK ||
+        chInfo.mediumType !=
+            static_cast<uint8_t>(ipmi::EChannelMediumType::lan8032))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    ret.pack(solParameterRevision);
+    if (getParamRev)
+    {
+        return ipmi::responseSuccess(std::move(ret));
+    }
+
+    switch (static_cast<sol::Parameter>(paramSelector))
+    {
+        case sol::Parameter::progress:
+        {
+            uint8_t progress = 0;
+            if (getSOLParameter(ctx, "Progress", progress, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            ret.pack(progress);
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        case sol::Parameter::enable:
+        {
+            bool enable = false;
+            if (getSOLParameter(ctx, "Enable", enable, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            ret.pack(static_cast<uint8_t>(enable));
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        case sol::Parameter::authentication:
+        {
+            uint8_t authentication = 0;
+            if (getSOLParameter(ctx, "Privilege", authentication, channelNum) <
+                0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            authentication = authentication & 0x0f;
+            bool forceAuth = true;
+            if (getSOLParameter(ctx, "ForceAuthentication", forceAuth,
+                                channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            authentication |= (static_cast<uint8_t>(forceAuth) << 6);
+
+            bool forceEnc = true;
+            if (getSOLParameter(ctx, "ForceEncryption", forceEnc, channelNum) <
+                0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            authentication |= (static_cast<uint8_t>(forceEnc) << 7);
+            ret.pack(authentication);
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        case sol::Parameter::accumulate:
+        {
+            uint8_t accInterval = 0;
+            if (getSOLParameter(ctx, "AccumulateIntervalMS", accInterval,
+                                channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            uint8_t threshold = 0;
+            if (getSOLParameter(ctx, "Threshold", threshold, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            ret.pack(accInterval, threshold);
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        case sol::Parameter::retry:
+        {
+            uint8_t retry = 0;
+            if (getSOLParameter(ctx, "RetryCount", retry, channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            uint8_t retryInterval;
+            if (getSOLParameter(ctx, "RetryIntervalMS", retryInterval,
+                                channelNum) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            retry = retry & retryCountMask;
+            ret.pack(retry, retryInterval);
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        case sol::Parameter::channel:
+        {
+            ret.pack(channelNum);
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        case sol::Parameter::port:
+        {
+            uint16_t port = htole16(ipmiStdPort);
+            auto buffer = reinterpret_cast<const uint8_t*>(&port);
+            ret.pack(buffer[0], buffer[1]);
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        case sol::Parameter::nvbitrate:
+        {
+            uint32_t baudRate = 0;
+            if (getSOLBaudRate(ctx, baudRate) < 0)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            uint8_t bitRate = 0;
+            switch (baudRate)
+            {
+                case b9600:
+                    bitRate = bitRate9600;
+                    break;
+                case b19200:
+                    bitRate = bitRate19200;
+                    break;
+                case b38400:
+                    bitRate = bitRate38400;
+                    break;
+                case b57600:
+                    bitRate = bitRate57600;
+                    break;
+                case b115200:
+                    bitRate = bitRate115200;
+                    break;
+                default:
+                    break;
+            }
+            ret.pack(bitRate);
+            return ipmi::responseSuccess(std::move(ret));
+        }
+        default:
+            return ipmi::responseParmNotSupported();
+    }
+}
+
 void register_netfn_transport_functions()
 {
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
@@ -2244,4 +2437,8 @@ void register_netfn_transport_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
                           ipmi::transport::cmdSetSolConfigParameters,
                           ipmi::Privilege::Admin, setSOLConfParams);
+
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
+                          ipmi::transport::cmdGetSolConfigParameters,
+                          ipmi::Privilege::User, getSOLConfParams);
 }
