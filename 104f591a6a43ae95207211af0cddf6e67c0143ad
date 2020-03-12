@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e23a52d_0a18abc2",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2342,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-12T21:31:16Z",
+      "side": 1,
+      "message": "No shifting and masking. (well, the mask on 2326 is okay).\nLet the packer do it for you. It packs low-order bits first.\n\nconstexpr uint2_t resvd \u003d 0;\nret.pack(static_cast\u003cuint4_t\u003e(authentication), resvd, forceAuth, forceEnc);",
+      "range": {
+        "startLine": 2342,
+        "startChar": 12,
+        "endLine": 2342,
+        "endChar": 37
+      },
+      "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c1b08c5_d47972c2",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2387,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-12T21:31:16Z",
+      "side": 1,
+      "message": "htole16 on a little-endian host will be a no-op.",
+      "range": {
+        "startLine": 2387,
+        "startChar": 0,
+        "endLine": 2387,
+        "endChar": 49
+      },
+      "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bb19369a_00319b0a",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2389,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-12T21:31:16Z",
+      "side": 1,
+      "message": "you should be able to just pack the uint16_t. It will be packed in little-endian format.",
+      "range": {
+        "startLine": 2388,
+        "startChar": 0,
+        "endLine": 2389,
+        "endChar": 43
+      },
+      "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
