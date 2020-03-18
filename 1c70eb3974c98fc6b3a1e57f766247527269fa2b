@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc2586bc_2a9d3fbd",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-18T23:47:13Z",
+      "side": 1,
+      "message": "if you save the results of the find() here, you can use that to insert and replace below to reduce the number of map lookups.\n\nauto interfaceIter \u003d sensorInterfaces.find(path);\nif (interfaceIter !\u003d sensorInterfaces.end())\n{\n    interfaceIter-\u003esecond \u003d intf;\n}\nelse\n{\n    if (interfaceIter-\u003esecond !\u003d intf)\n    {\n        ...\n    }\n    interfaceIter-\u003esecond \u003d intf;\n    cachedServices.erase(path);\n}",
+      "range": {
+        "startLine": 254,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 62
+      },
+      "revId": "1c70eb3974c98fc6b3a1e57f766247527269fa2b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30ec8dd5_b63e81ff",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-18T23:47:13Z",
+      "side": 1,
+      "message": "path",
+      "range": {
+        "startLine": 260,
+        "startChar": 29,
+        "endLine": 260,
+        "endChar": 50
+      },
+      "revId": "1c70eb3974c98fc6b3a1e57f766247527269fa2b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0a0dfce_dfe2b573",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-18T23:47:13Z",
+      "side": 1,
+      "message": "intf",
+      "range": {
+        "startLine": 261,
+        "startChar": 12,
+        "endLine": 261,
+        "endChar": 38
+      },
+      "revId": "1c70eb3974c98fc6b3a1e57f766247527269fa2b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "935fd21a_18fcd07b",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-03-18T23:47:13Z",
+      "side": 1,
+      "message": "standard logging routines should be used. Here and below.",
+      "range": {
+        "startLine": 263,
+        "startChar": 12,
+        "endLine": 265,
+        "endChar": 34
+      },
+      "revId": "1c70eb3974c98fc6b3a1e57f766247527269fa2b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
