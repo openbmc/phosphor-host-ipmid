@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -43,7 +43,7 @@ def main():
 
     parser.add_argument(
         'command', metavar='COMMAND', type=str,
-        choices=valid_commands.keys(),
+        choices=list(valid_commands.keys()),
         help='Command to run.')
 
     args = parser.parse_args()
