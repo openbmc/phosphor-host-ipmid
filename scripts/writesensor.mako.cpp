@@ -82,7 +82,7 @@ extern const IdInfoMap sensors = {
 <%
 try:
     preReq = property_value["Prereqs"]
-except KeyError, e:
+except KeyError as e:
     preReq = dict()
 %>\
                     {
@@ -116,7 +116,7 @@ try:
         skipVal = "SkipAssertion::DEASSERT"
     else:
         assert "Unknown skip value " + str(skip)
-except KeyError, e:
+except KeyError as e:
     skipVal = "SkipAssertion::NONE"
 %>\
                                 ${skipVal},
