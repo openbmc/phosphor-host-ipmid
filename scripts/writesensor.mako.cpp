@@ -4,7 +4,7 @@
 <%
 interfaceDict = {}
 %>\
-%for key in sensorDict.iterkeys():
+%for key in sensorDict.keys():
 <%
     sensor = sensorDict[key]
     serviceInterface = sensor["serviceInterface"]
@@ -32,7 +32,7 @@ namespace ipmi {
 namespace sensor {
 
 extern const IdInfoMap sensors = {
-% for key in sensorDict.iterkeys():
+% for key in sensorDict.keys():
    % if key:
 {${key},{
 <%
@@ -82,7 +82,7 @@ extern const IdInfoMap sensors = {
 <%
 try:
     preReq = property_value["Prereqs"]
-except KeyError, e:
+except KeyError:
     preReq = dict()
 %>\
                     {
@@ -116,7 +116,7 @@ try:
         skipVal = "SkipAssertion::DEASSERT"
     else:
         assert "Unknown skip value " + str(skip)
-except KeyError, e:
+except KeyError:
     skipVal = "SkipAssertion::NONE"
 %>\
                                 ${skipVal},
