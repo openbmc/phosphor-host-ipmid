@@ -7,7 +7,7 @@
 using namespace ipmi::sensor;
 
 extern const InvObjectIDMap invSensors = {
-% for key in sensorDict.iterkeys():
+% for key in sensorDict.keys():
    % if key:
 {"${key}",
     {
