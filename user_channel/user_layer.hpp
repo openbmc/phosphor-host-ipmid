@@ -141,7 +141,7 @@ uint8_t ipmiUserGetUserId(const std::string& userName);
  *
  *  @return ccSuccess for success, others for failure.
  */
-Cc ipmiUserSetUserName(const uint8_t userId, const std::string& userName);
+Cc ipmiUserSetUserName(const uint8_t userId, const char* userName);
 
 /** @brief set user password
  *
