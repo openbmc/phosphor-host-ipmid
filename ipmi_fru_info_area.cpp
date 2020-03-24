@@ -40,7 +40,7 @@ static constexpr auto commonHeaderFormatSize = 0x8; // size in bytes
 static constexpr auto manufacturingDateSize = 0x3;
 static constexpr auto areaSizeOffset = 0x1;
 static constexpr uint8_t typeASCII = 0xC0;
-static constexpr auto maxRecordAttributeValue = 0x1F;
+static constexpr auto maxRecordAttributeValue = 0x3F;
 
 static constexpr auto secs_from_1970_1996 = 820454400;
 static constexpr auto maxMfgDateValue = 0xFFFFFF; // 3 Byte length
@@ -174,8 +174,8 @@ void appendData(const Property& key, const PropertyMap& propMap,
             value.erase(0, 2);
         }
 
-        // 5 bits for length
-        // if length is greater then 31(2^5) bytes then trim the data to 31
+        // 6 bits for length as per FRU spec v1.0
+        // if length is greater then 63(2^6) bytes then trim the data to 63
         // bytess.
         auto valueLength = (value.length() > maxRecordAttributeValue)
                                ? maxRecordAttributeValue
