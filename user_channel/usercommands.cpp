@@ -291,9 +291,10 @@ Cc ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         log<level::DEBUG>("Set user name - Invalid user id");
         return ccParmOutOfRange;
     }
+    std::string strUserName;
+    strUserName.assign(reinterpret_cast<const char*>(req->userName));
 
-    return ipmiUserSetUserName(req->userId,
-                               reinterpret_cast<const char*>(req->userName));
+    return ipmiUserSetUserName(req->userId, strUserName);
 }
 
 /** @brief implementes the get user name command
