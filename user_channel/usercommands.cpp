@@ -292,8 +292,9 @@ Cc ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         return ccParmOutOfRange;
     }
 
-    return ipmiUserSetUserName(req->userId,
-                               reinterpret_cast<const char*>(req->userName));
+    const std::string strUserName(reinterpret_cast<const char*>(req->userName));
+
+    return ipmiUserSetUserName(req->userId, strUserName);
 }
 
 /** @brief implementes the get user name command
