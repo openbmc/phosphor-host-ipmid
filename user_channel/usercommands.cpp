@@ -54,7 +54,7 @@ struct SetUserNameReq
     uint8_t reserved1 : 2;
     uint8_t userId : 6;
 #endif
-    uint8_t userName[16];
+    std::array<uint8_t, 16> userName;
 } __attribute__((packed));
 
 /** @struct GetUserNameReq
@@ -291,9 +291,9 @@ Cc ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         log<level::DEBUG>("Set user name - Invalid user id");
         return ccParmOutOfRange;
     }
+    std::string strUserName(req->userName.begin(), req->userName.end());
 
-    return ipmiUserSetUserName(req->userId,
-                               reinterpret_cast<const char*>(req->userName));
+    return ipmiUserSetUserName(req->userId, strUserName);
 }
 
 /** @brief implementes the get user name command
