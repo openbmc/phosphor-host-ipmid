@@ -135,13 +135,10 @@ bool ipmiUserIsValidPrivilege(const uint8_t priv);
 uint8_t ipmiUserGetUserId(const std::string& userName);
 
 /** @brief set's user name
- *
- *  @param[in] userId - user id
- *  @param[in] userName - user name
- *
- *  @return ccSuccess for success, others for failure.
+ *  This API is deprecated
  */
-Cc ipmiUserSetUserName(const uint8_t userId, const char* userName);
+Cc ipmiUserSetUserName(const uint8_t userId, const char* userName)
+    __attribute__((deprecated));
 
 /** @brief set's user name
  *
