@@ -92,8 +92,7 @@ class Interface
      */
     static bool isAlgorithmSupported(Algorithms algo)
     {
-        if (algo == Algorithms::HMAC_SHA1_96 ||
-            algo == Algorithms::HMAC_SHA256_128)
+        if (algo == Algorithms::HMAC_SHA256_128)
         {
             return true;
         }

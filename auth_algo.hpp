@@ -105,8 +105,7 @@ class Interface
      */
     static bool isAlgorithmSupported(Algorithms algo)
     {
-        if (algo == Algorithms::RAKP_HMAC_SHA1 ||
-            algo == Algorithms::RAKP_HMAC_SHA256)
+        if (algo == Algorithms::RAKP_HMAC_SHA256)
         {
             return true;
         }
