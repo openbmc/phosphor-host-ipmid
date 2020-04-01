@@ -41,7 +41,8 @@ enum ipmi_sensor_types
     IPMI_SENSOR_MEMORY = 0x0C,
     IPMI_SENSOR_CABLE = 0x1B,
     IPMI_SENSOR_POWER_UNIT = 0x09,
-    IPMI_SENSOR_BUTTON = 0x14
+    IPMI_SENSOR_BUTTON = 0x14,
+    IPMI_SENSOR_PROCESSOR = 0x07
 };
 
 enum ipmi_event_types
