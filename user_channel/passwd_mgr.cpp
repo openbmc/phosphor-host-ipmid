@@ -444,8 +444,8 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
         return -EIO;
     }
 
-    // Set the file mode as of actual ipmi-pass file.
-    if (fchmod(fileno((temp)()), st.st_mode) < 0)
+    // Set the file mode as read-write for owner only
+    if (fchmod(fileno((temp)()), S_IRUSR | S_IWUSR) < 0)
     {
         log<level::DEBUG>("Error setting fchmod for temp file");
         return -EIO;
