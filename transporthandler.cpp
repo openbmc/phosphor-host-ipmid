@@ -1579,7 +1579,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             in6_addr ip;
             std::array<uint8_t, sizeof(ip)> ipbytes;
             uint8_t prefix;
-            uint8_t status;
+            std::optional<uint8_t> status;
             if (req.unpack(set, rsvd, enabled, ipbytes, prefix, status) != 0 ||
                 !req.fullyUnpacked())
             {
