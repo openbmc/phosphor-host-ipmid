@@ -1585,7 +1585,9 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseReqDataLenInvalid();
             }
-            if (rsvd)
+
+            constexpr uint8_t ipv6InvalidAddressStatus = 5;
+            if (rsvd || (status > ipv6InvalidAddressStatus))
             {
                 return responseInvalidFieldRequest();
             }
