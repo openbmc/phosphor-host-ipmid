@@ -37,7 +37,8 @@ namespace ipmi
 
 static const char* passwdFileName = "/etc/ipmi_pass";
 static const char* encryptKeyFileName = "/etc/key_file";
-static const size_t maxKeySize = 8;
+static const size_t oldMaxKeySize = 8;
+static const size_t maxKeySize = 32;
 
 #define META_PASSWD_SIG "=OPENBMC="
 
@@ -238,19 +239,62 @@ void PasswdMgr::initPasswordMap(void)
     return;
 }
 
-int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
+int PasswdMgr::readKeyFile(std::vector<uint8_t>& key) const
 {
-    std::array<uint8_t, maxKeySize> keyBuff;
+    key.resize(maxKeySize);
     std::ifstream keyFile(encryptKeyFileName, std::ios::in | std::ios::binary);
+    size_t keyLen = 0;
     if (!keyFile.is_open())
     {
-        log<level::DEBUG>("Error in opening encryption key file");
-        return -EIO;
+        // use a derivative of /etc/machine-id as the key
+        constexpr size_t appIdSize = 16;
+        constexpr std::array<uint8_t, appIdSize> app_id = {
+            {0x48, 0xf5, 0xa9, 0x53, 0x0f, 0x4c, 0x5f, 0xea, 0x46, 0xd1, 0xbf,
+             0x8a, 0x36, 0x73, 0x57, 0x5a}};
+        std::array<char, maxKeySize> machineId;
+        size_t len;
+        keyFile.open("/etc/machine-id", std::ios::in | std::ios::binary);
+        if (!keyFile.is_open())
+        {
+            return -EIO;
+        }
+        len = keyFile.readsome(machineId.data(), machineId.size());
+        keyFile.close();
+        if (len != machineId.size())
+        {
+            return -EIO;
+        }
+        unsigned int mdLen = 0;
+        HMAC(EVP_sha256(), machineId.data(), machineId.size(), app_id.data(),
+             app_id.size(), key.data(), &mdLen);
+        if (mdLen != maxKeySize)
+        {
+            return -EIO;
+        }
+        keyLen = mdLen;
+        return 0;
     }
-    keyFile.read(reinterpret_cast<char*>(keyBuff.data()), keyBuff.size());
+    keyLen = keyFile.readsome(reinterpret_cast<char*>(key.data()), key.size());
     if (keyFile.fail())
     {
+        keyFile.close();
         log<level::DEBUG>("Error in reading encryption key file");
+        return -EIO;
+    }
+    keyFile.close();
+    if (keyLen == (oldMaxKeySize + 1))
+    {
+        // old key had '\n' on the end that should be removed
+        key.resize(oldMaxKeySize);
+    }
+    return 0;
+}
+
+int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
+{
+    std::vector<uint8_t> keyBuff(maxKeySize);
+    if (readKeyFile(keyBuff) != 0)
+    {
         return -EIO;
     }
 
@@ -395,20 +439,11 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     }
 
     // Read the key buff from key file
-    std::array<uint8_t, maxKeySize> keyBuff;
-    std::ifstream keyFile(encryptKeyFileName, std::ios::in | std::ios::binary);
-    if (!keyFile.good())
+    std::vector<uint8_t> keyBuff(maxKeySize);
+    if (readKeyFile(keyBuff) != 0)
     {
-        log<level::DEBUG>("Error in opening encryption key file");
         return -EIO;
     }
-    keyFile.read(reinterpret_cast<char*>(keyBuff.data()), keyBuff.size());
-    if (keyFile.fail())
-    {
-        log<level::DEBUG>("Error in reading encryption key file");
-        return -EIO;
-    }
-    keyFile.close();
 
     // Read the original passwd file mode
     struct stat st = {};

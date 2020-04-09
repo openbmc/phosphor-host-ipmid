@@ -75,6 +75,14 @@ class PasswdMgr
      */
     void initPasswordMap(void);
 
+    /** @brief Function to read the key file that encrypts the password file
+     *
+     *  @param[out] outBytes - vector to hold decrypted password key data
+     *
+     * @return error response
+     */
+    int readKeyFile(std::vector<uint8_t>& key) const;
+
     /** @brief Function to read the encrypted password file data
      *
      *  @param[out] outBytes - vector to hold decrypted password file data
