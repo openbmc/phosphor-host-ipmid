@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a13d7ad8_e89a2dc6",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000410
+      },
+      "writtenOn": "2020-04-09T12:01:12Z",
+      "side": 1,
+      "message": "This is supposed to return a privilege level. I see you are returning CC codes in cases of error, but returning a valid privilege level in case of success.\n\nPlease ensure that you are returning privilege levels only.",
+      "range": {
+        "startLine": 245,
+        "startChar": 0,
+        "endLine": 245,
+        "endChar": 7
+      },
+      "revId": "9a0323e6f7194d4b0670ad5894f04c48b5a686b3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    }
+  ]
+}
