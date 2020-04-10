@@ -17,6 +17,7 @@
 #include "channel_layer.hpp"
 
 #include "channel_mgmt.hpp"
+#include "cipher_mgmt.hpp"
 
 #include <phosphor-logging/log.hpp>
 
@@ -43,7 +44,8 @@ bool doesDeviceExist(const uint8_t chNum)
 
 bool isValidPrivLimit(const uint8_t privLimit)
 {
-    return ((privLimit >= PRIVILEGE_CALLBACK) && (privLimit <= PRIVILEGE_OEM));
+    // Callback privilege is deprecated in OpenBMC
+    return ((privLimit > PRIVILEGE_CALLBACK) && (privLimit <= PRIVILEGE_OEM));
 }
 
 bool isValidAccessMode(const uint8_t accessMode)
@@ -78,55 +80,52 @@ size_t getChannelMaxTransferSize(uint8_t chNum)
     return getChannelConfigObject().getChannelMaxTransferSize(chNum);
 }
 
-ipmi_ret_t ipmiChannelInit()
+Cc ipmiChannelInit()
 {
     getChannelConfigObject();
-    return IPMI_CC_OK;
+    getCipherConfigObject(csPrivFileName, csPrivDefaultFileName);
+    return ccSuccess;
 }
 
-ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo)
+Cc getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo)
 {
     return getChannelConfigObject().getChannelInfo(chNum, chInfo);
 }
 
-ipmi_ret_t getChannelAccessData(const uint8_t chNum,
-                                ChannelAccess& chAccessData)
+Cc getChannelAccessData(const uint8_t chNum, ChannelAccess& chAccessData)
 {
     return getChannelConfigObject().getChannelAccessData(chNum, chAccessData);
 }
 
-ipmi_ret_t setChannelAccessData(const uint8_t chNum,
-                                const ChannelAccess& chAccessData,
-                                const uint8_t setFlag)
+Cc setChannelAccessData(const uint8_t chNum, const ChannelAccess& chAccessData,
+                        const uint8_t setFlag)
 {
     return getChannelConfigObject().setChannelAccessData(chNum, chAccessData,
                                                          setFlag);
 }
 
-ipmi_ret_t getChannelAccessPersistData(const uint8_t chNum,
-                                       ChannelAccess& chAccessData)
+Cc getChannelAccessPersistData(const uint8_t chNum, ChannelAccess& chAccessData)
 {
     return getChannelConfigObject().getChannelAccessPersistData(chNum,
                                                                 chAccessData);
 }
 
-ipmi_ret_t setChannelAccessPersistData(const uint8_t chNum,
-                                       const ChannelAccess& chAccessData,
-                                       const uint8_t setFlag)
+Cc setChannelAccessPersistData(const uint8_t chNum,
+                               const ChannelAccess& chAccessData,
+                               const uint8_t setFlag)
 {
     return getChannelConfigObject().setChannelAccessPersistData(
         chNum, chAccessData, setFlag);
 }
 
-ipmi_ret_t getChannelAuthTypeSupported(const uint8_t chNum,
-                                       uint8_t& authTypeSupported)
+Cc getChannelAuthTypeSupported(const uint8_t chNum, uint8_t& authTypeSupported)
 {
     return getChannelConfigObject().getChannelAuthTypeSupported(
         chNum, authTypeSupported);
 }
 
-ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
-                                     EAuthType& authType)
+Cc getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
+                             EAuthType& authType)
 {
     return getChannelConfigObject().getChannelEnabledAuthType(chNum, priv,
                                                               authType);

@@ -14,8 +14,8 @@
 // limitations under the License.
 */
 #pragma once
-#include <ipmid/api.h>
-
+#include <array>
+#include <ipmid/api.hpp>
 #include <string>
 
 namespace ipmi
@@ -24,16 +24,13 @@ namespace ipmi
 static constexpr uint8_t maxIpmiChannels = 16;
 static constexpr uint8_t currentChNum = 0xE;
 static constexpr uint8_t invalidChannel = 0xff;
+static constexpr const uint8_t ccActionNotSupportedForChannel = 0x82;
+static constexpr const uint8_t ccAccessModeNotSupportedForChannel = 0x83;
 
 /**
- * @enum IPMI return codes specific to channel (refer spec se 22.22 response
- * data)
+ * @array of privilege levels
  */
-enum ipmi_channel_return_codes
-{
-    IPMI_CC_ACTION_NOT_SUPPORTED_FOR_CHANNEL = 0x82,
-    IPMI_CC_ACCESS_MODE_NOT_SUPPORTED_FOR_CHANEL = 0x83
-};
+extern const std::array<std::string, PRIVILEGE_OEM + 1> privList;
 
 /**
  * @enum Channel Protocol Type (refer spec sec 6.4)
@@ -254,28 +251,27 @@ size_t getChannelMaxTransferSize(uint8_t chNum);
 
 /** @brief initializes channel management
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t ipmiChannelInit();
+Cc ipmiChannelInit();
 
 /** @brief provides channel info details
  *
  *  @param[in] chNum - channel number
  *  @param[out] chInfo - channel info details
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo);
+Cc getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo);
 
 /** @brief provides channel access data
  *
  *  @param[in] chNum - channel number
  *  @param[out] chAccessData -channel access data
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t getChannelAccessData(const uint8_t chNum,
-                                ChannelAccess& chAccessData);
+Cc getChannelAccessData(const uint8_t chNum, ChannelAccess& chAccessData);
 
 /** @brief provides function to convert current channel number (0xE)
  *
@@ -301,21 +297,20 @@ static inline uint8_t convertCurrentChannelNum(const uint8_t chNum,
  *  @param[in] chAccessData - channel access data
  *  @param[in] setFlag - flag to indicate updatable fields
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t setChannelAccessData(const uint8_t chNum,
-                                const ChannelAccess& chAccessData,
-                                const uint8_t setFlag);
+Cc setChannelAccessData(const uint8_t chNum, const ChannelAccess& chAccessData,
+                        const uint8_t setFlag);
 
 /** @brief to get channel access data persistent data
  *
  *  @param[in] chNum - channel number
  *  @param[out] chAccessData - channel access data
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t getChannelAccessPersistData(const uint8_t chNum,
-                                       ChannelAccess& chAccessData);
+Cc getChannelAccessPersistData(const uint8_t chNum,
+                               ChannelAccess& chAccessData);
 
 /** @brief to set channel access data persistent data
  *
@@ -323,21 +318,20 @@ ipmi_ret_t getChannelAccessPersistData(const uint8_t chNum,
  *  @param[in] chAccessData - channel access data
  *  @param[in] setFlag - flag to indicate updatable fields
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t setChannelAccessPersistData(const uint8_t chNum,
-                                       const ChannelAccess& chAccessData,
-                                       const uint8_t setFlag);
+Cc setChannelAccessPersistData(const uint8_t chNum,
+                               const ChannelAccess& chAccessData,
+                               const uint8_t setFlag);
 
 /** @brief provides supported authentication type for the channel
  *
  *  @param[in] chNum - channel number
  *  @param[out] authTypeSupported - supported authentication type
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t getChannelAuthTypeSupported(const uint8_t chNum,
-                                       uint8_t& authTypeSupported);
+Cc getChannelAuthTypeSupported(const uint8_t chNum, uint8_t& authTypeSupported);
 
 /** @brief provides enabled authentication type for the channel
  *
@@ -345,10 +339,10 @@ ipmi_ret_t getChannelAuthTypeSupported(const uint8_t chNum,
  *  @param[in] priv - privilege
  *  @param[out] authType - enabled authentication type
  *
- *  @return IPMI_CC_OK for success, others for failure.
+ *  @return ccSuccess for success, others for failure.
  */
-ipmi_ret_t getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
-                                     EAuthType& authType);
+Cc getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
+                             EAuthType& authType);
 
 /** @brief Retrieves the LAN channel name from the IPMI channel number
  *
