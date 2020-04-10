@@ -131,15 +131,24 @@ ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
                                   std::optional<uint8_t> sessionLimit)
 {
     uint8_t sessLimit = sessionLimit.value_or(0);
-    uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if (reserved1 != 0 || reserved2 != 0 || sessLimit != 0 ||
-        (!isValidChannel(chNum)) ||
-        (!ipmiUserIsValidPrivilege(static_cast<uint8_t>(privilege))) ||
-        (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
+    if (reserved1 || reserved2 || sessLimit ||
+        !ipmiUserIsValidPrivilege(static_cast<uint8_t>(privilege)))
     {
         log<level::DEBUG>("Set user access - Invalid field in request");
         return ipmi::responseInvalidFieldRequest();
+    }
+
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    if (!isValidChannel(chNum))
+    {
+        log<level::DEBUG>("Set user access - Invalid channel request");
+        return ipmi::response(invalidChannel);
+    }
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        log<level::DEBUG>("Set user access - No support on channel");
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -202,11 +211,17 @@ ipmi::RspType<uint6_t, // max channel users
 {
     uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if (reserved1 != 0 || reserved2 != 0 || (!isValidChannel(chNum)) ||
-        (EChannelSessSupported::none == getChannelSessionSupport(chNum)))
+
+    if (reserved1 || reserved2 || !isValidChannel(chNum))
     {
         log<level::DEBUG>("Get user access - Invalid field in request");
         return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        log<level::DEBUG>("Get user access - No support on channel");
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -217,7 +232,7 @@ ipmi::RspType<uint6_t, // max channel users
     uint8_t maxChUsers = 0, enabledUsers = 0, fixedUsers = 0;
     ipmi::Cc retStatus;
     retStatus = ipmiUserGetAllCounts(maxChUsers, enabledUsers, fixedUsers);
-    if (retStatus != IPMI_CC_OK)
+    if (retStatus != ccSuccess)
     {
         return ipmi::response(retStatus);
     }
@@ -225,7 +240,7 @@ ipmi::RspType<uint6_t, // max channel users
     bool enabledState = false;
     retStatus =
         ipmiUserCheckEnabled(static_cast<uint8_t>(userId), enabledState);
-    if (retStatus != IPMI_CC_OK)
+    if (retStatus != ccSuccess)
     {
         return ipmi::response(retStatus);
     }
@@ -235,7 +250,7 @@ ipmi::RspType<uint6_t, // max channel users
     PrivAccess privAccess{};
     retStatus = ipmiUserGetPrivilegeAccess(static_cast<uint8_t>(userId), chNum,
                                            privAccess);
-    if (retStatus != IPMI_CC_OK)
+    if (retStatus != ccSuccess)
     {
         return ipmi::response(retStatus);
     }
@@ -254,9 +269,9 @@ ipmi::RspType<uint6_t, // max channel users
         static_cast<uint1_t>(privAccess.reserved));
 }
 
-ipmi_ret_t ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                           ipmi_request_t request, ipmi_response_t response,
-                           ipmi_data_len_t dataLen, ipmi_context_t context)
+Cc ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+                   ipmi_response_t response, ipmi_data_len_t dataLen,
+                   ipmi_context_t context)
 {
     const SetUserNameReq* req = static_cast<SetUserNameReq*>(request);
     size_t reqLength = *dataLen;
@@ -265,16 +280,16 @@ ipmi_ret_t ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (reqLength != sizeof(*req))
     {
         log<level::DEBUG>("Set user name - Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ccReqDataLenInvalid;
     }
     if (req->reserved1)
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ccInvalidFieldRequest;
     }
     if (!ipmiUserIsValidUserId(req->userId))
     {
         log<level::DEBUG>("Set user name - Invalid user id");
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
 
     return ipmiUserSetUserName(req->userId,
@@ -290,9 +305,9 @@ ipmi_ret_t ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
  *  @param[in] context - ipmi context.
  *  @returns ipmi completion code.
  */
-ipmi_ret_t ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                           ipmi_request_t request, ipmi_response_t response,
-                           ipmi_data_len_t dataLen, ipmi_context_t context)
+Cc ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
+                   ipmi_response_t response, ipmi_data_len_t dataLen,
+                   ipmi_context_t context)
 {
     const GetUserNameReq* req = static_cast<GetUserNameReq*>(request);
     size_t reqLength = *dataLen;
@@ -302,15 +317,15 @@ ipmi_ret_t ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (reqLength != sizeof(*req))
     {
         log<level::DEBUG>("Get user name - Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ccReqDataLenInvalid;
     }
 
     std::string userName;
-    if (ipmiUserGetUserName(req->userId, userName) != IPMI_CC_OK)
+    if (ipmiUserGetUserName(req->userId, userName) != ccSuccess)
     { // Invalid User ID
         log<level::DEBUG>("User Name not found",
                           entry("USER-ID=%d", (uint8_t)req->userId));
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
     GetUserNameResp* resp = static_cast<GetUserNameResp*>(response);
     std::fill(reinterpret_cast<uint8_t*>(resp),
@@ -319,7 +334,7 @@ ipmi_ret_t ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                   sizeof(resp->userName), 0);
     *dataLen = sizeof(*resp);
 
-    return IPMI_CC_OK;
+    return ccSuccess;
 }
 
 /** @brief implementes the set user password command
@@ -331,9 +346,9 @@ ipmi_ret_t ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
  *  @param[in] context - ipmi context.
  *  @returns ipmi completion code.
  */
-ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                               ipmi_request_t request, ipmi_response_t response,
-                               ipmi_data_len_t dataLen, ipmi_context_t context)
+Cc ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
+                       ipmi_request_t request, ipmi_response_t response,
+                       ipmi_data_len_t dataLen, ipmi_context_t context)
 {
     const SetUserPasswordReq* req = static_cast<SetUserPasswordReq*>(request);
     size_t reqLength = *dataLen;
@@ -350,7 +365,7 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
          ((reqLength < 2) || (reqLength > sizeof(SetUserPasswordReq)))))
     {
         log<level::DEBUG>("Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ccReqDataLenInvalid;
     }
     // If set / test password then password length has to be 16 or 20 bytes
     // based on the password size bit.
@@ -361,15 +376,15 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
           (passwordLength != maxIpmi15PasswordSize))))
     {
         log<level::DEBUG>("Invalid Length");
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ccReqDataLenInvalid;
     }
 
     std::string userName;
-    if (ipmiUserGetUserName(req->userId, userName) != IPMI_CC_OK)
+    if (ipmiUserGetUserName(req->userId, userName) != ccSuccess)
     {
         log<level::DEBUG>("User Name not found",
                           entry("USER-ID=%d", (uint8_t)req->userId));
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ccParmOutOfRange;
     }
     if (req->operation == setPassword)
     {
@@ -394,12 +409,12 @@ ipmi_ret_t ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             log<level::DEBUG>("Test password failed",
                               entry("USER-ID=%d", (uint8_t)req->userId));
-            return static_cast<ipmi_ret_t>(
+            return static_cast<Cc>(
                 IPMISetPasswordReturnCodes::ipmiCCPasswdFailMismatch);
         }
-        return IPMI_CC_OK;
+        return ccSuccess;
     }
-    return IPMI_CC_INVALID_FIELD_REQUEST;
+    return ccInvalidFieldRequest;
 }
 
 /** @brief implements the get channel authentication command
@@ -450,15 +465,22 @@ ipmi::RspType<uint8_t,  // channel number
                                              bool extData, uint4_t privLevel,
                                              uint4_t reserved2)
 {
-
     uint8_t channel =
         convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
 
     if (reserved1 || reserved2 || !isValidChannel(channel) ||
-        !isValidPrivLimit(static_cast<uint8_t>(privLevel)) ||
-        (EChannelSessSupported::none == getChannelSessionSupport(channel)))
+        !isValidPrivLimit(static_cast<uint8_t>(privLevel)))
     {
-        return ipmi::response(ccInvalidFieldRequest);
+        log<level::DEBUG>(
+            "Get channel auth capabilities - Invalid field in request");
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (getChannelSessionSupport(channel) == EChannelSessSupported::none)
+    {
+        log<level::DEBUG>(
+            "Get channel auth capabilities - No support on channel");
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
 
     constexpr bool extDataSupport = true; // true for IPMI 2.0 extensions
@@ -532,25 +554,27 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
 
     uint8_t oemPayloadEnables2Reserved)
 {
+    auto chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
     // Validate the reserved args. Only SOL payload is supported as on date.
     if (reserved || stdPayload0ipmiReserved || stdPayload2 || stdPayload3 ||
         stdPayload4 || stdPayload5 || stdPayload6 || stdPayload7 ||
         oemPayload0 || oemPayload1 || oemPayload2 || oemPayload3 ||
         oemPayload4 || oemPayload5 || oemPayload6 || oemPayload7 ||
-        stdPayloadEnables2Reserved || oemPayloadEnables2Reserved)
+        stdPayloadEnables2Reserved || oemPayloadEnables2Reserved ||
+        !isValidChannel(chNum))
     {
         return ipmi::responseInvalidFieldRequest();
     }
 
-    auto chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if ((operation != enableOperation && operation != disableOperation) ||
-        (!isValidChannel(chNum)) ||
-        (getChannelSessionSupport(chNum) == EChannelSessSupported::none))
+    if ((operation != enableOperation && operation != disableOperation))
     {
         return ipmi::responseInvalidFieldRequest();
     }
-
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        return ipmi::response(ccActionNotSupportedForChannel);
+    }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
         return ipmi::responseParmOutOfRange();
@@ -627,10 +651,14 @@ ipmi::RspType<bool, // stdPayload0ipmiReserved
 {
     uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
-    if (reserved1 != 0 || reserved2 != 0 || (!isValidChannel(chNum)) ||
-        (getChannelSessionSupport(chNum) == EChannelSessSupported::none))
+
+    if (reserved1 || reserved2 || !isValidChannel(chNum))
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+    if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
+    {
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -641,7 +669,7 @@ ipmi::RspType<bool, // stdPayload0ipmiReserved
     PayloadAccess payloadAccess = {};
     retStatus = ipmiUserGetUserPayloadAccess(
         chNum, static_cast<uint8_t>(userId), payloadAccess);
-    if (retStatus != IPMI_CC_OK)
+    if (retStatus != ccSuccess)
     {
         return ipmi::response(retStatus);
     }

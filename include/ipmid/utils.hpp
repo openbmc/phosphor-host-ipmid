@@ -376,6 +376,33 @@ boost::system::error_code getAllAncestors(Context::ptr ctx,
 
 /********* End co-routine yielding alternatives ***************/
 
+/** @brief Retrieve the value from map of variants,
+ *         returning a default if the key does not exist or the
+ *         type of the value does not match the expected type
+ *
+ *  @tparam T - type of expected value to return
+ *  @param[in] props - D-Bus propery map (Map of variants)
+ *  @param[in] name - key name of property to fetch
+ *  @param[in] defaultValue - default value to return on error
+ *  @return - value from propery map at name, or defaultValue
+ */
+template <typename T>
+T mappedVariant(const ipmi::PropertyMap& props, const std::string& name,
+                const T& defaultValue)
+{
+    auto item = props.find(name);
+    if (item == props.end())
+    {
+        return defaultValue;
+    }
+    const T* prop = std::get_if<T>(&item->second);
+    if (!prop)
+    {
+        return defaultValue;
+    }
+    return *prop;
+}
+
 /** @struct VariantToDoubleVisitor
  *  @brief Visitor to convert variants to doubles
  *  @details Performs a static cast on the underlying type
