@@ -28,7 +28,7 @@ namespace ipmi
  */
 enum class EChannelID : uint8_t
 {
-    chanLan1 = 0x01
+    chanLan1 = 0x01,
 };
 
 static constexpr uint8_t invalidUserId = 0xFF;
