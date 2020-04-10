@@ -875,6 +875,11 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     }
     std::string priv = convertToSystemPrivilege(
         static_cast<CommandPrivilege>(privAccess.privilege));
+    if (chNum == static_cast<uint8_t>(EChannelID::chanLan3) &&
+        privAccess.privilege == PRIVILEGE_OEM)
+    {
+        return ccUnspecifiedError;
+    }
     uint8_t syncIndex = getUsrMgmtSyncIndex();
     if (chNum == syncIndex &&
         privAccess.privilege != userInfo->userPrivAccess[syncIndex].privilege)
