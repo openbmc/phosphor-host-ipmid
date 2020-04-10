@@ -862,6 +862,12 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     {
         return ccParmOutOfRange;
     }
+    if (chNum == static_cast<uint8_t>(EChannelID::chanLan3) &&
+        privAccess.privilege == PRIVILEGE_OEM)
+    {
+        log<level::DEBUG>("User Privilege is invalid");
+        return ccUnspecifiedError;
+    }
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         userLock{*userMutex};
     UserInfo* userInfo = getUserInfo(userId);
