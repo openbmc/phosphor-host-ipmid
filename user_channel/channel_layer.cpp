@@ -44,8 +44,8 @@ bool doesDeviceExist(const uint8_t chNum)
 
 bool isValidPrivLimit(const uint8_t privLimit)
 {
-    // Callback privilege is deprecated in OpenBMC
-    return ((privLimit > PRIVILEGE_CALLBACK) && (privLimit <= PRIVILEGE_OEM));
+    // Callback & OEM privilege is deprecated in OpenBMC
+    return ((privLimit > PRIVILEGE_CALLBACK) && (privLimit < PRIVILEGE_OEM));
 }
 
 bool isValidAccessMode(const uint8_t accessMode)
