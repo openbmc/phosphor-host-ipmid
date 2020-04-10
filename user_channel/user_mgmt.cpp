@@ -503,8 +503,8 @@ bool UserAccess::isValidUserId(const uint8_t userId)
 
 bool UserAccess::isValidPrivilege(const uint8_t priv)
 {
-    // Callback privilege is deprecated in OpenBMC
-    return (isValidPrivLimit(priv) || priv == privNoAccess);
+    return ((priv >= PRIVILEGE_CALLBACK && priv <= PRIVILEGE_OEM) ||
+            priv == privNoAccess);
 }
 
 uint8_t UserAccess::getUsrMgmtSyncIndex()
@@ -876,7 +876,8 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     std::string priv = convertToSystemPrivilege(
         static_cast<CommandPrivilege>(privAccess.privilege));
     uint8_t syncIndex = getUsrMgmtSyncIndex();
-    if (chNum == syncIndex &&
+    if ((chNum == syncIndex ||
+         chNum == static_cast<uint8_t>(EChannelID::chanLan3)) &&
         privAccess.privilege != userInfo->userPrivAccess[syncIndex].privilege)
     {
         std::string userPath = std::string(userObjBasePath) + "/" + userName;
