@@ -192,6 +192,102 @@
     },
     {
       "key": {
+        "uuid": "a4a28455_1972b089",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-04-23T10:11:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d2e7dc51_bc777820",
+      "range": {
+        "startLine": 245,
+        "startChar": 0,
+        "endLine": 245,
+        "endChar": 7
+      },
+      "revId": "9a0323e6f7194d4b0670ad5894f04c48b5a686b3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5a43dd3_6fcb0023",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-04-23T10:11:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dea223e6_0585e89e",
+      "range": {
+        "startLine": 245,
+        "startChar": 59,
+        "endLine": 245,
+        "endChar": 67
+      },
+      "revId": "9a0323e6f7194d4b0670ad5894f04c48b5a686b3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e2995ae_2ef1cc3f",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-04-23T10:11:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a13d7ad8_e89a2dc6",
+      "range": {
+        "startLine": 245,
+        "startChar": 0,
+        "endLine": 245,
+        "endChar": 7
+      },
+      "revId": "9a0323e6f7194d4b0670ad5894f04c48b5a686b3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9dbff7e_3da376d3",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-04-23T10:11:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12ff4216_b007b473",
+      "range": {
+        "startLine": 245,
+        "startChar": 0,
+        "endLine": 245,
+        "endChar": 7
+      },
+      "revId": "9a0323e6f7194d4b0670ad5894f04c48b5a686b3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f68c4e38_8f84f133",
         "filename": "user_channel/cipher_mgmt.cpp",
         "patchSetId": 5
@@ -226,6 +322,30 @@
       "writtenOn": "2020-04-13T09:35:36Z",
       "side": 1,
       "message": "Ack",
+      "parentUuid": "f68c4e38_8f84f133",
+      "range": {
+        "startLine": 253,
+        "startChar": 4,
+        "endLine": 253,
+        "endChar": 10
+      },
+      "revId": "9a0323e6f7194d4b0670ad5894f04c48b5a686b3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc8539e3_15a6210b",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-04-23T10:11:50Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "f68c4e38_8f84f133",
       "range": {
         "startLine": 253,
