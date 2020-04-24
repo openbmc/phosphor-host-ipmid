@@ -23,11 +23,6 @@ using InternalFailure =
 std::unique_ptr<sdbusplus::bus::match_t> matchPtr
     __attribute__((init_priority(101)));
 
-static constexpr auto XYZ_PREFIX = "/xyz/openbmc_project/";
-static constexpr auto INV_INTF = "xyz.openbmc_project.Inventory.Manager";
-static constexpr auto OBJ_PATH = "/xyz/openbmc_project/inventory";
-static constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
-
 namespace cache
 {
 // User initiate read FRU info area command followed by
