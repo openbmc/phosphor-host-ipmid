@@ -89,6 +89,10 @@ static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
 #endif // ENABLE_I2C_WHITELIST_CHECK
 static constexpr uint8_t maxIPMIWriteReadSize = 144;
+static constexpr uint8_t oemCmdStart = 192;
+static constexpr uint8_t oemCmdEnd = 255;
+static constexpr uint8_t invalidParamSelectorStart = 8;
+static constexpr uint8_t invalidParamSelectorEnd = 191;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -1350,6 +1354,16 @@ ipmi::RspType<uint8_t,                // Parameter revision
 ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
                                      std::vector<uint8_t> configData)
 {
+    if (paramSelector >= invalidParamSelectorStart &&
+        paramSelector <= invalidParamSelectorEnd)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if ((paramSelector >= oemCmdStart) && (paramSelector <= oemCmdEnd))
+    {
+        return ipmi::responseParmNotSupported();
+    }
+
     if (paramSelector == 0)
     {
         // attempt to set the 'set in progress' value (in parameter #0)
@@ -1373,6 +1387,13 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
     if (configData.size() > configParameterLength)
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+
+    // Append zero's to remaining bytes
+    if (configData.size() < configParameterLength)
+    {
+        fill_n(back_inserter(configData),
+               (configParameterLength - configData.size()), 0x00);
     }
 
     if (!sysInfoParamStore)
