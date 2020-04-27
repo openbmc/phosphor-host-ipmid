@@ -1371,6 +1371,12 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
         return ipmi::responseInvalidFieldRequest();
     }
 
+    if (configData.size() < configParameterLength)
+    {
+        fill_n(back_inserter(configData),
+               (configParameterLength - configData.size()), 0x00);
+    }
+
     if (!sysInfoParamStore)
     {
         sysInfoParamStore = std::make_unique<SysInfoParamStore>();
