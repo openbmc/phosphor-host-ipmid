@@ -1163,7 +1163,8 @@ ipmi::RspType<uint8_t, // session handle,
         return ipmi::responseUnspecifiedError();
     }
 
-    uint8_t totalSessionCount = getTotalSessionCount();
+    uint8_t totalSessionCount =
+        session::maxSessionCountPerChannel; // Number of sessions per channel
     uint8_t activeSessionCount = 0;
     uint8_t sessionHandle = session::defaultSessionHandle;
     std::optional<SessionDetails> maybeDetails;
