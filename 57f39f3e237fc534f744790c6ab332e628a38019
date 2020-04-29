@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0a383ce_6225d65a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-29T23:59:11Z",
+      "side": 1,
+      "message": "this is insufficient to fully test this feature. ipmitool does not have an option to specify wildcards in the payload types fields; it hard-codes 8 every time. This will only return the highest privilege for THIS cipher suite. Which is fine, but that means the implementation is not correct.",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 67
+      },
+      "revId": "57f39f3e237fc534f744790c6ab332e628a38019",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fdd097bf_d1754445",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-29T23:59:11Z",
+      "side": 1,
+      "message": "Where is the cipher suite info (payload types)? This function needs to return the max privilege for a given cipher suite. This should check the payload types against allowed cipher suites and then choose the correct cipher suite and max privilege for that cipher suite.\n\nThis implementation, as is, could possibly return a higher max privilege for a cipher suite that was not requested.",
+      "range": {
+        "startLine": 279,
+        "startChar": 60,
+        "endLine": 279,
+        "endChar": 80
+      },
+      "revId": "57f39f3e237fc534f744790c6ab332e628a38019",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "168591a1_0631f550",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-29T23:59:11Z",
+      "side": 1,
+      "message": "lowerCamelCase for constants.",
+      "range": {
+        "startLine": 36,
+        "startChar": 18,
+        "endLine": 36,
+        "endChar": 33
+      },
+      "revId": "57f39f3e237fc534f744790c6ab332e628a38019",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e088855a_712cc0a5",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-29T23:59:11Z",
+      "side": 1,
+      "message": "I don\u0027t see anywhere in this code where this function actually gets called.",
+      "range": {
+        "startLine": 79,
+        "startChar": 12,
+        "endLine": 79,
+        "endChar": 49
+      },
+      "revId": "57f39f3e237fc534f744790c6ab332e628a38019",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
