@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74292522_0103ddf8",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1946,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-30T00:08:58Z",
+      "side": 1,
+      "message": "since you are only returning -1 or 0, this can be easier to read as bool. returns true on success and false on failure.\n\nthen the checks below can be:\nif (!setSolParameter(...))\n{\n}",
+      "range": {
+        "startLine": 1946,
+        "startChar": 7,
+        "endLine": 1946,
+        "endChar": 10
+      },
+      "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c71e9c4_db63af94",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1975,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-30T00:08:58Z",
+      "side": 1,
+      "message": "same bool comment",
+      "range": {
+        "startLine": 1975,
+        "startChar": 7,
+        "endLine": 1975,
+        "endChar": 10
+      },
+      "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3c207c5_a6014371",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2009,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-30T00:08:58Z",
+      "side": 1,
+      "message": "these appear to be unused",
+      "range": {
+        "startLine": 2005,
+        "startChar": 1,
+        "endLine": 2009,
+        "endChar": 50
+      },
+      "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c5475af_7589b4c1",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2055,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-30T00:08:58Z",
+      "side": 1,
+      "message": "how is this different than the Privilege in api-types.hpp?",
+      "range": {
+        "startLine": 2047,
+        "startChar": 1,
+        "endLine": 2055,
+        "endChar": 2
+      },
+      "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e4d6d5ca_4f47cafd",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2061,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-04-30T00:08:58Z",
+      "side": 1,
+      "message": "these appear to be unused",
+      "range": {
+        "startLine": 2059,
+        "startChar": 1,
+        "endLine": 2061,
+        "endChar": 35
+      },
+      "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
