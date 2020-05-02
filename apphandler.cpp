@@ -1315,13 +1315,24 @@ ipmi::RspType<uint8_t,                // Parameter revision
     // Parameters other than Set In Progress are assumed to be strings.
     std::tuple<bool, std::string> ret =
         sysInfoParamStore->lookup(paramSelector);
+    std::vector<uint8_t> configData;
     bool found = std::get<0>(ret);
     if (!found)
     {
-        return ipmi::responseParmNotSupported();
+        // Provided default value as zero's to all bytes
+        if ((paramSelector > 0) && (paramSelector < 5))
+        {
+            std::fill_n(std::back_inserter(configData), configParameterLength,
+                        0x00);
+            return ipmi::responseSuccess(paramRevision, setSelector,
+                                         configData);
+        }
+        else
+        {
+            return ipmi::responseParmNotSupported();
+        }
     }
     std::string& paramString = std::get<1>(ret);
-    std::vector<uint8_t> configData;
     size_t count = 0;
     if (setSelector == 0)
     {                               // First chunk has only 14 bytes.
@@ -1331,6 +1342,13 @@ ipmi::RspType<uint8_t,                // Parameter revision
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
                     configData.begin() + configDataOverhead); // 14 bytes thunk
+
+        // Append zero's to remaining bytes
+        if (configData.size() < configParameterLength)
+        {
+            std::fill_n(std::back_inserter(configData),
+                        configParameterLength - configData.size(), 0x00);
+        }
     }
     else
     {
