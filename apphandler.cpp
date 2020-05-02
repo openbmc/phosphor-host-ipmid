@@ -89,6 +89,12 @@ static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
 #endif // ENABLE_I2C_WHITELIST_CHECK
 static constexpr uint8_t maxIPMIWriteReadSize = 144;
+static constexpr uint8_t oemCmdStart = 192;
+static constexpr uint8_t oemCmdEnd = 255;
+static constexpr uint8_t parmStartSelector = 1;
+static constexpr uint8_t parmEndSelector = 7;
+static constexpr uint8_t parmStartSelect = 8;
+static constexpr uint8_t parmEndSelect = 191;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -1285,9 +1291,14 @@ ipmi::RspType<uint8_t,                // Parameter revision
                          uint8_t paramSelector, uint8_t setSelector,
                          uint8_t BlockSelector)
 {
-    if (reserved)
+    if (reserved ||
+        (paramSelector >= parmStartSelect && paramSelector <= parmEndSelect))
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+    if ((paramSelector >= oemCmdStart) && (paramSelector <= oemCmdEnd))
+    {
+        return ipmi::responseParmNotSupported();
     }
     if (getRevision)
     {
@@ -1318,7 +1329,15 @@ ipmi::RspType<uint8_t,                // Parameter revision
     bool found = std::get<0>(ret);
     if (!found)
     {
-        return ipmi::responseParmNotSupported();
+        if ((paramSelector >= parmStartSelector) &&
+            (paramSelector <= parmEndSelector))
+        {
+            return ipmi::responseUnspecifiedError();
+        }
+        else
+        {
+            return ipmi::responseParmNotSupported();
+        }
     }
     std::string& paramString = std::get<1>(ret);
     std::vector<uint8_t> configData;
@@ -1330,7 +1349,14 @@ ipmi::RspType<uint8_t,                // Parameter revision
         count = std::min(paramString.length(), smallChunkSize);
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
-                    configData.begin() + configDataOverhead); // 14 bytes thunk
+                    configData.begin() + configDataOverhead); // 14 bytes chunk
+
+        // Append zero's to remaining bytes
+        if (configData.size() < configParameterLength)
+        {
+            std::fill_n(std::back_inserter(configData),
+                        configParameterLength - configData.size(), 0x00);
+        }
     }
     else
     {
