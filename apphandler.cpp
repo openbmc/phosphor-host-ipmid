@@ -1318,7 +1318,15 @@ ipmi::RspType<uint8_t,                // Parameter revision
     bool found = std::get<0>(ret);
     if (!found)
     {
-        return ipmi::responseParmNotSupported();
+        // Provided default value as zero's to all bytes
+        if ((paramSelector > 0) && (paramSelector < 8))
+        {
+            return ipmi::responseUnspecifiedError();
+        }
+        else
+        {
+            return ipmi::responseParmNotSupported();
+        }
     }
     std::string& paramString = std::get<1>(ret);
     std::vector<uint8_t> configData;
@@ -1331,6 +1339,13 @@ ipmi::RspType<uint8_t,                // Parameter revision
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
                     configData.begin() + configDataOverhead); // 14 bytes thunk
+
+        // Append zero's to remaining bytes
+        if (configData.size() < configParameterLength)
+        {
+            std::fill_n(std::back_inserter(configData),
+                        configParameterLength - configData.size(), 0x00);
+        }
     }
     else
     {
