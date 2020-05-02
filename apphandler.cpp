@@ -1289,9 +1289,14 @@ ipmi::RspType<uint8_t,                // Parameter revision
                          uint8_t paramSelector, uint8_t setSelector,
                          uint8_t BlockSelector)
 {
-    if (reserved)
+    if (reserved || (paramSelector >= invalidParamSelectorStart &&
+                     paramSelector <= invalidParamSelectorEnd))
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+    if ((paramSelector >= oemCmdStart) && (paramSelector <= oemCmdEnd))
+    {
+        return ipmi::responseParmNotSupported();
     }
     if (getRevision)
     {
@@ -1322,7 +1327,7 @@ ipmi::RspType<uint8_t,                // Parameter revision
     bool found = std::get<0>(ret);
     if (!found)
     {
-        return ipmi::responseParmNotSupported();
+        return ipmi::responseSensorInvalid();
     }
     std::string& paramString = std::get<1>(ret);
     std::vector<uint8_t> configData;
@@ -1334,7 +1339,14 @@ ipmi::RspType<uint8_t,                // Parameter revision
         count = std::min(paramString.length(), smallChunkSize);
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
-                    configData.begin() + configDataOverhead); // 14 bytes thunk
+                    configData.begin() + configDataOverhead); // 14 bytes chunk
+
+        // Append zero's to remaining bytes
+        if (configData.size() < configParameterLength)
+        {
+            std::fill_n(std::back_inserter(configData),
+                        configParameterLength - configData.size(), 0x00);
+        }
     }
     else
     {
