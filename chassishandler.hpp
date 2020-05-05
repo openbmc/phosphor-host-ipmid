@@ -20,7 +20,6 @@ enum ipmi_netfn_chassis_cmds
     IPMI_CMD_GET_POH_COUNTER = 0x0F,
 };
 
-// Command specific completion codes
 enum ipmi_chassis_return_codes
 {
     IPMI_OK = 0x0,
@@ -46,15 +45,15 @@ enum ipmi_chassis_control_cmds : uint8_t
 };
 enum class BootOptionParameter : size_t
 {
-    BOOT_INFO = 0x4,
-    BOOT_FLAGS = 0x5,
-    OPAL_NETWORK_SETTINGS = 0x61
+    bootInfo = 0x4,
+    bootFlags = 0x5,
+    opalNetworkSettings = 0x61
 };
 
 enum class BootOptionResponseSize : size_t
 {
-    BOOT_FLAGS = 5,
-    OPAL_NETWORK_SETTINGS = 50
+    bootFlags = 5,
+    opalNetworkSettings = 50
 };
 
 enum class ChassisIDState : uint8_t
