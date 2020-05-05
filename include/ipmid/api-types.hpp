@@ -365,6 +365,7 @@ constexpr Cmd cmdWildcard = 0xFF;
 //
 // Alternately, OEM completion codes are in the 0x01-0x7E range
 constexpr Cc ccSuccess = 0x00;
+constexpr Cc ccParamNotSupported = 0x80;
 constexpr Cc ccBusy = 0xC0;
 constexpr Cc ccInvalidCommand = 0xC1;
 constexpr Cc ccInvalidCommandOnLun = 0xC2;
@@ -548,6 +549,10 @@ static inline auto responseCommandDisabled()
 static inline auto responseUnspecifiedError()
 {
     return response(ccUnspecifiedError);
+}
+static inline auto responseParamNotSupported()
+{
+    return response(ccParamNotSupported);
 }
 
 } // namespace ipmi
