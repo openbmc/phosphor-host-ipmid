@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "9cc09336_b2269065",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2020-05-08T22:21:20Z",
+      "side": 1,
+      "message": "Is this move or copy?   Can the network still set this or do you plan to remove or disable it there?",
+      "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2e23a52d_0a18abc2",
         "filename": "transporthandler.cpp",
         "patchSetId": 2
