@@ -149,7 +149,7 @@ struct SequenceNumbers
  *  interfaces to handle incoming SOL payload, send response and send outbound
  *  SOL payload.
  */
-class Context : std::enable_shared_from_this<Context>
+class Context : public std::enable_shared_from_this<Context>
 {
   public:
     Context() = delete;
