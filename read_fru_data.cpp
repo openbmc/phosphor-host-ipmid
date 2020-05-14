@@ -23,11 +23,6 @@ using InternalFailure =
 std::unique_ptr<sdbusplus::bus::match_t> matchPtr
     __attribute__((init_priority(101)));
 
-static constexpr auto XYZ_PREFIX = "/xyz/openbmc_project/";
-static constexpr auto INV_INTF = "xyz.openbmc_project.Inventory.Manager";
-static constexpr auto OBJ_PATH = "/xyz/openbmc_project/inventory";
-static constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
-
 namespace cache
 {
 // User initiate read FRU info area command followed by
@@ -54,19 +49,19 @@ ipmi::PropertyMap readAllProperties(const std::string& intf,
     std::string objPath;
 
     // Is the path the full dbus path?
-    if (path.find(XYZ_PREFIX) != std::string::npos)
+    if (path.find(xyzPrefix) != std::string::npos)
     {
         service = ipmi::getService(bus, intf, path);
         objPath = path;
     }
     else
     {
-        service = ipmi::getService(bus, INV_INTF, OBJ_PATH);
-        objPath = OBJ_PATH + path;
+        service = ipmi::getService(bus, invMgrInterface, invObjPath);
+        objPath = invObjPath + path;
     }
 
     auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                      PROP_INTF, "GetAll");
+                                      propInterface, "GetAll");
     method.append(intf);
     try
     {
@@ -93,9 +88,9 @@ void processFruPropChange(sdbusplus::message::message& msg)
     }
     std::string path = msg.get_path();
     // trim the object base path, if found at the beginning
-    if (path.compare(0, strlen(OBJ_PATH), OBJ_PATH) == 0)
+    if (path.compare(0, strlen(invObjPath), invObjPath) == 0)
     {
-        path.erase(0, strlen(OBJ_PATH));
+        path.erase(0, strlen(invObjPath));
     }
     for (const auto& [fruId, instanceList] : frus)
     {
@@ -120,8 +115,8 @@ int registerCallbackHandler()
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
         matchPtr = std::make_unique<sdbusplus::bus::match_t>(
             bus,
-            path_namespace(OBJ_PATH) + type::signal() +
-                member("PropertiesChanged") + interface(PROP_INTF),
+            path_namespace(invObjPath) + type::signal() +
+                member("PropertiesChanged") + interface(propInterface),
             std::bind(processFruPropChange, std::placeholders::_1));
     }
     return 0;

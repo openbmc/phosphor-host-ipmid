@@ -1241,7 +1241,6 @@ static std::string sysInfoReadSystemName()
     return hostname;
 }
 
-static constexpr uint8_t revisionOnly = 0x80;
 static constexpr uint8_t paramRevision = 0x11;
 static constexpr size_t configParameterLength = 16;
 
@@ -1282,10 +1281,15 @@ static inline auto responseSystemInfoParameterSetReadOnly()
 ipmi::RspType<uint8_t,                // Parameter revision
               std::optional<uint8_t>, // data1 / setSelector / ProgressStatus
               std::optional<std::vector<uint8_t>>> // data2-17
-    ipmiAppGetSystemInfo(uint8_t getRevision, uint8_t paramSelector,
-                         uint8_t setSelector, uint8_t BlockSelector)
+    ipmiAppGetSystemInfo(uint7_t reserved, bool getRevision,
+                         uint8_t paramSelector, uint8_t setSelector,
+                         uint8_t BlockSelector)
 {
-    if (getRevision & revisionOnly)
+    if (reserved)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if (getRevision)
     {
         return ipmi::responseSuccess(paramRevision, std::nullopt, std::nullopt);
     }

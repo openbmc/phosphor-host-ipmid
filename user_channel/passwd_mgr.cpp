@@ -39,6 +39,9 @@ static const char* passwdFileName = "/etc/ipmi_pass";
 static const char* encryptKeyFileName = "/etc/key_file";
 static const size_t maxKeySize = 8;
 
+constexpr mode_t modeMask =
+    (S_ISUID | S_ISGID | S_ISVTX | S_IRWXU | S_IRWXG | S_IRWXO);
+
 #define META_PASSWD_SIG "=OPENBMC="
 
 /*
@@ -59,7 +62,29 @@ using namespace phosphor::logging;
 
 PasswdMgr::PasswdMgr()
 {
+    restrictFilesPermission();
     initPasswordMap();
+}
+
+void PasswdMgr::restrictFilesPermission(void)
+{
+    struct stat st = {};
+    // Restrict file permission to owner read & write
+    if (stat(passwdFileName, &st) == 0)
+    {
+        if ((st.st_mode & modeMask) != (S_IRUSR | S_IWUSR))
+        {
+            chmod(passwdFileName, S_IRUSR | S_IWUSR);
+        }
+    }
+
+    if (stat(encryptKeyFileName, &st) == 0)
+    {
+        if ((st.st_mode & modeMask) != (S_IRUSR | S_IWUSR))
+        {
+            chmod(encryptKeyFileName, S_IRUSR | S_IWUSR);
+        }
+    }
 }
 
 std::string PasswdMgr::getPasswdByUserName(const std::string& userName)
@@ -444,8 +469,8 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
         return -EIO;
     }
 
-    // Set the file mode as of actual ipmi-pass file.
-    if (fchmod(fileno((temp)()), st.st_mode) < 0)
+    // Set the file mode as read-write for owner only
+    if (fchmod(fileno((temp)()), S_IRUSR | S_IWUSR) < 0)
     {
         log<level::DEBUG>("Error setting fchmod for temp file");
         return -EIO;
