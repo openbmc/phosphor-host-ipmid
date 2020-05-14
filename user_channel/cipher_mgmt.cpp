@@ -267,8 +267,8 @@ std::string CipherConfig::getCipherID(uint8_t auth, uint8_t integrity,
 }
 
 uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
-    const uint8_t chNum, const uint8_t auth, const uint8_t integrity,
-    const uint8_t confidentiality)
+    const uint8_t chNum, uint8_t auth, uint8_t integrity,
+    uint8_t confidentiality)
 {
     uint8_t priv = 0x00;
     std::string cipherID;
@@ -283,11 +283,12 @@ uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
 
     if (fs::exists(cipherSuitePrivFileName))
     {
-        configFile = "cs_privilege_levels.json";
+        configFile = "/usr/share/ipmi-providers/cs_privilege_levels.json";
     }
     else
     {
-        configFile = "cs_privilege_levels_default.json";
+        configFile =
+            "/usr/share/ipmi-providers/cs_privilege_levels_default.json";
     }
 
     Json data = nullptr;
@@ -302,8 +303,7 @@ uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
     }
     if (data == nullptr)
     {
-        log<level::ERR>(
-            "Error in getting cipher records from cipher list json");
+        log<level::ERR>("Null value in data");
         return PRIVILEGE_ERROR;
     }
     try
@@ -313,7 +313,7 @@ uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
     }
     catch (...)
     {
-        log<level::ERR>("Error in getting cipher ID");
+        log<level::ERR>("Error in static casting");
         return PRIVILEGE_ERROR;
     }
     return priv;
