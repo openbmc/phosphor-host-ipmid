@@ -76,7 +76,8 @@ class CipherConfig
     /** @brief function to get highest level matching proposed algorithm
      *
      */
-    uint8_t getHighestLevelMatchProposedAlgorithm(const uint8_t chNum);
+    uint8_t getHighestLevelMatchProposedAlgorithm(
+        const uint8_t chNum, const std::string& cipherListFileName);
 
   private:
     std::string cipherSuitePrivFileName, cipherSuiteDefaultPrivFileName;
