@@ -276,7 +276,8 @@ int CipherConfig::checkAndReloadData()
     return ret;
 }
 
-uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(const uint8_t chNum)
+uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
+    const uint8_t chNum, const std::string& configFile)
 {
     if (!isValidChannel(chNum))
     {
@@ -289,7 +290,6 @@ uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(const uint8_t chNum)
         return PRIVILEGE_ERROR;
     }
 
-    constexpr auto configFile = "/usr/share/ipmi-providers/cipher_list.json";
     std::ifstream jsonFile(configFile);
     if (!jsonFile.good())
     {

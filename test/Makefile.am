@@ -90,3 +90,18 @@ session_unittest_LDFLAGS = \
     $(CODE_COVERAGE_LDFLAGS)
 session_unittest_SOURCES = %reldir%/session/closesession_unittest.cpp
 check_PROGRAMS += %reldir%/session_unittest
+
+# Build/add ciphersuite_unittest to test suite
+ciphersuite_unittest_CPPFLAGS = -Igtest \
+				$(GTEST_CPPFLAGS) \
+				$(AM_CPPFLAGS)
+ciphersuite_unittest_CXXFLAGS = $(COMMON_CXX)
+ciphersuite_unittest_LDFLAGS  =	-lgtest_main \
+				-lgtest \
+				-lstdc++fs \
+				-lboost_coroutine \
+				$(PHOSPHOR_LOGGING_LIBS) \
+				$(LIBADD_DLOPEN)
+ciphersuite_unittest_SOURCES  = %reldir%/ciphersuite_unittest.cpp \
+				$(top_builddir)/user_channel/cipher_mgmt.cpp
+check_PROGRAMS += %reldir%/ciphersuite_unittest
