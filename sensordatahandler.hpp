@@ -276,7 +276,7 @@ ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
     {
         msg.append(property.first);
         std::variant<T> value =
-            (cmdData.assertOffset8_14 << 8) | cmdData.assertOffset0_7;
+            (T)((cmdData.assertOffset8_14 << 8) | cmdData.assertOffset0_7);
         msg.append(value);
     }
     return updateToDbus(msg);
