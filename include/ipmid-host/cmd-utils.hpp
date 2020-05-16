@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 
+#include <cstdint>
 #include <functional>
 #include <tuple>
 
