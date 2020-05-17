@@ -4,6 +4,7 @@
 #include "integrity_algo.hpp"
 
 #include <array>
+#include <cstddef>
 #include <string>
 #include <vector>
 

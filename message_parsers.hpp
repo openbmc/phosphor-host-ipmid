@@ -3,6 +3,8 @@
 #include "message.hpp"
 #include "session.hpp"
 
+#include <cstddef>
+
 namespace message
 {
 

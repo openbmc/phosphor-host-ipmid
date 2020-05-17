@@ -3,6 +3,7 @@
 #include "rmcp.hpp"
 
 #include <array>
+#include <cstddef>
 #include <vector>
 
 namespace cipher

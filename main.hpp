@@ -5,6 +5,7 @@
 #include "sol/sol_manager.hpp"
 
 #include <command_table.hpp>
+#include <cstddef>
 #include <sdbusplus/asio/connection.hpp>
 #include <sessions_manager.hpp>
 #include <tuple>

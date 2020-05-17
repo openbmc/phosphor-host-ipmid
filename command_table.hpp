@@ -4,6 +4,7 @@
 
 #include <ipmid/api.h>
 
+#include <cstddef>
 #include <functional>
 #include <map>
 

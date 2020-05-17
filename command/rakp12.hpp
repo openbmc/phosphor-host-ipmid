@@ -3,6 +3,7 @@
 #include "comm_module.hpp"
 #include "message_handler.hpp"
 
+#include <cstddef>
 #include <vector>
 
 namespace command
