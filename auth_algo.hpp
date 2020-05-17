@@ -4,6 +4,7 @@
 #include "integrity_algo.hpp"
 
 #include <array>
+#include <string>
 #include <vector>
 
 namespace cipher

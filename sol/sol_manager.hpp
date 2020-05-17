@@ -8,6 +8,7 @@
 #include <boost/asio/local/stream_protocol.hpp>
 #include <map>
 #include <memory>
+#include <string>
 
 namespace sol
 {

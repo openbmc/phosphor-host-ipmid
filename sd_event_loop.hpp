@@ -8,6 +8,7 @@
 #include <chrono>
 #include <map>
 #include <sdbusplus/asio/connection.hpp>
+#include <string>
 
 namespace ipmi
 {
