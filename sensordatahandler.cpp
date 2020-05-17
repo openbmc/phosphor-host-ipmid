@@ -133,6 +133,8 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
 
+    enableScanning(&response);
+
     auto service = ipmi::getService(bus, interface, path);
 
     const auto& interfaceList = sensorInfo.propertyInterfaces;
@@ -168,6 +170,8 @@ GetSensorResponse eventdata2(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
+
+    enableScanning(&response);
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
