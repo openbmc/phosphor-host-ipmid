@@ -772,7 +772,9 @@ void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
     }
     catch (const sdbusplus::exception::SdBusError& e)
     {
-        if (strcmp(e.name(), "org.freedesktop.DBus.Error.UnknownObject") != 0)
+        if (strcmp(e.name(),
+                   "xyz.openbmc_project.Common.Error.InternalFailure") != 0 &&
+            strcmp(e.name(), "org.freedesktop.DBus.Error.UnknownObject") != 0)
         {
             // We want to rethrow real errors
             throw;
@@ -1538,8 +1540,12 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 lastDisabledVlan[channel] = vlan;
                 vlan = 0;
             }
-            channelCall<reconfigureVLAN>(channel, vlan);
+            else if (vlan == 0 || vlan == VLAN_VALUE_MASK)
+            {
+                return responseInvalidFieldRequest();
+            }
 
+            channelCall<reconfigureVLAN>(channel, vlan);
             return responseSuccess();
         }
         case LanParam::CiphersuiteSupport:
