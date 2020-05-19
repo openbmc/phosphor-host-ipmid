@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "124518e8_43048462",
+        "filename": "test/Makefile.am",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-05-19T22:09:57Z",
+      "side": 1,
+      "message": "This is also fine. Whitespace can help our eyes group logically related code groups.",
+      "parentUuid": "1145e184_4409cedc",
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11fec509_31607ae0",
         "filename": "test/ciphersuite_unittest.cpp",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2020-05-19T13:22:53Z",
       "side": 1,
       "message": "Use alias for namespace.",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 34
+      },
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31227c25_746580d8",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-05-19T22:09:57Z",
+      "side": 1,
+      "message": "this is commonly done. It is fine to use a namespace in a cpp file. Not in a header file because then it could pollute other namespaces.",
+      "parentUuid": "11fec509_31607ae0",
       "range": {
         "startLine": 8,
         "startChar": 0,
@@ -56,6 +98,47 @@
       "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "776a8068_dbfec189",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-05-19T22:09:57Z",
+      "side": 1,
+      "message": "std::string cannot be constexpr in c++17. const std::string or constexpr const char [] are both fine, but if the const char * must be promoted to a std::string every time it is used, it might be better to be a const std::string so it can be constructed only once.",
+      "parentUuid": "d3c06729_c23411b0",
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91218d50_b405eee3",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-05-19T22:09:57Z",
+      "side": 1,
+      "message": "does this break the netipmid usage of this function?\n\nTo make API changes like this, it would be better to add a new function that calls the first with an argument or use a default argument. Given the simplicity of this case, it would be better to use a default argument. Then netipmid can use this without any change.",
+      "range": {
+        "startLine": 79,
+        "startChar": 8,
+        "endLine": 80,
+        "endChar": 68
+      },
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
