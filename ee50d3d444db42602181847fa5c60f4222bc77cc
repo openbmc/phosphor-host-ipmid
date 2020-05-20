@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "66d1e0bb_622b9806",
+        "filename": "test/Makefile.am",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-05-20T10:07:22Z",
+      "side": 1,
+      "message": "No changes made",
+      "parentUuid": "124518e8_43048462",
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11fec509_31607ae0",
         "filename": "test/ciphersuite_unittest.cpp",
         "patchSetId": 1
@@ -84,6 +102,30 @@
     },
     {
       "key": {
+        "uuid": "f49a1a41_4d9d2b0f",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-05-20T10:07:22Z",
+      "side": 1,
+      "message": "No changes made",
+      "parentUuid": "31227c25_746580d8",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 34
+      },
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d3c06729_c23411b0",
         "filename": "test/ciphersuite_unittest.cpp",
         "patchSetId": 1
@@ -119,6 +161,24 @@
     },
     {
       "key": {
+        "uuid": "3c83dfcf_ceb26f5e",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-05-20T10:07:22Z",
+      "side": 1,
+      "message": "No changes made",
+      "parentUuid": "776a8068_dbfec189",
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91218d50_b405eee3",
         "filename": "user_channel/cipher_mgmt.hpp",
         "patchSetId": 1
@@ -139,6 +199,29 @@
       "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b266cd9b_6a15b470",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000498
+      },
+      "writtenOn": "2020-05-20T10:07:22Z",
+      "side": 1,
+      "message": "Done. I thought to update netipmid after doing these changes and review comments fix in base version, https://gerrit.openbmc-project.xyz/#/c/openbmc/phosphor-host-ipmid/+/28933/",
+      "range": {
+        "startLine": 79,
+        "startChar": 8,
+        "endLine": 80,
+        "endChar": 68
+      },
+      "revId": "ee50d3d444db42602181847fa5c60f4222bc77cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
