@@ -43,6 +43,12 @@ extern sd_bus* bus;
 
 constexpr auto bmc_state_interface = "xyz.openbmc_project.State.BMC";
 constexpr auto bmc_state_property = "CurrentBMCState";
+static constexpr const char* specialModeService =
+    "xyz.openbmc_project.SpecialMode";
+static constexpr const char* specialModeObjPath =
+    "/xyz/openbmc_project/security/special_mode";
+static constexpr const char* specialModeIntf =
+    "xyz.openbmc_project.Security.SpecialMode";
 
 static constexpr auto redundancyIntf =
     "xyz.openbmc_project.Software.RedundancyPriority";
@@ -1598,6 +1604,32 @@ ipmi::RspType<std::vector<uint8_t>>
                         bool reserved, uint7_t slaveAddr, uint8_t readCount,
                         std::vector<uint8_t> writeData)
 {
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+    ipmi::Value specialMode;
+    try
+    {
+        specialMode =
+            ipmi::getDbusProperty(*busp, specialModeService, specialModeObjPath,
+                                  specialModeIntf, "SpecialMode");
+    }
+    catch (sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("ipmiMasterWriteRead: failed to get SpecialMode",
+                        entry("PATH=%s", specialModeObjPath),
+                        entry("ERROR=%s", e.what()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (std::get<std::string>(specialMode) !=
+        "xyz.openbmc_project.Control.Security.SpecialMode.Modes."
+        "Manufacturing")
+    {
+        log<level::ERR>(
+            "ipmiMasterWriteRead: Manufacturing mode is not Enabled...can't "
+            "execute MasterWriteRead command");
+        return ipmi::responseInsufficientPrivilege();
+    }
+
     if (readCount > maxIPMIWriteReadSize)
     {
         log<level::ERR>("Master write read command: Read count exceeds limit");
