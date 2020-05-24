@@ -43,6 +43,10 @@ extern sd_bus* bus;
 
 constexpr auto bmc_state_interface = "xyz.openbmc_project.State.BMC";
 constexpr auto bmc_state_property = "CurrentBMCState";
+static constexpr const char* specialModeObjPath =
+    "/xyz/openbmc_project/security/special_mode";
+static constexpr const char* specialModeIntf =
+    "xyz.openbmc_project.Security.SpecialMode";
 
 static constexpr auto redundancyIntf =
     "xyz.openbmc_project.Software.RedundancyPriority";
@@ -1594,10 +1598,45 @@ static bool populateI2CMasterWRWhitelist()
  *   - readData - i2c response data
  */
 ipmi::RspType<std::vector<uint8_t>>
-    ipmiMasterWriteRead(bool isPrivateBus, uint3_t busId, uint4_t channelNum,
-                        bool reserved, uint7_t slaveAddr, uint8_t readCount,
+    ipmiMasterWriteRead(ipmi::Context::ptr ctx, bool isPrivateBus,
+                        uint3_t busId, uint4_t channelNum, bool reserved,
+                        uint7_t slaveAddr, uint8_t readCount,
                         std::vector<uint8_t> writeData)
 {
+    std::string specialModeService{};
+    boost::system::error_code ec = ipmi::getService(
+        ctx, specialModeIntf, specialModeObjPath, specialModeService);
+    if (ec)
+    {
+        log<level::ERR>("ipmiMasterWriteRead: failed to get specialModeService",
+                        entry("PATH=%s", specialModeObjPath),
+                        entry("INTERFACE=%s", specialModeIntf),
+                        entry("ERRMSG=%s", ec.message().c_str()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    std::string specialMode{};
+    ec = ipmi::getDbusProperty(ctx, specialModeService, specialModeObjPath,
+                               specialModeIntf, "SpecialMode", specialMode);
+    if (ec)
+    {
+        log<level::ERR>(
+            "ipmiMasterWriteRead: failed to get SpecialMode Property",
+            entry("PATH=%s", specialModeObjPath),
+            entry("INTERFACE=%s", specialModeIntf),
+            entry("ERRMSG=%s", ec.message().c_str()));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (specialMode !=
+        "xyz.openbmc_project.Control.Security.SpecialMode.Modes.Manufacturing")
+    {
+        log<level::ERR>(
+            "ipmiMasterWriteRead: Manufacturing mode is not Enabled...can't "
+            "execute MasterWriteRead command");
+        return ipmi::responseCommandNotAvailable();
+    }
+
     if (readCount > maxIPMIWriteReadSize)
     {
         log<level::ERR>("Master write read command: Read count exceeds limit");
