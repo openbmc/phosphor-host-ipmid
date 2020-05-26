@@ -17,6 +17,7 @@
 #include <openssl/evp.h>
 
 #include <ctime>
+#include <string>
 #include <unordered_map>
 #include <vector>
 

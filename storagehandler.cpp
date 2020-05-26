@@ -1059,7 +1059,7 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
         auto service = ipmi::getService(bus, TIME_INTERFACE, HOST_TIME_PATH);
-        std::variant<uint64_t> value{usec.count()};
+        std::variant<uint64_t> value{(uint64_t)usec.count()};
 
         // Set host time
         auto method = bus.new_method_call(service.c_str(), HOST_TIME_PATH,
