@@ -43,7 +43,7 @@ constexpr uint8_t eventDataSize = 3;
 namespace
 {
 constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
-constexpr auto HOST_TIME_PATH = "/xyz/openbmc_project/time/host";
+constexpr auto BMC_TIME_PATH = "/xyz/openbmc_project/time/bmc";
 constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
 constexpr auto PROPERTY_ELAPSED = "Elapsed";
 
@@ -998,17 +998,17 @@ ipmi::RspType<uint32_t> // current time
     ipmiStorageGetSelTime()
 {
     using namespace std::chrono;
-    uint64_t host_time_usec = 0;
-    std::stringstream hostTime;
+    uint64_t bmc_time_usec = 0;
+    std::stringstream bmcTime;
 
     try
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-        auto service = ipmi::getService(bus, TIME_INTERFACE, HOST_TIME_PATH);
+        auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
         std::variant<uint64_t> value;
 
-        // Get host time
-        auto method = bus.new_method_call(service.c_str(), HOST_TIME_PATH,
+        // Get bmc time
+        auto method = bus.new_method_call(service.c_str(), BMC_TIME_PATH,
                                           DBUS_PROPERTIES, "Get");
 
         method.append(TIME_INTERFACE, PROPERTY_ELAPSED);
@@ -1017,11 +1017,11 @@ ipmi::RspType<uint32_t> // current time
         {
             log<level::ERR>("Error getting time",
                             entry("SERVICE=%s", service.c_str()),
-                            entry("PATH=%s", HOST_TIME_PATH));
+                            entry("PATH=%s", BMC_TIME_PATH));
             return ipmi::responseUnspecifiedError();
         }
         reply.read(value);
-        host_time_usec = std::get<uint64_t>(value);
+        bmc_time_usec = std::get<uint64_t>(value);
     }
     catch (InternalFailure& e)
     {
@@ -1034,15 +1034,15 @@ ipmi::RspType<uint32_t> // current time
         return ipmi::responseUnspecifiedError();
     }
 
-    hostTime << "Host time:"
-             << duration_cast<seconds>(microseconds(host_time_usec)).count();
-    log<level::DEBUG>(hostTime.str().c_str());
+    bmcTime << "BMC time:"
+            << duration_cast<seconds>(microseconds(bmc_time_usec)).count();
+    log<level::DEBUG>(bmcTime.str().c_str());
 
     // Time is really long int but IPMI wants just uint32. This works okay until
     // the number of seconds since 1970 overflows uint32 size.. Still a whole
     // lot of time here to even think about that.
     return ipmi::responseSuccess(
-        duration_cast<seconds>(microseconds(host_time_usec)).count());
+        duration_cast<seconds>(microseconds(bmc_time_usec)).count());
 }
 
 /** @brief implements the set SEL time command
@@ -1058,11 +1058,11 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
     try
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-        auto service = ipmi::getService(bus, TIME_INTERFACE, HOST_TIME_PATH);
-        std::variant<uint64_t> value{usec.count()};
+        auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
+        std::variant<uint64_t> value{(uint64_t)usec.count()};
 
-        // Set host time
-        auto method = bus.new_method_call(service.c_str(), HOST_TIME_PATH,
+        // Set bmc time
+        auto method = bus.new_method_call(service.c_str(), BMC_TIME_PATH,
                                           DBUS_PROPERTIES, "Set");
 
         method.append(TIME_INTERFACE, PROPERTY_ELAPSED, value);
@@ -1071,7 +1071,7 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
         {
             log<level::ERR>("Error setting time",
                             entry("SERVICE=%s", service.c_str()),
-                            entry("PATH=%s", HOST_TIME_PATH));
+                            entry("PATH=%s", BMC_TIME_PATH));
             return ipmi::responseUnspecifiedError();
         }
     }
@@ -1245,6 +1245,19 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
 }
 #endif // JOURNAL_SEL
 
+bool isFruPresent(const std::string& fruPath)
+{
+    using namespace ipmi::fru;
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    auto propValue =
+        ipmi::getDbusProperty(bus, invMgrInterface, invObjPath + fruPath,
+                              invItemInterface, itemPresentProp);
+
+    return std::get<bool>(propValue);
+}
+
 /** @brief implements the get FRU Inventory Area Info command
  *
  *  @returns IPMI completion code plus response data
@@ -1259,6 +1272,12 @@ ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
 
     auto iter = frus.find(fruID);
     if (iter == frus.end())
+    {
+        return ipmi::responseSensorInvalid();
+    }
+
+    auto path = iter->second[0].path;
+    if (!isFruPresent(path))
     {
         return ipmi::responseSensorInvalid();
     }

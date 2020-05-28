@@ -1854,6 +1854,11 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::CiphersuiteSupport:
         {
+            if (getChannelSessionSupport(channel) ==
+                EChannelSessSupported::none)
+            {
+                return responseInvalidFieldRequest();
+            }
             if (!listInit)
             {
                 return responseUnspecifiedError();
@@ -1863,6 +1868,11 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::CiphersuiteEntries:
         {
+            if (getChannelSessionSupport(channel) ==
+                EChannelSessSupported::none)
+            {
+                return responseInvalidFieldRequest();
+            }
             if (!listInit)
             {
                 return responseUnspecifiedError();

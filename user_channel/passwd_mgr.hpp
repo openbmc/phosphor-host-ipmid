@@ -17,6 +17,7 @@
 #include <openssl/evp.h>
 
 #include <ctime>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -63,6 +64,11 @@ class PasswdMgr
     using Password = std::string;
     std::unordered_map<UserName, Password> passwdMapList;
     std::time_t fileLastUpdatedTime;
+
+    /** @brief restrict file permission
+     *
+     */
+    void restrictFilesPermission(void);
     /** @brief check timestamp and reload password map if required
      *
      */
