@@ -19,7 +19,7 @@ static constexpr auto partNumber = "Part Number";
 static constexpr auto serialNumber = "Serial Number";
 static constexpr auto manufacturer = "Manufacturer";
 static constexpr auto buildDate = "Mfg Date";
-static constexpr auto model = "Model";
+static constexpr auto modelNumber = "Model Number";
 static constexpr auto prettyName = "Name";
 static constexpr auto version = "Version";
 static constexpr auto type = "Type";
@@ -305,7 +305,7 @@ FruAreaData buildChassisInfoArea(const PropertyMap& propMap)
         appendChassisType(propMap, fruAreaData);
 
         // Chasiss part number, in config.yaml it is configured as model
-        appendData(model, propMap, fruAreaData);
+        appendData(modelNumber, propMap, fruAreaData);
 
         // Board serial number
         appendData(serialNumber, propMap, fruAreaData);
@@ -382,7 +382,7 @@ FruAreaData buildProductInfoArea(const PropertyMap& propMap)
         appendData(prettyName, propMap, fruAreaData);
 
         // Product part/model number
-        appendData(model, propMap, fruAreaData);
+        appendData(modelNumber, propMap, fruAreaData);
 
         // Product version
         appendData(version, propMap, fruAreaData);
