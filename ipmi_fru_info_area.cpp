@@ -382,7 +382,11 @@ FruAreaData buildProductInfoArea(const PropertyMap& propMap)
         appendData(prettyName, propMap, fruAreaData);
 
         // Product part/model number
+#ifdef FRU_PART_NUMBER
+        appendData(partNumber, propMap, fruAreaData);
+#else
         appendData(model, propMap, fruAreaData);
+#endif
 
         // Product version
         appendData(version, propMap, fruAreaData);

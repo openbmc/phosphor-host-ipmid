@@ -47,6 +47,18 @@ AS_IF([test "x$enable_i2c_whitelist_check" != "xno"],
     AC_MSG_WARN([Disabling I2C master write read command white list check])
 )
 
+# Add an option to enable/disable FRU Part Number field instead of a Model field for reading FRU with IPMItool
+AC_ARG_ENABLE([fru-part-number],
+        AS_HELP_STRING([--enable-fru-part-number], [Enable FRU Part Number support for IPMItool])
+    )
+    AS_IF([test "x$enable_fru_part_number" == "xyes"],
+        AC_MSG_NOTICE([Enabling FRU Part Number support])
+        [
+            cpp_flags="-DFRU_PART_NUMBER"
+        ]
+        AC_SUBST([CPPFLAGS], [$cpp_flags])
+)
+
 # softoff dir specific ones
 AC_ARG_ENABLE([softoff],
     AS_HELP_STRING([--enable-softoff], [Builds soft power off])
