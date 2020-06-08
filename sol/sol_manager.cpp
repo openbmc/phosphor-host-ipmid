@@ -12,12 +12,15 @@
 #include <boost/asio/write.hpp>
 #include <chrono>
 #include <cmath>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
 
 namespace sol
 {
 
 using namespace phosphor::logging;
+
+std::unique_ptr<sdbusplus::bus::match_t> matchPtrSOL(nullptr);
 
 void Manager::initConsoleSocket()
 {
@@ -74,6 +77,13 @@ void Manager::startHostConsole()
     {
         initConsoleSocket();
     }
+
+    // Register callback to close SOL session for disable SSH SOL
+    if (matchPtrSOL == nullptr)
+    {
+        registerSOLServiceChangeCallback();
+    }
+
     consoleSocket->async_wait(boost::asio::socket_base::wait_read,
                               [this](const boost::system::error_code& ec) {
                                   if (!ec)
@@ -134,6 +144,63 @@ void Manager::stopPayloadInstance(uint8_t payloadInstance)
         stopHostConsole();
 
         dataBuffer.erase(dataBuffer.size());
+    }
+}
+
+void Manager::stopAllPayloadInstance()
+{
+    // Erase all payload instance
+    payloadMap.erase(payloadMap.begin(), payloadMap.end());
+
+    stopHostConsole();
+
+    dataBuffer.erase(dataBuffer.size());
+}
+
+void registerSOLServiceChangeCallback()
+{
+    using namespace sdbusplus::bus::match::rules;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    try
+    {
+        auto servicePath = ipmi::getDbusObject(
+            bus, "xyz.openbmc_project.Control.Service.Attributes",
+            "/xyz/openbmc_project/control/service", "obmc_2dconsole");
+
+        if (!std::empty(servicePath.first))
+        {
+            matchPtrSOL = std::make_unique<sdbusplus::bus::match_t>(
+                bus,
+                path_namespace(servicePath.first) +
+                    "arg0namespace='xyz.openbmc_project.Control.Service."
+                    "Attributes'"
+                    ", " +
+                    type::signal() + member("PropertiesChanged") +
+                    interface("org.freedesktop.DBus.Properties"),
+                [](sdbusplus::message::message& msg) {
+                    std::string intfName;
+                    std::map<std::string, std::variant<bool>> properties;
+                    msg.read(intfName, properties);
+
+                    const auto it = properties.find("Enabled");
+                    if (it != properties.end())
+                    {
+                        const bool* state = std::get_if<bool>(&it->second);
+
+                        if (state != nullptr && *state == false)
+                        {
+                            // Stop all the payload session.
+                            std::get<sol::Manager&>(singletonPool)
+                                .stopAllPayloadInstance();
+                        }
+                    }
+                });
+        }
+    }
+    catch (sdbusplus::exception_t& e)
+    {
+        log<level::ERR>(
+            "Failed to get service path in registerSOLServiceChangeCallback");
     }
 }
 

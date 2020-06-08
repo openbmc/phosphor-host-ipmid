@@ -192,6 +192,9 @@ class Manager
      */
     void stopPayloadInstance(uint8_t payloadInstance);
 
+    /* @brief Stop all the active SOL payload instances */
+    void stopAllPayloadInstance();
+
     /** @brief Get SOL Context by Payload Instance.
      *
      *  @param[in] payloadInstance - SOL payload instance.
@@ -263,5 +266,8 @@ class Manager
     /** @brief Handle incoming console data on the console socket */
     void consoleInputHandler();
 };
+
+/** @brief Callback method to close SOL sessions for SOL service change  */
+void registerSOLServiceChangeCallback();
 
 } // namespace sol
