@@ -95,7 +95,10 @@ const static boost::container::flat_map<
          {"cable", std::make_pair(IPMI_SENSOR_CABLE, SENSOR_SPECIFIC)},
          {"state", std::make_pair(IPMI_SENSOR_POWER_UNIT, SENSOR_SPECIFIC)},
          {"buttons", std::make_pair(IPMI_SENSOR_BUTTON, SENSOR_SPECIFIC)},
-         {"processor", std::make_pair(IPMI_SENSOR_PROCESSOR, SENSOR_SPECIFIC)}}
+         {"processor", std::make_pair(IPMI_SENSOR_PROCESSOR, SENSOR_SPECIFIC)},
+         {"criticalinterrupt", std::make_pair(IPMI_SENSOR_CRITICALINT, SENSOR_SPECIFIC)},
+         {"posterror", std::make_pair(IPMI_SENSOR_POSTERR, SENSOR_SPECIFIC)},
+         {"eventloggingdisable", std::make_pair(IPMI_SENSOR_EVENTLOG, SENSOR_SPECIFIC)}}
          };
 
 inline static std::string getSensorTypeStringFromPath(const std::string& path)
