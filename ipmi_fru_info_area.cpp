@@ -425,7 +425,7 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
     auto chassisIt = inventory.find(chassis);
     if (chassisIt != inventory.end())
     {
-        chassisArea = std::move(buildChassisInfoArea(chassisIt->second));
+        chassisArea = buildChassisInfoArea(chassisIt->second);
     }
     // update the offset to chassis data.
     buildCommonHeaderSection(chassisArea.size(), curDataOffset, combFruArea);
@@ -435,7 +435,7 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
     auto boardIt = inventory.find(board);
     if (boardIt != inventory.end())
     {
-        boardArea = std::move(buildBoardInfoArea(boardIt->second));
+        boardArea = buildBoardInfoArea(boardIt->second);
     }
     // update the offset to the board data.
     buildCommonHeaderSection(boardArea.size(), curDataOffset, combFruArea);
@@ -445,7 +445,7 @@ FruAreaData buildFruAreaData(const FruInventoryData& inventory)
     auto prodIt = inventory.find(product);
     if (prodIt != inventory.end())
     {
-        prodArea = std::move(buildProductInfoArea(prodIt->second));
+        prodArea = buildProductInfoArea(prodIt->second);
     }
     // update the offset to the product data.
     buildCommonHeaderSection(prodArea.size(), curDataOffset, combFruArea);
