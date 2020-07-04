@@ -940,7 +940,7 @@ uint8_t getTotalSessionCount()
     while (ch < ipmi::maxIpmiChannels &&
            count < session::maxNetworkInstanceSupported)
     {
-        ipmi::ChannelInfo chInfo;
+        ipmi::ChannelInfo chInfo{};
         ipmi::getChannelInfo(ch, chInfo);
         if (static_cast<ipmi::EChannelMediumType>(chInfo.mediumType) ==
             ipmi::EChannelMediumType::lan8032)
