@@ -1,0 +1,13 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: AppaRao Puli <apparao.puli@linux.intel.com>
+Code-Review+1: Sumanth Bhat <sumanth.bhat@linux.intel.com>
+Code-Review+1: Vikram B <vikram.bodireddy@linux.intel.com>
+Code-Review+1: <raja.sekhar.reddy.gade@linux.intel.com>
+Code-Review+1: Suryakanth Sekar <suryakanth.sekar@linux.intel.com>
+Code-Review+2: Vernon Mauery <vernon.mauery@linux.intel.com>
+Submitted-by: Vernon Mauery <vernon.mauery@linux.intel.com>
+Submitted-at: Mon, 06 Jul 2020 22:19:30 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/31230
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
