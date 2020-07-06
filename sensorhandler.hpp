@@ -45,7 +45,8 @@ enum ipmi_sensor_types
     IPMI_SENSOR_PROCESSOR = 0x07,
     IPMI_SENSOR_CRITICALINT = 0x13,
     IPMI_SENSOR_POSTERR = 0x0F,
-    IPMI_SENSOR_EVENTLOG = 0x10
+    IPMI_SENSOR_EVENTLOG = 0x10,
+    IPMI_SENSOR_WATCHDOG = 0x23
 };
 
 enum ipmi_event_types
