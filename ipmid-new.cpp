@@ -248,7 +248,7 @@ message::Response::ptr executeIpmiCommandCommon(
         HandlerTuple& chosen = cmdIter->second;
         if (request->ctx->priv < std::get<Privilege>(chosen))
         {
-            return errorResponse(request, ccInsufficientPrivilege);
+            return errorResponse(request, ccCommandNotAvailable);
         }
         return std::get<HandlerBase::ptr>(chosen)->call(request);
     }
@@ -266,7 +266,7 @@ message::Response::ptr executeIpmiCommandCommon(
             HandlerTuple& chosen = cmdIter->second;
             if (request->ctx->priv < std::get<Privilege>(chosen))
             {
-                return errorResponse(request, ccInsufficientPrivilege);
+                return errorResponse(request, ccCommandNotAvailable);
             }
             return std::get<HandlerBase::ptr>(chosen)->call(request);
         }
