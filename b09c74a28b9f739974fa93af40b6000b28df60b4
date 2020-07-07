@@ -16,6 +16,24 @@
       "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54dfe1ec_d5587613",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-07-07T23:00:38Z",
+      "side": 1,
+      "message": "This doesn\u0027t require an initial \u0027v\u0027, but it will strip off the \u0027v\u0027 if it finds one.\n\nIf there\u0027s no \u0027v\u0027, location will be npos and the if on line 486 will simply be skipped",
+      "parentUuid": "faae3e9a_a82c1729",
+      "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
