@@ -258,7 +258,7 @@ RspType<uint4_t,  // chNum
     if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel Info - No support on channel");
-        return response(ccActionNotSupportedForChannel);
+        return responseInvalidFieldRequest();
     }
 
     ChannelInfo chInfo;
