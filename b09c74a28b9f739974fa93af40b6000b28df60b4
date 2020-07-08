@@ -70,6 +70,24 @@
       "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2481379_dc3f0dc4",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-07-08T23:08:04Z",
+      "side": 1,
+      "message": "👍",
+      "parentUuid": "122b5e45_9660c522",
+      "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
