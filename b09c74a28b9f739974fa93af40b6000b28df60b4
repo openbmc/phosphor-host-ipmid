@@ -52,6 +52,24 @@
       "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "122b5e45_9660c522",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-07-08T22:48:54Z",
+      "side": 1,
+      "message": "ah, so it\u0027s because of the v in -dev on the tag\n\nhow about we just check whether the first character is \u0027v\u0027, and skip it if it is, rather than using find_first_of?",
+      "parentUuid": "a95b90ab_8277c8fa",
+      "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
