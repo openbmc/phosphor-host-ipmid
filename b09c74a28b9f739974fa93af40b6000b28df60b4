@@ -34,6 +34,24 @@
       "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a95b90ab_8277c8fa",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-07-08T22:24:25Z",
+      "side": 1,
+      "message": "You made me curious now so i added some debug traces (because ipimtool mc info still shows 0s with this commit) and there\u0027s still a problem with the parsing, it appears the issue is with the substr(location+1):\n\nrunning this version of bmc:\ns \u003d 2.9.0-dev-422-gcbf5051ca5-dirty\n\nthen  s \u003d s.substr(location + 1); prints:\ns \u003d -422-gcbf5051ca5-dirty\n\nSince there\u0027s no \".\" anymore, the major field and the rest and left blank.",
+      "parentUuid": "54dfe1ec_d5587613",
+      "revId": "b09c74a28b9f739974fa93af40b6000b28df60b4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
