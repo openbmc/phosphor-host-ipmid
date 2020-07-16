@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e19fe1d9_14e7acc6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-07-16T01:44:09Z",
+      "side": 1,
+      "message": "nit: typo",
+      "range": {
+        "startLine": 12,
+        "startChar": 8,
+        "endLine": 12,
+        "endChar": 15
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "abc69d58_629e0f29",
+        "filename": "test/Makefile.am",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-07-16T01:44:09Z",
+      "side": 1,
+      "message": "No need of tab here?",
+      "range": {
+        "startLine": 99,
+        "startChar": 31,
+        "endLine": 99,
+        "endChar": 32
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8dadf410_2a0caf04",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-07-16T01:44:09Z",
+      "side": 1,
+      "message": "magic number. Number can be assigned to named constant and used?",
+      "range": {
+        "startLine": 64,
+        "startChar": 28,
+        "endLine": 64,
+        "endChar": 29
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2695fca_0559c871",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-07-16T01:44:09Z",
+      "side": 1,
+      "message": "Used here also. Can be declared as constexpr and used at both places?",
+      "range": {
+        "startLine": 66,
+        "startChar": 28,
+        "endLine": 66,
+        "endChar": 29
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    }
+  ]
+}
