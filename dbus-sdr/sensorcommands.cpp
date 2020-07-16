@@ -47,6 +47,7 @@ using SDRObjectType =
     boost::container::flat_map<uint16_t, std::vector<uint8_t>>;
 
 static constexpr int sensorMapUpdatePeriod = 10;
+static constexpr int sensorMapSdrUpdatePeriod = 60;
 
 constexpr size_t maxSDRTotalSize =
     76; // Largest SDR Record Size (type 01) + SDR Overheader Size
@@ -211,7 +212,8 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
 }
 
 static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
-                         std::string sensorPath, DbusInterfaceMap& sensorMap)
+                         std::string sensorPath, DbusInterfaceMap& sensorMap,
+                         int updatePeriod = sensorMapUpdatePeriod)
 {
     static boost::container::flat_map<
         std::string, std::chrono::time_point<std::chrono::steady_clock>>
@@ -227,7 +229,7 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
     auto now = std::chrono::steady_clock::now();
 
     if (std::chrono::duration_cast<std::chrono::seconds>(now - lastUpdate)
-            .count() > sensorMapUpdatePeriod)
+            .count() > updatePeriod)
     {
         updateTimeMap[sensorConnection] = now;
 
@@ -244,6 +246,9 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
         }
 
         SensorCache[sensorConnection] = managedObjects;
+        // Update time after finish building the map which allow the
+        // data to be cached for updatePeriod plus the build time.
+        updateTimeMap[sensorConnection] = std::chrono::steady_clock::now();
     }
     auto connection = SensorCache.find(sensorConnection);
     if (connection == SensorCache.end())
@@ -980,7 +985,8 @@ static int getSensorDataRecords(ipmi::Context::ptr ctx)
         path = sensor.first;
 
         DbusInterfaceMap sensorMap;
-        if (!getSensorMap(ctx, connection, path, sensorMap))
+        if (!getSensorMap(ctx, connection, path, sensorMap,
+                          sensorMapSdrUpdatePeriod))
         {
             return GENERAL_ERROR;
         }
