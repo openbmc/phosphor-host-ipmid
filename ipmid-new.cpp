@@ -482,6 +482,7 @@ auto executionEntry(boost::asio::yield_context yield,
     std::string sender = m.get_sender();
     Privilege privilege = Privilege::None;
     int rqSA = 0;
+    uint8_t hostId = 0;
     uint8_t userId = 0; // undefined user
     uint32_t sessionId = 0;
 
@@ -538,6 +539,14 @@ auto executionEntry(boost::asio::yield_context yield,
                     rqSA = std::get<int>(iter->second);
                 }
             }
+            const auto iteration = options.find("host");
+            if (iteration != options.end())
+            {
+                if (std::holds_alternative<int>(iteration->second))
+                {
+                    hostId = std::get<int>(iteration->second);
+                }
+            }
         }
     }
     // check to see if the requested priv/username is valid
@@ -548,11 +557,15 @@ auto executionEntry(boost::asio::yield_context yield,
                       entry("PRIVILEGE=%u", static_cast<uint8_t>(privilege)),
                       entry("RQSA=%x", rqSA));
 
-    auto ctx =
-        std::make_shared<ipmi::Context>(getSdBus(), netFn, cmd, channel, userId,
-                                        sessionId, privilege, rqSA, yield);
+    auto ctx = std::make_shared<ipmi::Context>(getSdBus(), netFn, cmd, channel,
+                                               userId, sessionId, privilege,
+                                               rqSA, hostId, yield);
     auto request = std::make_shared<ipmi::message::Request>(
         ctx, std::forward<std::vector<uint8_t>>(data));
+
+    printf("execution Entry called end ..\n");
+    std::cout.flush();
+
     message::Response::ptr response = executeIpmiCommand(request);
 
     return dbusResponse(response->cc, response->payload.raw);
@@ -763,7 +776,7 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         m.read(seq, netFn, lun, cmd, data);
         std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
         auto ctx = std::make_shared<ipmi::Context>(
-            bus, netFn, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, yield);
+            bus, netFn, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, 0, yield);
         auto request = std::make_shared<ipmi::message::Request>(
             ctx, std::forward<std::vector<uint8_t>>(data));
         ipmi::message::Response::ptr response =
