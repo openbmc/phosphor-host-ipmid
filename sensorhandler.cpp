@@ -607,7 +607,8 @@ ipmi::RspType<uint8_t, // validMask
 ipmi::RspType<uint8_t, // respcount
               uint8_t  // dynamic population flags
               >
-    ipmiSensorGetDeviceSdrInfo(std::optional<uint8_t> count)
+    ipmiSensorGetDeviceSdrInfo(ipmi::Context::ptr ctx,
+                               std::optional<uint8_t> count)
 {
     uint8_t sdrCount;
     // multiple LUNs not supported.

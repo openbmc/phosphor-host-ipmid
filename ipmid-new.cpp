@@ -542,15 +542,16 @@ auto executionEntry(boost::asio::yield_context yield,
     }
     // check to see if the requested priv/username is valid
     log<level::DEBUG>("Set up ipmi context", entry("SENDER=%s", sender.c_str()),
-                      entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd),
-                      entry("CHANNEL=%u", channel), entry("USERID=%u", userId),
+                      entry("NETFN=0x%X", netFn), entry("LUN=0x%X", lun),
+                      entry("CMD=0x%X", cmd), entry("CHANNEL=%u", channel),
+                      entry("USERID=%u", userId),
                       entry("SESSIONID=0x%X", sessionId),
                       entry("PRIVILEGE=%u", static_cast<uint8_t>(privilege)),
                       entry("RQSA=%x", rqSA));
 
-    auto ctx =
-        std::make_shared<ipmi::Context>(getSdBus(), netFn, cmd, channel, userId,
-                                        sessionId, privilege, rqSA, yield);
+    auto ctx = std::make_shared<ipmi::Context>(getSdBus(), netFn, lun, cmd,
+                                               channel, userId, sessionId,
+                                               privilege, rqSA, yield);
     auto request = std::make_shared<ipmi::message::Request>(
         ctx, std::forward<std::vector<uint8_t>>(data));
     message::Response::ptr response = executeIpmiCommand(request);
@@ -763,7 +764,7 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         m.read(seq, netFn, lun, cmd, data);
         std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
         auto ctx = std::make_shared<ipmi::Context>(
-            bus, netFn, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, yield);
+            bus, netFn, lun, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, yield);
         auto request = std::make_shared<ipmi::message::Request>(
             ctx, std::forward<std::vector<uint8_t>>(data));
         ipmi::message::Response::ptr response =

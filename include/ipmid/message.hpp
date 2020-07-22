@@ -42,10 +42,10 @@ struct Context
     Context& operator=(Context&&) = delete;
 
     Context(std::shared_ptr<sdbusplus::asio::connection> bus, NetFn netFn,
-            Cmd cmd, int channel, int userId, uint32_t sessionId,
+            uint8_t lun, Cmd cmd, int channel, int userId, uint32_t sessionId,
             Privilege priv, int rqSA, boost::asio::yield_context& yield) :
         bus(bus),
-        netFn(netFn), cmd(cmd), channel(channel), userId(userId),
+        netFn(netFn), lun(lun), cmd(cmd), channel(channel), userId(userId),
         sessionId(sessionId), priv(priv), rqSA(rqSA), yield(yield)
     {
     }
@@ -53,6 +53,7 @@ struct Context
     std::shared_ptr<sdbusplus::asio::connection> bus;
     // normal IPMI context (what call is this, from whence it came...)
     NetFn netFn;
+    uint8_t lun;
     Cmd cmd;
     int channel;
     int userId;
