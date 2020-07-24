@@ -17,10 +17,15 @@ std::vector<uint8_t>
     setSessionPrivilegeLevel(const std::vector<uint8_t>& inPayload,
                              const message::Handler& handler)
 {
-
-    std::vector<uint8_t> outPayload(sizeof(SetSessionPrivLevelResp));
     auto request =
         reinterpret_cast<const SetSessionPrivLevelReq*>(inPayload.data());
+    if (inPayload.size() != sizeof(*request))
+    {
+        std::vector<uint8_t> errorPayload{IPMI_CC_REQ_DATA_LEN_INVALID};
+        return errorPayload;
+    }
+
+    std::vector<uint8_t> outPayload(sizeof(SetSessionPrivLevelResp));
     auto response =
         reinterpret_cast<SetSessionPrivLevelResp*>(outPayload.data());
     response->completionCode = IPMI_CC_OK;
@@ -207,14 +212,29 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
 std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
                                   const message::Handler& handler)
 {
-    std::vector<uint8_t> outPayload(sizeof(CloseSessionResponse));
+    // minimum inPayload size is reqSessionId (uint32_t)
+    // maximum inPayload size is struct CloseSessionRequest
+    if (inPayload.size() != sizeof(uint32_t) &&
+        inPayload.size() != sizeof(CloseSessionRequest))
+    {
+        std::vector<uint8_t> errorPayload{IPMI_CC_REQ_DATA_LEN_INVALID};
+        return errorPayload;
+    }
+
     auto request =
         reinterpret_cast<const CloseSessionRequest*>(inPayload.data());
+
+    std::vector<uint8_t> outPayload(sizeof(CloseSessionResponse));
     auto response = reinterpret_cast<CloseSessionResponse*>(outPayload.data());
     uint32_t reqSessionId = request->sessionID;
     uint8_t ipmiNetworkInstance = 0;
     uint8_t currentSessionPriv = 0;
-    uint8_t reqSessionHandle = request->sessionHandle;
+    uint8_t reqSessionHandle = session::invalidSessionHandle;
+
+    if (inPayload.size() == sizeof(CloseSessionRequest))
+    {
+        reqSessionHandle = request->sessionHandle;
+    }
 
     if (reqSessionId == session::sessionZero &&
         reqSessionHandle == session::invalidSessionHandle)

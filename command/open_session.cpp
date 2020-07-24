@@ -14,10 +14,15 @@ namespace command
 std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
                                  const message::Handler& handler)
 {
-
-    std::vector<uint8_t> outPayload(sizeof(OpenSessionResponse));
     auto request =
         reinterpret_cast<const OpenSessionRequest*>(inPayload.data());
+    if (inPayload.size() != sizeof(*request))
+    {
+        std::vector<uint8_t> errorPayload{IPMI_CC_REQ_DATA_LEN_INVALID};
+        return errorPayload;
+    }
+
+    std::vector<uint8_t> outPayload(sizeof(OpenSessionResponse));
     auto response = reinterpret_cast<OpenSessionResponse*>(outPayload.data());
 
     // Per the IPMI Spec, messageTag and remoteConsoleSessionID are always
