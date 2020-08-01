@@ -48,6 +48,52 @@
     },
     {
       "key": {
+        "uuid": "de05dc5f_ae1911af",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000412
+      },
+      "writtenOn": "2020-08-01T04:19:44Z",
+      "side": 1,
+      "message": "Curious to know how this method will be called? I see it is not part of any method.",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 31
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f47ba9fd_7cd36d55",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000412
+      },
+      "writtenOn": "2020-08-01T04:19:44Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 11
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8dadf410_2a0caf04",
         "filename": "test/ciphersuite_unittest.cpp",
         "patchSetId": 2
@@ -88,6 +134,46 @@
         "endLine": 66,
         "endChar": 29
       },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6814b76_2904eaf1",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000412
+      },
+      "writtenOn": "2020-08-01T04:19:44Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 11
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e20c4da_17f95bd6",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000412
+      },
+      "writtenOn": "2020-08-01T04:19:44Z",
+      "side": 1,
+      "message": "commit message does not explain anything regarding these changes.",
       "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
