@@ -13,7 +13,7 @@
   readingType: assertion
   # indicate if a sensor is READ/WRITE/RW.
   # This particular sensor read and write operation is allowed
-  mutability: Mutability::Write|Mutability::Read
+  mutability: MMutability::write|Mutability::read
   # Sensor name would be occ0
   sensorNamePattern: nameLeaf
   eventType: 0x6F
@@ -40,7 +40,7 @@
   path: /system/chassis/motherboard/dimm1
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
-  mutability: Mutability::Write|Mutability::Read
+  mutability: MMutability::write|Mutability::read
   sensorNamePattern: nameLeaf
   interfaces:
     xyz.openbmc_project.State.Decorator.OperationalStatus:
@@ -80,7 +80,7 @@
   # Sensor name would be AttemptsLeft
   sensorNamePattern: nameProperty
   sensorReadingType: 0x6F
-  mutability: Mutability::Write|Mutability::Read
+  mutability: MMutability::write|Mutability::read
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
 
@@ -96,7 +96,7 @@
   # set an explicit name for the sensor
   sensorName: RebootAttempts
   sensorReadingType: 0x6F
-  mutability: Mutability::Write|Mutability::Read
+  mutability: MMutability::write|Mutability::read
   sensorType: 0xC3
   serviceInterface: org.freedesktop.DBus.Properties
 
@@ -112,7 +112,7 @@
   # Applies for analog sensors, the actual reading value for the sensor is
   # Value * 10^N
   scale: -3
-  mutability: Mutability::Write|Mutability::Read
+  mutability: MMutability::write|Mutability::read
   serviceInterface: org.freedesktop.DBus.Properties
   readingType: readingData
   sensorNamePattern: nameLeaf
@@ -129,7 +129,7 @@
   sensorReadingType: 0x6F
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
-  mutability: Mutability::Write|Mutability::Read
+  mutability: MMutability::write|Mutability::read
   # Sensor name would be cpu0_core22
   sensorNamePattern: nameParentLeaf
   interfaces:
@@ -162,7 +162,7 @@
   sensorReadingType: 1
   serviceInterface: xyz.openbmc_project.Inventory.Manager
   readingType: assertion
-  mutability: Mutability::Write|Mutability::Read
+  mutability: MMutability::write|Mutability::read
   sensorNamePattern: nameLeaf
   interfaces:
     xyz.openbmc_project.Inventory.Decorator.Replaceable:

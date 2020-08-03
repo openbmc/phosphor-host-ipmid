@@ -76,7 +76,7 @@ extern const IdInfoMap sensors = {
        sensorInterface = serviceInterface
        if serviceInterface == "org.freedesktop.DBus.Properties":
            sensorInterface = next(iter(interfaces))
-       mutability = sensor.get("mutability", "Mutability::Read")
+       mutability = sensor.get("mutability", "Mutability::read")
 %>
         .entityType = ${entityID},
         .instance = ${instance},

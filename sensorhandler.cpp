@@ -373,8 +373,8 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
 
     try
     {
-        if (ipmi::sensor::Mutability::Write !=
-            (iter->second.mutability & ipmi::sensor::Mutability::Write))
+        if (ipmi::sensor::Mutability::write !=
+            (iter->second.mutability & ipmi::sensor::Mutability::write))
         {
             log<level::ERR>("Sensor Set operation is not allowed",
                             entry("SENSOR_NUM=%d", sensorNumber));
@@ -431,8 +431,8 @@ ipmi::RspType<uint8_t, // sensor reading
     {
         return ipmi::responseSensorInvalid();
     }
-    if (ipmi::sensor::Mutability::Read !=
-        (iter->second.mutability & ipmi::sensor::Mutability::Read))
+    if (ipmi::sensor::Mutability::read !=
+        (iter->second.mutability & ipmi::sensor::Mutability::read))
     {
         return ipmi::responseIllegalCommand();
     }
@@ -472,19 +472,15 @@ ipmi::RspType<uint8_t, // sensor reading
     }
 }
 
-get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
+void getSensorThresholds(const ipmi::sensor::Info& info,
+                         get_sdr::GetSensorThresholdsResponse& resp)
 {
-    get_sdr::GetSensorThresholdsResponse resp;
     constexpr auto warningThreshIntf =
         "xyz.openbmc_project.Sensor.Threshold.Warning";
     constexpr auto criticalThreshIntf =
         "xyz.openbmc_project.Sensor.Threshold.Critical";
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-
-    const auto iter = ipmi::sensor::sensors.find(sensorNum);
-    const auto info = iter->second;
-
     auto service = ipmi::getService(bus, info.sensorInterface, info.sensorPath);
 
     auto warnThresholds = ipmi::getAllDbusProperties(
@@ -501,7 +497,7 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
         resp.lowerNonCritical = static_cast<uint8_t>(
             (warnLow - info.scaledOffset) / info.coefficientM);
         resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK);
+            ipmi::sensor::ThresholdMask::nonCriticalLowMask);
     }
 
     if (warnHigh != 0)
@@ -510,7 +506,7 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
         resp.upperNonCritical = static_cast<uint8_t>(
             (warnHigh - info.scaledOffset) / info.coefficientM);
         resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK);
+            ipmi::sensor::ThresholdMask::nonCriticalHighMask);
     }
 
     auto critThresholds = ipmi::getAllDbusProperties(
@@ -525,8 +521,8 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
         critLow *= std::pow(10, info.scale - info.exponentR);
         resp.lowerCritical = static_cast<uint8_t>(
             (critLow - info.scaledOffset) / info.coefficientM);
-        resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK);
+        resp.validMask |=
+            static_cast<uint8_t>(ipmi::sensor::ThresholdMask::criticalLowMask);
     }
 
     if (critHigh != 0)
@@ -534,11 +530,80 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
         critHigh *= std::pow(10, info.scale - info.exponentR);
         resp.upperCritical = static_cast<uint8_t>(
             (critHigh - info.scaledOffset) / info.coefficientM);
-        resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK);
+        resp.validMask |=
+            static_cast<uint8_t>(ipmi::sensor::ThresholdMask::criticalHighMask);
     }
+}
+
+get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
+{
+    get_sdr::GetSensorThresholdsResponse resp;
+
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
+    const auto info = iter->second;
+
+    getSensorThresholds(info, resp);
 
     return resp;
+}
+
+static void
+    populateThresholdMask(const ipmi::sensor::Info* info,
+                          get_sdr::SensorDataFullRecordBody* body,
+                          get_sdr::GetSensorThresholdsResponse& response)
+{
+    typedef struct
+    {
+        ipmi::sensor::Mutability mutability;
+        get_sdr::body::SdrCpbThresholdAccess access;
+    } ThresholdAccessByMutPair;
+
+    constexpr size_t thersholdAccessCount = 4;
+    constexpr std::array<ThresholdAccessByMutPair, thersholdAccessCount>
+        mutabilityAccessesPairTable = {
+            {{ipmi::sensor::Mutability::unreadable,
+              get_sdr::body::SdrCpbThresholdAccess::unreadable},
+             {ipmi::sensor::Mutability::read,
+              get_sdr::body::SdrCpbThresholdAccess::readable},
+             {ipmi::sensor::Mutability::write,
+              get_sdr::body::SdrCpbThresholdAccess::rw},
+             {ipmi::sensor::Mutability::rw,
+              get_sdr::body::SdrCpbThresholdAccess::rw}},
+        };
+
+    // defualt, if ThresholdAccessByMutPair no match value
+    auto threshold_access = get_sdr::body::SdrCpbThresholdAccess::no;
+
+    for (auto& mutabilityAccess : mutabilityAccessesPairTable)
+    {
+        if (mutabilityAccess.mutability == info->mutability)
+        {
+            threshold_access = mutabilityAccess.access;
+        }
+    }
+
+    try
+    {
+        getSensorThresholds(*info, response);
+    }
+    catch (std::exception& e)
+    {
+        threshold_access = get_sdr::body::SdrCpbThresholdAccess::no;
+        response.validMask = ipmi::sensor::thresholdMaskNo;
+    }
+
+    get_sdr::body::cpbEventThresholdAccess(threshold_access, body);
+    get_sdr::body::setTypeThresholdMask(
+        response.validMask, get_sdr::body::ThresholdMaskPurpose::readable,
+        body);
+
+    if (get_sdr::body::SdrCpbThresholdAccess::rw == threshold_access)
+    {
+        get_sdr::body::init_settable_state(true, body);
+        get_sdr::body::setTypeThresholdMask(
+            response.validMask, get_sdr::body::ThresholdMaskPurpose::settable,
+            body);
+    }
 }
 
 /** @brief implements the get sensor thresholds command
@@ -697,10 +762,11 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
                                      const ipmi::sensor::Info* info,
                                      ipmi_data_len_t data_len)
 {
+    constexpr auto valueInterface = "xyz.openbmc_project.Sensor.Value";
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
     {
-
+        get_sdr::GetSensorThresholdsResponse response = {0};
         body->sensor_units_1 = 0; // unsigned, no rate, no modifier, not a %
 
         /* Unit info */
@@ -712,6 +778,13 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
         get_sdr::body::set_r_exp(info->exponentR, body);
 
         get_sdr::body::set_id_type(0b00, body); // 00 = unicode
+
+        // Proceed only if the sensor value interface is implemented.
+        if (info->propertyInterfaces.find(valueInterface) !=
+            info->propertyInterfaces.end())
+        {
+            populateThresholdMask(info, body, response);
+        }
     }
 
     /* ID string */
@@ -958,8 +1031,8 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     record.body.sensor_type = sensor->second.sensorType;
     record.body.event_reading_type = sensor->second.sensorReadingType;
     record.body.entity_instance = sensor->second.instance;
-    if (ipmi::sensor::Mutability::Write ==
-        (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+    if (ipmi::sensor::Mutability::write ==
+        (sensor->second.mutability & ipmi::sensor::Mutability::write))
     {
         get_sdr::body::init_settable_state(true, &(record.body));
     }
