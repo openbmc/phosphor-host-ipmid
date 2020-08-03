@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c456e5b8_978e5a03",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-08-03T23:26:34Z",
+      "side": 1,
+      "message": "Since the range is continuous, there is no need for the overhead of a map.\n\nconstexpr size_t cipherSuiteSize \u003d 3;\nconstexpr size_t nrCipherSuites \u003d 20;\nstatic constexpr std::array\u003cstd::array\u003cuint8_t, cipherSuiteSize\u003e, nrCipherSuites\u003e cipherSuites \u003d {{...}, ...};",
+      "range": {
+        "startLine": 249,
+        "startChar": 4,
+        "endLine": 249,
+        "endChar": 12
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0129fdf1_3792c281",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-08-03T23:26:34Z",
+      "side": 1,
+      "message": "these should use names instead of numbers.",
+      "range": {
+        "startLine": 250,
+        "startChar": 9,
+        "endLine": 254,
+        "endChar": 73
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a432f68_576466b9",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-08-03T23:26:34Z",
+      "side": 1,
+      "message": "const std::exception\u0026 e",
+      "range": {
+        "startLine": 314,
+        "startChar": 11,
+        "endLine": 314,
+        "endChar": 14
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "300e2c9c_3f3a8329",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-08-03T23:26:34Z",
+      "side": 1,
+      "message": "still need lowerCamelCase here",
+      "range": {
+        "startLine": 37,
+        "startChar": 18,
+        "endLine": 37,
+        "endChar": 33
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
