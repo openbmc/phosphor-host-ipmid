@@ -472,6 +472,66 @@ ipmi::RspType<uint8_t, // sensor reading
     }
 }
 
+static void
+    populateThresholdMask(const ipmi::sensor::Info* info,
+                          get_sdr::SensorDataFullRecordBody* body,
+                          get_sdr::GetSensorThresholdsResponse& response)
+{
+    typedef struct
+    {
+        ipmi::sensor::Mutability mutability;
+        get_sdr::body::sdr_cpb_threshold_access access;
+    } ThresholdAccessByMutPair;
+
+    std::vector<ThresholdAccessByMutPair> mutabilityAccessesPairTable = {
+        {ipmi::sensor::Mutability::Unreadable,
+         get_sdr::body::sdr_cpb_threshold_access::CPB_THRESHOLD_UNREADABLE},
+        {ipmi::sensor::Mutability::Read,
+         get_sdr::body::sdr_cpb_threshold_access::CPB_THRESHOLD_READABLE},
+        {ipmi::sensor::Mutability::Write,
+         get_sdr::body::sdr_cpb_threshold_access::CPB_THRESHOLD_RW},
+        {ipmi::sensor::Mutability::RW,
+         get_sdr::body::sdr_cpb_threshold_access::CPB_THRESHOLD_RW},
+    };
+
+    // defualt, if ThresholdAccessByMutPair no match value
+    auto threshold_access =
+        get_sdr::body::sdr_cpb_threshold_access::CPB_THRESHOLD_NO;
+
+    for (auto& mutabilityAccess : mutabilityAccessesPairTable)
+    {
+        if (mutabilityAccess.mutability == info->mutability)
+        {
+            threshold_access = mutabilityAccess.access;
+        }
+    }
+
+    try
+    {
+        getSensorThresholds(*info, &response);
+    }
+    catch (std::exception& e)
+    {
+        threshold_access =
+            get_sdr::body::sdr_cpb_threshold_access::CPB_THRESHOLD_NO;
+        response.validMask = ipmi::sensor::thresholdMaskNo;
+    }
+
+    get_sdr::body::cpb_event_threshold_access(threshold_access, body);
+    get_sdr::body::set_type_threshold_mask(
+        response.validMask, get_sdr::body::threshold_mask_purpose::Readable,
+        body);
+
+    if (get_sdr::body::sdr_cpb_threshold_access::CPB_THRESHOLD_RW ==
+        threshold_access)
+    {
+        get_sdr::body::init_settable_state(true, body);
+        get_sdr::body::set_type_threshold_mask(
+            response.validMask, get_sdr::body::threshold_mask_purpose::Settable,
+            body);
+    }
+}
+
 get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
 {
     get_sdr::GetSensorThresholdsResponse resp;
@@ -697,10 +757,11 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
                                      const ipmi::sensor::Info* info,
                                      ipmi_data_len_t data_len)
 {
+    constexpr auto valueInterface = "xyz.openbmc_project.Sensor.Value";
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
     {
-
+        get_sdr::GetSensorThresholdsResponse response = {0};
         body->sensor_units_1 = 0; // unsigned, no rate, no modifier, not a %
 
         /* Unit info */
@@ -712,6 +773,13 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
         get_sdr::body::set_r_exp(info->exponentR, body);
 
         get_sdr::body::set_id_type(0b00, body); // 00 = unicode
+
+        // Proceed only if the sensor value interface is implemented.
+        if (info->propertyInterfaces.find(valueInterface) !=
+            info->propertyInterfaces.end())
+        {
+            populateThresholdMask(info, body, response);
+        }
     }
 
     /* ID string */
