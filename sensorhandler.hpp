@@ -306,9 +306,9 @@ struct SensorDataFullRecordBody
     uint8_t sensor_capabilities; // no macro support
     uint8_t sensor_type;
     uint8_t event_reading_type;
-    uint8_t supported_assertions[2];          // no macro support
-    uint8_t supported_deassertions[2];        // no macro support
-    uint8_t discrete_reading_setting_mask[2]; // no macro support
+    uint8_t supported_assertions[2];   // no macro support
+    uint8_t supported_deassertions[2]; // no macro support
+    uint8_t type_threshold_mask[2];
     uint8_t sensor_units_1;
     uint8_t sensor_units_2_base;
     uint8_t sensor_units_3_modifier;
@@ -372,11 +372,29 @@ struct SensorDataEntityRecordBody
 namespace body
 {
 
+/** Consts padding on byte of the Sensor Capabilities */
+constexpr auto padCpbThreshold = 2U;
+
+/** Sensor Capabilities: Threshold Access Support. */
+enum class sdr_cpb_threshold_access : uint8_t
+{
+    CPB_THRESHOLD_NO,
+    CPB_THRESHOLD_READABLE,
+    CPB_THRESHOLD_RW,
+    CPB_THRESHOLD_UNREADABLE,
+};
+
 inline void set_entity_instance_number(uint8_t n,
                                        SensorDataFullRecordBody* body)
 {
     body->entity_instance &= 1 << 7;
     body->entity_instance |= (n & ~(1 << 7));
+};
+inline void cpb_event_threshold_access(sdr_cpb_threshold_access threshold,
+                                       SensorDataFullRecordBody* body)
+{
+    body->sensor_capabilities |=
+        (static_cast<uint8_t>(threshold) << padCpbThreshold);
 };
 inline void set_entity_physical_entity(SensorDataFullRecordBody* body)
 {
@@ -576,9 +594,54 @@ inline uint8_t get_device_id_strlen(SensorDataFruRecordBody* body)
     return body->deviceIDLen & LENGTH_MASK;
 };
 
-inline void set_readable_mask(uint8_t mask, SensorDataFullRecordBody* body)
+/** Purpose of threshold mask for populate the full-body SDR */
+enum class threshold_mask_purpose : uint8_t
 {
-    body->discrete_reading_setting_mask[1] = mask & 0x3F;
+    Readable,
+    Settable
+};
+
+/**
+ * @brief set SDR record threshold mask
+ * @param mask[in] ipmi::sensor::ThresholdMask of mask
+ * @param purpose[in] Readable or Settable threshold mask
+ * @param body[in out] out full body strcut with populated the record mask field
+ */
+inline void set_type_threshold_mask(uint8_t mask,
+                                    threshold_mask_purpose purpose,
+                                    SensorDataFullRecordBody* body)
+{
+    uint8_t mask_field = 0U;
+    struct MaskShiftPair
+    {
+        ipmi::sensor::ThresholdMask mask;
+        uint8_t shift;
+    };
+
+    std::vector<MaskShiftPair> maskShift = {
+        {ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK,
+         ipmi::sensor::shiftThresholdMaskNoneCrl},
+        {ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK,
+         ipmi::sensor::shiftThresholdMaskCrl},
+        {ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK,
+         ipmi::sensor::shiftThresholdMaskNoneCrh},
+        {ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK,
+         ipmi::sensor::shiftThresholdMaskCrh},
+    };
+
+    for (auto& pair : maskShift)
+    {
+        if (mask & static_cast<uint8_t>(pair.mask))
+        {
+            mask_field |= 1U << pair.shift;
+        }
+    }
+
+    // clean reserved bits of bitmask field
+    mask_field &= ipmi::sensor::thresholdMaskBitmaskField;
+
+    // by default sdr threshold mask is 2 byte field.
+    body->type_threshold_mask[static_cast<uint8_t>(purpose)] = mask_field;
 }
 
 } // namespace body
