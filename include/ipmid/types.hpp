@@ -131,10 +131,12 @@ using EntityType = uint8_t;
 using EntityInst = uint8_t;
 using SensorName = std::string;
 
-enum class Mutability
+enum class Mutability : uint8_t
 {
-    Read = 1 << 0,
-    Write = 1 << 1,
+    unreadable = 0,
+    read = 1 << 0,
+    write = 1 << 1,
+    rw = (read | write),
 };
 
 inline Mutability operator|(Mutability lhs, Mutability rhs)
@@ -197,13 +199,20 @@ using InventoryPath = std::string;
 
 using InvObjectIDMap = std::map<InventoryPath, SelData>;
 
+constexpr auto thresholdMaskNo = 0U;
+constexpr auto thresholdMaskBitmaskField = (0x3FU);
 enum class ThresholdMask
 {
-    NON_CRITICAL_LOW_MASK = 0x01,
-    CRITICAL_LOW_MASK = 0x02,
-    NON_CRITICAL_HIGH_MASK = 0x08,
-    CRITICAL_HIGH_MASK = 0x10,
+    nonCriticalLowMask = 0x01,
+    criticalLowMask = 0x02,
+    nonCriticalHighMask = 0x08,
+    criticalHighMask = 0x10,
 };
+
+constexpr auto shiftThresholdMaskNoneCrl = 0U;
+constexpr auto shiftThresholdMaskCrl = 1U;
+constexpr auto shiftThresholdMaskNoneCrh = 3U;
+constexpr auto shiftThresholdMaskCrh = 4U;
 
 static constexpr uint8_t maxContainedEntities = 4;
 using ContainedEntitiesArray =
