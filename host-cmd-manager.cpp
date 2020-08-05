@@ -20,9 +20,6 @@ namespace host
 namespace command
 {
 
-constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
-constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
-constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
 constexpr auto HOST_STATE_PATH = "/xyz/openbmc_project/state/host0";
 constexpr auto HOST_STATE_INTERFACE = "xyz.openbmc_project.State.Host";
 constexpr auto HOST_TRANS_PROP = "RequestedHostTransition";
