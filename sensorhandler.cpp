@@ -715,7 +715,12 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     }
 
     /* ID string */
-    auto id_string = info->sensorNameFunc(*info);
+    auto id_string = info->sensorName;
+
+    if (id_string.empty())
+    {
+        id_string = info->sensorNameFunc(*info);
+    }
 
     if (id_string.length() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
