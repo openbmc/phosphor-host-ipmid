@@ -23,6 +23,31 @@
 
 namespace ipmi
 {
+enum authentication_algorithm : uint8_t
+{
+    RAKPA = 0x00,
+    RAKP_HMAC_SHA1,
+    RAKP_HMAC_MD5,
+    RAKP_HMAC_SHA256
+};
+
+enum integrity_algorithm : uint8_t
+{
+    RAKPI = 0x00,
+    HMAC_SHA1_96,
+    HMAC_MD5_128,
+    MD5_128,
+    HMAC_SHA256_128
+};
+
+enum confidentiality_algorithm : uint8_t
+{
+    RAKC = 0x00,
+    AES_CBC_128,
+    xRC4_128,
+    xRC4_40
+};
+
 static const std::string csPrivDefaultFileName =
     "/usr/share/ipmi-providers/cs_privilege_levels.json";
 
@@ -30,6 +55,10 @@ static const std::string csPrivFileName =
     "/var/lib/ipmi/cs_privilege_levels.json";
 
 static const size_t maxCSRecords = 16;
+
+constexpr size_t cipherSuiteSize = 3;
+constexpr size_t nrCipherSuites = 20;
+constexpr uint8_t privilegeError = 0xFF;
 
 using ChannelNumCipherIDPair = std::pair<uint8_t, uint8_t>;
 using privMap = std::map<ChannelNumCipherIDPair, uint4_t>;
@@ -71,6 +100,20 @@ class CipherConfig
     ipmi::Cc setCSPrivilegeLevels(
         uint8_t chNum,
         const std::array<uint4_t, maxCSRecords>& csPrivilegeLevels);
+
+    /** @brief returns Cipher suite ID for given payload information
+     *
+     */
+    std::string getCipherID(uint8_t auth, uint8_t integrity,
+                            uint8_t confidentiality);
+
+    /** @brief function to get highest level matching proposed algorithm
+     *
+     */
+    uint8_t getHighestLevelMatchProposedAlgorithm(const uint8_t chNum,
+                                                  uint8_t auth,
+                                                  uint8_t integrity,
+                                                  uint8_t confidentiality);
 
   private:
     std::string cipherSuitePrivFileName, cipherSuiteDefaultPrivFileName;

@@ -241,4 +241,98 @@ ipmi::Cc CipherConfig::setCSPrivilegeLevels(
     return ccSuccess;
 }
 
+std::string CipherConfig::getCipherID(uint8_t auth, uint8_t integrity,
+                                      uint8_t confidentiality)
+{
+    constexpr int arraySize = 20;
+    // Intialization of Cipher suite ID's
+    // Cannot intialize in normal way
+    std::array<std::array<uint8_t, cipherSuiteSize>, nrCipherSuites>
+        cipherSuites{};
+
+    cipherSuites[0] = {{RAKPA, RAKPI, RAKC}};
+    cipherSuites[1] = {{RAKPA, HMAC_SHA1_96, RAKC}};
+    cipherSuites[2] = {{RAKP_HMAC_SHA1, HMAC_SHA1_96, RAKC}};
+    cipherSuites[3] = {{RAKP_HMAC_SHA1, HMAC_SHA1_96, AES_CBC_128}};
+    cipherSuites[4] = {{RAKP_HMAC_SHA1, HMAC_SHA1_96, xRC4_128}};
+    cipherSuites[5] = {{RAKP_HMAC_SHA1, HMAC_SHA1_96, xRC4_40}};
+    cipherSuites[6] = {{RAKP_HMAC_MD5, RAKPI, RAKC}};
+    cipherSuites[7] = {{RAKP_HMAC_MD5, HMAC_MD5_128, RAKC}};
+    cipherSuites[8] = {{RAKP_HMAC_MD5, HMAC_MD5_128, AES_CBC_128}};
+    cipherSuites[9] = {{RAKP_HMAC_MD5, HMAC_MD5_128, xRC4_128}};
+    cipherSuites[10] = {{RAKP_HMAC_MD5, HMAC_MD5_128, xRC4_40}};
+    cipherSuites[11] = {{RAKP_HMAC_MD5, MD5_128, RAKC}};
+    cipherSuites[12] = {{RAKP_HMAC_MD5, MD5_128, AES_CBC_128}};
+    cipherSuites[13] = {{RAKP_HMAC_MD5, MD5_128, xRC4_128}};
+    cipherSuites[14] = {{RAKP_HMAC_MD5, MD5_128, xRC4_40}};
+    cipherSuites[15] = {{RAKP_HMAC_SHA256, RAKPI, RAKC}};
+    cipherSuites[16] = {{RAKP_HMAC_SHA256, HMAC_SHA256_128, RAKC}};
+    cipherSuites[17] = {{RAKP_HMAC_SHA256, HMAC_SHA256_128, AES_CBC_128}};
+    cipherSuites[18] = {{RAKP_HMAC_SHA256, HMAC_SHA256_128, xRC4_128}};
+    cipherSuites[19] = {{RAKP_HMAC_SHA256, HMAC_SHA256_128, xRC4_40}};
+
+    for (int i = 0; i < arraySize; i++)
+    {
+        if ((cipherSuites[i][0] == auth) && (cipherSuites[i][1] == integrity) &&
+            (cipherSuites[i][2] == confidentiality))
+        {
+            return ("CipherID" + std::to_string(i));
+        }
+    }
+
+    return "Invalid";
+}
+
+uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
+    const uint8_t chNum, const uint8_t auth, const uint8_t integrity,
+    const uint8_t confidentiality)
+{
+    uint8_t priv = 0x00;
+    std::string cipherID;
+    std::string channelNum = "Channel" + std::to_string(chNum);
+    std::string configFile;
+
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return privilegeError;
+    }
+
+    if (fs::exists(cipherSuitePrivFileName))
+    {
+        configFile = "cs_privilege_levels.json";
+    }
+    else
+    {
+        configFile = "cs_privilege_levels_default.json";
+    }
+
+    Json data = nullptr;
+
+    data = readCSPrivilegeLevels(configFile);
+
+    cipherID = getCipherID(auth, integrity, confidentiality);
+    if (cipherID == "Invalid")
+    {
+        log<level::ERR>("Error in getting Cipher Suite ID");
+        return privilegeError;
+    }
+    if (data == nullptr)
+    {
+        log<level::ERR>(
+            "Error in getting cipher records from cipher list json");
+        return privilegeError;
+    }
+    try
+    {
+        priv = static_cast<uint8_t>(convertToPrivLimitIndex(
+            static_cast<std::string>(data[channelNum][cipherID])));
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in getting cipher ID");
+        return privilegeError;
+    }
+    return priv;
+}
 } // namespace ipmi
