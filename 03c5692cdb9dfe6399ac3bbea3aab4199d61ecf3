@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "e9af5715_ba32d6cd",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de05dc5f_ae1911af",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 31
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f47ba9fd_7cd36d55",
         "filename": "test/ciphersuite_unittest.cpp",
         "patchSetId": 2
@@ -82,6 +106,30 @@
       "writtenOn": "2020-08-01T04:19:44Z",
       "side": 1,
       "message": "const?",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 11
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "81c5d5eb_0225519d",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f47ba9fd_7cd36d55",
       "range": {
         "startLine": 49,
         "startChar": 4,
@@ -117,6 +165,30 @@
     },
     {
       "key": {
+        "uuid": "b7e13141_1fa4d328",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8dadf410_2a0caf04",
+      "range": {
+        "startLine": 64,
+        "startChar": 28,
+        "endLine": 64,
+        "endChar": 29
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2695fca_0559c871",
         "filename": "test/ciphersuite_unittest.cpp",
         "patchSetId": 2
@@ -128,6 +200,30 @@
       "writtenOn": "2020-07-16T01:44:09Z",
       "side": 1,
       "message": "Used here also. Can be declared as constexpr and used at both places?",
+      "range": {
+        "startLine": 66,
+        "startChar": 28,
+        "endLine": 66,
+        "endChar": 29
+      },
+      "revId": "03c5692cdb9dfe6399ac3bbea3aab4199d61ecf3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4c55ed6_dcc5d102",
+        "filename": "test/ciphersuite_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2695fca_0559c871",
       "range": {
         "startLine": 66,
         "startChar": 28,
