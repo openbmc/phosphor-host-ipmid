@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6abcab9b_16ea51e9",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:56:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c456e5b8_978e5a03",
+      "range": {
+        "startLine": 249,
+        "startChar": 4,
+        "endLine": 249,
+        "endChar": 12
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0129fdf1_3792c281",
         "filename": "user_channel/cipher_mgmt.cpp",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2020-08-03T23:26:34Z",
       "side": 1,
       "message": "these should use names instead of numbers.",
+      "range": {
+        "startLine": 250,
+        "startChar": 9,
+        "endLine": 254,
+        "endChar": 73
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d3774ac6_f34db66f",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:56:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0129fdf1_3792c281",
       "range": {
         "startLine": 250,
         "startChar": 9,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "214cf89c_1d21f448",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:56:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a432f68_576466b9",
+      "range": {
+        "startLine": 314,
+        "startChar": 11,
+        "endLine": 314,
+        "endChar": 14
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "300e2c9c_3f3a8329",
         "filename": "user_channel/cipher_mgmt.hpp",
         "patchSetId": 9
@@ -82,6 +154,30 @@
       "writtenOn": "2020-08-03T23:26:34Z",
       "side": 1,
       "message": "still need lowerCamelCase here",
+      "range": {
+        "startLine": 37,
+        "startChar": 18,
+        "endLine": 37,
+        "endChar": 33
+      },
+      "revId": "c19e21752e64a66a8953165177408ec8fc2116de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc237dd8_c37db004",
+        "filename": "user_channel/cipher_mgmt.hpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-10T12:56:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "300e2c9c_3f3a8329",
       "range": {
         "startLine": 37,
         "startChar": 18,
