@@ -168,6 +168,7 @@ struct Info
     std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
     std::function<GetSensorResponse(const Info&)> getFunc;
     Mutability mutability;
+    SensorName sensorName;
     std::function<SensorName(const Info&)> sensorNameFunc;
     DbusInterfaceMap propertyInterfaces;
 };
