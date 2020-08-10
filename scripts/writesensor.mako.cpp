@@ -70,10 +70,25 @@ extern const IdInfoMap sensors = {
            sensorInterface = next(iter(interfaces))
        mutability = sensor.get("mutability", "Mutability::Read")
 %>
-        ${entityID},${instance},${sensorType},"${path}","${sensorInterface}",
-        ${readingType},${multiplier},${offsetB},${bExp},
-        ${offsetB * pow(10,bExp)}, ${rExp}, ${hasScale},${scale},"${unit}",
-        ${updateFunc},${getFunc},Mutability(${mutability}),${sensorNameFunc},{
+        .entityType = ${entityID},
+        .instance = ${instance},
+        .sensorType = ${sensorType},
+        .sensorPath = "${path}",
+        .sensorInterface = "${sensorInterface}",
+        .sensorReadingType = ${readingType},
+        .coefficientM = ${multiplier},
+        .coefficientB = ${offsetB},
+        .exponentB = ${bExp},
+        .scaledOffset = ${offsetB * pow(10,bExp)},
+        .exponentR = ${rExp},
+        .hasScale = ${hasScale},
+        .scale = ${scale},
+        .unit = "${unit}",
+        .updateFunc = ${updateFunc},
+        .getFunc = ${getFunc},
+        .mutability = Mutability(${mutability}),
+        .sensorNameFunc = ${sensorNameFunc},
+        .propertyInterfaces = {
     % for interface,properties in interfaces.items():
             {"${interface}",{
             % if properties:
