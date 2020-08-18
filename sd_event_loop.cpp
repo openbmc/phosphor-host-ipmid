@@ -9,6 +9,7 @@
 #include <systemd/sd-daemon.h>
 
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/signal_set.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/sd_event.hpp>
 #include <user_channel/channel_layer.hpp>
