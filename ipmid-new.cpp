@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <any>
 #include <boost/algorithm/string.hpp>
+#include <boost/asio/io_context.hpp>
 #include <dcmihandler.hpp>
 #include <exception>
 #include <filesystem>
@@ -376,7 +377,7 @@ void updateOwners(sdbusplus::asio::connection& conn, const std::string& name)
         name);
 }
 
-void doListNames(boost::asio::io_service& io, sdbusplus::asio::connection& conn)
+void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
 {
     conn.async_method_call(
         [&io, &conn](const boost::system::error_code ec,

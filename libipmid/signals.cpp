@@ -1,3 +1,4 @@
+#include <boost/asio/signal_set.hpp>
 #include <forward_list>
 #include <ipmid/api.hpp>
 #include <memory>
