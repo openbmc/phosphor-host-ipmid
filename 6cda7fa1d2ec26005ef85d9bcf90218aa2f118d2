@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "dc84ffb0_d96dbf66",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000410
+      },
+      "writtenOn": "2020-08-18T07:17:18Z",
+      "side": 1,
+      "message": "nit: IDs",
+      "range": {
+        "startLine": 248,
+        "startChar": 37,
+        "endLine": 248,
+        "endChar": 41
+      },
+      "revId": "6cda7fa1d2ec26005ef85d9bcf90218aa2f118d2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2fe39a8e_819332ae",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000410
+      },
+      "writtenOn": "2020-08-18T07:17:18Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 249,
+        "startChar": 4,
+        "endLine": 249,
+        "endChar": 37
+      },
+      "revId": "6cda7fa1d2ec26005ef85d9bcf90218aa2f118d2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56ca732d_9a46d278",
         "filename": "user_channel/cipher_mgmt.cpp",
         "patchSetId": 4
@@ -16,6 +62,29 @@
       "revId": "6cda7fa1d2ec26005ef85d9bcf90218aa2f118d2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f915ab34_edf7d802",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1000410
+      },
+      "writtenOn": "2020-08-18T07:17:18Z",
+      "side": 1,
+      "message": "can be global so that you don\u0027t have to initialise this every time gerCipherID is called ?",
+      "range": {
+        "startLine": 251,
+        "startChar": 8,
+        "endLine": 251,
+        "endChar": 23
+      },
+      "revId": "6cda7fa1d2ec26005ef85d9bcf90218aa2f118d2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
