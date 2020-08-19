@@ -43,10 +43,12 @@ struct Context
 
     Context(std::shared_ptr<sdbusplus::asio::connection> bus, NetFn netFn,
             uint8_t lun, Cmd cmd, int channel, int userId, uint32_t sessionId,
-            Privilege priv, int rqSA, boost::asio::yield_context& yield) :
+            Privilege priv, int rqSA, int channelIdx,
+            boost::asio::yield_context& yield) :
         bus(bus),
         netFn(netFn), lun(lun), cmd(cmd), channel(channel), userId(userId),
-        sessionId(sessionId), priv(priv), rqSA(rqSA), yield(yield)
+        sessionId(sessionId), priv(priv), rqSA(rqSA), channelIdx(channelIdx),
+        yield(yield)
     {
     }
 
@@ -62,6 +64,7 @@ struct Context
     // srcAddr is only set on IPMB requests because
     // Platform Event Message needs it to determine the incoming format
     int rqSA;
+    int channelIdx;
     boost::asio::yield_context yield;
 };
 
