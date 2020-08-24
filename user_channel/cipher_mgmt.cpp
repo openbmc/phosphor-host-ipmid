@@ -241,4 +241,74 @@ ipmi::Cc CipherConfig::setCSPrivilegeLevels(
     return ccSuccess;
 }
 
+std::string CipherConfig::getCipherID(uint8_t auth, uint8_t integrity,
+                                      uint8_t confidentiality)
+{
+    for (auto i = 0; i < nrCipherSuites; i++)
+    {
+        if ((cipherSuites[i][0] == auth) && (cipherSuites[i][1] == integrity) &&
+            (cipherSuites[i][2] == confidentiality))
+        {
+            return ("CipherID" + std::to_string(i));
+        }
+    }
+
+    return "Invalid";
+}
+
+uint8_t CipherConfig::getHighestLevelMatchProposedAlgorithm(
+    const uint8_t chNum, const uint8_t auth, const uint8_t integrity,
+    const uint8_t confidentiality)
+{
+    uint8_t priv = 0x00;
+    std::string cipherID;
+    std::string channelNum = "Channel" + std::to_string(chNum);
+    std::string configFile;
+
+    if (!isValidChannel(chNum))
+    {
+        log<level::ERR>("Invalid channel number", entry("CHANNEL=%u", chNum));
+        return privilegeError;
+    }
+
+    if (fs::exists(cipherSuitePrivFileName))
+    {
+        configFile = "/usr/share/ipmi-providers/cs_privilege_levels.json";
+    }
+    else
+    {
+        configFile =
+            "/usr/share/ipmi-providers/cs_privilege_levels_default.json";
+    }
+
+    Json data = nullptr;
+
+    data = readCSPrivilegeLevels(configFile);
+
+    if (data == nullptr)
+    {
+        log<level::ERR>(
+            "Error in getting cipher records from cipher list json");
+        return privilegeError;
+    }
+
+    cipherID = getCipherID(auth, integrity, confidentiality);
+    if (cipherID == "Invalid")
+    {
+        log<level::ERR>("Error in getting Cipher Suite ID");
+        return privilegeError;
+    }
+
+    try
+    {
+        priv = static_cast<uint8_t>(convertToPrivLimitIndex(
+            static_cast<std::string>(data[channelNum][cipherID])));
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in getting cipher ID");
+        return privilegeError;
+    }
+    return priv;
+}
 } // namespace ipmi
