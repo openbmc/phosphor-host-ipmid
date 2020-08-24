@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a7cc5138_fd7cf828",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-24T14:53:13Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "ea35cc8c_f7906afc",
+      "range": {
+        "startLine": 247,
+        "startChar": 0,
+        "endLine": 247,
+        "endChar": 33
+      },
+      "revId": "4a134f65dd007c4566e9983571eadbbd4b475916",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7ee40ff4_e4025d70",
         "filename": "user_channel/cipher_mgmt.cpp",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2020-08-18T23:02:41Z",
       "side": 1,
       "message": "constexpr std::array\u003cstd::array\u003cuint8_t, cipherSuiteSize\u003e, nrCipherSuites\u003e\n        cipherSuites{{\n            {RAKPA, RAKPI, RAKC},\n            {RAKPA, HMAC_SHA1_96, RAKC},\n            {RAKP_HMAC_SHA1, HMAC_SHA1_96, RAKC},\n...\n            {RAKP_HMAC_SHA256, HMAC_SHA256_128, AES_CBC_128},\n            {RAKP_HMAC_SHA256, HMAC_SHA256_128, xRC4_128},\n            {RAKP_HMAC_SHA256, HMAC_SHA256_128, xRC4_40}\n            }};\n\n\nAlso, I am not sure we need to list out every cipher suite. I understand that they are all defined in the IPMI spec, but openbmc only supports 3 and 17, so this seems like overkill :)",
+      "range": {
+        "startLine": 248,
+        "startChar": 1,
+        "endLine": 273,
+        "endChar": 0
+      },
+      "revId": "4a134f65dd007c4566e9983571eadbbd4b475916",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5c8dea4_e9a744d0",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-24T14:53:13Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "7ee40ff4_e4025d70",
       "range": {
         "startLine": 248,
         "startChar": 1,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2bad2223_5f7cee9f",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-24T14:53:13Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "be7638d8_8638e465",
+      "range": {
+        "startLine": 274,
+        "startChar": 24,
+        "endLine": 274,
+        "endChar": 33
+      },
+      "revId": "4a134f65dd007c4566e9983571eadbbd4b475916",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c6007c3b_0e22460c",
         "filename": "user_channel/cipher_mgmt.cpp",
         "patchSetId": 10
@@ -82,6 +154,30 @@
       "writtenOn": "2020-08-18T23:02:41Z",
       "side": 1,
       "message": "there is no need to call this if data is null; move this below the check.",
+      "range": {
+        "startLine": 315,
+        "startChar": 4,
+        "endLine": 320,
+        "endChar": 5
+      },
+      "revId": "4a134f65dd007c4566e9983571eadbbd4b475916",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1918cee_ee02d8b5",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1000863
+      },
+      "writtenOn": "2020-08-24T14:53:13Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "c6007c3b_0e22460c",
       "range": {
         "startLine": 315,
         "startChar": 4,
