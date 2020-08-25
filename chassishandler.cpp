@@ -43,9 +43,6 @@ static constexpr uint8_t setParmBootFlagsPermanent = 0x40;
 static constexpr uint8_t setParmBootFlagsValidOneTime = 0x80;
 static constexpr uint8_t setParmBootFlagsValidPermanent = 0xC0;
 
-constexpr size_t SIZE_BOOT_OPTION = static_cast<size_t>(
-    BootOptionResponseSize::opalNetworkSettings); // Maximum size of the boot
-                                                  // option parameters
 constexpr size_t sizeVersion = 2;
 constexpr size_t DEFAULT_IDENTIFY_TIME_OUT = 15;
 
@@ -171,21 +168,7 @@ constexpr auto minutesPerCount = 60;
 
 } // namespace poh
 
-struct get_sys_boot_options_t
-{
-    uint8_t parameter;
-    uint8_t set;
-    uint8_t block;
-} __attribute__((packed));
-
-struct get_sys_boot_options_response_t
-{
-    uint8_t version;
-    uint8_t parm;
-    uint8_t data[SIZE_BOOT_OPTION];
-} __attribute__((packed));
-
-int getHostNetworkData(get_sys_boot_options_response_t* respptr)
+int getHostNetworkData(ipmi::message::Payload& payload)
 {
     ipmi::PropertyMap properties;
     int rc = 0;
@@ -237,7 +220,6 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
         // don't send blank override.
         if ((MACAddress == ipmi::network::DEFAULT_MAC_ADDRESS))
         {
-            std::memset(respptr->data, 0, SIZE_BOOT_OPTION);
             rc = -1;
             return rc;
         }
@@ -248,22 +230,27 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
             if ((ipAddress == ipmi::network::DEFAULT_ADDRESS) ||
                 (gateway == ipmi::network::DEFAULT_ADDRESS) || (!prefix))
             {
-                std::memset(respptr->data, 0, SIZE_BOOT_OPTION);
                 rc = -1;
                 return rc;
             }
         }
 
-        sscanf(MACAddress.c_str(), ipmi::network::MAC_ADDRESS_FORMAT,
-               (respptr->data + macOffset), (respptr->data + macOffset + 1),
-               (respptr->data + macOffset + 2), (respptr->data + macOffset + 3),
-               (respptr->data + macOffset + 4),
-               (respptr->data + macOffset + 5));
+        std::string token;
+        std::stringstream ss(MACAddress);
 
-        respptr->data[macOffset + 6] = 0x00;
+        // First pack macOffset no of bytes in payload.
+        // Latter this PetiBoot-Specific data will be populated.
+        std::vector<uint8_t> payloadInitialBytes(macOffset);
+        payload.pack(payloadInitialBytes);
 
-        std::memcpy(respptr->data + addrTypeOffset, &isStatic,
-                    sizeof(isStatic));
+        while (std::getline(ss, token, ':'))
+        {
+            payload.pack(stoi(token, nullptr, 16));
+        }
+
+        payload.pack(0x00);
+
+        payload.pack(isStatic);
 
         uint8_t addressFamily = (std::get<std::string>(properties["Type"]) ==
                                  "xyz.openbmc_project.Network.IP.Protocol.IPv4")
@@ -275,39 +262,58 @@ int getHostNetworkData(get_sys_boot_options_response_t* respptr)
                        : ipmi::network::IPV6_ADDRESS_SIZE_BYTE;
 
         // ipaddress and gateway would be in IPv4 format
+        std::vector<uint8_t> addrInBinary(addrSize);
         inet_pton(addressFamily, ipAddress.c_str(),
-                  (respptr->data + ipAddrOffset));
+                  reinterpret_cast<void*>(addrInBinary.data()));
 
-        uint8_t prefixOffset = ipAddrOffset + addrSize;
+        payload.pack(addrInBinary);
 
-        std::memcpy(respptr->data + prefixOffset, &prefix, sizeof(prefix));
+        payload.pack(prefix);
 
-        uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
-
+        std::vector<uint8_t> gatewayDetails(addrSize);
         inet_pton(addressFamily, gateway.c_str(),
-                  (respptr->data + gatewayOffset));
+                  reinterpret_cast<void*>(gatewayDetails.data()));
+        payload.pack(gatewayDetails);
     }
     catch (InternalFailure& e)
     {
         commit<InternalFailure>();
-        std::memset(respptr->data, 0, SIZE_BOOT_OPTION);
         rc = -1;
         return rc;
     }
 
     // PetiBoot-Specific
-    // If success then copy the first 9 bytes to the data
-    std::memcpy(respptr->data, netConfInitialBytes,
-                sizeof(netConfInitialBytes));
+    // If success then copy the first 9 bytes to the payload message
+    // payload first 2 bytes contain the parameter values. Skip that 2 bytes.
+    uint8_t skipFirstTwoBytes = 2;
+    size_t payloadSize = payload.size();
+    uint8_t* configDataStartingAddress = payload.data() + skipFirstTwoBytes;
 
-    std::memcpy(respptr->data + addrSizeOffset, &addrSize, sizeof(addrSize));
+    if (payloadSize < skipFirstTwoBytes + sizeof(netConfInitialBytes))
+    {
+        log<level::ERR>("Invalid net config ");
+        rc = -1;
+        return rc;
+    }
+    std::copy(netConfInitialBytes,
+              netConfInitialBytes + sizeof(netConfInitialBytes),
+              configDataStartingAddress);
+
+    if (payloadSize < skipFirstTwoBytes + addrSizeOffset + sizeof(addrSize))
+    {
+        log<level::ERR>("Invalid length of address size");
+        rc = -1;
+        return rc;
+    }
+    std::copy(&addrSize, &(addrSize) + sizeof(addrSize),
+              configDataStartingAddress + addrSizeOffset);
 
 #ifdef _IPMI_DEBUG_
     std::printf("\n===Printing the IPMI Formatted Data========\n");
 
     for (uint8_t pos = 0; pos < index; pos++)
     {
-        std::printf("%02x ", respptr->data[pos]);
+        std::printf("%02x ", payloadStartingAddress[pos]);
     }
 #endif
 
@@ -1664,33 +1670,47 @@ static ipmi::Cc setBootMode(const Mode::Modes& mode)
     return ipmi::ccSuccess;
 }
 
-ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                             ipmi_request_t request,
-                                             ipmi_response_t response,
-                                             ipmi_data_len_t data_len,
-                                             ipmi_context_t context)
+/** @brief implements the Get Chassis system boot option
+ *  @param bootOptionParameter   - boot option parameter selector
+ *  @param reserved1    - reserved bit
+ *  @param setSelector  - selects a particular block or set of parameters
+ *                        under the given parameter selector
+ *                        write as 00h if parameter doesn't use a setSelector
+ *  @param blockSelector- selects a particular block within a set of
+ *                        parameters write as 00h if parameter doesn't use a
+ *                        blockSelector
+ *
+ *  @return IPMI completion code plus response data
+ *  @return Payload contains below parameters:
+ *   version             - parameter version
+ *   bootOptionParameter - boot option parameter selector
+ *   parmIndicator - parameter vaild/invaild indicator
+ *   data          - configuration parameter data
+ */
+ipmi::RspType<ipmi::message::Payload>
+    ipmiChassisGetSysBootOptions(uint7_t bootOptionParameter, bool reserved1,
+
+                                 uint8_t setSelector, uint8_t blockSelector)
 {
+    if (reserved1)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    constexpr uint4_t version = 0x01;
+    ipmi::message::Payload response;
+    response.pack(version, uint4_t{});
     using namespace boot_options;
-    ipmi_ret_t rc = IPMI_CC_PARM_NOT_SUPPORTED;
-    char* p = NULL;
-    get_sys_boot_options_response_t* resp =
-        (get_sys_boot_options_response_t*)response;
-    get_sys_boot_options_t* reqptr = (get_sys_boot_options_t*)request;
+
     IpmiValue bootOption = ipmiDefault;
 
-    std::memset(resp, 0, sizeof(*resp));
-    resp->version = setParmVersion;
-    resp->parm = 5;
-    resp->data[0] = setParmBootFlagsValidOneTime;
     /*
      * Parameter #5 means boot flags. Please refer to 28.13 of ipmi doc.
      * This is the only parameter used by petitboot.
      */
-    if (reqptr->parameter ==
+    if (static_cast<uint8_t>(bootOptionParameter) ==
         static_cast<uint8_t>(BootOptionParameter::bootFlags))
     {
-
-        *data_len = static_cast<uint8_t>(BootOptionResponseSize::bootFlags);
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
 
@@ -1709,10 +1729,10 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             auto reply = dbus.call(method);
             if (reply.is_method_error())
             {
-                log<level::ERR>("Error in BootSource Get");
+                log<level::ERR>(
+                    "ipmiChassisGetSysBootOptions: Error in BootSource Get");
                 report<InternalFailure>();
-                *data_len = 0;
-                return IPMI_CC_UNSPECIFIED_ERROR;
+                return ipmi::responseUnspecifiedError();
             }
             std::variant<std::string> result;
             reply.read(result);
@@ -1728,10 +1748,10 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             reply = dbus.call(method);
             if (reply.is_method_error())
             {
-                log<level::ERR>("Error in BootMode Get");
+                log<level::ERR>(
+                    "ipmiChassisGetSysBootOptions: Error in BootMode Get");
                 report<InternalFailure>();
-                *data_len = 0;
-                return IPMI_CC_UNSPECIFIED_ERROR;
+                return ipmi::responseUnspecifiedError();
             }
             reply.read(result);
             auto bootMode =
@@ -1747,59 +1767,54 @@ ipmi_ret_t ipmi_chassis_get_sys_boot_options(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             {
                 bootOption = modeDbusToIpmi.at(bootMode);
             }
-            resp->data[1] = (bootOption << 2);
 
-            resp->data[0] = oneTimeEnabled ? setParmBootFlagsValidOneTime
-                                           : setParmBootFlagsValidPermanent;
-
-            rc = IPMI_CC_OK;
+            uint8_t bootOptionParam = oneTimeEnabled
+                                          ? setParmBootFlagsValidOneTime
+                                          : setParmBootFlagsValidPermanent;
+            response.pack(bootOptionParameter, reserved1, bootOptionParam,
+                          uint2_t{}, uint4_t{bootOption}, uint2_t{}, uint8_t{},
+                          uint8_t{}, uint8_t{});
+            return ipmi::responseSuccess(std::move(response));
         }
         catch (InternalFailure& e)
         {
             cache::objectsPtr.reset();
             report<InternalFailure>();
-            *data_len = 0;
-            return IPMI_CC_UNSPECIFIED_ERROR;
+            return ipmi::responseUnspecifiedError();
         }
     }
-    else if (reqptr->parameter ==
-             static_cast<uint8_t>(BootOptionParameter::opalNetworkSettings))
-    {
-
-        *data_len =
-            static_cast<uint8_t>(BootOptionResponseSize::opalNetworkSettings);
-
-        resp->parm =
-            static_cast<uint8_t>(BootOptionParameter::opalNetworkSettings);
-
-        int ret = getHostNetworkData(resp);
-
-        if (ret < 0)
-        {
-
-            log<level::ERR>(
-                "getHostNetworkData failed for get_sys_boot_options.");
-            rc = IPMI_CC_UNSPECIFIED_ERROR;
-        }
-        else
-            rc = IPMI_CC_OK;
-    }
-
     else
     {
-        log<level::ERR>("Unsupported parameter",
-                        entry("PARAM=0x%x", reqptr->parameter));
+        if ((bootOptionParameter >= oemParmStart) &&
+            (bootOptionParameter <= oemParmEnd))
+        {
+            if (static_cast<uint8_t>(bootOptionParameter) ==
+                static_cast<uint8_t>(BootOptionParameter::opalNetworkSettings))
+            {
+                response.pack(bootOptionParameter, reserved1);
+                int ret = getHostNetworkData(response);
+                if (ret < 0)
+                {
+                    response.trailingOk = true;
+                    log<level::ERR>(
+                        "getHostNetworkData failed for GetSysBootOptions.");
+                    return ipmi::responseUnspecifiedError();
+                }
+                else
+                {
+                    return ipmi::responseSuccess(std::move(response));
+                }
+            }
+        }
+        else
+        {
+            log<level::ERR>(
+                "ipmiChassisGetSysBootOptions: Unsupported parameter",
+                entry("PARAM=0x%x", static_cast<uint8_t>(bootOptionParameter)));
+            return ipmi::responseUnspecifiedError();
+        }
     }
-
-    if (p)
-        free(p);
-
-    if (rc == IPMI_CC_OK)
-    {
-        *data_len += 2;
-    }
-
-    return rc;
+    return ipmi::responseUnspecifiedError();
 }
 
 ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
@@ -2133,9 +2148,10 @@ void register_netfn_chassis_functions()
                           ipmi::Privilege::User, ipmiSetChassisCap);
 
     // <Get System Boot Options>
-    ipmi_register_callback(NETFUN_CHASSIS, IPMI_CMD_GET_SYS_BOOT_OPTIONS, NULL,
-                           ipmi_chassis_get_sys_boot_options,
-                           PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
+                          ipmi::chassis::cmdGetSystemBootOptions,
+                          ipmi::Privilege::Operator,
+                          ipmiChassisGetSysBootOptions);
 
     // <Get Chassis Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
