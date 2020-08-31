@@ -99,6 +99,7 @@ const static boost::container::flat_map<
          {"criticalinterrupt", std::make_pair(IPMI_SENSOR_CRITICALINT, SENSOR_SPECIFIC)},
          {"posterror", std::make_pair(IPMI_SENSOR_POSTERR, SENSOR_SPECIFIC)},
          {"eventloggingdisable", std::make_pair(IPMI_SENSOR_EVENTLOG, SENSOR_SPECIFIC)},
+         {"entity", std::make_pair(IPMI_SENSOR_ENTITY, SENSOR_SPECIFIC)},
          {"watchdog", std::make_pair(IPMI_SENSOR_WATCHDOG, SENSOR_SPECIFIC)}}
          };
 
