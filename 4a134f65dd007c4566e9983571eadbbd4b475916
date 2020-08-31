@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "be5c2667_6799ef13",
+        "filename": "user_channel/cipher_mgmt.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-08-31T23:12:14Z",
+      "side": 1,
+      "message": "It is not so easy as just wanting to support one of the others. They would have to implement it in netipmid which would be the first clue to me that they are doing something insecure, and I would take that chance to convince them to do otherwise. Really, having all 20 of these is a waste of space.",
+      "parentUuid": "a1a91b07_3e97972d",
+      "range": {
+        "startLine": 248,
+        "startChar": 1,
+        "endLine": 273,
+        "endChar": 0
+      },
+      "revId": "4a134f65dd007c4566e9983571eadbbd4b475916",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "be7638d8_8638e465",
         "filename": "user_channel/cipher_mgmt.cpp",
         "patchSetId": 10
