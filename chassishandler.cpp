@@ -1684,7 +1684,7 @@ static ipmi::Cc setBootMode(const Mode::Modes& mode)
  *  @return Payload contains below parameters:
  *   version             - parameter version
  *   bootOptionParameter - boot option parameter selector
- *   parmIndicator - parameter vaild/invaild indicator
+ *   parmIndicator - parameter valid/invalid indicator
  *   data          - configuration parameter data
  */
 ipmi::RspType<ipmi::message::Payload>
