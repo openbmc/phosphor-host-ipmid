@@ -31,7 +31,6 @@
 #include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
 #include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
-#include <xyz/openbmc_project/State/Host/server.hpp>
 #include <xyz/openbmc_project/State/PowerOnHours/server.hpp>
 
 std::unique_ptr<phosphor::Timer> identifyTimer
@@ -811,68 +810,93 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
 }
 
 //------------------------------------------
-// Calls into Host State Manager Dbus object
+// Calls into State Manager Dbus objects
 //------------------------------------------
-int initiate_state_transition(State::Host::Transition transition)
+namespace ipmi
 {
-    // OpenBMC Host State Manager dbus framework
-    constexpr auto HOST_STATE_MANAGER_ROOT = "/xyz/openbmc_project/state/host0";
-    constexpr auto HOST_STATE_MANAGER_IFACE = "xyz.openbmc_project.State.Host";
-    constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
-    constexpr auto PROPERTY = "RequestedHostTransition";
+namespace chassis
+{
 
-    // sd_bus error
-    int rc = 0;
-    char* busname = NULL;
+bool initStateTransition(State::Chassis::Transition transition)
+{
+    bool stateTransitioned = false;
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
 
-    // SD Bus error report mechanism.
-    sd_bus_error bus_error = SD_BUS_ERROR_NULL;
-
-    // Gets a hook onto either a SYSTEM or SESSION bus
-    sd_bus* bus_type = ipmid_get_sd_bus_connection();
-    rc = mapper_get_service(bus_type, HOST_STATE_MANAGER_ROOT, &busname);
-    if (rc < 0)
+    try
     {
-        log<level::ERR>(
-            "Failed to get bus name",
-            entry("ERRNO=0x%X, OBJPATH=%s", -rc, HOST_STATE_MANAGER_ROOT));
-        return rc;
-    }
-
-    // Convert to string equivalent of the passed in transition enum.
-    auto request = State::convertForMessage(transition);
-
-    rc = sd_bus_call_method(bus_type,                // On the system bus
-                            busname,                 // Service to contact
-                            HOST_STATE_MANAGER_ROOT, // Object path
-                            DBUS_PROPERTY_IFACE,     // Interface name
-                            "Set",                   // Method to be called
-                            &bus_error,              // object to return error
-                            nullptr,                 // Response buffer if any
-                            "ssv",                   // Takes 3 arguments
-                            HOST_STATE_MANAGER_IFACE, PROPERTY, "s",
-                            request.c_str());
-    if (rc < 0)
-    {
-        log<level::ERR>("Failed to initiate transition",
-                        entry("ERRNO=0x%X, REQUEST=%s", -rc, request.c_str()));
-    }
-    else
-    {
+        setDbusProperty(*busp, stateMgrServiceIface, stateMgrRoot,
+                        stateMgrServiceIface, propReqTrans,
+                        State::convertForMessage(transition));
         log<level::INFO>("Transition request initiated successfully");
+        stateTransitioned = true;
     }
-
-    sd_bus_error_free(&bus_error);
-    free(busname);
-
-    return rc;
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failed to initiate Chassis state transition",
+                        entry("ERROR: %s", e.what()));
+    }
+    return stateTransitioned;
 }
+
+std::string getChassisState()
+{
+    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+
+    return std::get<std::string>(
+        getDbusProperty(bus, stateMgrServiceIface, stateMgrRoot,
+                        stateMgrServiceIface, propCurrentState));
+}
+} // namespace chassis
+
+namespace host
+{
+
+bool initStateTransition(State::Host::Transition transition)
+{
+    bool stateTransitioned = false;
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+
+    try
+    {
+        setDbusProperty(*busp, stateMgrServiceIface, stateMgrRoot,
+                        stateMgrServiceIface, propReqTrans,
+                        State::convertForMessage(transition));
+        log<level::INFO>("Transition request initiated successfully");
+        stateTransitioned = true;
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failed to initiate Host state transition",
+                        entry("ERROR: %s", e.what()));
+    }
+    return stateTransitioned;
+}
+
+std::string getHostState()
+{
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+
+    return std::get<std::string>(
+        getDbusProperty(*busp, stateMgrServiceIface, stateMgrRoot,
+                        stateMgrServiceIface, propCurrentState));
+}
+
+std::string getHostTransition()
+{
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+
+    return std::get<std::string>(
+        getDbusProperty(*busp, stateMgrServiceIface, stateMgrRoot,
+                        stateMgrServiceIface, propReqTrans));
+}
+} // namespace host
+} // namespace ipmi
 
 //------------------------------------------
 // Set Enabled property to inform NMI source
 // handling to trigger a NMI_OUT BSOD.
 //------------------------------------------
-int setNmiProperty(const bool value)
+bool setNmiProperty(const bool value)
 {
     constexpr const char* nmiSourceObjPath =
         "/xyz/openbmc_project/Chassis/Control/NMISource";
@@ -894,10 +918,10 @@ int setNmiProperty(const bool value)
     {
         log<level::ERR>("Failed to trigger NMI_OUT",
                         entry("EXCEPTION=%s", e.what()));
-        return -1;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
 namespace power_policy
@@ -1301,54 +1325,35 @@ ipmi::RspType<uint4_t, // Restart Cause
 //-------------------------------------------------------------
 // Send a command to SoftPowerOff application to stop any timer
 //-------------------------------------------------------------
-int stop_soft_off_timer()
+namespace ipmi
 {
-    constexpr auto iface = "org.freedesktop.DBus.Properties";
-    constexpr auto soft_off_iface = "xyz.openbmc_project.Ipmi.Internal."
-                                    "SoftPowerOff";
 
-    constexpr auto property = "ResponseReceived";
-    constexpr auto value = "xyz.openbmc_project.Ipmi.Internal."
-                           "SoftPowerOff.HostResponse.HostShutdown";
+namespace softoff
+{
 
-    // Get the system bus where most system services are provided.
-    auto bus = ipmid_get_sd_bus_connection();
+bool stopSoftOffTimer()
+{
+    auto timerStopped = false;
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
 
-    // Get the service name
-    // TODO openbmc/openbmc#1661 - Mapper refactor
-    //
-    // See openbmc/openbmc#1743 for some details but high level summary is that
-    // for now the code will directly call the soft off interface due to a
-    // race condition with mapper usage
-    //
-    // char *busname = nullptr;
-    // auto r = mapper_get_service(bus, SOFTOFF_OBJPATH, &busname);
-    // if (r < 0)
-    //{
-    //    fprintf(stderr, "Failed to get %s bus name: %s\n",
-    //            SOFTOFF_OBJPATH, -r);
-    //    return r;
-    //}
-
-    // No error object or reply expected.
-    int rc = sd_bus_call_method(bus, SOFTOFF_BUSNAME, SOFTOFF_OBJPATH, iface,
-                                "Set", nullptr, nullptr, "ssv", soft_off_iface,
-                                property, "s", value);
-    if (rc < 0)
+    try
+    {
+        setDbusProperty(*busp, SOFTOFF_BUSNAME, SOFTOFF_OBJPATH,
+                        SOFTOFF_BUSNAME, propRespReceived, valHostShutdown);
+        timerStopped = true;
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
     {
         log<level::ERR>("Failed to set property in SoftPowerOff object",
-                        entry("ERRNO=0x%X", -rc));
+                        entry("ERROR: %s", e.what()));
     }
-
-    // TODO openbmc/openbmc#1661 - Mapper refactor
-    // free(busname);
-    return rc;
+    return timerStopped;
 }
 
 //----------------------------------------------------------------------
 // Create file to indicate there is no need for softoff notification to host
 //----------------------------------------------------------------------
-void indicate_no_softoff_needed()
+void indicateNoSoftoffNeeded()
 {
     fs::path path{HOST_INBAND_REQUEST_DIR};
     if (!fs::is_directory(path))
@@ -1368,6 +1373,9 @@ void indicate_no_softoff_needed()
     std::ofstream(path.c_str());
 }
 
+} // namespace softoff
+} // namespace ipmi
+
 /** @brief Implementation of chassis control command
  *
  *  @param - chassisControl command byte
@@ -1376,11 +1384,11 @@ void indicate_no_softoff_needed()
  */
 ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
 {
-    int rc = 0;
+    auto rc = false;
     switch (chassisControl)
     {
         case CMD_POWER_ON:
-            rc = initiate_state_transition(State::Host::Transition::On);
+            rc = ipmi::host::initStateTransition(State::Host::Transition::On);
             break;
         case CMD_POWER_OFF:
             // This path would be hit in 2 conditions.
@@ -1395,20 +1403,21 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
 
             // For now, we are going ahead with trying to nudge the soft off and
             // interpret the failure to do so as a non softoff case
-            rc = stop_soft_off_timer();
+            rc = ipmi::softoff::stopSoftOffTimer();
 
             // Only request the Off transition if the soft power off
             // application is not running
-            if (rc < 0)
+            if (!rc)
             {
                 // First create a file to indicate to the soft off application
                 // that it should not run. Not doing this will result in State
                 // manager doing a default soft power off when asked for power
                 // off.
-                indicate_no_softoff_needed();
+                ipmi::softoff::indicateNoSoftoffNeeded();
 
                 // Now request the shutdown
-                rc = initiate_state_transition(State::Host::Transition::Off);
+                rc = ipmi::host::initStateTransition(
+                    State::Host::Transition::Off);
             }
             else
             {
@@ -1427,14 +1436,15 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
             // that it should not run since this is a direct user initiated
             // power reboot request (i.e. a reboot request that is not
             // originating via a soft power off SMS request)
-            indicate_no_softoff_needed();
+            ipmi::softoff::indicateNoSoftoffNeeded();
 
-            rc = initiate_state_transition(State::Host::Transition::Reboot);
+            rc = ipmi::host::initStateTransition(
+                State::Host::Transition::Reboot);
             break;
 
         case CMD_SOFT_OFF_VIA_OVER_TEMP:
             // Request Host State Manager to do a soft power off
-            rc = initiate_state_transition(State::Host::Transition::Off);
+            rc = ipmi::host::initStateTransition(State::Host::Transition::Off);
             break;
 
         case CMD_PULSE_DIAGNOSTIC_INTR:
@@ -1449,8 +1459,8 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
         }
     }
 
-    return ((rc < 0) ? ipmi::responseUnspecifiedError()
-                     : ipmi::responseSuccess());
+    return rc ? ipmi::responseUnspecifiedError()
+              : ipmi::responseSuccess();
 }
 
 /** @brief Return D-Bus connection string to enclosure identify LED object
