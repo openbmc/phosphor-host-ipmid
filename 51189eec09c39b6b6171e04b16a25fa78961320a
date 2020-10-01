@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99dde545_972b7ebb",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "constexpr size_t accessTypesCount \u003d 4;\nconstexpr std::array\u003cThresholdAccessByMutPair, accessTypesCount\u003e \u003d {...",
+      "range": {
+        "startLine": 561,
+        "startChar": 4,
+        "endLine": 561,
+        "endChar": 41
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9d32da8_c08c74dd",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "const auto\u0026",
+      "range": {
+        "startLine": 576,
+        "startChar": 9,
+        "endLine": 576,
+        "endChar": 13
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0551476d_befaf561",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "class names should be UpperCamelCase",
+      "range": {
+        "startLine": 379,
+        "startChar": 11,
+        "endLine": 379,
+        "endChar": 35
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e4f8466_2371a9f1",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "enums should be lowerCamelCase",
+      "range": {
+        "startLine": 381,
+        "startChar": 4,
+        "endLine": 381,
+        "endChar": 20
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f7b8a63_3784f821",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "functions should be lowerCamelCase",
+      "range": {
+        "startLine": 393,
+        "startChar": 12,
+        "endLine": 393,
+        "endChar": 38
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cfff8cd2_98423ab4",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "UpperCamelCase",
+      "range": {
+        "startLine": 598,
+        "startChar": 11,
+        "endLine": 598,
+        "endChar": 33
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "664e5c05_38e16253",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "lowerCamelCase",
+      "range": {
+        "startLine": 600,
+        "startChar": 4,
+        "endLine": 601,
+        "endChar": 12
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa374110_39274928",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "lowerCamelCase",
+      "range": {
+        "startLine": 610,
+        "startChar": 12,
+        "endLine": 610,
+        "endChar": 35
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79e61352_fd4fee34",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "lowerCamelCase",
+      "range": {
+        "startLine": 614,
+        "startChar": 12,
+        "endLine": 614,
+        "endChar": 22
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2532337_8f141a37",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "constexpr size_t thresholdCount \u003d 4;\nconstexpr std::array\u003cMaskShiftPair, thresholdCount\u003e \u003d {...",
+      "range": {
+        "startLine": 621,
+        "startChar": 4,
+        "endLine": 621,
+        "endChar": 15
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc0cd3db_f4d8eae5",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2020-10-01T21:37:56Z",
+      "side": 1,
+      "message": "const auto\u0026",
+      "range": {
+        "startLine": 632,
+        "startChar": 9,
+        "endLine": 632,
+        "endChar": 13
+      },
+      "revId": "51189eec09c39b6b6171e04b16a25fa78961320a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
