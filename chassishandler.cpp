@@ -1670,6 +1670,10 @@ static ipmi::Cc setBootMode(const Mode::Modes& mode)
     return ipmi::ccSuccess;
 }
 
+static constexpr uint8_t setComplete = 0x0;
+static constexpr uint8_t setInProgress = 0x1;
+static uint8_t transferStatus = setComplete;
+
 /** @brief implements the Get Chassis system boot option
  *  @param bootOptionParameter   - boot option parameter selector
  *  @param reserved1    - reserved bit
@@ -1703,6 +1707,13 @@ ipmi::RspType<ipmi::message::Payload>
     using namespace boot_options;
 
     IpmiValue bootOption = ipmiDefault;
+
+    if (static_cast<uint8_t>(bootOptionParameter) ==
+        static_cast<uint8_t>(BootOptionParameter::setInProgress))
+    {
+        response.pack(bootOptionParameter, reserved1, transferStatus);
+        return ipmi::responseSuccess(std::move(response));
+    }
 
     /*
      * Parameter #5 means boot flags. Please refer to 28.13 of ipmi doc.
@@ -1824,6 +1835,28 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
 {
     using namespace boot_options;
     ipmi::Cc rc;
+
+    if (parameterSelector ==
+        static_cast<uint7_t>(BootOptionParameter::setInProgress))
+    {
+        uint2_t setInProgressFlag;
+        uint6_t rsvd;
+        if (data.unpack(setInProgressFlag, rsvd) != 0 || !data.fullyUnpacked())
+        {
+            return ipmi::responseReqDataLenInvalid();
+        }
+        if (rsvd)
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+        if ((transferStatus == setInProgress) &&
+            (static_cast<uint8_t>(setInProgressFlag) != setComplete))
+        {
+            return ipmi::response(IPMI_CC_FAIL_SET_IN_PROGRESS);
+        }
+        transferStatus = static_cast<uint8_t>(setInProgressFlag);
+        return ipmi::responseSuccess();
+    }
 
     /*  000101
      * Parameter #5 means boot flags. Please refer to 28.13 of ipmi doc.

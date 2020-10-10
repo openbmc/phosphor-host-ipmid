@@ -25,6 +25,7 @@ enum ipmi_chassis_return_codes
 {
     IPMI_OK = 0x0,
     IPMI_CC_PARM_NOT_SUPPORTED = 0x80,
+    IPMI_CC_FAIL_SET_IN_PROGRESS = 0x81,
 };
 
 // Generic completion codes,
@@ -46,6 +47,7 @@ enum ipmi_chassis_control_cmds : uint8_t
 };
 enum class BootOptionParameter : size_t
 {
+    setInProgress= 0x0,
     bootInfo = 0x4,
     bootFlags = 0x5,
     opalNetworkSettings = 0x61
@@ -53,6 +55,7 @@ enum class BootOptionParameter : size_t
 
 enum class BootOptionResponseSize : size_t
 {
+    setInProgress = 3,
     bootFlags = 5,
     opalNetworkSettings = 50
 };
