@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstring>
 #include <iomanip>
+#include <ipmid/types.hpp>
 #include <phosphor-logging/log.hpp>
 
 using namespace phosphor::logging;
@@ -178,9 +179,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
 
     // Perform user name based lookup
     std::string userName(request->user_name, request->user_name_len);
-    std::string passwd;
-
-    message += "user: " + userName;
+    ipmi::SecureString passwd;
     uint8_t userId = ipmi::ipmiUserGetUserId(userName);
     if (userId == ipmi::invalidUserId)
     {
