@@ -495,7 +495,7 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
     double warnHigh = std::visit(ipmi::VariantToDoubleVisitor(),
                                  warnThresholds["WarningHigh"]);
 
-    if (warnLow != 0)
+    if (std::isfinite(warnLow))
     {
         warnLow *= std::pow(10, info.scale - info.exponentR);
         resp.lowerNonCritical = static_cast<uint8_t>(
@@ -504,7 +504,7 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
             ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK);
     }
 
-    if (warnHigh != 0)
+    if (std::isfinite(warnHigh))
     {
         warnHigh *= std::pow(10, info.scale - info.exponentR);
         resp.upperNonCritical = static_cast<uint8_t>(
@@ -515,12 +515,13 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
 
     auto critThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, criticalThreshIntf);
+
     double critLow = std::visit(ipmi::VariantToDoubleVisitor(),
                                 critThresholds["CriticalLow"]);
     double critHigh = std::visit(ipmi::VariantToDoubleVisitor(),
                                  critThresholds["CriticalHigh"]);
 
-    if (critLow != 0)
+    if (std::isfinite(critLow))
     {
         critLow *= std::pow(10, info.scale - info.exponentR);
         resp.lowerCritical = static_cast<uint8_t>(
@@ -529,7 +530,7 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
             ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK);
     }
 
-    if (critHigh != 0)
+    if (std::isfinite(critHigh))
     {
         critHigh *= std::pow(10, info.scale - info.exponentR);
         resp.upperCritical = static_cast<uint8_t>(
