@@ -490,52 +490,64 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
     auto warnThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, warningThreshIntf);
 
-    double warnLow = std::visit(ipmi::VariantToDoubleVisitor(),
-                                warnThresholds["WarningLow"]);
-    double warnHigh = std::visit(ipmi::VariantToDoubleVisitor(),
-                                 warnThresholds["WarningHigh"]);
-
-    if (warnLow != 0)
+    auto it = warnThresholds.find("WarningLow");
+    if (it != warnThresholds.end())
     {
-        warnLow *= std::pow(10, info.scale - info.exponentR);
-        resp.lowerNonCritical = static_cast<uint8_t>(
-            (warnLow - info.scaledOffset) / info.coefficientM);
-        resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK);
+        double* warnLow = std::get_if<double>(&it->second);
+        if (warnLow != nullptr)
+        {
+            *warnLow *= std::pow(10, info.scale - info.exponentR);
+            resp.lowerNonCritical = static_cast<uint8_t>(
+                (*warnLow - info.scaledOffset) / info.coefficientM);
+            resp.validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK);
+        }
     }
 
-    if (warnHigh != 0)
+    it = warnThresholds.find("WarningHigh");
+    if (it != warnThresholds.end())
     {
-        warnHigh *= std::pow(10, info.scale - info.exponentR);
-        resp.upperNonCritical = static_cast<uint8_t>(
-            (warnHigh - info.scaledOffset) / info.coefficientM);
-        resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK);
+        double* warnHigh = std::get_if<double>(&it->second);
+        if (warnHigh != nullptr)
+        {
+            *warnHigh *= std::pow(10, info.scale - info.exponentR);
+            resp.upperNonCritical = static_cast<uint8_t>(
+                (*warnHigh - info.scaledOffset) / info.coefficientM);
+            resp.validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK);
+        }
     }
+
 
     auto critThresholds = ipmi::getAllDbusProperties(
         bus, service, info.sensorPath, criticalThreshIntf);
-    double critLow = std::visit(ipmi::VariantToDoubleVisitor(),
-                                critThresholds["CriticalLow"]);
-    double critHigh = std::visit(ipmi::VariantToDoubleVisitor(),
-                                 critThresholds["CriticalHigh"]);
 
-    if (critLow != 0)
+    it = critThresholds.find("CriticalLow");
+    if (it != critThresholds.end())
     {
-        critLow *= std::pow(10, info.scale - info.exponentR);
-        resp.lowerCritical = static_cast<uint8_t>(
-            (critLow - info.scaledOffset) / info.coefficientM);
-        resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK);
+        double* critLow = std::get_if<double>(&it->second);
+        if (critLow != nullptr)
+        {
+            *critLow *= std::pow(10, info.scale - info.exponentR);
+            resp.lowerCritical = static_cast<uint8_t>(
+                (*critLow - info.scaledOffset) / info.coefficientM);
+            resp.validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK);
+        }
     }
 
-    if (critHigh != 0)
+    it = critThresholds.find("CriticalHigh");
+    if (it != critThresholds.end())
     {
-        critHigh *= std::pow(10, info.scale - info.exponentR);
-        resp.upperCritical = static_cast<uint8_t>(
-            (critHigh - info.scaledOffset) / info.coefficientM);
-        resp.validMask |= static_cast<uint8_t>(
-            ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK);
+        double* critHigh = std::get_if<double>(&it->second);
+        if (critHigh != nullptr)
+        {
+            *critHigh *= std::pow(10, info.scale - info.exponentR);
+            resp.upperCritical = static_cast<uint8_t>(
+                (*critHigh - info.scaledOffset) / info.coefficientM);
+            resp.validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK);
+        }
     }
 
     return resp;
