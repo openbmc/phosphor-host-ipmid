@@ -14,6 +14,8 @@
 // limitations under the License.
 */
 #pragma once
+#include <openssl/crypto.h>
+
 #include <array>
 #include <ipmid/api.hpp>
 #include <string>
