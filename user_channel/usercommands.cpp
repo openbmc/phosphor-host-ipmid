@@ -413,9 +413,16 @@ Cc ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             log<level::DEBUG>("Test password failed",
                               entry("USER-ID=%d", (uint8_t)req->userId));
+            // Clear sensitive data
+            testPassword.clear();
+            password.clear();
             return static_cast<Cc>(
                 IPMISetPasswordReturnCodes::ipmiCCPasswdFailMismatch);
         }
+        // Clear sensitive data
+        testPassword.clear();
+        password.clear();
+
         return ccSuccess;
     }
     return ccInvalidFieldRequest;

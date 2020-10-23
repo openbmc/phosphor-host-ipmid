@@ -260,6 +260,8 @@ void PasswdMgr::initPasswordMap(void)
 
     // Update the timestamp
     fileLastUpdatedTime = getUpdatedFileTime();
+    // Clear sensitive data
+    dataBuf.clear();
     return;
 }
 
