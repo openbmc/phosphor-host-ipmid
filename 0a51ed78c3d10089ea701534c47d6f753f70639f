@@ -22,6 +22,30 @@
       "revId": "0a51ed78c3d10089ea701534c47d6f753f70639f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "757b1847_dbda05dc",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2020-10-26T22:58:45Z",
+      "side": 1,
+      "message": "it should also be noted, at this point in time, I think we can assume that we don\u0027t need to support the \"old\" int64 interface, so the visit can turn into\n\nconst double* warnLow \u003d std::get_if\u003cdouble\u003e(\u0026t-\u003esecond);\nif (warnLow \u003d\u003d nullptr){\n    return;\n}\n\nUp to you if you want to do that as well.",
+      "parentUuid": "655a9d2b_19272258",
+      "range": {
+        "startLine": 496,
+        "startChar": 36,
+        "endLine": 496,
+        "endChar": 64
+      },
+      "revId": "0a51ed78c3d10089ea701534c47d6f753f70639f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
