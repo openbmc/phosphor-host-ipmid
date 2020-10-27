@@ -474,7 +474,7 @@ ipmi::RspType<uint8_t, // sensor reading
 
 get_sdr::GetSensorThresholdsResponse getSensorThresholds(uint8_t sensorNum)
 {
-    get_sdr::GetSensorThresholdsResponse resp;
+    get_sdr::GetSensorThresholdsResponse resp{};
     constexpr auto warningThreshIntf =
         "xyz.openbmc_project.Sensor.Threshold.Warning";
     constexpr auto criticalThreshIntf =
