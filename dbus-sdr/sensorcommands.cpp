@@ -341,6 +341,31 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
             IPMISensorReadingByte2::readingStateUnavailable);
     }
 
+    int byteValue;
+    if (bSigned)
+    {
+        byteValue = static_cast<int>(static_cast<int8_t>(value));
+    }
+    else
+    {
+        byteValue = static_cast<int>(static_cast<uint8_t>(value));
+    }
+
+    // Keep stats on the reading just obtained, even if it is "NaN"
+    if (details::sdrStatsTable.updateReading(sensnum, reading, byteValue))
+    {
+        // This is the first reading, show the coefficients
+        double step = (max - min) / 255.0;
+        std::cerr << "IPMI sensor " << details::sdrStatsTable.getName(sensnum)
+                  << ": Range min=" << min << " max=" << max
+                  << ", step=" << step
+                  << ", Coefficients mValue=" << static_cast<int>(mValue)
+                  << " rExp=" << static_cast<int>(rExp)
+                  << " bValue=" << static_cast<int>(bValue)
+                  << " bExp=" << static_cast<int>(bExp)
+                  << " bSigned=" << static_cast<int>(bSigned) << "\n";
+    };
+
     uint8_t thresholds = 0;
 
     auto warningObject =
@@ -1185,6 +1210,9 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     record.body.id_string_info = name.size();
     std::strncpy(record.body.id_string, name.c_str(),
                  sizeof(record.body.id_string));
+
+    // Remember the sensor name, as determined for this sensor number
+    details::sdrStatsTable.updateName(sensornumber, name);
 
     IPMIThresholds thresholdData;
     try
