@@ -66,6 +66,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     }
     subtree = sensorTreePtr;
     sensorUpdatedIndex++;
+    // The SDR is being regenerated, wipe the old stats
+    sdrStatsTable.wipeTable();
     return sensorUpdatedIndex;
 }
 
