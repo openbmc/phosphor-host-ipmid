@@ -57,6 +57,161 @@ static constexpr uint8_t reservedSensorNumber = 0xFF;
 
 namespace details
 {
+// Enable/disable the logging of stats instrumentation
+static constexpr bool enableInstrumentation = false;
+
+class IPMIStatsEntry
+{
+  private:
+    int numReadings = 0;
+    int numMissings = 0;
+    int numStreakRead = 0;
+    int numStreakMiss = 0;
+    double minValue = 0.0;
+    double maxValue = 0.0;
+    std::string sensorName;
+
+  public:
+    const std::string& getName(void) const
+    {
+        return sensorName;
+    }
+
+    void updateName(std::string_view name)
+    {
+        sensorName = name;
+    }
+
+    // Returns true if this is the first successful reading
+    // This is so the caller can log the coefficients used
+    bool updateReading(double reading, int raw)
+    {
+        if constexpr (!enableInstrumentation)
+        {
+            return false;
+        }
+
+        bool first = ((numReadings == 0) && (numMissings == 0));
+
+        // Sensors can use "nan" to indicate unavailable reading
+        if (!(std::isfinite(reading)))
+        {
+            // Only show this if beginning a new streak
+            if (numStreakMiss == 0)
+            {
+                std::cerr << "IPMI sensor " << sensorName
+                          << ": Missing reading, byte=" << raw
+                          << ", Reading counts good=" << numReadings
+                          << " miss=" << numMissings
+                          << ", Prior good streak=" << numStreakRead << "\n";
+            }
+
+            numStreakRead = 0;
+            ++numMissings;
+            ++numStreakMiss;
+
+            return first;
+        }
+
+        // Only show this if beginning a new streak and not the first time
+        if ((numStreakRead == 0) && (numReadings != 0))
+        {
+            std::cerr << "IPMI sensor " << sensorName
+                      << ": Recovered reading, value=" << reading
+                      << " byte=" << raw
+                      << ", Reading counts good=" << numReadings
+                      << " miss=" << numMissings
+                      << ", Prior miss streak=" << numStreakMiss << "\n";
+        }
+
+        // Initialize min/max if the first successful reading
+        if (numReadings == 0)
+        {
+            std::cerr << "IPMI sensor " << sensorName
+                      << ": First reading, value=" << reading << " byte=" << raw
+                      << "\n";
+
+            minValue = reading;
+            maxValue = reading;
+        }
+
+        numStreakMiss = 0;
+        ++numReadings;
+        ++numStreakRead;
+
+        // Only provide subsequent output if new min/max established
+        if (reading < minValue)
+        {
+            std::cerr << "IPMI sensor " << sensorName
+                      << ": Lowest reading, value=" << reading
+                      << " byte=" << raw << "\n";
+
+            minValue = reading;
+        }
+
+        if (reading > maxValue)
+        {
+            std::cerr << "IPMI sensor " << sensorName
+                      << ": Highest reading, value=" << reading
+                      << " byte=" << raw << "\n";
+
+            maxValue = reading;
+        }
+
+        return first;
+    }
+};
+
+class IPMIStatsTable
+{
+  private:
+    std::vector<IPMIStatsEntry> entries;
+
+  private:
+    void padEntries(size_t index)
+    {
+        char hexbuf[16];
+
+        // Pad vector until entries[index] becomes a valid index
+        while (entries.size() <= index)
+        {
+            // As name not known yet, use human-readable hex as name
+            IPMIStatsEntry newEntry;
+            sprintf(hexbuf, "0x%02zX", entries.size());
+            newEntry.updateName(hexbuf);
+
+            entries.push_back(std::move(newEntry));
+        }
+    }
+
+  public:
+    void wipeTable(void)
+    {
+        entries.clear();
+    }
+
+    const std::string& getName(size_t index)
+    {
+        padEntries(index);
+        return entries[index].getName();
+    }
+
+    void updateName(size_t index, std::string_view name)
+    {
+        padEntries(index);
+        entries[index].updateName(name);
+    }
+
+    bool updateReading(size_t index, double reading, int raw)
+    {
+        padEntries(index);
+        return entries[index].updateReading(reading, raw);
+    }
+};
+
+// This object is global singleton, used from a variety of places
+inline IPMIStatsTable sdrStatsTable;
+
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
 
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
