@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81efea08_85ea8c05",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2020-11-04T18:10:27Z",
+      "side": 1,
+      "message": "Absolutely not.  There is no such thing as \"optional\" dbus properties, which is what this is implying.  If an interface defines a property, all implementations of that interface should have the property.\n\nWhy are we not fixing these to use std::numeric_limits::min / std::numeric_limits::max as a placeholder for invalid?",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 32
+      },
+      "revId": "817e9a8f603cc3f5e9599b1848c59ea6e4894055",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
