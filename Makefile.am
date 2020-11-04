@@ -180,8 +180,15 @@ nodist_libwhitelist_la_SOURCES = ipmiwhitelist.cpp
 endif
 
 nobase_include_HEADERS = \
+	sensorhandler.hpp \
+	selutility.hpp \
 	user_channel/channel_layer.hpp \
 	user_channel/user_layer.hpp
 
 # Forcing the build of self and then subdir
 SUBDIRS = include libipmid libipmid-host user_channel . test softoff
+
+install-data-local:
+	$(MKDIR_P) $(DESTDIR)$(includedir)/phosphor-ipmi-host
+	$(LN_S) -f ../sensorhandler.hpp $(DESTDIR)$(includedir)/phosphor-ipmi-host/sensorhandler.hpp
+	$(LN_S) -f ../selutility.hpp $(DESTDIR)$(includedir)/phosphor-ipmi-host/selutility.hpp
