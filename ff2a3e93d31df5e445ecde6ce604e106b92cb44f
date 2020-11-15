@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25c92ed6_1db3bbcc",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1000295
+      },
+      "writtenOn": "2020-11-15T17:25:39Z",
+      "side": 1,
+      "message": "you are clearing only in test password. what about password ?",
+      "revId": "ff2a3e93d31df5e445ecde6ce604e106b92cb44f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
