@@ -90,3 +90,8 @@ session_unittest_LDFLAGS = \
     $(CODE_COVERAGE_LDFLAGS)
 session_unittest_SOURCES = %reldir%/session/closesession_unittest.cpp
 check_PROGRAMS += %reldir%/session_unittest
+
+# Run integration tests
+if ENABLE_ITESTS
+SUBDIRS = . integration
+endif #enable_itests
