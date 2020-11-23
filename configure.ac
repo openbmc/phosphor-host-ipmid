@@ -87,9 +87,78 @@ AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CXXFLAGS])
 LT_INIT([dlopen disable-static shared])
 LT_LIB_DLLOAD
 
+# Integration tests
+AC_ARG_ENABLE([itests], AC_HELP_STRING([--enable-itests],
+                                      [Run integration tests]))
+AM_CONDITIONAL([ENABLE_ITESTS], [test "x$enable_itests" = "xyes"])
+
 # Check/set gtest specific functions.
 PKG_CHECK_MODULES([GTEST], [gtest], [], [AC_MSG_NOTICE([gtest not found, tests will not build])])
 PKG_CHECK_MODULES([GTEST_MAIN], [gtest_main], [], [AC_MSG_NOTICE([gtest_main not found, tests will not build])])
+
+# Check/set gtest specific functions.
+AS_IF([test "x$enable_itests" != "xno"], [
+    PKG_CHECK_MODULES([GMOCK], [gmock], [], [true])
+    AX_PTHREAD
+
+    AX_SAVE_FLAGS_WITH_PREFIX(OLD, [CPPFLAGS])
+    AX_APPEND_COMPILE_FLAGS([$GTEST_CFLAGS], [CPPFLAGS])
+    AC_LANG_PUSH([C++])
+    AC_CHECK_HEADERS([gtest/gtest.h], [
+        AS_IF([test "x$GTEST_CFLAGS" = "x"], [
+            AS_IF([test "x$PTHREAD_CFLAGS" = "x"], [
+                AX_APPEND_COMPILE_FLAGS(["-DGTEST_HAS_PTHREAD=0"], [GTEST_CFLAGS])
+            ], [
+                AX_APPEND_COMPILE_FLAGS(["-DGTEST_HAS_PTHREAD=1"], [GTEST_CFLAGS])
+                AX_APPEND_COMPILE_FLAGS([$PTHREAD_CFLAGS], [GTEST_CFLAGS])
+            ])
+        ])
+    ], [
+        AS_IF([test "x$enable_itests" = "xyes"], [
+            AC_MSG_ERROR([Testing enabled but could not find gtest/gtest.h])
+        ])
+    ])
+    AC_LANG_POP([C++])
+    AX_RESTORE_FLAGS_WITH_PREFIX(OLD, [CPPFLAGS])
+
+    AX_SAVE_FLAGS_WITH_PREFIX(OLD, [CPPFLAGS])
+    AX_APPEND_COMPILE_FLAGS([$GMOCK_CFLAGS], [CPPFLAGS])
+    AC_LANG_PUSH([C++])
+    AC_CHECK_HEADERS([gmock/gmock.h], [], [
+        AS_IF([test "x$enable_itests" = "xyes"], [
+            AC_MSG_ERROR([Testing enabled but could not find gmock/gmock.h])
+        ])
+    ])
+    AC_LANG_POP([C++])
+    AX_RESTORE_FLAGS_WITH_PREFIX(OLD, [CPPFLAGS])
+
+    AX_SAVE_FLAGS_WITH_PREFIX(OLD, [LDFLAGS])
+    AX_APPEND_COMPILE_FLAGS([$GTEST_LIBS], [LDFLAGS])
+    AC_CHECK_LIB([gtest], [main], [
+        AS_IF([test "x$GTEST_LIBS" = "x"], [
+            AX_APPEND_COMPILE_FLAGS([-lgtest], [GTEST_LIBS])
+        ])
+    ], [
+        AS_IF([test "x$enable_itests" = "xyes"], [
+            AC_MSG_ERROR([Testing enabled but couldn't find gtest libs])
+        ])
+    ])
+    AX_RESTORE_FLAGS_WITH_PREFIX(OLD, [LDFLAGS])
+
+    AX_SAVE_FLAGS_WITH_PREFIX(OLD, [LDFLAGS])
+    AX_APPEND_COMPILE_FLAGS([$GMOCK_LIBS], [LDFLAGS])
+    AC_CHECK_LIB([gmock], [main], [
+        AS_IF([test "x$GMOCK_LIBS" = "x"], [
+            AX_APPEND_COMPILE_FLAGS([-lgmock], [GMOCK_LIBS])
+        ])
+    ], [
+        AS_IF([test "x$enable_itests" = "xyes"], [
+            AC_MSG_ERROR([Testing enabled but couldn't find gmock libs])
+        ])
+    ])
+    AX_RESTORE_FLAGS_WITH_PREFIX(OLD, [LDFLAGS])
+])
+
 
 AC_ARG_ENABLE([oe-sdk],
     AS_HELP_STRING([--enable-oe-sdk], [Link testcases absolutely against OE SDK so they can be ran within it.])
@@ -276,6 +345,7 @@ AC_CONFIG_FILES([
     libipmid-host/libipmid-host.pc
     softoff/Makefile
     test/Makefile
+    test/integration/Makefile
     user_channel/Makefile
 ])
 AC_OUTPUT
