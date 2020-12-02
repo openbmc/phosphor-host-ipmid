@@ -240,7 +240,10 @@ GetSensorResponse readingData(const Info& sensorInfo)
             rawData < std::numeric_limits<int8_t>::lowest())
         {
             log<level::ERR>("Value out of range");
-            throw std::out_of_range("Value out of range");
+            std::cerr << sensorInfo.sensorPath <<"\n";
+            std::cerr << sensorInfo.sensorPath << " dbus value : " << std::get<T>(propValue) * std::pow(10, sensorInfo.scale) <<"\n";
+            std::cerr << sensorInfo.sensorPath << " raw data : " << rawData <<"\n";
+            rawData=0;
         }
         setReading(static_cast<int8_t>(rawData), &response);
     }
@@ -250,7 +253,10 @@ GetSensorResponse readingData(const Info& sensorInfo)
             rawData < std::numeric_limits<uint8_t>::lowest())
         {
             log<level::ERR>("Value out of range");
-            throw std::out_of_range("Value out of range");
+            std::cerr << sensorInfo.sensorPath <<"\n";
+            std::cerr << sensorInfo.sensorPath << " dbus value : " << std::get<T>(propValue) * std::pow(10, sensorInfo.scale) <<"\n";
+            std::cerr << sensorInfo.sensorPath << " raw data : " << rawData <<"\n";
+            rawData=0;
         }
         setReading(static_cast<uint8_t>(rawData), &response);
     }
