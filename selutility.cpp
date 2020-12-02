@@ -58,8 +58,6 @@ GetSELEntryResponse
         elog<InternalFailure>();
     }
 
-    record.recordID = static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
-
     // Read Timestamp from the log entry.
     static constexpr auto propTimeStamp = "Timestamp";
     auto iterTimeStamp = entryData.find(propTimeStamp);
@@ -68,44 +66,56 @@ GetSELEntryResponse
         log<level::ERR>("Error in reading Timestamp of logging entry");
         elog<InternalFailure>();
     }
-
     std::chrono::milliseconds chronoTimeStamp(
         std::get<uint64_t>(iterTimeStamp->second));
-    record.timeStamp = static_cast<uint32_t>(
-        std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp)
-            .count());
 
-    static constexpr auto systemEventRecord = 0x02;
-    static constexpr auto generatorID = 0x2000;
-    static constexpr auto eventMsgRevision = 0x04;
-
-    record.recordType = systemEventRecord;
-    record.generatorID = generatorID;
-    record.eventMsgRevision = eventMsgRevision;
-
-    record.sensorType = iter->second.sensorType;
-    record.sensorNum = iter->second.sensorID;
-    record.eventData1 = iter->second.eventOffset;
-
-    // Read Resolved from the log entry.
-    static constexpr auto propResolved = "Resolved";
-    auto iterResolved = entryData.find(propResolved);
-    if (iterResolved == entryData.end())
+    if (iter == invSensors.end())
     {
-        log<level::ERR>("Error in reading Resolved field of logging entry");
-        elog<InternalFailure>();
-    }
-
-    static constexpr auto deassertEvent = 0x80;
-
-    // Evaluate if the event is assertion or deassertion event
-    if (std::get<bool>(iterResolved->second))
-    {
-        record.eventType = deassertEvent | iter->second.eventReadingType;
+        // It is expected to be a custom SEL entry
+        // TODO
     }
     else
     {
-        record.eventType = iter->second.eventReadingType;
+
+        record.event.eventRecord.recordID =
+            static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
+        record.event.eventRecord.timeStamp = static_cast<uint32_t>(
+            std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp)
+                .count());
+
+        static constexpr auto systemEventRecord = 0x02;
+        static constexpr auto generatorID = 0x2000;
+        static constexpr auto eventMsgRevision = 0x04;
+
+        record.event.eventRecord.recordType = systemEventRecord;
+        record.event.eventRecord.generatorID = generatorID;
+        record.event.eventRecord.eventMsgRevision = eventMsgRevision;
+
+        record.event.eventRecord.sensorType = iter->second.sensorType;
+        record.event.eventRecord.sensorNum = iter->second.sensorID;
+        record.event.eventRecord.eventData1 = iter->second.eventOffset;
+
+        // Read Resolved from the log entry.
+        static constexpr auto propResolved = "Resolved";
+        auto iterResolved = entryData.find(propResolved);
+        if (iterResolved == entryData.end())
+        {
+            log<level::ERR>("Error in reading Resolved field of logging entry");
+            elog<InternalFailure>();
+        }
+
+        static constexpr auto deassertEvent = 0x80;
+
+        // Evaluate if the event is assertion or deassertion event
+        if (std::get<bool>(iterResolved->second))
+        {
+            record.event.eventRecord.eventType =
+                deassertEvent | iter->second.eventReadingType;
+        }
+        else
+        {
+            record.event.eventRecord.eventType = iter->second.eventReadingType;
+        }
     }
 
     return record;
@@ -171,12 +181,6 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     // If there are no callout associations link the log entry to system event
     // sensor
     auto iter = invSensors.find(SYSTEM_SENSOR);
-    if (iter == invSensors.end())
-    {
-        log<level::ERR>("System event sensor not found");
-        elog<InternalFailure>();
-    }
-
     return internal::prepareSELEntry(objPath, iter);
 }
 
