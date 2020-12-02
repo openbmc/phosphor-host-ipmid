@@ -15,6 +15,8 @@ class WatchdogService
 
     using Action =
         sdbusplus::xyz::openbmc_project::State::server::Watchdog::Action;
+    using PreTimeoutInterruptAction = sdbusplus::xyz::openbmc_project::State::
+        server::Watchdog::PreTimeoutInterruptAction;
     using TimerUse =
         sdbusplus::xyz::openbmc_project::State::server::Watchdog::TimerUse;
 
@@ -91,6 +93,13 @@ class WatchdogService
      *  @param[in] interval - The new interval value
      */
     void setInterval(uint64_t interval);
+
+    /** @brief Sets the value of the PreTimeoutInterrupt property on the host
+     * watchdog
+     *
+     *  @param[in] PreTimeoutInterrupt - The new PreTimeoutInterrupt value
+     */
+    void setPreTimeoutInterrupt(PreTimeoutInterruptAction preTimeoutInterrupt);
 
   private:
     /** @brief sdbusplus handle */
