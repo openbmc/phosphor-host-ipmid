@@ -22,6 +22,13 @@ namespace
 
 constexpr auto systemEventRecord = 0x02;
 
+constexpr auto propAdditionalData = "AdditionalData";
+constexpr auto strEventDir = "EVENT_DIR";
+constexpr auto strGenerateId = "GENERATOR_ID";
+constexpr auto strRecordType = "RECORD_TYPE";
+constexpr auto strSensorData = "SENSOR_DATA";
+constexpr auto strSensorPath = "SENSOR_PATH";
+
 } // namespace
 
 namespace ipmi
@@ -38,6 +45,7 @@ inline bool isRecordOEM(uint8_t recordType)
     return recordType != systemEventRecord;
 }
 
+using additionalDataMap = std::map<std::string, std::string>;
 /** Parse the entry with format like key=val */
 std::pair<std::string, std::string> parseEntry(const std::string& entry)
 {
@@ -49,8 +57,7 @@ std::pair<std::string, std::string> parseEntry(const std::string& entry)
     return {key, val};
 }
 
-std::map<std::string, std::string>
-    parseAdditionalData(const AdditionalData& data)
+additionalDataMap parseAdditionalData(const AdditionalData& data)
 {
     std::map<std::string, std::string> ret;
 
@@ -79,6 +86,33 @@ std::vector<uint8_t> convertVec(const std::string_view& str)
         ret.emplace_back(convert(str.substr(i * 2, 2), 16));
     }
     return ret;
+}
+
+/** Construct OEM SEL record according to IPMI spec 32.2, 32.3. */
+void constructOEMSel(uint8_t recordType, std::chrono::milliseconds timestamp,
+                     const additionalDataMap& m, GetSELEntryResponse& record)
+{
+    auto dataIter = m.find(strSensorData);
+    assert(dataIter != m.end());
+    auto sensorData = convertVec(dataIter->second);
+    if (recordType >= 0xC0 && recordType < 0xE0)
+    {
+        record.event.oemCD.timeStamp = static_cast<uint32_t>(
+            std::chrono::duration_cast<std::chrono::seconds>(timestamp)
+                .count());
+        record.event.oemCD.recordType = recordType;
+        // The ManufactureID and OEM Defined are packed in the sensor data
+        // Fill the 9 bytes of Manufacture ID and oemDefined
+        memcpy(&record.event.oemCD.manufacturerID, sensorData.data(),
+               std::min(sensorData.size(), static_cast<size_t>(9)));
+    }
+    else if (recordType >= 0xE0)
+    {
+        record.event.oemEF.recordType = recordType;
+        // The remaining 13 bytes are the OEM Defined data
+        memcpy(&record.event.oemEF.oemDefined, sensorData.data(),
+               std::min(sensorData.size(), static_cast<size_t>(13)));
+    }
 }
 
 GetSELEntryResponse
@@ -130,12 +164,6 @@ GetSELEntryResponse
         // It is expected to be a custom SEL entry
         record.event.oemCD.recordID =
             static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
-        static constexpr auto propAdditionalData = "AdditionalData";
-        // static constexpr auto strEventDir = "EVENT_DIR";
-        // static constexpr auto strGenerateId = "GENERATOR_ID";
-        static constexpr auto strRecordType = "RECORD_TYPE";
-        static constexpr auto strSensorData = "SENSOR_DATA";
-        // static constexpr auto strSensorPath = "SENSOR_PATH";
         iterId = entryData.find(propAdditionalData);
         if (iterId == entryData.end())
         {
@@ -148,24 +176,7 @@ GetSELEntryResponse
         auto isOEM = isRecordOEM(recordType);
         if (isOEM)
         {
-            if (recordType >= 0xC0 && recordType < 0xE0)
-            {
-                record.event.oemCD.timeStamp = static_cast<uint32_t>(
-                    std::chrono::duration_cast<std::chrono::seconds>(
-                        chronoTimeStamp)
-                        .count());
-                record.event.oemCD.recordType = recordType;
-                // The ManufactureID and OEM Defined are packed in the sensor
-                // data
-                auto sensorData = convertVec(m[strSensorData]);
-                // Fill the 9 bytes of Manufacture ID and oemDefined
-                memcpy(&record.event.oemCD.manufacturerID, sensorData.data(),
-                       std::min(sensorData.size(), static_cast<size_t>(9)));
-            }
-            else if (recordType >= 0xE0)
-            {
-                // TODO
-            }
+            constructOEMSel(recordType, chronoTimeStamp, m, record);
         }
         else
         {
