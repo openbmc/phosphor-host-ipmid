@@ -2,6 +2,7 @@
 
 #include "selutility.hpp"
 
+#include <charconv>
 #include <chrono>
 #include <filesystem>
 #include <ipmid/api.hpp>
@@ -24,6 +25,49 @@ namespace sel
 
 namespace internal
 {
+
+/** Parse the entry with format like key=val */
+std::pair<std::string, std::string> parseEntry(const std::string& entry)
+{
+    constexpr auto equalSign = "=";
+    auto pos = entry.find(equalSign);
+    assert(pos != std::string::npos);
+    auto key = entry.substr(0, pos);
+    auto val = entry.substr(pos + 1);
+    return {key, val};
+}
+
+std::map<std::string, std::string>
+    parseAdditionalData(const AdditionalData& data)
+{
+    std::map<std::string, std::string> ret;
+
+    for (const auto& d : data)
+    {
+        ret.insert(parseEntry(d));
+    }
+    return ret;
+}
+
+uint8_t convert(const std::string_view& str, int base = 10)
+{
+    int ret;
+    std::from_chars(str.data(), str.data() + str.size(), ret, base);
+    return static_cast<uint8_t>(ret);
+}
+
+// Convert the string to a vector of uint8_t, where the str is formatted as hex
+std::vector<uint8_t> convertVec(const std::string_view& str)
+{
+    std::vector<uint8_t> ret;
+    auto len = str.size() / 2;
+    ret.reserve(len);
+    for (size_t i = 0; i < len; ++i)
+    {
+        ret.emplace_back(convert(str.substr(i * 2, 2), 16));
+    }
+    return ret;
+}
 
 GetSELEntryResponse
     prepareSELEntry(const std::string& objPath,
@@ -72,7 +116,50 @@ GetSELEntryResponse
     if (iter == invSensors.end())
     {
         // It is expected to be a custom SEL entry
-        // TODO
+        record.event.oemCD.recordID =
+            static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
+        static constexpr auto propAdditionalData = "AdditionalData";
+        // static constexpr auto strEventDir = "EVENT_DIR";
+        // static constexpr auto strGenerateId = "GENERATE_ID";
+        static constexpr auto strIsOEM = "IS_OEM";
+        static constexpr auto strRecordType = "RECORD_TYPE";
+        static constexpr auto strSensorData = "SENSOR_DATA";
+        // static constexpr auto strSensorPath = "SENSOR_PATH";
+        iterId = entryData.find(propAdditionalData);
+        if (iterId == entryData.end())
+        {
+            log<level::ERR>("Error finding AdditionalData");
+            elog<InternalFailure>();
+        }
+        const auto& addData = std::get<AdditionalData>(iterId->second);
+        auto m = parseAdditionalData(addData);
+        auto& isOEM = m[strIsOEM];
+        auto recordType = convert(m[strRecordType]);
+        if (isOEM == "1")
+        {
+            if (recordType >= 0xC0 && recordType < 0xE0)
+            {
+                record.event.oemCD.timeStamp = static_cast<uint32_t>(
+                    std::chrono::duration_cast<std::chrono::seconds>(
+                        chronoTimeStamp)
+                        .count());
+                record.event.oemCD.recordType = recordType;
+                // The ManufactureID and OEM Defined are packed in the sensor
+                // data
+                auto sensorData = convertVec(m[strSensorData]);
+                // Fill the 9 bytes of Manufacture ID and oemDefined
+                memcpy(&record.event.oemCD.manufacturerID, sensorData.data(),
+                       std::min(sensorData.size(), static_cast<size_t>(9)));
+            }
+            else if (recordType >= 0xE0)
+            {
+                // TODO
+            }
+        }
+        else
+        {
+            // TODO
+        }
     }
     else
     {
