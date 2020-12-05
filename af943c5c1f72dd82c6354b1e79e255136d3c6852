@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "424956bc_f6e5aa66",
+        "filename": "test/integration/common/services/sensor_server.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:01:42Z",
+      "side": 1,
+      "message": "Please add a short description for the methods that aren\u0027t in the base class",
+      "revId": "af943c5c1f72dd82c6354b1e79e255136d3c6852",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
