@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b156cf6d_23834394",
+        "filename": "test/integration/common/mapperd_manager.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T01:42:41Z",
+      "side": 1,
+      "message": "This will be common to many repos which include integration tests, right?\n\nWould it be possible to keep this class in the common sdbusplus integration test framework instead?",
+      "revId": "1b573079ca050f36e045cadfdd45021cb91d4211",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
