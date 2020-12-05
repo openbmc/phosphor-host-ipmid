@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "22ffa34c_2d242c6d",
+        "filename": "test/integration/common/services/restriction_mode.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:05:24Z",
+      "side": 1,
+      "message": "It looks like some of these methods are the same in every child object. Can they be moved to the parent class instead?\n\ne.g., start() that sets initial values, getMockBase, getObject, getMainObject",
+      "revId": "a1866f094b64adc1b22d6e00bbaa0ee22f034739",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
