@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bde16f0b_c93157e4",
+        "filename": "test/integration/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:47:54Z",
+      "side": 1,
+      "message": "please be consistent with tabs vs spaces",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 8
+      },
+      "revId": "c0413dbfe23465beea45d6e312b81ce179958f26",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08ae4234_37788742",
+        "filename": "test/integration/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:47:54Z",
+      "side": 1,
+      "message": "worker",
+      "range": {
+        "startLine": 38,
+        "startChar": 48,
+        "endLine": 38,
+        "endChar": 54
+      },
+      "revId": "c0413dbfe23465beea45d6e312b81ce179958f26",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5600dd3_07f1f281",
+        "filename": "test/integration/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:47:54Z",
+      "side": 1,
+      "message": "sp",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 8
+      },
+      "revId": "c0413dbfe23465beea45d6e312b81ce179958f26",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
