@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3835ed8_66081bbc",
+        "filename": "test/integration/ipmid_test.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:20:44Z",
+      "side": 1,
+      "message": "I suggest using EXPECT_THAT and ContainerEq instead so it will print the full expected and actual vectors if they don\u0027t match",
+      "revId": "676339825d9f25026f33e3a5dcb432caa63f7f83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cde2f89a_4be1e599",
+        "filename": "test/integration/ipmid_test.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:20:44Z",
+      "side": 1,
+      "message": "might want to explicitly say \"netfn\", \"lun\", etc for these labels",
+      "range": {
+        "startLine": 73,
+        "startChar": 18,
+        "endLine": 73,
+        "endChar": 19
+      },
+      "revId": "676339825d9f25026f33e3a5dcb432caa63f7f83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c3c426c_7517431e",
+        "filename": "test/integration/ipmid_test.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000233
+      },
+      "writtenOn": "2020-12-05T02:20:44Z",
+      "side": 1,
+      "message": "nit: this reads as redundant, since \"d\" already stands for \"daemon\"",
+      "range": {
+        "startLine": 20,
+        "startChar": 10,
+        "endLine": 20,
+        "endChar": 17
+      },
+      "revId": "676339825d9f25026f33e3a5dcb432caa63f7f83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
