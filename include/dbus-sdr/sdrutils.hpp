@@ -209,7 +209,8 @@ class IPMIStatsTable
     }
 };
 
-// This object is global singleton, used from a variety of places
+// Store information for threshold sensors and they are not used by VR
+// sensors. These objects are global singletons, used from a variety of places.
 inline IPMIStatsTable sdrStatsTable;
 
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
