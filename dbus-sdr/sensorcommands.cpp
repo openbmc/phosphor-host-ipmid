@@ -147,13 +147,21 @@ static sdbusplus::bus::match::match thresholdChanged(
         }
     });
 
+namespace sensor
+{
+static constexpr const char* vrInterface =
+    "xyz.openbmc_project.Control.VoltageRegulatorMode";
+static constexpr const char* sensorInterface =
+    "xyz.openbmc_project.Sensor.Value";
+} // namespace sensor
+
 static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
                             double& min)
 {
     max = 127;
     min = -128;
 
-    auto sensorObject = sensorMap.find("xyz.openbmc_project.Sensor.Value");
+    auto sensorObject = sensorMap.find(sensor::sensorInterface);
     auto critical =
         sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
     auto warning =
@@ -258,6 +266,101 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
     return true;
 }
 
+namespace sensor
+{
+// Calculate VR Mode from input IPMI discrete event bytes
+static std::optional<std::string>
+    calculateVRMode(uint15_t assertOffset,
+                    const ipmi::DbusInterfaceMap::mapped_type& VRObject)
+{
+    // get VR mode profiles from Supported Interface
+    auto supportedProperty = VRObject.find("Supported");
+    if (supportedProperty == VRObject.end() ||
+        VRObject.find("Selected") == VRObject.end())
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Missing the required Supported and Selected properties");
+        return std::nullopt;
+    }
+
+    const auto profilesPtr =
+        std::get_if<std::vector<std::string>>(&supportedProperty->second);
+
+    if (profilesPtr == nullptr)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "property is not array of string");
+        return std::nullopt;
+    }
+
+    // interpret IPMI cmd bits into profiles' index
+    long unsigned int index = 0;
+    // only one bit should be set and the highest bit should not be used.
+    if (assertOffset == 0 || assertOffset == (1u << 15) ||
+        (assertOffset & (assertOffset - 1)))
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "IPMI cmd format incorrect",
+
+            phosphor::logging::entry("BYTES=%#02x",
+                                     static_cast<uint16_t>(assertOffset)));
+        return std::nullopt;
+    }
+
+    while (assertOffset != 1)
+    {
+        assertOffset >>= 1;
+        index++;
+    }
+
+    if (index >= profilesPtr->size())
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "profile index out of boundary");
+        return std::nullopt;
+    }
+
+    return profilesPtr->at(index);
+}
+
+// Calculate sensor value from IPMI reading byte
+static std::optional<double>
+    calculateValue(uint8_t reading, const ipmi::DbusInterfaceMap& sensorMap,
+                   const ipmi::DbusInterfaceMap::mapped_type& valueObject)
+{
+    if (valueObject.find("Value") == valueObject.end())
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Missing the required Value property");
+        return std::nullopt;
+    }
+
+    double max = 0;
+    double min = 0;
+    getSensorMaxMin(sensorMap, max, min);
+
+    int16_t mValue = 0;
+    int16_t bValue = 0;
+    int8_t rExp = 0;
+    int8_t bExp = 0;
+    bool bSigned = false;
+
+    if (!getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned))
+    {
+        return std::nullopt;
+    }
+
+    double value = bSigned ? ((int8_t)reading) : reading;
+
+    value *= ((double)mValue);
+    value += ((double)bValue) * std::pow(10.0, bExp);
+    value *= std::pow(10.0, rExp);
+
+    return value;
+}
+
+} // namespace sensor
+
 ipmi::RspType<> ipmiSenPlatformEvent(uint8_t generatorID, uint8_t evmRev,
                                      uint8_t sensorType, uint8_t sensorNum,
                                      uint8_t eventType, uint8_t eventData1,
@@ -287,64 +390,81 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
     {
         return ipmi::responseResponseError();
     }
-    auto sensorObject = sensorMap.find("xyz.openbmc_project.Sensor.Value");
 
-    if (sensorObject == sensorMap.end() ||
-        sensorObject->second.find("Value") == sensorObject->second.end())
+    // we can tell the sensor type by its interface type
+    auto sensorObject = sensorMap.find(sensor::sensorInterface);
+    if (sensorObject != sensorMap.end())
     {
-        return ipmi::responseResponseError();
+        auto value =
+            sensor::calculateValue(reading, sensorMap, sensorObject->second);
+        if (!value)
+        {
+            return ipmi::responseResponseError();
+        }
+
+        if constexpr (debug)
+        {
+            phosphor::logging::log<phosphor::logging::level::INFO>(
+                "IPMI SET_SENSOR",
+                phosphor::logging::entry("SENSOR_NUM=%d", sensorNumber),
+                phosphor::logging::entry("BYTE=%u", (unsigned int)reading),
+                phosphor::logging::entry("VALUE=%f", *value));
+        }
+
+        boost::system::error_code ec =
+            setDbusProperty(ctx, connection, path, sensor::sensorInterface,
+                            "Value", ipmi::Value(*value));
+
+        // setDbusProperty intended to resolve dbus exception/rc within the
+        // function but failed to achieve that. Catch SdBusError in the ipmi
+        // callback functions for now (e.g. ipmiSetSensorReading).
+        if (ec)
+        {
+            using namespace phosphor::logging;
+            log<level::ERR>("Failed to set property",
+                            entry("PROPERTY=%s", "Value"),
+                            entry("PATH=%s", path.c_str()),
+                            entry("INTERFACE=%s", sensor::sensorInterface),
+                            entry("WHAT=%s", e.what()));
+            return ipmi::responseResponseError();
+        }
+        return ipmi::responseSuccess();
     }
 
-    double max = 0;
-    double min = 0;
-    getSensorMaxMin(sensorMap, max, min);
-
-    int16_t mValue = 0;
-    int16_t bValue = 0;
-    int8_t rExp = 0;
-    int8_t bExp = 0;
-    bool bSigned = false;
-
-    if (!getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned))
+    sensorObject = sensorMap.find(sensor::vrInterface);
+    if (sensorObject != sensorMap.end())
     {
-        return ipmi::responseResponseError();
+        // VR sensors are treated as a special case and we will not check the
+        // write permission for VR sensors, since they always deemed writable
+        // and permission table are not applied to VR sensors.
+        auto vrMode =
+            sensor::calculateVRMode(assertOffset, sensorObject->second);
+        if (!vrMode)
+        {
+            return ipmi::responseResponseError();
+        }
+        boost::system::error_code ec = setDbusProperty(
+            ctx, connection, path, sensor::vrInterface, "Selected", *vrMode);
+        // setDbusProperty intended to resolve dbus exception/rc within the
+        // function but failed to achieve that. Catch SdBusError in the ipmi
+        // callback functions for now (e.g. ipmiSetSensorReading).
+        if (ec)
+        {
+            using namespace phosphor::logging;
+            log<level::ERR>("Failed to set property",
+                            entry("PROPERTY=%s", "Selected"),
+                            entry("PATH=%s", path.c_str()),
+                            entry("INTERFACE=%s", sensor::sensorInterface),
+                            entry("WHAT=%s", e.what()));
+            return ipmi::responseResponseError();
+        }
+        return ipmi::responseSuccess();
     }
 
-    double value = bSigned ? ((int8_t)reading) : reading;
-
-    value *= ((double)mValue);
-    value += ((double)bValue) * std::pow(10.0, bExp);
-    value *= std::pow(10.0, rExp);
-
-    if constexpr (debug)
-    {
-        phosphor::logging::log<phosphor::logging::level::INFO>(
-            "IPMI SET_SENSOR",
-            phosphor::logging::entry("SENSOR_NUM=%d", sensorNumber),
-            phosphor::logging::entry("BYTE=%u", (unsigned int)reading),
-            phosphor::logging::entry("VALUE=%f", value));
-    }
-
-    try
-    {
-        setDbusProperty(ctx, connection, path,
-                        "xyz.openbmc_project.Sensor.Value", "Value",
-                        ipmi::Value(value));
-    }
-    // setDbusProperty intended to resolve dbus exception/rc within the
-    // function but failed to achieve that. Catch SdBusError in the ipmi
-    // callback functions for now (e.g. ipmiSetSensorReading).
-    catch (const sdbusplus::exception::SdBusError& e)
-    {
-        using namespace phosphor::logging;
-        log<level::ERR>(
-            "Failed to set property", entry("PROPERTY=%s", "Value"),
-            entry("PATH=%s", path.c_str()),
-            entry("INTERFACE=%s", "xyz.openbmc_project.Sensor.Value"),
-            entry("WHAT=%s", e.what()));
-        return ipmi::responseResponseError();
-    }
-    return ipmi::responseSuccess();
+    phosphor::logging::log<phosphor::logging::level::ERR>(
+        "unknown sensor type",
+        phosphor::logging::entry("PATH=%s", path.c_str()));
+    return ipmi::responseResponseError();
 }
 
 ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
@@ -364,7 +484,7 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
     {
         return ipmi::responseResponseError();
     }
-    auto sensorObject = sensorMap.find("xyz.openbmc_project.Sensor.Value");
+    auto sensorObject = sensorMap.find(sensor::sensorInterface);
 
     if (sensorObject == sensorMap.end() ||
         sensorObject->second.find("Value") == sensorObject->second.end())
@@ -669,7 +789,7 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
     if ((warningInterface != sensorMap.end()) ||
         (criticalInterface != sensorMap.end()))
     {
-        auto sensorPair = sensorMap.find("xyz.openbmc_project.Sensor.Value");
+        auto sensorPair = sensorMap.find(sensor::sensorInterface);
 
         if (sensorPair == sensorMap.end())
         {
@@ -1172,7 +1292,7 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
 
     record.body.event_reading_type = getSensorEventTypeFromPath(path);
 
-    auto sensorObject = sensorMap.find("xyz.openbmc_project.Sensor.Value");
+    auto sensorObject = sensorMap.find(sensor::sensorInterface);
     if (sensorObject == sensorMap.end())
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
