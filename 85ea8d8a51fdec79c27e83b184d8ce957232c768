@@ -22,6 +22,30 @@
       "revId": "85ea8d8a51fdec79c27e83b184d8ce957232c768",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac3bcfcd_13e210cc",
+        "filename": "user_channel/passwd_mgr.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2020-12-18T18:20:27Z",
+      "side": 1,
+      "message": "Thanks. Done.",
+      "parentUuid": "1dd165c3_031a0bbc",
+      "range": {
+        "startLine": 264,
+        "startChar": 12,
+        "endLine": 264,
+        "endChar": 17
+      },
+      "revId": "85ea8d8a51fdec79c27e83b184d8ce957232c768",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
