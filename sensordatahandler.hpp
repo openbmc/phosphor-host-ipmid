@@ -101,6 +101,21 @@ inline SensorName nameLeaf(const Info& sensorInfo)
 }
 
 /** @brief Populate sensor name from the D-Bus object associated with the
+ *         sensor and the property.
+ *         If the object path is /xyz/openbmc_project/inventory/Fan0 and
+ *         the property is Present, the leaf Fan0 and the Property is
+ *         joined to Fan0_Present as the sensor name.
+ *
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *
+ *  @return On success return the sensor name for the sensor.
+ */
+inline SensorName nameLeafProperty(const Info& sensorInfo)
+{
+    return nameLeaf(sensorInfo) + "_" + nameProperty(sensorInfo);
+}
+
+/** @brief Populate sensor name from the D-Bus object associated with the
  *         sensor. If the object path is /system/chassis/motherboard/cpu0/core0
  *         then the sensor name is cpu0_core0. The leaf and the parent is put
  *         together to get the sensor name.
