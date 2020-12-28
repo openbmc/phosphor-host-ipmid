@@ -1716,6 +1716,15 @@ ipmi::RspType<ipmi::message::Payload>
         return ipmi::responseSuccess(std::move(response));
     }
 
+    if (static_cast<uint8_t>(bootOptionParameter) ==
+        static_cast<uint8_t>(BootOptionParameter::bootInfo))
+    {
+        constexpr uint8_t writeMask = 0;
+        constexpr uint8_t bootInfoAck = 0;
+        response.pack(bootOptionParameter, writeMask, bootInfoAck);
+        return ipmi::responseSuccess(std::move(response));
+    }
+
     /*
      * Parameter #5 means boot flags. Please refer to 28.13 of ipmi doc.
      * This is the only parameter used by petitboot.
