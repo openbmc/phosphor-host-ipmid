@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "addb7b0f_1dca9402",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1858,
+      "author": {
+        "id": 1000305
+      },
+      "writtenOn": "2020-12-30T07:47:45Z",
+      "side": 1,
+      "message": "The whole patch is copied from https://github.com/Intel-BMC/openbmc/blob/intel/meta-openbmc-mods/meta-common/recipes-phosphor/ipmi/phosphor-ipmi-host/0056-add-SetInProgress-to-get-set-boot-option-cmd.patch\n\nexcept this line.",
+      "revId": "75661d72ad593628ea7edd87b8bd9d6f214b7ea3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
