@@ -43,27 +43,60 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     sensorTreePtr = std::make_shared<SensorSubTree>();
 
-    auto mapperCall =
-        dbus->new_method_call("xyz.openbmc_project.ObjectMapper",
-                              "/xyz/openbmc_project/object_mapper",
-                              "xyz.openbmc_project.ObjectMapper", "GetSubTree");
     static constexpr const int32_t depth = 2;
-    static constexpr std::array<const char*, 3> interfaces = {
+
+    auto lbdUpdateSensorTree = [&dbus](const char* path,
+                                       const auto& interfaces) {
+        auto mapperCall = dbus->new_method_call(
+            "xyz.openbmc_project.ObjectMapper",
+            "/xyz/openbmc_project/object_mapper",
+            "xyz.openbmc_project.ObjectMapper", "GetSubTree");
+        SensorSubTree sensorTreePartial;
+
+        mapperCall.append(path, depth, interfaces);
+
+        try
+        {
+            auto mapperReply = dbus->call(mapperCall);
+            mapperReply.read(sensorTreePartial);
+        }
+        catch (sdbusplus::exception_t& e)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "fail to update subtree",
+                phosphor::logging::entry("PATH=%s", path),
+                phosphor::logging::entry("WHAT=%s", e.what()));
+            return false;
+        }
+        if constexpr (debug)
+        {
+            std::fprintf(stderr, "IPMI updated: %zu sensors under %s\n",
+                         sensorTreePartial.size(), path);
+        }
+        sensorTreePtr->merge(std::move(sensorTreePartial));
+        return true;
+    };
+
+    // Add sensors to SensorTree
+    static constexpr const std::array sensorInterfaces = {
         "xyz.openbmc_project.Sensor.Value",
         "xyz.openbmc_project.Sensor.Threshold.Warning",
         "xyz.openbmc_project.Sensor.Threshold.Critical"};
-    mapperCall.append("/xyz/openbmc_project/sensors", depth, interfaces);
+    static constexpr const std::array vrInterfaces = {
+        "xyz.openbmc_project.Control.VoltageRegulatorMode"};
 
-    try
+    bool sensorRez =
+        lbdUpdateSensorTree("/xyz/openbmc_project/sensors", sensorInterfaces);
+
+    // Error if searching for sensors failed.
+    if (!sensorRez)
     {
-        auto mapperReply = dbus->call(mapperCall);
-        mapperReply.read(*sensorTreePtr);
-    }
-    catch (sdbusplus::exception_t& e)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
         return sensorUpdatedIndex;
     }
+
+    // Add VR control as optional search path.
+    (void)lbdUpdateSensorTree("/xyz/openbmc_project/vr", vrInterfaces);
+
     subtree = sensorTreePtr;
     sensorUpdatedIndex++;
     // The SDR is being regenerated, wipe the old stats
