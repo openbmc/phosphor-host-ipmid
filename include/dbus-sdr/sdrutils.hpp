@@ -213,6 +213,17 @@ class IPMIStatsTable
 // sensors. These objects are global singletons, used from a variety of places.
 inline IPMIStatsTable sdrStatsTable;
 
+/**
+ * Search ObjectMapper for sensors and update them to subtree.
+ *
+ * The function will search for sensors under either
+ * /xyz/openbmc_project/sensors or /xyz/openbmc_project/extsensors. It will
+ * optionally search VR typed sensors under /xyz/openbmc_project/vr
+ *
+ * @return the updated amount of times any of "sensors" or "extsensors" sensor
+ * paths updated successfully, previous amount if all failed. The "vr"
+ * sensor path is optional, and does not participate in the return value.
+ */
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
 
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
