@@ -1,0 +1,9 @@
+Ok-To-Test+1: Deepak Kodihalli <deepak.kodihalli.83@gmail.com>
+Code-Review+1: Deepak Kodihalli <deepak.kodihalli.83@gmail.com>
+Code-Review+2: Tom Joseph <tomjoseph@in.ibm.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Tom Joseph <tomjoseph@in.ibm.com>
+Submitted-at: Wed, 06 Jan 2021 03:51:45 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/39347
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
