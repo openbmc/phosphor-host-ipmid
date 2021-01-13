@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "50a766db_15b5a40a",
+        "filename": "test/integration/common/services/sensor_server.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-13T21:16:33Z",
+      "side": 1,
+      "message": "this looks like debug code that didn\u0027t get scrubbed. Is this supposed to be here?",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 34
+      },
+      "revId": "9d48dfdd9a38ad35c9b16314f1498f37c005b32a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68cf3f19_18cb562d",
+        "filename": "test/integration/common/services/sensor_server.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-13T21:16:33Z",
+      "side": 1,
+      "message": "I think it is best to not add an alias in an hpp file that would pollute the top-level namespace like this does. In a cpp file, it is not as big of deal because it only affects that one file, but any number of files can include this, creating unexpected consequences on namespace collisions.",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 0
+      },
+      "revId": "9d48dfdd9a38ad35c9b16314f1498f37c005b32a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
