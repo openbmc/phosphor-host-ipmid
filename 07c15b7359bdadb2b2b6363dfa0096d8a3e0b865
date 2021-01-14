@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d3f2ae1_c70dc971",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-14T18:08:59Z",
+      "side": 0,
+      "message": "I would leave this here and modify the header file so it uses the fully qualified names so the global namespace is not polluted.",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 0
+      },
+      "revId": "07c15b7359bdadb2b2b6363dfa0096d8a3e0b865",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
