@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1843d89a_40327da4",
+        "filename": "scripts/writesensor.mako.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-15T23:52:03Z",
+      "side": 1,
+      "message": "maybe split this into two lines, splitting on a comma. It seems like the syntax should allow that.",
+      "range": {
+        "startLine": 76,
+        "startChar": 6,
+        "endLine": 76,
+        "endChar": 91
+      },
+      "revId": "5d3c51f00c6358e6e52083884021d99d12dd7970",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
