@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e7c28ac_bc251a5f",
+        "filename": "test/integration/Makefile.am",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-16T00:03:29Z",
+      "side": 1,
+      "message": "if you add the tests one at a time, it would be helpful to see that the build/test still works for each test. It would also make each commit functional on its own.",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 0
+      },
+      "revId": "34b79b23a38813e70bada18eab091077d50a9d9c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
