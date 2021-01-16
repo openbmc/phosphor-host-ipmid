@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1bc14eea_0419baee",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2021-01-16T00:32:21Z",
+      "side": 1,
+      "message": "So I understand what you are saying and I removed my additions here. But what I don\u0027t understand is what you are trying to accomplish with the block\n\n```\n            try\n            {\n                eptr \u003d std::current_exception();\n                if (eptr)\n                {\n                    std::rethrow_exception(eptr);\n                }\n            }\n            catch (const std::exception\u0026 e)\n            {\n                ...\n            }\n```\n\nIf someone threw an `int` as an exception, it would still rethrow the int and not catch it with the catch block.",
+      "parentUuid": "3ebaa472_3bd375ff",
+      "range": {
+        "startLine": 294,
+        "startChar": 10,
+        "endLine": 303,
+        "endChar": 13
+      },
+      "revId": "2e7006b5e55172b3995733af7ec4c6053bc31636",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0bf0c886_9050778c",
         "filename": "include/ipmid/handler.hpp",
         "patchSetId": 3
