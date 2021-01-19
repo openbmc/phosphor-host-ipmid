@@ -606,17 +606,10 @@ struct IpmiProvider
         }
         catch (...)
         {
-            std::exception_ptr eptr = std::current_exception();
-            try
-            {
-                std::rethrow_exception(eptr);
-            }
-            catch (std::exception& e)
-            {
-                log<level::ERR>("ERROR opening IPMI provider",
-                                entry("PROVIDER=%s", name.c_str()),
-                                entry("ERROR=%s", e.what()));
-            }
+            const char* what = currentExceptionType();
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "ERROR opening IPMI provider",
+                entry("PROVIDER=%s", name.c_str()), entry("ERROR=%s", what));
         }
         if (!isOpen())
         {

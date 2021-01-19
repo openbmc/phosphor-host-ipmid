@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #pragma once
+#include <cxxabi.h>
+
 #include <algorithm>
 #include <boost/asio/spawn.hpp>
 #include <boost/callable_traits.hpp>
@@ -86,6 +88,13 @@ class HandlerException : public HandlerCompletion, public std::runtime_error
     {
     }
 };
+
+static inline const char* currentExceptionType()
+{
+    int status;
+    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0,
+                               0, &status);
+}
 
 /**
  * @brief Handler base class for dealing with IPMI request/response
@@ -282,24 +291,13 @@ class IpmiHandler final : public HandlerBase
         }
         catch (...)
         {
-            std::exception_ptr eptr;
-            try
-            {
-                eptr = std::current_exception();
-                if (eptr)
-                {
-                    std::rethrow_exception(eptr);
-                }
-            }
-            catch (const std::exception& e)
-            {
-                phosphor::logging::log<phosphor::logging::level::ERR>(
-                    "Handler failed to catch exception",
-                    phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                    phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                    phosphor::logging::entry("CMD=%x", request->ctx->cmd));
-                return errorResponse(request, ccUnspecifiedError);
-            }
+            const char* what = currentExceptionType();
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Handler failed to catch exception",
+                phosphor::logging::entry("EXCEPTION=%s", what),
+                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
+                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            return errorResponse(request, ccUnspecifiedError);
         }
 
         response->cc = std::get<0>(result);
@@ -395,24 +393,13 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         }
         catch (...)
         {
-            std::exception_ptr eptr;
-            try
-            {
-                eptr = std::current_exception();
-                if (eptr)
-                {
-                    std::rethrow_exception(eptr);
-                }
-            }
-            catch (const std::exception& e)
-            {
-                phosphor::logging::log<phosphor::logging::level::ERR>(
-                    "Handler failed to catch exception",
-                    phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                    phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                    phosphor::logging::entry("CMD=%x", request->ctx->cmd));
-                return errorResponse(request, ccUnspecifiedError);
-            }
+            const char* what = currentExceptionType();
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Handler failed to catch exception",
+                phosphor::logging::entry("EXCEPTION=%s", what),
+                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
+                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            return errorResponse(request, ccUnspecifiedError);
         }
         response->cc = ccRet;
         response->payload.resize(len);
@@ -498,24 +485,13 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
         }
         catch (...)
         {
-            std::exception_ptr eptr;
-            try
-            {
-                eptr = std::current_exception();
-                if (eptr)
-                {
-                    std::rethrow_exception(eptr);
-                }
-            }
-            catch (const std::exception& e)
-            {
-                phosphor::logging::log<phosphor::logging::level::ERR>(
-                    "Handler failed to catch exception",
-                    phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                    phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                    phosphor::logging::entry("CMD=%x", request->ctx->cmd));
-                return errorResponse(request, ccUnspecifiedError);
-            }
+            const char* what = currentExceptionType();
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Handler failed to catch exception",
+                phosphor::logging::entry("EXCEPTION=%s", what),
+                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
+                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            return errorResponse(request, ccUnspecifiedError);
         }
         response->cc = ccRet;
         response->payload.resize(len);
