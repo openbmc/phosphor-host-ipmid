@@ -90,3 +90,14 @@ session_unittest_LDFLAGS = \
     $(CODE_COVERAGE_LDFLAGS)
 session_unittest_SOURCES = %reldir%/session/closesession_unittest.cpp
 check_PROGRAMS += %reldir%/session_unittest
+
+fru_build_area_data_unittest_SOURCES = fru_build_area_data_unittest.cpp
+fru_build_area_data_unittest_CXXFLAGS = \
+    $(COMMON_CXX) \
+    $(PTHREAD_CFLAGS) \
+    $(PHOSPHOR_LOGGING_CFLAGS) \
+    $(CODE_COVERAGE_CXXFLAGS) \
+    $(CODE_COVERAGE_CFLAGS)
+fru_build_area_data_unittest_LDADD = $(top_builddir)/ipmi_fru_info_area.o -lgmock -lsdbusplus -lsystemd
+
+check_PROGRAMS += fru_build_area_data_unittest
