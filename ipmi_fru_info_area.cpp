@@ -288,6 +288,21 @@ void buildCommonHeaderSection(const uint32_t& infoAreaSize, uint16_t& offset,
 }
 
 /**
+ * @brief Check if PropertyMap has any non-empty values
+ *
+ * @param[in] propMap map of properties
+ * @return true, if PropertyMap contains any non-empty values.
+ */
+static bool hasProperties(const PropertyMap& propMap)
+{
+    return !(propMap.empty() ||
+             std::all_of(propMap.begin(), propMap.end(),
+                         [](const PropertyMap::value_type& val) {
+                             return val.second.empty();
+                         }));
+}
+
+/**
  * @brief Builds the Chassis info area data section
  *
  * @param[in] propMap map of properties for chassis info area
@@ -296,7 +311,7 @@ void buildCommonHeaderSection(const uint32_t& infoAreaSize, uint16_t& offset,
 FruAreaData buildChassisInfoArea(const PropertyMap& propMap)
 {
     FruAreaData fruAreaData;
-    if (!propMap.empty())
+    if (hasProperties(propMap))
     {
         // Set formatting data that goes at the beginning of the record
         preFormatProcessing(false, fruAreaData);
@@ -328,7 +343,7 @@ FruAreaData buildChassisInfoArea(const PropertyMap& propMap)
 FruAreaData buildBoardInfoArea(const PropertyMap& propMap)
 {
     FruAreaData fruAreaData;
-    if (!propMap.empty())
+    if (hasProperties(propMap))
     {
         preFormatProcessing(true, fruAreaData);
 
@@ -370,7 +385,7 @@ FruAreaData buildBoardInfoArea(const PropertyMap& propMap)
 FruAreaData buildProductInfoArea(const PropertyMap& propMap)
 {
     FruAreaData fruAreaData;
-    if (!propMap.empty())
+    if (hasProperties(propMap))
     {
         // Set formatting data that goes at the beginning of the record
         preFormatProcessing(true, fruAreaData);
