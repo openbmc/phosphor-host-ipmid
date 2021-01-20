@@ -110,3 +110,14 @@ sensorcommands_unittest_LDFLAGS = \
 sensorcommands_unittest_SOURCES = %reldir%/dbus-sdr/sensorcommands_unittest.cpp
 sensorcommands_unittest_LDADD = $(top_builddir)/dbus-sdr/sensorutils.o
 check_PROGRAMS += %reldir%/sensorcommands_unittest
+
+fru_build_area_data_unittest_SOURCES = fru_build_area_data_unittest.cpp
+fru_build_area_data_unittest_CXXFLAGS = \
+    $(COMMON_CXX) \
+    $(PTHREAD_CFLAGS) \
+    $(PHOSPHOR_LOGGING_CFLAGS) \
+    $(CODE_COVERAGE_CXXFLAGS) \
+    $(CODE_COVERAGE_CFLAGS)
+fru_build_area_data_unittest_LDADD = $(top_builddir)/ipmi_fru_info_area.o -lgmock -lsdbusplus -lsystemd
+
+check_PROGRAMS += fru_build_area_data_unittest
