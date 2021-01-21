@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "cc2bbca5_83f05436",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-21T20:54:32Z",
+      "side": 1,
+      "message": "The documentation I read was not entirely clear on that. But a short example test does show you are right. :) In that case, we should just remove the rethrow thing altogether so that we just log that something bad happened and move on.",
+      "parentUuid": "1bc14eea_0419baee",
+      "range": {
+        "startLine": 294,
+        "startChar": 10,
+        "endLine": 303,
+        "endChar": 13
+      },
+      "revId": "2e7006b5e55172b3995733af7ec4c6053bc31636",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0bf0c886_9050778c",
         "filename": "include/ipmid/handler.hpp",
         "patchSetId": 3
