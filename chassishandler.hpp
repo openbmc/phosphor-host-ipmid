@@ -47,7 +47,7 @@ enum ipmi_chassis_control_cmds : uint8_t
 };
 enum class BootOptionParameter : size_t
 {
-    setInProgress= 0x0,
+    setInProgress = 0x0,
     bootInfo = 0x4,
     bootFlags = 0x5,
     opalNetworkSettings = 0x61
