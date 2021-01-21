@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1939702c_3ff7e0e8",
+        "filename": "test/integration/common/services/bmc_state.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-01-21T21:43:22Z",
+      "side": 1,
+      "message": "don\u0027t put these aliases in the header file",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 18
+      },
+      "revId": "8b9026148eca69b4064781609c0432f7138a9fe2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
