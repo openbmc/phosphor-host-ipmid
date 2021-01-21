@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c21c446a_b6dd29ed",
+        "filename": "test/fru_build_area_data_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000118
+      },
+      "writtenOn": "2021-01-21T17:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b62aa55_9f4800bb",
+      "range": {
+        "startLine": 29,
+        "startChar": 19,
+        "endLine": 29,
+        "endChar": 20
+      },
+      "revId": "f28cad97f226d293f868c63e08ca15fb8d9644b8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e58ab07_d7cd2c05",
         "filename": "test/fru_build_area_data_unittest.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "f28cad97f226d293f868c63e08ca15fb8d9644b8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b3d74db_b4b3482b",
+        "filename": "test/fru_build_area_data_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000118
+      },
+      "writtenOn": "2021-01-21T17:54:10Z",
+      "side": 1,
+      "message": "I\u0027ve added the comment to formatFruArea function, explaining what it does.\nThe output it generates is only printed when the test fails, per gtest API.",
+      "parentUuid": "5e58ab07_d7cd2c05",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 53
+      },
+      "revId": "f28cad97f226d293f868c63e08ca15fb8d9644b8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
