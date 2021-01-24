@@ -15,15 +15,18 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <iostream>
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <optional>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/server.hpp>
 #include <string>
 #include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Logging/SEL/error.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -35,7 +38,7 @@ namespace sensor
 extern const IdInfoMap sensors;
 } // namespace sensor
 } // namespace ipmi
-
+extern const ipmi::sensor::InvObjectIDMap invSensors;
 extern const FruMap frus;
 constexpr uint8_t eventDataSize = 3;
 namespace
@@ -55,6 +58,9 @@ using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using namespace phosphor::logging;
 using namespace ipmi::fru;
+using namespace xyz::openbmc_project::Logging::SEL;
+using SELCreated =
+    sdbusplus::xyz::openbmc_project::Logging::SEL::Error::Created;
 
 using SELRecordID = uint16_t;
 using SELEntry = ipmi::sel::SELEventRecordFormat;
@@ -699,13 +705,30 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
                       uint8_t sensorNumber, uint8_t eventDir,
                       std::array<uint8_t, eventDataSize> eventData)
 {
-    // Per the IPMI spec, need to cancel the reservation when a SEL entry is
-    // added
-    cancelSELReservation();
+    std::string objpath;
+    static constexpr auto systemRecordType = 0x02;
     // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
     // a maintenance procedure associated with eSEL record.
     static constexpr auto procedureType = 0xDE;
-    if (recordType == procedureType)
+    cancelSELReservation();
+    if (recordType == systemRecordType)
+    {
+
+        for (auto it : invSensors)
+        {
+            if (it.second.sensorID == sensorNumber)
+            {
+                objpath = it.first;
+            }
+        }
+        auto selDataStr = ipmi::sel::toHexStr(eventData);
+        recordID = report<SELCreated>(Created::RECORD_TYPE(recordType),
+                                      Created::GENERATOR_ID(generatorID),
+                                      Created::SENSOR_DATA(selDataStr.c_str()),
+                                      Created::EVENT_DIR(eventDir),
+                                      Created::SENSOR_PATH(objpath.c_str()));
+    }
+    else if (recordType == procedureType)
     {
         // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
         // procedure number.
