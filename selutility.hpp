@@ -2,6 +2,9 @@
 
 #include <chrono>
 #include <cstdint>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <ipmid/types.hpp>
 #include <sdbusplus/server.hpp>
 
@@ -167,6 +170,17 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath);
  */
 void readLoggingObjectPaths(ObjectPaths& paths);
 
+template <typename T>
+std::string toHexStr(const T& data)
+{
+    std::stringstream stream;
+    stream << std::hex << std::uppercase << std::setfill('0');
+    for (const auto& v : data)
+    {
+        stream << std::setw(2) << static_cast<int>(v);
+    }
+    return stream.str();
+}
 namespace internal
 {
 
