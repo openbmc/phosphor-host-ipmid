@@ -17,7 +17,11 @@ nobase_include_HEADERS = \
 	ipmid/utility.hpp \
 	ipmid/utils.hpp \
 	ipmid-host/cmd.hpp \
-	ipmid-host/cmd-utils.hpp
+	ipmid-host/cmd-utils.hpp \
+	dbus-sdr/sdrutils.hpp \
+	dbus-sdr/sensorcommands.hpp \
+	dbus-sdr/sensorutils.hpp \
+	dbus-sdr/storagecommands.hpp
 
 # Eventually we will split <ipmid/*> and <host-ipmid/*> headers
 # For now they will be the same during migration
