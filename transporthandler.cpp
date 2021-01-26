@@ -732,6 +732,35 @@ SetStatus& getSetStatus(uint8_t channel)
     return setStatus[channel] = SetStatus::Complete;
 }
 
+/** @brief Gets the IPv6 Router Advertisement value
+ *
+ *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] params - The parameters for the channel
+ *  @return networkd IPV6AcceptRA value
+ */
+static bool getIPv6AcceptRA(sdbusplus::bus::bus& bus,
+                            const ChannelParams& params)
+{
+    auto raEnabled =
+        std::get<bool>(getDbusProperty(bus, params.service, params.logicalPath,
+                                       INTF_ETHERNET, "IPv6AcceptRA"));
+    return raEnabled;
+}
+
+/** @brief Sets the IPv6AcceptRA flag
+ *
+ *  @param[in] bus           - The bus object used for lookups
+ *  @param[in] params        - The parameters for the channel
+ *  @param[in] ipv6AcceptRA  - boolean to enable/disable IPv6 Routing
+ *                             Advertisement
+ */
+void setIPv6AcceptRA(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                     const bool ipv6AcceptRA)
+{
+    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
+                    "IPv6AcceptRA", ipv6AcceptRA);
+}
+
 /**
  * Define placeholder command handlers for the OEM Extension bytes for the Set
  * LAN Configuration Parameters and Get LAN Configuration Parameters
@@ -1097,26 +1126,20 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         case LanParam::IPv6RouterControl:
         {
             std::bitset<8> control;
+            constexpr uint8_t reservedRACCBits = 0xfc;
             if (req.unpack(control) != 0 || !req.fullyUnpacked())
             {
                 return responseReqDataLenInvalid();
             }
-            std::bitset<8> expected;
-            EthernetInterface::DHCPConf dhcp =
-                channelCall<getDHCPProperty>(channel);
-            if ((dhcp == EthernetInterface::DHCPConf::both) |
-                (dhcp == EthernetInterface::DHCPConf::v6))
+            if (std::bitset<8> expected(control &
+                                        std::bitset<8>(reservedRACCBits));
+                expected.any())
             {
-                expected[IPv6RouterControlFlag::Dynamic] = 1;
+                return response(ccParamNotSupported);
             }
-            else
-            {
-                expected[IPv6RouterControlFlag::Static] = 1;
-            }
-            if (expected != control)
-            {
-                return responseInvalidFieldRequest();
-            }
+
+            bool enableRA = control[IPv6RouterControlFlag::Dynamic];
+            channelCall<setIPv6AcceptRA>(channel, enableRA);
             return responseSuccess();
         }
         case LanParam::IPv6StaticRouter1IP:
@@ -1420,17 +1443,9 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         case LanParam::IPv6RouterControl:
         {
             std::bitset<8> control;
-            EthernetInterface::DHCPConf dhcp =
-                channelCall<getDHCPProperty>(channel);
-            if ((dhcp == EthernetInterface::DHCPConf::both) ||
-                (dhcp == EthernetInterface::DHCPConf::v6))
-            {
-                control[IPv6RouterControlFlag::Dynamic] = 1;
-            }
-            else
-            {
-                control[IPv6RouterControlFlag::Static] = 1;
-            }
+            control[IPv6RouterControlFlag::Dynamic] =
+                channelCall<getIPv6AcceptRA>(channel);
+            control[IPv6RouterControlFlag::Static] = 1;
             ret.pack(control);
             return responseSuccess(std::move(ret));
         }
