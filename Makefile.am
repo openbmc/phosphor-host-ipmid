@@ -164,6 +164,18 @@ libsysintfcmds_la_LDFLAGS = \
 	-version-info 0:0:0 -shared
 libsysintfcmds_la_CXXFLAGS = $(COMMON_CXX)
 
+providers_LTLIBRARIES += libdynamiccmds.la
+libdynamiccmds_la_SOURCES = \
+	dbus-sdr/ipmi_to_redfish_hooks.cpp \
+	dbus-sdr/me_to_redfish_hooks.cpp \
+	dbus-sdr/sensorcommands.cpp \
+	dbus-sdr/storagecommands.cpp
+libdynamiccmds_la_LDFLAGS = \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(libmapper_LIBS) \
+	-version-info 0:0:0 -shared
+libdynamiccmds_la_CXXFLAGS = $(COMMON_CXX)
+
 if FEATURE_IPMI_WHITELIST
 libwhitelistdir = ${libdir}/ipmid-providers
 libwhitelist_LTLIBRARIES = libwhitelist.la
