@@ -266,6 +266,17 @@ AC_ARG_ENABLE([ipmi-whitelist],
       )
 AM_CONDITIONAL([FEATURE_IPMI_WHITELIST], [test x$ipmi_whitelist = xtrue])
 
+# Dynamic sensors stack is enabled by default; offer a way to disable it
+AC_ARG_ENABLE([dynamic_sensors],
+    [ --enable-dynamic_sensors   Enable/disable Dynamic Sensors stack],
+    [case "${enableval}" in
+      yes) dynamic_sensors=true ;;
+      no) dynamic_sensors=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic_sensors]) ;;
+      esac],[dynamic_sensors=true]
+      )
+AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic_sensors = xtrue])
+
 # Create configured output
 AC_CONFIG_FILES([
     Makefile
