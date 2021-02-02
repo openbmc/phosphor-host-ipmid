@@ -1,0 +1,256 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bba4372e_32dc4eb5",
+        "filename": "dbus-sdr/ipmi_to_redfish_hooks.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "We probably need to remove these and their corresponding code trees for the generic implementation.  These events are only going to apply to an Intel BIOS, and likely need to stay in intel-ipmi-oem.",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ed37315_e87e7fb0",
+        "filename": "dbus-sdr/me_to_redfish_hooks.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "Same thing with this whole file.  Probably shouldn\u0027t be putting ME specific stuff into a generic daemon.",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c126244c_0f5c97b6",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "More ME specific stuff that needs removed.",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 391,
+        "endChar": 1
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a10c4cc_df8bd89d",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "I\u0027d have to look up what this is intended to do in the history.  I\u0027m having trouble understanding what it\u0027s doing, but it\u0027s probably fine.",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a93db3f4_28c5bd64",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1107,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "more OEM stuff.",
+      "range": {
+        "startLine": 1075,
+        "startChar": 0,
+        "endLine": 1107,
+        "endChar": 5
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71c0c4ab_2704f1a0",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1304,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "More OEM stuff.  We shouldn\u0027t be installing an NM discovery SDR on systems that don\u0027t have NM",
+      "range": {
+        "startLine": 1271,
+        "startChar": 0,
+        "endLine": 1304,
+        "endChar": 1
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd3fa59a_bcb24c72",
+        "filename": "include/dbus-sdr/me_to_redfish_hooks.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "More OEM stuff.",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bcdb791_c67d1a7c",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "not your fault.... but probably not in line with the coding standard externing a global variable.",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 32
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d2b08b2_97f6b537",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "I don\u0027t see this used.",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 17
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6eb70c2b_de404b7c",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "This doesn\u0027t look used.",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 2
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10d53d3b_fde9d867",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "More OEM stuff.",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 0
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70464ca7_77c72fb3",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-02T17:55:03Z",
+      "side": 1,
+      "message": "oem stuff.",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 138,
+        "endChar": 47
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
