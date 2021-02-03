@@ -275,15 +275,14 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
 
 namespace sensor
 {
-// Calculate VR Mode from input IPMI discrete event bytes
-static std::optional<std::string>
-    calculateVRMode(uint8_t assertOffset0_7, uint8_t assertOffset8_14,
-                    const ipmi::DbusInterfaceMap::mapped_type& VRObject)
+// Read VR profiles from sensor(daemon) interface
+static std::optional<std::vector<std::string>>
+    getSupportedVrProfiles(const ipmi::DbusInterfaceMap::mapped_type& object)
 {
     // get VR mode profiles from Supported Interface
-    auto supportedProperty = VRObject.find("Supported");
-    if (supportedProperty == VRObject.end() ||
-        VRObject.find("Selected") == VRObject.end())
+    auto supportedProperty = object.find("Supported");
+    if (supportedProperty == object.end() ||
+        object.find("Selected") == object.end())
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "lack of desired properties");
@@ -297,6 +296,20 @@ static std::optional<std::string>
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "property is not array of string");
+        return std::nullopt;
+    }
+    return *profilesPtr;
+}
+
+// Calculate VR Mode from input IPMI discrete event bytes
+static std::optional<std::string>
+    calculateVRMode(uint8_t assertOffset0_7, uint8_t assertOffset8_14,
+                    const ipmi::DbusInterfaceMap::mapped_type& VRObject)
+{
+    // get VR mode profiles from Supported Interface
+    auto profiles = getSupportedVrProfiles(VRObject);
+    if (!profiles)
+    {
         return std::nullopt;
     }
 
@@ -321,14 +334,14 @@ static std::optional<std::string>
         index++;
     }
 
-    if (index >= profilesPtr->size())
+    if (index >= profiles->size())
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "profile index out of boundary");
         return std::nullopt;
     }
 
-    return profilesPtr->at(index);
+    return profiles->at(index);
 }
 
 // Calculate sensor value from IPMI reading byte
@@ -395,6 +408,81 @@ std::string parseSdrIdFromPath(const std::string& path)
     return name;
 }
 
+void setVrEventStatus(const std::string& connection, const std::string& path,
+                      const ipmi::DbusInterfaceMap::mapped_type& object,
+                      std::bitset<16>& assertions)
+{
+    auto profiles = sensor::getSupportedVrProfiles(object);
+    if (!profiles)
+    {
+        return;
+    }
+    ipmi::Value modeVariant;
+    try
+    {
+        modeVariant = getDbusProperty(*getSdBus(), connection, path,
+                                      sensor::vrInterface, "Selected");
+    }
+    // setDbusProperty intended to resolve dbus exception/rc within the
+    // function but failed to achieve that. Until the bug is fixed by
+    // b/177106254, we will catch SdBusError in the ipmi callback functions
+    // (e.g. ipmiSetSensorReading).
+    catch (const sdbusplus::exception_t& e)
+    {
+        using namespace phosphor::logging;
+        log<level::ERR>("Failed to set property",
+                        entry("PROPERTY=%s", "Selected"),
+                        entry("PATH=%s", path.c_str()),
+                        entry("INTERFACE=%s", sensor::sensorInterface),
+                        entry("WHAT=%s", e.what()));
+        return;
+    }
+
+    auto mode = std::get_if<std::string>(&modeVariant);
+    if (mode == nullptr)
+    {
+        using namespace phosphor::logging;
+        log<level::ERR>("property is not a string",
+                        entry("PROPERTY=%s", "Selected"),
+                        entry("PATH=%s", path.c_str()),
+                        entry("INTERFACE=%s", sensor::sensorInterface));
+        return;
+    }
+
+    auto itr = std::find(profiles->begin(), profiles->end(), *mode);
+    if (itr == profiles->end())
+    {
+        using namespace phosphor::logging;
+        log<level::ERR>("VR mode doesn't match any of its profiles",
+                        entry("PATH=%s", path.c_str()));
+        return;
+    }
+    std::size_t index =
+        static_cast<std::size_t>(std::distance(profiles->begin(), itr));
+
+    // map index to reponse event assertion bit.
+    if (index < 8)
+    {
+        assertions.set(1u << index);
+    }
+    else if (index < 15)
+    {
+        assertions.set(1u << (index - 8));
+    }
+    else
+    {
+        using namespace phosphor::logging;
+        log<level::ERR>("VR profile index reaches max assertion bit",
+                        entry("PATH=%s", path.c_str()),
+                        entry("INDEX=%uz", index));
+        return;
+    }
+    if (debug)
+    {
+        std::cerr << "VR sensor " << sensor::parseSdrIdFromPath(path)
+                  << " mode is: [" << index << "] " << *mode << std::endl;
+    }
+}
 } // namespace sensor
 
 ipmi::RspType<> ipmiSenPlatformEvent(uint8_t generatorID, uint8_t evmRev,
@@ -1113,13 +1201,29 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
             phosphor::logging::entry("SENSOR=%s", path.c_str()));
         return ipmi::responseResponseError();
     }
+
+    uint8_t sensorEventStatus =
+        static_cast<uint8_t>(IPMISensorEventEnableByte2::sensorScanningEnable);
+    std::bitset<16> assertions = 0;
+    std::bitset<16> deassertions = 0;
+
+    // handle VR typed sensor
+    auto vrInterface = sensorMap.find(sensor::vrInterface);
+    if (vrInterface != sensorMap.end())
+    {
+        sensor::setVrEventStatus(connection, path, vrInterface->second,
+                                 assertions);
+
+        // both Event Message and Sensor Scanning are disable for VR.
+        sensorEventStatus = 0;
+        return ipmi::responseSuccess(sensorEventStatus, assertions,
+                                     deassertions);
+    }
+
     auto warningInterface =
         sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Warning");
     auto criticalInterface =
         sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
-
-    uint8_t sensorEventStatus =
-        static_cast<uint8_t>(IPMISensorEventEnableByte2::sensorScanningEnable);
 
     std::optional<bool> criticalDeassertHigh =
         thresholdDeassertMap[path]["CriticalAlarmHigh"];
@@ -1129,9 +1233,6 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
         thresholdDeassertMap[path]["WarningAlarmHigh"];
     std::optional<bool> warningDeassertLow =
         thresholdDeassertMap[path]["WarningAlarmLow"];
-
-    std::bitset<16> assertions = 0;
-    std::bitset<16> deassertions = 0;
 
     if (criticalDeassertHigh && !*criticalDeassertHigh)
     {
