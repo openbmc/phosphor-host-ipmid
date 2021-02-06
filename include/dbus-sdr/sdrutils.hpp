@@ -57,7 +57,7 @@ static constexpr uint8_t reservedSensorNumber = 0xFF;
 
 namespace details
 {
-bool getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
+uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
 
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
 } // namespace details
