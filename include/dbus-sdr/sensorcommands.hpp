@@ -124,12 +124,12 @@ SensorSubTree& getSensorTree()
     return sensorTree;
 }
 
-static ipmi_ret_t getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
+static ipmi_ret_t getSensorConnection(ipmi::Context::ptr ctx, uint16_t sensnum,
                                       std::string& connection,
                                       std::string& path)
 {
     auto& sensorTree = getSensorTree();
-    if (sensorTree.empty() && !getSensorSubtree(sensorTree))
+    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
     {
         return IPMI_CC_RESPONSE_ERROR;
     }
