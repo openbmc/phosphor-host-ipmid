@@ -18,9 +18,10 @@
 
 namespace details
 {
-bool getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
+uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 {
     static std::shared_ptr<SensorSubTree> sensorTreePtr;
+    static uint16_t sensorUpdatedIndex = 0;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
     static sdbusplus::bus::match::match sensorAdded(
         *dbus,
@@ -34,11 +35,10 @@ bool getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         "openbmc_project/sensors/'",
         [](sdbusplus::message::message& m) { sensorTreePtr.reset(); });
 
-    bool sensorTreeUpdated = false;
     if (sensorTreePtr)
     {
         subtree = sensorTreePtr;
-        return sensorTreeUpdated;
+        return sensorUpdatedIndex;
     }
 
     sensorTreePtr = std::make_shared<SensorSubTree>();
@@ -62,30 +62,31 @@ bool getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     catch (sdbusplus::exception_t& e)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
-        return sensorTreeUpdated;
+        return sensorUpdatedIndex;
     }
     subtree = sensorTreePtr;
-    sensorTreeUpdated = true;
-    return sensorTreeUpdated;
+    sensorUpdatedIndex++;
+    return sensorUpdatedIndex;
 }
 
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
 {
     static std::shared_ptr<SensorNumMap> sensorNumMapPtr;
     bool sensorNumMapUpated = false;
-
+    static uint16_t prevSensorUpdatedIndex = 0;
     std::shared_ptr<SensorSubTree> sensorTree;
-    bool sensorTreeUpdated = details::getSensorSubtree(sensorTree);
+    uint16_t curSensorUpdatedIndex = details::getSensorSubtree(sensorTree);
     if (!sensorTree)
     {
         return sensorNumMapUpated;
     }
 
-    if (!sensorTreeUpdated && sensorNumMapPtr)
+    if ((curSensorUpdatedIndex == prevSensorUpdatedIndex) && sensorNumMapPtr)
     {
         sensorNumMap = sensorNumMapPtr;
         return sensorNumMapUpated;
     }
+    prevSensorUpdatedIndex = curSensorUpdatedIndex;
 
     sensorNumMapPtr = std::make_shared<SensorNumMap>();
 
