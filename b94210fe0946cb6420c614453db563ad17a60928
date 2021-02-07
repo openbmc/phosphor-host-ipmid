@@ -22,6 +22,30 @@
       "revId": "b94210fe0946cb6420c614453db563ad17a60928",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0a80953_29e3f4f7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-07T21:31:16Z",
+      "side": 1,
+      "message": "Yeah, this looks like something that probably shouldn\u0027t be propogated forward to a generic solution.",
+      "parentUuid": "2f03a27c_468b0f0f",
+      "range": {
+        "startLine": 293,
+        "startChar": 4,
+        "endLine": 307,
+        "endChar": 5
+      },
+      "revId": "b94210fe0946cb6420c614453db563ad17a60928",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }

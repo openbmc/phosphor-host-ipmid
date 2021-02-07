@@ -154,6 +154,24 @@
     },
     {
       "key": {
+        "uuid": "85ed704b_ec8aba49",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-07T21:31:16Z",
+      "side": 1,
+      "message": "I\u0027m not understanding why anyone would want to configure that out, but I\u0027m not super worried about having the option here.",
+      "parentUuid": "6db61e20_cc998140",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a93db3f4_28c5bd64",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 4
@@ -318,6 +336,30 @@
       "side": 1,
       "message": "what is the recommended way of doing this?",
       "parentUuid": "9bcdb791_c67d1a7c",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 32
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d9115c0_2c86395c",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-07T21:31:16Z",
+      "side": 1,
+      "message": "IMO, the best way is to have a method that returns a singleton.  Something like:\n\nSensorSubTree\u0026 getSensorTree(){\n    static SensorSubTree sensorTree;\n    return sensorTree;\n}\n\nI think that code is the way we should go, but it\u0027s a little invasive.  Alternatively, we could declare this in a common header somewhere, rather than externing it.",
+      "parentUuid": "926df78b_63cbd79b",
       "range": {
         "startLine": 122,
         "startChar": 0,
