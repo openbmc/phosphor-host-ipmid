@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f7c78ffd_30cf146d",
+        "filename": "dbus-sdr/ipmi_to_redfish_hooks.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bba4372e_32dc4eb5",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4ed37315_e87e7fb0",
         "filename": "dbus-sdr/me_to_redfish_hooks.cpp",
         "patchSetId": 4
@@ -33,6 +51,24 @@
       "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "026a3d85_25101884",
+        "filename": "dbus-sdr/me_to_redfish_hooks.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ed37315_e87e7fb0",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "0b8da597_06fb4533",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c126244c_0f5c97b6",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 391,
+        "endChar": 1
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a10c4cc_df8bd89d",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 4
@@ -70,6 +130,24 @@
       "writtenOn": "2021-02-02T17:55:03Z",
       "side": 1,
       "message": "I\u0027d have to look up what this is intended to do in the history.  I\u0027m having trouble understanding what it\u0027s doing, but it\u0027s probably fine.",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6db61e20_cc998140",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Used for in https://gerrit.openbmc-project.xyz/c/openbmc/intel-ipmi-oem/+/28158\n\nI think it just give us an option to turn off the feature if people don\u0027t need it? I am not sure what the use cause will be.",
+      "parentUuid": "1a10c4cc_df8bd89d",
       "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
@@ -99,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "76aa2c5d_5890049f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1107,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a93db3f4_28c5bd64",
+      "range": {
+        "startLine": 1075,
+        "startChar": 0,
+        "endLine": 1107,
+        "endChar": 5
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71c0c4ab_2704f1a0",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 4
@@ -122,6 +224,30 @@
     },
     {
       "key": {
+        "uuid": "9d059602_1a7c0ff2",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1304,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71c0c4ab_2704f1a0",
+      "range": {
+        "startLine": 1271,
+        "startChar": 0,
+        "endLine": 1304,
+        "endChar": 1
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dd3fa59a_bcb24c72",
         "filename": "include/dbus-sdr/me_to_redfish_hooks.hpp",
         "patchSetId": 4
@@ -139,6 +265,24 @@
     },
     {
       "key": {
+        "uuid": "00519775_aa9f4677",
+        "filename": "include/dbus-sdr/me_to_redfish_hooks.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd3fa59a_bcb24c72",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9bcdb791_c67d1a7c",
         "filename": "include/dbus-sdr/sensorcommands.hpp",
         "patchSetId": 4
@@ -150,6 +294,30 @@
       "writtenOn": "2021-02-02T17:55:03Z",
       "side": 1,
       "message": "not your fault.... but probably not in line with the coding standard externing a global variable.",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 32
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "926df78b_63cbd79b",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "what is the recommended way of doing this?",
+      "parentUuid": "9bcdb791_c67d1a7c",
       "range": {
         "startLine": 122,
         "startChar": 0,
@@ -185,6 +353,30 @@
     },
     {
       "key": {
+        "uuid": "6c54baef_8b174eef",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d2b08b2_97f6b537",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 17
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6eb70c2b_de404b7c",
         "filename": "include/dbus-sdr/storagecommands.hpp",
         "patchSetId": 4
@@ -205,6 +397,30 @@
       "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a441686_0de0e719",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6eb70c2b_de404b7c",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 2
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -231,6 +447,30 @@
     },
     {
       "key": {
+        "uuid": "87bf36c3_7313f385",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "10d53d3b_fde9d867",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 0
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "70464ca7_77c72fb3",
         "filename": "include/dbus-sdr/storagecommands.hpp",
         "patchSetId": 4
@@ -251,6 +491,30 @@
       "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a10d5f86_6dcdc842",
+        "filename": "include/dbus-sdr/storagecommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-07T08:48:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70464ca7_77c72fb3",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 138,
+        "endChar": 47
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
