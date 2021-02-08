@@ -46,6 +46,30 @@
       "revId": "b94210fe0946cb6420c614453db563ad17a60928",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70d006c5_7c82259c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-08T08:06:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0a80953_29e3f4f7",
+      "range": {
+        "startLine": 293,
+        "startChar": 4,
+        "endLine": 307,
+        "endChar": 5
+      },
+      "revId": "b94210fe0946cb6420c614453db563ad17a60928",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }

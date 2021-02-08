@@ -172,6 +172,24 @@
     },
     {
       "key": {
+        "uuid": "502e4cd9_7735015f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-08T08:06:54Z",
+      "side": 1,
+      "message": "yeah, same. I wasn\u0027t sure where the use case would be. should be fine.",
+      "parentUuid": "85ed704b_ec8aba49",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a93db3f4_28c5bd64",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 4
@@ -369,6 +387,30 @@
       "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b8f22b2_ea392ff2",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-08T08:06:54Z",
+      "side": 1,
+      "message": "I updated the global variable to use the method that you described.\n\nAlso updated places that use it with \n\n```\nauto\u0026 sensorTree \u003d getSensorTree();\n```\nOr just \n```\ngetSensorTree()\n```",
+      "parentUuid": "7d9115c0_2c86395c",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 32
+      },
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
