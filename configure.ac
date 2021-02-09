@@ -32,7 +32,7 @@ AC_ARG_ENABLE([boot-flag-safe-mode-support],
 AS_IF([test "x$enable_boot_flag_safe_mode_support" != "xno"],
     AC_MSG_NOTICE([Enabling safe mode option in boot flags])
     [cpp_flags="-DENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT"]
-    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_SUBST([CPPFLAGS], [$CPPFLAGS $cpp_flags]),
     AC_MSG_WARN([Disabling safe mode option in boot flags])
 )
 
@@ -42,7 +42,7 @@ AC_ARG_ENABLE([i2c-whitelist-check],
 )
 AS_IF([test "x$enable_i2c_whitelist_check" != "xno"],
     AC_MSG_NOTICE([Enabling I2C master write read command white list check])
-    [cpp_flags="-DENABLE_I2C_WHITELIST_CHECK"]
+    [cpp_flags="$CPPFLAGS -DENABLE_I2C_WHITELIST_CHECK"]
     AC_SUBST([CPPFLAGS], [$cpp_flags]),
     AC_MSG_WARN([Disabling I2C master write read command white list check])
 )
