@@ -45,6 +45,30 @@
       "revId": "9d48dfdd9a38ad35c9b16314f1498f37c005b32a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8aa1aeb_3053fa28",
+        "filename": "test/integration/common/services/sensor_server.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-11T23:30:21Z",
+      "side": 1,
+      "message": "I changed my mind. This hpp is not intended to be included outside of this test project, so it is not as big of a deal.",
+      "parentUuid": "68cf3f19_18cb562d",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 0
+      },
+      "revId": "9d48dfdd9a38ad35c9b16314f1498f37c005b32a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
