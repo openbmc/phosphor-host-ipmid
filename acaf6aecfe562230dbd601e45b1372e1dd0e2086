@@ -22,6 +22,30 @@
       "revId": "acaf6aecfe562230dbd601e45b1372e1dd0e2086",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1cd7e41b_4e733dd4",
+        "filename": "test/integration/common/services/restriction_mode.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-11T23:30:47Z",
+      "side": 1,
+      "message": "nm, this is ok.",
+      "parentUuid": "00932172_34f2f6a3",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 24
+      },
+      "revId": "acaf6aecfe562230dbd601e45b1372e1dd0e2086",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
