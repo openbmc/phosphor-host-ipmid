@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3a4e6e1_fea8376d",
+        "filename": "Makefile.am",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-17T19:26:15Z",
+      "side": 1,
+      "message": "I am worried that not everybody will want this to be enabled by default. For now, it would probably be better to hide this behind a configure parameter.",
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75844223_e6365ae9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-17T19:26:15Z",
+      "side": 1,
+      "message": "I know this was just a copy from the Intel code, but not all the code there was perfect either. 😊\n\nIf you replace all the \"boost::asio::yield_context yield\" parameters with an \"ipmi::Context::ptr ctx\", then you don\u0027t need to call getSdBus() because the bus is already there (ctx-\u003ebus)",
+      "range": {
+        "startLine": 216,
+        "startChar": 25,
+        "endLine": 216,
+        "endChar": 57
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72a4255c_4864d278",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-17T19:26:15Z",
+      "side": 1,
+      "message": "this can use the yielding variant of the utils.cpp getManagedObjects()",
+      "range": {
+        "startLine": 240,
+        "startChar": 11,
+        "endLine": 242,
+        "endChar": 71
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd20ab52_0e61ef4e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-17T19:26:15Z",
+      "side": 1,
+      "message": "just pass ctx to simplify things",
+      "range": {
+        "startLine": 304,
+        "startChar": 25,
+        "endLine": 304,
+        "endChar": 32
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b1e7af9_adb8b1cf",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1529,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-17T19:26:15Z",
+      "side": 1,
+      "message": "this should be ipmi::prioOpenBmcBase for all of these commands.\n\nWhen it was in the intel-ipmi-oem repo, prioOemBase was appropriate, but now that it is in the phosphor-host-ipmid repo, it should use a lower priority so it can be easily overridden by oems.",
+      "range": {
+        "startLine": 1529,
+        "startChar": 32,
+        "endLine": 1529,
+        "endChar": 43
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "190cef59_b2c37b42",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-17T19:26:15Z",
+      "side": 1,
+      "message": "util yielding version of getManangedObjects()",
+      "range": {
+        "startLine": 232,
+        "startChar": 11,
+        "endLine": 232,
+        "endChar": 52
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
