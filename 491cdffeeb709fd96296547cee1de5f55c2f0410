@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ca8c5c9_9eea9879",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1520,
+      "author": {
+        "id": 1000271
+      },
+      "writtenOn": "2021-02-18T21:13:23Z",
+      "side": 1,
+      "message": "Some of these sensor commands are already supported in https://github.com/openbmc/phosphor-host-ipmid/blob/da06d15cab1dd116d3279d66f70966f95afdf676/sensorhandler.cpp#L1098\n\nis it possible to merge them or do we need multiple copy in the same repo.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d248de3_5c921dbc",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000271
+      },
+      "writtenOn": "2021-02-18T21:13:23Z",
+      "side": 1,
+      "message": "Many system has only single fru which is same as baseboard fru. Will ipmi fru command fail on single fru with this.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1f5089e_653e2aef",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000271
+      },
+      "writtenOn": "2021-02-18T21:13:23Z",
+      "side": 1,
+      "message": "please update this to the right name",
+      "range": {
+        "startLine": 239,
+        "startChar": 36,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "324415f0_28ae0625",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000271
+      },
+      "writtenOn": "2021-02-18T21:13:23Z",
+      "side": 1,
+      "message": "Will this get through if devId is 0. As 0 is ignored while calculating hash as reserved for baseboard.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db5d9dd2_2b74da40",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 738,
+      "author": {
+        "id": 1000271
+      },
+      "writtenOn": "2021-02-18T21:13:23Z",
+      "side": 1,
+      "message": "How about SEL entries which is a part of phosphor log entries. This one is looking for a specific directory then all applications must store SEL into a predefined directories. Is this a prerequisite for SEL.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4d08902_3259b20c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1000271
+      },
+      "writtenOn": "2021-02-18T21:13:23Z",
+      "side": 1,
+      "message": "Is this not implemented?",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34ff18d1_12a3b4fc",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1238,
+      "author": {
+        "id": 1000271
+      },
+      "writtenOn": "2021-02-18T21:13:23Z",
+      "side": 1,
+      "message": "These commands are nothing to do with sdr and should be a part of storagehandler.cpp. These should also be merged with existing storage commands.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
