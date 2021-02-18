@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dc38803c_45c714cb",
+        "filename": "Makefile.am",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-18T08:14:55Z",
+      "side": 1,
+      "message": "Done. something like this? Also see configure.ac",
+      "parentUuid": "e3a4e6e1_fea8376d",
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75844223_e6365ae9",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 9
@@ -39,6 +57,30 @@
       "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f58a51bc_1c6a21e5",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-18T08:14:55Z",
+      "side": 1,
+      "message": "Done. thanks.\n\nI had to update the data type that is used in the code to use \n```\n#include \u003cipmid/types.hpp\u003e\n```\n\ninstead of the custom one in `dbus-sdr/types.hpp`. Had to add \n```\nusing Association \u003d std::tuple\u003cstd::string, std::string, std::string\u003e;\n\nusing Value \u003d\n    std::variant\u003cbool, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t,\n                 uint64_t, double, std::string, std::vector\u003cAssociation\u003e\u003e;\n```\n\nto make it work.",
+      "parentUuid": "75844223_e6365ae9",
+      "range": {
+        "startLine": 216,
+        "startChar": 25,
+        "endLine": 216,
+        "endChar": 57
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "60687571_4bdba4e9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-18T08:14:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "72a4255c_4864d278",
+      "range": {
+        "startLine": 240,
+        "startChar": 11,
+        "endLine": 242,
+        "endChar": 71
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fd20ab52_0e61ef4e",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 9
@@ -85,6 +151,30 @@
       "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa67219d_aa79ec85",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-18T08:14:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd20ab52_0e61ef4e",
+      "range": {
+        "startLine": 304,
+        "startChar": 25,
+        "endLine": 304,
+        "endChar": 32
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "62fbf3cb_4de1b929",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1529,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-18T08:14:55Z",
+      "side": 1,
+      "message": "Done. I have replaced all of the prioOemBase to the lowest priority of prioOpenBmcBase.",
+      "parentUuid": "1b1e7af9_adb8b1cf",
+      "range": {
+        "startLine": 1529,
+        "startChar": 32,
+        "endLine": 1529,
+        "endChar": 43
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "190cef59_b2c37b42",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 9
@@ -122,6 +236,30 @@
       "writtenOn": "2021-02-17T19:26:15Z",
       "side": 1,
       "message": "util yielding version of getManangedObjects()",
+      "range": {
+        "startLine": 232,
+        "startChar": 11,
+        "endLine": 232,
+        "endChar": 52
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "89d74f01_07b9862c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-18T08:14:55Z",
+      "side": 1,
+      "message": "there is no `ipmi::Context::ptr ctx` available in this function. This is called within startMatch() which also does not have access to ctx. Is there a function to get ipmi::Context::ptr ctx?",
+      "parentUuid": "190cef59_b2c37b42",
       "range": {
         "startLine": 232,
         "startChar": 11,
