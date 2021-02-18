@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "43c35624_b0eaf19c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1520,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-18T22:34:37Z",
+      "side": 1,
+      "message": "No, it is not possible to merge, as they have different behavior and different prerequisites.  This was discussed on the mailing list, and for the moment overriding is the best option we were able to come up with.  The hope is that having the code in the right repo will allow us to merge to one common solution over time, but rome was not built in a day.\n\nIf you\u0027re interested in helping to iterate, feel free to put patches forward.",
+      "parentUuid": "8ca8c5c9_9eea9879",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1d248de3_5c921dbc",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 13
@@ -30,6 +48,24 @@
       "writtenOn": "2021-02-18T21:13:23Z",
       "side": 1,
       "message": "Many system has only single fru which is same as baseboard fru. Will ipmi fru command fail on single fru with this.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "161faf46_483b9e0f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-18T22:34:37Z",
+      "side": 1,
+      "message": "I\u0027m not following how you think this could fail, but this code is copied from intel-ipmi-oem.  Can we agree that this patchset is better than the alternative (continuing to have this code in intel-ipmi-oem) and for the systems you want to support, we can iterate here to get more things working?",
+      "parentUuid": "1d248de3_5c921dbc",
       "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
@@ -110,6 +146,24 @@
     },
     {
       "key": {
+        "uuid": "f89d4510_5f4df84c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-18T22:34:37Z",
+      "side": 1,
+      "message": "Because we need a null implementation of it that doesn\u0027t try to call into the old sensor code.  If you have input on how SEL should work, we\u0027re happy to hear it, but in the context of this patchset, the below code is correct.  If you\u0027re interested in implementing SEL add for ipmi-dynamic, I\u0027d be interested to hear your ideas on how it should work, but not in the context of this patchset, in the context of a patchset that extends on this one, as it will need to support ALL bios variants, not just intels, hence why this code is no-op for now.",
+      "parentUuid": "d4d08902_3259b20c",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "34ff18d1_12a3b4fc",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 13
@@ -121,6 +175,24 @@
       "writtenOn": "2021-02-18T21:13:23Z",
       "side": 1,
       "message": "These commands are nothing to do with sdr and should be a part of storagehandler.cpp. These should also be merged with existing storage commands.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d981324_a48361c7",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1238,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-18T22:34:37Z",
+      "side": 1,
+      "message": "\u003e These commands are nothing to do with sdr\n\nWhere did you get that idea?  SEL and SDR are very interrelated, as they share ID numbers.\n\n\u003e and should be a part of storagehandler.cpp. These should also be merged with existing storage commands.\n\nThis is simply moving code that already exists that people want to use and I don\u0027t think making this patchset any larger is a good idea.  can we agree to get this merged as-is (as it was already reviewed, and has several active non-intel users) and agree that we can work on a better design for this stuff?  We\u0027d love your input on how you think it should work, but we need to get the existing code checked in somewhere common so we can iterate with others.  This is what we discussed on the mailing list many months ago\n\nMerging the commands is going to take time and effort, if you\u0027re willing to do the work, feel free, but as-written, this is still useful in its current (compile time option) form, and I don\u0027t think should be blocked.\n\nWith that said, I\u0027m not the maintainer.",
+      "parentUuid": "34ff18d1_12a3b4fc",
       "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
