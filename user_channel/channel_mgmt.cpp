@@ -18,7 +18,9 @@
 
 #include "apphandler.hpp"
 
+#include <ifaddrs.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -874,6 +876,15 @@ int ChannelConfig::loadChannelConfig()
 
     channelData.fill(ChannelProperties{});
 
+    // Collect the list of NIC interfaces connected to the BMC. Use this
+    // information to  only add IPMI channels that have active NIC interfaces.
+    struct ifaddrs *ifaddr, *ifa;
+    if (int err = getifaddrs(&ifaddr); err < 0)
+    {
+        log<level::DEBUG>("Unable to acquire network interfaces");
+        return -EIO;
+    }
+
     for (int chNum = 0; chNum < maxIpmiChannels; chNum++)
     {
         try
@@ -894,13 +905,30 @@ int ChannelConfig::loadChannelConfig()
             if (jsonChInfo.is_null())
             {
                 log<level::ERR>("Invalid/corrupted channel config file");
+                freeifaddrs(ifaddr);
                 return -EBADMSG;
             }
 
+            bool channelFound = true;
+            // Confirm the LAN channel is present
+            if (jsonChInfo[mediumTypeString].get<std::string>() == "lan-802.3")
+            {
+                channelFound = false;
+                for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+                {
+                    if (jsonChData[nameString].get<std::string>() ==
+                        ifa->ifa_name)
+                    {
+                        channelFound = true;
+                        break;
+                    }
+                }
+            }
             ChannelProperties& chData = channelData[chNum];
-            chData.chName = jsonChData[nameString].get<std::string>();
             chData.chID = chNum;
-            chData.isChValid = jsonChData[isValidString].get<bool>();
+            chData.chName = jsonChData[nameString].get<std::string>();
+            chData.isChValid =
+                channelFound && jsonChData[isValidString].get<bool>();
             chData.activeSessCount = jsonChData.value(activeSessionsString, 0);
             chData.maxTransferSize =
                 jsonChData.value(maxTransferSizeString, smallChannelSize);
@@ -923,14 +951,18 @@ int ChannelConfig::loadChannelConfig()
         {
             log<level::DEBUG>("Json Exception caught.",
                               entry("MSG=%s", e.what()));
+            freeifaddrs(ifaddr);
+
             return -EBADMSG;
         }
         catch (const std::invalid_argument& e)
         {
             log<level::ERR>("Corrupted config.", entry("MSG=%s", e.what()));
+            freeifaddrs(ifaddr);
             return -EBADMSG;
         }
     }
+    freeifaddrs(ifaddr);
 
     return 0;
 }
