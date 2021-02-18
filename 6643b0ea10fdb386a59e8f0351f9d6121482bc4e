@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eda227df_b24e3e7d",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-18T20:36:51Z",
+      "side": 1,
+      "message": "not sure why this was done this way instead of just having the calling code unpack for you. Unless it is just so that it will properly respond to the command while you are still working on implementing something that uses all the parameters.\n\nipmi::RspType\u003c\u003e ipmiSenPlatformEvent(\n    uint8_t generatorID, uint8_t evmRev, uint8_t sensorType,\n    uint8_t sensorNum, uint8_t eventType, uint8_t eventData1,\n    std::optional\u003cuint8_t\u003e eventData2,\n    std::optional\u003cuint8_t\u003e eventData3)\n{\n   ...\n}",
+      "range": {
+        "startLine": 265,
+        "startChar": 0,
+        "endLine": 275,
+        "endChar": 37
+      },
+      "revId": "6643b0ea10fdb386a59e8f0351f9d6121482bc4e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
