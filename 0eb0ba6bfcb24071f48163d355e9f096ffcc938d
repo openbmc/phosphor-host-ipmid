@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "65afa950_0a880653",
+        "filename": "Makefile.am",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2021-02-18T19:28:36Z",
+      "side": 1,
+      "message": "\u003e I am worried that not everybody will want this to be enabled by default. For now, it would probably be better to hide this behind a configure parameter.\n\nIf it is IBM and other YAML using machines you are worried about ...FWIW I\u0027ve got no issue with this being enabled by default now or later (in fact that probably makes the most sense?), as long there is a corresponding change to the in-tree layers that opt out where it would cause problems.  Is the hard part knowing which layers those are?  Maybe its anything with a yaml file in the ipmi tree?\n\nAnyway...just thinking about the future - no action required based on my comment.",
+      "parentUuid": "dc38803c_45c714cb",
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75844223_e6365ae9",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 9
