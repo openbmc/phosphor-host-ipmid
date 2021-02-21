@@ -190,6 +190,24 @@
     },
     {
       "key": {
+        "uuid": "06162ecd_b4ecc38d",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-21T08:52:24Z",
+      "side": 1,
+      "message": "just realized that I don\u0027t think I even have the option to enable this... Will have to add that option.",
+      "parentUuid": "502e4cd9_7735015f",
+      "revId": "6a9a92c39aacf011c3791bed7db9c7073fd50651",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a93db3f4_28c5bd64",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 4

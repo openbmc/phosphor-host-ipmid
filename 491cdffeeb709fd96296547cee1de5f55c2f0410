@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "bcabd764_9e973dd6",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-21T08:52:24Z",
+      "side": 1,
+      "message": "Done. thanks.",
+      "parentUuid": "f1f5089e_653e2aef",
+      "range": {
+        "startLine": 239,
+        "startChar": 36,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "324415f0_28ae0625",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 13
@@ -106,6 +130,24 @@
       "writtenOn": "2021-02-18T21:13:23Z",
       "side": 1,
       "message": "Will this get through if devId is 0. As 0 is ignored while calculating hash as reserved for baseboard.",
+      "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3e40ccc_eb897b2c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-21T08:52:24Z",
+      "side": 1,
+      "message": "good catch.\n\nDo we need a special case of devId of 0 like with 0xFF?\n\nmaybe just \n```\nif (devId \u003d\u003d 0) {\n  devId \u003d 1;\n}\n```\n\nor (I think this should work). Since only 0 is true and will set it to 1.\n```\ndevId +\u003d !devId\n```",
+      "parentUuid": "324415f0_28ae0625",
       "revId": "491cdffeeb709fd96296547cee1de5f55c2f0410",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true

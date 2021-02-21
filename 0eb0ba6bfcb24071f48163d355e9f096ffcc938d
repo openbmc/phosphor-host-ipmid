@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "6664b38e_77fc91a9",
+        "filename": "Makefile.am",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-21T08:52:24Z",
+      "side": 1,
+      "message": "sounds good. thanks for the feedback. I have left it to be enabled by default for now.\n\nI am not sure where enabling this will cause any issue, but it\u0027s still good to try to see what issue this can cause in the future.",
+      "parentUuid": "65afa950_0a880653",
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75844223_e6365ae9",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 9
@@ -311,6 +329,30 @@
       "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56117281_11dea328",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-21T08:52:24Z",
+      "side": 1,
+      "message": "There is another yield_method_call() in https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/40201/9/dbus-sdr/storagecommands.cpp#607\n\nHowever, changing that will require change the data structure used to follow ipmid/types.hpp instead of the ones defined in here. I tried it and it messed up https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/40201/9/dbus-sdr/storagecommands.cpp#622. There was some convention error.\n\nShould we just leave it as it is? or try to use `ipmid/types.hpp` as much as possible.",
+      "parentUuid": "5621058a_41347c56",
+      "range": {
+        "startLine": 232,
+        "startChar": 11,
+        "endLine": 232,
+        "endChar": 52
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
