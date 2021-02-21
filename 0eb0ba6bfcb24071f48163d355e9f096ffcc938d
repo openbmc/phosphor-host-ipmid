@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "6a5ce73b_2871156d",
+        "filename": "Makefile.am",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-02-21T20:17:44Z",
+      "side": 1,
+      "message": "\u003e sounds good. thanks for the feedback. I have left it to be enabled by default for now.\n\u003e \n\u003e I am not sure where enabling this will cause any issue, but it\u0027s still good to try to see what issue this can cause in the future.\n\nNot all platforms today support the dynamic way of building the SDR, so we don\u0027t want to break them by forcing these new commands on everything, only those that can work with it.\n\nBasically you would walk through the meta layers, and look for all platforms that have a phosphor-hwmon config file, and disable this option in a packageconfig.  I can walk you through it in more detail if you need.\n\nAs a note, It\u0027s on my list to go write a converter to try to convert the phosphor-hwmon files to EM configs automatically so we wont see any breakages with those platforms, but that\u0027s a ways off.\n\n\nWith all of the above said, up to Vernon if he doesn\u0027t want this enabled by default.  I think it\u0027s a good idea in the long run for this to be the default, but whether or not we do it in this patchset ¯\\_(ツ)_/¯\n\nYou\u0027ll for sure need a feature for it, something similar to line 177.",
+      "parentUuid": "6664b38e_77fc91a9",
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "75844223_e6365ae9",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 9
