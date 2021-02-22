@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "2bb9f928_1299edbe",
+        "filename": "Makefile.am",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-02-22T07:20:10Z",
+      "side": 1,
+      "message": "sounds good. thanks. I have the FEATURE in the latest patch. Please take a look. It should be right. I have left the default to true in https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/40201/14/configure.ac#269",
+      "parentUuid": "6a5ce73b_2871156d",
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "75844223_e6365ae9",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 9
