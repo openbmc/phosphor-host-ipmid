@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a121cff8_ece82ab9",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1696,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-26T23:19:39Z",
+      "side": 1,
+      "message": "dbus.call() will throw rather than simply return an error via the is_method_error() call. You must have try/catch around the call function or ipmid will abort.",
+      "range": {
+        "startLine": 1694,
+        "startChar": 0,
+        "endLine": 1696,
+        "endChar": 5
+      },
+      "revId": "913d3558c886dabae9c1f0e8c984f059383da7c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f6775d5_bc042779",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1808,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-26T23:19:39Z",
+      "side": 1,
+      "message": "call() and read() will both throw on error, so you must have try/catch around them to avoid an abort.",
+      "range": {
+        "startLine": 1799,
+        "startChar": 0,
+        "endLine": 1808,
+        "endChar": 31
+      },
+      "revId": "913d3558c886dabae9c1f0e8c984f059383da7c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9285862_36016770",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2023,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-02-26T23:19:39Z",
+      "side": 1,
+      "message": "An error log is already present in the setBootType() function. No need to log an error twice for the same failure.",
+      "range": {
+        "startLine": 2020,
+        "startChar": 17,
+        "endLine": 2023,
+        "endChar": 57
+      },
+      "revId": "913d3558c886dabae9c1f0e8c984f059383da7c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
