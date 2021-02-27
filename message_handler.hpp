@@ -93,6 +93,12 @@ class Handler : public std::enable_shared_from_this<Handler>
     bool receive();
 
     /**
+     * @brief Get Session data from the IPMI packet
+     *
+     */
+    void updSessionData(std::shared_ptr<Message>& inMessage);
+
+    /**
      * @brief Process the incoming IPMI message
      *
      * The incoming message payload is handled and the command handler for
@@ -109,6 +115,21 @@ class Handler : public std::enable_shared_from_this<Handler>
      *  @param[in] outMessage - Outgoing Message
      */
     void send(std::shared_ptr<Message> outMessage);
+
+#ifdef RMCP_PING
+    /** @brief Send the outgoing ASF message
+     *
+     *  The outgoing ASF message contains only ASF message header
+     *  which is flattened and sent out on the socket
+     */
+    void sendASF();
+#endif // RMCP_PING
+
+    /** @brief Write the packet to the socket
+     *
+     *  @param[in] packet - Outgoing packet
+     */
+    void writeData(const std::vector<uint8_t>& packet);
 
     /** @brief Socket channel for communicating with the remote client.*/
     std::shared_ptr<udpsocket::Channel> channel;

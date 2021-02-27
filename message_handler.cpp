@@ -37,6 +37,11 @@ bool Handler::receive()
     // Unflatten the packet
     std::tie(inMessage, sessionHeader) = parser::unflatten(packet);
 
+    return true;
+}
+
+void Handler::updSessionData(std::shared_ptr<Message>& inMessage)
+{
     auto session = std::get<session::Manager&>(singletonPool)
                        .getSession(inMessage->bmcSessionID);
 
@@ -48,30 +53,37 @@ bool Handler::receive()
     uint32_t ipAddr = 0;
     channel->getRemoteAddress(ipAddr);
     session->remoteIPAddr(ipAddr);
-
-    return true;
 }
 
 Handler::~Handler()
 {
-    if (outPayload)
+    try
     {
-        std::shared_ptr<Message> outMessage =
-            inMessage->createResponse(*outPayload);
-        if (!outMessage)
+#ifdef RMCP_PING
+        if (ClassOfMsg::ASF == inMessage->rmcpMsgClass)
         {
-            return;
+            sendASF();
         }
-        try
+        else
+#endif // RMCP_PING
         {
-            send(outMessage);
+            if (outPayload)
+            {
+                std::shared_ptr<Message> outMessage =
+                    inMessage->createResponse(*outPayload);
+                if (!outMessage)
+                {
+                    return;
+                }
+                send(outMessage);
+            }
         }
-        catch (const std::exception& e)
-        {
-            // send failed, most likely due to a session closure
-            log<level::INFO>("Async RMCP+ reply failed",
-                             entry("EXCEPTION=%s", e.what()));
-        }
+    }
+    catch (const std::exception& e)
+    {
+        // send failed, most likely due to a session closure
+        log<level::INFO>("Async RMCP+ reply failed",
+                         entry("EXCEPTION=%s", e.what()));
     }
 }
 
@@ -83,14 +95,21 @@ void Handler::processIncoming()
         return;
     }
 
+#ifdef RMCP_PING
     // Execute the Command, possibly asynchronously
-    executeCommand();
+    if (ClassOfMsg::ASF != inMessage->rmcpMsgClass)
+#endif // RMCP_PING
+    {
+        updSessionData(inMessage);
+        executeCommand();
+    }
 
     // send happens during the destructor if a payload was set
 }
 
 void Handler::executeCommand()
 {
+
     // Get the CommandID to map into the command table
     auto command = inMessage->getCommand();
     if (inMessage->payloadType == PayloadType::IPMI)
@@ -128,6 +147,26 @@ void Handler::executeCommand()
     }
 }
 
+void Handler::writeData(const std::vector<uint8_t>& packet)
+{
+    auto writeStatus = channel->write(packet);
+    if (writeStatus < 0)
+    {
+        throw std::runtime_error("Error in writing to socket");
+    }
+}
+
+#ifdef RMCP_PING
+void Handler::sendASF()
+{
+    // Flatten the packet
+    auto packet = asfparser::flatten(inMessage->asfMsgTag);
+
+    // Write the packet
+    writeData(packet);
+}
+#endif // RMCP_PING
+
 void Handler::send(std::shared_ptr<Message> outMessage)
 {
     auto session =
@@ -137,11 +176,7 @@ void Handler::send(std::shared_ptr<Message> outMessage)
     auto packet = parser::flatten(outMessage, sessionHeader, session);
 
     // Write the packet
-    auto writeStatus = channel->write(packet);
-    if (writeStatus < 0)
-    {
-        throw std::runtime_error("Error in writing to socket");
-    }
+    writeData(packet);
 }
 
 void Handler::setChannelInSession() const

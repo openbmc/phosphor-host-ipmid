@@ -17,24 +17,37 @@ std::tuple<std::shared_ptr<Message>, SessionHeader>
     unflatten(std::vector<uint8_t>& inPacket)
 {
     // Check if the packet has atleast the size of the RMCP Header
-    if (inPacket.size() < sizeof(BasicHeader_t))
+    if (inPacket.size() < sizeof(RmcpHeader_t))
     {
         throw std::runtime_error("RMCP Header missing");
     }
 
-    auto rmcpHeaderPtr = reinterpret_cast<BasicHeader_t*>(inPacket.data());
+    auto rmcpHeaderPtr = reinterpret_cast<RmcpHeader_t*>(inPacket.data());
 
     // Verify if the fields in the RMCP header conforms to the specification
     if ((rmcpHeaderPtr->version != RMCP_VERSION) ||
         (rmcpHeaderPtr->rmcpSeqNum != RMCP_SEQ) ||
-        (rmcpHeaderPtr->classOfMsg != RMCP_MESSAGE_CLASS_IPMI))
+        (rmcpHeaderPtr->classOfMsg < static_cast<uint8_t>(ClassOfMsg::ASF) &&
+         rmcpHeaderPtr->classOfMsg > static_cast<uint8_t>(ClassOfMsg::OEM)))
     {
         throw std::runtime_error("RMCP Header is invalid");
     }
 
+    if (rmcpHeaderPtr->classOfMsg == static_cast<uint8_t>(ClassOfMsg::ASF))
+    {
+#ifndef RMCP_PING
+        throw std::runtime_error("RMCP Ping is not supported");
+#else
+        return std::make_tuple(asfparser::unflatten(inPacket),
+                               SessionHeader::IPMI15);
+#endif // RMCP_PING
+    }
+
+    auto sessionHeaderPtr = reinterpret_cast<BasicHeader_t*>(inPacket.data());
+
     // Read the Session Header and invoke the parser corresponding to the
     // header type
-    switch (static_cast<SessionHeader>(rmcpHeaderPtr->format.formatType))
+    switch (static_cast<SessionHeader>(sessionHeaderPtr->format.formatType))
     {
         case SessionHeader::IPMI15:
         {
@@ -96,6 +109,8 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     message->sessionSeqNum = endian::from_ipmi(header->sessSeqNum);
     message->isPacketEncrypted = false;
     message->isPacketAuthenticated = false;
+    message->rmcpMsgClass =
+        static_cast<ClassOfMsg>(header->base.rmcp.classOfMsg);
 
     auto payloadLen = header->payloadLength;
 
@@ -120,10 +135,10 @@ std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
 
     // Insert Session Header into the Packet
     auto header = reinterpret_cast<SessionHeader_t*>(packet.data());
-    header->base.version = parser::RMCP_VERSION;
-    header->base.reserved = 0x00;
-    header->base.rmcpSeqNum = parser::RMCP_SEQ;
-    header->base.classOfMsg = parser::RMCP_MESSAGE_CLASS_IPMI;
+    header->base.rmcp.version = parser::RMCP_VERSION;
+    header->base.rmcp.reserved = 0x00;
+    header->base.rmcp.rmcpSeqNum = parser::RMCP_SEQ;
+    header->base.rmcp.classOfMsg = static_cast<uint8_t>(ClassOfMsg::IPMI);
     header->base.format.formatType =
         static_cast<uint8_t>(parser::SessionHeader::IPMI15);
     header->sessSeqNum = 0;
@@ -168,6 +183,8 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         ((header->payloadType & PAYLOAD_ENCRYPT_MASK) ? true : false);
     message->isPacketAuthenticated =
         ((header->payloadType & PAYLOAD_AUTH_MASK) ? true : false);
+    message->rmcpMsgClass =
+        static_cast<ClassOfMsg>(header->base.rmcp.classOfMsg);
 
     auto payloadLen = endian::from_ipmi(header->payloadLength);
 
@@ -202,10 +219,10 @@ std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
     SessionHeader_t* header = reinterpret_cast<SessionHeader_t*>(packet.data());
-    header->base.version = parser::RMCP_VERSION;
-    header->base.reserved = 0x00;
-    header->base.rmcpSeqNum = parser::RMCP_SEQ;
-    header->base.classOfMsg = parser::RMCP_MESSAGE_CLASS_IPMI;
+    header->base.rmcp.version = parser::RMCP_VERSION;
+    header->base.rmcp.reserved = 0x00;
+    header->base.rmcp.rmcpSeqNum = parser::RMCP_SEQ;
+    header->base.rmcp.classOfMsg = static_cast<uint8_t>(ClassOfMsg::IPMI);
     header->base.format.formatType =
         static_cast<uint8_t>(parser::SessionHeader::IPMI20);
     header->payloadType = static_cast<uint8_t>(outMessage->payloadType);
@@ -369,5 +386,54 @@ std::vector<uint8_t> encryptPayload(std::shared_ptr<Message> message)
 } // namespace internal
 
 } // namespace ipmi20parser
+
+#ifdef RMCP_PING
+namespace asfparser
+{
+std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
+{
+    auto message = std::make_shared<Message>();
+
+    auto header = reinterpret_cast<AsfMessagePing_t*>(inPacket.data());
+
+    message->payloadType = PayloadType::IPMI;
+    message->rmcpMsgClass = ClassOfMsg::ASF;
+    message->asfMsgTag = header->msgTag;
+
+    return message;
+}
+
+std::vector<uint8_t> flatten(uint8_t asfMsgTag)
+{
+    std::vector<uint8_t> packet(sizeof(AsfMessagePong_t));
+
+    // Insert RMCP header into the Packet
+    auto header = reinterpret_cast<AsfMessagePong_t*>(packet.data());
+    header->ping.rmcp.version = parser::RMCP_VERSION;
+    header->ping.rmcp.reserved = 0x00;
+    header->ping.rmcp.rmcpSeqNum = parser::RMCP_SEQ;
+    header->ping.rmcp.classOfMsg = static_cast<uint8_t>(ClassOfMsg::ASF);
+
+    // No OEM-specific capabilities exist, therefore the second
+    // IANA Enterprise Number contains the same IANA(4542)
+    header->ping.iana = header->iana = endian::to_ipmi(parser::ASF_IANA);
+    header->ping.msgType = static_cast<uint8_t>(RmcpMsgType::PONG);
+    header->ping.msgTag = asfMsgTag;
+    header->ping.reserved = 0x00;
+    header->ping.dataLen =
+        parser::RMCP_ASF_PONG_DATA_LEN; // as per spec 13.2.4,
+
+    header->iana = parser::ASF_IANA;
+    header->oemDefined = 0x00;
+    header->suppEntities = parser::ASF_SUPP_ENT;
+    header->suppInteract = parser::ASF_SUPP_INT;
+    header->reserved1 = 0x00;
+    header->reserved2 = 0x00;
+
+    return packet;
+}
+
+} // namespace asfparser
+#endif // RMCP_PING
 
 } // namespace message

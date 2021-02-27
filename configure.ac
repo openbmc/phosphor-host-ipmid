@@ -66,6 +66,17 @@ AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
       [AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])])
 AM_CONDITIONAL([HAVE_SYSTEMD], [test "x$with_systemdsystemunitdir" != "xno"])
 
+AC_ARG_ENABLE([rmcp-ping],
+        AS_HELP_STRING([--enable-rmcp-ping], [Enable RMCP Ping support])
+    )
+    AS_IF([test "x$enable_rmcp_ping" == "xyes"],
+        AC_MSG_NOTICE([Enabling RMCP Ping])
+        [
+            cpp_flags="-DRMCP_PING"
+        ]
+        AC_SUBST([CPPFLAGS], [$cpp_flags])
+)
+
 # Checks for header files.
 AC_CHECK_HEADER(systemd/sd-bus.h, ,[AC_MSG_ERROR([Could not find systemd/sd-bus.h...systemd development package required])])
 

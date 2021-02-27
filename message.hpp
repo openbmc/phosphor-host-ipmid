@@ -21,6 +21,24 @@ enum class PayloadType : uint8_t
     INVALID = 0xFF,
 };
 
+// RMCP Classes of Message as per section 13.1.3.
+enum class ClassOfMsg : uint8_t
+{
+    RESERVED = 0x05,
+    ASF = 0x06,
+    IPMI = 0x07,
+    OEM = 0x08,
+};
+
+#ifdef RMCP_PING
+// RMCP Message Type as per section 13.1.3.
+enum class RmcpMsgType : uint8_t
+{
+    PING = 0x80,
+    PONG = 0x40,
+};
+#endif // RMCP_PING
+
 namespace LAN
 {
 
@@ -103,7 +121,8 @@ struct Message
     Message() :
         payloadType(PayloadType::INVALID),
         rcSessionID(Message::MESSAGE_INVALID_SESSION_ID),
-        bmcSessionID(Message::MESSAGE_INVALID_SESSION_ID)
+        bmcSessionID(Message::MESSAGE_INVALID_SESSION_ID),
+        rmcpMsgClass(ClassOfMsg::RESERVED)
     {
     }
 
@@ -120,7 +139,7 @@ struct Message
         isPacketEncrypted(other.isPacketEncrypted),
         isPacketAuthenticated(other.isPacketAuthenticated),
         payloadType(other.payloadType), rcSessionID(other.rcSessionID),
-        bmcSessionID(other.bmcSessionID)
+        bmcSessionID(other.bmcSessionID), rmcpMsgClass(other.rmcpMsgClass)
     {
         // special behavior for rmcp+ session creation
         if (PayloadType::OPEN_SESSION_REQUEST == other.payloadType)
@@ -227,6 +246,10 @@ struct Message
     uint32_t rcSessionID;       // Remote Client's Session ID
     uint32_t bmcSessionID;      // BMC's session ID
     uint32_t sessionSeqNum;     // Session Sequence Number
+    ClassOfMsg rmcpMsgClass;    // Class of Message
+#ifdef RMCP_PING
+    uint8_t asfMsgTag; // ASF Message Tag
+#endif                 // RMCP_PING
 
     /** @brief Message payload
      *

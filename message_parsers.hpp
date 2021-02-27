@@ -24,6 +24,19 @@ constexpr size_t RMCP_MESSAGE_CLASS_IPMI = 7;
 // RMCP Session Header Size
 constexpr size_t RMCP_SESSION_HEADER_SIZE = 4;
 
+// RMCP/ASF Pong Message ASF Header Data Length
+// as per IPMI spec 13.2.4
+constexpr size_t RMCP_ASF_PONG_DATA_LEN = 16;
+
+// ASF IANA
+constexpr uint32_t ASF_IANA = 4542;
+
+// ASF Supported Entities
+constexpr uint32_t ASF_SUPP_ENT = 0x81;
+
+// ASF Supported Entities
+constexpr uint32_t ASF_SUPP_INT = 0x00;
+
 // Maximum payload size
 constexpr size_t MAX_PAYLOAD_SIZE = 255;
 
@@ -34,13 +47,20 @@ enum class SessionHeader
     INVALID = 0xFF,
 };
 
-struct BasicHeader_t
+// RMCP Header
+struct RmcpHeader_t
 {
     // RMCP Header
     uint8_t version;
     uint8_t reserved;
     uint8_t rmcpSeqNum;
     uint8_t classOfMsg;
+} __attribute__((packed));
+
+struct BasicHeader_t
+{
+    // RMCP Header
+    struct RmcpHeader_t rmcp;
 
     // IPMI partial session header
     union
@@ -225,5 +245,55 @@ std::vector<uint8_t> encryptPayload(std::shared_ptr<Message> message);
 } // namespace internal
 
 } // namespace ipmi20parser
+
+#ifdef RMCP_PING
+namespace asfparser
+{
+
+// ASF message fields for RMCP Ping message
+struct AsfMessagePing_t
+{
+    struct parser::RmcpHeader_t rmcp;
+
+    uint32_t iana;
+    uint8_t msgType;
+    uint8_t msgTag;
+    uint8_t reserved;
+    uint8_t dataLen;
+} __attribute__((packed));
+
+// ASF message fields for RMCP Pong message
+struct AsfMessagePong_t
+{
+    struct AsfMessagePing_t ping;
+
+    uint32_t iana;
+    uint32_t oemDefined;
+    uint8_t suppEntities;
+    uint8_t suppInteract;
+    uint32_t reserved1;
+    uint16_t reserved2;
+} __attribute__((packed));
+
+/**
+ * @brief Unflatten an incoming packet and prepare the ASF message
+ *
+ * @param[in] inPacket - Incoming ASF packet
+ *
+ * @return ASF message in the packet on success
+ */
+std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
+
+/**
+ * @brief Generate the ASF packet with the RMCP header
+ *
+ * @param[in] asfMsgTag - ASF Message Tag from Ping request
+ *
+ * @return ASF packet on success
+ */
+std::vector<uint8_t> flatten(uint8_t asfMsgTag);
+
+} // namespace asfparser
+#endif // RMCP_PING
 
 } // namespace message
