@@ -109,6 +109,24 @@
     },
     {
       "key": {
+        "uuid": "955939b2_c710a7a4",
+        "filename": "Makefile.am",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-03-01T07:39:34Z",
+      "side": 1,
+      "message": "I just realized that I missed some part of the message.\n\nFor the packageconfig issue, I am actually not exactly sure why that is needed. Do we just want to prevent it from building the library in the first place? Could you point me to an example for that?\n\nI was under the impression that we can just not include the new library in `HOSTIPMI_PROVIDER_LIBRARY` like https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-phosphor/ipmi/phosphor-ipmi-host_git.bb#L86. Then this will not break anything?",
+      "parentUuid": "2bb9f928_1299edbe",
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "75844223_e6365ae9",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 9
@@ -389,6 +407,30 @@
       "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0f31b0f_9eaebd7a",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-03-01T07:39:34Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "56117281_11dea328",
+      "range": {
+        "startLine": 232,
+        "startChar": 11,
+        "endLine": 232,
+        "endChar": 52
+      },
+      "revId": "0eb0ba6bfcb24071f48163d355e9f096ffcc938d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
