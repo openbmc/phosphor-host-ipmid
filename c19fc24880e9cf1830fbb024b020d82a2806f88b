@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4bb39ef3_8fbd53d0",
+        "filename": "dbus-sdr/sensorutils.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2021-03-03T01:38:00Z",
+      "side": 1,
+      "message": "Looks like this has now been done?",
+      "revId": "c19fc24880e9cf1830fbb024b020d82a2806f88b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df607341_d6d99a10",
+        "filename": "dbus-sdr/sensorutils.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2021-03-03T01:38:00Z",
+      "side": 1,
+      "message": "Should this be marked `static` then?  (And the declaration removed from `sensorutils.hpp` if so?)",
+      "revId": "c19fc24880e9cf1830fbb024b020d82a2806f88b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd7bd3db_11f25369",
+        "filename": "dbus-sdr/sensorutils.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2021-03-03T01:38:00Z",
+      "side": 1,
+      "message": "As with scaleFloatExp(), mark `static` and remove declaration from header?",
+      "revId": "c19fc24880e9cf1830fbb024b020d82a2806f88b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
