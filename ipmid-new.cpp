@@ -199,6 +199,7 @@ void registerFilter(int prio, FilterBase::ptr filter)
     if (filterList.empty() || std::get<int>(filterList.front()) < prio)
     {
         filterList.emplace_front(std::make_tuple(prio, filter));
+        return;
     }
     // walk the list and put it in the right place
     auto j = filterList.begin();
