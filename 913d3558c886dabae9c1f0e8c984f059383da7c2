@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "13f5a37e_d92187d3",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1696,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-03-08T15:18:25Z",
+      "side": 1,
+      "message": "The try/catch looks fine except there is no need to call if(reply.is_method_error()) because that will always be false if it didn\u0027t throw.\n\nSure, using the ipmi::(set/get)DbusProperty calls is convenient. The try/catch is still needed, but it would make the code easier to read. Also, there is a yielding variant for those that can be used if you request the ipmi::Context::ptr parameter as the first argument to ipmiChassisGetSysBootOptions.",
+      "parentUuid": "40cd39ef_07c851ff",
+      "range": {
+        "startLine": 1694,
+        "startChar": 0,
+        "endLine": 1696,
+        "endChar": 5
+      },
+      "revId": "913d3558c886dabae9c1f0e8c984f059383da7c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0f6775d5_bc042779",
         "filename": "chassishandler.cpp",
         "patchSetId": 1
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "This is a mistake that comes from the `setBootSource`/`setBootMode` methods.\nDo you want me to fix it here, or in a separate commit?",
       "parentUuid": "e9285862_36016770",
+      "range": {
+        "startLine": 2020,
+        "startChar": 17,
+        "endLine": 2023,
+        "endChar": 57
+      },
+      "revId": "913d3558c886dabae9c1f0e8c984f059383da7c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b55795d_ec715a3e",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2023,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-03-08T15:18:25Z",
+      "side": 1,
+      "message": "Since both the function and the code that calls it are new code in this commit, it makes sense to change it now. I just don\u0027t want two messages logged about the same error.",
+      "parentUuid": "df6e4224_df353981",
       "range": {
         "startLine": 2020,
         "startChar": 17,
