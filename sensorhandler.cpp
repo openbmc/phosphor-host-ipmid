@@ -947,7 +947,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     get_sdr::header::set_record_id(sensor_id, &(record.header));
     record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
     record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
-    record.header.record_length = sizeof(get_sdr::SensorDataFullRecord);
+    record.header.record_length = sizeof(record.key) + sizeof(record.body);
 
     /* Key */
     get_sdr::key::set_owner_id_bmc(&(record.key));
