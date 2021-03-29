@@ -46,6 +46,9 @@ namespace ipmi
 static constexpr int sensorMapUpdatePeriod = 10;
 static constexpr int sensorMapSdrUpdatePeriod = 60;
 
+// BMC I2C address is generally at 0x20
+static constexpr uint8_t bmcI2CAddr = 0x20;
+
 constexpr size_t maxSDRTotalSize =
     76; // Largest SDR Record Size (type 01) + SDR Overheader Size
 constexpr static const uint32_t noTimestamp = 0xFFFFFFFF;
@@ -358,6 +361,34 @@ static std::optional<double>
     value *= std::pow(10.0, rExp);
 
     return value;
+}
+
+// Extract file name from sensor path as the sensors SDR ID. Simplify the name
+// if it is too long.
+std::string parseSdrIdFromPath(const std::string& path)
+{
+    std::string name;
+    size_t nameStart = path.rfind("/");
+    if (nameStart != std::string::npos)
+    {
+        name = path.substr(nameStart + 1, std::string::npos - nameStart);
+    }
+
+    std::replace(name.begin(), name.end(), '_', ' ');
+    if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+    {
+        // try to not truncate by replacing common words
+        constexpr std::array<std::pair<const char*, const char*>, 2>
+            replaceWords = {std::make_pair("Output", "Out"),
+                            std::make_pair("Input", "In")};
+        for (const auto& [find, replace] : replaceWords)
+        {
+            boost::replace_all(name, find, replace);
+        }
+
+        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+    }
+    return name;
 }
 
 } // namespace sensor
@@ -1183,103 +1214,23 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
     return ipmi::responseSuccess(sensorEventStatus, assertions, deassertions);
 }
 
-static int getSensorDataRecord(ipmi::Context::ptr ctx,
-                               std::vector<uint8_t>& recordData,
-                               uint16_t recordID)
+// Construct a type 1 SDR for threshold sensor.
+bool constructSensorSdr(uint16_t sensorNum, uint16_t recordID,
+                        const std::string& path,
+                        const DbusInterfaceMap& sensorMap,
+                        get_sdr::SensorDataFullRecord& record)
 {
-    auto& sensorTree = getSensorTree();
-    size_t fruCount = 0;
-    ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
-    if (ret != ipmi::ccSuccess)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: getFruSdrCount error");
-        return GENERAL_ERROR;
-    }
-
-    size_t lastRecord =
-        sensorTree.size() + fruCount + ipmi::storage::type12Count - 1;
-    if (recordID == lastRecordIndex)
-    {
-        recordID = lastRecord;
-    }
-    if (recordID > lastRecord)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: recordID > lastRecord error");
-        return GENERAL_ERROR;
-    }
-
-    if (recordID >= sensorTree.size())
-    {
-        size_t fruIndex = recordID - sensorTree.size();
-        if (fruIndex >= fruCount)
-        {
-            // handle type 12 hardcoded records
-            size_t type12Index = fruIndex - fruCount;
-            if (type12Index >= ipmi::storage::type12Count)
-            {
-                phosphor::logging::log<phosphor::logging::level::ERR>(
-                    "getSensorDataRecord: type12Index error");
-                return GENERAL_ERROR;
-            }
-            recordData = ipmi::storage::getType12SDRs(type12Index, recordID);
-        }
-        else
-        {
-            // handle fru records
-            get_sdr::SensorDataFruRecord data;
-            ret = ipmi::storage::getFruSdrs(ctx, fruIndex, data);
-            if (ret != IPMI_CC_OK)
-            {
-                return GENERAL_ERROR;
-            }
-            data.header.record_id_msb = recordID >> 8;
-            data.header.record_id_lsb = recordID & 0xFF;
-            recordData.insert(recordData.end(),
-                              reinterpret_cast<uint8_t*>(&data),
-                              reinterpret_cast<uint8_t*>(&data) + sizeof(data));
-        }
-
-        return 0;
-    }
-
-    std::string connection;
-    std::string path;
-    auto status = getSensorConnection(ctx, recordID, connection, path);
-    if (status)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: getSensorConnection error");
-        return GENERAL_ERROR;
-    }
-    DbusInterfaceMap sensorMap;
-    if (!getSensorMap(ctx, connection, path, sensorMap, sensorMapUpdatePeriod))
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: getSensorMap error");
-        return GENERAL_ERROR;
-    }
-    uint16_t sensorNum = getSensorNumberFromPath(path);
-    if (sensorNum == invalidSensorNumber)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: invalidSensorNumber");
-        return GENERAL_ERROR;
-    }
-    uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
-    uint8_t lun = static_cast<uint8_t>(sensorNum >> 8);
-
-    get_sdr::SensorDataFullRecord record = {0};
-
     get_sdr::header::set_record_id(
         recordID, reinterpret_cast<get_sdr::SensorDataRecordHeader*>(&record));
+
+    uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
+    uint8_t lun = static_cast<uint8_t>(sensorNum >> 8);
 
     record.header.sdr_version = ipmiSdrVersion;
     record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
     record.header.record_length = sizeof(get_sdr::SensorDataFullRecord) -
                                   sizeof(get_sdr::SensorDataRecordHeader);
-    record.key.owner_id = 0x20;
+    record.key.owner_id = bmcI2CAddr;
     record.key.owner_lun = lun;
     record.key.sensor_number = sensornumber;
 
@@ -1301,7 +1252,7 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "getSensorDataRecord: sensorObject error");
-        return GENERAL_ERROR;
+        return false;
     }
 
     uint8_t entityId = 0;
@@ -1341,7 +1292,7 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "getSensorDataRecord: getSensorAttributes error");
-        return GENERAL_ERROR;
+        return false;
     }
 
     // The record.body is a struct SensorDataFullRecordBody
@@ -1395,27 +1346,7 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     // Original comment said "todo fill out rest of units"
 
     // populate sensor name from path
-    std::string name;
-    size_t nameStart = path.rfind("/");
-    if (nameStart != std::string::npos)
-    {
-        name = path.substr(nameStart + 1, std::string::npos - nameStart);
-    }
-
-    std::replace(name.begin(), name.end(), '_', ' ');
-    if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
-    {
-        // try to not truncate by replacing common words
-        constexpr std::array<std::pair<const char*, const char*>, 2>
-            replaceWords = {std::make_pair("Output", "Out"),
-                            std::make_pair("Input", "In")};
-        for (const auto& [find, replace] : replaceWords)
-        {
-            boost::replace_all(name, find, replace);
-        }
-
-        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
-    }
+    auto name = sensor::parseSdrIdFromPath(path);
     record.body.id_string_info = name.size();
     std::strncpy(record.body.id_string, name.c_str(),
                  sizeof(record.body.id_string));
@@ -1432,7 +1363,7 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "getSensorDataRecord: getIPMIThresholds error");
-        return GENERAL_ERROR;
+        return false;
     }
 
     if (thresholdData.criticalHigh)
@@ -1487,8 +1418,107 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     // everything that is readable is setable
     record.body.discrete_reading_setting_mask[1] =
         record.body.discrete_reading_setting_mask[0];
-    recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&record),
-                      reinterpret_cast<uint8_t*>(&record) + sizeof(record));
+    return true;
+}
+
+static int getSensorDataRecord(ipmi::Context::ptr ctx,
+                               std::vector<uint8_t>& recordData,
+                               uint16_t recordID)
+{
+    size_t fruCount = 0;
+    ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
+    if (ret != ipmi::ccSuccess)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "getSensorDataRecord: getFruSdrCount error");
+        return GENERAL_ERROR;
+    }
+
+    auto& sensorTree = getSensorTree();
+    size_t lastRecord =
+        sensorTree.size() + fruCount + ipmi::storage::type12Count + -1;
+    if (recordID == lastRecordIndex)
+    {
+        recordID = lastRecord;
+    }
+    if (recordID > lastRecord)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "getSensorDataRecord: recordID > lastRecord error");
+        return GENERAL_ERROR;
+    }
+
+    if (recordID >= sensorTree.size())
+    {
+        size_t fruIndex = recordID - sensorTree.size();
+
+        if (fruIndex >= fruCount)
+        {
+            // handle type 12 hardcoded records
+            size_t type12Index = fruIndex - fruCount;
+            if (type12Index >= ipmi::storage::type12Count)
+            {
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "getSensorDataRecord: type12Index error");
+                return GENERAL_ERROR;
+            }
+            recordData = ipmi::storage::getType12SDRs(type12Index, recordID);
+        }
+        else
+        {
+            // handle fru records
+            get_sdr::SensorDataFruRecord data;
+            ret = ipmi::storage::getFruSdrs(ctx, fruIndex, data);
+            if (ret != IPMI_CC_OK)
+            {
+                return GENERAL_ERROR;
+            }
+            data.header.record_id_msb = recordID >> 8;
+            data.header.record_id_lsb = recordID & 0xFF;
+            recordData.insert(recordData.end(), (uint8_t*)&data,
+                              ((uint8_t*)&data) + sizeof(data));
+        }
+
+        return 0;
+    }
+
+    std::string connection;
+    std::string path;
+    auto status = getSensorConnection(ctx, recordID, connection, path);
+    if (status)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "getSensorDataRecord: getSensorConnection error");
+        return GENERAL_ERROR;
+    }
+    DbusInterfaceMap sensorMap;
+    if (!getSensorMap(ctx, connection, path, sensorMap, sensorMapUpdatePeriod))
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "getSensorDataRecord: getSensorMap error");
+        return GENERAL_ERROR;
+    }
+    uint16_t sensorNum = getSensorNumberFromPath(path);
+    if (sensorNum == invalidSensorNumber)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "getSensorDataRecord: invalidSensorNumber");
+        return GENERAL_ERROR;
+    }
+
+    auto sensorObject = sensorMap.find(sensor::sensorInterface);
+    // Construct full record (SDR type 1) for the threshold sensors
+    if (sensorObject != sensorMap.end())
+    {
+        get_sdr::SensorDataFullRecord record = {0};
+
+        if (!constructSensorSdr(sensorNum, recordID, path, sensorMap, record))
+        {
+            return GENERAL_ERROR;
+        }
+        recordData.insert(recordData.end(), (uint8_t*)&record,
+                          ((uint8_t*)&record) + sizeof(record));
+    }
     return 0;
 }
 
