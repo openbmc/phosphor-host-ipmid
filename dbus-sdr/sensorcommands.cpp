@@ -267,6 +267,91 @@ ipmi::RspType<> ipmiSenPlatformEvent(uint8_t generatorID, uint8_t evmRev,
     return ipmi::responseSuccess();
 }
 
+ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
+                                     uint8_t sensorNumber, uint8_t operation,
+                                     uint8_t reading, uint15_t assertOffset,
+                                     bool resvd1, uint15_t deassertOffset,
+                                     bool resvd2, uint8_t eventData1,
+                                     uint8_t eventData2, uint8_t eventData3)
+{
+
+#ifndef FEATURE_DYNAMIC_SENSORS_WRITE
+    return ipmi::responseResponseError();
+#endif
+
+    std::string connection;
+    std::string path;
+    ipmi::Cc status = getSensorConnection(ctx, sensorNumber, connection, path);
+    if (status)
+    {
+        return ipmi::response(status);
+    }
+
+    DbusInterfaceMap sensorMap;
+    if (!getSensorMap(ctx, connection, path, sensorMap))
+    {
+        return ipmi::responseResponseError();
+    }
+    auto sensorObject = sensorMap.find("xyz.openbmc_project.Sensor.Value");
+
+    if (sensorObject == sensorMap.end() ||
+        sensorObject->second.find("Value") == sensorObject->second.end())
+    {
+        return ipmi::responseResponseError();
+    }
+
+    double max = 0;
+    double min = 0;
+    getSensorMaxMin(sensorMap, max, min);
+
+    int16_t mValue = 0;
+    int16_t bValue = 0;
+    int8_t rExp = 0;
+    int8_t bExp = 0;
+    bool bSigned = false;
+
+    if (!getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned))
+    {
+        return ipmi::responseResponseError();
+    }
+
+    double value = bSigned ? ((int8_t)reading) : reading;
+
+    value *= ((double)mValue);
+    value += ((double)bValue) * std::pow(10.0, bExp);
+    value *= std::pow(10.0, rExp);
+
+    if constexpr (debug)
+    {
+        phosphor::logging::log<phosphor::logging::level::INFO>(
+            "IPMI SET_SENSOR",
+            phosphor::logging::entry("SENSOR_NUM=%d", sensorNumber),
+            phosphor::logging::entry("BYTE=%u", (unsigned int)reading),
+            phosphor::logging::entry("VALUE=%f", value));
+    }
+
+    try
+    {
+        setDbusProperty(ctx, connection, path,
+                        "xyz.openbmc_project.Sensor.Value", "Value",
+                        ipmi::Value(value));
+    }
+    // setDbusProperty intended to resolve dbus exception/rc within the
+    // function but failed to achieve that. Catch SdBusError in the ipmi
+    // callback functions for now (e.g. ipmiSetSensorReading).
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        using namespace phosphor::logging;
+        log<level::ERR>(
+            "Failed to set property", entry("PROPERTY=%s", "Value"),
+            entry("PATH=%s", path.c_str()),
+            entry("INTERFACE=%s", "xyz.openbmc_project.Sensor.Value"),
+            entry("WHAT=%s", e.what()));
+        return ipmi::responseResponseError();
+    }
+    return ipmi::responseSuccess();
+}
+
 ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
     ipmiSenGetSensorReading(ipmi::Context::ptr ctx, uint8_t sensnum)
 {
@@ -1423,6 +1508,12 @@ ipmi::RspType<uint8_t,  // sdr version
     uint16_t recordCount =
         sensorTree.size() + fruCount + ipmi::storage::type12Count;
 
+    if constexpr (debug)
+    {
+        std::fprintf(stderr, "IPMI counted %d records: %d sensors, %d FRUs\n",
+                     (int)recordCount, (int)(sensorTree.size()), (int)fruCount);
+    }
+
     uint8_t operationSupport = static_cast<uint8_t>(
         SdrRepositoryInfoOps::overflow); // write not supported
 
@@ -1557,6 +1648,11 @@ void registerSensorFunctions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdPlatformEvent,
                           ipmi::Privilege::Operator, ipmiSenPlatformEvent);
+
+    // <Set Sensor Reading and Event Status>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
+                          ipmi::Privilege::Operator, ipmiSetSensorReading);
 
     // <Get Sensor Reading>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
