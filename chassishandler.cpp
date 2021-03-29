@@ -59,9 +59,6 @@ static constexpr size_t macOffset = 9;
 static constexpr size_t addrTypeOffset = 16;
 static constexpr size_t ipAddrOffset = 17;
 
-static constexpr uint4_t RESERVED = 0;
-static constexpr uint8_t CHANNEL_NOT_SUPPORTED = 0;
-
 static constexpr size_t encIdentifyObjectsSize = 1;
 static constexpr size_t chassisIdentifyReqLength = 2;
 static constexpr size_t identifyIntervalPos = 0;
@@ -1294,8 +1291,9 @@ ipmi::RspType<uint4_t, // Restart Cause
         return ipmi::responseUnspecifiedError();
     }
 
-    return ipmi::responseSuccess(cause.value(), RESERVED,
-                                 CHANNEL_NOT_SUPPORTED);
+    constexpr uint4_t reserved = 0;
+    auto channel = static_cast<uint8_t>(ctx->channel);
+    return ipmi::responseSuccess(cause.value(), reserved, channel);
 }
 
 //-------------------------------------------------------------
