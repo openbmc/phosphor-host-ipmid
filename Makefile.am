@@ -178,6 +178,10 @@ libdynamiccmds_la_LDFLAGS = \
 	$(libmapper_LIBS) \
 	-version-info 0:0:0 -shared
 libdynamiccmds_la_CXXFLAGS = $(COMMON_CXX)
+
+if FEATURE_DYNAMIC_SENSORS_WRITE
+	libdynamiccmds_la_CXXFLAGS += -DFEATURE_DYNAMIC_SENSORS_WRITE
+endif
 endif
 
 if FEATURE_IPMI_WHITELIST
