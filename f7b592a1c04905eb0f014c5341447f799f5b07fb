@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2c1d49a3_4b88b99d",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-04-01T21:25:19Z",
+      "side": 1,
+      "message": "Nit, this should explicitly be int32_t, because that\u0027s what the dbus interface says.  If we use auto, this code will be incorrect if we ever get a 64 bit bmc.\n\nNot your fault, feel free to fix if you like.",
+      "range": {
+        "startLine": 50,
+        "startChar": 27,
+        "endLine": 50,
+        "endChar": 31
+      },
+      "revId": "f7b592a1c04905eb0f014c5341447f799f5b07fb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
