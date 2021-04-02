@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "c566328e_6c72edd9",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-04-02T16:42:34Z",
+      "side": 1,
+      "message": "this is not necessary, but I don\u0027t think it causes any overhead. The shared_ptr class overrides the -\u003e operator which implicitly does the same thing as a get()-\u003e\n\nMore of an FYI.",
+      "range": {
+        "startLine": 46,
+        "startChar": 26,
+        "endLine": 46,
+        "endChar": 32
+      },
+      "revId": "f7b592a1c04905eb0f014c5341447f799f5b07fb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2c1d49a3_4b88b99d",
         "filename": "dbus-sdr/sdrutils.cpp",
         "patchSetId": 20
