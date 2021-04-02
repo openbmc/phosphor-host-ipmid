@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c20b5af5_25971d72",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-04-02T17:05:32Z",
+      "side": 1,
+      "message": "Done. thanks. I\u0027ll just clean it up for now.",
+      "parentUuid": "c566328e_6c72edd9",
+      "range": {
+        "startLine": 46,
+        "startChar": 26,
+        "endLine": 46,
+        "endChar": 32
+      },
+      "revId": "f7b592a1c04905eb0f014c5341447f799f5b07fb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c1d49a3_4b88b99d",
         "filename": "dbus-sdr/sdrutils.cpp",
         "patchSetId": 20
@@ -45,6 +69,30 @@
       "revId": "f7b592a1c04905eb0f014c5341447f799f5b07fb",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5a8a954_fd714567",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-04-02T17:05:32Z",
+      "side": 1,
+      "message": "Done. thanks.",
+      "parentUuid": "2c1d49a3_4b88b99d",
+      "range": {
+        "startLine": 50,
+        "startChar": 27,
+        "endLine": 50,
+        "endChar": 31
+      },
+      "revId": "f7b592a1c04905eb0f014c5341447f799f5b07fb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
