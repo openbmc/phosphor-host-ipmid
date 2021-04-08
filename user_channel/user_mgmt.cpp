@@ -738,7 +738,7 @@ Cc UserAccess::setUserPassword(const uint8_t userId, const char* userPassword)
 
     int retval = pamUpdatePasswd(userName.c_str(), passwd.c_str());
     // Clear sensitive data
-    OPENSSL_cleanse(&passwd, passwd.length());
+    OPENSSL_cleanse(passwd.data(), passwd.length());
 
     switch (retval)
     {
