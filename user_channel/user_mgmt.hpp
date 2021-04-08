@@ -1,4 +1,4 @@
-/*
+/*.
 // Copyright (c) 2018 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -401,4 +401,45 @@ class UserAccess
      */
     void cacheUserDataFile();
 };
+
+template <typename T>
+class SecureAllocator : public std::allocator<T>
+{
+  public:
+    typedef size_t size_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    template <typename _Tp1>
+    struct rebind
+    {
+        typedef SecureAllocator<_Tp1> other;
+    };
+    pointer allocate(size_type n, const void* hint = 0)
+    {
+        return std::allocator<T>::allocate(n, hint);
+    }
+
+    void deallocate(pointer p, size_type n)
+    {
+        OPENSSL_cleanse(p, n);
+        return std::allocator<T>::deallocate(p, n);
+    }
+
+    SecureAllocator() throw() : std::allocator<T>()
+    {
+    }
+    SecureAllocator(const SecureAllocator& a) throw() : std::allocator<T>(a)
+    {
+    }
+    template <class U>
+    SecureAllocator(const SecureAllocator<U>& a) throw() : std::allocator<T>(a)
+    {
+    }
+    ~SecureAllocator() throw()
+    {
+    }
+};
+using SecureString = std::basic_string<char, std::char_traits<char>,
+                                       ipmi::SecureAllocator<char>>;
 } // namespace ipmi
