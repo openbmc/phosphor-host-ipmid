@@ -737,13 +737,12 @@ Cc UserAccess::setUserPassword(const uint8_t userId, const char* userPassword)
                           entry("USER-ID=%d", (uint8_t)userId));
         return ccParmOutOfRange;
     }
-    std::string passwd;
-    passwd.assign(reinterpret_cast<const char*>(userPassword), 0,
-                  maxIpmi20PasswordSize);
 
-    int retval = pamUpdatePasswd(userName.c_str(), passwd.c_str());
-    // Clear sensitive data
-    OPENSSL_cleanse(&passwd, passwd.length());
+    int retval = pamUpdatePasswd(userName.c_str(), userPassword);
+    typedef std::basic_string<char, std::char_traits<char>,
+                              custom_allocator::SecureString<char>>
+        passwd;
+    passwd x(userPassword);
 
     switch (retval)
     {

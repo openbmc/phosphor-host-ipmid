@@ -402,3 +402,47 @@ class UserAccess
     void cacheUserDataFile();
 };
 } // namespace ipmi
+
+namespace custom_allocator
+{
+
+template <typename T>
+class SecureString : public std::allocator<T>
+{
+  public:
+    typedef size_t size_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+
+    template <typename _Tp1>
+    struct rebind
+    {
+        typedef SecureString<_Tp1> other;
+    };
+
+    pointer allocate(size_type n, const void* hint = 0)
+    {
+        return std::allocator<T>::allocate(n, hint);
+    }
+
+    void deallocate(pointer p, size_type n)
+    {
+        OPENSSL_cleanse(p, n);
+        return std::allocator<T>::deallocate(p, n);
+    }
+
+    SecureString() throw() : std::allocator<T>()
+    {
+    }
+    SecureString(const SecureString& a) throw() : std::allocator<T>(a)
+    {
+    }
+    template <class U>
+    SecureString(const SecureString<U>& a) throw() : std::allocator<T>(a)
+    {
+    }
+    ~SecureString() throw()
+    {
+    }
+};
+} // namespace custom_allocator
