@@ -17,6 +17,7 @@
 #include "channel_mgmt.hpp"
 
 #include "apphandler.hpp"
+#include "user_layer.hpp"
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -67,6 +68,7 @@ static constexpr const char* mediumTypeString = "medium_type";
 static constexpr const char* protocolTypeString = "protocol_type";
 static constexpr const char* sessionSupportedString = "session_supported";
 static constexpr const char* isIpmiString = "is_ipmi";
+static constexpr const char* isManagementNIC = "is_management_nic";
 static constexpr const char* authTypeSupportedString = "auth_type_supported";
 static constexpr const char* accessModeString = "access_mode";
 static constexpr const char* userAuthDisabledString = "user_auth_disabled";
@@ -852,12 +854,41 @@ void ChannelConfig::setDefaultChannelConfig(const uint8_t chNum,
     channelData[chNum].chID = chNum;
     channelData[chNum].isChValid = false;
     channelData[chNum].activeSessCount = 0;
+    channelData[chNum].isManagementNIC = false;
 
     channelData[chNum].chInfo.mediumType = defaultMediumType;
     channelData[chNum].chInfo.protocolType = defaultProtocolType;
     channelData[chNum].chInfo.sessionSupported = defaultSessionSupported;
     channelData[chNum].chInfo.isIpmi = defaultIsIpmiState;
     channelData[chNum].chInfo.authTypeSupported = defaultAuthType;
+}
+
+uint8_t ChannelConfig::getManagementNICID()
+{
+    static bool idFound = false;
+    static uint8_t id = 0;
+
+    if (idFound)
+    {
+        return id;
+    }
+
+    for (uint8_t chIdx = 0; chIdx < maxIpmiChannels; chIdx++)
+    {
+        if (channelData[chIdx].isManagementNIC)
+        {
+            id = chIdx;
+            idFound = true;
+            break;
+        }
+    }
+
+    if (!idFound)
+    {
+        id = static_cast<uint8_t>(EChannelID::chanLan1);
+        idFound = true;
+    }
+    return id;
 }
 
 int ChannelConfig::loadChannelConfig()
@@ -904,6 +935,12 @@ int ChannelConfig::loadChannelConfig()
             chData.activeSessCount = jsonChData.value(activeSessionsString, 0);
             chData.maxTransferSize =
                 jsonChData.value(maxTransferSizeString, smallChannelSize);
+            if (jsonChData.count(isManagementNIC) != 0)
+            {
+                chData.isManagementNIC =
+                    jsonChData[isManagementNIC].get<bool>();
+            }
+
             std::string medTypeStr =
                 jsonChInfo[mediumTypeString].get<std::string>();
             chData.chInfo.mediumType =

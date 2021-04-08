@@ -64,6 +64,7 @@ struct ChannelProperties
     ChannelInfo chInfo;
     ChannelAccessData chAccess;
     size_t maxTransferSize;
+    bool isManagementNIC;
 };
 
 class ChannelConfig;
@@ -234,6 +235,14 @@ class ChannelConfig
      *  @return 0 for success, -errno for failure.
      */
     int writeChannelVolatileData();
+
+    /** @brief Returns the IPMI channel ID authorized to push IPMI privilege
+     * changes to phosphor-user-manager. Any channel access changes made on
+     * any other channel are ignored.
+     *
+     *  @return IPMI channel ID as defined in channel_config.json
+     */
+    uint8_t getManagementNICID();
 
   private:
     uint32_t signalFlag = 0;

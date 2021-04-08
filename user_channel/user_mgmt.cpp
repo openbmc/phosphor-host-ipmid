@@ -17,6 +17,7 @@
 
 #include "apphandler.hpp"
 #include "channel_layer.hpp"
+#include "channel_mgmt.hpp"
 
 #include <security/pam_appl.h>
 #include <sys/stat.h>
@@ -509,11 +510,15 @@ bool UserAccess::isValidPrivilege(const uint8_t priv)
 
 uint8_t UserAccess::getUsrMgmtSyncIndex()
 {
-    // TODO: Need to get LAN1 channel number dynamically,
-    // which has to be in sync with system user privilege
-    // level(Phosphor-user-manager). Note: For time being chanLan1 is marked as
-    // sync index to the user-manager privilege..
-    return static_cast<uint8_t>(EChannelID::chanLan1);
+    // Identify the IPMI channel used to assign system user privilege levels
+    // in phosphor-user-manager. The default value is IPMI Channel 1. To
+    // assign a different channel add:
+    //      "is_management_nic" : true
+    // into the channel_config.json file describing the assignment of the IPMI
+    // channels. It is only necessary to add the string above to ONE record in
+    // the channel_config.json file. All other records will be automatically
+    // assigned a "false" value.
+    return getChannelConfigObject().getManagementNICID();
 }
 
 CommandPrivilege UserAccess::convertToIPMIPrivilege(const std::string& value)
