@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfcfb8ff_a837826c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-04-08T17:59:39Z",
+      "side": 1,
+      "message": "Sorry, my bad.\n\nAfter double checking the changes. I missed this line.",
+      "revId": "5bdc394877139490e807187cab8e6b46f7d79add",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
