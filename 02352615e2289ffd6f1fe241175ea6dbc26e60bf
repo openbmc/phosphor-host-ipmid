@@ -46,6 +46,30 @@
       "revId": "02352615e2289ffd6f1fe241175ea6dbc26e60bf",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4322b5c3_cb474ab7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2021-04-09T05:56:56Z",
+      "side": 1,
+      "message": "Technically the check for enableInstrumentation here isn\u0027t needed, because updateReading() will always return false if enableInstrumentation is false. So, the large std::cerr output block won\u0027t run if enableInstrumentation is false. However, adding a double-check around it here will not hurt anything.",
+      "parentUuid": "e62ab008_d20a4074",
+      "range": {
+        "startLine": 346,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 6
+      },
+      "revId": "02352615e2289ffd6f1fe241175ea6dbc26e60bf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
