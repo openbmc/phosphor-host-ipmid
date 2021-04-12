@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d2483929_e2dd61ff",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-04-12T08:21:37Z",
+      "side": 1,
+      "message": "Retain the sensitive data clearing in old line number 741 itself.\nI believe, crash is due to passing address of std::string type variable, instead of character pointer to it.\n\n void OPENSSL_cleanse(void *ptr, size_t len);",
+      "revId": "a0eb8d753b520c61a2aa1fad5c4093a6a7d80159",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
