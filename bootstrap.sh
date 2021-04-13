@@ -8,11 +8,12 @@ case $1 in
     clean)
         test -f Makefile && make maintainer-clean
         for file in ${AUTOCONF_FILES}; do
-            find -name "$file" | xargs -r rm -rf
+            find . -name "$file" -print0 | xargs -0 -r rm -rf
         done
         exit 0
         ;;
 esac
 
 autoreconf -i
+# shellcheck disable=SC2016
 echo 'Run "./configure ${CONFIGURE_FLAGS} && make"'
