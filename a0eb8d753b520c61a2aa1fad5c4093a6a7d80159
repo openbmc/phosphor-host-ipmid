@@ -16,6 +16,24 @@
       "revId": "a0eb8d753b520c61a2aa1fad5c4093a6a7d80159",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "98a457fa_2513aa51",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-04-14T20:15:58Z",
+      "side": 1,
+      "message": "+1. First argument needs to be passwd.data(). And I\u0027d like to point out again, there is no guarantee this does anything useful for security, since we have no control over the std::string memory allocation logic.",
+      "parentUuid": "d2483929_e2dd61ff",
+      "revId": "a0eb8d753b520c61a2aa1fad5c4093a6a7d80159",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
