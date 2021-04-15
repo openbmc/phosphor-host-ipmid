@@ -21,17 +21,8 @@ namespace
 {
 
 constexpr auto systemEventRecord = 0x02;
-constexpr auto generatorID = 0x2000;
-constexpr auto eventMsgRevision = 0x04;
-constexpr auto assertEvent = 0x00;
-constexpr auto deassertEvent = 0x80;
-constexpr auto selDataSize = 3;
-constexpr auto oemCDDataSize = 9;
-constexpr auto oemEFDataSize = 13;
 
 constexpr auto propAdditionalData = "AdditionalData";
-constexpr auto propResolved = "Resolved";
-
 constexpr auto strEventDir = "EVENT_DIR";
 constexpr auto strGenerateId = "GENERATOR_ID";
 constexpr auto strRecordType = "RECORD_TYPE";
@@ -55,7 +46,6 @@ inline bool isRecordOEM(uint8_t recordType)
 }
 
 using additionalDataMap = std::map<std::string, std::string>;
-using entryDataMap = std::map<PropertyName, PropertyType>;
 /** Parse the entry with format like key=val */
 std::pair<std::string, std::string> parseEntry(const std::string& entry)
 {
@@ -78,11 +68,11 @@ additionalDataMap parseAdditionalData(const AdditionalData& data)
     return ret;
 }
 
-int convert(const std::string_view& str, int base = 10)
+uint8_t convert(const std::string_view& str, int base = 10)
 {
     int ret;
     std::from_chars(str.data(), str.data() + str.size(), ret, base);
-    return ret;
+    return static_cast<uint8_t>(ret);
 }
 
 // Convert the string to a vector of uint8_t, where the str is formatted as hex
@@ -93,14 +83,13 @@ std::vector<uint8_t> convertVec(const std::string_view& str)
     ret.reserve(len);
     for (size_t i = 0; i < len; ++i)
     {
-        ret.emplace_back(
-            static_cast<uint8_t>(convert(str.substr(i * 2, 2), 16)));
+        ret.emplace_back(convert(str.substr(i * 2, 2), 16));
     }
     return ret;
 }
 
 /** Construct OEM SEL record according to IPMI spec 32.2, 32.3. */
-void constructOEMSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
+void constructOEMSel(uint8_t recordType, std::chrono::milliseconds timestamp,
                      const additionalDataMap& m, GetSELEntryResponse& record)
 {
     auto dataIter = m.find(strSensorData);
@@ -115,64 +104,15 @@ void constructOEMSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
         // The ManufactureID and OEM Defined are packed in the sensor data
         // Fill the 9 bytes of Manufacture ID and oemDefined
         memcpy(&record.event.oemCD.manufacturerID, sensorData.data(),
-               std::min(sensorData.size(), static_cast<size_t>(oemCDDataSize)));
+               std::min(sensorData.size(), static_cast<size_t>(9)));
     }
     else if (recordType >= 0xE0)
     {
         record.event.oemEF.recordType = recordType;
         // The remaining 13 bytes are the OEM Defined data
         memcpy(&record.event.oemEF.oemDefined, sensorData.data(),
-               std::min(sensorData.size(), static_cast<size_t>(oemEFDataSize)));
+               std::min(sensorData.size(), static_cast<size_t>(13)));
     }
-}
-
-void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
-                  const additionalDataMap& m, const entryDataMap& entryData,
-                  GetSELEntryResponse& record)
-{
-    if (recordType != systemEventRecord)
-    {
-        log<level::ERR>("Invalid recordType");
-        elog<InternalFailure>();
-    }
-
-    // Default values when there is no matched sensor
-    record.event.eventRecord.sensorType = 0;
-    record.event.eventRecord.sensorNum = 0xFF;
-    record.event.eventRecord.eventType = 0;
-
-    auto iter = m.find(strSensorPath);
-    assert(iter != m.end());
-    const auto& sensorPath = iter->second;
-    auto sensorIter = invSensors.find(sensorPath);
-
-    if (sensorIter != invSensors.end())
-    {
-        // There is a matched sensor
-        record.event.eventRecord.sensorType = sensorIter->second.sensorType;
-        record.event.eventRecord.sensorNum = sensorIter->second.sensorID;
-
-        iter = m.find(strEventDir);
-        assert(iter != m.end());
-        auto eventDir = static_cast<uint8_t>(convert(iter->second));
-        uint8_t assert = eventDir ? assertEvent : deassertEvent;
-        record.event.eventRecord.eventType =
-            assert | sensorIter->second.eventReadingType;
-    }
-    record.event.eventRecord.recordType = recordType;
-    record.event.eventRecord.timeStamp = static_cast<uint32_t>(
-        std::chrono::duration_cast<std::chrono::seconds>(timestamp).count());
-    iter = m.find(strGenerateId);
-    assert(iter != m.end());
-    record.event.eventRecord.generatorID =
-        static_cast<uint16_t>(convert(iter->second));
-    record.event.eventRecord.eventMsgRevision = eventMsgRevision;
-    iter = m.find(strSensorData);
-    assert(iter != m.end());
-    auto sensorData = convertVec(iter->second);
-    // The remaining 3 bytes are the sensor data
-    memcpy(&record.event.eventRecord.eventData1, sensorData.data(),
-           std::min(sensorData.size(), static_cast<size_t>(selDataSize)));
 }
 
 GetSELEntryResponse
@@ -196,7 +136,7 @@ GetSELEntryResponse
         elog<InternalFailure>();
     }
 
-    entryDataMap entryData;
+    std::map<PropertyName, PropertyType> entryData;
     reply.read(entryData);
 
     // Read Id from the log entry.
@@ -222,9 +162,7 @@ GetSELEntryResponse
     if (iter == invSensors.end())
     {
         // It is expected to be a custom SEL entry
-        // The recordID are with the same offset between different types,
-        // so we are safe to set the recordID here
-        record.event.eventRecord.recordID =
+        record.event.oemCD.recordID =
             static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
         iterId = entryData.find(propAdditionalData);
         if (iterId == entryData.end())
@@ -234,15 +172,15 @@ GetSELEntryResponse
         }
         const auto& addData = std::get<AdditionalData>(iterId->second);
         auto m = parseAdditionalData(addData);
-        auto recordType = static_cast<uint8_t>(convert(m[strRecordType]));
+        auto recordType = convert(m[strRecordType]);
         auto isOEM = isRecordOEM(recordType);
         if (isOEM)
         {
-            constructOEMSEL(recordType, chronoTimeStamp, m, record);
+            constructOEMSel(recordType, chronoTimeStamp, m, record);
         }
         else
         {
-            constructSEL(recordType, chronoTimeStamp, m, entryData, record);
+            // TODO
         }
     }
     else
@@ -254,6 +192,9 @@ GetSELEntryResponse
             std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp)
                 .count());
 
+        static constexpr auto generatorID = 0x2000;
+        static constexpr auto eventMsgRevision = 0x04;
+
         record.event.eventRecord.recordType = systemEventRecord;
         record.event.eventRecord.generatorID = generatorID;
         record.event.eventRecord.eventMsgRevision = eventMsgRevision;
@@ -263,12 +204,15 @@ GetSELEntryResponse
         record.event.eventRecord.eventData1 = iter->second.eventOffset;
 
         // Read Resolved from the log entry.
+        static constexpr auto propResolved = "Resolved";
         auto iterResolved = entryData.find(propResolved);
         if (iterResolved == entryData.end())
         {
             log<level::ERR>("Error in reading Resolved field of logging entry");
             elog<InternalFailure>();
         }
+
+        static constexpr auto deassertEvent = 0x80;
 
         // Evaluate if the event is assertion or deassertion event
         if (std::get<bool>(iterResolved->second))
