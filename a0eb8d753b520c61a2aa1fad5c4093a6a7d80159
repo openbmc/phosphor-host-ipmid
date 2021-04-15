@@ -52,6 +52,24 @@
       "revId": "a0eb8d753b520c61a2aa1fad5c4093a6a7d80159",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f91f5bb8_e812a56c",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-04-15T16:54:09Z",
+      "side": 1,
+      "message": "@jonathan: One other thing is, passwd.data() returns \u0027const char *\u0027 and we pass it to OPENSSL_cleanse() after stripping const-ness apparently.  passwd.front() may be suggested use?\n\nWe discuss in other code-review about \u0027class Passwd\u0027 with destructor defining this contents reset.  For simplicity, Can we fill the contents with some fixed value like 0xbabe\" through out its length in the destructor ?\n\nI don\u0027t see a standard way to clear std::string.\nRef:\nhttps://stackoverflow.com/questions/38702943/how-to-cleanse-overwrite-with-random-bytes-stdstring-internal-buffer",
+      "parentUuid": "1d25902b_7f5324b1",
+      "revId": "a0eb8d753b520c61a2aa1fad5c4093a6a7d80159",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
