@@ -89,6 +89,10 @@ static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
 #endif // ENABLE_I2C_WHITELIST_CHECK
 static constexpr uint8_t maxIPMIWriteReadSize = 144;
+static constexpr uint8_t oemCmdStart = 192;
+static constexpr uint8_t oemCmdEnd = 255;
+static constexpr uint8_t invalidParamSelectorStart = 8;
+static constexpr uint8_t invalidParamSelectorEnd = 191;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -940,7 +944,7 @@ uint8_t getTotalSessionCount()
     while (ch < ipmi::maxIpmiChannels &&
            count < session::maxNetworkInstanceSupported)
     {
-        ipmi::ChannelInfo chInfo;
+        ipmi::ChannelInfo chInfo{};
         ipmi::getChannelInfo(ch, chInfo);
         if (static_cast<ipmi::EChannelMediumType>(chInfo.mediumType) ==
             ipmi::EChannelMediumType::lan8032)
@@ -1285,9 +1289,14 @@ ipmi::RspType<uint8_t,                // Parameter revision
                          uint8_t paramSelector, uint8_t setSelector,
                          uint8_t BlockSelector)
 {
-    if (reserved)
+    if (reserved || (paramSelector >= invalidParamSelectorStart &&
+                     paramSelector <= invalidParamSelectorEnd))
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+    if ((paramSelector >= oemCmdStart) && (paramSelector <= oemCmdEnd))
+    {
+        return ipmi::responseParmNotSupported();
     }
     if (getRevision)
     {
@@ -1318,7 +1327,7 @@ ipmi::RspType<uint8_t,                // Parameter revision
     bool found = std::get<0>(ret);
     if (!found)
     {
-        return ipmi::responseParmNotSupported();
+        return ipmi::responseSensorInvalid();
     }
     std::string& paramString = std::get<1>(ret);
     std::vector<uint8_t> configData;
@@ -1330,7 +1339,14 @@ ipmi::RspType<uint8_t,                // Parameter revision
         count = std::min(paramString.length(), smallChunkSize);
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
-                    configData.begin() + configDataOverhead); // 14 bytes thunk
+                    configData.begin() + configDataOverhead); // 14 bytes chunk
+
+        // Append zero's to remaining bytes
+        if (configData.size() < configParameterLength)
+        {
+            std::fill_n(std::back_inserter(configData),
+                        configParameterLength - configData.size(), 0x00);
+        }
     }
     else
     {
@@ -1350,6 +1366,16 @@ ipmi::RspType<uint8_t,                // Parameter revision
 ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
                                      std::vector<uint8_t> configData)
 {
+    if (paramSelector >= invalidParamSelectorStart &&
+        paramSelector <= invalidParamSelectorEnd)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if ((paramSelector >= oemCmdStart) && (paramSelector <= oemCmdEnd))
+    {
+        return ipmi::responseParmNotSupported();
+    }
+
     if (paramSelector == 0)
     {
         // attempt to set the 'set in progress' value (in parameter #0)
@@ -1373,6 +1399,13 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
     if (configData.size() > configParameterLength)
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+
+    // Append zero's to remaining bytes
+    if (configData.size() < configParameterLength)
+    {
+        fill_n(back_inserter(configData),
+               (configParameterLength - configData.size()), 0x00);
     }
 
     if (!sysInfoParamStore)

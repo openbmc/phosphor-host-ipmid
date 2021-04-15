@@ -292,8 +292,12 @@ Cc ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         return ccParmOutOfRange;
     }
 
-    return ipmiUserSetUserName(req->userId,
-                               reinterpret_cast<const char*>(req->userName));
+    size_t nameLen = strnlen(reinterpret_cast<const char*>(req->userName),
+                             sizeof(req->userName));
+    const std::string strUserName(reinterpret_cast<const char*>(req->userName),
+                                  nameLen);
+
+    return ipmiUserSetUserName(req->userId, strUserName);
 }
 
 /** @brief implementes the get user name command
@@ -409,9 +413,17 @@ Cc ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         {
             log<level::DEBUG>("Test password failed",
                               entry("USER-ID=%d", (uint8_t)req->userId));
+            // Clear sensitive data
+            OPENSSL_cleanse(&testPassword, testPassword.length());
+            OPENSSL_cleanse(&password, password.length());
+
             return static_cast<Cc>(
                 IPMISetPasswordReturnCodes::ipmiCCPasswdFailMismatch);
         }
+        // Clear sensitive data
+        OPENSSL_cleanse(&testPassword, testPassword.length());
+        OPENSSL_cleanse(&password, password.length());
+
         return ccSuccess;
     }
     return ccInvalidFieldRequest;

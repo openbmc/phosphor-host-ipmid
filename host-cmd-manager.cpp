@@ -20,9 +20,6 @@ namespace host
 namespace command
 {
 
-constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
-constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
-constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
 constexpr auto HOST_STATE_PATH = "/xyz/openbmc_project/state/host0";
 constexpr auto HOST_STATE_INTERFACE = "xyz.openbmc_project.State.Host";
 constexpr auto HOST_TRANS_PROP = "RequestedHostTransition";
@@ -115,10 +112,9 @@ void Manager::checkQueueAndAlertHost()
     {
         log<level::DEBUG>("Asserting SMS Attention");
 
+        std::string HOST_IPMI_SVC("org.openbmc.HostIpmi");
         std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
         std::string IPMI_INTERFACE("org.openbmc.HostIpmi");
-
-        auto host = ::ipmi::getService(this->bus, IPMI_INTERFACE, IPMI_PATH);
 
         // Start the timer for this transaction
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -132,7 +128,7 @@ void Manager::checkQueueAndAlertHost()
         }
 
         auto method =
-            this->bus.new_method_call(host.c_str(), IPMI_PATH.c_str(),
+            this->bus.new_method_call(HOST_IPMI_SVC.c_str(), IPMI_PATH.c_str(),
                                       IPMI_INTERFACE.c_str(), "setAttention");
         auto reply = this->bus.call(method);
 

@@ -180,7 +180,7 @@ ipmi ::RspType<uint3_t, // access mode,
     if ((accessSetMode == doNotSet) || (accessSetMode == reserved))
     {
         log<level::DEBUG>("Get channel access - Invalid Access mode");
-        return response(ccAccessModeNotSupportedForChannel);
+        return responseInvalidFieldRequest();
     }
 
     const uint8_t chNum =
@@ -258,7 +258,7 @@ RspType<uint4_t,  // chNum
     if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel Info - No support on channel");
-        return response(ccActionNotSupportedForChannel);
+        return responseInvalidFieldRequest();
     }
 
     ChannelInfo chInfo;

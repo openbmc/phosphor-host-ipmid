@@ -22,6 +22,7 @@
 #include <ipmid/api.h>
 #endif
 
+#include <boost/asio/io_context.hpp>
 #include <ipmid/api-types.hpp>
 #include <ipmid/filter.hpp>
 #include <ipmid/handler.hpp>

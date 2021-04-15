@@ -93,7 +93,8 @@
             type: uint32_t
   path: /xyz/openbmc_project/state/host1
   readingType: readingAssertion
-  sensorNamePattern: nameProperty
+  # set an explicit name for the sensor
+  sensorName: RebootAttempts
   sensorReadingType: 0x6F
   mutability: Mutability::Write|Mutability::Read
   sensorType: 0xC3

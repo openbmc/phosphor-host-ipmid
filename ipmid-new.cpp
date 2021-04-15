@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <any>
 #include <boost/algorithm/string.hpp>
+#include <boost/asio/io_context.hpp>
 #include <dcmihandler.hpp>
 #include <exception>
 #include <filesystem>
@@ -198,6 +199,7 @@ void registerFilter(int prio, FilterBase::ptr filter)
     if (filterList.empty() || std::get<int>(filterList.front()) < prio)
     {
         filterList.emplace_front(std::make_tuple(prio, filter));
+        return;
     }
     // walk the list and put it in the right place
     auto j = filterList.begin();
@@ -376,7 +378,7 @@ void updateOwners(sdbusplus::asio::connection& conn, const std::string& name)
         name);
 }
 
-void doListNames(boost::asio::io_service& io, sdbusplus::asio::connection& conn)
+void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
 {
     conn.async_method_call(
         [&io, &conn](const boost::system::error_code ec,
@@ -482,6 +484,7 @@ auto executionEntry(boost::asio::yield_context yield,
     std::string sender = m.get_sender();
     Privilege privilege = Privilege::None;
     int rqSA = 0;
+    int hostIdx = 0;
     uint8_t userId = 0; // undefined user
     uint32_t sessionId = 0;
 
@@ -538,19 +541,28 @@ auto executionEntry(boost::asio::yield_context yield,
                     rqSA = std::get<int>(iter->second);
                 }
             }
+            const auto iteration = options.find("hostId");
+            if (iteration != options.end())
+            {
+                if (std::holds_alternative<int>(iteration->second))
+                {
+                    hostIdx = std::get<int>(iteration->second);
+                }
+            }
         }
     }
     // check to see if the requested priv/username is valid
     log<level::DEBUG>("Set up ipmi context", entry("SENDER=%s", sender.c_str()),
-                      entry("NETFN=0x%X", netFn), entry("CMD=0x%X", cmd),
-                      entry("CHANNEL=%u", channel), entry("USERID=%u", userId),
+                      entry("NETFN=0x%X", netFn), entry("LUN=0x%X", lun),
+                      entry("CMD=0x%X", cmd), entry("CHANNEL=%u", channel),
+                      entry("USERID=%u", userId),
                       entry("SESSIONID=0x%X", sessionId),
                       entry("PRIVILEGE=%u", static_cast<uint8_t>(privilege)),
                       entry("RQSA=%x", rqSA));
 
-    auto ctx =
-        std::make_shared<ipmi::Context>(getSdBus(), netFn, cmd, channel, userId,
-                                        sessionId, privilege, rqSA, yield);
+    auto ctx = std::make_shared<ipmi::Context>(getSdBus(), netFn, lun, cmd,
+                                               channel, userId, sessionId,
+                                               privilege, rqSA, hostIdx, yield);
     auto request = std::make_shared<ipmi::message::Request>(
         ctx, std::forward<std::vector<uint8_t>>(data));
     message::Response::ptr response = executeIpmiCommand(request);
@@ -763,7 +775,7 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         m.read(seq, netFn, lun, cmd, data);
         std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
         auto ctx = std::make_shared<ipmi::Context>(
-            bus, netFn, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, yield);
+            bus, netFn, lun, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, 0, yield);
         auto request = std::make_shared<ipmi::message::Request>(
             ctx, std::forward<std::vector<uint8_t>>(data));
         ipmi::message::Response::ptr response =

@@ -169,13 +169,14 @@ struct GetSELEntryRequest
     uint8_t readLength;     //!< Bytes to read.
 } __attribute__((packed));
 
-/** @struct GetSELEntryResponse
+constexpr size_t SELRecordLength = 16;
+
+/** @struct SELEventRecord
  *
- *  IPMI payload for Get SEL Entry command response.
+ * IPMI SEL Event Record
  */
-struct GetSELEntryResponse
+struct SELEventRecord
 {
-    uint16_t nextRecordID;    //!< Next RecordID.
     uint16_t recordID;        //!< Record ID.
     uint8_t recordType;       //!< Record Type.
     uint32_t timeStamp;       //!< Timestamp.
@@ -188,6 +189,56 @@ struct GetSELEntryResponse
     uint8_t eventData2;       //!< Event Data 2.
     uint8_t eventData3;       //!< Event Data 3.
 } __attribute__((packed));
+
+static_assert(sizeof(SELEventRecord) == SELRecordLength);
+
+/** @struct SELOEMRecordTypeCD
+ *
+ * IPMI SEL OEM Record - Type C0h-DFh
+ */
+struct SELOEMRecordTypeCD
+{
+    uint16_t recordID;         //!< Record ID.
+    uint8_t recordType;        //!< Record Type.
+    uint32_t timeStamp;        //!< Timestamp.
+    uint8_t manufacturerID[3]; //!< Manufacturer ID.
+    uint8_t oemDefined[6];     //!< OEM Defined data.
+} __attribute__((packed));
+
+static_assert(sizeof(SELOEMRecordTypeCD) == SELRecordLength);
+
+/** @struct SELOEMRecordTypeEF
+ *
+ * IPMI SEL OEM Record - Type E0h-FFh
+ */
+struct SELOEMRecordTypeEF
+{
+    uint16_t recordID;      //!< Record ID.
+    uint8_t recordType;     //!< Record Type.
+    uint8_t oemDefined[13]; //!< OEM Defined data.
+} __attribute__((packed));
+
+static_assert(sizeof(SELOEMRecordTypeEF) == SELRecordLength);
+
+union SELEventRecordFormat
+{
+    SELEventRecord eventRecord;
+    SELOEMRecordTypeCD oemCD;
+    SELOEMRecordTypeEF oemEF;
+};
+
+/** @struct GetSELEntryResponse
+ *
+ *  IPMI payload for Get SEL Entry command response.
+ */
+struct GetSELEntryResponse
+{
+    uint16_t nextRecordID;      //!< Next RecordID.
+    SELEventRecordFormat event; // !< The Event Record.
+} __attribute__((packed));
+
+static_assert(sizeof(GetSELEntryResponse) ==
+              SELRecordLength + sizeof(uint16_t));
 
 static constexpr auto initiateErase = 0xAA;
 static constexpr auto getEraseStatus = 0x00;

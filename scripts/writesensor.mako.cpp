@@ -3,6 +3,7 @@
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
 <%
 interfaceDict = {}
+sensorNameMaxLength = 16
 %>\
 %for key in sensorDict.keys():
 <%
@@ -53,12 +54,19 @@ extern const IdInfoMap sensors = {
        scale = sensor.get("scale", 0)
        hasScale = "true" if "scale" in sensor.keys() else "false"
        valueReadingType = sensor["readingType"]
-       sensorNamePattern = sensor.get("sensorNamePattern", "nameLeaf")
-       sensorNameFunc = "get::" + sensorNamePattern
        updateFunc = interfaceDict[serviceInterface]["updateFunc"]
        updateFunc += sensor["readingType"]
        getFunc = interfaceDict[serviceInterface]["getFunc"]
        getFunc += sensor["readingType"]
+       sensorName = sensor.get("sensorName", None)
+       if sensorName:
+           assert len(sensorName) <= sensorNameMaxLength, \
+                   "sensor name '%s' is too long (%d bytes max)" % \
+                   (sensorName, sensorNameMaxLength)
+       else:
+           sensorNameFunc = "get::" + sensor.get("sensorNamePattern",
+                   "nameLeaf")
+
        if "readingAssertion" == valueReadingType or "readingData" == valueReadingType:
            for interface,properties in interfaces.items():
                for dbus_property,property_value in properties.items():
@@ -71,10 +79,29 @@ extern const IdInfoMap sensors = {
            sensorInterface = next(iter(interfaces))
        mutability = sensor.get("mutability", "Mutability::Read")
 %>
-        ${entityID},${instance},${sensorType},"${path}","${sensorInterface}",
-        ${readingType},${multiplier},${offsetB},${bExp},
-        ${offsetB * pow(10,bExp)}, ${rExp}, ${hasScale},${scale},${sensorUnits1},"${unit}",
-        ${updateFunc},${getFunc},Mutability(${mutability}),${sensorNameFunc},{
+        .entityType = ${entityID},
+        .instance = ${instance},
+        .sensorType = ${sensorType},
+        .sensorPath = "${path}",
+        .sensorInterface = "${sensorInterface}",
+        .sensorReadingType = ${readingType},
+        .coefficientM = ${multiplier},
+        .coefficientB = ${offsetB},
+        .exponentB = ${bExp},
+        .scaledOffset = ${offsetB * pow(10,bExp)},
+        .exponentR = ${rExp},
+        .hasScale = ${hasScale},
+        .scale = ${scale},
+        .unit = "${unit}",
+        .updateFunc = ${updateFunc},
+        .getFunc = ${getFunc},
+        .mutability = Mutability(${mutability}),
+    % if sensorName:
+        .sensorName = "${sensorName}",
+    % else:
+        .sensorNameFunc = ${sensorNameFunc},
+    % endif
+        .propertyInterfaces = {
     % for interface,properties in interfaces.items():
             {"${interface}",{
             % if properties:
