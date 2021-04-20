@@ -70,6 +70,24 @@
       "revId": "a0eb8d753b520c61a2aa1fad5c4093a6a7d80159",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "783e36f8_87bc152c",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-04-20T20:35:08Z",
+      "side": 1,
+      "message": "Since c++17 there is a non-const overload of data(), but sure, there are other ways to get the pointer that may be preferable.\n\nWhether the data is overwritten with zeros (as in openssl_cleanse) or another pattern - I don\u0027t think it matters much. The bigger problem is ensuring that std::string did not allocate intermediate buffers (e.g. as the string was being built up in memory) which are then deallocated before the string is destroyed. I believe we can provide a custom allocator to std::basic_string\u003c\u003e to control this.",
+      "parentUuid": "f91f5bb8_e812a56c",
+      "revId": "a0eb8d753b520c61a2aa1fad5c4093a6a7d80159",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
