@@ -219,21 +219,42 @@ GetSELEntryResponse
     std::chrono::milliseconds chronoTimeStamp(
         std::get<uint64_t>(iterTimeStamp->second));
 
-    if (iter == invSensors.end())
+    bool isFromSELLogger = false;
+    additionalDataMap m;
+
+    // The recordID are with the same offset between different types,
+    // so we are safe to set the recordID here
+    record.event.eventRecord.recordID =
+        static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
+
+    iterId = entryData.find(propAdditionalData);
+    if (iterId != entryData.end())
+    {
+        // Check if it's a SEL from phosphor-sel-logger which shall contain
+        // the record ID, etc
+        const auto& addData = std::get<AdditionalData>(iterId->second);
+        m = parseAdditionalData(addData);
+        auto recordTypeIter = m.find(strRecordType);
+        if (recordTypeIter != m.end())
+        {
+            // It is a SEL from phosphor-sel-logger
+            isFromSELLogger = true;
+        }
+        else
+        {
+            // Not a SEL from phosphor-sel-logger, it shall have a valid
+            // invSensor
+            if (iter == invSensors.end())
+            {
+                log<level::ERR>("System event sensor not found");
+                elog<InternalFailure>();
+            }
+        }
+    }
+
+    if (isFromSELLogger)
     {
         // It is expected to be a custom SEL entry
-        // The recordID are with the same offset between different types,
-        // so we are safe to set the recordID here
-        record.event.eventRecord.recordID =
-            static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
-        iterId = entryData.find(propAdditionalData);
-        if (iterId == entryData.end())
-        {
-            log<level::ERR>("Error finding AdditionalData");
-            elog<InternalFailure>();
-        }
-        const auto& addData = std::get<AdditionalData>(iterId->second);
-        auto m = parseAdditionalData(addData);
         auto recordType = static_cast<uint8_t>(convert(m[strRecordType]));
         auto isOEM = isRecordOEM(recordType);
         if (isOEM)
@@ -247,9 +268,6 @@ GetSELEntryResponse
     }
     else
     {
-
-        record.event.eventRecord.recordID =
-            static_cast<uint16_t>(std::get<uint32_t>(iterId->second));
         record.event.eventRecord.timeStamp = static_cast<uint32_t>(
             std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp)
                 .count());
