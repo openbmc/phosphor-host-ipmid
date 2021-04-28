@@ -67,6 +67,13 @@ void Host::commandStatusHandler(IpmiCmdData cmd, bool status)
     this->commandComplete(intfCommand.at(std::get<0>(cmd)), value);
 }
 
+Host::FirmwareCondition Host::currentFirmwareCondition() const
+{
+    // TODO: Implement function
+    return (sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware::
+                currentFirmwareCondition());
+}
+
 } // namespace command
 } // namespace host
 } // namespace phosphor
