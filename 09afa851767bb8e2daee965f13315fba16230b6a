@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c52958e1_42911528",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-04-28T21:49:42Z",
+      "side": 1,
+      "message": "typo: success",
+      "range": {
+        "startLine": 36,
+        "startChar": 45,
+        "endLine": 36,
+        "endChar": 52
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c50462be_66413230",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 880,
+      "author": {
+        "id": 1000276
+      },
+      "writtenOn": "2021-04-28T21:49:42Z",
+      "side": 1,
+      "message": "typo: double space",
+      "range": {
+        "startLine": 880,
+        "startChar": 21,
+        "endLine": 880,
+        "endChar": 23
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
