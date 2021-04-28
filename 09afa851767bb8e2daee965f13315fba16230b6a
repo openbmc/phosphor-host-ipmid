@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "4cf22775_3c154a65",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-04-28T22:20:10Z",
+      "side": 1,
+      "message": "Wouldn\u0027t the normal answer to this be to put the information in an entity-manager exposes record and key off that?\n\nI only comment that, because this is coming up in another review for adding ipmb-capable sensors.  It sounded like Jayashree was already getting started on defining that interface, maybe there\u0027s some synergy to be had between those two patches, where ipmid could read directly from entity-manager?\n\nhttps://gerrit.openbmc-project.xyz/c/openbmc/dbus-sensors/+/38905",
+      "range": {
+        "startLine": 12,
+        "startChar": 49,
+        "endLine": 14,
+        "endChar": 42
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c523753e_df9751eb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-04-28T22:20:10Z",
+      "side": 1,
+      "message": "Doesn\u0027t this change how a failing device is reported?  I would assume a device that\u0027s failed to enumerate/instantiate would return a different error code than one that just was never present in the config.",
+      "range": {
+        "startLine": 21,
+        "startChar": 49,
+        "endLine": 21,
+        "endChar": 56
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c52958e1_42911528",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
