@@ -67,6 +67,12 @@ void Host::commandStatusHandler(IpmiCmdData cmd, bool status)
     this->commandComplete(intfCommand.at(std::get<0>(cmd)), value);
 }
 
+Host::FirmwareCondition Host::currentFirmwareCondition() const
+{
+    // TODO: Implement function
+    return FirmwareCondition::Unknown;
+}
+
 } // namespace command
 } // namespace host
 } // namespace phosphor
