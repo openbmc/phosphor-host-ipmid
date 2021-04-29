@@ -22,6 +22,30 @@
       "revId": "db23e6129289952a94971683aab40d2e437371f6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b44c0ed1_bafdcfb7",
+        "filename": "configure.ac",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2021-04-29T20:47:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "41d24e42_7df5687e",
+      "range": {
+        "startLine": 269,
+        "startChar": 0,
+        "endLine": 269,
+        "endChar": 72
+      },
+      "revId": "db23e6129289952a94971683aab40d2e437371f6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
