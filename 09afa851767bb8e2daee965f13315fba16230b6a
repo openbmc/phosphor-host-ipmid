@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a5a3445d_280d09fa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2021-04-29T15:50:06Z",
+      "side": 1,
+      "message": "In prior commits I\u0027ve been directed to place changes into the \"appropriate\" manager/handler. Ex: The BMCWeb sit0 handling was deemed inappropriate in BMCWeb, and I was directed to place it in phosphor-network. \nAs this is an IPMI only issue, the guidance I\u0027ve received in the past indicates the solution should be wholly within the IPMI code.",
+      "parentUuid": "4cf22775_3c154a65",
+      "range": {
+        "startLine": 12,
+        "startChar": 49,
+        "endLine": 14,
+        "endChar": 42
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c523753e_df9751eb",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2021-04-28T22:20:10Z",
       "side": 1,
       "message": "Doesn\u0027t this change how a failing device is reported?  I would assume a device that\u0027s failed to enumerate/instantiate would return a different error code than one that just was never present in the config.",
+      "range": {
+        "startLine": 21,
+        "startChar": 49,
+        "endLine": 21,
+        "endChar": 56
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "750b51a8_7a9a1068",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2021-04-29T15:50:06Z",
+      "side": 1,
+      "message": "A device that was never in the IPMI channel config file won\u0027t have the ability to handle IPMI commands. The network interface could be fully functional due to kernel initialization and IPMI won\u0027t be able to interact with that network device.\n\nIf the device fails to enumerate what corrective action is IPMI going to apply? What corrective action is entity-manager going to apply? The kernel has failed to enumerate and create the device. The only user level correction of this I can imagine is to replace the network device in the event it is a user replaceable item, and then reboot the BMC. The only other corrective action I can think of in this case is to be applied by the OEM vendor.",
+      "parentUuid": "c523753e_df9751eb",
       "range": {
         "startLine": 21,
         "startChar": 49,
