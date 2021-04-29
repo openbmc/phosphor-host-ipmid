@@ -273,7 +273,7 @@ AC_ARG_ENABLE([dynamic_sensors],
       yes) dynamic_sensors=true ;;
       no) dynamic_sensors=false ;;
       *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic_sensors]) ;;
-      esac],[dynamic_sensors=true]
+      esac],[dynamic_sensors=false]
       )
 AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic_sensors = xtrue])
 
