@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "521c7e2b_42bab614",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-04-29T21:41:39Z",
+      "side": 1,
+      "message": "But it\u0027s not an IPMI only issue, as it effects sensors (see aforementioned patch), and things that can\u0027t be the same per-system.  I think the distinction here is that \"IPMI-capable\" can be a description of an upstream device, because that\u0027s a property of that \"thing\", but normally shouldn\u0027t be a description of an openbmc IPMI specific northbound data structure, because we have to support more than just IPMI.\n\nThis is a weird case where it\u0027s kind of both;  We need to know the IPMB channels to know where sensors and FRUs are, AND we need them to be available to the northbound interfaces as a kind of passthrough.  That seems like a reasonable use in that case in terms of design.\n\nThe other option is we duplicate the data both places, which I guess is fine?  But means that IPMB capable add in cards wont really work right unless explicitly compiled into the ipmi channel config, which seems like a pain.",
+      "parentUuid": "a5a3445d_280d09fa",
+      "range": {
+        "startLine": 12,
+        "startChar": 49,
+        "endLine": 14,
+        "endChar": 42
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c523753e_df9751eb",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "A device that was never in the IPMI channel config file won\u0027t have the ability to handle IPMI commands. The network interface could be fully functional due to kernel initialization and IPMI won\u0027t be able to interact with that network device.\n\nIf the device fails to enumerate what corrective action is IPMI going to apply? What corrective action is entity-manager going to apply? The kernel has failed to enumerate and create the device. The only user level correction of this I can imagine is to replace the network device in the event it is a user replaceable item, and then reboot the BMC. The only other corrective action I can think of in this case is to be applied by the OEM vendor.",
       "parentUuid": "c523753e_df9751eb",
+      "range": {
+        "startLine": 21,
+        "startChar": 49,
+        "endLine": 21,
+        "endChar": 56
+      },
+      "revId": "09afa851767bb8e2daee965f13315fba16230b6a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8833100_087875d1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-04-29T21:41:39Z",
+      "side": 1,
+      "message": "\u003e A device that was never in the IPMI channel config file won\u0027t have the ability to handle IPMI commands. The network interface could be fully functional due to kernel initialization and IPMI won\u0027t be able to interact with that network device.\n\u003e \n\u003e If the device fails to enumerate what corrective action is IPMI going to apply?\n\nReturn the \"something is wrong\" error code to the control plane, who has more power to take action.\n\n\u003e What corrective action is entity-manager going to apply?\n\nNothing, entity-manager just makes the config available to IPMI and IPMB sensors at the same time without duplicating information.\n\n\u003e The kernel has failed to enumerate and create the device. The only user level correction of this I can imagine is to replace the network device in the event it is a user replaceable item, and then reboot the BMC.\n\nOr reboot the BMC/server?  Schedule it for repairs so the FRU can be replaced?  There\u0027s a lot a control plane can do to try to get it working again if it can tell the difference between \"broken\" and \"not supported\".\n\n\u003e The only other corrective action I can think of in this case is to be applied by the OEM vendor.\n\nBut the OEM vendor can\u0027t do anything if the correct return codes aren\u0027t sent, right?\n\nWith that said, presumably the control plan could also keep the per-system channel data, but in practice, that\u0027s not very common, and does rely somewhat on the BMC to give appropriate codes.",
+      "parentUuid": "750b51a8_7a9a1068",
       "range": {
         "startLine": 21,
         "startChar": 49,
