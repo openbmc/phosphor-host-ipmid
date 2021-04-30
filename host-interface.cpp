@@ -1,3 +1,4 @@
+
 #include "config.h"
 
 #include "host-interface.hpp"
@@ -7,7 +8,10 @@
 #include <functional>
 #include <ipmid-host/cmd-utils.hpp>
 #include <ipmid-host/cmd.hpp>
+#include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
+#include <memory>
+#include <optional>
 #include <phosphor-logging/log.hpp>
 
 namespace phosphor
@@ -16,6 +20,8 @@ namespace host
 {
 namespace command
 {
+
+using namespace phosphor::logging;
 
 // When you see Base:: you know we're referencing our base class
 namespace Base = sdbusplus::xyz::openbmc_project::Control::server;
@@ -43,8 +49,6 @@ static const std::map<Host::Command, IpmiCmdData> ipmiCommand = {
 // Called at user request
 void Host::execute(Base::Host::Command command)
 {
-    using namespace phosphor::logging;
-
     log<level::DEBUG>(
         "Pushing cmd on to queue",
         entry("CONTROL_HOST_CMD=%s", convertForMessage(command).c_str()));
@@ -69,8 +73,54 @@ void Host::commandStatusHandler(IpmiCmdData cmd, bool status)
 
 Host::FirmwareCondition Host::currentFirmwareCondition() const
 {
-    // TODO: Implement function
-    return FirmwareCondition::Unknown;
+    // shared object used to wait for host response
+    auto hostCondition =
+        std::make_shared<std::optional<Host::FirmwareCondition>>();
+
+    // Default is host firmware is not running
+    auto result = Host::FirmwareCondition::Off;
+
+    // callback for command to host
+    auto hostAckCallback = [hostCondition](IpmiCmdData cmd, bool status) {
+        auto value = status ? Host::FirmwareCondition::Running
+                            : Host::FirmwareCondition::Off;
+
+        log<level::DEBUG>("currentFirmwareCondition:hostAckCallback fired",
+                          entry("CONTROL_HOST_CMD=%i", value));
+
+        *(hostCondition.get()) = value;
+        return;
+    };
+
+    auto cmd = phosphor::host::command::CommandHandler(
+        ipmiCommand.at(Base::Host::Command::Heartbeat),
+        std::move(hostAckCallback));
+
+    ipmid_send_cmd_to_host(std::move(cmd));
+
+    auto io = getIoContext();
+
+    // Loop 1 second past the ATN_ACK timeout to ensure we wait for as
+    // long as the timeout
+    std::chrono::milliseconds timeoutMs =
+        std::chrono::seconds(IPMI_SMS_ATN_ACK_TIMEOUT_SECS + 1);
+    using namespace std::chrono_literals;
+    while (timeoutMs > 0s)
+    {
+        io->run_for(std::chrono::milliseconds(100));
+        timeoutMs -= std::chrono::milliseconds(100);
+        if (hostCondition.get()->has_value())
+        {
+            log<level::DEBUG>(
+                "currentFirmwareCondition: hostCondition is ready!");
+            result = hostCondition.get()->value();
+            break;
+        }
+        log<level::DEBUG>(
+            "currentFirmwareCondition: still waiting for host response");
+    }
+
+    return (result);
 }
 
 } // namespace command
