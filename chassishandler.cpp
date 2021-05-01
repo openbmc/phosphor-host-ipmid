@@ -92,7 +92,7 @@ constexpr auto MAC_INTERFACE = "xyz.openbmc_project.Network.MACAddress";
 static constexpr auto chassisStateRoot = "/xyz/openbmc_project/state";
 static constexpr auto chassisPOHStateIntf =
     "xyz.openbmc_project.State.PowerOnHours";
-static constexpr auto pOHCounterProperty = "POHCounter";
+static constexpr auto pohCounterProperty = "POHCounter";
 static constexpr auto match = "chassis0";
 const static constexpr char chassisCapIntf[] =
     "xyz.openbmc_project.Control.ChassisCapabilities";
@@ -569,7 +569,7 @@ uint32_t getPOHCounter()
 
     auto propValue =
         ipmi::getDbusProperty(bus, service, chassisStateObj.first,
-                              chassisPOHStateIntf, pOHCounterProperty);
+                              chassisPOHStateIntf, pohCounterProperty);
 
     return std::get<uint32_t>(propValue);
 }
