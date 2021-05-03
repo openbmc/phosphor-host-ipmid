@@ -166,7 +166,7 @@ AS_IF([test "x$enable_softoff" != "xno"],
     # Timeouts in SECONDS for SoftPowerOff protocol
     [AC_ARG_VAR(IPMI_SMS_ATN_ACK_TIMEOUT_SECS, \
          [Initial timeout for host to ack and query SMS_ATN from BMC])]
-    [AC_DEFINE_UNQUOTED([IPMI_SMS_ATN_ACK_TIMEOUT_SECS], [30], \
+    [AC_DEFINE_UNQUOTED([IPMI_SMS_ATN_ACK_TIMEOUT_SECS], [3], \
                         [Timeout for host to ack and query SMS_ATN from BMC])]
 
     [AC_ARG_VAR(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS, [Wait time for host to shutdown])]
