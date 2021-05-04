@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d3828255_0b4ee38a",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-04T21:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8f80c9e4_06d0f2cd",
+      "range": {
+        "startLine": 78,
+        "startChar": 4,
+        "endLine": 78,
+        "endChar": 10
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c6787ff_eab3449e",
         "filename": "host-interface.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca2e4710_6c646352",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-04T21:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c6787ff_eab3449e",
+      "range": {
+        "startLine": 83,
+        "startChar": 4,
+        "endLine": 83,
+        "endChar": 40
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e430d532_5d2f7985",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-04T21:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39ab0ea2_dd78afa7",
+      "range": {
+        "startLine": 98,
+        "startChar": 15,
+        "endLine": 98,
+        "endChar": 30
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "21f2ce70_333374c9",
         "filename": "host-interface.cpp",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "167e296e_bce9105d",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-04T21:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "21f2ce70_333374c9",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 111,
+        "endChar": 26
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a109bff0_ea0c7dea",
         "filename": "host-interface.cpp",
         "patchSetId": 1
@@ -108,6 +204,58 @@
       "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e414b1b4_060dcc34",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-04T21:06:11Z",
+      "side": 1,
+      "message": "Yeah, I was just thinking it had to be non-zero but I don\u0027t see anything saying that in the docs.",
+      "parentUuid": "a109bff0_ea0c7dea",
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57ece9fe_c57bba30",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-04T21:06:11Z",
+      "side": 1,
+      "message": "Make log messages DEBUG",
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aac07d9_769a359e",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-04T21:06:11Z",
+      "side": 1,
+      "message": "No longer needed now that it\u0027s not static",
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
