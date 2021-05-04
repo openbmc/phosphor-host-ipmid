@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f80c9e4_06d0f2cd",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-04T20:20:33Z",
+      "side": 1,
+      "message": "I don\u0027t think this is necessary and is actually buggy because the code becomes non-reentrant (but you can\u0027t stop it from being called again).",
+      "range": {
+        "startLine": 78,
+        "startChar": 4,
+        "endLine": 78,
+        "endChar": 10
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c6787ff_eab3449e",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-04T20:20:33Z",
+      "side": 1,
+      "message": "Suggest `auto`.",
+      "range": {
+        "startLine": 83,
+        "startChar": 4,
+        "endLine": 83,
+        "endChar": 40
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39ab0ea2_dd78afa7",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-04T20:20:33Z",
+      "side": 1,
+      "message": "You might want to use phosphor::host::command::CommandHandler here rather than causing a type conversion on line 101.",
+      "range": {
+        "startLine": 98,
+        "startChar": 15,
+        "endLine": 98,
+        "endChar": 30
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21f2ce70_333374c9",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-04T20:20:33Z",
+      "side": 1,
+      "message": "Suggest `auto`.",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 111,
+        "endChar": 26
+      },
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a109bff0_ea0c7dea",
+        "filename": "host-interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-04T20:20:33Z",
+      "side": 1,
+      "message": "Any reason this isn\u0027t 0?  I think you\u0027re just wanting to know if the future is already complete.",
+      "revId": "c4037e7c5dddc2544c1a31829a3b1aed6c438486",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
