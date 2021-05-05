@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ccb0bf81_b31336e9",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-05T22:37:02Z",
+      "side": 1,
+      "message": "It is possible to get to this point with a non-nul terminated string (userPassword). This is why the string conversion and all were there in the first place. The string an \u0027\\0\u0027 padding was added to ensure that the password was properly terminated. Later the OPENSSL_Cleanse was added to make sure we didn\u0027t have a bonus copy of the password lying around on the stack.\n\nThis fix addresses the crash because of a zeroed out std::string will likely not deconstruct properly, but the non-nul terminated password will cause trouble.",
+      "revId": "bd081c56d91fd70429aeac9b8263fb0d9cf436d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
