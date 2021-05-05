@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bdcd34ab_d204beac",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-05-05T23:35:16Z",
+      "side": 1,
+      "message": "+1.  I had a comment in drafts but didn\u0027t hit submit.  This seems odd that IPMI would enforce this.  We should be enforcing this in the sensors themselves, and quanta has patches to add this already.  I suspect IPMI can just \"send the request and ask forgiveness later\" and rely on the return code to determine when to send unsupported back.",
+      "parentUuid": "4abae90a_e7eae6ff",
+      "revId": "f02158cb617fdd2b6844c0bb785467d5aab4ccb9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9d26e23d_a04afcb8",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 3
@@ -30,6 +48,30 @@
       "writtenOn": "2021-05-05T23:15:16Z",
       "side": 1,
       "message": "these two should probably be combined into \n\nuint15_t assertOffset, bool resvd1, uint15_t deassertOffset, bool resvd2\n\nfor properly following the spec. Also, the spec seems to infer that bytes 4-10 are optional.",
+      "range": {
+        "startLine": 276,
+        "startChar": 21,
+        "endLine": 276,
+        "endChar": 70
+      },
+      "revId": "f02158cb617fdd2b6844c0bb785467d5aab4ccb9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7465eaa2_16873892",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-05-05T23:35:16Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "9d26e23d_a04afcb8",
       "range": {
         "startLine": 276,
         "startChar": 21,
