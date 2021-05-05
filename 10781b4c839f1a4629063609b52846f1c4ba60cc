@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "edb9fd8a_68bcd89f",
+        "filename": "host-interface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-05T21:24:47Z",
+      "side": 1,
+      "message": "I\u0027m not a big fan of the roll our own approach. This may be a bit overkill but it works using off the shelf standard lib features and this is not in any type of high use or high performance path. With that said, I can\u0027t really argue with your comment below about just using std::make_shared\u003cstd::optional\u003cHost::FirmwareCondition\u003e\u003e so I moved over to that.",
+      "parentUuid": "020f0e65_60df4743",
+      "revId": "10781b4c839f1a4629063609b52846f1c4ba60cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7a653e3a_b7782e2f",
         "filename": "host-interface.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2021-05-04T22:33:20Z",
       "side": 1,
       "message": "You should capture the promise by value (move) in case a timeout causes the reference to go away before the callback is executed.",
+      "revId": "10781b4c839f1a4629063609b52846f1c4ba60cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5334af8e_df1b8d23",
+        "filename": "host-interface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-05T21:24:47Z",
+      "side": 1,
+      "message": "I moved to a shared_ptr so we should be good here now (I think?).",
+      "parentUuid": "7a653e3a_b7782e2f",
       "revId": "10781b4c839f1a4629063609b52846f1c4ba60cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "03965a39_812a5d32",
+        "filename": "host-interface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-05T21:24:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40574b2d_79fa691b",
+      "revId": "10781b4c839f1a4629063609b52846f1c4ba60cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dff51322_d4619e00",
         "filename": "host-interface.cpp",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "70917a60_9cd9bdcd",
+        "filename": "host-interface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-05T21:24:47Z",
+      "side": 1,
+      "message": "Yeah, somewhat of an arbitrary number to make the for loop easier. I\u0027ll optimize it a bit.",
+      "parentUuid": "dff51322_d4619e00",
+      "revId": "10781b4c839f1a4629063609b52846f1c4ba60cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "62d9fe49_71ba4461",
         "filename": "host-interface.cpp",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2021-05-04T22:33:20Z",
       "side": 1,
       "message": "It doesn\u0027t feel like you are benefiting much from the use of futures here. If you shared a std::shared_ptr\u003cstd::optional\u003cHost::FirmwareCondition\u003e\u003e you could get the same behavior without any of the underlying threading protections std::future offers.\n\nIt would make more sense once we have futures that can be awoken as part of a larger async state machine.",
+      "revId": "10781b4c839f1a4629063609b52846f1c4ba60cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "081d886e_6442a336",
+        "filename": "host-interface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-05T21:24:47Z",
+      "side": 1,
+      "message": "Yeah, I\u0027m fine with this. Seems to work just as well.",
+      "parentUuid": "62d9fe49_71ba4461",
       "revId": "10781b4c839f1a4629063609b52846f1c4ba60cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
