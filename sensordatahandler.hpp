@@ -230,6 +230,11 @@ GetSensorResponse readingData(const Info& sensorInfo)
                                         sensorInfo.coefficientM);
     setReading(rawData, &response);
 
+    if (!std::isfinite(value))
+    {
+        response.readingOrStateUnavailable = 1;
+    }
+
     return response;
 }
 
