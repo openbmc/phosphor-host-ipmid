@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4abae90a_e7eae6ff",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-05T23:15:16Z",
+      "side": 1,
+      "message": "The ipmi spec seems to think that there is a way to set this on a per-sensor basis with SDRs. Although, with the OpenBMC setup, if the DBus sensor set command fails, maybe that sensor doesn\u0027t support this, so I guess the SDRs would only be helpful if users would like to know prior to attempting to set something that it will work.\n\nAlso, this is the sort of thing that would be more helpful as a configure option so that it can be set without patching.",
+      "revId": "f02158cb617fdd2b6844c0bb785467d5aab4ccb9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d26e23d_a04afcb8",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-05T23:15:16Z",
+      "side": 1,
+      "message": "these two should probably be combined into \n\nuint15_t assertOffset, bool resvd1, uint15_t deassertOffset, bool resvd2\n\nfor properly following the spec. Also, the spec seems to infer that bytes 4-10 are optional.",
+      "range": {
+        "startLine": 276,
+        "startChar": 21,
+        "endLine": 276,
+        "endChar": 70
+      },
+      "revId": "f02158cb617fdd2b6844c0bb785467d5aab4ccb9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
