@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c77fb113_23ea729a",
+        "filename": "Makefile.am",
+        "patchSetId": 5
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-05-06T17:17:45Z",
+      "side": 1,
+      "message": "I can\u0027t seem to get this to work...\n\nIn the makefile, it is added after libdynamiccmds_la_CXXFLAGS was already used without `-DFEATURE_DYNAMIC_SENSORS_WRITE`. \n\nAny suggestion on this issue?",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 184,
+        "endChar": 5
+      },
+      "revId": "22c0e969107689aea47b7e559c0bf351a63e8512",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
