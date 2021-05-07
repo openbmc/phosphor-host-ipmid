@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "38d4feb9_92e9b617",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-05-07T23:32:17Z",
+      "side": 1,
+      "message": "Done. I have added to wrap around the handler registration.",
+      "parentUuid": "6c1b5c69_a716aa22",
+      "range": {
+        "startLine": 278,
+        "startChar": 8,
+        "endLine": 278,
+        "endChar": 37
+      },
+      "revId": "efd2f603bcdf4a6586a3b14dcdc8116b8c89f3df",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e94a1fc_9b51d118",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 8
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "213c4bb1_a9c13f5f",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1511,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-05-07T23:32:17Z",
+      "side": 1,
+      "message": "Done. Thanks. yeah, we don\u0027t need this.",
+      "parentUuid": "2e94a1fc_9b51d118",
+      "revId": "efd2f603bcdf4a6586a3b14dcdc8116b8c89f3df",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0cda447_fa7953d8",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 8
@@ -56,6 +98,24 @@
       "revId": "efd2f603bcdf4a6586a3b14dcdc8116b8c89f3df",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1bcb72b_e84ba523",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1652,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-05-07T23:32:17Z",
+      "side": 1,
+      "message": "Done. I have also updated the commit message to reflect this.",
+      "parentUuid": "e0cda447_fa7953d8",
+      "revId": "efd2f603bcdf4a6586a3b14dcdc8116b8c89f3df",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
