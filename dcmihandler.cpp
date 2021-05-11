@@ -1174,9 +1174,9 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                            ipmi_request_t request, ipmi_response_t response,
                            ipmi_data_len_t data_len, ipmi_context_t context)
 {
+    *data_len = 0;
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        *data_len = 0;
         log<level::ERR>("DCMI Power management is unsupported!");
         return IPMI_CC_INVALID;
     }
