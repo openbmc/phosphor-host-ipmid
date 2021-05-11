@@ -1196,6 +1196,7 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::ERR>("Error in reading power sensor value",
                         entry("INTERFACE=%s", SENSOR_VALUE_INTF),
                         entry("PROPERTY=%s", SENSOR_VALUE_PROP));
+        *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
 
