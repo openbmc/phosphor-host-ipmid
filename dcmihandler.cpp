@@ -1187,6 +1187,7 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     int64_t power = 0;
+    *data_len = 0;
     try
     {
         power = getPowerReading(bus);
