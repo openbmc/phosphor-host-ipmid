@@ -125,6 +125,12 @@ int PasswdMgr::updateUserEntry(const std::string& userName,
     return 0;
 }
 
+void PasswdMgr::forceReloadPasswd(void)
+{
+    fileLastUpdatedTime = 0;
+    log<level::DEBUG>("Passwd file will be reload");
+}
+
 void PasswdMgr::checkAndReload(void)
 {
     std::time_t updatedTime = getUpdatedFileTime();

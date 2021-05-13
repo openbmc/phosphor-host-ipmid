@@ -82,6 +82,12 @@ struct PayloadAccess
  */
 Cc ipmiUserInit();
 
+/** @brief force reload password file, to avoid outdated cached password
+ *
+ *  @return ccSuccess for success.
+ */
+Cc ipmiForceReloadPasswd(void);
+
 /** @brief The ipmi get user password layer call
  *
  *  @param[in] userName - user name
