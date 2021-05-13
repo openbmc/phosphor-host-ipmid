@@ -59,6 +59,11 @@ class PasswdMgr
     int updateUserEntry(const std::string& userName,
                         const std::string& newUserName);
 
+    /** @brief set fileLastUpdatedTime to zero to force Reload Password file
+     *
+     */
+    void forceReloadPasswd(void);
+
   private:
     using UserName = std::string;
     using Password = std::string;

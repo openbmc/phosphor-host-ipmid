@@ -33,6 +33,12 @@ Cc ipmiUserInit()
     return ccSuccess;
 }
 
+Cc ipmiForceReloadPasswd(void)
+{
+    passwdMgr.forceReloadPasswd();
+    return ccSuccess;
+}
+
 std::string ipmiUserGetPassword(const std::string& userName)
 {
     return passwdMgr.getPasswdByUserName(userName);
