@@ -1712,6 +1712,7 @@ static constexpr uint8_t setComplete = 0x0;
 static constexpr uint8_t setInProgress = 0x1;
 static uint8_t transferStatus = setComplete;
 static uint8_t bootFlagValidBitClr = 0;
+static uint5_t bootInitiatorAckData = 0x0;
 
 /** @brief implements the Get Chassis system boot option
  *  @param ctx - context pointer
@@ -1760,8 +1761,8 @@ ipmi::RspType<ipmi::message::Payload>
         BootOptionParameter::bootInfo)
     {
         constexpr uint8_t writeMask = 0;
-        constexpr uint8_t bootInfoAck = 0;
-        response.pack(bootOptionParameter, writeMask, bootInfoAck);
+        response.pack(bootOptionParameter, reserved1, writeMask,
+                      bootInitiatorAckData);
         return ipmi::responseSuccess(std::move(response));
     }
 
@@ -2088,10 +2089,10 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
              BootOptionParameter::bootInfo)
     {
         uint8_t writeMak;
-        uint5_t bootInitiatorAckData;
+        uint5_t bootInfoAck;
         uint3_t rsvd;
 
-        if (data.unpack(writeMak, bootInitiatorAckData, rsvd) != 0 ||
+        if (data.unpack(writeMak, bootInfoAck, rsvd) != 0 ||
             !data.fullyUnpacked())
         {
             return ipmi::responseReqDataLenInvalid();
@@ -2100,10 +2101,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         {
             return ipmi::responseInvalidFieldRequest();
         }
-        // (ccSuccess). There is no implementation in OpenBMC for this
-        // parameter. This is added to support the ipmitool command `chassis
-        // bootdev` which sends set on parameter #4, before setting the boot
-        // flags.
+        bootInitiatorAckData &= ~writeMak;
+        bootInitiatorAckData |= (writeMak & bootInfoAck);
         log<level::INFO>("ipmiChassisSetSysBootOptions: bootInfo parameter set "
                          "successfully");
         data.trailingOk = true;
