@@ -66,6 +66,30 @@
     },
     {
       "key": {
+        "uuid": "784dd6de_eee76f4a",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1000929
+      },
+      "writtenOn": "2021-05-14T05:29:47Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "5f90c6e8_9d16af93",
+      "range": {
+        "startLine": 742,
+        "startChar": 2,
+        "endLine": 743,
+        "endChar": 67
+      },
+      "revId": "478efdcaad23558968d66e72f2a38e3aff179590",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a6fe2f0d_37334221",
         "filename": "user_channel/user_mgmt.cpp",
         "patchSetId": 5
@@ -146,6 +170,24 @@
       "writtenOn": "2021-05-13T23:31:23Z",
       "side": 1,
       "message": "Add the alias here to simplify the code later:\n\nusing SecureString \u003d std::basic_string\u003cchar, std::char_traits\u003cchar\u003e, custom_allocator::SecureAllocator\u003cchar\u003e\u003e;",
+      "revId": "478efdcaad23558968d66e72f2a38e3aff179590",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c8cbc17_2f40e757",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000929
+      },
+      "writtenOn": "2021-05-14T05:29:47Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "ed025cc4_cb13f5bc",
       "revId": "478efdcaad23558968d66e72f2a38e3aff179590",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
