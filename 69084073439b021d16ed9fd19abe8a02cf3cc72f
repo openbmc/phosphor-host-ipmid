@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b60f7dcf_1adfd777",
+        "filename": "configure.ac",
+        "patchSetId": 9
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-05-14T23:13:18Z",
+      "side": 1,
+      "message": "Does this really need to be a compile option?  Assuming we do this as planned, where the sensors control whether or not they\u0027re settable, there should be no security implications, right?\n\n\nWith that said, I\u0027m fine if this is temporary staging until Quantas patch lands in dbus-sensors, but ultimately I don\u0027t think this behavior should be configurable at this level.  dbus daemons should enforce the appropriate read-write behavior, otherwise we need to add this option into every protocol stack individually.",
+      "range": {
+        "startLine": 270,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 68
+      },
+      "revId": "69084073439b021d16ed9fd19abe8a02cf3cc72f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
