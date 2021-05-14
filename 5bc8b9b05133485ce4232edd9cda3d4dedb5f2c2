@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c62b7041_028077a2",
+        "filename": "user_channel/channelcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-05-14T20:18:14Z",
+      "side": 1,
+      "message": "technically should be static_cast\u003cint\u003e\n\nYou might also consider casting accessSetMode the other way in one place, then reusing the result in those couple of places.\n\nAnother slightly more invasive change, we might consider is changing the definition of this enum to:\n\ntypedef enum class : uint2_t\n\nWhich would make this (I think) directly comparable without casting, but might run into other issues.",
+      "range": {
+        "startLine": 180,
+        "startChar": 26,
+        "endLine": 180,
+        "endChar": 31
+      },
+      "revId": "5bc8b9b05133485ce4232edd9cda3d4dedb5f2c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
