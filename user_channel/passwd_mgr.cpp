@@ -227,7 +227,7 @@ int PasswdMgr::encryptDecryptData(bool doEncrypt, const EVP_CIPHER* cipher,
 
 void PasswdMgr::initPasswordMap(void)
 {
-    phosphor::user::shadow::Lock lock();
+    // TODO  phosphor-host-ipmid#170 phosphor::user::shadow::Lock lock{};
     std::vector<uint8_t> dataBuf;
 
     if (readPasswdFileData(dataBuf) != 0)
@@ -357,7 +357,7 @@ int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
 int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
                                        const std::string& newUserName)
 {
-    phosphor::user::shadow::Lock lock();
+    // TODO  phosphor-host-ipmid#170 phosphor::user::shadow::Lock lock{};
 
     size_t bytesWritten = 0;
     size_t inBytesLen = 0;
