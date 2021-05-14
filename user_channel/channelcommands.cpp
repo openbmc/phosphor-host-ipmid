@@ -177,7 +177,7 @@ ipmi ::RspType<uint3_t, // access mode,
         return responseInvalidFieldRequest();
     }
 
-    if ((accessSetMode == doNotSet) || (accessSetMode == reserved))
+    if ((accessSetMode == (int)doNotSet) || (accessSetMode == (int)reserved))
     {
         log<level::DEBUG>("Get channel access - Invalid Access mode");
         return responseInvalidFieldRequest();
@@ -197,11 +197,11 @@ ipmi ::RspType<uint3_t, // access mode,
 
     Cc compCode;
 
-    if (accessSetMode == nvData)
+    if (accessSetMode == (int)nvData)
     {
         compCode = getChannelAccessPersistData(chNum, chAccess);
     }
-    else if (accessSetMode == activeData)
+    else if (accessSetMode == (int)activeData)
     {
         compCode = getChannelAccessData(chNum, chAccess);
     }
