@@ -22,6 +22,30 @@
       "revId": "69084073439b021d16ed9fd19abe8a02cf3cc72f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8757fefb_e2bb32a1",
+        "filename": "configure.ac",
+        "patchSetId": 9
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-05-14T23:17:11Z",
+      "side": 1,
+      "message": "yes, that is the main reason to having this configurable option for now. I want to get this patch moving, since there are a few more after this that will need to go in.\n\nWill definitely want to remove this once the Quanta\u0027s changes are in.",
+      "parentUuid": "b60f7dcf_1adfd777",
+      "range": {
+        "startLine": 270,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 68
+      },
+      "revId": "69084073439b021d16ed9fd19abe8a02cf3cc72f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
