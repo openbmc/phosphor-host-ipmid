@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "377da896_ef49c707",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-05-17T11:27:53Z",
+      "side": 1,
+      "message": "As done in other functions, ex. line number 1121, you can initialize \u0027data_len\u0027 at line number 1190, out side of try catch block:\n\n*data_len \u003d 0;",
+      "range": {
+        "startLine": 1199,
+        "startChar": 8,
+        "endLine": 1199,
+        "endChar": 22
+      },
+      "revId": "64f1f130c8c70bde7ff8507d5c1fd9bf58f017bc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
