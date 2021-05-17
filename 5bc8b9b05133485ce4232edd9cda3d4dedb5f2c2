@@ -46,6 +46,30 @@
       "revId": "5bc8b9b05133485ce4232edd9cda3d4dedb5f2c2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6522dd4b_bfb5d424",
+        "filename": "user_channel/channelcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-05-17T20:31:09Z",
+      "side": 1,
+      "message": "Option A doesn\u0027t seem to make it through CI. Going to go back to the first patch with an additional static_cast().",
+      "parentUuid": "67357d1d_a7e813a1",
+      "range": {
+        "startLine": 180,
+        "startChar": 26,
+        "endLine": 180,
+        "endChar": 31
+      },
+      "revId": "5bc8b9b05133485ce4232edd9cda3d4dedb5f2c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
