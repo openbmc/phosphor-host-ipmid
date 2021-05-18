@@ -939,7 +939,7 @@ ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
 
 uint8_t getTotalSessionCount()
 {
-    uint8_t count = 0, ch = 1;
+    uint8_t count = 0, ch = 0;
 
     while (ch < ipmi::maxIpmiChannels &&
            count < session::maxNetworkInstanceSupported)
