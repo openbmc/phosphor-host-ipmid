@@ -352,7 +352,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
 
 bool ChannelConfig::isValidChannel(const uint8_t chNum)
 {
-    if (chNum > maxIpmiChannels)
+    if (chNum >= maxIpmiChannels)
     {
         log<level::DEBUG>("Invalid channel ID - Out of range");
         return false;
@@ -1022,7 +1022,7 @@ int ChannelConfig::readChannelVolatileData()
         {
             std::string chKey = it.key();
             uint8_t chNum = std::stoi(chKey, nullptr, 10);
-            if ((chNum < 0) || (chNum > maxIpmiChannels))
+            if (chNum >= maxIpmiChannels)
             {
                 log<level::DEBUG>(
                     "Invalid channel access entry in config file");
@@ -1090,7 +1090,7 @@ int ChannelConfig::readChannelPersistData()
         {
             std::string chKey = it.key();
             uint8_t chNum = std::stoi(chKey, nullptr, 10);
-            if ((chNum < 0) || (chNum > maxIpmiChannels))
+            if (chNum >= maxIpmiChannels)
             {
                 log<level::DEBUG>(
                     "Invalid channel access entry in config file");
