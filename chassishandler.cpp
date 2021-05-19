@@ -1163,7 +1163,7 @@ ipmi::RspType<bool,    // Power is on
     constexpr bool coolingFanFault = false;
     // chassisIdentifySupport set because this command is implemented
     constexpr bool chassisIdentifySupport = true;
-    uint2_t chassisIdentifyState = static_cast<uint2_t>(chassisIDState);
+    uint2_t chassisIdentifyState = types::enum_cast<uint2_t>(chassisIDState);
     constexpr bool diagButtonDisabled = false;
     constexpr bool sleepButtonDisabled = false;
     constexpr bool diagButtonDisableAllow = false;
@@ -1268,7 +1268,8 @@ static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
         {
             auto cause =
                 State::Host::convertRestartCauseFromString(restartCauseStr);
-            return restartCauseToIpmiRestartCause(cause);
+            return types::enum_cast<uint4_t>(
+                restartCauseToIpmiRestartCause(cause));
         }
     }
 
@@ -1706,15 +1707,15 @@ ipmi::RspType<ipmi::message::Payload>
 
     IpmiValue bootOption = ipmiDefault;
 
-    if (static_cast<uint8_t>(bootOptionParameter) ==
-        static_cast<uint8_t>(BootOptionParameter::setInProgress))
+    if (types::enum_cast<BootOptionParameter>(bootOptionParameter) ==
+        BootOptionParameter::setInProgress)
     {
         response.pack(bootOptionParameter, reserved1, transferStatus);
         return ipmi::responseSuccess(std::move(response));
     }
 
-    if (static_cast<uint8_t>(bootOptionParameter) ==
-        static_cast<uint8_t>(BootOptionParameter::bootInfo))
+    if (types::enum_cast<BootOptionParameter>(bootOptionParameter) ==
+        BootOptionParameter::bootInfo)
     {
         constexpr uint8_t writeMask = 0;
         constexpr uint8_t bootInfoAck = 0;
@@ -1726,8 +1727,8 @@ ipmi::RspType<ipmi::message::Payload>
      * Parameter #5 means boot flags. Please refer to 28.13 of ipmi doc.
      * This is the only parameter used by petitboot.
      */
-    if (static_cast<uint8_t>(bootOptionParameter) ==
-        static_cast<uint8_t>(BootOptionParameter::bootFlags))
+    if (types::enum_cast<BootOptionParameter>(bootOptionParameter) ==
+        BootOptionParameter::bootFlags)
     {
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
@@ -1806,8 +1807,8 @@ ipmi::RspType<ipmi::message::Payload>
         if ((bootOptionParameter >= oemParmStart) &&
             (bootOptionParameter <= oemParmEnd))
         {
-            if (static_cast<uint8_t>(bootOptionParameter) ==
-                static_cast<uint8_t>(BootOptionParameter::opalNetworkSettings))
+            if (types::enum_cast<BootOptionParameter>(bootOptionParameter) ==
+                BootOptionParameter::opalNetworkSettings)
             {
                 response.pack(bootOptionParameter, reserved1);
                 int ret = getHostNetworkData(response);
@@ -1843,8 +1844,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
     using namespace boot_options;
     ipmi::Cc rc;
 
-    if (parameterSelector ==
-        static_cast<uint7_t>(BootOptionParameter::setInProgress))
+    if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
+        BootOptionParameter::setInProgress)
     {
         uint2_t setInProgressFlag;
         uint6_t rsvd;
@@ -1870,8 +1871,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
      * This is the only parameter used by petitboot.
      */
 
-    if (parameterSelector ==
-        static_cast<uint7_t>(BootOptionParameter::bootFlags))
+    if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
+        BootOptionParameter::bootFlags)
     {
         uint5_t rsvd;
         bool validFlag;
@@ -1994,8 +1995,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
             return ipmi::responseUnspecifiedError();
         }
     }
-    else if (parameterSelector ==
-             static_cast<uint7_t>(BootOptionParameter::bootInfo))
+    else if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
+             BootOptionParameter::bootInfo)
     {
         uint8_t writeMak;
         uint5_t bootInitiatorAckData;
@@ -2024,8 +2025,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         if ((parameterSelector >= static_cast<uint7_t>(oemParmStart)) &&
             (parameterSelector <= static_cast<uint7_t>(oemParmEnd)))
         {
-            if (parameterSelector ==
-                static_cast<uint7_t>(BootOptionParameter::opalNetworkSettings))
+            if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
+                BootOptionParameter::opalNetworkSettings)
             {
                 ipmi::Cc ret = setHostNetworkData(data);
                 if (ret != ipmi::ccSuccess)

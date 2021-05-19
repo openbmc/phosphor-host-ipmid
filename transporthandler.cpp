@@ -522,10 +522,10 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
     }
 
     ret.pack(set);
-    ret.pack(static_cast<uint4_t>(source), uint3_t{}, enabled);
+    ret.pack(types::enum_cast<uint4_t>(source), uint3_t{}, enabled);
     ret.pack(std::string_view(reinterpret_cast<char*>(&addr), sizeof(addr)));
     ret.pack(prefix);
-    ret.pack(static_cast<uint8_t>(status));
+    ret.pack(types::enum_cast<uint8_t>(status));
 }
 
 /** @brief Gets the vlan ID configured on the interface
@@ -1276,7 +1276,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             {
                 status = SetStatus::Complete;
             }
-            ret.pack(static_cast<uint2_t>(status), uint6_t{});
+            ret.pack(types::enum_cast<uint2_t>(status), uint6_t{});
             return responseSuccess(std::move(ret));
         }
         case LanParam::AuthSupport:
@@ -1316,7 +1316,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             {
                 src = IPSrc::DHCP;
             }
-            ret.pack(static_cast<uint4_t>(src), uint4_t{});
+            ret.pack(types::enum_cast<uint4_t>(src), uint4_t{});
             return responseSuccess(std::move(ret));
         }
         case LanParam::MAC:

@@ -234,8 +234,7 @@ ipmi::RspType<>
             static_cast<uint8_t>(timeoutAction) & wd_timeout_action_mask);
         wd_service.setExpireAction(ipmiActionToWdAction(ipmi_action));
 
-        const auto ipmiTimerUse =
-            static_cast<IpmiTimerUse>(static_cast<uint8_t>(timerUse));
+        const auto ipmiTimerUse = types::enum_cast<IpmiTimerUse>(timerUse);
         wd_service.setTimerUse(ipmiTimerUseToWdTimerUse(ipmiTimerUse));
 
         wd_service.setExpiredTimerUse(WatchdogService::TimerUse::Reserved);
@@ -415,10 +414,12 @@ ipmi::RspType<uint3_t, // timerUse - timer use
 
         lastCallSuccessful = true;
         return ipmi::responseSuccess(
-            static_cast<uint3_t>(wdTimerUseToIpmiTimerUse(wd_prop.timerUse)), 0,
-            wd_prop.enabled, timerNotLogFlags,
-            static_cast<uint3_t>(wdActionToIpmiAction(wd_prop.expireAction)), 0,
-            timerPreTimeoutInterrupt, 0, pretimeout, timerUseExpirationFlags,
+            types::enum_cast<uint3_t>(
+                wdTimerUseToIpmiTimerUse(wd_prop.timerUse)),
+            0, wd_prop.enabled, timerNotLogFlags,
+            types::enum_cast<uint3_t>(
+                wdActionToIpmiAction(wd_prop.expireAction)),
+            0, timerPreTimeoutInterrupt, 0, pretimeout, timerUseExpirationFlags,
             initialCountdown, presentCountdown);
     }
     catch (const InternalFailure& e)

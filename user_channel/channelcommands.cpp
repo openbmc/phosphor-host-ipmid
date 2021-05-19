@@ -177,7 +177,8 @@ ipmi ::RspType<uint3_t, // access mode,
         return responseInvalidFieldRequest();
     }
 
-    if ((accessSetMode == doNotSet) || (accessSetMode == reserved))
+    if ((types::enum_cast<EChannelActionType>(accessSetMode) == doNotSet) ||
+        (types::enum_cast<EChannelActionType>(accessSetMode) == reserved))
     {
         log<level::DEBUG>("Get channel access - Invalid Access mode");
         return responseInvalidFieldRequest();
@@ -197,11 +198,11 @@ ipmi ::RspType<uint3_t, // access mode,
 
     Cc compCode;
 
-    if (accessSetMode == nvData)
+    if (types::enum_cast<EChannelActionType>(accessSetMode) == nvData)
     {
         compCode = getChannelAccessPersistData(chNum, chAccess);
     }
-    else if (accessSetMode == activeData)
+    else if (types::enum_cast<EChannelActionType>(accessSetMode) == activeData)
     {
         compCode = getChannelAccessData(chNum, chAccess);
     }
@@ -215,9 +216,10 @@ ipmi ::RspType<uint3_t, // access mode,
     constexpr uint4_t reservedOut2 = 0;
 
     return responseSuccess(
-        static_cast<uint3_t>(chAccess.accessMode), chAccess.userAuthDisabled,
-        chAccess.perMsgAuthDisabled, chAccess.alertingDisabled, reservedOut1,
-        static_cast<uint4_t>(chAccess.privLimit), reservedOut2);
+        types::enum_cast<uint3_t>(chAccess.accessMode),
+        chAccess.userAuthDisabled, chAccess.perMsgAuthDisabled,
+        chAccess.alertingDisabled, reservedOut1,
+        types::enum_cast<uint4_t>(chAccess.privLimit), reservedOut2);
 }
 
 /** @brief implements the get channel info command
