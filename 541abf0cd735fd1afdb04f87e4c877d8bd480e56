@@ -22,6 +22,29 @@
       "revId": "541abf0cd735fd1afdb04f87e4c877d8bd480e56",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1399509_41ae2276",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-19T14:43:17Z",
+      "side": 1,
+      "message": "Also, securestring should be SecureString",
+      "range": {
+        "startLine": 448,
+        "startChar": 6,
+        "endLine": 448,
+        "endChar": 18
+      },
+      "revId": "541abf0cd735fd1afdb04f87e4c877d8bd480e56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
