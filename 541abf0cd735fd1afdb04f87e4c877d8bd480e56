@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a062c673_a1b83a46",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-19T14:42:08Z",
+      "side": 1,
+      "message": "I think the custom_allocator namespace is not needed. Just put SecureAllocator and SecureString in the ipmi namespace.\n\nnamespace ipmi\n{\n...\n\ntemplate \u003c...\u003e\nclass SecureAllocator\n{\n...\n};\n\nusing SecureString \u003d ...;\n\n} // namespace ipmi",
+      "range": {
+        "startLine": 448,
+        "startChar": 0,
+        "endLine": 448,
+        "endChar": 68
+      },
+      "revId": "541abf0cd735fd1afdb04f87e4c877d8bd480e56",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
