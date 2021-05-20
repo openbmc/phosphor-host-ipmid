@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4abe7e70_602c6436",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1698,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-20T22:33:14Z",
+      "side": 1,
+      "message": "I don\u0027t think the comment here explains sufficiently why an error to set the boot type would return success here. It says that not reporting would be a normal thing to do, but not why you return here instead of executing the rest of the function.",
+      "revId": "498213d0941522c03baf1819551888bde4ef4206",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
