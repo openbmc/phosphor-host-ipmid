@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6745a114_45bb54c3",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-20T23:28:21Z",
+      "side": 1,
+      "message": "so close.\n\nPart of the problem here is that the userPassword char* might not be nul terminated. This is why we used a string in the first place.\n\n    ipmi::SecureString passwd;\n    passwd.assign(reinterpret_cast\u003cconst char*\u003e(userPassword), 0,\n                  maxIpmi20PasswordSize);\n\n    int retval \u003d pamUpdatePasswd(userName.c_str(), passwd.c_str());",
+      "range": {
+        "startLine": 741,
+        "startChar": 4,
+        "endLine": 743,
+        "endChar": 0
+      },
+      "revId": "24fa9531e2554530162c10409737a38d94afe228",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
