@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c014e1f2_4a2b0028",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1641,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-20T22:39:07Z",
+      "side": 1,
+      "message": "the yielding variants of get/setdbusproperty do not throw on errors, they return a boost::system::error_code instead.\n\nboost::system::error_code ec{};\nec \u003d ipmi::setDbusProperty(...);\nif (ec) {\n    log\u003clevel::ERR\u003e(\"Error in BootSource Set\", entry(\"ERROR\u003d%s\", ec.message().c_str());\n    return ipmi::ccUnspecifiedError;\n}\n\nPlease fix here and below.",
+      "range": {
+        "startLine": 1641,
+        "startChar": 0,
+        "endLine": 1641,
+        "endChar": 30
+      },
+      "revId": "045048e8b3fdaf4bcd0e052544bfc0da2df52fe4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
