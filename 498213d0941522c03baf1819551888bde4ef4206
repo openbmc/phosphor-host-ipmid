@@ -34,6 +34,24 @@
       "revId": "498213d0941522c03baf1819551888bde4ef4206",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b74d4df_315fc688",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1698,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-05-21T13:59:24Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "cd2b3829_07a4f83b",
+      "revId": "498213d0941522c03baf1819551888bde4ef4206",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
