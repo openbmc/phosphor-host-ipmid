@@ -103,6 +103,7 @@ constexpr static const char* entityManagerServiceName =
     "xyz.openbmc_project.EntityManager";
 constexpr static const size_t writeTimeoutSeconds = 10;
 constexpr static const char* chassisTypeRackMount = "23";
+constexpr static const char* chassisTypeMainServer = "17";
 
 // event direction is bit[7] of eventType where 1b = Deassertion event
 constexpr static const uint8_t deassertionEvent = 0x80;
@@ -194,7 +195,8 @@ void recalculateHashes()
         }
 
         uint8_t fruHash = 0;
-        if (chassisType.compare(chassisTypeRackMount) != 0)
+        if (chassisType.compare(chassisTypeRackMount) != 0 &&
+            chassisType.compare(chassisTypeMainServer) != 0)
         {
             fruHash = hasher(fru.first.str);
             // can't be 0xFF based on spec, and 0 is reserved for baseboard
