@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80c5b560_54627c5e",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-21T15:16:57Z",
+      "side": 1,
+      "message": "use passwd.c_str() instead of userPassword here.\n\nuserPassword may not be nul-terminated. That is why we are using the string assign function. That construct will create a valid string up to the requested size. Then the c_str() call will provide the pointer that is safe.",
+      "range": {
+        "startLine": 744,
+        "startChar": 51,
+        "endLine": 744,
+        "endChar": 63
+      },
+      "revId": "deb087d4d7085672afa6fa5779bd2e4a066158c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
