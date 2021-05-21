@@ -251,11 +251,6 @@ ipmi::Cc getFru(ipmi::Context::ptr ctx, uint8_t devId)
         return ipmi::ccSuccess;
     }
 
-    // Set devId to 1 if devId is 0.
-    // 0 is reserved for baseboard and set to 1 in recalculateHashes().
-    if (!devId)
-        devId = 1;
-
     auto deviceFind = deviceHashes.find(devId);
     if (deviceFind == deviceHashes.end())
     {
