@@ -510,61 +510,18 @@ ipmi::RspType<uint8_t // erase status
     cancelSELReservation();
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    ipmi::sel::ObjectPaths objectPaths;
-    auto depth = 0;
-
-    auto mapperCall =
-        bus.new_method_call(ipmi::sel::mapperBusName, ipmi::sel::mapperObjPath,
-                            ipmi::sel::mapperIntf, "GetSubTreePaths");
-    mapperCall.append(ipmi::sel::logBasePath);
-    mapperCall.append(depth);
-    mapperCall.append(ipmi::sel::ObjectPaths({ipmi::sel::logEntryIntf}));
-
+    auto service = ipmi::getService(bus, ipmi::sel::logIntf, ipmi::sel::logObj);
+    auto method =
+        bus.new_method_call(service.c_str(), ipmi::sel::logObj,
+                            ipmi::sel::logIntf, ipmi::sel::logDeleteAllMethod);
     try
     {
-        auto reply = bus.call(mapperCall);
-        if (reply.is_method_error())
-        {
-            return ipmi::responseSuccess(
-                static_cast<uint8_t>(ipmi::sel::eraseComplete));
-        }
-
-        reply.read(objectPaths);
-        if (objectPaths.empty())
-        {
-            return ipmi::responseSuccess(
-                static_cast<uint8_t>(ipmi::sel::eraseComplete));
-        }
+        bus.call_noreply(method);
     }
     catch (const sdbusplus::exception::exception& e)
     {
-        return ipmi::responseSuccess(
-            static_cast<uint8_t>(ipmi::sel::eraseComplete));
-    }
-
-    std::string service;
-
-    try
-    {
-        service = ipmi::getService(bus, ipmi::sel::logDeleteIntf,
-                                   objectPaths.front());
-    }
-    catch (const std::runtime_error& e)
-    {
-        log<level::ERR>(e.what());
+        log<level::ERR>("Error eraseAll ", entry("ERROR=%s", e.what()));
         return ipmi::responseUnspecifiedError();
-    }
-
-    for (const auto& iter : objectPaths)
-    {
-        auto methodCall = bus.new_method_call(
-            service.c_str(), iter.c_str(), ipmi::sel::logDeleteIntf, "Delete");
-
-        auto reply = bus.call(methodCall);
-        if (reply.is_method_error())
-        {
-            return ipmi::responseUnspecifiedError();
-        }
     }
 
     return ipmi::responseSuccess(
