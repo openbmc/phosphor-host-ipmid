@@ -21,6 +21,10 @@ static constexpr auto logBasePath = "/xyz/openbmc_project/logging/entry";
 static constexpr auto logEntryIntf = "xyz.openbmc_project.Logging.Entry";
 static constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 
+static constexpr auto logObj = "/xyz/openbmc_project/logging";
+static constexpr auto logIntf = "xyz.openbmc_project.Collection.DeleteAll";
+static constexpr auto logDeleteAllMethod = "DeleteAll";
+
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 
 using ObjectPaths = std::vector<std::string>;
