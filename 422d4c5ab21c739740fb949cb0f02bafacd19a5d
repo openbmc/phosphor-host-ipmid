@@ -22,6 +22,30 @@
       "revId": "422d4c5ab21c739740fb949cb0f02bafacd19a5d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7e36d69_47dd3ada",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1179,
+      "author": {
+        "id": 1000566
+      },
+      "writtenOn": "2021-05-24T16:01:39Z",
+      "side": 1,
+      "message": "Updated. Thank You",
+      "parentUuid": "ff27a8c9_9f950302",
+      "range": {
+        "startLine": 1179,
+        "startChar": 8,
+        "endLine": 1179,
+        "endChar": 22
+      },
+      "revId": "422d4c5ab21c739740fb949cb0f02bafacd19a5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
