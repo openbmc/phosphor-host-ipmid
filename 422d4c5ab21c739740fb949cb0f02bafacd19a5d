@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff27a8c9_9f950302",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1179,
+      "author": {
+        "id": 1000410
+      },
+      "writtenOn": "2021-05-24T10:20:29Z",
+      "side": 1,
+      "message": "nit: instead of having *data_len \u003d 0 twice, we could initialise *data_len \u003d 0 at line 1176 itself.",
+      "range": {
+        "startLine": 1179,
+        "startChar": 8,
+        "endLine": 1179,
+        "endChar": 22
+      },
+      "revId": "422d4c5ab21c739740fb949cb0f02bafacd19a5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
