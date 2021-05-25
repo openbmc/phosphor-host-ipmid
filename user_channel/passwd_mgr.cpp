@@ -51,11 +51,11 @@ struct MetaPassStruct
 {
     char signature[10];
     unsigned char reseved[2];
-    size_t hashSize;
-    size_t ivSize;
-    size_t dataSize;
-    size_t padSize;
-    size_t macSize;
+    unsigned int hashSize;
+    unsigned int ivSize;
+    unsigned int dataSize;
+    unsigned int padSize;
+    unsigned int macSize;
 };
 
 using namespace phosphor::logging;
@@ -529,11 +529,11 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
 
     // Update the meta password structure.
     MetaPassStruct metaData = {META_PASSWD_SIG, {0, 0}, 0, 0, 0, 0, 0};
-    metaData.hashSize = hashLen;
-    metaData.ivSize = ivLen;
-    metaData.dataSize = bytesWritten;
-    metaData.padSize = outBytesLen - bytesWritten;
-    metaData.macSize = macLen;
+    metaData.hashSize = static_cast<unsigned int>(hashLen);
+    metaData.ivSize = static_cast<unsigned int>(ivLen);
+    metaData.dataSize = static_cast<unsigned int>(bytesWritten);
+    metaData.padSize = static_cast<unsigned int>(outBytesLen - bytesWritten);
+    metaData.macSize = static_cast<unsigned int>(macLen);
 
     if (fwrite(&metaData, 1, sizeof(metaData), (temp)()) != sizeof(metaData))
     {
