@@ -22,6 +22,30 @@
       "revId": "8c6c2d6014eb93153f4c9b2f83d0107ef90f5c78",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55c0959b_dbe3e4e5",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000652
+      },
+      "writtenOn": "2021-05-26T05:01:21Z",
+      "side": 1,
+      "message": "No, it gives an error: \u0027template\u003cclass\u003e class std::allocator\u0027 used without template arguments\u0027.\nWe need to keep those constructors.\nhttps://en.cppreference.com/w/cpp/memory/allocator/allocator",
+      "parentUuid": "1a3c29ab_15b90405",
+      "range": {
+        "startLine": 429,
+        "startChar": 0,
+        "endLine": 442,
+        "endChar": 2
+      },
+      "revId": "8c6c2d6014eb93153f4c9b2f83d0107ef90f5c78",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
