@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "d8e458f9_2ea84153",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1000857
+      },
+      "writtenOn": "2021-05-27T22:13:42Z",
+      "side": 1,
+      "message": "return should be bool. it returns false on dbus execptions.",
+      "range": {
+        "startLine": 406,
+        "startChar": 0,
+        "endLine": 406,
+        "endChar": 4
+      },
+      "revId": "dd8601d3a37c0edeeeb5553df644618f6153b0fe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c6922528_6d461071",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 5
@@ -18,6 +41,29 @@
         "startChar": 33,
         "endLine": 1205,
         "endChar": 34
+      },
+      "revId": "dd8601d3a37c0edeeeb5553df644618f6153b0fe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09a84173_f82db82d",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1205,
+      "author": {
+        "id": 1000857
+      },
+      "writtenOn": "2021-05-27T22:13:42Z",
+      "side": 1,
+      "message": "whenever setVrEventStatus fails, we should response failure on ipmi",
+      "range": {
+        "startLine": 1205,
+        "startChar": 16,
+        "endLine": 1205,
+        "endChar": 32
       },
       "revId": "dd8601d3a37c0edeeeb5553df644618f6153b0fe",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
