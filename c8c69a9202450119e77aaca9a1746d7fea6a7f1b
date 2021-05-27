@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aaf75e5e_f5611207",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000857
+      },
+      "writtenOn": "2021-05-27T21:55:17Z",
+      "side": 1,
+      "message": "This is the test result of all 3 SDR relate patches (this one together with the following 2). \n\nThis patch is a preparation change, it is hard to solo test this one.\n\nThe implementation looks to me though.",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 27
+      },
+      "revId": "c8c69a9202450119e77aaca9a1746d7fea6a7f1b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
