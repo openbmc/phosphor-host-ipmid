@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c6922528_6d461071",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1205,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-05-27T22:07:47Z",
+      "side": 1,
+      "message": "pass ctx in to setVrEventStatus so it can use yielding dbus calls as well.",
+      "range": {
+        "startLine": 1205,
+        "startChar": 33,
+        "endLine": 1205,
+        "endChar": 34
+      },
+      "revId": "dd8601d3a37c0edeeeb5553df644618f6153b0fe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
