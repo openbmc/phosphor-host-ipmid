@@ -22,6 +22,30 @@
       "revId": "8941866646e62c272709a582dc0912c015a6c7a4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5294f7b_63c28099",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-05-28T12:56:46Z",
+      "side": 1,
+      "message": "Done. It have simplified the code significantly",
+      "parentUuid": "087d9a1d_71f1ecfb",
+      "range": {
+        "startLine": 597,
+        "startChar": 33,
+        "endLine": 597,
+        "endChar": 34
+      },
+      "revId": "8941866646e62c272709a582dc0912c015a6c7a4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
