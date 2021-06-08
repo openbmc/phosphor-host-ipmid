@@ -52,6 +52,16 @@ void Table::executeCommand(uint32_t inCommand,
     {
         CommandID command(inCommand);
 
+        // Do not forward any session zero commands to ipmid
+        if (handler->sessionID == session::sessionZero)
+        {
+            log<level::INFO>("Table: refuse to forward session-zero command",
+                             entry("LUN=%x", command.lun()),
+                             entry("NETFN=%x", command.netFn()),
+                             entry("CMD=%x", command.cmd()));
+            return;
+        }
+
         auto bus = getSdBus();
         // forward the request onto the main ipmi queue
         using IpmiDbusRspType = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t,

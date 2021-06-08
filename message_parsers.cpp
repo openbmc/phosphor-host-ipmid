@@ -100,12 +100,18 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         throw std::runtime_error("IPMI1.5 Session Header Missing");
     }
 
-    auto message = std::make_shared<Message>();
-
     auto header = reinterpret_cast<SessionHeader_t*>(inPacket.data());
 
+    uint32_t sessionID = endian::from_ipmi(header->sessId);
+    if (sessionID != session::sessionZero)
+    {
+        throw std::runtime_error("IPMI1.5 session packets are unsupported");
+    }
+
+    auto message = std::make_shared<Message>();
+
     message->payloadType = PayloadType::IPMI;
-    message->bmcSessionID = endian::from_ipmi(header->sessId);
+    message->bmcSessionID = session::sessionZero;
     message->sessionSeqNum = endian::from_ipmi(header->sessSeqNum);
     message->isPacketEncrypted = false;
     message->isPacketAuthenticated = false;
