@@ -112,11 +112,10 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     message->rmcpMsgClass =
         static_cast<ClassOfMsg>(header->base.rmcp.classOfMsg);
 
-    auto payloadLen = header->payloadLength;
-
     // Confirm the number of data bytes received correlates to
     // the packet length in the header
-    if (inPacket.size() < (sizeof(SessionHeader_t) + payloadLen))
+    size_t payloadLen = header->payloadLength;
+    if ((payloadLen == 0) || (inPacket.size() < (sizeof(*header) + payloadLen)))
     {
         throw std::runtime_error("Invalid data length");
     }
@@ -186,7 +185,13 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     message->rmcpMsgClass =
         static_cast<ClassOfMsg>(header->base.rmcp.classOfMsg);
 
-    auto payloadLen = endian::from_ipmi(header->payloadLength);
+    // Confirm the number of data bytes received correlates to
+    // the packet length in the header
+    size_t payloadLen = endian::from_ipmi(header->payloadLength);
+    if ((payloadLen == 0) || (inPacket.size() < (sizeof(*header) + payloadLen)))
+    {
+        throw std::runtime_error("Invalid data length");
+    }
 
     if (message->isPacketAuthenticated)
     {
