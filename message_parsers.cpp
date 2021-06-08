@@ -171,12 +171,21 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         throw std::runtime_error("IPMI2.0 Session Header Missing");
     }
 
-    auto message = std::make_shared<Message>();
-
     auto header = reinterpret_cast<SessionHeader_t*>(inPacket.data());
 
+    uint32_t sessionID = endian::from_ipmi(header->sessId);
+
+    auto session =
+        std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    if (!session)
+    {
+        throw std::runtime_error("RMCP+ message from unknown session");
+    }
+
+    auto message = std::make_shared<Message>();
+
     message->payloadType = static_cast<PayloadType>(header->payloadType & 0x3F);
-    message->bmcSessionID = endian::from_ipmi(header->sessId);
+    message->bmcSessionID = sessionID;
     message->sessionSeqNum = endian::from_ipmi(header->sessSeqNum);
     message->isPacketEncrypted =
         ((header->payloadType & PAYLOAD_ENCRYPT_MASK) ? true : false);
@@ -191,6 +200,17 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     if ((payloadLen == 0) || (inPacket.size() < (sizeof(*header) + payloadLen)))
     {
         throw std::runtime_error("Invalid data length");
+    }
+
+    bool integrityMismatch =
+        session->isIntegrityAlgoEnabled() && !message->isPacketAuthenticated;
+    bool encryptMismatch =
+        session->isCryptAlgoEnabled() && !message->isPacketEncrypted;
+
+    if (sessionID != session::sessionZero &&
+        (integrityMismatch || encryptMismatch))
+    {
+        throw std::runtime_error("unencrypted or unauthenticated message");
     }
 
     if (message->isPacketAuthenticated)
