@@ -1,7 +1,7 @@
 #include "session_cmds.hpp"
 
 #include "endian.hpp"
-#include "main.hpp"
+#include "sessions_manager.hpp"
 
 #include <ipmid/api.h>
 
@@ -34,8 +34,7 @@ std::vector<uint8_t>
     response->completionCode = IPMI_CC_OK;
     uint8_t reqPrivilegeLevel = request->reqPrivLevel;
 
-    auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(handler.sessionID);
+    auto session = session::Manager::get().getSession(handler.sessionID);
 
     if (reqPrivilegeLevel == 0) // Just return present privilege level
     {
@@ -176,10 +175,8 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
     {
         if (reqSessionId == session::sessionZero)
         {
-            reqSessionId = std::get<session::Manager&>(singletonPool)
-                               .getSessionIDbyHandle(
-                                   reqSessionHandle &
-                                   session::multiIntfaceSessionHandleMask);
+            reqSessionId = session::Manager::get().getSessionIDbyHandle(
+                reqSessionHandle & session::multiIntfaceSessionHandleMask);
             if (!reqSessionId)
             {
                 return session::ccInvalidSessionHandle;
@@ -187,15 +184,14 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
         }
 
         auto closeSessionInstance =
-            std::get<session::Manager&>(singletonPool).getSession(reqSessionId);
+            session::Manager::get().getSession(reqSessionId);
         uint8_t closeSessionPriv = closeSessionInstance->currentPrivilege();
 
         if (currentSessionPriv < closeSessionPriv)
         {
             return ipmi::ccInsufficientPrivilege;
         }
-        status = std::get<session::Manager&>(singletonPool)
-                     .stopSession(reqSessionId);
+        status = session::Manager::get().stopSession(reqSessionId);
 
         if (!status)
         {
@@ -262,10 +258,9 @@ std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
 
     try
     {
-        ipmiNetworkInstance =
-            std::get<session::Manager&>(singletonPool).getNetworkInstance();
-        auto currentSession = std::get<session::Manager&>(singletonPool)
-                                  .getSession(handler.sessionID);
+        ipmiNetworkInstance = session::Manager::get().getNetworkInstance();
+        auto currentSession =
+            session::Manager::get().getSession(handler.sessionID);
         currentSessionPriv = currentSession->currentPrivilege();
     }
     catch (sdbusplus::exception::SdBusError& e)
@@ -285,8 +280,7 @@ std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
     {
         response->completionCode = closeMyNetInstanceSession(
             reqSessionId, reqSessionHandle, currentSessionPriv);
-        std::get<session::Manager&>(singletonPool)
-            .scheduleSessionCleaner(100us);
+        session::Manager::get().scheduleSessionCleaner(100us);
     }
     else
     {

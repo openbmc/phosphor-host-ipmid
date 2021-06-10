@@ -1,5 +1,6 @@
 #pragma once
 
+#include "main.hpp"
 #include "sol/sol_manager.hpp"
 
 #include <systemd/sd-event.h>
@@ -40,8 +41,14 @@ constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
 
 class EventLoop
 {
+  private:
+    struct Private
+    {
+    };
+
   public:
-    explicit EventLoop(std::shared_ptr<boost::asio::io_context> io) : io(io)
+    EventLoop(std::shared_ptr<boost::asio::io_context>& io, const Private&) :
+        io(io)
     {
     }
     EventLoop() = delete;
@@ -50,6 +57,22 @@ class EventLoop
     EventLoop& operator=(const EventLoop&) = delete;
     EventLoop(EventLoop&&) = delete;
     EventLoop& operator=(EventLoop&&) = delete;
+
+    /**
+     * @brief Get a reference to the singleton EventLoop
+     *
+     * @return EventLoop reference
+     */
+    static EventLoop& get()
+    {
+        static std::shared_ptr<EventLoop> ptr = nullptr;
+        if (!ptr)
+        {
+            std::shared_ptr<boost::asio::io_context> io = getIo();
+            ptr = std::make_shared<EventLoop>(io, Private());
+        }
+        return *ptr;
+    }
 
     /** @brief Initialise the event loop and add the handler for incoming
      *         IPMI packets.

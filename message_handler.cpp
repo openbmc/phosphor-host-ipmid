@@ -42,8 +42,7 @@ bool Handler::receive()
 
 void Handler::updSessionData(std::shared_ptr<Message>& inMessage)
 {
-    auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(inMessage->bmcSessionID);
+    auto session = session::Manager::get().getSession(inMessage->bmcSessionID);
 
     sessionID = inMessage->bmcSessionID;
     inMessage->rcSessionID = session->getRCSessionID();
@@ -114,8 +113,7 @@ void Handler::executeCommand()
     auto command = inMessage->getCommand();
     if (inMessage->payloadType == PayloadType::IPMI)
     {
-        auto session =
-            std::get<session::Manager&>(singletonPool).getSession(sessionID);
+        auto session = session::Manager::get().getSession(sessionID);
         // Process PayloadType::IPMI only if ipmi is enabled or for sessionless
         // or for session establisbment command
         if (this->sessionID == session::sessionZero ||
@@ -131,8 +129,8 @@ void Handler::executeCommand()
                 inMessage->payload.begin() + sizeof(LAN::header::Request);
             auto end = inMessage->payload.end() - sizeof(LAN::trailer::Request);
             std::vector<uint8_t> inPayload(start, end);
-            std::get<command::Table&>(singletonPool)
-                .executeCommand(command, inPayload, shared_from_this());
+            command::Table::get().executeCommand(command, inPayload,
+                                                 shared_from_this());
         }
         else
         {
@@ -142,8 +140,8 @@ void Handler::executeCommand()
     }
     else
     {
-        std::get<command::Table&>(singletonPool)
-            .executeCommand(command, inMessage->payload, shared_from_this());
+        command::Table::get().executeCommand(command, inMessage->payload,
+                                             shared_from_this());
     }
 }
 
@@ -169,8 +167,7 @@ void Handler::sendASF()
 
 void Handler::send(std::shared_ptr<Message> outMessage)
 {
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    auto session = session::Manager::get().getSession(sessionID);
 
     // Flatten the packet
     auto packet = parser::flatten(outMessage, sessionHeader, session);
@@ -181,16 +178,14 @@ void Handler::send(std::shared_ptr<Message> outMessage)
 
 void Handler::setChannelInSession() const
 {
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    auto session = session::Manager::get().getSession(sessionID);
 
     session->channelPtr = channel;
 }
 
 void Handler::sendSOLPayload(const std::vector<uint8_t>& input)
 {
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    auto session = session::Manager::get().getSession(sessionID);
 
     auto outMessage = std::make_shared<Message>();
     outMessage->payloadType = PayloadType::SOL;
@@ -206,8 +201,7 @@ void Handler::sendSOLPayload(const std::vector<uint8_t>& input)
 void Handler::sendUnsolicitedIPMIPayload(uint8_t netfn, uint8_t cmd,
                                          const std::vector<uint8_t>& output)
 {
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    auto session = session::Manager::get().getSession(sessionID);
 
     auto outMessage = std::make_shared<Message>();
     outMessage->payloadType = PayloadType::IPMI;

@@ -216,8 +216,16 @@ class NetIpmidEntry final : public Entry
  */
 class Table
 {
+  private:
+    struct Private
+    {
+    };
+
   public:
-    Table() = default;
+    explicit Table(const Private&)
+    {
+    }
+    Table() = delete;
     ~Table() = default;
     // Command Table is a singleton so copy, copy-assignment, move and
     // move assignment is deleted
@@ -225,6 +233,21 @@ class Table
     Table& operator=(const Table&) = delete;
     Table(Table&&) = default;
     Table& operator=(Table&&) = default;
+
+    /**
+     * @brief Get a reference to the singleton Table
+     *
+     * @return Table reference
+     */
+    static Table& get()
+    {
+        static std::shared_ptr<Table> ptr = nullptr;
+        if (!ptr)
+        {
+            ptr = std::make_shared<Table>(Private());
+        }
+        return *ptr;
+    }
 
     using CommandTable = std::map<uint32_t, std::unique_ptr<Entry>>;
 

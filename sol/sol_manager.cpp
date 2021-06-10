@@ -255,8 +255,7 @@ void registerSOLServiceChangeCallback()
                         if (state != nullptr && *state == false)
                         {
                             // Stop all the payload session.
-                            std::get<sol::Manager&>(singletonPool)
-                                .stopAllPayloadInstance();
+                            sol::Manager::get().stopAllPayloadInstance();
                         }
                     }
                 });

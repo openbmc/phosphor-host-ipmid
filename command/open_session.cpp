@@ -2,7 +2,7 @@
 
 #include "comm_module.hpp"
 #include "endian.hpp"
-#include "main.hpp"
+#include "sessions_manager.hpp"
 
 #include <phosphor-logging/log.hpp>
 
@@ -77,15 +77,11 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
     try
     {
         // Start an IPMI session
-        session =
-            std::get<session::Manager&>(singletonPool)
-                .startSession(
-                    endian::from_ipmi<>(request->remoteConsoleSessionID), priv,
-                    static_cast<cipher::rakp_auth::Algorithms>(
-                        request->authAlgo),
-                    static_cast<cipher::integrity::Algorithms>(
-                        request->intAlgo),
-                    static_cast<cipher::crypt::Algorithms>(request->confAlgo));
+        session = session::Manager::get().startSession(
+            endian::from_ipmi<>(request->remoteConsoleSessionID), priv,
+            static_cast<cipher::rakp_auth::Algorithms>(request->authAlgo),
+            static_cast<cipher::integrity::Algorithms>(request->intAlgo),
+            static_cast<cipher::crypt::Algorithms>(request->confAlgo));
     }
     catch (std::exception& e)
     {

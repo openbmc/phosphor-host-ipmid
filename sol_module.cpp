@@ -1,7 +1,6 @@
 #include "command/payload_cmds.hpp"
 #include "command/sol_cmds.hpp"
 #include "command_table.hpp"
-#include "main.hpp"
 #include "session.hpp"
 
 namespace sol
@@ -52,11 +51,10 @@ void registerCommands()
 
     for (const auto& iter : commands)
     {
-        std::get<::command::Table&>(singletonPool)
-            .registerCommand(iter.command,
-                             std::make_unique<::command::NetIpmidEntry>(
-                                 iter.command, iter.functor, iter.privilege,
-                                 iter.sessionless));
+        ::command::Table::get().registerCommand(
+            iter.command,
+            std::make_unique<::command::NetIpmidEntry>(
+                iter.command, iter.functor, iter.privilege, iter.sessionless));
     }
 }
 

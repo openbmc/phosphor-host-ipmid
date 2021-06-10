@@ -62,8 +62,7 @@ void Table::executeCommand(uint32_t inCommand,
             return;
         }
         std::shared_ptr<session::Session> session =
-            std::get<session::Manager&>(singletonPool)
-                .getSession(handler->sessionID);
+            session::Manager::get().getSession(handler->sessionID);
 
         // Ignore messages that are not part of an active session
         auto state = static_cast<session::State>(session->state());
@@ -122,8 +121,7 @@ void Table::executeCommand(uint32_t inCommand,
         if (handler->sessionID != session::sessionZero)
         {
             std::shared_ptr<session::Session> session =
-                std::get<session::Manager&>(singletonPool)
-                    .getSession(handler->sessionID);
+                session::Manager::get().getSession(handler->sessionID);
             auto state = static_cast<session::State>(session->state());
             if ((state != session::State::setupInProgress) &&
                 (state != session::State::active))

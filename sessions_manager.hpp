@@ -1,5 +1,6 @@
 #pragma once
 
+#include "main.hpp"
 #include "session.hpp"
 
 #include <boost/asio/steady_timer.hpp>
@@ -32,18 +33,43 @@ static constexpr size_t maxSessionHandles = multiIntfaceSessionHandleMask;
 
 class Manager
 {
+  private:
+    struct Private
+    {
+    };
+
   public:
     // BMC Session ID is the key for the map
     using SessionMap = std::map<SessionID, std::shared_ptr<Session>>;
 
     Manager() = delete;
-    explicit Manager(std::shared_ptr<boost::asio::io_context>& io) :
+    Manager(std::shared_ptr<boost::asio::io_context>& io, const Private&) :
         io(io), timer(*io){};
     ~Manager() = default;
     Manager(const Manager&) = delete;
     Manager& operator=(const Manager&) = delete;
     Manager(Manager&&) = default;
     Manager& operator=(Manager&&) = default;
+
+    /**
+     * @brief Get a reference to the singleton Manager
+     *
+     * @return Manager reference
+     */
+    static Manager& get()
+    {
+        static std::shared_ptr<Manager> ptr = nullptr;
+        if (!ptr)
+        {
+            std::shared_ptr<boost::asio::io_context> io = getIo();
+            ptr = std::make_shared<Manager>(io, Private());
+            if (!ptr)
+            {
+                throw std::runtime_error("failed to create session manager");
+            }
+        }
+        return *ptr;
+    }
 
     /**
      * @brief Start an IPMI session

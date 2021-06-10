@@ -3,8 +3,8 @@
 #include "comm_module.hpp"
 #include "endian.hpp"
 #include "guid.hpp"
-#include "main.hpp"
 #include "rmcp.hpp"
+#include "sessions_manager.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -17,8 +17,7 @@ namespace command
 
 void applyIntegrityAlgo(const uint32_t bmcSessionID)
 {
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(bmcSessionID);
+    auto session = session::Manager::get().getSession(bmcSessionID);
 
     auto authAlgo = session->getAuthAlgo();
 
@@ -45,8 +44,7 @@ void applyIntegrityAlgo(const uint32_t bmcSessionID)
 
 void applyCryptAlgo(const uint32_t bmcSessionID)
 {
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(bmcSessionID);
+    auto session = session::Manager::get().getSession(bmcSessionID);
 
     auto authAlgo = session->getAuthAlgo();
 
@@ -97,8 +95,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     try
     {
         session =
-            std::get<session::Manager&>(singletonPool)
-                .getSession(endian::from_ipmi(request->managedSystemSessionID));
+            session::Manager::get().getSession(request->managedSystemSessionID);
     }
     catch (std::exception& e)
     {
@@ -174,8 +171,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
         response->remoteConsoleSessionID = rcSessionID;
 
         // close the session
-        std::get<session::Manager&>(singletonPool)
-            .stopSession(session->getBMCSessionID());
+        session::Manager::get().stopSession(session->getBMCSessionID());
 
         return outPayload;
     }

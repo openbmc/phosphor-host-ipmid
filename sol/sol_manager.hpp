@@ -1,6 +1,7 @@
 #pragma once
 
 #include "console_buffer.hpp"
+#include "main.hpp"
 #include "session.hpp"
 #include "sol_context.hpp"
 
@@ -36,6 +37,11 @@ using namespace std::chrono_literals;
  */
 class Manager
 {
+  private:
+    struct Private
+    {
+    };
+
   public:
     /** @brief SOL Payload Instance is the key for the map, the value is the
      *         SOL context.
@@ -49,8 +55,25 @@ class Manager
     Manager(Manager&&) = default;
     Manager& operator=(Manager&&) = default;
 
-    Manager(std::shared_ptr<boost::asio::io_context> io) : io(io)
+    Manager(std::shared_ptr<boost::asio::io_context>& io, const Private&) :
+        io(io)
     {
+    }
+
+    /**
+     * @brief Get a reference to the singleton Manager
+     *
+     * @return Manager reference
+     */
+    static Manager& get()
+    {
+        static std::shared_ptr<Manager> ptr = nullptr;
+        if (!ptr)
+        {
+            std::shared_ptr<boost::asio::io_context> io = getIo();
+            ptr = std::make_shared<Manager>(io, Private());
+        }
+        return *ptr;
     }
 
     /** @brief io context to add events to */

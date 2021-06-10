@@ -1,7 +1,9 @@
 #include "sol_context.hpp"
 
 #include "main.hpp"
+#include "message_handler.hpp"
 #include "sd_event_loop.hpp"
+#include "sessions_manager.hpp"
 #include "sol_manager.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -18,7 +20,7 @@ Context::Context(std::shared_ptr<boost::asio::io_context> io,
     sendThreshold(sendThreshold), payloadInstance(instance),
     sessionID(sessionID)
 {
-    session = std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    session = session::Manager::get().getSession(sessionID);
 }
 
 std::shared_ptr<Context>
@@ -35,8 +37,7 @@ std::shared_ptr<Context>
 void Context::enableAccumulateTimer(bool enable)
 {
     // fetch the timeout from the SOL manager
-    std::chrono::microseconds interval =
-        std::get<sol::Manager&>(singletonPool).accumulateInterval;
+    std::chrono::microseconds interval = sol::Manager::get().accumulateInterval;
     if (enable)
     {
         accumulateTimer.expires_after(interval);
@@ -61,8 +62,7 @@ void Context::enableRetryTimer(bool enable)
     if (enable)
     {
         // fetch the timeout from the SOL manager
-        std::chrono::microseconds interval =
-            std::get<sol::Manager&>(singletonPool).retryInterval;
+        std::chrono::microseconds interval = sol::Manager::get().retryInterval;
         retryTimer.expires_after(interval);
         std::weak_ptr<Context> weakRef = weak_from_this();
         retryTimer.async_wait([weakRef](const boost::system::error_code& ec) {
@@ -133,7 +133,7 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
     else if ((count == expectedCharCount) && ackSeqNum)
     {
         // Clear the Host Console Buffer
-        std::get<sol::Manager&>(singletonPool).dataBuffer.erase(count);
+        sol::Manager::get().dataBuffer.erase(count);
 
         // Once it is acknowledged stop the retry interval timer
         enableRetryTimer(false);
@@ -146,8 +146,7 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
     // Write character data to the Host Console
     if (!input.empty() && seqNum)
     {
-        auto rc =
-            std::get<sol::Manager&>(singletonPool).writeConsoleSocket(input);
+        auto rc = sol::Manager::get().writeConsoleSocket(input);
         if (rc)
         {
             log<level::ERR>("Writing to console socket descriptor failed");
@@ -182,7 +181,7 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
 
 void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
 {
-    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
+    auto bufferSize = sol::Manager::get().dataBuffer.size();
 
     /* Sent a ACK only response */
     if (payloadCache.size() != 0 || (bufferSize < sendThreshold))
@@ -207,7 +206,7 @@ void Context::prepareResponse(uint8_t ackSeqNum, uint8_t count, bool ack)
     response->outOperation.ack = ack;
     response->packetSeqNum = seqNums.incOutboundSeqNum();
 
-    auto handle = std::get<sol::Manager&>(singletonPool).dataBuffer.read();
+    auto handle = sol::Manager::get().dataBuffer.read();
     std::copy_n(handle, readSize, payloadCache.data() + sizeof(Payload));
     expectedCharCount = readSize;
 
@@ -225,7 +224,7 @@ int Context::sendOutboundPayload()
         return -1;
     }
 
-    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
+    auto bufferSize = sol::Manager::get().dataBuffer.size();
     auto readSize = std::min(bufferSize, MAX_PAYLOAD_SIZE);
 
     payloadCache.resize(sizeof(Payload) + readSize);
@@ -235,7 +234,7 @@ int Context::sendOutboundPayload()
     response->outOperation.ack = false;
     response->packetSeqNum = seqNums.incOutboundSeqNum();
 
-    auto handle = std::get<sol::Manager&>(singletonPool).dataBuffer.read();
+    auto handle = sol::Manager::get().dataBuffer.read();
     std::copy_n(handle, readSize, payloadCache.data() + sizeof(Payload));
     expectedCharCount = readSize;
 
@@ -255,8 +254,7 @@ void Context::resendPayload(bool clear)
     {
         payloadCache.clear();
         expectedCharCount = 0;
-        std::get<sol::Manager&>(singletonPool)
-            .dataBuffer.erase(expectedCharCount);
+        sol::Manager::get().dataBuffer.erase(expectedCharCount);
     }
 }
 
@@ -269,7 +267,7 @@ void Context::sendPayload(const std::vector<uint8_t>& out) const
 
 void Context::charAccTimerHandler()
 {
-    auto bufferSize = std::get<sol::Manager&>(singletonPool).dataBuffer.size();
+    auto bufferSize = sol::Manager::get().dataBuffer.size();
 
     try
     {

@@ -5,6 +5,8 @@
 #include "command_table.hpp"
 #include "message.hpp"
 #include "message_handler.hpp"
+#include "sd_event_loop.hpp"
+#include "sessions_manager.hpp"
 #include "socket_channel.hpp"
 #include "sol_module.hpp"
 
@@ -24,16 +26,11 @@
 
 using namespace phosphor::logging;
 
-// Tuple of Global Singletons
 static auto io = std::make_shared<boost::asio::io_context>();
-session::Manager manager(io);
-command::Table table;
-eventloop::EventLoop loop(io);
-sol::Manager solManager(io);
-
-std::tuple<session::Manager&, command::Table&, eventloop::EventLoop&,
-           sol::Manager&>
-    singletonPool(manager, table, loop, solManager);
+std::shared_ptr<boost::asio::io_context> getIo()
+{
+    return io;
+}
 
 sd_bus* bus = nullptr;
 
@@ -102,7 +99,7 @@ int main(int argc, char* argv[])
         setInterfaceIndex(channel);
     }
 
-    std::get<session::Manager&>(singletonPool).managerInit(channel);
+    session::Manager::get().managerInit(channel);
     // Register callback to update cache for a GUID change and cache the GUID
     command::registerGUIDChangeCallback();
     cache::guid = command::getSystemGUID();
@@ -113,7 +110,7 @@ int main(int argc, char* argv[])
     // Register the phosphor-net-ipmid SOL commands
     sol::command::registerCommands();
 
-    auto& loop = std::get<eventloop::EventLoop&>(singletonPool);
+    auto& loop = eventloop::EventLoop::get();
     if (loop.setupSocket(sdbusp, channel))
     {
         return EXIT_FAILURE;

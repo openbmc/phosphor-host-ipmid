@@ -1,6 +1,6 @@
 #include "sol_cmds.hpp"
 
-#include "main.hpp"
+#include "sessions_manager.hpp"
 #include "sol/sol_context.hpp"
 #include "sol/sol_manager.hpp"
 
@@ -35,8 +35,7 @@ std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
 
     try
     {
-        auto& context = std::get<sol::Manager&>(singletonPool)
-                            .getContext(handler.sessionID);
+        auto& context = sol::Manager::get().getContext(handler.sessionID);
 
         context.processInboundPayload(
             request->packetSeqNum, request->packetAckSeqNum,
@@ -62,8 +61,7 @@ void activating(uint8_t payloadInstance, uint32_t sessionID)
     request->majorVersion = MAJOR_VERSION;
     request->minorVersion = MINOR_VERSION;
 
-    auto session =
-        std::get<session::Manager&>(singletonPool).getSession(sessionID);
+    auto session = session::Manager::get().getSession(sessionID);
 
     message::Handler msgHandler(session->channelPtr, sessionID);
 
@@ -90,23 +88,22 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
     {
         case Parameter::PROGRESS:
         {
-            outPayload.push_back(
-                std::get<sol::Manager&>(singletonPool).progress);
+            outPayload.push_back(sol::Manager::get().progress);
             break;
         }
         case Parameter::ENABLE:
         {
-            outPayload.push_back(std::get<sol::Manager&>(singletonPool).enable);
+            outPayload.push_back(sol::Manager::get().enable);
             break;
         }
         case Parameter::AUTHENTICATION:
         {
             Auth value{0};
 
-            value.encrypt = std::get<sol::Manager&>(singletonPool).forceEncrypt;
-            value.auth = std::get<sol::Manager&>(singletonPool).forceAuth;
-            value.privilege = static_cast<uint8_t>(
-                std::get<sol::Manager&>(singletonPool).solMinPrivilege);
+            value.encrypt = sol::Manager::get().forceEncrypt;
+            value.auth = sol::Manager::get().forceAuth;
+            value.privilege =
+                static_cast<uint8_t>(sol::Manager::get().solMinPrivilege);
             auto buffer = reinterpret_cast<const uint8_t*>(&value);
 
             std::copy_n(buffer, sizeof(value), std::back_inserter(outPayload));
@@ -116,11 +113,9 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
         {
             Accumulate value{0};
 
-            value.interval = std::get<sol::Manager&>(singletonPool)
-                                 .accumulateInterval.count() /
+            value.interval = sol::Manager::get().accumulateInterval.count() /
                              sol::accIntervalFactor;
-            value.threshold =
-                std::get<sol::Manager&>(singletonPool).sendThreshold;
+            value.threshold = sol::Manager::get().sendThreshold;
             auto buffer = reinterpret_cast<const uint8_t*>(&value);
 
             std::copy_n(buffer, sizeof(value), std::back_inserter(outPayload));
@@ -130,10 +125,9 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
         {
             Retry value{0};
 
-            value.count = std::get<sol::Manager&>(singletonPool).retryCount;
-            value.interval =
-                std::get<sol::Manager&>(singletonPool).retryInterval.count() /
-                sol::retryIntervalFactor;
+            value.count = sol::Manager::get().retryCount;
+            value.interval = sol::Manager::get().retryInterval.count() /
+                             sol::retryIntervalFactor;
             auto buffer = reinterpret_cast<const uint8_t*>(&value);
 
             std::copy_n(buffer, sizeof(value), std::back_inserter(outPayload));
@@ -149,8 +143,7 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
         }
         case Parameter::CHANNEL:
         {
-            outPayload.push_back(
-                std::get<sol::Manager&>(singletonPool).channel);
+            outPayload.push_back(sol::Manager::get().channel);
             break;
         }
         case Parameter::NVBITRATE:

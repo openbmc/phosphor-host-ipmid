@@ -1,6 +1,6 @@
 #include "payload_cmds.hpp"
 
-#include "main.hpp"
+#include "sessions_manager.hpp"
 #include "sol/sol_manager.hpp"
 #include "sol_cmds.hpp"
 
@@ -41,10 +41,9 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    std::get<sol::Manager&>(singletonPool)
-        .updateSOLParameter(ipmi::convertCurrentChannelNum(
-            ipmi::currentChNum, getInterfaceIndex()));
-    if (!std::get<sol::Manager&>(singletonPool).enable)
+    sol::Manager::get().updateSOLParameter(ipmi::convertCurrentChannelNum(
+        ipmi::currentChNum, getInterfaceIndex()));
+    if (!sol::Manager::get().enable)
     {
         response->completionCode = IPMI_CC_PAYLOAD_TYPE_DISABLED;
         return outPayload;
@@ -57,8 +56,7 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    auto session = std::get<session::Manager&>(singletonPool)
-                       .getSession(handler.sessionID);
+    auto session = session::Manager::get().getSession(handler.sessionID);
 
     if (!request->encryption && session->isCryptAlgoEnabled())
     {
@@ -78,8 +76,7 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    auto status = std::get<sol::Manager&>(singletonPool)
-                      .isPayloadActive(request->payloadInstance);
+    auto status = sol::Manager::get().isPayloadActive(request->payloadInstance);
     if (status)
     {
         response->completionCode = IPMI_CC_PAYLOAD_ALREADY_ACTIVE;
@@ -92,8 +89,8 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
     // Start the SOL payload
     try
     {
-        std::get<sol::Manager&>(singletonPool)
-            .startPayloadInstance(request->payloadInstance, handler.sessionID);
+        sol::Manager::get().startPayloadInstance(request->payloadInstance,
+                                                 handler.sessionID);
     }
     catch (std::exception& e)
     {
@@ -142,8 +139,7 @@ std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    auto status = std::get<sol::Manager&>(singletonPool)
-                      .isPayloadActive(request->payloadInstance);
+    auto status = sol::Manager::get().isPayloadActive(request->payloadInstance);
     if (!status)
     {
         response->completionCode = IPMI_CC_PAYLOAD_DEACTIVATED;
@@ -152,12 +148,11 @@ std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
 
     try
     {
-        auto& context = std::get<sol::Manager&>(singletonPool)
-                            .getContext(request->payloadInstance);
+        auto& context =
+            sol::Manager::get().getContext(request->payloadInstance);
         auto sessionID = context.sessionID;
 
-        std::get<sol::Manager&>(singletonPool)
-            .stopPayloadInstance(request->payloadInstance);
+        sol::Manager::get().stopPayloadInstance(request->payloadInstance);
 
         try
         {
@@ -213,8 +208,7 @@ std::vector<uint8_t> getPayloadStatus(const std::vector<uint8_t>& inPayload,
     response->capacity = maxSolPayloadInstances;
 
     // Currently we support only one SOL session
-    response->instance1 =
-        std::get<sol::Manager&>(singletonPool).isPayloadActive(1);
+    response->instance1 = sol::Manager::get().isPayloadActive(1);
 
     return outPayload;
 }
@@ -244,13 +238,12 @@ std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
         response->completionCode = IPMI_CC_INVALID_FIELD_REQUEST;
         return outPayload;
     }
-    auto status = std::get<sol::Manager&>(singletonPool)
-                      .isPayloadActive(request->payloadInstance);
+    auto status = sol::Manager::get().isPayloadActive(request->payloadInstance);
 
     if (status)
     {
-        auto& context = std::get<sol::Manager&>(singletonPool)
-                            .getContext(request->payloadInstance);
+        auto& context =
+            sol::Manager::get().getContext(request->payloadInstance);
         response->sessionID = context.sessionID;
     }
     else

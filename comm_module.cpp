@@ -6,7 +6,6 @@
 #include "command/rakp34.hpp"
 #include "command/session_cmds.hpp"
 #include "command_table.hpp"
-#include "main.hpp"
 #include "session.hpp"
 
 #include <algorithm>
@@ -57,11 +56,10 @@ void sessionSetupCommands()
 
     for (auto& iter : commands)
     {
-        std::get<command::Table&>(singletonPool)
-            .registerCommand(iter.command,
-                             std::make_unique<command::NetIpmidEntry>(
-                                 iter.command, iter.functor, iter.privilege,
-                                 iter.sessionless));
+        command::Table::get().registerCommand(
+            iter.command,
+            std::make_unique<command::NetIpmidEntry>(
+                iter.command, iter.functor, iter.privilege, iter.sessionless));
     }
 }
 
