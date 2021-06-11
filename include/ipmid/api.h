@@ -75,6 +75,10 @@ typedef ipmi_ret_t (*ipmid_callback_t)(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 void ipmi_register_callback(ipmi_netfn_t, ipmi_cmd_t, ipmi_context_t,
                             ipmid_callback_t, ipmi_cmd_privilege_t);
 
+// This is the constructor function for the Redfish Host interface.
+void ipmi_register_redfish_host_inf(ipmi_netfn_t, ipmi_cmd_t, ipmi_context_t,
+                                    ipmid_callback_t, ipmi_cmd_privilege_t);
+
 unsigned short reserveSel(void);
 bool checkSELReservation(unsigned short id);
 void cancelSELReservation(void);

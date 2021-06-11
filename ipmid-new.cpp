@@ -56,6 +56,7 @@ using namespace phosphor::logging;
 // IPMI Spec, shared Reservation ID.
 static unsigned short selReservationID = 0xFFFF;
 static bool selReservationValid = false;
+static constexpr uint8_t groupExtIdRedfish = 0x52;
 
 unsigned short reserveSel(void)
 {
@@ -728,6 +729,42 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
         ipmi::impl::registerHandler(ipmi::prioOpenBmcBase, netFn, cmd, realPriv,
                                     h);
     }
+}
+
+void ipmi_register_redfish_host_inf(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
+                                    ipmi_context_t context,
+                                    ipmid_callback_t handler,
+                                    ipmi_cmd_privilege_t priv)
+{
+    auto h = ipmi::makeLegacyHandler(handler, context);
+    // translate priv from deprecated enum to current
+    ipmi::Privilege realPriv;
+    switch (priv)
+    {
+        case PRIVILEGE_CALLBACK:
+            realPriv = ipmi::Privilege::Callback;
+            break;
+        case PRIVILEGE_USER:
+            realPriv = ipmi::Privilege::User;
+            break;
+        case PRIVILEGE_OPERATOR:
+            realPriv = ipmi::Privilege::Operator;
+            break;
+        case PRIVILEGE_ADMIN:
+            realPriv = ipmi::Privilege::Admin;
+            break;
+        case PRIVILEGE_OEM:
+            realPriv = ipmi::Privilege::Oem;
+            break;
+        case SYSTEM_INTERFACE:
+            realPriv = ipmi::Privilege::Admin;
+            break;
+        default:
+            realPriv = ipmi::Privilege::Admin;
+            break;
+    }
+    ipmi::impl::registerGroupHandler(ipmi::prioOpenBmcBase, groupExtIdRedfish,
+                                     cmd, realPriv, h);
 }
 
 namespace oem
