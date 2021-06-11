@@ -88,7 +88,7 @@ static constexpr const char* cmdStr = "command";
 static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
 #endif // ENABLE_I2C_WHITELIST_CHECK
-static constexpr uint8_t maxIPMIWriteReadSize = 144;
+static constexpr uint8_t maxIPMIWriteReadSize = 255;
 static constexpr uint8_t oemCmdStart = 192;
 static constexpr uint8_t oemCmdEnd = 255;
 static constexpr uint8_t invalidParamSelectorStart = 8;
