@@ -714,4 +714,21 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
                             ipmi_context_t context, ipmid_callback_t handler,
                             ipmi_cmd_privilege_t priv);
 
+/**
+ * @brief IPMI handler registration function for the Redfish Host Interface
+ *
+ * This function used to register for the Redfish Host interface handler
+ * functions. Defines the IPMI commands to the "Group Extension"
+ * NetFn (2Ch, 2Dh). The defining body code for Redfish is 52h.
+ *
+ * @param netFn - the IPMI net function number to register
+ * @param cmd - the IPMI command number to register
+ * @param context - ignored
+ * @param handler - the callback function that will handle this request
+ * @param priv - the IPMI user privilige required for this command
+ */
+void ipmi_register_redfish_host_inf(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
+                            ipmi_context_t context, ipmid_callback_t handler,
+                            ipmi_cmd_privilege_t priv);
+
 #endif /* ALLOW_DEPRECATED_API */
