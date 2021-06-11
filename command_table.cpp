@@ -166,7 +166,7 @@ std::vector<uint8_t>
         return errResponse;
     }
 
-    return functor(commandData, *handler);
+    return functor(commandData, handler);
 }
 
 } // namespace command

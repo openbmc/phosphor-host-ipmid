@@ -15,7 +15,7 @@ namespace command
 using namespace phosphor::logging;
 
 std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
-                                    const message::Handler& handler)
+                                    std::shared_ptr<message::Handler>& handler)
 {
     // Check inPayload size is at least Payload
     if (inPayload.size() < sizeof(Payload))
@@ -35,7 +35,7 @@ std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
 
     try
     {
-        auto& context = sol::Manager::get().getContext(handler.sessionID);
+        auto& context = sol::Manager::get().getContext(handler->sessionID);
 
         context.processInboundPayload(
             request->packetSeqNum, request->packetAckSeqNum,
@@ -70,7 +70,7 @@ void activating(uint8_t payloadInstance, uint32_t sessionID)
 }
 
 std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
-                                   const message::Handler& handler)
+                                   std::shared_ptr<message::Handler>& handler)
 {
     std::vector<uint8_t> outPayload(sizeof(GetConfParamsResponse));
     auto request =

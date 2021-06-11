@@ -109,8 +109,9 @@ struct ActivatePayloadResponse
  *
  *  @return Response data for the command
  */
-std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
-                                     const message::Handler& handler);
+std::vector<uint8_t>
+    activatePayload(const std::vector<uint8_t>& inPayload,
+                    std::shared_ptr<message::Handler>& handler);
 
 constexpr uint8_t IPMI_CC_PAYLOAD_DEACTIVATED = 0x80;
 
@@ -172,8 +173,9 @@ struct DeactivatePayloadResponse
  *
  * @return Response data for the command.
  */
-std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
-                                       const message::Handler& handler);
+std::vector<uint8_t>
+    deactivatePayload(const std::vector<uint8_t>& inPayload,
+                      std::shared_ptr<message::Handler>& handler);
 
 /** @struct GetPayloadStatusRequest
  *
@@ -250,8 +252,9 @@ struct GetPayloadStatusResponse
  *
  *  @return Response data for the command
  */
-std::vector<uint8_t> getPayloadStatus(const std::vector<uint8_t>& inPayload,
-                                      const message::Handler& handler);
+std::vector<uint8_t>
+    getPayloadStatus(const std::vector<uint8_t>& inPayload,
+                     std::shared_ptr<message::Handler>& handler);
 
 /** @struct GetPayloadInfoRequest
  *
@@ -286,7 +289,7 @@ struct GetPayloadInfoResponse
  *  @return Response data for the command
  */
 std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
-                                    const message::Handler& handler);
+                                    std::shared_ptr<message::Handler>& handler);
 
 } // namespace command
 

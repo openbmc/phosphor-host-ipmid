@@ -120,6 +120,6 @@ struct GetChannelCapabilitiesResp
  */
 std::vector<uint8_t>
     GetChannelCapabilities(const std::vector<uint8_t>& inPayload,
-                           const message::Handler& handler);
+                           std::shared_ptr<message::Handler>& handler);
 
 } // namespace command

@@ -65,7 +65,7 @@ void applyCryptAlgo(const uint32_t bmcSessionID)
 }
 
 std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
-                            const message::Handler& handler)
+                            std::shared_ptr<message::Handler>& handler)
 {
 
     std::vector<uint8_t> outPayload(sizeof(RAKP4response));

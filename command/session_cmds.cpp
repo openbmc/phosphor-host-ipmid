@@ -18,7 +18,7 @@ using namespace phosphor::logging;
 
 std::vector<uint8_t>
     setSessionPrivilegeLevel(const std::vector<uint8_t>& inPayload,
-                             const message::Handler& handler)
+                             std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const SetSessionPrivLevelReq*>(inPayload.data());
@@ -34,7 +34,7 @@ std::vector<uint8_t>
     response->completionCode = IPMI_CC_OK;
     uint8_t reqPrivilegeLevel = request->reqPrivLevel;
 
-    auto session = session::Manager::get().getSession(handler.sessionID);
+    auto session = session::Manager::get().getSession(handler->sessionID);
 
     if (reqPrivilegeLevel == 0) // Just return present privilege level
     {
@@ -209,7 +209,7 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
 }
 
 std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
-                                  const message::Handler& handler)
+                                  std::shared_ptr<message::Handler>& handler)
 {
     // minimum inPayload size is reqSessionId (uint32_t)
     // maximum inPayload size is struct CloseSessionRequest
@@ -260,7 +260,7 @@ std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
     {
         ipmiNetworkInstance = session::Manager::get().getNetworkInstance();
         auto currentSession =
-            session::Manager::get().getSession(handler.sessionID);
+            session::Manager::get().getSession(handler->sessionID);
         currentSessionPriv = currentSession->currentPrivilege();
     }
     catch (sdbusplus::exception::SdBusError& e)

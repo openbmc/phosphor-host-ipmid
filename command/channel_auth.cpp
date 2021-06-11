@@ -10,7 +10,7 @@ namespace command
 
 std::vector<uint8_t>
     GetChannelCapabilities(const std::vector<uint8_t>& inPayload,
-                           const message::Handler& handler)
+                           std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const GetChannelCapabilitiesReq*>(inPayload.data());

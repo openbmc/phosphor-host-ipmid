@@ -50,6 +50,6 @@ struct RAKP4response
  * @return Response data for the command
  */
 std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
-                            const message::Handler& handler);
+                            std::shared_ptr<message::Handler>& handler);
 
 } // namespace command

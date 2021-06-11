@@ -22,7 +22,7 @@ namespace command
  *  @return Response data for the command.
  */
 std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
-                                    const message::Handler& handler);
+                                    std::shared_ptr<message::Handler>& handler);
 
 constexpr uint8_t netfnTransport = 0x0C;
 constexpr uint8_t solActivatingCmd = 0x20;
@@ -185,7 +185,7 @@ struct SetConfParamsResponse
  *  @return Response data for the command.
  */
 std::vector<uint8_t> setConfParams(const std::vector<uint8_t>& inPayload,
-                                   const message::Handler& handler);
+                                   std::shared_ptr<message::Handler>& handler);
 
 /** @struct GetConfParamsRequest
  *
@@ -228,7 +228,7 @@ struct GetConfParamsResponse
  *  @return Response data for the command.
  */
 std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
-                                   const message::Handler& handler);
+                                   std::shared_ptr<message::Handler>& handler);
 
 } // namespace command
 

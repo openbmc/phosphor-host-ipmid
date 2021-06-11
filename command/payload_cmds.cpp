@@ -18,7 +18,7 @@ namespace command
 using namespace phosphor::logging;
 
 std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
-                                     const message::Handler& handler)
+                                     std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const ActivatePayloadRequest*>(inPayload.data());
@@ -56,7 +56,7 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    auto session = session::Manager::get().getSession(handler.sessionID);
+    auto session = session::Manager::get().getSession(handler->sessionID);
 
     if (!request->encryption && session->isCryptAlgoEnabled())
     {
@@ -84,13 +84,13 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
     }
 
     // Set the current command's socket channel to the session
-    handler.setChannelInSession();
+    handler->setChannelInSession();
 
     // Start the SOL payload
     try
     {
         sol::Manager::get().startPayloadInstance(request->payloadInstance,
-                                                 handler.sessionID);
+                                                 handler->sessionID);
     }
     catch (std::exception& e)
     {
@@ -109,8 +109,9 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
-std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
-                                       const message::Handler& handler)
+std::vector<uint8_t>
+    deactivatePayload(const std::vector<uint8_t>& inPayload,
+                      std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const DeactivatePayloadRequest*>(inPayload.data());
@@ -180,8 +181,9 @@ std::vector<uint8_t> deactivatePayload(const std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
-std::vector<uint8_t> getPayloadStatus(const std::vector<uint8_t>& inPayload,
-                                      const message::Handler& handler)
+std::vector<uint8_t>
+    getPayloadStatus(const std::vector<uint8_t>& inPayload,
+                     std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const GetPayloadStatusRequest*>(inPayload.data());
@@ -214,7 +216,7 @@ std::vector<uint8_t> getPayloadStatus(const std::vector<uint8_t>& inPayload,
 }
 
 std::vector<uint8_t> getPayloadInfo(const std::vector<uint8_t>& inPayload,
-                                    const message::Handler& handler)
+                                    std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const GetPayloadInfoRequest*>(inPayload.data());

@@ -24,7 +24,7 @@ bool isChannelAccessModeEnabled(const uint8_t accessMode)
 }
 
 std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
-                            const message::Handler& handler)
+                            std::shared_ptr<message::Handler>& handler)
 {
     auto request = reinterpret_cast<const RAKP1request*>(inPayload.data());
     // verify inPayload minimum size

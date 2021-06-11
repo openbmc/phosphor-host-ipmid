@@ -44,7 +44,7 @@ struct CommandID
  * command is returned as a vector.
  */
 using CommandFunctor = std::function<std::vector<uint8_t>(
-    const std::vector<uint8_t>&, const message::Handler&)>;
+    const std::vector<uint8_t>&, std::shared_ptr<message::Handler>&)>;
 
 /**
  * @struct CmdDetails
