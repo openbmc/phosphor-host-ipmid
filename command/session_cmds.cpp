@@ -5,9 +5,12 @@
 
 #include <ipmid/api.h>
 
+#include <chrono>
 #include <ipmid/sessionhelper.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
+
+using namespace std::chrono_literals;
 
 namespace command
 {
@@ -282,6 +285,8 @@ std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
     {
         response->completionCode = closeMyNetInstanceSession(
             reqSessionId, reqSessionHandle, currentSessionPriv);
+        std::get<session::Manager&>(singletonPool)
+            .scheduleSessionCleaner(100us);
     }
     else
     {

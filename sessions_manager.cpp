@@ -53,10 +53,6 @@ uint8_t Manager::getNetworkInstance(void)
     return ipmiNetworkInstance;
 }
 
-Manager::Manager()
-{
-}
-
 void Manager::managerInit(const std::string& channel)
 {
 
@@ -77,6 +73,9 @@ void Manager::managerInit(const std::string& channel)
     setNetworkInstance();
     sessionsMap.emplace(
         0, std::make_shared<Session>(*getSdBus(), objPath.c_str(), 0, 0, 0));
+
+    // set up the timer for clearing out stale sessions
+    scheduleSessionCleaner(std::chrono::microseconds(3 * 1000 * 1000));
 }
 
 std::shared_ptr<Session>
@@ -92,7 +91,7 @@ std::shared_ptr<Session>
 
     auto activeSessions = sessionsMap.size() - session::maxSessionlessCount;
 
-    if (activeSessions < session::maxSessionCountPerChannel)
+    if (activeSessions < maxSessionHandles)
     {
         do
         {
@@ -230,20 +229,52 @@ std::shared_ptr<Session> Manager::getSession(SessionID sessionID,
 
 void Manager::cleanStaleEntries()
 {
+    // with overflow = min(1, max - active sessions)
+    // active idle time in seconds = 60 / overflow^3
+    constexpr int baseIdleMicros = 60 * 1000 * 1000;
+    // no +1 for the zero session here because this is just active sessions
+    int sessionDivisor =
+        getActiveSessionCount() - session::maxSessionCountPerChannel;
+    sessionDivisor = std::max(0, sessionDivisor) + 1;
+    sessionDivisor = sessionDivisor * sessionDivisor * sessionDivisor;
+    int activeMicros = baseIdleMicros / sessionDivisor;
+
+    // with overflow = min(1, max - total sessions)
+    // setup idle time in seconds = max(3, 60 / overflow^3)
+
+    // +1 for the zero session here because size() counts that too
+    int setupDivisor =
+        sessionsMap.size() - (session::maxSessionCountPerChannel + 1);
+    setupDivisor = std::max(0, setupDivisor) + 1;
+    setupDivisor = setupDivisor * setupDivisor * setupDivisor;
+    constexpr int maxSetupMicros = 3 * 1000 * 1000;
+    int setupMicros = std::min(maxSetupMicros, baseIdleMicros / setupDivisor);
+
+    std::chrono::microseconds activeGrace(activeMicros);
+    std::chrono::microseconds setupGrace(setupMicros);
+
     for (auto iter = sessionsMap.begin(); iter != sessionsMap.end();)
     {
-
         auto session = iter->second;
-        if ((session->getBMCSessionID() != session::sessionZero) &&
-            !(session->isSessionActive(session->state())))
+        // special handling for sessionZero
+        if (session->getBMCSessionID() == session::sessionZero)
+        {
+            iter++;
+            continue;
+        }
+        if (!(session->isSessionActive(activeGrace, setupGrace)))
         {
             sessionHandleMap[getSessionHandle(session->getBMCSessionID())] = 0;
             iter = sessionsMap.erase(iter);
         }
         else
         {
-            ++iter;
+            iter++;
         }
+    }
+    if (sessionsMap.size() > 1)
+    {
+        scheduleSessionCleaner(setupGrace);
     }
 }
 
@@ -251,7 +282,7 @@ uint8_t Manager::storeSessionHandle(SessionID bmcSessionID)
 {
     // Handler index 0 is  reserved for invalid session.
     // index starts with 1, for direct usage. Index 0 reserved
-    for (uint8_t i = 1; i <= session::maxSessionCountPerChannel; i++)
+    for (size_t i = 1; i < session::maxSessionHandles; i++)
     {
         if (sessionHandleMap[i] == 0)
         {
@@ -264,7 +295,7 @@ uint8_t Manager::storeSessionHandle(SessionID bmcSessionID)
 
 uint32_t Manager::getSessionIDbyHandle(uint8_t sessionHandle) const
 {
-    if (sessionHandle <= session::maxSessionCountPerChannel)
+    if (sessionHandle < session::maxSessionHandles)
     {
         return sessionHandleMap[sessionHandle];
     }
@@ -276,8 +307,7 @@ uint8_t Manager::getSessionHandle(SessionID bmcSessionID) const
 
     // Handler index 0 is reserved for invalid session.
     // index starts with 1, for direct usage. Index 0 reserved
-
-    for (uint8_t i = 1; i <= session::maxSessionCountPerChannel; i++)
+    for (size_t i = 1; i < session::maxSessionHandles; i++)
     {
         if (sessionHandleMap[i] == bmcSessionID)
         {
@@ -297,4 +327,16 @@ uint8_t Manager::getActiveSessionCount() const
                    static_cast<uint8_t>(session::State::active);
         }));
 }
+
+void Manager::scheduleSessionCleaner(const std::chrono::microseconds& when)
+{
+    timer.expires_from_now(when);
+    timer.async_wait([this](const boost::system::error_code& ec) {
+        if (!ec)
+        {
+            cleanStaleEntries();
+        }
+    });
+}
+
 } // namespace session

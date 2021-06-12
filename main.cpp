@@ -26,7 +26,7 @@ using namespace phosphor::logging;
 
 // Tuple of Global Singletons
 static auto io = std::make_shared<boost::asio::io_context>();
-session::Manager manager;
+session::Manager manager(io);
 command::Table table;
 eventloop::EventLoop loop(io);
 sol::Manager solManager(io);

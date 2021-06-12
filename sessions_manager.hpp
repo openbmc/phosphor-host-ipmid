@@ -2,6 +2,8 @@
 
 #include "session.hpp"
 
+#include <boost/asio/steady_timer.hpp>
+#include <chrono>
 #include <ipmid/api.hpp>
 #include <ipmid/sessiondef.hpp>
 #include <map>
@@ -18,6 +20,8 @@ enum class RetrieveOption
     RC_SESSION_ID,
 };
 
+static constexpr size_t maxSessionHandles = multiIntfaceSessionHandleMask;
+
 /**
  * @class Manager
  *
@@ -32,7 +36,9 @@ class Manager
     // BMC Session ID is the key for the map
     using SessionMap = std::map<SessionID, std::shared_ptr<Session>>;
 
-    Manager();
+    Manager() = delete;
+    explicit Manager(std::shared_ptr<boost::asio::io_context>& io) :
+        io(io), timer(*io){};
     ~Manager() = default;
     Manager(const Manager&) = delete;
     Manager& operator=(const Manager&) = delete;
@@ -90,10 +96,36 @@ class Manager
 
     uint8_t getNetworkInstance(void);
 
+    /**
+     * @brief Clean Session Stale Entries
+     *
+     *  Schedules cleaning the inactive sessions entries from the Session Map
+     */
+    void scheduleSessionCleaner(const std::chrono::microseconds& grace);
+
   private:
-    //+1 for session, as 0 is reserved for sessionless command
-    std::array<uint32_t, session::maxSessionCountPerChannel + 1>
-        sessionHandleMap = {0};
+    /**
+     * @brief reclaim system resources by limiting idle sessions
+     *
+     * Limits on active, authenticated sessions are calculated independently
+     * from in-setup sessions, which are not required to be authenticated. This
+     * will prevent would-be DoS attacks by calling a bunch of Open Session
+     * requests to fill up all available sessions. Too many active sessions will
+     * trigger a shorter timeout, but is unaffected by setup session counts.
+     *
+     * For active sessions, grace time is inversely proportional to (the number
+     * of active sessions beyond max sessions per channel)^3
+     *
+     * For sessions in setup, grace time is inversely proportional to (the
+     * number of total sessions beyond max sessions per channel)^3, with a max
+     * of 3 seconds
+     */
+    void cleanStaleEntries();
+
+    std::shared_ptr<boost::asio::io_context> io;
+    boost::asio::steady_timer timer;
+
+    std::array<uint32_t, session::maxSessionHandles> sessionHandleMap = {0};
 
     /**
      * @brief Session Manager keeps the session objects as a sorted
@@ -103,12 +135,6 @@ class Manager
     std::unique_ptr<sdbusplus::server::manager::manager> objManager = nullptr;
     std::string chName{}; // Channel Name
     uint8_t ipmiNetworkInstance;
-    /**
-     * @brief Clean Session Stale Entries
-     *
-     *  Removes the inactive sessions entries from the Session Map
-     */
-    void cleanStaleEntries();
     void setNetworkInstance(void);
 };
 
