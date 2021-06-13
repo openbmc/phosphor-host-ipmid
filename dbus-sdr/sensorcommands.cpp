@@ -643,6 +643,11 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
     std::string connection;
     std::string path;
 
+    if (sensnum == reservedSensorNumber)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     auto status = getSensorConnection(ctx, sensnum, connection, path);
     if (status)
     {
@@ -868,7 +873,7 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     uint8_t upperNonCritical, uint8_t upperCritical,
     uint8_t upperNonRecoverable)
 {
-    if (reserved)
+    if (sensorNum == reservedSensorNumber || reserved)
     {
         return ipmi::responseInvalidFieldRequest();
     }
@@ -1090,6 +1095,11 @@ ipmi::RspType<uint8_t, // readable
     std::string connection;
     std::string path;
 
+    if (sensorNumber == reservedSensorNumber)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     auto status = getSensorConnection(ctx, sensorNumber, connection, path);
     if (status)
     {
@@ -1177,6 +1187,11 @@ ipmi::RspType<uint8_t, // enabled
     uint8_t assertionEnabledMsb = 0;
     uint8_t deassertionEnabledLsb = 0;
     uint8_t deassertionEnabledMsb = 0;
+
+    if (sensorNum == reservedSensorNumber)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
 
     auto status = getSensorConnection(ctx, sensorNum, connection, path);
     if (status)
