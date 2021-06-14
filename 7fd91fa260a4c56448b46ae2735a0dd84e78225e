@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "113964f7_14d07914",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-06-14T07:29:31Z",
+      "side": 1,
+      "message": "Looking at the history, this variable was introduced by Richard.\nCan you check with him and reply why he chosen the value 144 ?\nhttps://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/21023/6/apphandler.cpp#85",
+      "range": {
+        "startLine": 91,
+        "startChar": 25,
+        "endLine": 91,
+        "endChar": 52
+      },
+      "revId": "7fd91fa260a4c56448b46ae2735a0dd84e78225e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
