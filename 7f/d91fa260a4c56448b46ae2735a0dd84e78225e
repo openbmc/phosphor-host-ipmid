@@ -1,0 +1,12 @@
+Ok-To-Test+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+1: Vikram B <vikram.bodireddy@linux.intel.com>
+Code-Review+1: Richard Marian Thomaiyar <richard.marian.thomaiyar@linux.intel.com>
+Code-Review+1: Saravanan Palanisamy <saravanan.palanisamy@linux.intel.com>
+Code-Review+1: Suryakanth Sekar <suryakanth.sekar@linux.intel.com>
+Code-Review+2: Tom Joseph <rushtotom@gmail.com>
+Submitted-by: Mansi Joshi <mansi.joshi@linux.intel.com>
+Submitted-at: Tue, 15 Jun 2021 16:51:15 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/43992
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
