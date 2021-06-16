@@ -97,9 +97,7 @@ libipmi20_la_SOURCES = \
 	app/watchdog_service.cpp \
 	apphandler.cpp \
 	sys_info_param.cpp \
-	sensorhandler.cpp \
 	entity_map_json.cpp \
-	storagehandler.cpp \
 	chassishandler.cpp \
 	dcmihandler.cpp \
 	ipmisensor.cpp \
@@ -114,6 +112,13 @@ libipmi20_la_SOURCES = \
 	user_channel/channelcommands.cpp \
 	$(libipmi20_la_TRANSPORTOEM) \
 	$(libipmi20_BUILT_LIST)
+
+if FEATURE_DYNAMIC_SENSORS
+else
+libipmi20_la_SOURCES += \
+	sensorhandler.cpp \
+	storagehandler.cpp
+endif
 
 check_PROGRAMS =
 XFAIL_TESTS =
