@@ -1132,6 +1132,5 @@ void register_netfn_sen_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetSensorThreshold,
                           ipmi::Privilege::User, ipmiSensorGetSensorThresholds);
-
     return;
 }

@@ -294,7 +294,7 @@ AC_ARG_ENABLE([dynamic_sensors],
       *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic_sensors]) ;;
       esac],[dynamic_sensors=true]
       )
-AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic_sensors = xtrue])
+AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic_sensors = xfalse])
 
 # Create configured output
 AC_CONFIG_FILES([
