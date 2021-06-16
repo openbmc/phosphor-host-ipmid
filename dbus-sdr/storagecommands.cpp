@@ -1246,7 +1246,7 @@ void registerStorageFunctions()
     startMatch();
 
     // <Get FRU Inventory Area Info>
-    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetFruInventoryAreaInfo,
                           ipmi::Privilege::User, ipmiStorageGetFruInvAreaInfo);
     // <READ FRU Data>
