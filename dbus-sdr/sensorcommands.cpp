@@ -1634,40 +1634,40 @@ ipmi::RspType<uint16_t,            // next record ID
 void registerSensorFunctions()
 {
     // <Platform Event>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdPlatformEvent,
                           ipmi::Privilege::Operator, ipmiSenPlatformEvent);
 
 #ifdef FEATURE_DYNAMIC_SENSORS_WRITE
     // <Set Sensor Reading and Event Status>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
                           ipmi::Privilege::Operator, ipmiSetSensorReading);
 #endif
 
     // <Get Sensor Reading>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetSensorReading,
                           ipmi::Privilege::User, ipmiSenGetSensorReading);
 
     // <Get Sensor Threshold>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetSensorThreshold,
                           ipmi::Privilege::User, ipmiSenGetSensorThresholds);
 
     // <Set Sensor Threshold>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdSetSensorThreshold,
                           ipmi::Privilege::Operator,
                           ipmiSenSetSensorThresholds);
 
     // <Get Sensor Event Enable>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetSensorEventEnable,
                           ipmi::Privilege::User, ipmiSenGetSensorEventEnable);
 
     // <Get Sensor Event Status>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetSensorEventStatus,
                           ipmi::Privilege::User, ipmiSenGetSensorEventStatus);
 
@@ -1675,37 +1675,37 @@ void registerSensorFunctions()
     // versions
 
     // <Get SDR Repository Info>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSdrRepositoryInfo,
                           ipmi::Privilege::User,
                           ipmiStorageGetSDRRepositoryInfo);
 
     // <Get Device SDR Info>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetDeviceSdrInfo,
                           ipmi::Privilege::User, ipmiSensorGetDeviceSdrInfo);
 
     // <Get SDR Allocation Info>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSdrRepositoryAllocInfo,
                           ipmi::Privilege::User,
                           ipmiStorageGetSDRAllocationInfo);
 
     // <Reserve SDR Repo>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdReserveDeviceSdrRepository,
                           ipmi::Privilege::User, ipmiStorageReserveSDR);
 
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdReserveSdrRepository,
                           ipmi::Privilege::User, ipmiStorageReserveSDR);
 
     // <Get Sdr>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetDeviceSdr,
                           ipmi::Privilege::User, ipmiStorageGetSDR);
 
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSdr, ipmi::Privilege::User,
                           ipmiStorageGetSDR);
 }

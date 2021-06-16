@@ -1250,42 +1250,42 @@ void registerStorageFunctions()
                           ipmi::storage::cmdGetFruInventoryAreaInfo,
                           ipmi::Privilege::User, ipmiStorageGetFruInvAreaInfo);
     // <READ FRU Data>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdReadFruData, ipmi::Privilege::User,
                           ipmiStorageReadFruData);
 
     // <WRITE FRU Data>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdWriteFruData,
                           ipmi::Privilege::Operator, ipmiStorageWriteFruData);
 
     // <Get SEL Info>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
                           ipmiStorageGetSELInfo);
 
     // <Get SEL Entry>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelEntry, ipmi::Privilege::User,
                           ipmiStorageGetSELEntry);
 
     // <Add SEL Entry>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdAddSelEntry,
                           ipmi::Privilege::Operator, ipmiStorageAddSELEntry);
 
     // <Clear SEL>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdClearSel, ipmi::Privilege::Operator,
                           ipmiStorageClearSEL);
 
     // <Get SEL Time>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelTime, ipmi::Privilege::User,
                           ipmiStorageGetSELTime);
 
     // <Set SEL Time>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
                           ipmi::storage::cmdSetSelTime,
                           ipmi::Privilege::Operator, ipmiStorageSetSELTime);
 }
