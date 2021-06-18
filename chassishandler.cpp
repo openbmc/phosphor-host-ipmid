@@ -1631,13 +1631,9 @@ static ipmi_ret_t setBootSource(ipmi::Context::ptr& ctx,
                                 const Source::Sources& source)
 {
     using namespace chassis::internal;
-    using namespace chassis::internal::cache;
-    settings::Objects& objects = getObjects();
-    auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
-    const auto& bootSourceSetting = std::get<settings::Path>(bootSetting);
     boost::system::error_code ec = ipmi::setDbusProperty(
-        ctx, objects.service(bootSourceSetting, bootSourceIntf),
-        bootSourceSetting, bootSourceIntf, "BootSource",
+        ctx, "xyz.openbmc_project.Settings",
+        "/xyz/openbmc_project/control/host0/boot", bootSourceIntf, "BootSource",
         convertForMessage(source));
     if (ec)
     {
@@ -1656,13 +1652,10 @@ static ipmi_ret_t setBootSource(ipmi::Context::ptr& ctx,
 static ipmi::Cc setBootMode(ipmi::Context::ptr& ctx, const Mode::Modes& mode)
 {
     using namespace chassis::internal;
-    using namespace chassis::internal::cache;
-    settings::Objects& objects = getObjects();
-    auto bootSetting = settings::boot::setting(objects, bootModeIntf);
-    const auto& bootModeSetting = std::get<settings::Path>(bootSetting);
     boost::system::error_code ec = ipmi::setDbusProperty(
-        ctx, objects.service(bootModeSetting, bootModeIntf), bootModeSetting,
-        bootModeIntf, "BootMode", convertForMessage(mode));
+        ctx, "xyz.openbmc_project.Settings",
+        "/xyz/openbmc_project/control/host0/boot", bootModeIntf, "BootMode",
+        convertForMessage(mode));
     if (ec)
     {
         log<level::ERR>("Error in BootMode Set",
@@ -1680,31 +1673,14 @@ static ipmi::Cc setBootMode(ipmi::Context::ptr& ctx, const Mode::Modes& mode)
 static ipmi::Cc setBootType(ipmi::Context::ptr& ctx, const Type::Types& type)
 {
     using namespace chassis::internal;
-    using namespace chassis::internal::cache;
-    settings::Objects& objects = getObjects();
-    std::tuple<settings::Path, settings::boot::OneTimeEnabled> bootSetting;
-    try
-    {
-        bootSetting = settings::boot::setting(objects, bootTypeIntf);
-    }
-    catch (const std::exception& e)
-    {
-        // Return immediately if BootType interface is not present.
-        // This interface is not relevant for some Host architectures
-        // (for example POWER). In this case we don't won't IPMI to
-        // return an error, but want to just skip this function.
-        return ipmi::ccSuccess;
-    }
-    const auto& bootTypeSetting = std::get<settings::Path>(bootSetting);
-    boost::system::error_code ec = ipmi::setDbusProperty(
-        ctx, objects.service(bootTypeSetting, bootTypeIntf), bootTypeSetting,
-        bootTypeIntf, "BootType", convertForMessage(type));
-    if (ec)
-    {
-        log<level::ERR>("Error in BootType Set",
-                        entry("ERROR=%s", ec.message().c_str()));
-        return ipmi::ccUnspecifiedError;
-    }
+    ipmi::setDbusProperty(ctx, "xyz.openbmc_project.Settings",
+                          "/xyz/openbmc_project/control/host0/boot",
+                          bootTypeIntf, "BootType", convertForMessage(type));
+
+    // Don't throw error if BootType interface is not present.
+    // This interface is not relevant for some Host architectures
+    // (for example POWER). In this case we don't won't IPMI to
+    // return an error, but want to just skip this function.
     return ipmi::ccSuccess;
 }
 
@@ -1778,14 +1754,11 @@ ipmi::RspType<ipmi::message::Payload>
         {
             std::string result;
             boost::system::error_code ec;
-            settings::Objects& objects = getObjects();
+            ec =
+                ipmi::getDbusProperty(ctx, "xyz.openbmc_project.Settings",
+                                      "/xyz/openbmc_project/control/host0/boot",
+                                      bootSourceIntf, "BootSource", result);
 
-            auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
-            const auto& bootSourceSetting =
-                std::get<settings::Path>(bootSetting);
-            ec = ipmi::getDbusProperty(
-                ctx, objects.service(bootSourceSetting, bootSourceIntf),
-                bootSourceSetting, bootSourceIntf, "BootSource", result);
             if (ec)
             {
                 log<level::ERR>(
@@ -1793,47 +1766,33 @@ ipmi::RspType<ipmi::message::Payload>
                 report<InternalFailure>();
                 return ipmi::responseUnspecifiedError();
             }
+
             auto bootSource = Source::convertSourcesFromString(result);
 
+            ec =
+                ipmi::getDbusProperty(ctx, "xyz.openbmc_project.Settings",
+                                      "/xyz/openbmc_project/control/host0/boot",
+                                      bootTypeIntf, "BootType", result);
+
             Type::Types bootType;
-            bool bootTypeIntfPresent = true;
-            try
+            if (!ec)
             {
-                bootSetting = settings::boot::setting(objects, bootTypeIntf);
-            }
-            catch (const std::exception& e)
-            {
-                bootTypeIntfPresent = false;
-            }
-            if (bootTypeIntfPresent)
-            {
-                const auto& bootTypeSetting =
-                    std::get<settings::Path>(bootSetting);
-                ec = ipmi::getDbusProperty(
-                    ctx, objects.service(bootTypeSetting, bootTypeIntf),
-                    bootTypeSetting, bootTypeIntf, "BootType", result);
-                if (ec)
-                {
-                    log<level::ERR>(
-                        "ipmiChassisGetSysBootOptions: Error in BootType Get");
-                    report<InternalFailure>();
-                    return ipmi::responseUnspecifiedError();
-                }
-                else
-                {
-                    bootType = Type::convertTypesFromString(result);
-                }
+                bootType = Type::convertTypesFromString(result);
             }
             else
             {
+                // Don't throw error if BootType interface is not present.
+                // This interface is not relevant for some Host architectures
+                // (for example POWER). In this case we don't won't IPMI to
+                // return an error, but simply return bootType as EFI.
                 bootType = Type::Types::EFI;
             }
 
-            bootSetting = settings::boot::setting(objects, bootModeIntf);
-            const auto& bootModeSetting = std::get<settings::Path>(bootSetting);
-            ec = ipmi::getDbusProperty(
-                ctx, objects.service(bootModeSetting, bootModeIntf),
-                bootModeSetting, bootModeIntf, "BootMode", result);
+            ec =
+                ipmi::getDbusProperty(ctx, "xyz.openbmc_project.Settings",
+                                      "/xyz/openbmc_project/control/host0/boot",
+                                      bootModeIntf, "BootMode", result);
+
             if (ec)
             {
                 log<level::ERR>(
@@ -1855,10 +1814,38 @@ ipmi::RspType<ipmi::message::Payload>
             }
 
             IpmiValue biosBootType = typeDbusToIpmi.at(bootType);
-            auto oneTimeEnabled =
-                std::get<settings::boot::OneTimeEnabled>(bootSetting);
+
+            bool oneTimeEnabled;
+            ec = ipmi::getDbusProperty(
+                ctx, "xyz.openbmc_project.Settings",
+                "/xyz/openbmc_project/control/host0/boot/one_time",
+                "xyz.openbmc_project.Object.Enable", "Enabled", oneTimeEnabled);
+
+            if (ec)
+            {
+                log<level::ERR>(
+                    "ipmiChassisGetSysBootOptions: Error in one_time Get");
+                report<InternalFailure>();
+                return ipmi::responseUnspecifiedError();
+            }
+
             uint1_t permanent = oneTimeEnabled ? 0 : 1;
-            uint1_t validFlag = 1;
+
+            bool valid;
+            ec = ipmi::getDbusProperty(
+                ctx, "xyz.openbmc_project.Settings",
+                "/xyz/openbmc_project/control/host0/boot",
+                "xyz.openbmc_project.Object.Enable", "Enabled", valid);
+
+            if (ec)
+            {
+                log<level::ERR>("ipmiChassisGetSysBootOptions: Error in boot "
+                                "flags valid Get");
+                report<InternalFailure>();
+                return ipmi::responseUnspecifiedError();
+            }
+
+            uint1_t validFlag = valid ? 1 : 0;
 
             response.pack(bootOptionParameter, reserved1, uint5_t{},
                           uint1_t{biosBootType}, uint1_t{permanent},
@@ -1975,36 +1962,31 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
 
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
-        auto oneTimeEnabled = false;
-        constexpr auto enabledIntf = "xyz.openbmc_project.Object.Enable";
-        constexpr auto oneTimePath =
-            "/xyz/openbmc_project/control/host0/boot/one_time";
 
         try
         {
-            settings::Objects& objects = getObjects();
+            boost::system::error_code ec;
 
-            auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
-
-            oneTimeEnabled =
-                std::get<settings::boot::OneTimeEnabled>(bootSetting);
-
-            /*
-             * Check if the current boot setting is onetime or permanent, if the
-             * request in the command is otherwise, then set the "Enabled"
-             * property in one_time object path to 'True' to indicate onetime
-             * and 'False' to indicate permanent.
-             *
-             * Once the onetime/permanent setting is applied, then the bootMode
-             * and bootSource is updated for the corresponding object.
-             */
-            if ((permanent && oneTimeEnabled) ||
-                (!permanent && !oneTimeEnabled))
+            ec = ipmi::setDbusProperty(
+                ctx, "xyz.openbmc_project.Settings",
+                "/xyz/openbmc_project/control/host0/boot/one_time",
+                "xyz.openbmc_project.Object.Enable", "Enabled", !permanent);
+            if (ec)
             {
-                auto service = ipmi::getService(dbus, enabledIntf, oneTimePath);
+                log<level::ERR>("Error in one_time Set",
+                                entry("ERROR=%s", ec.message().c_str()));
+                return ipmi::responseUnspecifiedError();
+            }
 
-                ipmi::setDbusProperty(dbus, service, oneTimePath, enabledIntf,
-                                      "Enabled", !permanent);
+            ec = ipmi::setDbusProperty(
+                ctx, "xyz.openbmc_project.Settings",
+                "/xyz/openbmc_project/control/host0/boot",
+                "xyz.openbmc_project.Object.Enable", "Enabled", validFlag);
+            if (ec)
+            {
+                log<level::ERR>("Error in boot flags valid Set",
+                                entry("ERROR=%s", ec.message().c_str()));
+                return ipmi::responseUnspecifiedError();
             }
 
             auto modeItr =
