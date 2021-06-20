@@ -29,6 +29,7 @@
 #include <cstring>
 #include <iostream>
 #include <ipmid/api.hpp>
+#include <ipmid/channel_layer.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <map>
@@ -487,7 +488,9 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     {
         assertions.set(1u << (index - 8));
     }
-    else
+
+    if (static_cast<ipmi::EChannelMediumType>(chInfo.mediumType) ==
+        ipmi::EChannelMediumType::systemInterface)
     {
         log<level::ERR>("VR profile index reaches max assertion bit",
                         entry("PATH=%s", path.c_str()),
@@ -503,12 +506,57 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
 }
 } // namespace sensor
 
-ipmi::RspType<> ipmiSenPlatformEvent(uint8_t generatorID, uint8_t evmRev,
-                                     uint8_t sensorType, uint8_t sensorNum,
-                                     uint8_t eventType, uint8_t eventData1,
-                                     std::optional<uint8_t> eventData2,
-                                     std::optional<uint8_t> eventData3)
+ipmi::RspType<> ipmiSenPlatformEvent(ipmi::Context::ptr ctx,
+                                     ipmi::message::Payload& p)
 {
+    uint8_t generatorID = 0;
+    uint8_t evmRev = 0;
+    uint8_t sensorType = 0;
+    uint8_t sensorNum = 0;
+    uint8_t eventType = 0;
+    uint8_t eventData1 = 0;
+    std::optional<uint8_t> eventData2 = 0;
+    std::optional<uint8_t> eventData3 = 0;
+    ipmi::ChannelInfo chInfo;
+
+    if (ipmi::getChannelInfo(ctx->channel, chInfo) != ipmi::ccSuccess)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Failed to get Channel Info",
+            phosphor::logging::entry("CHANNEL=%d", ctx->channel));
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (static_cast<ipmi::EChannelMediumType>(chInfo.mediumType) ==
+        ipmi::EChannelMediumType::systemInterface)
+    {
+
+        p.unpack(generatorID, evmRev, sensorType, sensorNum, eventType,
+                 eventData1, eventData2, eventData3);
+    }
+    else
+    {
+
+        p.unpack(evmRev, sensorType, sensorNum, eventType, eventData1,
+                 eventData2, eventData3);
+        generatorID = ctx->rqSA;
+    }
+
+    if (!p.fullyUnpacked())
+    {
+        return ipmi::responseReqDataLenInvalid();
+    }
+
+    // Check for valid evmRev and Sensor Type(per Table 42 of spec)
+    if (evmRev != 0x04)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if ((sensorType > 0x2C) && (sensorType < 0xC0))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     return ipmi::responseSuccess();
 }
 
