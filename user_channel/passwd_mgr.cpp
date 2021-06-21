@@ -37,6 +37,8 @@ namespace ipmi
 
 static const char* passwdFileName = "/etc/ipmi_pass";
 static const char* encryptKeyFileName = "/etc/key_file";
+static const char* defaultUserName = "root";
+static const char* defaultPassWord = "0penBmc";
 static const size_t maxKeySize = 8;
 
 constexpr mode_t modeMask =
@@ -281,6 +283,9 @@ int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
         return -EIO;
     }
 
+    if (checkPasswdFile())
+        createPasswdFile();
+
     std::ifstream passwdFile(passwdFileName, std::ios::in | std::ios::binary);
     if (!passwdFile.is_open())
     {
@@ -350,6 +355,214 @@ int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
 
     OPENSSL_cleanse(key.data(), keyLen);
     OPENSSL_cleanse(iv, ivLen);
+
+    return 0;
+}
+
+int PasswdMgr::checkPasswdFile(void)
+{
+    std::ifstream passwdFile(passwdFileName, std::ios::in | std::ios::binary);
+    if (!passwdFile.is_open())
+    {
+        log<level::DEBUG>("Error in opening ipmi password file");
+        return -EIO;
+    }
+
+    // calculate file size and read the data
+    passwdFile.seekg(0, std::ios::end);
+    ssize_t fileSize = passwdFile.tellg();
+    passwdFile.seekg(0, std::ios::beg);
+    std::vector<uint8_t> input(fileSize);
+    passwdFile.read(reinterpret_cast<char*>(input.data()), fileSize);
+    if (passwdFile.fail())
+    {
+        log<level::DEBUG>("Error in reading encryption key file");
+        return -EIO;
+    }
+
+    // verify the signature first
+    MetaPassStruct* metaData = reinterpret_cast<MetaPassStruct*>(input.data());
+    if (std::strncmp(metaData->signature, META_PASSWD_SIG,
+                     sizeof(metaData->signature)))
+    {
+        log<level::DEBUG>("Error signature mismatch in password file");
+        return -EBADMSG;
+    }
+    ssize_t total_len = sizeof(*metaData) + metaData->hashSize +
+                        metaData->ivSize + metaData->dataSize +
+                        metaData->padSize + metaData->macSize;
+    if (total_len == fileSize)
+        return 0;
+
+    return -EBADMSG;
+}
+int PasswdMgr::createPasswdFile(void)
+{
+    std::string userName(defaultUserName);
+    std::string passWord(defaultPassWord);
+
+    size_t bytesWritten = 0;
+    size_t inBytesLen = 0;
+    const EVP_CIPHER* cipher = EVP_aes_128_cbc();
+
+    // Read the key buff from key file
+    std::array<uint8_t, maxKeySize> keyBuff;
+    std::ifstream keyFile(encryptKeyFileName, std::ios::in | std::ios::binary);
+    if (!keyFile.good())
+    {
+        log<level::DEBUG>("Error in opening encryption key file");
+        return -EIO;
+    }
+    keyFile.read(reinterpret_cast<char*>(keyBuff.data()), keyBuff.size());
+    if (keyFile.fail())
+    {
+        log<level::DEBUG>("Error in reading encryption key file");
+        return -EIO;
+    }
+    keyFile.close();
+
+    // Create temporary file for write
+    std::string pwdFile(passwdFileName);
+    std::vector<char> tempFileName(pwdFile.begin(), pwdFile.end());
+    std::vector<char> fileTemplate = {'_', '_', 'X', 'X', 'X',
+                                      'X', 'X', 'X', '\0'};
+    tempFileName.insert(tempFileName.end(), fileTemplate.begin(),
+                        fileTemplate.end());
+    int fd = mkstemp((char*)tempFileName.data());
+    if (fd == -1)
+    {
+        log<level::DEBUG>("Error creating temp file");
+        return -EIO;
+    }
+
+    std::string strTempFileName(tempFileName.data());
+    // Open the temp file for writing from provided fd
+    // By "true", remove it at exit if still there.
+    // This is needed to cleanup the temp file at exception
+    phosphor::user::File temp(fd, strTempFileName, "w", true);
+    if ((temp)() == NULL)
+    {
+        close(fd);
+        log<level::DEBUG>("Error creating temp file");
+        return -EIO;
+    }
+
+    // Set the file mode as read-write for owner only
+    if (fchmod(fileno((temp)()), S_IRUSR | S_IWUSR) < 0)
+    {
+        log<level::DEBUG>("Error setting fchmod for temp file");
+        return -EIO;
+    }
+
+    const EVP_MD* digest = EVP_sha256();
+    size_t hashLen = EVP_MD_block_size(digest);
+    std::vector<uint8_t> hash(hashLen);
+    size_t ivLen = EVP_CIPHER_iv_length(cipher);
+    std::vector<uint8_t> iv(ivLen);
+    std::array<uint8_t, EVP_MAX_KEY_LENGTH> key;
+    size_t keyLen = key.size();
+    std::array<uint8_t, EVP_MAX_MD_SIZE> mac;
+    size_t macLen = mac.size();
+
+    // Create random hash and generate hash key which will be used for
+    // encryption.
+    if (RAND_bytes(hash.data(), hashLen) != 1)
+    {
+        log<level::DEBUG>("Hash genertion failed, bailing out");
+        return -EIO;
+    }
+    if (NULL == HMAC(digest, keyBuff.data(), keyBuff.size(), hash.data(),
+                     hashLen, key.data(),
+                     reinterpret_cast<unsigned int*>(&keyLen)))
+    {
+        log<level::DEBUG>("Failed to create MAC for authentication");
+        return -EIO;
+    }
+
+    // Generate IV values
+    if (RAND_bytes(iv.data(), ivLen) != 1)
+    {
+        log<level::DEBUG>("UV genertion failed, bailing out");
+        return -EIO;
+    }
+
+    inBytesLen = userName.size() + passWord.size() + 3 + EVP_MAX_BLOCK_LENGTH;
+    std::vector<uint8_t> inBytes(inBytesLen);
+    // Write the default user:password pair.
+    bytesWritten =
+        std::snprintf(reinterpret_cast<char*>(&inBytes[0]), inBytesLen,
+                      "%s:%s\n", userName.c_str(), passWord.c_str());
+
+    // Encrypt the input data
+    std::vector<uint8_t> outBytes(inBytesLen + EVP_MAX_BLOCK_LENGTH);
+    size_t outBytesLen = 0;
+    if (inBytesLen != 0)
+    {
+        if (encryptDecryptData(true, EVP_aes_128_cbc(), key.data(), keyLen,
+                               iv.data(), ivLen, inBytes.data(), inBytesLen,
+                               mac.data(), &macLen, outBytes.data(),
+                               &outBytesLen) != 0)
+        {
+            log<level::DEBUG>("Error while encrypting the data");
+            return -EIO;
+        }
+        outBytes[outBytesLen] = 0;
+    }
+    OPENSSL_cleanse(key.data(), keyLen);
+
+    // Update the meta password structure.
+    MetaPassStruct metaData = {META_PASSWD_SIG, {0, 0}, 0, 0, 0, 0, 0};
+    metaData.hashSize = hashLen;
+    metaData.ivSize = ivLen;
+    metaData.dataSize = bytesWritten;
+    metaData.padSize = outBytesLen - bytesWritten;
+    metaData.macSize = macLen;
+
+    if (fwrite(&metaData, 1, sizeof(metaData), (temp)()) != sizeof(metaData))
+    {
+        log<level::DEBUG>("Error in writing meta data");
+        return -EIO;
+    }
+
+    if (fwrite(&hash[0], 1, hashLen, (temp)()) != hashLen)
+    {
+        log<level::DEBUG>("Error in writing hash data");
+        return -EIO;
+    }
+
+    if (fwrite(&iv[0], 1, ivLen, (temp)()) != ivLen)
+    {
+        log<level::DEBUG>("Error in writing IV data");
+        return -EIO;
+    }
+
+    if (fwrite(&outBytes[0], 1, outBytesLen, (temp)()) != outBytesLen)
+    {
+        log<level::DEBUG>("Error in writing encrypted data");
+        return -EIO;
+    }
+
+    if (fwrite(&mac[0], 1, macLen, (temp)()) != macLen)
+    {
+        log<level::DEBUG>("Error in writing MAC data");
+        return -EIO;
+    }
+
+    if (fflush((temp)()))
+    {
+        log<level::DEBUG>(
+            "File fflush error while writing entries to special file");
+        return -EIO;
+    }
+
+    OPENSSL_cleanse(iv.data(), ivLen);
+
+    // Rename the tmp  file to actual file
+    if (std::rename(strTempFileName.data(), passwdFileName) != 0)
+    {
+        log<level::DEBUG>("Failed to rename tmp file to ipmi-pass");
+        return -EIO;
+    }
 
     return 0;
 }
