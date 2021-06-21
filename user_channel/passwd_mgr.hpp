@@ -99,6 +99,16 @@ class PasswdMgr
      */
     int updatePasswdSpecialFile(const std::string& userName,
                                 const std::string& newUserName);
+    /** @brief  Check if password file exists and size is correct or not.
+     *
+     * @return error response
+     */
+    int checkPasswdFile(void);
+    /** @brief  Create default password file.
+     *
+     * @return error response
+     */
+    int createPasswdFile(void);
     /** @brief encrypts or decrypt the data provided
      *
      *  @param[in] doEncrypt - do encrypt if set to true, else do decrypt.
