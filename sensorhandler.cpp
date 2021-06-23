@@ -339,21 +339,39 @@ bool isAnalogSensor(const std::string& interface)
 @return completion code on success.
 **/
 
-ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
-                                     uint8_t reading, uint8_t assertOffset0_7,
-                                     uint8_t assertOffset8_14,
-                                     uint8_t deassertOffset0_7,
-                                     uint8_t deassertOffset8_14,
-                                     uint8_t eventData1, uint8_t eventData2,
-                                     uint8_t eventData3)
+ipmi::RspType<>
+    ipmiSetSensorReading(uint8_t sensorNumber, uint2_t sensorReadingOperation,
+                         uint2_t deassertionOperation,
+                         uint2_t assertionOperation, uint2_t eventOperation,
+                         uint8_t reading, uint8_t assertOffset0_7,
+                         uint8_t assertOffset8_14, uint8_t deassertOffset0_7,
+                         uint8_t deassertOffset8_14, uint8_t eventData1,
+                         uint8_t eventData2, uint8_t eventData3)
 {
     log<level::DEBUG>("IPMI SET_SENSOR",
                       entry("SENSOR_NUM=0x%02x", sensorNumber));
 
+    constexpr std::array<uint8_t, 2> operationReserved = {3, 2};
+
+    // Validate reserved values in operation
+    if (eventOperation == operationReserved[0])
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if ((sensorReadingOperation == operationReserved[0]) ||
+        (sensorReadingOperation == operationReserved[1]))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     ipmi::sensor::SetSensorReadingReq cmdData;
 
     cmdData.number = sensorNumber;
-    cmdData.operation = operation;
+    cmdData.sensorReadingOperation =
+        static_cast<uint8_t>(sensorReadingOperation);
+    cmdData.deassertionOperation = static_cast<uint8_t>(deassertionOperation);
+    cmdData.assertionOperation = static_cast<uint8_t>(assertionOperation);
+    cmdData.eventOperation = static_cast<uint8_t>(eventOperation);
     cmdData.reading = reading;
     cmdData.assertOffset0_7 = assertOffset0_7;
     cmdData.assertOffset8_14 = assertOffset8_14;
