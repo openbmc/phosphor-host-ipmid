@@ -326,42 +326,55 @@ bool isAnalogSensor(const std::string& interface)
 
 @param
     -  sensorNumber
-    -  operation
+    -  sensorReadingOperation
+    -  deassertionOperation
+    -  assertionOperation
+    -  eventOperation
     -  reading
-    -  assertOffset0_7
-    -  assertOffset8_14
-    -  deassertOffset0_7
-    -  deassertOffset8_14
-    -  eventData1
-    -  eventData2
-    -  eventData3
+    -  assert
+    -  deassert
+    -  eventData
 
 @return completion code on success.
 **/
 
-ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
-                                     uint8_t reading, uint8_t assertOffset0_7,
-                                     uint8_t assertOffset8_14,
-                                     uint8_t deassertOffset0_7,
-                                     uint8_t deassertOffset8_14,
-                                     uint8_t eventData1, uint8_t eventData2,
-                                     uint8_t eventData3)
+ipmi::RspType<> ipmiSetSensorReading(
+    uint8_t sensorNumber, uint2_t sensorReadingOperation,
+    uint2_t deassertionOperation, uint2_t assertionOperation,
+    uint2_t eventOperation, uint8_t reading, uint15_t assert, bool resvd1,
+    uint15_t deassert, bool resvd2, std::array<uint8_t, 3> eventData)
 {
     log<level::DEBUG>("IPMI SET_SENSOR",
                       entry("SENSOR_NUM=0x%02x", sensorNumber));
+    static constexpr uint2_t eventOperationReserved = 3;
+    static constexpr uint2_t sensorReadingOperationReservedMask = 2;
+
+    // Validate reserved values in operation
+    if (eventOperation == eventOperationReserved)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if (sensorReadingOperation & sensorReadingOperationReservedMask)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if (resvd1 || resvd2)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
 
     ipmi::sensor::SetSensorReadingReq cmdData;
 
     cmdData.number = sensorNumber;
-    cmdData.operation = operation;
+    cmdData.sensorReadingOperation =
+        static_cast<uint8_t>(sensorReadingOperation);
+    cmdData.deassertionOperation = static_cast<uint8_t>(deassertionOperation);
+    cmdData.assertionOperation = static_cast<uint8_t>(assertionOperation);
+    cmdData.eventOperation = static_cast<uint8_t>(eventOperation);
     cmdData.reading = reading;
-    cmdData.assertOffset0_7 = assertOffset0_7;
-    cmdData.assertOffset8_14 = assertOffset8_14;
-    cmdData.deassertOffset0_7 = deassertOffset0_7;
-    cmdData.deassertOffset8_14 = deassertOffset8_14;
-    cmdData.eventData1 = eventData1;
-    cmdData.eventData2 = eventData2;
-    cmdData.eventData3 = eventData3;
+    cmdData.assert = static_cast<uint16_t>(assert);
+    cmdData.deassert = static_cast<uint16_t>(deassert);
+    cmdData.eventData = eventData;
 
     // Check if the Sensor Number is present
     const auto iter = ipmi::sensor::sensors.find(sensorNumber);

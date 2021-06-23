@@ -76,17 +76,6 @@ ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
     return std::make_pair(iter->first, iter->second.begin()->first);
 }
 
-AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData)
-{
-    Assertion assertionStates =
-        (static_cast<Assertion>(cmdData.assertOffset8_14)) << 8 |
-        cmdData.assertOffset0_7;
-    Deassertion deassertionStates =
-        (static_cast<Deassertion>(cmdData.deassertOffset8_14)) << 8 |
-        cmdData.deassertOffset0_7;
-    return std::make_pair(assertionStates, deassertionStates);
-}
-
 ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
@@ -217,7 +206,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                                updateInterface.c_str(), command.c_str());
 }
 
-ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData, const Info& sensorInfo,
+ipmi_ret_t eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
                      uint8_t data)
 {
     auto msg =
@@ -242,8 +231,8 @@ ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData, const Info& sensorInfo,
 
 ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
 {
-    std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
-    std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
+    std::bitset<16> assertionSet(cmdData.assert);
+    std::bitset<16> deassertionSet(cmdData.deassert);
     auto bothSet = assertionSet ^ deassertionSet;
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
@@ -316,8 +305,8 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
     auto msg = makeDbusMsg(sensorInfo.sensorInterface, sensorInfo.sensorPath,
                            "Notify", sensorInfo.sensorInterface);
 
-    std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
-    std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
+    std::bitset<16> assertionSet(cmdData.assert);
+    std::bitset<16> deassertionSet(cmdData.deassert);
     ipmi::sensor::ObjectMap objects;
     ipmi::sensor::InterfaceMap interfaces;
     for (const auto& interface : sensorInfo.propertyInterfaces)

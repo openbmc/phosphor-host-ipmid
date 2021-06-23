@@ -42,12 +42,6 @@ ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
                               const std::string& interface,
                               const std::string& path = std::string());
 
-/** @brief Make assertion set from input data
- *  @param[in] cmdData - Input sensor data
- *  @return pair of assertion and deassertion set
- */
-AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData);
-
 /** @brief send the message to DBus
  *  @param[in] msg - message to send
  *  @return failure status in IPMI error code
@@ -307,8 +301,7 @@ ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
     for (const auto& property : interface->second)
     {
         msg.append(property.first);
-        std::variant<T> value = static_cast<T>((cmdData.assertOffset8_14 << 8) |
-                                               cmdData.assertOffset0_7);
+        std::variant<T> value = static_cast<T>(cmdData.assert);
         msg.append(value);
     }
     return updateToDbus(msg);
@@ -360,7 +353,7 @@ ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData, const Info& sensorInfo,
 inline ipmi_ret_t eventdata1(const SetSensorReadingReq& cmdData,
                              const Info& sensorInfo)
 {
-    return eventdata(cmdData, sensorInfo, cmdData.eventData1);
+    return eventdata(cmdData, sensorInfo, cmdData.eventData[0]);
 }
 
 /** @brief Update d-bus based on eventdata2 type sensor data
@@ -371,7 +364,7 @@ inline ipmi_ret_t eventdata1(const SetSensorReadingReq& cmdData,
 inline ipmi_ret_t eventdata2(const SetSensorReadingReq& cmdData,
                              const Info& sensorInfo)
 {
-    return eventdata(cmdData, sensorInfo, cmdData.eventData2);
+    return eventdata(cmdData, sensorInfo, cmdData.eventData[1]);
 }
 
 /** @brief Update d-bus based on eventdata3 type sensor data
@@ -382,7 +375,7 @@ inline ipmi_ret_t eventdata2(const SetSensorReadingReq& cmdData,
 inline ipmi_ret_t eventdata3(const SetSensorReadingReq& cmdData,
                              const Info& sensorInfo)
 {
-    return eventdata(cmdData, sensorInfo, cmdData.eventData3);
+    return eventdata(cmdData, sensorInfo, cmdData.eventData[2]);
 }
 
 } // namespace set

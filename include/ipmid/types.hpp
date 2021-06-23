@@ -3,6 +3,7 @@
 #include <openssl/crypto.h>
 #include <stdint.h>
 
+#include <array>
 #include <map>
 #include <sdbusplus/server.hpp>
 #include <string>
@@ -78,29 +79,15 @@ using PreReqOffsetValueMap = std::map<Offset, PreReqValues>;
 struct SetSensorReadingReq
 {
     uint8_t number;
-    uint8_t operation;
+    uint8_t sensorReadingOperation;
+    uint8_t deassertionOperation;
+    uint8_t assertionOperation;
+    uint8_t eventOperation;
     uint8_t reading;
-    uint8_t assertOffset0_7;
-    uint8_t assertOffset8_14;
-    uint8_t deassertOffset0_7;
-    uint8_t deassertOffset8_14;
-    uint8_t eventData1;
-    uint8_t eventData2;
-    uint8_t eventData3;
-} __attribute__((packed));
-
-/**
- * @struct GetReadingResponse
- *
- * IPMI response data for Get Sensor Reading command.
- */
-struct GetReadingResponse
-{
-    uint8_t reading;          //!< Sensor reading.
-    uint8_t operation;        //!< Sensor scanning status / reading state.
-    uint8_t assertOffset0_7;  //!< Discrete assertion states(0-7).
-    uint8_t assertOffset8_14; //!< Discrete assertion states(8-14).
-} __attribute__((packed));
+    uint16_t assert;
+    uint16_t deassert;
+    std::array<uint8_t, 3> eventData;
+};
 
 constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory";
 
