@@ -363,6 +363,16 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
     cmdData.eventData2 = eventData2;
     cmdData.eventData3 = eventData3;
 
+    // check for reserved bits in operation
+    if ((operation & 0xC0) == 0xC0)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if (operation & 0x02)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     // Check if the Sensor Number is present
     const auto iter = ipmi::sensor::sensors.find(sensorNumber);
     if (iter == ipmi::sensor::sensors.end())
