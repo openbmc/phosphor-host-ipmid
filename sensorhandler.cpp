@@ -27,6 +27,7 @@ static constexpr uint8_t BMCSlaveAddress = 0x20;
 
 extern int updateSensorRecordFromSSRAESC(const void*);
 extern sd_bus* bus;
+#define ISBITSET(x, y) (((x) >> (y)) & 0x01)
 
 namespace ipmi
 {
@@ -362,6 +363,14 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
     cmdData.eventData1 = eventData1;
     cmdData.eventData2 = eventData2;
     cmdData.eventData3 = eventData3;
+
+    // Per IPMI spec 2.0 section 35.17, operation bits [7:6] = 11b and [1:0] =
+    // 10b, 11b are reserved.
+    if ((ISBITSET(operation, 7) && ISBITSET(operation, 6)) ||
+        ISBITSET(operation, 1))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
 
     // Check if the Sensor Number is present
     const auto iter = ipmi::sensor::sensors.find(sensorNumber);
