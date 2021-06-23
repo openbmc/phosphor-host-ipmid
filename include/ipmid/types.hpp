@@ -77,7 +77,10 @@ using PreReqOffsetValueMap = std::map<Offset, PreReqValues>;
 struct SetSensorReadingReq
 {
     uint8_t number;
-    uint8_t operation;
+    uint8_t sensorReadingOperation;
+    uint8_t deassertionOperation;
+    uint8_t assertionOperation;
+    uint8_t eventOperation;
     uint8_t reading;
     uint8_t assertOffset0_7;
     uint8_t assertOffset8_14;
