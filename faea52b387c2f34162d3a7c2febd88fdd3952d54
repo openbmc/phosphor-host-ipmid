@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40d72b1b_2977f78d",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-06-24T14:44:53Z",
+      "side": 1,
+      "message": "Also, If there scenarios where two FRU Devices with \u0027Chassis Info Area\u0027 present, say one with \u0027ChassisTypeRackMount\u0027 and one with \u0027chassisTypeMainServer\u0027 which can break the existing code/systems, right ?  Currently, Only ChassisTypeRackMount FRU device will be elected as baseboard FRU.",
+      "range": {
+        "startLine": 198,
+        "startChar": 8,
+        "endLine": 199,
+        "endChar": 60
+      },
+      "revId": "faea52b387c2f34162d3a7c2febd88fdd3952d54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "847db0f1_e444ee41",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-06-24T14:44:53Z",
+      "side": 1,
+      "message": "As per IPMI FRU spec, \"1.Introduction\" section,\n\n\"\nA system can have multiple FRU Information Devices\nwithin a chassis, but only one device should provide the Chassis Info Area.\n\"\n\nDoes this criteria met for \"chassisTypeMainServer\" ?",
+      "range": {
+        "startLine": 199,
+        "startChar": 32,
+        "endLine": 199,
+        "endChar": 53
+      },
+      "revId": "faea52b387c2f34162d3a7c2febd88fdd3952d54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
