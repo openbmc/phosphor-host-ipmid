@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a0eafec6_207b013f",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1000583
+      },
+      "writtenOn": "2021-06-24T04:50:52Z",
+      "side": 1,
+      "message": "nit: make it function scope or file scope?",
+      "range": {
+        "startLine": 422,
+        "startChar": 8,
+        "endLine": 422,
+        "endChar": 42
+      },
+      "revId": "fac1c61e790cf2dce34a98131d34565d7648cbff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
