@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cdab82b8_2d0e4156",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2021-06-25T19:40:34Z",
+      "side": 1,
+      "message": "Can you specify what is the expected response?",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 31
+      },
+      "revId": "4cd97a4b73ed3b84a7f3ec594c8124f638ea584b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
