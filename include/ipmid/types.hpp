@@ -1,5 +1,6 @@
 #pragma once
 
+#include <openssl/crypto.h>
 #include <stdint.h>
 
 #include <map>
@@ -236,5 +237,34 @@ constexpr auto DEFAULT_MAC_ADDRESS = "00:00:00:00:00:00";
 constexpr auto DEFAULT_ADDRESS = "0.0.0.0";
 
 } // namespace network
+
+template <typename T>
+class SecureAllocator : public std::allocator<T>
+{
+  public:
+    template <typename U>
+    struct rebind
+    {
+        typedef SecureAllocator<U> other;
+    };
+
+    void deallocate(T* p, size_t n)
+    {
+        OPENSSL_cleanse(p, n);
+        return std::allocator<T>::deallocate(p, n);
+    }
+};
+
+using SecureString = std::basic_string<char, std::char_traits<char>,
+                                       ipmi::SecureAllocator<char>>;
+
+class SecuredString : public SecureString
+{
+  public:
+    ~SecuredString()
+    {
+        OPENSSL_cleanse((&(*this)[0]), this->size());
+    };
+};
 
 } // namespace ipmi

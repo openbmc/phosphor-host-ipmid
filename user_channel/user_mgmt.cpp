@@ -27,6 +27,7 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <cerrno>
 #include <fstream>
+#include <ipmid/types.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
