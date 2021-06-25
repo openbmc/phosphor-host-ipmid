@@ -1711,6 +1711,7 @@ static ipmi::Cc setBootType(ipmi::Context::ptr& ctx, const Type::Types& type)
 static constexpr uint8_t setComplete = 0x0;
 static constexpr uint8_t setInProgress = 0x1;
 static uint8_t transferStatus = setComplete;
+static uint8_t bootFlagValidBitClr = 0;
 
 /** @brief implements the Get Chassis system boot option
  *  @param ctx - context pointer
@@ -1761,6 +1762,14 @@ ipmi::RspType<ipmi::message::Payload>
         constexpr uint8_t writeMask = 0;
         constexpr uint8_t bootInfoAck = 0;
         response.pack(bootOptionParameter, writeMask, bootInfoAck);
+        return ipmi::responseSuccess(std::move(response));
+    }
+
+    if (types::enum_cast<BootOptionParameter>(bootOptionParameter) ==
+        BootOptionParameter::bootFlagValidClr)
+    {
+        response.pack(bootOptionParameter, reserved1,
+                      uint5_t{bootFlagValidBitClr}, uint3_t{});
         return ipmi::responseSuccess(std::move(response));
     }
 
@@ -2098,6 +2107,28 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         log<level::INFO>("ipmiChassisSetSysBootOptions: bootInfo parameter set "
                          "successfully");
         data.trailingOk = true;
+        return ipmi::responseSuccess();
+    }
+    else if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
+             BootOptionParameter::bootFlagValidClr)
+    {
+        uint5_t bootFlagValidClr;
+        uint3_t rsvd;
+
+        if (data.unpack(bootFlagValidClr, rsvd) != 0 || !data.fullyUnpacked())
+        {
+            return ipmi::responseReqDataLenInvalid();
+        }
+        if (rsvd)
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+        // store boot flag valid bits clear value
+        bootFlagValidBitClr = static_cast<uint8_t>(bootFlagValidClr);
+        log<level::INFO>(
+            "ipmiChassisSetSysBootOptions: bootFlagValidBits parameter set "
+            "successfully",
+            entry("value=0x%x", bootFlagValidBitClr));
         return ipmi::responseSuccess();
     }
     else
