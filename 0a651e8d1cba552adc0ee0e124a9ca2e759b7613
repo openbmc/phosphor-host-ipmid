@@ -22,6 +22,30 @@
       "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d399c58_6b1e99d7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000652
+      },
+      "writtenOn": "2021-06-26T07:45:06Z",
+      "side": 1,
+      "message": "Needed to use in the below patch:\nhttps://gerrit.openbmc-project.xyz/c/openbmc/phosphor-net-ipmid/+/37515",
+      "parentUuid": "4d02ff38_33b959b3",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 11
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
