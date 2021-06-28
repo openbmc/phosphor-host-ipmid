@@ -359,6 +359,11 @@ Cc ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     // subtract 2 bytes header to know the password length - including NULL
     uint8_t passwordLength = *dataLen - 2;
     *dataLen = 0;
+    if (req->reserved1 || req->reserved2)
+    {
+        log<level::DEBUG>("Invalid data field in request");
+        return ccInvalidFieldRequest;
+    }
 
     // verify input length based on operation. Required password size is 20
     // bytes as  we support only IPMI 2.0, but in order to be compatible with
