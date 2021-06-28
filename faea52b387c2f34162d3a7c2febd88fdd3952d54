@@ -69,6 +69,30 @@
       "revId": "faea52b387c2f34162d3a7c2febd88fdd3952d54",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a3d8fa8_82147c9a",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-06-28T17:08:05Z",
+      "side": 1,
+      "message": "\u003e Well, the bit you\u0027ve quoted from the spec seems to indicate that a system with multiple FRU devices containing Chassis Info Areas would be in violation, right?\n\nYes.\n\n\u003e \n\u003e If there are actual systems out there that are known to have that problem and that we want to support anyway I guess we might need to take that possibility into account, but unless there are specific known cases like that, it seems like it should be OK to assume that the hardware complies with the spec?\n\nI don\u0027t have known specific scenarios now. Hope there won\u0027t be mutually exclusive FRUs with \u0027chassisTypeMainServer\u0027 type and \u0027chassisTypeRackMount\u0027 in the same chassis.",
+      "parentUuid": "8ab3dbf6_0cb0bdb9",
+      "range": {
+        "startLine": 199,
+        "startChar": 32,
+        "endLine": 199,
+        "endChar": 53
+      },
+      "revId": "faea52b387c2f34162d3a7c2febd88fdd3952d54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
