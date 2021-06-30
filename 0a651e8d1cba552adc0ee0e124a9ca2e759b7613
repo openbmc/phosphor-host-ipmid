@@ -46,6 +46,121 @@
       "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6cba772_97bbe8a3",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-06-30T18:36:32Z",
+      "side": 1,
+      "message": "could be better to say\n\n  using size_type \u003d typename std::allocator\u003cT\u003e::size_type;\n  ...\n\nto avoid redefining the types. Or just use T*, etc. directly and not rename them.",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 246,
+        "endChar": 35
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f7e424c_6b126055",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-06-30T18:36:32Z",
+      "side": 1,
+      "message": "Replace _Tp1 with something else (\"U\"?) - identifiers beginning with an underscore and capital letter are reserved for the compiler.",
+      "range": {
+        "startLine": 248,
+        "startChar": 4,
+        "endLine": 252,
+        "endChar": 6
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32752def_420502b7",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-06-30T18:36:32Z",
+      "side": 1,
+      "message": "Is it really needed? It just calls the base class impl.",
+      "range": {
+        "startLine": 253,
+        "startChar": 0,
+        "endLine": 256,
+        "endChar": 5
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d2a70ac_ab297ec6",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-06-30T18:36:32Z",
+      "side": 1,
+      "message": "I pulled down this commit and was able to compile after removing these empty constructor/destructors, so they could probably be removed.\n\nIf they are needed for some reason, replace all instances of \"throw()\" with \"noexcept\". Dynamic exception specifications are totally removed in c++20.",
+      "range": {
+        "startLine": 264,
+        "startChar": 0,
+        "endLine": 276,
+        "endChar": 5
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd259fab_38b5edb7",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-06-30T18:36:32Z",
+      "side": 1,
+      "message": "This doesn\u0027t account for small string optimization.\nWe should override the destructor of std::string to also clear the string contents in case there was no dynamic memory allocation needed.",
+      "range": {
+        "startLine": 278,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 0
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
