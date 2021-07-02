@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "93fd93b8_9426812d",
+        "filename": "Makefile.am",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-02T19:22:38Z",
+      "side": 1,
+      "message": "um.. this will prevent the test for these files tho...",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 121,
+        "endChar": 5
+      },
+      "revId": "aecbfd7e8e32f129e310af0ab824f73278d794fd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
