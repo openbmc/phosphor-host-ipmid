@@ -1,4 +1,4 @@
-/*
+x/*
 // Copyright (c) 2017 2018 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1271,14 +1271,7 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     // Original comment said "todo fill out rest of units"
 
     // populate sensor name from path
-    std::string name;
-    size_t nameStart = path.rfind("/");
-    if (nameStart != std::string::npos)
-    {
-        name = path.substr(nameStart + 1, std::string::npos - nameStart);
-    }
-
-    std::replace(name.begin(), name.end(), '_', ' ');
+    std::string name = sdbusplus::message::object_path(path).filename();
     if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
         // try to not truncate by replacing common words
