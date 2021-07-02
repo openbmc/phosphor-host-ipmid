@@ -604,6 +604,7 @@ ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
         return IPMI_CC_RESPONSE_ERROR;
     }
 
+    std::string name;
 #ifdef USING_ENTITY_MANAGER_DECORATORS
 
     boost::container::flat_map<std::string, Value>* entityData = nullptr;
@@ -669,28 +670,36 @@ ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
                                  "not found for Fru\n");
         }
     }
+    else
+    {
+        // Use entity filename as device name.
+        name = entity->first.filename();
+    }
 
 #endif
 
-    std::string name;
-    auto findProductName = fruData->find("BOARD_PRODUCT_NAME");
-    auto findBoardName = fruData->find("PRODUCT_PRODUCT_NAME");
-    if (findProductName != fruData->end())
+    if (name.empty())
     {
-        name = std::get<std::string>(findProductName->second);
+        auto findProductName = fruData->find("BOARD_PRODUCT_NAME");
+        auto findBoardName = fruData->find("PRODUCT_PRODUCT_NAME");
+        if (findProductName != fruData->end())
+        {
+            name = std::get<std::string>(findProductName->second);
+        }
+        else if (findBoardName != fruData->end())
+        {
+            name = std::get<std::string>(findBoardName->second);
+        }
+        else
+        {
+            name = "UNKNOWN";
+        }
+        if (name.size() > maxFruSdrNameSize)
+        {
+            name = name.substr(0, maxFruSdrNameSize);
+        }
     }
-    else if (findBoardName != fruData->end())
-    {
-        name = std::get<std::string>(findBoardName->second);
-    }
-    else
-    {
-        name = "UNKNOWN";
-    }
-    if (name.size() > maxFruSdrNameSize)
-    {
-        name = name.substr(0, maxFruSdrNameSize);
-    }
+
     size_t sizeDiff = maxFruSdrNameSize - name.size();
 
     resp.header.record_id_lsb = 0x0; // calling code is to implement these
