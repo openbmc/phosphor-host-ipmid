@@ -22,6 +22,30 @@
       "revId": "aecbfd7e8e32f129e310af0ab824f73278d794fd",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06de3cab_f79c9511",
+        "filename": "Makefile.am",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-02T21:48:09Z",
+      "side": 1,
+      "message": "This will remove some features that the dbus-sdr doesn\u0027t cover. We probably don\u0027t want to do this.\n\n\nMaybe it is better to use FEATURE_DYNAMIC_SENSORS in the sensorhander or storagehandler to wrap around the handlers that dbus-sdr covers for this.?\n\nThis way we can still build all the  codes but still have control of what handler to use.\nIt will be easiler for end users to know which handler is being used.",
+      "parentUuid": "93fd93b8_9426812d",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 121,
+        "endChar": 5
+      },
+      "revId": "aecbfd7e8e32f129e310af0ab824f73278d794fd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
