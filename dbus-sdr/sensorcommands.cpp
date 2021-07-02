@@ -1271,12 +1271,7 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     // Original comment said "todo fill out rest of units"
 
     // populate sensor name from path
-    std::string name;
-    size_t nameStart = path.rfind("/");
-    if (nameStart != std::string::npos)
-    {
-        name = path.substr(nameStart + 1, std::string::npos - nameStart);
-    }
+    std::string name = sdbusplus::message::object_path(path).filename();
 
     std::replace(name.begin(), name.end(), '_', ' ');
     if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
