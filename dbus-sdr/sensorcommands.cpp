@@ -1299,6 +1299,11 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     // Remember the sensor name, as determined for this sensor number
     details::sdrStatsTable.updateName(sensornumber, name);
 
+#ifdef FEATURE_DYNAMIC_SENSORS_WRITE
+    // Set the sensor settable state to true by default
+    get_sdr::body::init_settable_state(true, &record.body);
+#endif
+
     IPMIThresholds thresholdData;
     try
     {
