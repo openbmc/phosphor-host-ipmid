@@ -16,6 +16,19 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#ifdef FEATURE_HYBRID_SENSORS
+
+#include <ipmid/utils.hpp>
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+} // namespace sensor
+} // namespace ipmi
+
+#endif
+
 namespace details
 {
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
@@ -87,6 +100,31 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     bool sensorRez =
         lbdUpdateSensorTree("/xyz/openbmc_project/sensors", sensorInterfaces);
+
+#ifdef FEATURE_HYBRID_SENSORS
+
+    if (!ipmi::sensor::sensors.empty())
+    {
+        for (const auto& sensor : ipmi::sensor::sensors)
+        {
+            // Threshold sensors should not be emplaced in here.
+            if (boost::starts_with(sensor.second.sensorPath,
+                                   "/xyz/openbmc_project/sensors/"))
+            {
+                continue;
+            }
+
+            // The bus service name is not listed in ipmi::sensor::Info. Give it
+            // an empty string. For those function using non-threshold sensors,
+            // the bus service name will be retrieved in an alternative way.
+            boost::container::flat_map<std::string, std::vector<std::string>>
+                connectionMap{
+                    {"", {sensor.second.propertyInterfaces.begin()->first}}};
+            sensorTreePtr->emplace(sensor.second.sensorPath, connectionMap);
+        }
+    }
+
+#endif
 
     // Error if searching for sensors failed.
     if (!sensorRez)
@@ -166,6 +204,19 @@ bool getSensorSubtree(SensorSubTree& subtree)
     subtree = *sensorTree;
     return true;
 }
+
+#ifdef FEATURE_HYBRID_SENSORS
+// Static sensors are listed in sensor-gen.cpp.
+ipmi::sensor::IdInfoMap::const_iterator
+    findStaticSensor(const std::string& path)
+{
+    return std::find_if(
+        ipmi::sensor::sensors.begin(), ipmi::sensor::sensors.end(),
+        [&path](const ipmi::sensor::IdInfoMap::value_type& findSensor) {
+            return findSensor.second.sensorPath == path;
+        });
+}
+#endif
 
 std::string getSensorTypeStringFromPath(const std::string& path)
 {
