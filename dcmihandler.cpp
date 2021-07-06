@@ -705,6 +705,13 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto requestData =
         reinterpret_cast<const dcmi::GetDCMICapRequest*>(request);
 
+    if (*data_len != sizeof(dcmi::GetDCMICapRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     // get list of capabilities in a parameter
     auto caps =
         dcmiCaps.find(static_cast<dcmi::DCMICapParameters>(requestData->param));
