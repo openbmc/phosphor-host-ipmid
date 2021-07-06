@@ -1303,17 +1303,19 @@ ipmi::RspType<uint8_t,                // Parameter revision
         return ipmi::responseSuccess(paramRevision, std::nullopt, std::nullopt);
     }
 
-    if (paramSelector == 0)
-    {
-        return ipmi::responseSuccess(paramRevision, transferStatus,
-                                     std::nullopt);
-    }
-
     if (BlockSelector != 0) // 00h if parameter does not require a block number
     {
         return ipmi::responseParmNotSupported();
     }
 
+    if (paramSelector == 0)
+    {
+        if (setSelector != 0)
+            return ipmi::responseInvalidFieldRequest();
+
+        return ipmi::responseSuccess(paramRevision, transferStatus,
+                                     std::nullopt);
+    }
     if (sysInfoParamStore == nullptr)
     {
         sysInfoParamStore = std::make_unique<SysInfoParamStore>();
