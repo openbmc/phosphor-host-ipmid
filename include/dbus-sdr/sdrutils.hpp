@@ -231,6 +231,11 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
 
 bool getSensorSubtree(SensorSubTree& subtree);
 
+#ifdef FEATURE_HYBRID_SENSORS
+ipmi::sensor::IdInfoMap::const_iterator
+    findStaticSensor(const std::string& path);
+#endif
+
 struct CmpStr
 {
     bool operator()(const char* a, const char* b) const

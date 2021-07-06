@@ -168,6 +168,9 @@ if FEATURE_DYNAMIC_SENSORS
 providers_LTLIBRARIES += libdynamiccmds.la
 libdynamiccmds_la_LIBADD = \
 	libipmid/libipmid.la
+if FEATURE_HYBRID_SENSORS
+libdynamiccmds_la_LIBADD += libipmi20.la
+endif
 libdynamiccmds_la_SOURCES = \
 	dbus-sdr/sensorcommands.cpp \
 	dbus-sdr/storagecommands.cpp \
