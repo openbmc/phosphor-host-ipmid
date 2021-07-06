@@ -41,6 +41,18 @@
 #include <utility>
 #include <variant>
 
+#ifdef FEATURE_HYBRID_SENSORS
+
+#include "sensordatahandler.hpp"
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+} // namespace sensor
+} // namespace ipmi
+#endif
+
 namespace ipmi
 {
 static constexpr int sensorMapUpdatePeriod = 10;
@@ -210,6 +222,19 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
                          std::string sensorPath, DbusInterfaceMap& sensorMap,
                          int updatePeriod = sensorMapUpdatePeriod)
 {
+#ifdef FEATURE_HYBRID_SENSORS
+    if (auto sensor = findStaticSensor(sensorPath);
+        sensor != ipmi::sensor::sensors.end() &&
+        getSensorEventTypeFromPath(sensorPath) !=
+            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+    {
+        // If the incoming sensor is a discrete sensor, it might fail in
+        // getManagedObjects(), return true, and use its own getFunc to get
+        // value.
+        return true;
+    }
+#endif
+
     static boost::container::flat_map<
         std::string, std::chrono::time_point<std::chrono::steady_clock>>
         updateTimeMap;
@@ -358,6 +383,54 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
     {
         return ipmi::response(status);
     }
+
+#ifdef FEATURE_HYBRID_SENSORS
+    if (auto sensor = findStaticSensor(path);
+        sensor != ipmi::sensor::sensors.end() &&
+        getSensorEventTypeFromPath(path) !=
+            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+    {
+        if (ipmi::sensor::Mutability::Read !=
+            (sensor->second.mutability & ipmi::sensor::Mutability::Read))
+        {
+            return ipmi::responseIllegalCommand();
+        }
+
+        uint8_t operation;
+        try
+        {
+            ipmi::sensor::GetSensorResponse getResponse =
+                sensor->second.getFunc(sensor->second);
+
+            if (getResponse.readingOrStateUnavailable)
+            {
+                operation |= static_cast<uint8_t>(
+                    IPMISensorReadingByte2::readingStateUnavailable);
+            }
+            if (getResponse.scanningEnabled)
+            {
+                operation |= static_cast<uint8_t>(
+                    IPMISensorReadingByte2::sensorScanningEnable);
+            }
+            if (getResponse.allEventMessagesEnabled)
+            {
+                operation |= static_cast<uint8_t>(
+                    IPMISensorReadingByte2::eventMessagesEnable);
+            }
+            return ipmi::responseSuccess(
+                getResponse.reading, operation,
+                getResponse.thresholdLevelsStates,
+                getResponse.discreteReadingSensorStates);
+        }
+
+        catch (const std::exception& e)
+        {
+            operation |= static_cast<uint8_t>(
+                IPMISensorReadingByte2::readingStateUnavailable);
+            return ipmi::responseSuccess(0, operation, 0, std::nullopt);
+        }
+    }
+#endif
 
     DbusInterfaceMap sensorMap;
     if (!getSensorMap(ctx, connection, path, sensorMap))
@@ -847,6 +920,31 @@ ipmi::RspType<uint8_t, // enabled
         return ipmi::response(status);
     }
 
+#ifdef FEATURE_HYBRID_SENSORS
+    if (auto sensor = findStaticSensor(path);
+        sensor != ipmi::sensor::sensors.end() &&
+        getSensorEventTypeFromPath(path) !=
+            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+    {
+        enabled = static_cast<uint8_t>(
+            IPMISensorEventEnableByte2::sensorScanningEnable);
+        uint16_t assertionEnabled = 0;
+        for (auto& offsetValMap : sensor->second.propertyInterfaces.begin()
+                                      ->second.begin()
+                                      ->second.second)
+        {
+            assertionEnabled |= (1 << offsetValMap.first);
+        }
+        assertionEnabledLsb = static_cast<uint8_t>((assertionEnabled & 0xFF));
+        assertionEnabledMsb =
+            static_cast<uint8_t>(((assertionEnabled >> 8) & 0xFF));
+
+        return ipmi::responseSuccess(enabled, assertionEnabledLsb,
+                                     assertionEnabledMsb, deassertionEnabledLsb,
+                                     deassertionEnabledMsb);
+    }
+#endif
+
     DbusInterfaceMap sensorMap;
     if (!getSensorMap(ctx, connection, path, sensorMap))
     {
@@ -941,6 +1039,40 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
             phosphor::logging::entry("SENSOR=%d", sensorNum));
         return ipmi::response(status);
     }
+
+#ifdef FEATURE_HYBRID_SENSORS
+    if (auto sensor = findStaticSensor(path);
+        sensor != ipmi::sensor::sensors.end() &&
+        getSensorEventTypeFromPath(path) !=
+            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+    {
+        auto response = ipmi::sensor::get::mapDbusToAssertion(
+            sensor->second, path, sensor->second.sensorInterface);
+        std::bitset<16> assertions;
+        // deassertions are not used.
+        std::bitset<16> deassertions = 0;
+        uint8_t sensorEventStatus;
+        if (response.readingOrStateUnavailable)
+        {
+            sensorEventStatus |= static_cast<uint8_t>(
+                IPMISensorReadingByte2::readingStateUnavailable);
+        }
+        if (response.scanningEnabled)
+        {
+            sensorEventStatus |= static_cast<uint8_t>(
+                IPMISensorReadingByte2::sensorScanningEnable);
+        }
+        if (response.allEventMessagesEnabled)
+        {
+            sensorEventStatus |= static_cast<uint8_t>(
+                IPMISensorReadingByte2::eventMessagesEnable);
+        }
+        assertions |= response.discreteReadingSensorStates << 8;
+        assertions |= response.thresholdLevelsStates;
+        return ipmi::responseSuccess(sensorEventStatus, assertions,
+                                     deassertions);
+    }
+#endif
 
     DbusInterfaceMap sensorMap;
     if (!getSensorMap(ctx, connection, path, sensorMap))
@@ -1158,6 +1290,49 @@ static int getSensorDataRecord(ipmi::Context::ptr ctx,
     record.key.owner_id = 0x20;
     record.key.owner_lun = lun;
     record.key.sensor_number = sensornumber;
+
+#ifdef FEATURE_HYBRID_SENSORS
+    // Separately construct SDR body by sensor event type.
+    if (auto sensor = findStaticSensor(path);
+        sensor != ipmi::sensor::sensors.end() &&
+        getSensorEventTypeFromPath(path) !=
+            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+    {
+        /* Body */
+        record.body.entity_id = sensor->second.entityType;
+        record.body.sensor_type = sensor->second.sensorType;
+        record.body.event_reading_type = sensor->second.sensorReadingType;
+        record.body.entity_instance = sensor->second.instance;
+        if (ipmi::sensor::Mutability::Write ==
+            (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+        {
+            get_sdr::body::init_settable_state(true, &(record.body));
+        }
+
+        auto id_string = sensor->second.sensorName;
+
+        if (id_string.empty())
+        {
+            id_string = sensor->second.sensorNameFunc(sensor->second);
+        }
+
+        if (id_string.length() > FULL_RECORD_ID_STR_MAX_LENGTH)
+        {
+            get_sdr::body::set_id_strlen(FULL_RECORD_ID_STR_MAX_LENGTH,
+                                         &(record.body));
+        }
+        else
+        {
+            get_sdr::body::set_id_strlen(id_string.length(), &(record.body));
+        }
+        strncpy(record.body.id_string, id_string.c_str(),
+                get_sdr::body::get_id_strlen(&(record.body)));
+
+        recordData.insert(recordData.end(), (uint8_t*)&record,
+                          ((uint8_t*)&record) + sizeof(record));
+        return 0;
+    }
+#endif
 
     record.body.sensor_capabilities = 0x68; // auto rearm - todo hysteresis
     record.body.sensor_type = getSensorTypeFromPath(path);
