@@ -160,7 +160,8 @@ uint8_t getSensorTypeFromPath(const std::string& path)
     auto findSensor = sensorTypes.find(type.c_str());
     if (findSensor != sensorTypes.end())
     {
-        sensorType = static_cast<uint8_t>(findSensor->second);
+        sensorType = static_cast<uint8_t>(
+            std::get<SENSOR_TYPE_CODES>(findSensor->second));
     } // else default 0x0 RESERVED
 
     return sensorType;
@@ -188,8 +189,16 @@ uint16_t getSensorNumberFromPath(const std::string& path)
 
 uint8_t getSensorEventTypeFromPath(const std::string& path)
 {
-    // TODO: Add support for additional reading types as needed
-    return 0x1; // reading type = threshold
+    uint8_t sensorEventType = 0;
+    std::string type = getSensorTypeStringFromPath(path);
+    auto findSensor = sensorTypes.find(type.c_str());
+    if (findSensor != sensorTypes.end())
+    {
+        sensorEventType = static_cast<uint8_t>(
+            std::get<SENSOR_EVENT_TYPE_CODES>(findSensor->second));
+    }
+
+    return sensorEventType;
 }
 
 std::string getPathFromSensorNumber(uint16_t sensorNum)

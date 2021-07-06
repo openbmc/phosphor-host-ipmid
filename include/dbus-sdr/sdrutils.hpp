@@ -227,6 +227,9 @@ struct CmpStr
     }
 };
 
+#define SENSOR_TYPE_CODES 0
+#define SENSOR_EVENT_TYPE_CODES 1
+
 enum class SensorTypeCodes : uint8_t
 {
     reserved = 0x0,
@@ -237,13 +240,28 @@ enum class SensorTypeCodes : uint8_t
     other = 0xB,
 };
 
-const static boost::container::flat_map<const char*, SensorTypeCodes, CmpStr>
-    sensorTypes{{{"temperature", SensorTypeCodes::temperature},
-                 {"voltage", SensorTypeCodes::voltage},
-                 {"current", SensorTypeCodes::current},
-                 {"fan_tach", SensorTypeCodes::fan},
-                 {"fan_pwm", SensorTypeCodes::fan},
-                 {"power", SensorTypeCodes::other}}};
+enum class SensorEventTypeCodes : uint8_t
+{
+    unspecified = 0x00,
+    threshold = 0x01,
+    sensorSpecified = 0x6f
+};
+
+const static boost::container::flat_map<
+    const char*, std::pair<SensorTypeCodes, SensorEventTypeCodes>, CmpStr>
+    sensorTypes{
+        {{"temperature", std::make_pair(SensorTypeCodes::temperature,
+                                        SensorEventTypeCodes::threshold)},
+         {"voltage", std::make_pair(SensorTypeCodes::voltage,
+                                    SensorEventTypeCodes::threshold)},
+         {"current", std::make_pair(SensorTypeCodes::current,
+                                    SensorEventTypeCodes::threshold)},
+         {"fan_tach", std::make_pair(SensorTypeCodes::fan,
+                                     SensorEventTypeCodes::threshold)},
+         {"fan_pwm", std::make_pair(SensorTypeCodes::fan,
+                                    SensorEventTypeCodes::threshold)},
+         {"power", std::make_pair(SensorTypeCodes::other,
+                                  SensorEventTypeCodes::threshold)}}};
 
 std::string getSensorTypeStringFromPath(const std::string& path);
 
