@@ -1544,6 +1544,12 @@ ipmi::RspType<> ipmiChassisIdentify(std::optional<uint8_t> interval,
 {
     uint8_t identifyInterval = interval.value_or(DEFAULT_IDENTIFY_TIME_OUT);
     bool forceIdentify = force.value_or(0) & 0x01;
+    uint8_t force_byte_res_field = force.value_or(0) & 0xFE;
+
+    if (0 != force_byte_res_field)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
 
     if (identifyInterval || forceIdentify)
     {
