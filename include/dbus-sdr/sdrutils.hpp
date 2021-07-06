@@ -238,6 +238,10 @@ enum class SensorTypeCodes : uint8_t
     current = 0x3,
     fan = 0x4,
     other = 0xB,
+    memory = 0x0c,
+    power_unit = 0x09,
+    buttons = 0x14,
+    watchdog2 = 0x23,
 };
 
 enum class SensorEventTypeCodes : uint8_t
@@ -261,7 +265,15 @@ const static boost::container::flat_map<
          {"fan_pwm", std::make_pair(SensorTypeCodes::fan,
                                     SensorEventTypeCodes::threshold)},
          {"power", std::make_pair(SensorTypeCodes::other,
-                                  SensorEventTypeCodes::threshold)}}};
+                                  SensorEventTypeCodes::threshold)},
+         {"memory", std::make_pair(SensorTypeCodes::memory,
+                                   SensorEventTypeCodes::sensorSpecified)},
+         {"state", std::make_pair(SensorTypeCodes::power_unit,
+                                  SensorEventTypeCodes::sensorSpecified)},
+         {"buttons", std::make_pair(SensorTypeCodes::buttons,
+                                    SensorEventTypeCodes::sensorSpecified)},
+         {"watchdog", std::make_pair(SensorTypeCodes::watchdog2,
+                                     SensorEventTypeCodes::sensorSpecified)}}};
 
 std::string getSensorTypeStringFromPath(const std::string& path);
 
