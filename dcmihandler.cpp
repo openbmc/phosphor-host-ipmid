@@ -435,6 +435,13 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto responseData =
         reinterpret_cast<dcmi::GetAssetTagResponse*>(outPayload.data());
 
+    if (*data_len != sizeof(dcmi::GetAssetTagRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
     // Verify offset to read and number of bytes to read are not exceeding the
     // range.
     if ((requestData->offset > dcmi::assetTagMaxOffset) ||
@@ -501,6 +508,13 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     std::vector<uint8_t> outPayload(sizeof(dcmi::SetAssetTagResponse));
     auto responseData =
         reinterpret_cast<dcmi::SetAssetTagResponse*>(outPayload.data());
+
+    if (*data_len < sizeof(dcmi::SetAssetTagRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
 
     // Verify offset to read and number of bytes to read are not exceeding the
     // range.
