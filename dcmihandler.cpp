@@ -737,9 +737,9 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 val &= dcmi::gMaxSELEntriesMask;
             }
             val <<= cap.position;
+            responseData->data[cap.bytePosition] |= static_cast<uint8_t>(val);
             responseData->data[cap.bytePosition - 1] |=
-                static_cast<uint8_t>(val);
-            responseData->data[cap.bytePosition] |= val >> dcmi::gByteBitSize;
+                val >> dcmi::gByteBitSize;
         }
         else
         {
