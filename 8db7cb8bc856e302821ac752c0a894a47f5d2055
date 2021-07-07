@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "03921cc9_d30eff5e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-07T09:27:51Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we be adding support for non-threshold sensors instead of adding static sensors implementations from sensor.yaml?",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 0
+      },
+      "revId": "8db7cb8bc856e302821ac752c0a894a47f5d2055",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1da1447a_ebd5a449",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-07T09:27:51Z",
+      "side": 1,
+      "message": "Is this suppose be like this?\n\nWon\u0027t this remove functionality if we don\u0027t want hybrid sensors?",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 6
+      },
+      "revId": "8db7cb8bc856e302821ac752c0a894a47f5d2055",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4efc430_becc55d5",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-07T09:27:51Z",
+      "side": 1,
+      "message": "rm line",
+      "revId": "8db7cb8bc856e302821ac752c0a894a47f5d2055",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
