@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9805a437_c1b31d2a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-08T17:41:21Z",
+      "side": 1,
+      "message": "oh dang. I don\u0027t have any particular suggestion on how to fix this.\n\nYeah, it won\u0027t really work without exposing the dbus path for the non-threshold sensors.",
+      "parentUuid": "fbb9cbe2_982f0d60",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 0
+      },
+      "revId": "8db7cb8bc856e302821ac752c0a894a47f5d2055",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1da1447a_ebd5a449",
         "filename": "dbus-sdr/sdrutils.cpp",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "The functionality of this try-catch won\u0027t get influenced when we disable the flag: FEATURE_HYBRID_SENSORS. For example, I tested this function with the flag disabled and kept no sensor exist on dbus. This try-catch worked well and printed the expected error message:\n    sd_bus_call: xyz.openbmc_project.Common.Error.ResourceNotFound: path or object not found",
       "parentUuid": "1da1447a_ebd5a449",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 6
+      },
+      "revId": "8db7cb8bc856e302821ac752c0a894a47f5d2055",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e745280_d04c26dd",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-08T17:41:21Z",
+      "side": 1,
+      "message": "oh wait, nevermind. I thought the code already existed and you only added \n\n```\n#ifdef FEATURE_HYBRID_SENSORS\n```\n.\n\nyeah, this is fine.",
+      "parentUuid": "744f9330_ef6eff68",
       "range": {
         "startLine": 78,
         "startChar": 0,
