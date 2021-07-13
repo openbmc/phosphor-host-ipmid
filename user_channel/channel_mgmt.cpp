@@ -909,7 +909,7 @@ int ChannelConfig::loadChannelConfig()
 
     // Collect the list of NIC interfaces connected to the BMC. Use this
     // information to only add IPMI channels that have active NIC interfaces.
-    struct ifaddrs *ifaddr, *ifa;
+    struct ifaddrs *ifaddr = nullptr, *ifa = nullptr;
     if (int err = getifaddrs(&ifaddr); err < 0)
     {
         log<level::DEBUG>("Unable to acquire network interfaces");
