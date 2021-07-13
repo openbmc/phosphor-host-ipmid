@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a51ea53_747aace4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-07-13T16:56:49Z",
+      "side": 1,
+      "message": "Better one may be:\nFix static analysis (uninitialized var) warnings",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 13
+      },
+      "revId": "7d664cd74ca0e5fadec81931c721f1bd41be1541",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "364cbd67_868aa965",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-07-13T16:56:49Z",
+      "side": 1,
+      "message": "Test individual modified commands at basic level. To ensure modified code hits once atleast and runs successfuly.",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 20
+      },
+      "revId": "7d664cd74ca0e5fadec81931c721f1bd41be1541",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
