@@ -1083,12 +1083,222 @@ ipmi::RspType<uint16_t, // Next Record ID
             systemEventType{timestamp, generatorID, evmRev, sensorType,
                             sensorNum, eventType, eventDir, eventData});
     }
+    else if (recordType >= dynamic_sensors::ipmi::sel::oemTsEventFirst &&
+             recordType <= dynamic_sensors::ipmi::sel::oemTsEventLast)
+    {
+        // Get the timestamp
+        std::tm timeStruct = {};
+        std::istringstream entryStream(entryTimestamp);
+
+        uint32_t timestamp = ipmi::sel::invalidTimeStamp;
+        if (entryStream >> std::get_time(&timeStruct, "%Y-%m-%dT%H:%M:%S"))
+        {
+            timestamp = std::mktime(&timeStruct);
+        }
+
+        // Only keep the bytes that fit in the record
+        std::array<uint8_t, dynamic_sensors::ipmi::sel::oemTsEventSize> eventData{};
+        std::copy_n(eventDataBytes.begin(),
+                    std::min(eventDataBytes.size(), eventData.size()),
+                    eventData.begin());
+
+        return ipmi::responseSuccess(nextRecordID, recordID, recordType,
+                                     oemTsEventType{timestamp, eventData});
+    }
+    else if (recordType >= dynamic_sensors::ipmi::sel::oemEventFirst)
+    {
+        // Only keep the bytes that fit in the record
+        std::array<uint8_t, dynamic_sensors::ipmi::sel::oemEventSize> eventData{};
+        std::copy_n(eventDataBytes.begin(),
+                    std::min(eventDataBytes.size(), eventData.size()),
+                    eventData.begin());
+
+        return ipmi::responseSuccess(nextRecordID, recordID, recordType,
+                                     eventData);
+    }
 
     return ipmi::responseUnspecifiedError();
 }
 
+std::string decrementEntries(std::string line)
+{
+    std::string logTime;
+    std::string logString;
+    std::stringstream logStringStream(line); //Read in entry
+    getline(logStringStream, logTime, ' '); //Split entry of time stamp
+    getline(logStringStream, logString, ' '); //split entry of rest
+
+    std::stringstream splitLogStream(logString);
+    std::string recordID;
+    std::string remainingEntry;
+
+    getline(splitLogStream, recordID, ','); //Grab recordID from entry
+    getline(splitLogStream, remainingEntry); //Store rest of entry in a string
+
+    int recordIDInt = std::stoi(recordID);
+
+    //Return decremented entry
+    return logTime + " " + std::to_string(recordIDInt-1)
+        + ',' + remainingEntry + '\n';
+}
+
+static bool cleanUpSelFiles(std::filesystem::path entrySELLogFile,
+        std::filesystem::path tempSelFile, std::filesystem::path oldIPMISELFile)
+{
+    std::error_code ec;
+
+    //Store original ipmi_sel to old_ file
+    std::filesystem::rename(entrySELLogFile, oldIPMISELFile, ec);
+    if (ec){
+        std::cout << "DeleteSELEntry: Failed save SEL to temp File" <<std::endl;
+        //If saving file to temp fails remove temp file
+        std::filesystem::remove(tempSelFile, ec);
+        if (ec){
+            std::cout << "DeleteSELEntry: Failed remove temp file on error" <<std::endl;
+            return false;
+        }
+        return false;
+    }
+    //Move temp file to ipmi_sel.# location
+    std::filesystem::rename(tempSelFile, entrySELLogFile, ec);
+    if (ec){
+        std::cout << "DeleteSELEntry: Failed to move new ipmi_sel"<<std::endl;
+        //If moving temp file fails move original ipmi_sel file back
+        std::filesystem::rename(oldIPMISELFile, entrySELLogFile, ec);
+        if (ec){
+            std::cout << "DeleteSELEntry: Failed move saved sel" <<std::endl;
+            return false;
+        }
+        return false;
+    }
+    //Remove the original saved ipmi_sel
+    std::filesystem::remove(oldIPMISELFile, ec);
+    if (ec){
+        std::cout << "DeleteSELEntry: Failed to delete old_ipmi_sel"<<std::endl;
+        return false;
+    }
+    return true;
+}
+
+ipmi::RspType<uint16_t> ipmiDeleteSELEntry(uint16_t reservationID, uint16_t targetID)
+{
+    if (!checkSELReservation(reservationID))
+    {
+        return ipmi::responseInvalidReservationId();
+    }
+
+    cancelSELReservation();
+
+    // Get the ipmi_sel log files
+    std::vector<std::filesystem::path> selLogFiles;
+    if (!getSELLogFiles(selLogFiles))
+    {
+        return ipmi::responseSensorInvalid();
+    }
+
+    // Record ID is the first entry field following the timestamp. It is
+    // preceded by a space and followed by a comma
+    std::string search = " " + std::to_string(targetID) + ",";
+    std::string line;
+    std::filesystem::path entrySELLogFile;
+    bool targetEntryFound = false;
+    // Loop through the ipmi_sel log entries
+    for (const std::filesystem::path& file : selLogFiles)
+    {
+        std::ifstream logStream(file);
+        if (!logStream.is_open())
+        {
+             continue;
+        }
+
+        while (std::getline(logStream, line))
+        {
+            // Check if the record ID matches
+            if (line.find(search) != std::string::npos)
+            {
+                //Target Entry found and file that contains it
+                entrySELLogFile = file;
+                targetEntryFound = true;
+            }
+        }
+    }
+    if(!targetEntryFound)
+    {
+        std::cout << "DeleteSELEntry: Target SEL Entry not found" <<std::endl;
+        return ipmi::responseUnspecifiedError();
+    };
+
+    std::ofstream tempSelLogFile("/var/log/tempSEL");
+
+    std::ifstream logStream(entrySELLogFile);
+    bool entryRemoved = false;
+    //Start copying line by line to temp file until entry is found
+    while (std::getline(logStream, line))
+    {
+        if (entryRemoved)
+        {
+            //Now that Target entry has been skipped start decrementing following entries
+            tempSelLogFile << decrementEntries(line);
+        }
+        // Check if the record ID matches
+        else if (line.find(search) != std::string::npos)
+        {
+            //Skip writing target entry to temp file
+            entryRemoved = true;
+        }
+        else
+        {
+            //Write entry to temp file
+            tempSelLogFile << line << '\n';
+        }
+    }
+
+    std::filesystem::path tempSelFile("/var/log/tempSEL");
+    std::filesystem::path oldIPMISELFile("/var/log/old_ipmi_sel");
+
+    if(!cleanUpSelFiles(entrySELLogFile, tempSelFile, oldIPMISELFile))
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    //Now that file containing the entry has been modified other ipmi_sel have to decremented
+    std::string ipmiSELFileExtension = entrySELLogFile.extension();
+    if (!ipmiSELFileExtension.empty()) //Check that modified file has a .#
+    {
+        int ipmiSELExtensionNum = std::stoi(ipmiSELFileExtension.substr(ipmiSELFileExtension.find(".")+1));
+        for(int i = ipmiSELExtensionNum-1; i >= 0; i--) //decrement entries in files with a lower .# extension
+        {
+            if (i == 0)
+            {
+                entrySELLogFile = "/var/log/ipmi_sel";
+                oldIPMISELFile = "/var/log/old_ipmi_sel";
+            }
+            else
+            {
+                entrySELLogFile.replace_extension(std::to_string(i));
+                oldIPMISELFile.replace_extension(std::to_string(i));
+            }
+            tempSelFile.replace_extension(std::to_string(i));
+            std::ofstream tempSelLogFile("/var/log/tempSEL."+ std::to_string(i));
+            std::ifstream logStream(entrySELLogFile);
+            std::string line;
+
+            while (std::getline(logStream, line))
+            {
+                tempSelLogFile << decrementEntries(line);
+            }
+
+            if(!cleanUpSelFiles(entrySELLogFile, tempSelFile, oldIPMISELFile))
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+        }
+    }
+    return ipmi::responseSuccess(targetID);
+}
+
 ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
-    uint16_t recordID, uint8_t recordType, uint32_t timestamp,
+    ipmi::Context::ptr ctx, uint16_t recordID, uint8_t recordType, uint32_t timestamp,
     uint16_t generatorID, uint8_t evmRev, uint8_t sensorType, uint8_t sensorNum,
     uint8_t eventType, uint8_t eventData1, uint8_t eventData2,
     uint8_t eventData3)
@@ -1097,8 +1307,56 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
     // added
     cancelSELReservation();
 
-    uint16_t responseID = 0xFFFF;
-    return ipmi::responseSuccess(responseID);
+    if(recordType == 0x02) //System SEL
+    {
+        std::string message = "System User Generated SEL";
+        std::string sensorPath = getPathFromSensorNumber(sensorNum);
+        if(sensorPath.empty())
+        {
+            std::cout << "ADDSELEntry: Error Sensor path not found" <<std::endl;
+            sensorPath = ""; //If sensor path not found set to ""
+        }
+
+        boost::system::error_code ec;
+        std::vector<uint8_t> eventData = {eventData1, eventData2, eventData3};
+
+        //Perform sdbus IpmiSelAdd from phosphor-sel-logger
+        uint16_t responseID = ctx->bus->yield_method_call<uint16_t>(
+                ctx->yield, ec, "xyz.openbmc_project.Logging.IPMI", "/xyz/openbmc_project/Logging/IPMI",
+                "xyz.openbmc_project.Logging.IPMI","IpmiSelAdd", message, sensorPath, eventData,
+                (bool)(eventType>>7), generatorID);
+
+        if (ec)
+        {
+            std::cout << "ADDSELEntry: Failed to add System SEL through sdbus" <<std::endl;
+            return ipmi::responseUnspecifiedError();
+        }
+        return ipmi::responseSuccess(responseID);
+    }
+    else if((recordType >= 0xC0) && (recordType <= 0xDF)) //OEM SEL
+    {
+        std::string message = "OEM User Generated SEL";
+        boost::system::error_code ec;
+        uint8_t partA = static_cast<uint8_t>((generatorID & 0xFF00) >> 8);
+        uint8_t partB = static_cast<uint8_t>(generatorID & 0x00FF);
+
+        //Following the IPMI spec for OEM commands the generatorID and evmRev are used as ManufactureID
+        //And sensorType, sensorNum, eventType and eventData 1,2,3 are sent as the OEM Defined
+        std::vector<uint8_t> eventData = {partA, partB, evmRev,sensorType, sensorNum, eventType, eventData1, eventData2, eventData3};
+
+        //Perform sdbus IpmiSelAddOEM from phosphor-sel-logger
+        uint16_t responseID = ctx->bus->yield_method_call<uint16_t>(
+                ctx->yield, ec, "xyz.openbmc_project.Logging.IPMI", "/xyz/openbmc_project/Logging/IPMI",
+                "xyz.openbmc_project.Logging.IPMI","IpmiSelAddOem", message, eventData, recordType);
+
+        if (ec)
+        {
+            std::cout << "ADDSELEntry: Failed to add OEM SEL through sdbus" <<std::endl;
+            return ipmi::responseUnspecifiedError();
+        }
+        return ipmi::responseSuccess(responseID);
+    }
+    return ipmi::responseUnspecifiedError();
 }
 
 ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
@@ -1245,47 +1503,58 @@ void registerStorageFunctions()
     createTimers();
     startMatch();
 
+#ifdef FEATURE_DYNAMIC_SENSORS
+        constexpr int priority = ipmi::prioOemBase;
+#else
+        constexpr int priority = ipmi::prioOpenBmcBase;
+#endif
+
     // <Get FRU Inventory Area Info>
-    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdGetFruInventoryAreaInfo,
                           ipmi::Privilege::User, ipmiStorageGetFruInvAreaInfo);
     // <READ FRU Data>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdReadFruData, ipmi::Privilege::User,
                           ipmiStorageReadFruData);
 
     // <WRITE FRU Data>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdWriteFruData,
                           ipmi::Privilege::Operator, ipmiStorageWriteFruData);
 
     // <Get SEL Info>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
                           ipmiStorageGetSELInfo);
 
     // <Get SEL Entry>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelEntry, ipmi::Privilege::User,
                           ipmiStorageGetSELEntry);
 
+    // <Delete SEL Entry>
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
+            ipmi::storage::cmdDeleteSelEntry, ipmi::Privilege::User,
+            ipmiDeleteSELEntry);
+
     // <Add SEL Entry>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdAddSelEntry,
                           ipmi::Privilege::Operator, ipmiStorageAddSELEntry);
 
     // <Clear SEL>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdClearSel, ipmi::Privilege::Operator,
                           ipmiStorageClearSEL);
 
     // <Get SEL Time>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelTime, ipmi::Privilege::User,
                           ipmiStorageGetSELTime);
 
     // <Set SEL Time>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+    ipmi::registerHandler(priority, ipmi::netFnStorage,
                           ipmi::storage::cmdSetSelTime,
                           ipmi::Privilege::Operator, ipmiStorageSetSELTime);
 }

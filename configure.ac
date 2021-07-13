@@ -294,6 +294,13 @@ AC_ARG_ENABLE([dynamic_sensors],
       *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic_sensors]) ;;
       esac],[dynamic_sensors=true]
       )
+
+AS_IF([test x$dynamic_sensors = xtrue],
+    AC_MSG_NOTICE([Enabling dynamic sensors])
+    [cpp_flags="$cpp_flags -DFEATURE_DYNAMIC_SENSORS"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling dynamic sensors])
+)
 AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic_sensors = xtrue])
 
 # Create configured output
