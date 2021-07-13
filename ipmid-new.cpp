@@ -769,7 +769,7 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
     boost::asio::spawn(*getIoContext(), [b = std::move(b)](
                                             boost::asio::yield_context yield) {
         sdbusplus::message::message m{std::move(b)};
-        unsigned char seq, netFn, lun, cmd;
+        unsigned char seq = 0, netFn = 0, lun = 0, cmd = 0;
         std::vector<uint8_t> data;
 
         m.read(seq, netFn, lun, cmd, data);
