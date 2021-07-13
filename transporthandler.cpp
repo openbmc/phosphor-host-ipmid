@@ -1069,7 +1069,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::IPFamilyEnables:
         {
-            uint8_t enables;
+            uint8_t enables = 0;
             if (req.unpack(enables) != 0 || !req.fullyUnpacked())
             {
                 return responseReqDataLenInvalid();
@@ -1095,8 +1095,8 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             uint7_t rsvd;
             bool enabled;
             in6_addr ip;
-            std::array<uint8_t, sizeof(ip)> ipbytes;
-            uint8_t prefix;
+            std::array<uint8_t, sizeof(ip)> ipbytes = {0};
+            uint8_t prefix = 0;
             uint8_t status;
             if (req.unpack(set, rsvd, enabled, ipbytes, prefix, status) != 0 ||
                 !req.fullyUnpacked())
@@ -1168,7 +1168,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::IPv6StaticRouter1PrefixLength:
         {
-            uint8_t prefix;
+            uint8_t prefix = 0;
             if (req.unpack(prefix) != 0 || !req.fullyUnpacked())
             {
                 return responseReqDataLenInvalid();
@@ -1191,7 +1191,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::cipherSuitePrivilegeLevels:
         {
-            uint8_t reserved;
+            uint8_t reserved = 0;
             std::array<uint4_t, ipmi::maxCSRecords> cipherSuitePrivs;
 
             if (req.unpack(reserved, cipherSuitePrivs) || !req.fullyUnpacked())
