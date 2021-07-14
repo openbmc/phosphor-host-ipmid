@@ -1627,8 +1627,8 @@ std::map<Mode::Modes, IpmiValue> modeDbusToIpmi = {
  *  @param[in] source - boot source value
  *  @return On failure return IPMI error.
  */
-static ipmi_ret_t setBootSource(ipmi::Context::ptr& ctx,
-                                const Source::Sources& source)
+static ipmi::Cc setBootSource(ipmi::Context::ptr& ctx,
+                              const Source::Sources& source)
 {
     using namespace chassis::internal;
     using namespace chassis::internal::cache;
@@ -1901,7 +1901,7 @@ ipmi::RspType<ipmi::message::Payload>
             log<level::ERR>(
                 "ipmiChassisGetSysBootOptions: Unsupported parameter",
                 entry("PARAM=0x%x", static_cast<uint8_t>(bootOptionParameter)));
-            return ipmi::responseUnspecifiedError();
+            return ipmi::responseParmNotSupported();
         }
     }
     return ipmi::responseUnspecifiedError();
