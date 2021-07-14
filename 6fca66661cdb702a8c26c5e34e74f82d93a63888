@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "604db497_4939fa2f",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-14T19:46:59Z",
+      "side": 1,
+      "message": "this message provides no context to where in the code the issue is happening and has the same message as the one on line 334.",
+      "range": {
+        "startLine": 282,
+        "startChar": 0,
+        "endLine": 282,
+        "endChar": 42
+      },
+      "revId": "6fca66661cdb702a8c26c5e34e74f82d93a63888",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5b00981_ec645453",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-14T19:46:59Z",
+      "side": 1,
+      "message": "this call does not throw on errors, it returns an error code.",
+      "range": {
+        "startLine": 415,
+        "startChar": 0,
+        "endLine": 415,
+        "endChar": 75
+      },
+      "revId": "6fca66661cdb702a8c26c5e34e74f82d93a63888",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46aa0fad_02acec5e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-14T19:46:59Z",
+      "side": 1,
+      "message": "this call does not throw on errors, it returns an error code.",
+      "revId": "6fca66661cdb702a8c26c5e34e74f82d93a63888",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
