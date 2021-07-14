@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e7e7524b_3445eb0e",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-14T20:40:53Z",
+      "side": 1,
+      "message": "is this safe? I am not sure if this is doing a deep copy or what. Either way, it is a copy, which could be avoided with a move, if the loop var is not const auto\u0026.",
+      "range": {
+        "startLine": 155,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 60
+      },
+      "revId": "6aa266600a2c915fe1c35dccdaca6416e0f0144c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
