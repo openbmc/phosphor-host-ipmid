@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4f9a535_df8d6261",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-14T20:31:21Z",
+      "side": 1,
+      "message": "I am fine with this at file scope rather than every time logging is used.",
+      "range": {
+        "startLine": 422,
+        "startChar": 0,
+        "endLine": 422,
+        "endChar": 42
+      },
+      "revId": "f11dc19b0397824302595b763f63564a82ec6b21",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e63babd_0982c5b9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-14T20:31:21Z",
+      "side": 1,
+      "message": "get",
+      "range": {
+        "startLine": 423,
+        "startChar": 35,
+        "endLine": 423,
+        "endChar": 38
+      },
+      "revId": "f11dc19b0397824302595b763f63564a82ec6b21",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17f978cb_f977d2fa",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-14T20:31:21Z",
+      "side": 1,
+      "message": "if constexpr (debug)",
+      "range": {
+        "startLine": 470,
+        "startChar": 0,
+        "endLine": 470,
+        "endChar": 14
+      },
+      "revId": "f11dc19b0397824302595b763f63564a82ec6b21",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
