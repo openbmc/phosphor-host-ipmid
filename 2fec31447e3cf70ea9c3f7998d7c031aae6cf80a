@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79942443_abeca72c",
+        "filename": "configure.ac",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-14T21:11:42Z",
+      "side": 1,
+      "message": "Do we need this? does FEATURE_DYNAMIC_SENSORS not get enable at all with the flag?",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 303,
+        "endChar": 1
+      },
+      "revId": "2fec31447e3cf70ea9c3f7998d7c031aae6cf80a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca964afa_0614cbe2",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1641,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-14T21:11:42Z",
+      "side": 1,
+      "message": "This is no different from just setting prioOemBase by default.\n\nFEATURE_DYNAMIC_SENSORS enabled the builds for the code. \n\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/de54f486d633c5bc7a6d17b77ee46d8a8fdf57cd/Makefile.am#L167-L181\n\nThis code won\u0027t be used without it.",
+      "range": {
+        "startLine": 1637,
+        "startChar": 0,
+        "endLine": 1641,
+        "endChar": 6
+      },
+      "revId": "2fec31447e3cf70ea9c3f7998d7c031aae6cf80a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
