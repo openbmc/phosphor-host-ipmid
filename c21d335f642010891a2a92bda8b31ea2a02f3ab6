@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "19678cca_9258a90e",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1025,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-07-15T11:06:05Z",
+      "side": 1,
+      "message": "Hi Meera,\nEven with this new change, you will end up in throwing same \"Out of range - channel number\u0027 error message only.\nAs per spec, We define channel number values (0 to 15) as unsigned integer and negative numbers also handled automatically as they go out of range.\nSo, please implement the change as Vernon proposed.\n\nThanks,\nSaravanan",
+      "parentUuid": "d1bbd889_1951a3eb",
+      "range": {
+        "startLine": 1025,
+        "startChar": 16,
+        "endLine": 1025,
+        "endChar": 57
+      },
+      "revId": "c21d335f642010891a2a92bda8b31ea2a02f3ab6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df2b725b_e14141ed",
         "filename": "user_channel/channel_mgmt.cpp",
         "patchSetId": 4
