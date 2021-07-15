@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "63e7f479_617a89e9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-15T00:23:12Z",
+      "side": 1,
+      "message": "I have updated the log to mentioned the priority names.",
+      "parentUuid": "604db497_4939fa2f",
+      "range": {
+        "startLine": 282,
+        "startChar": 0,
+        "endLine": 282,
+        "endChar": 42
+      },
+      "revId": "6fca66661cdb702a8c26c5e34e74f82d93a63888",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d5b00981_ec645453",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "b7a54594_ef038ac7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-15T00:23:12Z",
+      "side": 1,
+      "message": "Done. Thanks.",
+      "parentUuid": "d5b00981_ec645453",
+      "range": {
+        "startLine": 415,
+        "startChar": 0,
+        "endLine": 415,
+        "endChar": 75
+      },
+      "revId": "6fca66661cdb702a8c26c5e34e74f82d93a63888",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46aa0fad_02acec5e",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 7
@@ -62,6 +110,24 @@
       "revId": "6fca66661cdb702a8c26c5e34e74f82d93a63888",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0cb46de_3e467161",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-15T00:23:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46aa0fad_02acec5e",
+      "revId": "6fca66661cdb702a8c26c5e34e74f82d93a63888",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
