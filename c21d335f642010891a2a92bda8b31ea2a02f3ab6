@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d1bbd889_1951a3eb",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1025,
+      "author": {
+        "id": 1001116
+      },
+      "writtenOn": "2021-07-15T09:29:46Z",
+      "side": 1,
+      "message": "Hi Vernon,\n\nYes, but one doubt what if user tried to send negative numbers then we should throw error message right. In above code, return value from stoi is assigned to unsigned int8 type. Hence chNum will never have negative(-ve) value. Even if we pass -ve value to stoi, it will be always converted to positive and assign it to chNum which is wrong. \nBut we should throw error when user try to give negative channel numbers.  To handle this, we should declare chNum as type int8_t like below\n\n           int8_t chNumber \u003d std::stoi(chKey, nullptr, 10);\n            if ((chNumber \u003c 0) || (chNumber \u003e maxIpmiChannels))\n            {\n                log\u003clevel::DEBUG\u003e(\n                    \"Invalid channel access entry in config file\");\n                throw std::out_of_range(\"Out of range - channel number\");\n            }\n            uint8_t chNum \u003d static_cast\u003cuint8_t\u003e(chNumber);\n\nPlease correct me if any thing wrong here and I have made above changes as part of Klocwork reported issue and planning to push for review.\n\nThanks\nMeera",
+      "parentUuid": "3b606193_77e8afb7",
+      "range": {
+        "startLine": 1025,
+        "startChar": 16,
+        "endLine": 1025,
+        "endChar": 57
+      },
+      "revId": "c21d335f642010891a2a92bda8b31ea2a02f3ab6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df2b725b_e14141ed",
         "filename": "user_channel/channel_mgmt.cpp",
         "patchSetId": 4
