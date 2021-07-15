@@ -46,6 +46,30 @@
       "revId": "3b896bf2d17922577633473eabb85a62ce1d377a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "245d8f3d_7371bb83",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1423,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-07-15T00:20:40Z",
+      "side": 1,
+      "message": "oh jk. I think I moved it so constructSensorSdr can use it. But either way, helper function was already there as part of intel-ipmi-oem and constructSensorSdr just refactored out some part of the codes in it.",
+      "parentUuid": "53b185a5_75fecde2",
+      "range": {
+        "startLine": 1423,
+        "startChar": 11,
+        "endLine": 1423,
+        "endChar": 30
+      },
+      "revId": "3b896bf2d17922577633473eabb85a62ce1d377a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
