@@ -1416,6 +1416,9 @@ ipmi::RspType<> ipmiChassisControl(uint8_t chassisControl)
             break;
 
         case CMD_HARD_RESET:
+            rc = initiate_state_transition(
+                State::Host::Transition::ForceWarmReboot);
+            break;
         case CMD_POWER_CYCLE:
             // SPEC has a section that says certain implementations can trigger
             // PowerOn if power is Off when a command to power cycle is
