@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb9cfd46_adfda14e",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-07-16T18:34:47Z",
+      "side": 1,
+      "message": "All should be uint2_t, right ?",
+      "range": {
+        "startLine": 80,
+        "startChar": 4,
+        "endLine": 83,
+        "endChar": 27
+      },
+      "revId": "876171b85aef14a379989d9a5dcf8abc1be8b7f6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0d5832a_262de834",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-07-16T18:34:47Z",
+      "side": 1,
+      "message": "You can try using simple \u0026 operators to check whether these bits are set.",
+      "range": {
+        "startLine": 361,
+        "startChar": 9,
+        "endLine": 361,
+        "endChar": 55
+      },
+      "revId": "876171b85aef14a379989d9a5dcf8abc1be8b7f6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
