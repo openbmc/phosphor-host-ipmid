@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "61b70a1e_ba282aff",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-16T16:23:25Z",
+      "side": 1,
+      "message": "I prefer not renaming them. Just use the types directly.",
+      "parentUuid": "b6cba772_97bbe8a3",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 246,
+        "endChar": 35
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5f7e424c_6b126055",
         "filename": "include/ipmid/types.hpp",
         "patchSetId": 1
@@ -176,6 +200,30 @@
       "side": 1,
       "message": "correct, just chekced with few examples\n\nwill it be better if we define another password class with all our requirements",
       "parentUuid": "bd259fab_38b5edb7",
+      "range": {
+        "startLine": 278,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 0
+      },
+      "revId": "0a651e8d1cba552adc0ee0e124a9ca2e759b7613",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09bcf346_8365f539",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-16T16:23:25Z",
+      "side": 1,
+      "message": "I really hesitate defining a new class.\n\nHere is the minimum change I have come up with that works:\n\n\ntemplate \u003ctypename T\u003e\nclass SecureAllocator : public std::allocator\u003cT\u003e\n{\n};\ntemplate \u003ctypename T\u003e\nclass SecureAllocator : public std::allocator\u003cT\u003e\n{\n  public:\n    template \u003ctypename U\u003e\n    struct rebind\n    {\n        typedef SecureAllocator\u003cU\u003e other;\n    };\n\n    void deallocate(T* p, size_t n)\n    {\n        OPENSSL_cleanse(p, n);\n        return std::allocator\u003cT\u003e::deallocate(p, n);\n    }\n};\n\nusing SecureString \u003d\n    std::basic_string\u003cchar, std::char_traits\u003cchar\u003e, SecureAllocator\u003cchar\u003e\u003e;\n\n// Zero the string on destruction (alloc\u0027d or internal)\ntemplate \u003c\u003e\nSecureString::~SecureString()\n{\n    OPENSSL_cleanse(\u0026((*this)[0]), this-\u003esize());\n}\n\n\nI tested this using a class to capture the string pointer and len prior to changes (+, \u003d, std::move) and then inspected the memory after.",
+      "parentUuid": "96972273_90c1e195",
       "range": {
         "startLine": 278,
         "startChar": 0,
