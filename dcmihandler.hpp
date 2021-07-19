@@ -2,6 +2,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include <ipmid/utils.hpp>
 #include <map>
 #include <sdbusplus/bus.hpp>
 #include <string>
@@ -192,56 +193,27 @@ void writeAssetTag(const std::string& assetTag);
 
 /** @brief Read the current power cap value
  *
- *  @param[in] bus - dbus connection
+ *  @param[in] Context - ctx
  *
  *  @return On success return the power cap value.
  */
-uint32_t getPcap(sdbusplus::bus_t& bus);
+uint32_t getPcap(ipmi::Context::ptr& ctx);
 
 /** @brief Check if the power capping is enabled
  *
- *  @param[in] bus - dbus connection
+ *  @param[in] Context - ctx
  *
  *  @return true if the powerCap is enabled and false if the powercap
  *          is disabled.
  */
-bool getPcapEnabled(sdbusplus::bus_t& bus);
-
-/** @struct GetPowerLimitResponse
- *
- *  DCMI payload for Get Power Limit command response.
- */
-struct GetPowerLimitResponse
-{
-    uint16_t reserved;       //!< Reserved.
-    uint8_t exceptionAction; //!< Exception action.
-    uint16_t powerLimit;     //!< Power limit requested in watts.
-    uint32_t correctionTime; //!< Correction time limit in milliseconds.
-    uint16_t reserved1;      //!< Reserved.
-    uint16_t samplingPeriod; //!< Statistics sampling period in seconds.
-} __attribute__((packed));
+bool getPcapEnabled(ipmi::Context::ptr& ctx);
 
 /** @brief Set the power cap value
  *
- *  @param[in] bus - dbus connection
+ *  @param[in] Context - ctx
  *  @param[in] powerCap - power cap value
  */
-void setPcap(sdbusplus::bus_t& bus, const uint32_t powerCap);
-
-/** @struct SetPowerLimitRequest
- *
- *  DCMI payload for Set Power Limit command request.
- */
-struct SetPowerLimitRequest
-{
-    uint16_t reserved;       //!< Reserved
-    uint8_t reserved1;       //!< Reserved
-    uint8_t exceptionAction; //!< Exception action.
-    uint16_t powerLimit;     //!< Power limit requested in watts.
-    uint32_t correctionTime; //!< Correction time limit in milliseconds.
-    uint16_t reserved2;      //!< Reserved.
-    uint16_t samplingPeriod; //!< Statistics sampling period in seconds.
-} __attribute__((packed));
+void setPcap(ipmi::Context::ptr& ctx, const uint32_t powerCap);
 
 /** @brief Enable or disable the power capping
  *
