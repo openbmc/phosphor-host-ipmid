@@ -407,6 +407,26 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
+    // check length
+    // powerLimitAction,reserved,reserved = 1,2,3
+    if((*data_len > 3 || (*data_len < 3))
+      {
+        log<level::ERR>("DCMI Power Activate/Deactivate length is too long/short!");
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+      }
+    // check reserved bytes
+    if(requestData->reserved != 0)
+      {
+        log<level::ERR>("DCMI Power Activate/Deactivate reserved bytes must be 0x00!");
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+      }
+    // powerLimitAction can only be 0 or 1
+    if((requestData->powerLimitAction < 0) || (requestData->powerLimitAction > 1))
+      {
+        log<level::ERR>("DCMI Power Activate/Deactivate must be 0x00 or 0x01!");
+        return IPMI_CC_PARM_OUT_OF_RANGE;
+      }
+
     try
     {
         dcmi::setPcapEnable(sdbus,
