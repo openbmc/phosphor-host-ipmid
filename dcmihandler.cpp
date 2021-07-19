@@ -39,6 +39,8 @@ constexpr auto DCMI_ACTIVATE_DHCP_MASK = 0x01;
 constexpr auto DCMI_ACTIVATE_DHCP_REPLY = 0x00;
 constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE = 0x04;
 constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE = 0x03;
+constexpr auto DCMI_SET_PWR_LIMIT_EXCEPTION_ACTION_RESERVED = 0x12;
+constexpr auto DCMI_SET_PWR_LIMIT_EXCEPTION_ACTION_RESERVED1 = 0xFF;
 constexpr auto DHCP_TIMING1 = 0x04;       // 4 sec
 constexpr auto DHCP_TIMING2_UPPER = 0x00; // 2 min
 constexpr auto DHCP_TIMING2_LOWER = 0x78;
@@ -299,20 +301,45 @@ Json parseJSONConfig(const std::string& configFile)
 
 } // namespace dcmi
 
-ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                         ipmi_request_t request, ipmi_response_t response,
-                         ipmi_data_len_t data_len, ipmi_context_t context)
+/** @brief implements the get Power Limit command
+ *  @param
+ *   - reqByte - Reserved
+ *
+ *  @returns completion code plus response data
+ *   - reserved - Reserved
+ *   - exceptionAction - Exception Actions
+ *   - powerLimit - Power limit requested in watts
+ *   - correctionTime - Correction time limit in milliseconds
+ *   - reserved1 - Reserved
+ *   - samplingPeriod - Statistics sampling period in seconds
+ */
+
+ipmi::RspType<uint16_t, // Reserved.
+              uint8_t,  // Exception action.
+              uint16_t, // Power limit requested in watts.
+              uint32_t, // Correction time limit in milliseconds.
+              uint16_t, // Reserved.
+              uint16_t  // Statistics sampling period in seconds.
+              >
+    getPowerLimit(uint16_t reqByte)
 {
+    uint16_t reserved = 0;
+    uint8_t exceptionAction = 0;
+    uint16_t powerLimit = 0;
+    uint32_t correctionTime = 0;
+    uint16_t reserved1 = 0;
+    uint16_t samplingPeriod = 0;
+
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        *data_len = 0;
         log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
+        return ipmi::responseInvalidCommand();
     }
 
-    std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerLimitResponse));
-    auto responseData =
-        reinterpret_cast<dcmi::GetPowerLimitResponse*>(outPayload.data());
+    if (reqByte != 0)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
 
     sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
     uint32_t pcapValue = 0;
@@ -325,8 +352,7 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     catch (InternalFailure& e)
     {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     /*
@@ -335,60 +361,76 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
      * and log event to SEL.
      */
     constexpr auto exception = 0x01;
-    responseData->exceptionAction = exception;
+    exceptionAction = exception;
 
-    responseData->powerLimit = static_cast<uint16_t>(pcapValue);
+    powerLimit = static_cast<uint16_t>(pcapValue);
 
     /*
      * Correction time limit and Statistics sampling period is currently not
      * populated.
      */
 
-    *data_len = outPayload.size();
-    memcpy(response, outPayload.data(), *data_len);
-
     if (pcapEnable)
     {
-        return IPMI_CC_OK;
+        return ipmi::responseSuccess(reserved, exceptionAction, powerLimit,
+                                     correctionTime, reserved1, samplingPeriod);
     }
     else
     {
-        return IPMI_DCMI_CC_NO_ACTIVE_POWER_LIMIT;
+        return ipmi::responseNoActivePowerLimit();
     }
 }
 
-ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                         ipmi_request_t request, ipmi_response_t response,
-                         ipmi_data_len_t data_len, ipmi_context_t context)
+/** @brief implements the set Power Limit command
+ *  @param
+ *   - reserved - Reserved
+ *   - reserved1 - Reserved
+ *   - exceptionAction - Exception Actions
+ *   - powerLimit - Power Limit Requested in Watts
+ *   - correctionTime - Correction Time Limit in milliseconds
+ *   - reserved2 - Reserved
+ *   - samplingPeriod - Statistics Sampling period in seconds
+ *
+ *  @returns completion code
+ */
+
+ipmi::RspType<> setPowerLimit(uint16_t reserved, uint8_t reserved1,
+                              uint8_t exceptionAction, uint16_t powerLimit,
+                              uint32_t correctionTime, uint16_t reserved2,
+                              uint16_t samplingPeriod)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        *data_len = 0;
         log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
+        return ipmi::responseInvalidCommand();
     }
 
-    auto requestData =
-        reinterpret_cast<const dcmi::SetPowerLimitRequest*>(request);
+    if ((reserved != 0) || (reserved1 != 0) || (reserved2 != 0))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if ((exceptionAction >= DCMI_SET_PWR_LIMIT_EXCEPTION_ACTION_RESERVED) &&
+        (exceptionAction <= DCMI_SET_PWR_LIMIT_EXCEPTION_ACTION_RESERVED1))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
 
     sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
     // Only process the power limit requested in watts.
     try
     {
-        dcmi::setPcap(sdbus, requestData->powerLimit);
+        dcmi::setPcap(sdbus, powerLimit);
     }
     catch (InternalFailure& e)
     {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    log<level::INFO>("Set Power Cap",
-                     entry("POWERCAP=%u", requestData->powerLimit));
+    log<level::INFO>("Set Power Cap", entry("POWERCAP=%u", powerLimit));
 
-    *data_len = 0;
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
 ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
@@ -1393,14 +1435,14 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
-
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_LIMIT, NULL,
-                           getPowerLimit, PRIVILEGE_USER);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdGetPowerLimit,
+                               ipmi::Privilege::User, getPowerLimit);
 
     // <Set Power Limit>
-
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_POWER_LIMIT, NULL,
-                           setPowerLimit, PRIVILEGE_OPERATOR);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdSetPowerLimit,
+                               ipmi::Privilege::Operator, setPowerLimit);
 
     // <Activate/Deactivate Power Limit>
 
