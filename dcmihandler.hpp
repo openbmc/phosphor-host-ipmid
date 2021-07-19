@@ -207,6 +207,15 @@ uint32_t getPcap(sdbusplus::bus::bus& bus);
  */
 bool getPcapEnabled(sdbusplus::bus::bus& bus);
 
+/** @struct GetPowerLimitRequest
+ *
+ *  DCMI payload for Get Power Limit command resquest.
+ */
+struct GetPowerLimitRequest
+{
+    uint16_t reserved; //!< Reserved.
+} __attribute__((packed));
+
 /** @struct GetPowerLimitResponse
  *
  *  DCMI payload for Get Power Limit command response.
