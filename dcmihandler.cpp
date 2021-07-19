@@ -310,6 +310,23 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         return IPMI_CC_INVALID;
     }
 
+    auto requestData =
+        reinterpret_cast<const dcmi::GetPowerLimitRequest*>(request);
+
+    if (*data_len != sizeof(dcmi::GetPowerLimitRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    if (requestData->reserved != 0)
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
     std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerLimitResponse));
     auto responseData =
         reinterpret_cast<dcmi::GetPowerLimitResponse*>(outPayload.data());
@@ -370,6 +387,21 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     auto requestData =
         reinterpret_cast<const dcmi::SetPowerLimitRequest*>(request);
+
+    if (*data_len != sizeof(dcmi::SetPowerLimitRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        *data_len = 0;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+
+    if ((requestData->reserved != 0) || (requestData->reserved1 != 0) ||
+        (requestData->reserved2 != 0))
+    {
+        *data_len = 0;
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
 
     sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
