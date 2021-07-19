@@ -175,7 +175,7 @@ struct Message
             auto request =
                 reinterpret_cast<LAN::header::Request*>(payload.data());
             command |= request->netfn << 8;
-            command |= request->cmd;
+            command |= static_cast<uint32_t>(request->cmd);
         }
         return command;
     }
