@@ -177,6 +177,12 @@ int PasswdMgr::encryptDecryptData(bool doEncrypt, const EVP_CIPHER* cipher,
         EVP_CIPHER_CTX_new(), ::EVP_CIPHER_CTX_free);
     EVP_CIPHER_CTX_set_padding(ctx.get(), 1);
 
+    if (!ctx)
+    {
+        log<level::DEBUG>("Error: EVP_CIPHER_CTX is NULL");
+        return -ENOMEM;
+    }
+
     // Set key & IV
     int retval = EVP_CipherInit_ex(ctx.get(), cipher, NULL, key, iv,
                                    static_cast<int>(doEncrypt));
