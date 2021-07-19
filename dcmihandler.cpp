@@ -44,6 +44,8 @@ constexpr auto DHCP_TIMING2_UPPER = 0x00; // 2 min
 constexpr auto DHCP_TIMING2_LOWER = 0x78;
 constexpr auto DHCP_TIMING3_UPPER = 0x00; // 64 sec
 constexpr auto DHCP_TIMING3_LOWER = 0x40;
+constexpr auto DEACTIVATE_POWER_LIMIT = 0x00;
+constexpr auto ACTIVATE_POWER_LIMIT = 0x01;
 // When DHCP Option 12 is enabled the string "SendHostName=true" will be
 // added into n/w configuration file and the parameter
 // SendHostNameEnabled will set to true.
@@ -390,38 +392,45 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t applyPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                           ipmi_response_t, ipmi_data_len_t data_len,
-                           ipmi_context_t)
+ipmi::RspType<> applyPowerLimit(uint8_t powerLimitAction, uint16_t reserved)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        *data_len = 0;
         log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
+        return ipmi::responseInvalidCommand();
     }
 
-    auto requestData =
-        reinterpret_cast<const dcmi::ApplyPowerLimitRequest*>(request);
+    // Reserved bytes must be zero
+    if (reserved != 0)
+    {
+        log<level::ERR>(
+            "DCMI Activate/Deactivate reserved field contents modified");
+        return ipmi::responseInvalidFieldRequest();
+    }
 
-    sdbusplus::bus_t sdbus{ipmid_get_sd_bus_connection()};
+    // To Activate/Deactivate power limit action can be 0 or 1
+    if (powerLimitAction != DEACTIVATE_POWER_LIMIT &&
+        powerLimitAction != ACTIVATE_POWER_LIMIT)
+    {
+        log<level::ERR>(
+            "DCMI Activate/Deactivate invalid data field in request");
+        return ipmi::responseInvalidFieldRequest();
+    }
+    sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
 
     try
     {
-        dcmi::setPcapEnable(sdbus,
-                            static_cast<bool>(requestData->powerLimitAction));
+        dcmi::setPcapEnable(sdbus, static_cast<bool>(powerLimitAction));
     }
     catch (const InternalFailure& e)
     {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     log<level::INFO>("Set Power Cap Enable",
-                     entry("POWERCAPENABLE=%u", requestData->powerLimitAction));
+                     entry("POWERCAPENABLE=%u", powerLimitAction));
 
-    *data_len = 0;
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
 ipmi_ret_t getAssetTag(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
@@ -1398,8 +1407,9 @@ void register_netfn_dcmi_functions()
 
     // <Activate/Deactivate Power Limit>
 
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::APPLY_POWER_LIMIT,
-                           NULL, applyPowerLimit, PRIVILEGE_OPERATOR);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdActDeactivatePwrLimit,
+                               ipmi::Privilege::Operator, applyPowerLimit);
 
     // <Get Asset Tag>
 

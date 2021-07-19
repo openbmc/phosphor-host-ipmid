@@ -250,16 +250,6 @@ struct SetPowerLimitRequest
  */
 void setPcapEnable(sdbusplus::bus_t& bus, bool enabled);
 
-/** @struct ApplyPowerLimitRequest
- *
- *  DCMI payload for Activate/Deactivate Power Limit command request.
- */
-struct ApplyPowerLimitRequest
-{
-    uint8_t powerLimitAction; //!< Power limit activation
-    uint16_t reserved;        //!< Reserved
-} __attribute__((packed));
-
 /** @struct GetMgmntCtrlIdStrRequest
  *
  *  DCMI payload for Get Management Controller Identifier String cmd request.
