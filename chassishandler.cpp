@@ -1648,6 +1648,30 @@ static ipmi_ret_t setBootSource(ipmi::Context::ptr& ctx,
     return ipmi::ccSuccess;
 }
 
+/** @brief Set the property value for boot valid
+ *  @param[in] ctx - context pointer
+ *  @param[in] valid - boot valid value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootValid(ipmi::Context::ptr& ctx, bool valid)
+{
+    using namespace chassis::internal;
+    using namespace chassis::internal::cache;
+    settings::Objects& objects = getObjects();
+    auto bootSetting = settings::boot::setting(objects, bootSourceIntf);
+    const auto& bootSourceSetting = std::get<settings::Path>(bootSetting);
+    boost::system::error_code ec = ipmi::setDbusProperty(
+        ctx, objects.service(bootSourceSetting, bootSourceIntf),
+        bootSourceSetting, bootSourceIntf, "Valid", valid);
+    if (ec)
+    {
+        log<level::ERR>("Error in boot source valid set",
+                        entry("ERROR=%s", ec.message().c_str()));
+        return ipmi::ccUnspecifiedError;
+    }
+    return ipmi::ccSuccess;
+}
+
 /** @brief Set the property value for boot mode
  *  @param[in] ctx - context pointer
  *  @param[in] mode - boot mode value
@@ -1804,6 +1828,17 @@ ipmi::RspType<ipmi::message::Payload>
             }
             auto bootSource = Source::convertSourcesFromString(result);
 
+            // Get boot flag valid
+            bool validValue = true;
+            ec = ipmi::getDbusProperty(
+                ctx, objects.service(bootSourceSetting, bootSourceIntf),
+                bootSourceSetting, bootSourceIntf, "Valid", validValue);
+            if (ec)
+            {
+                log<level::ERR>("Error getting Boot Valid");
+                return ipmi::responseUnspecifiedError();
+            }
+
             Type::Types bootType;
             bool bootTypeIntfPresent = true;
             try
@@ -1867,7 +1902,7 @@ ipmi::RspType<ipmi::message::Payload>
             auto oneTimeEnabled =
                 std::get<settings::boot::OneTimeEnabled>(bootSetting);
             uint1_t permanent = oneTimeEnabled ? 0 : 1;
-            uint1_t validFlag = 1;
+            uint1_t validFlag = validValue;
 
             response.pack(bootOptionParameter, reserved1, uint5_t{},
                           uint1_t{biosBootType}, uint1_t{permanent},
@@ -2014,6 +2049,14 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
 
                 ipmi::setDbusProperty(dbus, service, oneTimePath, enabledIntf,
                                       "Enabled", !permanent);
+            }
+
+            rc = setBootValid(ctx, validFlag);
+            if (rc != ipmi::ccSuccess)
+            {
+                log<level::ERR>("ipmiChassisSetSysBootOptions: Error in "
+                                "setting boot valid");
+                return ipmi::responseUnspecifiedError();
             }
 
             auto modeItr =
