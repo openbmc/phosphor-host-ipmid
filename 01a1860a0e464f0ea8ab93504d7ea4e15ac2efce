@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9d4f52c5_ffe82c76",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-07-21T08:51:31Z",
+      "side": 1,
+      "message": "To be honest I was glad that I could get rig of all this `settings::boot::setting` code. It was always somewhat cryptic to me.\nWhy do you think it is necessary?\nAlso I don\u0027t believe that it would work now, as now there are only one BootSource/BootMode/BootType object on a Dbus.\nAnd the settings code checks for 2 objects:\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/settings.cpp#L104\n```\nstd::tuple\u003cPath, OneTimeEnabled\u003e setting(const Objects\u0026 objects,\n                                         const Interface\u0026 iface)\n{\n    constexpr auto bootObjCount \u003d 2;\n\n    const std::vector\u003cPath\u003e\u0026 paths \u003d objects.map.at(iface);\n    auto count \u003d paths.size();\n    if (count !\u003d bootObjCount)\n    {\n        log\u003clevel::ERR\u003e(\"Exactly two objects expected\",\n                        entry(\"INTERFACE\u003d%s\", iface.c_str()),\n                        entry(\"COUNT\u003d%d\", count));\n        elog\u003cInternalFailure\u003e();\n    }\n```",
+      "parentUuid": "504b0d81_6867b72b",
+      "range": {
+        "startLine": 1635,
+        "startChar": 13,
+        "endLine": 1635,
+        "endChar": 43
+      },
+      "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a743c611_e68ede57",
         "filename": "chassishandler.cpp",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2021-07-21T05:58:17Z",
       "side": 1,
       "message": "I do not think you should change this logic. The previous code already handles the case by try-catch on getting the service.",
+      "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f748496b_0afb9bb4",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1680,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-07-21T08:51:31Z",
+      "side": 1,
+      "message": "The `ipmi::setDbusProperty(ctx,` do not throw. As for the getting the service name, please check discussion above",
+      "parentUuid": "a743c611_e68ede57",
       "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
