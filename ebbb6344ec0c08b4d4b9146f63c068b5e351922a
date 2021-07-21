@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6b409cf_bb6281a6",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-21T00:18:13Z",
+      "side": 1,
+      "message": "this try/catch should not be needed around the entire block below, only around the getAllDbusProperties. \n\nThe VariantToDoubleVisitor would throw, but mappedVariant should not.\n\nThe same comment applies for the try/catch for the criticalThresIntf below.",
+      "range": {
+        "startLine": 490,
+        "startChar": 1,
+        "endLine": 491,
+        "endChar": 3
+      },
+      "revId": "ebbb6344ec0c08b4d4b9146f63c068b5e351922a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
