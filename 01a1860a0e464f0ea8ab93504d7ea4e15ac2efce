@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "504b0d81_6867b72b",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-07-21T05:58:17Z",
+      "side": 1,
+      "message": "Do not hard code the service name, get the service name as before.\nAlso apply to all other places.",
+      "range": {
+        "startLine": 1635,
+        "startChar": 13,
+        "endLine": 1635,
+        "endChar": 43
+      },
+      "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a743c611_e68ede57",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1680,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-07-21T05:58:17Z",
+      "side": 1,
+      "message": "I do not think you should change this logic. The previous code already handles the case by try-catch on getting the service.",
+      "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
