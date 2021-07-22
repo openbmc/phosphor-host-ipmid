@@ -99,6 +99,24 @@
       "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b0b6b0f_61f544b0",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1680,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-07-22T08:55:29Z",
+      "side": 1,
+      "message": "In this particular case BootType interface is optional.\nIt can be present on the BMCs for the systems based on x86 arch CPUs, and absent on the BMCs for the systems based on POWER arch CPUs.\nSo it is not possible to say if the error was caused by the absent interface (which is intendend by design) or by some other reason.\nTherefore we\u0027ve ignored exception before this patch and don\u0027t handle error with this patch.\n\nSimilar functions for the mandatory interfaces (BootMode/BootSource) handle error case.",
+      "parentUuid": "f166226b_630e41ef",
+      "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
