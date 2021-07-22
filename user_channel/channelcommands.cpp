@@ -369,6 +369,7 @@ RspType<uint8_t> // formatVersion
 {
     uint8_t channel =
         convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
+    constexpr uint8_t payloadTypeNotSupported = 0x80;
 
     if (reserved || !isValidChannel(channel))
     {
@@ -381,7 +382,7 @@ RspType<uint8_t> // formatVersion
     {
         log<level::DEBUG>(
             "Get channel payload version - No support on channel");
-        return response(ccActionNotSupportedForChannel);
+        return response(payloadTypeNotSupported);
     }
 
     if (!isValidPayloadType(static_cast<PayloadType>(payloadTypeNum)))
@@ -389,7 +390,6 @@ RspType<uint8_t> // formatVersion
         log<level::ERR>(
             "Get channel payload version - Payload type unavailable");
 
-        constexpr uint8_t payloadTypeNotSupported = 0x80;
         return response(payloadTypeNotSupported);
     }
 
