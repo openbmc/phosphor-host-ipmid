@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a064e950_61a35137",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-07-23T16:10:40Z",
+      "side": 1,
+      "message": "Imperative mood:\nFix incorrect std::string object usage",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 40
+      },
+      "revId": "b886c028dc7d4fc555aefb1404ee3b008296989b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3eb31ed3_04438905",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-07-23T16:10:40Z",
+      "side": 1,
+      "message": "Add Tested section and how you unit-tested info.\n\"Tested:\"",
+      "revId": "b886c028dc7d4fc555aefb1404ee3b008296989b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
