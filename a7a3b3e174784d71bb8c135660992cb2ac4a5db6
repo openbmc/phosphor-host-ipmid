@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1985d49e_b458ff0e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000414
+      },
+      "writtenOn": "2021-07-23T18:43:24Z",
+      "side": 1,
+      "message": "Can you make the issue statement clearer?",
+      "revId": "a7a3b3e174784d71bb8c135660992cb2ac4a5db6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
