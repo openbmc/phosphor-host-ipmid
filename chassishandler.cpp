@@ -1981,6 +1981,13 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         {
             return ipmi::responseInvalidFieldRequest();
         }
+        if (!biosBootType)
+        {
+            // return error if BIOS boot type is legacy
+            log<level::ERR>("ipmiChassisSetSysBootOptions: BIOS boot type "
+                            "Legacy is not supported");
+            return ipmi::responseInvalidFieldRequest();
+        }
 
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
