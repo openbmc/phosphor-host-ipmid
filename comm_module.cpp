@@ -40,6 +40,12 @@ void sessionSetupCommands()
          &GetChannelCapabilities,
          session::Privilege::HIGHEST_MATCHING,
          true},
+        // Get Channel Cipher Suites Command
+        {{(static_cast<uint32_t>(message::PayloadType::IPMI) << 16) |
+          static_cast<uint16_t>(::command::NetFns::APP) | 0x54},
+         &getChannelCipherSuites,
+         session::Privilege::HIGHEST_MATCHING,
+         true},
         // Set Session Privilege Command
         {{(static_cast<uint32_t>(message::PayloadType::IPMI) << 16) |
           static_cast<uint16_t>(command::NetFns::APP) | 0x3B},
