@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3cf07c88_6d8a6dcb",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-07-26T21:45:11Z",
+      "side": 1,
+      "message": "At the very least the handler should look up the service so that other services can offer the interface too. The call to the mapper is abstracted here by the settings::boot::setting stuff (which I agree is annoying, but only because it is not used in other places), but the idea is that the interface is fixed, but the provider can be replaced.",
+      "parentUuid": "9d4f52c5_ffe82c76",
+      "range": {
+        "startLine": 1635,
+        "startChar": 13,
+        "endLine": 1635,
+        "endChar": 43
+      },
+      "revId": "01a1860a0e464f0ea8ab93504d7ea4e15ac2efce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a743c611_e68ede57",
         "filename": "chassishandler.cpp",
         "patchSetId": 2
