@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b5db726_2b8b01c8",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1984,
+      "author": {
+        "id": 1000295
+      },
+      "writtenOn": "2021-07-26T08:05:37Z",
+      "side": 1,
+      "message": "i hope, all bios are moved from legacyboot (CSM boot) to EFI. If anyone support the legacy  CSM BIOS then we need to patch as intel specific patch.",
+      "revId": "936a57fe92044d70b117ce015fa503277a5c7510",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
