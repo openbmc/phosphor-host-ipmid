@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "4644d5ae_74e7a03b",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1645,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-07-29T08:07:09Z",
+      "side": 1,
+      "message": "Why? The ctx (context pointer) is already here in every function. So it is even easier to use the async versions. I didn\u0027t add it in this patch, it was already here before that.\nMoreover I were even asked to do it when I\u0027ve first implemented boot type handle (\"chassishandler: Add support for boot type flag (Legacy/EFI)\" https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/40900) and I did that in a \"chassishandler: Refactor get/set boot parameters code\" (https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/41413).\nAlso I was asked to use yielding calls in my separate commit \"sensorhandler: Don\u0027t fail on absent Threshold.Warning interface\" (https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/43136)\nSo I\u0027ve got an understanding that yielding versions are preferred to use. I guess it is because they do not throw, but return an error code. Because of that we can get rid of all the try/catch statements.",
+      "parentUuid": "ffd68e9e_cff8ff88",
+      "revId": "bde9df61ada21317bbf26fb872597a4608759847",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f194cd00_6a07cc2f",
         "filename": "chassishandler.cpp",
         "patchSetId": 3
@@ -56,6 +74,30 @@
       "revId": "bde9df61ada21317bbf26fb872597a4608759847",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6865a3c0_c3bfb008",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2153,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-07-29T08:07:09Z",
+      "side": 1,
+      "message": "Done. Also I\u0027ve spotted a few places where function return codes weren\u0027t checked and have added necessary checks for them as well.",
+      "parentUuid": "f194cd00_6a07cc2f",
+      "range": {
+        "startLine": 2153,
+        "startChar": 29,
+        "endLine": 2153,
+        "endChar": 53
+      },
+      "revId": "bde9df61ada21317bbf26fb872597a4608759847",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
