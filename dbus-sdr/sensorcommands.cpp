@@ -540,7 +540,13 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
             return ipmi::responseResponseError();
         }
         auto sensorObject = sensorMap.find(sensor::sensorInterface);
-        if (sensorObject != sensorMap.end())
+        if (sensorObject == sensorMap.end())
+        {
+            return ipmi::responseResponseError();
+        }
+
+        // Only allow external SetSensor if write permission granted
+        if (!details::sdrWriteTable.getWritePermission(sensorNumber))
         {
             return ipmi::responseResponseError();
         }
@@ -590,7 +596,7 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
             return ipmi::responseResponseError();
         }
         auto sensorObject = sensorMap.find(sensor::vrInterface);
-        if (sensorObject != sensorMap.end())
+        if (sensorObject == sensorMap.end())
         {
             return ipmi::responseResponseError();
         }
@@ -1618,10 +1624,18 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     // Remember the sensor name, as determined for this sensor number
     details::sdrStatsTable.updateName(sensornumber, name);
 
-#ifdef FEATURE_DYNAMIC_SENSORS_WRITE
-    // Set the sensor settable state to true by default
-    get_sdr::body::init_settable_state(true, &record.body);
-#endif
+    bool sensorSettable = false;
+    auto mutability =
+        sensorMap.find("xyz.openbmc_project.Sensor.ValueMutability");
+    if (mutability != sensorMap.end())
+    {
+        sensorSettable =
+            mappedVariant<bool>(mutability->second, "Mutable", false);
+    }
+    get_sdr::body::init_settable_state(sensorSettable, &record.body);
+
+    // Grant write permission to sensors deemed externally settable
+    details::sdrWriteTable.setWritePermission(sensornumber, sensorSettable);
 
     IPMIThresholds thresholdData;
     try
@@ -2225,12 +2239,10 @@ void registerSensorFunctions()
                           ipmi::sensor_event::cmdPlatformEvent,
                           ipmi::Privilege::Operator, ipmiSenPlatformEvent);
 
-#ifdef FEATURE_DYNAMIC_SENSORS_WRITE
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
                           ipmi::Privilege::Operator, ipmiSetSensorReading);
-#endif
 
     // <Get Sensor Reading>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
