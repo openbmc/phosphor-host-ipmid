@@ -1619,8 +1619,17 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     details::sdrStatsTable.updateName(sensornumber, name);
 
 #ifdef FEATURE_DYNAMIC_SENSORS_WRITE
-    // Set the sensor settable state to true by default
-    get_sdr::body::init_settable_state(true, &record.body);
+    bool sensorSettable = false;
+    auto settableObject = sensorObject->second.find("Mutable");
+    if (settableObject != sensorObject->second.end())
+    {
+        auto ptrBool = std::get_if<bool>(&(settableObject->second));
+        if (ptrBool)
+        {
+            sensorSettable = *ptrBool;
+        }
+    }
+    get_sdr::body::init_settable_state(sensorSettable, &record.body);
 #endif
 
     IPMIThresholds thresholdData;
