@@ -209,9 +209,63 @@ class IPMIStatsTable
     }
 };
 
+class IPMIWriteEntry
+{
+  private:
+    bool writePermission = false;
+
+  public:
+    bool getWritePermission(void) const
+    {
+        return writePermission;
+    }
+
+    void setWritePermission(bool permission)
+    {
+        writePermission = permission;
+    }
+};
+
+class IPMIWriteTable
+{
+  private:
+    std::vector<IPMIWriteEntry> entries;
+
+  private:
+    void padEntries(size_t index)
+    {
+        // Pad vector until entries[index] becomes a valid index
+        while (entries.size() <= index)
+        {
+            IPMIWriteEntry newEntry;
+
+            entries.push_back(std::move(newEntry));
+        }
+    }
+
+  public:
+    void wipeTable(void)
+    {
+        entries.clear();
+    }
+
+    bool getWritePermission(size_t index)
+    {
+        padEntries(index);
+        return entries[index].getWritePermission();
+    }
+
+    void setWritePermission(size_t index, bool permission)
+    {
+        padEntries(index);
+        entries[index].setWritePermission(permission);
+    }
+};
+
 // Store information for threshold sensors and they are not used by VR
 // sensors. These objects are global singletons, used from a variety of places.
 inline IPMIStatsTable sdrStatsTable;
+inline IPMIWriteTable sdrWriteTable;
 
 /**
  * Search ObjectMapper for sensors and update them to subtree.

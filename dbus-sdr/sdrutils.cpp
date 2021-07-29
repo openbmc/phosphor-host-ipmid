@@ -93,6 +93,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     // Add sensors to SensorTree
     static constexpr const std::array sensorInterfaces = {
         "xyz.openbmc_project.Sensor.Value",
+        "xyz.openbmc_project.Sensor.ValueMutability",
         "xyz.openbmc_project.Sensor.Threshold.Warning",
         "xyz.openbmc_project.Sensor.Threshold.Critical"};
     static constexpr const std::array vrInterfaces = {
@@ -139,6 +140,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     sensorUpdatedIndex++;
     // The SDR is being regenerated, wipe the old stats
     sdrStatsTable.wipeTable();
+    sdrWriteTable.wipeTable();
     return sensorUpdatedIndex;
 }
 
