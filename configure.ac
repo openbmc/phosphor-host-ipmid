@@ -278,13 +278,6 @@ AC_ARG_ENABLE([dynamic-sensors-write],
       esac],[dynamic-sensors-write=false]
       )
 
-AS_IF([test x$dynamic-sensors-write = xtrue],
-    AC_MSG_NOTICE([Enabling dynamic sensors write feature])
-    [cpp_flags="$cpp_flags -DFEATURE_DYNAMIC_SENSORS_WRITE"]
-    AC_SUBST([CPPFLAGS], [$cpp_flags]),
-    AC_MSG_WARN([Disabling dynamic sensors write feature])
-)
-
 # Dynamic sensors stack is enabled by default; offer a way to disable it
 AC_ARG_ENABLE([dynamic-sensors],
     [ --enable-dynamic-sensors   Enable/disable Dynamic Sensors stack],
