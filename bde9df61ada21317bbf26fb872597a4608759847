@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "2ea1f949_42212273",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1642,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-07-29T05:43:36Z",
+      "side": 1,
+      "message": "I do not think you need to use this function here, instead, use\n\n std::string getService(sdbusplus::bus::bus\u0026 bus, const std::string\u0026 intf, const std::string\u0026 path)\n\nto make a sync call to get the service.\n\nBecause the previous code was using the sync calls, it\u0027s a bit weird to use async calls here.",
+      "revId": "bde9df61ada21317bbf26fb872597a4608759847",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ffd68e9e_cff8ff88",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1645,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-07-29T05:43:36Z",
+      "side": 1,
+      "message": "The same as above, use the sync version.",
+      "revId": "bde9df61ada21317bbf26fb872597a4608759847",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f194cd00_6a07cc2f",
         "filename": "chassishandler.cpp",
         "patchSetId": 3
