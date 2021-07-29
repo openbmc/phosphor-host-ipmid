@@ -266,25 +266,6 @@ AC_ARG_ENABLE([ipmi-whitelist],
       )
 AM_CONDITIONAL([FEATURE_IPMI_WHITELIST], [test x$ipmi_whitelist = xtrue])
 
-# Dynamic sensors stack write permission is disabled by default; offer a way to enable it
-# Change to true if you wish to allow external IPMI users to modify your sensor
-# values, and you are OK with the security implications of doing so.
-AC_ARG_ENABLE([dynamic-sensors-write],
-    [ --enable-dynamic-sensors-write   Enable/disable Dynamic Sensors writes],
-    [case "${enableval}" in
-      yes) dynamic-sensors-write=true ;;
-      no) dynamic-sensors-write=false ;;
-      *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic-sensors-write]) ;;
-      esac],[dynamic-sensors-write=false]
-      )
-
-AS_IF([test x$dynamic-sensors-write = xtrue],
-    AC_MSG_NOTICE([Enabling dynamic sensors write feature])
-    [cpp_flags="$cpp_flags -DFEATURE_DYNAMIC_SENSORS_WRITE"]
-    AC_SUBST([CPPFLAGS], [$cpp_flags]),
-    AC_MSG_WARN([Disabling dynamic sensors write feature])
-)
-
 # Dynamic sensors stack is enabled by default; offer a way to disable it
 AC_ARG_ENABLE([dynamic-sensors],
     [ --enable-dynamic-sensors   Enable/disable Dynamic Sensors stack],
