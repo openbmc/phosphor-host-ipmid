@@ -472,11 +472,11 @@ uint8_t channelFromMessage(sdbusplus::message::message& msg)
 /* called from sdbus async server context */
 auto executionEntry(boost::asio::yield_context yield,
                     sdbusplus::message::message& m, NetFn netFn, uint8_t lun,
-                    Cmd cmd, std::vector<uint8_t>& data,
+                    Cmd cmd, ipmi::SecureBuffer& data,
                     std::map<std::string, ipmi::Value>& options)
 {
     const auto dbusResponse =
-        [netFn, lun, cmd](Cc cc, const std::vector<uint8_t>& data = {}) {
+        [netFn, lun, cmd](Cc cc, const ipmi::SecureBuffer& data = {}) {
             constexpr uint8_t netFnResponse = 0x01;
             uint8_t retNetFn = netFn | netFnResponse;
             return std::make_tuple(retNetFn, lun, cmd, cc, data);
@@ -564,7 +564,7 @@ auto executionEntry(boost::asio::yield_context yield,
                                                channel, userId, sessionId,
                                                privilege, rqSA, hostIdx, yield);
     auto request = std::make_shared<ipmi::message::Request>(
-        ctx, std::forward<std::vector<uint8_t>>(data));
+        ctx, std::forward<ipmi::SecureBuffer>(data));
     message::Response::ptr response = executeIpmiCommand(request);
 
     return dbusResponse(response->cc, response->payload.raw);
@@ -770,14 +770,14 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
                                             boost::asio::yield_context yield) {
         sdbusplus::message::message m{std::move(b)};
         unsigned char seq = 0, netFn = 0, lun = 0, cmd = 0;
-        std::vector<uint8_t> data;
+        ipmi::SecureBuffer data;
 
         m.read(seq, netFn, lun, cmd, data);
         std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
         auto ctx = std::make_shared<ipmi::Context>(
             bus, netFn, lun, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, 0, yield);
         auto request = std::make_shared<ipmi::message::Request>(
-            ctx, std::forward<std::vector<uint8_t>>(data));
+            ctx, std::forward<ipmi::SecureBuffer>(data));
         ipmi::message::Response::ptr response =
             ipmi::executeIpmiCommand(request);
 
