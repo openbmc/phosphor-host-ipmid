@@ -241,7 +241,7 @@ class UserAccess
      *  @return ccSuccess for success, others for failure.
      */
     Cc setSpecialUserPassword(const std::string& userName,
-                              const std::string& userPassword);
+                              const SecureString& userPassword);
 
     /** @brief to set user privilege and access details
      *
