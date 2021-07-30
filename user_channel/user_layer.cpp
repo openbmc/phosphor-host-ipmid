@@ -33,7 +33,7 @@ Cc ipmiUserInit()
     return ccSuccess;
 }
 
-std::string ipmiUserGetPassword(const std::string& userName)
+SecureString ipmiUserGetPassword(const std::string& userName)
 {
     return passwdMgr.getPasswdByUserName(userName);
 }
@@ -95,7 +95,7 @@ Cc ipmiUserSetUserPassword(const uint8_t userId, const char* userPassword)
 }
 
 Cc ipmiSetSpecialUserPassword(const std::string& userName,
-                              const std::string& userPassword)
+                              const SecureString& userPassword)
 {
     return getUserAccessObject().setSpecialUserPassword(userName, userPassword);
 }

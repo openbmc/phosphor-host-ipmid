@@ -17,6 +17,7 @@
 #include <openssl/evp.h>
 
 #include <ctime>
+#include <ipmid/types.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -45,7 +46,7 @@ class PasswdMgr
      * @return password string. will return empty string, if unable to locate
      * the user
      */
-    std::string getPasswdByUserName(const std::string& userName);
+    SecureString getPasswdByUserName(const std::string& userName);
 
     /** @brief Update / clear  username and password entry for the specified
      * user
@@ -61,7 +62,7 @@ class PasswdMgr
 
   private:
     using UserName = std::string;
-    using Password = std::string;
+    using Password = SecureString;
     std::unordered_map<UserName, Password> passwdMapList;
     std::time_t fileLastUpdatedTime;
 
@@ -87,7 +88,7 @@ class PasswdMgr
      *
      * @return error response
      */
-    int readPasswdFileData(std::vector<uint8_t>& outBytes);
+    int readPasswdFileData(SecureString& outBytes);
     /** @brief  Updates special password file by clearing the password entry
      *  for the user specified.
      *

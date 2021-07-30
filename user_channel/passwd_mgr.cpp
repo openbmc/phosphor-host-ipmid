@@ -87,13 +87,13 @@ void PasswdMgr::restrictFilesPermission(void)
     }
 }
 
-std::string PasswdMgr::getPasswdByUserName(const std::string& userName)
+SecureString PasswdMgr::getPasswdByUserName(const std::string& userName)
 {
     checkAndReload();
     auto iter = passwdMapList.find(userName);
     if (iter == passwdMapList.end())
     {
-        return std::string();
+        return SecureString();
     }
     return iter->second;
 }
@@ -235,7 +235,7 @@ int PasswdMgr::encryptDecryptData(bool doEncrypt, const EVP_CIPHER* cipher,
 void PasswdMgr::initPasswordMap(void)
 {
     // TODO  phosphor-host-ipmid#170 phosphor::user::shadow::Lock lock{};
-    std::vector<uint8_t> dataBuf;
+    SecureString dataBuf;
 
     if (readPasswdFileData(dataBuf) != 0)
     {
@@ -246,14 +246,14 @@ void PasswdMgr::initPasswordMap(void)
     if (dataBuf.size() != 0)
     {
         // populate the user list with password
-        char* outPtr = reinterpret_cast<char*>(dataBuf.data());
+        char* outPtr = dataBuf.data();
         char* nToken = NULL;
         char* linePtr = strtok_r(outPtr, "\n", &nToken);
         size_t lineSize = 0;
         while (linePtr != NULL)
         {
             size_t userEPos = 0;
-            std::string lineStr(linePtr);
+            SecureString lineStr(linePtr);
             if ((userEPos = lineStr.find(":")) != std::string::npos)
             {
                 lineSize = lineStr.size();
@@ -267,12 +267,10 @@ void PasswdMgr::initPasswordMap(void)
 
     // Update the timestamp
     fileLastUpdatedTime = getUpdatedFileTime();
-    // Clear sensitive data
-    OPENSSL_cleanse(dataBuf.data(), dataBuf.size());
     return;
 }
 
-int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
+int PasswdMgr::readPasswdFileData(SecureString& outBytes)
 {
     std::array<uint8_t, maxKeySize> keyBuff;
     std::ifstream keyFile(encryptKeyFileName, std::ios::in | std::ios::binary);
@@ -344,10 +342,11 @@ int PasswdMgr::readPasswdFileData(std::vector<uint8_t>& outBytes)
 
     size_t outBytesLen = 0;
     // Resize to actual data size
-    outBytes.resize(inBytesLen + EVP_MAX_BLOCK_LENGTH);
+    outBytes.resize(inBytesLen + EVP_MAX_BLOCK_LENGTH, '\0');
     if (encryptDecryptData(false, EVP_aes_128_cbc(), key.data(), keyLen, iv,
                            ivLen, inBytes, inBytesLen, mac, &macLen,
-                           outBytes.data(), &outBytesLen) != 0)
+                           reinterpret_cast<unsigned char*>(outBytes.data()),
+                           &outBytesLen) != 0)
     {
         log<level::DEBUG>("Error in decryption");
         return -EIO;
@@ -370,7 +369,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     size_t inBytesLen = 0;
     size_t isUsrFound = false;
     const EVP_CIPHER* cipher = EVP_aes_128_cbc();
-    std::vector<uint8_t> dataBuf;
+    SecureString dataBuf;
 
     // Read the encrypted file and get the file data
     // Check user existance and return if not exist.
@@ -386,7 +385,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
             dataBuf.size() + newUserName.size() + EVP_CIPHER_block_size(cipher);
     }
 
-    std::vector<uint8_t> inBytes(inBytesLen);
+    SecureString inBytes(inBytesLen, '\0');
     if (inBytesLen != 0)
     {
         char* outPtr = reinterpret_cast<char*>(dataBuf.data());
@@ -396,7 +395,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
         {
             size_t userEPos = 0;
 
-            std::string lineStr(linePtr);
+            SecureString lineStr(linePtr);
             if ((userEPos = lineStr.find(":")) != std::string::npos)
             {
                 if (userName.compare(lineStr.substr(0, userEPos)) == 0)
@@ -405,7 +404,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
                     if (!newUserName.empty())
                     {
                         bytesWritten += std::snprintf(
-                            reinterpret_cast<char*>(&inBytes[0]) + bytesWritten,
+                            &inBytes[0] + bytesWritten,
                             (inBytesLen - bytesWritten), "%s%s\n",
                             newUserName.c_str(),
                             lineStr.substr(userEPos, lineStr.size()).data());
@@ -413,9 +412,9 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
                 }
                 else
                 {
-                    bytesWritten += std::snprintf(
-                        reinterpret_cast<char*>(&inBytes[0]) + bytesWritten,
-                        (inBytesLen - bytesWritten), "%s\n", lineStr.data());
+                    bytesWritten += std::snprintf(&inBytes[0] + bytesWritten,
+                                                  (inBytesLen - bytesWritten),
+                                                  "%s\n", lineStr.data());
                 }
             }
             linePtr = strtok_r(NULL, "\n", &nToken);
@@ -522,10 +521,10 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     size_t outBytesLen = 0;
     if (inBytesLen != 0)
     {
-        if (encryptDecryptData(true, EVP_aes_128_cbc(), key.data(), keyLen,
-                               iv.data(), ivLen, inBytes.data(), inBytesLen,
-                               mac.data(), &macLen, outBytes.data(),
-                               &outBytesLen) != 0)
+        if (encryptDecryptData(
+                true, EVP_aes_128_cbc(), key.data(), keyLen, iv.data(), ivLen,
+                reinterpret_cast<unsigned char*>(inBytes.data()), inBytesLen,
+                mac.data(), &macLen, outBytes.data(), &outBytesLen) != 0)
         {
             log<level::DEBUG>("Error while encrypting the data");
             return -EIO;

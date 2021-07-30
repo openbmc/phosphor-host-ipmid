@@ -751,7 +751,7 @@ bool pamUserCheckAuthenticate(std::string_view username,
 }
 
 Cc UserAccess::setSpecialUserPassword(const std::string& userName,
-                                      const std::string& userPassword)
+                                      const SecureString& userPassword)
 {
     if (pamUpdatePasswd(userName.c_str(), userPassword.c_str()) != PAM_SUCCESS)
     {

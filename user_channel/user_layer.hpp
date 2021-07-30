@@ -17,6 +17,7 @@
 
 #include <bitset>
 #include <ipmid/api.hpp>
+#include <ipmid/types.hpp>
 #include <string>
 
 namespace ipmi
@@ -88,7 +89,7 @@ Cc ipmiUserInit();
  *
  *  @return password or empty string
  */
-std::string ipmiUserGetPassword(const std::string& userName);
+SecureString ipmiUserGetPassword(const std::string& userName);
 
 /** @brief The IPMI call to clear password entry associated with specified
  * username
@@ -166,7 +167,7 @@ Cc ipmiUserSetUserPassword(const uint8_t userId, const char* userPassword);
  *  @return ccSuccess for success, others for failure.
  */
 Cc ipmiSetSpecialUserPassword(const std::string& userName,
-                              const std::string& userPassword);
+                              const SecureString& userPassword);
 
 /** @brief get user name
  *
