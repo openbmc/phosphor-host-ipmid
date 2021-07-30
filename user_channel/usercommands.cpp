@@ -407,28 +407,34 @@ Cc ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
     else if (req->operation == testPassword)
     {
-        auto password = ipmiUserGetPassword(userName);
-        std::string testPassword(
+        SecureString password = ipmiUserGetPassword(userName);
+        SecureString testPassword(
             reinterpret_cast<const char*>(req->userPassword), 0,
             passwordLength);
-        // Note: For security reasons password size won't be compared and
-        // wrong password size completion code will not be returned if size
-        // doesn't match as specified in IPMI specification.
-        if (password != testPassword)
+        // constant time string compare: always compare exactly as many bytes
+        // as the length of the input, resizing the actual password to match,
+        // maintaining a knowledge if the sizes differed originally
+        static const std::array<char, maxIpmi20PasswordSize> empty = {'\0'};
+        size_t cmpLen = testPassword.size();
+        bool pwLenDiffers = password.size() != cmpLen;
+        const char* cmpPassword = nullptr;
+        if (pwLenDiffers)
+        {
+            cmpPassword = empty.data();
+        }
+        else
+        {
+            cmpPassword = password.data();
+        }
+        bool pwBad = CRYPTO_memcmp(cmpPassword, testPassword.data(), cmpLen);
+        pwBad |= pwLenDiffers;
+        if (pwBad)
         {
             log<level::DEBUG>("Test password failed",
                               entry("USER-ID=%d", (uint8_t)req->userId));
-            // Clear sensitive data
-            OPENSSL_cleanse(testPassword.data(), testPassword.length());
-            OPENSSL_cleanse(password.data(), password.length());
-
             return static_cast<Cc>(
                 IPMISetPasswordReturnCodes::ipmiCCPasswdFailMismatch);
         }
-        // Clear sensitive data
-        OPENSSL_cleanse(testPassword.data(), testPassword.length());
-        OPENSSL_cleanse(password.data(), password.length());
-
         return ccSuccess;
     }
     return ccInvalidFieldRequest;
