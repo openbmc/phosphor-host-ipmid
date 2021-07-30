@@ -20,8 +20,8 @@
 
 TEST(Uints, Uint8)
 {
-    std::vector<uint8_t> i = {0x04};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint8_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -34,8 +34,8 @@ TEST(Uints, Uint8)
 
 TEST(Uints, Uint8TooManyBytes)
 {
-    std::vector<uint8_t> i = {0x04, 0x86};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint8_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -48,8 +48,8 @@ TEST(Uints, Uint8TooManyBytes)
 
 TEST(Uints, Uint8InsufficientBytes)
 {
-    std::vector<uint8_t> i = {};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint8_t v = 0;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -61,8 +61,8 @@ TEST(Uints, Uint8InsufficientBytes)
 
 TEST(Uints, Uint16)
 {
-    std::vector<uint8_t> i = {0x04, 0x86};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint16_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -75,8 +75,8 @@ TEST(Uints, Uint16)
 
 TEST(Uints, Uint16TooManyBytes)
 {
-    std::vector<uint8_t> i = {0x04, 0x86, 0x00};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86, 0x00};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint16_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -89,8 +89,8 @@ TEST(Uints, Uint16TooManyBytes)
 
 TEST(Uints, Uint16InsufficientBytes)
 {
-    std::vector<uint8_t> i = {0x04};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint16_t v = 0;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -102,8 +102,8 @@ TEST(Uints, Uint16InsufficientBytes)
 
 TEST(Uints, Uint32)
 {
-    std::vector<uint8_t> i = {0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint32_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -116,8 +116,8 @@ TEST(Uints, Uint32)
 
 TEST(Uints, Uint32TooManyBytes)
 {
-    std::vector<uint8_t> i = {0x04, 0x86, 0x00, 0x02, 0x44};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86, 0x00, 0x02, 0x44};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint32_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -130,8 +130,8 @@ TEST(Uints, Uint32TooManyBytes)
 
 TEST(Uints, Uint32InsufficientBytes)
 {
-    std::vector<uint8_t> i = {0x04, 0x86, 0x00};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86, 0x00};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint32_t v = 0;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -143,8 +143,8 @@ TEST(Uints, Uint32InsufficientBytes)
 
 TEST(Uints, Uint64)
 {
-    std::vector<uint8_t> i = {0x04, 0x86, 0x00, 0x02, 0x44, 0x33, 0x22, 0x11};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86, 0x00, 0x02, 0x44, 0x33, 0x22, 0x11};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint64_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -157,9 +157,9 @@ TEST(Uints, Uint64)
 
 TEST(Uints, Uint64TooManyBytes)
 {
-    std::vector<uint8_t> i = {0x04, 0x86, 0x00, 0x02, 0x44,
-                              0x33, 0x22, 0x11, 0x55};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86, 0x00, 0x02, 0x44,
+                            0x33, 0x22, 0x11, 0x55};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint64_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -172,8 +172,8 @@ TEST(Uints, Uint64TooManyBytes)
 
 TEST(Uints, Uint64InsufficientBytes)
 {
-    std::vector<uint8_t> i = {0x04, 0x86, 0x00, 0x02, 0x44, 0x33, 0x22};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86, 0x00, 0x02, 0x44, 0x33, 0x22};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint64_t v = 0;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -185,8 +185,8 @@ TEST(Uints, Uint64InsufficientBytes)
 
 TEST(Uints, Uint24)
 {
-    std::vector<uint8_t> i = {0x58, 0x23, 0x11};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x58, 0x23, 0x11};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint24_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -199,8 +199,8 @@ TEST(Uints, Uint24)
 
 TEST(FixedInts, Uint24TooManyBytes)
 {
-    std::vector<uint8_t> i = {0x58, 0x23, 0x11, 0x00};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x58, 0x23, 0x11, 0x00};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint24_t v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -213,8 +213,8 @@ TEST(FixedInts, Uint24TooManyBytes)
 
 TEST(FixedInts, Uint24InsufficientBytes)
 {
-    std::vector<uint8_t> i = {0x58, 0x23};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x58, 0x23};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint24_t v = 0;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -228,8 +228,8 @@ TEST(FixedInts, Uint3Uint5)
 {
     // individual bytes are unpacked low-order-bits first
     // v1 will use [2:0], v2 will use [7:3]
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint3_t v1;
     uint5_t v2;
     // check that the number of bytes matches
@@ -246,8 +246,8 @@ TEST(FixedInts, Uint3Uint5)
 TEST(FixedInts, Uint3Uint4TooManyBits)
 {
     // high order bit should not get unpacked
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint3_t v1;
     uint4_t v2;
     // check that the number of bytes matches
@@ -264,8 +264,8 @@ TEST(FixedInts, Uint3Uint4TooManyBits)
 TEST(FixedInts, Uint3Uint6InsufficientBits)
 {
     // insufficient bits to unpack v2
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint3_t v1;
     uint6_t v2;
     // check that the number of bytes matches
@@ -283,8 +283,8 @@ TEST(Bools, Boolx8)
 {
     // individual bytes are unpacked low-order-bits first
     // [v8, v7, v6, v5, v4, v3, v2, v1]
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     bool v8, v7, v6, v5;
     bool v4, v3, v2, v1;
     // check that the number of bytes matches
@@ -309,8 +309,8 @@ TEST(Bools, Boolx8TooManyBits)
     // high order bit should not get unpacked
     // individual bytes are unpacked low-order-bits first
     // [v7, v6, v5, v4, v3, v2, v1]
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     bool v7, v6, v5;
     bool v4, v3, v2, v1;
     // check that the number of bytes matches
@@ -333,8 +333,8 @@ TEST(Bools, Boolx8InsufficientBits)
 {
     // individual bytes are unpacked low-order-bits first
     // [v8, v7, v6, v5, v4, v3, v2, v1]
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     bool v9;
     bool v8, v7, v6, v5;
     bool v4, v3, v2, v1;
@@ -359,8 +359,8 @@ TEST(Bitsets, Bitset8)
 {
     // individual bytes are unpacked low-order-bits first
     // a bitset for 8 bits fills the full byte
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<8> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -375,8 +375,8 @@ TEST(Bitsets, Bitset7TooManyBits)
 {
     // individual bytes are unpacked low-order-bits first
     // a bitset for 8 bits fills the full byte
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<7> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -391,8 +391,8 @@ TEST(Bitsets, Bitset9InsufficientBits)
 {
     // individual bytes are unpacked low-order-bits first
     // a bitset for 8 bits fills the full byte
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<9> v;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -407,8 +407,8 @@ TEST(Bitsets, Bitset3Bitset5)
 {
     // individual bytes are unpacked low-order-bits first
     // v1 will use [2:0], v2 will use [7:3]
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<3> v1;
     std::bitset<5> v2;
     // check that the number of bytes matches
@@ -425,8 +425,8 @@ TEST(Bitsets, Bitset3Bitset5)
 TEST(Bitsets, Bitset3Bitset4TooManyBits)
 {
     // high order bit should not get unpacked
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<3> v1;
     std::bitset<4> v2;
     // check that the number of bytes matches
@@ -443,8 +443,8 @@ TEST(Bitsets, Bitset3Bitset4TooManyBits)
 TEST(Bitsets, Bitset3Bitset6InsufficientBits)
 {
     // insufficient bits to unpack v2
-    std::vector<uint8_t> i = {0xc9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xc9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<3> v1;
     std::bitset<6> v2;
     // check that the number of bytes matches
@@ -463,8 +463,8 @@ TEST(Bitsets, Bitset32)
     // individual bytes are unpacked low-order-bits first
     // v1 will use 4 bytes, but in LSByte first order
     // v1[7:0] v1[15:9] v1[23:16] v1[31:24]
-    std::vector<uint8_t> i = {0xb4, 0x86, 0x91, 0xc2};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xb4, 0x86, 0x91, 0xc2};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<32> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -478,8 +478,8 @@ TEST(Bitsets, Bitset32)
 TEST(Bitsets, Bitset31TooManyBits)
 {
     // high order bit should not get unpacked
-    std::vector<uint8_t> i = {0xb4, 0x86, 0x91, 0xc2};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xb4, 0x86, 0x91, 0xc2};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<31> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -493,8 +493,8 @@ TEST(Bitsets, Bitset31TooManyBits)
 TEST(Bitsets, Bitset33InsufficientBits)
 {
     // insufficient bits to unpack v2
-    std::vector<uint8_t> i = {0xb4, 0x86, 0x91, 0xc2};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xb4, 0x86, 0x91, 0xc2};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::bitset<33> v;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -508,8 +508,8 @@ TEST(Bitsets, Bitset33InsufficientBits)
 TEST(Arrays, Array4xUint8)
 {
     // an array of bytes will be read verbatim, low-order element first
-    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::array<uint8_t, 4> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -524,8 +524,8 @@ TEST(Arrays, Array4xUint8TooManyBytes)
 {
     // last byte should not get unpacked
     // an array of bytes will be read verbatim, low-order element first
-    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04, 0x22};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x00, 0x86, 0x04, 0x22};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::array<uint8_t, 4> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -540,8 +540,8 @@ TEST(Arrays, Array4xUint8InsufficientBytes)
 {
     // last byte should not get unpacked
     // an array of bytes will be read verbatim, low-order element first
-    std::vector<uint8_t> i = {0x02, 0x00, 0x86};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x00, 0x86};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::array<uint8_t, 4> v;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -562,9 +562,9 @@ TEST(Arrays, Array4xUint32)
     // v[1][7:0] v[1][15:9] v[1][23:16] v[1][31:24]
     // v[2][7:0] v[2][15:9] v[2][23:16] v[2][31:24]
     // v[3][7:0] v[3][15:9] v[3][23:16] v[3][31:24]
-    std::vector<uint8_t> i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
-                              0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
+                            0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::array<uint32_t, 4> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -585,10 +585,10 @@ TEST(Arrays, Array4xUint32TooManyBytes)
     // v[1][7:0] v[1][15:9] v[1][23:16] v[1][31:24]
     // v[2][7:0] v[2][15:9] v[2][23:16] v[2][31:24]
     // v[3][7:0] v[3][15:9] v[3][23:16] v[3][31:24]
-    std::vector<uint8_t> i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66,
-                              0x44, 0x22, 0x99, 0x77, 0x55, 0x33,
-                              0x78, 0x56, 0x34, 0x12, 0xaa};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66,
+                            0x44, 0x22, 0x99, 0x77, 0x55, 0x33,
+                            0x78, 0x56, 0x34, 0x12, 0xaa};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::array<uint32_t, 4> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -609,9 +609,9 @@ TEST(Arrays, Array4xUint32InsufficientBytes)
     // v[1][7:0] v[1][15:9] v[1][23:16] v[1][31:24]
     // v[2][7:0] v[2][15:9] v[2][23:16] v[2][31:24]
     // v[3][7:0] v[3][15:9] v[3][23:16] v[3][31:24]
-    std::vector<uint8_t> i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
-                              0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
+                            0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::array<uint32_t, 4> v;
     // check that the number of bytes matches
     ASSERT_NE(p.unpack(v), 0);
@@ -631,9 +631,9 @@ TEST(Vectors, VectorUint32)
     // v[1][7:0] v[1][15:9] v[1][23:16] v[1][31:24]
     // v[2][7:0] v[2][15:9] v[2][23:16] v[2][31:24]
     // v[3][7:0] v[3][15:9] v[3][23:16] v[3][31:24]
-    std::vector<uint8_t> i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
-                              0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
+                            0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::vector<uint32_t> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -656,9 +656,9 @@ TEST(Vectors, VectorUint32NonIntegralBytes)
     // v[1][7:0] v[1][15:9] v[1][23:16] v[1][31:24]
     // v[2][7:0] v[2][15:9] v[2][23:16] v[2][31:24]
     // v[3][7:0] v[3][15:9] v[3][23:16] v[3][31:24]
-    std::vector<uint8_t> i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
-                              0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
+                            0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::vector<uint32_t> v;
     // check that the vector unpacks successfully
     ASSERT_EQ(p.unpack(v), 0);
@@ -674,8 +674,8 @@ TEST(Vectors, VectorUint32NonIntegralBytes)
 TEST(Vectors, VectorUint8)
 {
     // a vector of bytes will be unpacked verbatim, low-order element first
-    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::vector<uint8_t> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -689,8 +689,8 @@ TEST(Vectors, VectorUint8)
 TEST(Vectors, VectorEmptyOk)
 {
     // an empty input vector to show that unpacking elements is okay
-    std::vector<uint8_t> i{};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i{};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::vector<uint32_t> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -704,8 +704,8 @@ TEST(Vectors, VectorEmptyOk)
 TEST(Vectors, VectorOfTuplesOk)
 {
     // a vector of bytes will be unpacked verbatim, low-order element first
-    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::vector<std::tuple<uint8_t, uint8_t>> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -719,8 +719,8 @@ TEST(Vectors, VectorOfTuplesOk)
 TEST(Vectors, VectorOfTuplesInsufficientBytes)
 {
     // a vector of bytes will be unpacked verbatim, low-order element first
-    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04, 0xb4};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x00, 0x86, 0x04, 0xb4};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::vector<std::tuple<uint8_t, uint8_t>> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -739,8 +739,8 @@ TEST(Vectors, VectorOfTuplesInsufficientBytes)
 TEST(UnpackAdvanced, OptionalOk)
 {
     // a vector of bytes will be unpacked verbatim, low-order element first
-    std::vector<uint8_t> i = {0xbe, 0x02, 0x00, 0x86, 0x04};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbe, 0x02, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::optional<std::tuple<uint8_t, uint32_t>> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -754,8 +754,8 @@ TEST(UnpackAdvanced, OptionalOk)
 TEST(UnpackAdvanced, OptionalInsufficientBytes)
 {
     // a vector of bytes will be unpacked verbatim, low-order element first
-    std::vector<uint8_t> i = {0x02, 0x00, 0x86, 0x04};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     std::optional<std::tuple<uint8_t, uint32_t>> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
@@ -773,9 +773,9 @@ TEST(UnpackAdvanced, Uints)
     // v1[7:0] v2[7:0] v2[15:8] v3[7:0] v3[15:8] v3[23:16] v3[31:24]
     // v4[7:0] v4[15:8] v4[23:16] v4[31:24]
     // v4[39:25] v4[47:40] v4[55:48] v4[63:56]
-    std::vector<uint8_t> i = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
-                              0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
+                            0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint8_t v1;
     uint16_t v2;
     uint32_t v3;
@@ -802,9 +802,9 @@ TEST(UnpackAdvanced, TupleInts)
     // v1[7:0] v2[7:0] v2[15:8] v3[7:0] v3[15:8] v3[23:16] v3[31:24]
     // v4[7:0] v4[15:8] v4[23:16] v4[31:24]
     // v4[39:25] v4[47:40] v4[55:48] v4[63:56]
-    std::vector<uint8_t> i = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
-                              0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
+                            0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint8_t v1;
     uint16_t v2;
     uint32_t v3;
@@ -832,8 +832,8 @@ TEST(UnpackAdvanced, BoolsnBitfieldsnFixedIntsOhMy)
     // v3[4:0] will use k[0][7:3], v3[6:5] will use k[1][1:0]
     // v4 will use k[1][2]
     // v5 will use k[1][7:3]
-    std::vector<uint8_t> i = {0x9e, 0xdb};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x9e, 0xdb};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint2_t v1;
     bool v2;
     std::bitset<7> v3;
@@ -871,8 +871,8 @@ TEST(UnpackAdvanced, UnalignedBitUnpacking)
     // v6[19:12] will use k[5][7:0] v6[27:20] will use k[6][7:0]
     // v6[31:28] will use k[7][3:0]
     // v7 will use k[7][7:4]
-    std::vector<uint8_t> i = {0x96, 0xd2, 0x2a, 0xcd, 0xd3, 0x3b, 0xbc, 0x9d};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x96, 0xd2, 0x2a, 0xcd, 0xd3, 0x3b, 0xbc, 0x9d};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint2_t v1;
     uint8_t v2;
     bool v3;

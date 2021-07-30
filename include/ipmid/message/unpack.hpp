@@ -324,6 +324,20 @@ struct UnpackSingle<std::vector<uint8_t>>
     }
 };
 
+/** @brief Specialization of UnpackSingle for SecureBuffer */
+template <>
+struct UnpackSingle<SecureBuffer>
+{
+    static int op(Payload& p, SecureBuffer& t)
+    {
+        // copy out the remainder of the message
+        t.reserve(p.raw.size() - p.rawIndex);
+        t.insert(t.begin(), p.raw.begin() + p.rawIndex, p.raw.end());
+        p.rawIndex = p.raw.size();
+        return 0;
+    }
+};
+
 /** @brief Specialization of UnpackSingle for Payload */
 template <>
 struct UnpackSingle<Payload>

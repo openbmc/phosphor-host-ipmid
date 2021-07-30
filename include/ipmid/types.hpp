@@ -259,12 +259,20 @@ class SecureAllocator : public std::allocator<T>
 using SecureString =
     std::basic_string<char, std::char_traits<char>, SecureAllocator<char>>;
 
+using SecureBuffer = std::vector<uint8_t, SecureAllocator<uint8_t>>;
+
 } // namespace ipmi
+
 namespace std
 {
-
 template <>
 inline ipmi::SecureString::~SecureString()
+{
+    OPENSSL_cleanse(&((*this)[0]), this->size());
+}
+
+template <>
+inline ipmi::SecureBuffer::~SecureBuffer()
 {
     OPENSSL_cleanse(&((*this)[0]), this->size());
 }

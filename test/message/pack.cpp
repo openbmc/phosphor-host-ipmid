@@ -28,7 +28,7 @@ TEST(PackBasics, Uint8)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(v));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x04};
+    ipmi::SecureBuffer k = {0x04};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -40,7 +40,7 @@ TEST(PackBasics, Uint16)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(v));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x04, 0x86};
+    ipmi::SecureBuffer k = {0x04, 0x86};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -52,7 +52,7 @@ TEST(PackBasics, Uint32)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(v));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x04, 0x86, 0x00, 0x02};
+    ipmi::SecureBuffer k = {0x04, 0x86, 0x00, 0x02};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -64,7 +64,7 @@ TEST(PackBasics, Uint64)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(v));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x04, 0x86, 0x00, 0x02, 0x44, 0x33, 0x22, 0x11};
+    ipmi::SecureBuffer k = {0x04, 0x86, 0x00, 0x02, 0x44, 0x33, 0x22, 0x11};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -76,7 +76,7 @@ TEST(PackBasics, Uint24)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), types::nrFixedBits<decltype(v)> / CHAR_BIT);
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x58, 0x23, 0x11};
+    ipmi::SecureBuffer k = {0x58, 0x23, 0x11};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -93,7 +93,7 @@ TEST(PackBasics, Uint3Uint5)
                          types::nrFixedBits<decltype(v2)>) /
                             CHAR_BIT);
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0xc9};
+    ipmi::SecureBuffer k = {0xc9};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -108,7 +108,7 @@ TEST(PackBasics, Boolx8)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(uint8_t));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0xc9};
+    ipmi::SecureBuffer k = {0xc9};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -122,7 +122,7 @@ TEST(PackBasics, Bitset8)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), v.size() / CHAR_BIT);
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0xc9};
+    ipmi::SecureBuffer k = {0xc9};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -137,7 +137,7 @@ TEST(PackBasics, Bitset3Bitset5)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), (v1.size() + v2.size()) / CHAR_BIT);
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0xc9};
+    ipmi::SecureBuffer k = {0xc9};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -152,7 +152,7 @@ TEST(PackBasics, Bitset32)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), v.size() / CHAR_BIT);
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x04, 0x86, 0x00, 0x02};
+    ipmi::SecureBuffer k = {0x04, 0x86, 0x00, 0x02};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -165,7 +165,7 @@ TEST(PackBasics, Tuple)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(uint16_t) + sizeof(char));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x04, 0x86, 0x41};
+    ipmi::SecureBuffer k = {0x04, 0x86, 0x41};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -178,7 +178,7 @@ TEST(PackBasics, Array4xUint8)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), v.size() * sizeof(v[0]));
     // check that the bytes were correctly packed (in byte order)
-    std::vector<uint8_t> k = {0x02, 0x00, 0x86, 0x04};
+    ipmi::SecureBuffer k = {0x02, 0x00, 0x86, 0x04};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -197,8 +197,8 @@ TEST(PackBasics, Array4xUint32)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), v.size() * sizeof(v[0]));
     // check that the bytes were correctly packed (in byte order)
-    std::vector<uint8_t> k = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
-                              0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
+    ipmi::SecureBuffer k = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
+                            0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -217,8 +217,8 @@ TEST(PackBasics, VectorUint32)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), v.size() * sizeof(v[0]));
     // check that the bytes were correctly packed (in byte order)
-    std::vector<uint8_t> k = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
-                              0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
+    ipmi::SecureBuffer k = {0x44, 0x33, 0x22, 0x11, 0x88, 0x66, 0x44, 0x22,
+                            0x99, 0x77, 0x55, 0x33, 0x78, 0x56, 0x34, 0x12};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -231,7 +231,7 @@ TEST(PackBasics, VectorUint8)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), v.size() * sizeof(v[0]));
     // check that the bytes were correctly packed (in byte order)
-    std::vector<uint8_t> k = {0x02, 0x00, 0x86, 0x04};
+    ipmi::SecureBuffer k = {0x02, 0x00, 0x86, 0x04};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -239,21 +239,21 @@ TEST(PackBasics, VectorUnaligned)
 {
     ipmi::message::Payload p;
     EXPECT_EQ(p.pack(true, std::vector<uint8_t>{1}), 1);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>{0b1});
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer{0b1});
 }
 
 TEST(PackBasics, StringView)
 {
     ipmi::message::Payload p;
     EXPECT_EQ(p.pack(std::string_view{"\x24\x30\x11"}), 0);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0x24, 0x30, 0x11}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0x24, 0x30, 0x11}));
 }
 
 TEST(PackBasics, StringViewUnaligned)
 {
     ipmi::message::Payload p;
     EXPECT_EQ(p.pack(true, std::string_view{"abc"}), 1);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0b1}));
 }
 
 TEST(PackBasics, OptionalEmpty)
@@ -265,7 +265,7 @@ TEST(PackBasics, OptionalEmpty)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), 0);
     // check that the bytes were correctly packed (in byte order)
-    std::vector<uint8_t> k = {};
+    ipmi::SecureBuffer k = {};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -278,7 +278,7 @@ TEST(PackBasics, OptionalContainsValue)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(uint32_t));
     // check that the bytes were correctly packed (in byte order)
-    std::vector<uint8_t> k = {0x02, 0x00, 0x86, 0x04};
+    ipmi::SecureBuffer k = {0x02, 0x00, 0x86, 0x04};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -287,14 +287,14 @@ TEST(PackBasics, Payload)
     ipmi::message::Payload p;
     EXPECT_EQ(p.pack(true), 0);
     EXPECT_EQ(p.pack(ipmi::message::Payload({0x24, 0x30})), 0);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1, 0x24, 0x30}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0b1, 0x24, 0x30}));
 }
 
 TEST(PackBasics, PayloadUnaligned)
 {
     ipmi::message::Payload p;
     EXPECT_EQ(p.pack(true, ipmi::message::Payload({0x24})), 1);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0b1}));
 }
 
 TEST(PackBasics, PayloadOtherUnaligned)
@@ -303,7 +303,7 @@ TEST(PackBasics, PayloadOtherUnaligned)
     q.appendBits(1, 1);
     EXPECT_EQ(p.pack(true), 0);
     EXPECT_EQ(p.pack(q), 1);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0b1}));
 }
 
 TEST(PackBasics, PrependPayload)
@@ -311,7 +311,7 @@ TEST(PackBasics, PrependPayload)
     ipmi::message::Payload p;
     EXPECT_EQ(p.pack(true), 0);
     EXPECT_EQ(p.prepend(ipmi::message::Payload({0x24, 0x30})), 0);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0x24, 0x30, 0b1}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0x24, 0x30, 0b1}));
 }
 
 TEST(PackBasics, PrependPayloadUnaligned)
@@ -320,7 +320,7 @@ TEST(PackBasics, PrependPayloadUnaligned)
     p.appendBits(1, 1);
     EXPECT_EQ(p.prepend(ipmi::message::Payload({0x24})), 1);
     p.drain();
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0b1}));
 }
 
 TEST(PackBasics, PrependPayloadOtherUnaligned)
@@ -329,7 +329,7 @@ TEST(PackBasics, PrependPayloadOtherUnaligned)
     q.appendBits(1, 1);
     EXPECT_EQ(p.pack(true), 0);
     EXPECT_EQ(p.prepend(q), 1);
-    EXPECT_EQ(p.raw, std::vector<uint8_t>({0b1}));
+    EXPECT_EQ(p.raw, ipmi::SecureBuffer({0b1}));
 }
 
 TEST(PackAdvanced, Uints)
@@ -348,8 +348,8 @@ TEST(PackAdvanced, Uints)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(v1) + sizeof(v2) + sizeof(v3) + sizeof(v4));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
-                              0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
+    ipmi::SecureBuffer k = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
+                            0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -370,8 +370,8 @@ TEST(PackAdvanced, TupleInts)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(v1) + sizeof(v2) + sizeof(v3) + sizeof(v4));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
-                              0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
+    ipmi::SecureBuffer k = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
+                            0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -386,7 +386,7 @@ TEST(PackAdvanced, VariantArray)
     ASSERT_EQ(p.size(), sizeof(data));
 
     // check that the bytes were correctly packed packed (LSB first)
-    std::vector<uint8_t> k = {2, 4};
+    ipmi::SecureBuffer k = {2, 4};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -410,7 +410,7 @@ TEST(PackAdvanced, BoolsnBitfieldsnFixedIntsOhMy)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(uint16_t));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x9e, 0xdb};
+    ipmi::SecureBuffer k = {0x9e, 0xdb};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -444,7 +444,7 @@ TEST(PackAdvanced, UnalignedBitPacking)
     // check that the number of bytes matches
     ASSERT_EQ(p.size(), sizeof(uint64_t));
     // check that the bytes were correctly packed (LSB first)
-    std::vector<uint8_t> k = {0x96, 0xd2, 0x2a, 0xcd, 0xd3, 0x3b, 0xbc, 0x9d};
+    ipmi::SecureBuffer k = {0x96, 0xd2, 0x2a, 0xcd, 0xd3, 0x3b, 0xbc, 0x9d};
     ASSERT_EQ(p.raw, k);
 }
 
@@ -485,13 +485,13 @@ TEST(PackAdvanced, ComplexOptionalTuple)
                             sizeof(uint16_t));
     uint8_t protocol_channel =
         (static_cast<uint8_t>(protocol) << 4) | static_cast<uint8_t>(channel);
-    std::vector<uint8_t> k = {handle, maxSessions, currentSessions, userID,
-                              priv, protocol_channel,
-                              // ip addr
-                              0x05, 0x01, 0x01, 0x0a,
-                              // mac addr
-                              0, 0, 0, 0, 0, 0,
-                              // port
-                              0x1f, 0xd8};
+    ipmi::SecureBuffer k = {handle, maxSessions, currentSessions, userID, priv,
+                            protocol_channel,
+                            // ip addr
+                            0x05, 0x01, 0x01, 0x0a,
+                            // mac addr
+                            0, 0, 0, 0, 0, 0,
+                            // port
+                            0x1f, 0xd8};
     ASSERT_EQ(p.raw, k);
 }
