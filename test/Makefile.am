@@ -64,6 +64,7 @@ message_unittest_LDFLAGS = \
     -lsdbusplus \
     -lsystemd \
     -pthread \
+	$(CRYPTO_LIBS) \
     $(PHOSPHOR_LOGGING_LIBS) \
     $(OESDK_TESTCASE_FLAGS) \
     $(CODE_COVERAGE_LDFLAGS)

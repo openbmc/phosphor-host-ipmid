@@ -250,6 +250,22 @@ struct PackSingle<std::vector<uint8_t>>
     }
 };
 
+/** @brief Specialization of PackSingle for SecureBuffer */
+template <>
+struct PackSingle<SecureBuffer>
+{
+    static int op(Payload& p, const SecureBuffer& t)
+    {
+        if (p.bitCount != 0)
+        {
+            return 1;
+        }
+        p.raw.reserve(p.raw.size() + t.size());
+        p.raw.insert(p.raw.end(), t.begin(), t.end());
+        return 0;
+    }
+};
+
 /** @brief Specialization of PackSingle for std::string_view */
 template <>
 struct PackSingle<std::string_view>
