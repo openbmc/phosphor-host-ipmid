@@ -25,9 +25,9 @@
 
 TEST(Payload, InputSize)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
     size_t input_size = i.size();
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     ASSERT_EQ(input_size, p.size());
 }
 
@@ -35,7 +35,7 @@ TEST(Payload, OutputSize)
 {
     ipmi::message::Payload p;
     ASSERT_EQ(0, p.size());
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
     p.pack(i);
     ASSERT_EQ(i.size(), p.size());
     p.pack(i);
@@ -45,7 +45,7 @@ TEST(Payload, OutputSize)
 
 TEST(Payload, Resize)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
     ipmi::message::Payload p;
     p.pack(i);
     p.resize(16);
@@ -54,7 +54,7 @@ TEST(Payload, Resize)
 
 TEST(Payload, Data)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
     ipmi::message::Payload p;
     p.pack(i);
     ASSERT_NE(nullptr, p.data());
@@ -92,7 +92,7 @@ TEST(PayloadResponse, AppendBits)
     ASSERT_EQ(p.bitCount, 0);
     // appended 8 bits, should be one byte
     ASSERT_EQ(p.size(), 1);
-    std::vector<uint8_t> k1 = {0b11100101};
+    ipmi::SecureBuffer k1 = {0b11100101};
     ASSERT_EQ(p.raw, k1);
     p.appendBits(7, 0b1110111);
     // appended 7 more bits, should still be one byte
@@ -100,7 +100,7 @@ TEST(PayloadResponse, AppendBits)
     p.drain();
     // drain forces padding; should be two bytes now
     ASSERT_EQ(p.size(), 2);
-    std::vector<uint8_t> k2 = {0b11100101, 0b01110111};
+    ipmi::SecureBuffer k2 = {0b11100101, 0b01110111};
     ASSERT_EQ(p.raw, k2);
 }
 
@@ -113,7 +113,7 @@ TEST(PayloadResponse, Drain16Bits)
     ASSERT_EQ(p.size(), 2);
     ASSERT_EQ(p.bitCount, 0);
     ASSERT_EQ(p.bitStream, 0);
-    std::vector<uint8_t> k1 = {0b11001111, 0b10110100};
+    ipmi::SecureBuffer k1 = {0b11001111, 0b10110100};
     ASSERT_EQ(p.raw, k1);
 }
 
@@ -126,7 +126,7 @@ TEST(PayloadResponse, Drain15Bits)
     ASSERT_EQ(p.size(), 2);
     ASSERT_EQ(p.bitCount, 0);
     ASSERT_EQ(p.bitStream, 0);
-    std::vector<uint8_t> k1 = {0b1100111, 0b1011010};
+    ipmi::SecureBuffer k1 = {0b1100111, 0b1011010};
     ASSERT_EQ(p.raw, k1);
 }
 
@@ -140,14 +140,14 @@ TEST(PayloadResponse, Drain15BitsWholeBytesOnly)
     ASSERT_EQ(p.size(), 1);
     ASSERT_EQ(p.bitCount, 7);
     ASSERT_EQ(p.bitStream, 0b1011010);
-    std::vector<uint8_t> k1 = {0b1100111};
+    ipmi::SecureBuffer k1 = {0b1100111};
     ASSERT_EQ(p.raw, k1);
 }
 
 TEST(PayloadRequest, Pop)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     const auto& [vb, ve] = p.pop<uint8_t>(4);
     std::vector<uint8_t> v(vb, ve);
     std::vector<uint8_t> k = {0xbf, 0x04, 0x86, 0x00};
@@ -156,8 +156,8 @@ TEST(PayloadRequest, Pop)
 
 TEST(PayloadRequest, FillBits)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     p.fillBits(5);
     ASSERT_FALSE(p.unpackError);
     ASSERT_EQ(p.bitStream, 0xbf);
@@ -178,24 +178,24 @@ TEST(PayloadRequest, FillBits)
 
 TEST(PayloadRequest, FillBitsTooManyBits)
 {
-    std::vector<uint8_t> i = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     p.fillBits(72);
     ASSERT_TRUE(p.unpackError);
 }
 
 TEST(PayloadRequest, FillBitsNotEnoughBytes)
 {
-    std::vector<uint8_t> i = {1, 2, 3, 4};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {1, 2, 3, 4};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     p.fillBits(48);
     ASSERT_TRUE(p.unpackError);
 }
 
 TEST(PayloadRequest, PopBits)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     p.fillBits(4);
     uint8_t v = p.popBits(4);
     ASSERT_FALSE(p.unpackError);
@@ -206,16 +206,16 @@ TEST(PayloadRequest, PopBits)
 
 TEST(PayloadRequest, PopBitsNoFillBits)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     p.popBits(4);
     ASSERT_TRUE(p.unpackError);
 }
 
 TEST(PayloadRequest, DiscardBits)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     p.fillBits(5);
     ASSERT_FALSE(p.unpackError);
     ASSERT_EQ(p.bitStream, 0xbf);
@@ -228,8 +228,8 @@ TEST(PayloadRequest, DiscardBits)
 
 TEST(PayloadRequest, FullyUnpacked)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint32_t v1;
     p.unpack(v1);
     // still one remaining byte
@@ -249,8 +249,8 @@ TEST(PayloadRequest, FullyUnpacked)
 
 TEST(PayloadRequest, ResetInternal)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     p.fillBits(4);
     p.unpackError = true;
     p.reset();
@@ -265,8 +265,8 @@ TEST(PayloadRequest, ResetUsage)
     // Payload.reset is used to rewind the unpacking to the initial
     // state. This is needed so that OEM commands can unpack the group
     // number or the IANA to determine which handler needs to be called
-    std::vector<uint8_t> i = {0x04, 0x86};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0x04, 0x86};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint8_t v1;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v1), 0);
@@ -290,8 +290,8 @@ TEST(PayloadRequest, ResetUsage)
 
 TEST(PayloadRequest, PartialPayload)
 {
-    std::vector<uint8_t> i = {0xbf, 0x04, 0x86, 0x00, 0x02};
-    ipmi::message::Payload p(std::forward<std::vector<uint8_t>>(i));
+    ipmi::SecureBuffer i = {0xbf, 0x04, 0x86, 0x00, 0x02};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
     uint8_t v1;
     ipmi::message::Payload localPayload;
     // check that the number of bytes matches

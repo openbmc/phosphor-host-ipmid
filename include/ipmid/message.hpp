@@ -21,6 +21,7 @@
 #include <exception>
 #include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
+#include <ipmid/types.hpp>
 #include <memory>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/connection.hpp>
@@ -115,7 +116,7 @@ struct Payload
     Payload(Payload&&) = default;
     Payload& operator=(Payload&&) = default;
 
-    explicit Payload(std::vector<uint8_t>&& data) : raw(std::move(data))
+    explicit Payload(SecureBuffer&& data) : raw(std::move(data))
     {
     }
 
@@ -480,7 +481,7 @@ struct Payload
     // partial bytes in the form of bits
     fixed_uint_t<details::bitStreamSize> bitStream;
     size_t bitCount = 0;
-    std::vector<uint8_t> raw;
+    SecureBuffer raw;
     size_t rawIndex = 0;
     bool trailingOk = true;
     bool unpackCheck = false;
@@ -594,8 +595,8 @@ struct Request
 
     using ptr = std::shared_ptr<Request>;
 
-    explicit Request(Context::ptr context, std::vector<uint8_t>&& d) :
-        payload(std::forward<std::vector<uint8_t>>(d)), ctx(context)
+    explicit Request(Context::ptr context, SecureBuffer&& d) :
+        payload(std::forward<SecureBuffer>(d)), ctx(context)
     {
     }
 
