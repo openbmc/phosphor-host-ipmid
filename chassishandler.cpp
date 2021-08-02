@@ -153,8 +153,7 @@ settings::Objects& getObjects()
     if (objectsPtr == nullptr)
     {
         objectsPtr = std::make_unique<settings::Objects>(
-            dbus, std::vector<std::string>{bootModeIntf, bootTypeIntf,
-                                           bootSourceIntf, powerRestoreIntf});
+            dbus, std::vector<std::string>{powerRestoreIntf});
     }
     return *objectsPtr;
 }
