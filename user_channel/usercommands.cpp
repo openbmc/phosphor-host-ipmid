@@ -324,6 +324,11 @@ Cc ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
         return ccReqDataLenInvalid;
     }
 
+    if (req->reserved1)
+    {
+        return ccInvalidFieldRequest;
+    }
+
     std::string userName;
     if (ipmiUserGetUserName(req->userId, userName) != ccSuccess)
     { // Invalid User ID
