@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "64f0a097_54e67d79",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000566
+      },
+      "writtenOn": "2021-08-02T11:00:21Z",
+      "side": 1,
+      "message": "With bitfields the size of this structure is 10 bytes. do we have portability issues if we use bitfields from uint8_t type?\nThank You.",
+      "parentUuid": "ce388ffb_71d67aa8",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 27
+      },
+      "revId": "3863ae2f2e9bddf6ed380659a37ab169373f4948",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0020fe4_166518d2",
         "filename": "sensorhandler.cpp",
         "patchSetId": 4
@@ -60,6 +84,30 @@
       "writtenOn": "2021-07-21T00:44:02Z",
       "side": 1,
       "message": "rather than making an array and then indexing with magic indices below, just give each reserved thing a name.\n\nstatic constexpr uint2_t eventOperationReserved \u003d 3;\nstatic constexpr uint2_t sensorReadingOperationReservedMask \u003d 2;",
+      "range": {
+        "startLine": 354,
+        "startChar": 0,
+        "endLine": 354,
+        "endChar": 64
+      },
+      "revId": "3863ae2f2e9bddf6ed380659a37ab169373f4948",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4b9f456_22c189b9",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1000566
+      },
+      "writtenOn": "2021-08-02T11:00:21Z",
+      "side": 1,
+      "message": "Updated. Thank You",
+      "parentUuid": "b0020fe4_166518d2",
       "range": {
         "startLine": 354,
         "startChar": 0,
