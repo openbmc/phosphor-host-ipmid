@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cce9f5e5_3a4551eb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2021-08-03T17:16:01Z",
+      "side": 1,
+      "message": "How does this change make this possible?",
+      "range": {
+        "startLine": 11,
+        "startChar": 68,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "d627e4fc74f61b645c4c9378e1e640fbc982f8ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
