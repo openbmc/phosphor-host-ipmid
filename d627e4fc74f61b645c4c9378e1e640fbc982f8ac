@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "47ac712c_3f4c3cde",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000632
+      },
+      "writtenOn": "2021-08-04T03:33:03Z",
+      "side": 1,
+      "message": "We wanna use dbus-sdr with dbus-sensor, but we do not include some intel oem commands like manufacturing mode stuff. Briefly speaking, in our use case, the ValueMutability interface implemented in dbus-sensor will tell us if the sensor value is settable (mutable). Then IPMI setting sensor command will check the sensor mutability.",
+      "parentUuid": "a34477a1_b2679ee8",
+      "range": {
+        "startLine": 11,
+        "startChar": 68,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "d627e4fc74f61b645c4c9378e1e640fbc982f8ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84dcb519_968d7a6e",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 1
@@ -93,6 +117,30 @@
       "revId": "d627e4fc74f61b645c4c9378e1e640fbc982f8ac",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e418385a_2387e6cc",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1621,
+      "author": {
+        "id": 1000632
+      },
+      "writtenOn": "2021-08-04T03:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "20ad917b_e98a73b9",
+      "range": {
+        "startLine": 1621,
+        "startChar": 0,
+        "endLine": 1621,
+        "endChar": 36
+      },
+      "revId": "d627e4fc74f61b645c4c9378e1e640fbc982f8ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
