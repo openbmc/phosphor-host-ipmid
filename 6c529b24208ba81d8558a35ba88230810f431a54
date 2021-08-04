@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36bb650e_6b828c5d",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-08-04T23:19:14Z",
+      "side": 1,
+      "message": "why not just call entries.resize()?",
+      "range": {
+        "startLine": 238,
+        "startChar": 8,
+        "endLine": 243,
+        "endChar": 9
+      },
+      "revId": "6c529b24208ba81d8558a35ba88230810f431a54",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
