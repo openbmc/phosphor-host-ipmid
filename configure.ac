@@ -269,16 +269,16 @@ AM_CONDITIONAL([FEATURE_IPMI_WHITELIST], [test x$ipmi_whitelist = xtrue])
 # Dynamic sensors stack write permission is disabled by default; offer a way to enable it
 # Change to true if you wish to allow external IPMI users to modify your sensor
 # values, and you are OK with the security implications of doing so.
-AC_ARG_ENABLE([dynamic-sensors-write],
-    [ --enable-dynamic-sensors-write   Enable/disable Dynamic Sensors writes],
+AC_ARG_ENABLE([dynamic_sensors_write],
+    [ --enable-dynamic_sensors_write   Enable/disable Dynamic Sensors writes],
     [case "${enableval}" in
-      yes) dynamic-sensors-write=true ;;
-      no) dynamic-sensors-write=false ;;
-      *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic-sensors-write]) ;;
-      esac],[dynamic-sensors-write=false]
+      yes) dynamic_sensors_write=true ;;
+      no) dynamic_sensors_write=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic_sensors_write]) ;;
+      esac],[dynamic_sensors_write=false]
       )
 
-AS_IF([test x$dynamic-sensors-write = xtrue],
+AS_IF([test x$dynamic_sensors_write = xtrue],
     AC_MSG_NOTICE([Enabling dynamic sensors write feature])
     [cpp_flags="$cpp_flags -DFEATURE_DYNAMIC_SENSORS_WRITE"]
     AC_SUBST([CPPFLAGS], [$cpp_flags]),
@@ -286,15 +286,15 @@ AS_IF([test x$dynamic-sensors-write = xtrue],
 )
 
 # Dynamic sensors stack is enabled by default; offer a way to disable it
-AC_ARG_ENABLE([dynamic-sensors],
-    [ --enable-dynamic-sensors   Enable/disable Dynamic Sensors stack],
+AC_ARG_ENABLE([dynamic_sensors],
+    [ --enable-dynamic_sensors   Enable/disable Dynamic Sensors stack],
     [case "${enableval}" in
-      yes) dynamic-sensors=true ;;
-      no) dynamic-sensors=false ;;
-      *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic-sensors]) ;;
-      esac],[dynamic-sensors=true]
+      yes) dynamic_sensors=true ;;
+      no) dynamic_sensors=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic_sensors]) ;;
+      esac],[dynamic_sensors=true]
       )
-AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic-sensors = xtrue])
+AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic_sensors = xtrue])
 
 # hybrid sensors stack is disabled by default; offer a way to enable it
 AC_ARG_ENABLE([hybrid-sensors],
