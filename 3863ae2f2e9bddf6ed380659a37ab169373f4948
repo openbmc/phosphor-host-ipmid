@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "e5d226e0_00db0ea8",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-08-04T23:06:11Z",
+      "side": 1,
+      "message": "You need to look at how the struct is used and make the changes to meet the usage.\n\nIn this case, the struct used to be part of the ipmi command decoding. It no longer is, but it was passed along to various functions as well. It does not need to be packed or have bitfields anymore because it is never directly decoded from a data stream.",
+      "parentUuid": "64f0a097_54e67d79",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 27
+      },
+      "revId": "3863ae2f2e9bddf6ed380659a37ab169373f4948",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0020fe4_166518d2",
         "filename": "sensorhandler.cpp",
         "patchSetId": 4
