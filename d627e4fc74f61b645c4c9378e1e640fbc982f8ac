@@ -46,6 +46,29 @@
       "revId": "d627e4fc74f61b645c4c9378e1e640fbc982f8ac",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84dcb519_968d7a6e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1621,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-04T02:33:40Z",
+      "side": 1,
+      "message": "remove this flag with we are using Mutable flag to control the sensor write permission.",
+      "range": {
+        "startLine": 1621,
+        "startChar": 0,
+        "endLine": 1621,
+        "endChar": 36
+      },
+      "revId": "d627e4fc74f61b645c4c9378e1e640fbc982f8ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
