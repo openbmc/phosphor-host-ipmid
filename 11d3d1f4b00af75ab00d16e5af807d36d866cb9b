@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8197e6d_6ece69c5",
+        "filename": "configure.ac",
+        "patchSetId": 4
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-04T21:05:44Z",
+      "side": 1,
+      "message": "revert.\n\nProbably outdated local changes,",
+      "range": {
+        "startLine": 273,
+        "startChar": 0,
+        "endLine": 287,
+        "endChar": 34
+      },
+      "revId": "11d3d1f4b00af75ab00d16e5af807d36d866cb9b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
