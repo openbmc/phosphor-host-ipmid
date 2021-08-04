@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0b8ebb39_7e8aa458",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1639,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-04T06:32:13Z",
+      "side": 1,
+      "message": "this is only called in getSensor handlers.\n\nThis will force the set handler to be dependent on the get handler. Ideally each handler shoul dbe independent of each other.\n\nI would suggest also checking the `Mutable` flag the first time in the set handler",
+      "range": {
+        "startLine": 1639,
+        "startChar": 4,
+        "endLine": 1639,
+        "endChar": 76
+      },
+      "revId": "7a6dbac32f30ca7b566a4bfa8f0311b8e755ad51",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
