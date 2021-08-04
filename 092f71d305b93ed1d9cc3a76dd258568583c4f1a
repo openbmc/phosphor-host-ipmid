@@ -70,6 +70,30 @@
       "revId": "092f71d305b93ed1d9cc3a76dd258568583c4f1a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75c944bb_6e0d985e",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 677,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-04T21:58:46Z",
+      "side": 1,
+      "message": "I think it is better to use the object path as the FRU name directly, since it has to be unique.\n\nUsing BOARD_PRODUCT_NAME will force all of them to be the same name.\n\nMaybe we need a flag to support this better. Allow people to have option to use the old method.",
+      "parentUuid": "e2b3e362_da91d438",
+      "range": {
+        "startLine": 673,
+        "startChar": 0,
+        "endLine": 677,
+        "endChar": 5
+      },
+      "revId": "092f71d305b93ed1d9cc3a76dd258568583c4f1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
