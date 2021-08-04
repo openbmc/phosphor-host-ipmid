@@ -2064,6 +2064,14 @@ ipmi::RspType<ipmi::message::Payload>
                     return ipmi::responseSuccess(std::move(response));
                 }
             }
+            else
+            {
+                log<level::ERR>(
+                    "ipmiChassisGetSysBootOptions: Unsupported parameter",
+                    entry("PARAM=0x%x",
+                          static_cast<uint8_t>(bootOptionParameter)));
+                return ipmi::responseParmNotSupported();
+            }
         }
         else
         {
