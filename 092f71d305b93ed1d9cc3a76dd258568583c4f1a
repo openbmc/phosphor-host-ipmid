@@ -22,6 +22,30 @@
       "revId": "092f71d305b93ed1d9cc3a76dd258568583c4f1a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d69ab179_8a40daba",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 677,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-04T21:01:43Z",
+      "side": 1,
+      "message": "sorry, not exactly sure what you mean?\n\nIn interl-ipmi-oem, they just use BOARD_PRODUCT_NAME or PRODUCT_PRODUCT_NAME. It is how they do it in here without this patch.",
+      "parentUuid": "4ae90922_6efc6581",
+      "range": {
+        "startLine": 673,
+        "startChar": 0,
+        "endLine": 677,
+        "endChar": 5
+      },
+      "revId": "092f71d305b93ed1d9cc3a76dd258568583c4f1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
