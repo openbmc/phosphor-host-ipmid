@@ -16,6 +16,24 @@
       "revId": "e7faf9f57f4c90c30447997d90914aca3b881fee",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19ec8466_9ef55c1c",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2021-08-05T06:22:06Z",
+      "side": 1,
+      "message": "Since this is a fix for an issue so added check in this commit to expedite. Can do the refactoring as a part of another commit ?",
+      "parentUuid": "4ee34485_b6d90140",
+      "revId": "e7faf9f57f4c90c30447997d90914aca3b881fee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
