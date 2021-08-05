@@ -31,37 +31,8 @@ namespace ipmi
 
 using namespace phosphor::logging;
 
-static constexpr uint8_t disableUser = 0x00;
-static constexpr uint8_t enableUser = 0x01;
-static constexpr uint8_t setPassword = 0x02;
-static constexpr uint8_t testPassword = 0x03;
-static constexpr uint8_t passwordKeySize20 = 1;
-static constexpr uint8_t passwordKeySize16 = 0;
 static constexpr uint8_t enableOperation = 0x00;
 static constexpr uint8_t disableOperation = 0x01;
-
-/** @struct SetUserPasswordReq
- *
- *  Structure for set user password request command (refer spec sec 22.30)
- */
-struct SetUserPasswordReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t userId : 6;
-    uint8_t reserved1 : 1;
-    uint8_t ipmi20 : 1;
-    uint8_t operation : 2;
-    uint8_t reserved2 : 6;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t ipmi20 : 1;
-    uint8_t reserved1 : 1;
-    uint8_t userId : 6;
-    uint8_t reserved2 : 6;
-    uint8_t operation : 2;
-#endif
-    uint8_t userPassword[maxIpmi20PasswordSize];
-} __attribute__((packed));
 
 /** @brief implements the set user access command
  *  @param ctx - IPMI context pointer (for channel)
@@ -292,75 +263,72 @@ ipmi::RspType<std::array<uint8_t, ipmi::ipmiMaxUserName>> // user name
     return ipmi::responseSuccess(std::move(userNameFixed));
 }
 
-/** @brief implementes the set user password command
- *  @param[in] netfn - specifies netfn.
- *  @param[in] cmd   - specifies cmd number.
- *  @param[in] request - pointer to request data.
- *  @param[in, out] dataLen - specifies request data length, and returns
- * response data length.
- *  @param[in] context - ipmi context.
- *  @returns ipmi completion code.
+/** @brief implementes the get user name command
+ *  @param[in] ctx - ipmi command context
+ *  @param[in] userId - 6-bit user ID
+ *  @param[in] reserved - 2-bits reserved
+
+ *  @returns ipmi response with 16-byte username
  */
-Cc ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                       ipmi_request_t request, ipmi_response_t response,
-                       ipmi_data_len_t dataLen, ipmi_context_t context)
+ipmi::RspType<> // user name
+    ipmiSetUserPassword(ipmi::Context::ptr ctx, uint6_t id, bool reserved1,
+                        bool pwLen20, uint2_t operation, uint6_t reserved2,
+                        SecureBuffer& userPassword)
 {
-    const SetUserPasswordReq* req = static_cast<SetUserPasswordReq*>(request);
-    size_t reqLength = *dataLen;
-    // subtract 2 bytes header to know the password length - including NULL
-    uint8_t passwordLength = *dataLen - 2;
-    *dataLen = 0;
-    if (req->reserved1 || req->reserved2)
+    if (reserved1 || reserved2)
     {
         log<level::DEBUG>("Invalid data field in request");
-        return ccInvalidFieldRequest;
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    // verify input length based on operation. Required password size is 20
-    // bytes as  we support only IPMI 2.0, but in order to be compatible with
-    // tools, accept 16 bytes of password size too.
-    if (reqLength < 2 ||
-        // If enable / disable user, reqLength has to be >=2 & <= 22
-        ((req->operation == disableUser || req->operation == enableUser) &&
-         ((reqLength < 2) || (reqLength > sizeof(SetUserPasswordReq)))))
+    if (pwLen20 && userPassword.size() != maxIpmi20PasswordSize)
     {
         log<level::DEBUG>("Invalid Length");
-        return ccReqDataLenInvalid;
+        return ipmi::responseReqDataLenInvalid();
     }
-    // If set / test password then password length has to be 16 or 20 bytes
-    // based on the password size bit.
-    if (((req->operation == setPassword) || (req->operation == testPassword)) &&
-        (((req->ipmi20 == passwordKeySize20) &&
-          (passwordLength != maxIpmi20PasswordSize)) ||
-         ((req->ipmi20 == passwordKeySize16) &&
-          (passwordLength != maxIpmi15PasswordSize))))
+    else if (!pwLen20 && userPassword.size() != maxIpmi15PasswordSize)
     {
         log<level::DEBUG>("Invalid Length");
-        return ccReqDataLenInvalid;
+        return ipmi::responseReqDataLenInvalid();
     }
+    size_t passwordLength = userPassword.size();
 
+    uint8_t userId = static_cast<uint8_t>(id);
     std::string userName;
-    if (ipmiUserGetUserName(req->userId, userName) != ccSuccess)
+    if (ipmiUserGetUserName(userId, userName) != ccSuccess)
     {
-        log<level::DEBUG>("User Name not found",
-                          entry("USER-ID=%d", (uint8_t)req->userId));
-        return ccParmOutOfRange;
+        log<level::DEBUG>("User Name not found", entry("USER-ID=%d", userId));
+        return ipmi::responseParmOutOfRange();
     }
-    if (req->operation == setPassword)
+
+    static constexpr uint2_t opDisableUser = 0x00;
+    static constexpr uint2_t opEnableUser = 0x01;
+    static constexpr uint2_t opSetPassword = 0x02;
+    static constexpr uint2_t opTestPassword = 0x03;
+    if (operation == opSetPassword)
     {
-        return ipmiUserSetUserPassword(
-            req->userId, reinterpret_cast<const char*>(req->userPassword));
+        // turn the non-nul terminated SecureBuffer into a SecureString
+        SecureString password(
+            reinterpret_cast<const char*>(userPassword.data()), passwordLength);
+        ipmi::Cc res = ipmiUserSetUserPassword(userId, password.data());
+        return ipmi::response(res);
     }
-    else if (req->operation == enableUser || req->operation == disableUser)
+    else if (operation == opEnableUser || operation == opDisableUser)
     {
-        return ipmiUserUpdateEnabledState(req->userId,
-                                          static_cast<bool>(req->operation));
+        ipmi::Cc res =
+            ipmiUserUpdateEnabledState(userId, static_cast<bool>(operation));
+        return ipmi::response(res);
     }
-    else if (req->operation == testPassword)
+    else if (operation == opTestPassword)
     {
         SecureString password = ipmiUserGetPassword(userName);
+        // extend with zeros, if needed
+        if (password.size() < passwordLength)
+        {
+            password.resize(passwordLength, '\0');
+        }
         SecureString testPassword(
-            reinterpret_cast<const char*>(req->userPassword), passwordLength);
+            reinterpret_cast<const char*>(userPassword.data()), passwordLength);
         // constant time string compare: always compare exactly as many bytes
         // as the length of the input, resizing the actual password to match,
         // maintaining a knowledge if the sizes differed originally
@@ -381,13 +349,13 @@ Cc ipmiSetUserPassword(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         if (pwBad)
         {
             log<level::DEBUG>("Test password failed",
-                              entry("USER-ID=%d", (uint8_t)req->userId));
-            return static_cast<Cc>(
-                IPMISetPasswordReturnCodes::ipmiCCPasswdFailMismatch);
+                              entry("USER-ID=%d", userId));
+            static constexpr ipmi::Cc ipmiCCPasswdFailMismatch = 0x80;
+            return ipmi::response(ipmiCCPasswdFailMismatch);
         }
-        return ccSuccess;
+        return ipmi::responseSuccess();
     }
-    return ccInvalidFieldRequest;
+    return ipmi::responseInvalidFieldRequest();
 }
 
 /** @brief implements the get channel authentication command
@@ -690,8 +658,9 @@ void registerUserIpmiFunctions()
                           ipmi::app::cmdSetUserName, ipmi::Privilege::Admin,
                           ipmiSetUserName);
 
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_PASSWORD, NULL,
-                           ipmiSetUserPassword, PRIVILEGE_ADMIN);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetUserPasswordCommand,
+                          ipmi::Privilege::Admin, ipmiSetUserPassword);
 
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetChannelAuthCapabilities,
