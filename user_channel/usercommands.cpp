@@ -40,23 +40,6 @@ static constexpr uint8_t passwordKeySize16 = 0;
 static constexpr uint8_t enableOperation = 0x00;
 static constexpr uint8_t disableOperation = 0x01;
 
-/** @struct SetUserNameReq
- *
- *  Structure for set user name request command (refer spec sec 22.28)
- */
-struct SetUserNameReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t userId : 6;
-    uint8_t reserved1 : 2;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 2;
-    uint8_t userId : 6;
-#endif
-    uint8_t userName[16];
-} __attribute__((packed));
-
 /** @struct SetUserPasswordReq
  *
  *  Structure for set user password request command (refer spec sec 22.30)
@@ -244,35 +227,36 @@ ipmi::RspType<uint6_t, // max channel users
         static_cast<uint1_t>(privAccess.reserved));
 }
 
-Cc ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-                   ipmi_response_t response, ipmi_data_len_t dataLen,
-                   ipmi_context_t context)
-{
-    const SetUserNameReq* req = static_cast<SetUserNameReq*>(request);
-    size_t reqLength = *dataLen;
-    *dataLen = 0;
+/** @brief implementes the get user name command
+ *  @param[in] ctx - ipmi command context
+ *  @param[in] userId - 6-bit user ID
+ *  @param[in] reserved - 2-bits reserved
+ *  @param[in] name - 16-byte array for username
 
-    if (reqLength != sizeof(*req))
+ *  @returns ipmi response
+ */
+ipmi::RspType<>
+    ipmiSetUserName(ipmi::Context::ptr ctx, uint6_t id, uint2_t reserved,
+                    const std::array<uint8_t, ipmi::ipmiMaxUserName>& name)
+{
+    if (reserved)
     {
-        log<level::DEBUG>("Set user name - Invalid Length");
-        return ccReqDataLenInvalid;
+        return ipmi::responseInvalidFieldRequest();
     }
-    if (req->reserved1)
-    {
-        return ccInvalidFieldRequest;
-    }
-    if (!ipmiUserIsValidUserId(req->userId))
+    uint8_t userId = static_cast<uint8_t>(id);
+    if (!ipmiUserIsValidUserId(userId))
     {
         log<level::DEBUG>("Set user name - Invalid user id");
-        return ccParmOutOfRange;
+        return ipmi::responseParmOutOfRange();
     }
 
-    size_t nameLen = strnlen(reinterpret_cast<const char*>(req->userName),
-                             sizeof(req->userName));
-    const std::string strUserName(reinterpret_cast<const char*>(req->userName),
+    size_t nameLen = strnlen(reinterpret_cast<const char*>(name.data()),
+                             ipmi::ipmiMaxUserName);
+    const std::string strUserName(reinterpret_cast<const char*>(name.data()),
                                   nameLen);
 
-    return ipmiUserSetUserName(req->userId, strUserName);
+    ipmi::Cc res = ipmiUserSetUserName(userId, strUserName);
+    return ipmi::response(res);
 }
 
 /** @brief implementes the get user name command
@@ -697,8 +681,9 @@ void registerUserIpmiFunctions()
                           ipmi::app::cmdGetUserNameCommand,
                           ipmi::Privilege::Operator, ipmiGetUserName);
 
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_NAME, NULL,
-                           ipmiSetUserName, PRIVILEGE_ADMIN);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetUserName, ipmi::Privilege::Admin,
+                          ipmiSetUserName);
 
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_PASSWORD, NULL,
                            ipmiSetUserPassword, PRIVILEGE_ADMIN);
