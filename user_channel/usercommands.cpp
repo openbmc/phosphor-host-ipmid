@@ -57,31 +57,6 @@ struct SetUserNameReq
     uint8_t userName[16];
 } __attribute__((packed));
 
-/** @struct GetUserNameReq
- *
- *  Structure for get user name request command (refer spec sec 22.29)
- */
-struct GetUserNameReq
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t userId : 6;
-    uint8_t reserved1 : 2;
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 2;
-    uint8_t userId : 6;
-#endif
-} __attribute__((packed));
-
-/** @struct GetUserNameResp
- *
- *  Structure for get user name response command (refer spec sec 22.29)
- */
-struct GetUserNameResp
-{
-    uint8_t userName[16];
-} __attribute__((packed));
-
 /** @struct SetUserPasswordReq
  *
  *  Structure for set user password request command (refer spec sec 22.30)
@@ -301,44 +276,36 @@ Cc ipmiSetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
 }
 
 /** @brief implementes the get user name command
- *  @param[in] netfn - specifies netfn.
- *  @param[in] cmd   - specifies cmd number.
- *  @param[in] request - pointer to request data.
- *  @param[in, out] dataLen - specifies request data length, and returns
- * response data length.
- *  @param[in] context - ipmi context.
- *  @returns ipmi completion code.
+ *  @param[in] ctx - ipmi command context
+ *  @param[in] userId - 6-bit user ID
+ *  @param[in] reserved - 2-bits reserved
+
+ *  @returns ipmi response with 16-byte username
  */
-Cc ipmiGetUserName(ipmi_netfn_t netfn, ipmi_cmd_t cmd, ipmi_request_t request,
-                   ipmi_response_t response, ipmi_data_len_t dataLen,
-                   ipmi_context_t context)
+ipmi::RspType<std::array<uint8_t, ipmi::ipmiMaxUserName>> // user name
+    ipmiGetUserName(ipmi::Context::ptr ctx, uint6_t id, uint2_t reserved)
 {
-    const GetUserNameReq* req = static_cast<GetUserNameReq*>(request);
-    size_t reqLength = *dataLen;
-
-    *dataLen = 0;
-
-    if (reqLength != sizeof(*req))
+    if (reserved)
     {
-        log<level::DEBUG>("Get user name - Invalid Length");
-        return ccReqDataLenInvalid;
+        return ipmi::responseInvalidFieldRequest();
     }
 
+    uint8_t userId = static_cast<uint8_t>(id);
     std::string userName;
-    if (ipmiUserGetUserName(req->userId, userName) != ccSuccess)
+    if (ipmiUserGetUserName(userId, userName) != ccSuccess)
     { // Invalid User ID
-        log<level::DEBUG>("User Name not found",
-                          entry("USER-ID=%d", (uint8_t)req->userId));
-        return ccParmOutOfRange;
+        log<level::DEBUG>("User Name not found", entry("USER-ID=%u", userId));
+        return ipmi::responseParmOutOfRange();
     }
-    GetUserNameResp* resp = static_cast<GetUserNameResp*>(response);
-    std::fill(reinterpret_cast<uint8_t*>(resp),
-              reinterpret_cast<uint8_t*>(resp) + sizeof(*resp), 0);
-    userName.copy(reinterpret_cast<char*>(resp->userName),
-                  sizeof(resp->userName), 0);
-    *dataLen = sizeof(*resp);
-
-    return ccSuccess;
+    // copy the std::string into a fixed array
+    if (userName.size() > ipmi::ipmiMaxUserName)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+    std::array<uint8_t, ipmi::ipmiMaxUserName> userNameFixed;
+    std::fill(userNameFixed.begin(), userNameFixed.end(), 0);
+    std::copy(userName.begin(), userName.end(), userNameFixed.begin());
+    return ipmi::responseSuccess(std::move(userNameFixed));
 }
 
 /** @brief implementes the set user password command
@@ -726,8 +693,9 @@ void registerUserIpmiFunctions()
                           ipmi::app::cmdGetUserAccessCommand,
                           ipmi::Privilege::Operator, ipmiGetUserAccess);
 
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_GET_USER_NAME, NULL,
-                           ipmiGetUserName, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdGetUserNameCommand,
+                          ipmi::Privilege::Operator, ipmiGetUserName);
 
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_SET_USER_NAME, NULL,
                            ipmiSetUserName, PRIVILEGE_ADMIN);
