@@ -125,7 +125,7 @@ SensorSubTree& getSensorTree()
 }
 
 static ipmi_ret_t
-    getSensorConnection(ipmi::Context::ptr ctx, uint16_t sensnum,
+    getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
                         std::string& connection, std::string& path,
                         std::vector<std::string>* interfaces = nullptr)
 {
