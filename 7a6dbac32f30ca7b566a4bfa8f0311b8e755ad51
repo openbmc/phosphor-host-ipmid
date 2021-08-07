@@ -70,6 +70,30 @@
       "revId": "7a6dbac32f30ca7b566a4bfa8f0311b8e755ad51",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a225cbb_f7197a28",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1639,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2021-08-07T10:11:43Z",
+      "side": 1,
+      "message": "It is definitely a bug, that the set-handler code path doesn\u0027t initialize the SDR in the same way as the get-handler code path. Ideally, these two code paths should be equivalent.\n\nHowever, fixing this bug is beyond the scope of the Mutable feature, I feel. It should be the subject of a second patch, as it would be making a much deeper change.\n\nAs long as the existing behavior is erring on the side of caution, denying the IPMI write attempt if the SDR permission can\u0027t be verified to allow external mutability, then I\u0027m OK with accepting this patch as-is.",
+      "parentUuid": "7ea156ea_61b3ef18",
+      "range": {
+        "startLine": 1639,
+        "startChar": 4,
+        "endLine": 1639,
+        "endChar": 76
+      },
+      "revId": "7a6dbac32f30ca7b566a4bfa8f0311b8e755ad51",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
