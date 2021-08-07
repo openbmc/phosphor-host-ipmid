@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "09b139db_2e0c733e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2021-08-07T03:55:40Z",
+      "side": 1,
+      "message": "So \"Manual Mode\" is referring to phosphor-pid-controls\u0027s oem command, it disables the automatic pid control of fans. But it is not a PwmSensor(dbus-sensors) mode.",
+      "parentUuid": "47ac712c_3f4c3cde",
+      "range": {
+        "startLine": 11,
+        "startChar": 68,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "d627e4fc74f61b645c4c9378e1e640fbc982f8ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84dcb519_968d7a6e",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 1
