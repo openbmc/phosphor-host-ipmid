@@ -127,7 +127,6 @@ class HandlerBase
     {
         return executeCallback(request);
     }
-
   private:
     /** @brief call the registered handler with the request
      *
