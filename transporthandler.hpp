@@ -45,10 +45,6 @@ namespace transport
 
 // D-Bus Network Daemon definitions
 constexpr auto PATH_ROOT = "/xyz/openbmc_project/network";
-constexpr auto PATH_SYSTEMCONFIG = "/xyz/openbmc_project/network/config";
-
-constexpr auto INTF_SYSTEMCONFIG =
-    "xyz.openbmc_project.Network.SystemConfiguration";
 constexpr auto INTF_ETHERNET = "xyz.openbmc_project.Network.EthernetInterface";
 constexpr auto INTF_IP = "xyz.openbmc_project.Network.IP";
 constexpr auto INTF_IP_CREATE = "xyz.openbmc_project.Network.IP.Create";
@@ -578,9 +574,10 @@ template <int family>
 std::optional<typename AddrFamily<family>::addr>
     getGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
 {
-    auto gatewayStr = std::get<std::string>(getDbusProperty(
-        bus, params.service, PATH_SYSTEMCONFIG, INTF_SYSTEMCONFIG,
-        AddrFamily<family>::propertyGateway));
+    auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
+    auto gatewayStr = std::get<std::string>(
+        getDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
+                        AddrFamily<family>::propertyGateway));
     if (gatewayStr.empty())
     {
         return std::nullopt;
@@ -668,7 +665,8 @@ void setGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
         neighbor = findStaticNeighbor<family>(bus, params, *gateway, neighbors);
     }
 
-    setDbusProperty(bus, params.service, PATH_SYSTEMCONFIG, INTF_SYSTEMCONFIG,
+    auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
+    setDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
                     AddrFamily<family>::propertyGateway,
                     addrToString<family>(address));
 
