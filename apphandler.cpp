@@ -578,7 +578,7 @@ ipmi::RspType<uint8_t,  // Device ID
               uint16_t, // Product ID
               uint32_t  // AUX info
               >
-    ipmiAppGetDeviceId(ipmi::Context::ptr ctx)
+    ipmiAppGetDeviceId([[maybe_unused]] ipmi::Context::ptr ctx)
 {
     int r = -1;
     Revision rev = {0, 0, 0, 0};

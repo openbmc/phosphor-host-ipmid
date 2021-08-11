@@ -301,70 +301,71 @@ void writeFruIfRunning()
 
 void startMatch(void)
 {
-    if (fruMatches.size())
-    {
-        return;
-    }
+    // if (fruMatches.size())
+    // {
+    //     return;
+    // }
 
-    fruMatches.reserve(2);
+    // fruMatches.reserve(2);
 
-    auto bus = getSdBus();
-    fruMatches.emplace_back(*bus,
-                            "type='signal',arg0path='/xyz/openbmc_project/"
-                            "FruDevice/',member='InterfacesAdded'",
-                            [](sdbusplus::message::message& message) {
-                                sdbusplus::message::object_path path;
-                                ObjectType object;
-                                try
-                                {
-                                    message.read(path, object);
-                                }
-                                catch (const sdbusplus::exception_t&)
-                                {
-                                    return;
-                                }
-                                auto findType = object.find(
-                                    "xyz.openbmc_project.FruDevice");
-                                if (findType == object.end())
-                                {
-                                    return;
-                                }
-                                writeFruIfRunning();
-                                frus[path] = object;
-                                recalculateHashes();
-                                lastDevId = 0xFF;
-                            });
+    // auto bus = getSdBus();
+    // fruMatches.emplace_back(*bus,
+    //                         "type='signal',arg0path='/xyz/openbmc_project/"
+    //                         "FruDevice/',member='InterfacesAdded'",
+    //                         [](sdbusplus::message::message& message) {
+    //                             sdbusplus::message::object_path path;
+    //                             ObjectType object;
+    //                             try
+    //                             {
+    //                                 message.read(path, object);
+    //                             }
+    //                             catch (const sdbusplus::exception_t&)
+    //                             {
+    //                                 return;
+    //                             }
+    //                             auto findType = object.find(
+    //                                 "xyz.openbmc_project.FruDevice");
+    //                             if (findType == object.end())
+    //                             {
+    //                                 return;
+    //                             }
+    //                             writeFruIfRunning();
+    //                             frus[path] = object;
+    //                             recalculateHashes();
+    //                             lastDevId = 0xFF;
+    //                         });
 
-    fruMatches.emplace_back(*bus,
-                            "type='signal',arg0path='/xyz/openbmc_project/"
-                            "FruDevice/',member='InterfacesRemoved'",
-                            [](sdbusplus::message::message& message) {
-                                sdbusplus::message::object_path path;
-                                std::set<std::string> interfaces;
-                                try
-                                {
-                                    message.read(path, interfaces);
-                                }
-                                catch (const sdbusplus::exception_t&)
-                                {
-                                    return;
-                                }
-                                auto findType = interfaces.find(
-                                    "xyz.openbmc_project.FruDevice");
-                                if (findType == interfaces.end())
-                                {
-                                    return;
-                                }
-                                writeFruIfRunning();
-                                frus.erase(path);
-                                recalculateHashes();
-                                lastDevId = 0xFF;
-                            });
+    // fruMatches.emplace_back(*bus,
+    //                         "type='signal',arg0path='/xyz/openbmc_project/"
+    //                         "FruDevice/',member='InterfacesRemoved'",
+    //                         [](sdbusplus::message::message& message) {
+    //                             sdbusplus::message::object_path path;
+    //                             std::set<std::string> interfaces;
+    //                             try
+    //                             {
+    //                                 message.read(path, interfaces);
+    //                             }
+    //                             catch (const sdbusplus::exception_t&)
+    //                             {
+    //                                 return;
+    //                             }
+    //                             auto findType = interfaces.find(
+    //                                 "xyz.openbmc_project.FruDevice");
+    //                             if (findType == interfaces.end())
+    //                             {
+    //                                 return;
+    //                             }
+    //                             writeFruIfRunning();
+    //                             frus.erase(path);
+    //                             recalculateHashes();
+    //                             lastDevId = 0xFF;
+    //                         });
 
-    // call once to populate
-    boost::asio::spawn(*getIoContext(), [](boost::asio::yield_context yield) {
-        replaceCacheFru(getSdBus(), yield);
-    });
+    // // call once to populate
+    // boost::asio::spawn(*getIoContext(), [](boost::asio::yield_context yield)
+    // {
+    //     replaceCacheFru(getSdBus(), yield);
+    // });
 }
 
 /** @brief implements the read FRU data command
