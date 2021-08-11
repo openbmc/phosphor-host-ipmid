@@ -45,10 +45,6 @@ namespace transport
 
 // D-Bus Network Daemon definitions
 constexpr auto PATH_ROOT = "/xyz/openbmc_project/network";
-constexpr auto PATH_SYSTEMCONFIG = "/xyz/openbmc_project/network/config";
-
-constexpr auto INTF_SYSTEMCONFIG =
-    "xyz.openbmc_project.Network.SystemConfiguration";
 constexpr auto INTF_ETHERNET = "xyz.openbmc_project.Network.EthernetInterface";
 constexpr auto INTF_IP = "xyz.openbmc_project.Network.IP";
 constexpr auto INTF_IP_CREATE = "xyz.openbmc_project.Network.IP.Create";
@@ -568,7 +564,7 @@ void reconfigureIfAddr6(sdbusplus::bus::bus& bus, const ChannelParams& params,
                         uint8_t idx, const in6_addr& address, uint8_t prefix);
 
 /** @brief Retrieves the current gateway for the address family on the system
- *         NOTE: The gateway is currently system wide and not per channel
+ *         NOTE: The gateway is per channel instead of the system wide one.
  *
  *  @param[in] bus    - The bus object used for lookups
  *  @param[in] params - The parameters for the channel
@@ -578,9 +574,10 @@ template <int family>
 std::optional<typename AddrFamily<family>::addr>
     getGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
 {
-    auto gatewayStr = std::get<std::string>(getDbusProperty(
-        bus, params.service, PATH_SYSTEMCONFIG, INTF_SYSTEMCONFIG,
-        AddrFamily<family>::propertyGateway));
+    auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
+    auto gatewayStr = std::get<std::string>(
+        getDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
+                        AddrFamily<family>::propertyGateway));
     if (gatewayStr.empty())
     {
         return std::nullopt;
@@ -649,7 +646,7 @@ void createNeighbor(sdbusplus::bus::bus& bus, const ChannelParams& params,
 void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
                           const std::string& path);
 
-/** @brief Sets the system wide value for the default gateway
+/** @brief Sets the value for the default gateway of the channel
  *
  *  @param[in] bus     - The bus object used for lookups
  *  @param[in] params  - The parameters for the channel
@@ -668,7 +665,8 @@ void setGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
         neighbor = findStaticNeighbor<family>(bus, params, *gateway, neighbors);
     }
 
-    setDbusProperty(bus, params.service, PATH_SYSTEMCONFIG, INTF_SYSTEMCONFIG,
+    auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
+    setDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
                     AddrFamily<family>::propertyGateway,
                     addrToString<family>(address));
 
