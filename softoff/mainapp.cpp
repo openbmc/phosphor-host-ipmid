@@ -49,34 +49,34 @@ int main(int argc, char** argv)
     // Create the SoftPowerOff object.
     phosphor::ipmi::SoftPowerOff powerObj(bus, event.get(), SOFTOFF_OBJPATH);
 
-    // Wait for client requests until this application has processed
-    // at least one successful SoftPowerOff or we timed out
-    while (!powerObj.isCompleted() && !powerObj.isTimerExpired())
-    {
-        try
-        {
-            event.run(std::nullopt);
-        }
-        catch (const sdeventplus::SdEventError& e)
-        {
-            log<level::ERR>("Failure in processing request",
-                            entry("ERROR=%s", e.what()));
-            return 1;
-        }
-    }
+    // // Wait for client requests until this application has processed
+    // // at least one successful SoftPowerOff or we timed out
+    // while (!powerObj.isCompleted() && !powerObj.isTimerExpired())
+    // {
+    //     try
+    //     {
+    //         event.run(std::nullopt);
+    //     }
+    //     catch (const sdeventplus::SdEventError& e)
+    //     {
+    //         log<level::ERR>("Failure in processing request",
+    //                         entry("ERROR=%s", e.what()));
+    //         return 1;
+    //     }
+    // }
 
-    // Log an error if we timed out after getting Ack for SMS_ATN and before
-    // getting the Host Shutdown response
-    if (powerObj.isTimerExpired() &&
-        (powerObj.responseReceived() ==
-         phosphor::ipmi::Base::SoftPowerOff::HostResponse::SoftOffReceived))
-    {
-        using error =
-            sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout;
-        using errorMetadata = xyz::openbmc_project::State::Host::SoftOffTimeout;
-        report<error>(prev_entry<errorMetadata::TIMEOUT_IN_MSEC>());
-        return -1;
-    }
+    // // Log an error if we timed out after getting Ack for SMS_ATN and before
+    // // getting the Host Shutdown response
+    // if (powerObj.isTimerExpired() &&
+    //     (powerObj.responseReceived() ==
+    //      phosphor::ipmi::Base::SoftPowerOff::HostResponse::SoftOffReceived))
+    // {
+    //     using error =
+    //         sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout;
+    //     using errorMetadata = xyz::openbmc_project::State::Host::SoftOffTimeout;
+    //     report<error>(prev_entry<errorMetadata::TIMEOUT_IN_MSEC>());
+    //     return -1;
+    // }
 
-    return 0;
+    // return 0;
 }
