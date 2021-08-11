@@ -84,3 +84,7 @@ test/*_unittest
 *~
 .cscope/
 build/
+
+# Meson
+/build*/
+/subprojects/*/
