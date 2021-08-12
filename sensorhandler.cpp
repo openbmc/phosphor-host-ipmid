@@ -1104,15 +1104,10 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_sen_functions()
 {
-    // <Platform Event Message>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_PLATFORM_EVENT, nullptr,
-                           ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
+    // Handlers with dbus-sdr handler implementation.
+    // Do not register the hander if it dynamic sensors stack is used.
 
-    // <Get Sensor Type>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
-                          ipmi::sensor_event::cmdGetSensorType,
-                          ipmi::Privilege::User, ipmiGetSensorType);
-
+#ifndef FEATURE_DYNAMIC_SENSORS
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
@@ -1132,14 +1127,26 @@ void register_netfn_sen_functions()
                           ipmi::sensor_event::cmdGetDeviceSdrInfo,
                           ipmi::Privilege::User, ipmiSensorGetDeviceSdrInfo);
 
-    // <Get Device SDR>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
-                           ipmi_sen_get_sdr, PRIVILEGE_USER);
-
     // <Get Sensor Thresholds>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetSensorThreshold,
                           ipmi::Privilege::User, ipmiSensorGetSensorThresholds);
 
+#endif
+
+    // Common Handers used by both implementation.
+
+    // <Platform Event Message>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_PLATFORM_EVENT, nullptr,
+                           ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
+
+    // <Get Sensor Type>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorType,
+                          ipmi::Privilege::User, ipmiGetSensorType);
+
+    // <Get Device SDR>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
+                           ipmi_sen_get_sdr, PRIVILEGE_USER);
     return;
 }
