@@ -277,6 +277,13 @@ AC_ARG_ENABLE([dynamic_sensors],
       )
 AM_CONDITIONAL([FEATURE_DYNAMIC_SENSORS], [test x$dynamic_sensors = xtrue])
 
+AS_IF([test x$dynamic_sensors = xtrue],
+    AC_MSG_NOTICE([Enabling dynamic sensors feature])
+    [cpp_flags="$cpp_flags -DFEATURE_DYNAMIC_SENSORS"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling dynamic sensors feature])
+)
+
 # hybrid sensors stack is disabled by default; offer a way to enable it
 AC_ARG_ENABLE([hybrid-sensors],
     [ --enable-hybrid-sensors   Enable/disable Hybrid Sensors stack],
