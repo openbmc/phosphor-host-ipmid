@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5564db2_e772d552",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-08-12T17:35:00Z",
+      "side": 1,
+      "message": "I think this constructor is this:\n\n constexpr basic_string( const basic_string\u0026 other,\n                        size_type pos,\n                        size_type count,\n                        const Allocator\u0026 alloc \u003d Allocator() );\n\nso I think the first parameter might invoke a temporary std::string which isn\u0027t secure? Not sure, but might be better to use this constructor:\n\n constexpr basic_string( const CharT* s,\n                        size_type count,\n                        const Allocator\u0026 alloc \u003d Allocator() );\n\ni.e. just get rid of the second parameter",
+      "range": {
+        "startLine": 411,
+        "startChar": 8,
+        "endLine": 413,
+        "endChar": 28
+      },
+      "revId": "81a8d29b92e3bc0d746707db8426aece0beb61d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
