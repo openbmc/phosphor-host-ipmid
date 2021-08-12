@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31c7c81d_8270cd1a",
+        "filename": "include/ipmid/message.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-08-12T18:50:15Z",
+      "side": 1,
+      "message": "tangent to this review, but I think std::move is more appropriate than std::forward in this context. (reference: Effective Modern C++ Item 25)",
+      "range": {
+        "startLine": 599,
+        "startChar": 16,
+        "endLine": 599,
+        "endChar": 45
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64577a76_fcfcd0a6",
+        "filename": "include/ipmid/message/pack.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-08-12T18:50:15Z",
+      "side": 1,
+      "message": "Can we just change the previous PackSingle\u003cstd::vector\u003cuint8_t\u003e\u003e to a partial template specialization since the op() definition is identical? Something like this on line 239?\n\n template \u003cclass Allocator\u003e\nstruct PackSingle\u003cstd::vector\u003cuint8_t, Allocator\u003e\u003e {}\n\nnot sure it\u0027ll work just a thought.",
+      "range": {
+        "startLine": 253,
+        "startChar": 0,
+        "endLine": 267,
+        "endChar": 2
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "721dbc20_f246d3bb",
+        "filename": "ipmid-new.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-08-12T18:50:15Z",
+      "side": 1,
+      "message": "tangent to this review, but std::forward is no-op in this context. It can be removed.",
+      "range": {
+        "startLine": 567,
+        "startChar": 13,
+        "endLine": 567,
+        "endChar": 45
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0ac461b_2f0c6845",
+        "filename": "ipmid-new.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-08-12T18:50:15Z",
+      "side": 1,
+      "message": "same here - the forward is a no-op.",
+      "range": {
+        "startLine": 780,
+        "startChar": 17,
+        "endLine": 780,
+        "endChar": 49
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5d15c75_82dad7c8",
+        "filename": "test/Makefile.am",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-08-12T18:50:15Z",
+      "side": 1,
+      "message": "tab -\u003e spaces",
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
