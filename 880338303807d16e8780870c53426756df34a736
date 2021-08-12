@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0974f20b_38ddb9aa",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-12T22:16:31Z",
+      "side": 1,
+      "message": "Originally, we had https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/44104\n\nthat removed building the sensor/storage handler... however, there were dependencies on those files. \n\nIt feels cleaner to do it with priority. This way we can still test both codebase.",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 35
+      },
+      "revId": "880338303807d16e8780870c53426756df34a736",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
