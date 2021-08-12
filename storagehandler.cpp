@@ -849,6 +849,10 @@ void register_netfn_storage_functions()
 {
     selCacheMapInitialized = false;
     initSELCache();
+    // Handlers with dbus-sdr handler implementation.
+    // Do not register the hander if it dynamic sensors stack is used.
+
+#ifndef FEATURE_DYNAMIC_SENSORS
     // <Get SEL Info>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
@@ -864,10 +868,6 @@ void register_netfn_storage_functions()
                           ipmi::storage::cmdSetSelTime,
                           ipmi::Privilege::Operator, ipmiStorageSetSelTime);
 
-    // <Reserve SEL>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
-                          ipmi::storage::cmdReserveSel, ipmi::Privilege::User,
-                          ipmiStorageReserveSel);
     // <Get SEL Entry>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
                            getSELEntry, PRIVILEGE_USER);
@@ -910,6 +910,15 @@ void register_netfn_storage_functions()
     // <Get SDR>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SDR, nullptr,
                            ipmi_sen_get_sdr, PRIVILEGE_USER);
+
+#endif
+
+    // Common Handers used by both implementation.
+
+    // <Reserve SEL>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdReserveSel, ipmi::Privilege::User,
+                          ipmiStorageReserveSel);
 
     ipmi::fru::registerCallbackHandler();
     return;
