@@ -39,6 +39,7 @@ constexpr Group groupDCMI = 0xDC;
  * is being created at.
  */
 constexpr int prioOpenBmcBase = 10;
+constexpr int prioDbusSdrBase = 11;
 constexpr int prioOemBase = 20;
 constexpr int prioOdmBase = 30;
 constexpr int prioCustomBase = 40;
