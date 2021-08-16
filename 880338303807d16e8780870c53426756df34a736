@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "acfc178e_09b8cb62",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-16T17:43:12Z",
+      "side": 1,
+      "message": "These handlers also depends on the `Reserve SEL` handler in storagehandler.\n\nSo we either have to duplicate that handler here or just do it this way so it picks up the changes automatically.",
+      "range": {
+        "startLine": 1262,
+        "startChar": 0,
+        "endLine": 1281,
+        "endChar": 0
+      },
+      "revId": "880338303807d16e8780870c53426756df34a736",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0974f20b_38ddb9aa",
         "filename": "include/ipmid/api-types.hpp",
         "patchSetId": 3
