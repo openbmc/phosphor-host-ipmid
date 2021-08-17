@@ -98,7 +98,7 @@ std::shared_ptr<Session>
             bmcSessionID = (crypto::prng::rand());
             bmcSessionID &= session::multiIntfaceSessionIDMask;
             // In sessionID , BIT 31 BIT30 are used for netipmid instance
-            bmcSessionID |= ipmiNetworkInstance << 30;
+            bmcSessionID |= static_cast<uint32_t>(ipmiNetworkInstance) << 30;
             /*
              * Every IPMI Session has two ID's attached to it Remote Console
              * Session ID and BMC Session ID. The remote console ID is passed
@@ -130,7 +130,7 @@ std::shared_ptr<Session>
         }
         sessionHandle &= session::multiIntfaceSessionHandleMask;
         // In sessionID , BIT 31 BIT30 are used for netipmid instance
-        sessionHandle |= ipmiNetworkInstance << 6;
+        sessionHandle |= static_cast<uint8_t>(ipmiNetworkInstance) << 6;
         std::stringstream sstream;
         sstream << std::hex << bmcSessionID;
         std::stringstream shstream;
