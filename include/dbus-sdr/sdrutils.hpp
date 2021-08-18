@@ -377,4 +377,11 @@ const std::string* getSensorConfigurationInterface(
 void updateIpmiFromAssociation(const std::string& path,
                                const DbusInterfaceMap& sensorMap,
                                uint8_t& entityId, uint8_t& entityInstance);
+namespace sensor
+{
+// Extract file name from sensor path as the sensors SDR ID. Simplify the name
+// if it is too long.
+std::string parseSdrIdFromPath(const std::string& path);
+} // namespace sensor
+
 } // namespace ipmi

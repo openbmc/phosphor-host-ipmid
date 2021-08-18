@@ -16,18 +16,53 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
-#ifdef FEATURE_HYBRID_SENSORS
+#include "sensordatahandler.hpp"
 
 #include <ipmid/utils.hpp>
+
+constexpr std::array<const char*, 7> suffixes = {
+    "_Output_Voltage", "_Input_Voltage", "_Output_Current", "_Input_Current",
+    "_Output_Power",   "_Input_Power",   "_Temperature"};
+
 namespace ipmi
 {
 namespace sensor
 {
+#ifdef FEATURE_HYBRID_SENSORS
 extern const IdInfoMap sensors;
+#endif
+
+std::string parseSdrIdFromPath(const std::string& path)
+{
+    std::string name;
+    size_t nameStart = path.rfind("/");
+    if (nameStart != std::string::npos)
+    {
+        name = path.substr(nameStart + 1, std::string::npos - nameStart);
+    }
+
+    if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+    {
+        // try to not truncate by replacing common words
+        for (const auto& suffix : suffixes)
+        {
+            if (boost::ends_with(name, suffix))
+            {
+                boost::replace_all(name, suffix, "");
+                break;
+            }
+        }
+        if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+        {
+            name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+        }
+    }
+    std::replace(name.begin(), name.end(), '_', ' ');
+    return name;
+}
+
 } // namespace sensor
 } // namespace ipmi
-
-#endif
 
 namespace details
 {
@@ -48,6 +83,18 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         "openbmc_project/sensors/'",
         [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
 
+    static sdbusplus::bus::match_t inventoryAdded(
+        *dbus,
+        "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
+        "openbmc_project/inventory/'",
+        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+
+    static sdbusplus::bus::match_t inventoryRemoved(
+        *dbus,
+        "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
+        "openbmc_project/inventory/'",
+        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+
     if (sensorTreePtr)
     {
         subtree = sensorTreePtr;
@@ -58,8 +105,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     static constexpr const int32_t depth = 2;
 
-    auto lbdUpdateSensorTree = [&dbus](const char* path,
-                                       const auto& interfaces) {
+    auto lbdUpdateSensorTree = [&dbus](const char* path, const auto& interfaces,
+                                       const bool groupByObjPath = false) {
         auto mapperCall = dbus->new_method_call(
             "xyz.openbmc_project.ObjectMapper",
             "/xyz/openbmc_project/object_mapper",
@@ -86,7 +133,74 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
             std::fprintf(stderr, "IPMI updated: %zu sensors under %s\n",
                          sensorTreePartial.size(), path);
         }
-        sensorTreePtr->merge(std::move(sensorTreePartial));
+
+        if (groupByObjPath)
+        {
+            static constexpr int discreteSensorMaxState = 14;
+            // Merging the object with similar sdrName into one discrete sensor.
+            // For example, cablePresence1 and cablePresence2 should be merged.
+            SensorSubTree discreteSensorTreePartial;
+            // Define the distance of two objects as the index difference of
+            // objectPath. Therefore, we can at most walk 14 distance away in
+            // one sdr.
+            while (sensorTreePartial.size())
+            {
+                auto head = sensorTreePartial.begin();
+                // Split the index postion from the object path.
+                // For example, if the object path is /xyz/cable13,
+                // the index is 13.
+                auto lastNotDigit = head->first.find_last_not_of("0123456789");
+                if (lastNotDigit == head->first.size() - 1)
+                {
+                    // not indexed object path
+                    discreteSensorTreePartial[head->first] = head->second;
+                    sensorTreePartial.erase(head);
+                    continue;
+                }
+                // Make a copy of the interfaces information because we will
+                // erase the entries in sensorTree later.
+                auto intf = head->second;
+                auto indexPos = lastNotDigit + 1;
+                // The default object path without the index position
+                // information.
+                std::string defaultObjPath = head->first.substr(0, indexPos);
+                std::string sdrName =
+                    ::ipmi::sensor::parseSdrIdFromPath(defaultObjPath);
+                int index = std::stoi(head->first.substr(indexPos));
+                int range = index;
+                // Increment 1 distance on each loop.
+                for (; range < discreteSensorMaxState + index; ++range)
+                {
+                    std::string objPath =
+                        defaultObjPath + std::to_string(range);
+                    if (auto it = sensorTreePartial.find(objPath);
+                        it != sensorTreePartial.end())
+                    {
+                        sensorTreePartial.erase(it);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                // Construct the ranged object path. e.g. /xyz/cable[1-3].
+                std::string rangedObjPath;
+                // we don't want cdfp[0-0].
+                if (range - 1 != index) {
+                  rangedObjPath = defaultObjPath + "[" +
+                      std::to_string(index) + "-" +
+                      std::to_string(--range) + "]";
+                } else {
+                  rangedObjPath = defaultObjPath + std::to_string(index);
+                }
+                discreteSensorTreePartial[rangedObjPath] = intf;
+            }
+            sensorTreePtr->merge(std::move(discreteSensorTreePartial));
+        }
+        else
+        {
+            sensorTreePtr->merge(std::move(sensorTreePartial));
+        }
         return true;
     };
 
@@ -98,6 +212,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         "xyz.openbmc_project.Sensor.Threshold.Critical"};
     static constexpr const std::array vrInterfaces = {
         "xyz.openbmc_project.Control.VoltageRegulatorMode"};
+    static constexpr const std::array discreteCableInterface = {
+        "xyz.openbmc_project.Inventory.Item.Cable"};
 
     bool sensorRez =
         lbdUpdateSensorTree("/xyz/openbmc_project/sensors", sensorInterfaces);
@@ -135,6 +251,10 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     // Add VR control as optional search path.
     (void)lbdUpdateSensorTree("/xyz/openbmc_project/vr", vrInterfaces);
+
+    (void)lbdUpdateSensorTree("/xyz/openbmc_project/inventory/system",
+                              discreteCableInterface,
+                              /*groupByObjPath=*/true);
 
     subtree = sensorTreePtr;
     sensorUpdatedIndex++;

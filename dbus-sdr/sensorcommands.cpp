@@ -36,6 +36,7 @@
 #include <memory>
 #include <optional>
 #include <phosphor-logging/log.hpp>
+#include <regex>
 #include <sdbusplus/bus.hpp>
 #include <stdexcept>
 #include <string>
@@ -55,9 +56,6 @@ extern const IdInfoMap sensors;
 } // namespace ipmi
 #endif
 
-constexpr std::array<const char*, 7> suffixes = {
-    "_Output_Voltage", "_Input_Voltage", "_Output_Current", "_Input_Current",
-    "_Output_Power",   "_Input_Power",   "_Temperature"};
 namespace ipmi
 {
 
@@ -133,6 +131,28 @@ static sdbusplus::bus::match_t sensorRemoved(
                             .count();
     });
 
+static sdbusplus::bus::match_t inventoryAdded(
+    *getSdBus(),
+    "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
+    "inventory/'",
+    [](sdbusplus::message_t&) {
+        getSensorTree().clear();
+        sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
+                         std::chrono::system_clock::now().time_since_epoch())
+                         .count();
+    });
+
+static sdbusplus::bus::match_t inventoryRemoved(
+    *getSdBus(),
+    "type='signal',member='InterfacesRemoved',arg0path='/xyz/openbmc_project/"
+    "inventory/'",
+    [](sdbusplus::message_t&) {
+        getSensorTree().clear();
+        sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count();
+    });
+
 // this keeps track of deassertions for sensor event status command. A
 // deasertion can only happen if an assertion was seen first.
 static boost::container::flat_map<
@@ -185,6 +205,8 @@ static sdbusplus::bus::match_t thresholdChanged(
 
 namespace sensor
 {
+static constexpr const char* cableInterface =
+    "xyz.openbmc_project.Inventory.Item.Cable";
 static constexpr const char* vrInterface =
     "xyz.openbmc_project.Control.VoltageRegulatorMode";
 static constexpr const char* sensorInterface =
@@ -278,6 +300,13 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
         return true;
     }
 #endif
+
+    // If the path is indexed in the form of [x-y], that means this is a stacked
+    // sdr and we need to use ipmi event sensor.
+    if (std::regex_match(sensorPath, std::regex("^.*\\[[0-9]+-[0-9]+\\]$")))
+    {
+        return true;
+    }
 
     static boost::container::flat_map<
         std::string, std::chrono::time_point<std::chrono::steady_clock>>
@@ -433,35 +462,58 @@ static std::optional<double>
     return value;
 }
 
-// Extract file name from sensor path as the sensors SDR ID. Simplify the name
-// if it is too long.
-std::string parseSdrIdFromPath(const std::string& path)
+void getCableEventStatus(ipmi::Context::ptr ctx, std::string_view connection,
+                         std::string_view path, std::bitset<16>& assertions)
 {
-    std::string name;
-    size_t nameStart = path.rfind("/");
-    if (nameStart != std::string::npos)
-    {
-        name = path.substr(nameStart + 1, std::string::npos - nameStart);
-    }
+    assertions = 0;
+    auto readProperty = [&ctx, &connection, &path](std::string_view sdrPath,
+                                                   bool& value) {
+        auto ec = getDbusProperty<bool>(
+            ctx, std::string(connection), std::string(sdrPath),
+            "xyz.openbmc_project.Inventory.Item", "Present", value);
+        if (ec)
+        {
+            log<level::ERR>("Failed to get property",
+                            entry("PROPERTY=%s", "Selected"),
+                            entry("PATH=%s", sdrPath.data()),
+                            entry("INTERFACE=%s", sensor::sensorInterface),
+                            entry("WHAT=%s", ec.message().c_str()));
+            return false;
+        }
+        return true;
+    };
 
-    if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+    bool value;
+    std::string defaultObjPath;
+    // cable[0-3] would produce
+    //group1=cable
+    //group2=0
+    //group3=3
+    int start, end;
+    std::regex rgx("^([A-Za-z0-9\\/_]+)(?:\\[([0-9]+)-([0-9]+)\\]){0,1}$");
+    std::smatch matches;
+    std::string path_str(path); // regex doesn't work so well with string_view
+    if (std::regex_match(path_str, matches, rgx))
     {
-        // try to not truncate by replacing common words
-        for (const auto& suffix : suffixes)
+        defaultObjPath = matches[1].str();
+        start = std::stoi(matches[2].str());
+        end = std::stoi(matches[3].str());
+    }
+    else
+    {
+        // Not Indexed
+        readProperty(path, value);
+        assertions |= value;
+        return;
+    }
+    for (int i = start; i <= end; ++i)
+    {
+        auto sdrPath = defaultObjPath + std::to_string(i);
+        if (readProperty(sdrPath, value))
         {
-            if (boost::ends_with(name, suffix))
-            {
-                boost::replace_all(name, suffix, "");
-                break;
-            }
-        }
-        if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
-        {
-            name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+            assertions |= value << (start == 0 ? i : (i % start));
         }
     }
-    std::replace(name.begin(), name.end(), '_', ' ');
-    return name;
 }
 
 bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
@@ -1454,6 +1506,19 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
     std::bitset<16> assertions = 0;
     std::bitset<16> deassertions = 0;
 
+    // sensor map for gpio cable discrete sensor is empty so we can't rely on
+    // that to determine the property list.
+    // If the path is indexed in the form of [x-y], that means this is a stacked
+    // sdr and we need to use ipmi event sensor.
+    if (std::regex_match(path, std::regex("^.*\\[[0-9]+-[0-9]+\\]$")))
+    {
+        sensor::getCableEventStatus(ctx, connection, path, assertions);
+        // both Event Message and Sensor Scanning are disable.
+        sensorEventStatus = 0;
+        return ipmi::responseSuccess(sensorEventStatus, assertions,
+                                     deassertions);
+    }
+
     // handle VR typed sensor
     auto vrInterface = sensorMap.find(sensor::vrInterface);
     if (vrInterface != sensorMap.end())
@@ -1857,11 +1922,11 @@ void constructEventSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
     record.body.entity_instance = 0x01;
 }
 
-// Construct a type 3 SDR for VR typed sensor(daemon).
-bool constructVrSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
-                    uint16_t recordID, const std::string& service,
-                    const std::string& path,
-                    get_sdr::SensorDataEventRecord& record)
+// Construct a type 3 SDR.
+bool constructEventSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
+                       uint16_t recordID, const std::string& service,
+                       const std::string& path,
+                       get_sdr::SensorDataEventRecord& record)
 {
     constructEventSdrHeaderKey(sensorNum, recordID, record);
 
@@ -2091,9 +2156,11 @@ static int
     }
 #endif
 
-    // Contruct SDR type 3 record for VR sensor (daemon)
-    if (std::find(interfaces.begin(), interfaces.end(), sensor::vrInterface) !=
-        interfaces.end())
+    // Contruct SDR type 3 record for VR sensor and cable presence sensor
+    if ((std::find(interfaces.begin(), interfaces.end(), sensor::vrInterface) !=
+         interfaces.end()) ||
+        (std::find(interfaces.begin(), interfaces.end(),
+                   sensor::cableInterface) != interfaces.end()))
     {
         get_sdr::SensorDataEventRecord record = {};
 
@@ -2103,8 +2170,8 @@ static int
         {
             constructEventSdrHeaderKey(sensorNum, recordID, record);
         }
-        else if (!constructVrSdr(ctx, sensorNum, recordID, connection, path,
-                                 record))
+        else if (!constructEventSdr(ctx, sensorNum, recordID, connection, path,
+                                    record))
         {
             return GENERAL_ERROR;
         }
