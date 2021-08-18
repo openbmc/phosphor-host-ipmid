@@ -16,18 +16,45 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
-#ifdef FEATURE_HYBRID_SENSORS
+#include "sensordatahandler.hpp"
 
 #include <ipmid/utils.hpp>
 namespace ipmi
 {
 namespace sensor
 {
+#ifdef FEATURE_HYBRID_SENSORS
 extern const IdInfoMap sensors;
+#endif
+
+std::string parseSdrIdFromPath(const std::string& path)
+{
+    std::string name;
+    size_t nameStart = path.rfind("/");
+    if (nameStart != std::string::npos)
+    {
+        name = path.substr(nameStart + 1, std::string::npos - nameStart);
+    }
+
+    std::replace(name.begin(), name.end(), '_', ' ');
+    if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+    {
+        // try to not truncate by replacing common words
+        constexpr std::array<std::pair<const char*, const char*>, 2>
+            replaceWords = {std::make_pair("Output", "Out"),
+                            std::make_pair("Input", "In")};
+        for (const auto& [find, replace] : replaceWords)
+        {
+            boost::replace_all(name, find, replace);
+        }
+
+        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+    }
+    return name;
+}
+
 } // namespace sensor
 } // namespace ipmi
-
-#endif
 
 namespace details
 {
@@ -58,8 +85,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     static constexpr const int32_t depth = 2;
 
-    auto lbdUpdateSensorTree = [&dbus](const char* path,
-                                       const auto& interfaces) {
+    auto lbdUpdateSensorTree = [&dbus](const char* path, const auto& interfaces,
+                                       const bool groupByObjPath = false) {
         auto mapperCall = dbus->new_method_call(
             "xyz.openbmc_project.ObjectMapper",
             "/xyz/openbmc_project/object_mapper",
@@ -86,7 +113,30 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
             std::fprintf(stderr, "IPMI updated: %zu sensors under %s\n",
                          sensorTreePartial.size(), path);
         }
-        sensorTreePtr->merge(std::move(sensorTreePartial));
+
+        if (groupByObjPath)
+        {
+            // Merging the object with similar sdrName into one discrete sensor.
+            // For example, cablePresence1 and cablePresence2 should be merged.
+            std::set<std::string> bookKeeping;
+            SensorSubTree discreteSensorTreePartial;
+            for (auto obj : sensorTreePartial)
+            {
+                std::string sdrName =
+                    ::ipmi::sensor::parseSdrIdFromPath(obj.first.substr(
+                        0, obj.first.find_last_not_of("0123456789") + 1));
+                if (bookKeeping.find(sdrName) == bookKeeping.end())
+                {
+                    bookKeeping.insert(sdrName);
+                    discreteSensorTreePartial[obj.first] = obj.second;
+                }
+            }
+            sensorTreePtr->merge(std::move(discreteSensorTreePartial));
+        }
+        else
+        {
+            sensorTreePtr->merge(std::move(sensorTreePartial));
+        }
         return true;
     };
 
@@ -97,6 +147,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         "xyz.openbmc_project.Sensor.Threshold.Critical"};
     static constexpr const std::array vrInterfaces = {
         "xyz.openbmc_project.Control.VoltageRegulatorMode"};
+    static constexpr const std::array discreteCableInterface = {
+        "xyz.openbmc_project.Inventory.Item.Cable"};
 
     bool sensorRez =
         lbdUpdateSensorTree("/xyz/openbmc_project/sensors", sensorInterfaces);
@@ -134,6 +186,10 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     // Add VR control as optional search path.
     (void)lbdUpdateSensorTree("/xyz/openbmc_project/vr", vrInterfaces);
+
+    (void)lbdUpdateSensorTree("/xyz/openbmc_project/inventory/item",
+                              discreteCableInterface,
+                              /*groupByObjPath=*/true);
 
     subtree = sensorTreePtr;
     sensorUpdatedIndex++;
