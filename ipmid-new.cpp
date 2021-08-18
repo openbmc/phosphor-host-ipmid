@@ -594,18 +594,21 @@ struct IpmiProvider
     {
         log<level::DEBUG>("Open IPMI provider library",
                           entry("PROVIDER=%s", name.c_str()));
+        std::cerr << "Open IPMI provider library" << name << std::endl;
         try
         {
             addr = dlopen(name.c_str(), RTLD_NOW);
         }
         catch (const std::exception& e)
         {
+           std::cerr << "exception 1 " << e.what() << std::endl;
             log<level::ERR>("ERROR opening IPMI provider",
                             entry("PROVIDER=%s", name.c_str()),
                             entry("ERROR=%s", e.what()));
         }
         catch (...)
         {
+          std::cerr << "exception 2 " << std::endl;
             const char* what = currentExceptionType();
             phosphor::logging::log<phosphor::logging::level::ERR>(
                 "ERROR opening IPMI provider",
@@ -613,9 +616,11 @@ struct IpmiProvider
         }
         if (!isOpen())
         {
+          std::cerr << "open failed " << std::endl;
             log<level::ERR>("ERROR opening IPMI provider",
                             entry("PROVIDER=%s", name.c_str()),
                             entry("ERROR=%s", dlerror()));
+            printf("error is %s", dlerror());
         }
     }
 
