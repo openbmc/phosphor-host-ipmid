@@ -1,0 +1,10 @@
+Code-Review+2: Tom Joseph <rushtotom@gmail.com>
+Code-Review+1: Ratan Gupta <ratankgupta31@gmail.com>
+Code-Review+1: William A. Kennington III <wak@google.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Ok-To-Test+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Lei YU <yulei.sh@bytedance.com>
+Submitted-at: Wed, 18 Aug 2021 02:13:08 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/45806
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
