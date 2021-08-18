@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c9739f04_f900c366",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-18T16:52:13Z",
+      "side": 1,
+      "message": "Yes",
+      "parentUuid": "a43fa5ed_c3a5a99b",
+      "range": {
+        "startLine": 174,
+        "startChar": 0,
+        "endLine": 175,
+        "endChar": 60
+      },
+      "revId": "21cc4b828d468ed707a69691a92cd28000c170ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0c80b5c0_29ee40e3",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "851bd34c_f9ef3560",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-18T16:52:13Z",
+      "side": 1,
+      "message": "Yes, I just updated the doc.",
+      "parentUuid": "0c80b5c0_29ee40e3",
+      "range": {
+        "startLine": 446,
+        "startChar": 8,
+        "endLine": 450,
+        "endChar": 9
+      },
+      "revId": "21cc4b828d468ed707a69691a92cd28000c170ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e15d13e_782885ef",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 3
@@ -62,6 +110,24 @@
       "revId": "21cc4b828d468ed707a69691a92cd28000c170ee",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3d26d34_d9d9c0a1",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1961,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-18T16:52:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e15d13e_782885ef",
+      "revId": "21cc4b828d468ed707a69691a92cd28000c170ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
