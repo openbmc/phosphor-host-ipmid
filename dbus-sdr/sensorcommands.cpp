@@ -169,6 +169,10 @@ static sdbusplus::bus::match::match thresholdChanged(
 
 namespace sensor
 {
+static constexpr const char* cableInterface =
+    "xyz.openbmc_project.Inventory.Item.Cable";
+static constexpr const char* statusInterface =
+    "xyz.openbmc_project.State.Decorator.OperationalStatus";
 static constexpr const char* vrInterface =
     "xyz.openbmc_project.Control.VoltageRegulatorMode";
 static constexpr const char* sensorInterface =
@@ -405,32 +409,46 @@ static std::optional<double>
     return value;
 }
 
-// Extract file name from sensor path as the sensors SDR ID. Simplify the name
-// if it is too long.
-std::string parseSdrIdFromPath(const std::string& path)
+void getCableEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
+                         const std::string& path, std::bitset<16>& assertions)
 {
-    std::string name;
-    size_t nameStart = path.rfind("/");
-    if (nameStart != std::string::npos)
-    {
-        name = path.substr(nameStart + 1, std::string::npos - nameStart);
-    }
-
-    std::replace(name.begin(), name.end(), '_', ' ');
-    if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
-    {
-        // try to not truncate by replacing common words
-        constexpr std::array<std::pair<const char*, const char*>, 2>
-            replaceWords = {std::make_pair("Output", "Out"),
-                            std::make_pair("Input", "In")};
-        for (const auto& [find, replace] : replaceWords)
+    assertions = 0;
+    auto baseName = path.substr(0, path.find_last_not_of("0123456789") + 1);
+    auto readProperty = [&](std::string sdrPath, bool& value) {
+        auto ec =
+            getDbusProperty<bool>(ctx, connection, sdrPath,
+                                  sensor::statusInterface, "Functional", value);
+        if (ec)
         {
-            boost::replace_all(name, find, replace);
+            return false;
         }
+        return true;
+    };
 
-        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+    bool value;
+    // Check the case where no position index is provided in the object path
+    // e.g. /xyz/openbmc_project/inventory/item/cable/osfp
+    bool skip_zero_index = false;
+    if (readProperty(baseName, value))
+    {
+        assertions |= value ? 1 : 0;
+        skip_zero_index = true;
     }
-    return name;
+    // Check the case where position index is appened to the object path
+    // e.g. /xyz/openbmc_project/inventory/item/cable/osfp0
+    for (int i = 0; i < 14; ++i)
+    {
+        auto sdrPath = baseName + std::to_string(skip_zero_index ? i : i + 1);
+        if (readProperty(sdrPath, value))
+        {
+            assertions |= (value ? 1 : 0) << i;
+        }
+        if ((i > 13) || (skip_zero_index && i > 12))
+        {
+            log<level::ERR>("Only support up to 14 cable presence state in 1 "
+                            "discrete sensor");
+        }
+    }
 }
 
 bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
@@ -1343,6 +1361,15 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
     std::bitset<16> assertions = 0;
     std::bitset<16> deassertions = 0;
 
+    if (sensorMap.find(sensor::cableInterface) != sensorMap.end())
+    {
+        sensor::getCableEventStatus(ctx, connection, path, assertions);
+        // both Event Message and Sensor Scanning are disable.
+        sensorEventStatus = 0;
+        return ipmi::responseSuccess(sensorEventStatus, assertions,
+                                     deassertions);
+    }
+
     // handle VR typed sensor
     auto vrInterface = sensorMap.find(sensor::vrInterface);
     if (vrInterface != sensorMap.end())
@@ -1752,11 +1779,11 @@ void constructEventSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
     record.body.entity_instance = 0x01;
 }
 
-// Construct a type 3 SDR for VR typed sensor(daemon).
-bool constructVrSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
-                    uint16_t recordID, const std::string& service,
-                    const std::string& path,
-                    get_sdr::SensorDataEventRecord& record)
+// Construct a type 3 SDR.
+bool constructEventSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
+                       uint16_t recordID, const std::string& service,
+                       const std::string& path,
+                       get_sdr::SensorDataEventRecord& record)
 {
     uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     constructEventSdrHeaderKey(sensorNum, recordID, record);
@@ -1932,8 +1959,10 @@ static int
 #endif
 
     // Contruct SDR type 3 record for VR sensor (daemon)
-    if (std::find(interfaces.begin(), interfaces.end(), sensor::vrInterface) !=
-        interfaces.end())
+    if ((std::find(interfaces.begin(), interfaces.end(), sensor::vrInterface) !=
+         interfaces.end()) ||
+        (std::find(interfaces.begin(), interfaces.end(),
+                   sensor::cableInterface) != interfaces.end()))
     {
         get_sdr::SensorDataEventRecord record = {0};
 
@@ -1943,8 +1972,8 @@ static int
         {
             constructEventSdrHeaderKey(sensorNum, recordID, record);
         }
-        else if (!constructVrSdr(ctx, sensorNum, recordID, connection, path,
-                                 record))
+        else if (!constructEventSdr(ctx, sensorNum, recordID, connection, path,
+                                    record))
         {
             return GENERAL_ERROR;
         }
