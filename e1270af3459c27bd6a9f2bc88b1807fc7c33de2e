@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "449b1feb_39e2e718",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-19T22:05:33Z",
+      "side": 1,
+      "message": "can move the scope of this inside the statement.",
+      "range": {
+        "startLine": 117,
+        "startChar": 9,
+        "endLine": 119,
+        "endChar": 42
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fb4ea0e_1ea3b981",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-19T22:05:33Z",
+      "side": 1,
+      "message": "print error log?",
+      "range": {
+        "startLine": 423,
+        "startChar": 12,
+        "endLine": 423,
+        "endChar": 25
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02088ca6_a7efdf66",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-19T22:05:33Z",
+      "side": 1,
+      "message": "new line before this.",
+      "range": {
+        "startLine": 437,
+        "startChar": 4,
+        "endLine": 437,
+        "endChar": 12
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75c7d64c_3742b07f",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1961,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-19T22:05:33Z",
+      "side": 1,
+      "message": "update the comment here?",
+      "range": {
+        "startLine": 1961,
+        "startChar": 10,
+        "endLine": 1961,
+        "endChar": 56
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1d9d630_1d06db0e",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-19T22:05:33Z",
+      "side": 1,
+      "message": "do we need this?\n\nIs this used somewhere else?",
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
