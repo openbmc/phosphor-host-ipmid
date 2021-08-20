@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2f4def14_a15c5e1d",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-20T17:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "449b1feb_39e2e718",
+      "range": {
+        "startLine": 117,
+        "startChar": 9,
+        "endLine": 119,
+        "endChar": 42
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9fb4ea0e_1ea3b981",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 5
@@ -45,6 +69,30 @@
       "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b35c6df3_5f0dafba",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-20T17:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fb4ea0e_1ea3b981",
+      "range": {
+        "startLine": 423,
+        "startChar": 12,
+        "endLine": 423,
+        "endChar": 25
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b325c6e1_e2ac3487",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-20T17:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02088ca6_a7efdf66",
+      "range": {
+        "startLine": 437,
+        "startChar": 4,
+        "endLine": 437,
+        "endChar": 12
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75c7d64c_3742b07f",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 5
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "de98a3f0_6ed41bb8",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1961,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-20T17:09:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75c7d64c_3742b07f",
+      "range": {
+        "startLine": 1961,
+        "startChar": 10,
+        "endLine": 1961,
+        "endChar": 56
+      },
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f1d9d630_1d06db0e",
         "filename": "include/dbus-sdr/sdrutils.hpp",
         "patchSetId": 5
@@ -108,6 +204,24 @@
       "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db088971_e6e37912",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-20T17:09:43Z",
+      "side": 1,
+      "message": "Yes it is used in both sdrutil.cpp and sensorcommands.cpp. Therefore, I promoted it from sensorcommands.cpp to sdrutil.hpp.",
+      "parentUuid": "f1d9d630_1d06db0e",
+      "revId": "e1270af3459c27bd6a9f2bc88b1807fc7c33de2e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
