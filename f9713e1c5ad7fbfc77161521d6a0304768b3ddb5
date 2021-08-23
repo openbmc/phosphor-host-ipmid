@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a3c8274_8f8d1725",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-23T20:20:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d5783241_57290f71",
+      "range": {
+        "startLine": 423,
+        "startChar": 10,
+        "endLine": 428,
+        "endChar": 25
+      },
+      "revId": "f9713e1c5ad7fbfc77161521d6a0304768b3ddb5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "141e6dfc_f2e7cbf7",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0be3490d_a7242f7c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-23T20:20:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "141e6dfc_f2e7cbf7",
+      "range": {
+        "startLine": 440,
+        "startChar": 8,
+        "endLine": 440,
+        "endChar": 36
+      },
+      "revId": "f9713e1c5ad7fbfc77161521d6a0304768b3ddb5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "51dcac56_27a2de8a",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 7
@@ -68,6 +116,30 @@
       "revId": "f9713e1c5ad7fbfc77161521d6a0304768b3ddb5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a5e9c2b_bdedadcc",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1372,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2021-08-23T20:20:19Z",
+      "side": 1,
+      "message": "We do. In the case of the failure, we just log the relavent error and return the initial value which indicates none of the cable is presenting.",
+      "parentUuid": "51dcac56_27a2de8a",
+      "range": {
+        "startLine": 1372,
+        "startChar": 7,
+        "endLine": 1372,
+        "endChar": 70
+      },
+      "revId": "f9713e1c5ad7fbfc77161521d6a0304768b3ddb5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
