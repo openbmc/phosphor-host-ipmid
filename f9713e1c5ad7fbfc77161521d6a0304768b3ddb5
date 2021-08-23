@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d5783241_57290f71",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-23T17:54:21Z",
+      "side": 1,
+      "message": "nit: the spacing does not match here?",
+      "range": {
+        "startLine": 423,
+        "startChar": 10,
+        "endLine": 428,
+        "endChar": 25
+      },
+      "revId": "f9713e1c5ad7fbfc77161521d6a0304768b3ddb5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "141e6dfc_f2e7cbf7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-23T17:54:21Z",
+      "side": 1,
+      "message": "does\n```\nassertions |\u003d value;\n```\n\nnot work?",
+      "range": {
+        "startLine": 440,
+        "startChar": 8,
+        "endLine": 440,
+        "endChar": 36
+      },
+      "revId": "f9713e1c5ad7fbfc77161521d6a0304768b3ddb5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51dcac56_27a2de8a",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1372,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-23T17:54:21Z",
+      "side": 1,
+      "message": "do we never expect failure here?",
+      "range": {
+        "startLine": 1372,
+        "startChar": 7,
+        "endLine": 1372,
+        "endChar": 70
+      },
+      "revId": "f9713e1c5ad7fbfc77161521d6a0304768b3ddb5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
