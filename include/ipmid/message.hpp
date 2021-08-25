@@ -596,7 +596,7 @@ struct Request
     using ptr = std::shared_ptr<Request>;
 
     explicit Request(Context::ptr context, SecureBuffer&& d) :
-        payload(std::forward<SecureBuffer>(d)), ctx(context)
+        payload(std::move(d)), ctx(context)
     {
     }
 

@@ -563,8 +563,8 @@ auto executionEntry(boost::asio::yield_context yield,
     auto ctx = std::make_shared<ipmi::Context>(getSdBus(), netFn, lun, cmd,
                                                channel, userId, sessionId,
                                                privilege, rqSA, hostIdx, yield);
-    auto request = std::make_shared<ipmi::message::Request>(
-        ctx, std::forward<ipmi::SecureBuffer>(data));
+    auto request =
+        std::make_shared<ipmi::message::Request>(ctx, std::move(data));
     message::Response::ptr response = executeIpmiCommand(request);
 
     return dbusResponse(response->cc, response->payload.raw);
@@ -769,8 +769,8 @@ void handleLegacyIpmiCommand(sdbusplus::message::message& m)
         std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
         auto ctx = std::make_shared<ipmi::Context>(
             bus, netFn, lun, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, 0, yield);
-        auto request = std::make_shared<ipmi::message::Request>(
-            ctx, std::forward<ipmi::SecureBuffer>(data));
+        auto request =
+            std::make_shared<ipmi::message::Request>(ctx, std::move(data));
         ipmi::message::Response::ptr response =
             ipmi::executeIpmiCommand(request);
 
