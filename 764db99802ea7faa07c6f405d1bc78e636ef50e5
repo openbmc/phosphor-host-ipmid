@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d78799b6_28566b38",
+        "filename": "include/ipmid/message.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-08-25T22:27:47Z",
+      "side": 1,
+      "message": "Yup. I think you are right.",
+      "parentUuid": "31c7c81d_8270cd1a",
+      "range": {
+        "startLine": 599,
+        "startChar": 16,
+        "endLine": 599,
+        "endChar": 45
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "64577a76_fcfcd0a6",
         "filename": "include/ipmid/message/pack.hpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "382d5581_71543d3d",
+        "filename": "include/ipmid/message/pack.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-08-25T22:27:47Z",
+      "side": 1,
+      "message": "No, by adding Allocator to the previous partial template, it then becomes ambiguous with the original std::vector\u003cT\u003e specialization.",
+      "parentUuid": "64577a76_fcfcd0a6",
+      "range": {
+        "startLine": 253,
+        "startChar": 0,
+        "endLine": 267,
+        "endChar": 2
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "555b5c54_2e2cd523",
+        "filename": "ipmid-new.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-08-25T22:27:47Z",
+      "side": 1,
+      "message": "I see what you mean. When I first wrote this code, std::move and std::forward were still a bit mysterious to me. When I changed it here, I was mostly just doing a copy/replace.\n\nI will push a new review to address this.",
+      "parentUuid": "721dbc20_f246d3bb",
+      "range": {
+        "startLine": 567,
+        "startChar": 13,
+        "endLine": 567,
+        "endChar": 45
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a0ac461b_2f0c6845",
         "filename": "ipmid-new.cpp",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "bdab533f_cc6f4297",
+        "filename": "ipmid-new.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-08-25T22:27:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a0ac461b_2f0c6845",
+      "range": {
+        "startLine": 780,
+        "startChar": 17,
+        "endLine": 780,
+        "endChar": 49
+      },
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b5d15c75_82dad7c8",
         "filename": "test/Makefile.am",
         "patchSetId": 2
@@ -108,6 +204,24 @@
       "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "426fdbf7_767b8c02",
+        "filename": "test/Makefile.am",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-08-25T22:27:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b5d15c75_82dad7c8",
+      "revId": "764db99802ea7faa07c6f405d1bc78e636ef50e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
