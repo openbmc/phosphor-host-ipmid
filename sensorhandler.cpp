@@ -350,6 +350,10 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
     log<level::DEBUG>("IPMI SET_SENSOR",
                       entry("SENSOR_NUM=0x%02x", sensorNumber));
 
+    if (sensorNumber == 0xFF)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
     ipmi::sensor::SetSensorReadingReq cmdData;
 
     cmdData.number = sensorNumber;
