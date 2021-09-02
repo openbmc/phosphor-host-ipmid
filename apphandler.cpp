@@ -114,7 +114,7 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
         objectTree =
             ipmi::getAllDbusObjects(*ctx->bus, softwareRoot, redundancyIntf);
     }
-    catch (sdbusplus::exception::SdBusError& e)
+    catch (sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to fetch redundancy object from dbus",
                         entry("INTERFACE=%s", redundancyIntf),
@@ -926,7 +926,7 @@ ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
             }
         }
     }
-    catch (sdbusplus::exception::SdBusError& e)
+    catch (sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to fetch object from dbus",
                         entry("INTERFACE=%s", session::sessionIntf),

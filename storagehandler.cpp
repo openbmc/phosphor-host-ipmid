@@ -109,7 +109,7 @@ ipmi::RspType<uint8_t,  // SEL revision.
     {
         ipmi::sel::readLoggingObjectPaths(cache::paths);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         // No action if reading log objects have failed for this command.
         // readLoggingObjectPaths will throw exception if there are no log
@@ -299,7 +299,7 @@ ipmi::RspType<uint16_t // deleted record ID
     {
         ipmi::sel::readLoggingObjectPaths(cache::paths);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         // readLoggingObjectPaths will throw exception if there are no error
         // log entries.
@@ -434,7 +434,7 @@ ipmi::RspType<uint8_t // erase status
                 static_cast<uint8_t>(ipmi::sel::eraseComplete));
         }
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         return ipmi::responseSuccess(
             static_cast<uint8_t>(ipmi::sel::eraseComplete));

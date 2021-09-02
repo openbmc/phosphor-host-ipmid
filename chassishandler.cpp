@@ -1046,7 +1046,7 @@ static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
                                                     buttonIntf, "Enabled");
         buttonDisabled = !std::get<bool>(enabled);
     }
-    catch (sdbusplus::exception::SdBusError& e)
+    catch (sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Fail to get button Enabled property",
                         entry("PATH=%s", buttonPath.c_str()),

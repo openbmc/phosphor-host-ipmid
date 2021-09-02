@@ -162,7 +162,7 @@ void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
         method.append(interface, property, value);
         bus.call(method);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to set property",
                         entry("PROPERTY=%s", property.c_str()),
@@ -183,7 +183,7 @@ static std::string getUserServiceName()
             userMgmtService =
                 ipmi::getUserService(bus, userMgrInterface, userMgrObjBasePath);
         }
-        catch (const sdbusplus::exception::SdBusError& e)
+        catch (const sdbusplus::exception::exception& e)
         {
             userMgmtService.clear();
         }
@@ -413,7 +413,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess,
                         auto reply = bus.call(method);
                         reply.read(properties);
                     }
-                    catch (const sdbusplus::exception::SdBusError& e)
+                    catch (const sdbusplus::exception::exception& e)
                     {
                         log<level::DEBUG>(
                             "Failed to excute method",
@@ -587,7 +587,7 @@ bool UserAccess::isValidUserName(const std::string& userName)
         auto reply = bus.call(method);
         reply.read(properties);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to excute method",
                         entry("METHOD=%s", getSubTreeMethod),
@@ -1032,7 +1032,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
                 deleteUserInterface, deleteUserMethod);
             auto reply = bus.call(method);
         }
-        catch (const sdbusplus::exception::SdBusError& e)
+        catch (const sdbusplus::exception::exception& e)
         {
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", deleteUserMethod),
@@ -1056,7 +1056,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
             method.append(userName.c_str(), availableGroups, "", false);
             auto reply = bus.call(method);
         }
-        catch (const sdbusplus::exception::SdBusError& e)
+        catch (const sdbusplus::exception::exception& e)
         {
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", createUserMethod),
@@ -1080,7 +1080,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
             method.append(oldUser.c_str(), userName.c_str());
             auto reply = bus.call(method);
         }
-        catch (const sdbusplus::exception::SdBusError& e)
+        catch (const sdbusplus::exception::exception& e)
         {
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", renameUserMethod),
@@ -1530,7 +1530,7 @@ void UserAccess::getSystemPrivAndGroups()
         auto reply = bus.call(method);
         reply.read(properties);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::DEBUG>("Failed to excute method",
                           entry("METHOD=%s", getAllPropertiesMethod),
@@ -1671,7 +1671,7 @@ void UserAccess::cacheUserDataFile()
         auto reply = bus.call(method);
         reply.read(managedObjs);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::DEBUG>("Failed to excute method",
                           entry("METHOD=%s", getSubTreeMethod),

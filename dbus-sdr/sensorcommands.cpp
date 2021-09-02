@@ -566,7 +566,7 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
                             "Value", ipmi::Value(*value));
 
         // setDbusProperty intended to resolve dbus exception/rc within the
-        // function but failed to achieve that. Catch SdBusError in the ipmi
+        // function but failed to achieve that. Catch exception in the ipmi
         // callback functions for now (e.g. ipmiSetSensorReading).
         if (ec)
         {
@@ -607,7 +607,7 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         boost::system::error_code ec = setDbusProperty(
             ctx, connection, path, sensor::vrInterface, "Selected", *vrMode);
         // setDbusProperty intended to resolve dbus exception/rc within the
-        // function but failed to achieve that. Catch SdBusError in the ipmi
+        // function but failed to achieve that. Catch exception in the ipmi
         // callback functions for now (e.g. ipmiSetSensorReading).
         if (ec)
         {

@@ -68,7 +68,7 @@ ipmi::PropertyMap readAllProperties(const std::string& intf,
         auto reply = bus.call(method);
         reply.read(properties);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         // If property is not found simply return empty value
         log<level::ERR>("Error in reading property values",

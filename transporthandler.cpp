@@ -318,7 +318,7 @@ void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
                                        ipmi::DELETE_INTERFACE, "Delete");
         bus.call_noreply(req);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         if (strcmp(e.name(),
                    "xyz.openbmc_project.Common.Error.InternalFailure") != 0 &&
