@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18b28b39_ec9f2326",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-03T16:48:14Z",
+      "side": 1,
+      "message": "use powerLimitAction instead",
+      "range": {
+        "startLine": 394,
+        "startChar": 40,
+        "endLine": 394,
+        "endChar": 56
+      },
+      "revId": "1a13668facd3c8e62cd7001730a24bdbe82aaec3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "186a96aa_47192c1f",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-03T16:48:14Z",
+      "side": 1,
+      "message": "powerlimitaction is a uint8_t. comparison to \u003c 0 is always false.\n\nSince it is two discrete values and not a range, it would be better to simply check:\nif (powerlimitaction !\u003d0 \u0026\u0026 powerlimitaction !\u003d 1)\n\nor\nif (powerlimitaction \u003e 1)\n\nEven better yet, you could give constexpr names to the values and compare against those instead of just 0 and 1.",
+      "range": {
+        "startLine": 411,
+        "startChar": 8,
+        "endLine": 411,
+        "endChar": 24
+      },
+      "revId": "1a13668facd3c8e62cd7001730a24bdbe82aaec3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
