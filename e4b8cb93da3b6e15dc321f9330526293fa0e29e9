@@ -22,6 +22,30 @@
       "revId": "e4b8cb93da3b6e15dc321f9330526293fa0e29e9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8e8e8a8_d886a6e2",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-03T20:11:23Z",
+      "side": 1,
+      "message": "We have two choices here. The pwLen20 bit is set and the password size MUST be 20. Alternately, if the pwLen20 bit is not set, the password size MUST be 16. This is just the IPMI spec here.",
+      "parentUuid": "8ddad526_6aac6f7d",
+      "range": {
+        "startLine": 284,
+        "startChar": 19,
+        "endLine": 284,
+        "endChar": 63
+      },
+      "revId": "e4b8cb93da3b6e15dc321f9330526293fa0e29e9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
