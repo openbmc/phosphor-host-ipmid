@@ -15,35 +15,35 @@ namespace xyz
 {
 namespace openbmc_project
 {
-namespace Dump
+namespace Common
 {
-namespace Create
+namespace Device
 {
 namespace Error
 {
-struct QuotaExceeded;
+struct ReadFailure;
 } // namespace Error
-} // namespace Create
-} // namespace Dump
+} // namespace Device
+} // namespace Common
 } // namespace openbmc_project
 } // namespace xyz
 } // namespace sdbusplus
 
 namespace sdbusplus
 {
-namespace org
+namespace com
 {
-namespace open_power
+namespace ibm
 {
-namespace Host
+namespace VPD
 {
 namespace Error
 {
-struct Event;
+struct RecordNotFound;
 } // namespace Error
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 } // namespace sdbusplus
 
 namespace sdbusplus
@@ -58,10 +58,30 @@ namespace Host
 {
 namespace Error
 {
-struct SoftOffTimeout;
+struct HostShutdownFailure;
 } // namespace Error
 } // namespace Host
 } // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace Error
+{
+struct PasswordNotSettable;
+} // namespace Error
+} // namespace Common
+} // namespace BIOSConfig
 } // namespace openbmc_project
 } // namespace xyz
 } // namespace sdbusplus
@@ -88,99 +108,19 @@ struct ReadFailure;
 
 namespace sdbusplus
 {
-namespace xyz
+namespace com
 {
-namespace openbmc_project
+namespace ibm
 {
-namespace Control
-{
-namespace Device
+namespace VPD
 {
 namespace Error
 {
-struct WriteFailure;
+struct BlankSystemVPD;
 } // namespace Error
-} // namespace Device
-} // namespace Control
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
-{
-namespace Error
-{
-struct Seek;
-} // namespace Error
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-
-namespace sdbusplus
-{
-namespace org
-{
-namespace open_power
-{
-namespace Common
-{
-namespace Callout
-{
-namespace Error
-{
-struct Procedure;
-} // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Control
-{
-namespace Host
-{
-namespace Error
-{
-struct CommandNotSupported;
-} // namespace Error
-} // namespace Host
-} // namespace Control
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct InternalFailure;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 } // namespace sdbusplus
 
 namespace sdbusplus
@@ -211,16 +151,87 @@ namespace open_power
 {
 namespace Host
 {
-namespace Access
-{
 namespace Error
 {
-struct WriteCFAM;
+struct MaintenanceProcedure;
 } // namespace Error
-} // namespace Access
 } // namespace Host
 } // namespace open_power
 } // namespace org
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Inventory
+{
+namespace Error
+{
+struct NotPresent;
+} // namespace Error
+} // namespace Inventory
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace Error
+{
+struct SoftOffTimeout;
+} // namespace Error
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace Error
+{
+struct Event;
+} // namespace Error
+} // namespace Host
+} // namespace open_power
+} // namespace org
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace Error
+{
+struct MediaFault;
+} // namespace Error
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
 } // namespace sdbusplus
 
 namespace sdbusplus
@@ -245,19 +256,39 @@ struct Open;
 
 namespace sdbusplus
 {
-namespace org
+namespace xyz
 {
-namespace open_power
+namespace openbmc_project
 {
-namespace Host
+namespace Dump
+{
+namespace Create
 {
 namespace Error
 {
-struct Checkstop;
+struct Disabled;
 } // namespace Error
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace Create
+} // namespace Dump
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct PathNotFound;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 } // namespace sdbusplus
 
 namespace sdbusplus
@@ -272,12 +303,728 @@ namespace File
 {
 namespace Error
 {
-struct Write;
+struct Seek;
 } // namespace Error
 } // namespace File
 } // namespace Common
 } // namespace openbmc_project
 } // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Software
+{
+namespace Version
+{
+namespace Error
+{
+struct AlreadyExists;
+} // namespace Error
+} // namespace Version
+} // namespace Software
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Chassis
+{
+namespace Common
+{
+namespace Error
+{
+struct UnsupportedCommand;
+} // namespace Error
+} // namespace Common
+} // namespace Chassis
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Smbios
+{
+namespace MDR_V2
+{
+namespace Error
+{
+struct InvalidId;
+} // namespace Error
+} // namespace MDR_V2
+} // namespace Smbios
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct DbusFailure;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace Error
+{
+struct CapacityFault;
+} // namespace Error
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct TooManyResources;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct NoCACertificate;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace Access
+{
+namespace Error
+{
+struct ReadCFAM;
+} // namespace Error
+} // namespace Access
+} // namespace Host
+} // namespace open_power
+} // namespace org
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace Error
+{
+struct HostStartFailure;
+} // namespace Error
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct KeywordNotFound;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace Error
+{
+struct DegradesFault;
+} // namespace Error
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Sensor
+{
+namespace Threshold
+{
+namespace Error
+{
+struct CriticalLow;
+} // namespace Error
+} // namespace Threshold
+} // namespace Sensor
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace ThermalEvent
+{
+namespace Error
+{
+struct Ambient;
+} // namespace Error
+} // namespace ThermalEvent
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace Error
+{
+struct AttributeNotFound;
+} // namespace Error
+} // namespace Common
+} // namespace BIOSConfig
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace ThermalEvent
+{
+namespace Error
+{
+struct GPU;
+} // namespace Error
+} // namespace ThermalEvent
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Chassis
+{
+namespace Error
+{
+struct PowerOnFailure;
+} // namespace Error
+} // namespace Chassis
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Sensor
+{
+namespace Threshold
+{
+namespace Error
+{
+struct CriticalHigh;
+} // namespace Error
+} // namespace Threshold
+} // namespace Sensor
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct Timeout;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct InternalFailure;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct NotAllowed;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct InsufficientPermission;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Callout
+{
+namespace Error
+{
+struct IIC;
+} // namespace Error
+} // namespace Callout
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Software
+{
+namespace Version
+{
+namespace Error
+{
+struct Incompatible;
+} // namespace Error
+} // namespace Version
+} // namespace Software
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Logging
+{
+namespace SEL
+{
+namespace Error
+{
+struct Created;
+} // namespace Error
+} // namespace SEL
+} // namespace Logging
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Device
+{
+namespace Error
+{
+struct WriteFailure;
+} // namespace Error
+} // namespace Device
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace Error
+{
+struct PrivilegeMappingExists;
+} // namespace Error
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace Error
+{
+struct NoResource;
+} // namespace Error
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct EccCheckFailed;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Control
+{
+namespace Device
+{
+namespace Error
+{
+struct WriteFailure;
+} // namespace Error
+} // namespace Device
+} // namespace Control
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Inventory
+{
+namespace Error
+{
+struct Fan;
+} // namespace Error
+} // namespace Inventory
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace Error
+{
+struct HostMinStartFailure;
+} // namespace Error
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace File
+{
+namespace Error
+{
+struct Read;
+} // namespace Error
+} // namespace File
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct InvalidJson;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct InvalidVPD;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace org
+{
+namespace open_power
+{
+namespace Proc
+{
+namespace FSI
+{
+namespace Error
+{
+struct SlaveDetectionFailure;
+} // namespace Error
+} // namespace FSI
+} // namespace Proc
+} // namespace open_power
+} // namespace org
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace Error
+{
+struct UserNameExists;
+} // namespace Error
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace org
+{
+namespace open_power
+{
+namespace Common
+{
+namespace Callout
+{
+namespace Error
+{
+struct Procedure;
+} // namespace Error
+} // namespace Callout
+} // namespace Common
+} // namespace open_power
+} // namespace org
 } // namespace sdbusplus
 
 namespace sdbusplus
@@ -306,6 +1053,211 @@ namespace xyz
 {
 namespace openbmc_project
 {
+namespace Nvme
+{
+namespace Status
+{
+namespace Error
+{
+struct BackupDeviceFault;
+} // namespace Error
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Memory
+{
+namespace MemoryECC
+{
+namespace Error
+{
+struct ceCount;
+} // namespace Error
+} // namespace MemoryECC
+} // namespace Memory
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Inventory
+{
+namespace Error
+{
+struct Nonfunctional;
+} // namespace Error
+} // namespace Inventory
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Chassis
+{
+namespace Error
+{
+struct PowerOffFailure;
+} // namespace Error
+} // namespace Chassis
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Power
+{
+namespace Error
+{
+struct Blackout;
+} // namespace Error
+} // namespace Power
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Chassis
+{
+namespace Common
+{
+namespace Error
+{
+struct IOError;
+} // namespace Error
+} // namespace Common
+} // namespace Chassis
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace ScheduledTime
+{
+namespace Error
+{
+struct InvalidTime;
+} // namespace Error
+} // namespace ScheduledTime
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace HardwareIsolation
+{
+namespace Error
+{
+struct IsolatedAlready;
+} // namespace Error
+} // namespace HardwareIsolation
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Time
+{
+namespace Error
+{
+struct NotAllowed;
+} // namespace Error
+} // namespace Time
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Time
+{
+namespace Error
+{
+struct Failed;
+} // namespace Error
+} // namespace Time
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct ResourceNotFound;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
 namespace Common
 {
 namespace Error
@@ -323,53 +1275,16 @@ namespace xyz
 {
 namespace openbmc_project
 {
-namespace Dump
+namespace State
 {
-namespace Create
-{
-namespace Error
-{
-struct Disabled;
-} // namespace Error
-} // namespace Create
-} // namespace Dump
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
+namespace Host
 {
 namespace Error
 {
-struct IPMISensor;
+struct HostStopFailure;
 } // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct Timeout;
-} // namespace Error
-} // namespace Common
+} // namespace Host
+} // namespace State
 } // namespace openbmc_project
 } // namespace xyz
 } // namespace sdbusplus
@@ -402,14 +1317,68 @@ namespace openbmc_project
 {
 namespace Common
 {
-namespace Callout
+namespace Error
+{
+struct UnsupportedRequest;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Memory
+{
+namespace MemoryECC
 {
 namespace Error
 {
-struct IIC;
+struct ueCount;
 } // namespace Error
-} // namespace Callout
-} // namespace Common
+} // namespace MemoryECC
+} // namespace Memory
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Certs
+{
+namespace Error
+{
+struct InvalidCertificate;
+} // namespace Error
+} // namespace Certs
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Control
+{
+namespace Host
+{
+namespace Error
+{
+struct CommandNotSupported;
+} // namespace Error
+} // namespace Host
+} // namespace Control
 } // namespace openbmc_project
 } // namespace xyz
 } // namespace sdbusplus
@@ -420,15 +1389,378 @@ namespace org
 {
 namespace open_power
 {
+namespace Proc
+{
+namespace FSI
+{
+namespace Error
+{
+struct MasterDetectionFailure;
+} // namespace Error
+} // namespace FSI
+} // namespace Proc
+} // namespace open_power
+} // namespace org
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct LocationNotFound;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Smbios
+{
+namespace MDR_V2
+{
+namespace Error
+{
+struct UpdateInProgress;
+} // namespace Error
+} // namespace MDR_V2
+} // namespace Smbios
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Memory
+{
+namespace MemoryECC
+{
+namespace Error
+{
+struct isLoggingLimitReached;
+} // namespace Error
+} // namespace MemoryECC
+} // namespace Memory
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct InvalidEepromPath;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Power
+{
+namespace Error
+{
+struct Regulator;
+} // namespace Error
+} // namespace Power
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Callout
+{
+namespace Error
+{
+struct IPMISensor;
+} // namespace Error
+} // namespace Callout
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace Error
+{
+struct TemperatureFault;
+} // namespace Error
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace Error
+{
+struct InvalidCurrentPassword;
+} // namespace Error
+} // namespace Common
+} // namespace BIOSConfig
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace Error
+{
+struct AttributeReadOnly;
+} // namespace Error
+} // namespace Common
+} // namespace BIOSConfig
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Error
+{
+struct Unavailable;
+} // namespace Error
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Dump
+{
+namespace Create
+{
+namespace Error
+{
+struct QuotaExceeded;
+} // namespace Error
+} // namespace Create
+} // namespace Dump
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Smbios
+{
+namespace MDR_V2
+{
+namespace Error
+{
+struct InvalidParameter;
+} // namespace Error
+} // namespace MDR_V2
+} // namespace Smbios
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace SystemdTarget
+{
+namespace Error
+{
+struct Failure;
+} // namespace Error
+} // namespace SystemdTarget
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace Error
+{
+struct UserNamePrivFail;
+} // namespace Error
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace ThermalEvent
+{
+namespace Error
+{
+struct Processor;
+} // namespace Error
+} // namespace ThermalEvent
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
 namespace Host
 {
 namespace Error
 {
-struct WatchdogTimedOut;
+struct HostRebootFailure;
 } // namespace Error
 } // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace File
+{
+namespace Error
+{
+struct Write;
+} // namespace Error
+} // namespace File
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Power
+{
+namespace Error
+{
+struct Fault;
+} // namespace Error
+} // namespace Power
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
 } // namespace sdbusplus
 
 namespace sdbusplus
@@ -443,7 +1775,7 @@ namespace Access
 {
 namespace Error
 {
-struct ReadCFAM;
+struct WriteCFAM;
 } // namespace Error
 } // namespace Access
 } // namespace Host
@@ -453,19 +1785,79 @@ struct ReadCFAM;
 
 namespace sdbusplus
 {
-namespace org
+namespace xyz
 {
-namespace open_power
+namespace openbmc_project
 {
-namespace Host
+namespace User
+{
+namespace Common
 {
 namespace Error
 {
-struct MaintenanceProcedure;
+struct UserNameDoesNotExist;
 } // namespace Error
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace BMC
+{
+namespace Error
+{
+struct MultiUserTargetFailure;
+} // namespace Error
+} // namespace BMC
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace Error
+{
+struct NodeNotFound;
+} // namespace Error
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+} // namespace sdbusplus
+
+namespace sdbusplus
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace Error
+{
+struct UserNameGroupFail;
+} // namespace Error
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
 } // namespace sdbusplus
 
 namespace phosphor
@@ -474,263 +1866,354 @@ namespace phosphor
 namespace logging
 {
 
-namespace xyz
+namespace com
 {
-namespace openbmc_project
+namespace ibm
 {
-namespace Common
+namespace VPD
 {
-namespace Callout
-{
-namespace _Device
+namespace _LocationNotFound
 {
 
-struct CALLOUT_ERRNO
-{
-    static constexpr auto str = "CALLOUT_ERRNO=%d";
-    static constexpr auto str_short = "CALLOUT_ERRNO";
-    using type = std::tuple<std::decay_t<decltype(str)>, int32_t>;
-    explicit constexpr CALLOUT_ERRNO(int32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct CALLOUT_DEVICE_PATH
-{
-    static constexpr auto str = "CALLOUT_DEVICE_PATH=%s";
-    static constexpr auto str_short = "CALLOUT_DEVICE_PATH";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr CALLOUT_DEVICE_PATH(const char* a) :
-        _entry(entry(str, a)){};
-    type _entry;
-};
+} // namespace _LocationNotFound
 
-} // namespace _Device
-
-struct Device
+struct LocationNotFound
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_ERRNO = _Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH = _Device::CALLOUT_DEVICE_PATH;
-    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+    using metadata_types = std::tuple<>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 
 namespace details
 {
 
 template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::Device>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::LocationNotFound>
 {
-    using type = xyz::openbmc_project::Common::Callout::Device;
+    using type = com::ibm::VPD::LocationNotFound;
 };
 
 } // namespace details
 
-namespace xyz
+namespace com
 {
-namespace openbmc_project
+namespace ibm
 {
-namespace Common
+namespace VPD
 {
-namespace Callout
-{
-namespace _GPIO
+namespace _NodeNotFound
 {
 
-struct CALLOUT_GPIO_NUM
-{
-    static constexpr auto str = "CALLOUT_GPIO_NUM=%u";
-    static constexpr auto str_short = "CALLOUT_GPIO_NUM";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr CALLOUT_GPIO_NUM(uint32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
+} // namespace _NodeNotFound
 
-} // namespace _GPIO
-
-struct GPIO
+struct NodeNotFound
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_GPIO_NUM = _GPIO::CALLOUT_GPIO_NUM;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
-    using metadata_types =
-        std::tuple<CALLOUT_GPIO_NUM, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+    using metadata_types = std::tuple<>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 
 namespace details
 {
 
 template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::GPIO>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::NodeNotFound>
 {
-    using type = xyz::openbmc_project::Common::Callout::GPIO;
+    using type = com::ibm::VPD::NodeNotFound;
 };
 
 } // namespace details
 
-namespace xyz
+namespace com
 {
-namespace openbmc_project
+namespace ibm
 {
-namespace Common
+namespace VPD
 {
-namespace Callout
-{
-namespace _IIC
+namespace _PathNotFound
 {
 
-struct CALLOUT_IIC_BUS
-{
-    static constexpr auto str = "CALLOUT_IIC_BUS=%s";
-    static constexpr auto str_short = "CALLOUT_IIC_BUS";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr CALLOUT_IIC_BUS(const char* a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct CALLOUT_IIC_ADDR
-{
-    static constexpr auto str = "CALLOUT_IIC_ADDR=0x%hx";
-    static constexpr auto str_short = "CALLOUT_IIC_ADDR";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint16_t>;
-    explicit constexpr CALLOUT_IIC_ADDR(uint16_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
+} // namespace _PathNotFound
 
-} // namespace _IIC
-
-struct IIC
+struct PathNotFound
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_IIC_BUS = _IIC::CALLOUT_IIC_BUS;
-    using CALLOUT_IIC_ADDR = _IIC::CALLOUT_IIC_ADDR;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
-    using metadata_types = std::tuple<CALLOUT_IIC_BUS, CALLOUT_IIC_ADDR,
-                                      CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+    using metadata_types = std::tuple<>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 
 namespace details
 {
 
 template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::IIC>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::PathNotFound>
 {
-    using type = xyz::openbmc_project::Common::Callout::IIC;
+    using type = com::ibm::VPD::PathNotFound;
 };
 
 } // namespace details
 
-namespace xyz
+namespace com
 {
-namespace openbmc_project
+namespace ibm
 {
-namespace Common
+namespace VPD
 {
-namespace Callout
-{
-namespace _Inventory
+namespace _RecordNotFound
 {
 
-struct CALLOUT_INVENTORY_PATH
-{
-    static constexpr auto str = "CALLOUT_INVENTORY_PATH=%s";
-    static constexpr auto str_short = "CALLOUT_INVENTORY_PATH";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr CALLOUT_INVENTORY_PATH(const char* a) :
-        _entry(entry(str, a)){};
-    type _entry;
-};
+} // namespace _RecordNotFound
 
-} // namespace _Inventory
-
-struct Inventory
+struct RecordNotFound
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_INVENTORY_PATH = _Inventory::CALLOUT_INVENTORY_PATH;
-    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
+    using metadata_types = std::tuple<>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 
 namespace details
 {
 
 template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::Inventory>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::RecordNotFound>
 {
-    using type = xyz::openbmc_project::Common::Callout::Inventory;
+    using type = com::ibm::VPD::RecordNotFound;
 };
 
 } // namespace details
 
-namespace xyz
+namespace com
 {
-namespace openbmc_project
+namespace ibm
 {
-namespace Common
+namespace VPD
 {
-namespace Callout
-{
-namespace _IPMISensor
+namespace _KeywordNotFound
 {
 
-struct CALLOUT_IPMI_SENSOR_NUM
-{
-    static constexpr auto str = "CALLOUT_IPMI_SENSOR_NUM=%u";
-    static constexpr auto str_short = "CALLOUT_IPMI_SENSOR_NUM";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr CALLOUT_IPMI_SENSOR_NUM(uint32_t a) :
-        _entry(entry(str, a)){};
-    type _entry;
-};
+} // namespace _KeywordNotFound
 
-} // namespace _IPMISensor
-
-struct IPMISensor
+struct KeywordNotFound
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_IPMI_SENSOR_NUM = _IPMISensor::CALLOUT_IPMI_SENSOR_NUM;
-    using metadata_types = std::tuple<CALLOUT_IPMI_SENSOR_NUM>;
+    using metadata_types = std::tuple<>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace VPD
+} // namespace ibm
+} // namespace com
 
 namespace details
 {
 
 template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::IPMISensor>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::KeywordNotFound>
 {
-    using type = xyz::openbmc_project::Common::Callout::IPMISensor;
+    using type = com::ibm::VPD::KeywordNotFound;
+};
+
+} // namespace details
+
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace _BlankSystemVPD
+{
+
+} // namespace _BlankSystemVPD
+
+struct BlankSystemVPD
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::BlankSystemVPD>
+{
+    using type = com::ibm::VPD::BlankSystemVPD;
+};
+
+} // namespace details
+
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace _InvalidEepromPath
+{
+
+} // namespace _InvalidEepromPath
+
+struct InvalidEepromPath
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::InvalidEepromPath>
+{
+    using type = com::ibm::VPD::InvalidEepromPath;
+};
+
+} // namespace details
+
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace _InvalidVPD
+{
+
+} // namespace _InvalidVPD
+
+struct InvalidVPD
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::InvalidVPD>
+{
+    using type = com::ibm::VPD::InvalidVPD;
+};
+
+} // namespace details
+
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace _EccCheckFailed
+{
+
+} // namespace _EccCheckFailed
+
+struct EccCheckFailed
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::EccCheckFailed>
+{
+    using type = com::ibm::VPD::EccCheckFailed;
+};
+
+} // namespace details
+
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace _InvalidJson
+{
+
+} // namespace _InvalidJson
+
+struct InvalidJson
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::InvalidJson>
+{
+    using type = com::ibm::VPD::InvalidJson;
+};
+
+} // namespace details
+
+namespace com
+{
+namespace ibm
+{
+namespace VPD
+{
+namespace _DbusFailure
+{
+
+} // namespace _DbusFailure
+
+struct DbusFailure
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace VPD
+} // namespace ibm
+} // namespace com
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::com::ibm::VPD::Error::DbusFailure>
+{
+    using type = com::ibm::VPD::DbusFailure;
 };
 
 } // namespace details
@@ -748,10 +2231,15 @@ namespace _Procedure
 
 struct PROCEDURE
 {
-    static constexpr auto str = "PROCEDURE=%u";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "PROCEDURE";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr PROCEDURE(uint32_t a) : _entry(entry(str, a)){};
+    using type = std::tuple<std::decay_t<decltype("PROCEDURE=%u")>, uint32_t>;
+    explicit constexpr PROCEDURE(uint32_t a) :
+        _entry(entry("PROCEDURE=%u", a)){};
     type _entry;
 };
 
@@ -781,6 +2269,184 @@ struct map_exception_type<
 
 } // namespace details
 
+namespace org
+{
+namespace open_power
+{
+namespace Proc
+{
+namespace FSI
+{
+namespace _SlaveDetectionFailure
+{
+
+struct ERRNO
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ERRNO";
+    using type = std::tuple<std::decay_t<decltype("ERRNO=%d")>, int32_t>;
+    explicit constexpr ERRNO(int32_t a) : _entry(entry("ERRNO=%d", a)){};
+    type _entry;
+};
+
+} // namespace _SlaveDetectionFailure
+
+struct SlaveDetectionFailure
+{
+    static constexpr auto L = level::ERR;
+    using ERRNO = _SlaveDetectionFailure::ERRNO;
+    using metadata_types = std::tuple<ERRNO>;
+};
+
+} // namespace FSI
+} // namespace Proc
+} // namespace open_power
+} // namespace org
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::org::open_power::Proc::FSI::Error::SlaveDetectionFailure>
+{
+    using type = org::open_power::Proc::FSI::SlaveDetectionFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Certs
+{
+namespace _InvalidCertificate
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON ";
+    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
+    explicit constexpr REASON(const char* a) :
+        _entry(entry("REASON = %s", a)){};
+    type _entry;
+};
+
+} // namespace _InvalidCertificate
+
+struct InvalidCertificate
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _InvalidCertificate::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Certs
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Certs::Error::InvalidCertificate>
+{
+    using type = xyz::openbmc_project::Certs::InvalidCertificate;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace ScheduledTime
+{
+namespace _InvalidTime
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+
+} // namespace _InvalidTime
+
+struct InvalidTime
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _InvalidTime::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace ScheduledTime
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::ScheduledTime::Error::InvalidTime>
+{
+    using type = xyz::openbmc_project::ScheduledTime::InvalidTime;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace HardwareIsolation
+{
+namespace _IsolatedAlready
+{
+
+} // namespace _IsolatedAlready
+
+struct IsolatedAlready
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace HardwareIsolation
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::HardwareIsolation::Error::IsolatedAlready>
+{
+    using type = xyz::openbmc_project::HardwareIsolation::IsolatedAlready;
+};
+
+} // namespace details
+
 namespace xyz
 {
 namespace openbmc_project
@@ -792,10 +2458,16 @@ namespace _Timeout
 
 struct TIMEOUT_IN_MSEC
 {
-    static constexpr auto str = "TIMEOUT_IN_MSEC=%llu";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "TIMEOUT_IN_MSEC";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint64_t>;
-    explicit constexpr TIMEOUT_IN_MSEC(uint64_t a) : _entry(entry(str, a)){};
+    using type =
+        std::tuple<std::decay_t<decltype("TIMEOUT_IN_MSEC=%llu")>, uint64_t>;
+    explicit constexpr TIMEOUT_IN_MSEC(uint64_t a) :
+        _entry(entry("TIMEOUT_IN_MSEC=%llu", a)){};
     type _entry;
 };
 
@@ -868,18 +2540,30 @@ namespace _InvalidArgument
 
 struct ARGUMENT_NAME
 {
-    static constexpr auto str = "ARGUMENT_NAME=%s";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "ARGUMENT_NAME";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr ARGUMENT_NAME(const char* a) : _entry(entry(str, a)){};
+    using type =
+        std::tuple<std::decay_t<decltype("ARGUMENT_NAME=%s")>, const char*>;
+    explicit constexpr ARGUMENT_NAME(const char* a) :
+        _entry(entry("ARGUMENT_NAME=%s", a)){};
     type _entry;
 };
 struct ARGUMENT_VALUE
 {
-    static constexpr auto str = "ARGUMENT_VALUE=%s";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "ARGUMENT_VALUE";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr ARGUMENT_VALUE(const char* a) : _entry(entry(str, a)){};
+    using type =
+        std::tuple<std::decay_t<decltype("ARGUMENT_VALUE=%s")>, const char*>;
+    explicit constexpr ARGUMENT_VALUE(const char* a) :
+        _entry(entry("ARGUMENT_VALUE=%s", a)){};
     type _entry;
 };
 
@@ -909,77 +2593,802 @@ struct map_exception_type<
 
 } // namespace details
 
-namespace example
-{
 namespace xyz
 {
 namespace openbmc_project
 {
-namespace Example
+namespace Common
 {
-namespace Device
-{
-namespace _Callout
+namespace _InsufficientPermission
 {
 
-struct CALLOUT_ERRNO_TEST
+} // namespace _InsufficientPermission
+
+struct InsufficientPermission
 {
-    static constexpr auto str = "CALLOUT_ERRNO_TEST=%d";
-    static constexpr auto str_short = "CALLOUT_ERRNO_TEST";
-    using type = std::tuple<std::decay_t<decltype(str)>, int32_t>;
-    explicit constexpr CALLOUT_ERRNO_TEST(int32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct CALLOUT_DEVICE_PATH_TEST
-{
-    static constexpr auto str = "CALLOUT_DEVICE_PATH_TEST=%s";
-    static constexpr auto str_short = "CALLOUT_DEVICE_PATH_TEST";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr CALLOUT_DEVICE_PATH_TEST(const char* a) :
-        _entry(entry(str, a)){};
-    type _entry;
+    static constexpr auto L = level::INFO;
+    using metadata_types = std::tuple<>;
 };
 
-} // namespace _Callout
-
-struct Callout : public sdbusplus::exception_t
-{
-    static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Device.Callout";
-    static constexpr auto errDesc = "Generic device callout";
-    static constexpr auto L = level::ERR;
-    using CALLOUT_ERRNO_TEST = _Callout::CALLOUT_ERRNO_TEST;
-    using CALLOUT_DEVICE_PATH_TEST = _Callout::CALLOUT_DEVICE_PATH_TEST;
-    using metadata_types =
-        std::tuple<CALLOUT_ERRNO_TEST, CALLOUT_DEVICE_PATH_TEST>;
-
-    const char* name() const noexcept
-    {
-        return errName;
-    }
-
-    const char* description() const noexcept
-    {
-        return errDesc;
-    }
-
-    const char* what() const noexcept
-    {
-        return errName;
-    }
-};
-
-} // namespace Device
-} // namespace Example
+} // namespace Common
 } // namespace openbmc_project
 } // namespace xyz
-} // namespace example
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Error::InsufficientPermission>
+{
+    using type = xyz::openbmc_project::Common::InsufficientPermission;
+};
+
+} // namespace details
 
 namespace xyz
 {
 namespace openbmc_project
 {
-namespace Sensor
+namespace Common
+{
+namespace _NotAllowed
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+
+} // namespace _NotAllowed
+
+struct NotAllowed
+{
+    static constexpr auto L = level::INFO;
+    using REASON = _NotAllowed::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Error::NotAllowed>
+{
+    using type = xyz::openbmc_project::Common::NotAllowed;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace _NoCACertificate
+{
+
+} // namespace _NoCACertificate
+
+struct NoCACertificate
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Error::NoCACertificate>
+{
+    using type = xyz::openbmc_project::Common::NoCACertificate;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace _TooManyResources
+{
+
+} // namespace _TooManyResources
+
+struct TooManyResources
+{
+    static constexpr auto L = level::INFO;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Error::TooManyResources>
+{
+    using type = xyz::openbmc_project::Common::TooManyResources;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace _ResourceNotFound
+{
+
+} // namespace _ResourceNotFound
+
+struct ResourceNotFound
+{
+    static constexpr auto L = level::INFO;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Error::ResourceNotFound>
+{
+    using type = xyz::openbmc_project::Common::ResourceNotFound;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace _Unavailable
+{
+
+} // namespace _Unavailable
+
+struct Unavailable
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Error::Unavailable>
+{
+    using type = xyz::openbmc_project::Common::Unavailable;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace _UnsupportedRequest
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+
+} // namespace _UnsupportedRequest
+
+struct UnsupportedRequest
+{
+    static constexpr auto L = level::INFO;
+    using REASON = _UnsupportedRequest::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Error::UnsupportedRequest>
+{
+    using type = xyz::openbmc_project::Common::UnsupportedRequest;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace _AttributeNotFound
+{
+
+} // namespace _AttributeNotFound
+
+struct AttributeNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace BIOSConfig
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
+                              Error::AttributeNotFound>
+{
+    using type = xyz::openbmc_project::BIOSConfig::Common::AttributeNotFound;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace _AttributeReadOnly
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+
+} // namespace _AttributeReadOnly
+
+struct AttributeReadOnly
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _AttributeReadOnly::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Common
+} // namespace BIOSConfig
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
+                              Error::AttributeReadOnly>
+{
+    using type = xyz::openbmc_project::BIOSConfig::Common::AttributeReadOnly;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace _InvalidCurrentPassword
+{
+
+} // namespace _InvalidCurrentPassword
+
+struct InvalidCurrentPassword
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace BIOSConfig
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
+                              Error::InvalidCurrentPassword>
+{
+    using type =
+        xyz::openbmc_project::BIOSConfig::Common::InvalidCurrentPassword;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace BIOSConfig
+{
+namespace Common
+{
+namespace _PasswordNotSettable
+{
+
+} // namespace _PasswordNotSettable
+
+struct PasswordNotSettable
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace BIOSConfig
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
+                              Error::PasswordNotSettable>
+{
+    using type = xyz::openbmc_project::BIOSConfig::Common::PasswordNotSettable;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Chassis
+{
+namespace Common
+{
+namespace _UnsupportedCommand
+{
+
+} // namespace _UnsupportedCommand
+
+struct UnsupportedCommand
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace Chassis
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Chassis::Common::Error::UnsupportedCommand>
+{
+    using type = xyz::openbmc_project::Chassis::Common::UnsupportedCommand;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Chassis
+{
+namespace Common
+{
+namespace _IOError
+{
+
+} // namespace _IOError
+
+struct IOError
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace Chassis
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Chassis::Common::Error::IOError>
+{
+    using type = xyz::openbmc_project::Chassis::Common::IOError;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Callout
+{
+namespace _Device
+{
+
+struct CALLOUT_ERRNO
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_ERRNO";
+    using type =
+        std::tuple<std::decay_t<decltype("CALLOUT_ERRNO=%d")>, int32_t>;
+    explicit constexpr CALLOUT_ERRNO(int32_t a) :
+        _entry(entry("CALLOUT_ERRNO=%d", a)){};
+    type _entry;
+};
+struct CALLOUT_DEVICE_PATH
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_DEVICE_PATH";
+    using type = std::tuple<std::decay_t<decltype("CALLOUT_DEVICE_PATH=%s")>,
+                            const char*>;
+    explicit constexpr CALLOUT_DEVICE_PATH(const char* a) :
+        _entry(entry("CALLOUT_DEVICE_PATH=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Device
+
+struct Device
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO = _Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = _Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace Callout
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Callout::Error::Device>
+{
+    using type = xyz::openbmc_project::Common::Callout::Device;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Callout
+{
+namespace _GPIO
+{
+
+struct CALLOUT_GPIO_NUM
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_GPIO_NUM";
+    using type =
+        std::tuple<std::decay_t<decltype("CALLOUT_GPIO_NUM=%u")>, uint32_t>;
+    explicit constexpr CALLOUT_GPIO_NUM(uint32_t a) :
+        _entry(entry("CALLOUT_GPIO_NUM=%u", a)){};
+    type _entry;
+};
+
+} // namespace _GPIO
+
+struct GPIO
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_GPIO_NUM = _GPIO::CALLOUT_GPIO_NUM;
+    using CALLOUT_ERRNO =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types =
+        std::tuple<CALLOUT_GPIO_NUM, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace Callout
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Callout::Error::GPIO>
+{
+    using type = xyz::openbmc_project::Common::Callout::GPIO;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Callout
+{
+namespace _IIC
+{
+
+struct CALLOUT_IIC_BUS
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_IIC_BUS";
+    using type =
+        std::tuple<std::decay_t<decltype("CALLOUT_IIC_BUS=%s")>, const char*>;
+    explicit constexpr CALLOUT_IIC_BUS(const char* a) :
+        _entry(entry("CALLOUT_IIC_BUS=%s", a)){};
+    type _entry;
+};
+struct CALLOUT_IIC_ADDR
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_IIC_ADDR";
+    using type =
+        std::tuple<std::decay_t<decltype("CALLOUT_IIC_ADDR=0x%hx")>, uint16_t>;
+    explicit constexpr CALLOUT_IIC_ADDR(uint16_t a) :
+        _entry(entry("CALLOUT_IIC_ADDR=0x%hx", a)){};
+    type _entry;
+};
+
+} // namespace _IIC
+
+struct IIC
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_IIC_BUS = _IIC::CALLOUT_IIC_BUS;
+    using CALLOUT_IIC_ADDR = _IIC::CALLOUT_IIC_ADDR;
+    using CALLOUT_ERRNO =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_IIC_BUS, CALLOUT_IIC_ADDR,
+                                      CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace Callout
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Callout::Error::IIC>
+{
+    using type = xyz::openbmc_project::Common::Callout::IIC;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Callout
+{
+namespace _Inventory
+{
+
+struct CALLOUT_INVENTORY_PATH
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_INVENTORY_PATH";
+    using type = std::tuple<std::decay_t<decltype("CALLOUT_INVENTORY_PATH=%s")>,
+                            const char*>;
+    explicit constexpr CALLOUT_INVENTORY_PATH(const char* a) :
+        _entry(entry("CALLOUT_INVENTORY_PATH=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Inventory
+
+struct Inventory
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_INVENTORY_PATH = _Inventory::CALLOUT_INVENTORY_PATH;
+    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
+};
+
+} // namespace Callout
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Callout::Error::Inventory>
+{
+    using type = xyz::openbmc_project::Common::Callout::Inventory;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace Callout
+{
+namespace _IPMISensor
+{
+
+struct CALLOUT_IPMI_SENSOR_NUM
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_IPMI_SENSOR_NUM";
+    using type =
+        std::tuple<std::decay_t<decltype("CALLOUT_IPMI_SENSOR_NUM=%u")>,
+                   uint32_t>;
+    explicit constexpr CALLOUT_IPMI_SENSOR_NUM(uint32_t a) :
+        _entry(entry("CALLOUT_IPMI_SENSOR_NUM=%u", a)){};
+    type _entry;
+};
+
+} // namespace _IPMISensor
+
+struct IPMISensor
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_IPMI_SENSOR_NUM = _IPMISensor::CALLOUT_IPMI_SENSOR_NUM;
+    using metadata_types = std::tuple<CALLOUT_IPMI_SENSOR_NUM>;
+};
+
+} // namespace Callout
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::Callout::Error::IPMISensor>
+{
+    using type = xyz::openbmc_project::Common::Callout::IPMISensor;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
 {
 namespace Device
 {
@@ -999,7 +3408,7 @@ struct ReadFailure
 };
 
 } // namespace Device
-} // namespace Sensor
+} // namespace Common
 } // namespace openbmc_project
 } // namespace xyz
 
@@ -1008,350 +3417,327 @@ namespace details
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Sensor::Device::Error::ReadFailure>
+    sdbusplus::xyz::openbmc_project::Common::Device::Error::ReadFailure>
 {
-    using type = xyz::openbmc_project::Sensor::Device::ReadFailure;
+    using type = xyz::openbmc_project::Common::Device::ReadFailure;
 };
 
 } // namespace details
 
-namespace org
+namespace xyz
 {
-namespace open_power
+namespace openbmc_project
 {
-namespace Host
+namespace Common
 {
-namespace _Checkstop
+namespace Device
+{
+namespace _WriteFailure
 {
 
-} // namespace _Checkstop
+} // namespace _WriteFailure
 
-struct Checkstop
+struct WriteFailure
 {
     static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
+    using CALLOUT_ERRNO =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Host
-} // namespace open_power
-} // namespace org
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::org::open_power::Host::Error::Checkstop>
-{
-    using type = org::open_power::Host::Checkstop;
-};
-
-} // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace _WatchdogTimedOut
-{
-
-} // namespace _WatchdogTimedOut
-
-struct WatchdogTimedOut
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace Device
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::org::open_power::Host::Error::WatchdogTimedOut>
+    sdbusplus::xyz::openbmc_project::Common::Device::Error::WriteFailure>
 {
-    using type = org::open_power::Host::WatchdogTimedOut;
+    using type = xyz::openbmc_project::Common::Device::WriteFailure;
 };
 
 } // namespace details
 
-namespace example
-{
 namespace xyz
 {
 namespace openbmc_project
 {
-namespace Example
+namespace Common
 {
-namespace Elog
+namespace File
 {
-namespace _TestErrorTwo
+namespace _Open
 {
 
-struct DEV_ADDR
+struct ERRNO
 {
-    static constexpr auto str = "DEV_ADDR=0x%.8X";
-    static constexpr auto str_short = "DEV_ADDR";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr DEV_ADDR(uint32_t a) : _entry(entry(str, a)){};
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ERRNO";
+    using type = std::tuple<std::decay_t<decltype("ERRNO=%d")>, int32_t>;
+    explicit constexpr ERRNO(int32_t a) : _entry(entry("ERRNO=%d", a)){};
     type _entry;
 };
-struct DEV_ID
+struct PATH
 {
-    static constexpr auto str = "DEV_ID=%u";
-    static constexpr auto str_short = "DEV_ID";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr DEV_ID(uint32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct DEV_NAME
-{
-    static constexpr auto str = "DEV_NAME=%s";
-    static constexpr auto str_short = "DEV_NAME";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr DEV_NAME(const char* a) : _entry(entry(str, a)){};
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "PATH";
+    using type = std::tuple<std::decay_t<decltype("PATH=%s")>, const char*>;
+    explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
     type _entry;
 };
 
-} // namespace _TestErrorTwo
+} // namespace _Open
 
-struct TestErrorTwo : public sdbusplus::exception_t
+struct Open
 {
-    static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Elog.TestErrorTwo";
-    static constexpr auto errDesc = "This is test error two";
     static constexpr auto L = level::ERR;
-    using DEV_ADDR = _TestErrorTwo::DEV_ADDR;
-    using DEV_ID = _TestErrorTwo::DEV_ID;
-    using DEV_NAME = _TestErrorTwo::DEV_NAME;
-    using metadata_types = std::tuple<DEV_ADDR, DEV_ID, DEV_NAME>;
-
-    const char* name() const noexcept
-    {
-        return errName;
-    }
-
-    const char* description() const noexcept
-    {
-        return errDesc;
-    }
-
-    const char* what() const noexcept
-    {
-        return errName;
-    }
+    using ERRNO = _Open::ERRNO;
+    using PATH = _Open::PATH;
+    using metadata_types = std::tuple<ERRNO, PATH>;
 };
 
-} // namespace Elog
-} // namespace Example
+} // namespace File
+} // namespace Common
 } // namespace openbmc_project
 } // namespace xyz
-} // namespace example
-
-namespace example
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Elog
-{
-namespace _AutoTestSimple
-{
-
-struct STRING
-{
-    static constexpr auto str = "STRING=%s";
-    static constexpr auto str_short = "STRING";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr STRING(const char* a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _AutoTestSimple
-
-struct AutoTestSimple : public sdbusplus::exception_t
-{
-    static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Elog.AutoTestSimple";
-    static constexpr auto errDesc = "This is a simple test error.";
-    static constexpr auto L = level::ERR;
-    using STRING = _AutoTestSimple::STRING;
-    using metadata_types = std::tuple<STRING>;
-
-    const char* name() const noexcept
-    {
-        return errName;
-    }
-
-    const char* description() const noexcept
-    {
-        return errDesc;
-    }
-
-    const char* what() const noexcept
-    {
-        return errName;
-    }
-};
-
-} // namespace Elog
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
-
-namespace example
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Elog
-{
-namespace _TestCallout
-{
-
-struct DEV_ADDR
-{
-    static constexpr auto str = "DEV_ADDR=0x%.8X";
-    static constexpr auto str_short = "DEV_ADDR";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr DEV_ADDR(uint32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _TestCallout
-
-struct TestCallout : public sdbusplus::exception_t
-{
-    static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Elog.TestCallout";
-    static constexpr auto errDesc = "This is test error TestCallout";
-    static constexpr auto L = level::ERR;
-    using DEV_ADDR = _TestCallout::DEV_ADDR;
-    using CALLOUT_ERRNO_TEST = example::xyz::openbmc_project::Example::Device::
-        Callout::CALLOUT_ERRNO_TEST;
-    using CALLOUT_DEVICE_PATH_TEST = example::xyz::openbmc_project::Example::
-        Device::Callout::CALLOUT_DEVICE_PATH_TEST;
-    using metadata_types =
-        std::tuple<DEV_ADDR, CALLOUT_ERRNO_TEST, CALLOUT_DEVICE_PATH_TEST>;
-
-    const char* name() const noexcept
-    {
-        return errName;
-    }
-
-    const char* description() const noexcept
-    {
-        return errDesc;
-    }
-
-    const char* what() const noexcept
-    {
-        return errName;
-    }
-};
-
-} // namespace Elog
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
-
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace _Event
-{
-
-struct ESEL
-{
-    static constexpr auto str = "ESEL=%s";
-    static constexpr auto str_short = "ESEL";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr ESEL(const char* a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _Event
-
-struct Event
-{
-    static constexpr auto L = level::ERR;
-    using ESEL = _Event::ESEL;
-    using CALLOUT_INVENTORY_PATH = xyz::openbmc_project::Common::Callout::
-        Inventory::CALLOUT_INVENTORY_PATH;
-    using metadata_types = std::tuple<ESEL, CALLOUT_INVENTORY_PATH>;
-};
-
-} // namespace Host
-} // namespace open_power
-} // namespace org
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::org::open_power::Host::Error::Event>
-{
-    using type = org::open_power::Host::Event;
-};
-
-} // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace _MaintenanceProcedure
-{
-
-struct ESEL
-{
-    static constexpr auto str = "ESEL=%s";
-    static constexpr auto str_short = "ESEL";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr ESEL(const char* a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _MaintenanceProcedure
-
-struct MaintenanceProcedure
-{
-    static constexpr auto L = level::ERR;
-    using ESEL = _MaintenanceProcedure::ESEL;
-    using PROCEDURE = org::open_power::Common::Callout::Procedure::PROCEDURE;
-    using metadata_types = std::tuple<ESEL, PROCEDURE>;
-};
-
-} // namespace Host
-} // namespace open_power
-} // namespace org
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::org::open_power::Host::Error::MaintenanceProcedure>
+    sdbusplus::xyz::openbmc_project::Common::File::Error::Open>
 {
-    using type = org::open_power::Host::MaintenanceProcedure;
+    using type = xyz::openbmc_project::Common::File::Open;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace File
+{
+namespace _Seek
+{
+
+struct OFFSET
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "OFFSET";
+    using type = std::tuple<std::decay_t<decltype("OFFSET=%ll")>, int64_t>;
+    explicit constexpr OFFSET(int64_t a) : _entry(entry("OFFSET=%ll", a)){};
+    type _entry;
+};
+struct WHENCE
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "WHENCE";
+    using type = std::tuple<std::decay_t<decltype("WHENCE=%d")>, int32_t>;
+    explicit constexpr WHENCE(int32_t a) : _entry(entry("WHENCE=%d", a)){};
+    type _entry;
+};
+struct ERRNO
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ERRNO";
+    using type = std::tuple<std::decay_t<decltype("ERRNO=%d")>, int32_t>;
+    explicit constexpr ERRNO(int32_t a) : _entry(entry("ERRNO=%d", a)){};
+    type _entry;
+};
+struct PATH
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "PATH";
+    using type = std::tuple<std::decay_t<decltype("PATH=%s")>, const char*>;
+    explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Seek
+
+struct Seek
+{
+    static constexpr auto L = level::ERR;
+    using OFFSET = _Seek::OFFSET;
+    using WHENCE = _Seek::WHENCE;
+    using ERRNO = _Seek::ERRNO;
+    using PATH = _Seek::PATH;
+    using metadata_types = std::tuple<OFFSET, WHENCE, ERRNO, PATH>;
+};
+
+} // namespace File
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::File::Error::Seek>
+{
+    using type = xyz::openbmc_project::Common::File::Seek;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace File
+{
+namespace _Write
+{
+
+struct ERRNO
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ERRNO";
+    using type = std::tuple<std::decay_t<decltype("ERRNO=%d")>, int32_t>;
+    explicit constexpr ERRNO(int32_t a) : _entry(entry("ERRNO=%d", a)){};
+    type _entry;
+};
+struct PATH
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "PATH";
+    using type = std::tuple<std::decay_t<decltype("PATH=%s")>, const char*>;
+    explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Write
+
+struct Write
+{
+    static constexpr auto L = level::ERR;
+    using ERRNO = _Write::ERRNO;
+    using PATH = _Write::PATH;
+    using metadata_types = std::tuple<ERRNO, PATH>;
+};
+
+} // namespace File
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::File::Error::Write>
+{
+    using type = xyz::openbmc_project::Common::File::Write;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Common
+{
+namespace File
+{
+namespace _Read
+{
+
+struct ERRNO
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ERRNO";
+    using type = std::tuple<std::decay_t<decltype("ERRNO=%d")>, int32_t>;
+    explicit constexpr ERRNO(int32_t a) : _entry(entry("ERRNO=%d", a)){};
+    type _entry;
+};
+struct PATH
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "PATH";
+    using type = std::tuple<std::decay_t<decltype("PATH=%s")>, const char*>;
+    explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Read
+
+struct Read
+{
+    static constexpr auto L = level::ERR;
+    using ERRNO = _Read::ERRNO;
+    using PATH = _Read::PATH;
+    using metadata_types = std::tuple<ERRNO, PATH>;
+};
+
+} // namespace File
+} // namespace Common
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Common::File::Error::Read>
+{
+    using type = xyz::openbmc_project::Common::File::Read;
 };
 
 } // namespace details
@@ -1400,310 +3786,23 @@ namespace xyz
 {
 namespace openbmc_project
 {
-namespace Common
-{
-namespace File
-{
-namespace _Open
-{
-
-struct ERRNO
-{
-    static constexpr auto str = "ERRNO=%d";
-    static constexpr auto str_short = "ERRNO";
-    using type = std::tuple<std::decay_t<decltype(str)>, int32_t>;
-    explicit constexpr ERRNO(int32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct PATH
-{
-    static constexpr auto str = "PATH=%s";
-    static constexpr auto str_short = "PATH";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr PATH(const char* a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _Open
-
-struct Open
-{
-    static constexpr auto L = level::ERR;
-    using ERRNO = _Open::ERRNO;
-    using PATH = _Open::PATH;
-    using metadata_types = std::tuple<ERRNO, PATH>;
-};
-
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::File::Error::Open>
-{
-    using type = xyz::openbmc_project::Common::File::Open;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
-{
-namespace _Seek
-{
-
-struct OFFSET
-{
-    static constexpr auto str = "OFFSET=%ll";
-    static constexpr auto str_short = "OFFSET";
-    using type = std::tuple<std::decay_t<decltype(str)>, int64_t>;
-    explicit constexpr OFFSET(int64_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct WHENCE
-{
-    static constexpr auto str = "WHENCE=%d";
-    static constexpr auto str_short = "WHENCE";
-    using type = std::tuple<std::decay_t<decltype(str)>, int32_t>;
-    explicit constexpr WHENCE(int32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct ERRNO
-{
-    static constexpr auto str = "ERRNO=%d";
-    static constexpr auto str_short = "ERRNO";
-    using type = std::tuple<std::decay_t<decltype(str)>, int32_t>;
-    explicit constexpr ERRNO(int32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct PATH
-{
-    static constexpr auto str = "PATH=%s";
-    static constexpr auto str_short = "PATH";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr PATH(const char* a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _Seek
-
-struct Seek
-{
-    static constexpr auto L = level::ERR;
-    using OFFSET = _Seek::OFFSET;
-    using WHENCE = _Seek::WHENCE;
-    using ERRNO = _Seek::ERRNO;
-    using PATH = _Seek::PATH;
-    using metadata_types = std::tuple<OFFSET, WHENCE, ERRNO, PATH>;
-};
-
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::File::Error::Seek>
-{
-    using type = xyz::openbmc_project::Common::File::Seek;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
-{
-namespace _Write
-{
-
-struct ERRNO
-{
-    static constexpr auto str = "ERRNO=%d";
-    static constexpr auto str_short = "ERRNO";
-    using type = std::tuple<std::decay_t<decltype(str)>, int32_t>;
-    explicit constexpr ERRNO(int32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-struct PATH
-{
-    static constexpr auto str = "PATH=%s";
-    static constexpr auto str_short = "PATH";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr PATH(const char* a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _Write
-
-struct Write
-{
-    static constexpr auto L = level::ERR;
-    using ERRNO = _Write::ERRNO;
-    using PATH = _Write::PATH;
-    using metadata_types = std::tuple<ERRNO, PATH>;
-};
-
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::File::Error::Write>
-{
-    using type = xyz::openbmc_project::Common::File::Write;
-};
-
-} // namespace details
-
-namespace org
-{
-namespace open_power
+namespace Control
 {
 namespace Host
 {
-namespace Access
-{
-namespace _WriteCFAM
+namespace _CommandNotSupported
 {
 
-struct ADDRESS
-{
-    static constexpr auto str = "ADDRESS=0x%X";
-    static constexpr auto str_short = "ADDRESS";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr ADDRESS(uint32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
+} // namespace _CommandNotSupported
 
-} // namespace _WriteCFAM
-
-struct WriteCFAM
+struct CommandNotSupported
 {
     static constexpr auto L = level::ERR;
-    using ADDRESS = _WriteCFAM::ADDRESS;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
-    using metadata_types =
-        std::tuple<ADDRESS, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
-};
-
-} // namespace Access
-} // namespace Host
-} // namespace open_power
-} // namespace org
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::org::open_power::Host::Access::Error::WriteCFAM>
-{
-    using type = org::open_power::Host::Access::WriteCFAM;
-};
-
-} // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace Access
-{
-namespace _ReadCFAM
-{
-
-struct ADDRESS
-{
-    static constexpr auto str = "ADDRESS=0x%X";
-    static constexpr auto str_short = "ADDRESS";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint32_t>;
-    explicit constexpr ADDRESS(uint32_t a) : _entry(entry(str, a)){};
-    type _entry;
-};
-
-} // namespace _ReadCFAM
-
-struct ReadCFAM
-{
-    static constexpr auto L = level::ERR;
-    using ADDRESS = _ReadCFAM::ADDRESS;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
-    using metadata_types =
-        std::tuple<ADDRESS, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
-};
-
-} // namespace Access
-} // namespace Host
-} // namespace open_power
-} // namespace org
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::org::open_power::Host::Access::Error::ReadCFAM>
-{
-    using type = org::open_power::Host::Access::ReadCFAM;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace _SoftOffTimeout
-{
-
-} // namespace _SoftOffTimeout
-
-struct SoftOffTimeout
-{
-    static constexpr auto L = level::ERR;
-    using TIMEOUT_IN_MSEC =
-        xyz::openbmc_project::Common::Timeout::TIMEOUT_IN_MSEC;
-    using metadata_types = std::tuple<TIMEOUT_IN_MSEC>;
+    using metadata_types = std::tuple<>;
 };
 
 } // namespace Host
-} // namespace State
+} // namespace Control
 } // namespace openbmc_project
 } // namespace xyz
 
@@ -1712,9 +3811,9 @@ namespace details
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout>
+    sdbusplus::xyz::openbmc_project::Control::Host::Error::CommandNotSupported>
 {
-    using type = xyz::openbmc_project::State::Host::SoftOffTimeout;
+    using type = xyz::openbmc_project::Control::Host::CommandNotSupported;
 };
 
 } // namespace details
@@ -1768,10 +3867,15 @@ namespace _QuotaExceeded
 
 struct REASON
 {
-    static constexpr auto str = "REASON = %s";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "REASON ";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr REASON(const char* a) : _entry(entry(str, a)){};
+    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
+    explicit constexpr REASON(const char* a) :
+        _entry(entry("REASON = %s", a)){};
     type _entry;
 };
 
@@ -1805,23 +3909,98 @@ namespace xyz
 {
 namespace openbmc_project
 {
-namespace Control
+namespace Logging
 {
-namespace Host
+namespace SEL
 {
-namespace _CommandNotSupported
+namespace _Created
 {
 
-} // namespace _CommandNotSupported
-
-struct CommandNotSupported
+struct RECORD_TYPE
 {
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "RECORD_TYPE";
+    using type = std::tuple<std::decay_t<decltype("RECORD_TYPE=%u")>, uint8_t>;
+    explicit constexpr RECORD_TYPE(uint8_t a) :
+        _entry(entry("RECORD_TYPE=%u", a)){};
+    type _entry;
+};
+struct GENERATOR_ID
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "GENERATOR_ID";
+    using type =
+        std::tuple<std::decay_t<decltype("GENERATOR_ID=%u")>, uint16_t>;
+    explicit constexpr GENERATOR_ID(uint16_t a) :
+        _entry(entry("GENERATOR_ID=%u", a)){};
+    type _entry;
+};
+struct SENSOR_DATA
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "SENSOR_DATA";
+    using type =
+        std::tuple<std::decay_t<decltype("SENSOR_DATA=%s")>, const char*>;
+    explicit constexpr SENSOR_DATA(const char* a) :
+        _entry(entry("SENSOR_DATA=%s", a)){};
+    type _entry;
+};
+struct EVENT_DIR
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "EVENT_DIR";
+    using type = std::tuple<std::decay_t<decltype("EVENT_DIR=%u")>, uint8_t>;
+    explicit constexpr EVENT_DIR(uint8_t a) :
+        _entry(entry("EVENT_DIR=%u", a)){};
+    type _entry;
+};
+struct SENSOR_PATH
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "SENSOR_PATH";
+    using type =
+        std::tuple<std::decay_t<decltype("SENSOR_PATH=%s")>, const char*>;
+    explicit constexpr SENSOR_PATH(const char* a) :
+        _entry(entry("SENSOR_PATH=%s", a)){};
+    type _entry;
 };
 
-} // namespace Host
-} // namespace Control
+} // namespace _Created
+
+struct Created
+{
+    static constexpr auto L = level::INFO;
+    using RECORD_TYPE = _Created::RECORD_TYPE;
+    using GENERATOR_ID = _Created::GENERATOR_ID;
+    using SENSOR_DATA = _Created::SENSOR_DATA;
+    using EVENT_DIR = _Created::EVENT_DIR;
+    using SENSOR_PATH = _Created::SENSOR_PATH;
+    using metadata_types = std::tuple<RECORD_TYPE, GENERATOR_ID, SENSOR_DATA,
+                                      EVENT_DIR, SENSOR_PATH>;
+};
+
+} // namespace SEL
+} // namespace Logging
 } // namespace openbmc_project
 } // namespace xyz
 
@@ -1830,9 +4009,2348 @@ namespace details
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Control::Host::Error::CommandNotSupported>
+    sdbusplus::xyz::openbmc_project::Logging::SEL::Error::Created>
 {
-    using type = xyz::openbmc_project::Control::Host::CommandNotSupported;
+    using type = xyz::openbmc_project::Logging::SEL::Created;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Memory
+{
+namespace MemoryECC
+{
+namespace _isLoggingLimitReached
+{
+
+} // namespace _isLoggingLimitReached
+
+struct isLoggingLimitReached
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace MemoryECC
+} // namespace Memory
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::Memory::MemoryECC::
+                              Error::isLoggingLimitReached>
+{
+    using type = xyz::openbmc_project::Memory::MemoryECC::isLoggingLimitReached;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Memory
+{
+namespace MemoryECC
+{
+namespace _ceCount
+{
+
+} // namespace _ceCount
+
+struct ceCount
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace MemoryECC
+} // namespace Memory
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Memory::MemoryECC::Error::ceCount>
+{
+    using type = xyz::openbmc_project::Memory::MemoryECC::ceCount;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Memory
+{
+namespace MemoryECC
+{
+namespace _ueCount
+{
+
+} // namespace _ueCount
+
+struct ueCount
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace MemoryECC
+} // namespace Memory
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Memory::MemoryECC::Error::ueCount>
+{
+    using type = xyz::openbmc_project::Memory::MemoryECC::ueCount;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace _CapacityFault
+{
+
+} // namespace _CapacityFault
+
+struct CapacityFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::CapacityFault>
+{
+    using type = xyz::openbmc_project::Nvme::Status::CapacityFault;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace _TemperatureFault
+{
+
+} // namespace _TemperatureFault
+
+struct TemperatureFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::TemperatureFault>
+{
+    using type = xyz::openbmc_project::Nvme::Status::TemperatureFault;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace _DegradesFault
+{
+
+} // namespace _DegradesFault
+
+struct DegradesFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::DegradesFault>
+{
+    using type = xyz::openbmc_project::Nvme::Status::DegradesFault;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace _MediaFault
+{
+
+} // namespace _MediaFault
+
+struct MediaFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::MediaFault>
+{
+    using type = xyz::openbmc_project::Nvme::Status::MediaFault;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Nvme
+{
+namespace Status
+{
+namespace _BackupDeviceFault
+{
+
+} // namespace _BackupDeviceFault
+
+struct BackupDeviceFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Status
+} // namespace Nvme
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::BackupDeviceFault>
+{
+    using type = xyz::openbmc_project::Nvme::Status::BackupDeviceFault;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Sensor
+{
+namespace Device
+{
+namespace _ReadFailure
+{
+
+} // namespace _ReadFailure
+
+struct ReadFailure
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace Device
+} // namespace Sensor
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Sensor::Device::Error::ReadFailure>
+{
+    using type = xyz::openbmc_project::Sensor::Device::ReadFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Sensor
+{
+namespace Threshold
+{
+namespace _CriticalHigh
+{
+
+struct SENSOR_DATA
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "SENSOR_DATA";
+    using type =
+        std::tuple<std::decay_t<decltype("SENSOR_DATA=%s")>, const char*>;
+    explicit constexpr SENSOR_DATA(const char* a) :
+        _entry(entry("SENSOR_DATA=%s", a)){};
+    type _entry;
+};
+
+} // namespace _CriticalHigh
+
+struct CriticalHigh
+{
+    static constexpr auto L = level::ERR;
+    using SENSOR_DATA = _CriticalHigh::SENSOR_DATA;
+    using metadata_types = std::tuple<SENSOR_DATA>;
+};
+
+} // namespace Threshold
+} // namespace Sensor
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Sensor::Threshold::Error::CriticalHigh>
+{
+    using type = xyz::openbmc_project::Sensor::Threshold::CriticalHigh;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Sensor
+{
+namespace Threshold
+{
+namespace _CriticalLow
+{
+
+struct SENSOR_DATA
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "SENSOR_DATA";
+    using type =
+        std::tuple<std::decay_t<decltype("SENSOR_DATA=%s")>, const char*>;
+    explicit constexpr SENSOR_DATA(const char* a) :
+        _entry(entry("SENSOR_DATA=%s", a)){};
+    type _entry;
+};
+
+} // namespace _CriticalLow
+
+struct CriticalLow
+{
+    static constexpr auto L = level::ERR;
+    using SENSOR_DATA = _CriticalLow::SENSOR_DATA;
+    using metadata_types = std::tuple<SENSOR_DATA>;
+};
+
+} // namespace Threshold
+} // namespace Sensor
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Sensor::Threshold::Error::CriticalLow>
+{
+    using type = xyz::openbmc_project::Sensor::Threshold::CriticalLow;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Smbios
+{
+namespace MDR_V2
+{
+namespace _InvalidParameter
+{
+
+} // namespace _InvalidParameter
+
+struct InvalidParameter
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace MDR_V2
+} // namespace Smbios
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Smbios::MDR_V2::Error::InvalidParameter>
+{
+    using type = xyz::openbmc_project::Smbios::MDR_V2::InvalidParameter;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Smbios
+{
+namespace MDR_V2
+{
+namespace _UpdateInProgress
+{
+
+} // namespace _UpdateInProgress
+
+struct UpdateInProgress
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace MDR_V2
+} // namespace Smbios
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Smbios::MDR_V2::Error::UpdateInProgress>
+{
+    using type = xyz::openbmc_project::Smbios::MDR_V2::UpdateInProgress;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Smbios
+{
+namespace MDR_V2
+{
+namespace _InvalidId
+{
+
+} // namespace _InvalidId
+
+struct InvalidId
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace MDR_V2
+} // namespace Smbios
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Smbios::MDR_V2::Error::InvalidId>
+{
+    using type = xyz::openbmc_project::Smbios::MDR_V2::InvalidId;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Software
+{
+namespace Version
+{
+namespace _Incompatible
+{
+
+struct MIN_VERSION
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "MIN_VERSION";
+    using type =
+        std::tuple<std::decay_t<decltype("MIN_VERSION=%s")>, const char*>;
+    explicit constexpr MIN_VERSION(const char* a) :
+        _entry(entry("MIN_VERSION=%s", a)){};
+    type _entry;
+};
+struct ACTUAL_VERSION
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ACTUAL_VERSION";
+    using type =
+        std::tuple<std::decay_t<decltype("ACTUAL_VERSION=%s")>, const char*>;
+    explicit constexpr ACTUAL_VERSION(const char* a) :
+        _entry(entry("ACTUAL_VERSION=%s", a)){};
+    type _entry;
+};
+struct VERSION_PURPOSE
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "VERSION_PURPOSE";
+    using type =
+        std::tuple<std::decay_t<decltype("VERSION_PURPOSE=%s")>, const char*>;
+    explicit constexpr VERSION_PURPOSE(const char* a) :
+        _entry(entry("VERSION_PURPOSE=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Incompatible
+
+struct Incompatible
+{
+    static constexpr auto L = level::ERR;
+    using MIN_VERSION = _Incompatible::MIN_VERSION;
+    using ACTUAL_VERSION = _Incompatible::ACTUAL_VERSION;
+    using VERSION_PURPOSE = _Incompatible::VERSION_PURPOSE;
+    using metadata_types =
+        std::tuple<MIN_VERSION, ACTUAL_VERSION, VERSION_PURPOSE>;
+};
+
+} // namespace Version
+} // namespace Software
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Software::Version::Error::Incompatible>
+{
+    using type = xyz::openbmc_project::Software::Version::Incompatible;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Software
+{
+namespace Version
+{
+namespace _AlreadyExists
+{
+
+struct IMAGE_VERSION
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "IMAGE_VERSION";
+    using type =
+        std::tuple<std::decay_t<decltype("IMAGE_VERSION=%s")>, const char*>;
+    explicit constexpr IMAGE_VERSION(const char* a) :
+        _entry(entry("IMAGE_VERSION=%s", a)){};
+    type _entry;
+};
+
+} // namespace _AlreadyExists
+
+struct AlreadyExists
+{
+    static constexpr auto L = level::ERR;
+    using IMAGE_VERSION = _AlreadyExists::IMAGE_VERSION;
+    using metadata_types = std::tuple<IMAGE_VERSION>;
+};
+
+} // namespace Version
+} // namespace Software
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Software::Version::Error::AlreadyExists>
+{
+    using type = xyz::openbmc_project::Software::Version::AlreadyExists;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace _SoftOffTimeout
+{
+
+} // namespace _SoftOffTimeout
+
+struct SoftOffTimeout
+{
+    static constexpr auto L = level::ERR;
+    using TIMEOUT_IN_MSEC =
+        xyz::openbmc_project::Common::Timeout::TIMEOUT_IN_MSEC;
+    using metadata_types = std::tuple<TIMEOUT_IN_MSEC>;
+};
+
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout>
+{
+    using type = xyz::openbmc_project::State::Host::SoftOffTimeout;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace SystemdTarget
+{
+namespace _Failure
+{
+
+struct SYSTEMD_RESULT
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "SYSTEMD_RESULT";
+    using type =
+        std::tuple<std::decay_t<decltype("SYSTEMD_RESULT=%s")>, const char*>;
+    explicit constexpr SYSTEMD_RESULT(const char* a) :
+        _entry(entry("SYSTEMD_RESULT=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Failure
+
+struct Failure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = _Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace SystemdTarget
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::SystemdTarget::Error::Failure>
+{
+    using type = xyz::openbmc_project::State::SystemdTarget::Failure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Inventory
+{
+namespace _Fan
+{
+
+} // namespace _Fan
+
+struct Fan
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Inventory
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Shutdown::Inventory::Error::Fan>
+{
+    using type = xyz::openbmc_project::State::Shutdown::Inventory::Fan;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace ThermalEvent
+{
+namespace _Processor
+{
+
+} // namespace _Processor
+
+struct Processor
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace ThermalEvent
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::State::Shutdown::
+                              ThermalEvent::Error::Processor>
+{
+    using type = xyz::openbmc_project::State::Shutdown::ThermalEvent::Processor;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace ThermalEvent
+{
+namespace _GPU
+{
+
+} // namespace _GPU
+
+struct GPU
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace ThermalEvent
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Shutdown::ThermalEvent::Error::GPU>
+{
+    using type = xyz::openbmc_project::State::Shutdown::ThermalEvent::GPU;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace ThermalEvent
+{
+namespace _Ambient
+{
+
+} // namespace _Ambient
+
+struct Ambient
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace ThermalEvent
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::State::Shutdown::
+                              ThermalEvent::Error::Ambient>
+{
+    using type = xyz::openbmc_project::State::Shutdown::ThermalEvent::Ambient;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Power
+{
+namespace _Fault
+{
+
+} // namespace _Fault
+
+struct Fault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Power
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Shutdown::Power::Error::Fault>
+{
+    using type = xyz::openbmc_project::State::Shutdown::Power::Fault;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Power
+{
+namespace _Blackout
+{
+
+} // namespace _Blackout
+
+struct Blackout
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Power
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Shutdown::Power::Error::Blackout>
+{
+    using type = xyz::openbmc_project::State::Shutdown::Power::Blackout;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Shutdown
+{
+namespace Power
+{
+namespace _Regulator
+{
+
+} // namespace _Regulator
+
+struct Regulator
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Power
+} // namespace Shutdown
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Shutdown::Power::Error::Regulator>
+{
+    using type = xyz::openbmc_project::State::Shutdown::Power::Regulator;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace _UserNameExists
+{
+
+} // namespace _UserNameExists
+
+struct UserNameExists
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNameExists>
+{
+    using type = xyz::openbmc_project::User::Common::UserNameExists;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace _UserNameDoesNotExist
+{
+
+} // namespace _UserNameDoesNotExist
+
+struct UserNameDoesNotExist
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNameDoesNotExist>
+{
+    using type = xyz::openbmc_project::User::Common::UserNameDoesNotExist;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace _UserNameGroupFail
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON ";
+    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
+    explicit constexpr REASON(const char* a) :
+        _entry(entry("REASON = %s", a)){};
+    type _entry;
+};
+
+} // namespace _UserNameGroupFail
+
+struct UserNameGroupFail
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _UserNameGroupFail::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNameGroupFail>
+{
+    using type = xyz::openbmc_project::User::Common::UserNameGroupFail;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace _UserNamePrivFail
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON ";
+    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
+    explicit constexpr REASON(const char* a) :
+        _entry(entry("REASON = %s", a)){};
+    type _entry;
+};
+
+} // namespace _UserNamePrivFail
+
+struct UserNamePrivFail
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _UserNamePrivFail::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNamePrivFail>
+{
+    using type = xyz::openbmc_project::User::Common::UserNamePrivFail;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace _NoResource
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON ";
+    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
+    explicit constexpr REASON(const char* a) :
+        _entry(entry("REASON = %s", a)){};
+    type _entry;
+};
+
+} // namespace _NoResource
+
+struct NoResource
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _NoResource::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::User::Common::Error::NoResource>
+{
+    using type = xyz::openbmc_project::User::Common::NoResource;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace User
+{
+namespace Common
+{
+namespace _PrivilegeMappingExists
+{
+
+} // namespace _PrivilegeMappingExists
+
+struct PrivilegeMappingExists
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace Common
+} // namespace User
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::User::Common::Error::
+                              PrivilegeMappingExists>
+{
+    using type = xyz::openbmc_project::User::Common::PrivilegeMappingExists;
+};
+
+} // namespace details
+
+namespace example
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Example
+{
+namespace Device
+{
+namespace _Callout
+{
+
+struct CALLOUT_ERRNO_TEST
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_ERRNO_TEST";
+    using type =
+        std::tuple<std::decay_t<decltype("CALLOUT_ERRNO_TEST=%d")>, int32_t>;
+    explicit constexpr CALLOUT_ERRNO_TEST(int32_t a) :
+        _entry(entry("CALLOUT_ERRNO_TEST=%d", a)){};
+    type _entry;
+};
+struct CALLOUT_DEVICE_PATH_TEST
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "CALLOUT_DEVICE_PATH_TEST";
+    using type =
+        std::tuple<std::decay_t<decltype("CALLOUT_DEVICE_PATH_TEST=%s")>,
+                   const char*>;
+    explicit constexpr CALLOUT_DEVICE_PATH_TEST(const char* a) :
+        _entry(entry("CALLOUT_DEVICE_PATH_TEST=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Callout
+
+struct Callout : public sdbusplus::exception_t
+{
+    static constexpr auto errName =
+        "example.xyz.openbmc_project.Example.Device.Callout";
+    static constexpr auto errDesc = "Generic device callout";
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO_TEST = _Callout::CALLOUT_ERRNO_TEST;
+    using CALLOUT_DEVICE_PATH_TEST = _Callout::CALLOUT_DEVICE_PATH_TEST;
+    using metadata_types =
+        std::tuple<CALLOUT_ERRNO_TEST, CALLOUT_DEVICE_PATH_TEST>;
+
+    const char* name() const noexcept override
+    {
+        return errName;
+    }
+
+    const char* description() const noexcept override
+    {
+        return errDesc;
+    }
+
+    const char* what() const noexcept override
+    {
+        return errName;
+    }
+
+    int get_errno() const noexcept override
+    {
+        return EIO;
+    }
+};
+
+} // namespace Device
+} // namespace Example
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace example
+
+namespace example
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Example
+{
+namespace Elog
+{
+namespace _TestErrorTwo
+{
+
+struct DEV_ADDR
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "DEV_ADDR";
+    using type =
+        std::tuple<std::decay_t<decltype("DEV_ADDR=0x%.8X")>, uint32_t>;
+    explicit constexpr DEV_ADDR(uint32_t a) :
+        _entry(entry("DEV_ADDR=0x%.8X", a)){};
+    type _entry;
+};
+struct DEV_ID
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "DEV_ID";
+    using type = std::tuple<std::decay_t<decltype("DEV_ID=%u")>, uint32_t>;
+    explicit constexpr DEV_ID(uint32_t a) : _entry(entry("DEV_ID=%u", a)){};
+    type _entry;
+};
+struct DEV_NAME
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "DEV_NAME";
+    using type = std::tuple<std::decay_t<decltype("DEV_NAME=%s")>, const char*>;
+    explicit constexpr DEV_NAME(const char* a) :
+        _entry(entry("DEV_NAME=%s", a)){};
+    type _entry;
+};
+
+} // namespace _TestErrorTwo
+
+struct TestErrorTwo : public sdbusplus::exception_t
+{
+    static constexpr auto errName =
+        "example.xyz.openbmc_project.Example.Elog.TestErrorTwo";
+    static constexpr auto errDesc = "This is test error two";
+    static constexpr auto L = level::ERR;
+    using DEV_ADDR = _TestErrorTwo::DEV_ADDR;
+    using DEV_ID = _TestErrorTwo::DEV_ID;
+    using DEV_NAME = _TestErrorTwo::DEV_NAME;
+    using metadata_types = std::tuple<DEV_ADDR, DEV_ID, DEV_NAME>;
+
+    const char* name() const noexcept override
+    {
+        return errName;
+    }
+
+    const char* description() const noexcept override
+    {
+        return errDesc;
+    }
+
+    const char* what() const noexcept override
+    {
+        return errName;
+    }
+
+    int get_errno() const noexcept override
+    {
+        return EIO;
+    }
+};
+
+} // namespace Elog
+} // namespace Example
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace example
+
+namespace example
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Example
+{
+namespace Elog
+{
+namespace _AutoTestSimple
+{
+
+struct STRING
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "STRING";
+    using type = std::tuple<std::decay_t<decltype("STRING=%s")>, const char*>;
+    explicit constexpr STRING(const char* a) : _entry(entry("STRING=%s", a)){};
+    type _entry;
+};
+
+} // namespace _AutoTestSimple
+
+struct AutoTestSimple : public sdbusplus::exception_t
+{
+    static constexpr auto errName =
+        "example.xyz.openbmc_project.Example.Elog.AutoTestSimple";
+    static constexpr auto errDesc = "This is a simple test error.";
+    static constexpr auto L = level::ERR;
+    using STRING = _AutoTestSimple::STRING;
+    using metadata_types = std::tuple<STRING>;
+
+    const char* name() const noexcept override
+    {
+        return errName;
+    }
+
+    const char* description() const noexcept override
+    {
+        return errDesc;
+    }
+
+    const char* what() const noexcept override
+    {
+        return errName;
+    }
+
+    int get_errno() const noexcept override
+    {
+        return EIO;
+    }
+};
+
+} // namespace Elog
+} // namespace Example
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace example
+
+namespace example
+{
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Example
+{
+namespace Elog
+{
+namespace _TestCallout
+{
+
+struct DEV_ADDR
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "DEV_ADDR";
+    using type =
+        std::tuple<std::decay_t<decltype("DEV_ADDR=0x%.8X")>, uint32_t>;
+    explicit constexpr DEV_ADDR(uint32_t a) :
+        _entry(entry("DEV_ADDR=0x%.8X", a)){};
+    type _entry;
+};
+
+} // namespace _TestCallout
+
+struct TestCallout : public sdbusplus::exception_t
+{
+    static constexpr auto errName =
+        "example.xyz.openbmc_project.Example.Elog.TestCallout";
+    static constexpr auto errDesc = "This is test error TestCallout";
+    static constexpr auto L = level::ERR;
+    using DEV_ADDR = _TestCallout::DEV_ADDR;
+    using CALLOUT_ERRNO_TEST = example::xyz::openbmc_project::Example::Device::
+        Callout::CALLOUT_ERRNO_TEST;
+    using CALLOUT_DEVICE_PATH_TEST = example::xyz::openbmc_project::Example::
+        Device::Callout::CALLOUT_DEVICE_PATH_TEST;
+    using metadata_types =
+        std::tuple<DEV_ADDR, CALLOUT_ERRNO_TEST, CALLOUT_DEVICE_PATH_TEST>;
+
+    const char* name() const noexcept override
+    {
+        return errName;
+    }
+
+    const char* description() const noexcept override
+    {
+        return errDesc;
+    }
+
+    const char* what() const noexcept override
+    {
+        return errName;
+    }
+
+    int get_errno() const noexcept override
+    {
+        return EIO;
+    }
+};
+
+} // namespace Elog
+} // namespace Example
+} // namespace openbmc_project
+} // namespace xyz
+} // namespace example
+
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace _Event
+{
+
+struct ESEL
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ESEL";
+    using type = std::tuple<std::decay_t<decltype("ESEL=%s")>, const char*>;
+    explicit constexpr ESEL(const char* a) : _entry(entry("ESEL=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Event
+
+struct Event
+{
+    static constexpr auto L = level::ERR;
+    using ESEL = _Event::ESEL;
+    using CALLOUT_INVENTORY_PATH = xyz::openbmc_project::Common::Callout::
+        Inventory::CALLOUT_INVENTORY_PATH;
+    using metadata_types = std::tuple<ESEL, CALLOUT_INVENTORY_PATH>;
+};
+
+} // namespace Host
+} // namespace open_power
+} // namespace org
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::org::open_power::Host::Error::Event>
+{
+    using type = org::open_power::Host::Event;
+};
+
+} // namespace details
+
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace _MaintenanceProcedure
+{
+
+struct ESEL
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ESEL";
+    using type = std::tuple<std::decay_t<decltype("ESEL=%s")>, const char*>;
+    explicit constexpr ESEL(const char* a) : _entry(entry("ESEL=%s", a)){};
+    type _entry;
+};
+
+} // namespace _MaintenanceProcedure
+
+struct MaintenanceProcedure
+{
+    static constexpr auto L = level::ERR;
+    using ESEL = _MaintenanceProcedure::ESEL;
+    using PROCEDURE = org::open_power::Common::Callout::Procedure::PROCEDURE;
+    using metadata_types = std::tuple<ESEL, PROCEDURE>;
+};
+
+} // namespace Host
+} // namespace open_power
+} // namespace org
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::org::open_power::Host::Error::MaintenanceProcedure>
+{
+    using type = org::open_power::Host::MaintenanceProcedure;
+};
+
+} // namespace details
+
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace Access
+{
+namespace _WriteCFAM
+{
+
+struct ADDRESS
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ADDRESS";
+    using type = std::tuple<std::decay_t<decltype("ADDRESS=0x%X")>, uint32_t>;
+    explicit constexpr ADDRESS(uint32_t a) : _entry(entry("ADDRESS=0x%X", a)){};
+    type _entry;
+};
+
+} // namespace _WriteCFAM
+
+struct WriteCFAM
+{
+    static constexpr auto L = level::ERR;
+    using ADDRESS = _WriteCFAM::ADDRESS;
+    using CALLOUT_ERRNO =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types =
+        std::tuple<ADDRESS, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace Access
+} // namespace Host
+} // namespace open_power
+} // namespace org
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::org::open_power::Host::Access::Error::WriteCFAM>
+{
+    using type = org::open_power::Host::Access::WriteCFAM;
+};
+
+} // namespace details
+
+namespace org
+{
+namespace open_power
+{
+namespace Host
+{
+namespace Access
+{
+namespace _ReadCFAM
+{
+
+struct ADDRESS
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ADDRESS";
+    using type = std::tuple<std::decay_t<decltype("ADDRESS=0x%X")>, uint32_t>;
+    explicit constexpr ADDRESS(uint32_t a) : _entry(entry("ADDRESS=0x%X", a)){};
+    type _entry;
+};
+
+} // namespace _ReadCFAM
+
+struct ReadCFAM
+{
+    static constexpr auto L = level::ERR;
+    using ADDRESS = _ReadCFAM::ADDRESS;
+    using CALLOUT_ERRNO =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types =
+        std::tuple<ADDRESS, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace Access
+} // namespace Host
+} // namespace open_power
+} // namespace org
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::org::open_power::Host::Access::Error::ReadCFAM>
+{
+    using type = org::open_power::Host::Access::ReadCFAM;
+};
+
+} // namespace details
+
+namespace org
+{
+namespace open_power
+{
+namespace Proc
+{
+namespace FSI
+{
+namespace _MasterDetectionFailure
+{
+
+} // namespace _MasterDetectionFailure
+
+struct MasterDetectionFailure
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH =
+        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace FSI
+} // namespace Proc
+} // namespace open_power
+} // namespace org
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::org::open_power::Proc::FSI::Error::MasterDetectionFailure>
+{
+    using type = org::open_power::Proc::FSI::MasterDetectionFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Inventory
+{
+namespace _NotPresent
+{
+
+} // namespace _NotPresent
+
+struct NotPresent
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_INVENTORY_PATH = xyz::openbmc_project::Common::Callout::
+        Inventory::CALLOUT_INVENTORY_PATH;
+    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
+};
+
+} // namespace Inventory
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Inventory::Error::NotPresent>
+{
+    using type = xyz::openbmc_project::Inventory::NotPresent;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Inventory
+{
+namespace _Nonfunctional
+{
+
+} // namespace _Nonfunctional
+
+struct Nonfunctional
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_INVENTORY_PATH = xyz::openbmc_project::Common::Callout::
+        Inventory::CALLOUT_INVENTORY_PATH;
+    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
+};
+
+} // namespace Inventory
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Inventory::Error::Nonfunctional>
+{
+    using type = xyz::openbmc_project::Inventory::Nonfunctional;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Time
+{
+namespace _NotAllowed
+{
+
+struct OWNER
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "OWNER";
+    using type = std::tuple<std::decay_t<decltype("OWNER=%s")>, const char*>;
+    explicit constexpr OWNER(const char* a) : _entry(entry("OWNER=%s", a)){};
+    type _entry;
+};
+struct SYNC_METHOD
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "SYNC_METHOD";
+    using type =
+        std::tuple<std::decay_t<decltype("SYNC_METHOD=%s")>, const char*>;
+    explicit constexpr SYNC_METHOD(const char* a) :
+        _entry(entry("SYNC_METHOD=%s", a)){};
+    type _entry;
+};
+
+} // namespace _NotAllowed
+
+struct NotAllowed
+{
+    static constexpr auto L = level::ERR;
+    using OWNER = _NotAllowed::OWNER;
+    using SYNC_METHOD = _NotAllowed::SYNC_METHOD;
+    using REASON = xyz::openbmc_project::Common::NotAllowed::REASON;
+    using metadata_types = std::tuple<OWNER, SYNC_METHOD, REASON>;
+};
+
+} // namespace Time
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::Time::Error::NotAllowed>
+{
+    using type = xyz::openbmc_project::Time::NotAllowed;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace Time
+{
+namespace _Failed
+{
+
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+
+} // namespace _Failed
+
+struct Failed
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _Failed::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace Time
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::xyz::openbmc_project::Time::Error::Failed>
+{
+    using type = xyz::openbmc_project::Time::Failed;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace BMC
+{
+namespace _MultiUserTargetFailure
+{
+
+} // namespace _MultiUserTargetFailure
+
+struct MultiUserTargetFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace BMC
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::BMC::Error::MultiUserTargetFailure>
+{
+    using type = xyz::openbmc_project::State::BMC::MultiUserTargetFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Chassis
+{
+namespace _PowerOnFailure
+{
+
+} // namespace _PowerOnFailure
+
+struct PowerOnFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace Chassis
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Chassis::Error::PowerOnFailure>
+{
+    using type = xyz::openbmc_project::State::Chassis::PowerOnFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Chassis
+{
+namespace _PowerOffFailure
+{
+
+} // namespace _PowerOffFailure
+
+struct PowerOffFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace Chassis
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Chassis::Error::PowerOffFailure>
+{
+    using type = xyz::openbmc_project::State::Chassis::PowerOffFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace _HostStartFailure
+{
+
+} // namespace _HostStartFailure
+
+struct HostStartFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Host::Error::HostStartFailure>
+{
+    using type = xyz::openbmc_project::State::Host::HostStartFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace _HostMinStartFailure
+{
+
+} // namespace _HostMinStartFailure
+
+struct HostMinStartFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Host::Error::HostMinStartFailure>
+{
+    using type = xyz::openbmc_project::State::Host::HostMinStartFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace _HostShutdownFailure
+{
+
+} // namespace _HostShutdownFailure
+
+struct HostShutdownFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Host::Error::HostShutdownFailure>
+{
+    using type = xyz::openbmc_project::State::Host::HostShutdownFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace _HostStopFailure
+{
+
+} // namespace _HostStopFailure
+
+struct HostStopFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Host::Error::HostStopFailure>
+{
+    using type = xyz::openbmc_project::State::Host::HostStopFailure;
+};
+
+} // namespace details
+
+namespace xyz
+{
+namespace openbmc_project
+{
+namespace State
+{
+namespace Host
+{
+namespace _HostRebootFailure
+{
+
+} // namespace _HostRebootFailure
+
+struct HostRebootFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT =
+        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace Host
+} // namespace State
+} // namespace openbmc_project
+} // namespace xyz
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::xyz::openbmc_project::State::Host::Error::HostRebootFailure>
+{
+    using type = xyz::openbmc_project::State::Host::HostRebootFailure;
 };
 
 } // namespace details
@@ -1852,26 +6370,42 @@ namespace _TestErrorOne
 
 struct ERRNUM
 {
-    static constexpr auto str = "ERRNUM=0x%.4X";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "ERRNUM";
-    using type = std::tuple<std::decay_t<decltype(str)>, uint16_t>;
-    explicit constexpr ERRNUM(uint16_t a) : _entry(entry(str, a)){};
+    using type = std::tuple<std::decay_t<decltype("ERRNUM=0x%.4X")>, uint16_t>;
+    explicit constexpr ERRNUM(uint16_t a) : _entry(entry("ERRNUM=0x%.4X", a)){};
     type _entry;
 };
 struct FILE_PATH
 {
-    static constexpr auto str = "FILE_PATH=%s";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "FILE_PATH";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr FILE_PATH(const char* a) : _entry(entry(str, a)){};
+    using type =
+        std::tuple<std::decay_t<decltype("FILE_PATH=%s")>, const char*>;
+    explicit constexpr FILE_PATH(const char* a) :
+        _entry(entry("FILE_PATH=%s", a)){};
     type _entry;
 };
 struct FILE_NAME
 {
-    static constexpr auto str = "FILE_NAME=%s";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "FILE_NAME";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr FILE_NAME(const char* a) : _entry(entry(str, a)){};
+    using type =
+        std::tuple<std::decay_t<decltype("FILE_NAME=%s")>, const char*>;
+    explicit constexpr FILE_NAME(const char* a) :
+        _entry(entry("FILE_NAME=%s", a)){};
     type _entry;
 };
 
@@ -1895,19 +6429,24 @@ struct TestErrorOne : public sdbusplus::exception_t
     using metadata_types =
         std::tuple<ERRNUM, FILE_PATH, FILE_NAME, DEV_ADDR, DEV_ID, DEV_NAME>;
 
-    const char* name() const noexcept
+    const char* name() const noexcept override
     {
         return errName;
     }
 
-    const char* description() const noexcept
+    const char* description() const noexcept override
     {
         return errDesc;
     }
 
-    const char* what() const noexcept
+    const char* what() const noexcept override
     {
         return errName;
+    }
+
+    int get_errno() const noexcept override
+    {
+        return EIO;
     }
 };
 
@@ -1932,10 +6471,15 @@ namespace _Foo
 
 struct FOO_DATA
 {
-    static constexpr auto str = "FOO_DATA=%s";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "FOO_DATA";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr FOO_DATA(const char* a) : _entry(entry(str, a)){};
+    using type = std::tuple<std::decay_t<decltype("FOO_DATA=%s")>, const char*>;
+    explicit constexpr FOO_DATA(const char* a) :
+        _entry(entry("FOO_DATA=%s", a)){};
     type _entry;
 };
 
@@ -1963,19 +6507,24 @@ struct Foo : public sdbusplus::exception_t
     using metadata_types = std::tuple<FOO_DATA, ERRNUM, FILE_PATH, FILE_NAME,
                                       DEV_ADDR, DEV_ID, DEV_NAME>;
 
-    const char* name() const noexcept
+    const char* name() const noexcept override
     {
         return errName;
     }
 
-    const char* description() const noexcept
+    const char* description() const noexcept override
     {
         return errDesc;
     }
 
-    const char* what() const noexcept
+    const char* what() const noexcept override
     {
         return errName;
+    }
+
+    int get_errno() const noexcept override
+    {
+        return EIO;
     }
 };
 
@@ -2000,10 +6549,15 @@ namespace _Bar
 
 struct BAR_DATA
 {
-    static constexpr auto str = "BAR_DATA=%s";
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
     static constexpr auto str_short = "BAR_DATA";
-    using type = std::tuple<std::decay_t<decltype(str)>, const char*>;
-    explicit constexpr BAR_DATA(const char* a) : _entry(entry(str, a)){};
+    using type = std::tuple<std::decay_t<decltype("BAR_DATA=%s")>, const char*>;
+    explicit constexpr BAR_DATA(const char* a) :
+        _entry(entry("BAR_DATA=%s", a)){};
     type _entry;
 };
 
@@ -2032,19 +6586,24 @@ struct Bar : public sdbusplus::exception_t
     using metadata_types = std::tuple<BAR_DATA, FOO_DATA, ERRNUM, FILE_PATH,
                                       FILE_NAME, DEV_ADDR, DEV_ID, DEV_NAME>;
 
-    const char* name() const noexcept
+    const char* name() const noexcept override
     {
         return errName;
     }
 
-    const char* description() const noexcept
+    const char* description() const noexcept override
     {
         return errDesc;
     }
 
-    const char* what() const noexcept
+    const char* what() const noexcept override
     {
         return errName;
+    }
+
+    int get_errno() const noexcept override
+    {
+        return EIO;
     }
 };
 

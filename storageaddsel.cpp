@@ -1,5 +1,4 @@
 #include "elog-errors.hpp"
-#include "error-HostEvent.hpp"
 #include "sensorhandler.hpp"
 #include "storagehandler.hpp"
 
