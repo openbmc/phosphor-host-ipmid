@@ -13,7 +13,7 @@ namespace Host
 namespace Error
 {
 
-struct Event final : public sdbusplus::exception_t
+struct Event final : public sdbusplus::exception::generated_exception
 {
     static constexpr auto errName = "org.open_power.Host.Error.Event";
     static constexpr auto errDesc = "A host system event was received";
@@ -25,7 +25,8 @@ struct Event final : public sdbusplus::exception_t
     const char* what() const noexcept override;
 };
 
-struct MaintenanceProcedure final : public sdbusplus::exception_t
+struct MaintenanceProcedure final
+    : public sdbusplus::exception::generated_exception
 {
     static constexpr auto errName =
         "org.open_power.Host.Error.MaintenanceProcedure";
