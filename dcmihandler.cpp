@@ -978,7 +978,7 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-int64_t getPowerReading(sdbusplus::bus::bus& bus)
+int64_t getPwrReading(sdbusplus::bus::bus& bus)
 {
     std::ifstream sensorFile(POWER_READING_SENSOR);
     std::string objectPath;
@@ -1170,47 +1170,107 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                           ipmi_request_t request, ipmi_response_t response,
-                           ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi::RspType<uint16_t, //!< Current power in watts
+              uint16_t, //!< Minimum power over sampling duration
+              uint16_t, //!< Maximum power over sampling duration
+              uint16_t, //!< Average power over sampling duration
+              uint32_t, //!< IPMI specification based time stamp
+              uint32_t, //!< Statistics reporting time
+              uint8_t   //!< Power Reading State
+              >
+    getPowerReading(uint8_t mode, uint8_t modeAttribute, uint8_t reserved)
 {
-    *data_len = 0;
+
+    uint16_t currentPower = 0;
+    uint16_t minimumPower = 0;
+    uint16_t maximumPower = 0;
+    uint16_t averagePower = 0;
+    uint32_t timeStamp = 0;
+    uint32_t timeFrame = 0;
+    uint8_t powerReadingState = 0;
+
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
         log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
-    }
-
-    ipmi_ret_t rc = IPMI_CC_OK;
-    auto responseData =
-        reinterpret_cast<dcmi::GetPowerReadingResponse*>(response);
-
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-    int64_t power = 0;
-    try
-    {
-        power = getPowerReading(bus);
-    }
-    catch (InternalFailure& e)
-    {
-        log<level::ERR>("Error in reading power sensor value",
-                        entry("INTERFACE=%s", SENSOR_VALUE_INTF),
-                        entry("PROPERTY=%s", SENSOR_VALUE_PROP));
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseInvalidCommand();
     }
 
     // TODO: openbmc/openbmc#2819
     // Minimum, Maximum, Average power, TimeFrame, TimeStamp,
     // PowerReadingState readings need to be populated
     // after Telemetry changes.
-    uint16_t totalPower = static_cast<uint16_t>(power);
-    responseData->currentPower = totalPower;
-    responseData->minimumPower = totalPower;
-    responseData->maximumPower = totalPower;
-    responseData->averagePower = totalPower;
 
-    *data_len = sizeof(*responseData);
-    return rc;
+    if ((mode > dcmi::DCMIPowerReadingMode::MODE_ENHANCED_POWER_STATS) ||
+        reserved)
+    {
+        log<level::ERR>("Invalid data fields - Invalid Mode");
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    int64_t power = 0;
+
+    switch (mode)
+    {
+
+        case dcmi::DCMIPowerReadingMode::MODE_POWER_STATS:
+            if (modeAttribute != 0)
+            {
+                log<level::ERR>("Invalid data fields - modeAttribute ");
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            // Get Time in milli seconds
+            try
+            {
+                power = getPwrReading(bus);
+            }
+            catch (InternalFailure& e)
+            {
+                log<level::ERR>("Error in reading power sensor value",
+                                entry("INTERFACE=%s", SENSOR_VALUE_INTF),
+                                entry("PROPERTY=%s", SENSOR_VALUE_PROP));
+                return ipmi::responseUnspecifiedError();
+            }
+            break;
+        case dcmi::DCMIPowerReadingMode::MODE_ENHANCED_POWER_STATS:
+
+            // check if Rolling Average Time Period is allowed (only ones
+            //   specified in DMCI Capability Parameter 5 are allowed).
+            //   Currently we support only Rolling Average Time Period = 0
+            if (modeAttribute != 0)
+            {
+                log<level::ERR>("Invalid data fields - modeAttribute ");
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            // Get Time in milli seconds
+            try
+            {
+                power = getPwrReading(bus);
+            }
+            catch (InternalFailure& e)
+            {
+                log<level::ERR>("Error in reading power sensor value",
+                                entry("INTERFACE=%s", SENSOR_VALUE_INTF),
+                                entry("PROPERTY=%s", SENSOR_VALUE_PROP));
+                return ipmi::responseUnspecifiedError();
+            }
+            break;
+
+        default:
+            return ipmi::responseInvalidCommand();
+    }
+
+    uint16_t totalPower = static_cast<uint16_t>(power);
+    currentPower = totalPower;
+    minimumPower = totalPower;
+    maximumPower = totalPower;
+    averagePower = totalPower;
+
+    return ipmi::responseSuccess(currentPower, minimumPower, maximumPower,
+                                 averagePower, timeStamp, timeFrame,
+                                 powerReadingState);
 }
 
 namespace dcmi
@@ -1435,8 +1495,9 @@ void register_netfn_dcmi_functions()
                            NULL, getTempReadings, PRIVILEGE_USER);
 
     // <Get Power Reading>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING,
-                           NULL, getPowerReading, PRIVILEGE_USER);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdGetPowerReading,
+                               ipmi::Privilege::User, getPowerReading);
 
     // <Get Sensor Info>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_SENSOR_INFO, NULL,
