@@ -1093,75 +1093,59 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                             ipmi_response_t response, ipmi_data_len_t data_len,
-                             ipmi_context_t)
+ipmi::RspType<uint8_t,             // DCMI Spec Conformance - major ver = 01h.
+              uint8_t,             // DCMI Spec Conformance - minor ver = 05h.
+              uint8_t,             // Parameter Revision = 01h.
+              std::vector<uint8_t> // Parameter data.
+              >
+    getDCMIConfParams(uint8_t paramSelect, uint8_t)
 {
 
-    auto requestData =
-        reinterpret_cast<const dcmi::GetConfParamsRequest*>(request);
-    auto responseData =
-        reinterpret_cast<dcmi::GetConfParamsResponse*>(response);
-
-    responseData->data[0] = 0x00;
-
-    if (*data_len != sizeof(dcmi::GetConfParamsRequest))
-    {
-        log<level::ERR>("Invalid Requested Packet size",
-                        entry("PACKET SIZE=%d", *data_len));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
-    *data_len = 0;
+    std::vector<uint8_t> data{0};
+    uint8_t major, minor, paramRevision;
 
     try
     {
         // Take action based on the Parameter Selector
-        switch (
-            static_cast<dcmi::DCMIConfigParameters>(requestData->paramSelect))
+        switch (static_cast<dcmi::DCMIConfigParameters>(paramSelect))
         {
             case dcmi::DCMIConfigParameters::ActivateDHCP:
-                responseData->data[0] = DCMI_ACTIVATE_DHCP_REPLY;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 1;
+                data[0] = DCMI_ACTIVATE_DHCP_REPLY;
                 break;
             case dcmi::DCMIConfigParameters::DiscoveryConfig:
                 if (dcmi::getDHCPOption(DHCP_OPT12_ENABLED))
                 {
-                    responseData->data[0] |= DCMI_OPTION_12_MASK;
+                    data[0] |= DCMI_OPTION_12_MASK;
                 }
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 1;
                 break;
             // Get below values from Systemd-networkd source code
             case dcmi::DCMIConfigParameters::DHCPTiming1:
-                responseData->data[0] = DHCP_TIMING1;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 1;
+                data[0] = DHCP_TIMING1;
                 break;
             case dcmi::DCMIConfigParameters::DHCPTiming2:
-                responseData->data[0] = DHCP_TIMING2_LOWER;
-                responseData->data[1] = DHCP_TIMING2_UPPER;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 2;
+                data[0] = DHCP_TIMING2_LOWER;
+                data.push_back(DHCP_TIMING2_UPPER);
                 break;
             case dcmi::DCMIConfigParameters::DHCPTiming3:
-                responseData->data[0] = DHCP_TIMING3_LOWER;
-                responseData->data[1] = DHCP_TIMING3_UPPER;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 2;
+                data[0] = DHCP_TIMING3_LOWER;
+                data.push_back(DHCP_TIMING3_UPPER);
                 break;
             default:
-                *data_len = 0;
-                return IPMI_CC_INVALID;
+                return ipmi::responseInvalidCommand();
+                ;
         }
     }
     catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    responseData->major = DCMI_SPEC_MAJOR_VERSION;
-    responseData->minor = DCMI_SPEC_MINOR_VERSION;
-    responseData->paramRevision = DCMI_CONFIG_PARAMETER_REVISION;
+    major = DCMI_SPEC_MAJOR_VERSION;
+    minor = DCMI_SPEC_MINOR_VERSION;
+    paramRevision = DCMI_CONFIG_PARAMETER_REVISION;
 
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(major, minor, paramRevision, data);
 }
 
 ipmi_ret_t getPowerReading(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
@@ -1437,8 +1421,9 @@ void register_netfn_dcmi_functions()
                            getSensorInfo, PRIVILEGE_USER);
 
     // <Get DCMI Configuration Parameters>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS, NULL,
-                           getDCMIConfParams, PRIVILEGE_USER);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdGetDcmiConfigParameters,
+                               ipmi::Privilege::User, getDCMIConfParams);
 
     // <Set DCMI Configuration Parameters>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_CONF_PARAMS, NULL,
