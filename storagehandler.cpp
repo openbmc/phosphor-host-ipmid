@@ -44,6 +44,7 @@ constexpr auto BMC_TIME_PATH = "/xyz/openbmc_project/time/bmc";
 constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
 constexpr auto PROPERTY_ELAPSED = "Elapsed";
 
+constexpr auto logWatchPath = "/xyz/openbmc_project/logging";
 constexpr auto logBasePath = "/xyz/openbmc_project/logging/entry";
 constexpr auto logEntryIntf = "xyz.openbmc_project.Logging.Entry";
 constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
@@ -74,6 +75,8 @@ using SELEntry = ipmi::sel::SELEventRecordFormat;
 using SELCacheMap = std::map<uint16_t, SELEntry>;
 
 SELCacheMap selCacheMap __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match::match> selAddedMatch
+    __attribute__((init_priority(101)));
 
 std::pair<uint16_t, SELEntry> parseLoggingEntry(const std::string& p)
 {
@@ -82,6 +85,35 @@ std::pair<uint16_t, SELEntry> parseLoggingEntry(const std::string& p)
     auto id = static_cast<uint16_t>(std::stoul(entryPath.filename().string()));
     // TODO: parse the sel data
     return {id, {}};
+}
+
+static void selAddedCallback(sdbusplus::message::message& m)
+{
+    sdbusplus::message::object_path objPath;
+    try
+    {
+        m.read(objPath);
+    }
+    catch (const sdbusplus::exception::exception& e)
+    {
+        log<level::ERR>("Failed to read object path");
+        return;
+    }
+    std::string p = objPath;
+    selCacheMap.insert(parseLoggingEntry(p));
+}
+
+void registerSelCallbackHandler()
+{
+    using namespace sdbusplus::bus::match::rules;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    if (!selAddedMatch)
+    {
+        selAddedMatch = std::make_unique<sdbusplus::bus::match::match>(
+            bus, interfacesAdded(logWatchPath),
+            std::bind(selAddedCallback, std::placeholders::_1));
+    }
+    // TODO: Add other callbacks
 }
 
 void initSELCache()
@@ -99,6 +131,7 @@ void initSELCache()
     {
         selCacheMap.insert(parseLoggingEntry(p));
     }
+    registerSelCallbackHandler();
 }
 
 /**
