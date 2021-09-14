@@ -81,12 +81,19 @@ using SELCacheMap = std::map<uint16_t, SELEntry>;
 SELCacheMap selCacheMap __attribute__((init_priority(101)));
 std::unique_ptr<sdbusplus::bus::match::match> selAddedMatch
     __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match::match> selRemovedMatch
+    __attribute__((init_priority(101)));
 
-std::pair<uint16_t, SELEntry> parseLoggingEntry(const std::string& p)
+static inline uint16_t getLoggingId(const std::string& p)
 {
     namespace fs = std::filesystem;
     fs::path entryPath(p);
-    auto id = static_cast<uint16_t>(std::stoul(entryPath.filename().string()));
+    return std::stoul(entryPath.filename().string());
+}
+
+std::pair<uint16_t, SELEntry> parseLoggingEntry(const std::string& p)
+{
+    auto id = getLoggingId(p);
     // TODO: parse the sel data
     return {id, {}};
 }
@@ -99,6 +106,14 @@ static void selAddedCallback(sdbusplus::message::message& m)
     selCacheMap.insert(parseLoggingEntry(p));
 }
 
+static void selRemovedCallback(sdbusplus::message::message& m)
+{
+    sdbusplus::message::object_path objPath;
+    m.read(objPath);
+    std::string p = objPath;
+    selCacheMap.erase(getLoggingId(p));
+}
+
 void registerSelCallbackHandler()
 {
     using namespace sdbusplus::bus::match::rules;
@@ -109,7 +124,12 @@ void registerSelCallbackHandler()
             bus, interfacesAdded(logWatchPath),
             std::bind(selAddedCallback, std::placeholders::_1));
     }
-    // TODO: Add other callbacks
+    if (!selRemovedMatch)
+    {
+        selRemovedMatch = std::make_unique<sdbusplus::bus::match::match>(
+            bus, interfacesRemoved(logWatchPath),
+            std::bind(selRemovedCallback, std::placeholders::_1));
+    }
 }
 
 void initSELCache()
