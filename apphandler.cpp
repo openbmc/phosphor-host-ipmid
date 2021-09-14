@@ -1631,6 +1631,10 @@ ipmi::RspType<std::vector<uint8_t>>
                         bool reserved, uint7_t slaveAddr, uint8_t readCount,
                         std::vector<uint8_t> writeData)
 {
+    if (reserved)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
     if (readCount > maxIPMIWriteReadSize)
     {
         log<level::ERR>("Master write read command: Read count exceeds limit");
