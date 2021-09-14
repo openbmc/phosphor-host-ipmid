@@ -44,6 +44,9 @@ constexpr auto BMC_TIME_PATH = "/xyz/openbmc_project/time/bmc";
 constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
 constexpr auto PROPERTY_ELAPSED = "Elapsed";
 
+constexpr auto logBasePath = "/xyz/openbmc_project/logging/entry";
+constexpr auto logEntryIntf = "xyz.openbmc_project.Logging.Entry";
+constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 } // namespace
 
 namespace cache
@@ -66,6 +69,37 @@ using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 using namespace phosphor::logging;
 using namespace ipmi::fru;
+
+using SELEntry = ipmi::sel::SELEventRecordFormat;
+using SELCacheMap = std::map<uint16_t, SELEntry>;
+
+SELCacheMap selCacheMap __attribute__((init_priority(101)));
+
+std::pair<uint16_t, SELEntry> parseLoggingEntry(const std::string& p)
+{
+    namespace fs = std::filesystem;
+    fs::path entryPath(p);
+    auto id = static_cast<uint16_t>(std::stoul(entryPath.filename().string()));
+    // TODO: parse the sel data
+    return {id, {}};
+}
+
+void initSELCache()
+{
+    try
+    {
+        ipmi::sel::readLoggingObjectPaths(cache::paths);
+    }
+    catch (const sdbusplus::exception::exception& e)
+    {
+        log<level::ERR>("Failed to get logging object paths");
+        return;
+    }
+    for (const auto& p : cache::paths)
+    {
+        selCacheMap.insert(parseLoggingEntry(p));
+    }
+}
 
 /**
  * @enum Device access mode
@@ -752,6 +786,7 @@ ipmi::RspType<uint8_t,  // SDR version
 
 void register_netfn_storage_functions()
 {
+    initSELCache();
     // <Get SEL Info>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
