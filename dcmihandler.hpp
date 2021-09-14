@@ -207,20 +207,6 @@ uint32_t getPcap(sdbusplus::bus::bus& bus);
  */
 bool getPcapEnabled(sdbusplus::bus::bus& bus);
 
-/** @struct GetPowerLimitResponse
- *
- *  DCMI payload for Get Power Limit command response.
- */
-struct GetPowerLimitResponse
-{
-    uint16_t reserved;       //!< Reserved.
-    uint8_t exceptionAction; //!< Exception action.
-    uint16_t powerLimit;     //!< Power limit requested in watts.
-    uint32_t correctionTime; //!< Correction time limit in milliseconds.
-    uint16_t reserved1;      //!< Reserved.
-    uint16_t samplingPeriod; //!< Statistics sampling period in seconds.
-} __attribute__((packed));
-
 /** @brief Set the power cap value
  *
  *  @param[in] bus - dbus connection
@@ -228,20 +214,6 @@ struct GetPowerLimitResponse
  */
 void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap);
 
-/** @struct SetPowerLimitRequest
- *
- *  DCMI payload for Set Power Limit command request.
- */
-struct SetPowerLimitRequest
-{
-    uint16_t reserved;       //!< Reserved
-    uint8_t reserved1;       //!< Reserved
-    uint8_t exceptionAction; //!< Exception action.
-    uint16_t powerLimit;     //!< Power limit requested in watts.
-    uint32_t correctionTime; //!< Correction time limit in milliseconds.
-    uint16_t reserved2;      //!< Reserved.
-    uint16_t samplingPeriod; //!< Statistics sampling period in seconds.
-} __attribute__((packed));
 
 /** @brief Enable or disable the power capping
  *

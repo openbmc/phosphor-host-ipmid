@@ -389,6 +389,7 @@ constexpr Cc ccInsufficientPrivilege = 0xD4;
 constexpr Cc ccCommandNotAvailable = 0xD5;
 constexpr Cc ccCommandDisabled = 0xD6;
 constexpr Cc ccUnspecifiedError = 0xFF;
+constexpr Cc ccNoActivePowerLimit = 0x80;
 
 /* ipmi often has two return types:
  * 1. Failure: CC is non-zero; no trailing data
@@ -548,6 +549,10 @@ static inline auto responseCommandDisabled()
 static inline auto responseUnspecifiedError()
 {
     return response(ccUnspecifiedError);
+}
+static inline auto responseNoActivePowerLimit()
+{
+    return response(ccNoActivePowerLimit);
 }
 
 } // namespace ipmi
