@@ -1178,6 +1178,41 @@ ipmi::RspType<> ipmiStorageSetSELTime(uint32_t selTime)
     return ipmi::responseInvalidCommand();
 }
 
+std::vector<uint8_t>
+    getType8SDRs(ipmi::sensor::EntityInfoMap::const_iterator& entity,
+                 uint16_t recordId)
+{
+    std::vector<uint8_t> resp;
+    get_sdr::SensorDataEntityRecord data{};
+
+    /* Header */
+    get_sdr::header::set_record_id(recordId, &(data.header));
+    // Based on IPMI Spec v2.0 rev 1.1
+    data.header.sdr_version = SDR_VERSION;
+    data.header.record_type = 0x08;
+    data.header.record_length = sizeof(data.key) + sizeof(data.body);
+
+    /* Key */
+    data.key.containerEntityId = entity->second.containerEntityId;
+    data.key.containerEntityInstance = entity->second.containerEntityInstance;
+    get_sdr::key::set_flags(entity->second.isList, entity->second.isLinked,
+                            &(data.key));
+    data.key.entityId1 = entity->second.containedEntities[0].first;
+    data.key.entityInstance1 = entity->second.containedEntities[0].second;
+
+    /* Body */
+    data.body.entityId2 = entity->second.containedEntities[1].first;
+    data.body.entityInstance2 = entity->second.containedEntities[1].second;
+    data.body.entityId3 = entity->second.containedEntities[2].first;
+    data.body.entityInstance3 = entity->second.containedEntities[2].second;
+    data.body.entityId4 = entity->second.containedEntities[3].first;
+    data.body.entityInstance4 = entity->second.containedEntities[3].second;
+
+    resp.insert(resp.end(), (uint8_t*)&data, ((uint8_t*)&data) + sizeof(data));
+
+    return resp;
+}
+
 std::vector<uint8_t> getType12SDRs(uint16_t index, uint16_t recordId)
 {
     std::vector<uint8_t> resp;

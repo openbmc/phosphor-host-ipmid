@@ -19,6 +19,7 @@
 #include "dbus-sdr/sdrutils.hpp"
 #include "dbus-sdr/sensorutils.hpp"
 #include "dbus-sdr/storagecommands.hpp"
+#include "entity_map_json.hpp"
 
 #include <algorithm>
 #include <array>
@@ -1925,8 +1926,13 @@ static int
         return GENERAL_ERROR;
     }
 
-    size_t lastRecord =
-        getNumberOfSensors() + fruCount + ipmi::storage::type12Count - 1;
+    const auto& entityRecords =
+        ipmi::sensor::EntityInfoMapContainer::getContainer()
+            ->getIpmiEntityRecords();
+    size_t entityCount = entityRecords.size();
+
+    size_t lastRecord = getNumberOfSensors() + fruCount +
+                        ipmi::storage::type12Count + entityCount - 1;
     if (recordID == lastRecordIndex)
     {
         recordID = lastRecord;
@@ -1940,12 +1946,24 @@ static int
 
     if (recordID >= getNumberOfSensors())
     {
-        size_t fruIndex = recordID - getNumberOfSensors();
+        size_t sdrIndex = recordID - getNumberOfSensors();
 
-        if (fruIndex >= fruCount)
+        if (sdrIndex >= fruCount + ipmi::storage::type12Count)
+        {
+            // handle type 8 entity map records
+            ipmi::sensor::EntityInfoMap::const_iterator entity =
+                entityRecords.find(static_cast<uint8_t>(
+                    sdrIndex - fruCount - ipmi::storage::type12Count));
+            if (entity == entityRecords.end())
+            {
+                return IPMI_CC_SENSOR_INVALID;
+            }
+            recordData = ipmi::storage::getType8SDRs(entity, recordID);
+        }
+        else if (sdrIndex >= fruCount)
         {
             // handle type 12 hardcoded records
-            size_t type12Index = fruIndex - fruCount;
+            size_t type12Index = sdrIndex - fruCount;
             if (type12Index >= ipmi::storage::type12Count)
             {
                 phosphor::logging::log<phosphor::logging::level::ERR>(
@@ -1958,7 +1976,7 @@ static int
         {
             // handle fru records
             get_sdr::SensorDataFruRecord data;
-            ret = ipmi::storage::getFruSdrs(ctx, fruIndex, data);
+            ret = ipmi::storage::getFruSdrs(ctx, sdrIndex, data);
             if (ret != IPMI_CC_OK)
             {
                 return GENERAL_ERROR;
@@ -2315,9 +2333,14 @@ ipmi::RspType<uint16_t,            // next record ID
         return ipmi::response(ret);
     }
 
+    const auto& entityRecords =
+        ipmi::sensor::EntityInfoMapContainer::getContainer()
+            ->getIpmiEntityRecords();
+    int entityCount = entityRecords.size();
+
     auto& sensorTree = getSensorTree();
-    size_t lastRecord =
-        getNumberOfSensors() + fruCount + ipmi::storage::type12Count - 1;
+    size_t lastRecord = getNumberOfSensors() + fruCount +
+                        ipmi::storage::type12Count + entityCount - 1;
     uint16_t nextRecordId = lastRecord > recordID ? recordID + 1 : 0XFFFF;
 
     if (!getSensorSubtree(sensorTree) && sensorTree.empty())
