@@ -540,7 +540,7 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
             return ipmi::responseResponseError();
         }
         auto sensorObject = sensorMap.find(sensor::sensorInterface);
-        if (sensorObject != sensorMap.end())
+        if (sensorObject == sensorMap.end())
         {
             return ipmi::responseResponseError();
         }
@@ -590,7 +590,7 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
             return ipmi::responseResponseError();
         }
         auto sensorObject = sensorMap.find(sensor::vrInterface);
-        if (sensorObject != sensorMap.end())
+        if (sensorObject == sensorMap.end())
         {
             return ipmi::responseResponseError();
         }
