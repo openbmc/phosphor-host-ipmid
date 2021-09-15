@@ -96,8 +96,17 @@ static inline uint16_t getLoggingId(const std::string& p)
 std::pair<uint16_t, SELEntry> parseLoggingEntry(const std::string& p)
 {
     auto id = getLoggingId(p);
-    // TODO: parse the sel data
-    return {id, {}};
+    ipmi::sel::GetSELEntryResponse record{};
+    try
+    {
+        record = ipmi::sel::convertLogEntrytoSEL(p);
+    }
+    catch (const std::exception& e)
+    {
+        fprintf(stderr, "Failed to convert %s to SEL: %s\n", p.c_str(),
+                e.what());
+    }
+    return {id, std::move(record.event)};
 }
 
 static void selAddedCallback(sdbusplus::message::message& m)
@@ -272,74 +281,52 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
     }
 
-    if (cache::paths.empty())
+    if (selCacheMap.empty())
     {
         *data_len = 0;
         return IPMI_CC_SENSOR_INVALID;
     }
 
-    ipmi::sel::ObjectPaths::const_iterator iter;
+    SELCacheMap::const_iterator iter;
 
     // Check for the requested SEL Entry.
     if (requestData->selRecordID == ipmi::sel::firstEntry)
     {
-        iter = cache::paths.begin();
+        iter = selCacheMap.begin();
     }
     else if (requestData->selRecordID == ipmi::sel::lastEntry)
     {
-        iter = cache::paths.end();
+        if (selCacheMap.size() > 1)
+        {
+            iter = selCacheMap.end();
+            --iter;
+        }
+        else
+        {
+            // Only one entry exists, return the first
+            iter = selCacheMap.begin();
+        }
     }
     else
     {
-        std::string objPath = std::string(ipmi::sel::logBasePath) + "/" +
-                              std::to_string(requestData->selRecordID);
-
-        iter = std::find(cache::paths.begin(), cache::paths.end(), objPath);
-        if (iter == cache::paths.end())
+        iter = selCacheMap.find(requestData->selRecordID);
+        if (iter == selCacheMap.end())
         {
             *data_len = 0;
             return IPMI_CC_SENSOR_INVALID;
         }
     }
 
-    ipmi::sel::GetSELEntryResponse record{};
-
-    // Convert the log entry into SEL record.
-    try
-    {
-        record = ipmi::sel::convertLogEntrytoSEL(*iter);
-    }
-    catch (InternalFailure& e)
-    {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-    catch (const std::runtime_error& e)
-    {
-        log<level::ERR>(e.what());
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-
+    ipmi::sel::GetSELEntryResponse record{0, iter->second};
     // Identify the next SEL record ID
-    if (iter != cache::paths.end())
+    ++iter;
+    if (iter == selCacheMap.end())
     {
-        ++iter;
-        if (iter == cache::paths.end())
-        {
-            record.nextRecordID = ipmi::sel::lastEntry;
-        }
-        else
-        {
-            namespace fs = std::filesystem;
-            fs::path path(*iter);
-            record.nextRecordID = static_cast<uint16_t>(
-                std::stoul(std::string(path.filename().c_str())));
-        }
+        record.nextRecordID = ipmi::sel::lastEntry;
     }
     else
     {
-        record.nextRecordID = ipmi::sel::lastEntry;
+        record.nextRecordID = iter->first;
     }
 
     if (requestData->readLength == ipmi::sel::entireRecord)
