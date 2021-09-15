@@ -83,6 +83,8 @@ std::unique_ptr<sdbusplus::bus::match::match> selAddedMatch
     __attribute__((init_priority(101)));
 std::unique_ptr<sdbusplus::bus::match::match> selRemovedMatch
     __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match::match> selUpdatedMatch
+    __attribute__((init_priority(101)));
 
 static inline uint16_t getLoggingId(const std::string& p)
 {
@@ -114,6 +116,13 @@ static void selRemovedCallback(sdbusplus::message::message& m)
     selCacheMap.erase(getLoggingId(p));
 }
 
+static void selUpdatedCallback(sdbusplus::message::message& m)
+{
+    std::string p = m.get_path();
+    auto entry = parseLoggingEntry(p);
+    selCacheMap.insert_or_assign(entry.first, std::move(entry.second));
+}
+
 void registerSelCallbackHandler()
 {
     using namespace sdbusplus::bus::match::rules;
@@ -129,6 +138,15 @@ void registerSelCallbackHandler()
         selRemovedMatch = std::make_unique<sdbusplus::bus::match::match>(
             bus, interfacesRemoved(logWatchPath),
             std::bind(selRemovedCallback, std::placeholders::_1));
+    }
+    if (!selUpdatedMatch)
+    {
+        selUpdatedMatch = std::make_unique<sdbusplus::bus::match::match>(
+            bus,
+            type::signal() + member("PropertiesChanged"s) +
+                interface("org.freedesktop.DBus.Properties"s) +
+                argN(0, logEntryIntf),
+            std::bind(selUpdatedCallback, std::placeholders::_1));
     }
 }
 
