@@ -314,6 +314,24 @@ AS_IF([test x$hybrid_sensors = xtrue],
     AC_MSG_WARN([Disabling hybrid sensors feature])
 )
 
+# Sensor cache stack is disabled by default; offer a way to enable it
+AC_ARG_ENABLE([sensors-cache],
+    [ --enable-sensors-cache   Enable/disable sensors cache stack],
+    [case "${enableval}" in
+      yes) sensors_cache=true ;;
+      no) sensors_cache=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-sensors-cache]) ;;
+      esac],[sensors_cache=false]
+      )
+AM_CONDITIONAL([FEATURE_SENSORS_CACHE], [test x$sensors_cache= xtrue])
+
+AS_IF([test x$sensors_cache = xtrue],
+    AC_MSG_NOTICE([Enabling sensors cache stack])
+    [cpp_flags="$cpp_flags -DFEATURE_SENSORS_CACHE"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling sensors cache feature])
+)
+
 # Create configured output
 AC_CONFIG_FILES([
     Makefile

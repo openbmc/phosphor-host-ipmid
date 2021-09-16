@@ -86,6 +86,7 @@ using SensorThresholdMap =
     std::unordered_map<uint8_t, get_sdr::GetSensorThresholdsResponse>;
 SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
 
+#ifdef FEATURE_SENSORS_CACHE
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
     sensorAddedMatches __attribute__((init_priority(101)));
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
@@ -116,6 +117,7 @@ void initSensorMatches()
                 }));
     }
 }
+#endif
 
 int get_bus_for_path(const char* path, char** busname)
 {
@@ -1303,7 +1305,9 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 void register_netfn_sen_functions()
 {
+#ifdef FEATURE_SENSORS_CACHE
     initSensorMatches();
+#endif
     // <Platform Event Message>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_PLATFORM_EVENT, nullptr,
                            ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
