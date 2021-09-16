@@ -172,7 +172,13 @@ struct Info
     SensorUnits1 sensorUnits1;
     Unit unit;
     std::function<uint8_t(SetSensorReadingReq&, const Info&)> updateFunc;
+#ifndef FEATURE_SENSORS_CACHE
     std::function<GetSensorResponse(const Info&)> getFunc;
+#else
+    std::function<std::optional<GetSensorResponse>(
+        uint8_t, const Info&, sdbusplus::message::message&)>
+        getFunc;
+#endif
     Mutability mutability;
     SensorName sensorName;
     std::function<SensorName(const Info&)> sensorNameFunc;
