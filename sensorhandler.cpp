@@ -92,6 +92,10 @@ std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
     sensorUpdatedMatches __attribute__((init_priority(101)));
 
+using SensorCacheMap =
+    std::map<uint8_t, std::optional<ipmi::sensor::GetSensorResponse>>;
+SensorCacheMap sensorCacheMap __attribute__((init_priority(101)));
+
 void initSensorMatches()
 {
     using namespace sdbusplus::bus::match::rules;
@@ -483,6 +487,10 @@ ipmi::RspType<uint8_t, // sensor reading
 
     try
     {
+#ifdef FEATURE_SENSORS_CACHE
+        // TODO
+        return ipmi::responseSuccess();
+#else
         ipmi::sensor::GetSensorResponse getResponse =
             iter->second.getFunc(iter->second);
 
@@ -492,6 +500,7 @@ ipmi::RspType<uint8_t, // sensor reading
                                      getResponse.allEventMessagesEnabled,
                                      getResponse.thresholdLevelsStates,
                                      getResponse.discreteReadingSensorStates);
+#endif
     }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     catch (const SensorFunctionalError& e)
