@@ -86,6 +86,7 @@ using SensorThresholdMap =
     std::unordered_map<uint8_t, get_sdr::GetSensorThresholdsResponse>;
 SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
 
+#ifdef FEATURE_SENSORS_CACHE
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
     sensorAddedMatches __attribute__((init_priority(101)));
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
@@ -116,6 +117,7 @@ void initSensorMatches()
                 }));
     }
 }
+#endif
 
 int get_bus_for_path(const char* path, char** busname)
 {
@@ -1308,8 +1310,10 @@ void register_netfn_sen_functions()
 
 #ifndef FEATURE_DYNAMIC_SENSORS
 
+#ifdef FEATURE_SENSORS_CACHE
     // Initialize the sensor matches
     initSensorMatches();
+#endif
 
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
