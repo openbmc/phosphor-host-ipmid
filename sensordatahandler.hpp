@@ -140,6 +140,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
                                      const InstancePath& path,
                                      const DbusInterface& interface);
 
+#ifndef FEATURE_SENSORS_CACHE
 /**
  *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
  *         reading command response.
@@ -277,6 +278,77 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
     return response;
 }
+
+#else
+
+using SensorCacheMap =
+    std::map<uint8_t, std::optional<ipmi::sensor::GetSensorResponse>>;
+extern SensorCacheMap sensorCacheMap;
+
+/**
+ *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
+ *         reading command response.
+ *
+ *  @param[in] id - The sensor id
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *  @param[in] msg - Dbus message from match callback.
+ *
+ *  @return Response for get sensor reading command.
+ */
+std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
+                                           sdbusplus::message::message& msg);
+
+/**
+ *  @brief Maps the Dbus info to the reading field in the Get sensor reading
+ *         command response.
+ *
+ *  @param[in] id - The sensor id
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *  @param[in] msg - Dbus message from match callback.
+ *
+ *  @return Response for get sensor reading command.
+ */
+std::optional<GetSensorResponse> eventdata2(uint8_t id, const Info& sensorInfo,
+                                            sdbusplus::message::message& msg);
+
+/**
+ *  @brief readingAssertion is a case where the entire assertion state field
+ *         serves as the sensor value.
+ *
+ *  @tparam T - type of the dbus property related to sensor.
+ *  @param[in] id - The sensor id
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *  @param[in] msg - Dbus message from match callback.
+ *
+ *  @return Response for get sensor reading command.
+ */
+template <typename T>
+std::optional<GetSensorResponse>
+    readingAssertion(uint8_t id, const Info& sensorInfo,
+                     sdbusplus::message::message& msg)
+{
+    // TODO
+    return {};
+}
+
+/** @brief Get sensor reading from the dbus message from match
+ *
+ *  @tparam T - type of the dbus property related to sensor.
+ *  @param[in] id - The sensor id
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *  @param[in] msg - Dbus message from match callback.
+ *
+ *  @return Response for get sensor reading command.
+ */
+template <typename T>
+std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
+                                             sdbusplus::message::message& msg)
+{
+    // TODO
+    return {};
+}
+
+#endif // FEATURE_SENSORS_CACHE
 
 } // namespace get
 
