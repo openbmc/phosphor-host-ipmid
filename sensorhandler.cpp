@@ -86,6 +86,37 @@ using SensorThresholdMap =
     std::unordered_map<uint8_t, get_sdr::GetSensorThresholdsResponse>;
 SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
 
+std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
+    sensorAddedMatches __attribute__((init_priority(101)));
+std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
+    sensorUpdatedMatches __attribute__((init_priority(101)));
+
+void initSensorMatches()
+{
+    using namespace sdbusplus::bus::match::rules;
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    for (const auto& s : ipmi::sensor::sensors)
+    {
+        sensorAddedMatches.emplace(
+            s.first,
+            std::make_unique<sdbusplus::bus::match::match>(
+                bus, interfacesAdded() + argNpath(0, s.second.sensorPath),
+                [id = s.first, obj = s.second.sensorPath](auto& /*msg*/) {
+                    // TODO
+                }));
+        sensorUpdatedMatches.emplace(
+            s.first,
+            std::make_unique<sdbusplus::bus::match::match>(
+                bus,
+                type::signal() + path(s.second.sensorPath) +
+                    member("PropertiesChanged"s) +
+                    interface("org.freedesktop.DBus.Properties"s),
+                [id = s.first, obj = s.second.sensorPath](auto& /*msg*/) {
+                    // TODO
+                }));
+    }
+}
+
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -1289,6 +1320,10 @@ void register_netfn_sen_functions()
     // Do not register the hander if it dynamic sensors stack is used.
 
 #ifndef FEATURE_DYNAMIC_SENSORS
+
+    // Initialize the sensor matches
+    initSensorMatches();
+
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdSetSensorReadingAndEvtSts,
