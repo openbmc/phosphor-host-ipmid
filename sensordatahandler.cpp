@@ -158,6 +158,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
     return response;
 }
 
+#ifndef FEATURE_SENSORS_CACHE
 GetSensorResponse assertion(const Info& sensorInfo)
 {
     return mapDbusToAssertion(sensorInfo, sensorInfo.sensorPath,
@@ -197,6 +198,22 @@ GetSensorResponse eventdata2(const Info& sensorInfo)
 
     return response;
 }
+#else
+std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
+                                           sdbusplus::message::message& msg)
+{
+    // TODO
+    return {};
+}
+
+std::optional<GetSensorResponse> eventdata2(uint8_t id, const Info& sensorInfo,
+                                            sdbusplus::message::message& msg)
+{
+    // TODO
+    return {};
+}
+
+#endif // FEATURE_SENSORS_CACHE
 
 } // namespace get
 
