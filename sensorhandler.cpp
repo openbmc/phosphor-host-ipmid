@@ -92,9 +92,7 @@ std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
     sensorUpdatedMatches __attribute__((init_priority(101)));
 
-using SensorCacheMap =
-    std::map<uint8_t, std::optional<ipmi::sensor::GetSensorResponse>>;
-SensorCacheMap sensorCacheMap __attribute__((init_priority(101)));
+ipmi::sensor::SensorCacheMap sensorCacheMap __attribute__((init_priority(101)));
 
 void initSensorMatches()
 {
@@ -110,15 +108,21 @@ void initSensorMatches()
                     // TODO
                 }));
         sensorUpdatedMatches.emplace(
-            s.first,
-            std::make_unique<sdbusplus::bus::match::match>(
-                bus,
-                type::signal() + path(s.second.sensorPath) +
-                    member("PropertiesChanged"s) +
-                    interface("org.freedesktop.DBus.Properties"s),
-                [id = s.first, obj = s.second.sensorPath](auto& /*msg*/) {
-                    // TODO
-                }));
+            s.first, std::make_unique<sdbusplus::bus::match::match>(
+                         bus,
+                         type::signal() + path(s.second.sensorPath) +
+                             member("PropertiesChanged"s) +
+                             interface("org.freedesktop.DBus.Properties"s),
+                         [&s](auto& msg) {
+                             try
+                             {
+                                 s.second.getFunc(s.first, s.second, msg);
+                             }
+                             catch (const std::exception& e)
+                             {
+                                 sensorCacheMap[s.first].reset();
+                             }
+                         }));
     }
 }
 #endif
@@ -489,7 +493,30 @@ ipmi::RspType<uint8_t, // sensor reading
     {
 #ifdef FEATURE_SENSORS_CACHE
         // TODO
-        return ipmi::responseSuccess();
+        const auto& sensorData = sensorCacheMap[sensorNum];
+        if (!sensorData.has_value())
+        {
+            // Intitilizing with default values
+            constexpr uint8_t senReading = 0;
+            constexpr uint5_t reserved{0};
+            constexpr bool readState = true;
+            constexpr bool senScanState = false;
+            constexpr bool allEventMessageState = false;
+            constexpr uint8_t assertionStatesLsb = 0;
+            constexpr uint8_t assertionStatesMsb = 0;
+
+            return ipmi::responseSuccess(
+                senReading, reserved, readState, senScanState,
+                allEventMessageState, assertionStatesLsb, assertionStatesMsb);
+        }
+        return ipmi::responseSuccess(
+            sensorData->response.reading, uint5_t(0),
+            sensorData->response.readingOrStateUnavailable,
+            sensorData->response.scanningEnabled,
+            sensorData->response.allEventMessagesEnabled,
+            sensorData->response.thresholdLevelsStates,
+            sensorData->response.discreteReadingSensorStates);
+
 #else
         ipmi::sensor::GetSensorResponse getResponse =
             iter->second.getFunc(iter->second);
