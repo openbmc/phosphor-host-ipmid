@@ -12,6 +12,10 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 
+#ifdef FEATURE_SENSORS_CACHE
+extern ipmi::sensor::SensorCacheMap sensorCacheMap;
+#endif
+
 namespace ipmi
 {
 namespace sensor
@@ -334,10 +338,6 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
 #else
 
-using SensorCacheMap =
-    std::map<uint8_t, std::optional<ipmi::sensor::GetSensorResponse>>;
-extern SensorCacheMap sensorCacheMap;
-
 /**
  *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
  *         reading command response.
@@ -397,8 +397,102 @@ template <typename T>
 std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
                                              sdbusplus::message::message& msg)
 {
-    // TODO
-    return {};
+    std::string interfaceName;
+    std::map<std::string, ipmi::Value> properties;
+    msg.read(interfaceName);
+
+    if (interfaceName ==
+        "xyz.openbmc_project.State.Decorator.OperationalStatus")
+    {
+        msg.read(properties);
+        auto val = properties.find("Functional");
+        if (val != properties.end())
+        {
+            sensorCacheMap[id]->functional = std::get<bool>(val->second);
+        }
+        return {};
+    }
+    if (interfaceName == "xyz.openbmc_project.State.Decorator.Availability")
+    {
+        msg.read(properties);
+        auto val = properties.find("Available");
+        if (val != properties.end())
+        {
+            sensorCacheMap[id]->available = std::get<bool>(val->second);
+        }
+        return {};
+    }
+
+    if (interfaceName != sensorInfo.sensorInterface)
+    {
+        // Not the interface we need
+        return {};
+    }
+
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    if (sensorCacheMap[id])
+    {
+        if (!sensorCacheMap[id]->functional)
+        {
+            throw SensorFunctionalError();
+        }
+    }
+#endif
+
+    GetSensorResponse response{};
+
+    enableScanning(&response);
+
+    msg.read(properties);
+
+    auto iter = properties.find(
+        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+    if (iter == properties.end())
+    {
+        return {};
+    }
+
+    double value = std::get<T>(iter->second) *
+                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+    int32_t rawData =
+        (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
+
+    constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
+    constexpr uint8_t signedDataFormat = 0x80;
+    // if sensorUnits1 [7:6] = 10b, sensor is signed
+    if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) == signedDataFormat)
+    {
+        if (rawData > std::numeric_limits<int8_t>::max() ||
+            rawData < std::numeric_limits<int8_t>::lowest())
+        {
+            log<level::ERR>("Value out of range");
+            throw std::out_of_range("Value out of range");
+        }
+        setReading(static_cast<int8_t>(rawData), &response);
+    }
+    else
+    {
+        if (rawData > std::numeric_limits<uint8_t>::max() ||
+            rawData < std::numeric_limits<uint8_t>::lowest())
+        {
+            log<level::ERR>("Value out of range");
+            throw std::out_of_range("Value out of range");
+        }
+        setReading(static_cast<uint8_t>(rawData), &response);
+    }
+
+    if (!std::isfinite(value))
+    {
+        response.readingOrStateUnavailable = 1;
+    }
+
+    if (!sensorCacheMap[id].has_value())
+    {
+        sensorCacheMap[id] = SensorData{};
+    }
+    sensorCacheMap[id]->response = response;
+
+    return response;
 }
 
 #endif // FEATURE_SENSORS_CACHE
