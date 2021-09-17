@@ -232,6 +232,23 @@ struct EntityInfo
 
 using EntityInfoMap = std::map<Id, EntityInfo>;
 
+#ifdef FEATURE_SENSORS_CACHE
+/**
+ * @struct SensorData
+ *
+ * The data to cache for sensors
+ */
+struct SensorData
+{
+    double value;
+    bool available;
+    bool functional;
+    GetSensorResponse response;
+};
+
+using SensorCacheMap = std::map<uint8_t, std::optional<SensorData>>;
+#endif
+
 } // namespace sensor
 
 namespace network
