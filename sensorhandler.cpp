@@ -79,6 +79,13 @@ struct sensor_data_t
     uint8_t sennum;
 } __attribute__((packed));
 
+using SDRCacheMap = std::unordered_map<uint8_t, get_sdr::SensorDataFullRecord>;
+SDRCacheMap sdrCacheMap __attribute__((init_priority(101)));
+
+using SensorThresholdMap =
+    std::unordered_map<uint8_t, get_sdr::GetSensorThresholdsResponse>;
+SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
+
 int get_bus_for_path(const char* path, char** busname)
 {
     return mapper_get_service(bus, path, busname);
@@ -598,8 +605,13 @@ ipmi::RspType<uint8_t, // validMask
         return ipmi::responseSuccess();
     }
 
-    get_sdr::GetSensorThresholdsResponse resp{};
-    resp = getSensorThresholds(ctx, sensorNum);
+    auto it = sensorThresholdMap.find(sensorNum);
+    if (it == sensorThresholdMap.end())
+    {
+        sensorThresholdMap[sensorNum] = getSensorThresholds(ctx, sensorNum);
+    }
+
+    const auto& resp = sensorThresholdMap[sensorNum];
 
     return ipmi::responseSuccess(resp.validMask, resp.lowerNonCritical,
                                  resp.lowerCritical, resp.lowerNonRecoverable,
@@ -751,6 +763,8 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
             std::get<propertyName>(property), ipmi::Value(valueToSet));
     }
 
+    // Invalidate the cache
+    sensorThresholdMap.erase(sensorNum);
     return ipmi::responseSuccess();
 }
 
@@ -1063,7 +1077,6 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     ipmi_ret_t ret = IPMI_CC_OK;
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
     get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
-    get_sdr::SensorDataFullRecord record = {0};
 
     // Note: we use an iterator so we can provide the next ID at the end of
     // the call.
@@ -1099,30 +1112,37 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     uint8_t sensor_id = sensor->first;
 
-    /* Header */
-    get_sdr::header::set_record_id(sensor_id, &(record.header));
-    record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
-    record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
-    record.header.record_length = sizeof(record.key) + sizeof(record.body);
-
-    /* Key */
-    get_sdr::key::set_owner_id_bmc(&(record.key));
-    record.key.sensor_number = sensor_id;
-
-    /* Body */
-    record.body.entity_id = sensor->second.entityType;
-    record.body.sensor_type = sensor->second.sensorType;
-    record.body.event_reading_type = sensor->second.sensorReadingType;
-    record.body.entity_instance = sensor->second.instance;
-    if (ipmi::sensor::Mutability::Write ==
-        (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+    auto it = sdrCacheMap.find(sensor_id);
+    if (it == sdrCacheMap.end())
     {
-        get_sdr::body::init_settable_state(true, &(record.body));
+        /* Header */
+        get_sdr::SensorDataFullRecord record = {0};
+        get_sdr::header::set_record_id(sensor_id, &(record.header));
+        record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
+        record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
+        record.header.record_length = sizeof(record.key) + sizeof(record.body);
+
+        /* Key */
+        get_sdr::key::set_owner_id_bmc(&(record.key));
+        record.key.sensor_number = sensor_id;
+
+        /* Body */
+        record.body.entity_id = sensor->second.entityType;
+        record.body.sensor_type = sensor->second.sensorType;
+        record.body.event_reading_type = sensor->second.sensorReadingType;
+        record.body.entity_instance = sensor->second.instance;
+        if (ipmi::sensor::Mutability::Write ==
+            (sensor->second.mutability & ipmi::sensor::Mutability::Write))
+        {
+            get_sdr::body::init_settable_state(true, &(record.body));
+        }
+
+        // Set the type-specific details given the DBus interface
+        populate_record_from_dbus(&(record.body), &(sensor->second), data_len);
+        sdrCacheMap[sensor_id] = std::move(record);
     }
 
-    // Set the type-specific details given the DBus interface
-    ret =
-        populate_record_from_dbus(&(record.body), &(sensor->second), data_len);
+    const auto& record = sdrCacheMap[sensor_id];
 
     if (++sensor == ipmi::sensor::sensors.end())
     {
@@ -1150,7 +1170,8 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                          sizeof(record) - req->offset);
 
     std::memcpy(resp->record_data,
-                reinterpret_cast<uint8_t*>(&record) + req->offset, *data_len);
+                reinterpret_cast<const uint8_t*>(&record) + req->offset,
+                *data_len);
 
     // data_len should include the LSB and MSB:
     *data_len +=
