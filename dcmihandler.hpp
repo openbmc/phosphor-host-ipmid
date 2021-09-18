@@ -123,44 +123,6 @@ static constexpr auto assetTagMaxSize = 63;
 static constexpr auto maxBytes = 16;
 static constexpr size_t maxCtrlIdStrLen = 63;
 
-/** @struct GetAssetTagRequest
- *
- *  DCMI payload for Get Asset Tag command request.
- */
-struct GetAssetTagRequest
-{
-    uint8_t offset; //!< Offset to read.
-    uint8_t bytes;  //!< Number of bytes to read.
-} __attribute__((packed));
-
-/** @struct GetAssetTagResponse
- *
- *  DCMI payload for Get Asset Tag command response.
- */
-struct GetAssetTagResponse
-{
-    uint8_t tagLength; //!< Total asset tag length.
-} __attribute__((packed));
-
-/** @struct SetAssetTagRequest
- *
- *  DCMI payload for Set Asset Tag command request.
- */
-struct SetAssetTagRequest
-{
-    uint8_t offset; //!< Offset to write.
-    uint8_t bytes;  //!< Number of bytes to write.
-} __attribute__((packed));
-
-/** @struct SetAssetTagResponse
- *
- *  DCMI payload for Set Asset Tag command response.
- */
-struct SetAssetTagResponse
-{
-    uint8_t tagLength; //!< Total asset tag length.
-} __attribute__((packed));
-
 /** @brief Check whether DCMI power management is supported
  *         in the DCMI Capabilities config file.
  *
