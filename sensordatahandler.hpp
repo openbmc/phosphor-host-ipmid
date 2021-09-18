@@ -386,8 +386,42 @@ std::optional<GetSensorResponse>
     readingAssertion(uint8_t id, const Info& sensorInfo,
                      sdbusplus::message::message& msg)
 {
-    // TODO
-    return {};
+    auto type = msg.get_type();
+    if (type == msgTypeSignal)
+    {
+        // This is signal callback
+        std::string interfaceName;
+        msg.read(interfaceName);
+        if (interfaceName != sensorInfo.sensorInterface)
+        {
+            // Not the interface we need
+            return {};
+        }
+    }
+    // Now the message only contains the properties.
+    GetSensorResponse response{};
+    std::map<std::string, ipmi::Value> properties;
+
+    enableScanning(&response);
+
+    msg.read(properties);
+
+    auto iter = properties.find(
+        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+    if (iter == properties.end())
+    {
+        return {};
+    }
+
+    setAssertionBytes(static_cast<uint16_t>(std::get<T>(iter->second)),
+                      &response);
+
+    if (!sensorCacheMap[id].has_value())
+    {
+        sensorCacheMap[id] = SensorData{};
+    }
+    sensorCacheMap[id]->response = response;
+    return response;
 }
 
 /** @brief Get sensor reading from the dbus message from match
