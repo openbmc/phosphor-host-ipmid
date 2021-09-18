@@ -13,7 +13,13 @@
 #include <sdbusplus/message/types.hpp>
 
 #ifdef FEATURE_SENSORS_CACHE
+
 extern ipmi::sensor::SensorCacheMap sensorCacheMap;
+
+// The signal's message type is 0x04 from DBus spec:
+// https://dbus.freedesktop.org/doc/dbus-specification.html#message-protocol-messages
+static constexpr auto msgTypeSignal = 0x04;
+
 #endif
 
 namespace ipmi
@@ -344,47 +350,53 @@ template <typename T>
 std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
                                              sdbusplus::message::message& msg)
 {
-    std::string interfaceName;
     std::map<std::string, ipmi::Value> properties;
-    msg.read(interfaceName);
+    auto type = msg.get_type();
+    if (type == msgTypeSignal)
+    {
+        // This is signal callback
+        std::string interfaceName;
+        msg.read(interfaceName);
 
-    if (interfaceName ==
-        "xyz.openbmc_project.State.Decorator.OperationalStatus")
-    {
-        msg.read(properties);
-        auto val = properties.find("Functional");
-        if (val != properties.end())
+        if (interfaceName ==
+            "xyz.openbmc_project.State.Decorator.OperationalStatus")
         {
-            sensorCacheMap[id]->functional = std::get<bool>(val->second);
+            msg.read(properties);
+            auto val = properties.find("Functional");
+            if (val != properties.end())
+            {
+                sensorCacheMap[id]->functional = std::get<bool>(val->second);
+            }
+            return {};
         }
-        return {};
-    }
-    if (interfaceName == "xyz.openbmc_project.State.Decorator.Availability")
-    {
-        msg.read(properties);
-        auto val = properties.find("Available");
-        if (val != properties.end())
+        if (interfaceName == "xyz.openbmc_project.State.Decorator.Availability")
         {
-            sensorCacheMap[id]->available = std::get<bool>(val->second);
+            msg.read(properties);
+            auto val = properties.find("Available");
+            if (val != properties.end())
+            {
+                sensorCacheMap[id]->available = std::get<bool>(val->second);
+            }
+            return {};
         }
-        return {};
-    }
 
-    if (interfaceName != sensorInfo.sensorInterface)
-    {
-        // Not the interface we need
-        return {};
-    }
+        if (interfaceName != sensorInfo.sensorInterface)
+        {
+            // Not the interface we need
+            return {};
+        }
 
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
-    if (sensorCacheMap[id])
-    {
-        if (!sensorCacheMap[id]->functional)
+        if (sensorCacheMap[id])
         {
-            throw SensorFunctionalError();
+            if (!sensorCacheMap[id]->functional)
+            {
+                throw SensorFunctionalError();
+            }
         }
-    }
 #endif
+    }
+    // Now the message only contains the properties.
 
     GetSensorResponse response{};
 
