@@ -2,6 +2,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include <ipmid/utils.hpp>
 #include <map>
 #include <sdbusplus/bus.hpp>
 #include <string>
@@ -123,44 +124,6 @@ static constexpr auto assetTagMaxSize = 63;
 static constexpr auto maxBytes = 16;
 static constexpr size_t maxCtrlIdStrLen = 63;
 
-/** @struct GetAssetTagRequest
- *
- *  DCMI payload for Get Asset Tag command request.
- */
-struct GetAssetTagRequest
-{
-    uint8_t offset; //!< Offset to read.
-    uint8_t bytes;  //!< Number of bytes to read.
-} __attribute__((packed));
-
-/** @struct GetAssetTagResponse
- *
- *  DCMI payload for Get Asset Tag command response.
- */
-struct GetAssetTagResponse
-{
-    uint8_t tagLength; //!< Total asset tag length.
-} __attribute__((packed));
-
-/** @struct SetAssetTagRequest
- *
- *  DCMI payload for Set Asset Tag command request.
- */
-struct SetAssetTagRequest
-{
-    uint8_t offset; //!< Offset to write.
-    uint8_t bytes;  //!< Number of bytes to write.
-} __attribute__((packed));
-
-/** @struct SetAssetTagResponse
- *
- *  DCMI payload for Set Asset Tag command response.
- */
-struct SetAssetTagResponse
-{
-    uint8_t tagLength; //!< Total asset tag length.
-} __attribute__((packed));
-
 /** @brief Check whether DCMI power management is supported
  *         in the DCMI Capabilities config file.
  *
@@ -172,23 +135,29 @@ bool isDCMIPowerMgmtSupported();
  *         Asset tag interface.
  *
  *  @param[in,out] objectTree - object tree
+ *  @param[in] Context - ctx
  *
  *  @return On success return the object tree with the object path that
  *          implemented the AssetTag interface.
  */
-void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree);
+void readAssetTagObjectTree(ipmi::Context::ptr& ctx,
+                            dcmi::assettag::ObjectTree& objectTree);
 
 /** @brief Read the asset tag of the server
  *
+ *  @param[in] Context - ctx
+ *
  *  @return On success return the asset tag.
  */
-std::string readAssetTag();
+std::string readAssetTag(ipmi::Context::ptr& ctx);
 
 /** @brief Write the asset tag to the asset tag DBUS property
  *
+ *  @param[in] Context - ctx
+ *
  *  @param[in] assetTag - Asset Tag to be written to the property.
  */
-void writeAssetTag(const std::string& assetTag);
+void writeAssetTag(ipmi::Context::ptr& ctx, const std::string& assetTag);
 
 /** @brief Read the current power cap value
  *
