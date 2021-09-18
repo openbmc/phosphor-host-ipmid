@@ -496,18 +496,39 @@ ipmi::RspType<uint8_t, // sensor reading
         const auto& sensorData = sensorCacheMap[sensorNum];
         if (!sensorData.has_value())
         {
-            // Intitilizing with default values
-            constexpr uint8_t senReading = 0;
-            constexpr uint5_t reserved{0};
-            constexpr bool readState = true;
-            constexpr bool senScanState = false;
-            constexpr bool allEventMessageState = false;
-            constexpr uint8_t assertionStatesLsb = 0;
-            constexpr uint8_t assertionStatesMsb = 0;
+            // No cached value, try read it
+            sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+            const auto& sensorInfo = iter->second;
+            auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
+                                            sensorInfo.sensorPath);
+            try
+            {
+                auto method = bus.new_method_call(
+                    service.c_str(), sensorInfo.sensorPath.c_str(),
+                    "org.freedesktop.DBus.Properties", "GetAll");
+                method.append(
+                    sensorInfo.propertyInterfaces.begin()->first.c_str());
+                auto reply = bus.call(method);
+                sensorInfo.getFunc(sensorNum, sensorInfo, reply);
+            }
+            catch (const std::exception& e)
+            {
+                fprintf(stderr, "Failed to get sensor %s\n",
+                        sensorInfo.sensorPath.c_str());
+                // Intitilizing with default values
+                constexpr uint8_t senReading = 0;
+                constexpr uint5_t reserved{0};
+                constexpr bool readState = true;
+                constexpr bool senScanState = false;
+                constexpr bool allEventMessageState = false;
+                constexpr uint8_t assertionStatesLsb = 0;
+                constexpr uint8_t assertionStatesMsb = 0;
 
-            return ipmi::responseSuccess(
-                senReading, reserved, readState, senScanState,
-                allEventMessageState, assertionStatesLsb, assertionStatesMsb);
+                return ipmi::responseSuccess(senReading, reserved, readState,
+                                             senScanState, allEventMessageState,
+                                             assertionStatesLsb,
+                                             assertionStatesMsb);
+            }
         }
         return ipmi::responseSuccess(
             sensorData->response.reading, uint5_t(0),
