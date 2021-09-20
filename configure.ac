@@ -302,6 +302,24 @@ AS_IF([test x$hybrid_sensors = xtrue],
     AC_MSG_WARN([Disabling hybrid sensors feature])
 )
 
+# Clearing SEL through sel-logger is disabled by default; offer a way to enable it
+AC_ARG_ENABLE([sel_logger_clears_sel],
+    [ --enable-sel_logger_clears_sel   Enable/disable sel-logger to Clear SEL],
+    [case "${enableval}" in
+      yes) sel_logger_clears_sel=true ;;
+      no) sel_logger_clears_sel=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-sel_logger_clears_sel]) ;;
+      esac],[sel_logger_clears_sel=false]
+      )
+AM_CONDITIONAL([FEATURE_SEL_LOGGER_CLEARS_SEL], [test x$sel_logger_clears_sel = xtrue])
+
+AS_IF([test x$sel_logger_clears_sel = xtrue],
+    AC_MSG_NOTICE([Enabling sel-logger to Clear SEL])
+    [cpp_flags="$cpp_flags -DFEATURE_SEL_LOGGER_CLEARS_SEL"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling sel-logger to Clear SEL])
+)
+
 # Create configured output
 AC_CONFIG_FILES([
     Makefile
