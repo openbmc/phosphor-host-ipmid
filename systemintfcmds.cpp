@@ -58,7 +58,7 @@ ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
 //---------------------------------------------------------------------
 // Called by Host on seeing a SMS_ATN bit set. Return a hardcoded
-// value of 0x2 indicating we need Host read some data.
+// value of 0x0 to indicate Event Message Buffer is not supported
 //-------------------------------------------------------------------
 ipmi::RspType<uint8_t> ipmiAppGetMessageFlags()
 {
@@ -68,8 +68,8 @@ ipmi::RspType<uint8_t> ipmiAppGetMessageFlags()
     // or when the Event Message buffer is disabled.
     // This path is used to communicate messages to the host
     // from within the phosphor::host::command::Manager
-    constexpr uint8_t setEventMsgBufferFull = 0x2;
-    return ipmi::responseSuccess(setEventMsgBufferFull);
+    constexpr uint8_t setEventMsgBufferNotSupported = 0x0;
+    return ipmi::responseSuccess(setEventMsgBufferNotSupported);
 }
 
 ipmi::RspType<bool,    // Receive Message Queue Interrupt Enabled
