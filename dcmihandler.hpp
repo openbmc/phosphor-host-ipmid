@@ -540,19 +540,6 @@ enum class DCMIConfigParameters : uint8_t
     DHCPTiming3,
 };
 
-/** @struct SetConfParamsRequest
- *
- *  DCMI Set DCMI Configuration Parameters Command.
- *  Refer DCMI specification Version 1.1 Section 6.1.2
- */
-struct SetConfParamsRequest
-{
-    uint8_t paramSelect; //!< Parameter selector.
-    uint8_t setSelect;   //!< Set Selector (use 00h for parameters that only
-                         //!< have one set).
-    uint8_t data[];      //!< Configuration parameter data.
-} __attribute__((packed));
-
 /** @struct GetConfParamsRequest
  *
  *  DCMI Get DCMI Configuration Parameters Command.
