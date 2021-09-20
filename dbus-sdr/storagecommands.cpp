@@ -97,6 +97,8 @@ using ManagedObjectType =
     boost::container::flat_map<sdbusplus::message::object_path, ObjectType>;
 using ManagedEntry = std::pair<sdbusplus::message::object_path, ObjectType>;
 
+constexpr static const char* selLoggerServiceName =
+    "xyz.openbmc_project.Logging.IPMI";
 constexpr static const char* fruDeviceServiceName =
     "xyz.openbmc_project.FruDevice";
 constexpr static const char* entityManagerServiceName =
@@ -1134,6 +1136,7 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
     // cleared
     cancelSELReservation();
 
+#ifndef SEL_LOGGER_CLEARS_SEL
     // Save the erase time
     dynamic_sensors::ipmi::sel::erase_time::save();
 
@@ -1162,7 +1165,25 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
     }
+#else
+    auto dbus = getSdBus();
+    sdbusplus::message::message clearSel = dbus->new_method_call(
+        selLoggerServiceName, "/xyz/openbmc_project/Logging/IPMI",
+        "xyz.openbmc_project.Logging.IPMI", "Clear");
+    try
+    {
+        dbus->call_noreply(clearSel);
+    }
+    catch (sdbusplus::exception_t&)
+    {
+        std::cerr << "error in clear SEL" << std::endl;
+        return ipmi::responseUnspecifiedError();
+    }
 
+    // Save the erase time
+    dynamic_sensors::ipmi::sel::erase_time::save();
+
+#endif
     return ipmi::responseSuccess(ipmi::sel::eraseComplete);
 }
 
