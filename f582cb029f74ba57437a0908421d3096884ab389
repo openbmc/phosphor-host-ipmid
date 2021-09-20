@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2ec263e_ac105c0e",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T21:15:20Z",
+      "side": 1,
+      "message": "std::string",
+      "range": {
+        "startLine": 410,
+        "startChar": 14,
+        "endLine": 411,
+        "endChar": 33
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cda1a85b_1d008052",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T21:15:20Z",
+      "side": 1,
+      "message": "use std::string and the string manipulation functions",
+      "range": {
+        "startLine": 415,
+        "startChar": 0,
+        "endLine": 415,
+        "endChar": 40
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f05493a4_9aaedb13",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T21:15:20Z",
+      "side": 1,
+      "message": "return ipmi::responseSuccess(returnData);",
+      "range": {
+        "startLine": 460,
+        "startChar": 4,
+        "endLine": 468,
+        "endChar": 58
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e1895eb_edae368f",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T21:15:20Z",
+      "side": 1,
+      "message": "const std::string\u0026 assetTagData",
+      "range": {
+        "startLine": 483,
+        "startChar": 57,
+        "endLine": 484,
+        "endChar": 49
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db3ef54d_aad98ffc",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T21:15:20Z",
+      "side": 1,
+      "message": "no need to copy to another buffer, since the input is already a string, you can directly call std::string::replace.",
+      "range": {
+        "startLine": 507,
+        "startChar": 7,
+        "endLine": 512,
+        "endChar": 0
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
