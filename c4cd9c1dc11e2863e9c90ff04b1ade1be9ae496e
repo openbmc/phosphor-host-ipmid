@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2813a489_c3b0dd0f",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "there is actually already an implementation that will pack/unpack pascal-style strings (uint8_t len + len-bytes-of-string-data). Simply return a std::string here and it will pack this for you.",
+      "range": {
+        "startLine": 564,
+        "startChar": 13,
+        "endLine": 565,
+        "endChar": 33
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee83d369_ebb0b307",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "not needed.",
+      "range": {
+        "startLine": 570,
+        "startChar": 0,
+        "endLine": 571,
+        "endChar": 32
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9659caea_109015b7",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "\u003e\u003d\n\nLooks like this was a bug in the old code. The offset is zero-based while length is 1-based.",
+      "range": {
+        "startLine": 587,
+        "startChar": 15,
+        "endLine": 587,
+        "endChar": 16
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "113ae315_dbb3bf1e",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "All this can be replaced with:\n\nreturn ipmi::responseSuccess(responseStr);",
+      "range": {
+        "startLine": 592,
+        "startChar": 0,
+        "endLine": 604,
+        "endChar": 47
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6fb6f705_74c13583",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "You should be able to just unpack a string here.\n\nconst std::string\u0026 data",
+      "range": {
+        "startLine": 619,
+        "startChar": 63,
+        "endLine": 620,
+        "endChar": 47
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27b26d81_4f722d3a",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "rather than using an array here, it would be better to use standard string functions and std::string objects.",
+      "range": {
+        "startLine": 623,
+        "startChar": 0,
+        "endLine": 623,
+        "endChar": 68
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cfa60338_e202d7a2",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "data.size()",
+      "range": {
+        "startLine": 625,
+        "startChar": 8,
+        "endLine": 625,
+        "endChar": 13
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b862e266_af8ff443",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:45:20Z",
+      "side": 1,
+      "message": "this should probably be looked up with getService like it is in the getHostName function.",
+      "range": {
+        "startLine": 660,
+        "startChar": 21,
+        "endLine": 660,
+        "endChar": 45
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
