@@ -260,46 +260,6 @@ struct ApplyPowerLimitRequest
     uint16_t reserved;        //!< Reserved
 } __attribute__((packed));
 
-/** @struct GetMgmntCtrlIdStrRequest
- *
- *  DCMI payload for Get Management Controller Identifier String cmd request.
- */
-struct GetMgmntCtrlIdStrRequest
-{
-    uint8_t offset; //!< Offset to read.
-    uint8_t bytes;  //!< Number of bytes to read.
-} __attribute__((packed));
-
-/** @struct GetMgmntCtrlIdStrResponse
- *
- *  DCMI payload for Get Management Controller Identifier String cmd response.
- */
-struct GetMgmntCtrlIdStrResponse
-{
-    uint8_t strLen; //!< ID string length.
-    char data[];    //!< ID string
-} __attribute__((packed));
-
-/** @struct SetMgmntCtrlIdStrRequest
- *
- *  DCMI payload for Set Management Controller Identifier String cmd request.
- */
-struct SetMgmntCtrlIdStrRequest
-{
-    uint8_t offset; //!< Offset to write.
-    uint8_t bytes;  //!< Number of bytes to read.
-    char data[];    //!< ID string
-} __attribute__((packed));
-
-/** @struct GetMgmntCtrlIdStrResponse
- *
- *  DCMI payload for Get Management Controller Identifier String cmd response.
- */
-struct SetMgmntCtrlIdStrResponse
-{
-    uint8_t offset; //!< Last Offset Written.
-} __attribute__((packed));
-
 /** @enum DCMICapParameters
  *
  * DCMI Capability parameters

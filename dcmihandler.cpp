@@ -234,15 +234,22 @@ void writeAssetTag(const std::string& assetTag)
     }
 }
 
-std::string getHostName(void)
+std::string getHostName(ipmi::Context::ptr& ctx)
 {
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-
-    auto service = ipmi::getService(bus, networkConfigIntf, networkConfigObj);
-    auto value = ipmi::getDbusProperty(bus, service, networkConfigObj,
-                                       networkConfigIntf, hostNameProp);
-
-    return std::get<std::string>(value);
+    std::string service, hostName;
+    boost::system::error_code ec;
+    ec = ipmi::getService(ctx, networkConfigIntf, networkConfigObj, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(ctx, service, networkConfigObj,
+                                   networkConfigIntf, hostNameProp, hostName);
+    }
+    if (ec)
+    {
+        log<level::ERR>("Error in get HostName");
+        elog<InternalFailure>();
+    }
+    return hostName;
 }
 
 bool getDHCPEnabled()
@@ -544,76 +551,92 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     }
 }
 
-ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                             ipmi_response_t response, ipmi_data_len_t data_len,
-                             ipmi_context_t)
+/** @brief implements the get Management Controller Identifier String Command
+ *  @param
+ *   - offset - Offest to read
+ *   - bytes - Number of bytes to read
+ *
+ *  @returns completion code plus response data
+ *   - strLen - ID String Length
+ *   - data - Data
+ */
+ipmi::RspType<uint8_t,             // ID String Length
+              std::vector<uint8_t> // Data
+              >
+    getMgmntCtrlIdStr(ipmi::Context::ptr& ctx, uint8_t offset, uint8_t bytes)
 {
-    auto requestData =
-        reinterpret_cast<const dcmi::GetMgmntCtrlIdStrRequest*>(request);
-    auto responseData =
-        reinterpret_cast<dcmi::GetMgmntCtrlIdStrResponse*>(response);
     std::string hostName;
+    uint8_t strLen = 0, byteData = 0;
+    std::vector<uint8_t> data{};
 
-    *data_len = 0;
-
-    if (requestData->bytes > dcmi::maxBytes ||
-        requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen)
+    if (bytes > dcmi::maxBytes || offset + bytes > dcmi::maxCtrlIdStrLen)
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseParmOutOfRange();
     }
 
     try
     {
-        hostName = dcmi::getHostName();
+        hostName = dcmi::getHostName(ctx);
     }
     catch (const InternalFailure& e)
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    if (requestData->offset > hostName.length())
+    if (offset >= hostName.length())
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
     }
-    auto responseStr = hostName.substr(requestData->offset, requestData->bytes);
-    auto responseStrLen = std::min(static_cast<std::size_t>(requestData->bytes),
-                                   responseStr.length() + 1);
-    responseData->strLen = hostName.length();
-    std::copy(begin(responseStr), end(responseStr), responseData->data);
+    std::string responseStr = hostName.substr(offset, bytes);
 
-    *data_len = sizeof(*responseData) + responseStrLen;
-    return IPMI_CC_OK;
+    strLen = hostName.length();
+
+    size_t dataSize =
+        std::min(static_cast<std::size_t>(bytes), responseStr.length() + 1);
+
+    for (size_t i = 0; i < dataSize; i++)
+    {
+        byteData = responseStr[i];
+        data.push_back(byteData);
+    }
+
+    return ipmi::responseSuccess(strLen, data);
 }
 
-ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                             ipmi_response_t response, ipmi_data_len_t data_len,
-                             ipmi_context_t)
+/** @brief implements the set Management Controller Identifier String Command
+ *  @param
+ *   - resOffset - Offset to write
+ *   - bytes - Number of bytes to write
+ *   - data - Data
+ *
+ *  @returns completion code plus response data
+ *   - offset - Last Offset Written
+ */
+
+ipmi::RspType<uint8_t // Last Offset Written
+              >
+    setMgmntCtrlIdStr(ipmi::Context::ptr& ctx, uint8_t offset,
+                      const std::string& data)
 {
+    uint8_t resOffset = 0;
     static std::array<char, dcmi::maxCtrlIdStrLen + 1> newCtrlIdStr;
+    uint8_t bytes = data.length();
 
-    auto requestData =
-        reinterpret_cast<const dcmi::SetMgmntCtrlIdStrRequest*>(request);
-    auto responseData =
-        reinterpret_cast<dcmi::SetMgmntCtrlIdStrResponse*>(response);
-
-    *data_len = 0;
-
-    if (requestData->bytes > dcmi::maxBytes ||
-        requestData->offset + requestData->bytes > dcmi::maxCtrlIdStrLen + 1 ||
-        (requestData->offset + requestData->bytes ==
-             dcmi::maxCtrlIdStrLen + 1 &&
-         requestData->data[requestData->bytes - 1] != '\0'))
+    if (bytes > dcmi::maxBytes ||
+        ((offset + bytes) > dcmi::maxCtrlIdStrLen + 1) ||
+        ((offset + bytes) == dcmi::maxCtrlIdStrLen + 1 &&
+         data[bytes - 1] != '\0'))
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseParmOutOfRange();
     }
 
     try
     {
         /* if there is no old value and offset is not 0 */
-        if (newCtrlIdStr[0] == '\0' && requestData->offset != 0)
+        if (newCtrlIdStr[0] == '\0' && offset != 0)
         {
             /* read old ctrlIdStr */
-            auto hostName = dcmi::getHostName();
+            auto hostName = dcmi::getHostName(ctx);
             hostName.resize(dcmi::maxCtrlIdStrLen);
             std::copy(begin(hostName), end(hostName), begin(newCtrlIdStr));
             newCtrlIdStr[hostName.length()] = '\0';
@@ -621,35 +644,41 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
 
         /* replace part of string and mark byte after the last as \0 */
         auto restStrIter =
-            std::copy_n(requestData->data, requestData->bytes,
-                        begin(newCtrlIdStr) + requestData->offset);
+            std::copy_n(data.begin(), bytes, begin(newCtrlIdStr) + offset);
         /* if the last written byte is not 64th - add '\0' */
-        if (requestData->offset + requestData->bytes <= dcmi::maxCtrlIdStrLen)
+        if (offset + bytes <= dcmi::maxCtrlIdStrLen)
         {
             *restStrIter = '\0';
         }
 
         /* if input data contains '\0' whole string is sent - update hostname */
-        auto it = std::find(requestData->data,
-                            requestData->data + requestData->bytes, '\0');
-        if (it != requestData->data + requestData->bytes)
+        auto it = std::find(data.begin(), data.begin() + bytes, '\0');
+        if (it != data.begin() + bytes)
         {
-            sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-            ipmi::setDbusProperty(bus, dcmi::networkServiceName,
-                                  dcmi::networkConfigObj,
-                                  dcmi::networkConfigIntf, dcmi::hostNameProp,
-                                  std::string(newCtrlIdStr.data()));
+            std::string service;
+            auto ec = ipmi::getService(ctx, dcmi::networkConfigIntf,
+                                       dcmi::networkConfigObj, service);
+            if (!ec)
+            {
+                ec = ipmi::setDbusProperty(ctx, service, dcmi::networkConfigObj,
+                                           dcmi::networkConfigIntf,
+                                           dcmi::hostNameProp,
+                                           std::string(newCtrlIdStr.data()));
+            }
+            if (ec)
+            {
+                log<level::ERR>("Error in setHostName property");
+                elog<InternalFailure>();
+            }
         }
     }
     catch (const InternalFailure& e)
     {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    responseData->offset = requestData->offset + requestData->bytes;
-    *data_len = sizeof(*responseData);
-    return IPMI_CC_OK;
+    resOffset = offset + bytes;
+    return ipmi::responseSuccess(resOffset);
 }
 
 // List of the capabilities under each parameter
@@ -1413,12 +1442,14 @@ void register_netfn_dcmi_functions()
 
     // <Get Management Controller Identifier String>
 
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_MGMNT_CTRL_ID_STR,
-                           NULL, getMgmntCtrlIdStr, PRIVILEGE_USER);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdGetMgmtCntlrIdString,
+                               ipmi::Privilege::User, getMgmntCtrlIdStr);
 
     // <Set Management Controller Identifier String>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_MGMNT_CTRL_ID_STR,
-                           NULL, setMgmntCtrlIdStr, PRIVILEGE_ADMIN);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdSetMgmtCntlrIdString,
+                               ipmi::Privilege::Admin, setMgmntCtrlIdStr);
 
     // <Get DCMI capabilities>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
