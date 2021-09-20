@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a0be808_d94c7548",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "these can be removed. They are no longer needed.",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 62
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8990232_1f13a829",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "first parameter should be ipmi::Context::ptr\u0026ctx",
+      "range": {
+        "startLine": 273,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 48
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa618700_e0627fc4",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "not needed",
+      "range": {
+        "startLine": 275,
+        "startChar": 0,
+        "endLine": 275,
+        "endChar": 59
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0226923b_eaba317b",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "use the yielding variant of these calls instead of the blocking variant.",
+      "range": {
+        "startLine": 277,
+        "startChar": 4,
+        "endLine": 278,
+        "endChar": 72
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e08e1a2_485b7447",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1033,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "First function parameter should be ipmi::Context::ptr\u0026 ctx so dbus calls invoked from this function can be yielding instead of blocking",
+      "range": {
+        "startLine": 1033,
+        "startChar": 33,
+        "endLine": 1033,
+        "endChar": 34
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e20119aa_852294c2",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1038,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "this should not be needed. See below.",
+      "range": {
+        "startLine": 1038,
+        "startChar": 0,
+        "endLine": 1038,
+        "endChar": 37
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea0d24b6_8b5d9522",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "changing the dbus calls in this function to be yielding will obviate the need for this try/catch, relying on error_code instead.",
+      "range": {
+        "startLine": 1040,
+        "startChar": 0,
+        "endLine": 1040,
+        "endChar": 7
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51accf41_d79b079d",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1059,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "this should not be necessary. If req.unpack(...) returns 0 and req.fullyUnpacked() returns true, the expected number of bytes was present in the request.",
+      "range": {
+        "startLine": 1053,
+        "startChar": 12,
+        "endLine": 1059,
+        "endChar": 0
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d249bdf6_3326b25f",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "not needed.",
+      "range": {
+        "startLine": 1081,
+        "startChar": 15,
+        "endLine": 1086,
+        "endChar": 17
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40699b16_69aff7fb",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "ipmi::responseInvalidFieldRequest();",
+      "range": {
+        "startLine": 1096,
+        "startChar": 33,
+        "endLine": 1096,
+        "endChar": 56
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9155ac2f_511f6d93",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-20T20:29:00Z",
+      "side": 1,
+      "message": "ipmi::responseInvalidFieldRequest();",
+      "range": {
+        "startLine": 1114,
+        "startChar": 29,
+        "endLine": 1114,
+        "endChar": 51
+      },
+      "revId": "489449be9cacf452648e3a622a87afd2f0e3ddc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
