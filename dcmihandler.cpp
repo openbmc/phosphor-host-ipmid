@@ -257,7 +257,22 @@ bool getDHCPEnabled()
     auto value = ipmi::getDbusProperty(bus, service, ethernetObj.first,
                                        ethernetIntf, "DHCPEnabled");
 
-    return std::get<bool>(value);
+    try
+    {
+        std::string& strValue = std::get<std::string>(value);
+
+        if (strValue == "xyz.openbmc_project.Network.EthernetInterface.DHCPConf.both")
+        {
+            return true;
+        }
+    }
+    catch (std::bad_variant_access& ex)
+    {
+        log<level::ERR>("Failed to convert returned value", entry("ERR=%s", ex.what()));
+        elog<InternalFailure>();
+    }
+
+    return false;
 }
 
 bool getDHCPOption(std::string prop)
@@ -1058,11 +1073,7 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 if ((requestData->data[0] & DCMI_ACTIVATE_DHCP_MASK) &&
                     dcmi::getDHCPEnabled())
                 {
-                    // When these conditions are met we have to trigger DHCP
-                    // protocol restart using the latest parameter settings, but
-                    // as per n/w manager design, each time when we update n/w
-                    // parameters, n/w service is restarted. So we no need to
-                    // take any action in this case.
+		    dcmi::restartSystemdUnit(dcmi::networkdService); 
                 }
                 break;
 
