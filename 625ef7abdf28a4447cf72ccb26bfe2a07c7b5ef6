@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e8767bb_3e02e912",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1035,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2021-09-21T10:45:13Z",
+      "side": 1,
+      "message": "nit:\n\nYou can use std::holds_alternative and remove the use of pointer variable.",
+      "range": {
+        "startLine": 1035,
+        "startChar": 21,
+        "endLine": 1035,
+        "endChar": 32
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9a2b7da_5089afde",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2021-09-21T10:45:13Z",
+      "side": 1,
+      "message": "nit:\n\ndoes std::pow need input validation?",
+      "range": {
+        "startLine": 1040,
+        "startChar": 21,
+        "endLine": 1040,
+        "endChar": 29
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4bf11970_a19bc81b",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1246,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2021-09-21T10:45:13Z",
+      "side": 1,
+      "message": "nit:\n\ncan this be moved to line 1224? \nas both switch cases are using the same code.",
+      "range": {
+        "startLine": 1235,
+        "startChar": 12,
+        "endLine": 1246,
+        "endChar": 13
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fce0cf0c_682cd154",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2021-09-21T10:45:13Z",
+      "side": 1,
+      "message": "why do we need all this variables if it is all holding the same value?\nin line 1283 directly use totalPower and comment properly\nand remove the unwanted variables.",
+      "range": {
+        "startLine": 1278,
+        "startChar": 4,
+        "endLine": 1281,
+        "endChar": 30
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ef59ca0_29e6d948",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2021-09-21T10:45:13Z",
+      "side": 1,
+      "message": "can we use enum class?",
+      "range": {
+        "startLine": 475,
+        "startChar": 0,
+        "endLine": 475,
+        "endChar": 4
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e5260c5_257a2d60",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2021-09-21T10:45:13Z",
+      "side": 1,
+      "message": "use lower camel case.",
+      "range": {
+        "startLine": 477,
+        "startChar": 4,
+        "endLine": 477,
+        "endChar": 21
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
