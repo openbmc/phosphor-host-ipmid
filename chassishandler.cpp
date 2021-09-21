@@ -1907,6 +1907,7 @@ static constexpr uint8_t setInProgress = 0x1;
 static uint8_t transferStatus = setComplete;
 static uint8_t bootFlagValidBitClr = 0;
 static uint5_t bootInitiatorAckData = 0x0;
+static bool cmosClear = false;
 
 /** @brief implements the Get Chassis system boot option
  *  @param ctx - context pointer
@@ -2036,7 +2037,8 @@ ipmi::RspType<ipmi::message::Payload>
             response.pack(bootOptionParameter, reserved1, uint5_t{},
                           uint1_t{biosBootType}, uint1_t{permanent},
                           uint1_t{validFlag}, uint2_t{}, uint4_t{bootOption},
-                          uint2_t{}, uint8_t{}, uint8_t{}, uint8_t{});
+                          uint1_t{}, uint1_t{cmosClear}, uint8_t{}, uint8_t{},
+                          uint8_t{});
             return ipmi::responseSuccess(std::move(response));
         }
         catch (InternalFailure& e)
@@ -2134,7 +2136,6 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         bool screenBlank;
         uint4_t bootDeviceSelector;
         bool lockKeyboard;
-        bool cmosClear;
         uint8_t data3;
         uint4_t biosInfo;
         uint4_t rsvd1;
