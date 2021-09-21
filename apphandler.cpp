@@ -61,6 +61,8 @@ using Activation =
 using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
 namespace fs = std::filesystem;
 
+#define MAX_SET_SELECTOR_VALUE 3
+
 #ifdef ENABLE_I2C_WHITELIST_CHECK
 typedef struct
 {
@@ -1303,15 +1305,17 @@ ipmi::RspType<uint8_t,                // Parameter revision
         return ipmi::responseSuccess(paramRevision, std::nullopt, std::nullopt);
     }
 
-    if (paramSelector == 0)
-    {
-        return ipmi::responseSuccess(paramRevision, transferStatus,
-                                     std::nullopt);
-    }
-
     if (BlockSelector != 0) // 00h if parameter does not require a block number
     {
-        return ipmi::responseParmNotSupported();
+        return ipmi::responseInvalidFieldRequest();
+    }
+    if (paramSelector == 0)
+    {
+        if (setSelector != 0)
+            return ipmi::responseInvalidFieldRequest();
+
+        return ipmi::responseSuccess(paramRevision, transferStatus,
+                                     std::nullopt);
     }
 
     if (sysInfoParamStore == nullptr)
@@ -1325,11 +1329,11 @@ ipmi::RspType<uint8_t,                // Parameter revision
     std::tuple<bool, std::string> ret =
         sysInfoParamStore->lookup(paramSelector);
     bool found = std::get<0>(ret);
+    std::string& paramString = std::get<1>(ret);
     if (!found)
     {
-        return ipmi::responseSensorInvalid();
+        paramString = "";
     }
-    std::string& paramString = std::get<1>(ret);
     std::vector<uint8_t> configData;
     size_t count = 0;
     if (setSelector == 0)
@@ -1353,12 +1357,32 @@ ipmi::RspType<uint8_t,                // Parameter revision
         size_t offset = (setSelector * fullChunkSize) - configDataOverhead;
         if (offset >= paramString.length())
         {
-            return ipmi::responseParmOutOfRange();
+            // As per spec., three blocks are recommended for params 1-5
+            if ((IPMI_SYSINFO_SYSTEM_FW_VERSION <= paramSelector) &&
+                (IPMI_SYSINFO_OS_VERSION >= paramSelector) &&
+                (MAX_SET_SELECTOR_VALUE > setSelector))
+            {
+                configData.resize(configParameterLength);
+                std::fill_n(configData.begin(), configParameterLength, 0x00);
+            }
+            else
+            {
+                return ipmi::responseParmOutOfRange();
+            }
         }
-        count = std::min(paramString.length() - offset, fullChunkSize);
-        configData.resize(count);
-        std::copy_n(paramString.begin() + offset, count,
-                    configData.begin()); // 16 bytes chunk
+        else
+        {
+            count = std::min(paramString.length() - offset, fullChunkSize);
+            configData.resize(count);
+            std::copy_n(paramString.begin() + offset, count,
+                        configData.begin()); // 16 bytes chunk
+                                             // Append zero's to remaining bytes
+            if (configData.size() < configParameterLength)
+            {
+                std::fill_n(std::back_inserter(configData),
+                            configParameterLength - configData.size(), 0x00);
+            }
+        }
     }
     return ipmi::responseSuccess(paramRevision, setSelector, configData);
 }
