@@ -56,6 +56,8 @@ using namespace phosphor::logging;
 // IPMI Spec, shared Reservation ID.
 static unsigned short selReservationID = 0xFFFF;
 static bool selReservationValid = false;
+constexpr uint8_t SYS_INTERFACE = 0x0F;
+constexpr uint8_t DBUS_INTERFACE = 0x08;
 
 unsigned short reserveSel(void)
 {
@@ -248,7 +250,15 @@ message::Response::ptr executeIpmiCommandCommon(
             return filterResponse;
         }
         HandlerTuple& chosen = cmdIter->second;
-        if (request->ctx->priv < std::get<Privilege>(chosen))
+        if (request->ctx->channel != DBUS_INTERFACE &&
+            request->ctx->channel != SYS_INTERFACE &&
+            std::get<Privilege>(chosen) == Privilege::sys_iface)
+        {
+            return errorResponse(request, ccInsufficientPrivilege);
+        }
+        if ((request->ctx->priv < std::get<Privilege>(chosen)) &&
+            (std::get<Privilege>(chosen) != Privilege::sys_iface))
+
         {
             return errorResponse(request, ccInsufficientPrivilege);
         }
@@ -266,7 +276,15 @@ message::Response::ptr executeIpmiCommandCommon(
                 return filterResponse;
             }
             HandlerTuple& chosen = cmdIter->second;
-            if (request->ctx->priv < std::get<Privilege>(chosen))
+            if (request->ctx->channel != DBUS_INTERFACE &&
+                request->ctx->channel != SYS_INTERFACE &&
+                std::get<Privilege>(chosen) == Privilege::sys_iface)
+            {
+                return errorResponse(request, ccInsufficientPrivilege);
+            }
+            if ((request->ctx->priv < std::get<Privilege>(chosen)) &&
+                (std::get<Privilege>(chosen) != Privilege::sys_iface))
+
             {
                 return errorResponse(request, ccInsufficientPrivilege);
             }
