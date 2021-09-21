@@ -54,6 +54,7 @@ constexpr auto INTF_NEIGHBOR_CREATE_STATIC =
     "xyz.openbmc_project.Network.Neighbor.CreateStatic";
 constexpr auto INTF_VLAN = "xyz.openbmc_project.Network.VLAN";
 constexpr auto INTF_VLAN_CREATE = "xyz.openbmc_project.Network.VLAN.Create";
+constexpr auto MD5_AUTH_TYPE = 0x04;
 
 /** @brief IPMI LAN Parameters */
 enum class LanParam : uint8_t
