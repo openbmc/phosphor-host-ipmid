@@ -1280,13 +1280,13 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::AuthSupport:
         {
-            std::bitset<6> support;
+            std::bitset<6> support = MD5_AUTH_TYPE;
             ret.pack(support, uint2_t{});
             return responseSuccess(std::move(ret));
         }
         case LanParam::AuthEnables:
         {
-            std::bitset<6> enables;
+            std::bitset<6> enables = MD5_AUTH_TYPE;
             ret.pack(enables, uint2_t{}); // Callback
             ret.pack(enables, uint2_t{}); // User
             ret.pack(enables, uint2_t{}); // Operator
