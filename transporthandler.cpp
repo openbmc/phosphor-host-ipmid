@@ -957,7 +957,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                     return responseInvalidFieldRequest();
                 }
             }
-            return response(ccParamNotSupported);
+            return responseInvalidFieldRequest();
         }
         case LanParam::MAC:
         {
