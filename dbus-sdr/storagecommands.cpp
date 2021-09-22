@@ -1182,45 +1182,15 @@ std::vector<uint8_t> getType12SDRs(uint16_t index, uint16_t recordId)
     std::vector<uint8_t> resp;
     if (index == 0)
     {
-        Type12Record bmc = {};
-        bmc.header.record_id_lsb = recordId;
-        bmc.header.record_id_msb = recordId >> 8;
-        bmc.header.sdr_version = ipmiSdrVersion;
-        bmc.header.record_type = 0x12;
-        bmc.header.record_length = 0x1b;
-        bmc.slaveAddress = 0x20;
-        bmc.channelNumber = 0;
-        bmc.powerStateNotification = 0;
-        bmc.deviceCapabilities = 0xBF;
-        bmc.reserved = 0;
-        bmc.entityID = 0x2E;
-        bmc.entityInstance = 1;
-        bmc.oem = 0;
-        bmc.typeLengthCode = 0xD0;
         std::string bmcName = "Basbrd Mgmt Ctlr";
-        std::copy(bmcName.begin(), bmcName.end(), bmc.name);
+        Type12Record bmc(recordId, 0x20, 0, 0, 0xbf, 0x2e, 1, 0, bmcName);
         uint8_t* bmcPtr = reinterpret_cast<uint8_t*>(&bmc);
         resp.insert(resp.end(), bmcPtr, bmcPtr + sizeof(Type12Record));
     }
     else if (index == 1)
     {
-        Type12Record me = {};
-        me.header.record_id_lsb = recordId;
-        me.header.record_id_msb = recordId >> 8;
-        me.header.sdr_version = ipmiSdrVersion;
-        me.header.record_type = 0x12;
-        me.header.record_length = 0x16;
-        me.slaveAddress = 0x2C;
-        me.channelNumber = 6;
-        me.powerStateNotification = 0x24;
-        me.deviceCapabilities = 0x21;
-        me.reserved = 0;
-        me.entityID = 0x2E;
-        me.entityInstance = 2;
-        me.oem = 0;
-        me.typeLengthCode = 0xCB;
         std::string meName = "Mgmt Engine";
-        std::copy(meName.begin(), meName.end(), me.name);
+        Type12Record me(recordId, 0x2c, 6, 0x24, 0x21, 0x2e, 2, 0, meName);
         uint8_t* mePtr = reinterpret_cast<uint8_t*>(&me);
         resp.insert(resp.end(), mePtr, mePtr + sizeof(Type12Record));
     }
