@@ -822,18 +822,29 @@ RspType<message::Payload> getLanOem(uint8_t, uint8_t, uint8_t, uint8_t)
  **/
 bool isValidMACAddress(const ether_addr& mac)
 {
+
     // check if mac address is empty
     if (equal(mac, ether_addr{}))
     {
         return false;
     }
-    // we accept only unicast MAC addresses and  same thing has been checked in
+
+    // we accept only unicast MAC addresses and same thing has been checked in
     // phosphor-network layer. If the least significant bit of the first octet
     // is set to 1, it is multicast MAC else it is unicast MAC address.
     if (mac.ether_addr_octet[0] & 1)
     {
         return false;
     }
+
+    // we accept only local MAC addresses
+    // If the 2nd least significant bit of the first octet
+    // is set to 0, it is global MAC else it is local MAC address.
+    if (!(mac.ether_addr_octet[0] & 2))
+    {
+        return false;
+    }
+
     return true;
 }
 
