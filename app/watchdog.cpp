@@ -41,9 +41,23 @@ void reportError()
 
 ipmi::RspType<> ipmiAppResetWatchdogTimer()
 {
+    uint16_t presentCountdown = 0;
+    uint8_t pretimeout = 0;
     try
     {
+        // if watchdog already reaches PreTimeoutInterval, reset watchdog
+        // command not supported
         WatchdogService wd_service;
+        WatchdogService::Properties wd_prop = wd_service.getProperties();
+        presentCountdown = htole16(wd_prop.timeRemaining / 100);
+        pretimeout = wd_prop.preTimeoutInterval;
+        if (presentCountdown != 0)
+        {
+            if (presentCountdown < pretimeout)
+            {
+                return ipmi::responseCommandNotAvailable();
+            }
+        }
 
         // Notify the caller if we haven't initialized our timer yet
         // so it can configure actions and timeouts
@@ -245,6 +259,7 @@ ipmi::RspType<>
         const uint64_t interval = initialCountdown * 100;
         wd_service.setInterval(interval);
         wd_service.resetTimeRemaining(false);
+        wd_service.setPreTimeoutInterval(preTimeoutInterval);
 
         // Mark as initialized so that future resets behave correctly
         wd_service.setInitialized(true);
@@ -410,7 +425,8 @@ ipmi::RspType<uint3_t, // timerUse - timer use
         }
 
         // TODO: Do something about having pretimeout support
-        pretimeout = 0;
+        // pretimeout = 0;
+        pretimeout = wd_prop.preTimeoutInterval;
 
         lastCallSuccessful = true;
         return ipmi::responseSuccess(
