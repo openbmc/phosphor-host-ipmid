@@ -760,7 +760,7 @@ namespace dcmi
 namespace temp_readings
 {
 
-Temperature readTemp(const std::string& dbusService,
+Temperature readTemp(ipmi::Context::ptr& ctx, const std::string& dbusService,
                      const std::string& dbusPath)
 {
     // Read the temperature value from d-bus object. Need some conversion.
@@ -769,9 +769,10 @@ Temperature readTemp(const std::string& dbusService,
     // formula Value * 10^Scale. The ipmi spec has the temperature as a uint8_t,
     // with a separate single bit for the sign.
 
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-    auto result = ipmi::getAllDbusProperties(
-        bus, dbusService, dbusPath, "xyz.openbmc_project.Sensor.Value");
+    // Read the sensor value and scale properties
+    ipmi::PropertyMap result;
+    ipmi::getAllDbusProperties(ctx, dbusService, dbusPath, SENSOR_VALUE_INTF,
+                               result);
     auto temperature =
         std::visit(ipmi::VariantToDoubleVisitor(), result.at("Value"));
     double absTemp = std::abs(temperature);
@@ -795,8 +796,8 @@ Temperature readTemp(const std::string& dbusService,
                            (temperature < 0));
 }
 
-std::tuple<Response, NumInstances> read(const std::string& type,
-                                        uint8_t instance)
+std::tuple<Response, NumInstances>
+    read(ipmi::Context::ptr& ctx, const std::string& type, uint8_t instance)
 {
     Response response{};
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
@@ -822,21 +823,18 @@ std::tuple<Response, NumInstances> read(const std::string& type,
 
         std::string path = j.value("dbus", "");
         std::string service;
-        try
+        boost::system::error_code ec;
+        ec = ipmi::getService(ctx, "xyz.openbmc_project.Sensor.Value", path,
+                              service);
+        if (ec)
         {
-            service =
-                ipmi::getService(bus, "xyz.openbmc_project.Sensor.Value", path);
-        }
-        catch (const std::exception& e)
-        {
-            log<level::DEBUG>(e.what());
             return std::make_tuple(response, numInstances);
         }
 
         response.instance = instance;
         uint8_t temp{};
         bool sign{};
-        std::tie(temp, sign) = readTemp(service, path);
+        std::tie(temp, sign) = readTemp(ctx, service, path);
         response.temperature = temp;
         response.sign = sign;
 
@@ -851,7 +849,8 @@ std::tuple<Response, NumInstances> read(const std::string& type,
     return std::make_tuple(response, numInstances);
 }
 
-std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
+std::tuple<ResponseList, NumInstances> readAll(ipmi::Context::ptr& ctx,
+                                               const std::string& type,
                                                uint8_t instanceStart)
 {
     ResponseList response{};
@@ -880,14 +879,20 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
             }
 
             std::string path = j.value("dbus", "");
-            auto service =
-                ipmi::getService(bus, "xyz.openbmc_project.Sensor.Value", path);
+            std::string service;
+            boost::system::error_code ec;
+            ec = ipmi::getService(ctx, "xyz.openbmc_project.Sensor.Value", path,
+                                  service);
+            if (ec)
+            {
+                continue;
+            }
 
             Response r{};
             r.instance = instanceNum;
             uint8_t temp{};
             bool sign{};
-            std::tie(temp, sign) = readTemp(service, path);
+            std::tie(temp, sign) = readTemp(ctx, service, path);
             r.temperature = temp;
             r.sign = sign;
             response.push_back(r);
@@ -909,72 +914,74 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
 } // namespace temp_readings
 } // namespace dcmi
 
-ipmi_ret_t getTempReadings(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                           ipmi_response_t response, ipmi_data_len_t data_len,
-                           ipmi_context_t)
+/** @brief implements the DCMI Get Temperature Reading Command
+ *  @param
+ *   - sensorType - Type of the sensor
+ *   - entityId - Entity ID
+ *   - entityInstance - Entity Instance (0 means all instances)
+ *   - instanceStart - Instance start (used if instance is 0)
+ *
+ *  @returns completion code plus response data
+ *   - numInstances - No of instances for requested id
+ *   - numRecords - No of record ids in the response
+ *   - sensors - SDR Record ID corresponding to the Entity IDs
+ */
+
+ipmi::RspType<uint8_t,              // No of instances for requested id
+              uint8_t,              // No of sets of temperature data
+              std::vector<uint16_t> // Temperature Data
+              >
+    getTempReadings(ipmi::Context::ptr ctx, int8_t sensorType, uint8_t entityId,
+                    uint8_t entityInstance, uint8_t instanceStart)
 {
-    auto requestData =
-        reinterpret_cast<const dcmi::GetTempReadingsRequest*>(request);
-    auto responseData =
-        reinterpret_cast<dcmi::GetTempReadingsResponseHdr*>(response);
-
-    if (*data_len != sizeof(dcmi::GetTempReadingsRequest))
-    {
-        log<level::ERR>("Malformed request data",
-                        entry("DATA_SIZE=%d", *data_len));
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-    *data_len = 0;
-
-    auto it = dcmi::entityIdToName.find(requestData->entityId);
+    uint8_t numInstances = 0, numDataSets = 0;
+    auto it = dcmi::entityIdToName.find(entityId);
     if (it == dcmi::entityIdToName.end())
     {
-        log<level::ERR>("Unknown Entity ID",
-                        entry("ENTITY_ID=%d", requestData->entityId));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        log<level::ERR>("Unknown Entity ID", entry("ENTITY_ID=%d", entityId));
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    if (requestData->sensorType != dcmi::temperatureSensorType)
+    if (sensorType != dcmi::temperatureSensorType)
     {
         log<level::ERR>("Invalid sensor type",
-                        entry("SENSOR_TYPE=%d", requestData->sensorType));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+                        entry("SENSOR_TYPE=%d", sensorType));
+        return ipmi::responseInvalidFieldRequest();
     }
 
     dcmi::temp_readings::ResponseList temps{};
     try
     {
-        if (!requestData->entityInstance)
+        if (!entityInstance)
         {
             // Read all instances
-            std::tie(temps, responseData->numInstances) =
-                dcmi::temp_readings::readAll(it->second,
-                                             requestData->instanceStart);
+            std::tie(temps, numInstances) =
+                dcmi::temp_readings::readAll(ctx, it->second, instanceStart);
         }
         else
         {
             // Read one instance
             temps.resize(1);
-            std::tie(temps[0], responseData->numInstances) =
-                dcmi::temp_readings::read(it->second,
-                                          requestData->entityInstance);
+            std::tie(temps[0], numInstances) =
+                dcmi::temp_readings::read(ctx, it->second, entityInstance);
         }
-        responseData->numDataSets = temps.size();
+        numDataSets = temps.size();
     }
     catch (const InternalFailure& e)
     {
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
+        ;
     }
 
-    size_t payloadSize = temps.size() * sizeof(dcmi::temp_readings::Response);
-    if (!temps.empty())
+    std::vector<uint16_t> tempVals{};
+    for (size_t i = 0; i < numDataSets; i++)
     {
-        memcpy(responseData + 1, // copy payload right after the response header
-               temps.data(), payloadSize);
+        uint16_t tempVal = temps[i].temperature | temps[i].sign;
+        tempVal = (temps[i].instance << 8) | tempVal;
+        tempVals.push_back(tempVal);
     }
-    *data_len = sizeof(dcmi::GetTempReadingsResponseHdr) + payloadSize;
 
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(numInstances, numDataSets, tempVals);
 }
 
 int64_t getPowerReading(sdbusplus::bus_t& bus)
@@ -1425,8 +1432,9 @@ void register_netfn_dcmi_functions()
                            NULL, getDCMICapabilities, PRIVILEGE_USER);
 
     // <Get Temperature Readings>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_TEMP_READINGS,
-                           NULL, getTempReadings, PRIVILEGE_USER);
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdGetTemperatureReadings,
+                               ipmi::Privilege::User, getTempReadings);
 
     // <Get Power Reading>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING,
