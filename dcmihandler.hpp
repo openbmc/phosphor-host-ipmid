@@ -2,6 +2,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include <ipmid/utils.hpp>
 #include <map>
 #include <sdbusplus/bus.hpp>
 #include <string>
@@ -359,28 +360,6 @@ struct DCMICapEntry
 
 using DCMICaps = std::map<DCMICapParameters, DCMICapEntry>;
 
-/** @struct GetTempReadingsRequest
- *
- *  DCMI payload for Get Temperature Readings request
- */
-struct GetTempReadingsRequest
-{
-    uint8_t sensorType;     //!< Type of the sensor
-    uint8_t entityId;       //!< Entity ID
-    uint8_t entityInstance; //!< Entity Instance (0 means all instances)
-    uint8_t instanceStart;  //!< Instance start (used if instance is 0)
-} __attribute__((packed));
-
-/** @struct GetTempReadingsResponse
- *
- *  DCMI header for Get Temperature Readings response
- */
-struct GetTempReadingsResponseHdr
-{
-    uint8_t numInstances; //!< No. of instances for requested id
-    uint8_t numDataSets;  //!< No. of sets of temperature data
-} __attribute__((packed));
-
 /** @brief Parse out JSON config file.
  *
  *  @param[in] configFile - JSON config file name
@@ -394,38 +373,42 @@ namespace temp_readings
 /** @brief Read temperature from a d-bus object, scale it as per dcmi
  *         get temperature reading requirements.
  *
+ *  @param[in] Context - ctx
  *  @param[in] dbusService - the D-Bus service
  *  @param[in] dbusPath - the D-Bus path
  *
  *  @return A temperature reading
  */
-Temperature readTemp(const std::string& dbusService,
+Temperature readTemp(ipmi::Context::ptr& ctx, const std::string& dbusService,
                      const std::string& dbusPath);
 
 /** @brief Read temperatures and fill up DCMI response for the Get
  *         Temperature Readings command. This looks at a specific
  *         instance.
  *
+ *  @param[in] Context - ctx
  *  @param[in] type - one of "inlet", "cpu", "baseboard"
  *  @param[in] instance - A non-zero Entity instance number
  *
  *  @return A tuple, containing a temperature reading and the
  *          number of instances.
  */
-std::tuple<Response, NumInstances> read(const std::string& type,
-                                        uint8_t instance);
+std::tuple<Response, NumInstances>
+    read(ipmi::Context::ptr& ctx, const std::string& type, uint8_t instance);
 
 /** @brief Read temperatures and fill up DCMI response for the Get
  *         Temperature Readings command. This looks at a range of
  *         instances.
  *
+ *  @param[in] Context - ctx
  *  @param[in] type - one of "inlet", "cpu", "baseboard"
  *  @param[in] instanceStart - Entity instance start index
  *
  *  @return A tuple, containing a list of temperature readings and the
  *          number of instances.
  */
-std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
+std::tuple<ResponseList, NumInstances> readAll(ipmi::Context::ptr& ctx,
+                                               const std::string& type,
                                                uint8_t instanceStart);
 } // namespace temp_readings
 
