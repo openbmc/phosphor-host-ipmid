@@ -507,27 +507,6 @@ struct GetPowerReadingResponse
     uint8_t powerReadingState; //!< Power Reading State
 } __attribute__((packed));
 
-/** @struct GetSensorInfoRequest
- *
- *  DCMI payload for Get Sensor Info request
- */
-struct GetSensorInfoRequest
-{
-    uint8_t sensorType;     //!< Type of the sensor
-    uint8_t entityId;       //!< Entity ID
-    uint8_t entityInstance; //!< Entity Instance (0 means all instances)
-    uint8_t instanceStart;  //!< Instance start (used if instance is 0)
-} __attribute__((packed));
-
-/** @struct GetSensorInfoResponseHdr
- *
- *  DCMI header for Get Sensor Info response
- */
-struct GetSensorInfoResponseHdr
-{
-    uint8_t numInstances; //!< No. of instances for requested id
-    uint8_t numRecords;   //!< No. of record ids in the response
-} __attribute__((packed));
 /**
  *  @brief Parameters for DCMI Configuration Parameters
  */
