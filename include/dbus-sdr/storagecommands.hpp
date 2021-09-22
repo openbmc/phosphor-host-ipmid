@@ -87,12 +87,34 @@ struct Type12Record
     uint8_t channelNumber;
     uint8_t powerStateNotification;
     uint8_t deviceCapabilities;
-    uint24_t reserved;
+    // define reserved bytes explicitly. The uint24_t is silently expanded to
+    // uint32_t, which ruins the byte alignment required by this structure.
+    uint8_t reserved[3];
     uint8_t entityID;
     uint8_t entityInstance;
     uint8_t oem;
     uint8_t typeLengthCode;
     char name[16];
+
+    Type12Record(uint16_t recordID, uint8_t address, uint8_t chNumber,
+                 uint8_t pwrStateNotification, uint8_t capabilities,
+                 uint8_t eid, uint8_t entityInst, uint8_t mfrDefined,
+                 const std::string& sensorname) :
+        slaveAddress(address),
+        channelNumber(chNumber), powerStateNotification(pwrStateNotification),
+        deviceCapabilities(capabilities), reserved{}, entityID(eid),
+        entityInstance(entityInst), oem(mfrDefined)
+    {
+        get_sdr::header::set_record_id(recordID, &header);
+        header.sdr_version = ipmiSdrVersion;
+        header.record_type = 0x12;
+        size_t nameLen = std::min(sensorname.size(), sizeof(name));
+        header.record_length = sizeof(Type12Record) -
+                               sizeof(get_sdr::SensorDataRecordHeader) -
+                               sizeof(name) + nameLen;
+        typeLengthCode = 0xc0 | nameLen;
+        std::copy(sensorname.begin(), sensorname.begin() + nameLen, name);
+    }
 };
 #pragma pack(pop)
 
