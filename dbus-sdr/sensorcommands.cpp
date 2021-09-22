@@ -570,7 +570,7 @@ ipmi::RspType<> ipmiSenPlatformEvent(ipmi::Context::ptr ctx,
 
         p.unpack(evmRev, sensorType, sensorNum, eventType, eventData1,
                  eventData2, eventData3);
-        generatorID = ctx->rqSA;
+        generatorID = ctx->rqSA << 1;
     }
 
     if (!p.fullyUnpacked())
