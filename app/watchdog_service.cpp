@@ -70,7 +70,8 @@ WatchdogService::Properties WatchdogService::getProperties()
     }
     try
     {
-        std::map<std::string, std::variant<bool, uint64_t, std::string>>
+        std::map<std::string,
+                 std::variant<bool, uint64_t, std::string, uint8_t>>
             properties;
         response.read(properties);
         Properties wd_prop;
@@ -86,6 +87,8 @@ WatchdogService::Properties WatchdogService::getProperties()
         wd_prop.interval = std::get<uint64_t>(properties.at("Interval"));
         wd_prop.timeRemaining =
             std::get<uint64_t>(properties.at("TimeRemaining"));
+        wd_prop.preTimeoutInterval =
+            std::get<uint8_t>(properties.at("PreTimeoutInterval"));
         return wd_prop;
     }
     catch (const std::exception& e)
@@ -197,4 +200,9 @@ void WatchdogService::setExpiredTimerUse(TimerUse timerUse)
 void WatchdogService::setInterval(uint64_t interval)
 {
     setProperty("Interval", interval);
+}
+
+void WatchdogService::setPreTimeoutInterval(uint8_t pretimeoutInterval)
+{
+    setProperty("PreTimeoutInterval", pretimeoutInterval);
 }

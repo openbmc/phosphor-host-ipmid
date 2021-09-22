@@ -38,6 +38,7 @@ class WatchdogService
         TimerUse expiredTimerUse;
         uint64_t interval;
         uint64_t timeRemaining;
+        uint8_t preTimeoutInterval;
     };
 
     /** @brief Retrieves a copy of the currently set properties on the
@@ -91,6 +92,13 @@ class WatchdogService
      *  @param[in] interval - The new interval value
      */
     void setInterval(uint64_t interval);
+
+    /** @brief Sets the value of the PreTimeoutInterval property on the host
+     * watchdog
+     *
+     *  @param[in] pretimeoutInterval  - The new pretimeoutInterval value
+     */
+    void setPreTimeoutInterval(uint8_t pretimeoutInterval);
 
   private:
     /** @brief sdbusplus handle */
