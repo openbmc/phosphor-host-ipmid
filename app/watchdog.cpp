@@ -219,6 +219,8 @@ ipmi::RspType<>
 
     timerNotLogFlags = dontLog;
     timerPreTimeoutInterrupt = preTimeoutInterrupt;
+    uint8_t ReqRreTimeoutInterrupt =
+        (static_cast<uint8_t>(timerPreTimeoutInterrupt) << 4) & 0xF0;
 
     try
     {
@@ -245,6 +247,7 @@ ipmi::RspType<>
         const uint64_t interval = initialCountdown * 100;
         wd_service.setInterval(interval);
         wd_service.resetTimeRemaining(false);
+        wd_service.setPreTimeoutInterrupt(ReqRreTimeoutInterrupt);
 
         // Mark as initialized so that future resets behave correctly
         wd_service.setInitialized(true);
