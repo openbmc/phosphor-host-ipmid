@@ -143,11 +143,12 @@ const std::array<std::string, PRIVILEGE_OEM + 1> privList = {
 
 std::string ChannelConfig::getChannelName(const uint8_t chNum)
 {
+
     if (!isValidChannel(chNum))
     {
         log<level::ERR>("Invalid channel number.",
                         entry("CHANNEL_ID=%d", chNum));
-        throw std::invalid_argument("Invalid channel number");
+       return std::string();
     }
 
     return channelData[chNum].chName;

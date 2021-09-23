@@ -326,9 +326,14 @@ RspType<uint16_t, // stdPayloadType
     uint8_t chNum =
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
 
-    if (!doesDeviceExist(chNum) || !isValidChannel(chNum) || reserved)
+    if (!doesDeviceExist(chNum))
     {
-        log<level::DEBUG>("Get channel payload - Invalid field in request");
+        log<level::DEBUG>("Get channel payload - device does not exist");
+        return responseInvalidFieldRequest();
+    }
+    if (reserved)
+    {
+        log<level::DEBUG>("Get channel payload - Invalid reserved bit");
         return responseInvalidFieldRequest();
     }
 
