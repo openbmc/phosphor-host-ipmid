@@ -1045,7 +1045,6 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         *data_len = 0;
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
-    *data_len = 0;
 
     try
     {
@@ -1054,6 +1053,14 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
             static_cast<dcmi::DCMIConfigParameters>(requestData->paramSelect))
         {
             case dcmi::DCMIConfigParameters::ActivateDHCP:
+
+                if (*data_len != DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE)
+                {
+        	    log<level::ERR>("Invalid Requested Packet size",
+                            entry("PACKET SIZE=%d", *data_len));
+                    *data_len = 0;
+        	    return IPMI_CC_REQ_DATA_LEN_INVALID;
+    		}
 
                 if ((requestData->data[0] & DCMI_ACTIVATE_DHCP_MASK) &&
                     dcmi::getDHCPEnabled())
@@ -1067,6 +1074,14 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 break;
 
             case dcmi::DCMIConfigParameters::DiscoveryConfig:
+
+                if (*data_len != DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE)
+                {
+                    log<level::ERR>("Invalid Requested Packet size",
+                            entry("PACKET SIZE=%d", *data_len));
+                    *data_len = 0;
+                    return IPMI_CC_REQ_DATA_LEN_INVALID;
+                }
 
                 if (requestData->data[0] & DCMI_OPTION_12_MASK)
                 {
@@ -1096,6 +1111,7 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         log<level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
+    *data_len = 0;
     return IPMI_CC_OK;
 }
 
@@ -1115,7 +1131,7 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         log<level::ERR>("Invalid Requested Packet size",
                         entry("PACKET SIZE=%d", *data_len));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
     }
 
     *data_len = 0;
