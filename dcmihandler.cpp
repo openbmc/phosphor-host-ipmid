@@ -435,6 +435,15 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto responseData =
         reinterpret_cast<dcmi::GetAssetTagResponse*>(outPayload.data());
 
+    // Verify get command's data length
+    if (*data_len != sizeof(dcmi::GetAssetTagRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                            entry("DATA_SIZE=%d", *data_len));
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    *data_len = 0;
+
     // Verify offset to read and number of bytes to read are not exceeding the
     // range.
     if ((requestData->offset > dcmi::assetTagMaxOffset) ||
@@ -502,6 +511,15 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto responseData =
         reinterpret_cast<dcmi::SetAssetTagResponse*>(outPayload.data());
 
+    // Verify set command's data length
+    if (*data_len < sizeof(dcmi::SetAssetTagRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    *data_len = 0;
+ 
     // Verify offset to read and number of bytes to read are not exceeding the
     // range.
     if ((requestData->offset > dcmi::assetTagMaxOffset) ||
@@ -704,6 +722,15 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
     auto requestData =
         reinterpret_cast<const dcmi::GetDCMICapRequest*>(request);
+
+    // Verify get command's data length
+    if (*data_len != sizeof(dcmi::GetDCMICapRequest))
+    {
+        log<level::ERR>("Malformed request data",
+                        entry("DATA_SIZE=%d", *data_len));
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
+    *data_len = 0;
 
     // get list of capabilities in a parameter
     auto caps =
