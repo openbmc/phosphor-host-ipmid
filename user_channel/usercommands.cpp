@@ -281,16 +281,21 @@ ipmi::RspType<> // user name
         return ipmi::responseInvalidFieldRequest();
     }
 
-    if (pwLen20 && userPassword.size() != maxIpmi20PasswordSize)
+    static constexpr uint2_t opDisableUser = 0x00;
+    static constexpr uint2_t opEnableUser = 0x01;
+    static constexpr uint2_t opSetPassword = 0x02;
+    static constexpr uint2_t opTestPassword = 0x03;
+
+    // If set / test password operation then password size has to be 16 or 20
+    // bytes based on the password size bit
+    if (((operation == opSetPassword) || (operation == opTestPassword)) &&
+        ((pwLen20 && (userPassword.size() != maxIpmi20PasswordSize)) ||
+         (!pwLen20 && (userPassword.size() != maxIpmi15PasswordSize))))
     {
         log<level::DEBUG>("Invalid Length");
         return ipmi::responseReqDataLenInvalid();
     }
-    else if (!pwLen20 && userPassword.size() != maxIpmi15PasswordSize)
-    {
-        log<level::DEBUG>("Invalid Length");
-        return ipmi::responseReqDataLenInvalid();
-    }
+
     size_t passwordLength = userPassword.size();
 
     uint8_t userId = static_cast<uint8_t>(id);
@@ -301,10 +306,6 @@ ipmi::RspType<> // user name
         return ipmi::responseParmOutOfRange();
     }
 
-    static constexpr uint2_t opDisableUser = 0x00;
-    static constexpr uint2_t opEnableUser = 0x01;
-    static constexpr uint2_t opSetPassword = 0x02;
-    static constexpr uint2_t opTestPassword = 0x03;
     if (operation == opSetPassword)
     {
         // turn the non-nul terminated SecureBuffer into a SecureString
