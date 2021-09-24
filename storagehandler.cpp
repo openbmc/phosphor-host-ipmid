@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
+#include <optional>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/server.hpp>
@@ -80,20 +81,22 @@ static inline std::string getLoggingObjPath(uint16_t id)
     return std::string(ipmi::sel::logBasePath) + "/" + std::to_string(id);
 }
 
-std::pair<uint16_t, SELEntry> parseLoggingEntry(const std::string& p)
+std::optional<std::pair<uint16_t, SELEntry>>
+    parseLoggingEntry(const std::string& p)
 {
-    auto id = getLoggingId(p);
-    ipmi::sel::GetSELEntryResponse record{};
     try
     {
+        auto id = getLoggingId(p);
+        ipmi::sel::GetSELEntryResponse record{};
         record = ipmi::sel::convertLogEntrytoSEL(p);
+        return std::pair<uint16_t, SELEntry>({id, std::move(record.event)});
     }
     catch (const std::exception& e)
     {
         fprintf(stderr, "Failed to convert %s to SEL: %s\n", p.c_str(),
                 e.what());
     }
-    return {id, std::move(record.event)};
+    return std::nullopt;
 }
 
 static void selAddedCallback(sdbusplus::message::message& m)
@@ -109,7 +112,11 @@ static void selAddedCallback(sdbusplus::message::message& m)
         return;
     }
     std::string p = objPath;
-    selCacheMap.insert(parseLoggingEntry(p));
+    auto entry = parseLoggingEntry(p);
+    if (entry)
+    {
+        selCacheMap.insert(std::move(*entry));
+    }
 }
 
 static void selRemovedCallback(sdbusplus::message::message& m)
@@ -122,17 +129,26 @@ static void selRemovedCallback(sdbusplus::message::message& m)
     catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to read object path");
-        return;
     }
-    std::string p = objPath;
-    selCacheMap.erase(getLoggingId(p));
+    try
+    {
+        std::string p = objPath;
+        selCacheMap.erase(getLoggingId(p));
+    }
+    catch (const std::invalid_argument& e)
+    {
+        log<level::ERR>("Invalid logging entry ID");
+    }
 }
 
 static void selUpdatedCallback(sdbusplus::message::message& m)
 {
     std::string p = m.get_path();
     auto entry = parseLoggingEntry(p);
-    selCacheMap.insert_or_assign(entry.first, std::move(entry.second));
+    if (entry)
+    {
+        selCacheMap.insert_or_assign(entry->first, std::move(entry->second));
+    }
 }
 
 void registerSelCallbackHandler()
@@ -176,7 +192,11 @@ void initSELCache()
     }
     for (const auto& p : paths)
     {
-        selCacheMap.insert(parseLoggingEntry(p));
+        auto entry = parseLoggingEntry(p);
+        if (entry)
+        {
+            selCacheMap.insert(std::move(*entry));
+        }
     }
     registerSelCallbackHandler();
     selCacheMapInitialized = true;
