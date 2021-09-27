@@ -16,6 +16,24 @@
       "revId": "5330a8192a6cae5d4a16e6e491e260a557d250a3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71efd478_30ec3b41",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2021-09-27T16:59:30Z",
+      "side": 1,
+      "message": "We may need to use enum class then as enum class have more control over their underlying type. \nHere as we want to have uint2_t type for 2 bit operation field.\nSince the scope of use is only to this function, preferred to continue to use constexpr (present in earlier code as well just moved above new added condition.)",
+      "parentUuid": "c7a07df6_3057689f",
+      "revId": "5330a8192a6cae5d4a16e6e491e260a557d250a3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
