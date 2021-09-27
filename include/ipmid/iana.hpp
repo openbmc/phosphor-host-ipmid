@@ -16,4 +16,9 @@ constexpr Number obmcOemNumber = 49871;
  */
 constexpr Number googOemNumber = 11129;
 
+/*
+ * This is the Foxconn IANA OEM Number
+ */
+constexpr Number foxconnOemNumber = 17084;
+
 } // namespace oem
