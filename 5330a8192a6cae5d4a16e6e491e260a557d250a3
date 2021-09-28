@@ -34,6 +34,24 @@
       "revId": "5330a8192a6cae5d4a16e6e491e260a557d250a3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1471bbab_011fc6e7",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-28T18:30:37Z",
+      "side": 1,
+      "message": "It is not possible to use uint2_t as the underlying type for an enum class.",
+      "parentUuid": "71efd478_30ec3b41",
+      "revId": "5330a8192a6cae5d4a16e6e491e260a557d250a3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
