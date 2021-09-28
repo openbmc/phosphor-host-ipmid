@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2aee224_4b0558a0",
+        "filename": "systemintfcmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2021-09-28T09:00:00Z",
+      "side": 1,
+      "message": "I will let IBM team comment on this. @Adriana",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 64
+      },
+      "revId": "f54e8ca7584585732099f9098804cc3724d25bad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
