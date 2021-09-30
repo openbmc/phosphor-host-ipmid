@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7035dc70_212645f7",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2021-09-30T07:23:41Z",
+      "side": 1,
+      "message": "What is preferred m.get_path() or m.read(objPath)?",
+      "range": {
+        "startLine": 133,
+        "startChar": 3,
+        "endLine": 133,
+        "endChar": 33
+      },
+      "revId": "6bf1cba29e259b198523109e3310ac625ac3dd44",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
