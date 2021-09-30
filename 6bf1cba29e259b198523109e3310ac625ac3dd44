@@ -22,6 +22,30 @@
       "revId": "6bf1cba29e259b198523109e3310ac625ac3dd44",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bcd750ae_b1438e7a",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-09-30T07:36:44Z",
+      "side": 1,
+      "message": "The m.get_path() is the path of the message itself, but not in the message data.\nIn this case, it\u0027s the callback of PropertiesChanged(), and the message itself contains the path of DBus object whose properties is changed. The message data contains the interface name and the dict of changed properties.\n\nm.read(objPath) is used when the message data itself contains a object path.",
+      "parentUuid": "7035dc70_212645f7",
+      "range": {
+        "startLine": 133,
+        "startChar": 3,
+        "endLine": 133,
+        "endChar": 33
+      },
+      "revId": "6bf1cba29e259b198523109e3310ac625ac3dd44",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
