@@ -22,6 +22,30 @@
       "revId": "f54e8ca7584585732099f9098804cc3724d25bad",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5b0cc30_28d518bb",
+        "filename": "systemintfcmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-30T00:10:31Z",
+      "side": 1,
+      "message": "This definitely seems to be more inline with the spec. We should only be returning 2 if the buffer is full, 1 if there is something to read and 0 otherwise.",
+      "parentUuid": "b2aee224_4b0558a0",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 64
+      },
+      "revId": "f54e8ca7584585732099f9098804cc3724d25bad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
