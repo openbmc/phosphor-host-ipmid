@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3c952ed1_38bed685",
+        "filename": "include/ipmid/iana.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-09-30T00:16:15Z",
+      "side": 1,
+      "message": "I would prefer this would go in the Foxconn OEM provider library. There is not really a need to declare this value in common code. The only reason the Google one is there is because they were the company that implemented the OEM handling in the first place. The only value that should be used by code in phosphor-host-ipmid is the OpenBMC value. All the others should only be used in OEM provider library code. That is the reason that it is not an enum, so that external code can add their own values.",
+      "revId": "265bffbcb6df7964b0820fa33bf36e82398e1d32",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
