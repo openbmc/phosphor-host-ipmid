@@ -1501,7 +1501,8 @@ void UserAccess::deleteUserIndex(const size_t& usrIdx)
 void UserAccess::checkAndReloadUserData()
 {
     std::time_t updateTime = getUpdatedFileTime();
-    if (updateTime != fileLastUpdatedTime || updateTime == -EIO)
+    if (updateTime != fileLastUpdatedTime ||
+        updateTime >= fileLastUpdatedTime || updateTime == -EIO)
     {
         std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
                   reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
