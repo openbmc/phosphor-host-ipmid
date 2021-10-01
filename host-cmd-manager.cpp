@@ -112,9 +112,8 @@ void Manager::checkQueueAndAlertHost()
     {
         log<level::DEBUG>("Asserting SMS Attention");
 
-        std::string HOST_IPMI_SVC("org.openbmc.HostIpmi");
-        std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
-        std::string IPMI_INTERFACE("org.openbmc.HostIpmi");
+        auto host = 
+            ::ipmi::getService(this->bus, HOST_MANAGER_INTF, HOST_MANAGER_PATH);
 
         // Start the timer for this transaction
         auto time = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -127,9 +126,9 @@ void Manager::checkQueueAndAlertHost()
             return;
         }
 
-        auto method =
-            this->bus.new_method_call(HOST_IPMI_SVC.c_str(), IPMI_PATH.c_str(),
-                                      IPMI_INTERFACE.c_str(), "setAttention");
+        auto method = this->bus.new_method_call(
+            host.c_str(), HOST_MANAGER_PATH, HOST_MANAGER_INTF, "setAttention");
+
         auto reply = this->bus.call(method);
 
         if (reply.is_method_error())
