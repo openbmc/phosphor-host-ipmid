@@ -1501,10 +1501,17 @@ void UserAccess::deleteUserIndex(const size_t& usrIdx)
 void UserAccess::checkAndReloadUserData()
 {
     std::time_t updateTime = getUpdatedFileTime();
-    if (updateTime != fileLastUpdatedTime || updateTime == -EIO)
+    using namespace std::chrono;
+    steady_clock::time_point currentTick = steady_clock::now();
+
+    if (updateTime != fileLastUpdatedTime || updateTime == -EIO ||
+        (updateTime == fileLastUpdatedTime &&
+         (currentTick <= (userDataFileLastReloadTime +
+                          duration_cast<std::chrono::seconds>(seconds(2))))))
     {
         std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
                   reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
+        userDataFileLastReloadTime = currentTick;
         readUserData();
     }
     return;
