@@ -717,7 +717,7 @@ bool pamUserCheckAuthenticate(std::string_view username,
 
     pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
 
-    if (pam_start("dropbear", username.data(), &localConversation,
+    if (pam_start("ipmi", username.data(), &localConversation,
                   &localAuthHandle) != PAM_SUCCESS)
     {
         log<level::ERR>("User Authentication Failure");
