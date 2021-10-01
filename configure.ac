@@ -166,11 +166,15 @@ AS_IF([test "x$enable_softoff" != "xno"],
     # Timeouts in SECONDS for SoftPowerOff protocol
     [AC_ARG_VAR(IPMI_SMS_ATN_ACK_TIMEOUT_SECS, \
          [Initial timeout for host to ack and query SMS_ATN from BMC])]
-    [AC_DEFINE_UNQUOTED([IPMI_SMS_ATN_ACK_TIMEOUT_SECS], [3], \
+    AS_IF([test "x$IPMI_SMS_ATN_ACK_TIMEOUT_SECS" == "x"], [IPMI_SMS_ATN_ACK_TIMEOUT_SECS=3])
+    [AC_DEFINE_UNQUOTED([IPMI_SMS_ATN_ACK_TIMEOUT_SECS], [$IPMI_SMS_ATN_ACK_TIMEOUT_SECS], \
                         [Timeout for host to ack and query SMS_ATN from BMC])]
 
     [AC_ARG_VAR(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS, [Wait time for host to shutdown])]
-    [AC_DEFINE_UNQUOTED([IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS], [45*60], [Wait time for host to shutdown])]
+    AS_IF([test "x$IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS" == "x"],
+         [IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS=45*60])
+    [AC_DEFINE_UNQUOTED([IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS], \
+                       [$IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS], [Wait time for host to shutdown])]
 
     # Indicates an in-band power off or reboot request from the host
     # This file is used to ensure the soft off service does not run for host
@@ -185,6 +189,19 @@ AS_IF([test "x$enable_softoff" != "xno"],
         [HOST_INBAND_REQUEST_FILE="host@%u-request"])
     [AC_DEFINE_UNQUOTED([HOST_INBAND_REQUEST_FILE], ["$HOST_INBAND_REQUEST_FILE"], [File to create if host has initiated shutdown or reboot])]
 )
+
+# Host Command Manager Path
+AC_ARG_VAR(HOST_MANAGER_PATH, [The Host Command Manager path to own])
+AS_IF([test "x$HOST_MANAGER_PATH" == "x"],
+      [HOST_MANAGER_PATH="/org/openbmc/HostIpmi/1"])
+AC_DEFINE_UNQUOTED([HOST_MANAGER_PATH], ["$HOST_MANAGER_PATH"], [The Host Command Manager path to own])
+
+# Host Command Manager Interface
+AC_ARG_VAR(HOST_MANAGER_INTF, [The Host Command Manager interface to own])
+AS_IF([test "x$HOST_MANAGER_INTF" == "x"],
+      [HOST_MANAGER_INTF="org.openbmc.HostIpmi"])
+AC_DEFINE_UNQUOTED([HOST_MANAGER_INTF], ["$HOST_MANAGER_INTF"], [The Host Command Manager interface to own])
+
 
 # Control Host Interfaces
 # Dbus service name
