@@ -1500,8 +1500,9 @@ void UserAccess::deleteUserIndex(const size_t& usrIdx)
 
 void UserAccess::checkAndReloadUserData()
 {
-    std::time_t updateTime = getUpdatedFileTime();
-    if (updateTime != fileLastUpdatedTime || updateTime == -EIO)
+    uint64_t updateTime = getUpdatedFileTime();
+    if (updateTime != fileLastUpdatedTime ||
+        updateTime == static_cast<uint64_t>(-EIO))
     {
         std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
                   reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
@@ -1553,7 +1554,7 @@ void UserAccess::getSystemPrivAndGroups()
     return;
 }
 
-std::time_t UserAccess::getUpdatedFileTime()
+uint64_t UserAccess::getUpdatedFileTime()
 {
     struct stat fileStat;
     if (stat(ipmiUserDataFile, &fileStat) != 0)
@@ -1561,7 +1562,9 @@ std::time_t UserAccess::getUpdatedFileTime()
         log<level::DEBUG>("Error in getting last updated time stamp");
         return -EIO;
     }
-    return fileStat.st_mtime;
+    uint64_t modification_ms =
+        fileStat.st_mtime * 1000 + fileStat.st_mtim.tv_nsec / 1000000;
+    return modification_ms;
 }
 
 void UserAccess::getUserProperties(const DbusUserObjProperties& properties,
