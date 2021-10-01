@@ -20,6 +20,7 @@
 #include "channel_mgmt.hpp"
 
 #include <security/pam_appl.h>
+#include <sys/inotify.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -97,6 +98,7 @@ static constexpr const char* allGrpProperty = "AllGroups";
 static constexpr const char* userPrivProperty = "UserPrivilege";
 static constexpr const char* userGrpProperty = "UserGroups";
 static constexpr const char* userEnabledProperty = "UserEnabled";
+static int ipmiUserDataFileModifyStatus = -1;
 
 static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-reserved", // PRIVILEGE_RESERVED - 0
@@ -1500,8 +1502,19 @@ void UserAccess::deleteUserIndex(const size_t& usrIdx)
 
 void UserAccess::checkAndReloadUserData()
 {
+    int inotifyFd = inotify_init();
+    // Add watch on ipmiUserDataFile file modify.
+    ipmiUserDataFileModifyStatus =
+        inotify_add_watch(inotifyFd, ipmiUserDataFile,
+                          IN_CREATE | IN_MOVED_TO | IN_DELETE | IN_MODIFY);
+    if (ipmiUserDataFileModifyStatus == -1)
+    {
+        return;
+    }
+
     std::time_t updateTime = getUpdatedFileTime();
-    if (updateTime != fileLastUpdatedTime || updateTime == -EIO)
+    if (updateTime != fileLastUpdatedTime || updateTime == -EIO ||
+        ipmiUserDataFileModifyStatus)
     {
         std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
                   reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
