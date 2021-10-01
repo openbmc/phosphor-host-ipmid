@@ -70,6 +70,8 @@ static constexpr const char* getObjectMethod = "GetObject";
 static constexpr const char* ipmiUserMutex = "ipmi_usr_mutex";
 static constexpr const char* ipmiMutexCleanupLockFile =
     "/var/lib/ipmi/ipmi_usr_mutex_cleanup";
+static constexpr const char* ipmiUserSignalLockFile =
+    "/var/lib/ipmi/ipmi_usr_signal_mutex";
 static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
 static constexpr const char* ipmiGrpName = "ipmi";
 static constexpr size_t privNoAccess = 0xF;
@@ -1504,8 +1506,10 @@ void UserAccess::deleteUserIndex(const size_t& usrIdx)
 
 void UserAccess::checkAndReloadUserData()
 {
-    std::time_t updateTime = getUpdatedFileTime();
-    if (updateTime != fileLastUpdatedTime || updateTime == -EIO)
+    std::timespec updateTime = getUpdatedFileTime();
+    if ((updateTime.tv_sec != fileLastUpdatedTime.tv_sec ||
+         updateTime.tv_nsec != fileLastUpdatedTime.tv_nsec) ||
+        (updateTime.tv_sec == 0 && updateTime.tv_nsec == 0))
     {
         std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
                   reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
@@ -1557,15 +1561,15 @@ void UserAccess::getSystemPrivAndGroups()
     return;
 }
 
-std::time_t UserAccess::getUpdatedFileTime()
+std::timespec UserAccess::getUpdatedFileTime()
 {
     struct stat fileStat;
     if (stat(ipmiUserDataFile, &fileStat) != 0)
     {
         log<level::DEBUG>("Error in getting last updated time stamp");
-        return -EIO;
+        return std::timespec{0, 0};
     }
-    return fileStat.st_mtime;
+    return fileStat.st_mtim;
 }
 
 void UserAccess::getUserProperties(const DbusUserObjProperties& properties,
@@ -1631,7 +1635,18 @@ void UserAccess::cacheUserDataFile()
         }
         writeUserData();
     }
-    sigHndlrLock = boost::interprocess::file_lock(ipmiUserDataFile);
+    // Create lock file if it does not exist
+    int fd = open(ipmiUserSignalLockFile, O_CREAT | O_TRUNC | O_SYNC,
+                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd < 0)
+    {
+        log<level::ERR>("Error in creating IPMI user signal lock file");
+        throw std::ios_base::failure(
+            "Error in creating temporary IPMI user signal lock file");
+    }
+    close(fd);
+
+    sigHndlrLock = boost::interprocess::file_lock(ipmiUserSignalLockFile);
     // Register it for single object and single process either netipimd /
     // host-ipmid
     if (userUpdatedSignal == nullptr && sigHndlrLock.try_lock())

@@ -379,7 +379,7 @@ class UserAccess
     std::vector<std::string> availablePrivileges;
     std::vector<std::string> availableGroups;
     sdbusplus::bus::bus bus;
-    std::time_t fileLastUpdatedTime;
+    std::timespec fileLastUpdatedTime;
     bool signalHndlrObject = false;
     boost::interprocess::file_lock sigHndlrLock;
     boost::interprocess::file_lock mutexCleanupLock;
@@ -388,7 +388,7 @@ class UserAccess
      *
      *  @return time stamp or -EIO for failure
      */
-    std::time_t getUpdatedFileTime();
+    std::timespec getUpdatedFileTime();
 
     /** @brief function to available system privileges and groups
      *
