@@ -380,6 +380,7 @@ class UserAccess
     std::vector<std::string> availableGroups;
     sdbusplus::bus::bus bus;
     std::time_t fileLastUpdatedTime;
+    std::chrono::steady_clock::time_point userDataFileLastReloadTime{};
     bool signalHndlrObject = false;
     boost::interprocess::file_lock sigHndlrLock;
     boost::interprocess::file_lock mutexCleanupLock;
