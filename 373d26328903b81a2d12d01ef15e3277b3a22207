@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7bc5dafd_40e9eb63",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-10-04T18:59:22Z",
+      "side": 1,
+      "message": "The device id was verified a while back with https://github.com/openbmc/phosphor-host-ipmid/commit/2b7e07d36754ba6da18079affbfeaf247511f93b\n\nSo curious on how it\u0027s broken today. Do you have an example of what ipmitool mc info currently reports without this change to see what the issue is? Also if you could post the output of \"ipmitool raw 0x06 0x01\" with and without the change, just to verify that we\u0027re still adhering to the spec which calls for BCD formatting of the major and minor fw fields.",
+      "revId": "373d26328903b81a2d12d01ef15e3277b3a22207",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
