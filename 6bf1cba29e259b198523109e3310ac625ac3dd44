@@ -46,6 +46,30 @@
       "revId": "6bf1cba29e259b198523109e3310ac625ac3dd44",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bf4e92a6_0f67bd37",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2021-10-04T09:54:19Z",
+      "side": 1,
+      "message": "Got it, Thx.",
+      "parentUuid": "bcd750ae_b1438e7a",
+      "range": {
+        "startLine": 133,
+        "startChar": 3,
+        "endLine": 133,
+        "endChar": 33
+      },
+      "revId": "6bf1cba29e259b198523109e3310ac625ac3dd44",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
