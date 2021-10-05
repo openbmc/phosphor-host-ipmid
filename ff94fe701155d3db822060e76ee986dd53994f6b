@@ -45,6 +45,29 @@
       "revId": "ff94fe701155d3db822060e76ee986dd53994f6b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de138c72_0ac312ac",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-05T00:23:47Z",
+      "side": 1,
+      "message": "when you end up with something like this, where parsing bytes depends on the previous contents of the message or on some other internal states, you need to change the function signature to request a \"message::Payload\u0026 req\" to conditionally parse them in the code below. Then you need to do things like:\n\nstd::bitset\u003c15\u003e assert, deassert;\nbool resvd1, resvd2;\nstd::array\u003cuint8_t, 3\u003e eventData;\nif (sensor-is-discrete)\n{\n    if (req.unpack(assert, resvd1, deassert, resvd2,\n        eventData) !\u003d 0 || !req.fullyUnpacked())\n    {\n        return responseReqDataLenInvalid();\n    }\n}\nelse\n{\n    // unpack threshold sensor types\n}",
+      "range": {
+        "startLine": 344,
+        "startChar": 27,
+        "endLine": 345,
+        "endChar": 68
+      },
+      "revId": "ff94fe701155d3db822060e76ee986dd53994f6b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
