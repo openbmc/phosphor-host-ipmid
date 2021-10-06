@@ -16,6 +16,24 @@
       "revId": "373d26328903b81a2d12d01ef15e3277b3a22207",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07e9c659_68bfa7ba",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000992
+      },
+      "writtenOn": "2021-10-06T05:01:36Z",
+      "side": 1,
+      "message": "Hi Adriana,\n\n1. For the ipmitool mc info, Tag with v1.11.0001-ampere\n- With the change, Firmware Revision         : 1.11\n- Without the change, Firmware Revision      : 1.17\n\n2.For the ipmitool raw 0x06 0x01 command\n- With the change:\n# ipmitool raw 0x06 0x01\n 20 01 00 00 02 8d 3a cd 00 82 00 00 00 00 00\n- Without the change:\n# ipmitool raw 0x06 0x01\n 20 01 00 00 02 8d 3a cd 00 82 00 00 00 00 00\n\nThanks,",
+      "parentUuid": "7bc5dafd_40e9eb63",
+      "revId": "373d26328903b81a2d12d01ef15e3277b3a22207",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
