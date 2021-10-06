@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39904426_8f9ac43f",
+        "filename": "configure.ac",
+        "patchSetId": 4
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-06T00:30:19Z",
+      "side": 1,
+      "message": "these are unrelated changes. Please make this a separate commit.",
+      "range": {
+        "startLine": 169,
+        "startChar": 1,
+        "endLine": 177,
+        "endChar": 102
+      },
+      "revId": "ed2592e3ab9e8a7e2fee083f2d974fef214637c7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8cd70c7d_a62ddf9a",
+        "filename": "configure.ac",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-06T00:30:19Z",
+      "side": 1,
+      "message": "This is not usually how the OpenBMC DBus path/interface determination goes. Usually, you have an interface (and maybe a path) that you want to affect. If you know both, then getService should be sufficient. Otherwise, getAllDbusObjects/getDbusOjbect will return services and paths that are provided for an interface.\n\nI agree that hard coding them is not the way to go, but I don\u0027t think adding them as compile-time parameters is either.",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 205,
+        "endChar": 0
+      },
+      "revId": "ed2592e3ab9e8a7e2fee083f2d974fef214637c7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
