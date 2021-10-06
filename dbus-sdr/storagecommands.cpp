@@ -141,7 +141,7 @@ bool writeFru()
     {
         sdbusplus::message::message writeFruResp = dbus->call(writeFru);
     }
-    catch (sdbusplus::exception_t&)
+    catch (const sdbusplus::exception_t&)
     {
         // todo: log sel?
         phosphor::logging::log<phosphor::logging::level::ERR>(
@@ -318,7 +318,7 @@ void startMatch(void)
                                 {
                                     message.read(path, object);
                                 }
-                                catch (sdbusplus::exception_t&)
+                                catch (const sdbusplus::exception_t&)
                                 {
                                     return;
                                 }
@@ -344,7 +344,7 @@ void startMatch(void)
                                 {
                                     message.read(path, interfaces);
                                 }
-                                catch (sdbusplus::exception_t&)
+                                catch (const sdbusplus::exception_t&)
                                 {
                                     return;
                                 }
@@ -843,12 +843,12 @@ static int fromHexStr(const std::string& hexStr, std::vector<uint8_t>& data)
             data.push_back(static_cast<uint8_t>(
                 std::stoul(hexStr.substr(i, 2), nullptr, 16)));
         }
-        catch (std::invalid_argument& e)
+        catch (const std::invalid_argument& e)
         {
             phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
             return -1;
         }
-        catch (std::out_of_range& e)
+        catch (const std::out_of_range& e)
         {
             phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
             return -1;
@@ -1158,7 +1158,7 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
     {
         sdbusplus::message::message reloadResponse = dbus->call(rsyslogReload);
     }
-    catch (sdbusplus::exception_t& e)
+    catch (const sdbusplus::exception_t& e)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
     }

@@ -598,7 +598,7 @@ struct IpmiProvider
         {
             addr = dlopen(name.c_str(), RTLD_NOW);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             log<level::ERR>("ERROR opening IPMI provider",
                             entry("PROVIDER=%s", name.c_str()),

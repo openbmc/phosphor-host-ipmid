@@ -126,7 +126,7 @@ ipmi::RspType<uint8_t,  // SEL revision.
             addTimeStamp = static_cast<uint32_t>(
                 (ipmi::sel::getEntryTimeStamp(cache::paths.back()).count()));
         }
-        catch (InternalFailure& e)
+        catch (const InternalFailure& e)
         {
         }
         catch (const std::runtime_error& e)
@@ -208,7 +208,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         record = ipmi::sel::convertLogEntrytoSEL(*iter);
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -504,7 +504,7 @@ ipmi::RspType<uint32_t> // current time
         reply.read(value);
         bmc_time_usec = std::get<uint64_t>(value);
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();
@@ -556,7 +556,7 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
             return ipmi::responseUnspecifiedError();
         }
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();

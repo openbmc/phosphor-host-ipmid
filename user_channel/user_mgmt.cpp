@@ -1297,7 +1297,7 @@ void UserAccess::readUserData()
                 }
             }
         }
-        catch (Json::out_of_range& e)
+        catch (const Json::out_of_range& e)
         {
             // Key not found in 'userInfo'; possibly an old JSON file. Use
             // default values for all payloads, and SOL payload default is true.

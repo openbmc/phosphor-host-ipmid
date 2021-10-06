@@ -73,7 +73,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
             auto mapperReply = dbus->call(mapperCall);
             mapperReply.read(sensorTreePartial);
         }
-        catch (sdbusplus::exception_t& e)
+        catch (const sdbusplus::exception_t& e)
         {
             phosphor::logging::log<phosphor::logging::level::ERR>(
                 "fail to update subtree",
@@ -264,7 +264,7 @@ uint16_t getSensorNumberFromPath(const std::string& path)
     {
         return sensorNumMapPtr->right.at(path);
     }
-    catch (std::out_of_range& e)
+    catch (const std::out_of_range& e)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
         return invalidSensorNumber;
@@ -298,7 +298,7 @@ std::string getPathFromSensorNumber(uint16_t sensorNum)
     {
         return sensorNumMapPtr->left.at(sensorNum);
     }
-    catch (std::out_of_range& e)
+    catch (const std::out_of_range& e)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
         return std::string();

@@ -323,7 +323,7 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         pcapValue = dcmi::getPcap(sdbus);
         pcapEnable = dcmi::getPcapEnabled(sdbus);
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -378,7 +378,7 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         dcmi::setPcap(sdbus, requestData->powerLimit);
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -412,7 +412,7 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         dcmi::setPcapEnable(sdbus,
                             static_cast<bool>(requestData->powerLimitAction));
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -451,7 +451,7 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         assetTag = dcmi::readAssetTag();
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -538,7 +538,7 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         return IPMI_CC_OK;
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -567,7 +567,7 @@ ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         hostName = dcmi::getHostName();
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
@@ -642,7 +642,7 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                                   std::string(newCtrlIdStr.data()));
         }
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         *data_len = 0;
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -828,7 +828,7 @@ std::tuple<Response, NumInstances> read(const std::string& type,
             service =
                 ipmi::getService(bus, "xyz.openbmc_project.Sensor.Value", path);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             log<level::DEBUG>(e.what());
             return std::make_tuple(response, numInstances);
@@ -893,7 +893,7 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
             r.sign = sign;
             response.push_back(r);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             log<level::DEBUG>(e.what());
             continue;
@@ -962,7 +962,7 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         responseData->numDataSets = temps.size();
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
@@ -1021,7 +1021,7 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
         // formula Value * 10^Scale.
         power = value * std::pow(10, scale);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::INFO>("Failure to read power value from D-Bus object",
                          entry("OBJECT_PATH=%s", objectPath.c_str()),
@@ -1091,7 +1091,7 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 return IPMI_CC_INVALID;
         }
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -1157,7 +1157,7 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                 return IPMI_CC_INVALID;
         }
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
@@ -1191,7 +1191,7 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         power = getPowerReading(bus);
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         log<level::ERR>("Error in reading power sensor value",
                         entry("INTERFACE=%s", SENSOR_VALUE_INTF),
@@ -1294,7 +1294,7 @@ std::tuple<ResponseList, NumInstances>
             Response response = createFromJson(reading);
             responses.push_back(response);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             log<level::DEBUG>(e.what());
             continue;
@@ -1374,7 +1374,7 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
         responseData->numRecords = sensors.size();
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         return IPMI_CC_UNSPECIFIED_ERROR;
     }

@@ -806,7 +806,7 @@ Json ChannelConfig::readJsonFile(const std::string& configFile)
     {
         data = Json::parse(jsonFile, nullptr, false);
     }
-    catch (Json::parse_error& e)
+    catch (const Json::parse_error& e)
     {
         log<level::DEBUG>("Corrupted channel config.",
                           entry("MSG=%s", e.what()));

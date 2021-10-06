@@ -99,7 +99,7 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
             return IPMI_CC_UNSPECIFIED_ERROR;
         }
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         commit<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;

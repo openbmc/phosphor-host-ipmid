@@ -141,7 +141,7 @@ void appendChassisType(const PropertyMap& propMap, FruAreaData& data)
         {
             chassisType = std::stoi(value);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             log<level::ERR>("Could not parse chassis type",
                             entry("VALUE=%s", value.c_str()),

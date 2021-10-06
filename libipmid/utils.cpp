@@ -326,7 +326,7 @@ void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
                                            "Delete");
         }
     }
-    catch (sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::INFO>("sdbusplus exception - Unable to delete the objects",
                          entry("ERROR=%s", e.what()),

@@ -106,7 +106,7 @@ Json CipherConfig::readCSPrivilegeLevels(const std::string& csFileName)
     {
         data = Json::parse(jsonFile, nullptr, false);
     }
-    catch (Json::parse_error& e)
+    catch (const Json::parse_error& e)
     {
         log<level::ERR>("Corrupted cipher suite privilege levels config file.",
                         entry("MSG: %s", e.what()));

@@ -1098,7 +1098,7 @@ ipmi::RspType<uint8_t, // readable
     {
         thresholdData = getIPMIThresholds(sensorMap);
     }
-    catch (std::exception&)
+    catch (const std::exception&)
     {
         return ipmi::responseResponseError();
     }
@@ -1628,7 +1628,7 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     {
         thresholdData = getIPMIThresholds(sensorMap);
     }
-    catch (std::exception&)
+    catch (const std::exception&)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "getSensorDataRecord: getIPMIThresholds error");

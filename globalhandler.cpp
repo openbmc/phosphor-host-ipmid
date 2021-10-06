@@ -42,7 +42,7 @@ ipmi::RspType<> ipmiGlobalReset()
     {
         resetBMC();
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();

@@ -387,7 +387,7 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
         auto ipmiRC = iter->second.updateFunc(cmdData, iter->second);
         return ipmi::response(ipmiRC);
     }
-    catch (InternalFailure& e)
+    catch (const InternalFailure& e)
     {
         log<level::ERR>("Set sensor failed",
                         entry("SENSOR_NUM=%d", sensorNumber));
@@ -1094,7 +1094,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     {
         dbus.call(writeSEL);
     }
-    catch (sdbusplus::exception_t& e)
+    catch (const sdbusplus::exception_t& e)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
         return IPMI_CC_UNSPECIFIED_ERROR;
