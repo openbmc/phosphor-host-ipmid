@@ -27,6 +27,11 @@ std::vector<uint8_t>
         std::vector<uint8_t> errorPayload{IPMI_CC_REQ_DATA_LEN_INVALID};
         return errorPayload;
     }
+    if (request->reserved != 0)
+    {
+        std::vector<uint8_t> errorPayload{IPMI_CC_INVALID_FIELD_REQUEST};
+        return errorPayload;
+    }
 
     std::vector<uint8_t> outPayload(sizeof(SetSessionPrivLevelResp));
     auto response =
@@ -41,6 +46,14 @@ std::vector<uint8_t>
         response->newPrivLevel = session->currentPrivilege();
         return outPayload;
     }
+    if (reqPrivilegeLevel ==
+            static_cast<uint8_t>(session::Privilege::CALLBACK) ||
+        reqPrivilegeLevel > static_cast<uint8_t>(session::Privilege::OEM))
+    {
+        response->completionCode = IPMI_CC_INVALID_FIELD_REQUEST;
+        return outPayload;
+    }
+
     if (reqPrivilegeLevel > (static_cast<uint8_t>(session->reqMaxPrivLevel) &
                              session::reqMaxPrivMask))
     {
