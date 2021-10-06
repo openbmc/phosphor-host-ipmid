@@ -16,6 +16,24 @@
       "revId": "265bffbcb6df7964b0820fa33bf36e82398e1d32",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "550b626a_9dd39490",
+        "filename": "include/ipmid/iana.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1001166
+      },
+      "writtenOn": "2021-10-06T20:45:27Z",
+      "side": 1,
+      "message": "Okay makes sense. I will use it in the Foxconn OEM provider library.",
+      "parentUuid": "3c952ed1_38bed685",
+      "revId": "265bffbcb6df7964b0820fa33bf36e82398e1d32",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
