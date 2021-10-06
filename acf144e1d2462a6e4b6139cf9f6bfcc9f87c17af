@@ -22,6 +22,30 @@
       "revId": "acf144e1d2462a6e4b6139cf9f6bfcc9f87c17af",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa85ca76_c7cc756e",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2040,
+      "author": {
+        "id": 1000879
+      },
+      "writtenOn": "2021-10-06T11:54:45Z",
+      "side": 1,
+      "message": "IMHO with uint1_t it is more clear - it explicitly shows that this field is 1bit-wide",
+      "parentUuid": "64571342_b6331322",
+      "range": {
+        "startLine": 2040,
+        "startChar": 37,
+        "endLine": 2040,
+        "endChar": 55
+      },
+      "revId": "acf144e1d2462a6e4b6139cf9f6bfcc9f87c17af",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
