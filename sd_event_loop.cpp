@@ -68,7 +68,7 @@ int EventLoop::getVLANID(const std::string channel)
         auto reply = bus.call(req);
         reply.read(objs);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>("getVLANID: failed to execute/read GetSubTree");
         return 0;
@@ -122,7 +122,7 @@ int EventLoop::getVLANID(const std::string channel)
         auto method_reply = bus.call(method);
         method_reply.read(value);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>("getVLANID: failed to execute/read VLAN Id");
         return 0;

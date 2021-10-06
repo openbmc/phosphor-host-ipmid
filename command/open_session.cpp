@@ -83,7 +83,7 @@ std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
             static_cast<cipher::integrity::Algorithms>(request->intAlgo),
             static_cast<cipher::crypt::Algorithms>(request->confAlgo));
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         response->status_code =
             static_cast<uint8_t>(RAKP_ReturnCode::INSUFFICIENT_RESOURCE);

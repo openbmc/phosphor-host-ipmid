@@ -281,7 +281,7 @@ void Context::charAccTimerHandler()
         }
         enableAccumulateTimer(true);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
     }
@@ -305,7 +305,7 @@ void Context::retryTimerHandler()
             enableAccumulateTimer(true);
         }
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
     }

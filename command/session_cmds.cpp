@@ -103,7 +103,7 @@ uint8_t setSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
             return ipmi::ccSuccess;
         }
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>("Failed in getting session state property",
                         entry("service=%s", service.c_str()),
@@ -154,7 +154,7 @@ uint8_t closeOtherNetInstanceSession(const uint32_t reqSessionId,
             }
         }
     }
-    catch (sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to fetch object from dbus",
                         entry("INTERFACE=%s", session::sessionIntf),
@@ -198,7 +198,7 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
             return session::ccInvalidSessionId;
         }
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>("Failed to get session manager instance",
                         entry("ERRMSG=%s", e.what()));
@@ -263,7 +263,7 @@ std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
             session::Manager::get().getSession(handler->sessionID);
         currentSessionPriv = currentSession->currentPrivilege();
     }
-    catch (sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to fetch object from dbus",
                         entry("INTERFACE=%s", session::sessionIntf),

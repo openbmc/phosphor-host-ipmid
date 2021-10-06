@@ -41,7 +41,7 @@ std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
             request->packetSeqNum, request->packetAckSeqNum,
             request->acceptedCharCount, request->inOperation.ack, charData);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         return std::vector<uint8_t>();

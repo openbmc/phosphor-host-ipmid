@@ -261,7 +261,7 @@ void registerSOLServiceChangeCallback()
                 });
         }
     }
-    catch (sdbusplus::exception_t& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>(
             "Failed to get service path in registerSOLServiceChangeCallback");

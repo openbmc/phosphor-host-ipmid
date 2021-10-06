@@ -97,7 +97,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
         session =
             session::Manager::get().getSession(request->managedSystemSessionID);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>("RAKP12 : session not found",
                         entry("EXCEPTION=%s", e.what()));

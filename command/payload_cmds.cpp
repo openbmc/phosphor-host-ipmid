@@ -92,7 +92,7 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         sol::Manager::get().startPayloadInstance(request->payloadInstance,
                                                  handler->sessionID);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
@@ -159,7 +159,7 @@ std::vector<uint8_t>
         {
             activating(request->payloadInstance, sessionID);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             log<level::INFO>(e.what());
             /*
@@ -171,7 +171,7 @@ std::vector<uint8_t>
             return outPayload;
         }
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>(e.what());
         response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
