@@ -46,6 +46,30 @@
       "revId": "acf144e1d2462a6e4b6139cf9f6bfcc9f87c17af",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e8e8614_0918ecb7",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2040,
+      "author": {
+        "id": 1000992
+      },
+      "writtenOn": "2021-10-07T04:02:33Z",
+      "side": 1,
+      "message": "Thank Andrei for your comment.\n\nHi Vernon, do you have any idea?",
+      "parentUuid": "fa85ca76_c7cc756e",
+      "range": {
+        "startLine": 2040,
+        "startChar": 37,
+        "endLine": 2040,
+        "endChar": 55
+      },
+      "revId": "acf144e1d2462a6e4b6139cf9f6bfcc9f87c17af",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
