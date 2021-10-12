@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "87958344_8cfc660b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-10-12T09:11:23Z",
+      "side": 1,
+      "message": "Updated",
+      "parentUuid": "289d2063_c00562f1",
+      "range": {
+        "startLine": 10,
+        "startChar": 54,
+        "endLine": 10,
+        "endChar": 62
+      },
+      "revId": "6dd38a17b31f346e474dd685152ddaf25ac8885b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9bcfb7a5_4d0bf503",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "59e67d1a_6568b350",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-10-12T09:11:23Z",
+      "side": 1,
+      "message": "Added. thanks",
+      "parentUuid": "9bcfb7a5_4d0bf503",
+      "range": {
+        "startLine": 12,
+        "startChar": 12,
+        "endLine": 12,
+        "endChar": 13
+      },
+      "revId": "6dd38a17b31f346e474dd685152ddaf25ac8885b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ffa72450_c39c1418",
         "filename": "user_channel/user_mgmt.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2021-10-12T06:27:20Z",
       "side": 1,
       "message": "This check will have worse effects in some cases.\n\nExample: If BMC system time is updated to new value which is less, Then we will miss all user updates. that is BMC time is x and later BMC time synced and updated to x-y, Then till all update time reached to x, All user data will not get updated.",
+      "range": {
+        "startLine": 1504,
+        "startChar": 18,
+        "endLine": 1504,
+        "endChar": 21
+      },
+      "revId": "6dd38a17b31f346e474dd685152ddaf25ac8885b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "36f0735d_c997147b",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1504,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-10-12T09:11:23Z",
+      "side": 1,
+      "message": "Not sure in real time this can be reproducible. In that case better we can remove this condition. But it may lead performance issues. If you have better solution please suggest.",
+      "parentUuid": "ffa72450_c39c1418",
       "range": {
         "startLine": 1504,
         "startChar": 18,
