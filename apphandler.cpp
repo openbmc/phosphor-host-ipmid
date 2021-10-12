@@ -1635,6 +1635,11 @@ ipmi::RspType<std::vector<uint8_t>>
     {
         return ipmi::responseInvalidFieldRequest();
     }
+    uint7_t pbusId = 0;
+    if (isPrivateBus)
+    {
+        pbusId = static_cast<uint7_t>(channelNum) << 3 | busId;
+    }
     if (readCount > maxIPMIWriteReadSize)
     {
         log<level::ERR>("Master write read command: Read count exceeds limit");
@@ -1647,18 +1652,20 @@ ipmi::RspType<std::vector<uint8_t>>
         return ipmi::responseInvalidFieldRequest();
     }
 #ifdef ENABLE_I2C_WHITELIST_CHECK
-    if (!isCmdWhitelisted(static_cast<uint8_t>(busId),
+    if (!isCmdWhitelisted(static_cast<uint8_t>(isPrivateBus ? pbusId : busId),
                           static_cast<uint8_t>(slaveAddr), writeData))
     {
         log<level::ERR>("Master write read request blocked!",
-                        entry("BUS=%d", static_cast<uint8_t>(busId)),
+                        entry("BUS=%d", static_cast<uint8_t>(
+                                            isPrivateBus ? pbusId : busId)),
                         entry("ADDR=0x%x", static_cast<uint8_t>(slaveAddr)));
         return ipmi::responseInvalidFieldRequest();
     }
 #endif // ENABLE_I2C_WHITELIST_CHECK
     std::vector<uint8_t> readBuf(readCount);
     std::string i2cBus =
-        "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
+        "/dev/i2c-" +
+        std::to_string(static_cast<uint8_t>(isPrivateBus ? pbusId : busId));
 
     ipmi::Cc ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(slaveAddr),
                                       writeData, readBuf);
