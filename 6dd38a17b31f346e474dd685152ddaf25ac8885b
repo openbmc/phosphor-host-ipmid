@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "289d2063_c00562f1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-10-12T06:43:29Z",
+      "side": 1,
+      "message": "Change it as :\nmissing \u003d\u003e not happening",
+      "range": {
+        "startLine": 10,
+        "startChar": 54,
+        "endLine": 10,
+        "endChar": 62
+      },
+      "revId": "6dd38a17b31f346e474dd685152ddaf25ac8885b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bcfb7a5_4d0bf503",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-10-12T06:43:29Z",
+      "side": 1,
+      "message": "Insert below lines here:\n\n\"\nipmi_user.json information is cached in \u0027usersTbl\u0027 which is currently updated only when file modification time is not same as cache last updated time.  Since modification time is in \u0027seconds\u0027 granularity, there exists a race condition in updating the cache if \n multiple updates happen to a file with in a second. \"",
+      "range": {
+        "startLine": 12,
+        "startChar": 12,
+        "endLine": 12,
+        "endChar": 13
+      },
+      "revId": "6dd38a17b31f346e474dd685152ddaf25ac8885b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ffa72450_c39c1418",
         "filename": "user_channel/user_mgmt.cpp",
         "patchSetId": 3
