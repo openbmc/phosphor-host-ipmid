@@ -202,8 +202,30 @@ GetSensorResponse eventdata2(const Info& sensorInfo)
 std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
                                            sdbusplus::message::message& msg)
 {
-    // TODO
-    return {};
+    auto type = msg.get_type();
+    if (type == msgTypeSignal)
+    {
+        // This is signal callback
+        std::string interfaceName;
+        msg.read(interfaceName);
+        if (interfaceName != sensorInfo.sensorInterface)
+        {
+            // Not the interface we need
+            return {};
+        }
+    }
+
+    // The assertion may contain multiple properties
+    // So we have to get the properties from DBus anyway
+    auto response = mapDbusToAssertion(sensorInfo, sensorInfo.sensorPath,
+                                       sensorInfo.sensorInterface);
+
+    if (!sensorCacheMap[id].has_value())
+    {
+        sensorCacheMap[id] = SensorData{};
+    }
+    sensorCacheMap[id]->response = response;
+    return response;
 }
 
 std::optional<GetSensorResponse> eventdata2(uint8_t id, const Info& sensorInfo,
