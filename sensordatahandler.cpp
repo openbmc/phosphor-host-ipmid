@@ -158,14 +158,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
     return response;
 }
 
-#ifndef FEATURE_SENSORS_CACHE
-GetSensorResponse assertion(const Info& sensorInfo)
-{
-    return mapDbusToAssertion(sensorInfo, sensorInfo.sensorPath,
-                              sensorInfo.sensorInterface);
-}
-
-GetSensorResponse eventdata2(const Info& sensorInfo)
+GetSensorResponse mapDbusToEventdata2(const Info& sensorInfo)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
@@ -197,6 +190,18 @@ GetSensorResponse eventdata2(const Info& sensorInfo)
     }
 
     return response;
+}
+
+#ifndef FEATURE_SENSORS_CACHE
+GetSensorResponse assertion(const Info& sensorInfo)
+{
+    return mapDbusToAssertion(sensorInfo, sensorInfo.sensorPath,
+                              sensorInfo.sensorInterface);
+}
+
+GetSensorResponse eventdata2(const Info& sensorInfo)
+{
+    return mapDbusToEventdata2(sensorInfo);
 }
 #else
 std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
@@ -231,8 +236,29 @@ std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
 std::optional<GetSensorResponse> eventdata2(uint8_t id, const Info& sensorInfo,
                                             sdbusplus::message::message& msg)
 {
-    // TODO
-    return {};
+    auto type = msg.get_type();
+    if (type == msgTypeSignal)
+    {
+        // This is signal callback
+        std::string interfaceName;
+        msg.read(interfaceName);
+        if (interfaceName != sensorInfo.sensorInterface)
+        {
+            // Not the interface we need
+            return {};
+        }
+    }
+
+    // The eventdata2 may contain multiple properties
+    // So we have to get the properties from DBus anyway
+    auto response = mapDbusToEventdata2(sensorInfo);
+
+    if (!sensorCacheMap[id].has_value())
+    {
+        sensorCacheMap[id] = SensorData{};
+    }
+    sensorCacheMap[id]->response = response;
+    return response;
 }
 
 #endif // FEATURE_SENSORS_CACHE
