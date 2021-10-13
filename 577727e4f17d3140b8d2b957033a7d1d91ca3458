@@ -45,6 +45,54 @@
       "revId": "577727e4f17d3140b8d2b957033a7d1d91ca3458",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa009177_5f8e723f",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2021-10-13T20:35:36Z",
+      "side": 1,
+      "message": "IPMIStatsTable is an optional feature, that is only beneficial for debugging/troubleshooting purposes, and can be compiled out if desired, to save space, without any user-visible change in functionality. That\u0027s why it was separate. IPMIWriteTable is more important, though, and stores the mutability permissions of each sensor.",
+      "parentUuid": "60647b87_4ab32437",
+      "range": {
+        "startLine": 266,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 36
+      },
+      "revId": "577727e4f17d3140b8d2b957033a7d1d91ca3458",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24bbd4be_3f58b818",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2021-10-13T20:35:36Z",
+      "side": 1,
+      "message": "It solves a circular dependency regarding variable declarations and definitions, with headers that can include others, such as what is done by many users of these headers. Basically, in some situations this header would be included twice, which would cause a compilation error if this were not done. https://en.cppreference.com/w/cpp/language/inline",
+      "parentUuid": "feeb48f3_5c14b12d",
+      "range": {
+        "startLine": 266,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 6
+      },
+      "revId": "577727e4f17d3140b8d2b957033a7d1d91ca3458",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
