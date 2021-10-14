@@ -1529,22 +1529,9 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     record.body.entity_id = entityId;
     record.body.entity_instance = entityInstance;
 
-    auto maxObject = sensorObject->second.find("MaxValue");
-    auto minObject = sensorObject->second.find("MinValue");
-
-    // If min and/or max are left unpopulated,
-    // then default to what a signed byte would be, namely (-128,127) range.
-    auto max = static_cast<double>(std::numeric_limits<int8_t>::max());
-    auto min = static_cast<double>(std::numeric_limits<int8_t>::lowest());
-    if (maxObject != sensorObject->second.end())
-    {
-        max = std::visit(VariantToDoubleVisitor(), maxObject->second);
-    }
-
-    if (minObject != sensorObject->second.end())
-    {
-        min = std::visit(VariantToDoubleVisitor(), minObject->second);
-    }
+    double max = 0;
+    double min = 0;
+    getSensorMaxMin(sensorMap, max, min);
 
     int16_t mValue = 0;
     int8_t rExp = 0;
