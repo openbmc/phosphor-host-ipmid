@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "74ecc6e2_75b19505",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1139,
+      "author": {
+        "id": 1000908
+      },
+      "writtenOn": "2021-10-14T18:13:25Z",
+      "side": 1,
+      "message": "I didn\u0027t change how the SEL files were cleared, so the logic would be the same. Instead I changed who clears the files (sel-logger vs ipmid). Instead of \u0027forcing\u0027 the shift to clear in sel-logger, I created an option.\n\nFor the problem I described in https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-sel-logger/+/45438, I believe sel-logger should clear the SEL files to more reliably track Record ID. Shall we discuss the potential for sel-logger to clear the SEL files becoming mainstream?",
+      "parentUuid": "c8dfedce_f4c7a6b8",
+      "range": {
+        "startLine": 1139,
+        "startChar": 0,
+        "endLine": 1139,
+        "endChar": 29
+      },
+      "revId": "a5c6164d290ad25baa475a2edbf8fd9637a6a9b0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4208f252_b40291fb",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 1
@@ -69,6 +93,30 @@
       "revId": "a5c6164d290ad25baa475a2edbf8fd9637a6a9b0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e715901_fb66e240",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1175,
+      "author": {
+        "id": 1000908
+      },
+      "writtenOn": "2021-10-14T18:13:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4208f252_b40291fb",
+      "range": {
+        "startLine": 1175,
+        "startChar": 36,
+        "endLine": 1175,
+        "endChar": 52
+      },
+      "revId": "a5c6164d290ad25baa475a2edbf8fd9637a6a9b0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
