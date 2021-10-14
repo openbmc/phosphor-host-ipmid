@@ -1,0 +1,12 @@
+Code-Review+2: Tom Joseph <rushtotom@gmail.com>
+Code-Review+1: Shakeeb A Pasha <shakeebbk@gmail.com>
+Code-Review+1: Zhenfei Tai <ztai@google.com>
+Code-Review+1: Nan Zhou <nanzhoumails@gmail.com>
+Code-Review+1: Willy Tu <wltu@google.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Ok-To-Test+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Harvey Wu <Harvey.Wu@quantatw.com>
+Submitted-at: Thu, 14 Oct 2021 09:15:25 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/46883
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
