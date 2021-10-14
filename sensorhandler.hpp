@@ -17,6 +17,7 @@ enum ipmi_netfn_sen_cmds
     IPMI_CMD_GET_SENSOR_TYPE = 0x2F,
     IPMI_CMD_SET_SENSOR = 0x30,
     IPMI_CMD_GET_SENSOR_THRESHOLDS = 0x27,
+    IPMI_CMD_GET_SENSOR_HYSTERESIS = 0x25,
 };
 
 /**

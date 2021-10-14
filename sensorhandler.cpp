@@ -476,6 +476,84 @@ ipmi::RspType<uint8_t, // sensor reading
     }
 }
 
+struct GetSensorHysteresisResponse
+{
+    uint8_t positive_threshold_hysteresis;
+    uint8_t negative_threshold_hysteresis;
+};
+
+GetSensorHysteresisResponse getSensorHysteresis(const ipmi::sensor::Info* info)
+{
+    GetSensorHysteresisResponse resp{};
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    boost::system::error_code ec;
+    auto positiveHysteresis = 0;
+    auto negativeHysteresis = 0;
+    auto entityManager = "xyz.openbmc_project.EntityManager";
+
+    ipmi::ObjectValueTree objects;
+
+    objects = ipmi::getManagedObjects(bus, entityManager, "/");
+    if (ec)
+    {
+        return resp;
+    }
+
+    auto name = info->sensorName;
+    if (name.empty())
+    {
+        name = info->sensorNameFunc(*info);
+    }
+    for (const auto& [path, interfaceMap] : objects)
+    {
+        auto objpath = static_cast<std::string>(path);
+        std::string pathname = path.filename();
+        if (pathname != name)
+        {
+            continue;
+        }
+
+        for (const auto& [interface, propertyMap] : interfaceMap)
+        {
+            if (auto itr = propertyMap.find("Hysteresis");
+                itr != propertyMap.end())
+            {
+                double hysteresis =
+                    std::visit(ipmi::VariantToDoubleVisitor(), itr->second);
+
+                if (interface.find(".Thresholds") != std::string::npos)
+                {
+                    if (auto itr = propertyMap.find("Direction");
+                        itr != propertyMap.end())
+                    {
+                        auto dir = std::get<std::string>(itr->second);
+                        if (!positiveHysteresis && dir == "greater than")
+                        {
+                            positiveHysteresis = hysteresis;
+                        }
+                        else if (!negativeHysteresis && dir == "less than")
+                        {
+                            negativeHysteresis = hysteresis;
+                        }
+                    }
+                    if (negativeHysteresis && positiveHysteresis)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    resp.positive_threshold_hysteresis =
+        static_cast<uint8_t>(positiveHysteresis);
+    resp.negative_threshold_hysteresis =
+        static_cast<uint8_t>(negativeHysteresis);
+    return resp;
+}
+
 get_sdr::GetSensorThresholdsResponse
     getSensorThresholds(ipmi::Context::ptr& ctx, uint8_t sensorNum)
 {
@@ -742,6 +820,9 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     strncpy(body->id_string, id_string.c_str(),
             get_sdr::body::get_id_strlen(body));
 
+    auto r = getSensorHysteresis(info);
+    body->negative_threshold_hysteresis = r.negative_threshold_hysteresis;
+    body->positive_threshold_hysteresis = r.positive_threshold_hysteresis;
     return IPMI_CC_OK;
 };
 
