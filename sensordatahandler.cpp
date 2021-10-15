@@ -459,6 +459,8 @@ namespace inventory
 namespace get
 {
 
+#ifndef FEATURE_SENSORS_CACHE
+
 GetSensorResponse assertion(const Info& sensorInfo)
 {
     namespace fs = std::filesystem;
@@ -470,6 +472,45 @@ GetSensorResponse assertion(const Info& sensorInfo)
         sensorInfo, path.string(),
         sensorInfo.propertyInterfaces.begin()->first);
 }
+
+#else
+
+std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
+                                           sdbusplus::message::message& msg)
+{
+    auto type = msg.get_type();
+    if (type == msgTypeSignal)
+    {
+        // This is signal callback
+        std::string interfaceName;
+        msg.read(interfaceName);
+        if (interfaceName != sensorInfo.sensorInterface)
+        {
+            // Not the interface we need
+            return {};
+        }
+    }
+
+    // The assertion may contain multiple properties
+    // So we have to get the properties from DBus anyway
+    namespace fs = std::filesystem;
+
+    fs::path path{ipmi::sensor::inventoryRoot};
+    path += sensorInfo.sensorPath;
+
+    auto response = ipmi::sensor::get::mapDbusToAssertion(
+        sensorInfo, path.string(),
+        sensorInfo.propertyInterfaces.begin()->first);
+
+    if (!sensorCacheMap[id].has_value())
+    {
+        sensorCacheMap[id] = SensorData{};
+    }
+    sensorCacheMap[id]->response = response;
+    return response;
+}
+
+#endif
 
 } // namespace get
 
