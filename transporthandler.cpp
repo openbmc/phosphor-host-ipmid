@@ -1109,7 +1109,23 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             copyInto(ip, ipbytes);
             if (enabled)
             {
-                channelCall<reconfigureIfAddr6>(channel, set, ip, prefix);
+                try
+                {
+                    channelCall<reconfigureIfAddr6>(channel, set, ip, prefix);
+                }
+                catch (const sdbusplus::exception::exception& e)
+                {
+                    if (std::string_view err{
+                            "xyz.openbmc_project.Common.Error.InvalidArgument"};
+                        err == e.name())
+                    {
+                        return responseInvalidFieldRequest();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
             else
             {
