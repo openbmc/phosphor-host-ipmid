@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "f5b3d484_0a6ef5be",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1139,
+      "author": {
+        "id": 1000908
+      },
+      "writtenOn": "2021-10-15T14:35:50Z",
+      "side": 1,
+      "message": "Is anyone against me removing the code (and option) that clears SEL here and submit the patch in sel-logger to remove its option and select it to clear the SEL? This can start the process of removing those options from each application.\n\nOtherwise, I am thinking we let this go through with the option and then remove the options in each package with final decisions later.",
+      "parentUuid": "4b6b6767_a9970894",
+      "range": {
+        "startLine": 1139,
+        "startChar": 0,
+        "endLine": 1139,
+        "endChar": 29
+      },
+      "revId": "a5c6164d290ad25baa475a2edbf8fd9637a6a9b0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4208f252_b40291fb",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 1
