@@ -699,6 +699,8 @@ namespace inventory
 namespace get
 {
 
+#ifndef FEATURE_SENSORS_CACHE
+
 /**
  *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
  *         reading command response.
@@ -708,6 +710,23 @@ namespace get
  *  @return Response for get sensor reading command.
  */
 GetSensorResponse assertion(const Info& sensorInfo);
+
+#else
+
+/**
+ *  @brief Map the Dbus info to sensor's assertion status in the Get sensor
+ *         reading command response.
+ *
+ *  @param[in] id - The sensor id
+ *  @param[in] sensorInfo - Dbus info related to sensor.
+ *  @param[in] msg - Dbus message from match callback.
+ *
+ *  @return Response for get sensor reading command.
+ */
+std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
+                                           sdbusplus::message::message& msg);
+
+#endif
 
 } // namespace get
 
