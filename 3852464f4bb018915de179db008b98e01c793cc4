@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0981e3f4_fa1dfeb1",
+        "filename": "selutility.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-10-15T07:17:19Z",
+      "side": 1,
+      "message": "This requires #include \u003csstream\u003e",
+      "revId": "3852464f4bb018915de179db008b98e01c793cc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4d3549c_e01111c3",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-10-15T07:17:19Z",
+      "side": 1,
+      "message": "No need, remove it.",
+      "revId": "3852464f4bb018915de179db008b98e01c793cc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4b50b84_c63fdf32",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-10-15T07:17:19Z",
+      "side": 1,
+      "message": "const auto\u0026",
+      "revId": "3852464f4bb018915de179db008b98e01c793cc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52eba0e8_35e93c92",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-10-15T07:17:19Z",
+      "side": 1,
+      "message": "break here.",
+      "revId": "3852464f4bb018915de179db008b98e01c793cc4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
