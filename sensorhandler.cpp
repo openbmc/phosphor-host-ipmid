@@ -607,6 +607,166 @@ ipmi::RspType<uint8_t, // validMask
                                  resp.upperNonRecoverable);
 }
 
+/** @brief implements the Set Sensor threshold command
+ *  @param sensorNumber        - sensor number
+ *  @param lowerNonCriticalThreshMask
+ *  @param lowerCriticalThreshMask
+ *  @param lowerNonRecovThreshMask
+ *  @param upperNonCriticalThreshMask
+ *  @param upperCriticalThreshMask
+ *  @param upperNonRecovThreshMask
+ *  @param reserved
+ *  @param lowerNonCritical    - lower non-critical threshold
+ *  @param lowerCritical       - Lower critical threshold
+ *  @param lowerNonRecoverable - Lower non recovarable threshold
+ *  @param upperNonCritical    - Upper non-critical threshold
+ *  @param upperCritical       - Upper critical
+ *  @param upperNonRecoverable - Upper Non-recoverable
+ *
+ *  @returns IPMI completion code
+ */
+ipmi::RspType<> ipmiSenSetSensorThresholds(
+    ipmi::Context::ptr& ctx, uint8_t sensorNum, bool lowerNonCriticalThreshMask,
+    bool lowerCriticalThreshMask, bool lowerNonRecovThreshMask,
+    bool upperNonCriticalThreshMask, bool upperCriticalThreshMask,
+    bool upperNonRecovThreshMask, uint2_t reserved, uint8_t lowerNonCritical,
+    uint8_t lowerCritical, uint8_t lowerNonRecoverable,
+    uint8_t upperNonCritical, uint8_t upperCritical,
+    uint8_t upperNonRecoverable)
+{
+    if (reserved)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    // lower nc and upper nc not suppported on any sensor
+    if (lowerNonRecovThreshMask || upperNonRecovThreshMask)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    // if none of the threshold mask are set, nothing to do
+    if (!(lowerNonCriticalThreshMask | lowerCriticalThreshMask |
+          lowerNonRecovThreshMask | upperNonCriticalThreshMask |
+          upperCriticalThreshMask | upperNonRecovThreshMask))
+    {
+        return ipmi::responseSuccess();
+    }
+
+    constexpr auto valueInterface = "xyz.openbmc_project.Sensor.Value";
+
+    const auto iter = ipmi::sensor::sensors.find(sensorNum);
+    if (iter == ipmi::sensor::sensors.end())
+    {
+        return ipmi::responseSensorInvalid();
+    }
+
+    const auto& info = iter->second;
+
+    // Proceed only if the sensor value interface is implemented.
+    if (info.propertyInterfaces.find(valueInterface) ==
+        info.propertyInterfaces.end())
+    {
+        // return with valid mask as 0
+        return ipmi::responseSuccess();
+    }
+
+    constexpr auto warningThreshIntf =
+        "xyz.openbmc_project.Sensor.Threshold.Warning";
+    constexpr auto criticalThreshIntf =
+        "xyz.openbmc_project.Sensor.Threshold.Critical";
+
+    std::string service;
+    boost::system::error_code ec;
+    ec = ipmi::getService(ctx, info.sensorInterface, info.sensorPath, service);
+    if (ec)
+    {
+        return ipmi::responseResponseError();
+    }
+    // store a vector of property name, value to set, and interface
+    std::vector<std::tuple<std::string, uint8_t, std::string>> thresholdsToSet;
+
+    // define the indexes of the tuple
+    constexpr uint8_t propertyName = 0;
+    constexpr uint8_t thresholdValue = 1;
+    constexpr uint8_t interface = 2;
+    // verifiy all needed fields are present
+    if (lowerCriticalThreshMask || upperCriticalThreshMask)
+    {
+
+        ipmi::PropertyMap findThreshold;
+        ec = ipmi::getAllDbusProperties(ctx, service, info.sensorPath,
+                                        criticalThreshIntf, findThreshold);
+
+        if (!ec)
+        {
+            if (lowerCriticalThreshMask)
+            {
+                auto findLower = findThreshold.find("CriticalLow");
+                if (findLower == findThreshold.end())
+                {
+                    return ipmi::responseInvalidFieldRequest();
+                }
+                thresholdsToSet.emplace_back("CriticalLow", lowerCritical,
+                                             criticalThreshIntf);
+            }
+            if (upperCriticalThreshMask)
+            {
+                auto findUpper = findThreshold.find("CriticalHigh");
+                if (findUpper == findThreshold.end())
+                {
+                    return ipmi::responseInvalidFieldRequest();
+                }
+                thresholdsToSet.emplace_back("CriticalHigh", upperCritical,
+                                             criticalThreshIntf);
+            }
+        }
+    }
+    if (lowerNonCriticalThreshMask || upperNonCriticalThreshMask)
+    {
+        ipmi::PropertyMap findThreshold;
+        ec = ipmi::getAllDbusProperties(ctx, service, info.sensorPath,
+                                        warningThreshIntf, findThreshold);
+
+        if (!ec)
+        {
+            if (lowerNonCriticalThreshMask)
+            {
+                auto findLower = findThreshold.find("WarningLow");
+                if (findLower == findThreshold.end())
+                {
+                    return ipmi::responseInvalidFieldRequest();
+                }
+                thresholdsToSet.emplace_back("WarningLow", lowerNonCritical,
+                                             warningThreshIntf);
+            }
+            if (upperNonCriticalThreshMask)
+            {
+                auto findUpper = findThreshold.find("WarningHigh");
+                if (findUpper == findThreshold.end())
+                {
+                    return ipmi::responseInvalidFieldRequest();
+                }
+                thresholdsToSet.emplace_back("WarningHigh", upperNonCritical,
+                                             warningThreshIntf);
+            }
+        }
+    }
+    for (const auto& property : thresholdsToSet)
+    {
+        // from section 36.3 in the IPMI Spec, assume all linear
+        double valueToSet =
+            ((info.coefficientM * std::get<thresholdValue>(property)) +
+             (info.scaledOffset * std::pow(10.0, info.scale))) *
+            std::pow(10.0, info.exponentR);
+        ipmi::setDbusProperty(
+            ctx, service, info.sensorPath, std::get<interface>(property),
+            std::get<propertyName>(property), ipmi::Value(valueToSet));
+    }
+
+    return ipmi::responseSuccess();
+}
+
 /** @brief implements the get SDR Info command
  *  @param count - Operation
  *
@@ -1132,6 +1292,10 @@ void register_netfn_sen_functions()
                           ipmi::sensor_event::cmdGetSensorThreshold,
                           ipmi::Privilege::User, ipmiSensorGetSensorThresholds);
 
+    // <Set Sensor Thresholds>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdSetSensorThreshold,
+                          ipmi::Privilege::User, ipmiSenSetSensorThresholds);
 #endif
 
     // Common Handers used by both implementation.
