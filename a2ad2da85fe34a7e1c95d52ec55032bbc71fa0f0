@@ -22,6 +22,30 @@
       "revId": "a2ad2da85fe34a7e1c95d52ec55032bbc71fa0f0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "735486c7_1f620cd8",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1000148
+      },
+      "writtenOn": "2021-10-18T05:30:55Z",
+      "side": 0,
+      "message": "To me, something like entity path used in https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/44677 makes a good default name, when name is not explicitly provided. Since we already have a way to pick BOARD_PRODUCT_NAME/PRODUCT_PRODUCT_NAME fields for name as mentioned in commit message, I think any existing platforms requiring such names would just have update their configs.",
+      "parentUuid": "eb1eb377_709a96e2",
+      "range": {
+        "startLine": 675,
+        "startChar": 4,
+        "endLine": 687,
+        "endChar": 0
+      },
+      "revId": "a2ad2da85fe34a7e1c95d52ec55032bbc71fa0f0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
