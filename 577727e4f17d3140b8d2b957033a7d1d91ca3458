@@ -93,6 +93,30 @@
       "revId": "577727e4f17d3140b8d2b957033a7d1d91ca3458",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "383ab470_39e13ea6",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1001048
+      },
+      "writtenOn": "2021-10-19T04:51:17Z",
+      "side": 1,
+      "message": "just one query s, if header guard is present in header file then is it required to add inline ..?",
+      "parentUuid": "24bbd4be_3f58b818",
+      "range": {
+        "startLine": 266,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 6
+      },
+      "revId": "577727e4f17d3140b8d2b957033a7d1d91ca3458",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
