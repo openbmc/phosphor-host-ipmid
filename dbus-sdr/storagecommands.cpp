@@ -629,7 +629,7 @@ ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
         entities.begin(), entities.end(),
         [bus, address, &entityData](ManagedEntry& entry) {
             auto findFruDevice = entry.second.find(
-                "xyz.openbmc_project.Inventory.Decorator.FruDevice");
+                "xyz.openbmc_project.Inventory.Decorator.I2CDevice");
             if (findFruDevice == entry.second.end())
             {
                 return false;
