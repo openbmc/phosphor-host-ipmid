@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0fbd6c86_ad7ab928",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1120,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2021-10-19T23:39:35Z",
+      "side": 1,
+      "message": "why not \"xyz.openbmc_project.Common.Error.InvalidArgument\" \u003d\u003d e.name() ?",
+      "range": {
+        "startLine": 1118,
+        "startChar": 24,
+        "endLine": 1120,
+        "endChar": 39
+      },
+      "revId": "f270f2bdc20672aa5e44a0d567b8fa71453f5801",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
