@@ -70,6 +70,30 @@
       "revId": "f270f2bdc20672aa5e44a0d567b8fa71453f5801",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "380725c3_720a032c",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1120,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2021-10-20T17:48:38Z",
+      "side": 1,
+      "message": "Could still use a string_view here.",
+      "parentUuid": "c1f2d83c_533b2cb1",
+      "range": {
+        "startLine": 1118,
+        "startChar": 24,
+        "endLine": 1120,
+        "endChar": 39
+      },
+      "revId": "f270f2bdc20672aa5e44a0d567b8fa71453f5801",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
