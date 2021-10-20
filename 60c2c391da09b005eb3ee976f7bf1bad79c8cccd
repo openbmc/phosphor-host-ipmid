@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e74ac8d_ff700f0c",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-20T23:22:55Z",
+      "side": 1,
+      "message": "(ipmi::Context::ptr \u0026ctx,\n\nBy requesting the ctx, you can do yielding dbus calls below.",
+      "range": {
+        "startLine": 628,
+        "startChar": 42,
+        "endLine": 628,
+        "endChar": 43
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5abb5986_cb0f72fc",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-20T23:22:55Z",
+      "side": 1,
+      "message": "const auto \u0026 ?",
+      "range": {
+        "startLine": 664,
+        "startChar": 4,
+        "endLine": 664,
+        "endChar": 15
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "831d599d_4bcc0ba8",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-20T23:22:55Z",
+      "side": 1,
+      "message": "this is not needed; it is part of ctx.",
+      "range": {
+        "startLine": 679,
+        "startChar": 0,
+        "endLine": 679,
+        "endChar": 59
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f0d7c5c_1c915368",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-20T23:22:55Z",
+      "side": 1,
+      "message": "use the yielding variant of getService",
+      "range": {
+        "startLine": 681,
+        "startChar": 19,
+        "endLine": 681,
+        "endChar": 39
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ce78021_1dd6cc5e",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 718,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-20T23:22:55Z",
+      "side": 1,
+      "message": "use yielding variant",
+      "range": {
+        "startLine": 718,
+        "startChar": 35,
+        "endLine": 718,
+        "endChar": 55
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d78f425_7fa1e097",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 749,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-20T23:22:55Z",
+      "side": 1,
+      "message": "use yielding variant",
+      "range": {
+        "startLine": 749,
+        "startChar": 14,
+        "endLine": 749,
+        "endChar": 29
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
