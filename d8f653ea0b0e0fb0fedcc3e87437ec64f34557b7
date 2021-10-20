@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16722931_dce09c92",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-10-20T23:27:28Z",
+      "side": 1,
+      "message": "with the way that we handle sensor numbers beyond 255 using LUN, should we make this an int instead of a uint8_t? Same question for the sensorThresholdMap below.",
+      "range": {
+        "startLine": 82,
+        "startChar": 39,
+        "endLine": 82,
+        "endChar": 46
+      },
+      "revId": "d8f653ea0b0e0fb0fedcc3e87437ec64f34557b7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
