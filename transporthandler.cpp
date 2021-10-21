@@ -507,7 +507,7 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
     auto source = IPv6Source::Static;
     bool enabled = false;
     in6_addr addr{};
-    uint8_t prefix = AddrFamily<AF_INET6>::defaultPrefix;
+    uint8_t prefix{};
     auto status = IPv6AddressStatus::Disabled;
 
     auto ifaddr = channelCall<getIfAddr<AF_INET6>>(channel, set, origins);
