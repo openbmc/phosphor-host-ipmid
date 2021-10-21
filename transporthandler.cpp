@@ -514,7 +514,7 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
     if (ifaddr)
     {
         source = originToSourceType(ifaddr->origin);
-        enabled = true;
+        enabled = (origins == originsV6Static);
         addr = ifaddr->address;
         prefix = ifaddr->prefix;
         status = IPv6AddressStatus::Active;
