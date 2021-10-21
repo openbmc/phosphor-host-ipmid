@@ -505,7 +505,6 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
                        const std::unordered_set<IP::AddressOrigin>& origins)
 {
     auto source = IPv6Source::Static;
-    bool enabled = false;
     in6_addr addr{};
     uint8_t prefix = AddrFamily<AF_INET6>::defaultPrefix;
     auto status = IPv6AddressStatus::Disabled;
@@ -514,14 +513,13 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
     if (ifaddr)
     {
         source = originToSourceType(ifaddr->origin);
-        enabled = true;
         addr = ifaddr->address;
         prefix = ifaddr->prefix;
         status = IPv6AddressStatus::Active;
     }
 
     ret.pack(set);
-    ret.pack(types::enum_cast<uint4_t>(source), uint3_t{}, enabled);
+    ret.pack(types::enum_cast<uint4_t>(source), uint4_t{});
     ret.pack(std::string_view(reinterpret_cast<char*>(&addr), sizeof(addr)));
     ret.pack(prefix);
     ret.pack(types::enum_cast<uint8_t>(status));
