@@ -22,6 +22,30 @@
       "revId": "d8f653ea0b0e0fb0fedcc3e87437ec64f34557b7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ed05931_3b8ca536",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-10-21T06:53:17Z",
+      "side": 1,
+      "message": "Do we have existing code to handle the sensor numbers beyond 255 now?\n\nFor now this series of changes is implemented based on the assumption that sensor id is 1 byte and it is consistent with the other code in this file.\n\nIf we do need to support sensor number beyond 255, probably we could have additional commits to implement it.",
+      "parentUuid": "16722931_dce09c92",
+      "range": {
+        "startLine": 82,
+        "startChar": 39,
+        "endLine": 82,
+        "endChar": 46
+      },
+      "revId": "d8f653ea0b0e0fb0fedcc3e87437ec64f34557b7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
