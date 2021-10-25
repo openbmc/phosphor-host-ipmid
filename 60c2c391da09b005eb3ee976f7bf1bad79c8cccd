@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c4c4e7eb_041a782a",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1000851
+      },
+      "writtenOn": "2021-10-25T09:40:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7e74ac8d_ff700f0c",
+      "range": {
+        "startLine": 628,
+        "startChar": 42,
+        "endLine": 628,
+        "endChar": 43
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5abb5986_cb0f72fc",
         "filename": "sensorhandler.cpp",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d7c5df6_8b0aa4ea",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1000851
+      },
+      "writtenOn": "2021-10-25T09:40:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5abb5986_cb0f72fc",
+      "range": {
+        "startLine": 664,
+        "startChar": 4,
+        "endLine": 664,
+        "endChar": 15
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "f6457a7c_0cd3e5ff",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1000851
+      },
+      "writtenOn": "2021-10-25T09:40:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "831d599d_4bcc0ba8",
+      "range": {
+        "startLine": 679,
+        "startChar": 0,
+        "endLine": 679,
+        "endChar": 59
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f0d7c5c_1c915368",
         "filename": "sensorhandler.cpp",
         "patchSetId": 3
@@ -91,6 +163,30 @@
       "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6de01944_5c5f5d4d",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1000851
+      },
+      "writtenOn": "2021-10-25T09:40:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8f0d7c5c_1c915368",
+      "range": {
+        "startLine": 681,
+        "startChar": 19,
+        "endLine": 681,
+        "endChar": 39
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "518e381a_71399eb4",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 718,
+      "author": {
+        "id": 1000851
+      },
+      "writtenOn": "2021-10-25T09:40:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ce78021_1dd6cc5e",
+      "range": {
+        "startLine": 718,
+        "startChar": 35,
+        "endLine": 718,
+        "endChar": 55
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8d78f425_7fa1e097",
         "filename": "sensorhandler.cpp",
         "patchSetId": 3
@@ -137,6 +257,30 @@
       "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5aaaa3a_4066036f",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 749,
+      "author": {
+        "id": 1000851
+      },
+      "writtenOn": "2021-10-25T09:40:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8d78f425_7fa1e097",
+      "range": {
+        "startLine": 749,
+        "startChar": 14,
+        "endLine": 749,
+        "endChar": 29
+      },
+      "revId": "60c2c391da09b005eb3ee976f7bf1bad79c8cccd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
