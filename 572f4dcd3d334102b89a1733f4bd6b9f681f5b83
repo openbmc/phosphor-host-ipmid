@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74bf5c44_d3e7f874",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-10-29T17:40:34Z",
+      "side": 1,
+      "message": "Please change as:\n...reading of ipmi_user.json file is missing when \u0027updateTime \u003d fileLastUpdatedTime\u0027 and an user trying to .....",
+      "range": {
+        "startLine": 10,
+        "startChar": 54,
+        "endLine": 11,
+        "endChar": 54
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a29006c7_3bb25f5d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-10-29T17:40:34Z",
+      "side": 1,
+      "message": "Please change as:\nfile last modification time (updateTime)",
+      "range": {
+        "startLine": 14,
+        "startChar": 18,
+        "endLine": 14,
+        "endChar": 41
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5fe1afd_a35c5e6d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-10-29T17:40:34Z",
+      "side": 1,
+      "message": "cache last updated time(fileLastUpdatedTime)",
+      "range": {
+        "startLine": 14,
+        "startChar": 56,
+        "endLine": 15,
+        "endChar": 12
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4157dd54_910f3473",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-10-29T17:40:34Z",
+      "side": 1,
+      "message": "Please change as:\n\nFix: \nIn addition to existing conditions for using the cache data, added a condition for avoiding 1-second granularity limitation.  i.e.) Cache last updated time is at least 2-seconds less than current time (though 1-second less is sufficient, 2-seconds cover any marginal errors in seconds calculation).  Since, steady_time a.k.a. system_uptime value will always increment, this new condition uses steady_time. \nIt is also foolproof against existing absolute time comparsions \u0027fileLastModificationTime\u0027, \u0027updateTime\u0027 which may go backward/forward in race conditions according to PCH time configuration.",
+      "range": {
+        "startLine": 17,
+        "startChar": 28,
+        "endLine": 18,
+        "endChar": 28
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "121ba04e_04a4e6f1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-10-29T17:40:34Z",
+      "side": 1,
+      "message": "Please add:\nVerified cached data is used when last cached time is at least 2-seconds less than current time AND file was not modified in that duration.",
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
