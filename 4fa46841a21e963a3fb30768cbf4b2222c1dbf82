@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ddeb5e7_5687dde4",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-11-01T17:35:43Z",
+      "side": 1,
+      "message": "I think, existing code works for LAN config param 56 correctly (bit7 enable/disable value).\nYour new change will correctly for param 59, but changes existing param 56 bit7 behavior.\n\nCan this be changed something like:\nif (origins \u003d\u003d originsV6Static) \n{\n   ret.pack(types::enum_cast\u003cuint4_t\u003e(source), uint3_t{}, enabled);\n}\nelse\n{\n   ret.pack(types::enum_cast\u003cuint4_t\u003e(source), uint4_t{});\n}",
+      "range": {
+        "startLine": 522,
+        "startChar": 4,
+        "endLine": 522,
+        "endChar": 59
+      },
+      "revId": "4fa46841a21e963a3fb30768cbf4b2222c1dbf82",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8771399_46674beb",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1000418
+      },
+      "writtenOn": "2021-11-01T17:35:43Z",
+      "side": 1,
+      "message": "I understand 20th byte provides status. \nDo you need to check any existing validation scripts for LanParam56 needs update, as spec is not clear on bit7 usage on Get operations?",
+      "range": {
+        "startLine": 522,
+        "startChar": 48,
+        "endLine": 522,
+        "endChar": 58
+      },
+      "revId": "4fa46841a21e963a3fb30768cbf4b2222c1dbf82",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
