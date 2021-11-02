@@ -275,6 +275,59 @@ GetSensorResponse readingData(const Info& sensorInfo)
         response.readingOrStateUnavailable = 1;
     }
 
+    bool critAlarmHigh;
+    try
+    {
+        critAlarmHigh = std::get<bool>(ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            "xyz.openbmc_project.Sensor.Threshold.Critical",
+            "CriticalAlarmHigh"));
+    }
+    catch (const std::exception& e)
+    {
+        critAlarmHigh = false;
+    }
+    bool critAlarmLow;
+    try
+    {
+        critAlarmLow = std::get<bool>(ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            "xyz.openbmc_project.Sensor.Threshold.Critical",
+            "CriticalAlarmLow"));
+    }
+    catch (const std::exception& e)
+    {
+        critAlarmLow = false;
+    }
+    bool warningAlarmHigh;
+    try
+    {
+        warningAlarmHigh = std::get<bool>(ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            "xyz.openbmc_project.Sensor.Threshold.Warning",
+            "WarningAlarmHigh"));
+    }
+    catch (const std::exception& e)
+    {
+        warningAlarmHigh = false;
+    }
+    bool warningAlarmLow;
+    try
+    {
+        warningAlarmLow = std::get<bool>(ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            "xyz.openbmc_project.Sensor.Threshold.Warning", "WarningAlarmlow"));
+    }
+    catch (const std::exception& e)
+    {
+        warningAlarmLow = false;
+    }
+    response.thresholdLevelsStates =
+        (static_cast<uint8_t>(critAlarmHigh) << 4) |
+        (static_cast<uint8_t>(warningAlarmHigh) << 3) |
+        (static_cast<uint8_t>(warningAlarmLow) << 2) |
+        (static_cast<uint8_t>(critAlarmLow) << 1);
+
     return response;
 }
 
