@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed7b1764_0726fb6f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "74bf5c44_d3e7f874",
+      "range": {
+        "startLine": 10,
+        "startChar": 54,
+        "endLine": 11,
+        "endChar": 54
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29006c7_3bb25f5d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2743bdbe_de349f6b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a29006c7_3bb25f5d",
+      "range": {
+        "startLine": 14,
+        "startChar": 18,
+        "endLine": 14,
+        "endChar": 41
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "140ac3c6_c14f2935",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5fe1afd_a35c5e6d",
+      "range": {
+        "startLine": 14,
+        "startChar": 56,
+        "endLine": 15,
+        "endChar": 12
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4157dd54_910f3473",
         "filename": "/COMMIT_MSG",
         "patchSetId": 6
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "34285c16_2f437f38",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4157dd54_910f3473",
+      "range": {
+        "startLine": 17,
+        "startChar": 28,
+        "endLine": 18,
+        "endChar": 28
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "121ba04e_04a4e6f1",
         "filename": "/COMMIT_MSG",
         "patchSetId": 6
@@ -111,6 +207,24 @@
     },
     {
       "key": {
+        "uuid": "27131b6c_b193d3e8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Added. Thanks",
+      "parentUuid": "121ba04e_04a4e6f1",
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "03ae445d_00f4ff4a",
         "filename": "user_channel/user_mgmt.cpp",
         "patchSetId": 6
@@ -122,6 +236,30 @@
       "writtenOn": "2021-10-29T21:23:18Z",
       "side": 1,
       "message": "Please add a comment or commit message about how this fixes the bug. It\u0027s really not clear to me what\u0027s going on.\nAlso, is the duration_cast from chrono::seconds to chrono::seconds necessary?",
+      "range": {
+        "startLine": 1508,
+        "startChar": 8,
+        "endLine": 1510,
+        "endChar": 74
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59a0d6de_678d9153",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1510,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Added in commit message.\nOtherwise getting compilation issue. \nno matching function for call to \u0027duration_cast\u003cstd::chrono::seconds\u003e(int)\u0027",
+      "parentUuid": "03ae445d_00f4ff4a",
       "range": {
         "startLine": 1508,
         "startChar": 8,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "8312395a_cfbd1bf9",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1515,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Moved to above line. Thanks",
+      "parentUuid": "e2a71d52_49d0509f",
+      "range": {
+        "startLine": 1515,
+        "startChar": 8,
+        "endLine": 1515,
+        "endChar": 33
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e1883e88_42acf1ef",
         "filename": "user_channel/user_mgmt.hpp",
         "patchSetId": 6
@@ -168,6 +330,30 @@
       "writtenOn": "2021-10-29T21:23:18Z",
       "side": 1,
       "message": "can you give this a more descriptive name? userDataFileLastReloadTime?",
+      "range": {
+        "startLine": 383,
+        "startChar": 42,
+        "endLine": 383,
+        "endChar": 52
+      },
+      "revId": "572f4dcd3d334102b89a1733f4bd6b9f681f5b83",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7928074_5c23dd1d",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-02T09:56:32Z",
+      "side": 1,
+      "message": "Replaced. Thanks",
+      "parentUuid": "e1883e88_42acf1ef",
       "range": {
         "startLine": 383,
         "startChar": 42,
