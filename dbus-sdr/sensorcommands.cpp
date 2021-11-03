@@ -1075,6 +1075,60 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
     return resp;
 }
 
+SensorHysteresisResp getSensorHysteresis(ipmi::Context::ptr ctx,
+                                         const std::string& sensorName)
+{
+    SensorHysteresisResp hysteresisData;
+    auto entityManager = "xyz.openbmc_project.EntityManager";
+    ipmi::ObjectValueTree objects;
+    auto ec = ipmi::getManagedObjects(ctx, entityManager, "/", objects);
+    if (ec)
+    {
+        return hysteresisData;
+    }
+
+    for (const auto& [path, interfaceMap] : objects)
+    {
+        auto objpath = static_cast<std::string>(path);
+        auto pathname = sensor::parseSdrIdFromPath(path);
+        if (pathname != sensorName)
+        {
+            continue;
+        }
+
+        for (const auto& [interface, propertyMap] : interfaceMap)
+        {
+            if (auto itr = propertyMap.find("Hysteresis");
+                itr != propertyMap.end())
+            {
+                double hysteresis =
+                    std::visit(ipmi::VariantToDoubleVisitor(), itr->second);
+                if (interface.find(".Thresholds") != std::string::npos)
+                {
+                    if (auto itr = propertyMap.find("Direction");
+                        itr != propertyMap.end())
+                    {
+                        auto dir = std::get<std::string>(itr->second);
+                        if (!hysteresisData.positive && dir == "greater than")
+                        {
+                            hysteresisData.positive = hysteresis;
+                        }
+                        else if (!hysteresisData.negative && dir == "less than")
+                        {
+                            hysteresisData.negative = hysteresis;
+                        }
+                    }
+                    if (hysteresisData.negative && hysteresisData.positive)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return hysteresisData;
+}
+
 ipmi::RspType<uint8_t, // readable
               uint8_t, // lowerNCrit
               uint8_t, // lowerCrit
@@ -1504,7 +1558,23 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
         return false;
     }
 
-    record.body.sensor_capabilities = 0x68; // auto rearm - todo hysteresis
+    // populate sensor name from path
+    auto name = sensor::parseSdrIdFromPath(path);
+    record.body.id_string_info = name.size();
+    std::strncpy(record.body.id_string, name.c_str(),
+                 sizeof(record.body.id_string));
+
+    auto hysteresisData = getSensorHysteresis(ctx, name);
+    if (hysteresisData.positive)
+    {
+        record.body.positive_threshold_hysteresis = hysteresisData.positive;
+    }
+    if (hysteresisData.negative)
+    {
+        record.body.negative_threshold_hysteresis = hysteresisData.negative;
+    }
+
+    record.body.sensor_capabilities = 0x68; // auto rearm
     record.body.sensor_type = getSensorTypeFromPath(path);
     std::string type = getSensorTypeStringFromPath(path);
     auto typeCstr = type.c_str();
@@ -1601,12 +1671,6 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     // TODO(): Perhaps care about Tolerance, Accuracy, and so on
     // These seem redundant, but derivable from the above 5 attributes
     // Original comment said "todo fill out rest of units"
-
-    // populate sensor name from path
-    auto name = sensor::parseSdrIdFromPath(path);
-    record.body.id_string_info = name.size();
-    std::strncpy(record.body.id_string, name.c_str(),
-                 sizeof(record.body.id_string));
 
     // Remember the sensor name, as determined for this sensor number
     details::sdrStatsTable.updateName(sensornumber, name);

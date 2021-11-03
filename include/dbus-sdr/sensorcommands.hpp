@@ -33,6 +33,12 @@ struct SensorThresholdResp
 
 #pragma pack(pop)
 
+struct SensorHysteresisResp
+{
+    uint8_t positive;
+    uint8_t negative;
+};
+
 enum class IPMIThresholdRespBits
 {
     lowerNonCritical,
