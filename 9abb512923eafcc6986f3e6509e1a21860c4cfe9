@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91b83c6b_72c7247e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-11-03T18:09:19Z",
+      "side": 1,
+      "message": "I understand this is a port and not your original code, but can we get some constexpr names to go with these magic numbers? Here and on line 553",
+      "range": {
+        "startLine": 549,
+        "startChar": 18,
+        "endLine": 549,
+        "endChar": 22
+      },
+      "revId": "9abb512923eafcc6986f3e6509e1a21860c4cfe9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
