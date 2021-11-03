@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2df32546_468f10d7",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1510,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-11-03T00:38:57Z",
+      "side": 1,
+      "message": "just replace this with seconds(2). It compiles fine for me.",
+      "range": {
+        "startLine": 1510,
+        "startChar": 26,
+        "endLine": 1510,
+        "endChar": 73
+      },
+      "revId": "f1ceb436e380b61b67c326157d9c101ce021db5c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f5d6813_90ac96f7",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1514,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2021-11-03T00:38:57Z",
+      "side": 1,
+      "message": "sorry, I meant that this should go at line 1343, so any possible callers of readUserData() will have it updated the same way. You can\u0027t put it here because readUserData() may throw an exception.",
+      "range": {
+        "startLine": 1514,
+        "startChar": 8,
+        "endLine": 1514,
+        "endChar": 49
+      },
+      "revId": "f1ceb436e380b61b67c326157d9c101ce021db5c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
