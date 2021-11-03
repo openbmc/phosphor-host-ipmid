@@ -647,8 +647,10 @@ ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
                 return false;
             }
 
-            auto fruName = findFruDevice->second.find("Name");
-            if (fruName != findFruDevice->second.end())
+            auto findInventoryItem =
+                entry.second.find("xyz.openbmc_project.Inventory.Item");
+            auto fruName = findInventoryItem->second.find("PrettyName");
+            if (fruName != findInventoryItem->second.end())
             {
                 name = std::get<std::string>(fruName->second);
             }
