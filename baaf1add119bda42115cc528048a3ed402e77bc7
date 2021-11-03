@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ff0cee71_056879f6",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-11-03T03:05:24Z",
+      "side": 1,
+      "message": "The comments were fixed by Lotus in PS5, but got reverted unexpectedly in PS6.\nNow PS7 fixes the comments.",
+      "parentUuid": "2b0616fc_b3893565",
+      "range": {
+        "startLine": 628,
+        "startChar": 42,
+        "endLine": 628,
+        "endChar": 43
+      },
+      "revId": "baaf1add119bda42115cc528048a3ed402e77bc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4b544c59_e4b9e2fa",
         "filename": "sensorhandler.cpp",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "baaf1add119bda42115cc528048a3ed402e77bc7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb08cfb4_79974a5f",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-11-03T03:05:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4b544c59_e4b9e2fa",
+      "range": {
+        "startLine": 679,
+        "startChar": 0,
+        "endLine": 679,
+        "endChar": 59
+      },
+      "revId": "baaf1add119bda42115cc528048a3ed402e77bc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3bd22b81_bb23906c",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-11-03T03:05:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b04e810_959d758f",
+      "range": {
+        "startLine": 681,
+        "startChar": 0,
+        "endLine": 681,
+        "endChar": 80
+      },
+      "revId": "baaf1add119bda42115cc528048a3ed402e77bc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c28af1fe_9bc45168",
         "filename": "sensorhandler.cpp",
         "patchSetId": 6
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "1d92d77d_645f0ad9",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 692,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-11-03T03:05:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c28af1fe_9bc45168",
+      "range": {
+        "startLine": 692,
+        "startChar": 29,
+        "endLine": 692,
+        "endChar": 56
+      },
+      "revId": "baaf1add119bda42115cc528048a3ed402e77bc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c4e3e1d_bb128e1e",
         "filename": "sensorhandler.cpp",
         "patchSetId": 6
@@ -114,6 +210,30 @@
       "revId": "baaf1add119bda42115cc528048a3ed402e77bc7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0b383d2_88c0a22d",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 749,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-11-03T03:05:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c4e3e1d_bb128e1e",
+      "range": {
+        "startLine": 749,
+        "startChar": 14,
+        "endLine": 749,
+        "endChar": 29
+      },
+      "revId": "baaf1add119bda42115cc528048a3ed402e77bc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
