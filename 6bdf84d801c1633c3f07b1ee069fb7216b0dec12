@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c04f8881_8f537d28",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-03T19:04:23Z",
+      "side": 1,
+      "message": "Since you\u0027re not mutating prefer string_view",
+      "range": {
+        "startLine": 441,
+        "startChar": 49,
+        "endLine": 441,
+        "endChar": 67
+      },
+      "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48e3d6df_16ecacc8",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-03T19:04:23Z",
+      "side": 1,
+      "message": "explicitly capture what you want in your lambda",
+      "range": {
+        "startLine": 445,
+        "startChar": 25,
+        "endLine": 445,
+        "endChar": 26
+      },
+      "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1045af5_f560aa34",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-03T19:04:23Z",
+      "side": 1,
+      "message": "can this also be a string_view?",
+      "range": {
+        "startLine": 445,
+        "startChar": 28,
+        "endLine": 445,
+        "endChar": 47
+      },
+      "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a7a3e8c_50ddc304",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-03T19:04:23Z",
+      "side": 1,
+      "message": "static/inline constexpr instead?\n\nThen coding standards apply , something like discreteSensorMaxStates\n\nAlso is MaxStates the right wording for this? MaxStates makes me think that a discrete sensor can have a maximum of 14 states whereas this is being used to describe how many discrete sensors can be represented by a record right?",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 34,
+        "endChar": 34
+      },
+      "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
