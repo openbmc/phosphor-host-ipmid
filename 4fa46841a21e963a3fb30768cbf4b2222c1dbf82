@@ -45,6 +45,54 @@
       "revId": "4fa46841a21e963a3fb30768cbf4b2222c1dbf82",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6bc3841_dca74fb6",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2021-11-05T14:35:17Z",
+      "side": 1,
+      "message": "Checking validation scripts is no longer required. Restored the behavior for Param 56. Established correct behavior for Param 59.",
+      "parentUuid": "b8771399_46674beb",
+      "range": {
+        "startLine": 522,
+        "startChar": 48,
+        "endLine": 522,
+        "endChar": 58
+      },
+      "revId": "4fa46841a21e963a3fb30768cbf4b2222c1dbf82",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f8dc17e_06498abf",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2021-11-05T14:35:17Z",
+      "side": 1,
+      "message": "Reverted static address response to established OBMC behavior.",
+      "parentUuid": "5ddeb5e7_5687dde4",
+      "range": {
+        "startLine": 522,
+        "startChar": 4,
+        "endLine": 522,
+        "endChar": 59
+      },
+      "revId": "4fa46841a21e963a3fb30768cbf4b2222c1dbf82",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
