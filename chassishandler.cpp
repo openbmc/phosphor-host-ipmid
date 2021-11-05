@@ -879,7 +879,7 @@ int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
 // Set Enabled property to inform NMI source
 // handling to trigger a NMI_OUT BSOD.
 //------------------------------------------
-int setNmiProperty(const bool value)
+int setNmiProperty(ipmi::Context::ptr& ctx, const bool value)
 {
     constexpr const char* nmiSourceObjPath =
         "/xyz/openbmc_project/Chassis/Control/NMISource";
@@ -887,20 +887,24 @@ int setNmiProperty(const bool value)
         "xyz.openbmc_project.Chassis.Control.NMISource";
     std::string bmcSourceSignal = "xyz.openbmc_project.Chassis.Control."
                                   "NMISource.BMCSourceSignal.ChassisCmd";
-    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
 
-    try
+    std::string service;
+    boost::system::error_code ec =
+        ipmi::getService(ctx, nmiSourceIntf, nmiSourceObjPath, service);
+    if (!ec)
     {
-        auto service = ipmi::getService(*busp, nmiSourceIntf, nmiSourceObjPath);
-        ipmi::setDbusProperty(*busp, service, nmiSourceObjPath, nmiSourceIntf,
-                              "BMCSource", bmcSourceSignal);
-        ipmi::setDbusProperty(*busp, service, nmiSourceObjPath, nmiSourceIntf,
-                              "Enabled", value);
+        ec = ipmi::setDbusProperty(ctx, service, nmiSourceObjPath,
+                                   nmiSourceIntf, "BMCSource", bmcSourceSignal);
     }
-    catch (const std::exception& e)
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, nmiSourceObjPath,
+                                   nmiSourceIntf, "Enabled", value);
+    }
+    if (ec)
     {
         log<level::ERR>("Failed to trigger NMI_OUT",
-                        entry("EXCEPTION=%s", e.what()));
+                        entry("EXCEPTION=%s", ec.message().c_str()));
         return -1;
     }
 
@@ -1337,7 +1341,7 @@ ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
             rc = initiateHostStateTransition(ctx, State::Host::Transition::Off);
             break;
         case CMD_PULSE_DIAGNOSTIC_INTR:
-            rc = setNmiProperty(true);
+            rc = setNmiProperty(ctx, true);
             break;
 
         default:
