@@ -22,6 +22,30 @@
       "revId": "24a5025021ad9dbf9f1df0acd4489a709dee44f0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b6b3a10_19df8edc",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1509,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-09T10:15:59Z",
+      "side": 1,
+      "message": "Fixed. Working fine. Thanks",
+      "parentUuid": "562383d3_fed43bd9",
+      "range": {
+        "startLine": 1509,
+        "startChar": 9,
+        "endLine": 1509,
+        "endChar": 42
+      },
+      "revId": "24a5025021ad9dbf9f1df0acd4489a709dee44f0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
