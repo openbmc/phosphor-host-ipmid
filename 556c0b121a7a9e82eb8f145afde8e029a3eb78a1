@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "797cc17d_76e59dad",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1509,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2021-11-09T22:40:07Z",
+      "side": 1,
+      "message": "If this function is called every 2seconds, then we stuck with always call readUserData() even when the file never changes.\nQuestion: is this a realistic use case that can happen? Will always call readUserData() a problem.",
+      "range": {
+        "startLine": 1509,
+        "startChar": 1,
+        "endLine": 1509,
+        "endChar": 65
+      },
+      "revId": "556c0b121a7a9e82eb8f145afde8e029a3eb78a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
