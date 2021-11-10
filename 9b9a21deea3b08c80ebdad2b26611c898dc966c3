@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "084e889f_7b95901c",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2021-11-10T01:22:01Z",
+      "side": 1,
+      "message": "Simply adding the context to the function signature will not change this function enough that it would affect the existing code (unless that code was changed to use it.) And in the spirit of trying to keep the code commit limited in scope, I am fine with not changing the existing code to use ctx at this time.\n\nI only object to doing the work later because it just adds to the already large pile of technical debt.",
+      "parentUuid": "0fed8b27_ab7c9590",
+      "range": {
+        "startLine": 502,
+        "startChar": 33,
+        "endLine": 502,
+        "endChar": 43
+      },
+      "revId": "9b9a21deea3b08c80ebdad2b26611c898dc966c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f53358e5_ba3b732e",
         "filename": "sensorhandler.cpp",
         "patchSetId": 2
