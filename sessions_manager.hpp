@@ -160,7 +160,7 @@ class Manager
     SessionMap sessionsMap;
     std::unique_ptr<sdbusplus::server::manager::manager> objManager = nullptr;
     std::string chName{}; // Channel Name
-    uint8_t ipmiNetworkInstance;
+    uint8_t ipmiNetworkInstance = 0;
     void setNetworkInstance(void);
 };
 
