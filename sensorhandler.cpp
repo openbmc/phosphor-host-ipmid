@@ -1132,6 +1132,10 @@ void register_netfn_sen_functions()
                           ipmi::sensor_event::cmdGetSensorThreshold,
                           ipmi::Privilege::User, ipmiSensorGetSensorThresholds);
 
+    // <Get Device SDR>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
+                           ipmi_sen_get_sdr, PRIVILEGE_USER);
+
 #endif
 
     // Common Handers used by both implementation.
@@ -1145,8 +1149,5 @@ void register_netfn_sen_functions()
                           ipmi::sensor_event::cmdGetSensorType,
                           ipmi::Privilege::User, ipmiGetSensorType);
 
-    // <Get Device SDR>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
-                           ipmi_sen_get_sdr, PRIVILEGE_USER);
     return;
 }
