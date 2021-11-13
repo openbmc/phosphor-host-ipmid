@@ -22,6 +22,30 @@
       "revId": "78fe1b14f60d55ae335369fb2c6e81ed9ac6d865",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1cacf9c8_f67ef221",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1150,
+      "author": {
+        "id": 1000590
+      },
+      "writtenOn": "2021-11-13T05:08:53Z",
+      "side": 0,
+      "message": "That comment is for storage netfn get sdr command and this is for sensor netfn and get device SDR command.",
+      "parentUuid": "90b4c6dd_ba8f68d1",
+      "range": {
+        "startLine": 1148,
+        "startChar": 4,
+        "endLine": 1150,
+        "endChar": 61
+      },
+      "revId": "78fe1b14f60d55ae335369fb2c6e81ed9ac6d865",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
