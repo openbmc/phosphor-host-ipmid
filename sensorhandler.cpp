@@ -1506,6 +1506,11 @@ void register_netfn_sen_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdSetSensorThreshold,
                           ipmi::Privilege::User, ipmiSenSetSensorThresholds);
+
+    // <Get Device SDR>
+    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
+                           ipmi_sen_get_sdr, PRIVILEGE_USER);
+
 #endif
 
     // Common Handers used by both implementation.
@@ -1519,8 +1524,5 @@ void register_netfn_sen_functions()
                           ipmi::sensor_event::cmdGetSensorType,
                           ipmi::Privilege::User, ipmiGetSensorType);
 
-    // <Get Device SDR>
-    ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
-                           ipmi_sen_get_sdr, PRIVILEGE_USER);
     return;
 }
