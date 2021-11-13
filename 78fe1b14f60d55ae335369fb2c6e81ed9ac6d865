@@ -46,6 +46,30 @@
       "revId": "78fe1b14f60d55ae335369fb2c6e81ed9ac6d865",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21f7c01b_ac0f194d",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1150,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-11-13T05:11:09Z",
+      "side": 0,
+      "message": "ah. thanks. I missed that.",
+      "parentUuid": "1cacf9c8_f67ef221",
+      "range": {
+        "startLine": 1148,
+        "startChar": 4,
+        "endLine": 1150,
+        "endChar": 61
+      },
+      "revId": "78fe1b14f60d55ae335369fb2c6e81ed9ac6d865",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
