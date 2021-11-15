@@ -46,6 +46,30 @@
       "revId": "556c0b121a7a9e82eb8f145afde8e029a3eb78a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc495763_72cb39cc",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1509,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-11-15T10:22:47Z",
+      "side": 1,
+      "message": "Thanks for comments. Now updated with different logic with inotify_init() API. Please review latest patch changes and provide me the comments if any.",
+      "parentUuid": "b599038f_bdb0d1f3",
+      "range": {
+        "startLine": 1509,
+        "startChar": 1,
+        "endLine": 1509,
+        "endChar": 65
+      },
+      "revId": "556c0b121a7a9e82eb8f145afde8e029a3eb78a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
