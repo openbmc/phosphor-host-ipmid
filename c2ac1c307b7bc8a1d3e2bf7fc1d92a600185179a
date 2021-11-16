@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "25f23f93_072bdc89",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-16T18:29:55Z",
+      "side": 1,
+      "message": "^[\\w\\/]+\\/(\\w+)+(?:\\[(\\d{1,2})-(\\d{1,2})\\]){0,1}$\n\nThis seems to work well and separates the sensor name into group 1\nrange start (if present) into group 2\nrange end (if present) into group 3\n\nused regex101.com as the checker.",
+      "parentUuid": "073285c1_05c5dd1e",
+      "range": {
+        "startLine": 469,
+        "startChar": 4,
+        "endLine": 469,
+        "endChar": 52
+      },
+      "revId": "c2ac1c307b7bc8a1d3e2bf7fc1d92a600185179a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5471e416_29458830",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 18
