@@ -1055,7 +1055,16 @@ ipmi::RspType<uint16_t, // Next Record ID
             sensorType = getSensorTypeFromPath(sensorPath);
             sensorAndLun = getSensorNumberFromPath(sensorPath);
             sensorNum = static_cast<uint8_t>(sensorAndLun);
-            generatorID |= sensorAndLun >> 8;
+            if (!(generatorID & 0x0001))
+            {
+                // IPMB Address
+                generatorID |= sensorAndLun & 0x0300;
+            }
+            else
+            {
+                // system software
+                generatorID |= sensorAndLun >> 8;
+            }
             eventType = getSensorEventTypeFromPath(sensorPath);
 
             // Get the event direction
