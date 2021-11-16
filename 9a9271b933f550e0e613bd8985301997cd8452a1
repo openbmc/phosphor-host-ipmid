@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97e1d3de_4849a0ea",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-11-16T16:47:29Z",
+      "side": 1,
+      "message": "const auto\u0026?\n\nSame with below.",
+      "range": {
+        "startLine": 104,
+        "startChar": 58,
+        "endLine": 104,
+        "endChar": 63
+      },
+      "revId": "9a9271b933f550e0e613bd8985301997cd8452a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
