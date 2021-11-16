@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7e4bdb6_5944520f",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1298,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-11-16T16:42:35Z",
+      "side": 1,
+      "message": "Is the `ipmiSenSetSensorThresholds` any different from the one in dbus-sdr?\n\nhttps://github.com/openbmc/intel-ipmi-oem/blob/f4d5e05e388aafd06d8320a2f81594de35c77c0d/src/sensorcommands.cpp#L597\n\nI can see some difference that is used to fit the static sensor config? I was just thinking if we can remove the duplication, but it seems like they are different enough.",
+      "range": {
+        "startLine": 1295,
+        "startChar": 4,
+        "endLine": 1298,
+        "endChar": 77
+      },
+      "revId": "677596859c334edbfb856833fda775032b1a3ab1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
