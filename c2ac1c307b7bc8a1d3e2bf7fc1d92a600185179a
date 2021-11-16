@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1a3a2d8_00527ec5",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-16T00:20:02Z",
+      "side": 1,
+      "message": "this regex seems wrong.\n\nAccording to this the following wouldn\u0027t be matched\n\n/xyz/openbmc_project/inventory/cables/myCable\n\nand neither would this\n\n/xyz/openbmc_project/inventory/cables/myCable[0-10]\n\n\nmaybe this is a bit closer?\n\n^([A-Za-z0-9\\/_]+)(?:\\[([0-9]+)-([0-9]+)\\]){0,1}$\n\nI\u0027d play around with some regex checker to test it out first.",
+      "range": {
+        "startLine": 466,
+        "startChar": 4,
+        "endLine": 466,
+        "endChar": 50
+      },
+      "revId": "c2ac1c307b7bc8a1d3e2bf7fc1d92a600185179a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f114a8c_98fc3c23",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-16T00:20:02Z",
+      "side": 1,
+      "message": "this looks like debug and seems like it\u0027d spam the logs.\nIf so, please remove.",
+      "range": {
+        "startLine": 469,
+        "startChar": 4,
+        "endLine": 469,
+        "endChar": 52
+      },
+      "revId": "c2ac1c307b7bc8a1d3e2bf7fc1d92a600185179a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5471e416_29458830",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 479,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2021-11-16T00:20:02Z",
+      "side": 1,
+      "message": "same here and elsewhere",
+      "range": {
+        "startLine": 478,
+        "startChar": 8,
+        "endLine": 479,
+        "endChar": 22
+      },
+      "revId": "c2ac1c307b7bc8a1d3e2bf7fc1d92a600185179a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
