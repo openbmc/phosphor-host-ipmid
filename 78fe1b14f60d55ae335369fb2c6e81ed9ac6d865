@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ef96917_ffb825f4",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-11-17T08:47:30Z",
+      "side": 0,
+      "message": "nit: I think we don\u0027t need to shift this.",
+      "range": {
+        "startLine": 340,
+        "startChar": 8,
+        "endLine": 341,
+        "endChar": 74
+      },
+      "revId": "78fe1b14f60d55ae335369fb2c6e81ed9ac6d865",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
