@@ -22,6 +22,30 @@
       "revId": "677596859c334edbfb856833fda775032b1a3ab1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7bad0a77_ee4c92b8",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1298,
+      "author": {
+        "id": 1000851
+      },
+      "writtenOn": "2021-11-17T02:15:14Z",
+      "side": 1,
+      "message": "yep，it‘s used to fit the static sensor config",
+      "parentUuid": "d7e4bdb6_5944520f",
+      "range": {
+        "startLine": 1295,
+        "startChar": 4,
+        "endLine": 1298,
+        "endChar": 77
+      },
+      "revId": "677596859c334edbfb856833fda775032b1a3ab1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
