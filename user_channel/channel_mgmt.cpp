@@ -29,6 +29,7 @@
 #include <exception>
 #include <experimental/filesystem>
 #include <fstream>
+#include <iostream>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/server/object.hpp>
@@ -59,6 +60,8 @@ static constexpr const char* privilegePropertyString = "MaxPrivilege";
 static constexpr const char* dBusPropertiesInterface =
     "org.freedesktop.DBus.Properties";
 static constexpr const char* propertiesChangedSignal = "PropertiesChanged";
+static constexpr const char* interfaceAddedSignal = "InterfacesAdded";
+static constexpr const char* interfaceRemovedSignal = "InterfacesRemoved";
 
 // STRING DEFINES: Should sync with key's in JSON
 static constexpr const char* nameString = "name";
@@ -93,6 +96,12 @@ static constexpr const bool defaultIsIpmiState = false;
 static constexpr size_t smallChannelSize = 64;
 
 std::unique_ptr<sdbusplus::bus::match_t> chPropertiesSignal
+    __attribute__((init_priority(101)));
+
+std::unique_ptr<sdbusplus::bus::match_t> chInterfaceAddedSignal
+    __attribute__((init_priority(101)));
+
+std::unique_ptr<sdbusplus::bus::match_t> chInterfaceRemovedSignal
     __attribute__((init_priority(101)));
 
 // String mappings use in JSON config file
@@ -289,6 +298,8 @@ ChannelConfig::~ChannelConfig()
     if (signalHndlrObjectState)
     {
         chPropertiesSignal.reset();
+        chInterfaceAddedSignal.reset();
+        chInterfaceRemovedSignal.reset();
         sigHndlrLock.unlock();
     }
 }
@@ -347,6 +358,24 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                 processChAccessPropChange(path, props);
             });
         signalHndlrObjectState = true;
+
+        chInterfaceAddedSignal = std::make_unique<sdbusplus::bus::match_t>(
+            bus,
+            "type='signal',member='InterfacesAdded',"
+            "arg0path='/xyz/openbmc_project/network/'",
+            [&](sdbusplus::message::message& msg) {
+                sdbusplus::message::object_path path;
+                loadChannelConfig();
+            });
+
+        chInterfaceRemovedSignal = std::make_unique<sdbusplus::bus::match_t>(
+            bus,
+            "type='signal',member='InterfacesAdded'"
+            "arg0path='/xyz/openbmc_project/network/'",
+            [&](sdbusplus::message::message& msg) {
+                sdbusplus::message::object_path path;
+                loadChannelConfig();
+            });
     }
 }
 
