@@ -301,14 +301,15 @@ static constexpr size_t sensorEventTypeCodes = 1;
 
 enum class SensorTypeCodes : uint8_t
 {
-    reserved = 0x0,
-    temperature = 0x1,
-    voltage = 0x2,
-    current = 0x3,
-    fan = 0x4,
-    other = 0xB,
-    memory = 0x0c,
+    reserved = 0x00,
+    temperature = 0x01,
+    voltage = 0x02,
+    current = 0x03,
+    fan = 0x04,
+    processor = 0x07,
     power_unit = 0x09,
+    other = 0x0b,
+    memory = 0x0c,
     buttons = 0x14,
     watchdog2 = 0x23,
 };
@@ -333,6 +334,8 @@ const static boost::container::flat_map<
                                      SensorEventTypeCodes::threshold)},
          {"fan_pwm", std::make_pair(SensorTypeCodes::fan,
                                     SensorEventTypeCodes::threshold)},
+         {"processor", std::make_pair(SensorTypeCodes::processor,
+                                      SensorEventTypeCodes::sensorSpecified)},
          {"power", std::make_pair(SensorTypeCodes::other,
                                   SensorEventTypeCodes::threshold)},
          {"memory", std::make_pair(SensorTypeCodes::memory,
