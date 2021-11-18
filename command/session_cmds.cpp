@@ -195,7 +195,17 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
                 return session::ccInvalidSessionHandle;
             }
         }
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failed to get session manager instance or sessionID "
+                        "by sessionHandle",
+                        entry("ERRMSG=%s", e.what()));
+        return session::ccInvalidSessionHandle;
+    }
 
+    try
+    {
         auto closeSessionInstance =
             session::Manager::get().getSession(reqSessionId);
         uint8_t closeSessionPriv = closeSessionInstance->currentPrivilege();
@@ -204,6 +214,16 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
         {
             return ipmi::ccInsufficientPrivilege;
         }
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failed to get session manager instance or sessionID",
+                        entry("ERRMSG=%s", e.what()));
+        return session::ccInvalidSessionId;
+    }
+
+    try
+    {
         status = session::Manager::get().stopSession(reqSessionId);
 
         if (!status)
@@ -213,8 +233,9 @@ uint8_t closeMyNetInstanceSession(uint32_t reqSessionId,
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Failed to get session manager instance",
-                        entry("ERRMSG=%s", e.what()));
+        log<level::ERR>(
+            "Failed to get session manager instance or stop session",
+            entry("ERRMSG=%s", e.what()));
         return ipmi::ccUnspecifiedError;
     }
 
