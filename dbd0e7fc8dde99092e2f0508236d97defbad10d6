@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "27685ae2_78124224",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-11-19T18:30:09Z",
+      "side": 1,
+      "message": "Needed\n```\n sdbusplus::bus::match::rules::argNpath(\n                    0, std::string(networkIntfObjectBasePath) + \"/\")\n```\ninstead.",
+      "parentUuid": "7a124623_8e6651e4",
+      "range": {
+        "startLine": 363,
+        "startChar": 12,
+        "endLine": 367,
+        "endChar": 76
+      },
+      "revId": "dbd0e7fc8dde99092e2f0508236d97defbad10d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a327e6eb_f8ee2c56",
         "filename": "user_channel/channel_mgmt.cpp",
         "patchSetId": 4
