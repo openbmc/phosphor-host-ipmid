@@ -117,6 +117,24 @@
       "revId": "dbd0e7fc8dde99092e2f0508236d97defbad10d6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e7024bc_f8bf8a7c",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 988,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-11-19T19:24:29Z",
+      "side": 1,
+      "message": "ok, sounds good. Let\u0027s see what the maintainer thinks then.",
+      "parentUuid": "b6f1e005_a0a31d3d",
+      "revId": "dbd0e7fc8dde99092e2f0508236d97defbad10d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
