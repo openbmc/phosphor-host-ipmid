@@ -99,6 +99,24 @@
       "revId": "dbd0e7fc8dde99092e2f0508236d97defbad10d6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6f1e005_a0a31d3d",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 988,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2021-11-19T18:36:52Z",
+      "side": 1,
+      "message": "I was thinking the `volatile` config that is written + read was using the isChValid field.\n\nInterfaces don\u0027t come and go that often, there may be a small storm when the system starts but that is it. We could add a timer that waits for the storm of interfaces to abait, but I don\u0027t think it will matter.",
+      "parentUuid": "82c8ae0b_24fcb267",
+      "revId": "dbd0e7fc8dde99092e2f0508236d97defbad10d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
