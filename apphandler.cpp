@@ -594,17 +594,18 @@ ipmi::RspType<uint8_t,  // Device ID
         uint32_t aux;
     } devId;
     static bool dev_id_initialized = false;
+    static bool haveBMCVersion = false;
     static bool defaultActivationSetting = true;
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
     constexpr auto ipmiDevIdStateShift = 7;
     constexpr auto ipmiDevIdFw1Mask = ~(1 << ipmiDevIdStateShift);
-
-    if (!dev_id_initialized)
+    if (!haveBMCVersion || !dev_id_initialized)
     {
         try
         {
             auto version = getActiveSoftwareVersionInfo(ctx);
             r = convertVersion(version, rev);
+            haveBMCVersion = true;
         }
         catch (const std::exception& e)
         {
@@ -625,7 +626,9 @@ ipmi::RspType<uint8_t,  // Device ID
             devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
             std::memcpy(&devId.aux, rev.d, 4);
         }
-
+    }
+    if (!dev_id_initialized)
+    {
         // IPMI Spec version 2.0
         devId.ipmiVer = 2;
 
