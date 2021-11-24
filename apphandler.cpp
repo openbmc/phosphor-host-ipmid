@@ -93,6 +93,7 @@ static constexpr uint8_t oemCmdStart = 192;
 static constexpr uint8_t oemCmdEnd = 255;
 static constexpr uint8_t invalidParamSelectorStart = 8;
 static constexpr uint8_t invalidParamSelectorEnd = 191;
+static bool haveBMCVersion = false;
 
 /**
  * @brief Returns the Version info from primary s/w object
@@ -122,7 +123,6 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
         elog<InternalFailure>();
     }
 
-    auto objectFound = false;
     for (auto& softObject : objectTree)
     {
         auto service =
@@ -155,7 +155,7 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
                     if (priority < minPriority)
                     {
                         minPriority = priority;
-                        objectFound = true;
+                        haveBMCVersion = true;
                         revision = std::move(version);
                     }
                 }
@@ -167,7 +167,7 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
         }
     }
 
-    if (!objectFound)
+    if (!haveBMCVersion)
     {
         log<level::ERR>("Could not found an BMC software Object");
         elog<InternalFailure>();
@@ -598,8 +598,7 @@ ipmi::RspType<uint8_t,  // Device ID
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
     constexpr auto ipmiDevIdStateShift = 7;
     constexpr auto ipmiDevIdFw1Mask = ~(1 << ipmiDevIdStateShift);
-
-    if (!dev_id_initialized)
+    if (!haveBMCVersion || !dev_id_initialized)
     {
         try
         {
@@ -625,7 +624,9 @@ ipmi::RspType<uint8_t,  // Device ID
             devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
             std::memcpy(&devId.aux, rev.d, 4);
         }
-
+    }
+    if (!dev_id_initialized)
+    {
         // IPMI Spec version 2.0
         devId.ipmiVer = 2;
 
