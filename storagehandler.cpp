@@ -698,17 +698,24 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
     return ipmi::responseSuccess(recordID);
 }
 
-bool isFruPresent(const std::string& fruPath)
+bool isFruPresent(ipmi::Context::ptr& ctx, const std::string& fruPath)
 {
     using namespace ipmi::fru;
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
-
-    auto propValue =
-        ipmi::getDbusProperty(bus, invMgrInterface, invObjPath + fruPath,
-                              invItemInterface, itemPresentProp);
-
-    return std::get<bool>(propValue);
+    std::string service;
+    boost::system::error_code ec =
+        getService(ctx, invItemInterface, invObjPath + fruPath, service);
+    if (!ec)
+    {
+        bool result;
+        ec = ipmi::getDbusProperty(ctx, service, invObjPath + fruPath,
+                                   invItemInterface, itemPresentProp, result);
+        if (!ec)
+        {
+            return result;
+        }
+    }
+    return false;
 }
 
 /** @brief implements the get FRU Inventory Area Info command
@@ -720,7 +727,7 @@ bool isFruPresent(const std::string& fruPath)
 ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
               uint8_t   // access size (bytes / words)
               >
-    ipmiStorageGetFruInvAreaInfo(uint8_t fruID)
+    ipmiStorageGetFruInvAreaInfo(ipmi::Context::ptr ctx, uint8_t fruID)
 {
 
     auto iter = frus.find(fruID);
@@ -730,7 +737,7 @@ ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
     }
 
     auto path = iter->second[0].path;
-    if (!isFruPresent(path))
+    if (!isFruPresent(ctx, path))
     {
         return ipmi::responseSensorInvalid();
     }
