@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8807ca61_7855a5a4",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1000056
+      },
+      "writtenOn": "2021-11-29T11:30:05Z",
+      "side": 1,
+      "message": "Are multiple D-Bus calls needed? Does the sensor app (dbus-sensors?) implement an ObjectManager, and if so can all sensor related properties by read via GetManagedObjects?",
+      "revId": "1053a026b876cf1aecfd7eac0e402937737cc468",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
