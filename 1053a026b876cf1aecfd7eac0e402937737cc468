@@ -16,6 +16,24 @@
       "revId": "1053a026b876cf1aecfd7eac0e402937737cc468",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3aba0132_d3d737c0",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2021-11-30T15:02:13Z",
+      "side": 1,
+      "message": "I\u0027ve tried to perform\n```\ngetManagedObjects(bus, service, sensorInfo.sensorPath);\n```\nBut this gives:\n```\nsd_bus_call: org.freedesktop.DBus.Error.UnknownMethod: Unknown method GetManagedObjects or interface org.freedesktop.DBus.ObjectManager\n```\n\nAs I understand, `dbus-sensors` doesn\u0027t implement `org.freedesktop.DBus.ObjectManager`. For the reference here is an `busctl introspect` output for some adc sensor created by `dbus-sensors`:\n```\nbusctl introspect xyz.openbmc_project.ADCSensor /xyz/openbmc_project/sensors/voltage/12_RUN\nNAME                                                  TYPE      SIGNATURE RESULT/VALUE                             FLAGS\norg.freedesktop.DBus.Introspectable                   interface -         -                                        -\n.Introspect                                           method    -         s                                        -\norg.freedesktop.DBus.Peer                             interface -         -                                        -\n.GetMachineId                                         method    -         s                                        -\n.Ping                                                 method    -         -                                        -\norg.freedesktop.DBus.Properties                       interface -         -                                        -\n.Get                                                  method    ss        v                                        -\n.GetAll                                               method    s         a{sv}                                    -\n.Set                                                  method    ssv       -                                        -\n.PropertiesChanged                                    signal    sa{sv}as  -                                        -\nxyz.openbmc_project.Association.Definitions           interface -         -                                        -\n.Associations                                         property  a(sss)    1 \"chassis\" \"all_sensors\" \"/xyz/openbmc… emits-change\nxyz.openbmc_project.Sensor.Threshold.Critical         interface -         -                                        -\n.CriticalAlarmHigh                                    property  b         false                                    emits-change\n.CriticalAlarmLow                                     property  b         false                                    emits-change\n.CriticalHigh                                         property  d         13.2                                     emits-change writable\n.CriticalLow                                          property  d         10.8                                     emits-change writable\nxyz.openbmc_project.Sensor.Value                      interface -         -                                        -\n.MaxValue                                             property  d         15.9292                                  emits-change\n.MinValue                                             property  d         0                                        emits-change\n.Unit                                                 property  s         \"xyz.openbmc_project.Sensor.Value.Unit.… emits-change\n.Value                                                property  d         nan                                      emits-change writable\nxyz.openbmc_project.State.Decorator.Availability      interface -         -                                        -\n.Available                                            property  b         false                                    emits-change writable\nxyz.openbmc_project.State.Decorator.OperationalStatus interface -         -                                        -\n.Functional                                           property  b         true                                     emits-change\n```",
+      "parentUuid": "8807ca61_7855a5a4",
+      "revId": "1053a026b876cf1aecfd7eac0e402937737cc468",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
