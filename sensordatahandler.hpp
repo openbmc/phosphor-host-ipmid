@@ -258,26 +258,20 @@ GetSensorResponse readingData(const Info& sensorInfo)
     constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
     constexpr uint8_t signedDataFormat = 0x80;
     // if sensorUnits1 [7:6] = 10b, sensor is signed
+    int32_t minClamp;
+    int32_t maxClamp;
     if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) == signedDataFormat)
     {
-        if (rawData > std::numeric_limits<int8_t>::max() ||
-            rawData < std::numeric_limits<int8_t>::lowest())
-        {
-            log<level::ERR>("Value out of range");
-            throw std::out_of_range("Value out of range");
-        }
-        setReading(static_cast<int8_t>(rawData), &response);
+        minClamp = std::numeric_limits<int8_t>::lowest();
+        maxClamp = std::numeric_limits<int8_t>::max();
     }
     else
     {
-        if (rawData > std::numeric_limits<uint8_t>::max() ||
-            rawData < std::numeric_limits<uint8_t>::lowest())
-        {
-            log<level::ERR>("Value out of range");
-            throw std::out_of_range("Value out of range");
-        }
-        setReading(static_cast<uint8_t>(rawData), &response);
+        minClamp = std::numeric_limits<uint8_t>::lowest();
+        maxClamp = std::numeric_limits<uint8_t>::max();
     }
+    setReading(static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp)),
+               &response);
 
     if (!std::isfinite(value))
     {
