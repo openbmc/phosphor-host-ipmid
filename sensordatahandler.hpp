@@ -4,13 +4,14 @@
 
 #include "sensorhandler.hpp"
 
-#include <cmath>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
+
+#include <cmath>
 
 namespace ipmi
 {
@@ -251,23 +252,20 @@ GetSensorResponse readingData(const Info& sensorInfo)
     // if sensorUnits1 [7:6] = 10b, sensor is signed
     if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) == signedDataFormat)
     {
-        if (rawData > std::numeric_limits<int8_t>::max() ||
-            rawData < std::numeric_limits<int8_t>::lowest())
-        {
-            log<level::ERR>("Value out of range");
-            throw std::out_of_range("Value out of range");
-        }
-        setReading(static_cast<int8_t>(rawData), &response);
+        minClamp = std::numeric_limits<int8_t>::lowest();
+        maxClamp = std::numeric_limits<int8_t>::max();
+
+        setReading(static_cast<int8_t>(std::clamp(
+                       rawData, std::numeric_limits<int8_t>::lowest(),
+                       std::numeric_limits<int8_t>::lowest())),
+                   &response);
     }
     else
     {
-        if (rawData > std::numeric_limits<uint8_t>::max() ||
-            rawData < std::numeric_limits<uint8_t>::lowest())
-        {
-            log<level::ERR>("Value out of range");
-            throw std::out_of_range("Value out of range");
-        }
-        setReading(static_cast<uint8_t>(rawData), &response);
+        setReading(static_cast<uint8_t>(std::clamp(
+            rawData, std::numeric_limits<uint8_t>::lowest(),
+                       std::numeric_limits<uint8_t>::lowest())),)),
+            &response);
     }
 
     if (!std::isfinite(value))
