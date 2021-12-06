@@ -175,8 +175,8 @@ struct Info
 #ifndef FEATURE_SENSORS_CACHE
     std::function<GetSensorResponse(const Info&)> getFunc;
 #else
-    std::function<std::optional<GetSensorResponse>(
-        uint8_t, const Info&, sdbusplus::message::message&)>
+    std::function<std::optional<GetSensorResponse>(uint8_t, const Info&,
+                                                   const ipmi::PropertyMap&)>
         getFunc;
 #endif
     Mutability mutability;
