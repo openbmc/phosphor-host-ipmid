@@ -116,7 +116,12 @@ void initSensorMatches()
                          [&s](auto& msg) {
                              try
                              {
-                                 s.second.getFunc(s.first, s.second, msg);
+                                 // This is signal callback
+                                 std::string interfaceName;
+                                 msg.read(interfaceName);
+                                 ipmi::PropertyMap props;
+                                 msg.read(props);
+                                 s.second.getFunc(s.first, s.second, props);
                              }
                              catch (const std::exception& e)
                              {
@@ -471,7 +476,7 @@ ipmi::RspType<uint8_t, // sensor reading
               uint8_t, // threshold levels states
               uint8_t  // discrete reading sensor states
               >
-    ipmiSensorGetSensorReading(uint8_t sensorNum)
+    ipmiSensorGetSensorReading(ipmi::Context::ptr& ctx, uint8_t sensorNum)
 {
     if (sensorNum == 0xFF)
     {
@@ -492,29 +497,29 @@ ipmi::RspType<uint8_t, // sensor reading
     try
     {
 #ifdef FEATURE_SENSORS_CACHE
-        // TODO
-        const auto& sensorData = sensorCacheMap[sensorNum];
+        auto& sensorData = sensorCacheMap[sensorNum];
         if (!sensorData.has_value())
         {
             // No cached value, try read it
-            sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+            std::string service;
+            boost::system::error_code ec;
             const auto& sensorInfo = iter->second;
-            auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
-                                            sensorInfo.sensorPath);
-            try
+            ec = ipmi::getService(ctx, sensorInfo.sensorInterface,
+                                  sensorInfo.sensorPath, service);
+            if (ec)
             {
-                auto method = bus.new_method_call(
-                    service.c_str(), sensorInfo.sensorPath.c_str(),
-                    "org.freedesktop.DBus.Properties", "GetAll");
-                method.append(
-                    sensorInfo.propertyInterfaces.begin()->first.c_str());
-                auto reply = bus.call(method);
-                sensorInfo.getFunc(sensorNum, sensorInfo, reply);
+                return ipmi::responseUnspecifiedError();
             }
-            catch (const std::exception& e)
+
+            ipmi::PropertyMap props;
+            ec = ipmi::getAllDbusProperties(
+                ctx, service, sensorInfo.sensorPath,
+                sensorInfo.propertyInterfaces.begin()->first, props);
+            if (ec)
             {
-                fprintf(stderr, "Failed to get sensor %s\n",
-                        sensorInfo.sensorPath.c_str());
+                fprintf(stderr, "Failed to get sensor %s, %d: %s\n",
+                        sensorInfo.sensorPath.c_str(), ec.value(),
+                        ec.message().c_str());
                 // Intitilizing with default values
                 constexpr uint8_t senReading = 0;
                 constexpr uint5_t reserved{0};
@@ -529,6 +534,7 @@ ipmi::RspType<uint8_t, // sensor reading
                                              assertionStatesLsb,
                                              assertionStatesMsb);
             }
+            sensorInfo.getFunc(sensorNum, sensorInfo, props);
         }
         return ipmi::responseSuccess(
             sensorData->response.reading, uint5_t(0),
