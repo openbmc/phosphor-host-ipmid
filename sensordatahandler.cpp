@@ -205,21 +205,8 @@ GetSensorResponse eventdata2(const Info& sensorInfo)
 }
 #else
 std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
-                                           sdbusplus::message::message& msg)
+                                           const PropertyMap& /*properties*/)
 {
-    auto type = msg.get_type();
-    if (type == msgTypeSignal)
-    {
-        // This is signal callback
-        std::string interfaceName;
-        msg.read(interfaceName);
-        if (interfaceName != sensorInfo.sensorInterface)
-        {
-            // Not the interface we need
-            return {};
-        }
-    }
-
     // The assertion may contain multiple properties
     // So we have to get the properties from DBus anyway
     auto response = mapDbusToAssertion(sensorInfo, sensorInfo.sensorPath,
@@ -234,21 +221,8 @@ std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
 }
 
 std::optional<GetSensorResponse> eventdata2(uint8_t id, const Info& sensorInfo,
-                                            sdbusplus::message::message& msg)
+                                            const PropertyMap& /*properties*/)
 {
-    auto type = msg.get_type();
-    if (type == msgTypeSignal)
-    {
-        // This is signal callback
-        std::string interfaceName;
-        msg.read(interfaceName);
-        if (interfaceName != sensorInfo.sensorInterface)
-        {
-            // Not the interface we need
-            return {};
-        }
-    }
-
     // The eventdata2 may contain multiple properties
     // So we have to get the properties from DBus anyway
     auto response = mapDbusToEventdata2(sensorInfo);
@@ -476,21 +450,8 @@ GetSensorResponse assertion(const Info& sensorInfo)
 #else
 
 std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
-                                           sdbusplus::message::message& msg)
+                                           const PropertyMap& /*properties*/)
 {
-    auto type = msg.get_type();
-    if (type == msgTypeSignal)
-    {
-        // This is signal callback
-        std::string interfaceName;
-        msg.read(interfaceName);
-        if (interfaceName != sensorInfo.sensorInterface)
-        {
-            // Not the interface we need
-            return {};
-        }
-    }
-
     // The assertion may contain multiple properties
     // So we have to get the properties from DBus anyway
     namespace fs = std::filesystem;

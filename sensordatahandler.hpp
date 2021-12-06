@@ -30,16 +30,14 @@ namespace sensor
 using Assertion = uint16_t;
 using Deassertion = uint16_t;
 using AssertionSet = std::pair<Assertion, Deassertion>;
-
 using Service = std::string;
 using Path = std::string;
 using Interface = std::string;
-
 using ServicePath = std::pair<Path, Service>;
-
 using Interfaces = std::vector<Interface>;
-
 using MapperResponseType = std::map<Path, std::map<Service, Interfaces>>;
+using PropertyMap = ipmi::PropertyMap;
+
 using namespace phosphor::logging;
 
 /** @brief get the D-Bus service and service path
@@ -355,7 +353,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
  *  @return Response for get sensor reading command.
  */
 std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
-                                           sdbusplus::message::message& msg);
+                                           const PropertyMap& properties);
 
 /**
  *  @brief Maps the Dbus info to the reading field in the Get sensor reading
@@ -368,7 +366,7 @@ std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
  *  @return Response for get sensor reading command.
  */
 std::optional<GetSensorResponse> eventdata2(uint8_t id, const Info& sensorInfo,
-                                            sdbusplus::message::message& msg);
+                                            const PropertyMap& properties);
 
 /**
  *  @brief readingAssertion is a case where the entire assertion state field
@@ -382,29 +380,12 @@ std::optional<GetSensorResponse> eventdata2(uint8_t id, const Info& sensorInfo,
  *  @return Response for get sensor reading command.
  */
 template <typename T>
-std::optional<GetSensorResponse>
-    readingAssertion(uint8_t id, const Info& sensorInfo,
-                     sdbusplus::message::message& msg)
+std::optional<GetSensorResponse> readingAssertion(uint8_t id,
+                                                  const Info& sensorInfo,
+                                                  const PropertyMap& properties)
 {
-    auto type = msg.get_type();
-    if (type == msgTypeSignal)
-    {
-        // This is signal callback
-        std::string interfaceName;
-        msg.read(interfaceName);
-        if (interfaceName != sensorInfo.sensorInterface)
-        {
-            // Not the interface we need
-            return {};
-        }
-    }
-    // Now the message only contains the properties.
     GetSensorResponse response{};
-    std::map<std::string, ipmi::Value> properties;
-
     enableScanning(&response);
-
-    msg.read(properties);
 
     auto iter = properties.find(
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
@@ -435,63 +416,33 @@ std::optional<GetSensorResponse>
  */
 template <typename T>
 std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
-                                             sdbusplus::message::message& msg)
+                                             const PropertyMap& properties)
 {
-    std::map<std::string, ipmi::Value> properties;
-    auto type = msg.get_type();
-    if (type == msgTypeSignal)
+    auto iter = properties.find("Functional");
+    if (iter != properties.end())
     {
-        // This is signal callback
-        std::string interfaceName;
-        msg.read(interfaceName);
-
-        if (interfaceName ==
-            "xyz.openbmc_project.State.Decorator.OperationalStatus")
-        {
-            msg.read(properties);
-            auto val = properties.find("Functional");
-            if (val != properties.end())
-            {
-                sensorCacheMap[id]->functional = std::get<bool>(val->second);
-            }
-            return {};
-        }
-        if (interfaceName == "xyz.openbmc_project.State.Decorator.Availability")
-        {
-            msg.read(properties);
-            auto val = properties.find("Available");
-            if (val != properties.end())
-            {
-                sensorCacheMap[id]->available = std::get<bool>(val->second);
-            }
-            return {};
-        }
-
-        if (interfaceName != sensorInfo.sensorInterface)
-        {
-            // Not the interface we need
-            return {};
-        }
-
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
-        if (sensorCacheMap[id])
-        {
-            if (!sensorCacheMap[id]->functional)
-            {
-                throw SensorFunctionalError();
-            }
-        }
-#endif
+        sensorCacheMap[id]->functional = std::get<bool>(iter->second);
     }
-    // Now the message only contains the properties.
+    iter = properties.find("Available");
+    if (iter != properties.end())
+    {
+        sensorCacheMap[id]->available = std::get<bool>(iter->second);
+    }
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    if (sensorCacheMap[id])
+    {
+        if (!sensorCacheMap[id]->functional)
+        {
+            throw SensorFunctionalError();
+        }
+    }
+#endif
 
     GetSensorResponse response{};
 
     enableScanning(&response);
 
-    msg.read(properties);
-
-    auto iter = properties.find(
+    iter = properties.find(
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
     if (iter == properties.end())
     {
@@ -724,7 +675,7 @@ GetSensorResponse assertion(const Info& sensorInfo);
  *  @return Response for get sensor reading command.
  */
 std::optional<GetSensorResponse> assertion(uint8_t id, const Info& sensorInfo,
-                                           sdbusplus::message::message& msg);
+                                           const PropertyMap& properties);
 
 #endif
 
