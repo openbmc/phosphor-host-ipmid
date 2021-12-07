@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "d5a121a2_e35922cb",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-12-07T09:00:20Z",
+      "side": 1,
+      "message": "This is done by https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/49410\nLet\u0027s do it in a separate commit.",
+      "parentUuid": "084e889f_7b95901c",
+      "range": {
+        "startLine": 502,
+        "startChar": 33,
+        "endLine": 502,
+        "endChar": 43
+      },
+      "revId": "9b9a21deea3b08c80ebdad2b26611c898dc966c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f53358e5_ba3b732e",
         "filename": "sensorhandler.cpp",
         "patchSetId": 2
@@ -117,6 +141,30 @@
       "revId": "9b9a21deea3b08c80ebdad2b26611c898dc966c3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "144dff60_dd189ea9",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-12-07T09:00:20Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c23011c8_6573ea73",
+      "range": {
+        "startLine": 506,
+        "startChar": 20,
+        "endLine": 508,
+        "endChar": 54
+      },
+      "revId": "9b9a21deea3b08c80ebdad2b26611c898dc966c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
