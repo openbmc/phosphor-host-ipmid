@@ -91,8 +91,55 @@ std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
     sensorAddedMatches __attribute__((init_priority(101)));
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
     sensorUpdatedMatches __attribute__((init_priority(101)));
+std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
+    sensorRemovedMatches __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match::match> sensorsOwnerMatch
+    __attribute__((init_priority(101)));
 
 ipmi::sensor::SensorCacheMap sensorCacheMap __attribute__((init_priority(101)));
+
+// It is needed to know which objects belong to which service, so that when a
+// service exits without interfacesRemoved signal, we could invaildate the cache
+// that is related to the service. It uses below two variables:
+// - idToServiceMap records which sensors are known to have a related service;
+// - serviceToIdMap maps a service to the sensors.
+using sensorIdToServiceMap = std::unordered_map<uint8_t, std::string>;
+sensorIdToServiceMap idToServiceMap __attribute__((init_priority(101)));
+
+using sensorServiceToIdMap = std::unordered_map<std::string, std::set<uint8_t>>;
+sensorServiceToIdMap serviceToIdMap __attribute__((init_priority(101)));
+
+static void fillSensorIdServiceMap(const std::string& obj,
+                                   const std::string& /*intf*/, uint8_t id,
+                                   const std::string& service)
+{
+    if (idToServiceMap.find(id) != idToServiceMap.end())
+    {
+        return;
+    }
+    idToServiceMap[id] = service;
+    serviceToIdMap[service].insert(id);
+}
+
+static void fillSensorIdServiceMap(const std::string& obj,
+                                   const std::string& intf, uint8_t id)
+{
+    if (idToServiceMap.find(id) != idToServiceMap.end())
+    {
+        return;
+    }
+    try
+    {
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        auto service = ipmi::getService(bus, intf, obj);
+        idToServiceMap[id] = service;
+        serviceToIdMap[service].insert(id);
+    }
+    catch (...)
+    {
+        // Ignore
+    }
+}
 
 void initSensorMatches()
 {
@@ -104,8 +151,19 @@ void initSensorMatches()
             s.first,
             std::make_unique<sdbusplus::bus::match::match>(
                 bus, interfacesAdded() + argNpath(0, s.second.sensorPath),
-                [id = s.first, obj = s.second.sensorPath](auto& /*msg*/) {
-                    // TODO
+                [id = s.first, obj = s.second.sensorPath,
+                 intf = s.second.propertyInterfaces.begin()->first](
+                    auto& /*msg*/) { fillSensorIdServiceMap(obj, intf, id); }));
+        sensorRemovedMatches.emplace(
+            s.first,
+            std::make_unique<sdbusplus::bus::match::match>(
+                bus, interfacesRemoved() + argNpath(0, s.second.sensorPath),
+                [id = s.first](auto& /*msg*/) {
+                    // Ideally this should work.
+                    // But when a service is terminated or crashed, it does not
+                    // emit interfacesRemoved signal. In that case it's handled
+                    // by sensorsOwnerMatch
+                    sensorCacheMap[id].reset();
                 }));
         sensorUpdatedMatches.emplace(
             s.first, std::make_unique<sdbusplus::bus::match::match>(
@@ -114,6 +172,10 @@ void initSensorMatches()
                              member("PropertiesChanged"s) +
                              interface("org.freedesktop.DBus.Properties"s),
                          [&s](auto& msg) {
+                             fillSensorIdServiceMap(
+                                 s.second.sensorPath,
+                                 s.second.propertyInterfaces.begin()->first,
+                                 s.first);
                              try
                              {
                                  // This is signal callback
@@ -128,6 +190,28 @@ void initSensorMatches()
                                  sensorCacheMap[s.first].reset();
                              }
                          }));
+        sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match::match>(
+            bus, nameOwnerChanged(), [](auto& msg) {
+                std::string name;
+                std::string oldOwner;
+                std::string newOwner;
+                msg.read(name, oldOwner, newOwner);
+
+                if (!name.empty() && newOwner.empty())
+                {
+                    // The service exits
+                    const auto it = serviceToIdMap.find(name);
+                    if (it == serviceToIdMap.end())
+                    {
+                        return;
+                    }
+                    for (const auto& id : it->second)
+                    {
+                        // Invalidate cache
+                        sensorCacheMap[id].reset();
+                    }
+                }
+            });
     }
 }
 #endif
@@ -504,12 +588,16 @@ ipmi::RspType<uint8_t, // sensor reading
             std::string service;
             boost::system::error_code ec;
             const auto& sensorInfo = iter->second;
-            ec = ipmi::getService(ctx, sensorInfo.sensorInterface,
+            ec = ipmi::getService(ctx,
+                                  sensorInfo.propertyInterfaces.begin()->first,
                                   sensorInfo.sensorPath, service);
             if (ec)
             {
                 return ipmi::responseUnspecifiedError();
             }
+            fillSensorIdServiceMap(sensorInfo.sensorPath,
+                                   sensorInfo.propertyInterfaces.begin()->first,
+                                   iter->first, service);
 
             ipmi::PropertyMap props;
             ec = ipmi::getAllDbusProperties(
