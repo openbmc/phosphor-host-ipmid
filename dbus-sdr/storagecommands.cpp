@@ -133,6 +133,7 @@ bool writeFru()
     {
         return true;
     }
+    lastDevId = 0xFF;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
     sdbusplus::message::message writeFru = dbus->new_method_call(
         fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
