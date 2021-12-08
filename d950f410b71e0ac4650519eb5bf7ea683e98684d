@@ -22,6 +22,30 @@
       "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad936b77_b48ba6ce",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-08T08:20:59Z",
+      "side": 0,
+      "message": "I am afraid that we can not cover all of cases which update FRU data. It is more safety if we always request to read FRU data via dbus method, FRU data will be synchronous.",
+      "parentUuid": "505fd855_cf827a3a",
+      "range": {
+        "startLine": 251,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 5
+      },
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
