@@ -111,7 +111,6 @@ constexpr static const uint8_t deassertionEvent = 0x80;
 static std::vector<uint8_t> fruCache;
 static uint8_t cacheBus = 0xFF;
 static uint8_t cacheAddr = 0XFF;
-static uint8_t lastDevId = 0xFF;
 
 static uint8_t writeBus = 0xFF;
 static uint8_t writeAddr = 0XFF;
@@ -248,11 +247,6 @@ void replaceCacheFru(const std::shared_ptr<sdbusplus::asio::connection>& bus,
 
 ipmi::Cc getFru(ipmi::Context::ptr ctx, uint8_t devId)
 {
-    if (lastDevId == devId && devId != 0xFF)
-    {
-        return ipmi::ccSuccess;
-    }
-
     auto deviceFind = deviceHashes.find(devId);
     if (deviceFind == deviceHashes.end())
     {
@@ -281,7 +275,6 @@ ipmi::Cc getFru(ipmi::Context::ptr ctx, uint8_t devId)
         return ipmi::ccResponseError;
     }
 
-    lastDevId = devId;
     return ipmi::ccSuccess;
 }
 
@@ -328,7 +321,6 @@ void startMatch(void)
                                 writeFruIfRunning();
                                 frus[path] = object;
                                 recalculateHashes();
-                                lastDevId = 0xFF;
                             });
 
     fruMatches.emplace_back(*bus,
@@ -354,7 +346,6 @@ void startMatch(void)
                                 writeFruIfRunning();
                                 frus.erase(path);
                                 recalculateHashes();
-                                lastDevId = 0xFF;
                             });
 
     // call once to populate
