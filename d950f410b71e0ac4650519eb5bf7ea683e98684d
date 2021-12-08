@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "505fd855_cf827a3a",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-12-08T05:36:33Z",
+      "side": 0,
+      "message": "I think this is with the assumption that the FRU won\u0027t be touched outside of the ipmi handlers, which is probably not quite true anymore.\n\n\nI think it is better to have the Write function reset `lastDevId` while still keeping this around.\n\nTo support FruWrite from outside of the ipmid, we can add a dbus-signal matcher for this signal\n```\n sdbusplus::message::message writeFru \u003d dbus-\u003enew_method_call(\n        fruDeviceServiceName, \"/xyz/openbmc_project/FruDevice\",\n        \"xyz.openbmc_project.FruDeviceManager\", \"WriteFru\");\n```\n\nAnd also reset the `lastDevId` to 0xFF if it is writing to that FRU. Something like that.",
+      "range": {
+        "startLine": 251,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 5
+      },
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
