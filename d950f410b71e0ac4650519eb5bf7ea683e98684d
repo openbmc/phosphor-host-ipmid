@@ -70,6 +70,30 @@
       "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb749be9_b346b42f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-10T03:04:52Z",
+      "side": 0,
+      "message": "Do you agree with me that we should read FRU data via Dbus method even device ID is same as the previous one?",
+      "parentUuid": "03de826d_4ea132a9",
+      "range": {
+        "startLine": 251,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 5
+      },
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
