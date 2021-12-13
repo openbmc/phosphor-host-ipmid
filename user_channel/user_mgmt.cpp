@@ -199,13 +199,8 @@ UserAccess& getUserAccessObject()
 
 int getUserNameFromPath(const std::string& path, std::string& userName)
 {
-    constexpr size_t length = strlen(userObjBasePath);
-    if (((length + 1) >= path.size()) ||
-        path.compare(0, length, userObjBasePath))
-    {
-        return -EINVAL;
-    }
-    userName.assign(path, length + 1, path.size());
+    sdbusplus::message::object_path objPath(path);
+    userName.assign(objPath.filename());
     return 0;
 }
 
@@ -595,7 +590,10 @@ bool UserAccess::isValidUserName(const std::string& userName)
         return false;
     }
 
-    std::string usersPath = std::string(userObjBasePath) + "/" + userName;
+    sdbusplus::message::object_path tempUserPath(userObjBasePath);
+    tempUserPath /= userName;
+    std::string usersPath(tempUserPath);
+
     if (properties.find(usersPath) != properties.end())
     {
         log<level::DEBUG>("User name already exists",
@@ -816,7 +814,9 @@ Cc UserAccess::setUserEnabledState(const uint8_t userId,
     }
     if (userInfo->userEnabled != enabledState)
     {
-        std::string userPath = std::string(userObjBasePath) + "/" + userName;
+        sdbusplus::message::object_path tempUserPath(userObjBasePath);
+        tempUserPath /= userName;
+        std::string userPath(tempUserPath);
         setDbusProperty(bus, getUserServiceName(), userPath, usersInterface,
                         userEnabledProperty, enabledState);
         userInfo->userEnabled = enabledState;
@@ -916,7 +916,9 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     if (chNum == syncIndex &&
         privAccess.privilege != userInfo->userPrivAccess[syncIndex].privilege)
     {
-        std::string userPath = std::string(userObjBasePath) + "/" + userName;
+        sdbusplus::message::object_path tempUserPath(userObjBasePath);
+        tempUserPath /= userName;
+        std::string userPath(tempUserPath);
         setDbusProperty(bus, getUserServiceName(), userPath, usersInterface,
                         userPrivProperty, priv);
     }
@@ -1024,7 +1026,9 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
     if (userName.empty() && !oldUser.empty())
     {
         // Delete existing user
-        std::string userPath = std::string(userObjBasePath) + "/" + oldUser;
+        sdbusplus::message::object_path tempUserPath(userObjBasePath);
+        tempUserPath /= oldUser;
+        std::string userPath(tempUserPath);
         try
         {
             auto method = bus.new_method_call(
@@ -1692,8 +1696,9 @@ void UserAccess::cacheUserDataFile()
             std::string userName(
                 reinterpret_cast<char*>(userData->user[usrIdx].userName), 0,
                 ipmiMaxUserName);
-            std::string usersPath =
-                std::string(userObjBasePath) + "/" + userName;
+            sdbusplus::message::object_path tempUserPath(userObjBasePath);
+            tempUserPath /= userName;
+            std::string usersPath(tempUserPath);
 
             auto usrObj = managedObjs.find(usersPath);
             if (usrObj != managedObjs.end())
