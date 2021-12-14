@@ -364,7 +364,9 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                 sdbusplus::bus::match::rules::member(interfaceAddedSignal) +
                 sdbusplus::bus::match::rules::argNpath(
                     0, std::string(networkIntfObjectBasePath) + "/"),
-            [&](sdbusplus::message::message& msg) { loadChannelConfig(); });
+            [&](sdbusplus::message::message& msg) {
+                initChannelPersistData();
+            });
 
         chInterfaceRemovedSignal = std::make_unique<sdbusplus::bus::match_t>(
             bus,
@@ -372,7 +374,9 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                 sdbusplus::bus::match::rules::member(interfaceRemovedSignal) +
                 sdbusplus::bus::match::rules::argNpath(
                     0, std::string(networkIntfObjectBasePath) + "/"),
-            [&](sdbusplus::message::message& msg) { loadChannelConfig(); });
+            [&](sdbusplus::message::message& msg) {
+                initChannelPersistData();
+            });
     }
 }
 
