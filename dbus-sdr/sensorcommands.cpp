@@ -223,12 +223,18 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
         if (lower != critical->second.end())
         {
             double value = std::visit(VariantToDoubleVisitor(), lower->second);
-            min = std::min(value, min);
+            if (std::isfinite(value))
+            {
+                min = std::min(value, min);
+            }
         }
         if (upper != critical->second.end())
         {
             double value = std::visit(VariantToDoubleVisitor(), upper->second);
-            max = std::max(value, max);
+            if (std::isfinite(value))
+            {
+                max = std::max(value, max);
+            }
         }
     }
     if (warning != sensorMap.end())
@@ -239,12 +245,18 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
         if (lower != warning->second.end())
         {
             double value = std::visit(VariantToDoubleVisitor(), lower->second);
-            min = std::min(value, min);
+            if (std::isfinite(value))
+            {
+                min = std::min(value, min);
+            }
         }
         if (upper != warning->second.end())
         {
             double value = std::visit(VariantToDoubleVisitor(), upper->second);
-            max = std::max(value, max);
+            if (std::isfinite(value))
+            {
+                max = std::max(value, max);
+            }
         }
     }
 }
@@ -1107,15 +1119,21 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
 
                 double value =
                     std::visit(VariantToDoubleVisitor(), warningHigh->second);
-                resp.warningHigh = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                {
+                    resp.warningHigh = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
+                }
             }
             if (warningLow != warningMap.end())
             {
                 double value =
                     std::visit(VariantToDoubleVisitor(), warningLow->second);
-                resp.warningLow = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                {
+                    resp.warningLow = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
+                }
             }
         }
         if (criticalInterface != sensorMap.end())
@@ -1129,15 +1147,21 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
             {
                 double value =
                     std::visit(VariantToDoubleVisitor(), criticalHigh->second);
-                resp.criticalHigh = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                {
+                    resp.criticalHigh = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
+                }
             }
             if (criticalLow != criticalMap.end())
             {
                 double value =
                     std::visit(VariantToDoubleVisitor(), criticalLow->second);
-                resp.criticalLow = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                {
+                    resp.criticalLow = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
+                }
             }
         }
     }
