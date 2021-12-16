@@ -442,7 +442,10 @@ std::string parseSdrIdFromPath(const std::string& path)
                 break;
             }
         }
-        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+        if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+        {
+            name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+        }
     }
     std::replace(name.begin(), name.end(), '_', ' ');
     return name;
