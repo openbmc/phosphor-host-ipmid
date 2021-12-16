@@ -1107,15 +1107,17 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
 
                 double value =
                     std::visit(VariantToDoubleVisitor(), warningHigh->second);
-                resp.warningHigh = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                    resp.warningHigh = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
             }
             if (warningLow != warningMap.end())
             {
                 double value =
                     std::visit(VariantToDoubleVisitor(), warningLow->second);
-                resp.warningLow = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                    resp.warningLow = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
             }
         }
         if (criticalInterface != sensorMap.end())
@@ -1129,15 +1131,17 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
             {
                 double value =
                     std::visit(VariantToDoubleVisitor(), criticalHigh->second);
-                resp.criticalHigh = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                    resp.criticalHigh = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
             }
             if (criticalLow != criticalMap.end())
             {
                 double value =
                     std::visit(VariantToDoubleVisitor(), criticalLow->second);
-                resp.criticalLow = scaleIPMIValueFromDouble(
-                    value, mValue, rExp, bValue, bExp, bSigned);
+                if (std::isfinite(value))
+                    resp.criticalLow = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
             }
         }
     }
