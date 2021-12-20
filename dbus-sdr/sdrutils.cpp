@@ -309,13 +309,17 @@ std::string getPathFromSensorNumber(uint16_t sensorNum)
 
 namespace ipmi
 {
+constexpr std::array<const char*, 4> unit_suffixes = {"_Voltage", "_Current",
+                                                      "_Power", "_Temperature"};
+
 constexpr std::array<const char*, 7> suffixes = {
     "_Output_Voltage", "_Input_Voltage", "_Output_Current", "_Input_Current",
     "_Output_Power",   "_Input_Power",   "_Temperature"};
 
-void remove_suffix(std::string& path)
+template <std::size_t size>
+static void remove_ending(std::string& path,
+                          const std::array<const char*, size>& suffixes)
 {
-    // try to not truncate by replacing common words
     for (const auto& suffix : suffixes)
     {
         if (boost::ends_with(path, suffix))
@@ -324,6 +328,16 @@ void remove_suffix(std::string& path)
             break;
         }
     }
+}
+
+void remove_suffix(std::string& path)
+{
+    remove_ending(path, suffixes);
+}
+
+void remove_unit(std::string& path)
+{
+    remove_ending(path, unit_suffixes);
 }
 
 std::map<std::string, std::vector<std::string>>
