@@ -309,6 +309,22 @@ std::string getPathFromSensorNumber(uint16_t sensorNum)
 
 namespace ipmi
 {
+constexpr std::array<const char*, 7> suffixes = {
+    "_Output_Voltage", "_Input_Voltage", "_Output_Current", "_Input_Current",
+    "_Output_Power",   "_Input_Power",   "_Temperature"};
+
+void remove_suffix(std::string& path)
+{
+    // try to not truncate by replacing common words
+    for (const auto& suffix : suffixes)
+    {
+        if (boost::ends_with(path, suffix))
+        {
+            boost::replace_all(path, suffix, "");
+            break;
+        }
+    }
+}
 
 std::map<std::string, std::vector<std::string>>
     getObjectInterfaces(const char* path)
@@ -483,6 +499,8 @@ void updateIpmiFromAssociation(const std::string& path,
         std::string sensorNameFromPath = fs::path(path).filename();
 
         std::string sensorConfigPath = endpoint + "/" + sensorNameFromPath;
+
+        remove_suffix(sensorConfigPath);
 
         // Download the interfaces for the sensor from
         // Entity-Manager to find the name of the configuration

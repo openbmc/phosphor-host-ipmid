@@ -54,9 +54,6 @@ extern const IdInfoMap sensors;
 } // namespace ipmi
 #endif
 
-constexpr std::array<const char*, 7> suffixes = {
-    "_Output_Voltage", "_Input_Voltage", "_Output_Current", "_Input_Current",
-    "_Output_Power",   "_Input_Power",   "_Temperature"};
 namespace ipmi
 {
 
@@ -433,15 +430,7 @@ std::string parseSdrIdFromPath(const std::string& path)
 
     if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
-        // try to not truncate by replacing common words
-        for (const auto& suffix : suffixes)
-        {
-            if (boost::ends_with(name, suffix))
-            {
-                boost::replace_all(name, suffix, "");
-                break;
-            }
-        }
+        remove_suffix(name);
         name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
     }
     std::replace(name.begin(), name.end(), '_', ' ');
