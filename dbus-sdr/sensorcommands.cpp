@@ -430,7 +430,14 @@ std::string parseSdrIdFromPath(const std::string& path)
 
     if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
-        remove_suffix(name);
+        constexpr std::array<std::pair<const char*, const char*>, 2>
+            replaceWords = {std::make_pair("Output", "Out"),
+                            std::make_pair("Input", "In")};
+        for (const auto& [find, replace] : replaceWords)
+        {
+            boost::replace_all(name, find, replace);
+        }
+        remove_unit(name);
         if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
         {
             name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);

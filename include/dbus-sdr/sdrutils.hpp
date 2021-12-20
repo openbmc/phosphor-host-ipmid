@@ -357,6 +357,7 @@ std::string getPathFromSensorNumber(uint16_t sensorNum);
 namespace ipmi
 {
 void remove_suffix(std::string& path);
+void remove_unit(std::string& path);
 
 std::map<std::string, std::vector<std::string>>
     getObjectInterfaces(const char* path);
