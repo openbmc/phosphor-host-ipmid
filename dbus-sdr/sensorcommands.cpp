@@ -287,11 +287,17 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
             ctx, sensorConnection.c_str(), "/", managedObjects);
         if (ec)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "GetMangagedObjects for getSensorMap failed",
-                phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+            boost::system::error_code ec = getManagedObjects(
+                ctx, sensorConnection.c_str(), "/xyz/openbmc_project/sensors",
+                managedObjects);
+            if (ec)
+            {
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "GetMangagedObjects for getSensorMap failed",
+                    phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
 
-            return false;
+                return false;
+            }
         }
 
         SensorCache[sensorConnection] = managedObjects;

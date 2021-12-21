@@ -335,6 +335,8 @@ const static boost::container::flat_map<
                                     SensorEventTypeCodes::threshold)},
          {"power", std::make_pair(SensorTypeCodes::other,
                                   SensorEventTypeCodes::threshold)},
+         {"utilization", std::make_pair(SensorTypeCodes::other,
+                                        SensorEventTypeCodes::threshold)},
          {"memory", std::make_pair(SensorTypeCodes::memory,
                                    SensorEventTypeCodes::sensorSpecified)},
          {"state", std::make_pair(SensorTypeCodes::power_unit,
