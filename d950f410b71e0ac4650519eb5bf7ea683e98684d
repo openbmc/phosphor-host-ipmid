@@ -118,6 +118,30 @@
       "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ca94d4b_5825ee49",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-22T00:11:28Z",
+      "side": 0,
+      "message": "\u003e I think this is with the assumption that the FRU won\u0027t be touched outside of the ipmi handlers\n\nThe assumption here is that two things within the system should not be expecting to make partially atomic writes to the FRU.  The FRU API as it exists was intended to be atomic, with the Dbus API is always seeing a valid FRU on the part of a read.\n\nIf there are two things expecting to write the FRU through different channels and get the same result, they need to understand how the atomic caching works and plan on it (ie, any IPMI handlers need to write the FULL fru to trigger the save, and not rely on the timeout).",
+      "parentUuid": "f2fb2679_a943d20f",
+      "range": {
+        "startLine": 251,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 5
+      },
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
