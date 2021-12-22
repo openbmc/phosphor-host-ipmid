@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "9010d0c3_d9f3dfb9",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-22T00:15:42Z",
+      "side": 0,
+      "message": "I suspect we should be clearing out lastDevId here, by doing\n\nlastDevId \u003d 0xFF;\n\nThat way, whenever the FRU is written back to FRUDevice, the cache will be invalidated, and the next attempt to set it will pull it again.",
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "505fd855_cf827a3a",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 1
