@@ -94,6 +94,30 @@
       "revId": "556c0b121a7a9e82eb8f145afde8e029a3eb78a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdae07ae_638917f4",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1509,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2021-12-23T07:57:14Z",
+      "side": 1,
+      "message": "We tried to fix with inotify_init() and inotify_add_watch() which is causing other issue and taking more time to fix. Please take this as temporary solution and review. Later we will try to work on inotify_add_watch().",
+      "parentUuid": "802fe7a0_2eb65e77",
+      "range": {
+        "startLine": 1509,
+        "startChar": 1,
+        "endLine": 1509,
+        "endChar": 65
+      },
+      "revId": "556c0b121a7a9e82eb8f145afde8e029a3eb78a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
