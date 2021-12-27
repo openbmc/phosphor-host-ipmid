@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "eaf56f20_398d1be8",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:20:49Z",
+      "side": 0,
+      "message": "\u003e I think that we can update the lastDevId \u003d 0xFF if writing fails. but I am afraid that some cases are not covered.\n\nPlease be more specific about which cases.\n\n\u003e Therefore, I think it is better if we always request to read raw FRU data via dbus method.\n\nReading the FRU every command breaks use cases where you might not be updating the entire FRU, and might only update one section.  Lets try to find something that works for all cases, but considering you didn\u0027t elaborate on the case that\u0027s broken, we\u0027re a little stuck.",
+      "parentUuid": "7277cf2d_2d5b64c3",
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "505fd855_cf827a3a",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 1

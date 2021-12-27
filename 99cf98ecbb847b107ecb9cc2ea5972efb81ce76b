@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "27dc23d4_eb38bbc8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:20:49Z",
+      "side": 1,
+      "message": "This is the correct behavior if you write an invalid fru, you should get an invalid return.",
+      "range": {
+        "startLine": 9,
+        "startChar": 7,
+        "endLine": 10,
+        "endChar": 54
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "490347cd_6cf15129",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:20:49Z",
+      "side": 1,
+      "message": "This makes it sound like there\u0027s cache invalidation issues, like I pointed out in the previous commit.  Please call out which command has the \"correct\" data, ie the correctly formatted FRU.",
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef04a8cb_d7f6311c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:20:49Z",
+      "side": 1,
+      "message": "This is correct behavior.  We do not persist data that is incorrect.",
+      "range": {
+        "startLine": 16,
+        "startChar": 12,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25f2c2db_01a8aab7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:20:49Z",
+      "side": 1,
+      "message": "Correct, we do this because not having the cache does not allow us to properly handle all overwrite cases, ie, if you write only one section of the FRU, we need to be able to write back the whole thing.",
+      "range": {
+        "startLine": 17,
+        "startChar": 21,
+        "endLine": 17,
+        "endChar": 66
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dad7213c_da3bc5fb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:20:49Z",
+      "side": 1,
+      "message": "The problem here is that if we ever fail a Fru write call, we should be clearing and replacing the cache.",
+      "range": {
+        "startLine": 19,
+        "startChar": 4,
+        "endLine": 20,
+        "endChar": 53
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1237459_33a0a40e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:20:49Z",
+      "side": 1,
+      "message": "This breaks the cache entirely, and would break partial writes, ie, if you only wanted to update the board section of the FRU, this would now fail.\n\nIt also has races if two devices attempt to write the FRU at the same time, which is less of an issue admittedly.",
+      "range": {
+        "startLine": 22,
+        "startChar": 10,
+        "endLine": 23,
+        "endChar": 9
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
