@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "69fa7c5d_eea4bf3c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:25:58Z",
+      "side": 1,
+      "message": "I\u0027ve read it, there\u0027s still not quite enough detail.  Also, the \"expect\" includes a non-user facing interface, so I\u0027m not really sure how that helps.",
+      "parentUuid": "04eb52a0_4f620faf",
+      "range": {
+        "startLine": 10,
+        "startChar": 57,
+        "endLine": 12,
+        "endChar": 55
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c1ced304_3f87d8af",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "cae4a7af_2fe90575",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:25:58Z",
+      "side": 1,
+      "message": "\u003e When the written data is incorrect data, it will not be wrote to FRU device. But dbus-sdr stored FruCache as written data. Therefore, when users request to read FRU information as written device ID, dbus-sdr returns FruCache data without reads data via dbus method (in this time, FruCache is including incorrect data).\n\nYes.  It does this because some programs write a block, then immediately read it back to ensure that it was \"written\" correctly.  Because we\u0027re verifying the whole flash contents before anything is written to flash (to avoid the possibility of writing bad data to the flash) it needs to be buffered somewhere.\n\n\u003e \n\u003e I updated the content of this part in the commit",
+      "parentUuid": "ca32b560_5d67fb46",
+      "range": {
+        "startLine": 14,
+        "startChar": 12,
+        "endLine": 16,
+        "endChar": 3
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cace4ebe_a3262909",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -131,6 +179,30 @@
       "side": 1,
       "message": "In my opinion, it is better if we can cover all the cases. We can reduce errors from users.",
       "parentUuid": "cace4ebe_a3262909",
+      "range": {
+        "startLine": 25,
+        "startChar": 9,
+        "endLine": 25,
+        "endChar": 44
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a15ed5c_fbbbed98",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:25:58Z",
+      "side": 1,
+      "message": "We covered this case correctly. When bad FRU data was written, we returned an error.  If programs are hitting this case ever, they need to fix their code to write a proper FRU.\n\nMy point is that this is asking to write bad data to the FRU, and it returned an error correctly.  This is not a common path, and should only occur if client calling code is broken, so I\u0027m trying to understand why the behavior is important.",
+      "parentUuid": "201d998b_3ae45814",
       "range": {
         "startLine": 25,
         "startChar": 9,

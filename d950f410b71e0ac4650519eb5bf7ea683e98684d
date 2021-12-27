@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "bb2290b9_4886d5ee",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2021-12-27T03:25:58Z",
+      "side": 0,
+      "message": "I think adding\n\nlastDevId \u003d 0xFF;\n\nis the right thing to do for SOME cases.  We might need to add it in other cases (basically anywhere we return an error)  Can we get it added here then start looking at what is still broken?",
+      "parentUuid": "eaf56f20_398d1be8",
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "505fd855_cf827a3a",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 1
