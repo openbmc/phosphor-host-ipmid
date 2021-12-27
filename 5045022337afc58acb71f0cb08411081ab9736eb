@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "04eb52a0_4f620faf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-27T02:28:17Z",
+      "side": 1,
+      "message": "I updated the expect and actual results of 2 of commands. Please check again.",
+      "parentUuid": "21303b81_9167ab78",
+      "range": {
+        "startLine": 10,
+        "startChar": 57,
+        "endLine": 12,
+        "endChar": 55
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c1ced304_3f87d8af",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ca32b560_5d67fb46",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-27T02:28:17Z",
+      "side": 1,
+      "message": "When the written data is incorrect data, it will not be wrote to FRU device. But dbus-sdr stored FruCache as written data. Therefore, when users request to read FRU information as written device ID, dbus-sdr returns FruCache data without reads data via dbus method (in this time, FruCache is including incorrect data).\n\nI updated the content of this part in the commit",
+      "parentUuid": "c1ced304_3f87d8af",
+      "range": {
+        "startLine": 14,
+        "startChar": 12,
+        "endLine": 16,
+        "endChar": 3
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cace4ebe_a3262909",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2021-12-22T00:07:33Z",
       "side": 1,
       "message": "I\u0027m all for making this easier, but is writing incorrect FRU data an important use case?  Shouldn\u0027t the user always be writing data thats per the FRU specification?",
+      "range": {
+        "startLine": 25,
+        "startChar": 9,
+        "endLine": 25,
+        "endChar": 44
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "201d998b_3ae45814",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-27T02:28:17Z",
+      "side": 1,
+      "message": "In my opinion, it is better if we can cover all the cases. We can reduce errors from users.",
+      "parentUuid": "cace4ebe_a3262909",
       "range": {
         "startLine": 25,
         "startChar": 9,
@@ -105,6 +177,30 @@
       "writtenOn": "2021-12-22T00:13:44Z",
       "side": 1,
       "message": "What did these commands return previously?  Looking at the set of steps, they\u0027re only writing a single FRU, so they should\u0027ve worked.",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 30
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c6ce45c5_1e10acfc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-27T02:28:17Z",
+      "side": 1,
+      "message": "Please find out my reply for 2 above your comments.\nIf written data are incorrect, it will not be wrote to FRU devices. Therefore, the result in step 1 and step 3 have to be the same result.",
+      "parentUuid": "de73d6ab_5d19a6c0",
       "range": {
         "startLine": 23,
         "startChar": 0,

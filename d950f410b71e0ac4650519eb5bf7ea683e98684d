@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7277cf2d_2d5b64c3",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-27T02:28:17Z",
+      "side": 0,
+      "message": "I think that we can update the lastDevId \u003d 0xFF if writing fails. but I am afraid that some cases are not covered. Therefore, I think it is better if we always request to read raw FRU data via dbus method.",
+      "parentUuid": "9010d0c3_d9f3dfb9",
+      "revId": "d950f410b71e0ac4650519eb5bf7ea683e98684d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "505fd855_cf827a3a",
         "filename": "dbus-sdr/storagecommands.cpp",
         "patchSetId": 1
