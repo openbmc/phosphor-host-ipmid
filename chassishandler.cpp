@@ -883,30 +883,32 @@ int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
 }
 
 //------------------------------------------
-// Set Enabled property to inform NMI source
-// handling to trigger a NMI_OUT BSOD.
+// Trigger NMI for host 0.
 //------------------------------------------
 int setNmiProperty(ipmi::Context::ptr& ctx, const bool value)
 {
     constexpr const char* nmiSourceObjPath =
-        "/xyz/openbmc_project/Chassis/Control/NMISource";
+        "/xyz/openbmc_project/control/host0/nmi";
     constexpr const char* nmiSourceIntf =
-        "xyz.openbmc_project.Chassis.Control.NMISource";
-    std::string bmcSourceSignal = "xyz.openbmc_project.Chassis.Control."
-                                  "NMISource.BMCSourceSignal.ChassisCmd";
+        "xyz.openbmc_project.Control.Host.NMI";
+    std::string bmcSourceSignal =
+        "xyz.openbmc_project.Control.Host.NMI.NMISource.ChassisCmd";
 
     std::string service;
     boost::system::error_code ec =
         ipmi::getService(ctx, nmiSourceIntf, nmiSourceObjPath, service);
+
     if (!ec)
     {
-        ec = ipmi::setDbusProperty(ctx, service, nmiSourceObjPath,
-                                   nmiSourceIntf, "BMCSource", bmcSourceSignal);
+        ctx->bus->yield_method_call(ctx->yield, ec, service, nmiSourceObjPath,
+                                    nmiSourceIntf, "NMIWithSource",
+                                    bmcSourceSignal);
     }
-    if (!ec)
+    if (ec)
     {
-        ec = ipmi::setDbusProperty(ctx, service, nmiSourceObjPath,
-                                   nmiSourceIntf, "Enabled", value);
+        // if failed to call NMIWithSource try basic NMI without source
+        ctx->bus->yield_method_call(ctx->yield, ec, service, nmiSourceObjPath,
+                                    nmiSourceIntf, "NMI");
     }
     if (ec)
     {
