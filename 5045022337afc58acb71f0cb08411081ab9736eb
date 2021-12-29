@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "21303b81_9167ab78",
         "filename": "/COMMIT_MSG",
@@ -20,10 +21,10 @@
         "endChar": 55
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "04eb52a0_4f620faf",
         "filename": "/COMMIT_MSG",
@@ -44,10 +45,10 @@
         "endChar": 55
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "69fa7c5d_eea4bf3c",
         "filename": "/COMMIT_MSG",
@@ -68,10 +69,34 @@
         "endChar": 55
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "9694132e_86f9d1bb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I updated the result of \"expect\": it will return old FRU data due to writing fails.",
+      "parentUuid": "69fa7c5d_eea4bf3c",
+      "range": {
+        "startLine": 10,
+        "startChar": 57,
+        "endLine": 12,
+        "endChar": 55
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "c1ced304_3f87d8af",
         "filename": "/COMMIT_MSG",
@@ -91,10 +116,10 @@
         "endChar": 3
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "ca32b560_5d67fb46",
         "filename": "/COMMIT_MSG",
@@ -115,10 +140,10 @@
         "endChar": 3
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "cae4a7af_2fe90575",
         "filename": "/COMMIT_MSG",
@@ -139,10 +164,34 @@
         "endChar": 3
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "94c758b2_98efe8c7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I agreed with you that checking previous device ID is right. I update the code to reset last device ID when request writing FRU data as your sugesstion.",
+      "parentUuid": "cae4a7af_2fe90575",
+      "range": {
+        "startLine": 14,
+        "startChar": 12,
+        "endLine": 16,
+        "endChar": 3
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "cace4ebe_a3262909",
         "filename": "/COMMIT_MSG",
@@ -162,10 +211,10 @@
         "endChar": 44
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "201d998b_3ae45814",
         "filename": "/COMMIT_MSG",
@@ -186,10 +235,10 @@
         "endChar": 44
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "6a15ed5c_fbbbed98",
         "filename": "/COMMIT_MSG",
@@ -210,10 +259,34 @@
         "endChar": 44
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "e8828e7c_90c7b207",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I agreed with you that users have to update correct FRU data, but in the host-ipmid, I think we have to reset the FRU cache in this case.",
+      "parentUuid": "6a15ed5c_fbbbed98",
+      "range": {
+        "startLine": 25,
+        "startChar": 9,
+        "endLine": 25,
+        "endChar": 44
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "9dc9c134_a6ad59e8",
         "filename": "/COMMIT_MSG",
@@ -233,10 +306,10 @@
         "endChar": 30
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "de73d6ab_5d19a6c0",
         "filename": "/COMMIT_MSG",
@@ -256,10 +329,10 @@
         "endChar": 30
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "c6ce45c5_1e10acfc",
         "filename": "/COMMIT_MSG",
@@ -280,8 +353,7 @@
         "endChar": 30
       },
       "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }

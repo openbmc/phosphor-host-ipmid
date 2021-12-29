@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "27dc23d4_eb38bbc8",
         "filename": "/COMMIT_MSG",
@@ -20,10 +21,34 @@
         "endChar": 54
       },
       "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "25a2fa8d_f24f77f0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I agreed with you this is correct behavior of software",
+      "parentUuid": "27dc23d4_eb38bbc8",
+      "range": {
+        "startLine": 9,
+        "startChar": 7,
+        "endLine": 10,
+        "endChar": 54
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "490347cd_6cf15129",
         "filename": "/COMMIT_MSG",
@@ -37,10 +62,28 @@
       "side": 1,
       "message": "This makes it sound like there\u0027s cache invalidation issues, like I pointed out in the previous commit.  Please call out which command has the \"correct\" data, ie the correctly formatted FRU.",
       "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "5de784eb_ef3fafeb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I updated this commit to figure out \"busctl introspect xyz.openbmc_project.FruDevice \u003cFruPath\u003e\" commands display correct information",
+      "parentUuid": "490347cd_6cf15129",
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "ef04a8cb_d7f6311c",
         "filename": "/COMMIT_MSG",
@@ -60,10 +103,10 @@
         "endChar": 19
       },
       "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "25f2c2db_01a8aab7",
         "filename": "/COMMIT_MSG",
@@ -83,10 +126,58 @@
         "endChar": 66
       },
       "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "7289cafd_289eb01a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "Yes, I think I made a mistake when removed checking the previous device ID in case the FRU data have been divided into multiple times.",
+      "parentUuid": "25f2c2db_01a8aab7",
+      "range": {
+        "startLine": 17,
+        "startChar": 21,
+        "endLine": 17,
+        "endChar": 66
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ce47d082_5bb4aac1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I agreed with you about that",
+      "parentUuid": "ef04a8cb_d7f6311c",
+      "range": {
+        "startLine": 16,
+        "startChar": 12,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "dad7213c_da3bc5fb",
         "filename": "/COMMIT_MSG",
@@ -106,10 +197,34 @@
         "endChar": 53
       },
       "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "965c0a63_9a0af650",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I updated this commit to reset the last device ID to 0xff when request to write FRU data as your suggestion.",
+      "parentUuid": "dad7213c_da3bc5fb",
+      "range": {
+        "startLine": 19,
+        "startChar": 4,
+        "endLine": 20,
+        "endChar": 53
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "e1237459_33a0a40e",
         "filename": "/COMMIT_MSG",
@@ -129,8 +244,31 @@
         "endChar": 9
       },
       "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "df2ba1ea_7a44888e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2021-12-29T14:46:36Z",
+      "side": 1,
+      "message": "I updated this commit to reset the last device ID to 0xff when request to write FRU data as your suggestion.",
+      "parentUuid": "e1237459_33a0a40e",
+      "range": {
+        "startLine": 22,
+        "startChar": 10,
+        "endLine": 23,
+        "endChar": 9
+      },
+      "revId": "99cf98ecbb847b107ecb9cc2ea5972efb81ce76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
