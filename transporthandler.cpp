@@ -227,29 +227,29 @@ void setDHCPv6Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
 
     if (defaultMode)
     {
-        if ((currentDhcp == EthernetInterface::DHCPConf::v4) &&
-            (requestedDhcp == EthernetInterface::DHCPConf::v6))
+        // When calling setDHCPv6Property, requestedDhcp only has "v6" and
+        // "none".
+        // setDHCPv6Property is only for IPv6 management. It should not modify
+        // IPv4 state.
+        if (requestedDhcp == EthernetInterface::DHCPConf::v6)
         {
-            nextDhcp = EthernetInterface::DHCPConf::both;
-        }
-        else if ((currentDhcp == EthernetInterface::DHCPConf::none) &&
-                 (requestedDhcp == EthernetInterface::DHCPConf::v6))
-
-        {
-            nextDhcp = requestedDhcp;
+            if ((currentDhcp == EthernetInterface::DHCPConf::v4) ||
+                (currentDhcp == EthernetInterface::DHCPConf::both))
+                nextDhcp = EthernetInterface::DHCPConf::both;
+            else if ((currentDhcp == EthernetInterface::DHCPConf::v6) ||
+                     (currentDhcp == EthernetInterface::DHCPConf::none))
+                nextDhcp = EthernetInterface::DHCPConf::v6;
         }
         else if (requestedDhcp == EthernetInterface::DHCPConf::none)
         {
-            if (currentDhcp == EthernetInterface::DHCPConf::both)
-            {
+            if ((currentDhcp == EthernetInterface::DHCPConf::v4) ||
+                (currentDhcp == EthernetInterface::DHCPConf::both))
                 nextDhcp = EthernetInterface::DHCPConf::v4;
-            }
-            else if (currentDhcp == EthernetInterface::DHCPConf::v6)
-            {
+            else if ((currentDhcp == EthernetInterface::DHCPConf::v6) ||
+                     (currentDhcp == EthernetInterface::DHCPConf::none))
                 nextDhcp = EthernetInterface::DHCPConf::none;
-            }
         }
-        else
+        else // Stay the same.
         {
             nextDhcp = currentDhcp;
         }
