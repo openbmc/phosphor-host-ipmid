@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "772cb0db_73ea3731",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-01-05T22:04:45Z",
+      "side": 1,
+      "message": "coding style: if statements need curly braces (even for one line statements)",
+      "revId": "0e4c8dc3ee2b5668165aa3309837300dedb97199",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
