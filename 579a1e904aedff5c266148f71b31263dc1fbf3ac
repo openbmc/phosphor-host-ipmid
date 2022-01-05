@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ad91da03_fb25d42d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-01-05T22:58:18Z",
+      "side": 1,
+      "message": "In all, this does make the sensor caching even more complex, but I see the motivation.",
+      "revId": "579a1e904aedff5c266148f71b31263dc1fbf3ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ddb07fd8_a76f2ccd",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-01-05T22:58:18Z",
+      "side": 1,
+      "message": "This change doesn\u0027t seem to be related to the description. Was it meant for this commit?",
+      "range": {
+        "startLine": 592,
+        "startChar": 35,
+        "endLine": 592,
+        "endChar": 78
+      },
+      "revId": "579a1e904aedff5c266148f71b31263dc1fbf3ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
