@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4fff64c3_5130e95e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000416
+      },
+      "writtenOn": "2022-01-05T18:18:35Z",
+      "side": 1,
+      "message": "Hi Vernon/Tom/Ratan/Deepak/Adriana, please provide +1/+2 if no comments. ",
+      "revId": "1292d371954163842e0c1cbe5518c79b06dc4ab1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
