@@ -185,6 +185,7 @@ void registerSelCallbackHandler()
 
 void initSELCache()
 {
+    registerSelCallbackHandler();
     ipmi::sel::ObjectPaths paths;
     try
     {
@@ -203,7 +204,6 @@ void initSELCache()
             selCacheMap.insert(std::move(*entry));
         }
     }
-    registerSelCallbackHandler();
     selCacheMapInitialized = true;
 }
 
