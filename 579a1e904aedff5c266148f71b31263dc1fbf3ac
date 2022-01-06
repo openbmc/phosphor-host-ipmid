@@ -39,6 +39,30 @@
       },
       "revId": "579a1e904aedff5c266148f71b31263dc1fbf3ac",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "98e3d38f_6c973404",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2022-01-06T05:23:05Z",
+      "side": 1,
+      "message": "Ahh, right, this is done because I was thinking it should use the property interface to get the service.\n\nActually it is not necessary because the generated code is setting the correct interface:\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/scripts/writesensor.mako.cpp#L78-L79\n\nSo this change is not necessary, done",
+      "parentUuid": "ddb07fd8_a76f2ccd",
+      "range": {
+        "startLine": 592,
+        "startChar": 35,
+        "endLine": 592,
+        "endChar": 78
+      },
+      "revId": "579a1e904aedff5c266148f71b31263dc1fbf3ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
