@@ -39,6 +39,30 @@
       },
       "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "83475970_f145c0c2",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1053,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2022-01-06T06:49:15Z",
+      "side": 1,
+      "message": "Hi Vernon, thanks for reviewing.\nI have no idea about the situation that the byte 0 lowest bit \u003d 1.\nThe generatorID in phosphor-sel-logger(https://github.com/openbmc/phosphor-sel-logger/blob/master/include/sel_logger.hpp#L30) is hardcore as 0x0020 which means the byte 0 lowest bit always is 0. If adding if condition to check the bit, it will error sel log when sensor id \u003e 255.\nDo I miss something?",
+      "parentUuid": "12847c9f_02e64ea3",
+      "range": {
+        "startLine": 1053,
+        "startChar": 11,
+        "endLine": 1053,
+        "endChar": 49
+      },
+      "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
