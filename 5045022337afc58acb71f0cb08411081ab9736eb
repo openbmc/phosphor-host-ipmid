@@ -98,6 +98,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1e241a18_1cdb1336",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2022-01-06T16:29:47Z",
+      "side": 1,
+      "message": "Returning the old fru is the correct behavior if you attempt to write a badly formatted FRU.",
+      "parentUuid": "9694132e_86f9d1bb",
+      "range": {
+        "startLine": 10,
+        "startChar": 57,
+        "endLine": 12,
+        "endChar": 55
+      },
+      "revId": "5045022337afc58acb71f0cb08411081ab9736eb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "c1ced304_3f87d8af",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
