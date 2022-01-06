@@ -33,6 +33,24 @@
       "message": "In my opinion this problem is solved by changing line 226 to:\nnextDhcp \u003d currentDhcp;\n\nAlternately, add an \"else\" clause at line 250:\n}\nelse\n{\nnextDhcp \u003d currentDhcp;\n}",
       "revId": "6dfb287fb2e8abc68301d908a87c6eeec80d752e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6e199757_7b20286e",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-01-06T21:38:27Z",
+      "side": 1,
+      "message": "I had those same thoughts, but I think the new logic makes it more clear what the intent is. And the two statements are parallel, which is easier to read.",
+      "parentUuid": "4166086f_e261065b",
+      "revId": "6dfb287fb2e8abc68301d908a87c6eeec80d752e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
