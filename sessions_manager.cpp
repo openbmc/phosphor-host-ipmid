@@ -87,6 +87,9 @@ std::shared_ptr<Session>
     std::shared_ptr<Session> session = nullptr;
     SessionID bmcSessionID = 0;
     cleanStaleEntries();
+    // set up the timer for monitoring this session
+    scheduleSessionCleaner(std::chrono::microseconds(1 * 1000 * 1000));
+
     uint8_t sessionHandle = 0;
 
     auto activeSessions = sessionsMap.size() - session::maxSessionlessCount;
@@ -264,6 +267,11 @@ void Manager::cleanStaleEntries()
         }
         if (!(session->isSessionActive(activeGrace, setupGrace)))
         {
+            log<level::INFO>(
+                "Removing idle IPMI LAN session",
+                entry("SESSION_ID=%x", session->getBMCSessionID()),
+                entry("HANDLE=%x",
+                      getSessionHandle(session->getBMCSessionID())));
             sessionHandleMap[getSessionHandle(session->getBMCSessionID())] = 0;
             iter = sessionsMap.erase(iter);
         }
@@ -274,7 +282,10 @@ void Manager::cleanStaleEntries()
     }
     if (sessionsMap.size() > 1)
     {
-        scheduleSessionCleaner(setupGrace);
+        constexpr int maxCleanupDelay = 1 * 1000 * 1000;
+        std::chrono::microseconds cleanupDelay(
+            std::min(setupMicros, maxCleanupDelay));
+        scheduleSessionCleaner(cleanupDelay);
     }
 }
 
@@ -330,6 +341,14 @@ uint8_t Manager::getActiveSessionCount() const
 
 void Manager::scheduleSessionCleaner(const std::chrono::microseconds& when)
 {
+    std::chrono::duration expTime = timer.expires_from_now();
+    if (expTime > std::chrono::microseconds(0) && expTime < when)
+    {
+        // if timer has not already expired AND
+        //    requested timeout is greater than current timeout
+        // then ignore this new requested timeout
+        return;
+    }
     timer.expires_from_now(when);
     timer.async_wait([this](const boost::system::error_code& ec) {
         if (!ec)
