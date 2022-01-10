@@ -16,6 +16,24 @@
       "message": "This seems like a hack on top of a hack. I would prefer that we could get an \u0027ipmi-compatible\u0027 version of the name from entity manager. Otherwise, I think we should just truncate to the max len. Then vendors could put their preferred string in the config file and it would just show up.",
       "revId": "1de16373f525abe37f4e1faf312f9d762cff2612",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4e01b52d_9d6421b0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-01-10T10:02:52Z",
+      "side": 1,
+      "message": "I want to point out, that this code was here before the recent change: \n48004: dbus-sdr: Remove suffixs appended by dbus-sensors | https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/48004\nThis change has introduced a bug, and the current patchset is trying to fix it.\n\nIt is possible to set custom name for the PSU with the `EM`+`dbus-sensors`. But nevertheless for each sensor label in the PSU the `dbus-sensors` app would add corresponding suffix to the sensor dbus path.\nhttps://github.com/openbmc/dbus-sensors/blob/master/src/PSUSensorMain.cpp#L955\nWe need this suffix to differentiate sensors. Its length is fine for Redfish or webui, but in case of IPMI we clearly need to make it more short.\n\nIt doesn\u0027t look like it would be possible to set custom name for each label inside PSU anytime soon. It would require considerable rewrite of the PSUsensor app from the dbus-sensors. Also as I understand it, EM maintainers are against of putting protocol specific (e.g. IPMI in this case) information to the EM config. So it looks like custom IPMI name wouldn\u0027t be a EM JSON property anytime soon either.",
+      "parentUuid": "785b303d_ef8e2b80",
+      "revId": "1de16373f525abe37f4e1faf312f9d762cff2612",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
