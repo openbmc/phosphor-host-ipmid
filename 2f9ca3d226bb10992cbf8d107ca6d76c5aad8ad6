@@ -16,6 +16,24 @@
       "message": "I am not sure why the second call to getManagedObjects is only called if the first one has an error. Shouldn\u0027t they both be called regardless of the return of the first and then have the maps merged together?",
       "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "22b7500c_a6402679",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-01-10T08:57:45Z",
+      "side": 1,
+      "message": "I just did this out of performance reasons. All of the dbus-sensors apps have `org.freedesktop.DBus.ObjectManager` under the `/` path.\nAnd it looks like the `phosphor-health-monitor` is the only OpenBMC app that has `org.freedesktop.DBus.ObjectManager` under the `/xyz/openbmc_project/sensors` path.\nIf we would always check both of these paths, most of the time second DBus call would be a waste.",
+      "parentUuid": "3f50b6cb_c7fd5568",
+      "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
