@@ -407,26 +407,30 @@ void readLoggingObjectPaths(ObjectPaths& paths)
     mapperCall.append(depth);
     mapperCall.append(ObjectPaths({logEntryIntf}));
 
-    auto reply = bus.call(mapperCall);
-    if (reply.is_method_error())
+    try
     {
-        log<level::INFO>("Error in reading logging entry object paths");
-    }
-    else
-    {
+        auto reply = bus.call(mapperCall);
         reply.read(paths);
-
-        std::sort(paths.begin(), paths.end(),
-                  [](const std::string& a, const std::string& b) {
-                      namespace fs = std::filesystem;
-                      fs::path pathA(a);
-                      fs::path pathB(b);
-                      auto idA = std::stoul(pathA.filename().string());
-                      auto idB = std::stoul(pathB.filename().string());
-
-                      return idA < idB;
-                  });
     }
+    catch (const sdbusplus::exception::exception& e)
+    {
+        if (strcmp(e.name(),
+                   "xyz.openbmc_project.Common.Error.ResourceNotFound"))
+        {
+            throw;
+        }
+    }
+
+    std::sort(paths.begin(), paths.end(),
+              [](const std::string& a, const std::string& b) {
+                  namespace fs = std::filesystem;
+                  fs::path pathA(a);
+                  fs::path pathB(b);
+                  auto idA = std::stoul(pathA.filename().string());
+                  auto idB = std::stoul(pathB.filename().string());
+
+                  return idA < idB;
+              });
 }
 
 } // namespace sel
