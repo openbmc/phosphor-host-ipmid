@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9e8bfb62_490330cd",
+        "filename": "selutility.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2022-01-11T03:17:10Z",
+      "side": 1,
+      "message": "I do not think this API is working now, in case of method error, sdbusplus now throws.",
+      "revId": "7384933516a093a73d8b38a033efbfaaf490db32",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e049d58_b8c14585",
+        "filename": "selutility.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2022-01-11T03:17:10Z",
+      "side": 1,
+      "message": "I thought it should be catching ResourceNotFound exception directly, but checking the phosphor-objmgr code, it is throwing its own exception instead of the one in sdbusplus (https://github.com/openbmc/phosphor-objmgr/blob/master/src/main.cpp#L25)\n\nI see phosphor-objmgr has dependency to sdbusplus, so I think it\u0027s better to the code to throw the ResourceNotFound exception, then this code could be simplified to catch the ResourceNotFound, and accept it, and throw the other exceptions.",
+      "revId": "7384933516a093a73d8b38a033efbfaaf490db32",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
