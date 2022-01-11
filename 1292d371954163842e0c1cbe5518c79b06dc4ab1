@@ -18,6 +18,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2dd5f790_ecba0160",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000900
+      },
+      "writtenOn": "2022-01-11T22:53:32Z",
+      "side": 1,
+      "message": "This works for Intel\u0027s platforms, but it does depend on the underlying filesystem, many of which don\u0027t store times in nanosecond granularity (including jffs2 I think). It does work for overlayfs though. How does ubifs behave?",
+      "revId": "1292d371954163842e0c1cbe5518c79b06dc4ab1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e2687ba7_8b202676",
