@@ -34,6 +34,24 @@
       "parentUuid": "785b303d_ef8e2b80",
       "revId": "1de16373f525abe37f4e1faf312f9d762cff2612",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "865eb13d_5dd0a4d4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000934
+      },
+      "writtenOn": "2022-01-11T02:13:48Z",
+      "side": 1,
+      "message": "IMO, the property \"Name\" in Entity-Manager is to defined what string we want to see in command like \"ipmitool sensor\". I pushed the PR 48004 is because PSUSensor add the suffix automatically which make the result of ipmitool command does not meet our expectation.\nFor example, we have a sensor have \"Name\": hotswap_in in Entity-Manager and we don\u0027t want to see any suffix in command \"ipmitool sensor\".\n\nI\u0027m afraid that someone prefer suffix \"_Input\"/\"_input\"/\"_in\" rather than \"_In\" or even there is someone don\u0027t want to add any suffix.\n\nIf you want to mark the input or output, you can try to add \"iin_Name\": \"P0_VDD_SOC_In\" and \"iou1_Name\": \"P0_VDD_SOC_Out\" in your entity-manager configuration.",
+      "parentUuid": "4e01b52d_9d6421b0",
+      "revId": "1de16373f525abe37f4e1faf312f9d762cff2612",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
