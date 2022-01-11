@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1f80f352_952b7a3d",
+        "filename": "selutility.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-01-11T12:17:34Z",
+      "side": 1,
+      "message": "Got rid of this. Also `initSELCache` (storagehandler.cpp) already has error logging, so I\u0027ve also removed it from here.",
+      "parentUuid": "9e8bfb62_490330cd",
+      "revId": "7384933516a093a73d8b38a033efbfaaf490db32",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3e049d58_b8c14585",
         "filename": "selutility.cpp",
         "patchSetId": 1
@@ -31,6 +49,24 @@
       "writtenOn": "2022-01-11T03:17:10Z",
       "side": 1,
       "message": "I thought it should be catching ResourceNotFound exception directly, but checking the phosphor-objmgr code, it is throwing its own exception instead of the one in sdbusplus (https://github.com/openbmc/phosphor-objmgr/blob/master/src/main.cpp#L25)\n\nI see phosphor-objmgr has dependency to sdbusplus, so I think it\u0027s better to the code to throw the ResourceNotFound exception, then this code could be simplified to catch the ResourceNotFound, and accept it, and throw the other exceptions.",
+      "revId": "7384933516a093a73d8b38a033efbfaaf490db32",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7de01379_1c729c85",
+        "filename": "selutility.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-01-11T12:17:34Z",
+      "side": 1,
+      "message": "I\u0027ve proposed a patch to the `phosphor-objmgr`\n50291: Use sdbusplus exception instead of the custom one | https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-objmgr/+/50291\nBut according to Patrick Williams even with this patch it still wouldn\u0027t be possible to use catch on the `ResourceNotFound` exception.\nSo for now it looks like we have to compare exception name and rethrow if it is not the necessary exception.\nI\u0027ve greped phosphor-ipmi-host code, and have found a similar example in the codebase https://github.com/openbmc/phosphor-host-ipmid/blob/c10cda1d2a9f6ae6ed7da059ec40b761465a3c0c/transporthandler.cpp#L321 So maybe it is not that wrong.",
+      "parentUuid": "3e049d58_b8c14585",
       "revId": "7384933516a093a73d8b38a033efbfaaf490db32",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
