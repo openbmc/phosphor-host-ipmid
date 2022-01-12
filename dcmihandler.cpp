@@ -51,7 +51,6 @@ constexpr auto DHCP_OPT12_ENABLED = "SendHostNameEnabled";
 
 constexpr auto SENSOR_VALUE_INTF = "xyz.openbmc_project.Sensor.Value";
 constexpr auto SENSOR_VALUE_PROP = "Value";
-constexpr auto SENSOR_SCALE_PROP = "Scale";
 
 using namespace phosphor::logging;
 
@@ -1012,20 +1011,15 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
         auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
 
         // Read the sensor value and scale properties
-        auto properties = ipmi::getAllDbusProperties(bus, service, objectPath,
-                                                     SENSOR_VALUE_INTF);
-        auto value = std::get<int64_t>(properties[SENSOR_VALUE_PROP]);
-        auto scale = std::get<int64_t>(properties[SENSOR_SCALE_PROP]);
-
-        // Power reading needs to be scaled with the Scale value using the
-        // formula Value * 10^Scale.
-        power = value * std::pow(10, scale);
+        auto value = ipmi::getDbusProperty(
+            bus, service, objectPath, SENSOR_VALUE_INTF, SENSOR_VALUE_PROP);
+        power = std::get<double>(value);
     }
     catch (const std::exception& e)
     {
-        log<level::INFO>("Failure to read power value from D-Bus object",
-                         entry("OBJECT_PATH=%s", objectPath.c_str()),
-                         entry("INTERFACE=%s", SENSOR_VALUE_INTF));
+        log<level::ERR>("Failure to read power value from D-Bus object",
+                        entry("OBJECT_PATH=%s", objectPath.c_str()),
+                        entry("INTERFACE=%s", SENSOR_VALUE_INTF));
     }
     return power;
 }
