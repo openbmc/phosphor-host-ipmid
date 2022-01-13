@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e8b6240_b04db5a1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2022-01-13T16:12:14Z",
+      "side": 1,
+      "message": "Maybe mention how the original OpenBMC design was to use the Scale property but that changed a few years ago and is no longer the case.",
+      "revId": "3571db546e780107d8645934d5e4d15daecb8eed",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
