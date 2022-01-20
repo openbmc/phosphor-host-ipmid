@@ -299,9 +299,9 @@ Json parseJSONConfig(const std::string& configFile)
 
 } // namespace dcmi
 
-ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                         ipmi_request_t request, ipmi_response_t response,
-                         ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
+                         ipmi_response_t response, ipmi_data_len_t data_len,
+                         ipmi_context_t)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
@@ -357,9 +357,9 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 }
 
-ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                         ipmi_request_t request, ipmi_response_t response,
-                         ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t setPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                         ipmi_response_t, ipmi_data_len_t data_len,
+                         ipmi_context_t)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
@@ -391,9 +391,9 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                           ipmi_request_t request, ipmi_response_t response,
-                           ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t applyPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                           ipmi_response_t, ipmi_data_len_t data_len,
+                           ipmi_context_t)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
@@ -425,9 +425,9 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                       ipmi_request_t request, ipmi_response_t response,
-                       ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getAssetTag(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                       ipmi_response_t response, ipmi_data_len_t data_len,
+                       ipmi_context_t)
 {
     auto requestData =
         reinterpret_cast<const dcmi::GetAssetTagRequest*>(request);
@@ -492,9 +492,9 @@ ipmi_ret_t getAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                       ipmi_request_t request, ipmi_response_t response,
-                       ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t setAssetTag(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                       ipmi_response_t response, ipmi_data_len_t data_len,
+                       ipmi_context_t)
 {
     auto requestData =
         reinterpret_cast<const dcmi::SetAssetTagRequest*>(request);
@@ -545,9 +545,9 @@ ipmi_ret_t setAssetTag(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     }
 }
 
-ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                             ipmi_response_t response, ipmi_data_len_t data_len,
+                             ipmi_context_t)
 {
     auto requestData =
         reinterpret_cast<const dcmi::GetMgmntCtrlIdStrRequest*>(request);
@@ -580,15 +580,15 @@ ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     auto responseStrLen = std::min(static_cast<std::size_t>(requestData->bytes),
                                    responseStr.length() + 1);
     responseData->strLen = hostName.length();
-    std::copy(begin(responseStr), end(responseStr), responseData->data);
+    std::copy(begin(responseStr), end(responseStr), responseData->data.data());
 
     *data_len = sizeof(*responseData) + responseStrLen;
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                             ipmi_response_t response, ipmi_data_len_t data_len,
+                             ipmi_context_t)
 {
     static std::array<char, dcmi::maxCtrlIdStrLen + 1> newCtrlIdStr;
 
@@ -622,7 +622,7 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
 
         /* replace part of string and mark byte after the last as \0 */
         auto restStrIter =
-            std::copy_n(requestData->data, requestData->bytes,
+            std::copy_n(requestData->data.data(), requestData->bytes,
                         begin(newCtrlIdStr) + requestData->offset);
         /* if the last written byte is not 64th - add '\0' */
         if (requestData->offset + requestData->bytes <= dcmi::maxCtrlIdStrLen)
@@ -631,9 +631,10 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
         }
 
         /* if input data contains '\0' whole string is sent - update hostname */
-        auto it = std::find(requestData->data,
-                            requestData->data + requestData->bytes, '\0');
-        if (it != requestData->data + requestData->bytes)
+        auto it =
+            std::find(requestData->data.begin(),
+                      requestData->data.begin() + requestData->bytes, '\0');
+        if (it != requestData->data.begin() + requestData->bytes)
         {
             sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
             ipmi::setDbusProperty(bus, dcmi::networkServiceName,
@@ -683,9 +684,9 @@ dcmi::DCMICaps dcmiCaps = {
        {"OptionalSecondaryLanOOBSupport", 2, 0, 8},
        {"OptionalSerialOOBMTMODECapability", 3, 0, 8}}}}};
 
-ipmi_ret_t getDCMICapabilities(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                               ipmi_request_t request, ipmi_response_t response,
-                               ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getDCMICapabilities(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                               ipmi_response_t response,
+                               ipmi_data_len_t data_len, ipmi_context_t)
 {
 
     std::ifstream dcmiCapFile(dcmi::gDCMICapabilitiesConfig);
@@ -910,9 +911,9 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
 } // namespace temp_readings
 } // namespace dcmi
 
-ipmi_ret_t getTempReadings(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                           ipmi_request_t request, ipmi_response_t response,
-                           ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getTempReadings(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                           ipmi_response_t response, ipmi_data_len_t data_len,
+                           ipmi_context_t)
 {
     auto requestData =
         reinterpret_cast<const dcmi::GetTempReadingsRequest*>(request);
@@ -1030,9 +1031,9 @@ int64_t getPowerReading(sdbusplus::bus::bus& bus)
     return power;
 }
 
-ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t setDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                             ipmi_response_t, ipmi_data_len_t data_len,
+                             ipmi_context_t)
 {
     auto requestData =
         reinterpret_cast<const dcmi::SetConfParamsRequest*>(request);
@@ -1099,9 +1100,9 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                             ipmi_request_t request, ipmi_response_t response,
-                             ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                             ipmi_response_t response, ipmi_data_len_t data_len,
+                             ipmi_context_t)
 {
 
     auto requestData =
@@ -1170,9 +1171,9 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getPowerReading(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                           ipmi_request_t request, ipmi_response_t response,
-                           ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getPowerReading(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
+                           ipmi_response_t response, ipmi_data_len_t data_len,
+                           ipmi_context_t)
 {
     *data_len = 0;
     if (!dcmi::isDCMIPowerMgmtSupported())
@@ -1313,9 +1314,9 @@ std::tuple<ResponseList, NumInstances>
 } // namespace sensor_info
 } // namespace dcmi
 
-ipmi_ret_t getSensorInfo(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                         ipmi_request_t request, ipmi_response_t response,
-                         ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getSensorInfo(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                         ipmi_response_t response, ipmi_data_len_t data_len,
+                         ipmi_context_t)
 {
     auto requestData =
         reinterpret_cast<const dcmi::GetSensorInfoRequest*>(request);
