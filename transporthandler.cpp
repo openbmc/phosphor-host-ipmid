@@ -125,7 +125,7 @@ std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus::bus& bus,
 
     params.id = channel;
     params.ifname = std::move(ifname);
-    return std::move(params);
+    return params;
 }
 
 ChannelParams getChannelParams(sdbusplus::bus::bus& bus, uint8_t channel)
@@ -802,14 +802,13 @@ RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
                                     uint8_t set, uint8_t block)
     __attribute__((weak));
 
-RspType<> setLanOem(uint8_t channel, uint8_t parameter, message::Payload& req)
+RspType<> setLanOem(uint8_t, uint8_t, message::Payload& req)
 {
     req.trailingOk = true;
     return response(ccParamNotSupported);
 }
 
-RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
-                                    uint8_t set, uint8_t block)
+RspType<message::Payload> getLanOem(uint8_t, uint8_t, uint8_t, uint8_t)
 {
     return response(ccParamNotSupported);
 }
