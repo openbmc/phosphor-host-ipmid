@@ -20,13 +20,13 @@ extern cmdManagerPtr& ipmid_get_host_cmd_manager();
 //-------------------------------------------------------------------
 // Called by Host post response from Get_Message_Flags
 //-------------------------------------------------------------------
-ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                               ipmi_request_t request, ipmi_response_t response,
-                               ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
+                               ipmi_response_t response,
+                               ipmi_data_len_t data_len, ipmi_context_t)
 {
     ipmi_ret_t rc = IPMI_CC_OK;
 
-    struct oem_sel_timestamped oem_sel = {0};
+    struct oem_sel_timestamped oem_sel = {};
     *data_len = sizeof(struct oem_sel_timestamped);
 
     // either id[0] -or- id[1] can be filled in. We will use id[0]

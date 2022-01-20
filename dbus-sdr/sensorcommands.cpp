@@ -114,7 +114,7 @@ static sdbusplus::bus::match::match sensorAdded(
     *getSdBus(),
     "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
     "sensors/'",
-    [](sdbusplus::message::message& m) {
+    [](sdbusplus::message::message&) {
         getSensorTree().clear();
         sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
                          std::chrono::system_clock::now().time_since_epoch())
@@ -125,7 +125,7 @@ static sdbusplus::bus::match::match sensorRemoved(
     *getSdBus(),
     "type='signal',member='InterfacesRemoved',arg0path='/xyz/openbmc_project/"
     "sensors/'",
-    [](sdbusplus::message::message& m) {
+    [](sdbusplus::message::message&) {
         getSensorTree().clear();
         sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
                             std::chrono::system_clock::now().time_since_epoch())
@@ -580,11 +580,10 @@ ipmi::RspType<> ipmiSenPlatformEvent(ipmi::Context::ptr ctx,
 }
 
 ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
-                                     uint8_t sensorNumber, uint8_t operation,
+                                     uint8_t sensorNumber, uint8_t,
                                      uint8_t reading, uint15_t assertOffset,
-                                     bool resvd1, uint15_t deassertOffset,
-                                     bool resvd2, uint8_t eventData1,
-                                     uint8_t eventData2, uint8_t eventData3)
+                                     bool, uint15_t, bool, uint8_t, uint8_t,
+                                     uint8_t)
 {
     std::string connection;
     std::string path;
@@ -933,9 +932,9 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     bool lowerCriticalThreshMask, bool lowerNonRecovThreshMask,
     bool upperNonCriticalThreshMask, bool upperCriticalThreshMask,
     bool upperNonRecovThreshMask, uint2_t reserved, uint8_t lowerNonCritical,
-    uint8_t lowerCritical, uint8_t lowerNonRecoverable,
+    uint8_t lowerCritical, [[maybe_unused]] uint8_t lowerNonRecoverable,
     uint8_t upperNonCritical, uint8_t upperCritical,
-    uint8_t upperNonRecoverable)
+    [[maybe_unused]] uint8_t upperNonRecoverable)
 {
     if (sensorNum == reservedSensorNumber || reserved)
     {
@@ -2007,7 +2006,7 @@ static int
     if (std::find(interfaces.begin(), interfaces.end(),
                   sensor::sensorInterface) != interfaces.end())
     {
-        get_sdr::SensorDataFullRecord record = {0};
+        get_sdr::SensorDataFullRecord record = {};
 
         // If the request doesn't read SDR body, construct only header and key
         // part to avoid additional DBus transaction.
@@ -2033,7 +2032,7 @@ static int
         getSensorEventTypeFromPath(path) !=
             static_cast<uint8_t>(SensorEventTypeCodes::threshold))
     {
-        get_sdr::SensorDataFullRecord record = {0};
+        get_sdr::SensorDataFullRecord record = {};
 
         // If the request doesn't read SDR body, construct only header and key
         // part to avoid additional DBus transaction.
@@ -2057,7 +2056,7 @@ static int
     if (std::find(interfaces.begin(), interfaces.end(), sensor::vrInterface) !=
         interfaces.end())
     {
-        get_sdr::SensorDataEventRecord record = {0};
+        get_sdr::SensorDataEventRecord record = {};
 
         // If the request doesn't read SDR body, construct only header and key
         // part to avoid additional DBus transaction.

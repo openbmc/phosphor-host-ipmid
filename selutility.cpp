@@ -127,7 +127,7 @@ void constructOEMSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
 }
 
 void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
-                  const additionalDataMap& m, const entryDataMap& entryData,
+                  const additionalDataMap& m, const entryDataMap&,
                   GetSELEntryResponse& record)
 {
     if (recordType != systemEventRecord)
