@@ -29,7 +29,7 @@ bool doesDeviceExist(const uint8_t chNum)
     // TODO: This is not the reliable way to find the device
     // associated with ethernet interface as the channel number to
     // eth association is not done. Need to revisit later
-    struct stat fileStat = {0};
+    struct stat fileStat = {};
     std::string devName("/sys/class/net/" + getChannelName(chNum));
 
     if (stat(devName.data(), &fileStat) != 0)

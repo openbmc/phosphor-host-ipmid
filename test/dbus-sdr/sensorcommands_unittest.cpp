@@ -39,6 +39,7 @@ double ipmitool_y_from_x(uint8_t x, int m, int k2_rExp, int b, int k1_bExp,
             if (val & 0x80)
                 val++;
             /* Deliberately fall through to case 2. */
+            [[fallthrough]];
         case 2:
             result =
                 (double)(((m * (int8_t)val) + (b * pow(10, k1))) * pow(10, k2));
