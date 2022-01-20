@@ -78,7 +78,7 @@ Host::FirmwareCondition Host::currentFirmwareCondition() const
         std::make_shared<std::optional<Host::FirmwareCondition>>();
 
     // callback for command to host
-    auto hostAckCallback = [hostCondition](IpmiCmdData cmd, bool status) {
+    auto hostAckCallback = [hostCondition](IpmiCmdData, bool status) {
         auto value = status ? Host::FirmwareCondition::Running
                             : Host::FirmwareCondition::Off;
 
