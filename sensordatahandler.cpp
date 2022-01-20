@@ -256,7 +256,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                                updateInterface.c_str(), command.c_str());
 }
 
-ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData, const Info& sensorInfo,
+ipmi_ret_t eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
                      uint8_t data)
 {
     auto msg =
@@ -336,9 +336,8 @@ namespace notify
 {
 
 IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
-                           const std::string& sensorPath,
-                           const std::string& command,
-                           const std::string& sensorInterface)
+                           const std::string&, const std::string& command,
+                           const std::string&)
 {
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
     using namespace std::string_literals;
