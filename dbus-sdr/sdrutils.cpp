@@ -40,13 +40,13 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         *dbus,
         "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
         "sensors/'",
-        [](sdbusplus::message::message& m) { sensorTreePtr.reset(); });
+        [](sdbusplus::message::message&) { sensorTreePtr.reset(); });
 
     static sdbusplus::bus::match::match sensorRemoved(
         *dbus,
         "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
         "openbmc_project/sensors/'",
-        [](sdbusplus::message::message& m) { sensorTreePtr.reset(); });
+        [](sdbusplus::message::message&) { sensorTreePtr.reset(); });
 
     if (sensorTreePtr)
     {

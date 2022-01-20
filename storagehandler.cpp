@@ -288,9 +288,9 @@ ipmi::RspType<uint8_t,  // SEL revision.
         ipmi::sel::operationSupport::overflow);
 }
 
-ipmi_ret_t getSELEntry(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                       ipmi_request_t request, ipmi_response_t response,
-                       ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                       ipmi_response_t response, ipmi_data_len_t data_len,
+                       ipmi_context_t)
 {
     if (*data_len != sizeof(ipmi::sel::GetSELEntryRequest))
     {
@@ -670,8 +670,9 @@ ipmi::RspType<uint16_t> ipmiStorageReserveSel()
  */
 ipmi::RspType<uint16_t // recordID of the Added SEL entry
               >
-    ipmiStorageAddSEL(uint16_t recordID, uint8_t recordType, uint32_t timeStamp,
-                      uint16_t generatorID, uint8_t evmRev, uint8_t sensorType,
+    ipmiStorageAddSEL(uint16_t recordID, uint8_t recordType,
+                      [[maybe_unused]] uint32_t timeStamp, uint16_t generatorID,
+                      [[maybe_unused]] uint8_t evmRev, uint8_t sensorType,
                       uint8_t sensorNumber, uint8_t eventDir,
                       std::array<uint8_t, eventDataSize> eventData)
 {

@@ -1204,8 +1204,7 @@ void UserAccess::readPayloadAccessFromUserInfo(
 void UserAccess::updatePayloadAccessInUserInfo(
     const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
         stdPayload,
-    const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&
-        oemPayload,
+    const std::array<std::array<bool, ipmiMaxChannels>, payloadsPerByte>&,
     UserInfo& userInfo)
 {
     for (size_t chIndex = 0; chIndex < ipmiMaxChannels; ++chIndex)
