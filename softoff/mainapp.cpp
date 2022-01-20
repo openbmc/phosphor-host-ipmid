@@ -25,7 +25,7 @@
 
 // Return -1 on any errors to ensure we follow the calling targets OnFailure=
 // path
-int main(int argc, char** argv)
+int main(int, char**)
 {
     using namespace phosphor::logging;
 

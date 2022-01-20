@@ -635,7 +635,7 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
     const size_t writeCount = writeData.size();
     const size_t readCount = readBuf.size();
     int msgCount = 0;
-    i2c_msg i2cmsg[2] = {0};
+    i2c_msg i2cmsg[2] = {};
     if (writeCount)
     {
         // Data will be writtern to the slave address
@@ -655,7 +655,7 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
         msgCount++;
     }
 
-    i2c_rdwr_ioctl_data msgReadWrite = {0};
+    i2c_rdwr_ioctl_data msgReadWrite = {};
     msgReadWrite.msgs = i2cmsg;
     msgReadWrite.nmsgs = msgCount;
 
