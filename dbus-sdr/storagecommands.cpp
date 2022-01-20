@@ -230,9 +230,10 @@ void recalculateHashes()
     }
 }
 
-void replaceCacheFru(const std::shared_ptr<sdbusplus::asio::connection>& bus,
-                     boost::asio::yield_context& yield,
-                     const std::optional<std::string>& path = std::nullopt)
+void replaceCacheFru(
+    const std::shared_ptr<sdbusplus::asio::connection>& bus,
+    boost::asio::yield_context& yield,
+    [[maybe_unused]] const std::optional<std::string>& path = std::nullopt)
 {
     boost::system::error_code ec;
 
@@ -554,7 +555,7 @@ ipmi::RspType<uint16_t, // inventorySize
     return ipmi::responseSuccess(fruCache.size(), accessType);
 }
 
-ipmi_ret_t getFruSdrCount(ipmi::Context::ptr ctx, size_t& count)
+ipmi_ret_t getFruSdrCount(ipmi::Context::ptr, size_t& count)
 {
     count = deviceHashes.size();
     return IPMI_CC_OK;
@@ -1084,11 +1085,17 @@ ipmi::RspType<uint16_t, // Next Record ID
     return ipmi::responseUnspecifiedError();
 }
 
-ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
-    uint16_t recordID, uint8_t recordType, uint32_t timestamp,
-    uint16_t generatorID, uint8_t evmRev, uint8_t sensorType, uint8_t sensorNum,
-    uint8_t eventType, uint8_t eventData1, uint8_t eventData2,
-    uint8_t eventData3)
+/*
+Unused arguments
+  uint16_t recordID, uint8_t recordType, uint32_t timestamp,
+  uint16_t generatorID, uint8_t evmRev, uint8_t sensorType, uint8_t sensorNum,
+  uint8_t eventType, uint8_t eventData1, uint8_t eventData2,
+  uint8_t eventData3
+*/
+ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t,
+                                               uint16_t, uint8_t, uint8_t,
+                                               uint8_t, uint8_t, uint8_t,
+                                               uint8_t, uint8_t)
 {
     // Per the IPMI spec, need to cancel any reservation when a SEL entry is
     // added
@@ -1098,7 +1105,7 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
     return ipmi::responseSuccess(responseID);
 }
 
-ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
+ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr,
                                            uint16_t reservationID,
                                            const std::array<uint8_t, 3>& clr,
                                            uint8_t eraseOperation)
@@ -1189,7 +1196,7 @@ ipmi::RspType<uint32_t> ipmiStorageGetSELTime()
     return ipmi::responseSuccess(selTime.tv_sec);
 }
 
-ipmi::RspType<> ipmiStorageSetSELTime(uint32_t selTime)
+ipmi::RspType<> ipmiStorageSetSELTime(uint32_t)
 {
     // Set SEL Time is not supported
     return ipmi::responseInvalidCommand();
