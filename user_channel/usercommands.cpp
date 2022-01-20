@@ -85,7 +85,7 @@ ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
         return ipmi::responseParmOutOfRange();
     }
 
-    PrivAccess privAccess = {0};
+    PrivAccess privAccess = {};
     if (bitsUpdate)
     {
         privAccess.ipmiEnabled = static_cast<uint8_t>(ipmiEnabled);
@@ -207,7 +207,8 @@ ipmi::RspType<uint6_t, // max channel users
  *  @returns ipmi response
  */
 ipmi::RspType<>
-    ipmiSetUserName(ipmi::Context::ptr ctx, uint6_t id, uint2_t reserved,
+    ipmiSetUserName([[maybe_unused]] ipmi::Context::ptr ctx, uint6_t id,
+                    uint2_t reserved,
                     const std::array<uint8_t, ipmi::ipmiMaxUserName>& name)
 {
     if (reserved)
@@ -238,7 +239,8 @@ ipmi::RspType<>
  *  @returns ipmi response with 16-byte username
  */
 ipmi::RspType<std::array<uint8_t, ipmi::ipmiMaxUserName>> // user name
-    ipmiGetUserName(ipmi::Context::ptr ctx, uint6_t id, uint2_t reserved)
+    ipmiGetUserName([[maybe_unused]] ipmi::Context::ptr ctx, uint6_t id,
+                    uint2_t reserved)
 {
     if (reserved)
     {
@@ -271,9 +273,9 @@ ipmi::RspType<std::array<uint8_t, ipmi::ipmiMaxUserName>> // user name
  *  @returns ipmi response with 16-byte username
  */
 ipmi::RspType<> // user name
-    ipmiSetUserPassword(ipmi::Context::ptr ctx, uint6_t id, bool reserved1,
-                        bool pwLen20, uint2_t operation, uint6_t reserved2,
-                        SecureBuffer& userPassword)
+    ipmiSetUserPassword([[maybe_unused]] ipmi::Context::ptr ctx, uint6_t id,
+                        bool reserved1, bool pwLen20, uint2_t operation,
+                        uint6_t reserved2, SecureBuffer& userPassword)
 {
     if (reserved1 || reserved2)
     {
@@ -404,7 +406,8 @@ ipmi::RspType<uint8_t,  // channel number
               >
     ipmiGetChannelAuthenticationCapabilities(ipmi::Context::ptr ctx,
                                              uint4_t chNum, uint3_t reserved1,
-                                             bool extData, uint4_t privLevel,
+                                             [[maybe_unused]] bool extData,
+                                             uint4_t privLevel,
                                              uint4_t reserved2)
 {
     uint8_t channel =
@@ -522,7 +525,7 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
         return ipmi::responseParmOutOfRange();
     }
 
-    PayloadAccess payloadAccess = {0};
+    PayloadAccess payloadAccess = {};
     payloadAccess.stdPayloadEnables1[1] = stdPayload1SOL;
 
     return ipmi::response(ipmiUserSetUserPayloadAccess(
