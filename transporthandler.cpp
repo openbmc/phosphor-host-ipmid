@@ -125,7 +125,7 @@ std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus::bus& bus,
 
     params.id = channel;
     params.ifname = std::move(ifname);
-    return std::move(params);
+    return params;
 }
 
 ChannelParams getChannelParams(sdbusplus::bus::bus& bus, uint8_t channel)
@@ -802,14 +802,13 @@ RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
                                     uint8_t set, uint8_t block)
     __attribute__((weak));
 
-RspType<> setLanOem(uint8_t channel, uint8_t parameter, message::Payload& req)
+RspType<> setLanOem(uint8_t, uint8_t, message::Payload& req)
 {
     req.trailingOk = true;
     return response(ccParamNotSupported);
 }
 
-RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
-                                    uint8_t set, uint8_t block)
+RspType<message::Payload> getLanOem(uint8_t, uint8_t, uint8_t, uint8_t)
 {
     return response(ccParamNotSupported);
 }
@@ -1543,7 +1542,7 @@ constexpr const char* solPath = "/xyz/openbmc_project/ipmi/sol/";
 constexpr const uint16_t solDefaultPort = 623;
 
 RspType<> setSolConfParams(Context::ptr ctx, uint4_t channelBits,
-                           uint4_t reserved, uint8_t parameter,
+                           uint4_t /*reserved*/, uint8_t parameter,
                            message::Payload& req)
 {
     const uint8_t channel = convertCurrentChannelNum(
@@ -1713,9 +1712,9 @@ RspType<> setSolConfParams(Context::ptr ctx, uint4_t channelBits,
 
 RspType<message::Payload> getSolConfParams(Context::ptr ctx,
                                            uint4_t channelBits,
-                                           uint3_t reserved, bool revOnly,
-                                           uint8_t parameter, uint8_t set,
-                                           uint8_t block)
+                                           uint3_t /*reserved*/, bool revOnly,
+                                           uint8_t parameter, uint8_t /*set*/,
+                                           uint8_t /*block*/)
 {
     message::Payload ret;
     constexpr uint8_t current_revision = 0x11;
