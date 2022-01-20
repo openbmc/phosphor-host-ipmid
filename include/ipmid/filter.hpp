@@ -39,6 +39,8 @@ class FilterBase
   public:
     using ptr = std::shared_ptr<FilterBase>;
 
+    virtual ~FilterBase() = default;
+
     virtual ipmi::Cc call(message::Request::ptr request) = 0;
 };
 
