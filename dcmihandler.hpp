@@ -577,7 +577,6 @@ struct GetConfParamsResponse
     uint8_t minor;         //!< DCMI Spec Conformance - minor ver = 05h.
     uint8_t paramRevision; //!< Parameter Revision = 01h.
     uint8_t data[];        //!< Parameter data.
-
 } __attribute__((packed));
 
 } // namespace dcmi
