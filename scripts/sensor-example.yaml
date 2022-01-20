@@ -172,7 +172,6 @@
         Offsets:
           7:
             assert: true
-            deassert: true
             type: bool
     xyz.openbmc_project.Inventory.Item:
       Present:
@@ -188,10 +187,8 @@
         Offsets:
           8:
             assert: false
-            deassert: true
             type: bool
         Prereqs:
           7:
             assert: true
-            deassert: false
             type: bool
