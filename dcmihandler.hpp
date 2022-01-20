@@ -276,9 +276,9 @@ struct GetMgmntCtrlIdStrRequest
  */
 struct GetMgmntCtrlIdStrResponse
 {
-    uint8_t strLen; //!< ID string length.
-    char data[];    //!< ID string
-} __attribute__((packed));
+    uint8_t strLen;         //!< ID string length.
+    std::vector<char> data; //!< ID string
+};
 
 /** @struct SetMgmntCtrlIdStrRequest
  *
@@ -286,10 +286,10 @@ struct GetMgmntCtrlIdStrResponse
  */
 struct SetMgmntCtrlIdStrRequest
 {
-    uint8_t offset; //!< Offset to write.
-    uint8_t bytes;  //!< Number of bytes to read.
-    char data[];    //!< ID string
-} __attribute__((packed));
+    uint8_t offset;         //!< Offset to write.
+    uint8_t bytes;          //!< Number of bytes to read.
+    std::vector<char> data; //!< ID string
+};
 
 /** @struct GetMgmntCtrlIdStrResponse
  *
@@ -327,11 +327,11 @@ struct GetDCMICapRequest
  */
 struct GetDCMICapResponse
 {
-    uint8_t major;         //!< DCMI Specification Conformance - major ver
-    uint8_t minor;         //!< DCMI Specification Conformance - minor ver
-    uint8_t paramRevision; //!< Parameter Revision = 02h
-    uint8_t data[];        //!< Capability array
-} __attribute__((packed));
+    uint8_t major;             //!< DCMI Specification Conformance - major ver
+    uint8_t minor;             //!< DCMI Specification Conformance - minor ver
+    uint8_t paramRevision;     //!< Parameter Revision = 02h
+    std::vector<uint8_t> data; //!< Capability array
+};
 
 /** @struct DCMICap
  *
@@ -550,8 +550,8 @@ struct SetConfParamsRequest
     uint8_t paramSelect; //!< Parameter selector.
     uint8_t setSelect;   //!< Set Selector (use 00h for parameters that only
                          //!< have one set).
-    uint8_t data[];      //!< Configuration parameter data.
-} __attribute__((packed));
+    std::vector<uint8_t> data; //!< Configuration parameter data.
+};
 
 /** @struct GetConfParamsRequest
  *
@@ -573,11 +573,10 @@ struct GetConfParamsRequest
  */
 struct GetConfParamsResponse
 {
-    uint8_t major;         //!< DCMI Spec Conformance - major ver = 01h.
-    uint8_t minor;         //!< DCMI Spec Conformance - minor ver = 05h.
-    uint8_t paramRevision; //!< Parameter Revision = 01h.
-    uint8_t data[];        //!< Parameter data.
-
-} __attribute__((packed));
+    uint8_t major;             //!< DCMI Spec Conformance - major ver = 01h.
+    uint8_t minor;             //!< DCMI Spec Conformance - minor ver = 05h.
+    uint8_t paramRevision;     //!< Parameter Revision = 01h.
+    std::vector<uint8_t> data; //!< Parameter data.
+};
 
 } // namespace dcmi

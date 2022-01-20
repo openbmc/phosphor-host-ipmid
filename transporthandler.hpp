@@ -469,7 +469,8 @@ ether_addr stringToMAC(const char* mac);
  */
 template <int family>
 std::optional<IfAddr<family>> findIfAddr(
-    sdbusplus::bus::bus& bus, const ChannelParams& params, uint8_t idx,
+    [[maybe_unused]] sdbusplus::bus::bus& bus,
+    [[maybe_unused]] const ChannelParams& params, uint8_t idx,
     const std::unordered_set<
         sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>&
         origins,
@@ -504,7 +505,7 @@ std::optional<IfAddr<family>> findIfAddr(
         ifaddr.address = *addr;
         ifaddr.prefix = std::get<uint8_t>(properties.at("PrefixLength"));
         ifaddr.origin = origin;
-        return std::move(ifaddr);
+        return ifaddr;
     }
 
     return std::nullopt;
@@ -587,7 +588,7 @@ std::optional<typename AddrFamily<family>::addr>
 
 template <int family>
 std::optional<IfNeigh<family>>
-    findStaticNeighbor(sdbusplus::bus::bus& bus, const ChannelParams& params,
+    findStaticNeighbor(sdbusplus::bus::bus&, const ChannelParams&,
                        const typename AddrFamily<family>::addr& ip,
                        ObjectLookupCache& neighbors)
 {
@@ -617,7 +618,7 @@ std::optional<IfNeigh<family>>
         ret.ip = ip;
         const auto& macStr = std::get<std::string>(neighbor.at("MACAddress"));
         ret.mac = stringToMAC(macStr.c_str());
-        return std::move(ret);
+        return ret;
     }
 
     return std::nullopt;
