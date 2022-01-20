@@ -1833,8 +1833,8 @@ static bool cmosClear = false;
 ipmi::RspType<ipmi::message::Payload>
     ipmiChassisGetSysBootOptions(ipmi::Context::ptr ctx,
                                  uint7_t bootOptionParameter, bool reserved1,
-
-                                 uint8_t setSelector, uint8_t blockSelector)
+                                 [[maybe_unused]] uint8_t setSelector,
+                                 [[maybe_unused]] uint8_t blockSelector)
 {
     ipmi::Cc rc;
     if (reserved1)
@@ -1994,8 +1994,7 @@ ipmi::RspType<ipmi::message::Payload>
 }
 
 ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
-                                             uint7_t parameterSelector,
-                                             bool parameterIsValid,
+                                             uint7_t parameterSelector, bool,
                                              ipmi::message::Payload& data)
 {
     using namespace boot_options;
@@ -2322,9 +2321,10 @@ ipmi::RspType<uint3_t, // policy support
     return ipmi::responseSuccess(power_policy::allSupport, reserved);
 }
 
-ipmi::RspType<> ipmiSetFrontPanelButtonEnables(
-    ipmi::Context::ptr ctx, bool disablePowerButton, bool disableResetButton,
-    bool disableDiagButton, bool disableSleepButton, uint4_t reserved)
+ipmi::RspType<> ipmiSetFrontPanelButtonEnables(ipmi::Context::ptr ctx,
+                                               bool disablePowerButton,
+                                               bool disableResetButton, bool,
+                                               bool, uint4_t)
 {
     using namespace chassis::internal;
 

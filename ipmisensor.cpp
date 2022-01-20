@@ -113,7 +113,7 @@ char* event_data_lookup(event_data_t* p, uint8_t b)
 //  The fw progress sensor contains some additional information that needs to be
 //  processed prior to calling the dbus code.
 int set_sensor_dbus_state_fwprogress(const sensorRES_t* pRec,
-                                     const lookup_t* pTable, const char* value)
+                                     const lookup_t* pTable, const char*)
 {
 
     char valuestring[128];
@@ -152,16 +152,15 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t* pRec,
 // Handling this special OEM sensor by coping what is in byte 4.  I also think
 // that is odd considering byte 3 is for sensor reading.  This seems like a
 // misuse of the IPMI spec
-int set_sensor_dbus_state_osbootcount(const sensorRES_t* pRec,
-                                      const lookup_t* pTable, const char* value)
+int set_sensor_dbus_state_osbootcount(const sensorRES_t* pRec, const lookup_t*,
+                                      const char*)
 {
     return set_sensor_dbus_state_y(pRec->sensor_number, "setValue",
                                    pRec->assert_state7_0);
 }
 
 int set_sensor_dbus_state_system_event(const sensorRES_t* pRec,
-                                       const lookup_t* pTable,
-                                       const char* value)
+                                       const lookup_t* pTable, const char*)
 {
     char valuestring[128];
     char* p = valuestring;

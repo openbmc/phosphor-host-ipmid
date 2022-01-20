@@ -418,7 +418,7 @@ struct VariantToDoubleVisitor
 
     template <typename T>
     std::enable_if_t<!std::is_arithmetic<T>::value, double>
-        operator()(const T& t) const
+        operator()(const T&) const
     {
         throw std::invalid_argument("Cannot translate type to double");
     }

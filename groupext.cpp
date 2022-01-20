@@ -4,9 +4,9 @@
 #define GRPEXT_GET_GROUP_CMD 0
 void register_netfn_groupext_functions() __attribute__((constructor));
 
-ipmi_ret_t ipmi_groupext(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                         ipmi_request_t request, ipmi_response_t response,
-                         ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_groupext(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
+                         ipmi_response_t response, ipmi_data_len_t data_len,
+                         ipmi_context_t)
 {
     // Generic return from IPMI commands.
     ipmi_ret_t rc = IPMI_CC_OK;

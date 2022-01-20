@@ -578,10 +578,10 @@ ipmi::RspType<uint8_t,  // Device ID
               uint16_t, // Product ID
               uint32_t  // AUX info
               >
-    ipmiAppGetDeviceId(ipmi::Context::ptr ctx)
+    ipmiAppGetDeviceId([[maybe_unused]] ipmi::Context::ptr ctx)
 {
     int r = -1;
-    Revision rev = {0};
+    Revision rev = {0, 0, 0, 0};
     static struct
     {
         uint8_t id;
@@ -1630,8 +1630,9 @@ static bool populateI2CMasterWRWhitelist()
  *   - readData - i2c response data
  */
 ipmi::RspType<std::vector<uint8_t>>
-    ipmiMasterWriteRead(bool isPrivateBus, uint3_t busId, uint4_t channelNum,
-                        bool reserved, uint7_t slaveAddr, uint8_t readCount,
+    ipmiMasterWriteRead([[maybe_unused]] bool isPrivateBus, uint3_t busId,
+                        [[maybe_unused]] uint4_t channelNum, bool reserved,
+                        uint7_t slaveAddr, uint8_t readCount,
                         std::vector<uint8_t> writeData)
 {
     if (reserved)
