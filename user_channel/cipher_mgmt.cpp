@@ -120,10 +120,10 @@ int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
     std::string tmpFile =
         static_cast<std::string>(cipherSuitePrivFileName) + "_tmpXXXXXX";
 
-    char tmpRandomFile[tmpFile.length() + 1];
-    strncpy(tmpRandomFile, tmpFile.c_str(), tmpFile.length() + 1);
+    std::vector<char> tmpRandomFile(tmpFile.length() + 1);
+    strncpy(tmpRandomFile.data(), tmpFile.c_str(), tmpFile.length() + 1);
 
-    int fd = mkstemp(tmpRandomFile);
+    int fd = mkstemp(tmpRandomFile.data());
     fchmod(fd, 0644);
 
     if (fd < 0)
@@ -139,16 +139,16 @@ int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
         close(fd);
         log<level::ERR>("Error writing CS privilege level config file",
                         entry("FILE_NAME=%s", tmpFile.c_str()));
-        unlink(tmpRandomFile);
+        unlink(tmpRandomFile.data());
         return -EIO;
     }
     close(fd);
 
-    if (std::rename(tmpRandomFile, cipherSuitePrivFileName.c_str()))
+    if (std::rename(tmpRandomFile.data(), cipherSuitePrivFileName.c_str()))
     {
         log<level::ERR>("Error renaming CS privilege level config file",
                         entry("FILE_NAME=%s", tmpFile.c_str()));
-        unlink(tmpRandomFile);
+        unlink(tmpRandomFile.data());
         return -EIO;
     }
 

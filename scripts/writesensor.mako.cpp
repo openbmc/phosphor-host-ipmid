@@ -99,7 +99,9 @@ extern const IdInfoMap sensors = {
         .mutability = Mutability(${mutability}),
     % if sensorName:
         .sensorName = "${sensorName}",
+        .sensorNameFunc = nullptr,
     % else:
+        .sensorName = "",
         .sensorNameFunc = ${sensorNameFunc},
     % endif
         .propertyInterfaces = {
