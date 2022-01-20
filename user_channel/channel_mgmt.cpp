@@ -155,7 +155,7 @@ std::string ChannelConfig::getChannelName(const uint8_t chNum)
     {
         log<level::ERR>("Invalid channel number.",
                         entry("CHANNEL_ID=%d", chNum));
-        throw std::invalid_argument("Invalid channel number");
+        return std::string();
     }
 
     return channelData[chNum].chName;
