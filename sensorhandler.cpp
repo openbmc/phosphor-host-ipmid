@@ -560,7 +560,7 @@ ipmi::RspType<uint8_t, // sensor reading
               uint8_t, // threshold levels states
               uint8_t  // discrete reading sensor states
               >
-    ipmiSensorGetSensorReading(ipmi::Context::ptr& ctx, uint8_t sensorNum)
+    ipmiSensorGetSensorReading(ipmi::Context::ptr&, uint8_t sensorNum)
 {
     if (sensorNum == 0xFF)
     {
@@ -825,9 +825,8 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     bool lowerCriticalThreshMask, bool lowerNonRecovThreshMask,
     bool upperNonCriticalThreshMask, bool upperCriticalThreshMask,
     bool upperNonRecovThreshMask, uint2_t reserved, uint8_t lowerNonCritical,
-    uint8_t lowerCritical, uint8_t lowerNonRecoverable,
-    uint8_t upperNonCritical, uint8_t upperCritical,
-    uint8_t upperNonRecoverable)
+    uint8_t lowerCritical, uint8_t, uint8_t upperNonCritical,
+    uint8_t upperCritical, uint8_t)
 {
     if (reserved)
     {
@@ -1062,7 +1061,7 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
 
 ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
                                      const ipmi::sensor::Info* info,
-                                     ipmi_data_len_t data_len)
+                                     ipmi_data_len_t)
 {
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
@@ -1266,9 +1265,9 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                            ipmi_request_t request, ipmi_response_t response,
-                            ipmi_data_len_t data_len, ipmi_context_t context)
+ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                            ipmi_response_t response, ipmi_data_len_t data_len,
+                            ipmi_context_t)
 {
     ipmi_ret_t ret = IPMI_CC_OK;
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
@@ -1312,7 +1311,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
     if (it == sdrCacheMap.end())
     {
         /* Header */
-        get_sdr::SensorDataFullRecord record = {0};
+        get_sdr::SensorDataFullRecord record = {};
         get_sdr::header::set_record_id(sensor_id, &(record.header));
         record.header.sdr_version = 0x51; // Based on IPMI Spec v2.0 rev 1.1
         record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
@@ -1384,10 +1383,9 @@ static bool isFromSystemChannel()
     return true;
 }
 
-ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                                ipmi_request_t request,
-                                ipmi_response_t response,
-                                ipmi_data_len_t dataLen, ipmi_context_t context)
+ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
+                                ipmi_request_t request, ipmi_response_t,
+                                ipmi_data_len_t dataLen, ipmi_context_t)
 {
     uint16_t generatorID;
     size_t count;
