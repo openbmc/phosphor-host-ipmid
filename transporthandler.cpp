@@ -992,8 +992,12 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 return responseReqDataLenInvalid();
             }
             copyInto(netmask, bytes);
-            channelCall<reconfigureIfAddr4>(channel, std::nullopt,
-                                            netmaskToPrefix(netmask));
+            uint8_t prefix = netmaskToPrefix(netmask);
+            if (prefix < MIN_IPV4_PREFIX_LENGTH)
+            {
+                return responseInvalidFieldRequest();
+            }
+            channelCall<reconfigureIfAddr4>(channel, std::nullopt, prefix);
             return responseSuccess();
         }
         case LanParam::Gateway1:
@@ -1109,6 +1113,11 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             copyInto(ip, ipbytes);
             if (enabled)
             {
+                if (prefix < MIN_IPV6_PREFIX_LENGTH ||
+                    prefix > MAX_IPV6_PREFIX_LENGTH)
+                {
+                    return responseParmOutOfRange();
+                }
                 try
                 {
                     channelCall<reconfigureIfAddr6>(channel, set, ip, prefix);
