@@ -16,6 +16,24 @@
       "message": "is this going to cause issues for systems that only want the yaml FRUs?",
       "revId": "14b1efc0e19b8a2d0d8f0d5dc6042abab2667502",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e744efc6_ca1623dd",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-01-25T22:43:01Z",
+      "side": 1,
+      "message": "This IPMI module entirely is for FRUs populated by YAML files.\nThis patch just adds support for searching YAML FRU paths not only in the Inventory.Manager service, but in the EM service as well.\nBecause as you can see the code above\n```\n        ec \u003d ipmi::getDbusProperty(ctx, service, invObjPath + fruPath,\n                                   invItemInterface, itemPresentProp, result);\n```\nchecks only the Inventory.Manager service.\nAs for the implementation in case of EM we don\u0027t have `itemPresentProp` property. We can just look for the `fruPath` under EM service, as it is created dynamically by the fruDevice application.",
+      "parentUuid": "5d95fffb_b3d9a78f",
+      "revId": "14b1efc0e19b8a2d0d8f0d5dc6042abab2667502",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
