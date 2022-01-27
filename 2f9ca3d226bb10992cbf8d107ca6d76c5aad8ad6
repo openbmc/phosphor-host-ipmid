@@ -88,6 +88,24 @@
       "parentUuid": "4cd1cb69_dc7891f1",
       "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f6e8a175_edb4fd03",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-01-27T23:11:47Z",
+      "side": 1,
+      "message": "What is the best way to dynamically find out a path of the ObjectManager interface inside a sensor service?",
+      "parentUuid": "bce8459d_ba252d1c",
+      "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
