@@ -34,6 +34,24 @@
       "parentUuid": "3f50b6cb_c7fd5568",
       "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bdf305dd_c8b61414",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-01-27T00:36:33Z",
+      "side": 1,
+      "message": "I still do not understand the logic here. If the first call to getManagedObjects succeeds, does that include the results from phosphor-health-monitor? If not, then you do need both calls, but not with the second one being in the error path of the first.\n\nI agree that fewer dbus calls is better. Maybe we should change phosphor-health-monitor to behave like all the other sensors.\n\nAlso, I noticed that you are re-declaring ec as a shadow variable here. No need; just reuse the existing one.",
+      "parentUuid": "22b7500c_a6402679",
+      "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
