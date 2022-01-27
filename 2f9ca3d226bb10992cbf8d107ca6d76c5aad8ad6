@@ -52,6 +52,24 @@
       "parentUuid": "22b7500c_a6402679",
       "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4cd1cb69_dc7891f1",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-01-27T15:04:05Z",
+      "side": 1,
+      "message": "This code will be executed for all the sensor services (`sensorConnection.c_str()` in this case):\n- xyz.openbmc_project.PSUSensor\n- xyz.openbmc_project.HwmonTempSensor\n- xyz.openbmc_project.FanSensor\n- xyz.openbmc_project.ADCSensor\n...\n- xyz.openbmc_project.HealthMon\n\nAnd all of these services have `org.freedesktop.DBus.ObjectManager` interface under the `/xyz/openbmc_project/sensors` path. Except the `xyz.openbmc_project.HealthMon`. Which has it under \u0027/\u0027.\n\n\u003e Maybe we should change phosphor-health-monitor to behave like all the other sensors\n`phosphor-health-monitor` maintainer doesn\u0027t agree with this. You can read discussion under:\nhttps://gerrit.openbmc-project.xyz/c/openbmc/phosphor-health-monitor/+/41228/1/healthMonitor.cpp#530",
+      "parentUuid": "bdf305dd_c8b61414",
+      "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
