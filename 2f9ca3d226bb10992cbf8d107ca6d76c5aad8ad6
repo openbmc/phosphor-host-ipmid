@@ -70,6 +70,24 @@
       "parentUuid": "bdf305dd_c8b61414",
       "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bce8459d_ba252d1c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-01-27T23:01:36Z",
+      "side": 1,
+      "message": "Okay. I think I finally have a handle on what this is trying to solve. According to Patrick: 1) most of the sensors have the ObjectManager interface in the wrong path; 2) the IPMI code should not be calling ObjectManager.\n\nI am not sure about problem 2, but problem 1 can be fixed if IPMI sensor code does not assume that the ObjectManager interface is at /. If the IPMI code looks up where the ObjectManager interface is for each sensor endpoint, we can just use that instead of hard-coding / and /xyz/openbmc_project/sensors.",
+      "parentUuid": "4cd1cb69_dc7891f1",
+      "revId": "2f9ca3d226bb10992cbf8d107ca6d76c5aad8ad6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
