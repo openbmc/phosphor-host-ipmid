@@ -70,6 +70,24 @@
       "parentUuid": "865eb13d_5dd0a4d4",
       "revId": "1de16373f525abe37f4e1faf312f9d762cff2612",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "818417fe_cf543280",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-01-27T22:16:51Z",
+      "side": 1,
+      "message": "I agree that we should not limit the names to fit IPMI, but I don\u0027t like IPMI doing this automatic find and replace to make things shorter. I would prefer that the same people giving the long names to things also provide a short name if they want it to work well with IPMI. Then EM could have a Name property and a ShortName property. IPMI would prefer the short name property if it is populated and would truncate the Name property if short name is not populated and Name is too long.",
+      "parentUuid": "319a8d8d_9780bae8",
+      "revId": "1de16373f525abe37f4e1faf312f9d762cff2612",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
