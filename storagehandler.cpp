@@ -841,7 +841,12 @@ ipmi::RspType<uint8_t,  // SDR version
     constexpr uint32_t deletionTimestamp = 0x0;
     constexpr uint8_t operationSupport = 0;
 
-    uint16_t records = frus.size() + ipmi::sensor::sensors.size();
+    // Get SDR count. This returns the total number of SDRs in the device.
+    const auto& entityRecords =
+        ipmi::sensor::EntityInfoMapContainer::getContainer()
+            ->getIpmiEntityRecords();
+    uint16_t records =
+        ipmi::sensor::sensors.size() + frus.size() + entityRecords.size();
 
     return ipmi::responseSuccess(sdrVersion, records, freeSpace,
                                  additionTimestamp, deletionTimestamp,
