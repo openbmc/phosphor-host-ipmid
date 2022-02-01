@@ -502,7 +502,7 @@ bool UserAccess::isValidUserId(const uint8_t userId)
 bool UserAccess::isValidPrivilege(const uint8_t priv)
 {
     // Callback privilege is deprecated in OpenBMC
-    return (isValidPrivLimit(priv) || priv == privNoAccess);
+    return isValidPrivLimit(priv);
 }
 
 uint8_t UserAccess::getUsrMgmtSyncIndex()
