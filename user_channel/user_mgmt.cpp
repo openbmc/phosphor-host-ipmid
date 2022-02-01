@@ -1059,7 +1059,8 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
             auto method = bus.new_method_call(
                 getUserServiceName().c_str(), userMgrObjBasePath,
                 userMgrInterface, createUserMethod);
-            method.append(userName.c_str(), availableGroups, "", false);
+            method.append(userName.c_str(), availableGroups,
+                          ipmiPrivIndex[PRIVILEGE_USER], false);
             auto reply = bus.call(method);
         }
         catch (const sdbusplus::exception::exception& e)
@@ -1074,6 +1075,11 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         std::memcpy(userInfo->userName,
                     static_cast<const void*>(userName.data()), userName.size());
         userInfo->userInSystem = true;
+        for (size_t chIndex = 0; chIndex < ipmiMaxChannels; chIndex++)
+        {
+            userInfo->userPrivAccess[chIndex].privilege =
+                static_cast<uint8_t>(PRIVILEGE_USER);
+        }
     }
     else if (oldUser != userName && validUser)
     {
