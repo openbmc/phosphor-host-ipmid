@@ -539,18 +539,20 @@ auto getIfAddr(
 sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface::DHCPConf
     getDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params);
 
-/** @brief Sets the DHCP v6 state on the given interface
+/** @brief Sets the DHCP state on the given interface
  *
  *  @param[in] bus           - The bus object used for lookups
  *  @param[in] params        - The parameters for the channel
- *  @param[in] requestedDhcp - DHCP state to assign (none, v6, both)
+ *  @param[in] requestedDhcp - DHCP state to assign
+ *  @param[in] ipv6          - True: Modify IPv6 DHCP configuration
+ *                             False: Modify IPv4 DHCP configuration
  *  @param[in] defaultMode   - True: Use algorithmic assignment
  *                             False: requestedDhcp assigned unconditionally
  */
-void setDHCPv6Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
-                       const sdbusplus::xyz::openbmc_project::Network::server::
-                           EthernetInterface::DHCPConf requestedDhcp,
-                       const bool defaultMode);
+void setDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
+                     const sdbusplus::xyz::openbmc_project::Network::server::
+                         EthernetInterface::DHCPConf requestedDhcp,
+                     const bool ipv6 = false, const bool defaultMode = true);
 
 /** @brief Reconfigures the IPv6 address info configured for the interface
  *
