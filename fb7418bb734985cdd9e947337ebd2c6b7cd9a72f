@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "64d2869d_1451baf7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001354
+      },
+      "writtenOn": "2022-02-09T22:57:22Z",
+      "side": 1,
+      "message": "This change makes sense. \n\nNon-actionable suggestion: The change made to body-\u003esensor_units_1 could be replaced with a call to set_percentage to make what\u0027s being done more immediately clear.",
+      "revId": "fb7418bb734985cdd9e947337ebd2c6b7cd9a72f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b72145fd_e5136bf4",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1001354
+      },
+      "writtenOn": "2022-02-09T22:57:22Z",
+      "side": 1,
+      "message": "It may make sense to replace this line with a call to set_percentage(SensorDataFullRecordBody*), as defined in sensorhandler.hpp, to make it more immediately clear what\u0027s being done.",
+      "revId": "fb7418bb734985cdd9e947337ebd2c6b7cd9a72f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
