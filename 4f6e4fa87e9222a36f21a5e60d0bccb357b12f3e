@@ -34,6 +34,24 @@
       "parentUuid": "33d62197_f1395e17",
       "revId": "4f6e4fa87e9222a36f21a5e60d0bccb357b12f3e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bcd2c247_c56dd289",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 22
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2022-02-09T18:45:49Z",
+      "side": 1,
+      "message": "I need to wait for the final consent on https://gerrit.openbmc-project.xyz/c/openbmc/dbus-sensors/+/45997. This two CL goes hand in hand. I afraid if the other CL needs to be changed. This CL needs to be changed again.",
+      "parentUuid": "03d430d1_e27a7bca",
+      "revId": "4f6e4fa87e9222a36f21a5e60d0bccb357b12f3e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
