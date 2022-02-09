@@ -53,6 +53,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd026471_4873e53e",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2022-02-09T22:34:23Z",
+      "side": 1,
+      "message": "OK. I can\u0027t see the setReading() prototype from here, so assuming that\u0027s the right thing to do.",
+      "parentUuid": "5da1e1df_fba6726a",
+      "revId": "dcb7368d3405821510e93fa575b6b273e6a32c2d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c59965ec_f2ddc770",
@@ -84,6 +102,24 @@
       "side": 1,
       "message": "I have refactored it out a bit.",
       "parentUuid": "c59965ec_f2ddc770",
+      "revId": "dcb7368d3405821510e93fa575b6b273e6a32c2d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "995de152_8340007a",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2022-02-09T22:34:23Z",
+      "side": 1,
+      "message": "Nice, looks good now",
+      "parentUuid": "7104fe4f_26267613",
       "revId": "dcb7368d3405821510e93fa575b6b273e6a32c2d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
