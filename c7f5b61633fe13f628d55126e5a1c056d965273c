@@ -1,6 +1,53 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "f7dca23e_fdd36dca",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2022-02-09T21:04:43Z",
+      "side": 1,
+      "message": "Two things..\n\n(1)can we put some description on what this regex should match on with some useful examples?\ne.g\ncable[0-3] would produce\ngroup1\u003dcable\ngroup2\u003d0\ngroup3\u003d3\n\ncable2 would produce\ngroup1\u003dcable2\ngroup2\u003dempty, no match\ngroup3\u003dempty, no match\n\n\n(2) The escape syntax in the regex doesn\u0027t look right to me. Can you please confirm that it does work?\n\nIn particular this part doesn\u0027t look like the right regex to me...\n(?:\\\\[([0-9]+)-([0-9]+)\\\\])\nparticularly \n\n\\\\[\n\nI was expecting this to be \\[ to put the \u0027[\u0027 literal in the regex..\n\\\\[ \nlooks like we\u0027re expecting the \u0027\\\u0027 literal followed by a range",
+      "range": {
+        "startLine": 464,
+        "startChar": 20,
+        "endLine": 464,
+        "endChar": 72
+      },
+      "revId": "c7f5b61633fe13f628d55126e5a1c056d965273c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1ea714b2_ff47b127",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2022-02-09T21:04:43Z",
+      "side": 1,
+      "message": "I don\u0027t think search is what we want here. we want match right?\nWe want to match on the whole string, not a substring.",
+      "range": {
+        "startLine": 467,
+        "startChar": 14,
+        "endLine": 467,
+        "endChar": 25
+      },
+      "revId": "c7f5b61633fe13f628d55126e5a1c056d965273c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "350340b6_cb5b1f35",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -20,8 +67,31 @@
         "endChar": 41
       },
       "revId": "c7f5b61633fe13f628d55126e5a1c056d965273c",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "495fb08d_814e82c9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1000521
+      },
+      "writtenOn": "2022-02-09T21:04:43Z",
+      "side": 1,
+      "message": "To add\n\nmatches[2],[3] \u003d EMPTY is the condition where we have something like cdfp0 and so that\u0027s actually the non-indexed case..\n\nIf the match fails then you have a malformed object path at which point you should give up and report an error?",
+      "parentUuid": "350340b6_cb5b1f35",
+      "range": {
+        "startLine": 470,
+        "startChar": 0,
+        "endLine": 471,
+        "endChar": 41
+      },
+      "revId": "c7f5b61633fe13f628d55126e5a1c056d965273c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
