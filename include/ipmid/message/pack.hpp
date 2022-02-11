@@ -138,7 +138,9 @@ struct PackSingle<fixed_uint_t<N>>
     {
         size_t count = N;
         static_assert(N <= (details::bitStreamSize - CHAR_BIT));
-        uint64_t bits = t;
+        static_assert(N <= std::numeric_limits<uint64_t>::digits,
+                      "Type exceeds uint64_t limit");
+        uint64_t bits = static_cast<uint64_t>(t);
         while (count > 0)
         {
             size_t appendCount = std::min(count, static_cast<size_t>(CHAR_BIT));
