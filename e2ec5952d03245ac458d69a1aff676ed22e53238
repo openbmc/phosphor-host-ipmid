@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "53763ee0_beb44cf5",
+        "filename": "include/ipmid/message/pack.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2022-02-13T17:09:23Z",
+      "side": 1,
+      "message": "nit, technically this is an issue in the codebase already, but this should have a static_assert to ensure that N isn\u0027t greater than 64 bit, so this doesn\u0027t accidentally and silently remove the upper bytes if someone plumbed in, say, a uint128.\n\nsomething like\n\nstatic_assert(N \u003c\u003d std::numeric_limits\u003cuint64_t\u003e::digits, \"type is too big\");",
+      "range": {
+        "startLine": 141,
+        "startChar": 24,
+        "endLine": 141,
+        "endChar": 48
+      },
+      "revId": "e2ec5952d03245ac458d69a1aff676ed22e53238",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
