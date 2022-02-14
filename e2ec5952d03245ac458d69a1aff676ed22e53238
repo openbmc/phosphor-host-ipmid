@@ -22,6 +22,30 @@
       },
       "revId": "e2ec5952d03245ac458d69a1aff676ed22e53238",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "98b20f4f_6c529275",
+        "filename": "include/ipmid/message/pack.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2022-02-14T05:38:41Z",
+      "side": 1,
+      "message": "This should have been covered by the above\n\n static_assert(N \u003c\u003d (details::bitStreamSize - CHAR_BIT));\n\nBut I am OK to add an extra check here for uint64_t in case bitStreamSize is extended in the future.",
+      "parentUuid": "53763ee0_beb44cf5",
+      "range": {
+        "startLine": 141,
+        "startChar": 24,
+        "endLine": 141,
+        "endChar": 48
+      },
+      "revId": "e2ec5952d03245ac458d69a1aff676ed22e53238",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
