@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cd9baf25_3325225d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-02-18T00:58:10Z",
+      "side": 1,
+      "message": "It is still possible with the current change to find a version but fail to parse it. But at that point it would have cached that it has a version and continue the same current broken behavior.\n\nIt is possible to both reduce the scope of the variable and get the desired behavior by moving the flag to just after the version string is properly parsed. Then, you know that you have a valid version and it is safe to cache it.",
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "925763dd_81bbe13d",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-02-18T00:58:10Z",
+      "side": 1,
+      "message": "This scope should be at the same level as the dev_id_initialized variable",
+      "range": {
+        "startLine": 96,
+        "startChar": 5,
+        "endLine": 96,
+        "endChar": 32
+      },
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "60bcc383_377d2016",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-02-18T00:58:10Z",
+      "side": 1,
+      "message": "don\u0027t make this change here.",
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4cd95d34_b7c3e71f",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-02-18T00:58:10Z",
+      "side": 1,
+      "message": "set haveBMCVersion here",
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
