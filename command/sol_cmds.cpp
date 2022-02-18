@@ -79,6 +79,9 @@ std::vector<uint8_t> getConfParams(const std::vector<uint8_t>& inPayload,
     response->completionCode = IPMI_CC_OK;
     response->paramRev = parameterRevision;
 
+    // Update latest property values from dbus to sol mananger
+    sol::Manager::get().updateSOLParameter(ipmi::convertCurrentChannelNum(
+        ipmi::currentChNum, getInterfaceIndex()));
     if (request->getParamRev)
     {
         return outPayload;
