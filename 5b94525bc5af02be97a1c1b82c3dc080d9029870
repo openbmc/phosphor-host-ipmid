@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b420ad10_48aff7bd",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1001252
+      },
+      "writtenOn": "2022-02-20T07:50:28Z",
+      "side": 1,
+      "message": "Maybe here it can be std::stoi(token.substr(0, location))? The default arguments are 0 and 10.\n\n  int std::stoi(const std::string\u0026 str, std::size_t* pos \u003d nullptr, int base \u003d 10);",
+      "revId": "5b94525bc5af02be97a1c1b82c3dc080d9029870",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
