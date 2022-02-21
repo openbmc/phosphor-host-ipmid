@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ebe3c226_9605e066",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000934
+      },
+      "writtenOn": "2022-02-21T02:22:30Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "925763dd_81bbe13d",
+      "range": {
+        "startLine": 96,
+        "startChar": 5,
+        "endLine": 96,
+        "endChar": 32
+      },
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "60bcc383_377d2016",
@@ -58,6 +82,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "59856a5c_f20b68d1",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000934
+      },
+      "writtenOn": "2022-02-21T02:22:30Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "60bcc383_377d2016",
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4cd95d34_b7c3e71f",
@@ -71,6 +113,24 @@
       "writtenOn": "2022-02-18T00:58:10Z",
       "side": 1,
       "message": "set haveBMCVersion here",
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c347e4e0_a783c5b7",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1000934
+      },
+      "writtenOn": "2022-02-21T02:22:30Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "4cd95d34_b7c3e71f",
       "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
