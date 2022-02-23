@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b8494acc_a78f7e71",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000235
+      },
+      "writtenOn": "2022-02-23T16:27:02Z",
+      "side": 1,
+      "message": "I am not familiar with ipmid.  Does this change disallow the no-access privilege for both creating new users and for modifying existing users?",
+      "revId": "daf207279511864425eb5a2e8657cadbcd0fff2c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
