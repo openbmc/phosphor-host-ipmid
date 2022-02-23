@@ -437,12 +437,13 @@ ipmi::RspType<uint16_t // deleted record ID
     }
     else
     {
-        iter = selCacheMap.find(selRecordID);
-        if (iter == selCacheMap.end())
-        {
-            return ipmi::responseSensorInvalid();
-        }
         delRecordID = selRecordID;
+    }
+
+    iter = selCacheMap.find(delRecordID);
+    if (iter == selCacheMap.end())
+    {
+        return ipmi::responseSensorInvalid();
     }
 
     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
