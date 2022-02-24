@@ -1,0 +1,38 @@
+From 35945f18982dc4f285e48fd4aeadcf91f9078a3b Mon Sep 17 00:00:00 2001
+From: Jian <zhangjian.3032@bytedance.com>
+Date: Wed, 23 Feb 2022 19:30:27 +0800
+Subject: [PATCH] bytedance: wgs: fixed deleteSelEntry command return
+ unspecific error when Record ID is 0x0000 or 0xFFFF.
+
+---
+ storagehandler.cpp | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/storagehandler.cpp b/storagehandler.cpp
+index 7127b84..357db2b 100644
+--- a/storagehandler.cpp
++++ b/storagehandler.cpp
+@@ -460,14 +460,15 @@ ipmi::RspType<uint16_t // deleted record ID
+     }
+     else
+     {
+-        iter = selCacheMap.find(selRecordID);
+-        if (iter == selCacheMap.end())
+-        {
+-            return ipmi::responseSensorInvalid();
+-        }
+         delRecordID = selRecordID;
+     }
+ 
++    iter = selCacheMap.find(delRecordID);
++    if (iter == selCacheMap.end())
++    {
++        return ipmi::responseSensorInvalid();
++    }
++
+     sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+     std::string service;
+ 
+-- 
+2.25.1
+
