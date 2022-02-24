@@ -16,6 +16,24 @@
       "message": "I am not familiar with ipmid.  Does this change disallow the no-access privilege for both creating new users and for modifying existing users?",
       "revId": "daf207279511864425eb5a2e8657cadbcd0fff2c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d058a66c_ea7cf9ac",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000219
+      },
+      "writtenOn": "2022-02-24T11:44:15Z",
+      "side": 1,
+      "message": "The new user creation execs by `ipmiSetUserName` function.\n  https://github.com/openbmc/phosphor-host-ipmid/blob/7adc5a10259086985077a7719c0d6e61d4d73a67/user_channel/usercommands.cpp#L210 function.\nAs you can see it doesn\u0027t ask the privilege of the new user and always set the default value.\nThe default value also requires to change and I do it by other PR.\nhttps://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/50824",
+      "parentUuid": "b8494acc_a78f7e71",
+      "revId": "daf207279511864425eb5a2e8657cadbcd0fff2c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
