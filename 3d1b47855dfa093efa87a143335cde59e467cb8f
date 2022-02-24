@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "034b68e2_146bcafe",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-02-24T20:43:09Z",
+      "side": 1,
+      "message": "Just curious what\u0027s driving this change, would people be surprised if newly created users suddenly have a different privilege if they pick up this change, or is this a fix because this privilege level is what\u0027s expected when creating new users? Maybe some additional info can be added to the commit msg.",
+      "revId": "3d1b47855dfa093efa87a143335cde59e467cb8f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "515ad630_348567fd",
