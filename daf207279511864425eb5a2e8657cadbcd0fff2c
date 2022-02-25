@@ -34,6 +34,41 @@
       "parentUuid": "b8494acc_a78f7e71",
       "revId": "daf207279511864425eb5a2e8657cadbcd0fff2c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "23a8d374_c4c93491",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000235
+      },
+      "writtenOn": "2022-02-25T02:01:02Z",
+      "side": 1,
+      "message": "Thanks for explaining.",
+      "parentUuid": "d058a66c_ea7cf9ac",
+      "revId": "daf207279511864425eb5a2e8657cadbcd0fff2c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6f289920_215eee60",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000235
+      },
+      "writtenOn": "2022-02-25T02:01:02Z",
+      "side": 1,
+      "message": "Seems okay to me, but I am not an IPMI expert.",
+      "revId": "daf207279511864425eb5a2e8657cadbcd0fff2c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
