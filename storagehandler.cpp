@@ -42,6 +42,10 @@ extern const FruMap frus;
 constexpr uint8_t eventDataSize = 3;
 namespace
 {
+constexpr auto SystemdTimeService = "org.freedesktop.timedate1";
+constexpr auto SystemdTimePath = "/org/freedesktop/timedate1";
+constexpr auto SystemdTimeInterface = "org.freedesktop.timedate1";
+
 constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
 constexpr auto BMC_TIME_PATH = "/xyz/openbmc_project/time/bmc";
 constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
@@ -596,6 +600,14 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
     try
     {
         sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        bool ntp = std::get<bool>(
+            ipmi::getDbusProperty(bus, SystemdTimeService, SystemdTimePath,
+                                  SystemdTimeInterface, "NTP"));
+        if (ntp)
+        {
+            return ipmi::responseCommandNotAvailable();
+        }
+
         auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
         std::variant<uint64_t> value{(uint64_t)usec.count()};
 
