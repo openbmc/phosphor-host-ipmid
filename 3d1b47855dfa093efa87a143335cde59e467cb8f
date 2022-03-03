@@ -108,6 +108,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "46ef74a6_bd4e04c1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000219
+      },
+      "writtenOn": "2022-03-03T19:43:40Z",
+      "side": 1,
+      "message": "I\u0027m not sure that it has sense.\n`ipmitool` is an external tool which version we cannot control at the user side. Moreover,  `NoAccess` removal may break `ipmitool` compatibility with other systems if they support this privilege.",
+      "parentUuid": "06b1279f_1ca236a6",
+      "revId": "3d1b47855dfa093efa87a143335cde59e467cb8f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "515ad630_348567fd",
