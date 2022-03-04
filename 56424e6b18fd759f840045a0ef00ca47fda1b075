@@ -16,6 +16,23 @@
       "message": "Looks good\n",
       "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b9cb5696_0e06c162",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-04T22:01:11Z",
+      "side": 1,
+      "message": "This is not correct. No Access is used for the set user access command. See Table 22 Set User Access Command in the ipmi 2.0 spec. Byte 3, bits 3:0, a valid value is 0xf for \"NO ACCESS\".",
+      "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
