@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6a8b443e_82835bc9",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-04T22:13:52Z",
+      "side": 1,
+      "message": "Normally, I would say don\u0027t hard-code the service name, but since it is a systemd service, I don\u0027t think we will likely have any other implementations with a different service name.\n\nPlease use camelCaps here for constexpr variable names. (this line and the next two.)",
+      "range": {
+        "startLine": 45,
+        "startChar": 15,
+        "endLine": 45,
+        "endChar": 35
+      },
+      "revId": "17d9b40bde87c6bc9614abf57ecf0f8fa3c1963b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
