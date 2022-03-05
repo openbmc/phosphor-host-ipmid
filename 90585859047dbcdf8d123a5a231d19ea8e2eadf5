@@ -16,6 +16,24 @@
       "message": "I don\u0027t think this change is necessary. This is effectively making a partial call to set user access when creating the user, but there is not sufficient information to set all the values. So the caller will still need to call set user access, wherein they will be specifying the user privilege level.\n\nWhen you create a user, you need to do it as several calls, set the user name, set the access, set the password, and enable (as well as possibly setting the channel access if that has not already been done). Skipping any of these steps will result in a user that is not usable.",
       "revId": "90585859047dbcdf8d123a5a231d19ea8e2eadf5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "502fd62e_c1ae7ef5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000219
+      },
+      "writtenOn": "2022-03-05T08:31:56Z",
+      "side": 1,
+      "message": "I agree, it seems unnecessary as a stand alone commit.\nBut this is a part of solution started by https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-host-ipmid/+/50825 and it is really required part of the solution.",
+      "parentUuid": "f5749fa0_cb0cb3d7",
+      "revId": "90585859047dbcdf8d123a5a231d19ea8e2eadf5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
