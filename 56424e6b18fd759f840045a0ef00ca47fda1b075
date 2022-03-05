@@ -69,6 +69,24 @@
       "parentUuid": "197bc4f9_aa3a2ccd",
       "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c12e626d_4eac79f3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000192
+      },
+      "writtenOn": "2022-03-05T11:21:24Z",
+      "side": 1,
+      "message": "As Alexander Filippov said, the Table 22-31 you\u0027re referring to sets the user access on a per-channel basis, quote:\n\n\"This command is used to configure the privilege level and channel accessibility associated with a given user ID.\"\n\nThe NO ACCESS is mentioned in the description of bits [3:0] of request byte 3, which is described as:\n\n\"[3:0] - User Privilege Limit. (Determines the maximum privilege level that the\nuser is allowed to switch to on the specified channel.)\"\n\nThat said, I believe that we indeed do not need to support the NO ACCESS role in OpenBMC because there is no per-channel access concept in OpenBMC.\n\nExistence of the NO ACCESS as a global role only complicates things and adds no benefits. We can safely return a 0xCC code (Invalid data field in request), as it happens with this patch, to indicate that the requested privilege is not supported.",
+      "parentUuid": "c45dfc62_2a204c73",
+      "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
