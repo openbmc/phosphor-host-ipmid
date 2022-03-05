@@ -51,6 +51,24 @@
       "parentUuid": "b9cb5696_0e06c162",
       "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c45dfc62_2a204c73",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000219
+      },
+      "writtenOn": "2022-03-05T08:59:31Z",
+      "side": 1,
+      "message": "Likely more correct logic is excluding the user from `ipmi` group when a command like `ipmitool ... user priv \u003cuser-id\u003e 0xF` called, but it requires a more complicated refactoring and I\u0027m not ready to do it right now.",
+      "parentUuid": "197bc4f9_aa3a2ccd",
+      "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
