@@ -130,14 +130,22 @@ void Manager::checkQueueAndAlertHost()
         auto method =
             this->bus.new_method_call(HOST_IPMI_SVC.c_str(), IPMI_PATH.c_str(),
                                       IPMI_INTERFACE.c_str(), "setAttention");
-        auto reply = this->bus.call(method);
 
-        if (reply.is_method_error())
+        try
         {
-            log<level::ERR>("Error in setting SMS attention");
-            elog<InternalFailure>();
+            auto reply = this->bus.call(method);
+
+            if (reply.is_method_error())
+            {
+                log<level::ERR>("Error in setting SMS attention");
+                elog<InternalFailure>();
+            }
+            log<level::DEBUG>("SMS Attention asserted");
         }
-        log<level::DEBUG>("SMS Attention asserted");
+        catch (sdbusplus::exception::exception& e)
+        {
+            log<level::ERR>("Error when call setAttention method");
+        }
     }
 }
 
