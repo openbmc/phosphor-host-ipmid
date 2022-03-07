@@ -22,6 +22,30 @@
       },
       "revId": "17d9b40bde87c6bc9614abf57ecf0f8fa3c1963b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ff62cd23_c9fc8924",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1001156
+      },
+      "writtenOn": "2022-03-07T06:43:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a8b443e_82835bc9",
+      "range": {
+        "startLine": 45,
+        "startChar": 15,
+        "endLine": 45,
+        "endChar": 35
+      },
+      "revId": "17d9b40bde87c6bc9614abf57ecf0f8fa3c1963b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
