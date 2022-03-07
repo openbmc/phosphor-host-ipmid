@@ -87,6 +87,24 @@
       "parentUuid": "c45dfc62_2a204c73",
       "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d8eb7e5a_9578622f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-07T23:47:01Z",
+      "side": 1,
+      "message": "I missed the per-channel part. I see now, that this is kind of weird to attempt to support in our current openbmc setup. However, if openbmc only has one privilege per user, then setting no-priv for any channel will apply to all. While that might not be what the caller expects, it is consistent with setting priv-user or priv-admin in the Set User Access call and having that apply to all channels.\n\nI am not sure why it is so necessary to remove this. It seems easier and just as good to document that openbmc does not support per-channel privileges and that setting no-priv (or any other priv) just sets it for all channels.",
+      "parentUuid": "c12e626d_4eac79f3",
+      "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
