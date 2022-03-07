@@ -34,6 +34,24 @@
       "parentUuid": "f5749fa0_cb0cb3d7",
       "revId": "90585859047dbcdf8d123a5a231d19ea8e2eadf5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22abc354_10cf95ce",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-07T23:43:25Z",
+      "side": 1,
+      "message": "I still don\u0027t think this is needed even with 50825. Without this change, the user is created without any privileges on any channel. That seems like the correct way to create a user. Since Set User Access is required to be called anyway, we can require them (using 50825) to set a valid privilege, which then, because openbmc does not have the notion of per-channel-privs, will just be applicable to that user for all channels.",
+      "parentUuid": "502fd62e_c1ae7ef5",
+      "revId": "90585859047dbcdf8d123a5a231d19ea8e2eadf5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
