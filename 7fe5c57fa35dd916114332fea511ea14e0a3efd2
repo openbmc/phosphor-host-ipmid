@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bcaddd0f_0b4be4ce",
+        "filename": "meson.build",
+        "patchSetId": 17
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-03-08T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "088cf15e_5112d230",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 1
+      },
+      "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "37e53f27_9982ae56",
@@ -54,6 +78,30 @@
       "writtenOn": "2022-03-08T00:17:34Z",
       "side": 1,
       "message": "you have tabs instead of spaces here",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 252,
+        "endChar": 9
+      },
+      "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "096106b1_7cf6c515",
+        "filename": "meson.build",
+        "patchSetId": 17
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-03-08T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37e53f27_9982ae56",
       "range": {
         "startLine": 238,
         "startChar": 0,
