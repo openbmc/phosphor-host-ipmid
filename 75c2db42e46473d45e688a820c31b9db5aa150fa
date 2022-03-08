@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "318d1cba_26acbde5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-08T00:08:54Z",
+      "side": 1,
+      "message": "Nice changes. Just one comment that needs to be addressed.",
+      "revId": "75c2db42e46473d45e688a820c31b9db5aa150fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f052ea50_ad5bb957",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-08T00:08:54Z",
+      "side": 1,
+      "message": "these changes are not safe. This struct and the other packed structs in this file are used as part of a cast from a buffer. The vector cannot be cast like that.",
+      "range": {
+        "startLine": 280,
+        "startChar": 4,
+        "endLine": 280,
+        "endChar": 28
+      },
+      "revId": "75c2db42e46473d45e688a820c31b9db5aa150fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
