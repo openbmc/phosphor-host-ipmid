@@ -39,6 +39,30 @@
       },
       "revId": "75c2db42e46473d45e688a820c31b9db5aa150fa",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dee8ce21_e74ee76d",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-03-08T01:00:13Z",
+      "side": 1,
+      "message": "oh interesting. \n\nso for something like\n```\nauto responseData \u003d\n        reinterpret_cast\u003cdcmi::SetMgmntCtrlIdStrResponse*\u003e(response);\n```\nit behaves differently? I am guessing there are extra data used for the vector.\n\nI\u0027ll try to see if there is a flag that I can set omit the warning.",
+      "parentUuid": "f052ea50_ad5bb957",
+      "range": {
+        "startLine": 280,
+        "startChar": 4,
+        "endLine": 280,
+        "endChar": 28
+      },
+      "revId": "75c2db42e46473d45e688a820c31b9db5aa150fa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
