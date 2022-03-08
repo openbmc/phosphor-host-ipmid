@@ -133,6 +133,30 @@
       },
       "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "73b96422_3a55a062",
+        "filename": "meson.build-2",
+        "patchSetId": 17
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-03-08T17:29:47Z",
+      "side": 1,
+      "message": "deleted this file.",
+      "parentUuid": "fb96fce6_8ed500a7",
+      "range": {
+        "startLine": 57,
+        "startChar": 21,
+        "endLine": 57,
+        "endChar": 22
+      },
+      "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }

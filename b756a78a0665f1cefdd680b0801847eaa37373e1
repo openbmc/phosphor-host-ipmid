@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2fc3e12c_c3434b31",
+        "filename": "meson.build",
+        "patchSetId": 21
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-03-08T17:29:47Z",
+      "side": 1,
+      "message": "I am currently stuck on\n\n```\n| checking pkg-config is at least version 0.9.0... configure: WARNING: using cross tools not prefixed with host triplet\n| yes\n| checking for libsystemd \u003e\u003d 221... yes\n| checking for sdbusplus... yes\n| checking for phosphor-logging... yes\n| checking for libipmid... no\n| configure: error: Package requirements (libipmid) were not met:\n| \n| No package \u0027libipmid\u0027 found\n| \n| Consider adjusting the PKG_CONFIG_PATH environment variable if you\n| installed software in a non-standard prefix.\n| \n| Alternatively, you may set the environment variables LIBIPMID_CFLAGS\n| and LIBIPMID_LIBS to avoid the need to call pkg-config.\n| See the pkg-config man page for more details.\n| NOTE: The following config.log files may provide further information.\n| NOTE: /workspace/gBMC/buildspace/gbmc/build/izumi/tmp/work/armv7a-openbmc-linux-gnueabi/phosphor-ipmi-fru/1.0+gitAUTOINC+bc145078e7-r1/build/config.log\n| ERROR: configure failed\n| WARNING: exit code 1 from a shell command.\nERROR: Task (/workspace/gBMC/buildspace/gbmc/meta-phosphor/recipes-phosphor/ipmi/phosphor-ipmi-fru_git.bb:do_configure) failed with exit code \u00271\u0027\nNOTE: Tasks Summary: Attempted 2705 tasks of which 2700 didn\u0027t need to be rerun and 1 failed.\n\n```\n\nMy setup is https://gerrit.openbmc-project.xyz/c/openbmc/openbmc/+/51791.\n\nI thought including this will fix it, but I guess not.",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 304,
+        "endChar": 0
+      },
+      "revId": "b756a78a0665f1cefdd680b0801847eaa37373e1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
