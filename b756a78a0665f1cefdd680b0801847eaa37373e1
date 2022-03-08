@@ -22,6 +22,30 @@
       },
       "revId": "b756a78a0665f1cefdd680b0801847eaa37373e1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "13f8db9e_749b2f01",
+        "filename": "meson.build",
+        "patchSetId": 21
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-03-08T18:52:14Z",
+      "side": 1,
+      "message": "Need to install the package in `/usr/lib/pkgconfig` instead.",
+      "parentUuid": "2fc3e12c_c3434b31",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 304,
+        "endChar": 0
+      },
+      "revId": "b756a78a0665f1cefdd680b0801847eaa37373e1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
