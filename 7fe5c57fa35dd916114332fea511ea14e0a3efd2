@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "16b68404_1218202a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-08T00:17:34Z",
+      "side": 1,
+      "message": "Thank you for doing this work. I have wanted to do this for a long time and welcome the change. We will need to add changes to recipes as well, but this is a big start.",
+      "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "088cf15e_5112d230",
+        "filename": "meson.build",
+        "patchSetId": 17
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-08T00:17:34Z",
+      "side": 1,
+      "message": "you have tabs instead of spaces here",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 1
+      },
+      "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "37e53f27_9982ae56",
+        "filename": "meson.build",
+        "patchSetId": 17
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-08T00:17:34Z",
+      "side": 1,
+      "message": "you have tabs instead of spaces here",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 252,
+        "endChar": 9
+      },
+      "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fb96fce6_8ed500a7",
+        "filename": "meson.build-2",
+        "patchSetId": 17
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-08T00:17:34Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "range": {
+        "startLine": 57,
+        "startChar": 21,
+        "endLine": 57,
+        "endChar": 22
+      },
+      "revId": "7fe5c57fa35dd916114332fea511ea14e0a3efd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
