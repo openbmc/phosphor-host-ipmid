@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d9e55dd4_4e2331d0",
+        "filename": "meson.build",
+        "patchSetId": 30
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-03-09T18:25:41Z",
+      "side": 1,
+      "message": "This is needed for the other libraries to have a reference to\n\n```\nundefined reference to `ipmid_get_sd_bus_connection()\u0027\ncollect2: error: ld returned 1 exit status\n```\n\nNot sure if that\u0027s an issue or not.",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 1
+      },
+      "revId": "03a330b005b8e9c14b2c4f01809477972034d4a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
