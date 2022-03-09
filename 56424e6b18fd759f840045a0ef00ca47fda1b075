@@ -105,6 +105,24 @@
       "parentUuid": "c12e626d_4eac79f3",
       "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2e18e3c6_e42c03da",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000219
+      },
+      "writtenOn": "2022-03-09T08:35:42Z",
+      "side": 1,
+      "message": "`priv-noaccess` is very uncertain role for other OpenBMC\u0027s software and brings some security issues.\n - How should the user with `priv-noaccess` be handled during the authorization process?\n - Should we decline the such users even when they specify valid login and password?\n - What difference between `priv-noaccess` and disabled account?\n\nIn https://gerrit.openbmc-project.xyz/c/openbmc/bmcweb/+/49295 we supposed that the best solution is the removal priv-noacces from OpenBMC at all. This is a step of that solution.",
+      "parentUuid": "d8eb7e5a_9578622f",
+      "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
