@@ -52,6 +52,24 @@
       "parentUuid": "502fd62e_c1ae7ef5",
       "revId": "90585859047dbcdf8d123a5a231d19ea8e2eadf5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e66ae2ca_214d8908",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000219
+      },
+      "writtenOn": "2022-03-09T09:20:43Z",
+      "side": 1,
+      "message": "How should `ipmid`/other-software behave with the users for which `Set User Access` wasn\u0027t called?",
+      "parentUuid": "22abc354_10cf95ce",
+      "revId": "90585859047dbcdf8d123a5a231d19ea8e2eadf5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
