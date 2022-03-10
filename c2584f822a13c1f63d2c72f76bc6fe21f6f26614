@@ -63,6 +63,30 @@
       },
       "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8ab5f606_4ba15000",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1053,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2022-03-10T09:13:32Z",
+      "side": 1,
+      "message": "Hi Vernon, I\u0027m using ipmi-host\u0027s dynamic sensor, if sensor number \u003e 255, the owner ID is hard-coded to 0x20(https://github.com/openbmc/phosphor-host-ipmid/blob/master/dbus-sdr/sensorcommands.cpp#L1592), and the LUN could be 0 or 1 or 3(https://github.com/openbmc/phosphor-host-ipmid/blob/master/dbus-sdr/sdrutils.cpp#L170-L190), not always be 0.\nSorry for not familiar when generatorID byte 0 !\u003d 0x20. Do you have any suggestions about owner ID !\u003d 0x20? Thanks.",
+      "parentUuid": "83475970_f145c0c2",
+      "range": {
+        "startLine": 1053,
+        "startChar": 11,
+        "endLine": 1053,
+        "endChar": 49
+      },
+      "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
