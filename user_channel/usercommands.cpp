@@ -501,12 +501,16 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
     // Validate the reserved args. Only SOL payload is supported as on date.
     if (reserved || stdPayload0ipmiReserved || stdPayload2 || stdPayload3 ||
         stdPayload4 || stdPayload5 || stdPayload6 || stdPayload7 ||
-        oemPayload0 || oemPayload1 || oemPayload2 || oemPayload3 ||
-        oemPayload4 || oemPayload5 || oemPayload6 || oemPayload7 ||
         stdPayloadEnables2Reserved || oemPayloadEnables2Reserved ||
         !isValidChannel(chNum))
     {
         return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (oemPayload0 || oemPayload1 || oemPayload2 || oemPayload3 ||
+        oemPayload4 || oemPayload5 || oemPayload6 || oemPayload7)
+    {
+        return ipmi::response(ccActionNotSupportedForChannel);
     }
 
     if ((operation != enableOperation && operation != disableOperation))
