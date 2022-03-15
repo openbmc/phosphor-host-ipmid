@@ -16,6 +16,75 @@
       "message": "Fixed.",
       "revId": "07a10002e033d26eb62d90216dbcf6e0bad2f29e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8c89a6b7_f7224ff7",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-15T23:57:50Z",
+      "side": 1,
+      "message": "If v6 is currently stateless, then a request for dhcpv6 should not result in no-change. It seems to me that these two currentDhcp configs should get their own stanza that sets nextDhcp to DHCPConf::v6.",
+      "range": {
+        "startLine": 222,
+        "startChar": 15,
+        "endLine": 223,
+        "endChar": 76
+      },
+      "revId": "07a10002e033d26eb62d90216dbcf6e0bad2f29e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "063888f4_f4f9960f",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-15T23:57:50Z",
+      "side": 1,
+      "message": "is it possible to call with requestedDhcp as something other than v4, v6, and None? This will silently ignore those. Is that what we want?",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 30
+      },
+      "revId": "07a10002e033d26eb62d90216dbcf6e0bad2f29e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b52fe32c_13605ecb",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-03-15T23:57:50Z",
+      "side": 1,
+      "message": "is this the only way that supports setting v6stateless? I suppose it is possible to get into that state from redfish and then still need to deal with it in ipmi.",
+      "range": {
+        "startLine": 288,
+        "startChar": 0,
+        "endLine": 288,
+        "endChar": 33
+      },
+      "revId": "07a10002e033d26eb62d90216dbcf6e0bad2f29e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
