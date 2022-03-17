@@ -10,6 +10,10 @@ using sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface;
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
 using sdbusplus::xyz::openbmc_project::Network::server::Neighbor;
 
+constexpr const char* solInterface = "xyz.openbmc_project.Ipmi.SOL";
+constexpr const char* solPath = "/xyz/openbmc_project/ipmi/sol/";
+constexpr const uint16_t IPMI_STD_PORT = 623;
+
 namespace cipher
 {
 
@@ -1529,6 +1533,316 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
     return response(ccParamNotSupported);
 }
 
+RspType<> setSolConfParams(Context::ptr ctx, uint4_t channelBits,
+                           uint4_t reserved, uint8_t parameter,
+                           message::Payload& req)
+{
+    const uint8_t channel = convertCurrentChannelNum(
+        static_cast<uint8_t>(channelBits), ctx->channel);
+
+    if (!isValidChannel(channel))
+    {
+        log<level::ERR>("Set Sol Config - Invalid channel in request");
+        return responseInvalidFieldRequest();
+    }
+
+    std::string solService{};
+    std::string solPathWitheEthName = solPath + ipmi::getChannelName(channel);
+
+    if (ipmi::getService(ctx, solInterface, solPathWitheEthName, solService))
+    {
+        log<level::ERR>("Set Sol Config - Invalid solInterface",
+                        entry("SERVICE=%s", solService.c_str()),
+                        entry("OBJPATH=%s", solPathWitheEthName.c_str()),
+                        entry("INTERFACE=%s", solInterface));
+        return responseInvalidFieldRequest();
+    }
+
+    switch (static_cast<SolConfParam>(parameter))
+    {
+        case SolConfParam::PROGRESS:
+        {
+            uint8_t progress;
+            if (req.unpack(progress) != 0 || !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Progress", progress))
+            {
+                return responseUnspecifiedError();
+            }
+            break;
+        }
+        case SolConfParam::ENABLE:
+        {
+            bool enable;
+            uint7_t reserved2;
+            if (req.unpack(enable, reserved2) != 0 || !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Enable", enable))
+            {
+                return responseUnspecifiedError();
+            }
+            break;
+        }
+        case SolConfParam::AUTHENTICATION:
+        {
+            uint4_t privilegeBits{};
+            uint2_t reserved2{};
+            bool forceAuth = false;
+            bool forceEncrypt = false;
+
+            if (req.unpack(privilegeBits, reserved2, forceAuth, forceEncrypt) !=
+                    0 ||
+                !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+
+            uint8_t privilege = static_cast<uint8_t>(privilegeBits);
+            if (privilege < static_cast<uint8_t>(Privilege::None) ||
+                privilege > static_cast<uint8_t>(Privilege::Oem))
+            {
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Privilege", privilege))
+            {
+                return responseUnspecifiedError();
+            }
+
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "ForceEncryption",
+                                      forceEncrypt))
+            {
+                return responseUnspecifiedError();
+            }
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "ForceAuthentication",
+                                      forceAuth))
+            {
+                return responseUnspecifiedError();
+            }
+            break;
+        }
+        case SolConfParam::ACCUMULATE:
+        {
+            uint8_t interval;
+            uint8_t threshold;
+            if (req.unpack(interval, threshold) != 0 || !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+
+            if (threshold == 0)
+            {
+                return responseInvalidFieldRequest();
+            }
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "AccumulateIntervalMS",
+                                      interval))
+            {
+                return responseUnspecifiedError();
+            }
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Threshold", threshold))
+            {
+                return responseUnspecifiedError();
+            }
+            break;
+        }
+        case SolConfParam::RETRY:
+        {
+            uint3_t countBits;
+            uint5_t reserved2;
+            uint8_t interval;
+
+            if (req.unpack(countBits, reserved2, interval) != 0 ||
+                !req.fullyUnpacked())
+            {
+                return responseReqDataLenInvalid();
+            }
+
+            uint8_t count = static_cast<uint8_t>(countBits);
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "RetryCount", count))
+            {
+                return responseUnspecifiedError();
+            }
+            if (ipmi::setDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "RetryIntervalMS",
+                                      interval))
+            {
+                return responseUnspecifiedError();
+            }
+            break;
+        }
+        case SolConfParam::PORT:
+        {
+            return response(ipmiCCWriteReadParameter);
+        }
+        case SolConfParam::NVBITRATE:
+        case SolConfParam::VBITRATE:
+        case SolConfParam::CHANNEL:
+        default:
+            return response(ipmiCCParamNotSupported);
+    }
+    return responseSuccess();
+}
+
+RspType<message::Payload> getSolConfParams(Context::ptr ctx,
+                                           uint4_t channelBits,
+                                           uint3_t reserved, bool revOnly,
+                                           uint8_t parameter, uint8_t set,
+                                           uint8_t block)
+{
+    message::Payload ret;
+    constexpr uint8_t current_revision = 0x11;
+    ret.pack(current_revision);
+    if (revOnly)
+    {
+        return responseSuccess(std::move(ret));
+    }
+
+    const uint8_t channel = convertCurrentChannelNum(
+        static_cast<uint8_t>(channelBits), ctx->channel);
+
+    if (!isValidChannel(channel))
+    {
+        log<level::ERR>("Get Sol Config - Invalid channel in request");
+        return responseInvalidFieldRequest();
+    }
+
+    std::string solService{};
+    std::string solPathWitheEthName = solPath + ipmi::getChannelName(channel);
+
+    if (ipmi::getService(ctx, solInterface, solPathWitheEthName, solService))
+    {
+        log<level::ERR>("Set Sol Config - Invalid solInterface",
+                        entry("SERVICE=%s", solService.c_str()),
+                        entry("OBJPATH=%s", solPathWitheEthName.c_str()),
+                        entry("INTERFACE=%s", solInterface));
+        return responseInvalidFieldRequest();
+    }
+
+    switch (static_cast<SolConfParam>(parameter))
+    {
+        case SolConfParam::PROGRESS:
+        {
+            uint8_t progress;
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Progress", progress))
+            {
+                return responseUnspecifiedError();
+            }
+            ret.pack(progress);
+            return responseSuccess(std::move(ret));
+        }
+        case SolConfParam::ENABLE:
+        {
+            bool enable{};
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Enable", enable))
+            {
+                return responseUnspecifiedError();
+            }
+            ret.pack(enable, uint7_t{});
+            return responseSuccess(std::move(ret));
+        }
+        case SolConfParam::AUTHENTICATION:
+        {
+            // 4bits, cast when pack
+            uint8_t privilege;
+            bool forceAuth = false;
+            bool forceEncrypt = false;
+
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Privilege", privilege))
+            {
+                return responseUnspecifiedError();
+            }
+
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "ForceAuthentication",
+                                      forceAuth))
+            {
+                return responseUnspecifiedError();
+            }
+
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "ForceEncryption",
+                                      forceEncrypt))
+            {
+                return responseUnspecifiedError();
+            }
+            ret.pack(uint4_t{privilege}, uint2_t{}, forceAuth, forceEncrypt);
+            return responseSuccess(std::move(ret));
+        }
+        case SolConfParam::ACCUMULATE:
+        {
+            uint8_t interval{}, threshold{};
+
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "AccumulateIntervalMS",
+                                      interval))
+            {
+                return responseUnspecifiedError();
+            }
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "Threshold", threshold))
+            {
+                return responseUnspecifiedError();
+            }
+            ret.pack(interval, threshold);
+            return responseSuccess(std::move(ret));
+        }
+        case SolConfParam::RETRY:
+        {
+            // 3bits, cast when cast
+            uint8_t count{};
+            uint8_t interval{};
+
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "RetryCount", count))
+            {
+                return responseUnspecifiedError();
+            }
+
+            if (ipmi::getDbusProperty(ctx, solService, solPathWitheEthName,
+                                      solInterface, "RetryIntervalMS",
+                                      interval))
+            {
+                return responseUnspecifiedError();
+            }
+            ret.pack(uint3_t{count}, uint5_t{}, interval);
+            return responseSuccess(std::move(ret));
+        }
+        case SolConfParam::PORT:
+        {
+            auto port = IPMI_STD_PORT;
+            ret.pack(static_cast<uint16_t>(port));
+            return responseSuccess(std::move(ret));
+        }
+        case SolConfParam::CHANNEL:
+        {
+            ret.pack(channel);
+            return responseSuccess(std::move(ret));
+        }
+        case SolConfParam::NVBITRATE:
+        case SolConfParam::VBITRATE:
+        default:
+            return response(ipmiCCParamNotSupported);
+    }
+
+    return response(ccParamNotSupported);
+}
+
 } // namespace transport
 } // namespace ipmi
 
@@ -1542,4 +1856,12 @@ void register_netfn_transport_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
                           ipmi::transport::cmdGetLanConfigParameters,
                           ipmi::Privilege::Operator, ipmi::transport::getLan);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
+                          ipmi::transport::cmdSetSolConfigParameters,
+                          ipmi::Privilege::Admin,
+                          ipmi::transport::setSolConfParams);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
+                          ipmi::transport::cmdGetSolConfigParameters,
+                          ipmi::Privilege::User,
+                          ipmi::transport::getSolConfParams);
 }
