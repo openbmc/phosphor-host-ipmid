@@ -678,5 +678,85 @@ void setGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
     }
 }
 
+/** @enum SolConfParam
+ *
+ *  SOL parameters are volatile, they are initialized by the SOL manager.
+ *  They can be read using Get SOL configuration parameters command and updated
+ *  using Set SOL configuration parameters command.
+ */
+enum class SolConfParam : uint8_t
+{
+    PROGRESS,       //!< Set In Progress.
+    ENABLE,         //!< SOL Enable.
+    AUTHENTICATION, //!< SOL Authentication.
+    ACCUMULATE,     //!< Character Accumulate Interval & Send Threshold.
+    RETRY,          //!< SOL Retry.
+    NVBITRATE,      //!< SOL non-volatile bit rate.
+    VBITRATE,       //!< SOL volatile bit rate.
+    CHANNEL,        //!< SOL payload channel.
+    PORT,           //!< SOL payload port.
+};
+
+constexpr uint8_t progressMask = 0x03;
+constexpr uint8_t enableMask = 0x01;
+
+/** @struct Auth
+ *
+ *  SOL authentication parameter.
+ */
+struct Auth
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t privilege : 4; //!< SOL privilege level.
+    uint8_t reserved : 2;  //!< Reserved.
+    uint8_t auth : 1;      //!< Force SOL payload Authentication.
+    uint8_t encrypt : 1;   //!< Force SOL payload encryption.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t encrypt : 1;   //!< Force SOL payload encryption.
+    uint8_t auth : 1;      //!< Force SOL payload Authentication.
+    uint8_t reserved : 2;  //!< Reserved.
+    uint8_t privilege : 4; //!< SOL privilege level.
+#endif
+} __attribute__((packed));
+
+/** @struct Accumulate
+ *
+ *  Character accumulate interval & Character send threshold.
+ */
+struct Accumulate
+{
+    uint8_t interval;  //!< Character accumulate interval.
+    uint8_t threshold; //!< Character send threshold.
+} __attribute__((packed));
+
+constexpr uint8_t retryCountMask = 0x07;
+
+/** @struct Retry
+ *
+ *  SOL retry count and interval.
+ */
+struct Retry
+{
+#if BYTE_ORDER == LITTLE_ENDIAN
+    uint8_t count : 3;    //!< SOL retry count.
+    uint8_t reserved : 5; //!< Reserved.
+#endif
+
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t reserved : 5; //!< Reserved.
+    uint8_t count : 3;    //!< SOL retry count.
+#endif
+
+    uint8_t interval; //!< SOL retry interval.
+} __attribute__((packed));
+
+constexpr uint8_t ipmiCCParamNotSupported = 0x80;
+constexpr uint8_t ipmiCCInvalidSetInProgress = 0x81;
+constexpr uint8_t ipmiCCWriteReadParameter = 0x82;
+constexpr uint8_t ipmiCCReadWriteParameter = 0x83;
+constexpr uint8_t parameterRevision = 0x11;
+
 } // namespace transport
 } // namespace ipmi
