@@ -82,6 +82,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "52fa8d39_984814c7",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2022-03-17T15:27:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "63269cda_a8b4799b",
+      "range": {
+        "startLine": 222,
+        "startChar": 15,
+        "endLine": 223,
+        "endChar": 76
+      },
+      "revId": "07a10002e033d26eb62d90216dbcf6e0bad2f29e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "063888f4_f4f9960f",
@@ -129,6 +153,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "198fcddf_3835b3a8",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2022-03-17T15:27:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3505e6bc_5940836a",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 30
+      },
+      "revId": "07a10002e033d26eb62d90216dbcf6e0bad2f29e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b52fe32c_13605ecb",
@@ -166,6 +214,30 @@
       "side": 1,
       "message": "IPMI has no way to assign stateless. This clause allows SetLan 4 or 64 to assign v4/none, or v6/none. The most recent SetLan command wins.",
       "parentUuid": "b52fe32c_13605ecb",
+      "range": {
+        "startLine": 288,
+        "startChar": 0,
+        "endLine": 288,
+        "endChar": 33
+      },
+      "revId": "07a10002e033d26eb62d90216dbcf6e0bad2f29e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f4bcc205_bd3b81e3",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2022-03-17T15:27:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62cc143d_009c3fe0",
       "range": {
         "startLine": 288,
         "startChar": 0,
