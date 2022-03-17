@@ -678,5 +678,25 @@ void setGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
     }
 }
 
+/** @enum SolConfParam
+ *
+ *  using for Set/Get SOL configuration parameters command.
+ */
+enum class SolConfParam : uint8_t
+{
+    Progress,       //!< Set In Progress.
+    Enable,         //!< SOL Enable.
+    Authentication, //!< SOL Authentication.
+    Accumulate,     //!< Character Accumulate Interval & Send Threshold.
+    Retry,          //!< SOL Retry.
+    NonVbitrate,    //!< SOL non-volatile bit rate.
+    Vbitrate,       //!< SOL volatile bit rate.
+    Channel,        //!< SOL payload channel.
+    Port,           //!< SOL payload port.
+};
+
+constexpr uint8_t ipmiCCParamNotSupported = 0x80;
+constexpr uint8_t ipmiCCWriteReadParameter = 0x82;
+
 } // namespace transport
 } // namespace ipmi
