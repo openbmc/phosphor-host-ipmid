@@ -151,6 +151,24 @@
       "parentUuid": "c347e4e0_a783c5b7",
       "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "46cd468c_7825ba7e",
+        "filename": "apphandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-03-18T00:59:05Z",
+      "side": 1,
+      "message": "Created https://gbmc-internal-review.git.corp.google.com/c/gbmc-host-ipmid/+/55331/ as for what I think is the fix",
+      "parentUuid": "ffe783a4_887a5d6f",
+      "revId": "ee733b577dfb758e618c82c37b46a46ee635e5d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
