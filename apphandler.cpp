@@ -605,7 +605,6 @@ ipmi::RspType<uint8_t,  // Device ID
         {
             auto version = getActiveSoftwareVersionInfo(ctx);
             r = convertVersion(version, rev);
-            haveBMCVersion = true;
         }
         catch (const std::exception& e)
         {
@@ -625,6 +624,7 @@ ipmi::RspType<uint8_t,  // Device ID
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
             std::memcpy(&devId.aux, rev.d, 4);
+            haveBMCVersion = true;
         }
     }
     if (!dev_id_initialized)
