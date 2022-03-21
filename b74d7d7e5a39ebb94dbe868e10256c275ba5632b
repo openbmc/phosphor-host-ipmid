@@ -16,6 +16,24 @@
       "message": "I am not against this change, but I am not really finding compelling documentation or other reasons to say this is any more correct than the current code.",
       "revId": "b74d7d7e5a39ebb94dbe868e10256c275ba5632b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ca53077_51537081",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001156
+      },
+      "writtenOn": "2022-03-21T06:56:34Z",
+      "side": 1,
+      "message": "Showing invalid data length if oem payload is not supported seems giving wrong interpretation to the end user, according gto ipmi specification its a separate field and should not be validated with the reserved bytes.",
+      "parentUuid": "37fc6525_45097fbf",
+      "revId": "b74d7d7e5a39ebb94dbe868e10256c275ba5632b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
