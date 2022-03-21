@@ -16,6 +16,23 @@
       "message": "Yes, you are right, it should be better to be added in \"r \u003e\u003d 0\" condition even if the function \"convertVersion\" seems will only return 0(refer to https://github.com/openbmc/phosphor-host-ipmid/blob/master/apphandler.cpp#L554).",
       "revId": "81832ac86e4b5f2a38a865623a65ba53ce0c050a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bf89cc7c_9701459e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-03-21T21:30:07Z",
+      "side": 1,
+      "message": "gentle ping (1 liner fix)",
+      "revId": "81832ac86e4b5f2a38a865623a65ba53ce0c050a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
