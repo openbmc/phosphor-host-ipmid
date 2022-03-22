@@ -104,6 +104,9 @@ int main(int argc, char* argv[])
     command::registerGUIDChangeCallback();
     cache::guid = command::getSystemGUID();
 
+    // Register callback to update cache for sol conf change
+    sol::registerSolConfChangeCallbackHandler(channel);
+
     // Register the phosphor-net-ipmid session setup commands
     command::sessionSetupCommands();
 

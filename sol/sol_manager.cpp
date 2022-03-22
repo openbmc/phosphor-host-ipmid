@@ -26,6 +26,7 @@ namespace sol
 using namespace phosphor::logging;
 
 std::unique_ptr<sdbusplus::bus::match_t> matchPtrSOL(nullptr);
+std::unique_ptr<sdbusplus::bus::match_t> solConfPropertiesSignal(nullptr);
 
 void Manager::initConsoleSocket()
 {
@@ -266,6 +267,95 @@ void registerSOLServiceChangeCallback()
         log<level::ERR>(
             "Failed to get service path in registerSOLServiceChangeCallback");
     }
+}
+
+void procSolConfChange(sdbusplus::message::message& msg)
+{
+    using SolConfVariant = std::variant<bool, uint8_t>;
+    using SolConfProperties =
+        std::vector<std::pair<std::string, SolConfVariant>>;
+
+    std::string iface;
+    SolConfProperties properties;
+
+    try
+    {
+        msg.read(iface, properties);
+    }
+    catch (const std::exception& e)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "procSolConfChange get properties FAIL",
+            entry("ERROR=%s", e.what()));
+        return;
+    }
+
+    for (const auto& prop : properties)
+    {
+        if (prop.first == "Progress")
+        {
+            sol::Manager::get().progress = std::get<uint8_t>(prop.second);
+        }
+        else if (prop.first == "Enable")
+        {
+            sol::Manager::get().enable = std::get<bool>(prop.second);
+        }
+        else if (prop.first == "ForceEncryption")
+        {
+            sol::Manager::get().forceEncrypt = std::get<bool>(prop.second);
+        }
+        else if (prop.first == "ForceAuthentication")
+        {
+            sol::Manager::get().forceAuth = std::get<bool>(prop.second);
+        }
+        else if (prop.first == "Privilege")
+        {
+            sol::Manager::get().solMinPrivilege =
+                static_cast<session::Privilege>(std::get<uint8_t>(prop.second));
+        }
+        else if (prop.first == "AccumulateIntervalMS")
+        {
+            sol::Manager::get().accumulateInterval =
+                std::get<uint8_t>(prop.second) * sol::accIntervalFactor * 1ms;
+        }
+        else if (prop.first == "Threshold")
+        {
+            sol::Manager::get().sendThreshold = std::get<uint8_t>(prop.second);
+        }
+        else if (prop.first == "RetryCount")
+        {
+            sol::Manager::get().retryCount = std::get<uint8_t>(prop.second);
+        }
+        else if (prop.first == "RetryIntervalMS")
+        {
+            sol::Manager::get().retryInterval =
+                std::get<uint8_t>(prop.second) * sol::retryIntervalFactor * 1ms;
+        }
+    }
+}
+
+void registerSolConfChangeCallbackHandler(std::string channel)
+{
+    if (solConfPropertiesSignal == nullptr)
+    {
+        using namespace sdbusplus::bus::match::rules;
+        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        try
+        {
+            auto servicePath = solPath + channel;
+
+            solConfPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
+                bus, propertiesChangedNamespace(servicePath, solInterface),
+                procSolConfChange);
+        }
+        catch (const sdbusplus::exception_t& e)
+        {
+            log<level::ERR>("Failed to get service path in "
+                            "registerSolConfChangeCallbackHandler",
+                            entry("CHANNEL=%s", channel.c_str()));
+        }
+    }
+    return;
 }
 
 } // namespace sol

@@ -294,4 +294,7 @@ class Manager
 /** @brief Callback method to close SOL sessions for SOL service change  */
 void registerSOLServiceChangeCallback();
 
+/** @brief Callback register method to SOL conf parameters change */
+void registerSolConfChangeCallbackHandler(std::string channel);
+
 } // namespace sol
