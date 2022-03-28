@@ -2,6 +2,8 @@
 Description=Network IPMI daemon
 Requires=phosphor-ipmi-host.service
 After=phosphor-ipmi-host.service
+Requires=sys-subsystem-net-devices-%i.device
+After=sys-subsystem-net-devices-%i.device
 
 [Service]
 ExecStart=/usr/bin/netipmid -c %i
