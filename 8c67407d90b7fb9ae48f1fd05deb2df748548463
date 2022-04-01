@@ -1,0 +1,147 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "62ee1c32_1d3c4b69",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-01T23:35:32Z",
+      "side": 1,
+      "message": "The idea is sound, but the implementation needs to change a little bit.",
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6a645d6d_129fa263",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-01T23:35:32Z",
+      "side": 1,
+      "message": "Please don\u0027t do this. Use the unpacker as it was designed.\n\nuint4_t privilege{};\nuint2_t reserved2{};\nbool forceAuth \u003d false;\nbool forceEncrypt \u003d false;\nreq.unpack(privilege, reserved, forceAuth, forceEncrypt);",
+      "range": {
+        "startLine": 1603,
+        "startChar": 9,
+        "endLine": 1609,
+        "endChar": 0
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2190090c_81daf9f7",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1637,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-01T23:35:32Z",
+      "side": 1,
+      "message": "use the unpacker to unpack the elements instead of casting to a struct.",
+      "range": {
+        "startLine": 1635,
+        "startChar": 0,
+        "endLine": 1637,
+        "endChar": 0
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f236b6a1_17e44778",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1668,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-01T23:35:32Z",
+      "side": 1,
+      "message": "use the unpacker to unpack the elements instead of casting to a struct.",
+      "range": {
+        "startLine": 1665,
+        "startChar": 0,
+        "endLine": 1668,
+        "endChar": 1
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd019475_dd20a287",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1798,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-01T23:35:32Z",
+      "side": 1,
+      "message": "pack the elements individually, do not use a struct.",
+      "range": {
+        "startLine": 1797,
+        "startChar": 0,
+        "endLine": 1798,
+        "endChar": 1
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8abe2abe_f59bfb97",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1820,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-01T23:35:32Z",
+      "side": 1,
+      "message": "pack the elements individually, do not use a struct.",
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d543a89d_f3d5d84a",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1847,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-01T23:35:32Z",
+      "side": 1,
+      "message": "pack the elements individually, do not use a struct.",
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
