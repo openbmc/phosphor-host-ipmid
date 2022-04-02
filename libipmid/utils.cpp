@@ -616,6 +616,18 @@ boost::system::error_code getAllAncestors(Context::ptr ctx,
     return ec;
 }
 
+boost::system::error_code callDbusMethod(Context::ptr ctx,
+                                         const std::string& service,
+                                         const std::string& objPath,
+                                         const std::string& interface,
+                                         const std::string& method)
+{
+    boost::system::error_code ec;
+    ctx->bus->yield_method_call(ctx->yield, ec, service, objPath, interface,
+                                method);
+    return ec;
+}
+
 /********* End co-routine yielding alternatives ***************/
 
 ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,

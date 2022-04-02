@@ -372,6 +372,22 @@ boost::system::error_code getAllAncestors(Context::ptr ctx,
                                           const InterfaceList& interfaces,
                                           ObjectTree& objectTree);
 
+/** @brief Gets the value associated with the given object
+ *         and the interface.
+ *  @param[in] ctx - ipmi::Context::ptr
+ *  @param[in] service - D-Bus service name.
+ *  @param[in] objPath - D-Bus object path.
+ *  @param[in] interface - D-Bus interface.
+ *  @param[in] method - name of the method.
+ *  @return - boost error code object
+ */
+
+boost::system::error_code callDbusMethod(Context::ptr ctx,
+                                         const std::string& service,
+                                         const std::string& objPath,
+                                         const std::string& interface,
+                                         const std::string& method);
+
 /********* End co-routine yielding alternatives ***************/
 
 /** @brief Retrieve the value from map of variants,
