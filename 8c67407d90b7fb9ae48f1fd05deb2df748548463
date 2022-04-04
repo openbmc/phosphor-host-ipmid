@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "37787aa9_4d13d1d7",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-04-04T17:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a645d6d_129fa263",
+      "range": {
+        "startLine": 1603,
+        "startChar": 9,
+        "endLine": 1609,
+        "endChar": 0
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2190090c_81daf9f7",
@@ -54,6 +78,30 @@
       "writtenOn": "2022-04-01T23:35:32Z",
       "side": 1,
       "message": "use the unpacker to unpack the elements instead of casting to a struct.",
+      "range": {
+        "startLine": 1635,
+        "startChar": 0,
+        "endLine": 1637,
+        "endChar": 0
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "65dd326a_6bc06285",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1637,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-04-04T17:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2190090c_81daf9f7",
       "range": {
         "startLine": 1635,
         "startChar": 0,
@@ -87,6 +135,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "51bbccca_895d7263",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1668,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-04-04T17:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f236b6a1_17e44778",
+      "range": {
+        "startLine": 1665,
+        "startChar": 0,
+        "endLine": 1668,
+        "endChar": 1
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bd019475_dd20a287",
@@ -100,6 +172,30 @@
       "writtenOn": "2022-04-01T23:35:32Z",
       "side": 1,
       "message": "pack the elements individually, do not use a struct.",
+      "range": {
+        "startLine": 1797,
+        "startChar": 0,
+        "endLine": 1798,
+        "endChar": 1
+      },
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c2608af9_7d2f1ab7",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1798,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-04-04T17:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd019475_dd20a287",
       "range": {
         "startLine": 1797,
         "startChar": 0,
@@ -127,6 +223,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "00aca80f_ceb452ab",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1820,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-04-04T17:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8abe2abe_f59bfb97",
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d543a89d_f3d5d84a",
@@ -140,6 +254,24 @@
       "writtenOn": "2022-04-01T23:35:32Z",
       "side": 1,
       "message": "pack the elements individually, do not use a struct.",
+      "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6084c4cd_98c9d6f7",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1847,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-04-04T17:12:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d543a89d_f3d5d84a",
       "revId": "8c67407d90b7fb9ae48f1fd05deb2df748548463",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }

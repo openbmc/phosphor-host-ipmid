@@ -16,6 +16,24 @@
       "message": "This might be better to follow the camelCase naming convention, something like `solDefaultPort`?",
       "revId": "553fb375bc19f04f8f95201e7a34bcf01285a22a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bc0cb82b_62c57e3c",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-04-04T17:12:34Z",
+      "side": 1,
+      "message": "ok, done",
+      "parentUuid": "a0420beb_5af53bf5",
+      "revId": "553fb375bc19f04f8f95201e7a34bcf01285a22a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
