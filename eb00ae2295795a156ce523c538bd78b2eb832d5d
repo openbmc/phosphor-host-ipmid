@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6b7189ab_8be65410",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001252
+      },
+      "writtenOn": "2022-04-05T12:55:06Z",
+      "side": 1,
+      "message": "LGTM",
+      "revId": "eb00ae2295795a156ce523c538bd78b2eb832d5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0f6dfb44_0eb6de4b",
+        "filename": "transporthandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1001252
+      },
+      "writtenOn": "2022-04-05T12:55:06Z",
+      "side": 1,
+      "message": "Sorry for not pointing this out earlier. In phosphor-ipmi-host, such enums are in UpperCamel or camelCase. It would be better to adopt the naming convention.",
+      "revId": "eb00ae2295795a156ce523c538bd78b2eb832d5d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
