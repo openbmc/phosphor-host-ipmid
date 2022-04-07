@@ -18,11 +18,15 @@ using namespace sdbusplus::xyz::openbmc_project::Control::server;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
+namespace
+{
+using SoftPowerOffInherit = sdbusplus::server::object_t<Base::SoftPowerOff>;
+}
+
 /** @class SoftPowerOff
  *  @brief Responsible for coordinating Host SoftPowerOff operation
  */
-class SoftPowerOff
-    : public sdbusplus::server::object::object<Base::SoftPowerOff>
+class SoftPowerOff : public SoftPowerOffInherit
 {
   public:
     /** @brief Constructs SoftPowerOff object.
@@ -33,8 +37,8 @@ class SoftPowerOff
      */
     SoftPowerOff(sdbusplus::bus::bus& bus, sd_event* event,
                  const char* objPath) :
-        sdbusplus::server::object::object<Base::SoftPowerOff>(bus, objPath,
-                                                              false),
+        SoftPowerOffInherit(bus, objPath,
+                            SoftPowerOffInherit::action::defer_emit),
         bus(bus), timer(event),
         hostControlSignal(
             bus,

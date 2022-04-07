@@ -11,15 +11,19 @@ namespace host
 namespace command
 {
 
+namespace
+{
+using HostInherit = sdbusplus::server::object_t<
+    sdbusplus::xyz::openbmc_project::Control::server::Host,
+    sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>
+}
+
 /** @class Host
  *  @brief OpenBMC control and condition host interface implementation.
  *  @details A concrete implementation for xyz.openbmc_project.Control.Host
  *  and xyz.openbmc_project.Condition.HostFirmware DBus API's.
  */
-class Host
-    : public sdbusplus::server::object::object<
-          sdbusplus::xyz::openbmc_project::Control::server::Host,
-          sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>
+class Host : public HostInherit
 {
   public:
     /** @brief Constructs Host Control and Condition Interfaces
@@ -28,10 +32,7 @@ class Host
      *  @param[in] objPath - The Dbus object path
      */
     Host(sdbusplus::bus::bus& bus, const char* objPath) :
-        sdbusplus::server::object::object<
-            sdbusplus::xyz::openbmc_project::Control::server::Host,
-            sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>(
-            bus, objPath),
+        HostInherit(bus, objPath),
         bus(bus)
     {
         // Nothing to do
