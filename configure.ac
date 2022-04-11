@@ -145,6 +145,9 @@ ENTITYGEN="$PYTHON $srcdir/scripts/entity_gen.py -i $ENTITY_YAML_GEN"
 AC_SUBST(ENTITY_YAML_GEN)
 AC_SUBST(ENTITYGEN)
 
+INSTANCES="$HOST_INSTANCES"
+AC_SUBST(INSTANCES)
+
 AC_DEFINE(CALLOUT_FWD_ASSOCIATION, "callout", [The name of the callout's forward association.])
 AC_DEFINE(BOARD_SENSOR, "/xyz/openbmc_project/inventory/system/chassis/motherboard", [The inventory path to the motherboard fault sensor.])
 AC_DEFINE(SYSTEM_SENSOR, "/xyz/openbmc_project/inventory/system", [The inventory path to the system event sensor.])
