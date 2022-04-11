@@ -18,6 +18,8 @@ namespace ipmi
 namespace
 {
 
+std::vector<int> host;
+
 /** @class WhitelistFilter
  *
  * Class that implements an IPMI message filter based
@@ -54,6 +56,19 @@ WhitelistFilter::WhitelistFilter()
 
     log<level::INFO>("Loading whitelist filter");
 
+    std::string instances = host_instances;
+    std::string delimiter = " ";
+    size_t position = 0;
+    std::string token;
+
+    while ((position = instances.find(delimiter)) != std::string::npos)
+    {
+        token = instances.substr(0, position);
+        host.emplace_back(std::stoi(token));
+        instances.erase(0, position + delimiter.length());
+    }
+    host.emplace_back(std::stoi(instances));
+
     ipmi::registerFilter(ipmi::prioOpenBmcBase,
                          [this](ipmi::message::Request::ptr request) {
                              return filterMessage(request);
@@ -68,38 +83,45 @@ void WhitelistFilter::cacheRestrictedMode()
     using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
     std::string restrictionModeSetting;
     std::string restrictionModeService;
-    try
+
+    for (size_t iter = 0; iter < host.size(); iter++)
     {
-        restrictionModeSetting = objects->map.at(restrictionModeIntf).at(0);
-        restrictionModeService =
-            objects->service(restrictionModeSetting, restrictionModeIntf);
+        try
+        {
+            restrictionModeSetting =
+                objects->map.at(restrictionModeIntf).at(iter);
+            restrictionModeService =
+                objects->service(restrictionModeSetting, restrictionModeIntf);
+        }
+        catch (const std::out_of_range& e)
+        {
+            log<level::ERR>(
+                "Could not look up restriction mode interface from cache");
+            return;
+        }
+
+        bus->async_method_call(
+            [this](boost::system::error_code ec, ipmi::Value v) {
+                if (ec)
+                {
+                    log<level::ERR>("Error in RestrictionMode Get");
+                    // Fail-safe to true.
+                    restrictedMode = true;
+                    return;
+                }
+                auto mode = std::get<std::string>(v);
+                auto restrictionMode =
+                    RestrictionMode::convertModesFromString(mode);
+                restrictedMode =
+                    (restrictionMode == RestrictionMode::Modes::Whitelist);
+                log<level::INFO>((restrictedMode
+                                      ? "Set restrictedMode = true"
+                                      : "Set restrictedMode = false"));
+            },
+            restrictionModeService, restrictionModeSetting,
+            "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
+            "RestrictionMode");
     }
-    catch (const std::out_of_range& e)
-    {
-        log<level::ERR>(
-            "Could not look up restriction mode interface from cache");
-        return;
-    }
-    bus->async_method_call(
-        [this](boost::system::error_code ec, ipmi::Value v) {
-            if (ec)
-            {
-                log<level::ERR>("Error in RestrictionMode Get");
-                // Fail-safe to true.
-                restrictedMode = true;
-                return;
-            }
-            auto mode = std::get<std::string>(v);
-            auto restrictionMode =
-                RestrictionMode::convertModesFromString(mode);
-            restrictedMode =
-                (restrictionMode == RestrictionMode::Modes::Whitelist);
-            log<level::INFO>((restrictedMode ? "Set restrictedMode = true"
-                                             : "Set restrictedMode = false"));
-        },
-        restrictionModeService, restrictionModeSetting,
-        "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
-        "RestrictionMode");
 }
 
 void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message::message& m)
