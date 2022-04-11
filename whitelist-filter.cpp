@@ -14,6 +14,9 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 namespace ipmi
 {
 
+int hostIdx;
+constexpr int ARRAY_SIZE = 20;
+
 // put the filter provider in an unnamed namespace
 namespace
 {
@@ -39,7 +42,7 @@ class WhitelistFilter
     void handleRestrictedModeChange(sdbusplus::message_t& m);
     ipmi::Cc filterMessage(ipmi::message::Request::ptr request);
 
-    bool restrictedMode = true;
+    bool restrictedMode[ARRAY_SIZE] = {true};
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::unique_ptr<settings::Objects> objects;
     std::unique_ptr<sdbusplus::bus::match_t> modeChangeMatch;
@@ -53,7 +56,6 @@ WhitelistFilter::WhitelistFilter()
     bus = getSdBus();
 
     log<level::INFO>("Loading whitelist filter");
-
     ipmi::registerFilter(ipmi::prioOpenBmcBase,
                          [this](ipmi::message::Request::ptr request) {
                              return filterMessage(request);
@@ -68,9 +70,11 @@ void WhitelistFilter::cacheRestrictedMode()
     using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
     std::string restrictionModeSetting;
     std::string restrictionModeService;
+
     try
     {
-        restrictionModeSetting = objects->map.at(restrictionModeIntf).at(0);
+        restrictionModeSetting =
+            objects->map.at(restrictionModeIntf).at(hostIdx);
         restrictionModeService =
             objects->service(restrictionModeSetting, restrictionModeIntf);
     }
@@ -80,22 +84,25 @@ void WhitelistFilter::cacheRestrictedMode()
             "Could not look up restriction mode interface from cache");
         return;
     }
+
     bus->async_method_call(
         [this](boost::system::error_code ec, ipmi::Value v) {
             if (ec)
             {
                 log<level::ERR>("Error in RestrictionMode Get");
                 // Fail-safe to true.
-                restrictedMode = true;
+                restrictedMode[hostIdx] = true;
                 return;
             }
+
             auto mode = std::get<std::string>(v);
             auto restrictionMode =
                 RestrictionMode::convertModesFromString(mode);
-            restrictedMode =
+            restrictedMode[hostIdx] =
                 (restrictionMode == RestrictionMode::Modes::Whitelist);
-            log<level::INFO>((restrictedMode ? "Set restrictedMode = true"
-                                             : "Set restrictedMode = false"));
+            log<level::INFO>((restrictedMode[hostIdx]
+                                  ? "Set restrictedMode = true"
+                                  : "Set restrictedMode = false"));
         },
         restrictionModeService, restrictionModeSetting,
         "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
@@ -115,9 +122,9 @@ void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message_t& m)
             RestrictionMode::Modes restrictionMode =
                 RestrictionMode::convertModesFromString(
                     std::get<std::string>(property.second));
-            restrictedMode =
+            restrictedMode[hostIdx] =
                 (restrictionMode == RestrictionMode::Modes::Whitelist);
-            log<level::INFO>((restrictedMode
+            log<level::INFO>((restrictedMode[hostIdx]
                                   ? "Updated restrictedMode = true"
                                   : "Updated restrictedMode = false"));
         }
@@ -142,7 +149,8 @@ void WhitelistFilter::postInit()
     try
     {
         filterStr = sdbusplus::bus::match::rules::propertiesChanged(
-            objects->map.at(restrictionModeIntf).at(0), restrictionModeIntf);
+            objects->map.at(restrictionModeIntf).at(hostIdx),
+            restrictionModeIntf);
     }
     catch (const std::out_of_range& e)
     {
@@ -156,7 +164,14 @@ void WhitelistFilter::postInit()
 
 ipmi::Cc WhitelistFilter::filterMessage(ipmi::message::Request::ptr request)
 {
-    if (request->ctx->channel == ipmi::channelSystemIface && restrictedMode)
+    /* Getting hostIdx for all IPMI devices like hosts, debugcard and other
+    devices from ipmi::message::Request for host Id's that is configured in
+    ipmb-channel.json */
+
+    hostIdx = request->ctx->hostIdx;
+
+    if (request->ctx->channel == ipmi::channelSystemIface &&
+        restrictedMode[hostIdx])
     {
         if (!std::binary_search(
                 whitelist.cbegin(), whitelist.cend(),
