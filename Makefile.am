@@ -182,6 +182,7 @@ libdynamiccmds_la_CXXFLAGS = $(COMMON_CXX)
 endif
 
 if FEATURE_IPMI_WHITELIST
+NUM_HOSTS="$(INSTANCES)"
 libwhitelistdir = ${libdir}/ipmid-providers
 libwhitelist_LTLIBRARIES = libwhitelist.la
 libwhitelist_la_SOURCES = \
@@ -192,7 +193,8 @@ libwhitelist_la_LDFLAGS = \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	-version-info 0:0:0 -shared
-libwhitelist_la_CXXFLAGS = $(COMMON_CXX)
+libwhitelist_la_CXXFLAGS = $(COMMON_CXX) \
+                           -Dhost_instances=\"$(NUM_HOSTS)\"
 nodist_libwhitelist_la_SOURCES = ipmiwhitelist.cpp
 endif
 
