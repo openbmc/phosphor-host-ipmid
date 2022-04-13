@@ -87,6 +87,30 @@
       },
       "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c589b4b9_6b1473c6",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1053,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-13T22:25:59Z",
+      "side": 1,
+      "message": "I am looking at section 32.1 in the IPMI spec. The table there shows the generatorID as a 16-bit value with the low byte having two possible values. \n\nIt is possible to add a SEL entry via IPMI commands from external devices. For example, the BIOS or ME (on an Intel system) might send a SEL event. For the BIOS sending it, it is likely over KCS and byte one would contain the software ID with bit-0 set. If it was from the ME, byte one would contain the address of the ME in the high seven bits with bit-0 clear, but also in this case byte two would have its bit-0 set to indicate that byte one contains an IPMB address.\n\nI admit that this part is complicated. It has accounted for more than one bug for us. :)",
+      "parentUuid": "8ab5f606_4ba15000",
+      "range": {
+        "startLine": 1053,
+        "startChar": 11,
+        "endLine": 1053,
+        "endChar": 49
+      },
+      "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
