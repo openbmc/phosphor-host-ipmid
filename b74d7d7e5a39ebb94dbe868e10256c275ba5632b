@@ -34,6 +34,24 @@
       "parentUuid": "37fc6525_45097fbf",
       "revId": "b74d7d7e5a39ebb94dbe868e10256c275ba5632b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "98377f0e_199b157f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-04-13T00:56:12Z",
+      "side": 1,
+      "message": "The current response is not invalid data length, it is invalid field. That means that one of the fields has an unsupported value in it. I believe this is the correct response for this error.\n\n0x82 is not listed as a per-command non-generic completion code.",
+      "parentUuid": "1ca53077_51537081",
+      "revId": "b74d7d7e5a39ebb94dbe868e10256c275ba5632b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
