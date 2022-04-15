@@ -37,7 +37,7 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
 )
 
 # Checks for typedefs, structures, and compiler characteristics.
-AX_CXX_COMPILE_STDCXX_17([noext])
+AX_CXX_COMPILE_STDCXX([20],[noext])
 AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CXXFLAGS])
 
 # Checks for libraries.
