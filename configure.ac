@@ -79,7 +79,7 @@ AS_IF([test "x$enable_softoff" != "xno"], [
 ])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
+AX_CXX_COMPILE_STDCXX([20], [noext], [mandatory])
 AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CFLAGS])
 AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CXXFLAGS])
 
