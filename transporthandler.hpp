@@ -303,6 +303,20 @@ struct IfAddr
     uint8_t prefix;
 };
 
+/** @brief Valid address origins for IPv4 */
+static inline const std::unordered_set<
+    sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>
+    originsV4 = {
+        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin::
+            Static,
+        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin::
+            DHCP,
+};
+static inline const std::unordered_set<
+    sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>
+    originsV4Static = {sdbusplus::xyz::openbmc_project::Network::server::IP::
+                           AddressOrigin::Static};
+
 /** @brief Valid address origins for IPv6 */
 static inline const std::unordered_set<
     sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>

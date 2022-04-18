@@ -48,12 +48,6 @@ namespace ipmi
 namespace transport
 {
 
-/** @brief Valid address origins for IPv4 */
-const std::unordered_set<IP::AddressOrigin> originsV4 = {
-    IP::AddressOrigin::Static,
-    IP::AddressOrigin::DHCP,
-};
-
 static constexpr uint8_t oemCmdStart = 192;
 static constexpr uint8_t oemCmdEnd = 255;
 
@@ -625,7 +619,7 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
 
     // Save info from the old logical interface
     ObjectLookupCache ips(bus, params, INTF_IP);
-    auto ifaddr4 = findIfAddr<AF_INET>(bus, params, 0, originsV4, ips);
+    auto ifaddr4 = findIfAddr<AF_INET>(bus, params, 0, originsV4Static, ips);
     std::vector<IfAddr<AF_INET6>> ifaddrs6;
     for (uint8_t i = 0; i < MAX_IPV6_STATIC_ADDRESSES; ++i)
     {
