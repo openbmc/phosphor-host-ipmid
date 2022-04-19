@@ -643,6 +643,8 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
         ifaddrs6.push_back(std::move(*ifaddr6));
     }
     EthernetInterface::DHCPConf dhcp = getDHCPProperty(bus, params);
+    auto gateway4 = getGatewayProperty<AF_INET>(bus, params);
+    auto gateway6 = getGatewayProperty<AF_INET6>(bus, params);
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
     auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
     auto neighbor6 = findGatewayNeighbor<AF_INET6>(bus, params, neighbors);
@@ -655,10 +657,18 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     if (ifaddr4)
     {
         createIfAddr<AF_INET>(bus, params, ifaddr4->address, ifaddr4->prefix);
+        if (gateway4)
+        {
+            setGatewayProperty<AF_INET>(bus, params, *gateway4);
+        }
     }
     for (const auto& ifaddr6 : ifaddrs6)
     {
         createIfAddr<AF_INET6>(bus, params, ifaddr6.address, ifaddr6.prefix);
+    }
+    if (!ifaddrs6.empty() && gateway6)
+    {
+        setGatewayProperty<AF_INET6>(bus, params, *gateway6);
     }
     if (neighbor4)
     {
