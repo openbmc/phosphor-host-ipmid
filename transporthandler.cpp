@@ -532,6 +532,34 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
     ret.pack(types::enum_cast<uint8_t>(status));
 }
 
+/** @brief Gets the IPv6 Router Advertisement value
+ *
+ *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] params - The parameters for the channel
+ *  @return networkd IPV6AcceptRA value
+ */
+static bool getIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params)
+{
+    auto raEnabled =
+        std::get<bool>(getDbusProperty(bus, params.service, params.logicalPath,
+                                       INTF_ETHERNET, "IPv6AcceptRA"));
+    return raEnabled;
+}
+
+/** @brief Sets the IPv6AcceptRA flag
+ *
+ *  @param[in] bus           - The bus object used for lookups
+ *  @param[in] params        - The parameters for the channel
+ *  @param[in] ipv6AcceptRA  - boolean to enable/disable IPv6 Routing
+ *                             Advertisement
+ */
+void setIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params,
+                     const bool ipv6AcceptRA)
+{
+    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
+                    "IPv6AcceptRA", ipv6AcceptRA);
+}
+
 /** @brief Gets the vlan ID configured on the interface
  *
  *  @param[in] bus    - The bus object used for lookups
@@ -643,6 +671,7 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
         ifaddrs6.push_back(std::move(*ifaddr6));
     }
     EthernetInterface::DHCPConf dhcp = getDHCPProperty(bus, params);
+    auto enableRA = getIPv6AcceptRA(bus, params);
     auto gateway4 = getGatewayProperty<AF_INET>(bus, params);
     auto gateway6 = getGatewayProperty<AF_INET6>(bus, params);
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
@@ -654,6 +683,7 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
 
     // Re-establish the saved settings
     setDHCPv6Property(bus, params, dhcp, false);
+    setIPv6AcceptRA(bus, params, enableRA);
     if (ifaddr4)
     {
         createIfAddr<AF_INET>(bus, params, ifaddr4->address, ifaddr4->prefix);
@@ -744,34 +774,6 @@ SetStatus& getSetStatus(uint8_t channel)
         return it->second;
     }
     return setStatus[channel] = SetStatus::Complete;
-}
-
-/** @brief Gets the IPv6 Router Advertisement value
- *
- *  @param[in] bus    - The bus object used for lookups
- *  @param[in] params - The parameters for the channel
- *  @return networkd IPV6AcceptRA value
- */
-static bool getIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params)
-{
-    auto raEnabled =
-        std::get<bool>(getDbusProperty(bus, params.service, params.logicalPath,
-                                       INTF_ETHERNET, "IPv6AcceptRA"));
-    return raEnabled;
-}
-
-/** @brief Sets the IPv6AcceptRA flag
- *
- *  @param[in] bus           - The bus object used for lookups
- *  @param[in] params        - The parameters for the channel
- *  @param[in] ipv6AcceptRA  - boolean to enable/disable IPv6 Routing
- *                             Advertisement
- */
-void setIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params,
-                     const bool ipv6AcceptRA)
-{
-    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
-                    "IPv6AcceptRA", ipv6AcceptRA);
 }
 
 /**
