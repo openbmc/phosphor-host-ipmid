@@ -16,6 +16,24 @@
       "message": "Nit: check whether it has `0x80`. This is probably fine as the usage so far seems to be only to determine whether it is signed.",
       "revId": "bb7173ead25a00242b37ba6d88d09768dfac06b6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b765eb63_11b42400",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-04-26T05:57:53Z",
+      "side": 1,
+      "message": "let\u0027s update this.",
+      "parentUuid": "5cea62ca_066a66df",
+      "revId": "bb7173ead25a00242b37ba6d88d09768dfac06b6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
