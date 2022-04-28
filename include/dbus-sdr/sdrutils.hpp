@@ -313,6 +313,7 @@ enum class SensorTypeCodes : uint8_t
     memory = 0x0c,
     buttons = 0x14,
     watchdog2 = 0x23,
+    entity = 0x25,
 };
 
 enum class SensorEventTypeCodes : uint8_t
@@ -348,8 +349,9 @@ const static boost::container::flat_map<
          {"buttons", std::make_pair(SensorTypeCodes::buttons,
                                     SensorEventTypeCodes::sensorSpecified)},
          {"watchdog", std::make_pair(SensorTypeCodes::watchdog2,
-                                     SensorEventTypeCodes::sensorSpecified)}}};
-
+                                     SensorEventTypeCodes::sensorSpecified)},
+         {"entity", std::make_pair(SensorTypeCodes::entity,
+                                      SensorEventTypeCodes::sensorSpecified)}}};
 std::string getSensorTypeStringFromPath(const std::string& path);
 
 uint8_t getSensorTypeFromPath(const std::string& path);
