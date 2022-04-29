@@ -474,10 +474,10 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     {
         return false;
     }
-    ipmi::Value modeVariant;
+    std::string mode;
 
     auto ec = getDbusProperty(ctx, connection, path, sensor::vrInterface,
-                              "Selected", modeVariant);
+                              "Selected", mode);
     if (ec)
     {
         log<level::ERR>("Failed to get property",
@@ -488,17 +488,7 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
         return false;
     }
 
-    auto mode = std::get_if<std::string>(&modeVariant);
-    if (mode == nullptr)
-    {
-        log<level::ERR>("property is not a string",
-                        entry("PROPERTY=%s", "Selected"),
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", sensor::sensorInterface));
-        return false;
-    }
-
-    auto itr = std::find(profiles->begin(), profiles->end(), *mode);
+    auto itr = std::find(profiles->begin(), profiles->end(), mode);
     if (itr == profiles->end())
     {
         using namespace phosphor::logging;
@@ -528,7 +518,7 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     if constexpr (debug)
     {
         std::cerr << "VR sensor " << sensor::parseSdrIdFromPath(path)
-                  << " mode is: [" << index << "] " << *mode << std::endl;
+                  << " mode is: [" << index << "] " << mode << std::endl;
     }
     return true;
 }
