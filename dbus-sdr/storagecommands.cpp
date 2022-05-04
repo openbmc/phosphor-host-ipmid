@@ -23,6 +23,7 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/process.hpp>
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <ipmid/api.hpp>
