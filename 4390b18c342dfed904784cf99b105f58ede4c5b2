@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "67aaa66f_141ec789",
+        "filename": ".gitignore",
+        "patchSetId": 44
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-05-05T23:57:15Z",
+      "side": 0,
+      "message": "don\u0027t delete these",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 8
+      },
+      "revId": "4390b18c342dfed904784cf99b105f58ede4c5b2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
