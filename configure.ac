@@ -284,6 +284,26 @@ AS_IF([test x$dynamic_sensors = xtrue],
     AC_MSG_WARN([Disabling dynamic sensors feature])
 )
 
+# Configured static FRU's ID is disabled by default.
+# Change to true if you wish to configure static FRU's ID.
+AC_ARG_ENABLE([dynamic_sensors_static_fru],
+    [ --enable-dynamic_sensors_static_fru   Enable/disable Dynamic Sensors set static FRU's ID],
+    [case "${enableval}" in
+      yes) dynamic_sensors_static_fru=true ;;
+      no) dynamic_sensors_static_fru=false ;;
+      *) AC_MSG_ERROR([bad value ${enableval} for --enable-dynamic_sensors_static_fru]) ;;
+      esac],[dynamic_sensors_static_fru=false]
+      )
+
+AM_CONDITIONAL([FEATURE_DYNAMIC_STATIC_FRU_ID], [test x$dynamic_sensors_static_fru = xtrue])
+
+AS_IF([test x$dynamic_sensors_static_fru = xtrue],
+    AC_MSG_NOTICE([Enabling dynamic sensors set static FRU's ID])
+    [cpp_flags="$cpp_flags -DFEATURE_DYNAMIC_STATIC_FRU_ID"]
+    AC_SUBST([CPPFLAGS], [$cpp_flags]),
+    AC_MSG_WARN([Disabling dynamic sensors set static FRU's ID])
+)
+
 # hybrid sensors stack is disabled by default; offer a way to enable it
 AC_ARG_ENABLE([hybrid-sensors],
     [ --enable-hybrid-sensors   Enable/disable Hybrid Sensors stack],

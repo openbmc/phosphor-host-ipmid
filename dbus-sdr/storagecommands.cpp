@@ -35,6 +35,11 @@
 #include <stdexcept>
 #include <string_view>
 
+#ifdef FEATURE_DYNAMIC_STATIC_FRU_ID
+
+#include <nlohmann/json.hpp>
+
+#endif
 static constexpr bool DEBUG = false;
 
 namespace dynamic_sensors::ipmi::sel
@@ -163,13 +168,86 @@ void createTimers()
     writeTimer = std::make_unique<phosphor::Timer>(writeFru);
 }
 
+#ifdef FEATURE_DYNAMIC_STATIC_FRU_ID
+std::optional<boost::container::flat_map<std::pair<uint8_t, uint8_t>, uint8_t>>
+    parseStaticFruConfig(const nlohmann::json& data)
+{
+    boost::container::flat_map<std::pair<uint8_t, uint8_t>, uint8_t> fruIdTbl;
+    if (data.is_array())
+    {
+        try
+        {
+            for (const auto& entity : data)
+            {
+                uint8_t busIdx = entity.at("busIdx").get<uint8_t>();
+                uint8_t addrIdx = entity.at("addrIdx").get<uint8_t>();
+                uint8_t fruId = entity.at("id").get<uint8_t>();
+                std::pair<uint8_t, uint8_t> fruDev(busIdx, addrIdx);
+                if (fruIdTbl.find(fruDev) != fruIdTbl.end())
+                {
+                    phosphor::logging::log<phosphor::logging::level::ERR>(
+                        "the pair of bus and address has been duplicated");
+                    continue;
+                }
+                fruIdTbl.emplace(fruDev, fruId);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "error happend during parsing fru configuration");
+            return std::nullopt;
+        }
+    }
+    return std::move(fruIdTbl);
+}
+#endif
+
 void recalculateHashes()
 {
 
     deviceHashes.clear();
+#ifdef FEATURE_DYNAMIC_STATIC_FRU_ID
+
+    boost::container::flat_map<std::pair<uint8_t, uint8_t>, uint8_t> fruIdTbl;
+    const char* staticIdCfgFileName = "/usr/share/ipmi-providers/fru_id.json";
+    std::ifstream fruCfgFile(staticIdCfgFileName);
+
+    /*
+     * Parse FRU configuration information
+     */
+    if (!fruCfgFile.is_open())
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "error reading fru configuration");
+        return;
+    }
+    else
+    {
+        auto data = nlohmann::json::parse(fruCfgFile, nullptr, false);
+
+        if (data.is_discarded())
+        {
+            /* pasrsing FRU configuration data */
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "error parsing fru configuration");
+            return;
+        }
+        else
+        {
+            auto parsingData = parseStaticFruConfig(data);
+            if (!parsingData)
+            {
+                return;
+            }
+            fruIdTbl = std::move(*parsingData);
+        }
+    }
+#else
     // hash the object paths to create unique device id's. increment on
     // collision
     std::hash<std::string> hasher;
+#endif
     for (const auto& fru : frus)
     {
         auto fruIface = fru.second.find("xyz.openbmc_project.FruDevice");
@@ -191,6 +269,16 @@ void recalculateHashes()
 
         uint8_t fruBus = std::get<uint32_t>(busFind->second);
         uint8_t fruAddr = std::get<uint32_t>(addrFind->second);
+
+#ifdef FEATURE_DYNAMIC_STATIC_FRU_ID
+        /* Set static ID for fru devices that have been configured */
+        std::pair<uint8_t, uint8_t> fruDev(fruBus, fruAddr);
+        if (fruIdTbl.find(fruDev) != fruIdTbl.end())
+        {
+            deviceHashes.emplace(fruIdTbl[fruDev], fruDev);
+        }
+#else
+
         auto chassisFind = fruIface->second.find("CHASSIS_TYPE");
         std::string chassisType;
         if (chassisFind != fruIface->second.end())
@@ -227,6 +315,7 @@ void recalculateHashes()
                 }
             }
         }
+#endif
     }
 }
 
