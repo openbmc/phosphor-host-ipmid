@@ -332,10 +332,10 @@ GetSensorResponse readingData(const Info& sensorInfo)
         warningAlarmLow = false;
     }
     response.thresholdLevelsStates =
-        (static_cast<uint8_t>(critAlarmHigh) << 4) |
-        (static_cast<uint8_t>(warningAlarmHigh) << 3) |
-        (static_cast<uint8_t>(warningAlarmLow) << 2) |
-        (static_cast<uint8_t>(critAlarmLow) << 1);
+        (static_cast<uint8_t>(critAlarmHigh) << 3) |
+        (static_cast<uint8_t>(critAlarmLow) << 2) |
+        (static_cast<uint8_t>(warningAlarmHigh) << 1) |
+        (static_cast<uint8_t>(warningAlarmLow));
 
     return response;
 }
