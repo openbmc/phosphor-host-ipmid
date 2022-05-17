@@ -16,6 +16,167 @@
       "message": "Hi all, Please help me review this change",
       "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ef8d3713_eb75330d",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T05:21:24Z",
+      "side": 1,
+      "message": "I personally like to avoid updating things by reference if we can avoid it.\n\nI prefer\n\n```\nstd::optional\u003cboost::container::flat_map\u003cstd::pair\u003cuint8_t, uint8_t\u003e, uint8_t\u003e\u003e parseFruCfg()\n```\n\nusing std::optional so that it just return std::nullopt on failures. This allow us to know that it failed and skip things if needed.\n\nalso, should it just open the json file here?",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 79
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8aa30442_14682bdc",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T05:21:24Z",
+      "side": 1,
+      "message": "I think\n```\ndata.is_array()\n```\n\nshould work.",
+      "range": {
+        "startLine": 176,
+        "startChar": 8,
+        "endLine": 176,
+        "endChar": 53
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3f812cf7_69caaaf6",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T05:21:24Z",
+      "side": 1,
+      "message": "const auto \u0026",
+      "range": {
+        "startLine": 180,
+        "startChar": 17,
+        "endLine": 180,
+        "endChar": 22
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b39296d9_f14d13cc",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T05:21:24Z",
+      "side": 1,
+      "message": "flip the logic and do\n\n```\nif (fruIdTbl.find(fruDev) !\u003d fruIdTbl.end())\n{\n  phosphor::logging::log\u003cphosphor::logging::level::ERR\u003e(\n    \"the pair of bus and address has been duplicated\");\n  continue;\n}\n\n\nfruIdTbl.emplace(fruDev, fruId);\n```\n\nsave horizontal space and easier to read.",
+      "range": {
+        "startLine": 186,
+        "startChar": 16,
+        "endLine": 194,
+        "endChar": 17
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0eb1ad6_697c213e",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T05:21:24Z",
+      "side": 1,
+      "message": "shouldn\u0027t it return at this point?",
+      "range": {
+        "startLine": 219,
+        "startChar": 4,
+        "endLine": 223,
+        "endChar": 5
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a467ad9b_0a4d652b",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T05:21:24Z",
+      "side": 1,
+      "message": "same here. Return after? since the fruIdTbl is empty and doesn\u0027t do anything\u003e?",
+      "range": {
+        "startLine": 228,
+        "startChar": 8,
+        "endLine": 233,
+        "endChar": 9
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4993fa56_cb977ec0",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T05:21:24Z",
+      "side": 1,
+      "message": "maybe parseStaticFruConfig instead?",
+      "range": {
+        "startLine": 236,
+        "startChar": 12,
+        "endLine": 236,
+        "endChar": 23
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
