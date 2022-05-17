@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "303db40a_683d27d5",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-05-17T09:53:42Z",
+      "side": 1,
+      "message": "I updated this function to return the FRU configuration.",
+      "parentUuid": "ef8d3713_eb75330d",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 79
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8aa30442_14682bdc",
@@ -54,6 +78,30 @@
       "writtenOn": "2022-05-17T05:21:24Z",
       "side": 1,
       "message": "I think\n```\ndata.is_array()\n```\n\nshould work.",
+      "range": {
+        "startLine": 176,
+        "startChar": 8,
+        "endLine": 176,
+        "endChar": 53
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e72a2024_b365a73c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-05-17T09:53:42Z",
+      "side": 1,
+      "message": "updated as your comment.",
+      "parentUuid": "8aa30442_14682bdc",
       "range": {
         "startLine": 176,
         "startChar": 8,
@@ -87,6 +135,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fcbb71c_8a8edd3a",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-05-17T09:53:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3f812cf7_69caaaf6",
+      "range": {
+        "startLine": 180,
+        "startChar": 17,
+        "endLine": 180,
+        "endChar": 22
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b39296d9_f14d13cc",
@@ -100,6 +172,30 @@
       "writtenOn": "2022-05-17T05:21:24Z",
       "side": 1,
       "message": "flip the logic and do\n\n```\nif (fruIdTbl.find(fruDev) !\u003d fruIdTbl.end())\n{\n  phosphor::logging::log\u003cphosphor::logging::level::ERR\u003e(\n    \"the pair of bus and address has been duplicated\");\n  continue;\n}\n\n\nfruIdTbl.emplace(fruDev, fruId);\n```\n\nsave horizontal space and easier to read.",
+      "range": {
+        "startLine": 186,
+        "startChar": 16,
+        "endLine": 194,
+        "endChar": 17
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c4907f9e_008ea629",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-05-17T09:53:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b39296d9_f14d13cc",
       "range": {
         "startLine": 186,
         "startChar": 16,
@@ -133,6 +229,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "da018c9d_44951cde",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-05-17T09:53:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0eb1ad6_697c213e",
+      "range": {
+        "startLine": 219,
+        "startChar": 4,
+        "endLine": 223,
+        "endChar": 5
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a467ad9b_0a4d652b",
@@ -156,6 +276,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5b70356a_41200d2a",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-05-17T09:53:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a467ad9b_0a4d652b",
+      "range": {
+        "startLine": 228,
+        "startChar": 8,
+        "endLine": 233,
+        "endChar": 9
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4993fa56_cb977ec0",
@@ -169,6 +313,30 @@
       "writtenOn": "2022-05-17T05:21:24Z",
       "side": 1,
       "message": "maybe parseStaticFruConfig instead?",
+      "range": {
+        "startLine": 236,
+        "startChar": 12,
+        "endLine": 236,
+        "endChar": 23
+      },
+      "revId": "d4b618ba8b8fbc7097f6a3d50c1d8e24b723a765",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cacac0fa_21c951d9",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-05-17T09:53:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4993fa56_cb977ec0",
       "range": {
         "startLine": 236,
         "startChar": 12,
