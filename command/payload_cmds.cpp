@@ -62,6 +62,13 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
+    if (session->currentPrivilege() <
+        static_cast<uint8_t>(sol::Manager::get().solMinPrivilege))
+    {
+        response->completionCode = IPMI_CC_INSUFFICIENT_PRIVILEGE;
+        return outPayload;
+    }
+
     // Is SOL Payload enabled for this user & channel.
     auto userId = ipmi::ipmiUserGetUserId(session->userName);
     ipmi::PayloadAccess payloadAccess = {};
@@ -109,7 +116,7 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
 
 std::vector<uint8_t>
     deactivatePayload(const std::vector<uint8_t>& inPayload,
-                      std::shared_ptr<message::Handler>& /* handler */)
+                      std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const DeactivatePayloadRequest*>(inPayload.data());
@@ -145,17 +152,27 @@ std::vector<uint8_t>
         return outPayload;
     }
 
+    auto currentSession =
+        session::Manager::get().getSession(handler->sessionID);
+    auto solSessionID =
+        sol::Manager::get().getContext(request->payloadInstance).sessionID;
+    auto solActiveSession = session::Manager::get().getSession(solSessionID);
+    // The session owner or the ADMIN could deactivate the session
+    if (currentSession->userName != solActiveSession->userName &&
+        currentSession->currentPrivilege() !=
+            static_cast<uint8_t>(session::Privilege::ADMIN))
+    {
+        response->completionCode = IPMI_CC_INSUFFICIENT_PRIVILEGE;
+        return outPayload;
+    }
+
     try
     {
-        auto& context =
-            sol::Manager::get().getContext(request->payloadInstance);
-        auto sessionID = context.sessionID;
-
         sol::Manager::get().stopPayloadInstance(request->payloadInstance);
 
         try
         {
-            activating(request->payloadInstance, sessionID);
+            activating(request->payloadInstance, solSessionID);
         }
         catch (const std::exception& e)
         {
@@ -164,7 +181,7 @@ std::vector<uint8_t>
             /*
              * In case session has been closed (like in the case of inactivity
              * timeout), then activating function would throw an exception,
-             * since sessionID is not found. IPMI success completion code is
+             * since solSessionID is not found. IPMI success completion code is
              * returned, since the session is closed.
              */
             return outPayload;
