@@ -16,6 +16,93 @@
       "message": "There\u0027s already a mechanism for supporting static FRU and sensor IDs.\n\nThis patch largely defeats the whole architecture of the dynamic sensors option by centralizing a single config file that has platform level information in it.  Have you looked into the json config file options?  Can you please compare and contrast in your commit message why that wasn\u0027t an option in your case?  If we\u0027re going to have a mechanisms for fixed IDs, we should avoid creating another one and reuse the one that exists already.",
       "revId": "648163c29763f7b3902b219e32f9ea13ec27e7a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4d70ad4a_e2057917",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T16:11:47Z",
+      "side": 1,
+      "message": "I am guessing that you are referring to https://github.com/openbmc/phosphor-host-ipmid/blob/master/scripts/readfru.mako.cpp?\n\nI wasn\u0027t sure how feasible it was to use that within dynamic sensors, but we can take a look.",
+      "parentUuid": "42679ecf_5d281baf",
+      "revId": "648163c29763f7b3902b219e32f9ea13ec27e7a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5a4774ba_92c49c60",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T16:11:47Z",
+      "side": 1,
+      "message": "prefer parsingData \u003d\u003d std::nullopt",
+      "range": {
+        "startLine": 239,
+        "startChar": 16,
+        "endLine": 239,
+        "endChar": 28
+      },
+      "revId": "648163c29763f7b3902b219e32f9ea13ec27e7a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca45f0a8_d38e1001",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T16:11:47Z",
+      "side": 1,
+      "message": "add error message",
+      "range": {
+        "startLine": 241,
+        "startChar": 16,
+        "endLine": 241,
+        "endChar": 23
+      },
+      "revId": "648163c29763f7b3902b219e32f9ea13ec27e7a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2d874d3a_bf703561",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-05-17T16:11:47Z",
+      "side": 1,
+      "message": "no need for this. Just set do\n\n```\nfruIdTbl \u003d parseStaticFruConfig(data)\n```\ninstead.\n\nand do\n\n```\n if (fruIdTbl-\u003efind(fruDev) !\u003d fruIdTbl-\u003eend())\n        {\n            deviceHashes.emplace((*fruIdTbl)[fruDev], fruDev);\n        }\n```",
+      "range": {
+        "startLine": 243,
+        "startChar": 12,
+        "endLine": 243,
+        "endChar": 47
+      },
+      "revId": "648163c29763f7b3902b219e32f9ea13ec27e7a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
