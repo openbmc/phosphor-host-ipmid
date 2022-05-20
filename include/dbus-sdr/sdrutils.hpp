@@ -314,6 +314,7 @@ enum class SensorTypeCodes : uint8_t
     buttons = 0x14,
     watchdog2 = 0x23,
     entity = 0x25,
+    management_subsystem_health = 0x28,
 };
 
 enum class SensorEventTypeCodes : uint8_t
@@ -348,6 +349,8 @@ const static boost::container::flat_map<
                                   SensorEventTypeCodes::sensorSpecified)},
          {"buttons", std::make_pair(SensorTypeCodes::buttons,
                                     SensorEventTypeCodes::sensorSpecified)},
+         {"utilization", std::make_pair(SensorTypeCodes::management_subsystem_health,
+                                        SensorEventTypeCodes::threshold)},
          {"watchdog", std::make_pair(SensorTypeCodes::watchdog2,
                                      SensorEventTypeCodes::sensorSpecified)},
          {"entity", std::make_pair(SensorTypeCodes::entity,
