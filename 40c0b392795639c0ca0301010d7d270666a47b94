@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b829f206_d8fbbcda",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2022-05-23T05:57:17Z",
+      "side": 1,
+      "message": "could you kindly help me to review this code, now, maybe only my oem packages use those data types, just for a extend",
+      "revId": "40c0b392795639c0ca0301010d7d270666a47b94",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
