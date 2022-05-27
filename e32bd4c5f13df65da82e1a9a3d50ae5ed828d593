@@ -16,6 +16,23 @@
       "message": "friendly ping. ",
       "revId": "e32bd4c5f13df65da82e1a9a3d50ae5ed828d593",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1669acb5_e06776b0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 46
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-05-27T22:20:12Z",
+      "side": 1,
+      "message": "This is fine, but it needs to be merged along with a change to the bb recipe that enables meson and removes the dependency on autotools. I think without that change, yocto will fail to build it (the autobump commit will fail).",
+      "revId": "e32bd4c5f13df65da82e1a9a3d50ae5ed828d593",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
