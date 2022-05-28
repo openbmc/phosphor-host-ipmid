@@ -1,0 +1,8 @@
+Code-Review+1: Lei YU <yulei.sh@bytedance.com>
+Code-Review+2: Vernon Mauery <vernon.mauery@linux.intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Jian Zhang <zhangjian.3032@bytedance.com>
+Submitted-at: Sat, 28 May 2022 08:23:15 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/53905
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
