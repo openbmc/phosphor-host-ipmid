@@ -52,6 +52,24 @@
       "parentUuid": "8ff38899_218ef3b2",
       "revId": "b41faa4cd3d6fb172e0eb939d6c98eeb612211a9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "08ed1993_9b2aea64",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2022-05-30T06:29:12Z",
+      "side": 1,
+      "message": "\u003e Hi George,\n\u003e Yes, I didn\u0027t see the maintainers be added to review, thus I just add you and Lei YU to review it. Thanks you help.\n\u003e \n\u003e Best regards,\n\u003e Tim\n\nFYI\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/OWNERS#L45-L60",
+      "parentUuid": "d8238f3d_884b87b1",
+      "revId": "b41faa4cd3d6fb172e0eb939d6c98eeb612211a9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
