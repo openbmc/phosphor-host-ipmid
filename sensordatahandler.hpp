@@ -325,7 +325,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
     {
         warningAlarmLow = std::get<bool>(ipmi::getDbusProperty(
             bus, service, sensorInfo.sensorPath,
-            "xyz.openbmc_project.Sensor.Threshold.Warning", "WarningAlarmlow"));
+            "xyz.openbmc_project.Sensor.Threshold.Warning", "WarningAlarmLow"));
     }
     catch (const std::exception& e)
     {
