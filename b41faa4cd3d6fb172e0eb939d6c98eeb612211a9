@@ -87,6 +87,41 @@
       "message": "@Tim George and I are not the maintainers of this repo.\n\nPreviously gerrit could add the OWNERS automatically, but this function is broken so you need to manually check the OWNERS/MAINTAINERS file, and add them to the review to get their approval.",
       "revId": "b41faa4cd3d6fb172e0eb939d6c98eeb612211a9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "76ac78d4_5215e8e0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-05-30T07:39:37Z",
+      "side": 1,
+      "message": "Hi Lei YU,\nThanks your review, I will add correct owners to get approval. Thank you.",
+      "parentUuid": "d8806537_e66a14b1",
+      "revId": "b41faa4cd3d6fb172e0eb939d6c98eeb612211a9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72d36e43_d8c34f5e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-05-30T07:39:37Z",
+      "side": 1,
+      "message": "Hi All,\nCould you help to review and merge this commit?\nI add you as reviewer according OWNERS file. Thank you.\n\nBest regards,\nTim",
+      "revId": "b41faa4cd3d6fb172e0eb939d6c98eeb612211a9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
