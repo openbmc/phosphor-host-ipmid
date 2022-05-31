@@ -5,4 +5,4 @@
 
 using netfncmd_pair = std::pair<unsigned char, unsigned char>;
 
-extern const std::vector<netfncmd_pair> whitelist;
+extern const std::vector<netfncmd_pair> allowlist;

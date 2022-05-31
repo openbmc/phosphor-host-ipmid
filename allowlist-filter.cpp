@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <array>
+#include <ipmiallowlist.hpp>
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
-#include <ipmiwhitelist.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <settings.hpp>
@@ -18,20 +18,20 @@ namespace ipmi
 namespace
 {
 
-/** @class WhitelistFilter
+/** @class AllowlistFilter
  *
  * Class that implements an IPMI message filter based
  * on incoming interface and a restriction mode setting
  */
-class WhitelistFilter
+class AllowlistFilter
 {
   public:
-    WhitelistFilter();
-    ~WhitelistFilter() = default;
-    WhitelistFilter(WhitelistFilter const&) = delete;
-    WhitelistFilter(WhitelistFilter&&) = delete;
-    WhitelistFilter& operator=(WhitelistFilter const&) = delete;
-    WhitelistFilter& operator=(WhitelistFilter&&) = delete;
+    AllowlistFilter();
+    ~AllowlistFilter() = default;
+    AllowlistFilter(AllowlistFilter const&) = delete;
+    AllowlistFilter(AllowlistFilter&&) = delete;
+    AllowlistFilter& operator=(AllowlistFilter const&) = delete;
+    AllowlistFilter& operator=(AllowlistFilter&&) = delete;
 
   private:
     void postInit();
@@ -48,11 +48,11 @@ class WhitelistFilter
         "xyz.openbmc_project.Control.Security.RestrictionMode";
 };
 
-WhitelistFilter::WhitelistFilter()
+AllowlistFilter::AllowlistFilter()
 {
     bus = getSdBus();
 
-    log<level::INFO>("Loading whitelist filter");
+    log<level::INFO>("Loading Allowlist filter");
 
     ipmi::registerFilter(ipmi::prioOpenBmcBase,
                          [this](ipmi::message::Request::ptr request) {
@@ -63,7 +63,7 @@ WhitelistFilter::WhitelistFilter()
     post_work([this]() { postInit(); });
 }
 
-void WhitelistFilter::cacheRestrictedMode()
+void AllowlistFilter::cacheRestrictedMode()
 {
     using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
     std::string restrictionModeSetting;
@@ -102,7 +102,7 @@ void WhitelistFilter::cacheRestrictedMode()
         "RestrictionMode");
 }
 
-void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message_t& m)
+void AllowlistFilter::handleRestrictedModeChange(sdbusplus::message_t& m)
 {
     using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
     std::string intf;
@@ -124,7 +124,7 @@ void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message_t& m)
     }
 }
 
-void WhitelistFilter::postInit()
+void AllowlistFilter::postInit()
 {
     objects = std::make_unique<settings::Objects>(
         *bus, std::vector<settings::Interface>({restrictionModeIntf}));
@@ -154,15 +154,15 @@ void WhitelistFilter::postInit()
         [this](sdbusplus::message_t& m) { handleRestrictedModeChange(m); });
 }
 
-ipmi::Cc WhitelistFilter::filterMessage(ipmi::message::Request::ptr request)
+ipmi::Cc AllowlistFilter::filterMessage(ipmi::message::Request::ptr request)
 {
     if (request->ctx->channel == ipmi::channelSystemIface && restrictedMode)
     {
         if (!std::binary_search(
-                whitelist.cbegin(), whitelist.cend(),
+                allowlist.cbegin(), allowlist.cend(),
                 std::make_pair(request->ctx->netFn, request->ctx->cmd)))
         {
-            log<level::ERR>("Net function not whitelisted",
+            log<level::ERR>("Net function not allowlisted",
                             entry("NETFN=0x%X", int(request->ctx->netFn)),
                             entry("CMD=0x%X", int(request->ctx->cmd)));
             return ipmi::ccInsufficientPrivilege;
@@ -171,8 +171,8 @@ ipmi::Cc WhitelistFilter::filterMessage(ipmi::message::Request::ptr request)
     return ipmi::ccSuccess;
 }
 
-// instantiate the WhitelistFilter when this shared object is loaded
-WhitelistFilter whitelistFilter;
+// instantiate the AllowlistFilter when this shared object is loaded
+AllowlistFilter allowlistFilter;
 
 } // namespace
 
