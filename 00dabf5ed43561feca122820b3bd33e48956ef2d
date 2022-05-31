@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ced08000_1354e821",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-05-31T15:36:20Z",
+      "side": 1,
+      "message": "I think the hard part is these kind of files too technically should be switched over... 😞",
+      "range": {
+        "startLine": 81,
+        "startChar": 49,
+        "endLine": 81,
+        "endChar": 54
+      },
+      "revId": "00dabf5ed43561feca122820b3bd33e48956ef2d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
