@@ -645,6 +645,19 @@ ipmi::RspType<uint8_t,  // Device ID
                 devId.prodId = data.value("prod_id", 0);
                 devId.aux = data.value("aux", 0);
 
+                if (data.contains("firmware_revision"))
+                {
+                    const auto& firmwareRevision = data.at("firmware_revision");
+                    if (firmwareRevision.contains("major"))
+                    {
+                        firmwareRevision.at("major").get_to(devId.fw[0]);
+                    }
+                    if (firmwareRevision.contains("minor"))
+                    {
+                        firmwareRevision.at("minor").get_to(devId.fw[1]);
+                    }
+                }
+
                 // Set the availablitity of the BMC.
                 defaultActivationSetting = data.value("availability", true);
 
