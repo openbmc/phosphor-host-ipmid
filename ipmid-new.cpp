@@ -802,7 +802,7 @@ using CommandHandler = phosphor::host::command::CommandHandler;
 std::unique_ptr<phosphor::host::command::Manager> cmdManager;
 void ipmid_send_cmd_to_host(CommandHandler&& cmd)
 {
-    return cmdManager->execute(std::forward<CommandHandler>(cmd));
+    cmdManager->execute(std::forward<CommandHandler>(cmd));
 }
 
 std::unique_ptr<phosphor::host::command::Manager>& ipmid_get_host_cmd_manager()
