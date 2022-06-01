@@ -123,7 +123,6 @@ if not get_option('ipmi-whitelist').disabled()
   whitelist_pre = declare_dependency(
     include_directories: root_inc,
     dependencies: [
-      channellayer_dep,
       crypto,
       ipmid_dep,
       phosphor_dbus_interfaces_dep,
@@ -132,19 +131,17 @@ if not get_option('ipmi-whitelist').disabled()
     ],
   )
 
-  whitelist_lib = shared_module(
+  whitelist_lib = library(
     'whitelist',
     'whitelist-filter.cpp',
     'ipmiwhitelist.cpp',
     implicit_include_directories: false,
     dependencies: whitelist_pre,
+    version: meson.project_version(),
+    override_options: ['b_lundef=false'],
     install: true,
     install_dir: get_option('libdir') / 'ipmid-providers')
 endif
-
-whitelist_dep = declare_dependency(
-  link_with: whitelist_lib,
-  dependencies: whitelist_pre)
 
 # libsysintfcmds
 sysintfcmds_pre = declare_dependency(
@@ -159,18 +156,16 @@ sysintfcmds_pre = declare_dependency(
     ipmid_dep,
   ])
 
-sysintfcmds_lib = shared_module(
+sysintfcmds_lib = library(
   'sysintfcmds',
   'systemintfcmds.cpp',
   'host-interface.cpp',
   implicit_include_directories: false,
   dependencies: sysintfcmds_pre,
+  version: meson.project_version(),
+  override_options: ['b_lundef=false'],
   install: true,
   install_dir: get_option('libdir') / 'ipmid-providers')
-
-sysintfcmds_dep = declare_dependency(
-  link_with: sysintfcmds_lib,
-  dependencies: sysintfcmds_pre)
 
 # ipmid
 ipmid_pre = [
@@ -236,6 +231,7 @@ ipmi20_lib = library(
   include_directories: root_inc,
   install: true,
   install_dir: get_option('libdir') / 'ipmid-providers',
+  version: meson.project_version(),
   override_options: ['b_lundef=false'])
 
 libipmi20_dep = declare_dependency(
@@ -258,6 +254,16 @@ executable(
 
 # Dynamic Sensor Stack
 subdir('dbus-sdr')
+
+library(
+  'dynamiccmds',
+  dbus_sdr_src,
+  implicit_include_directories: false,
+  dependencies: dbus_sdr_pre,
+  version: meson.project_version(),
+  override_options: ['b_lundef=false'],
+  install: true,
+  install_dir: get_option('libdir') / 'ipmid-providers')
 
 if not get_option('tests').disabled()
   subdir('test')

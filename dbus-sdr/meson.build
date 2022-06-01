@@ -17,16 +17,7 @@ dbus_sdr_pre = declare_dependency(
   ])
 
 dbus_sdr_src = [
-  'sdrutils.cpp',
-  'sensorcommands.cpp',
-  'storagecommands.cpp'
+  'dbus-sdr/sdrutils.cpp',
+  'dbus-sdr/sensorcommands.cpp',
+  'dbus-sdr/storagecommands.cpp'
 ]
-
-shared_module(
-  'dynamiccmds',
-  dbus_sdr_src,
-  implicit_include_directories: false,
-  dependencies: dbus_sdr_pre,
-  install: true,
-  install_dir: get_option('libdir') / 'ipmid-providers')
-

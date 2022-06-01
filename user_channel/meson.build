@@ -75,17 +75,14 @@ if not get_option('libuserlayer').disabled()
       channellayer_dep,
     ])
 
-  usercmds_lib = shared_library(
+  usercmds_lib = library(
     'usercmds',
     'usercommands.cpp',
     implicit_include_directories: false,
     dependencies: usercmds_pre,
     install: true,
     install_dir: get_option('libdir') / 'ipmid-providers',
+    version: meson.project_version(),
     override_options: ['b_lundef=false'])
-
-  usercmds_dep = declare_dependency(
-    link_with: usercmds_lib,
-    dependencies: usercmds_pre)
 
 endif
