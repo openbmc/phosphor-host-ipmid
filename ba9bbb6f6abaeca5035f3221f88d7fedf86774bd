@@ -16,6 +16,24 @@
       "message": "just realized that there are some issue with the binary size.\n\n```\n# Without meson\n$ ls -lh /usr/bin/ipmid\n-rwxr-xr-x    1 root     root      381.6K Apr  5  2011 /usr/bin/ipmid\n# With meson\n$ ls -lh /tmp/ipmid\n-rwxr-xr-x    1 root     root       13.3M Jan  1 07:06 /tmp/ipmid\n\n```\n\nNeed to fix how the library is linked.",
       "revId": "ba9bbb6f6abaeca5035f3221f88d7fedf86774bd",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a9107812_3210c230",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-03T15:43:20Z",
+      "side": 1,
+      "message": "nevermind.\n\nI had sanitizer on for debugging.",
+      "parentUuid": "ec3a35d2_5a961985",
+      "revId": "ba9bbb6f6abaeca5035f3221f88d7fedf86774bd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
