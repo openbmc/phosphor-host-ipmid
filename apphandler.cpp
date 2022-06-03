@@ -15,6 +15,7 @@
 #include <app/watchdog.hpp>
 #include <apphandler.hpp>
 #include <array>
+#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -30,6 +31,7 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <string>
+#include <string_view>
 #include <sys_info_param.hpp>
 #include <tuple>
 #include <vector>
@@ -481,9 +483,9 @@ typedef struct
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
-int convertVersion(std::string s, Revision& rev)
+int convertVersion(std::string_view s, Revision& rev)
 {
-    std::string token;
+    std::string_view token;
     uint16_t commits;
 
     auto location = s.find_first_of('v');
@@ -497,8 +499,20 @@ int convertVersion(std::string s, Revision& rev)
         location = s.find_first_of(".");
         if (location != std::string::npos)
         {
-            rev.major =
-                static_cast<char>(std::stoi(s.substr(0, location), 0, 10));
+            std::string_view major_view = s.substr(0, location);
+            auto [ptr, ec]{std::from_chars(major_view.begin(), major_view.end(),
+                                           rev.major)};
+            if (ec != std::errc())
+            {
+                throw std::runtime_error(
+                    "failed to convert major string to uint8_t: " +
+                    std::make_error_code(ec).message());
+            }
+            if (ptr != major_view.begin() + major_view.size())
+            {
+                throw std::runtime_error(
+                    "converted invalid characters in major string");
+            }
             token = s.substr(location + 1);
         }
 
@@ -507,8 +521,20 @@ int convertVersion(std::string s, Revision& rev)
             location = token.find_first_of(".-");
             if (location != std::string::npos)
             {
-                rev.minor = static_cast<char>(
-                    std::stoi(token.substr(0, location), 0, 10));
+                std::string_view minor_view = token.substr(0, location);
+                auto [ptr, ec]{std::from_chars(minor_view.begin(),
+                                               minor_view.end(), rev.minor)};
+                if (ec != std::errc())
+                {
+                    throw std::runtime_error(
+                        "failed to convert minor string to uint8_t: " +
+                        std::make_error_code(ec).message());
+                }
+                if (ptr != minor_view.begin() + minor_view.size())
+                {
+                    throw std::runtime_error(
+                        "converted invalid characters in minor string");
+                }
                 token = token.substr(location + 1);
             }
         }
@@ -518,7 +544,20 @@ int convertVersion(std::string s, Revision& rev)
         location = token.find_first_of(".-");
         if (!token.empty())
         {
-            commits = std::stoi(token.substr(0, location), 0, 16);
+            std::string_view commit_view = token.substr(0, location);
+            auto [ptr, ec]{std::from_chars(commit_view.begin(),
+                                           commit_view.end(), commits, 16)};
+            if (ec != std::errc())
+            {
+                throw std::runtime_error(
+                    "failed to convert commit string to uint16_t: " +
+                    std::make_error_code(ec).message());
+            }
+            if (ptr != commit_view.begin() + commit_view.size())
+            {
+                throw std::runtime_error(
+                    "converted invalid characters in commit string");
+            }
             rev.d[0] = (commits >> 8) | (commits << 8);
 
             // commit number we skip
