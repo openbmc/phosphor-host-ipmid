@@ -111,6 +111,30 @@
       },
       "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9ceddc66_04ecb717",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1053,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2022-06-06T09:49:35Z",
+      "side": 1,
+      "message": "Hi Vernon, I use if-else to set generatorID according the low byte bit 0.",
+      "parentUuid": "c589b4b9_6b1473c6",
+      "range": {
+        "startLine": 1053,
+        "startChar": 11,
+        "endLine": 1053,
+        "endChar": 49
+      },
+      "revId": "c2584f822a13c1f63d2c72f76bc6fe21f6f26614",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
