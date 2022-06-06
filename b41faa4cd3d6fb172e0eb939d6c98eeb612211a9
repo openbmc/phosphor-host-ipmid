@@ -122,6 +122,23 @@
       "message": "Hi All,\nCould you help to review and merge this commit?\nI add you as reviewer according OWNERS file. Thank you.\n\nBest regards,\nTim",
       "revId": "b41faa4cd3d6fb172e0eb939d6c98eeb612211a9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f2bc64e_2bc6ac8e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-06-06T01:52:12Z",
+      "side": 1,
+      "message": "Hi Vernon,\nCould you help to review this commit whether can be merged it? Thanks a lot.\n\nBest regards,\nTim",
+      "revId": "b41faa4cd3d6fb172e0eb939d6c98eeb612211a9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
