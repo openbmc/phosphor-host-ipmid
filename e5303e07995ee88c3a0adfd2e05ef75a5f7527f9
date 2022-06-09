@@ -22,6 +22,30 @@
       },
       "revId": "e5303e07995ee88c3a0adfd2e05ef75a5f7527f9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "48705108_1943e383",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-09T20:06:14Z",
+      "side": 1,
+      "message": "maybe it is better here. But usually we want `auto` and `enabled` to be considered enabled.",
+      "parentUuid": "26069072_7d52e445",
+      "range": {
+        "startLine": 258,
+        "startChar": 3,
+        "endLine": 258,
+        "endChar": 47
+      },
+      "revId": "e5303e07995ee88c3a0adfd2e05ef75a5f7527f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
