@@ -499,14 +499,10 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     std::size_t index =
         static_cast<std::size_t>(std::distance(profiles->begin(), itr));
 
-    // map index to reponse event assertion bit.
-    if (index < 8)
+    // map index to response event assertion bit.
+    if (index < 16)
     {
-        assertions.set(1u << index);
-    }
-    else if (index < 15)
-    {
-        assertions.set(1u << (index - 8));
+        assertions.set(index);
     }
     else
     {
