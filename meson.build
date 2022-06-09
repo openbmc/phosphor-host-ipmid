@@ -255,15 +255,17 @@ executable(
 # Dynamic Sensor Stack
 subdir('dbus-sdr')
 
-library(
-  'dynamiccmds',
-  dbus_sdr_src,
-  implicit_include_directories: false,
-  dependencies: dbus_sdr_pre,
-  version: meson.project_version(),
-  override_options: ['b_lundef=false'],
-  install: true,
-  install_dir: get_option('libdir') / 'ipmid-providers')
+if not get_option('dynamic-sensors').disabled()
+  library(
+    'dynamiccmds',
+    dbus_sdr_src,
+    implicit_include_directories: false,
+    dependencies: dbus_sdr_pre,
+    version: meson.project_version(),
+    override_options: ['b_lundef=false'],
+    install: true,
+    install_dir: get_option('libdir') / 'ipmid-providers')
+endif
 
 if not get_option('tests').disabled()
   subdir('test')

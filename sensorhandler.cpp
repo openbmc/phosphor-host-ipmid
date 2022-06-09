@@ -11,6 +11,7 @@
 #include <bitset>
 #include <cmath>
 #include <cstring>
+#include <iostream>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
