@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "262121bc_afe28817",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1058,
+      "author": {
+        "id": 1000682
+      },
+      "writtenOn": "2022-06-10T15:52:21Z",
+      "side": 1,
+      "message": "Prefer explicit comparison. `if (num !\u003d 0)` instead of `if (num)`",
+      "range": {
+        "startLine": 1058,
+        "startChar": 16,
+        "endLine": 1058,
+        "endChar": 39
+      },
+      "revId": "ef57d3c37ed0f4381aadce9129737151b7f6577b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
