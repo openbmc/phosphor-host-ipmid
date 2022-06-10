@@ -625,7 +625,8 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         }
 
         // Only allow external SetSensor if write permission granted
-        if (!details::sdrWriteTable.getWritePermission(sensorNumber))
+        if (!details::sdrWriteTable.getWritePermission((ctx->lun << 8) |
+                                                       sensorNumber))
         {
             return ipmi::responseResponseError();
         }
@@ -852,12 +853,14 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
         }
 
         // Keep stats on the reading just obtained, even if it is "NaN"
-        if (details::sdrStatsTable.updateReading(sensnum, reading, byteValue))
+        if (details::sdrStatsTable.updateReading((ctx->lun << 8) | sensnum,
+                                                 reading, byteValue))
         {
             // This is the first reading, show the coefficients
             double step = (max - min) / 255.0;
             std::cerr << "IPMI sensor "
-                      << details::sdrStatsTable.getName(sensnum)
+                      << details::sdrStatsTable.getName((ctx->lun << 8) |
+                                                        sensnum)
                       << ": Range min=" << min << " max=" << max
                       << ", step=" << step
                       << ", Coefficients mValue=" << static_cast<int>(mValue)
@@ -1597,7 +1600,6 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
                         const std::string& path,
                         get_sdr::SensorDataFullRecord& record)
 {
-    uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     constructSensorSdrHeaderKey(sensorNum, recordID, record);
 
     DbusInterfaceMap sensorMap;
@@ -1715,7 +1717,7 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
                  sizeof(record.body.id_string));
 
     // Remember the sensor name, as determined for this sensor number
-    details::sdrStatsTable.updateName(sensornumber, name);
+    details::sdrStatsTable.updateName(sensorNum, name);
 
     bool sensorSettable = false;
     auto mutability =
@@ -1728,7 +1730,7 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     get_sdr::body::init_settable_state(sensorSettable, &record.body);
 
     // Grant write permission to sensors deemed externally settable
-    details::sdrWriteTable.setWritePermission(sensornumber, sensorSettable);
+    details::sdrWriteTable.setWritePermission(sensorNum, sensorSettable);
 
     IPMIThresholds thresholdData;
     try
@@ -1865,7 +1867,6 @@ bool constructVrSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
                     const std::string& path,
                     get_sdr::SensorDataEventRecord& record)
 {
-    uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     constructEventSdrHeaderKey(sensorNum, recordID, record);
 
     DbusInterfaceMap sensorMap;
@@ -1901,7 +1902,7 @@ bool constructVrSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     std::memcpy(record.body.id_string, name.c_str(), nameSize);
 
     // Remember the sensor name, as determined for this sensor number
-    details::sdrStatsTable.updateName(sensornumber, name);
+    details::sdrStatsTable.updateName(sensorNum, name);
 
     return true;
 }
