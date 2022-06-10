@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8aec3604_6b94e470",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-10T00:30:07Z",
+      "side": 1,
+      "message": "actually, I don\u0027t even think it needs to be uint16_t.",
+      "range": {
+        "startLine": 505,
+        "startChar": 22,
+        "endLine": 505,
+        "endChar": 60
+      },
+      "revId": "e7ba8f45db5b7416c7baf4925f8ce9d5aba412d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
