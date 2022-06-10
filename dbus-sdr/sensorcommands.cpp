@@ -625,7 +625,8 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         }
 
         // Only allow external SetSensor if write permission granted
-        if (!details::sdrWriteTable.getWritePermission(sensorNumber))
+        if (!details::sdrWriteTable.getWritePermission((ctx->lun << 8) |
+                                                       sensorNumber))
         {
             return ipmi::responseResponseError();
         }
@@ -1597,7 +1598,6 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
                         const std::string& path,
                         get_sdr::SensorDataFullRecord& record)
 {
-    uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     constructSensorSdrHeaderKey(sensorNum, recordID, record);
 
     DbusInterfaceMap sensorMap;
@@ -1715,7 +1715,7 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
                  sizeof(record.body.id_string));
 
     // Remember the sensor name, as determined for this sensor number
-    details::sdrStatsTable.updateName(sensornumber, name);
+    details::sdrStatsTable.updateName(sensorNum, name);
 
     bool sensorSettable = false;
     auto mutability =
@@ -1728,7 +1728,7 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     get_sdr::body::init_settable_state(sensorSettable, &record.body);
 
     // Grant write permission to sensors deemed externally settable
-    details::sdrWriteTable.setWritePermission(sensornumber, sensorSettable);
+    details::sdrWriteTable.setWritePermission(sensorNum, sensorSettable);
 
     IPMIThresholds thresholdData;
     try
