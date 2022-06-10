@@ -3,6 +3,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6ab47662_693420ba",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-06-10T16:22:50Z",
+      "side": 1,
+      "message": "nit: With",
+      "range": {
+        "startLine": 10,
+        "startChar": 51,
+        "endLine": 10,
+        "endChar": 55
+      },
+      "revId": "e7ba8f45db5b7416c7baf4925f8ce9d5aba412d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "8aec3604_6b94e470",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 2
