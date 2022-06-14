@@ -1,5 +1,6 @@
 #include "storagehandler.hpp"
 
+#include "channel_layer.hpp"
 #include "entity_map_json.hpp"
 #include "fruread.hpp"
 #include "read_fru_data.hpp"
@@ -794,8 +795,8 @@ ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
  */
 ipmi::RspType<uint8_t,              // count returned
               std::vector<uint8_t>> // FRU data
-    ipmiStorageReadFruData(uint8_t fruDeviceId, uint16_t offset,
-                           uint8_t readCount)
+    ipmiStorageReadFruData(ipmi::Context::ptr ctx, uint8_t fruDeviceId,
+                           uint16_t offset, uint8_t readCount)
 {
     if (fruDeviceId == 0xFF)
     {
@@ -819,6 +820,11 @@ ipmi::RspType<uint8_t,              // count returned
         }
 
         // Write the count of response data.
+        // Read up to the max ipmi channel size or the requested size.
+        readCount = std::min(
+            static_cast<uint8_t>(ipmi::getChannelMaxTransferSize(ctx->channel) -
+                                 sizeof(uint8_t)),
+            readCount);
         uint8_t returnCount;
         if ((offset + readCount) <= size)
         {
