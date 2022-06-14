@@ -6,6 +6,7 @@
 #include "selutility.hpp"
 #include "sensorhandler.hpp"
 #include "storageaddsel.hpp"
+#include "storagehandler.hpp"
 
 #include <arpa/inet.h>
 #include <mapper.h>
@@ -819,6 +820,12 @@ ipmi::RspType<uint8_t,              // count returned
         }
 
         // Write the count of response data.
+        // Read up to the max ipmi channel size or the requested size.
+        const int ipmiChannel = ipmi::currentChNum;
+        readCount = std::min(
+            static_cast<uint8_t>(ipmi::getChannelMaxTransferSize(ipmiChannel) -
+                                 sizeof(uint8_t)),
+            readCount);
         uint8_t returnCount;
         if ((offset + readCount) <= size)
         {
