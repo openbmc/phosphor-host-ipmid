@@ -27,6 +27,7 @@ endif
 dbus_sdr_pre = declare_dependency(
     include_directories: root_inc,
     dependencies: [
+        channellayer_dep,
         crypto,
         nlohmann_json_dep,
         phosphor_logging_dep,

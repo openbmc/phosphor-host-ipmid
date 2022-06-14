@@ -5,6 +5,7 @@
 #include "selutility.hpp"
 #include "sensorhandler.hpp"
 #include "storageaddsel.hpp"
+#include "user_channel/channel_layer.hpp"
 
 #include <arpa/inet.h>
 #include <systemd/sd-bus.h>
@@ -785,8 +786,8 @@ ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
  */
 ipmi::RspType<uint8_t,              // count returned
               std::vector<uint8_t>> // FRU data
-    ipmiStorageReadFruData(uint8_t fruDeviceId, uint16_t offset,
-                           uint8_t readCount)
+    ipmiStorageReadFruData(ipmi::Context::ptr ctx, uint8_t fruDeviceId,
+                           uint16_t offset, uint8_t readCount)
 {
     if (fruDeviceId == 0xFF)
     {
@@ -810,6 +811,18 @@ ipmi::RspType<uint8_t,              // count returned
         }
 
         // Write the count of response data.
+        // Read up to the max ipmi channel size or the requested size.
+        // Subtract 5 bytes for the IPMI/BT response header (Length, NetFn/LUN,
+        // Seq, Cmd, Completion Code) and sizeof(uint8_t) (1 byte) for Count
+        // Returned.
+        constexpr size_t fruReadHeaderOverhead = 5 + sizeof(uint8_t);
+        size_t maxTransferSize = ipmi::getChannelMaxTransferSize(ctx->channel);
+        if (maxTransferSize <= fruReadHeaderOverhead)
+        {
+            return ipmi::responseReqDataLenExceeded();
+        }
+        readCount = static_cast<uint8_t>(std::min<size_t>(
+            maxTransferSize - fruReadHeaderOverhead, readCount));
         uint8_t returnCount;
         if ((offset + readCount) <= size)
         {
