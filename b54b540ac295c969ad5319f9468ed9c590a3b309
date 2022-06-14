@@ -34,6 +34,24 @@
       "parentUuid": "79525791_8d254f30",
       "revId": "b54b540ac295c969ad5319f9468ed9c590a3b309",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d527b7fc_20b19910",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-14T17:30:53Z",
+      "side": 1,
+      "message": "Vermon and Tom, any concern here?\n\nMy understanding is that the current `revision` field is for `Device Revision`.\n\nAny issue with adding `firmware_revision` to support `Firmware Revision`? Just supporting major/minor.",
+      "parentUuid": "53a207ac_5407f82c",
+      "revId": "b54b540ac295c969ad5319f9468ed9c590a3b309",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
