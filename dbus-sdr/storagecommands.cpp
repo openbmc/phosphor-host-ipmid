@@ -18,7 +18,9 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 #include "selutility.hpp"
+#include "user_channel/channel_layer.hpp"
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/container/flat_map.hpp>
@@ -392,11 +394,22 @@ ipmi::RspType<uint8_t,             // Count
         return ipmi::responseReqDataLenExceeded();
     }
 
+    // Read up to the max ipmi channel size or the requested size.
+    // Subtract 5 bytes for the IPMI/BT response header (Length, NetFn/LUN,
+    // Seq, Cmd, Completion Code) and sizeof(uint8_t) (1 byte) for Count
+    // Returned.
+    constexpr size_t fruReadHeaderOverhead = 5 + sizeof(uint8_t);
+    size_t maxTransferSize = ipmi::getChannelMaxTransferSize(ctx->channel);
+    if (maxTransferSize <= fruReadHeaderOverhead)
+    {
+        return ipmi::responseReqDataLenExceeded();
+    }
+    size_t readCount = std::min(
+        maxTransferSize - fruReadHeaderOverhead, fromFruByteLen);
     std::vector<uint8_t> requestedData;
-
     requestedData.insert(requestedData.begin(),
                          fru.begin() + fruInventoryOffset,
-                         fru.begin() + fruInventoryOffset + fromFruByteLen);
+                         fru.begin() + readCount + fruInventoryOffset);
 
     return ipmi::responseSuccess(static_cast<uint8_t>(requestedData.size()),
                                  requestedData);
