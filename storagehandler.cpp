@@ -1,5 +1,6 @@
 #include "storagehandler.hpp"
 
+#include "channel_layer.hpp"
 #include "entity_map_json.hpp"
 #include "fruread.hpp"
 #include "read_fru_data.hpp"
@@ -819,6 +820,12 @@ ipmi::RspType<uint8_t,              // count returned
         }
 
         // Write the count of response data.
+        // Read up to the max ipmi channel size or the requested size.
+        readCount =
+            std::min(static_cast<uint8_t>(
+                         ipmi::getChannelMaxTransferSize(ipmi::currentChNum) -
+                         sizeof(uint8_t)),
+                     readCount);
         uint8_t returnCount;
         if ((offset + readCount) <= size)
         {
