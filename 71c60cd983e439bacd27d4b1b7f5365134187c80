@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8637c7dc_14e97841",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-06-14T17:19:48Z",
+      "side": 1,
+      "message": "I took a quick look at the numbers on a particular system I have using blob read:\n* The Max transfer size of the particular channel is 64 bytes.\n* When transferring Blobs, the maximum IPMI response size is 59 bytes (3 bytes OEN, 2 bytes CRC, 54 bytes blob payload).\n* If the max IPMI response size for FRU read is also 59 bytes, the max read count would be 58 and not 63. I wonder if we need to also subtract 5 from readCount to account for the overhead?",
+      "range": {
+        "startLine": 824,
+        "startChar": 8,
+        "endLine": 824,
+        "endChar": 17
+      },
+      "revId": "71c60cd983e439bacd27d4b1b7f5365134187c80",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
