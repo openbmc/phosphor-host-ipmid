@@ -46,6 +46,30 @@
       },
       "revId": "e5303e07995ee88c3a0adfd2e05ef75a5f7527f9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9641fa39_a52828a3",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-15T18:01:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "48705108_1943e383",
+      "range": {
+        "startLine": 258,
+        "startChar": 3,
+        "endLine": 258,
+        "endChar": 47
+      },
+      "revId": "e5303e07995ee88c3a0adfd2e05ef75a5f7527f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
