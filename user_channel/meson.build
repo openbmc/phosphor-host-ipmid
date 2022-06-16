@@ -5,6 +5,7 @@ channellayer_pre = declare_dependency(
   dependencies: [
     crypto,
     ipmid_dep,
+    nlohmann_json_dep,
     phosphor_dbus_interfaces_dep,
     phosphor_logging_dep,
     std_cpp_fs,
@@ -38,9 +39,10 @@ if not get_option('libuserlayer').disabled()
       channellayer_dep,
       crypto,
       ipmid_dep,
+      nlohmann_json_dep,
+      pam,
       phosphor_dbus_interfaces_dep,
       phosphor_logging_dep,
-      pam,
       std_cpp_fs,
       systemd,
     ])
