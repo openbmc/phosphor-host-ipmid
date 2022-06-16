@@ -87,7 +87,7 @@ sdeventplus_dep = dependency('sdeventplus')
 systemd = dependency('systemd')
 crypto = dependency('libcrypto', version : '>=1.0.2g')
 pam = cpp.find_library('pam', required: true)
-mapper = cpp.find_library('mapper', required: true)
+mapper = dependency('libmapper')
 boost_coroutine = cpp.find_library('boost_coroutine', required: true)
 std_cpp_fs = cpp.find_library('stdc++fs', required: true)
 
