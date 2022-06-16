@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5066cd49_c5a00f78",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-06-16T21:31:55Z",
+      "side": 1,
+      "message": "This depends on https://gerrit.openbmc.org/c/openbmc/phosphor-objmgr/+/54640 , I think.",
+      "revId": "3d5751e8b6b8d5e15d8ff1f4404b6787786b0aac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
