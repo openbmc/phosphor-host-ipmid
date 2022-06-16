@@ -89,7 +89,6 @@ crypto = dependency('libcrypto', version : '>=1.0.2g')
 pam = cpp.find_library('pam', required: true)
 mapper = dependency('libmapper')
 boost_coroutine = cpp.find_library('boost_coroutine', required: true)
-std_cpp_fs = cpp.find_library('stdc++fs', required: true)
 sdbusplus_dep = dependency('sdbusplus')
 
 if cpp.has_header_symbol(
@@ -180,7 +179,6 @@ ipmid_pre = [
   ipmid_dep,
   channellayer_dep,
   mapper,
-  std_cpp_fs
 ]
 
 generated_src = [
