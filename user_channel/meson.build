@@ -8,7 +8,6 @@ channellayer_pre = declare_dependency(
     nlohmann_json_dep,
     phosphor_dbus_interfaces_dep,
     phosphor_logging_dep,
-    std_cpp_fs,
     systemd,
   ])
 
@@ -43,7 +42,6 @@ if not get_option('libuserlayer').disabled()
       pam,
       phosphor_dbus_interfaces_dep,
       phosphor_logging_dep,
-      std_cpp_fs,
       systemd,
     ])
 
