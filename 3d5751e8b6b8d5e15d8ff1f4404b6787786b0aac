@@ -16,6 +16,24 @@
       "message": "This depends on https://gerrit.openbmc.org/c/openbmc/phosphor-objmgr/+/54640 , I think.",
       "revId": "3d5751e8b6b8d5e15d8ff1f4404b6787786b0aac",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e04cc5ef_58991e67",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-06-16T21:38:13Z",
+      "side": 1,
+      "message": "Actually it was just a fail on my part.",
+      "parentUuid": "5066cd49_c5a00f78",
+      "revId": "3d5751e8b6b8d5e15d8ff1f4404b6787786b0aac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
