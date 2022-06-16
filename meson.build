@@ -90,13 +90,7 @@ pam = cpp.find_library('pam', required: true)
 mapper = dependency('libmapper')
 boost_coroutine = cpp.find_library('boost_coroutine', required: true)
 std_cpp_fs = cpp.find_library('stdc++fs', required: true)
-
-sdbusplus_dep = dependency('sdbusplus', required : false, include_type: 'system')
-if not sdbusplus_dep.found()
-  sdbusplus_proj = subproject('sdbusplus', required: true)
-  sdbusplus_dep = sdbusplus_proj.get_variable('sdbusplus_dep')
-  sdbusplus_dep = sdbusplus_dep.as_system('system')
-endif
+sdbusplus_dep = dependency('sdbusplus')
 
 # Subfolders
 subdir('libipmid')
