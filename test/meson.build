@@ -27,7 +27,13 @@ test('entitymap_json',
     include_directories: root_inc,
     build_by_default: false,
     implicit_include_directories: false,
-    dependencies: [entity_map_json_dep, gtest, gmock, nlohmann_json_dep]
+    dependencies: [
+        entity_map_json_dep,
+        gmock,
+        gtest,
+        nlohmann_json_dep,
+        sdbusplus_dep,
+    ]
   ))
 
 # Build/add oemrouter_unittest to test suite
