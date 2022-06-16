@@ -9,4 +9,5 @@
 
 # Meson
 /build*/
-/subprojects/*/
+/subprojects/*
+!/subprojects/*.wrap
