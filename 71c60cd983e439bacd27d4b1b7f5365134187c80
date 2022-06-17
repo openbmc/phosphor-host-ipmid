@@ -46,6 +46,30 @@
       },
       "revId": "71c60cd983e439bacd27d4b1b7f5365134187c80",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "77387a84_b78a1dc1",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-06-17T19:05:09Z",
+      "side": 1,
+      "message": "Took another look, the reason a blob read payload is capped to 54 bytes is due to:\n```\n(BlobManager::read)\n    handler-\u003eread(session, offset,\n                  std::min(maximumReadSize, requestedSize));\n\n```\n`maximumReadSize` is defined as `btTransportLength - (btReplyHdrLen + oem::groupMagicSize + crcSize);` here: https://github.com/openbmc/phosphor-ipmi-blobs/blob/master/manager.hpp#L26\n\nBT has a 5-byte long header, as is described in btbridged: NetFN, cmd, cc, LUN, seq.\nFor KCS, the header is 3-byte long as is described in kcsbridged: NetFN|LUN, cmd, cc.\n\nSo I think maybe we need to determine the header length and subtract it from the getChannelMaxTransferSize and then sutbtract sizeof(uint8).",
+      "parentUuid": "c561ff3a_346c50e9",
+      "range": {
+        "startLine": 824,
+        "startChar": 8,
+        "endLine": 824,
+        "endChar": 17
+      },
+      "revId": "71c60cd983e439bacd27d4b1b7f5365134187c80",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
