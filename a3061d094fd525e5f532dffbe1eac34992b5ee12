@@ -16,6 +16,23 @@
       "message": "Hello Patrick,\nCould you please help to review this commit and merge it? Thanks a lot.\n\nSincerely,\nTim",
       "revId": "a3061d094fd525e5f532dffbe1eac34992b5ee12",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4e7b00f1_e2b814f6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-06-17T19:51:49Z",
+      "side": 1,
+      "message": "I added the reviewers listed in the OWNERS file.",
+      "revId": "a3061d094fd525e5f532dffbe1eac34992b5ee12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
