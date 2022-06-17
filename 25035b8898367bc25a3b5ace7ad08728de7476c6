@@ -16,6 +16,24 @@
       "message": "Thanks for your contributions. I am a meson newbie, so this all *looks* good to me, but I am not sure how to test it.\n\nI have tried running \u0027meson build-native\u0027 to attempt a non-yocto build. I can see it try to wrap all the external dependencies. But it is failing on dependency libmapper. Should I be doing this differently?\n\n------------------------------------\n\nRun-time dependency libmapper found: NO (tried pkgconfig and cmake)\nLooking for a fallback subproject for the dependency libmapper\n\nExecuting subproject phosphor-objmgr \n\nphosphor-objmgr| Project name: phosphor-objmgr\nphosphor-objmgr| Project version: 1.0\nphosphor-objmgr| C compiler for the host machine: cc (gcc 11.2.0 \"cc (Ubuntu 11.2.0-19ubuntu1) 11.2.0\")\nphosphor-objmgr| C linker for the host machine: cc ld.bfd 2.38\nphosphor-objmgr| C++ compiler for the host machine: c++ (gcc 11.2.0 \"c++ (Ubuntu 11.2.0-19ubuntu1) 11.2.0\")\nphosphor-objmgr| C++ linker for the host machine: c++ ld.bfd 2.38\nphosphor-objmgr| Dependency phosphor-logging found: YES 1.0.0 (cached)\nphosphor-objmgr| Dependency phosphor-dbus-interfaces found: YES 1.0.0 (cached)\nphosphor-objmgr| Dependency sdbusplus found: YES 1.0.0 (cached)\nphosphor-objmgr| Run-time dependency GTest found: YES 1.11.0\nphosphor-objmgr| Run-time dependency GMock found: YES (building self)\nphosphor-objmgr| Dependency libsystemd found: YES 249 (cached)\nphosphor-objmgr| Dependency libsystemd found: YES 249 (cached)\nphosphor-objmgr| Dependency boost found: YES 1.74.0 (cached)\nphosphor-objmgr| Dependency libsystemd found: YES 249 (cached)\nphosphor-objmgr| Dependency systemd found: YES 249 (cached)\nphosphor-objmgr| Run-time dependency threads found: YES\nphosphor-objmgr| Run-time dependency tinyxml2 found: YES 9.0.0\nphosphor-objmgr| Build targets in project: 636\nphosphor-objmgr| Subproject phosphor-objmgr finished.\n\nWARNING: Variable \u0027mapper_dep\u0027 in the subproject \u0027subprojects/phosphor-objmgr\u0027 is not found\nDependency libmapper from subproject subprojects/phosphor-objmgr found: NO\n\nmeson.build:90:0: ERROR: Dependency \u0027libmapper\u0027 is required but not found.\n",
       "revId": "25035b8898367bc25a3b5ace7ad08728de7476c6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d170e85b_7d34514a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-06-17T17:34:25Z",
+      "side": 1,
+      "message": "No... I think you\u0027re doing it right.  I mentioned in the first diff in this stack that the mapper thing is needing a fix in phosphor-objmgr.  They didn\u0027t export their library as a \u0027dependency\u0027 properly so it could be consumed as a subproject.\n\nhttps://gerrit.openbmc.org/c/openbmc/phosphor-objmgr/+/54640\n\nSince you have `phosphor-objmgr` cloned now inside of `subprojects/phosphor-objmgr` you could actually fetch/cherry-pick this objmgr patch into it and then you should have success.\n\nI actually did \"co-development\" of the objmgr fix and this stack using the \u0027symlink workflow\u0027 I mentioned here in this commit.  I have all the openbmc repos cloned into a common workspace and then I can symlink the subprojects instead of having separate clones all over the place.\n\n    cd subproject \u0026\u0026 ls *.wrap | xargs -n1 basename -s .wrap | xargs -I{} bash -c \"test ! -L {} \u0026\u0026 test -d ../../{} \u0026\u0026 ln -s ../../{} {}\"",
+      "parentUuid": "43a7a69a_ce7a6f4f",
+      "revId": "25035b8898367bc25a3b5ace7ad08728de7476c6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
