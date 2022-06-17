@@ -16,18 +16,25 @@
 #pragma once
 
 #include <bitset>
+#include <boost/version.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <ipmid/utility.hpp>
 #include <tuple>
 
+#if BOOST_VERSION < 107900
+using bitcount_t = unsigned;
+#else
+using bitcount_t = std::size_t;
+#endif
+
 // unsigned fixed-bit sizes
-template <unsigned N>
+template <bitcount_t N>
 using fixed_uint_t =
     boost::multiprecision::number<boost::multiprecision::cpp_int_backend<
         N, N, boost::multiprecision::unsigned_magnitude,
         boost::multiprecision::unchecked, void>>;
 // signed fixed-bit sizes
-template <unsigned N>
+template <bitcount_t N>
 using fixed_int_t =
     boost::multiprecision::number<boost::multiprecision::cpp_int_backend<
         N, N, boost::multiprecision::signed_magnitude,
@@ -79,17 +86,17 @@ namespace types
 namespace details
 {
 
-template <size_t N>
+template <bitcount_t N>
 struct Size
 {
-    static constexpr size_t value = N;
+    static constexpr bitcount_t value = N;
 };
 
-template <unsigned Bits>
+template <bitcount_t Bits>
 constexpr auto getNrBits(const fixed_int_t<Bits>&) -> Size<Bits>;
-template <unsigned Bits>
+template <bitcount_t Bits>
 constexpr auto getNrBits(const fixed_uint_t<Bits>&) -> Size<Bits>;
-template <size_t Bits>
+template <bitcount_t Bits>
 constexpr auto getNrBits(const std::bitset<Bits>&) -> Size<Bits>;
 
 template <typename U>
