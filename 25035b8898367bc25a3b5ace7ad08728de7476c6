@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "43a7a69a_ce7a6f4f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-06-17T16:59:44Z",
+      "side": 1,
+      "message": "Thanks for your contributions. I am a meson newbie, so this all *looks* good to me, but I am not sure how to test it.\n\nI have tried running \u0027meson build-native\u0027 to attempt a non-yocto build. I can see it try to wrap all the external dependencies. But it is failing on dependency libmapper. Should I be doing this differently?\n\n------------------------------------\n\nRun-time dependency libmapper found: NO (tried pkgconfig and cmake)\nLooking for a fallback subproject for the dependency libmapper\n\nExecuting subproject phosphor-objmgr \n\nphosphor-objmgr| Project name: phosphor-objmgr\nphosphor-objmgr| Project version: 1.0\nphosphor-objmgr| C compiler for the host machine: cc (gcc 11.2.0 \"cc (Ubuntu 11.2.0-19ubuntu1) 11.2.0\")\nphosphor-objmgr| C linker for the host machine: cc ld.bfd 2.38\nphosphor-objmgr| C++ compiler for the host machine: c++ (gcc 11.2.0 \"c++ (Ubuntu 11.2.0-19ubuntu1) 11.2.0\")\nphosphor-objmgr| C++ linker for the host machine: c++ ld.bfd 2.38\nphosphor-objmgr| Dependency phosphor-logging found: YES 1.0.0 (cached)\nphosphor-objmgr| Dependency phosphor-dbus-interfaces found: YES 1.0.0 (cached)\nphosphor-objmgr| Dependency sdbusplus found: YES 1.0.0 (cached)\nphosphor-objmgr| Run-time dependency GTest found: YES 1.11.0\nphosphor-objmgr| Run-time dependency GMock found: YES (building self)\nphosphor-objmgr| Dependency libsystemd found: YES 249 (cached)\nphosphor-objmgr| Dependency libsystemd found: YES 249 (cached)\nphosphor-objmgr| Dependency boost found: YES 1.74.0 (cached)\nphosphor-objmgr| Dependency libsystemd found: YES 249 (cached)\nphosphor-objmgr| Dependency systemd found: YES 249 (cached)\nphosphor-objmgr| Run-time dependency threads found: YES\nphosphor-objmgr| Run-time dependency tinyxml2 found: YES 9.0.0\nphosphor-objmgr| Build targets in project: 636\nphosphor-objmgr| Subproject phosphor-objmgr finished.\n\nWARNING: Variable \u0027mapper_dep\u0027 in the subproject \u0027subprojects/phosphor-objmgr\u0027 is not found\nDependency libmapper from subproject subprojects/phosphor-objmgr found: NO\n\nmeson.build:90:0: ERROR: Dependency \u0027libmapper\u0027 is required but not found.\n",
+      "revId": "25035b8898367bc25a3b5ace7ad08728de7476c6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
