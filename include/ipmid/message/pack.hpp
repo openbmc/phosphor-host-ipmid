@@ -131,7 +131,7 @@ struct PackSingle<std::string>
 
 /** @brief Specialization of PackSingle for fixed_uint_t types
  */
-template <unsigned N>
+template <bitcount_t N>
 struct PackSingle<fixed_uint_t<N>>
 {
     static int op(Payload& p, const fixed_uint_t<N>& t)
