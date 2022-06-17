@@ -157,7 +157,7 @@ struct UnpackSingle<std::string>
 
 /** @brief Specialization of UnpackSingle for fixed_uint_t types
  */
-template <unsigned N>
+template <bitcount_t N>
 struct UnpackSingle<fixed_uint_t<N>>
 {
     static int op(Payload& p, fixed_uint_t<N>& t)
