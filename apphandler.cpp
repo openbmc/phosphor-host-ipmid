@@ -486,7 +486,7 @@ int convertVersion(std::string s, Revision& rev)
     std::string token;
     uint16_t commits;
 
-    auto location = s.find_first_of('v');
+    auto location = s.find_last_of('v', 0);
     if (location != std::string::npos)
     {
         s = s.substr(location + 1);
