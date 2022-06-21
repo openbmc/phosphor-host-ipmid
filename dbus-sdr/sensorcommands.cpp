@@ -117,6 +117,7 @@ static sdbusplus::bus::match_t sensorAdded(
     "sensors/'",
     [](sdbusplus::message_t&) {
         getSensorTree().clear();
+        getIpmiDecoratorPaths(/*fetch=*/false).reset();
         sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
                          std::chrono::system_clock::now().time_since_epoch())
                          .count();
@@ -128,6 +129,7 @@ static sdbusplus::bus::match_t sensorRemoved(
     "sensors/'",
     [](sdbusplus::message_t&) {
         getSensorTree().clear();
+        getIpmiDecoratorPaths(/*fetch=*/false).reset();
         sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
                             std::chrono::system_clock::now().time_since_epoch())
                             .count();
@@ -1591,10 +1593,11 @@ void constructSensorSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
     record.key.owner_lun = lun;
     record.key.sensor_number = sensornumber;
 }
-bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
-                        uint16_t recordID, const std::string& service,
-                        const std::string& path,
-                        get_sdr::SensorDataFullRecord& record)
+bool constructSensorSdr(
+    ipmi::Context::ptr ctx,
+    const std::unordered_set<std::string>& ipmiDecoratorPaths,
+    uint16_t sensorNum, uint16_t recordID, const std::string& service,
+    const std::string& path, get_sdr::SensorDataFullRecord& record)
 {
     constructSensorSdrHeaderKey(sensorNum, recordID, record);
 
@@ -1634,7 +1637,8 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
 
     // follow the association chain to get the parent board's entityid and
     // entityInstance
-    updateIpmiFromAssociation(path, sensorMap, entityId, entityInstance);
+    updateIpmiFromAssociation(path, ipmiDecoratorPaths, sensorMap, entityId,
+                              entityInstance);
 
     record.body.entity_id = entityId;
     record.body.entity_instance = entityInstance;
@@ -1858,9 +1862,10 @@ void constructEventSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
 }
 
 // Construct a type 3 SDR for VR typed sensor(daemon).
-bool constructVrSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
-                    uint16_t recordID, const std::string& service,
-                    const std::string& path,
+bool constructVrSdr(ipmi::Context::ptr ctx,
+                    const std::unordered_set<std::string>& ipmiDecoratorPaths,
+                    uint16_t sensorNum, uint16_t recordID,
+                    const std::string& service, const std::string& path,
                     get_sdr::SensorDataEventRecord& record)
 {
     constructEventSdrHeaderKey(sensorNum, recordID, record);
@@ -1876,7 +1881,8 @@ bool constructVrSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     }
     // follow the association chain to get the parent board's entityid and
     // entityInstance
-    updateIpmiFromAssociation(path, sensorMap, record.body.entity_id,
+    updateIpmiFromAssociation(path, ipmiDecoratorPaths, sensorMap,
+                              record.body.entity_id,
                               record.body.entity_instance);
 
     // Sensor type is hardcoded as a module/board type instead of parsing from
@@ -1908,10 +1914,11 @@ static inline uint16_t getNumberOfSensors()
     return std::min(getSensorTree().size(), maxIPMISensors);
 }
 
-static int
-    getSensorDataRecord(ipmi::Context::ptr ctx,
-                        std::vector<uint8_t>& recordData, uint16_t recordID,
-                        uint8_t readBytes = std::numeric_limits<uint8_t>::max())
+static int getSensorDataRecord(
+    ipmi::Context::ptr ctx,
+    const std::unordered_set<std::string>& ipmiDecoratorPaths,
+    std::vector<uint8_t>& recordData, uint16_t recordID,
+    uint8_t readBytes = std::numeric_limits<uint8_t>::max())
 {
     size_t fruCount = 0;
     ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
@@ -2053,8 +2060,8 @@ static int
         {
             constructSensorSdrHeaderKey(sensorNum, recordID, record);
         }
-        else if (!constructSensorSdr(ctx, sensorNum, recordID, connection, path,
-                                     record))
+        else if (!constructSensorSdr(ctx, ipmiDecoratorPaths, sensorNum,
+                                     recordID, connection, path, record))
         {
             return GENERAL_ERROR;
         }
@@ -2103,8 +2110,8 @@ static int
         {
             constructEventSdrHeaderKey(sensorNum, recordID, record);
         }
-        else if (!constructVrSdr(ctx, sensorNum, recordID, connection, path,
-                                 record))
+        else if (!constructVrSdr(ctx, ipmiDecoratorPaths, sensorNum, recordID,
+                                 connection, path, record))
         {
             return GENERAL_ERROR;
         }
@@ -2145,8 +2152,12 @@ static ipmi::RspType<uint8_t, // respcount
     uint16_t numSensors = getNumberOfSensors();
     if (count.value_or(0) == getSdrCount)
     {
+        auto& ipmiDecoratorPaths = getIpmiDecoratorPaths();
+
         // Count the number of Type 1 SDR entries assigned to the LUN
-        while (!getSensorDataRecord(ctx, record, recordID++))
+        while (!getSensorDataRecord(
+            ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
+            record, recordID++))
         {
             get_sdr::SensorDataRecordHeader* hdr =
                 reinterpret_cast<get_sdr::SensorDataRecordHeader*>(
@@ -2346,8 +2357,12 @@ ipmi::RspType<uint16_t,            // next record ID
         return ipmi::responseResponseError();
     }
 
+    auto& ipmiDecoratorPaths = getIpmiDecoratorPaths();
+
     std::vector<uint8_t> record;
-    if (getSensorDataRecord(ctx, record, recordID, offset + bytesToRead))
+    if (getSensorDataRecord(
+            ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
+            record, recordID, offset + bytesToRead))
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "ipmiStorageGetSDR: fail to get SDR");
