@@ -19,7 +19,6 @@
 #include "dbus-sdr/sdrutils.hpp"
 #include "selutility.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/process.hpp>
 #include <filesystem>
@@ -29,6 +28,7 @@
 #include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
 #include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
@@ -751,8 +751,7 @@ static bool getSELLogFiles(std::vector<std::filesystem::path>& selLogFiles)
              dynamic_sensors::ipmi::sel::selLogDir))
     {
         std::string filename = dirEnt.path().filename();
-        if (boost::starts_with(filename,
-                               dynamic_sensors::ipmi::sel::selLogFilename))
+        if (filename.starts_with(dynamic_sensors::ipmi::sel::selLogFilename))
         {
             // If we find an ipmi_sel log file, save the path
             selLogFiles.emplace_back(dynamic_sensors::ipmi::sel::selLogDir /

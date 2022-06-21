@@ -23,7 +23,6 @@
 
 #include <algorithm>
 #include <array>
-#include <boost/algorithm/string.hpp>
 #include <boost/container/flat_map.hpp>
 #include <chrono>
 #include <cmath>
@@ -449,9 +448,9 @@ std::string parseSdrIdFromPath(const std::string& path)
         // try to not truncate by replacing common words
         for (const auto& suffix : suffixes)
         {
-            if (boost::ends_with(name, suffix))
+            if (name.ends_with(suffix))
             {
-                boost::replace_all(name, suffix, "");
+                name.erase(name.end() - strlen(suffix), name.end());
                 break;
             }
         }
