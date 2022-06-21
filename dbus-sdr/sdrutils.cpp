@@ -109,8 +109,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         for (const auto& sensor : ipmi::sensor::sensors)
         {
             // Threshold sensors should not be emplaced in here.
-            if (boost::starts_with(sensor.second.sensorPath,
-                                   "/xyz/openbmc_project/sensors/"))
+            if (sensor.second.sensorPath.starts_with(
+                    "/xyz/openbmc_project/sensors/"))
             {
                 continue;
             }
@@ -388,10 +388,9 @@ const std::string* getSensorConfigurationInterface(
         }
     }
 
-    for (const auto& entry : entityManagerService->second)
+    for (const std::string& entry : entityManagerService->second)
     {
-        if (boost::algorithm::starts_with(entry,
-                                          "xyz.openbmc_project.Configuration."))
+        if (entry.starts_with("xyz.openbmc_project.Configuration."))
         {
             return &entry;
         }
