@@ -751,8 +751,7 @@ static bool getSELLogFiles(std::vector<std::filesystem::path>& selLogFiles)
              dynamic_sensors::ipmi::sel::selLogDir))
     {
         std::string filename = dirEnt.path().filename();
-        if (boost::starts_with(filename,
-                               dynamic_sensors::ipmi::sel::selLogFilename))
+        if (filename.starts_with(dynamic_sensors::ipmi::sel::selLogFilename))
         {
             // If we find an ipmi_sel log file, save the path
             selLogFiles.emplace_back(dynamic_sensors::ipmi::sel::selLogDir /
