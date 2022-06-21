@@ -24,9 +24,11 @@
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <map>
+#include <optional>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #pragma once
@@ -370,11 +372,16 @@ std::map<std::string, std::vector<std::string>>
 std::map<std::string, Value> getEntityManagerProperties(const char* path,
                                                         const char* interface);
 
+std::optional<std::unordered_set<std::string>>&
+    getIpmiDecoratorPaths(const std::optional<ipmi::Context::ptr>& ctx);
+
 const std::string* getSensorConfigurationInterface(
     const std::map<std::string, std::vector<std::string>>&
         sensorInterfacesResponse);
 
-void updateIpmiFromAssociation(const std::string& path,
-                               const DbusInterfaceMap& sensorMap,
-                               uint8_t& entityId, uint8_t& entityInstance);
+void updateIpmiFromAssociation(
+    const std::string& path,
+    const std::unordered_set<std::string>& ipmiDecoratorPaths,
+    const DbusInterfaceMap& sensorMap, uint8_t& entityId,
+    uint8_t& entityInstance);
 } // namespace ipmi

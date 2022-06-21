@@ -16,6 +16,9 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#include <optional>
+#include <unordered_set>
+
 #ifdef FEATURE_HYBRID_SENSORS
 
 #include <ipmid/utils.hpp>
@@ -365,6 +368,37 @@ std::map<std::string, Value> getEntityManagerProperties(const char* path,
     return properties;
 }
 
+// Fetch the ipmiDecoratorPaths to get the list of dbus objects that
+// have ipmi decorator to prevent unnessary dbus call to fetch the info
+std::optional<std::unordered_set<std::string>>&
+    getIpmiDecoratorPaths(const std::optional<ipmi::Context::ptr>& ctx)
+{
+    static std::optional<std::unordered_set<std::string>> ipmiDecoratorPaths;
+
+    if (!ctx.has_value() || ipmiDecoratorPaths != std::nullopt)
+    {
+        return ipmiDecoratorPaths;
+    }
+
+    boost::system::error_code ec;
+    std::vector<std::string> paths =
+        (*ctx)->bus->yield_method_call<std::vector<std::string>>(
+            (*ctx)->yield, ec, "xyz.openbmc_project.ObjectMapper",
+            "/xyz/openbmc_project/object_mapper",
+            "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths", "/",
+            int32_t(0),
+            std::array<const char*, 1>{
+                "xyz.openbmc_project.Inventory.Decorator.Ipmi"});
+    if (ec)
+    {
+        return ipmiDecoratorPaths;
+    }
+
+    ipmiDecoratorPaths =
+        std::unordered_set<std::string>(paths.begin(), paths.end());
+    return ipmiDecoratorPaths;
+}
+
 const std::string* getSensorConfigurationInterface(
     const std::map<std::string, std::vector<std::string>>&
         sensorInterfacesResponse)
@@ -402,9 +436,11 @@ const std::string* getSensorConfigurationInterface(
 
 // Follow Association properties for Sensor back to the Board dbus object to
 // check for an EntityId and EntityInstance property.
-void updateIpmiFromAssociation(const std::string& path,
-                               const DbusInterfaceMap& sensorMap,
-                               uint8_t& entityId, uint8_t& entityInstance)
+void updateIpmiFromAssociation(
+    const std::string& path,
+    const std::unordered_set<std::string>& ipmiDecoratorPaths,
+    const DbusInterfaceMap& sensorMap, uint8_t& entityId,
+    uint8_t& entityInstance)
 {
     namespace fs = std::filesystem;
 
@@ -456,22 +492,27 @@ void updateIpmiFromAssociation(const std::string& path,
         // the right interface.
 
         // just try grabbing the properties first.
-        std::map<std::string, Value> ipmiProperties =
-            getEntityManagerProperties(
-                endpoint.c_str(),
-                "xyz.openbmc_project.Inventory.Decorator.Ipmi");
+        ipmi::PropertyMap::iterator entityIdProp;
+        ipmi::PropertyMap::iterator entityInstanceProp;
+        if (ipmiDecoratorPaths.contains(endpoint))
+        {
+            std::map<std::string, Value> ipmiProperties =
+                getEntityManagerProperties(
+                    endpoint.c_str(),
+                    "xyz.openbmc_project.Inventory.Decorator.Ipmi");
 
-        auto entityIdProp = ipmiProperties.find("EntityId");
-        auto entityInstanceProp = ipmiProperties.find("EntityInstance");
-        if (entityIdProp != ipmiProperties.end())
-        {
-            entityId =
-                static_cast<uint8_t>(std::get<uint64_t>(entityIdProp->second));
-        }
-        if (entityInstanceProp != ipmiProperties.end())
-        {
-            entityInstance = static_cast<uint8_t>(
-                std::get<uint64_t>(entityInstanceProp->second));
+            entityIdProp = ipmiProperties.find("EntityId");
+            entityInstanceProp = ipmiProperties.find("EntityInstance");
+            if (entityIdProp != ipmiProperties.end())
+            {
+                entityId = static_cast<uint8_t>(
+                    std::get<uint64_t>(entityIdProp->second));
+            }
+            if (entityInstanceProp != ipmiProperties.end())
+            {
+                entityInstance = static_cast<uint8_t>(
+                    std::get<uint64_t>(entityInstanceProp->second));
+            }
         }
 
         // Now check the entity-manager entry for this sensor to see
