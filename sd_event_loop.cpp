@@ -210,7 +210,7 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
                             entry("ERROR=%s", strerror(errno)));
             return EXIT_FAILURE;
         }
-        log<level::INFO>("Bind to interfae",
+        log<level::INFO>("Bind to interface",
                          entry("INTERFACE=%s", iface.c_str()));
     }
     // cannot be constexpr because it gets passed by address
