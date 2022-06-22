@@ -70,6 +70,30 @@
       },
       "revId": "71c60cd983e439bacd27d4b1b7f5365134187c80",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2772e182_60f3c199",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-22T22:05:20Z",
+      "side": 1,
+      "message": "Good find. We actualy don\u0027t need the code you referenced https://gerrit.openbmc.org/c/openbmc/phosphor-ipmi-blobs/+/54820.\n\n---\n\nAs for getChannelMaxTransferSize, I believe it have already taken care of the headers.\n\nThe FRU read with this change return exactly 64 bytes. (this will usually exceed the size) \n```\nipmitool raw 0x0a 0x11 0x57 0x00 0x00 0xff\n 3f 01 00 00 01 00 00 00 fe 01 07 00 56 e7 ba c6\n 51 75 61 6e 74 61 ca 46 72 6f 6e 74 50 61 6e 65\n 6c cf 41 52 50 49 56 53 31 39 31 35 30 30 30 33\n 32 ca 31 30 33 36 38 31 33 2d 30 35 00 00 c1 00\n```",
+      "parentUuid": "77387a84_b78a1dc1",
+      "range": {
+        "startLine": 824,
+        "startChar": 8,
+        "endLine": 824,
+        "endChar": 17
+      },
+      "revId": "71c60cd983e439bacd27d4b1b7f5365134187c80",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
