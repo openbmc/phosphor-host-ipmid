@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "19d65b9b_ae545422",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-06-22T00:36:14Z",
+      "side": 1,
+      "message": "string_view doesn\u0027t guarantee null character ending - will this be an issue with the processing logic? I\u0027m guessing std::from_chars would throw?",
+      "range": {
+        "startLine": 486,
+        "startChar": 24,
+        "endLine": 486,
+        "endChar": 35
+      },
+      "revId": "a21a7cddfbfcf6036f68fbedb72e0029895bf106",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d1cc95dd_59a6aa31",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-06-22T00:36:14Z",
+      "side": 1,
+      "message": "Should we be doing a location check here as well before throwing it into substr?",
+      "range": {
+        "startLine": 544,
+        "startChar": 8,
+        "endLine": 544,
+        "endChar": 16
+      },
+      "revId": "a21a7cddfbfcf6036f68fbedb72e0029895bf106",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
