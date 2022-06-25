@@ -16,6 +16,29 @@
       "message": "friendly ping.",
       "revId": "b61d50f25323646c1ba1ff74677574b5987fa51b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0aa02947_0cca35d0",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-06-25T00:45:10Z",
+      "side": 1,
+      "message": "Maybe I need to take a look at \"setReading\" itself, but it looks like this is slightly different than the previous `setReading(static_cast\u003cint8_t\u003e(rawData), \u0026response);` right?\n\nBecause, we are not passing in a signed integer anymore, we\u0027re always casting it to uint",
+      "range": {
+        "startLine": 273,
+        "startChar": 27,
+        "endLine": 273,
+        "endChar": 34
+      },
+      "revId": "b61d50f25323646c1ba1ff74677574b5987fa51b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
