@@ -39,6 +39,30 @@
       },
       "revId": "b61d50f25323646c1ba1ff74677574b5987fa51b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ee5ad694_a3bf6a82",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-26T18:11:18Z",
+      "side": 1,
+      "message": "https://github.com/openbmc/phosphor-host-ipmid/blob/9ab2f94794c4f4ca1856d35c87abe9fa77356fa3/sensorhandler.hpp#L689-L698\n\nI think it should be fine since all we actually case about is that the data in 8 bits. Even in the case of int8_t, it get converted uint8_t when we pass into the function.",
+      "parentUuid": "0aa02947_0cca35d0",
+      "range": {
+        "startLine": 273,
+        "startChar": 27,
+        "endLine": 273,
+        "endChar": 34
+      },
+      "revId": "b61d50f25323646c1ba1ff74677574b5987fa51b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
