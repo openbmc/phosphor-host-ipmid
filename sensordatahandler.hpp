@@ -250,38 +250,42 @@ GetSensorResponse readingData(const Info& sensorInfo)
         sensorInfo.propertyInterfaces.begin()->first,
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    double value = std::get<T>(propValue) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-    int32_t rawData =
-        (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
+    // Solve the IPMI equation for x, instead of y
+    // https://www.wolframalpha.com/input/?i=solve+y%3D%28%28M*x%29%2B%28B*%2810%5EE%29%29%29*%2810%5ER%29+for+x
+    // x = (10^(-rExp) (y - B 10^(rExp + bExp)))/M and M 10^rExp!=0
+    // TODO(): Compare with this alternative solution from SageMathCell
+    // https://sagecell.sagemath.org/?z=eJyrtC1LLNJQr1TX5KqAMCuATF8I0xfIdIIwnYDMIteKAggPxAIKJMEFkiACxfk5Zaka0ZUKtrYKGhq-CloKFZoK2goaTkCWhqGBgpaWAkilpqYmQgBklmasDlAlAMB8JP0=&lang=sage&interacts=eJyLjgUAARUAuQ==
+    double dX =
+        (std::pow(10.0, -sensorInfo.exponentR) *
+         (std::get<T>(propValue) -
+          (sensorInfo.coefficientB *
+           std::pow(10.0, sensorInfo.exponentR + sensorInfo.exponentB)))) /
+        sensorInfo.coefficientM;
+
+    auto scaledValue = static_cast<int32_t>(std::round(dX));
 
     constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
     constexpr uint8_t signedDataFormat = 0x80;
     // if sensorUnits1 [7:6] = 10b, sensor is signed
     if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) == signedDataFormat)
     {
-        if (rawData > std::numeric_limits<int8_t>::max() ||
-            rawData < std::numeric_limits<int8_t>::lowest())
+        if (scaledValue > std::numeric_limits<int8_t>::max() ||
+            scaledValue < std::numeric_limits<int8_t>::lowest())
         {
             log<level::ERR>("Value out of range");
             throw std::out_of_range("Value out of range");
         }
-        setReading(static_cast<int8_t>(rawData), &response);
+        setReading(static_cast<int8_t>(scaledValue), &response);
     }
     else
     {
-        if (rawData > std::numeric_limits<uint8_t>::max() ||
-            rawData < std::numeric_limits<uint8_t>::lowest())
+        if (scaledValue > std::numeric_limits<uint8_t>::max() ||
+            scaledValue < std::numeric_limits<uint8_t>::lowest())
         {
             log<level::ERR>("Value out of range");
             throw std::out_of_range("Value out of range");
         }
-        setReading(static_cast<uint8_t>(rawData), &response);
-    }
-
-    if (!std::isfinite(value))
-    {
-        response.readingOrStateUnavailable = 1;
+        setReading(static_cast<uint8_t>(scaledValue), &response);
     }
 
     bool critAlarmHigh;
@@ -449,33 +453,37 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
         return {};
     }
 
-    double value = std::get<T>(iter->second) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-    int32_t rawData =
-        (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
+    double dX =
+        (std::pow(10.0, -sensorInfo.exponentR) *
+         (std::get<T>(propValue) -
+          (sensorInfo.coefficientB *
+           std::pow(10.0, sensorInfo.exponentR + sensorInfo.exponentB)))) /
+        sensorInfo.coefficientM;
+
+    auto scaledValue = static_cast<int32_t>(std::round(dX));
 
     constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
     constexpr uint8_t signedDataFormat = 0x80;
     // if sensorUnits1 [7:6] = 10b, sensor is signed
     if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) == signedDataFormat)
     {
-        if (rawData > std::numeric_limits<int8_t>::max() ||
-            rawData < std::numeric_limits<int8_t>::lowest())
+        if (scaledValue > std::numeric_limits<int8_t>::max() ||
+            scaledValue < std::numeric_limits<int8_t>::lowest())
         {
             log<level::ERR>("Value out of range");
             throw std::out_of_range("Value out of range");
         }
-        setReading(static_cast<int8_t>(rawData), &response);
+        setReading(static_cast<int8_t>(scaledValue), &response);
     }
     else
     {
-        if (rawData > std::numeric_limits<uint8_t>::max() ||
-            rawData < std::numeric_limits<uint8_t>::lowest())
+        if (scaledValue > std::numeric_limits<uint8_t>::max() ||
+            scaledValue < std::numeric_limits<uint8_t>::lowest())
         {
             log<level::ERR>("Value out of range");
             throw std::out_of_range("Value out of range");
         }
-        setReading(static_cast<uint8_t>(rawData), &response);
+        setReading(static_cast<uint8_t>(scaledValue), &response);
     }
 
     if (!std::isfinite(value))
