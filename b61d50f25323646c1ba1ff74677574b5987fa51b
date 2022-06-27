@@ -20,6 +20,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "5c7321e3_5b1fda38",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-06-27T16:44:50Z",
+      "side": 1,
+      "message": "it seems like the calculation here differs from https://github.com/openbmc/phosphor-host-ipmid/blob/422385dab9e5027469e516fe321f9ea7c84455ba/dbus-sdr/sensorutils.cpp#L258-L304.\n\nShould we fix that instead? like in https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/54929. Testing in progress.",
+      "range": {
+        "startLine": 248,
+        "startChar": 0,
+        "endLine": 259,
+        "endChar": 46
+      },
+      "revId": "b61d50f25323646c1ba1ff74677574b5987fa51b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0aa02947_0cca35d0",
         "filename": "sensordatahandler.hpp",
         "patchSetId": 12
