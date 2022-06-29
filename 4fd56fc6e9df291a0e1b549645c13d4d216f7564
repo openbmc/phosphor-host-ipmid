@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "57e3c5ee_ace19628",
         "filename": "/COMMIT_MSG",
@@ -20,10 +21,27 @@
         "endChar": 20
       },
       "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "40601ed2_08780dc0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000682
+      },
+      "writtenOn": "2022-06-29T17:24:50Z",
+      "side": 1,
+      "message": "This change is already in https://github.com/openbmc/phosphor-host-ipmid/blob/c710b975dce80ba877b9d98b40455746fb9132ec/include/dbus-sdr/sdrutils.hpp as I believe",
+      "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "c26db45d_0d78ee3b",
         "filename": "include/ipmid/sdrutils.hpp",
@@ -43,10 +61,10 @@
         "endChar": 51
       },
       "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "508a7240_900a3e59",
         "filename": "include/ipmid/sdrutils.hpp",
@@ -67,10 +85,10 @@
         "endChar": 51
       },
       "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "1655b167_b0e4f22d",
         "filename": "include/ipmid/sdrutils.hpp",
@@ -91,10 +109,10 @@
         "endChar": 51
       },
       "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "3fcb557b_bbeb764f",
         "filename": "include/ipmid/sdrutils.hpp",
@@ -115,8 +133,7 @@
         "endChar": 51
       },
       "revId": "4fd56fc6e9df291a0e1b549645c13d4d216f7564",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
