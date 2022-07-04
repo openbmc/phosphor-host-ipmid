@@ -1,3 +1,6 @@
+/build*/
+/subprojects/*
+!subprojects/*.wrap
 Makefile
 Makefile.in
 aclocal.m4

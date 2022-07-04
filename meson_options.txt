@@ -1,0 +1,13 @@
+option(
+    'tests',
+    type : 'feature',
+    value: 'enabled',
+    description : 'Build tests'
+)
+
+option(
+    'rmcp_ping',
+    type : 'feature',
+    value: 'enabled',
+    description : 'Enable RMCP Ping support'
+)
