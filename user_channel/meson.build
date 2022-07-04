@@ -31,6 +31,12 @@ channellayer_dep = declare_dependency(
   link_with: channellayer_lib,
   dependencies: channellayer_pre)
 
+import('pkgconfig').generate(
+  channellayer_lib,
+  name: 'libchannellayer',
+  version: meson.project_version(),
+  description: 'libchannellayer')
+
 if not get_option('libuserlayer').disabled()
   userlayer_pre = declare_dependency(
     include_directories: [root_inc, user_channel_inc],
@@ -84,5 +90,11 @@ if not get_option('libuserlayer').disabled()
     install_dir: get_option('libdir') / 'ipmid-providers',
     version: meson.project_version(),
     override_options: ['b_lundef=false'])
+
+  import('pkgconfig').generate(
+  userlayer_lib,
+  name: 'libuserlayer',
+  version: meson.project_version(),
+  description: 'libuserlayer')
 
 endif
