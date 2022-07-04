@@ -10,11 +10,12 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/local/stream_protocol.hpp>
 #include <boost/asio/write.hpp>
-#include <chrono>
-#include <cmath>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
+
+#include <chrono>
+#include <cmath>
 
 constexpr const char* solInterface = "xyz.openbmc_project.Ipmi.SOL";
 constexpr const char* solPath = "/xyz/openbmc_project/ipmi/sol/";

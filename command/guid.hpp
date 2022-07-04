@@ -2,8 +2,9 @@
 
 #include "comm_module.hpp"
 
-#include <cstddef>
 #include <sdbusplus/bus/match.hpp>
+
+#include <cstddef>
 #include <vector>
 
 namespace command

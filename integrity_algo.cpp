@@ -43,7 +43,6 @@ bool AlgoSHA1::verifyIntegrityData(
     const std::vector<uint8_t>& packet, const size_t length,
     std::vector<uint8_t>::const_iterator integrityData) const
 {
-
     auto output = generateHMAC(
         packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length);
 
@@ -108,7 +107,6 @@ bool AlgoSHA256::verifyIntegrityData(
     const std::vector<uint8_t>& packet, const size_t length,
     std::vector<uint8_t>::const_iterator integrityData) const
 {
-
     auto output = generateHMAC(
         packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length);
 

@@ -8,8 +8,9 @@
 
 #include <sys/socket.h>
 
-#include <memory>
 #include <phosphor-logging/log.hpp>
+
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -108,7 +109,6 @@ void Handler::processIncoming()
 
 void Handler::executeCommand()
 {
-
     // Get the CommandID to map into the command table
     auto command = inMessage->getCommand();
     if (inMessage->payloadType == PayloadType::IPMI)

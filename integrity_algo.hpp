@@ -48,8 +48,7 @@ class Interface
      * @param[in] - AuthCode length
      */
     explicit Interface(size_t authLength) : authCodeLength(authLength)
-    {
-    }
+    {}
 
     Interface() = delete;
     virtual ~Interface() = default;

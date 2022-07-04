@@ -7,11 +7,12 @@
 
 #include <openssl/rand.h>
 
+#include <ipmid/types.hpp>
+#include <phosphor-logging/log.hpp>
+
 #include <algorithm>
 #include <cstring>
 #include <iomanip>
-#include <ipmid/types.hpp>
-#include <phosphor-logging/log.hpp>
 
 using namespace phosphor::logging;
 

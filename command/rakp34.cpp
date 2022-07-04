@@ -6,9 +6,10 @@
 #include "rmcp.hpp"
 #include "sessions_manager.hpp"
 
+#include <phosphor-logging/log.hpp>
+
 #include <algorithm>
 #include <cstring>
-#include <phosphor-logging/log.hpp>
 
 using namespace phosphor::logging;
 
@@ -67,7 +68,6 @@ void applyCryptAlgo(const uint32_t bmcSessionID)
 std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
                             std::shared_ptr<message::Handler>& handler)
 {
-
     std::vector<uint8_t> outPayload(sizeof(RAKP4response));
     auto request = reinterpret_cast<const RAKP3request*>(inPayload.data());
     auto response = reinterpret_cast<RAKP4response*>(outPayload.data());

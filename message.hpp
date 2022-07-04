@@ -123,8 +123,7 @@ struct Message
         rcSessionID(Message::MESSAGE_INVALID_SESSION_ID),
         bmcSessionID(Message::MESSAGE_INVALID_SESSION_ID),
         rmcpMsgClass(ClassOfMsg::RESERVED)
-    {
-    }
+    {}
 
     /**
      * @brief Special behavior for copy constructor

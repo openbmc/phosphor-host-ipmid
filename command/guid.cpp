@@ -4,6 +4,7 @@
 #include <mapper.h>
 
 #include <phosphor-logging/log.hpp>
+
 #include <sstream>
 #include <string>
 

@@ -3,13 +3,14 @@
 #include "main.hpp"
 #include "session.hpp"
 
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/asio/connection.hpp>
+#include <user_channel/channel_layer.hpp>
+
 #include <algorithm>
 #include <cstdlib>
 #include <iomanip>
 #include <memory>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/asio/connection.hpp>
-#include <user_channel/channel_layer.hpp>
 
 using namespace phosphor::logging;
 
@@ -21,7 +22,6 @@ static std::array<uint8_t, session::maxNetworkInstanceSupported>
 
 void Manager::setNetworkInstance(void)
 {
-
     uint8_t index = 0, ch = 1;
     // Constructing net-ipmid instances list based on channel info
     // valid channel start from 1 to 15  and assuming max 4 LAN channel
@@ -35,7 +35,6 @@ void Manager::setNetworkInstance(void)
         if (static_cast<ipmi::EChannelMediumType>(chInfo.mediumType) ==
             ipmi::EChannelMediumType::lan8032)
         {
-
             if (getInterfaceIndex() == ch)
             {
                 ipmiNetworkInstance = index;
@@ -55,7 +54,6 @@ uint8_t Manager::getNetworkInstance(void)
 
 void Manager::managerInit(const std::string& channel)
 {
-
     /*
      * Session ID is 0000_0000h for messages that are sent outside the session.
      * The session setup commands are sent on this session, so when the session
@@ -315,7 +313,6 @@ uint32_t Manager::getSessionIDbyHandle(uint8_t sessionHandle) const
 
 uint8_t Manager::getSessionHandle(SessionID bmcSessionID) const
 {
-
     // Handler index 0 is reserved for invalid session.
     // index starts with 1, for direct usage. Index 0 reserved
     for (size_t i = 1; i < session::maxSessionHandles; i++)
@@ -329,7 +326,6 @@ uint8_t Manager::getSessionHandle(SessionID bmcSessionID) const
 }
 uint8_t Manager::getActiveSessionCount() const
 {
-
     return (std::count_if(
         sessionsMap.begin(), sessionsMap.end(),
         [](const std::pair<const uint32_t, std::shared_ptr<Session>>& in)
@@ -344,9 +340,8 @@ void Manager::scheduleSessionCleaner(const std::chrono::microseconds& when)
     std::chrono::duration expTime = timer.expires_from_now();
     if (expTime > std::chrono::microseconds(0) && expTime < when)
     {
-        // if timer has not already expired AND
-        //    requested timeout is greater than current timeout
-        // then ignore this new requested timeout
+        // if timer has not already expired AND requested timeout is greater
+        // than current timeout then ignore this new requested timeout
         return;
     }
     timer.expires_from_now(when);

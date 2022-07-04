@@ -22,8 +22,7 @@ class Handler : public std::enable_shared_from_this<Handler>
             uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
         sessionID(sessionID),
         channel(channel), io(io)
-    {
-    }
+    {}
 
     /**
      * @brief Create a Handler intended for a send only (SOL)
@@ -32,8 +31,7 @@ class Handler : public std::enable_shared_from_this<Handler>
             uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
         sessionID(sessionID),
         channel(channel), io(nullptr)
-    {
-    }
+    {}
 
     ~Handler();
     Handler() = delete;

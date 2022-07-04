@@ -1,9 +1,10 @@
 #pragma once
 
 #include <boost/asio/io_context.hpp>
+#include <sdbusplus/asio/connection.hpp>
+
 #include <cstddef>
 #include <memory>
-#include <sdbusplus/asio/connection.hpp>
 
 // Select call timeout is set arbitrarily set to 30 sec
 static constexpr size_t SELECT_CALL_TIMEOUT = 30;

@@ -21,8 +21,9 @@
 #include <CLI/CLI.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/connection.hpp>
-#include <tuple>
 #include <user_channel/channel_layer.hpp>
+
+#include <tuple>
 
 using namespace phosphor::logging;
 

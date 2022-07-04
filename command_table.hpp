@@ -15,8 +15,7 @@ struct CommandID
 {
     static constexpr size_t lunBits = 2;
     CommandID(uint32_t command) : command(command)
-    {
-    }
+    {}
 
     uint8_t netFnLun() const
     {
@@ -115,12 +114,10 @@ enum class NetFns
 
 class Entry
 {
-
   public:
     Entry(CommandID command, session::Privilege privilege) :
         command(command), privilege(privilege)
-    {
-    }
+    {}
 
     /**
      * @brief Execute the command
@@ -172,14 +169,12 @@ class Entry
  */
 class NetIpmidEntry final : public Entry
 {
-
   public:
     NetIpmidEntry(CommandID command, CommandFunctor functor,
                   session::Privilege privilege, bool sessionless) :
         Entry(command, privilege),
         functor(functor), sessionless(sessionless)
-    {
-    }
+    {}
 
     /**
      * @brief Execute the command
@@ -218,13 +213,11 @@ class Table
 {
   private:
     struct Private
-    {
-    };
+    {};
 
   public:
     explicit Table(const Private&)
-    {
-    }
+    {}
     Table() = delete;
     ~Table() = default;
     // Command Table is a singleton so copy, copy-assignment, move and

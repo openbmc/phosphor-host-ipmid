@@ -54,8 +54,7 @@ class Interface
                        crypt::Algorithms cryptAlgo) :
         intAlgo(intAlgo),
         cryptAlgo(cryptAlgo)
-    {
-    }
+    {}
 
     Interface() = delete;
     virtual ~Interface() = default;
@@ -167,8 +166,7 @@ class AlgoSHA1 : public Interface
     explicit AlgoSHA1(integrity::Algorithms intAlgo,
                       crypt::Algorithms cryptAlgo) :
         Interface(intAlgo, cryptAlgo)
-    {
-    }
+    {}
 
     AlgoSHA1() = delete;
     ~AlgoSHA1() = default;
@@ -203,8 +201,7 @@ class AlgoSHA256 : public Interface
     explicit AlgoSHA256(integrity::Algorithms intAlgo,
                         crypt::Algorithms cryptAlgo) :
         Interface(intAlgo, cryptAlgo)
-    {
-    }
+    {}
 
     ~AlgoSHA256() = default;
     AlgoSHA256(const AlgoSHA256&) = default;

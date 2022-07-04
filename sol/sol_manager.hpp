@@ -7,6 +7,7 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/local/stream_protocol.hpp>
+
 #include <cstddef>
 #include <map>
 #include <memory>
@@ -39,8 +40,7 @@ class Manager
 {
   private:
     struct Private
-    {
-    };
+    {};
 
   public:
     /** @brief SOL Payload Instance is the key for the map, the value is the
@@ -57,8 +57,7 @@ class Manager
 
     Manager(std::shared_ptr<boost::asio::io_context>& io, const Private&) :
         io(io)
-    {
-    }
+    {}
 
     /**
      * @brief Get a reference to the singleton Manager

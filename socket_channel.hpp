@@ -4,9 +4,10 @@
 #include <sys/types.h>
 
 #include <boost/asio/ip/udp.hpp>
+#include <phosphor-logging/log.hpp>
+
 #include <memory>
 #include <optional>
-#include <phosphor-logging/log.hpp>
 #include <string>
 #include <tuple>
 #include <variant>
@@ -42,8 +43,7 @@ class Channel
      */
     explicit Channel(std::shared_ptr<boost::asio::ip::udp::socket> socket) :
         socket(socket)
-    {
-    }
+    {}
     /**
      * @brief Check if ip address is ipv4 mapped ipv6
      *

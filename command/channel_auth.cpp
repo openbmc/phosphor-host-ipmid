@@ -2,17 +2,18 @@
 
 #include <ipmid/api.h>
 
-#include <fstream>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
-#include <set>
-#include <string>
 #include <user_channel/channel_layer.hpp>
 #include <user_channel/user_layer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+
+#include <fstream>
+#include <set>
+#include <string>
 
 namespace command
 {

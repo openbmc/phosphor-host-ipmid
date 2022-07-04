@@ -6,9 +6,10 @@
 #include <systemd/sd-event.h>
 
 #include <boost/asio/io_context.hpp>
+#include <sdbusplus/asio/connection.hpp>
+
 #include <chrono>
 #include <map>
-#include <sdbusplus/asio/connection.hpp>
 #include <string>
 
 namespace ipmi
@@ -43,14 +44,12 @@ class EventLoop
 {
   private:
     struct Private
-    {
-    };
+    {};
 
   public:
     EventLoop(std::shared_ptr<boost::asio::io_context>& io, const Private&) :
         io(io)
-    {
-    }
+    {}
     EventLoop() = delete;
     ~EventLoop() = default;
     EventLoop(const EventLoop&) = delete;
