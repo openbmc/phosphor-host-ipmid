@@ -241,12 +241,12 @@ int EventLoop::startEventLoop()
 {
     // set up boost::asio signal handling
     boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
-    signals.async_wait(
-        [this](const boost::system::error_code& error, int signalNumber) {
-            udpSocket->cancel();
-            udpSocket->close();
-            io->stop();
-        });
+    signals.async_wait([this](const boost::system::error_code& /* error */,
+                              int /* signalNumber */) {
+        udpSocket->cancel();
+        udpSocket->close();
+        io->stop();
+    });
 
     startRmcpReceive();
 

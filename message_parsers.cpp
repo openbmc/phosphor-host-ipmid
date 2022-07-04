@@ -133,8 +133,9 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     return message;
 }
 
-std::vector<uint8_t> flatten(const std::shared_ptr<Message>& outMessage,
-                             const std::shared_ptr<session::Session>& session)
+std::vector<uint8_t>
+    flatten(const std::shared_ptr<Message>& outMessage,
+            const std::shared_ptr<session::Session>& /* session */)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -316,7 +317,7 @@ void addSequenceNumber(std::vector<uint8_t>& packet,
 }
 
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
-                           const std::shared_ptr<Message>& message,
+                           const std::shared_ptr<Message>& /* message */,
                            size_t payloadLen,
                            const std::shared_ptr<session::Session>& session)
 {
@@ -369,7 +370,7 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
 }
 
 void addIntegrityData(std::vector<uint8_t>& packet,
-                      const std::shared_ptr<Message>& message,
+                      const std::shared_ptr<Message>& /* message */,
                       size_t payloadLen,
                       const std::shared_ptr<session::Session>& session)
 {
@@ -394,7 +395,8 @@ void addIntegrityData(std::vector<uint8_t>& packet,
 
 std::vector<uint8_t>
     decryptPayload(const std::vector<uint8_t>& packet,
-                   const std::shared_ptr<Message>& message, size_t payloadLen,
+                   const std::shared_ptr<Message>& /* message */,
+                   size_t payloadLen,
                    const std::shared_ptr<session::Session>& session)
 {
     return session->getCryptAlgo()->decryptPayload(

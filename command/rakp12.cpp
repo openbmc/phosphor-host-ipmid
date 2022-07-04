@@ -39,7 +39,7 @@ void logInvalidLoginRedfishEvent(const std::string& journalMsg,
                                  messageArgs.value().c_str()));
 }
 std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
-                            std::shared_ptr<message::Handler>& handler)
+                            std::shared_ptr<message::Handler>& /* handler */)
 {
     auto request = reinterpret_cast<const RAKP1request*>(inPayload.data());
     // verify inPayload minimum size

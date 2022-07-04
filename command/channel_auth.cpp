@@ -24,7 +24,7 @@ using Json = nlohmann::json;
 
 std::vector<uint8_t>
     GetChannelCapabilities(const std::vector<uint8_t>& inPayload,
-                           std::shared_ptr<message::Handler>& handler)
+                           std::shared_ptr<message::Handler>& /* handler */)
 {
     auto request =
         reinterpret_cast<const GetChannelCapabilitiesReq*>(inPayload.data());
@@ -183,7 +183,7 @@ static std::pair<std::vector<uint8_t>, std::vector<uint8_t>> getCipherRecords()
  **/
 std::vector<uint8_t>
     getChannelCipherSuites(const std::vector<uint8_t>& inPayload,
-                           std::shared_ptr<message::Handler>& handler)
+                           std::shared_ptr<message::Handler>& /* handler */)
 {
     const auto errorResponse = [](uint8_t cc) {
         std::vector<uint8_t> rsp(1);

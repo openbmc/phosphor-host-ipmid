@@ -11,8 +11,9 @@ using namespace phosphor::logging;
 namespace command
 {
 
-std::vector<uint8_t> openSession(const std::vector<uint8_t>& inPayload,
-                                 std::shared_ptr<message::Handler>& handler)
+std::vector<uint8_t>
+    openSession(const std::vector<uint8_t>& inPayload,
+                std::shared_ptr<message::Handler>& /* handler */)
 {
     auto request =
         reinterpret_cast<const OpenSessionRequest*>(inPayload.data());
