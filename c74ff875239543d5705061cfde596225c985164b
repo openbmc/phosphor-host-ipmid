@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4fde5f03_5c1111b5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001292
+      },
+      "writtenOn": "2022-07-04T20:37:00Z",
+      "side": 1,
+      "message": "Please update the patchset to resolve the build issue so the code review can proceed.",
+      "revId": "c74ff875239543d5705061cfde596225c985164b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
