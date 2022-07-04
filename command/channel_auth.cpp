@@ -1,12 +1,13 @@
 #include "channel_auth.hpp"
 
+#include <errno.h>
 #include <ipmid/api.h>
 
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <user_channel/channel_layer.hpp>
 #include <user_channel/user_layer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -120,14 +121,16 @@ static std::pair<std::vector<uint8_t>, std::vector<uint8_t>> getCipherRecords()
     std::ifstream jsonFile(configFile);
     if (!jsonFile.is_open())
     {
-        log<level::ERR>("Channel Cipher suites file not found");
+        lg2::error("Channel Cipher suites file not found: {ERROR}", "ERROR",
+                   strerror(errno));
         elog<InternalFailure>();
     }
 
     auto data = Json::parse(jsonFile, nullptr, false);
     if (data.is_discarded())
     {
-        log<level::ERR>("Parsing channel cipher suites JSON failed");
+        lg2::error("Parsing channel cipher suites JSON failed: {ERROR}",
+                   "ERROR", strerror(errno));
         elog<InternalFailure>();
     }
 
@@ -231,7 +234,8 @@ std::vector<uint8_t>
     }
     if (!ipmi::isValidPayloadType(static_cast<ipmi::PayloadType>(payloadType)))
     {
-        log<level::DEBUG>("Get channel cipher suites - Invalid payload type");
+        lg2::debug("Get channel cipher suites - Invalid payload type: {ERROR}",
+                   "ERROR", strerror(errno));
         constexpr uint8_t ccPayloadTypeNotSupported = 0x80;
         return errorResponse(ccPayloadTypeNotSupported);
     }
@@ -258,7 +262,8 @@ std::vector<uint8_t>
          ipmi::EChannelSessSupported::none) ||
         !(ipmi::doesDeviceExist(rspChannel)))
     {
-        log<level::DEBUG>("Get channel cipher suites - Device does not exist");
+        lg2::debug("Get channel cipher suites - Device does not exist:{ERROR}",
+                   "ERROR", strerror(errno));
         return errorResponse(IPMI_CC_INVALID_FIELD_REQUEST);
     }
 

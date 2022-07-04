@@ -8,13 +8,11 @@
 #include <openssl/rand.h>
 
 #include <ipmid/types.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <algorithm>
 #include <cstring>
 #include <iomanip>
-
-using namespace phosphor::logging;
 
 namespace command
 {
@@ -32,11 +30,10 @@ void logInvalidLoginRedfishEvent(const std::string& journalMsg,
     std::string messageID = "OpenBMC." +
                             std::string(openBMCMessageRegistryVersion) +
                             "InvalidLoginAttempted";
-    phosphor::logging::log<phosphor::logging::level::ERR>(
-        journalMsg.c_str(),
-        phosphor::logging::entry("REDFISH_MESSAGE_ID=%s", messageID.c_str()),
-        phosphor::logging::entry("REDFISH_MESSAGE_ARGS=%s",
-                                 messageArgs.value().c_str()));
+    lg2::error(
+        "message: {MSG}, id: {REDFISH_MESSAGE_ID}, args: {REDFISH_MESSAGE_ARGS}",
+        "MSG", journalMsg, "REDFISH_MESSAGE_ID", messageID,
+        "REDFISH_MESSAGE_ARGS", messageArgs.value());
 }
 std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
                             std::shared_ptr<message::Handler>& /* handler */)
@@ -56,7 +53,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     if (endian::from_ipmi(request->managedSystemSessionID) ==
         session::sessionZero)
     {
-        log<level::INFO>("RAKP12: BMC invalid Session ID");
+        lg2::info("RAKP12: BMC invalid Session ID");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -70,8 +67,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("RAKP12 : session not found",
-                        entry("EXCEPTION=%s", e.what()));
+        lg2::error("RAKP12 : session not found: {ERROR}", "ERROR", e);
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -211,8 +207,9 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     // Check whether user is already locked for failed attempts
     if (!ipmi::ipmiUserPamAuthenticate(userName, passwd))
     {
-        log<level::ERR>("Authentication failed - user already locked out",
-                        entry("USER-ID=%d", static_cast<uint8_t>(userId)));
+        lg2::error(
+            "Authentication failed - user already locked out, user id: {ID}",
+            "ID", userId);
 
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
@@ -234,8 +231,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     }
     if (!isChannelAccessModeEnabled(session->sessionChannelAccess.accessMode))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Channel access mode disabled.");
+        lg2::error("Channel access mode disabled.");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INACTIVE_ROLE);
         logInvalidLoginRedfishEvent(message);
@@ -274,8 +270,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         ((request->req_max_privilege_level & session::reqMaxPrivMask) !=
          session->sessionUserPrivAccess.privilege))
     {
-        log<level::INFO>(
-            "Username/Privilege lookup failed for requested privilege");
+        lg2::info("Username/Privilege lookup failed for requested privilege");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::UNAUTH_NAME);
 

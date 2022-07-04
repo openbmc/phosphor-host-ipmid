@@ -8,17 +8,14 @@
 
 #include <sys/socket.h>
 
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <memory>
 #include <string>
 #include <vector>
 
-using namespace phosphor::logging;
-
 namespace message
 {
-using namespace phosphor::logging;
 
 bool Handler::receive()
 {
@@ -31,7 +28,7 @@ bool Handler::receive()
     // Read of the packet failed
     if (readStatus < 0)
     {
-        log<level::ERR>("Error in Read", entry("STATUS=%x", readStatus));
+        lg2::error("Error in Read status: {STATUS}", "STATUS", readStatus);
         return false;
     }
 
@@ -82,8 +79,7 @@ Handler::~Handler()
     catch (const std::exception& e)
     {
         // send failed, most likely due to a session closure
-        log<level::INFO>("Async RMCP+ reply failed",
-                         entry("EXCEPTION=%s", e.what()));
+        lg2::info("Async RMCP+ reply failed: {ERROR}", "ERROR", e);
     }
 }
 

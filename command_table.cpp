@@ -7,15 +7,10 @@
 
 #include <ipmid/types.hpp>
 #include <main.hpp>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <user_channel/user_layer.hpp>
-#include <xyz/openbmc_project/Common/error.hpp>
 
 #include <iomanip>
-
-using namespace sdbusplus::xyz::openbmc_project::Common::Error;
-using namespace phosphor::logging;
 
 namespace command
 {
@@ -26,9 +21,8 @@ void Table::registerCommand(CommandID inCommand, std::unique_ptr<Entry>&& entry)
 
     if (command)
     {
-        log<level::DEBUG>(
-            "Already Registered",
-            phosphor::logging::entry("SKIPPED_ENTRY=0x%x", inCommand.command));
+        lg2::debug("Already Registered: {COMMAND}", "COMMAND",
+                   inCommand.command);
         return;
     }
 
@@ -50,10 +44,10 @@ void Table::executeCommand(uint32_t inCommand,
         // Do not forward any session zero commands to ipmid
         if (handler->sessionID == session::sessionZero)
         {
-            log<level::INFO>("Table: refuse to forward session-zero command",
-                             entry("LUN=%x", command.lun()),
-                             entry("NETFN=%x", command.netFn()),
-                             entry("CMD=%x", command.cmd()));
+            lg2::info(
+                "Table: refuse to forward session-zero command: lun: {LUN}, netFn: {NETFN}, command: {COMMAND}",
+                "LUN", command.lun(), "NETFN", command.netFn(), "COMMAND",
+                command.cmd());
             return;
         }
         std::shared_ptr<session::Session> session =
@@ -137,8 +131,8 @@ void Table::executeCommand(uint32_t inCommand,
         // exceeded message
         if (elapsedSeconds > 2s)
         {
-            log<level::ERR>("IPMI command timed out",
-                            entry("DELAY=%zu", elapsedSeconds.count()));
+            lg2::error("IPMI command timed out: {DELAY}", "DELAY",
+                       elapsedSeconds.count());
         }
     }
 }
@@ -154,10 +148,10 @@ std::vector<uint8_t>
     {
         errResponse.resize(1);
         errResponse[0] = IPMI_CC_INSUFFICIENT_PRIVILEGE;
-        log<level::INFO>("Table: Insufficient privilege for command",
-                         entry("LUN=%x", command.lun()),
-                         entry("NETFN=%x", command.netFn()),
-                         entry("CMD=%x", command.cmd()));
+        lg2::info(
+            "Table: Insufficient privilege for command: lun: {LUN}, netFn: {NETFN}, command: {COMMAND}",
+            "LUN", command.lun(), "NETFN", command.netFn(), "COMMAND",
+            command.cmd());
         return errResponse;
     }
 

@@ -19,13 +19,11 @@
 #include <unistd.h>
 
 #include <CLI/CLI.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <user_channel/channel_layer.hpp>
 
 #include <tuple>
-
-using namespace phosphor::logging;
 
 static auto io = std::make_shared<boost::asio::io_context>();
 std::shared_ptr<boost::asio::io_context> getIo()
@@ -63,9 +61,8 @@ static void setInterfaceIndex(const std::string& channel)
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Requested channel name is not a valid channel name",
-                        entry("ERROR=%s", e.what()),
-                        entry("CHANNEL=%s", channel.c_str()));
+        lg2::error("Requested {NAME} is not a valid channel name: {ERROR}",
+                   "NAME", channel, "ERROR", e);
     }
 }
 EInterfaceIndex getInterfaceIndex(void)
@@ -88,8 +85,8 @@ int main(int argc, char* argv[])
     auto rc = sd_bus_default_system(&bus);
     if (rc < 0)
     {
-        log<level::ERR>("Failed to connect to system bus",
-                        entry("ERROR=%s", strerror(-rc)));
+        lg2::error("Failed to connect to system bus: {ERROR}", "ERROR",
+                   strerror(-rc));
         return rc;
     }
     sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);

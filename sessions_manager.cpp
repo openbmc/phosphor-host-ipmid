@@ -3,7 +3,7 @@
 #include "main.hpp"
 #include "session.hpp"
 
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <user_channel/channel_layer.hpp>
 
@@ -11,8 +11,6 @@
 #include <cstdlib>
 #include <iomanip>
 #include <memory>
-
-using namespace phosphor::logging;
 
 namespace session
 {
@@ -171,7 +169,7 @@ std::shared_ptr<Session>
         return session;
     }
 
-    log<level::INFO>("No free RMCP+ sessions left");
+    lg2::info("No free RMCP+ sessions left");
 
     throw std::runtime_error("No free sessions left");
 }
@@ -265,11 +263,10 @@ void Manager::cleanStaleEntries()
         }
         if (!(session->isSessionActive(activeGrace, setupGrace)))
         {
-            log<level::INFO>(
-                "Removing idle IPMI LAN session",
-                entry("SESSION_ID=%x", session->getBMCSessionID()),
-                entry("HANDLE=%x",
-                      getSessionHandle(session->getBMCSessionID())));
+            lg2::info(
+                "Removing idle IPMI LAN session, id: {ID}, handler: {HANDLE}",
+                "ID", session->getBMCSessionID(), "HANDLE",
+                getSessionHandle(session->getBMCSessionID()));
             sessionHandleMap[getSessionHandle(session->getBMCSessionID())] = 0;
             iter = sessionsMap.erase(iter);
         }

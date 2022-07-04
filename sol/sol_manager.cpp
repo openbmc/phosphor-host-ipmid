@@ -11,7 +11,7 @@
 #include <boost/asio/local/stream_protocol.hpp>
 #include <boost/asio/write.hpp>
 #include <ipmid/utils.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 
 #include <chrono>
@@ -23,8 +23,6 @@ constexpr const char* PROP_INTF = "org.freedesktop.DBus.Properties";
 
 namespace sol
 {
-
-using namespace phosphor::logging;
 
 std::unique_ptr<sdbusplus::bus::match_t> matchPtrSOL(nullptr);
 std::unique_ptr<sdbusplus::bus::match_t> solConfPropertiesSignal(nullptr);
@@ -51,8 +49,9 @@ void Manager::consoleInputHandler()
     }
     else
     {
-        log<level::ERR>("Reading ready count from host console socket failed:",
-                        entry("EXCEPTION=%s", ec.message().c_str()));
+        lg2::error(
+            "Reading ready count from host console socket failed: {ERROR}",
+            "ERROR", ec.value());
         return;
     }
     std::vector<uint8_t> buffer(readSize);
@@ -61,8 +60,8 @@ void Manager::consoleInputHandler()
         consoleSocket->read_some(boost::asio::buffer(buffer), ec);
     if (ec)
     {
-        log<level::ERR>("Reading from host console socket failed:",
-                        entry("EXCEPTION=%s", ec.message().c_str()));
+        lg2::error("Reading from host console socket failed: {ERROR}", "ERROR",
+                   ec.value());
         return;
     }
 
@@ -128,8 +127,7 @@ void Manager::updateSOLParameter(uint8_t channelNum)
         catch (const std::runtime_error& e)
         {
             solService.clear();
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Error: get SOL service failed");
+            lg2::error("Get SOL service failed: {ERROR}", "ERROR", e);
             return;
         }
     }
@@ -138,10 +136,9 @@ void Manager::updateSOLParameter(uint8_t channelNum)
         properties = ipmi::getAllDbusProperties(
             dbus, solService, solPathWitheEthName, solInterface);
     }
-    catch (const std::runtime_error&)
+    catch (const std::runtime_error& e)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Error setting sol parameter");
+        lg2::error("Setting sol parameter: {ERROR}", "ERROR", e);
         return;
     }
 
@@ -181,9 +178,9 @@ void Manager::startPayloadInstance(uint8_t payloadInstance,
         }
         catch (const std::exception& e)
         {
-            log<level::ERR>("Encountered exception when starting host console. "
-                            "Hence stopping host console.",
-                            entry("EXCEPTION=%s", e.what()));
+            lg2::error(
+                "Encountered exception when starting host console. Hence stopping host console: {ERROR}",
+                "ERROR", e);
             stopHostConsole();
             throw;
         }
@@ -265,8 +262,9 @@ void registerSOLServiceChangeCallback()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>(
-            "Failed to get service path in registerSOLServiceChangeCallback");
+        lg2::error(
+            "Failed to get service path in registerSOLServiceChangeCallback: {ERROR}",
+            "ERROR", e);
     }
 }
 
@@ -285,9 +283,8 @@ void procSolConfChange(sdbusplus::message_t& msg)
     }
     catch (const std::exception& e)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "procSolConfChange get properties FAIL",
-            entry("ERROR=%s", e.what()));
+        lg2::error("procSolConfChange get properties FAIL: {ERROR}", "ERROR",
+                   e);
         return;
     }
 
@@ -351,9 +348,9 @@ void registerSolConfChangeCallbackHandler(std::string channel)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            log<level::ERR>("Failed to get service path in "
-                            "registerSolConfChangeCallbackHandler",
-                            entry("CHANNEL=%s", channel.c_str()));
+            lg2::error(
+                "Failed to get service path in registerSolConfChangeCallbackHandler, channel: {CHANNEL}, error: {ERROR}",
+                "CHANNEL", channel, "ERROR", e);
         }
     }
     return;

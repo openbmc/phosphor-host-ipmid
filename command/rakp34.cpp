@@ -6,12 +6,10 @@
 #include "rmcp.hpp"
 #include "sessions_manager.hpp"
 
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <algorithm>
 #include <cstring>
-
-using namespace phosphor::logging;
 
 namespace command
 {
@@ -75,7 +73,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     // Check if the RAKP3 Payload Length is as expected
     if (inPayload.size() < sizeof(RAKP3request))
     {
-        log<level::INFO>("RAKP34: Invalid RAKP3 request");
+        lg2::info("RAKP34: Invalid RAKP3 request");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_INTEGRITY_VALUE);
         return outPayload;
@@ -85,7 +83,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     if (endian::from_ipmi(request->managedSystemSessionID) ==
         session::sessionZero)
     {
-        log<level::INFO>("RAKP34: BMC invalid Session ID");
+        lg2::info("RAKP34: BMC invalid Session ID");
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -99,8 +97,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("RAKP12 : session not found",
-                        entry("EXCEPTION=%s", e.what()));
+        lg2::error("RAKP12 : session not found: {ERROR}", "ERROR", e);
         response->rmcpStatusCode =
             static_cast<uint8_t>(RAKP_ReturnCode::INVALID_SESSION_ID);
         return outPayload;
@@ -162,7 +159,7 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     if (inPayload.size() != (sizeof(RAKP3request) + output.size()) ||
         std::memcmp(output.data(), request + 1, output.size()))
     {
-        log<level::INFO>("Mismatch in HMAC sent by remote console");
+        lg2::info("Mismatch in HMAC sent by remote console");
 
         response->messageTag = request->messageTag;
         response->rmcpStatusCode =

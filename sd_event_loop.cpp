@@ -3,6 +3,7 @@
 #include "main.hpp"
 #include "message_handler.hpp"
 
+#include <error.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -10,13 +11,12 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/asio/sd_event.hpp>
 #include <user_channel/channel_layer.hpp>
 
 namespace eventloop
 {
-using namespace phosphor::logging;
 
 void EventLoop::handleRmcpPacket()
 {
@@ -31,8 +31,7 @@ void EventLoop::handleRmcpPacket()
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Executing the IPMI message failed",
-                        entry("EXCEPTION=%s", e.what()));
+        lg2::error("Executing the IPMI message failed: {ERROR}", "ERROR", e);
     }
 }
 
@@ -70,7 +69,8 @@ int EventLoop::getVLANID(const std::string channel)
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("getVLANID: failed to execute/read GetSubTree");
+        lg2::error("getVLANID: failed to execute/read GetSubTree: {ERROR}",
+                   "ERROR", e);
         return 0;
     }
 
@@ -124,15 +124,15 @@ int EventLoop::getVLANID(const std::string channel)
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("getVLANID: failed to execute/read VLAN Id");
+        lg2::error("getVLANID: failed to execute/read VLAN Id: {ERROR}",
+                   "ERROR", e);
         return 0;
     }
 
     vlanid = std::get<uint32_t>(value);
     if ((vlanid & VLAN_VALUE_MASK) != vlanid)
     {
-        log<level::ERR>("networkd returned an invalid vlan",
-                        entry("VLAN=%", vlanid));
+        lg2::error("networkd returned an invalid vlan: {VLAN}", "VLAN", vlanid);
         return 0;
     }
 
@@ -156,15 +156,15 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
         if (vlanid)
         {
             iface = iface + "." + std::to_string(vlanid);
-            log<level::DEBUG>("This channel has VLAN id",
-                              entry("VLANID=%d", vlanid));
+            lg2::debug("This channel has VLAN id: {VLAN}", "VLAN", vlanid);
         }
     }
     // Create our own socket if SysD did not supply one.
     int listensFdCount = sd_listen_fds(0);
     if (listensFdCount > 1)
     {
-        log<level::ERR>("Too many file descriptors received");
+        lg2::error("Too many file descriptors received, listensFdCount: {FD}",
+                   "FD", listensFdCount);
         return EXIT_FAILURE;
     }
     if (listensFdCount == 1)
@@ -172,7 +172,8 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
         int openFd = SD_LISTEN_FDS_START;
         if (!sd_is_socket(openFd, AF_UNSPEC, SOCK_DGRAM, -1))
         {
-            log<level::ERR>("Failed to set up systemd-passed socket");
+            lg2::error("Failed to set up systemd-passed socket: {ERROR}",
+                       "ERROR", strerror(errno));
             return EXIT_FAILURE;
         }
         udpSocket = std::make_shared<boost::asio::ip::udp::socket>(
@@ -196,8 +197,8 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
     if ((::getsockopt(udpSocket->native_handle(), SOL_SOCKET, SO_BINDTODEVICE,
                       nameout, &lenout) == -1))
     {
-        log<level::ERR>("Failed to read bound device",
-                        entry("ERROR=%s", strerror(errno)));
+        lg2::error("Failed to read bound device: {ERROR}", "ERROR",
+                   strerror(errno));
     }
     if (iface != nameout && iface != unboundIface)
     {
@@ -206,12 +207,11 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
                           SO_BINDTODEVICE, iface.c_str(),
                           iface.size() + 1) == -1))
         {
-            log<level::ERR>("Failed to bind to requested interface",
-                            entry("ERROR=%s", strerror(errno)));
+            lg2::error("Failed to bind to requested interface: {ERROR}",
+                       "ERROR", strerror(errno));
             return EXIT_FAILURE;
         }
-        log<level::INFO>("Bind to interface",
-                         entry("INTERFACE=%s", iface.c_str()));
+        lg2::info("Bind to interface: {INTERFACE}", "INTERFACE", iface);
     }
     // cannot be constexpr because it gets passed by address
     const int option_enabled = 1;
@@ -229,9 +229,8 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Failed to acquire D-Bus name",
-                        entry("NAME=%s", busName.c_str()),
-                        entry("ERROR=%s", e.what()));
+        lg2::error("Failed to acquire D-Bus name: {NAME}: {ERROR}", "NAME",
+                   busName, "ERROR", e);
         return EXIT_FAILURE;
     }
     return 0;

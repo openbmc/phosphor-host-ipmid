@@ -7,15 +7,13 @@
 #include <ipmid/api.h>
 
 #include <ipmid/api-types.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 namespace sol
 {
 
 namespace command
 {
-
-using namespace phosphor::logging;
 
 std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
                                      std::shared_ptr<message::Handler>& handler)
@@ -94,7 +92,7 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("Failed to start SOL payload: {ERROR}", "ERROR", e);
         response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
         return outPayload;
     }
@@ -161,7 +159,8 @@ std::vector<uint8_t>
         }
         catch (const std::exception& e)
         {
-            log<level::INFO>(e.what());
+            lg2::info("Failed to call the activating method: {ERROR}", "ERROR",
+                      e);
             /*
              * In case session has been closed (like in the case of inactivity
              * timeout), then activating function would throw an exception,
@@ -173,7 +172,7 @@ std::vector<uint8_t>
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("Failed to call the getContext method: {ERROR}", "ERROR", e);
         response->completionCode = IPMI_CC_UNSPECIFIED_ERROR;
         return outPayload;
     }

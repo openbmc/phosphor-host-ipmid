@@ -6,7 +6,9 @@
 #include "sessions_manager.hpp"
 #include "sol_manager.hpp"
 
-#include <phosphor-logging/log.hpp>
+#include <errno.h>
+
+#include <phosphor-logging/lg2.hpp>
 
 namespace sol
 {
@@ -96,7 +98,7 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
      */
     if (seqNum && (seqNum != seqNums.get(true)))
     {
-        log<level::INFO>("Out of sequence SOL packet - packet is dropped");
+        lg2::info("Out of sequence SOL packet - packet is dropped");
         return;
     }
 
@@ -108,7 +110,7 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
      */
     if (ackSeqNum && (ackSeqNum != seqNums.get(false)))
     {
-        log<level::INFO>("Out of sequence ack number - SOL packet is dropped");
+        lg2::info("Out of sequence ack number - SOL packet is dropped");
         return;
     }
 
@@ -149,7 +151,8 @@ void Context::processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum,
         auto rc = sol::Manager::get().writeConsoleSocket(input);
         if (rc)
         {
-            log<level::ERR>("Writing to console socket descriptor failed");
+            lg2::error("Writing to console socket descriptor failed: {ERROR}",
+                       "ERROR", strerror(errno));
             ack = true;
         }
         else
@@ -283,7 +286,8 @@ void Context::charAccTimerHandler()
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("Failed to call the sendOutboundPayload method: {ERROR}",
+                   "ERROR", e);
     }
 }
 
@@ -307,7 +311,7 @@ void Context::retryTimerHandler()
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("Failed to retry timer: {ERROR}", "ERROR", e);
     }
 }
 } // namespace sol

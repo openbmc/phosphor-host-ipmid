@@ -4,7 +4,7 @@
 #include "sol/sol_context.hpp"
 #include "sol/sol_manager.hpp"
 
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 namespace sol
 {
@@ -43,7 +43,7 @@ std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("Failed to call the getContext method: {ERROR}", "ERROR", e);
         return std::vector<uint8_t>();
     }
 
