@@ -16,6 +16,24 @@
       "message": "Please update the patchset to resolve the build issue so the code review can proceed.",
       "revId": "c74ff875239543d5705061cfde596225c985164b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "63e926f3_f9fd4ff3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-07-05T05:40:14Z",
+      "side": 1,
+      "message": "Ack. Working on it.",
+      "parentUuid": "4fde5f03_5c1111b5",
+      "revId": "c74ff875239543d5705061cfde596225c985164b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
