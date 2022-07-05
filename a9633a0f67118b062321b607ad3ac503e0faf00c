@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2de9d7a1_f503dc4f",
+        "filename": "user_channel/meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-07-05T12:10:13Z",
+      "side": 1,
+      "message": "Can you update the indentation for consistency?  Looks like this file is using 2-space indentation.",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 98,
+        "endChar": 30
+      },
+      "revId": "a9633a0f67118b062321b607ad3ac503e0faf00c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
