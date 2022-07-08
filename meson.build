@@ -1,5 +1,5 @@
 project(
-  'phosphor-host-ipimd',
+  'phosphor-host-ipmid',
   'cpp',
   version: '0.1',
   meson_version: '>=0.57.0',

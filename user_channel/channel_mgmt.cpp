@@ -335,7 +335,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
     initChannelPersistData();
 
     sigHndlrLock = boost::interprocess::file_lock(channelNvDataFilename);
-    // Register it for single object and single process either netipimd /
+    // Register it for single object and single process either netipmid /
     // host-ipmid
     if (chPropertiesSignal == nullptr && sigHndlrLock.try_lock())
     {
