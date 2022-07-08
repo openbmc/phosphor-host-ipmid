@@ -1646,7 +1646,7 @@ void UserAccess::cacheUserDataFile()
     close(fd);
 
     sigHndlrLock = boost::interprocess::file_lock(ipmiUserSignalLockFile);
-    // Register it for single object and single process either netipimd /
+    // Register it for single object and single process either netipmid /
     // host-ipmid
     if (userUpdatedSignal == nullptr && sigHndlrLock.try_lock())
     {
