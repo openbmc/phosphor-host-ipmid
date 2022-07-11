@@ -16,6 +16,23 @@
       "message": "friendly ping",
       "revId": "69d9f8e09ac6c15d77d3491de91aeea5ba4df29f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "afa5b02a_e6704046",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-07-11T08:30:52Z",
+      "side": 1,
+      "message": "I tested this patch on my platform.",
+      "revId": "69d9f8e09ac6c15d77d3491de91aeea5ba4df29f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
