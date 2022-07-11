@@ -87,6 +87,41 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "878740e0_09d4837e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-07-11T01:24:55Z",
+      "side": 1,
+      "message": "It\u0027s OK. Thanks your help to review this.",
+      "parentUuid": "0f05deb6_822254aa",
+      "revId": "a3061d094fd525e5f532dffbe1eac34992b5ee12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "23530a90_135b1a36",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-07-11T01:24:55Z",
+      "side": 1,
+      "message": "Hi Tom,\nCould you help to check my reply and review it? Thank you.\n\nBest regards,\nTim",
+      "revId": "a3061d094fd525e5f532dffbe1eac34992b5ee12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1bde69fc_53d24ba9",
@@ -100,6 +135,24 @@
       "writtenOn": "2022-07-08T12:49:14Z",
       "side": 1,
       "message": "I read the commit message, wanted to confirm that this cannot be size_t for BOOST_VERSION \u003c 107900. I curious if we can avoid the BOOST_VERSION check.",
+      "revId": "a3061d094fd525e5f532dffbe1eac34992b5ee12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eebb60c3_c4a790e0",
+        "filename": "include/ipmid/message/types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-07-11T01:24:55Z",
+      "side": 1,
+      "message": "Before, we have discussed with boost community and response as below:\n\nBoost community John said that.\nIt definitely won\u0027t be fixed in the next Boost release (for which a beta is due very soon), but in general, I don\u0027t believe we can fix this at our end without reverting the change to use std::size_t for bit counts - something we probably should not do.\n\nCurrently, we need to use this patch workaround the compile error in 64bit platform project. Or we need to roll back boost to v1.78, but openbmc is using v1.79 boost currently. Thus, we need to add this patch for fixing it temporary.",
+      "parentUuid": "1bde69fc_53d24ba9",
       "revId": "a3061d094fd525e5f532dffbe1eac34992b5ee12",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
