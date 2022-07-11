@@ -122,6 +122,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4848c142_7f9ace87",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-07-11T08:29:37Z",
+      "side": 1,
+      "message": "Hi Tom,\nAfter checking with boost community. The version check is necessary.\nCould you help to review and merge it if this is valuable for ipmid? Thank you.\n\nReply from boost community:\nCorrect: the correct type for the template is unsigned prior to boost-1.79 and size_t from 1.79 and later. Of course many/most platforms have size_t\u003dunsigned which is why this didn\u0027t show up before. So yes, the version check is necessary.\n\nBest regards,\nTim",
+      "revId": "a3061d094fd525e5f532dffbe1eac34992b5ee12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1bde69fc_53d24ba9",
