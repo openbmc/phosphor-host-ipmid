@@ -220,7 +220,8 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
 
     if (message->isPacketAuthenticated)
     {
-        if (!(internal::verifyPacketIntegrity(inPacket, message, payloadLen)))
+        if (!(internal::verifyPacketIntegrity(inPacket, message, payloadLen,
+                                              session)))
         {
             throw std::runtime_error("Packet Integrity check failed");
         }
@@ -231,7 +232,7 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     {
         // Assign the decrypted payload to the IPMI Message
         message->payload =
-            internal::decryptPayload(inPacket, message, payloadLen);
+            internal::decryptPayload(inPacket, message, payloadLen, session);
     }
     else
     {
@@ -267,7 +268,7 @@ std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
     if (outMessage->isPacketEncrypted)
     {
         header->payloadType |= PAYLOAD_ENCRYPT_MASK;
-        auto cipherPayload = internal::encryptPayload(outMessage);
+        auto cipherPayload = internal::encryptPayload(outMessage, session);
         payloadLen = cipherPayload.size();
         header->payloadLength = endian::to_ipmi<uint16_t>(cipherPayload.size());
 
@@ -289,7 +290,7 @@ std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
     {
         header = reinterpret_cast<SessionHeader_t*>(packet.data());
         header->payloadType |= PAYLOAD_AUTH_MASK;
-        internal::addIntegrityData(packet, outMessage, payloadLen);
+        internal::addIntegrityData(packet, outMessage, payloadLen, session);
     }
 
     return packet;
@@ -316,7 +317,8 @@ void addSequenceNumber(std::vector<uint8_t>& packet,
 
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
                            const std::shared_ptr<Message> message,
-                           size_t payloadLen)
+                           size_t payloadLen,
+                           const std::shared_ptr<session::Session>& session)
 {
     /*
      * Padding bytes are added to cause the number of bytes in the data range
@@ -344,8 +346,6 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
         return false;
     }
 
-    auto session = session::Manager::get().getSession(message->bmcSessionID);
-
     auto integrityAlgo = session->getIntegrityAlgo();
 
     // Check if Integrity data length is as expected, check integrity data
@@ -369,7 +369,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
 }
 
 void addIntegrityData(std::vector<uint8_t>& packet,
-                      const std::shared_ptr<Message> message, size_t payloadLen)
+                      const std::shared_ptr<Message> message, size_t payloadLen,
+                      const std::shared_ptr<session::Session>& session)
 {
     // The following logic calculates the number of padding bytes to be added to
     // IPMI packet. If needed each integrity Pad byte is set to FFh.
@@ -384,28 +385,25 @@ void addIntegrityData(std::vector<uint8_t>& packet,
     trailer->padLength = paddingLen;
     trailer->nextHeader = parser::RMCP_MESSAGE_CLASS_IPMI;
 
-    auto session = session::Manager::get().getSession(message->bmcSessionID);
-
     auto integrityData =
         session->getIntegrityAlgo()->generateIntegrityData(packet);
 
     packet.insert(packet.end(), integrityData.begin(), integrityData.end());
 }
 
-std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
-                                    const std::shared_ptr<Message> message,
-                                    size_t payloadLen)
+std::vector<uint8_t>
+    decryptPayload(const std::vector<uint8_t>& packet,
+                   const std::shared_ptr<Message> message, size_t payloadLen,
+                   const std::shared_ptr<session::Session>& session)
 {
-    auto session = session::Manager::get().getSession(message->bmcSessionID);
-
     return session->getCryptAlgo()->decryptPayload(
         packet, sizeof(SessionHeader_t), payloadLen);
 }
 
-std::vector<uint8_t> encryptPayload(std::shared_ptr<Message> message)
+std::vector<uint8_t>
+    encryptPayload(std::shared_ptr<Message> message,
+                   const std::shared_ptr<session::Session>& session)
 {
-    auto session = session::Manager::get().getSession(message->bmcSessionID);
-
     return session->getCryptAlgo()->encryptPayload(message->payload);
 }
 

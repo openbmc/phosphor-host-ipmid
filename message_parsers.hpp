@@ -178,6 +178,7 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket);
  *        session header
  *
  * @param[in] outMessage - IPMI message to be flattened
+ * @param[in] session - session handle
  *
  * @return IPMI packet on success
  */
@@ -203,11 +204,13 @@ void addSequenceNumber(std::vector<uint8_t>& packet,
  * @param[in] packet - Incoming IPMI packet
  * @param[in] message - IPMI Message populated from the incoming packet
  * @param[in] payloadLen - Length of the IPMI payload
+ * @param[in] session - session handle
  *
  */
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
                            const std::shared_ptr<Message> message,
-                           size_t payloadLen);
+                           size_t payloadLen,
+                           const std::shared_ptr<session::Session>& session);
 
 /**
  * @brief Add Integrity data to the outgoing IPMI packet
@@ -217,8 +220,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
  * @param[in] payloadLen - Length of the IPMI payload
  */
 void addIntegrityData(std::vector<uint8_t>& packet,
-                      const std::shared_ptr<Message> message,
-                      size_t payloadLen);
+                      const std::shared_ptr<Message> message, size_t payloadLen,
+                      const std::shared_ptr<session::Session>& session);
 
 /**
  * @brief Decrypt the encrypted payload in the incoming IPMI packet
@@ -226,21 +229,26 @@ void addIntegrityData(std::vector<uint8_t>& packet,
  * @param[in] packet - Incoming IPMI packet
  * @param[in] message - IPMI Message populated from the incoming packet
  * @param[in] payloadLen - Length of encrypted IPMI payload
+ * @param[in] session - session handle
  *
  * @return on successful completion, return the plain text payload
  */
-std::vector<uint8_t> decryptPayload(const std::vector<uint8_t>& packet,
-                                    const std::shared_ptr<Message> message,
-                                    size_t payloadLen);
+std::vector<uint8_t>
+    decryptPayload(const std::vector<uint8_t>& packet,
+                   const std::shared_ptr<Message> message, size_t payloadLen,
+                   const std::shared_ptr<session::Session>& session);
 
 /**
  * @brief Encrypt the plain text payload for the outgoing IPMI packet
  *
  * @param[in] message - IPMI Message populated for the outgoing packet
+ * @param[in] session - session handle
  *
  * @return on successful completion, return the encrypted payload
  */
-std::vector<uint8_t> encryptPayload(std::shared_ptr<Message> message);
+std::vector<uint8_t>
+    encryptPayload(std::shared_ptr<Message> message,
+                   const std::shared_ptr<session::Session>& session);
 
 } // namespace internal
 
