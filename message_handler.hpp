@@ -3,6 +3,7 @@
 #include "message.hpp"
 #include "message_parsers.hpp"
 #include "session.hpp"
+#include "sessions_manager.hpp"
 #include "sol/console_buffer.hpp"
 
 #include <memory>
@@ -22,7 +23,12 @@ class Handler : public std::enable_shared_from_this<Handler>
             uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
         sessionID(sessionID),
         channel(channel), io(io)
-    {}
+    {
+        if (sessionID != message::Message::MESSAGE_INVALID_SESSION_ID)
+        {
+            session = session::Manager::get().getSession(sessionID);
+        }
+    }
 
     /**
      * @brief Create a Handler intended for a send only (SOL)
@@ -31,7 +37,12 @@ class Handler : public std::enable_shared_from_this<Handler>
             uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
         sessionID(sessionID),
         channel(channel), io(nullptr)
-    {}
+    {
+        if (sessionID != message::Message::MESSAGE_INVALID_SESSION_ID)
+        {
+            session = session::Manager::get().getSession(sessionID);
+        }
+    }
 
     ~Handler();
     Handler() = delete;
@@ -138,6 +149,9 @@ class Handler : public std::enable_shared_from_this<Handler>
     parser::SessionHeader sessionHeader = parser::SessionHeader::IPMI20;
 
     std::shared_ptr<message::Message> inMessage;
+
+    /** @brief The IPMI session of the handler */
+    std::shared_ptr<session::Session> session;
 };
 
 } // namespace message
