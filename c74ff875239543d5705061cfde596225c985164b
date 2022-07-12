@@ -34,6 +34,23 @@
       "parentUuid": "4fde5f03_5c1111b5",
       "revId": "c74ff875239543d5705061cfde596225c985164b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8894b003_6cc67b3d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001292
+      },
+      "writtenOn": "2022-07-12T15:03:50Z",
+      "side": 1,
+      "message": "Is there an ETA on when the build changes will be resolved?  The review on this patchset has been blocked for a week. ",
+      "revId": "c74ff875239543d5705061cfde596225c985164b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
