@@ -66,9 +66,9 @@ std::tuple<std::shared_ptr<Message>, SessionHeader>
     }
 }
 
-std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
+std::vector<uint8_t> flatten(const std::shared_ptr<Message>& outMessage,
                              SessionHeader authType,
-                             std::shared_ptr<session::Session> session)
+                             const std::shared_ptr<session::Session>& session)
 {
     // Call the flatten routine based on the header type
     switch (authType)
@@ -133,8 +133,8 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     return message;
 }
 
-std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             std::shared_ptr<session::Session> session)
+std::vector<uint8_t> flatten(const std::shared_ptr<Message>& outMessage,
+                             const std::shared_ptr<session::Session>& session)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -244,8 +244,8 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     return message;
 }
 
-std::vector<uint8_t> flatten(std::shared_ptr<Message> outMessage,
-                             std::shared_ptr<session::Session> session)
+std::vector<uint8_t> flatten(const std::shared_ptr<Message>& outMessage,
+                             const std::shared_ptr<session::Session>& session)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -300,7 +300,7 @@ namespace internal
 {
 
 void addSequenceNumber(std::vector<uint8_t>& packet,
-                       std::shared_ptr<session::Session> session)
+                       const std::shared_ptr<session::Session>& session)
 {
     SessionHeader_t* header = reinterpret_cast<SessionHeader_t*>(packet.data());
 
@@ -316,7 +316,7 @@ void addSequenceNumber(std::vector<uint8_t>& packet,
 }
 
 bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
-                           const std::shared_ptr<Message> message,
+                           const std::shared_ptr<Message>& message,
                            size_t payloadLen,
                            const std::shared_ptr<session::Session>& session)
 {
@@ -369,7 +369,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
 }
 
 void addIntegrityData(std::vector<uint8_t>& packet,
-                      const std::shared_ptr<Message> message, size_t payloadLen,
+                      const std::shared_ptr<Message>& message,
+                      size_t payloadLen,
                       const std::shared_ptr<session::Session>& session)
 {
     // The following logic calculates the number of padding bytes to be added to
@@ -393,7 +394,7 @@ void addIntegrityData(std::vector<uint8_t>& packet,
 
 std::vector<uint8_t>
     decryptPayload(const std::vector<uint8_t>& packet,
-                   const std::shared_ptr<Message> message, size_t payloadLen,
+                   const std::shared_ptr<Message>& message, size_t payloadLen,
                    const std::shared_ptr<session::Session>& session)
 {
     return session->getCryptAlgo()->decryptPayload(
@@ -401,7 +402,7 @@ std::vector<uint8_t>
 }
 
 std::vector<uint8_t>
-    encryptPayload(std::shared_ptr<Message> message,
+    encryptPayload(const std::shared_ptr<Message>& message,
                    const std::shared_ptr<session::Session>& session)
 {
     return session->getCryptAlgo()->encryptPayload(message->payload);
