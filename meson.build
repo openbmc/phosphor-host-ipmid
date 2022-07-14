@@ -90,6 +90,7 @@ pam = cpp.find_library('pam', required: true)
 mapper = dependency('libmapper')
 boost_coroutine = cpp.find_library('boost_coroutine', required: true)
 sdbusplus_dep = dependency('sdbusplus')
+libdl_dep = cpp.find_library('dl')
 
 if cpp.has_header_symbol(
         'nlohmann/json.hpp',
@@ -179,6 +180,7 @@ ipmid_pre = [
   ipmid_dep,
   channellayer_dep,
   mapper,
+  libdl_dep,
 ]
 
 generated_src = [
