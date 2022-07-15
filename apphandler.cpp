@@ -1223,6 +1223,7 @@ ipmi::RspType<uint8_t, // session handle,
             return ipmi::response(completionCode);
         }
         maybeDetails = std::move(details);
+        break;
     }
 
     if (state == static_cast<uint8_t>(session::State::active) ||
