@@ -52,6 +52,47 @@ void SoftPowerOff::sendHostShutDownCmd()
     return;
 }
 
+void SoftPowerOff::sendPressVirtualButtonCmd()
+{
+    auto ctrlHostPath = std::string("/org/openbmc/control/power0");
+    auto host = ::ipmi::getService(this->bus, "org.openbmc.control.Power", ctrlHostPath.c_str());
+
+    auto method = bus.new_method_call(host.c_str(), ctrlHostPath.c_str(),
+                                      "org.openbmc.control.Power", "pressPowerButton");
+
+    method.append(200); // Press 200 ms
+
+    auto reply = bus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in call to press virtual button command");
+        throw std::runtime_error("Error in call to press virtual button command");
+    }
+
+    log<level::DEBUG>("Virtaul power button pressed. Wait for Host Power-Off.");
+
+    // Start timer for host shutdown
+    using namespace std::chrono;
+
+    auto time = duration_cast<microseconds>(seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS));
+    auto r = startTimer(time);
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to start Host shutdown wait timer", 
+                        entry("ERRNO=0x%X", -r));
+    }
+    else
+    {
+        log<level::INFO>("Timer started waiting for host to shutdown",
+            entry("TIMEOUT_IN_MSEC=%llu",
+                  (duration_cast<milliseconds>(
+                       seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS)))
+                      .count()));
+    }
+
+    return;
+}
+
 // Function called on host control signals
 void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
 {
@@ -82,8 +123,7 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
         }
         else
         {
-            log<level::INFO>(
-                "Timer started waiting for host to shutdown",
+            log<level::INFO>("Timer started waiting for host to shutdown",
                 entry("TIMEOUT_IN_MSEC=%llu",
                       (duration_cast<milliseconds>(
                            seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS)))
@@ -97,6 +137,22 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
         log<level::INFO>("Timeout on host attention, continue with power down");
         completed = true;
     }
+    return;
+}
+
+void SoftPowerOff::hostStateEvent([[maybe_unused]] sdbusplus::message::message& msg)
+{
+    log<level::DEBUG>("Host power off now and stop the timer.");
+
+    using namespace std::chrono;
+    auto r = timer.stop();
+    if (r < 0)
+    {
+        log<level::ERR>("Failure to STOP the timer", entry("ERRNO=0x%X", -r));
+    }
+
+    // This marks the completion of soft power off sequence.
+    completed = true;
     return;
 }
 
@@ -118,8 +174,7 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
         auto r = timer.stop();
         if (r < 0)
         {
-            log<level::ERR>("Failure to STOP the timer",
-                            entry("ERRNO=0x%X", -r));
+            log<level::ERR>("Failure to STOP the timer", entry("ERRNO=0x%X", -r));
         }
 
         // This marks the completion of soft power off sequence.

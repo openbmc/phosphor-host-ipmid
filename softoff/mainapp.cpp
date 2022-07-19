@@ -67,9 +67,7 @@ int main(int, char**)
 
     // Log an error if we timed out after getting Ack for SMS_ATN and before
     // getting the Host Shutdown response
-    if (powerObj.isTimerExpired() &&
-        (powerObj.responseReceived() ==
-         phosphor::ipmi::Base::SoftPowerOff::HostResponse::SoftOffReceived))
+    if (powerObj.isTimerExpired())
     {
         using error =
             sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout;

@@ -42,22 +42,18 @@ class SoftPowerOff : public SoftPowerOffInherit
         bus(bus), timer(event),
         hostControlSignal(
             bus,
-            sdbusRule::type::signal() + sdbusRule::member("CommandComplete") +
-                sdbusRule::path("/xyz/openbmc_project/control/host0") +
-                sdbusRule::interface(CONTROL_HOST_BUSNAME) +
-                sdbusRule::argN(0, convertForMessage(Host::Command::SoftOff)),
-            std::bind(std::mem_fn(&SoftPowerOff::hostControlEvent), this,
+            sdbusRule::type::signal() + sdbusRule::member("PowerLost") +
+                sdbusRule::path("/org/openbmc/control/power0") +
+                sdbusRule::interface("org.openbmc.control.Power"),
+            std::bind(std::mem_fn(&SoftPowerOff::hostStateEvent), this,
                       std::placeholders::_1))
     {
         // Need to announce since we may get the response
         // very quickly on host shutdown command
         emit_object_added();
 
-        // The whole purpose of this application is to send a host shutdown
-        // command and watch for the soft power off to go through. We need
-        // the interface added signal emitted before we send the shutdown
-        // command just to attend to lightning fast response from host
-        sendHostShutDownCmd();
+        // Press virtual power button to trigger host to do a shutdown
+        sendPressVirtualButtonCmd();
     }
 
     /** @brief Tells if the objective of this application is completed */
@@ -134,12 +130,36 @@ class SoftPowerOff : public SoftPowerOffInherit
      */
     void sendHostShutDownCmd();
 
+    /** @brief Sends virtual power button command to tell host to shut down
+     *
+     *  After sending the command, wait for a signal indicating the status
+     *  of the command.
+     *
+     *  After receiving the initial response, start a timer for 30 minutes
+     *  to let host do a shutdown. If BMC fails to get any response, then
+     *  a hard power off would be forced.
+     *
+     *  @return - Does not return anything. Error will result in exception
+     *            being thrown
+     */
+    void sendPressVirtualButtonCmd();
+
     /** @brief Callback function on host control signals
      *
      * @param[in]  msg       - Data associated with subscribed signal
      *
      */
     void hostControlEvent(sdbusplus::message::message& msg);
+
+    /** @brief Check if PowerLost is relevant to this object
+     *
+     * Instance specific interface to handle the detected pgood state
+     * change
+     *
+     * @param[in]  msg       - Data associated with subscribed signal
+     *
+     */
+    void hostStateEvent(sdbusplus::message::message& msg);
 };
 } // namespace ipmi
 } // namespace phosphor

@@ -1048,6 +1048,10 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
             case server::Value::Unit::Watts:
                 body->sensor_units_2_base = get_sdr::SENSOR_UNIT_WATTS;
                 break;
+            case server::Value::Unit::Percent:
+                body->sensor_units_2_base = get_sdr::SENSOR_UNIT_UNSPECIFIED;
+                body->sensor_units_1 |= 1 << 0; // Set Percentage
+                break;
             default:
                 // Cannot be hit.
                 std::fprintf(stderr, "Unknown value unit type: = %s\n",
