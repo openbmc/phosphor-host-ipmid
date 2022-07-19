@@ -1,0 +1,11 @@
+Code-Review+2: Vernon Mauery <vernon.mauery@linux.intel.com>
+Code-Review+1: William A. Kennington III <wak@google.com>
+Code-Review+1: Benjamin Fair <benjaminfair@google.com>
+Code-Review+1: Brandon Kim <brandonkim@google.com>
+Code-Review+1: Nan Zhou <nanzhoumails@gmail.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Willy Tu <wltu@google.com>
+Submitted-at: Tue, 19 Jul 2022 18:39:43 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/54147
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
