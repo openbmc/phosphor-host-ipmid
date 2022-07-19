@@ -69,6 +69,30 @@
       },
       "revId": "e7ba8f45db5b7416c7baf4925f8ce9d5aba412d4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ab7d030b_90aab08c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-07-19T17:43:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8aec3604_6b94e470",
+      "range": {
+        "startLine": 505,
+        "startChar": 22,
+        "endLine": 505,
+        "endChar": 60
+      },
+      "revId": "e7ba8f45db5b7416c7baf4925f8ce9d5aba412d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
