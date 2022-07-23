@@ -36,17 +36,17 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     static std::shared_ptr<SensorSubTree> sensorTreePtr;
     static uint16_t sensorUpdatedIndex = 0;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
-    static sdbusplus::bus::match::match sensorAdded(
+    static sdbusplus::bus::match_t sensorAdded(
         *dbus,
         "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
         "sensors/'",
-        [](sdbusplus::message::message&) { sensorTreePtr.reset(); });
+        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
 
-    static sdbusplus::bus::match::match sensorRemoved(
+    static sdbusplus::bus::match_t sensorRemoved(
         *dbus,
         "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
         "openbmc_project/sensors/'",
-        [](sdbusplus::message::message&) { sensorTreePtr.reset(); });
+        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
 
     if (sensorTreePtr)
     {
@@ -317,7 +317,7 @@ std::map<std::string, std::vector<std::string>>
     std::vector<std::string> interfaces;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
 
-    sdbusplus::message::message getObjectMessage =
+    sdbusplus::message_t getObjectMessage =
         dbus->new_method_call("xyz.openbmc_project.ObjectMapper",
                               "/xyz/openbmc_project/object_mapper",
                               "xyz.openbmc_project.ObjectMapper", "GetObject");
@@ -325,7 +325,7 @@ std::map<std::string, std::vector<std::string>>
 
     try
     {
-        sdbusplus::message::message response = dbus->call(getObjectMessage);
+        sdbusplus::message_t response = dbus->call(getObjectMessage);
         response.read(interfacesResponse);
     }
     catch (const std::exception& e)
@@ -344,14 +344,14 @@ std::map<std::string, Value> getEntityManagerProperties(const char* path,
     std::map<std::string, Value> properties;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
 
-    sdbusplus::message::message getProperties =
+    sdbusplus::message_t getProperties =
         dbus->new_method_call("xyz.openbmc_project.EntityManager", path,
                               "org.freedesktop.DBus.Properties", "GetAll");
     getProperties.append(interface);
 
     try
     {
-        sdbusplus::message::message response = dbus->call(getProperties);
+        sdbusplus::message_t response = dbus->call(getProperties);
         response.read(properties);
     }
     catch (const std::exception& e)

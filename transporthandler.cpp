@@ -57,7 +57,7 @@ const std::unordered_set<IP::AddressOrigin> originsV4 = {
 static constexpr uint8_t oemCmdStart = 192;
 static constexpr uint8_t oemCmdEnd = 255;
 
-std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus::bus& bus,
+std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
                                                    uint8_t channel)
 {
     auto ifname = getChannelName(channel);
@@ -128,7 +128,7 @@ std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus::bus& bus,
     return params;
 }
 
-ChannelParams getChannelParams(sdbusplus::bus::bus& bus, uint8_t channel)
+ChannelParams getChannelParams(sdbusplus::bus_t& bus, uint8_t channel)
 {
     auto params = maybeGetChannelParams(bus, channel);
     if (!params)
@@ -162,7 +162,7 @@ auto logWithChannel(const std::optional<ChannelParams>& params, Args&&... args)
     return log<level>(std::forward<Args>(args)...);
 }
 
-EthernetInterface::DHCPConf getDHCPProperty(sdbusplus::bus::bus& bus,
+EthernetInterface::DHCPConf getDHCPProperty(sdbusplus::bus_t& bus,
                                             const ChannelParams& params)
 {
     std::string dhcpstr = std::get<std::string>(getDbusProperty(
@@ -180,7 +180,7 @@ EthernetInterface::DHCPConf getDHCPProperty(sdbusplus::bus::bus& bus,
  *                              EthernetInterface::DHCPConf::v6,
  *                              EthernetInterface::DHCPConf::both)
  */
-void setDHCPv4Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void setDHCPv4Property(sdbusplus::bus_t& bus, const ChannelParams& params,
                        const EthernetInterface::DHCPConf requestedDhcp)
 {
     EthernetInterface::DHCPConf currentDhcp = getDHCPProperty(bus, params);
@@ -218,7 +218,7 @@ void setDHCPv4Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
                     "DHCPEnabled", newDhcp);
 }
 
-void setDHCPv6Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void setDHCPv6Property(sdbusplus::bus_t& bus, const ChannelParams& params,
                        const EthernetInterface::DHCPConf requestedDhcp,
                        const bool defaultMode = true)
 {
@@ -284,7 +284,7 @@ ether_addr stringToMAC(const char* mac)
  *  @param[in] params - The parameters for the channel
  *  @return The configured mac address
  */
-ether_addr getMACProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
+ether_addr getMACProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
 {
     auto macStr = std::get<std::string>(getDbusProperty(
         bus, params.service, params.ifPath, INTF_MAC, "MACAddress"));
@@ -297,7 +297,7 @@ ether_addr getMACProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
  *  @param[in] params - The parameters for the channel
  *  @param[in] mac    - MAC address to apply
  */
-void setMACProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void setMACProperty(sdbusplus::bus_t& bus, const ChannelParams& params,
                     const ether_addr& mac)
 {
     std::string macStr = ether_ntoa(&mac);
@@ -305,7 +305,7 @@ void setMACProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
                     macStr);
 }
 
-void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
+void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
                           const std::string& path)
 {
     if (path.empty())
@@ -318,7 +318,7 @@ void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
                                        ipmi::DELETE_INTERFACE, "Delete");
         bus.call_noreply(req);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         if (strcmp(e.name(),
                    "xyz.openbmc_project.Common.Error.InternalFailure") != 0 &&
@@ -340,7 +340,7 @@ void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
  *  @param[in] prefix  - The prefix of the new IP
  */
 template <int family>
-void createIfAddr(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void createIfAddr(sdbusplus::bus_t& bus, const ChannelParams& params,
                   const typename AddrFamily<family>::addr& address,
                   uint8_t prefix)
 {
@@ -360,7 +360,7 @@ void createIfAddr(sdbusplus::bus::bus& bus, const ChannelParams& params,
  *  @param[in] params - The parameters for the channel
  *  @return The address and prefix if found
  */
-auto getIfAddr4(sdbusplus::bus::bus& bus, const ChannelParams& params)
+auto getIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
 {
     return getIfAddr<AF_INET>(bus, params, 0, originsV4);
 }
@@ -372,7 +372,7 @@ auto getIfAddr4(sdbusplus::bus::bus& bus, const ChannelParams& params)
  *  @param[in] address - The new address if specified
  *  @param[in] prefix  - The new address prefix if specified
  */
-void reconfigureIfAddr4(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
                         const std::optional<in_addr>& address,
                         std::optional<uint8_t> prefix)
 {
@@ -393,7 +393,7 @@ void reconfigureIfAddr4(sdbusplus::bus::bus& bus, const ChannelParams& params,
 }
 
 template <int family>
-std::optional<IfNeigh<family>> findGatewayNeighbor(sdbusplus::bus::bus& bus,
+std::optional<IfNeigh<family>> findGatewayNeighbor(sdbusplus::bus_t& bus,
                                                    const ChannelParams& params,
                                                    ObjectLookupCache& neighbors)
 {
@@ -407,7 +407,7 @@ std::optional<IfNeigh<family>> findGatewayNeighbor(sdbusplus::bus::bus& bus,
 }
 
 template <int family>
-std::optional<IfNeigh<family>> getGatewayNeighbor(sdbusplus::bus::bus& bus,
+std::optional<IfNeigh<family>> getGatewayNeighbor(sdbusplus::bus_t& bus,
                                                   const ChannelParams& params)
 {
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
@@ -415,8 +415,8 @@ std::optional<IfNeigh<family>> getGatewayNeighbor(sdbusplus::bus::bus& bus,
 }
 
 template <int family>
-void reconfigureGatewayMAC(sdbusplus::bus::bus& bus,
-                           const ChannelParams& params, const ether_addr& mac)
+void reconfigureGatewayMAC(sdbusplus::bus_t& bus, const ChannelParams& params,
+                           const ether_addr& mac)
 {
     auto gateway = getGatewayProperty<family>(bus, params);
     if (!gateway)
@@ -442,7 +442,7 @@ void reconfigureGatewayMAC(sdbusplus::bus::bus& bus,
  *  @param[in] params  - The parameters for the channel
  *  @param[in] idx     - The address index to operate on
  */
-void deconfigureIfAddr6(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void deconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
                         uint8_t idx)
 {
     auto ifaddr = getIfAddr<AF_INET6>(bus, params, idx, originsV6Static);
@@ -460,7 +460,7 @@ void deconfigureIfAddr6(sdbusplus::bus::bus& bus, const ChannelParams& params,
  *  @param[in] address - The new address
  *  @param[in] prefix  - The new address prefix
  */
-void reconfigureIfAddr6(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void reconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
                         uint8_t idx, const in6_addr& address, uint8_t prefix)
 {
     deconfigureIfAddr6(bus, params, idx);
@@ -533,7 +533,7 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
  *  @param[in] params - The parameters for the channel
  *  @return VLAN id or the standard 0 for no VLAN
  */
-uint16_t getVLANProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
+uint16_t getVLANProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
 {
     // VLAN devices will always have a separate logical object
     if (params.ifPath == params.logicalPath)
@@ -557,7 +557,7 @@ uint16_t getVLANProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
  *  @param[in] bus    - The bus object used for lookups
  *  @param[in] params - The parameters for the channel
  */
-void deconfigureChannel(sdbusplus::bus::bus& bus, ChannelParams& params)
+void deconfigureChannel(sdbusplus::bus_t& bus, ChannelParams& params)
 {
     // Delete all objects associated with the interface
     auto objreq = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
@@ -593,7 +593,7 @@ void deconfigureChannel(sdbusplus::bus::bus& bus, ChannelParams& params)
  *  @param[in] params - The parameters for the channel
  *  @param[in] vlan   - The id of the new vlan
  */
-void createVLAN(sdbusplus::bus::bus& bus, ChannelParams& params, uint16_t vlan)
+void createVLAN(sdbusplus::bus_t& bus, ChannelParams& params, uint16_t vlan)
 {
     if (vlan == 0)
     {
@@ -615,7 +615,7 @@ void createVLAN(sdbusplus::bus::bus& bus, ChannelParams& params, uint16_t vlan)
  *  @param[in] params - The parameters for the channel
  *  @param[in] vlan   - The new vlan id to use
  */
-void reconfigureVLAN(sdbusplus::bus::bus& bus, ChannelParams& params,
+void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
                      uint16_t vlan)
 {
     // Unfortunatetly we don't have built-in functions to migrate our interface
@@ -737,8 +737,7 @@ SetStatus& getSetStatus(uint8_t channel)
  *  @param[in] params - The parameters for the channel
  *  @return networkd IPV6AcceptRA value
  */
-static bool getIPv6AcceptRA(sdbusplus::bus::bus& bus,
-                            const ChannelParams& params)
+static bool getIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params)
 {
     auto raEnabled =
         std::get<bool>(getDbusProperty(bus, params.service, params.logicalPath,
@@ -753,7 +752,7 @@ static bool getIPv6AcceptRA(sdbusplus::bus::bus& bus,
  *  @param[in] ipv6AcceptRA  - boolean to enable/disable IPv6 Routing
  *                             Advertisement
  */
-void setIPv6AcceptRA(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void setIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params,
                      const bool ipv6AcceptRA)
 {
     setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
@@ -1121,7 +1120,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 {
                     channelCall<reconfigureIfAddr6>(channel, set, ip, prefix);
                 }
-                catch (const sdbusplus::exception::exception& e)
+                catch (const sdbusplus::exception_t& e)
                 {
                     if (std::string_view err{
                             "xyz.openbmc_project.Common.Error.InvalidArgument"};

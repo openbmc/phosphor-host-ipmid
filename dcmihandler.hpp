@@ -196,7 +196,7 @@ void writeAssetTag(const std::string& assetTag);
  *
  *  @return On success return the power cap value.
  */
-uint32_t getPcap(sdbusplus::bus::bus& bus);
+uint32_t getPcap(sdbusplus::bus_t& bus);
 
 /** @brief Check if the power capping is enabled
  *
@@ -205,7 +205,7 @@ uint32_t getPcap(sdbusplus::bus::bus& bus);
  *  @return true if the powerCap is enabled and false if the powercap
  *          is disabled.
  */
-bool getPcapEnabled(sdbusplus::bus::bus& bus);
+bool getPcapEnabled(sdbusplus::bus_t& bus);
 
 /** @struct GetPowerLimitResponse
  *
@@ -226,7 +226,7 @@ struct GetPowerLimitResponse
  *  @param[in] bus - dbus connection
  *  @param[in] powerCap - power cap value
  */
-void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap);
+void setPcap(sdbusplus::bus_t& bus, const uint32_t powerCap);
 
 /** @struct SetPowerLimitRequest
  *
@@ -248,7 +248,7 @@ struct SetPowerLimitRequest
  *  @param[in] bus - dbus connection
  *  @param[in] enabled - enable/disable
  */
-void setPcapEnable(sdbusplus::bus::bus& bus, bool enabled);
+void setPcapEnable(sdbusplus::bus_t& bus, bool enabled);
 
 /** @struct ApplyPowerLimitRequest
  *
@@ -474,7 +474,7 @@ std::tuple<ResponseList, NumInstances>
  *
  *  @return total power reading
  */
-int64_t getPowerReading(sdbusplus::bus::bus& bus);
+int64_t getPowerReading(sdbusplus::bus_t& bus);
 
 /** @struct GetPowerReadingRequest
  *

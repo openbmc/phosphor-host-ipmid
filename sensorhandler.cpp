@@ -87,13 +87,13 @@ using SensorThresholdMap =
 SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
 
 #ifdef FEATURE_SENSORS_CACHE
-std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
-    sensorAddedMatches __attribute__((init_priority(101)));
-std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
-    sensorUpdatedMatches __attribute__((init_priority(101)));
-std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match::match>>
-    sensorRemovedMatches __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match::match> sensorsOwnerMatch
+std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorAddedMatches
+    __attribute__((init_priority(101)));
+std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorUpdatedMatches
+    __attribute__((init_priority(101)));
+std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorRemovedMatches
+    __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match_t> sensorsOwnerMatch
     __attribute__((init_priority(101)));
 
 ipmi::sensor::SensorCacheMap sensorCacheMap __attribute__((init_priority(101)));
@@ -130,7 +130,7 @@ static void fillSensorIdServiceMap(const std::string& obj,
     }
     try
     {
-        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
         auto service = ipmi::getService(bus, intf, obj);
         idToServiceMap[id] = service;
         serviceToIdMap[service].insert(id);
@@ -144,19 +144,19 @@ static void fillSensorIdServiceMap(const std::string& obj,
 void initSensorMatches()
 {
     using namespace sdbusplus::bus::match::rules;
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     for (const auto& s : ipmi::sensor::sensors)
     {
         sensorAddedMatches.emplace(
             s.first,
-            std::make_unique<sdbusplus::bus::match::match>(
+            std::make_unique<sdbusplus::bus::match_t>(
                 bus, interfacesAdded() + argNpath(0, s.second.sensorPath),
                 [id = s.first, obj = s.second.sensorPath,
                  intf = s.second.propertyInterfaces.begin()->first](
                     auto& /*msg*/) { fillSensorIdServiceMap(obj, intf, id); }));
         sensorRemovedMatches.emplace(
             s.first,
-            std::make_unique<sdbusplus::bus::match::match>(
+            std::make_unique<sdbusplus::bus::match_t>(
                 bus, interfacesRemoved() + argNpath(0, s.second.sensorPath),
                 [id = s.first](auto& /*msg*/) {
                     // Ideally this should work.
@@ -166,7 +166,7 @@ void initSensorMatches()
                     sensorCacheMap[id].reset();
                 }));
         sensorUpdatedMatches.emplace(
-            s.first, std::make_unique<sdbusplus::bus::match::match>(
+            s.first, std::make_unique<sdbusplus::bus::match_t>(
                          bus,
                          type::signal() + path(s.second.sensorPath) +
                              member("PropertiesChanged"s) +
@@ -190,7 +190,7 @@ void initSensorMatches()
                                  sensorCacheMap[s.first].reset();
                              }
                          }));
-        sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match::match>(
+        sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
             bus, nameOwnerChanged(), [](auto& msg) {
                 std::string name;
                 std::string oldOwner;
@@ -1446,10 +1446,10 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
     assert = req->eventDirectionType & directionMask ? false : true;
     std::vector<uint8_t> eventData(req->data, req->data + count);
 
-    sdbusplus::bus::bus dbus(bus);
+    sdbusplus::bus_t dbus(bus);
     std::string service =
         ipmi::getService(dbus, ipmiSELAddInterface, ipmiSELPath);
-    sdbusplus::message::message writeSEL = dbus.new_method_call(
+    sdbusplus::message_t writeSEL = dbus.new_method_call(
         service.c_str(), ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
     writeSEL.append(ipmiSELAddMessage, sensorPath, eventData, assert,
                     generatorID);

@@ -142,7 +142,7 @@ constexpr auto bootOneTimeIntf = "xyz.openbmc_project.Object.Enable";
 
 constexpr auto powerRestoreIntf =
     "xyz.openbmc_project.Control.Power.RestorePolicy";
-sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
+sdbusplus::bus_t dbus(ipmid_get_sd_bus_connection());
 
 namespace cache
 {
@@ -187,7 +187,7 @@ int getHostNetworkData(ipmi::message::Payload& payload)
         //  as SETTINGS_MATCH.
         //  Later SETTINGS_MATCH will be replaced with busname.
 
-        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+        sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
 
         auto ipObjectInfo = ipmi::getDbusObject(bus, IP_INTERFACE,
                                                 SETTINGS_ROOT, SETTINGS_MATCH);
@@ -529,7 +529,7 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
                              ",mac="s + mac + ",addressOrigin="s +
                              addressOrigin;
 
-        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+        sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
 
         auto ipObjectInfo = ipmi::getDbusObject(bus, IP_INTERFACE,
                                                 SETTINGS_ROOT, SETTINGS_MATCH);
@@ -565,7 +565,7 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
 
 uint32_t getPOHCounter()
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto chassisStateObj =
         ipmi::getDbusObject(bus, chassisPOHStateIntf, chassisStateRoot, match);
@@ -606,7 +606,7 @@ ipmi::RspType<bool,    // chassis intrusion sensor
     ipmi::PropertyMap properties;
     try
     {
-        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
         ipmi::DbusObjectInfo chassisCapObject =
             ipmi::getDbusObject(bus, chassisCapIntf);
@@ -773,7 +773,7 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
 
     try
     {
-        sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+        sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
         ipmi::DbusObjectInfo chassisCapObject =
             ipmi::getDbusObject(bus, chassisCapIntf);
 
@@ -1062,7 +1062,7 @@ static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
                                                     buttonIntf, "Enabled");
         buttonDisabled = !std::get<bool>(enabled);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Fail to get button Enabled property",
                         entry("PATH=%s", buttonPath.c_str()),

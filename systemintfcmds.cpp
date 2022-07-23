@@ -129,7 +129,7 @@ namespace
 // Static storage to keep the object alive during process life
 std::unique_ptr<phosphor::host::command::Host> host
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::server::manager::manager> objManager
+std::unique_ptr<sdbusplus::server::manager_t> objManager
     __attribute__((init_priority(101)));
 } // namespace
 
@@ -162,7 +162,7 @@ void register_netfn_app_functions()
         ipmid_get_sdbus_plus_handler();
 
     // Add sdbusplus ObjectManager.
-    objManager = std::make_unique<sdbusplus::server::manager::manager>(
+    objManager = std::make_unique<sdbusplus::server::manager_t>(
         *sdbusp, CONTROL_HOST_OBJ_MGR);
 
     host = std::make_unique<phosphor::host::command::Host>(*sdbusp,

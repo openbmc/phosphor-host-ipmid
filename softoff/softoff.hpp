@@ -35,8 +35,7 @@ class SoftPowerOff : public SoftPowerOffInherit
      *  @param[in] event     - sd_event handler
      *  @param[in] objPath   - The Dbus path hosting SoftPowerOff function
      */
-    SoftPowerOff(sdbusplus::bus::bus& bus, sd_event* event,
-                 const char* objPath) :
+    SoftPowerOff(sdbusplus::bus_t& bus, sd_event* event, const char* objPath) :
         SoftPowerOffInherit(bus, objPath,
                             SoftPowerOffInherit::action::defer_emit),
         bus(bus), timer(event),
@@ -99,7 +98,7 @@ class SoftPowerOff : public SoftPowerOffInherit
     static constexpr auto HOST_IPMI_INTF = "org.openbmc.HostIpmi";
 
     /* @brief sdbusplus handle */
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
 
     /** @brief Reference to Timer object */
     Timer timer;
@@ -139,7 +138,7 @@ class SoftPowerOff : public SoftPowerOffInherit
      * @param[in]  msg       - Data associated with subscribed signal
      *
      */
-    void hostControlEvent(sdbusplus::message::message& msg);
+    void hostControlEvent(sdbusplus::message_t& msg);
 };
 } // namespace ipmi
 } // namespace phosphor

@@ -31,7 +31,7 @@ using InternalFailure =
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
-Manager::Manager(sdbusplus::bus::bus& bus) :
+Manager::Manager(sdbusplus::bus_t& bus) :
     bus(bus), timer(std::bind(&Manager::hostTimeout, this)),
     hostTransitionMatch(
         bus,
@@ -137,7 +137,7 @@ void Manager::checkQueueAndAlertHost()
 
             log<level::DEBUG>("SMS Attention asserted");
         }
-        catch (sdbusplus::exception::exception& e)
+        catch (sdbusplus::exception_t& e)
         {
             log<level::ERR>("Error when call setAttention method");
         }
@@ -166,7 +166,7 @@ void Manager::execute(CommandHandler command)
     return;
 }
 
-void Manager::clearQueueOnPowerOn(sdbusplus::message::message& msg)
+void Manager::clearQueueOnPowerOn(sdbusplus::message_t& msg)
 {
     namespace server = sdbusplus::xyz::openbmc_project::State::server;
 

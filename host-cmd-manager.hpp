@@ -32,7 +32,7 @@ class Manager
      *  @param[in] bus   - dbus handler
      *  @param[in] event - pointer to sd_event
      */
-    explicit Manager(sdbusplus::bus::bus& bus);
+    explicit Manager(sdbusplus::bus_t& bus);
 
     /** @brief  Extracts the next entry in the queue and returns
      *          Command and data part of it.
@@ -92,10 +92,10 @@ class Manager
      *
      *  @param[in] msg - the sdbusplus message containing the property
      */
-    void clearQueueOnPowerOn(sdbusplus::message::message& msg);
+    void clearQueueOnPowerOn(sdbusplus::message_t& msg);
 
     /** @brief Reference to the dbus handler */
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
 
     /** @brief Queue to store the requested commands */
     std::queue<CommandHandler> workQueue{};

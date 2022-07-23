@@ -53,7 +53,7 @@ void SoftPowerOff::sendHostShutDownCmd()
 }
 
 // Function called on host control signals
-void SoftPowerOff::hostControlEvent(sdbusplus::message::message& msg)
+void SoftPowerOff::hostControlEvent(sdbusplus::message_t& msg)
 {
     std::string cmdCompleted{};
     std::string cmdStatus{};

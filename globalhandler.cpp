@@ -20,7 +20,7 @@ void register_netfn_global_functions() __attribute__((constructor));
 
 void resetBMC()
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto bmcStateObj =
         ipmi::getDbusObject(bus, bmcStateIntf, bmcStateRoot, match);

@@ -17,7 +17,7 @@ namespace command
  *  and xyz.openbmc_project.Condition.HostFirmware DBus API's.
  */
 class Host
-    : public sdbusplus::server::object::object<
+    : public sdbusplus::server::object_t<
           sdbusplus::xyz::openbmc_project::Control::server::Host,
           sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>
 {
@@ -27,8 +27,8 @@ class Host
      *  @param[in] bus     - The Dbus bus object
      *  @param[in] objPath - The Dbus object path
      */
-    Host(sdbusplus::bus::bus& bus, const char* objPath) :
-        sdbusplus::server::object::object<
+    Host(sdbusplus::bus_t& bus, const char* objPath) :
+        sdbusplus::server::object_t<
             sdbusplus::xyz::openbmc_project::Control::server::Host,
             sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>(
             bus, objPath),
@@ -50,7 +50,7 @@ class Host
 
   private:
     /** @brief sdbusplus DBus bus connection. */
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
 
     /** @brief  Callback function to be invoked by command manager
      *

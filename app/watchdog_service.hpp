@@ -94,7 +94,7 @@ class WatchdogService
 
   private:
     /** @brief sdbusplus handle */
-    sdbusplus::bus::bus bus;
+    sdbusplus::bus_t bus;
     /** @brief The name of the mapped host watchdog service */
     static ipmi::ServiceCache wd_service;
 

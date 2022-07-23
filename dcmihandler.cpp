@@ -69,7 +69,7 @@ bool isDCMIPowerMgmtSupported()
     return (gDCMIPowerMgmtSupported == data.value(gDCMIPowerMgmtCapability, 0));
 }
 
-uint32_t getPcap(sdbusplus::bus::bus& bus)
+uint32_t getPcap(sdbusplus::bus_t& bus)
 {
     auto settingService = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
@@ -90,7 +90,7 @@ uint32_t getPcap(sdbusplus::bus::bus& bus)
     return std::get<uint32_t>(pcap);
 }
 
-bool getPcapEnabled(sdbusplus::bus::bus& bus)
+bool getPcapEnabled(sdbusplus::bus_t& bus)
 {
     auto settingService = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
@@ -111,7 +111,7 @@ bool getPcapEnabled(sdbusplus::bus::bus& bus)
     return std::get<bool>(pcapEnabled);
 }
 
-void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap)
+void setPcap(sdbusplus::bus_t& bus, const uint32_t powerCap)
 {
     auto service = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
@@ -130,7 +130,7 @@ void setPcap(sdbusplus::bus::bus& bus, const uint32_t powerCap)
     }
 }
 
-void setPcapEnable(sdbusplus::bus::bus& bus, bool enabled)
+void setPcapEnable(sdbusplus::bus_t& bus, bool enabled)
 {
     auto service = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
 
@@ -156,7 +156,7 @@ void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree)
     static constexpr auto mapperIface = "xyz.openbmc_project.ObjectMapper";
     static constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory/";
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     auto depth = 0;
 
     auto mapperCall = bus.new_method_call(mapperBusName, mapperObjPath,
@@ -184,7 +184,7 @@ void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree)
 
 std::string readAssetTag()
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     dcmi::assettag::ObjectTree objectTree;
 
     // Read the object tree with the inventory root to figure out the object
@@ -212,7 +212,7 @@ std::string readAssetTag()
 
 void writeAssetTag(const std::string& assetTag)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     dcmi::assettag::ObjectTree objectTree;
 
     // Read the object tree with the inventory root to figure out the object
@@ -236,7 +236,7 @@ void writeAssetTag(const std::string& assetTag)
 
 std::string getHostName(void)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto service = ipmi::getService(bus, networkConfigIntf, networkConfigObj);
     auto value = ipmi::getDbusProperty(bus, service, networkConfigObj,
@@ -247,7 +247,7 @@ std::string getHostName(void)
 
 bool getDHCPEnabled()
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto ethdevice = ipmi::getChannelName(ethernetDefaultChannelNum);
     auto ethernetObj =
@@ -261,7 +261,7 @@ bool getDHCPEnabled()
 
 bool getDHCPOption(std::string prop)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto service = ipmi::getService(bus, dhcpIntf, dhcpObj);
     auto value = ipmi::getDbusProperty(bus, service, dhcpObj, dhcpIntf, prop);
@@ -271,7 +271,7 @@ bool getDHCPOption(std::string prop)
 
 void setDHCPOption(std::string prop, bool value)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto service = ipmi::getService(bus, dhcpIntf, dhcpObj);
     ipmi::setDbusProperty(bus, service, dhcpObj, dhcpIntf, prop, value);
@@ -313,7 +313,7 @@ ipmi_ret_t getPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
     auto responseData =
         reinterpret_cast<dcmi::GetPowerLimitResponse*>(outPayload.data());
 
-    sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t sdbus{ipmid_get_sd_bus_connection()};
     uint32_t pcapValue = 0;
     bool pcapEnable = false;
 
@@ -370,7 +370,7 @@ ipmi_ret_t setPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     auto requestData =
         reinterpret_cast<const dcmi::SetPowerLimitRequest*>(request);
 
-    sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t sdbus{ipmid_get_sd_bus_connection()};
 
     // Only process the power limit requested in watts.
     try
@@ -404,7 +404,7 @@ ipmi_ret_t applyPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     auto requestData =
         reinterpret_cast<const dcmi::ApplyPowerLimitRequest*>(request);
 
-    sdbusplus::bus::bus sdbus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t sdbus{ipmid_get_sd_bus_connection()};
 
     try
     {
@@ -634,7 +634,7 @@ ipmi_ret_t setMgmntCtrlIdStr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
                             requestData->data + requestData->bytes, '\0');
         if (it != requestData->data + requestData->bytes)
         {
-            sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+            sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
             ipmi::setDbusProperty(bus, dcmi::networkServiceName,
                                   dcmi::networkConfigObj,
                                   dcmi::networkConfigIntf, dcmi::hostNameProp,
@@ -769,7 +769,7 @@ Temperature readTemp(const std::string& dbusService,
     // formula Value * 10^Scale. The ipmi spec has the temperature as a uint8_t,
     // with a separate single bit for the sign.
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     auto result = ipmi::getAllDbusProperties(
         bus, dbusService, dbusPath, "xyz.openbmc_project.Sensor.Value");
     auto temperature =
@@ -799,7 +799,7 @@ std::tuple<Response, NumInstances> read(const std::string& type,
                                         uint8_t instance)
 {
     Response response{};
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     if (!instance)
     {
@@ -855,7 +855,7 @@ std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
                                                uint8_t instanceStart)
 {
     ResponseList response{};
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     size_t numInstances = 0;
     auto data = parseJSONConfig(gDCMISensorsConfig);
@@ -977,7 +977,7 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     return IPMI_CC_OK;
 }
 
-int64_t getPowerReading(sdbusplus::bus::bus& bus)
+int64_t getPowerReading(sdbusplus::bus_t& bus)
 {
     std::ifstream sensorFile(POWER_READING_SENSOR);
     std::string objectPath;
@@ -1179,7 +1179,7 @@ ipmi_ret_t getPowerReading(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
     auto responseData =
         reinterpret_cast<dcmi::GetPowerReadingResponse*>(response);
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     int64_t power = 0;
     try
     {

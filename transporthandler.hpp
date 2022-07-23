@@ -228,7 +228,7 @@ std::string_view dataRef(const T& t)
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return Ethernet interface service and object path if it exists
  */
-std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus::bus& bus,
+std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
                                                    uint8_t channel);
 
 /** @brief A trivial helper around maybeGetChannelParams() that throws an
@@ -238,7 +238,7 @@ std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus::bus& bus,
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return Ethernet interface service and object path
  */
-ChannelParams getChannelParams(sdbusplus::bus::bus& bus, uint8_t channel);
+ChannelParams getChannelParams(sdbusplus::bus_t& bus, uint8_t channel);
 
 /** @brief Trivializes using parameter getter functions by providing a bus
  *         and channel parameters automatically.
@@ -249,7 +249,7 @@ ChannelParams getChannelParams(sdbusplus::bus::bus& bus, uint8_t channel);
 template <auto func, typename... Args>
 auto channelCall(uint8_t channel, Args&&... args)
 {
-    sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+    sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
     auto params = getChannelParams(bus, channel);
     return std::invoke(func, bus, params, std::forward<Args>(args)...);
 }
@@ -334,7 +334,7 @@ class ObjectLookupCache
      *  @param[in] params - The parameters for the channel
      *  @param[in] intf   - The interface we are looking up
      */
-    ObjectLookupCache(sdbusplus::bus::bus& bus, const ChannelParams& params,
+    ObjectLookupCache(sdbusplus::bus_t& bus, const ChannelParams& params,
                       const char* intf) :
         bus(bus),
         params(params), intf(intf),
@@ -378,7 +378,7 @@ class ObjectLookupCache
     }
 
   private:
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
     const ChannelParams& params;
     const char* const intf;
     const ObjectTree objs;
@@ -475,7 +475,7 @@ ether_addr stringToMAC(const char* mac);
  */
 template <int family>
 std::optional<IfAddr<family>> findIfAddr(
-    [[maybe_unused]] sdbusplus::bus::bus& bus,
+    [[maybe_unused]] sdbusplus::bus_t& bus,
     [[maybe_unused]] const ChannelParams& params, uint8_t idx,
     const std::unordered_set<
         sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>&
@@ -528,7 +528,7 @@ std::optional<IfAddr<family>> findIfAddr(
  */
 template <int family>
 auto getIfAddr(
-    sdbusplus::bus::bus& bus, const ChannelParams& params, uint8_t idx,
+    sdbusplus::bus_t& bus, const ChannelParams& params, uint8_t idx,
     const std::unordered_set<
         sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>&
         origins)
@@ -544,7 +544,7 @@ auto getIfAddr(
  *  @return DHCPConf enumeration
  */
 sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface::DHCPConf
-    getDHCPProperty(sdbusplus::bus::bus& bus, const ChannelParams& params);
+    getDHCPProperty(sdbusplus::bus_t& bus, const ChannelParams& params);
 
 /** @brief Sets the DHCP v6 state on the given interface
  *
@@ -554,7 +554,7 @@ sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface::DHCPConf
  *  @param[in] defaultMode   - True: Use algorithmic assignment
  *                             False: requestedDhcp assigned unconditionally
  */
-void setDHCPv6Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void setDHCPv6Property(sdbusplus::bus_t& bus, const ChannelParams& params,
                        const sdbusplus::xyz::openbmc_project::Network::server::
                            EthernetInterface::DHCPConf requestedDhcp,
                        const bool defaultMode);
@@ -567,7 +567,7 @@ void setDHCPv6Property(sdbusplus::bus::bus& bus, const ChannelParams& params,
  *  @param[in] address - The new address
  *  @param[in] prefix  - The new address prefix
  */
-void reconfigureIfAddr6(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void reconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
                         uint8_t idx, const in6_addr& address, uint8_t prefix);
 
 /** @brief Retrieves the current gateway for the address family on the system
@@ -579,7 +579,7 @@ void reconfigureIfAddr6(sdbusplus::bus::bus& bus, const ChannelParams& params,
  */
 template <int family>
 std::optional<typename AddrFamily<family>::addr>
-    getGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params)
+    getGatewayProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
 {
     auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
     auto gatewayStr = std::get<std::string>(
@@ -594,7 +594,7 @@ std::optional<typename AddrFamily<family>::addr>
 
 template <int family>
 std::optional<IfNeigh<family>>
-    findStaticNeighbor(sdbusplus::bus::bus&, const ChannelParams&,
+    findStaticNeighbor(sdbusplus::bus_t&, const ChannelParams&,
                        const typename AddrFamily<family>::addr& ip,
                        ObjectLookupCache& neighbors)
 {
@@ -631,7 +631,7 @@ std::optional<IfNeigh<family>>
 }
 
 template <int family>
-void createNeighbor(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void createNeighbor(sdbusplus::bus_t& bus, const ChannelParams& params,
                     const typename AddrFamily<family>::addr& address,
                     const ether_addr& mac)
 {
@@ -650,7 +650,7 @@ void createNeighbor(sdbusplus::bus::bus& bus, const ChannelParams& params,
  *  @param[in] service - The name of the service
  *  @param[in] path    - The path of the object to delete
  */
-void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
+void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
                           const std::string& path);
 
 /** @brief Sets the value for the default gateway of the channel
@@ -660,7 +660,7 @@ void deleteObjectIfExists(sdbusplus::bus::bus& bus, const std::string& service,
  *  @param[in] gateway - Gateway address to apply
  */
 template <int family>
-void setGatewayProperty(sdbusplus::bus::bus& bus, const ChannelParams& params,
+void setGatewayProperty(sdbusplus::bus_t& bus, const ChannelParams& params,
                         const typename AddrFamily<family>::addr& address)
 {
     // Save the old gateway MAC address if it exists so we can recreate it

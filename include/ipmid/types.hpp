@@ -197,7 +197,7 @@ using InterfaceMap = std::map<DbusInterface, PropertyMap>;
 using Object = sdbusplus::message::object_path;
 using ObjectMap = std::map<Object, InterfaceMap>;
 
-using IpmiUpdateData = sdbusplus::message::message;
+using IpmiUpdateData = sdbusplus::message_t;
 
 struct SelData
 {

@@ -33,7 +33,7 @@ int main(int, char**)
     auto bus = sdbusplus::bus::new_default();
 
     // Add systemd object manager.
-    sdbusplus::server::manager::manager(bus, SOFTOFF_OBJPATH);
+    sdbusplus::server::manager_t(bus, SOFTOFF_OBJPATH);
 
     // Get default event loop
     auto event = sdeventplus::Event::get_default();

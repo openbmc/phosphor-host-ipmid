@@ -349,7 +349,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                 sdbusplus::bus::match::rules::interface(
                     dBusPropertiesInterface) +
                 sdbusplus::bus::match::rules::argN(0, networkChConfigIntfName),
-            [&](sdbusplus::message::message& msg) {
+            [&](sdbusplus::message_t& msg) {
                 DbusChObjProperties props;
                 std::string iface;
                 std::string path = msg.get_path();
@@ -364,7 +364,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                 sdbusplus::bus::match::rules::member(interfaceAddedSignal) +
                 sdbusplus::bus::match::rules::argNpath(
                     0, std::string(networkIntfObjectBasePath) + "/"),
-            [&](sdbusplus::message::message&) { initChannelPersistData(); });
+            [&](sdbusplus::message_t&) { initChannelPersistData(); });
 
         chInterfaceRemovedSignal = std::make_unique<sdbusplus::bus::match_t>(
             bus,
@@ -372,7 +372,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                 sdbusplus::bus::match::rules::member(interfaceRemovedSignal) +
                 sdbusplus::bus::match::rules::argNpath(
                     0, std::string(networkIntfObjectBasePath) + "/"),
-            [&](sdbusplus::message::message&) { initChannelPersistData(); });
+            [&](sdbusplus::message_t&) { initChannelPersistData(); });
     }
 }
 
@@ -649,7 +649,7 @@ Cc ChannelConfig::setChannelAccessPersistData(const uint8_t chNum,
                 return ccUnspecifiedError;
             }
         }
-        catch (const sdbusplus::exception::exception& e)
+        catch (const sdbusplus::exception_t& e)
         {
             log<level::ERR>("Exception: Network interface does not exist");
             return ccInvalidFieldRequest;
@@ -1321,7 +1321,7 @@ int ChannelConfig::setDbusProperty(const std::string& service,
 
         auto reply = bus.call(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::DEBUG>("set-property failed",
                           entry("SERVICE=%s", service.c_str()),
@@ -1351,7 +1351,7 @@ int ChannelConfig::getDbusProperty(const std::string& service,
         auto reply = bus.call(method);
         reply.read(value);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::DEBUG>("get-property failed",
                           entry("SERVICE=%s", service.c_str()),
@@ -1396,7 +1396,7 @@ int ChannelConfig::syncNetworkChannelConfig()
                     "exception: Network interface does not exist");
                 continue;
             }
-            catch (const sdbusplus::exception::exception& e)
+            catch (const sdbusplus::exception_t& e)
             {
                 log<level::DEBUG>(
                     "exception: Network interface does not exist");

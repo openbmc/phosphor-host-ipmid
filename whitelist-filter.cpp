@@ -36,13 +36,13 @@ class WhitelistFilter
   private:
     void postInit();
     void cacheRestrictedMode();
-    void handleRestrictedModeChange(sdbusplus::message::message& m);
+    void handleRestrictedModeChange(sdbusplus::message_t& m);
     ipmi::Cc filterMessage(ipmi::message::Request::ptr request);
 
     bool restrictedMode = true;
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::unique_ptr<settings::Objects> objects;
-    std::unique_ptr<sdbusplus::bus::match::match> modeChangeMatch;
+    std::unique_ptr<sdbusplus::bus::match_t> modeChangeMatch;
 
     static constexpr const char restrictionModeIntf[] =
         "xyz.openbmc_project.Control.Security.RestrictionMode";
@@ -102,7 +102,7 @@ void WhitelistFilter::cacheRestrictedMode()
         "RestrictionMode");
 }
 
-void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message::message& m)
+void WhitelistFilter::handleRestrictedModeChange(sdbusplus::message_t& m)
 {
     using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
     std::string intf;
@@ -149,10 +149,9 @@ void WhitelistFilter::postInit()
         log<level::ERR>("Failed to determine restriction mode filter string");
         return;
     }
-    modeChangeMatch = std::make_unique<sdbusplus::bus::match::match>(
-        *bus, filterStr, [this](sdbusplus::message::message& m) {
-            handleRestrictedModeChange(m);
-        });
+    modeChangeMatch = std::make_unique<sdbusplus::bus::match_t>(
+        *bus, filterStr,
+        [this](sdbusplus::message_t& m) { handleRestrictedModeChange(m); });
 }
 
 ipmi::Cc WhitelistFilter::filterMessage(ipmi::message::Request::ptr request)
