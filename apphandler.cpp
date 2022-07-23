@@ -114,7 +114,7 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
         objectTree =
             ipmi::getAllDbusObjects(*ctx->bus, softwareRoot, redundancyIntf);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to fetch redundancy object from dbus",
                         entry("INTERFACE=%s", redundancyIntf),
@@ -178,7 +178,7 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
 
 bool getCurrentBmcState()
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     // Get the Inventory object implementing the BMC interface
     ipmi::DbusObjectInfo bmcObject =
@@ -311,7 +311,7 @@ ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
 {
     auto s = static_cast<uint8_t>(acpi_state::PowerState::unknown);
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto value = acpi_state::ACPIPowerState::ACPI::Unknown;
 
@@ -431,7 +431,7 @@ ipmi::RspType<uint8_t, // acpiSystemPowerState
     uint8_t sysAcpiState;
     uint8_t devAcpiState;
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     try
     {
@@ -942,7 +942,7 @@ ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
             }
         }
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to fetch object from dbus",
                         entry("INTERFACE=%s", session::sessionIntf),

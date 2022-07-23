@@ -44,7 +44,7 @@ ipmi::PropertyMap readAllProperties(const std::string& intf,
                                     const std::string& path)
 {
     ipmi::PropertyMap properties;
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     std::string service;
     std::string objPath;
 
@@ -68,7 +68,7 @@ ipmi::PropertyMap readAllProperties(const std::string& intf,
         auto reply = bus.call(method);
         reply.read(properties);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         // If property is not found simply return empty value
         log<level::ERR>("Error in reading property values",
@@ -80,7 +80,7 @@ ipmi::PropertyMap readAllProperties(const std::string& intf,
     return properties;
 }
 
-void processFruPropChange(sdbusplus::message::message& msg)
+void processFruPropChange(sdbusplus::message_t& msg)
 {
     if (cache::fruMap.empty())
     {
@@ -112,7 +112,7 @@ int registerCallbackHandler()
     if (matchPtr == nullptr)
     {
         using namespace sdbusplus::bus::match::rules;
-        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
         matchPtr = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             path_namespace(invObjPath) + type::signal() +

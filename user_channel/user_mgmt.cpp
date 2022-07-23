@@ -128,7 +128,7 @@ std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal
     __attribute__((init_priority(101)));
 
 // TODO:  Below code can be removed once it is moved to common layer libmiscutil
-std::string getUserService(sdbusplus::bus::bus& bus, const std::string& intf,
+std::string getUserService(sdbusplus::bus_t& bus, const std::string& intf,
                            const std::string& path)
 {
     auto mapperCall = bus.new_method_call(objMapperService, objMapperPath,
@@ -151,7 +151,7 @@ std::string getUserService(sdbusplus::bus::bus& bus, const std::string& intf,
     return mapperResponse.begin()->first;
 }
 
-void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
+void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
                      const std::string& objPath, const std::string& interface,
                      const std::string& property,
                      const DbusUserPropVariant& value)
@@ -164,7 +164,7 @@ void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
         method.append(interface, property, value);
         bus.call(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to set property",
                         entry("PROPERTY=%s", property.c_str()),
@@ -176,7 +176,7 @@ void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
 
 static std::string getUserServiceName()
 {
-    static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+    static sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
     static std::string userMgmtService;
     if (userMgmtService.empty())
     {
@@ -185,7 +185,7 @@ static std::string getUserServiceName()
             userMgmtService =
                 ipmi::getUserService(bus, userMgrInterface, userMgrObjBasePath);
         }
-        catch (const sdbusplus::exception::exception& e)
+        catch (const sdbusplus::exception_t& e)
         {
             userMgmtService.clear();
         }
@@ -302,10 +302,9 @@ void userUpdateHelper(UserAccess& usrAccess, const UserUpdateEvent& userEvent,
     return;
 }
 
-void userUpdatedSignalHandler(UserAccess& usrAccess,
-                              sdbusplus::message::message& msg)
+void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
 {
-    static sdbusplus::bus::bus bus(ipmid_get_sd_bus_connection());
+    static sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
     std::string signal = msg.get_member();
     std::string userName, priv, newUserName;
     std::vector<std::string> groups;
@@ -410,7 +409,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess,
                         auto reply = bus.call(method);
                         reply.read(properties);
                     }
-                    catch (const sdbusplus::exception::exception& e)
+                    catch (const sdbusplus::exception_t& e)
                     {
                         log<level::DEBUG>(
                             "Failed to excute method",
@@ -584,7 +583,7 @@ bool UserAccess::isValidUserName(const std::string& userName)
         auto reply = bus.call(method);
         reply.read(properties);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to excute method",
                         entry("METHOD=%s", getSubTreeMethod),
@@ -1038,7 +1037,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
                 deleteUserInterface, deleteUserMethod);
             auto reply = bus.call(method);
         }
-        catch (const sdbusplus::exception::exception& e)
+        catch (const sdbusplus::exception_t& e)
         {
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", deleteUserMethod),
@@ -1062,7 +1061,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
             method.append(userName.c_str(), availableGroups, "", false);
             auto reply = bus.call(method);
         }
-        catch (const sdbusplus::exception::exception& e)
+        catch (const sdbusplus::exception_t& e)
         {
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", createUserMethod),
@@ -1086,7 +1085,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
             method.append(oldUser.c_str(), userName.c_str());
             auto reply = bus.call(method);
         }
-        catch (const sdbusplus::exception::exception& e)
+        catch (const sdbusplus::exception_t& e)
         {
             log<level::DEBUG>("Failed to excute method",
                               entry("METHOD=%s", renameUserMethod),
@@ -1537,7 +1536,7 @@ void UserAccess::getSystemPrivAndGroups()
         auto reply = bus.call(method);
         reply.read(properties);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::DEBUG>("Failed to excute method",
                           entry("METHOD=%s", getAllPropertiesMethod),
@@ -1656,7 +1655,7 @@ void UserAccess::cacheUserDataFile()
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::interface(dBusObjManager) +
                 sdbusplus::bus::match::rules::path(userMgrObjBasePath),
-            [&](sdbusplus::message::message& msg) {
+            [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });
         userMgrRenamedSignal = std::make_unique<sdbusplus::bus::match_t>(
@@ -1664,7 +1663,7 @@ void UserAccess::cacheUserDataFile()
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::interface(userMgrInterface) +
                 sdbusplus::bus::match::rules::path(userMgrObjBasePath),
-            [&](sdbusplus::message::message& msg) {
+            [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });
         userPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
@@ -1675,7 +1674,7 @@ void UserAccess::cacheUserDataFile()
                     dBusPropertiesInterface) +
                 sdbusplus::bus::match::rules::member(propertiesChangedSignal) +
                 sdbusplus::bus::match::rules::argN(0, usersInterface),
-            [&](sdbusplus::message::message& msg) {
+            [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });
         signalHndlrObject = true;
@@ -1689,7 +1688,7 @@ void UserAccess::cacheUserDataFile()
         auto reply = bus.call(method);
         reply.read(managedObjs);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::DEBUG>("Failed to excute method",
                           entry("METHOD=%s", getSubTreeMethod),

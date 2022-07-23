@@ -16,8 +16,7 @@ constexpr auto mapperService = "xyz.openbmc_project.ObjectMapper";
 constexpr auto mapperPath = "/xyz/openbmc_project/object_mapper";
 constexpr auto mapperIntf = "xyz.openbmc_project.ObjectMapper";
 
-Objects::Objects(sdbusplus::bus::bus& bus,
-                 const std::vector<Interface>& filter) :
+Objects::Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter) :
     bus(bus)
 {
     auto depth = 0;

@@ -38,7 +38,7 @@ bool isLinkLocalIP(const std::string& ipaddress);
 //  Currently mapper doesn't give the readable busname(gives busid) so we can't
 //  use busname to find the object,will do later once the support is there.
 
-DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
+DbusObjectInfo getDbusObject(sdbusplus::bus_t& bus,
                              const std::string& interface,
                              const std::string& serviceRoot,
                              const std::string& match)
@@ -98,7 +98,7 @@ DbusObjectInfo getDbusObject(sdbusplus::bus::bus& bus,
     return make_pair(found->first, std::move(found->second.begin()->first));
 }
 
-Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
+Value getDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
                       const std::string& objPath, const std::string& interface,
                       const std::string& property,
                       std::chrono::microseconds timeout)
@@ -127,7 +127,7 @@ Value getDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
     return value;
 }
 
-PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
+PropertyMap getAllDbusProperties(sdbusplus::bus_t& bus,
                                  const std::string& service,
                                  const std::string& objPath,
                                  const std::string& interface,
@@ -154,7 +154,7 @@ PropertyMap getAllDbusProperties(sdbusplus::bus::bus& bus,
     return properties;
 }
 
-ObjectValueTree getManagedObjects(sdbusplus::bus::bus& bus,
+ObjectValueTree getManagedObjects(sdbusplus::bus_t& bus,
                                   const std::string& service,
                                   const std::string& objPath)
 {
@@ -177,7 +177,7 @@ ObjectValueTree getManagedObjects(sdbusplus::bus::bus& bus,
     return interfaces;
 }
 
-void setDbusProperty(sdbusplus::bus::bus& bus, const std::string& service,
+void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
                      const std::string& objPath, const std::string& interface,
                      const std::string& property, const Value& value,
                      std::chrono::microseconds timeout)
@@ -209,7 +209,7 @@ ServiceCache::ServiceCache(std::string&& intf, std::string&& path) :
 {
 }
 
-const std::string& ServiceCache::getService(sdbusplus::bus::bus& bus)
+const std::string& ServiceCache::getService(sdbusplus::bus_t& bus)
 {
     if (!isValid(bus))
     {
@@ -225,20 +225,20 @@ void ServiceCache::invalidate()
     cachedService = std::nullopt;
 }
 
-sdbusplus::message::message
-    ServiceCache::newMethodCall(sdbusplus::bus::bus& bus, const char* intf,
-                                const char* method)
+sdbusplus::message_t ServiceCache::newMethodCall(sdbusplus::bus_t& bus,
+                                                 const char* intf,
+                                                 const char* method)
 {
     return bus.new_method_call(getService(bus).c_str(), path.c_str(), intf,
                                method);
 }
 
-bool ServiceCache::isValid(sdbusplus::bus::bus& bus) const
+bool ServiceCache::isValid(sdbusplus::bus_t& bus) const
 {
     return cachedService && cachedBusName == bus.get_unique_name();
 }
 
-std::string getService(sdbusplus::bus::bus& bus, const std::string& intf,
+std::string getService(sdbusplus::bus_t& bus, const std::string& intf,
                        const std::string& path)
 {
     auto mapperCall =
@@ -267,7 +267,7 @@ std::string getService(sdbusplus::bus::bus& bus, const std::string& intf,
     return mapperResponse.begin()->first;
 }
 
-ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus::bus& bus,
+ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
                                    const std::string& serviceRoot,
                                    const std::string& interface,
                                    const std::string& match)
@@ -310,8 +310,7 @@ ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus::bus& bus,
     return objectTree;
 }
 
-void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
-                          const std::string& serviceRoot,
+void deleteAllDbusObjects(sdbusplus::bus_t& bus, const std::string& serviceRoot,
                           const std::string& interface,
                           const std::string& match)
 {
@@ -326,7 +325,7 @@ void deleteAllDbusObjects(sdbusplus::bus::bus& bus,
                                            "Delete");
         }
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::INFO>("sdbusplus exception - Unable to delete the objects",
                          entry("ERROR=%s", e.what()),
@@ -345,7 +344,7 @@ static inline std::string convertToString(const InterfaceList& interfaces)
     return intfStr;
 }
 
-ObjectTree getAllAncestors(sdbusplus::bus::bus& bus, const std::string& path,
+ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
                            InterfaceList&& interfaces)
 {
     auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ,
@@ -380,7 +379,7 @@ ObjectTree getAllAncestors(sdbusplus::bus::bus& bus, const std::string& path,
 namespace method_no_args
 {
 
-void callDbusMethod(sdbusplus::bus::bus& bus, const std::string& service,
+void callDbusMethod(sdbusplus::bus_t& bus, const std::string& service,
                     const std::string& objPath, const std::string& interface,
                     const std::string& method)
 

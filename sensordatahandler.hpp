@@ -46,7 +46,7 @@ using namespace phosphor::logging;
  *  @param[in] path - interested path in the list of objects
  *  @return pair of service path and service
  */
-ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
+ServicePath getServiceAndPath(sdbusplus::bus_t& bus,
                               const std::string& interface,
                               const std::string& path = std::string());
 
@@ -181,7 +181,7 @@ GetSensorResponse eventdata2(const Info& sensorInfo);
 template <typename T>
 GetSensorResponse readingAssertion(const Info& sensorInfo)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
 
     enableScanning(&response);
@@ -210,7 +210,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
 template <typename T>
 GetSensorResponse readingData(const Info& sensorInfo)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     GetSensorResponse response{};
 

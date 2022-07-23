@@ -406,7 +406,7 @@ void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
         "ListNames");
 }
 
-void nameChangeHandler(sdbusplus::message::message& message)
+void nameChangeHandler(sdbusplus::message_t& message)
 {
     std::string name;
     std::string oldOwner;
@@ -449,7 +449,7 @@ void nameChangeHandler(sdbusplus::message::message& message)
 } // anonymous namespace
 
 static constexpr const char intraBmcName[] = "INTRABMC";
-uint8_t channelFromMessage(sdbusplus::message::message& msg)
+uint8_t channelFromMessage(sdbusplus::message_t& msg)
 {
     // channel name for ipmitool to resolve to
     std::string sender = msg.get_sender();
@@ -470,9 +470,8 @@ uint8_t channelFromMessage(sdbusplus::message::message& msg)
 } // namespace ipmi
 
 /* called from sdbus async server context */
-auto executionEntry(boost::asio::yield_context yield,
-                    sdbusplus::message::message& m, NetFn netFn, uint8_t lun,
-                    Cmd cmd, ipmi::SecureBuffer& data,
+auto executionEntry(boost::asio::yield_context yield, sdbusplus::message_t& m,
+                    NetFn netFn, uint8_t lun, Cmd cmd, ipmi::SecureBuffer& data,
                     std::map<std::string, ipmi::Value>& options)
 {
     const auto dbusResponse =
@@ -755,13 +754,13 @@ Router* mutableRouter()
 } // namespace oem
 
 /* legacy alternative to executionEntry */
-void handleLegacyIpmiCommand(sdbusplus::message::message& m)
+void handleLegacyIpmiCommand(sdbusplus::message_t& m)
 {
     // make a copy so the next two moves don't wreak havoc on the stack
-    sdbusplus::message::message b{m};
+    sdbusplus::message_t b{m};
     boost::asio::spawn(*getIoContext(), [b = std::move(b)](
                                             boost::asio::yield_context yield) {
-        sdbusplus::message::message m{std::move(b)};
+        sdbusplus::message_t m{std::move(b)};
         unsigned char seq = 0, netFn = 0, lun = 0, cmd = 0;
         ipmi::SecureBuffer data;
 
@@ -851,12 +850,12 @@ int main(int argc, char* argv[])
     // listen on deprecated signal interface for kcs/bt commands
     constexpr const char* FILTER = "type='signal',interface='org.openbmc."
                                    "HostIpmi',member='ReceivedMessage'";
-    sdbusplus::bus::match::match oldIpmiInterface(*sdbusp, FILTER,
-                                                  handleLegacyIpmiCommand);
+    sdbusplus::bus::match_t oldIpmiInterface(*sdbusp, FILTER,
+                                             handleLegacyIpmiCommand);
 #endif /* ALLOW_DEPRECATED_API */
 
     // set up bus name watching to match channels with bus names
-    sdbusplus::bus::match::match nameOwnerChanged(
+    sdbusplus::bus::match_t nameOwnerChanged(
         *sdbusp,
         sdbusplus::bus::match::rules::nameOwnerChanged() +
             sdbusplus::bus::match::rules::arg0namespace(

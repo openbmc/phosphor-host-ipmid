@@ -378,7 +378,7 @@ class UserAccess
     UsersTbl usersTbl;
     std::vector<std::string> availablePrivileges;
     std::vector<std::string> availableGroups;
-    sdbusplus::bus::bus bus;
+    sdbusplus::bus_t bus;
     std::timespec fileLastUpdatedTime;
     bool signalHndlrObject = false;
     boost::interprocess::file_lock sigHndlrLock;

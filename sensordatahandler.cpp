@@ -29,7 +29,7 @@ static constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
  *  @param[in] path - interested path in the list of objects
  *  @return pair of service path and service
  */
-ServicePath getServiceAndPath(sdbusplus::bus::bus& bus,
+ServicePath getServiceAndPath(sdbusplus::bus_t& bus,
                               const std::string& interface,
                               const std::string& path)
 {
@@ -89,7 +89,7 @@ AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData)
 
 ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     try
     {
         auto serviceResponseMsg = bus.call(msg);
@@ -128,7 +128,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
                                      const InstancePath& path,
                                      const DbusInterface& interface)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
 
     enableScanning(&response);
@@ -160,7 +160,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
 
 GetSensorResponse mapDbusToEventdata2(const Info& sensorInfo)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
 
     enableScanning(&response);
@@ -247,7 +247,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                            const std::string& command,
                            const std::string& sensorInterface)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     using namespace std::string_literals;
 
     auto dbusService = getService(bus, sensorInterface, sensorPath);
@@ -339,7 +339,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                            const std::string&, const std::string& command,
                            const std::string&)
 {
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     using namespace std::string_literals;
 
     static const auto dbusPath = "/xyz/openbmc_project/inventory"s;

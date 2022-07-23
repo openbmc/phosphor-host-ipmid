@@ -72,11 +72,11 @@ using SELCacheMap = std::map<SELRecordID, SELEntry>;
 
 SELCacheMap selCacheMap __attribute__((init_priority(101)));
 bool selCacheMapInitialized;
-std::unique_ptr<sdbusplus::bus::match::match> selAddedMatch
+std::unique_ptr<sdbusplus::bus::match_t> selAddedMatch
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match::match> selRemovedMatch
+std::unique_ptr<sdbusplus::bus::match_t> selRemovedMatch
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match::match> selUpdatedMatch
+std::unique_ptr<sdbusplus::bus::match_t> selUpdatedMatch
     __attribute__((init_priority(101)));
 
 static inline uint16_t getLoggingId(const std::string& p)
@@ -109,14 +109,14 @@ std::optional<std::pair<uint16_t, SELEntry>>
     return std::nullopt;
 }
 
-static void selAddedCallback(sdbusplus::message::message& m)
+static void selAddedCallback(sdbusplus::message_t& m)
 {
     sdbusplus::message::object_path objPath;
     try
     {
         m.read(objPath);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to read object path");
         return;
@@ -129,14 +129,14 @@ static void selAddedCallback(sdbusplus::message::message& m)
     }
 }
 
-static void selRemovedCallback(sdbusplus::message::message& m)
+static void selRemovedCallback(sdbusplus::message_t& m)
 {
     sdbusplus::message::object_path objPath;
     try
     {
         m.read(objPath);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to read object path");
     }
@@ -151,7 +151,7 @@ static void selRemovedCallback(sdbusplus::message::message& m)
     }
 }
 
-static void selUpdatedCallback(sdbusplus::message::message& m)
+static void selUpdatedCallback(sdbusplus::message_t& m)
 {
     std::string p = m.get_path();
     auto entry = parseLoggingEntry(p);
@@ -164,22 +164,22 @@ static void selUpdatedCallback(sdbusplus::message::message& m)
 void registerSelCallbackHandler()
 {
     using namespace sdbusplus::bus::match::rules;
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     if (!selAddedMatch)
     {
-        selAddedMatch = std::make_unique<sdbusplus::bus::match::match>(
+        selAddedMatch = std::make_unique<sdbusplus::bus::match_t>(
             bus, interfacesAdded(logWatchPath),
             std::bind(selAddedCallback, std::placeholders::_1));
     }
     if (!selRemovedMatch)
     {
-        selRemovedMatch = std::make_unique<sdbusplus::bus::match::match>(
+        selRemovedMatch = std::make_unique<sdbusplus::bus::match_t>(
             bus, interfacesRemoved(logWatchPath),
             std::bind(selRemovedCallback, std::placeholders::_1));
     }
     if (!selUpdatedMatch)
     {
-        selUpdatedMatch = std::make_unique<sdbusplus::bus::match::match>(
+        selUpdatedMatch = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             type::signal() + member("PropertiesChanged"s) +
                 interface("org.freedesktop.DBus.Properties"s) +
@@ -196,7 +196,7 @@ void initSELCache()
     {
         ipmi::sel::readLoggingObjectPaths(paths);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to get logging object paths");
         return;
@@ -451,7 +451,7 @@ ipmi::RspType<uint16_t // deleted record ID
         return ipmi::responseSensorInvalid();
     }
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     std::string service;
 
     auto objPath = getLoggingObjPath(iter->first);
@@ -515,7 +515,7 @@ ipmi::RspType<uint8_t // erase status
     // Per the IPMI spec, need to cancel any reservation when the SEL is cleared
     cancelSELReservation();
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     auto service = ipmi::getService(bus, ipmi::sel::logIntf, ipmi::sel::logObj);
     auto method =
         bus.new_method_call(service.c_str(), ipmi::sel::logObj,
@@ -524,7 +524,7 @@ ipmi::RspType<uint8_t // erase status
     {
         bus.call_noreply(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Error eraseAll ", entry("ERROR=%s", e.what()));
         return ipmi::responseUnspecifiedError();
@@ -547,7 +547,7 @@ ipmi::RspType<uint32_t> // current time
 
     try
     {
-        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
         auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
         std::variant<uint64_t> value;
 
@@ -601,7 +601,7 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
 
     try
     {
-        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
         bool ntp = std::get<bool>(
             ipmi::getDbusProperty(bus, SystemdTimeService, SystemdTimePath,
                                   SystemdTimeInterface, "NTP"));

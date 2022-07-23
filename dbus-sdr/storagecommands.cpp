@@ -120,7 +120,7 @@ static uint8_t writeBus = 0xFF;
 static uint8_t writeAddr = 0XFF;
 
 std::unique_ptr<phosphor::Timer> writeTimer = nullptr;
-static std::vector<sdbusplus::bus::match::match> fruMatches;
+static std::vector<sdbusplus::bus::match_t> fruMatches;
 
 ManagedObjectType frus;
 
@@ -138,13 +138,13 @@ bool writeFru()
     }
     lastDevId = 0xFF;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
-    sdbusplus::message::message writeFru = dbus->new_method_call(
+    sdbusplus::message_t writeFru = dbus->new_method_call(
         fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
         "xyz.openbmc_project.FruDeviceManager", "WriteFru");
     writeFru.append(writeBus, writeAddr, fruCache);
     try
     {
-        sdbusplus::message::message writeFruResp = dbus->call(writeFru);
+        sdbusplus::message_t writeFruResp = dbus->call(writeFru);
     }
     catch (const sdbusplus::exception_t&)
     {
@@ -313,7 +313,7 @@ void startMatch(void)
     fruMatches.emplace_back(*bus,
                             "type='signal',arg0path='/xyz/openbmc_project/"
                             "FruDevice/',member='InterfacesAdded'",
-                            [](sdbusplus::message::message& message) {
+                            [](sdbusplus::message_t& message) {
                                 sdbusplus::message::object_path path;
                                 ObjectType object;
                                 try
@@ -339,7 +339,7 @@ void startMatch(void)
     fruMatches.emplace_back(*bus,
                             "type='signal',arg0path='/xyz/openbmc_project/"
                             "FruDevice/',member='InterfacesRemoved'",
-                            [](sdbusplus::message::message& message) {
+                            [](sdbusplus::message_t& message) {
                                 sdbusplus::message::object_path path;
                                 std::set<std::string> interfaces;
                                 try
@@ -1164,13 +1164,13 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr,
 
     // Reload rsyslog so it knows to start new log files
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
-    sdbusplus::message::message rsyslogReload = dbus->new_method_call(
+    sdbusplus::message_t rsyslogReload = dbus->new_method_call(
         "org.freedesktop.systemd1", "/org/freedesktop/systemd1",
         "org.freedesktop.systemd1.Manager", "ReloadUnit");
     rsyslogReload.append("rsyslog.service", "replace");
     try
     {
-        sdbusplus::message::message reloadResponse = dbus->call(rsyslogReload);
+        sdbusplus::message_t reloadResponse = dbus->call(rsyslogReload);
     }
     catch (const sdbusplus::exception_t& e)
     {

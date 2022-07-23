@@ -252,7 +252,7 @@ class ChannelConfig
     std::time_t nvFileLastUpdatedTime;
     std::time_t voltFileLastUpdatedTime;
     boost::interprocess::file_lock mutexCleanupLock;
-    sdbusplus::bus::bus bus;
+    sdbusplus::bus_t bus;
     bool signalHndlrObjectState = false;
     boost::interprocess::file_lock sigHndlrLock;
 
