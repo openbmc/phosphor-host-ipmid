@@ -168,7 +168,7 @@ uint8_t closeOtherNetInstanceSession(const uint32_t reqSessionId,
             }
         }
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to fetch object from dbus",
                         entry("INTERFACE=%s", session::sessionIntf),
@@ -298,7 +298,7 @@ std::vector<uint8_t> closeSession(const std::vector<uint8_t>& inPayload,
             session::Manager::get().getSession(handler->sessionID);
         currentSessionPriv = currentSession->currentPrivilege();
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to fetch object from dbus",
                         entry("INTERFACE=%s", session::sessionIntf),

@@ -158,7 +158,7 @@ class Manager
      *        associative container with Session ID as the unique key
      */
     SessionMap sessionsMap;
-    std::unique_ptr<sdbusplus::server::manager::manager> objManager = nullptr;
+    std::unique_ptr<sdbusplus::server::manager_t> objManager = nullptr;
     std::string chName{}; // Channel Name
     uint8_t ipmiNetworkInstance = 0;
     void setNetworkInstance(void);

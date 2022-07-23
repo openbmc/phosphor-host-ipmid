@@ -56,7 +56,7 @@ int EventLoop::getVLANID(const std::string channel)
         return 0;
     }
 
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     // Enumerate all VLAN + ETHERNET interfaces
     auto req = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
                                    "GetSubTree");

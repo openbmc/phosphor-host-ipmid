@@ -93,7 +93,7 @@ struct SequenceNumbers
  * implementation support at least four simultaneous sessions
  */
 
-using SessionIface = sdbusplus::server::object::object<
+using SessionIface = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Ipmi::server::SessionInfo>;
 
 class Session : public SessionIface
@@ -115,7 +115,7 @@ class Session : public SessionIface
      * @param[in] inRemoteConsoleSessID - Remote Console Session ID
      * @param[in] priv - Privilege Level requested in the Command
      */
-    Session(sdbusplus::bus::bus& bus, const char* path,
+    Session(sdbusplus::bus_t& bus, const char* path,
             SessionID inRemoteConsoleSessID, SessionID BMCSessionID,
             char priv) :
         SessionIface(bus, path)

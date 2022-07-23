@@ -113,7 +113,7 @@ void Manager::stopHostConsole()
 void Manager::updateSOLParameter(uint8_t channelNum)
 {
     std::variant<uint8_t, bool> value;
-    sdbusplus::bus::bus dbus(ipmid_get_sd_bus_connection());
+    sdbusplus::bus_t dbus(ipmid_get_sd_bus_connection());
     static std::string solService{};
     ipmi::PropertyMap properties;
     std::string ethdevice = ipmi::getChannelName(channelNum);
@@ -227,7 +227,7 @@ void Manager::stopAllPayloadInstance()
 void registerSOLServiceChangeCallback()
 {
     using namespace sdbusplus::bus::match::rules;
-    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     try
     {
         auto servicePath = ipmi::getDbusObject(
@@ -244,7 +244,7 @@ void registerSOLServiceChangeCallback()
                     ", " +
                     type::signal() + member("PropertiesChanged") +
                     interface("org.freedesktop.DBus.Properties"),
-                [](sdbusplus::message::message& msg) {
+                [](sdbusplus::message_t& msg) {
                     std::string intfName;
                     std::map<std::string, std::variant<bool>> properties;
                     msg.read(intfName, properties);
@@ -270,7 +270,7 @@ void registerSOLServiceChangeCallback()
     }
 }
 
-void procSolConfChange(sdbusplus::message::message& msg)
+void procSolConfChange(sdbusplus::message_t& msg)
 {
     using SolConfVariant = std::variant<bool, uint8_t>;
     using SolConfProperties =
@@ -340,7 +340,7 @@ void registerSolConfChangeCallbackHandler(std::string channel)
     if (solConfPropertiesSignal == nullptr)
     {
         using namespace sdbusplus::bus::match::rules;
-        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
         try
         {
             auto servicePath = solPath + channel;

@@ -61,7 +61,7 @@ void Manager::managerInit(const std::string& channel)
      * through the lifetime of the Session Manager.
      */
 
-    objManager = std::make_unique<sdbusplus::server::manager::manager>(
+    objManager = std::make_unique<sdbusplus::server::manager_t>(
         *getSdBus(), session::sessionManagerRootPath);
 
     auto objPath =

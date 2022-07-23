@@ -92,15 +92,13 @@ void registerGUIDChangeCallback()
     if (matchPtr == nullptr)
     {
         using namespace sdbusplus::bus::match::rules;
-        sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
         matchPtr = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             path_namespace(guidObjPath) + type::signal() +
                 member("PropertiesChanged") + interface(propInterface),
-            [](sdbusplus::message::message&) {
-                cache::guid = getSystemGUID();
-            });
+            [](sdbusplus::message_t&) { cache::guid = getSystemGUID(); });
     }
 }
 
