@@ -1,35 +1,41 @@
 # Generate Configuration Files from Yaml
 python_exe = find_program('python3', 'python')
 
-sensor_yaml_script = files('sensor_gen.py')
-sensor_yaml_gen = run_command( \
-  python_exe, \
-  sensor_yaml_script, \
-  '-i', get_option('sensor-yaml-gen'), \
-  '-o', meson.project_build_root(), \
-  'generate-cpp')
-if sensor_yaml_gen.returncode() != 0
-  error(sensor_yaml_gen.stderr())
-endif
+sensor_gen = custom_target('sensor-gen',
+    output: 'sensor-gen.cpp',
+    input: [ 'sensor_gen.py', get_option('sensor-yaml-gen')],
+    command: [
+        python_exe,
+        '@INPUT0@',
+        '-i', '@INPUT1@',
+        '-o', meson.current_build_dir(),
+        'generate-cpp',
+    ],
+)
+generated_src += sensor_gen
 
-invsensor_yaml_script = files('inventory-sensor.py')
-invsensor_yaml_gen = run_command( \
-  python_exe, \
-  invsensor_yaml_script, \
-  '-i', get_option('invsensor-yaml-gen'), \
-  '-o', meson.project_build_root(), \
-  'generate-cpp')
-if invsensor_yaml_gen.returncode() != 0
-  error(invsensor_yaml_gen.stderr())
-endif
+invsensor_gen = custom_target('invsensor-gen',
+    output: 'inventory-sensor-gen.cpp',
+    input: [ 'inventory-sensor.py', get_option('invsensor-yaml-gen')],
+    command: [
+        python_exe,
+        '@INPUT0@',
+        '-i', '@INPUT1@',
+        '-o', meson.current_build_dir(),
+        'generate-cpp',
+    ],
+)
+generated_src += invsensor_gen
 
-fru_yaml_script = files('fru_gen.py')
-fru_yaml_gen = run_command( \
-  python_exe, \
-  fru_yaml_script, \
-  '-i', get_option('fru-yaml-gen'), \
-  '-o', meson.project_build_root(), \
-  'generate-cpp')
-if fru_yaml_gen.returncode() != 0
-  error(fru_yaml_gen.stderr())
-endif
+fru_gen = custom_target('fru-gen',
+    output: 'fru-read-gen.cpp',
+    input: [ 'fru_gen.py', get_option('fru-yaml-gen') ],
+    command: [
+        python_exe,
+        '@INPUT0@',
+        '-i', '@INPUT1@',
+        '-o', meson.current_build_dir(),
+        'generate-cpp',
+    ],
+)
+generated_src += fru_gen
