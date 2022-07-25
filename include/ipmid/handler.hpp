@@ -107,6 +107,8 @@ class HandlerBase
   public:
     using ptr = std::shared_ptr<HandlerBase>;
 
+    virtual ~HandlerBase() = default;
+
     /** @brief wrap the call to the registered handler with the request
      *
      * This is called from the running queue context after it has already
