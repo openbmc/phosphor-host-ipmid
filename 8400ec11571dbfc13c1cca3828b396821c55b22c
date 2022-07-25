@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1708d000_545fa08e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 23
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-07-25T08:19:42Z",
+      "side": 1,
+      "message": "I was able to find a way to test this change in QEMU .. by \"faking\" a Cable object with the following small program (which provides the DBus object needed for `ipmitool sdr list event` to show results.)\n\n```\n#include \u003cxyz/openbmc_project/Inventory/Item/Cable/server.hpp\u003e\n#include \u003csdeventplus/event.hpp\u003e\n#include \u003csdbusplus/asio/connection.hpp\u003e\n#include \u003csdbusplus/asio/object_server.hpp\u003e\n#include \u003csdbusplus/asio/sd_event.hpp\u003e\n\n#include \u003cstdio.h\u003e\n\nusing CableInterface \u003d sdbusplus::xyz::openbmc_project::Inventory::Item::server::Cable;\nusing fakeCableIface \u003d sdbusplus::server::object::object\u003cCableInterface\u003e;\n\nint main() {\n  printf(\"FakeSensor daemon for testing change 45999.\\n\");\n  boost::asio::io_context io;\n  auto conn \u003d std::make_shared\u003csdbusplus::asio::connection\u003e(io);\n  conn-\u003erequest_name(\"xyz.openbmc_project.GPIOPresence\");\n  sdbusplus::bus::bus\u0026 the_bus \u003d *conn;\n\n  auto cable1 \u003d std::make_unique\u003cfakeCableIface\u003e(the_bus,\n    \"/xyz/openbmc_project/inventory/item/cdfp0\");\n\n  auto event \u003d sdeventplus::Event::get_default();\n  sdbusplus::asio::object_server objserver(conn);\n  sdbusplus::asio::sd_event_wrapper sd_events(io);\n  io.run();\n  return 0;\n}\n```\n\nI think I finally come to understand what this change and its dependency that does hand-in-hand are doing. Still trying to understand the code a bit more ..",
+      "revId": "8400ec11571dbfc13c1cca3828b396821c55b22c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "562d9d55_680dd545",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-07-25T08:19:42Z",
+      "side": 1,
+      "message": "One small nit here: if there is only 1 cable to be grouped, this code will still generate a range. For example `cdfp0` gives `cdfp0-0`. Is this intended?",
+      "range": {
+        "startLine": 139,
+        "startChar": 12,
+        "endLine": 139,
+        "endChar": 26
+      },
+      "revId": "8400ec11571dbfc13c1cca3828b396821c55b22c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}

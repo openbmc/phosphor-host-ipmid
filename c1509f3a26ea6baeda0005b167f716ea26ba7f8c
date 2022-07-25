@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "85ba3f57_2a62d2ca",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -20,8 +21,31 @@
         "endChar": 0
       },
       "revId": "c1509f3a26ea6baeda0005b167f716ea26ba7f8c",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6e2d499b_0ba4cd30",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-07-25T08:19:42Z",
+      "side": 1,
+      "message": "I guess you can also wrap the match rules with \n    sdbusplus::bus::match::rules::interfacesAdded(\"interface name\") ?",
+      "parentUuid": "85ba3f57_2a62d2ca",
+      "range": {
+        "startLine": 98,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 0
+      },
+      "revId": "c1509f3a26ea6baeda0005b167f716ea26ba7f8c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
