@@ -100,6 +100,8 @@ else
     nlohmann_json_dep = dependency('nlohmann-json')
 endif
 
+generated_src = []
+
 # Subfolders
 subdir('libipmid')
 subdir('libipmid-host')
@@ -179,12 +181,6 @@ ipmid_pre = [
   ipmid_dep,
   channellayer_dep,
   mapper,
-]
-
-generated_src = [
-  meson.project_build_root() + '/sensor-gen.cpp',
-  meson.project_build_root() + '/inventory-sensor-gen.cpp',
-  meson.project_build_root() + '/fru-read-gen.cpp',
 ]
 
 transportoem_src = []
