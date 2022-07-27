@@ -1114,7 +1114,7 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t,
     return ipmi::responseSuccess(responseID);
 }
 
-ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr,
+ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
                                            uint16_t reservationID,
                                            const std::array<uint8_t, 3>& clr,
                                            uint8_t eraseOperation)
@@ -1163,14 +1163,15 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr,
     }
 
     // Reload rsyslog so it knows to start new log files
-    std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
-    sdbusplus::message::message rsyslogReload = dbus->new_method_call(
-        "org.freedesktop.systemd1", "/org/freedesktop/systemd1",
+    boost::system::error_code ec;
+    sdbusplus::message::message rsyslogReload = ctx->bus->yield_method_call<>(
+        ctx->yield, ec, "org.freedesktop.systemd1", "/org/freedesktop/systemd1",
         "org.freedesktop.systemd1.Manager", "ReloadUnit");
+
     rsyslogReload.append("rsyslog.service", "replace");
     try
     {
-        sdbusplus::message::message reloadResponse = dbus->call(rsyslogReload);
+        sdbusplus::message::message reloadResponse = ctx->bus->call(rsyslogReload);
     }
     catch (const sdbusplus::exception_t& e)
     {
