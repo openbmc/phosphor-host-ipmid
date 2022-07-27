@@ -16,6 +16,24 @@
       "message": "Hi Willy,\n\nCould you help to review this commit and merge it? Thank you.\nWe meet this kind of build error after below commit:\n\n11d68897e483cfcf7c085aaa2b48a614a431508e\n\"cleanup: Remove all warning errors for the Meson build support\"\n\nBest regards,\nTim",
       "revId": "e1e554ed5c93f28bbbf6a3a6cea7d5922f67dac7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "04ad3839_edcf3792",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-07-27T05:10:33Z",
+      "side": 1,
+      "message": "I don\u0027t have +2 permission. But I would recommend pinging Vernon and Tom on Discord to get faster response.",
+      "parentUuid": "74f3eb61_49cd6db1",
+      "revId": "e1e554ed5c93f28bbbf6a3a6cea7d5922f67dac7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
