@@ -1121,7 +1121,7 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t,
     return ipmi::responseSuccess(responseID);
 }
 
-ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr,
+ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
                                            uint16_t reservationID,
                                            const std::array<uint8_t, 3>& clr,
                                            uint8_t eraseOperation)
@@ -1170,18 +1170,15 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr,
     }
 
     // Reload rsyslog so it knows to start new log files
-    std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
-    sdbusplus::message_t rsyslogReload = dbus->new_method_call(
-        "org.freedesktop.systemd1", "/org/freedesktop/systemd1",
-        "org.freedesktop.systemd1.Manager", "ReloadUnit");
-    rsyslogReload.append("rsyslog.service", "replace");
-    try
+    boost::system::error_code ec;
+    callDbusMethod(ctx->yield, ec, "org.freedesktop.systemd1",
+                   "/org/freedesktop/systemd1",
+                   "org.freedesktop.systemd1.Manager", "ReloadUnit",
+                   "rsyslog.service", "replace");
+    if (ec)
     {
-        sdbusplus::message_t reloadResponse = dbus->call(rsyslogReload);
-    }
-    catch (const sdbusplus::exception_t& e)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
+        std::cerr << "error in reload rsyslog: " << ec << std::endl;
+        return ipmi::responseUnspecifiedError();
     }
 #else
     boost::system::error_code ec;
