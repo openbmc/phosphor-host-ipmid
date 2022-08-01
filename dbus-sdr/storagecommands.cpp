@@ -127,10 +127,9 @@ ManagedObjectType frus;
 // we unfortunately have to build a map of hashes in case there is a
 // collision to verify our dev-id
 boost::container::flat_map<uint8_t, std::pair<uint8_t, uint8_t>> deviceHashes;
-
 void registerStorageFunctions() __attribute__((constructor));
 
-bool writeFru()
+bool writeFru(const std::vector<uint8_t>& fru)
 {
     if (writeBus == 0xFF && writeAddr == 0xFF)
     {
@@ -141,7 +140,7 @@ bool writeFru()
     sdbusplus::message::message writeFru = dbus->new_method_call(
         fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
         "xyz.openbmc_project.FruDeviceManager", "WriteFru");
-    writeFru.append(writeBus, writeAddr, fruCache);
+    writeFru.append(writeBus, writeAddr, fru);
     try
     {
         sdbusplus::message::message writeFruResp = dbus->call(writeFru);
@@ -158,9 +157,14 @@ bool writeFru()
     return true;
 }
 
+bool writeFruCache()
+{
+    return writeFru(fruCache);
+}
+
 void createTimers()
 {
-    writeTimer = std::make_unique<phosphor::Timer>(writeFru);
+    writeTimer = std::make_unique<phosphor::Timer>(writeFruCache);
 }
 
 void recalculateHashes()
@@ -251,30 +255,31 @@ void replaceCacheFru(
     recalculateHashes();
 }
 
-ipmi::Cc getFru(ipmi::Context::ptr ctx, uint8_t devId)
+std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
+                                                 uint8_t devId)
 {
     if (lastDevId == devId && devId != 0xFF)
     {
-        return ipmi::ccSuccess;
+        return {ipmi::ccSuccess, fruCache};
     }
 
     auto deviceFind = deviceHashes.find(devId);
     if (deviceFind == deviceHashes.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return {IPMI_CC_SENSOR_INVALID, {}};
     }
-
-    fruCache.clear();
 
     cacheBus = deviceFind->second.first;
     cacheAddr = deviceFind->second.second;
 
     boost::system::error_code ec;
 
-    fruCache = ctx->bus->yield_method_call<std::vector<uint8_t>>(
-        ctx->yield, ec, fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
-        "xyz.openbmc_project.FruDeviceManager", "GetRawFru", cacheBus,
-        cacheAddr);
+    std::vector<uint8_t> fru =
+        ctx->bus->yield_method_call<std::vector<uint8_t>>(
+            ctx->yield, ec, fruDeviceServiceName,
+            "/xyz/openbmc_project/FruDevice",
+            "xyz.openbmc_project.FruDeviceManager", "GetRawFru", cacheBus,
+            cacheAddr);
     if (ec)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
@@ -283,11 +288,14 @@ ipmi::Cc getFru(ipmi::Context::ptr ctx, uint8_t devId)
 
         cacheBus = 0xFF;
         cacheAddr = 0xFF;
-        return ipmi::ccResponseError;
+        return {ipmi::ccResponseError, {}};
     }
 
+    fruCache.clear();
     lastDevId = devId;
-    return ipmi::ccSuccess;
+    fruCache = fru;
+
+    return {ipmi::ccSuccess, fru};
 }
 
 void writeFruIfRunning()
@@ -297,7 +305,7 @@ void writeFruIfRunning()
         return;
     }
     writeTimer->stop();
-    writeFru();
+    writeFruCache();
 }
 
 void startMatch(void)
@@ -387,21 +395,20 @@ ipmi::RspType<uint8_t,             // Count
         return ipmi::responseInvalidFieldRequest();
     }
 
-    ipmi::Cc status = getFru(ctx, fruDeviceId);
-
+    auto [status, fru] = getFru(ctx, fruDeviceId);
     if (status != ipmi::ccSuccess)
     {
         return ipmi::response(status);
     }
 
     size_t fromFruByteLen = 0;
-    if (countToRead + fruInventoryOffset < fruCache.size())
+    if (countToRead + fruInventoryOffset < fru.size())
     {
         fromFruByteLen = countToRead;
     }
-    else if (fruCache.size() > fruInventoryOffset)
+    else if (fru.size() > fruInventoryOffset)
     {
-        fromFruByteLen = fruCache.size() - fruInventoryOffset;
+        fromFruByteLen = fru.size() - fruInventoryOffset;
     }
     else
     {
@@ -410,9 +417,9 @@ ipmi::RspType<uint8_t,             // Count
 
     std::vector<uint8_t> requestedData;
 
-    requestedData.insert(
-        requestedData.begin(), fruCache.begin() + fruInventoryOffset,
-        fruCache.begin() + fruInventoryOffset + fromFruByteLen);
+    requestedData.insert(requestedData.begin(),
+                         fru.begin() + fruInventoryOffset,
+                         fru.begin() + fruInventoryOffset + fromFruByteLen);
 
     return ipmi::responseSuccess(static_cast<uint8_t>(requestedData.size()),
                                  requestedData);
@@ -438,25 +445,25 @@ ipmi::RspType<uint8_t>
 
     size_t writeLen = dataToWrite.size();
 
-    ipmi::Cc status = getFru(ctx, fruDeviceId);
+    auto [status, fru] = getFru(ctx, fruDeviceId);
     if (status != ipmi::ccSuccess)
     {
         return ipmi::response(status);
     }
     size_t lastWriteAddr = fruInventoryOffset + writeLen;
-    if (fruCache.size() < lastWriteAddr)
+    if (fru.size() < lastWriteAddr)
     {
-        fruCache.resize(fruInventoryOffset + writeLen);
+        fru.resize(fruInventoryOffset + writeLen);
     }
 
     std::copy(dataToWrite.begin(), dataToWrite.begin() + writeLen,
-              fruCache.begin() + fruInventoryOffset);
+              fru.begin() + fruInventoryOffset);
 
     bool atEnd = false;
 
-    if (fruCache.size() >= sizeof(FRUHeader))
+    if (fru.size() >= sizeof(FRUHeader))
     {
-        FRUHeader* header = reinterpret_cast<FRUHeader*>(fruCache.data());
+        FRUHeader* header = reinterpret_cast<FRUHeader*>(fru.data());
 
         size_t areaLength = 0;
         size_t lastRecordStart = std::max(
@@ -473,9 +480,9 @@ ipmi::RspType<uint8_t>
             {
                 // The MSB in the second byte of the MultiRecord header signals
                 // "End of list"
-                endOfList = fruCache[lastRecordStart + 1] & 0x80;
+                endOfList = fru[lastRecordStart + 1] & 0x80;
                 // Third byte in the MultiRecord header is the length
-                areaLength = fruCache[lastRecordStart + 2];
+                areaLength = fru[lastRecordStart + 2];
                 // This length is in bytes (not 8 bytes like other headers)
                 areaLength += 5; // The length omits the 5 byte header
                 if (!endOfList)
@@ -492,7 +499,7 @@ ipmi::RspType<uint8_t>
             if (lastWriteAddr > (lastRecordStart + 1))
             {
                 // second byte in record area is the length
-                areaLength = fruCache[lastRecordStart + 1];
+                areaLength = fru[lastRecordStart + 1];
                 areaLength *= 8; // it is in multiples of 8 bytes
             }
         }
@@ -509,11 +516,11 @@ ipmi::RspType<uint8_t>
     {
         // cancel timer, we're at the end so might as well send it
         writeTimer->stop();
-        if (!writeFru())
+        if (!writeFru(fru))
         {
             return ipmi::responseInvalidFieldRequest();
         }
-        countWritten = std::min(fruCache.size(), static_cast<size_t>(0xFF));
+        countWritten = std::min(fru.size(), static_cast<size_t>(0xFF));
     }
     else
     {
@@ -543,7 +550,7 @@ ipmi::RspType<uint16_t, // inventorySize
         return ipmi::responseInvalidFieldRequest();
     }
 
-    ipmi::Cc ret = getFru(ctx, fruDeviceId);
+    auto [ret, fru] = getFru(ctx, fruDeviceId);
     if (ret != ipmi::ccSuccess)
     {
         return ipmi::response(ret);
@@ -552,7 +559,7 @@ ipmi::RspType<uint16_t, // inventorySize
     constexpr uint8_t accessType =
         static_cast<uint8_t>(GetFRUAreaAccessType::byte);
 
-    return ipmi::responseSuccess(fruCache.size(), accessType);
+    return ipmi::responseSuccess(fru.size(), accessType);
 }
 
 ipmi_ret_t getFruSdrCount(ipmi::Context::ptr, size_t& count)
