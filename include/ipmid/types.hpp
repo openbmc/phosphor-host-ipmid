@@ -181,6 +181,10 @@ struct Info
                                                    const ipmi::PropertyMap&)>
         getFunc;
 #endif
+
+#ifdef FEATURE_SENSORS_OVERRIDE
+    std::vector<InstancePath> overridePaths;
+#endif
     Mutability mutability;
     SensorName sensorName;
     std::function<SensorName(const Info&)> sensorNameFunc;

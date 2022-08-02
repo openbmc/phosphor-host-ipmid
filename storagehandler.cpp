@@ -35,7 +35,11 @@ namespace ipmi
 {
 namespace sensor
 {
+#ifdef FEATURE_SENSORS_OVERRIDE
+extern IdInfoMap sensors;
+#else
 extern const IdInfoMap sensors;
+#endif
 } // namespace sensor
 } // namespace ipmi
 extern const ipmi::sensor::InvObjectIDMap invSensors;

@@ -57,6 +57,9 @@ option('hybrid-sensors', type: 'feature', value: 'disabled', description: 'Hybri
 # Sensor Cache
 option('sensors-cache', type: 'feature', value: 'disabled', description: 'Sensor cache stack is disabled by default; offer a way to enable it')
 
+# Sensor Override
+option('sensors-override', type: 'feature', value: 'disabled', description: 'Sensor override function, override sensor path if defined in yaml and appared in dbus')
+
 # SEL Logger
 option('sel-logger-clears-sel', type: 'feature', value: 'disabled', description: 'Clearing SEL through sel-logger is disabled by default; offer a way to enable it')
 

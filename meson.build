@@ -60,6 +60,7 @@ feature_map = {
   'dynamic-sensors-write'      : '-DFEATURE_DYNAMIC_SENSORS_WRITE',
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
+  'sensors-override'           : '-DFEATURE_SENSORS_OVERRIDE',
   'sel-logger-clears-sel'      : '-DFEATURE_SEL_LOGGER_CLEARS_SEL',
 }
 

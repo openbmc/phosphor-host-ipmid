@@ -32,7 +32,11 @@ sensorNameMaxLength = 16
 namespace ipmi {
 namespace sensor {
 
+#ifdef FEATURE_SENSORS_OVERRIDE
+IdInfoMap sensors = {
+#else
 extern const IdInfoMap sensors = {
+#endif
 % for key in sensorDict.keys():
    % if key:
 {${key},{
@@ -67,6 +71,8 @@ extern const IdInfoMap sensors = {
            sensorNameFunc = "get::" + sensor.get("sensorNamePattern",
                    "nameLeaf")
 
+       overridePaths = sensor.get("overridePaths", [])
+
        if "readingAssertion" == valueReadingType or "readingData" == valueReadingType:
            for interface,properties in interfaces.items():
                for dbus_property,property_value in properties.items():
@@ -96,6 +102,13 @@ extern const IdInfoMap sensors = {
         .unit = "${unit}",
         .updateFunc = ${updateFunc},
         .getFunc = ${getFunc},
+#ifdef FEATURE_SENSORS_OVERRIDE
+        .overridePaths = {
+    % for path in overridePaths:
+            "${path}",
+    % endfor
+        },
+#endif
         .mutability = Mutability(${mutability}),
     % if sensorName:
         .sensorName = "${sensorName}",
