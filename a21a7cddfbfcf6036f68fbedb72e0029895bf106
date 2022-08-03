@@ -72,6 +72,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1438938c_6cf378a4",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-08-03T20:54:49Z",
+      "side": 1,
+      "message": "ack.",
+      "parentUuid": "f410a06d_b4857ebb",
+      "range": {
+        "startLine": 486,
+        "startChar": 24,
+        "endLine": 486,
+        "endChar": 35
+      },
+      "revId": "a21a7cddfbfcf6036f68fbedb72e0029895bf106",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d1cc95dd_59a6aa31",
@@ -109,6 +133,30 @@
       "side": 1,
       "message": "no need to check since \n\n```\ntoken \u003d\u003d token.substr(0, std::string::npos)\n```\n\n---\n\nJust FYI,\n\nstd::string::npos \u003d\u003d -1, but the argument is size_t...\n\nso std::string::npos \u003d\u003d MAX(size_t).\n\nSo at the end of the day, token.substr(index \u003d 0, len \u003d MAX(size_t)) \u003d token.\n(len is the max length of the string to take... Original string can be shorter).",
       "parentUuid": "d1cc95dd_59a6aa31",
+      "range": {
+        "startLine": 544,
+        "startChar": 8,
+        "endLine": 544,
+        "endChar": 16
+      },
+      "revId": "a21a7cddfbfcf6036f68fbedb72e0029895bf106",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ccbafda_0a53bf57",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-08-03T20:54:49Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "08dd5dc5_4fd8ad81",
       "range": {
         "startLine": 544,
         "startChar": 8,
