@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f410a06d_b4857ebb",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-08-03T20:53:08Z",
+      "side": 1,
+      "message": "from_chars doesn\u0027t use nul char string termination, it uses a begin pointer and and end pointer.",
+      "parentUuid": "79ea97c4_a096c7ea",
+      "range": {
+        "startLine": 486,
+        "startChar": 24,
+        "endLine": 486,
+        "endChar": 35
+      },
+      "revId": "a21a7cddfbfcf6036f68fbedb72e0029895bf106",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d1cc95dd_59a6aa31",
