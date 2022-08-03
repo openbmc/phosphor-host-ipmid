@@ -15,6 +15,7 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <set>
@@ -145,56 +146,89 @@ static void fillSensorIdServiceMap(const std::string& obj,
     }
 }
 
+void initOneSensorMatches(ipmi::sensor::IdInfoMap::const_iterator it)
+{
+    using namespace sdbusplus::bus::match::rules;
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+
+    const auto& s = *it;
+
+    sensorAddedMatches.emplace(
+        s.first,
+        std::make_unique<sdbusplus::bus::match_t>(
+            bus, interfacesAdded() + argNpath(0, s.second.sensorPath),
+            [id = s.first, obj = s.second.sensorPath,
+             intf = s.second.propertyInterfaces.begin()->first](auto& /*msg*/) {
+                fillSensorIdServiceMap(obj, intf, id);
+            }));
+    sensorRemovedMatches.emplace(
+        s.first,
+        std::make_unique<sdbusplus::bus::match_t>(
+            bus, interfacesRemoved() + argNpath(0, s.second.sensorPath),
+            [id = s.first](auto& /*msg*/) {
+                // Ideally this should work.
+                // But when a service is terminated or crashed, it does not
+                // emit interfacesRemoved signal. In that case it's handled
+                // by sensorsOwnerMatch
+                sensorCacheMap[id].reset();
+            }));
+    sensorUpdatedMatches.emplace(
+        s.first, std::make_unique<sdbusplus::bus::match_t>(
+                     bus,
+                     type::signal() + path(s.second.sensorPath) +
+                         member("PropertiesChanged"s) +
+                         interface("org.freedesktop.DBus.Properties"s),
+                     [&s](auto& msg) {
+                         fillSensorIdServiceMap(
+                             s.second.sensorPath,
+                             s.second.propertyInterfaces.begin()->first,
+                             s.first);
+                         try
+                         {
+                             // This is signal callback
+                             std::string interfaceName;
+                             msg.read(interfaceName);
+                             ipmi::PropertyMap props;
+                             msg.read(props);
+                             s.second.getFunc(s.first, s.second, props);
+                         }
+                         catch (const std::exception& e)
+                         {
+                             sensorCacheMap[s.first].reset();
+                         }
+                     }));
+}
+
+void clearOneSensorMatches(const uint8_t id)
+{
+    sensorAddedMatches.erase(id);
+    idToServiceMap.erase(id);
+    sensorRemovedMatches.erase(id);
+    sensorUpdatedMatches.erase(id);
+}
+
+void reInitOneSensorMatches(const uint8_t id)
+{
+    auto it = ipmi::sensor::sensors.find(id);
+    if (it == ipmi::sensor::sensors.end())
+    {
+        return;
+    }
+    clearOneSensorMatches(id);
+    initOneSensorMatches(it);
+}
+
 void initSensorMatches()
 {
     using namespace sdbusplus::bus::match::rules;
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-    for (const auto& s : ipmi::sensor::sensors)
+
+    for (auto it = ipmi::sensor::sensors.begin();
+         it != ipmi::sensor::sensors.end(); ++it)
     {
-        sensorAddedMatches.emplace(
-            s.first,
-            std::make_unique<sdbusplus::bus::match_t>(
-                bus, interfacesAdded() + argNpath(0, s.second.sensorPath),
-                [id = s.first, obj = s.second.sensorPath,
-                 intf = s.second.propertyInterfaces.begin()->first](
-                    auto& /*msg*/) { fillSensorIdServiceMap(obj, intf, id); }));
-        sensorRemovedMatches.emplace(
-            s.first,
-            std::make_unique<sdbusplus::bus::match_t>(
-                bus, interfacesRemoved() + argNpath(0, s.second.sensorPath),
-                [id = s.first](auto& /*msg*/) {
-                    // Ideally this should work.
-                    // But when a service is terminated or crashed, it does not
-                    // emit interfacesRemoved signal. In that case it's handled
-                    // by sensorsOwnerMatch
-                    sensorCacheMap[id].reset();
-                }));
-        sensorUpdatedMatches.emplace(
-            s.first, std::make_unique<sdbusplus::bus::match_t>(
-                         bus,
-                         type::signal() + path(s.second.sensorPath) +
-                             member("PropertiesChanged"s) +
-                             interface("org.freedesktop.DBus.Properties"s),
-                         [&s](auto& msg) {
-                             fillSensorIdServiceMap(
-                                 s.second.sensorPath,
-                                 s.second.propertyInterfaces.begin()->first,
-                                 s.first);
-                             try
-                             {
-                                 // This is signal callback
-                                 std::string interfaceName;
-                                 msg.read(interfaceName);
-                                 ipmi::PropertyMap props;
-                                 msg.read(props);
-                                 s.second.getFunc(s.first, s.second, props);
-                             }
-                             catch (const std::exception& e)
-                             {
-                                 sensorCacheMap[s.first].reset();
-                             }
-                         }));
+        initOneSensorMatches(it);
     }
+
     sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
         bus, nameOwnerChanged(), [](auto& msg) {
             std::string name;
@@ -217,6 +251,123 @@ void initSensorMatches()
                 }
             }
         });
+}
+#endif
+
+#ifdef FEATURE_SENSORS_OVERRIDE
+
+/**
+ * @key: uint8_t: sensor id, std::string: sensor override path
+ * @value: std::unique_ptr<ipmi::SensorOverride>
+ */
+using SensorOverrideMatchMap =
+    std::map<std::pair<uint8_t, std::string>,
+             std::unique_ptr<sdbusplus::bus::match_t>>;
+
+SensorOverrideMatchMap sensorOverrideMatches
+    __attribute__((init_priority(101)));
+
+/**
+ * @brief Get the override from the dbus, if it exists, override the sensor
+ * path
+ *
+ */
+void initSensorOverride()
+{
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+
+    for (auto& sensor : ipmi::sensor::sensors)
+    {
+        // If the sensor has no override, continue
+        if (sensor.second.overridePaths.empty())
+        {
+            continue;
+        }
+
+        lg2::debug("Sensor {ID} : {SENSOR} have override paths", "ID",
+                   sensor.first, "SENSOR", sensor.second.sensorPath);
+
+        for (const auto& path : sensor.second.overridePaths)
+        {
+            try
+            {
+                // if override is found, the sensor path is used
+                // as the override path
+                ipmi::getService(bus, sensor.second.sensorInterface, path);
+                lg2::debug("Sensor {ID} : {SENSOR} override to path {PATH}",
+                           "ID", sensor.first, "SENSOR",
+                           sensor.second.sensorPath, "PATH", path);
+                sensor.second.sensorPath = path;
+                break;
+            }
+            catch (const std::exception& e)
+            {
+                lg2::info("No override found for sensor {PATH}, {INFO}", "PATH",
+                          sensor.first, "INFO", e.what());
+            }
+        }
+    }
+}
+
+void initSensorOverrideMatches()
+{
+    using namespace sdbusplus::bus::match::rules;
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+
+    for (auto& [id, info] : ipmi::sensor::sensors)
+    {
+        // for all sensors with override paths, create a match for the override
+        for (const auto& path : info.overridePaths)
+        {
+            sensorOverrideMatches[std::make_pair(id, path)] = std::make_unique<
+                sdbusplus::bus::match_t>(
+                bus, interfacesAdded() + argNpath(0, path),
+                [id, path, &info](auto& msg) {
+                    using InterfaceType = std::map<
+                        std::string,
+                        std::map<std::string, std::variant<std::string>>>;
+                    sdbusplus::message::object_path objPath;
+                    InterfaceType interfaces;
+                    try
+                    {
+                        msg.read(objPath, interfaces);
+                    }
+                    catch (const std::exception& e)
+                    {
+                        lg2::error("Failed to read message: {INFO}", "INFO",
+                                   e.what());
+                        return;
+                    }
+
+                    lg2::debug("Sensor {ID} : {SENSOR} override path {PATH} "
+                               "interfaces added",
+                               "ID", id, "SENSOR", info.sensorPath, "PATH",
+                               static_cast<std::string>(objPath));
+
+                    if (interfaces.find(info.sensorInterface) ==
+                        interfaces.end())
+                    {
+                        lg2::debug("Sensor {ID} : No interface {INTERFACE} "
+                                   "found",
+                                   "ID", id, "INTERFACE", info.sensorInterface);
+                        return;
+                    }
+
+                    lg2::debug(
+                        "Sensor {ID} : old {SENSOR} override path to {PATH}",
+                        "ID", id, "SENSOR", info.sensorPath, "PATH", path);
+
+                    info.sensorPath = path;
+
+                    // clear sdr and threshold cache, will be reloaded on next
+                    sdrCacheMap.erase(id);
+                    sensorThresholdMap.erase(id);
+#ifdef FEATURE_SENSORS_CACHE
+                    reInitOneSensorMatches(id);
+#endif
+                });
+        }
+    }
 }
 #endif
 
@@ -1475,6 +1626,11 @@ void register_netfn_sen_functions()
     // Do not register the hander if it dynamic sensors stack is used.
 
 #ifndef FEATURE_DYNAMIC_SENSORS
+
+#ifdef FEATURE_SENSORS_OVERRIDE
+    initSensorOverride();
+    initSensorOverrideMatches();
+#endif
 
 #ifdef FEATURE_SENSORS_CACHE
     // Initialize the sensor matches
