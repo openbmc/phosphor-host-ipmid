@@ -168,7 +168,7 @@ struct Message
     {
         uint32_t command = 0;
 
-        command |= (static_cast<uint8_t>(payloadType) << 16);
+        command |= (static_cast<uint32_t>(payloadType) << 16);
         if (payloadType == PayloadType::IPMI)
         {
             auto request =
