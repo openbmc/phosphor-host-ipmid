@@ -131,7 +131,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
 
     auto check = algoPtr->verifyIntegrityData(
         packet, packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
-        integrityIter);
+        integrityIter, packet.cend());
 
     EXPECT_EQ(true, check);
 }
@@ -151,7 +151,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataFail)
 
     // Point to the integrity data in the packet
     auto integrityIter = packet.cbegin();
-    std::advance(integrityIter, packet.size());
+    std::advance(integrityIter, integrity.size());
 
     /*
      * Step-2 Invoke the verifyIntegrityData API and validate the response
@@ -168,7 +168,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataFail)
     // Verify the Integrity Data
     auto check = algoPtr->verifyIntegrityData(
         packet, packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE,
-        integrityIter);
+        integrityIter, packet.cend());
 
     EXPECT_EQ(false, check);
 }
@@ -295,7 +295,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataPass)
 
     auto check = algoPtr->verifyIntegrityData(
         packet, packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
-        integrityIter);
+        integrityIter, packet.cend());
 
     EXPECT_EQ(true, check);
 }
@@ -315,7 +315,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataFail)
 
     // Point to the integrity data in the packet
     auto integrityIter = packet.cbegin();
-    std::advance(integrityIter, packet.size());
+    std::advance(integrityIter, integrity.size());
 
     /*
      * Step-2 Invoke the verifyIntegrityData API and validate the response
@@ -333,7 +333,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataFail)
     // Verify the Integrity Data
     auto check = algoPtr->verifyIntegrityData(
         packet, packet.size() - message::parser::RMCP_SESSION_HEADER_SIZE,
-        integrityIter);
+        integrityIter, packet.cend());
 
     EXPECT_EQ(false, check);
 }

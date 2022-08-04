@@ -41,14 +41,16 @@ std::vector<uint8_t> AlgoSHA1::generateHMAC(const uint8_t* input,
 
 bool AlgoSHA1::verifyIntegrityData(
     const std::vector<uint8_t>& packet, const size_t length,
-    std::vector<uint8_t>::const_iterator integrityData) const
+    std::vector<uint8_t>::const_iterator integrityDataBegin,
+    std::vector<uint8_t>::const_iterator integrityDataEnd) const
 {
     auto output = generateHMAC(
         packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length);
 
     // Verify if the generated integrity data for the packet and the received
     // integrity data matches.
-    return (std::equal(output.begin(), output.end(), integrityData));
+    return (std::equal(output.begin(), output.end(), integrityDataBegin,
+                       integrityDataEnd));
 }
 
 std::vector<uint8_t>
@@ -105,14 +107,16 @@ std::vector<uint8_t> AlgoSHA256::generateHMAC(const uint8_t* input,
 
 bool AlgoSHA256::verifyIntegrityData(
     const std::vector<uint8_t>& packet, const size_t length,
-    std::vector<uint8_t>::const_iterator integrityData) const
+    std::vector<uint8_t>::const_iterator integrityDataBegin,
+    std::vector<uint8_t>::const_iterator integrityDataEnd) const
 {
     auto output = generateHMAC(
         packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length);
 
     // Verify if the generated integrity data for the packet and the received
     // integrity data matches.
-    return (std::equal(output.begin(), output.end(), integrityData));
+    return (std::equal(output.begin(), output.end(), integrityDataBegin,
+                       integrityDataEnd));
 }
 
 std::vector<uint8_t>

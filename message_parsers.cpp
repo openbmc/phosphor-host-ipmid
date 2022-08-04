@@ -366,7 +366,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
     size_t length = packet.size() - integrityAlgo->authCodeLength -
                     message::parser::RMCP_SESSION_HEADER_SIZE;
 
-    return integrityAlgo->verifyIntegrityData(packet, length, integrityIter);
+    return integrityAlgo->verifyIntegrityData(packet, length, integrityIter,
+                                              packet.cend());
 }
 
 void addIntegrityData(std::vector<uint8_t>& packet,

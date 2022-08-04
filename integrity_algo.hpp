@@ -62,14 +62,17 @@ class Interface
      *
      * @param[in] packet - Incoming IPMI packet
      * @param[in] packetLen - Packet length excluding authCode
-     * @param[in] integrityData - Iterator to the authCode in the packet
+     * @param[in] integrityDataBegin - Begin iterator to the authCode in the
+     *                                 packet
+     * @param[in] integrityDataEnd   - End to the authCode in the packet
      *
      * @return true if authcode in the packet is equal to one generated
      *         using integrity algorithm on the packet data, false otherwise
      */
     bool virtual verifyIntegrityData(
         const std::vector<uint8_t>& packet, const size_t packetLen,
-        std::vector<uint8_t>::const_iterator integrityData) const = 0;
+        std::vector<uint8_t>::const_iterator integrityDataBegin,
+        std::vector<uint8_t>::const_iterator integrityDataEnd) const = 0;
 
     /**
      * @brief Generate integrity data for the outgoing IPMI packet
@@ -178,14 +181,17 @@ class AlgoSHA1 final : public Interface
      * @param[in] packet - Incoming IPMI packet
      * @param[in] length - Length of the data in the packet to calculate
      *                     the integrity data
-     * @param[in] integrityData - Iterator to the authCode in the packet
+     * @param[in] integrityDataBegin - Begin iterator to the authCode in the
+     *                                 packet
+     * @param[in] integrityDataEnd   - End to the authCode in the packet
      *
      * @return true if authcode in the packet is equal to one generated
      *         using integrity algorithm on the packet data, false otherwise
      */
     bool verifyIntegrityData(
         const std::vector<uint8_t>& packet, const size_t length,
-        std::vector<uint8_t>::const_iterator integrityData) const override;
+        std::vector<uint8_t>::const_iterator integrityDataBegin,
+        std::vector<uint8_t>::const_iterator integrityDataEnd) const override;
 
     /**
      * @brief Generate integrity data for the outgoing IPMI packet
@@ -260,14 +266,17 @@ class AlgoSHA256 final : public Interface
      * @param[in] packet - Incoming IPMI packet
      * @param[in] length - Length of the data in the packet to calculate
      *                     the integrity data
-     * @param[in] integrityData - Iterator to the authCode in the packet
+     * @param[in] integrityDataBegin - Begin iterator to the authCode in the
+     *                                 packet
+     * @param[in] integrityDataEnd   - End to the authCode in the packet
      *
      * @return true if authcode in the packet is equal to one generated
      *         using integrity algorithm on the packet data, false otherwise
      */
     bool verifyIntegrityData(
         const std::vector<uint8_t>& packet, const size_t length,
-        std::vector<uint8_t>::const_iterator integrityData) const override;
+        std::vector<uint8_t>::const_iterator integrityDataBegin,
+        std::vector<uint8_t>::const_iterator integrityDataEnd) const override;
 
     /**
      * @brief Generate integrity data for the outgoing IPMI packet
