@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9f121a14_fb52b022",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1000547
+      },
+      "writtenOn": "2022-08-04T09:26:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f7db5e1_d4751016",
+      "range": {
+        "startLine": 627,
+        "startChar": 56,
+        "endLine": 627,
+        "endChar": 61
+      },
+      "revId": "a51fd162c658e05f4b8507e8f08b0b90c33b6a22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4b002fa8_e26c65c0",
@@ -109,6 +133,30 @@
       "side": 1,
       "message": "There are also functions that need parameters passed in. So there are 4 cases here, void(void), void(...), ...(void), ...(...).\n\nI would suggest following the example of templates within the sdbusplus/asio/connection.hpp to reduce overloading functions AND templates.",
       "parentUuid": "4c07ddbc_f3074189",
+      "range": {
+        "startLine": 626,
+        "startChar": 3,
+        "endLine": 628,
+        "endChar": 68
+      },
+      "revId": "a51fd162c658e05f4b8507e8f08b0b90c33b6a22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f19256b4_e3e2ebf5",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1000547
+      },
+      "writtenOn": "2022-08-04T09:26:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6c15f6ef_57eb1730",
       "range": {
         "startLine": 626,
         "startChar": 3,
