@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b695d4c1_776aa5b9",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-05T17:13:17Z",
+      "side": 1,
+      "message": "Ack. \n\nIt is not only hosts index, It has other IPMI device number also. We are passing IPMB index as hostIdx in the command request.\n\nWhat happens when the IPMB target isn\u0027t a host ?\n\nEx : A system has no hosts and 1 debug cards.\n\n     Then, ipmb-channel.json is machine specific, we can configure for debug card entry with IPMB index as 0 only. This is sending to ipmid as hostIdx. So, we  can hostIdx to map the setting manager objects.\n     \n     Settings manager objects also displays the dbus objects based on machine specific .yml file. we can map these with hostIdx in the same order.",
+      "parentUuid": "bfd5877e_2b3f712d",
+      "revId": "06b3c7d350d27d3e400368d5d6b47a21d9093584",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d71486a1_bc62a1d0",
@@ -35,6 +53,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "95da87ec_9b3efa79",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-05T17:13:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d71486a1_bc62a1d0",
+      "revId": "06b3c7d350d27d3e400368d5d6b47a21d9093584",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f920f953_77cddf3d",
@@ -48,6 +84,24 @@
       "writtenOn": "2022-08-05T12:53:26Z",
       "side": 1,
       "message": "Seems like a vector or a hashmap\u003cint, bool\u003e would get rid of a static limit, wouldn\u0027t it?",
+      "revId": "06b3c7d350d27d3e400368d5d6b47a21d9093584",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6dcc550f_5ced9638",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-05T17:13:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f920f953_77cddf3d",
       "revId": "06b3c7d350d27d3e400368d5d6b47a21d9093584",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
