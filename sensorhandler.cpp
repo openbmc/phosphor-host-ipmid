@@ -190,29 +190,29 @@ void initSensorMatches()
                                  sensorCacheMap[s.first].reset();
                              }
                          }));
-        sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
-            bus, nameOwnerChanged(), [](auto& msg) {
-                std::string name;
-                std::string oldOwner;
-                std::string newOwner;
-                msg.read(name, oldOwner, newOwner);
-
-                if (!name.empty() && newOwner.empty())
-                {
-                    // The service exits
-                    const auto it = serviceToIdMap.find(name);
-                    if (it == serviceToIdMap.end())
-                    {
-                        return;
-                    }
-                    for (const auto& id : it->second)
-                    {
-                        // Invalidate cache
-                        sensorCacheMap[id].reset();
-                    }
-                }
-            });
     }
+    sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
+        bus, nameOwnerChanged(), [](auto& msg) {
+            std::string name;
+            std::string oldOwner;
+            std::string newOwner;
+            msg.read(name, oldOwner, newOwner);
+
+            if (!name.empty() && newOwner.empty())
+            {
+                // The service exits
+                const auto it = serviceToIdMap.find(name);
+                if (it == serviceToIdMap.end())
+                {
+                    return;
+                }
+                for (const auto& id : it->second)
+                {
+                    // Invalidate cache
+                    sensorCacheMap[id].reset();
+                }
+            }
+        });
 }
 #endif
 
