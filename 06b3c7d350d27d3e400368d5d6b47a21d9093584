@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bfd5877e_2b3f712d",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-05T12:53:26Z",
+      "side": 1,
+      "message": "Why a global?  Why not at least a member variable?\n\nWhy not change APIs to pass the \"host index\" around?  Is it always a \"host index\"?  What happens when the IPMB target isn\u0027t a host?",
+      "revId": "06b3c7d350d27d3e400368d5d6b47a21d9093584",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d71486a1_bc62a1d0",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-05T12:53:26Z",
+      "side": 1,
+      "message": "static?  size_t?\n\nWhy do we have this?  An arbitrary \"ARRAY_SIZE\" doesn\u0027t give me any information.",
+      "revId": "06b3c7d350d27d3e400368d5d6b47a21d9093584",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f920f953_77cddf3d",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-05T12:53:26Z",
+      "side": 1,
+      "message": "Seems like a vector or a hashmap\u003cint, bool\u003e would get rid of a static limit, wouldn\u0027t it?",
+      "revId": "06b3c7d350d27d3e400368d5d6b47a21d9093584",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
