@@ -22,6 +22,30 @@
       },
       "revId": "584a66a5f13cda51a471ae3ac0ac3ea0413c75c3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "882e51b6_edae6f9f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1180,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-08-08T02:47:48Z",
+      "side": 1,
+      "message": "Thanks your suggestion, I have changed it.\nPlease kindly help me review it again. Thanks in advance.",
+      "parentUuid": "bea086b4_325373dd",
+      "range": {
+        "startLine": 1167,
+        "startChar": 4,
+        "endLine": 1180,
+        "endChar": 5
+      },
+      "revId": "584a66a5f13cda51a471ae3ac0ac3ea0413c75c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
