@@ -33,6 +33,24 @@
       "message": "I probably have to test fruWrite a bit more before submitting this.",
       "revId": "e93412853ef68d033b1148070b6e6df58884d3e4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e4967325_3dbe25fc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-08-09T06:54:09Z",
+      "side": 1,
+      "message": "Tested fru write manually and seems to work for now. Will submit and see how it goes.",
+      "parentUuid": "a3a58757_61f27e6d",
+      "revId": "e93412853ef68d033b1148070b6e6df58884d3e4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
