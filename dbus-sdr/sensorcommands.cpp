@@ -1610,15 +1610,17 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
 
     record.body.sensor_capabilities = 0x68; // auto rearm - todo hysteresis
     record.body.sensor_type = getSensorTypeFromPath(path);
-    std::string type = getSensorTypeStringFromPath(path);
-    auto typeCstr = type.c_str();
-    auto findUnits = sensorUnits.find(typeCstr);
-    if (findUnits != sensorUnits.end())
+    const std::optional<std::string>& typeStr =
+        getSensorTypeStringFromPath(path);
+    if (typeStr != std::nullopt)
     {
-        record.body.sensor_units_2_base =
-            static_cast<uint8_t>(findUnits->second);
-    } // else default 0x0 unspecified
-
+        auto findUnits = sensorUnits.find(typeStr->c_str());
+        if (findUnits != sensorUnits.end())
+        {
+            record.body.sensor_units_2_base =
+                static_cast<uint8_t>(findUnits->second);
+        } // else default 0x0 unspecified
+    }
     record.body.event_reading_type = getSensorEventTypeFromPath(path);
 
     auto sensorObject = sensorMap.find(sensor::sensorInterface);
@@ -1634,7 +1636,7 @@ bool constructSensorSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
 
     // follow the association chain to get the parent board's entityid and
     // entityInstance
-    updateIpmiFromAssociation(path, sensorMap, entityId, entityInstance);
+    updateIpmiFromAssociation(ctx, path, sensorMap, entityId, entityInstance);
 
     record.body.entity_id = entityId;
     record.body.entity_instance = entityInstance;
@@ -1876,7 +1878,7 @@ bool constructVrSdr(ipmi::Context::ptr ctx, uint16_t sensorNum,
     }
     // follow the association chain to get the parent board's entityid and
     // entityInstance
-    updateIpmiFromAssociation(path, sensorMap, record.body.entity_id,
+    updateIpmiFromAssociation(ctx, path, sensorMap, record.body.entity_id,
                               record.body.entity_instance);
 
     // Sensor type is hardcoded as a module/board type instead of parsing from
@@ -2020,7 +2022,7 @@ static int
             "getSensorDataRecord: getSensorConnection error");
         return GENERAL_ERROR;
     }
-    uint16_t sensorNum = getSensorNumberFromPath(path);
+    uint16_t sensorNum = getSensorNumberFromPath(ctx, path);
     // Return an error on LUN 2 assingments, and any sensor number beyond the
     // range of LUN 3
     if (((sensorNum > lun1MaxSensorNum) && (sensorNum <= maxIPMISensors)) ||
@@ -2138,7 +2140,7 @@ static ipmi::RspType<uint8_t, // respcount
     constexpr uint8_t getSdrCount = 0x01;
     constexpr uint8_t getSensorCount = 0x00;
 
-    if (!getSensorSubtree(sensorTree) || sensorTree.empty())
+    if (!getSensorSubtree(ctx, sensorTree) || sensorTree.empty())
     {
         return ipmi::responseResponseError();
     }
@@ -2235,7 +2237,7 @@ ipmi::RspType<uint8_t,  // sdr version
 {
     auto& sensorTree = getSensorTree();
     constexpr const uint16_t unspecifiedFreeSpace = 0xFFFF;
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    if (!getSensorSubtree(ctx, sensorTree) && sensorTree.empty())
     {
         return ipmi::responseResponseError();
     }
@@ -2339,7 +2341,7 @@ ipmi::RspType<uint16_t,            // next record ID
                         ipmi::storage::type12Count + entityCount - 1;
     uint16_t nextRecordId = lastRecord > recordID ? recordID + 1 : 0XFFFF;
 
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    if (!getSensorSubtree(ctx, sensorTree) && sensorTree.empty())
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "ipmiStorageGetSDR: getSensorSubtree error");
