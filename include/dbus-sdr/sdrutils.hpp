@@ -23,10 +23,11 @@
 #include <filesystem>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
-#include <map>
+#include <optional>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #pragma once
@@ -276,12 +277,14 @@ inline IPMIWriteTable sdrWriteTable;
  * paths updated successfully, previous amount if all failed. The "vr"
  * sensor path is optional, and does not participate in the return value.
  */
-uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
+uint16_t getSensorSubtree(ipmi::Context::ptr ctx,
+                          std::shared_ptr<SensorSubTree>& subtree);
 
-bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
+bool getSensorNumMap(ipmi::Context::ptr ctx,
+                     std::shared_ptr<SensorNumMap>& sensorNumMap);
 } // namespace details
 
-bool getSensorSubtree(SensorSubTree& subtree);
+bool getSensorSubtree(ipmi::Context::ptr ctx, SensorSubTree& subtree);
 
 #ifdef FEATURE_HYBRID_SENSORS
 ipmi::sensor::IdInfoMap::const_iterator
@@ -352,29 +355,34 @@ const static boost::container::flat_map<
                                      SensorEventTypeCodes::sensorSpecified)},
          {"entity", std::make_pair(SensorTypeCodes::entity,
                                    SensorEventTypeCodes::sensorSpecified)}}};
-std::string getSensorTypeStringFromPath(const std::string& path);
+std::optional<std::string>
+    getSensorTypeStringFromPath(const sdbusplus::message::object_path& path);
 
 uint8_t getSensorTypeFromPath(const std::string& path);
 
-uint16_t getSensorNumberFromPath(const std::string& path);
+uint16_t getSensorNumberFromPath(ipmi::Context::ptr ctx,
+                                 const std::string& path);
 
 uint8_t getSensorEventTypeFromPath(const std::string& path);
 
-std::string getPathFromSensorNumber(uint16_t sensorNum);
+std::string getPathFromSensorNumber(ipmi::Context::ptr ctx, uint16_t sensorNum);
 
 namespace ipmi
 {
-std::map<std::string, std::vector<std::string>>
-    getObjectInterfaces(const char* path);
+boost::container::flat_map<std::string, std::vector<std::string>>
+    getObjectInterfaces(ipmi::Context::ptr ctx, const char* path);
 
-std::map<std::string, Value> getEntityManagerProperties(const char* path,
-                                                        const char* interface);
+boost::container::flat_map<std::string, Value>
+    getEntityManagerProperties(ipmi::Context::ptr ctx, const char* path,
+                               const char* interface);
+
+std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPathsCache();
 
 const std::string* getSensorConfigurationInterface(
-    const std::map<std::string, std::vector<std::string>>&
+    const boost::container::flat_map<std::string, std::vector<std::string>>&
         sensorInterfacesResponse);
 
-void updateIpmiFromAssociation(const std::string& path,
+void updateIpmiFromAssociation(ipmi::Context::ptr ctx, const std::string& path,
                                const DbusInterfaceMap& sensorMap,
                                uint8_t& entityId, uint8_t& entityInstance);
 } // namespace ipmi

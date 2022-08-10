@@ -900,8 +900,8 @@ ipmi::RspType<uint16_t, // Next Record ID
               uint8_t,  // Record Type
               std::variant<systemEventType, oemTsEventType,
                            oemEventType>> // Record Content
-    ipmiStorageGetSELEntry(uint16_t reservationID, uint16_t targetID,
-                           uint8_t offset, uint8_t size)
+    ipmiStorageGetSELEntry(ipmi::Context::ptr ctx, uint16_t reservationID,
+                           uint16_t targetID, uint8_t offset, uint8_t size)
 {
     // Only support getting the entire SEL record. If a partial size or non-zero
     // offset is requested, return an error
@@ -1053,7 +1053,7 @@ ipmi::RspType<uint16_t, // Next Record ID
 
             // Get the sensor type, sensor number, and event type for the sensor
             sensorType = getSensorTypeFromPath(sensorPath);
-            sensorAndLun = getSensorNumberFromPath(sensorPath);
+            sensorAndLun = getSensorNumberFromPath(ctx, sensorPath);
             sensorNum = static_cast<uint8_t>(sensorAndLun);
             if ((generatorID & 0x0001) == 0)
             {

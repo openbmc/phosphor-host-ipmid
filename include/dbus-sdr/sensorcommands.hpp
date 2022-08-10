@@ -130,7 +130,7 @@ static ipmi_ret_t
                         std::vector<std::string>* interfaces = nullptr)
 {
     auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    if (!getSensorSubtree(ctx, sensorTree) && sensorTree.empty())
     {
         return IPMI_CC_RESPONSE_ERROR;
     }
@@ -140,7 +140,7 @@ static ipmi_ret_t
         return IPMI_CC_RESPONSE_ERROR;
     }
 
-    path = getPathFromSensorNumber((ctx->lun << 8) | sensnum);
+    path = getPathFromSensorNumber(ctx, (ctx->lun << 8) | sensnum);
     if (path.empty())
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;
@@ -148,11 +148,15 @@ static ipmi_ret_t
 
     for (const auto& sensor : sensorTree)
     {
-        if (path == sensor.first)
+        // If the sensorTree has no entry, sensor.second.begin() will be invalid
+        // and crash.
+        if (path == sensor.first && !sensor.second.empty())
         {
             connection = sensor.second.begin()->first;
             if (interfaces)
+            {
                 *interfaces = sensor.second.begin()->second;
+            }
             break;
         }
     }
