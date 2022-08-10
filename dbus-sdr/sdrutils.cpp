@@ -16,6 +16,12 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#include <boost/container/flat_map.hpp>
+#include <iostream>
+#include <optional>
+#include <sdbusplus/message/native_types.hpp>
+#include <unordered_set>
+
 #ifdef FEATURE_HYBRID_SENSORS
 
 #include <ipmid/utils.hpp>
@@ -31,24 +37,24 @@ extern const IdInfoMap sensors;
 
 namespace details
 {
-uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
+uint16_t getSensorSubtree(ipmi::Context::ptr ctx,
+                          std::shared_ptr<SensorSubTree>& subtree)
 {
     static std::shared_ptr<SensorSubTree> sensorTreePtr;
     static uint16_t sensorUpdatedIndex = 0;
-    std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
     static sdbusplus::bus::match_t sensorAdded(
-        *dbus,
+        *ctx->bus,
         "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
         "sensors/'",
         [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
 
     static sdbusplus::bus::match_t sensorRemoved(
-        *dbus,
+        *ctx->bus,
         "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
         "openbmc_project/sensors/'",
         [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
 
-    if (sensorTreePtr)
+    if (sensorTreePtr != nullptr)
     {
         subtree = sensorTreePtr;
         return sensorUpdatedIndex;
@@ -58,27 +64,22 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     static constexpr const int32_t depth = 2;
 
-    auto lbdUpdateSensorTree = [&dbus](const char* path,
-                                       const auto& interfaces) {
-        auto mapperCall = dbus->new_method_call(
-            "xyz.openbmc_project.ObjectMapper",
-            "/xyz/openbmc_project/object_mapper",
-            "xyz.openbmc_project.ObjectMapper", "GetSubTree");
-        SensorSubTree sensorTreePartial;
+    auto lbdUpdateSensorTree = [](ipmi::Context::ptr ctx, const char* path,
+                                  const auto& interfaces) {
+        boost::system::error_code ec;
+        SensorSubTree sensorTreePartial =
+            ctx->bus->yield_method_call<SensorSubTree>(
+                ctx->yield, ec, "xyz.openbmc_project.ObjectMapper",
+                "/xyz/openbmc_project/object_mapper",
+                "xyz.openbmc_project.ObjectMapper", "GetSubTree", path, depth,
+                interfaces);
 
-        mapperCall.append(path, depth, interfaces);
-
-        try
-        {
-            auto mapperReply = dbus->call(mapperCall);
-            mapperReply.read(sensorTreePartial);
-        }
-        catch (const sdbusplus::exception_t& e)
+        if (ec)
         {
             phosphor::logging::log<phosphor::logging::level::ERR>(
                 "fail to update subtree",
                 phosphor::logging::entry("PATH=%s", path),
-                phosphor::logging::entry("WHAT=%s", e.what()));
+                phosphor::logging::entry("WHAT=%s", ec.message().c_str()));
             return false;
         }
         if constexpr (debug)
@@ -99,30 +100,27 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     static constexpr const std::array vrInterfaces = {
         "xyz.openbmc_project.Control.VoltageRegulatorMode"};
 
-    bool sensorRez =
-        lbdUpdateSensorTree("/xyz/openbmc_project/sensors", sensorInterfaces);
+    bool sensorRez = lbdUpdateSensorTree(ctx, "/xyz/openbmc_project/sensors",
+                                         sensorInterfaces);
 
 #ifdef FEATURE_HYBRID_SENSORS
 
-    if (!ipmi::sensor::sensors.empty())
+    for (const auto& sensor : ipmi::sensor::sensors)
     {
-        for (const auto& sensor : ipmi::sensor::sensors)
+        // Threshold sensors should not be emplaced in here.
+        if (sensor.second.sensorPath.starts_with(
+                "/xyz/openbmc_project/sensors/"))
         {
-            // Threshold sensors should not be emplaced in here.
-            if (boost::starts_with(sensor.second.sensorPath,
-                                   "/xyz/openbmc_project/sensors/"))
-            {
-                continue;
-            }
-
-            // The bus service name is not listed in ipmi::sensor::Info. Give it
-            // an empty string. For those function using non-threshold sensors,
-            // the bus service name will be retrieved in an alternative way.
-            boost::container::flat_map<std::string, std::vector<std::string>>
-                connectionMap{
-                    {"", {sensor.second.propertyInterfaces.begin()->first}}};
-            sensorTreePtr->emplace(sensor.second.sensorPath, connectionMap);
+            continue;
         }
+
+        // The bus service name is not listed in ipmi::sensor::Info. Give it
+        // an empty string. For those function using non-threshold sensors,
+        // the bus service name will be retrieved in an alternative way.
+        boost::container::flat_map<std::string, std::vector<std::string>>
+            connectionMap{
+                {"", {sensor.second.propertyInterfaces.begin()->first}}};
+        sensorTreePtr->emplace(sensor.second.sensorPath, connectionMap);
     }
 
 #endif
@@ -134,7 +132,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     }
 
     // Add VR control as optional search path.
-    (void)lbdUpdateSensorTree("/xyz/openbmc_project/vr", vrInterfaces);
+    (void)lbdUpdateSensorTree(ctx, "/xyz/openbmc_project/vr", vrInterfaces);
 
     subtree = sensorTreePtr;
     sensorUpdatedIndex++;
@@ -144,13 +142,14 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     return sensorUpdatedIndex;
 }
 
-bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
+bool getSensorNumMap(ipmi::Context::ptr ctx,
+                     std::shared_ptr<SensorNumMap>& sensorNumMap)
 {
     static std::shared_ptr<SensorNumMap> sensorNumMapPtr;
     bool sensorNumMapUpated = false;
     static uint16_t prevSensorUpdatedIndex = 0;
     std::shared_ptr<SensorSubTree> sensorTree;
-    uint16_t curSensorUpdatedIndex = details::getSensorSubtree(sensorTree);
+    uint16_t curSensorUpdatedIndex = details::getSensorSubtree(ctx, sensorTree);
     if (!sensorTree)
     {
         return sensorNumMapUpated;
@@ -194,10 +193,10 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
 }
 } // namespace details
 
-bool getSensorSubtree(SensorSubTree& subtree)
+bool getSensorSubtree(ipmi::Context::ptr ctx, SensorSubTree& subtree)
 {
     std::shared_ptr<SensorSubTree> sensorTree;
-    details::getSensorSubtree(sensorTree);
+    details::getSensorSubtree(ctx, sensorTree);
     if (!sensorTree)
     {
         return false;
@@ -220,43 +219,46 @@ ipmi::sensor::IdInfoMap::const_iterator
 }
 #endif
 
-std::string getSensorTypeStringFromPath(const std::string& path)
+std::optional<std::string>
+    getSensorTypeStringFromPath(const sdbusplus::message::object_path& path)
 {
     // get sensor type string from path, path is defined as
     // /xyz/openbmc_project/sensors/<type>/label
-    size_t typeEnd = path.rfind("/");
-    if (typeEnd == std::string::npos)
+    const sdbusplus::message::object_path& typePath = path.parent_path();
+    const std::string typeStr = typePath.filename();
+
+    if (typeStr.empty())
     {
-        return path;
+        return std::nullopt;
     }
-    size_t typeStart = path.rfind("/", typeEnd - 1);
-    if (typeStart == std::string::npos)
-    {
-        return path;
-    }
-    // Start at the character after the '/'
-    typeStart++;
-    return path.substr(typeStart, typeEnd - typeStart);
+
+    return typeStr;
 }
 
 uint8_t getSensorTypeFromPath(const std::string& path)
 {
-    uint8_t sensorType = 0;
-    std::string type = getSensorTypeStringFromPath(path);
-    auto findSensor = sensorTypes.find(type.c_str());
+    const std::optional<std::string>& typeStr =
+        getSensorTypeStringFromPath(path);
+    if (typeStr == std::nullopt)
+    {
+        return 0;
+    }
+
+    auto findSensor = sensorTypes.find(typeStr->c_str());
     if (findSensor != sensorTypes.end())
     {
-        sensorType =
-            static_cast<uint8_t>(std::get<sensorTypeCodes>(findSensor->second));
+        return static_cast<uint8_t>(
+            std::get<sensorTypeCodes>(findSensor->second));
     } // else default 0x0 RESERVED
 
-    return sensorType;
+    return 0;
 }
 
-uint16_t getSensorNumberFromPath(const std::string& path)
+uint16_t getSensorNumberFromPath(ipmi::Context::ptr ctx,
+                                 const std::string& path)
 {
     std::shared_ptr<SensorNumMap> sensorNumMapPtr;
-    details::getSensorNumMap(sensorNumMapPtr);
+    details::getSensorNumMap(ctx, sensorNumMapPtr);
     if (!sensorNumMapPtr)
     {
         return invalidSensorNumber;
@@ -275,22 +277,27 @@ uint16_t getSensorNumberFromPath(const std::string& path)
 
 uint8_t getSensorEventTypeFromPath(const std::string& path)
 {
-    uint8_t sensorEventType = 0;
-    std::string type = getSensorTypeStringFromPath(path);
-    auto findSensor = sensorTypes.find(type.c_str());
+    const std::optional<std::string>& typeStr =
+        getSensorTypeStringFromPath(path);
+    if (typeStr == std::nullopt)
+    {
+        return 0;
+    }
+
+    auto findSensor = sensorTypes.find(typeStr->c_str());
     if (findSensor != sensorTypes.end())
     {
-        sensorEventType = static_cast<uint8_t>(
+        return static_cast<uint8_t>(
             std::get<sensorEventTypeCodes>(findSensor->second));
     }
 
-    return sensorEventType;
+    return 0;
 }
 
-std::string getPathFromSensorNumber(uint16_t sensorNum)
+std::string getPathFromSensorNumber(ipmi::Context::ptr ctx, uint16_t sensorNum)
 {
     std::shared_ptr<SensorNumMap> sensorNumMapPtr;
-    details::getSensorNumMap(sensorNumMapPtr);
+    details::getSensorNumMap(ctx, sensorNumMapPtr);
     if (!sensorNumMapPtr)
     {
         return std::string();
@@ -310,63 +317,51 @@ std::string getPathFromSensorNumber(uint16_t sensorNum)
 namespace ipmi
 {
 
-std::map<std::string, std::vector<std::string>>
-    getObjectInterfaces(const char* path)
+boost::container::flat_map<std::string, std::vector<std::string>>
+    getObjectInterfaces(ipmi::Context::ptr ctx, const char* path)
 {
-    std::map<std::string, std::vector<std::string>> interfacesResponse;
-    std::vector<std::string> interfaces;
-    std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
+    boost::system::error_code ec;
+    auto interfacesResponse = ctx->bus->yield_method_call<
+        boost::container::flat_map<std::string, std::vector<std::string>>>(
+        ctx->yield, ec, "xyz.openbmc_project.ObjectMapper",
+        "/xyz/openbmc_project/object_mapper",
+        "xyz.openbmc_project.ObjectMapper", "GetObject", path,
+        std::vector<std::string>{});
 
-    sdbusplus::message_t getObjectMessage =
-        dbus->new_method_call("xyz.openbmc_project.ObjectMapper",
-                              "/xyz/openbmc_project/object_mapper",
-                              "xyz.openbmc_project.ObjectMapper", "GetObject");
-    getObjectMessage.append(path, interfaces);
-
-    try
-    {
-        sdbusplus::message_t response = dbus->call(getObjectMessage);
-        response.read(interfacesResponse);
-    }
-    catch (const std::exception& e)
+    if (ec)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "Failed to GetObject", phosphor::logging::entry("PATH=%s", path),
-            phosphor::logging::entry("WHAT=%s", e.what()));
+            phosphor::logging::entry("WHAT=%s", ec.message().c_str()));
     }
 
     return interfacesResponse;
 }
 
-std::map<std::string, Value> getEntityManagerProperties(const char* path,
-                                                        const char* interface)
+boost::container::flat_map<std::string, Value>
+    getEntityManagerProperties(ipmi::Context::ptr ctx, const char* path,
+                               const char* interface)
 {
-    std::map<std::string, Value> properties;
-    std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
+    boost::system::error_code ec;
+    auto properties =
+        ctx->bus
+            ->yield_method_call<boost::container::flat_map<std::string, Value>>(
+                ctx->yield, ec, "xyz.openbmc_project.EntityManager", path,
+                "org.freedesktop.DBus.Properties", "GetAll", interface);
 
-    sdbusplus::message_t getProperties =
-        dbus->new_method_call("xyz.openbmc_project.EntityManager", path,
-                              "org.freedesktop.DBus.Properties", "GetAll");
-    getProperties.append(interface);
-
-    try
-    {
-        sdbusplus::message_t response = dbus->call(getProperties);
-        response.read(properties);
-    }
-    catch (const std::exception& e)
+    if (ec)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "Failed to GetAll", phosphor::logging::entry("PATH=%s", path),
             phosphor::logging::entry("INTF=%s", interface),
-            phosphor::logging::entry("WHAT=%s", e.what()));
+            phosphor::logging::entry("WHAT=%s", ec.message().c_str()));
     }
 
     return properties;
 }
 
 const std::string* getSensorConfigurationInterface(
-    const std::map<std::string, std::vector<std::string>>&
+    const boost::container::flat_map<std::string, std::vector<std::string>>&
         sensorInterfacesResponse)
 {
     auto entityManagerService =
@@ -390,8 +385,7 @@ const std::string* getSensorConfigurationInterface(
 
     for (const auto& entry : entityManagerService->second)
     {
-        if (boost::algorithm::starts_with(entry,
-                                          "xyz.openbmc_project.Configuration."))
+        if (entry.starts_with("xyz.openbmc_project.Configuration."))
         {
             return &entry;
         }
@@ -402,7 +396,7 @@ const std::string* getSensorConfigurationInterface(
 
 // Follow Association properties for Sensor back to the Board dbus object to
 // check for an EntityId and EntityInstance property.
-void updateIpmiFromAssociation(const std::string& path,
+void updateIpmiFromAssociation(ipmi::Context::ptr ctx, const std::string& path,
                                const DbusInterfaceMap& sensorMap,
                                uint8_t& entityId, uint8_t& entityInstance)
 {
@@ -456,9 +450,9 @@ void updateIpmiFromAssociation(const std::string& path,
         // the right interface.
 
         // just try grabbing the properties first.
-        std::map<std::string, Value> ipmiProperties =
+        boost::container::flat_map<std::string, Value> ipmiProperties =
             getEntityManagerProperties(
-                endpoint.c_str(),
+                ctx, endpoint.c_str(),
                 "xyz.openbmc_project.Inventory.Decorator.Ipmi");
 
         auto entityIdProp = ipmiProperties.find("EntityId");
@@ -487,9 +481,9 @@ void updateIpmiFromAssociation(const std::string& path,
         // Download the interfaces for the sensor from
         // Entity-Manager to find the name of the configuration
         // interface.
-        std::map<std::string, std::vector<std::string>>
+        boost::container::flat_map<std::string, std::vector<std::string>>
             sensorInterfacesResponse =
-                getObjectInterfaces(sensorConfigPath.c_str());
+                getObjectInterfaces(ctx, sensorConfigPath.c_str());
 
         const std::string* configurationInterface =
             getSensorConfigurationInterface(sensorInterfacesResponse);
@@ -503,8 +497,8 @@ void updateIpmiFromAssociation(const std::string& path,
         }
 
         // We found a configuration interface.
-        std::map<std::string, Value> configurationProperties =
-            getEntityManagerProperties(sensorConfigPath.c_str(),
+        boost::container::flat_map<std::string, Value> configurationProperties =
+            getEntityManagerProperties(ctx, sensorConfigPath.c_str(),
                                        configurationInterface->c_str());
 
         entityIdProp = configurationProperties.find("EntityId");
