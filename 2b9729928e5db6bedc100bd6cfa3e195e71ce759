@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "afae1ff4_c68ea761",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-10T15:59:33Z",
+      "side": 1,
+      "message": "Do we want \u0027int\u0027 or size_t?\n\nYou might want to just use a vector?",
+      "range": {
+        "startLine": 42,
+        "startChar": 13,
+        "endLine": 42,
+        "endChar": 16
+      },
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "288db670_fe81d619",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-10T15:59:33Z",
+      "side": 1,
+      "message": "Is there a reason we\u0027re using a class member to pass state between functions?  Can we just pass it as a parameter?\n\nIf not, can you please document what this is used for and why here?\n\n\nSuggest `size_t hostIdx \u003d 0` for default initialization at a minimum.",
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b2857b8c_060f0e88",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-10T15:59:33Z",
+      "side": 1,
+      "message": "Do we need to add the `hostIdx` to the log anywhere?",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 67
+      },
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
