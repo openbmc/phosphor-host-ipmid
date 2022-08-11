@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e048b8fb_15e6d9aa",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-11T15:56:25Z",
+      "side": 1,
+      "message": "Done. Updated with vector. The reason I used map earlier is storing and lookup is little easy compared to vector. we need to iterate in vector.",
+      "parentUuid": "e1bae47e_e0df9be0",
+      "range": {
+        "startLine": 42,
+        "startChar": 13,
+        "endLine": 42,
+        "endChar": 16
+      },
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "288db670_fe81d619",
@@ -79,6 +103,24 @@
       "side": 1,
       "message": "Is there a reason we\u0027re using a class member to pass state between functions?  Can we just pass it as a parameter?\n\nAll the functions(cacheRestrictedMode, handleRestrictedModeChange, filterMessage) are declared in the same class. So, no need to pass extra parameter to these functions.",
       "parentUuid": "288db670_fe81d619",
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "88b14d04_9d64f8b0",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-11T15:56:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62c06eb1_5a8a017a",
       "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -120,6 +162,30 @@
       "side": 1,
       "message": "Ack.  I think not needed in logs.",
       "parentUuid": "b2857b8c_060f0e88",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 67
+      },
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e535c1f8_49944921",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-11T15:56:25Z",
+      "side": 1,
+      "message": "In the log, the condition is checking whether restriction mode is true or false. Hence, hostIdx is needed here to check this condition for each host restriction mode.",
+      "parentUuid": "57a06914_a76e5aae",
       "range": {
         "startLine": 101,
         "startChar": 0,
