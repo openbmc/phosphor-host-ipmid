@@ -127,6 +127,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "2fd22edb_5619b15b",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-11T17:48:50Z",
+      "side": 1,
+      "message": "\u003e All the functions(cacheRestrictedMode, handleRestrictedModeChange, filterMessage) are declared in the same class. So, no need to pass extra parameter to these functions.\n\nIsn\u0027t passing a parameter far more obvious?  I don\u0027t know why we\u0027d ever want to use class state for control flow.  This is far less maintainable.",
+      "parentUuid": "88b14d04_9d64f8b0",
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b2857b8c_060f0e88",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 7
@@ -186,6 +204,30 @@
       "side": 1,
       "message": "In the log, the condition is checking whether restriction mode is true or false. Hence, hostIdx is needed here to check this condition for each host restriction mode.",
       "parentUuid": "57a06914_a76e5aae",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 67
+      },
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "81b5f174_e152620e",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-11T17:48:50Z",
+      "side": 1,
+      "message": "\u003e Ack.  I think not needed in logs.\n\nWhy or why not?  I don\u0027t know understand the point of logging a bool that you have no idea what it is associated with.  Is there something earlier in the logging that clearly indicates which host (or IPMB channel) this is associated with?",
+      "parentUuid": "e535c1f8_49944921",
       "range": {
         "startLine": 101,
         "startChar": 0,
