@@ -433,14 +433,17 @@ ipmi::RspType<uint8_t, // sensorType
               >
     ipmiGetSensorType(uint8_t sensorNumber)
 {
-    uint8_t sensorType = find_type_for_sensor_number(sensorNumber);
-
-    if (sensorType == 0)
+    const auto it = ipmi::sensor::sensors.find(sensorNumber);
+    if (it == ipmi::sensor::sensors.end())
     {
+        // The sensor map does not contain the sensor requested
         return ipmi::responseSensorInvalid();
     }
 
-    constexpr uint8_t eventType = 0x6F;
+    const auto& info = it->second;
+    uint8_t sensorType = info.sensorType;
+    uint8_t eventType = info.sensorReadingType;
+
     return ipmi::responseSuccess(sensorType, eventType);
 }
 
