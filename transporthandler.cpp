@@ -771,19 +771,19 @@ void setIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params,
  *     function names below (i.e. setLanOem). The default name for the
  *     transport IPMI commands is transporthandler_oem.cpp.
  *   Add:
- *      EXTRA_OECONF_append = " --enable-transport-oem=yes"
- *   Create a do_compile_prepend()/do_install_append method in your
+ *      EXTRA_OEMESON:append = "-Dtransport-oem=enabled"
+ *   Create a do_configure:prepend()/do_install:append() method in your
  *   bbappend file to copy the file to the build directory.
  *   Add:
  *   PROJECT_SRC_DIR := "${THISDIR}/${PN}"
  *   # Copy the "strong" functions into the working directory, overriding the
  *   # placeholder functions.
- *   do_compile_prepend(){
+ *   do_configure:prepend(){
  *      cp -f ${PROJECT_SRC_DIR}/transporthandler_oem.cpp ${S}
  *   }
  *
  *   # Clean up after complilation has completed
- *   do_install_append(){
+ *   do_install:append(){
  *      rm -f ${S}/transporthandler_oem.cpp
  *   }
  *
