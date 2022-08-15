@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "11737877_daba41db",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-08-15T22:29:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34a13d56_163e2df2",
+      "revId": "a59621d28a2a4bfafc93bf3f1d0345dea486413d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bc613bfb_6b2a0452",
@@ -31,6 +49,30 @@
       "writtenOn": "2022-08-15T20:17:24Z",
       "side": 1,
       "message": "please remove this too",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 37
+      },
+      "revId": "a59621d28a2a4bfafc93bf3f1d0345dea486413d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2b546459_af66b502",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-08-15T22:29:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bc613bfb_6b2a0452",
       "range": {
         "startLine": 22,
         "startChar": 0,
