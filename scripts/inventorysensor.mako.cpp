@@ -6,7 +6,7 @@
 #include <ipmid/types.hpp>
 using namespace ipmi::sensor;
 
-extern const InvObjectIDMap invSensors = {
+extern const InvObjectIDMap __attribute__((init_priority(101))) invSensors = {
 % for key in sensorDict.keys():
    % if key:
 {"${key}",
@@ -24,4 +24,3 @@ extern const InvObjectIDMap invSensors = {
    % endif
 % endfor
 };
-
