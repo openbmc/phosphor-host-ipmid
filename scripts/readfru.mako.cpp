@@ -2,7 +2,7 @@
 #include <iostream>
 #include "fruread.hpp"
 
-extern const FruMap frus = {
+extern const FruMap __attribute__((init_priority(101))) frus = {
 % for key in fruDict.keys():
    {${key},{
 <%
