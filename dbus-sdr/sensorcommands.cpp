@@ -1724,7 +1724,8 @@ bool constructSensorSdr(
 
     // populate sensor name from path
     auto name = sensor::parseSdrIdFromPath(path);
-    record.body.id_string_info = name.size();
+    get_sdr::body::set_id_strlen(name.size(), &record.body);
+    get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
     std::strncpy(record.body.id_string, name.c_str(),
                  sizeof(record.body.id_string));
 
@@ -1846,6 +1847,7 @@ void constructStaticSensorSdr(ipmi::Context::ptr, uint16_t sensorNum,
     {
         get_sdr::body::set_id_strlen(id_string.length(), &(record.body));
     }
+    get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
     std::strncpy(record.body.id_string, id_string.c_str(),
                  get_sdr::body::get_id_strlen(&(record.body)));
 }
@@ -1911,7 +1913,8 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
     // populate sensor name from path
     auto name = sensor::parseSdrIdFromPath(path);
     int nameSize = std::min(name.size(), sizeof(record.body.id_string));
-    record.body.id_string_info = nameSize;
+    get_sdr::body::set_id_strlen(nameSize, &record.body);
+    get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
     std::memset(record.body.id_string, 0x00, sizeof(record.body.id_string));
     std::memcpy(record.body.id_string, name.c_str(), nameSize);
 

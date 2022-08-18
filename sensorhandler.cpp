@@ -1099,8 +1099,6 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
         get_sdr::body::set_m(info->coefficientM, body);
         get_sdr::body::set_b_exp(info->exponentB, body);
         get_sdr::body::set_r_exp(info->exponentR, body);
-
-        get_sdr::body::set_id_type(0b00, body); // 00 = unicode
     }
 
     /* ID string */
@@ -1119,6 +1117,7 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     {
         get_sdr::body::set_id_strlen(id_string.length(), body);
     }
+    get_sdr::body::set_id_type(3, body); // "8-bit ASCII + Latin 1"
     strncpy(body->id_string, id_string.c_str(),
             get_sdr::body::get_id_strlen(body));
 
