@@ -143,6 +143,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4d4be1f1_7c50e0b8",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-18T12:57:06Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "2fd22edb_5619b15b",
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b2857b8c_060f0e88",
@@ -228,6 +246,30 @@
       "side": 1,
       "message": "\u003e Ack.  I think not needed in logs.\n\nWhy or why not?  I don\u0027t know understand the point of logging a bool that you have no idea what it is associated with.  Is there something earlier in the logging that clearly indicates which host (or IPMB channel) this is associated with?",
       "parentUuid": "e535c1f8_49944921",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 67
+      },
+      "revId": "2b9729928e5db6bedc100bd6cfa3e195e71ce759",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d65c98b8_6aea157f",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-18T12:57:06Z",
+      "side": 1,
+      "message": "Done.\nYes. Earlier the implementation was supported only single host. So it indicates restriction modes by default for that single host. Now, we have updated the logic to support for multi hosts and other IPMI devices.",
+      "parentUuid": "81b5f174_e152620e",
       "range": {
         "startLine": 101,
         "startChar": 0,
