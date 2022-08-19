@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "00d68671_639c17df",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-08-19T03:19:43Z",
+      "side": 1,
+      "message": "I got a compile issue when I disable sel-logger-clears-sel after your commit. Please help me check this issue. Thank",
+      "revId": "11317d75d4a6f38f998af7e6c612a99ad3eff12a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
