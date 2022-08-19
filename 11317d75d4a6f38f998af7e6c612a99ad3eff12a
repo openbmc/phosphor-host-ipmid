@@ -70,6 +70,24 @@
       "parentUuid": "6de4c08a_54a2c6ed",
       "revId": "11317d75d4a6f38f998af7e6c612a99ad3eff12a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2a62ae67_cf87df16",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-08-19T04:29:06Z",
+      "side": 1,
+      "message": "I see that we have 2 issues here:\n- callDbusMethod is not declared in storagecommands.cpp.\n- callDbusMethod has 5 arguments, but I see that you are passing 8 parameters to this function.",
+      "parentUuid": "c7f9efd4_4829a817",
+      "revId": "11317d75d4a6f38f998af7e6c612a99ad3eff12a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
