@@ -34,6 +34,24 @@
       "parentUuid": "00d68671_639c17df",
       "revId": "11317d75d4a6f38f998af7e6c612a99ad3eff12a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6de4c08a_54a2c6ed",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-08-19T03:56:38Z",
+      "side": 1,
+      "message": "The error when -Dsel-logger-clears-sel\u003ddisable \n../git/dbus-sdr/storagecommands.cpp:1263:5: error: \u0027callDbusMethod\u0027 was not declared in this scope\ncallDbusMethod(ctx-\u003eyield, ec, \"org.freedesktop.systemd1\",\nIt seems that callDbusMethod is not declared in storagecommands.cpp file",
+      "parentUuid": "f505965a_f221bd84",
+      "revId": "11317d75d4a6f38f998af7e6c612a99ad3eff12a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
