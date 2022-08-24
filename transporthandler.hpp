@@ -673,9 +673,25 @@ void setGatewayProperty(sdbusplus::bus_t& bus, const ChannelParams& params,
     }
 
     auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
+    auto addrStr = addrToString<family>(address);
+
+    // Clear the gateway on all zero IP
+    if constexpr (family == AF_INET)
+    {
+        if (address.s_addr == INADDR_ANY)
+        {
+            addrStr = "";
+        }
+    }
+    else if constexpr (family == AF_INET6)
+    {
+        if (!(memcmp(&address, &in6addr_any, sizeof(struct in6_addr))))
+        {
+            addrStr = "";
+        }
+    }
     setDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
-                    AddrFamily<family>::propertyGateway,
-                    addrToString<family>(address));
+                    AddrFamily<family>::propertyGateway, addrStr);
 
     // Restore the gateway MAC if we had one
     if (neighbor)
