@@ -16,6 +16,155 @@
       "message": "Gentle remainder for review.",
       "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c1ad6245_c77e3067",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-30T16:07:03Z",
+      "side": 1,
+      "message": "const map\u0026",
+      "range": {
+        "startLine": 40,
+        "startChar": 36,
+        "endLine": 40,
+        "endChar": 65
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6ff5fd90_65b0d902",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-30T16:07:03Z",
+      "side": 1,
+      "message": "const vector\u0026",
+      "range": {
+        "startLine": 66,
+        "startChar": 42,
+        "endLine": 66,
+        "endChar": 67
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b2d9ed64_5255c2a3",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-30T16:07:03Z",
+      "side": 1,
+      "message": "You should rarely use anything except `size_t` for an index type.",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 16
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7868de9a_451847ab",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-30T16:07:03Z",
+      "side": 1,
+      "message": "Probably use `devices[iter]` here to avoid bounds checking.  You already know the bounds are safe.\n\nAlternatively, change the whole for-loop to use range iteration: for (auto\u0026 d : devices)",
+      "range": {
+        "startLine": 76,
+        "startChar": 37,
+        "endLine": 76,
+        "endChar": 54
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "74321887_1366bc21",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-30T16:07:03Z",
+      "side": 1,
+      "message": "Is there any reason you\u0027re not using sdbusplus::asio::getProperty ?  Please use that instead of writing your own method call because I\u0027m pretty sure there are error paths handled in that function you don\u0027t handle here.  You\u0027ll also be able to use `std::string` directly instead of dealing with variants.",
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ee0d9442_63d45bd5",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-30T16:07:03Z",
+      "side": 1,
+      "message": "Please use range-for syntax.  You have no need for the index here.",
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2456f7f0_ff737922",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-08-30T16:07:03Z",
+      "side": 1,
+      "message": "I\u0027m confused how this filter is created inside the for loop but used outside of it.  Isn\u0027t it overwritten N times?",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 58
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
