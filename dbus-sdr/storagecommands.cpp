@@ -1171,10 +1171,10 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
 
     // Reload rsyslog so it knows to start new log files
     boost::system::error_code ec;
-    callDbusMethod(ctx->yield, ec, "org.freedesktop.systemd1",
-                   "/org/freedesktop/systemd1",
-                   "org.freedesktop.systemd1.Manager", "ReloadUnit",
-                   "rsyslog.service", "replace");
+    ctx->bus->yield_method_call<>(ctx->yield, ec, "org.freedesktop.systemd1",
+                                  "/org/freedesktop/systemd1",
+                                  "org.freedesktop.systemd1.Manager",
+                                  "ReloadUnit", "rsyslog.service", "replace");
     if (ec)
     {
         std::cerr << "error in reload rsyslog: " << ec << std::endl;
