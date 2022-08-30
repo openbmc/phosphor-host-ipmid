@@ -359,6 +359,17 @@ auto getIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
     return getIfAddr<AF_INET>(bus, params, 0, originsV4);
 }
 
+/** @brief Trivial helper for getting the Static IPv4 address from getIfAddrs()
+ *
+ *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] params - The parameters for the channel
+ *  @return The address and prefix if found
+ */
+auto getStaticIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
+{
+    return getIfAddr<AF_INET>(bus, params, 0, originsV4Static);
+}
+
 /** @brief Reconfigures the IPv4 address info configured for the interface
  *
  *  @param[in] bus     - The bus object used for lookups
@@ -370,7 +381,7 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
                         const std::optional<in_addr>& address,
                         std::optional<uint8_t> prefix)
 {
-    auto ifaddr = getIfAddr4(bus, params);
+    auto ifaddr = getStaticIfAddr4(bus, params);
     if (!ifaddr && !address)
     {
         log<level::ERR>("Missing address for IPv4 assignment");
