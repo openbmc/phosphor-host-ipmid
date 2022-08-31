@@ -67,6 +67,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "de32909c_db340f42",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-31T05:03:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "eb702e36_b37e3766",
+      "range": {
+        "startLine": 40,
+        "startChar": 36,
+        "endLine": 40,
+        "endChar": 65
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6ff5fd90_65b0d902",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 9
@@ -78,6 +102,30 @@
       "writtenOn": "2022-08-30T16:07:03Z",
       "side": 1,
       "message": "const vector\u0026",
+      "range": {
+        "startLine": 66,
+        "startChar": 42,
+        "endLine": 66,
+        "endChar": 67
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a41f3612_3a0b4df5",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-31T05:03:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6ff5fd90_65b0d902",
       "range": {
         "startLine": 66,
         "startChar": 42,
@@ -113,6 +161,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "acc13b97_646ee03c",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-31T05:03:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b2d9ed64_5255c2a3",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 16
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "7868de9a_451847ab",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 9
@@ -124,6 +196,30 @@
       "writtenOn": "2022-08-30T16:07:03Z",
       "side": 1,
       "message": "Probably use `devices[iter]` here to avoid bounds checking.  You already know the bounds are safe.\n\nAlternatively, change the whole for-loop to use range iteration: for (auto\u0026 d : devices)",
+      "range": {
+        "startLine": 76,
+        "startChar": 37,
+        "endLine": 76,
+        "endChar": 54
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a8ca3fba_44385ecd",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-31T05:03:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7868de9a_451847ab",
       "range": {
         "startLine": 76,
         "startChar": 37,
@@ -153,6 +249,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "25771058_8244efd7",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-31T05:03:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "74321887_1366bc21",
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "ee0d9442_63d45bd5",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 9
@@ -170,6 +284,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ebadfe24_d64c64e2",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-31T05:03:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ee0d9442_63d45bd5",
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2456f7f0_ff737922",
         "filename": "whitelist-filter.cpp",
         "patchSetId": 9
@@ -181,6 +313,30 @@
       "writtenOn": "2022-08-30T16:07:03Z",
       "side": 1,
       "message": "I\u0027m confused how this filter is created inside the for loop but used outside of it.  Isn\u0027t it overwritten N times?",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 58
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4e0b2384_b4144ebc",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-08-31T05:03:24Z",
+      "side": 1,
+      "message": "Earlier implementation used propertiesChanged, so for loop needed to get the all host dbus path.\n\nNow, used propertiesChangedNamespace to filter all the host dbus paths.\nIt will overwrite N times. I move it to outside of the loop.",
+      "parentUuid": "2456f7f0_ff737922",
       "range": {
         "startLine": 185,
         "startChar": 0,
