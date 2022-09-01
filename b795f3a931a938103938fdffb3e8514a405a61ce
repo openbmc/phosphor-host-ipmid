@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d2c49055_2e723a85",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-01T14:15:33Z",
+      "side": 1,
+      "message": "Suggest calculating this when needed rather than maintaining it.\n\nindex \u003d std::distance(std::begin(devices), \u0026dev)\n\nThis can be inserted into the lambda parameter.",
+      "range": {
+        "startLine": 89,
+        "startChar": 8,
+        "endLine": 89,
+        "endChar": 16
+      },
+      "revId": "b795f3a931a938103938fdffb3e8514a405a61ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f8c48846_c90308fd",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-01T14:15:33Z",
+      "side": 1,
+      "message": "Now that the filter is rewritten it is much easier to see what is going on here...  The original for-loop you had is fine (with devices.size() based iteration).  There is probably a std::transform you could do instead, but it likely isn\u0027t as readable as this.",
+      "range": {
+        "startLine": 184,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 5
+      },
+      "revId": "b795f3a931a938103938fdffb3e8514a405a61ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c8e2e618_4883917c",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-01T14:15:33Z",
+      "side": 1,
+      "message": "I don\u0027t think this code can actually throw.  Is there something that happened in the refactor that got rid of a function call that caused out_of_range?  I think it was from the `devices.at` before.",
+      "range": {
+        "startLine": 189,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 5
+      },
+      "revId": "b795f3a931a938103938fdffb3e8514a405a61ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
