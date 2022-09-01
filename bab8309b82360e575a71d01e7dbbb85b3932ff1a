@@ -89,6 +89,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d6011752_19598069",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-01T13:21:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de32909c_db340f42",
+      "range": {
+        "startLine": 40,
+        "startChar": 36,
+        "endLine": 40,
+        "endChar": 65
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6ff5fd90_65b0d902",
@@ -126,6 +150,30 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "6ff5fd90_65b0d902",
+      "range": {
+        "startLine": 66,
+        "startChar": 42,
+        "endLine": 66,
+        "endChar": 67
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2fc35f6a_35091fa5",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-01T13:21:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a41f3612_3a0b4df5",
       "range": {
         "startLine": 66,
         "startChar": 42,
@@ -183,6 +231,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8a066dc_52e0eb1d",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-01T13:21:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "acc13b97_646ee03c",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 16
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7868de9a_451847ab",
@@ -230,6 +302,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "78d6ee5e_5f423107",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-01T13:21:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8ca3fba_44385ecd",
+      "range": {
+        "startLine": 76,
+        "startChar": 37,
+        "endLine": 76,
+        "endChar": 54
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "74321887_1366bc21",
@@ -265,6 +361,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1bfe12b3_2eb736d9",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-01T13:21:15Z",
+      "side": 1,
+      "message": "Using async_method_call is the existing implementation. So, I didn\u0027t update that logic. I have updated only to get/set the restrictedMode for multi hosts.",
+      "parentUuid": "25771058_8244efd7",
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ee0d9442_63d45bd5",
@@ -296,6 +410,24 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "ee0d9442_63d45bd5",
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "60cc1992_0360a49b",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-01T13:21:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ebadfe24_d64c64e2",
       "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -337,6 +469,30 @@
       "side": 1,
       "message": "Earlier implementation used propertiesChanged, so for loop needed to get the all host dbus path.\n\nNow, used propertiesChangedNamespace to filter all the host dbus paths.\nIt will overwrite N times. I move it to outside of the loop.",
       "parentUuid": "2456f7f0_ff737922",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 58
+      },
+      "revId": "bab8309b82360e575a71d01e7dbbb85b3932ff1a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb88f39f_ae687560",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-01T13:21:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e0b2384_b4144ebc",
       "range": {
         "startLine": 185,
         "startChar": 0,
