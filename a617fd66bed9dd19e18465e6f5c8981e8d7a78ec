@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "117c7dbb_d695e6a6",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-02T15:03:33Z",
+      "side": 1,
+      "message": "Try again.  I\u0027ve given you the exact code two other times now.\n\nHint: devices.end() is certainly _not_ what you are looking for.",
+      "range": {
+        "startLine": 90,
+        "startChar": 27,
+        "endLine": 90,
+        "endChar": 71
+      },
+      "revId": "a617fd66bed9dd19e18465e6f5c8981e8d7a78ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
