@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "969f8a0d_2e4fa16c",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-02T10:59:47Z",
+      "side": 1,
+      "message": "I think you misunderstood me.  Now you\u0027re passing a reference to an iterator into a lambda which is called async.  You\u0027ll never get the right value here.\n\nSwitch the for-loop to:\n\n  for (auto\u0026 dev : devices)\n\nSwitch the lambda to:\n\n  [this, index \u003d std::distance(devices.begin(), \u0026dev)](...)",
+      "revId": "ed42a90c66553b09a42989e4f26f00ff906a5605",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0317712d_6ee9e17e",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-02T10:59:47Z",
+      "side": 1,
+      "message": "Again, you don\u0027t need \u0027at\u0027; use operator[].\n\nat provides bounds checking and throws an exception.  operator[] does not.  You already know you are within bounds because the loop iteration is set up that way purposefully.",
+      "range": {
+        "startLine": 187,
+        "startChar": 27,
+        "endLine": 187,
+        "endChar": 44
+      },
+      "revId": "ed42a90c66553b09a42989e4f26f00ff906a5605",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "efe973e6_3ca438d1",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-02T10:59:47Z",
+      "side": 1,
+      "message": "Prefer emplace over insert for efficiency.\n\n  deviceList.emplace(devices[index], index);",
+      "range": {
+        "startLine": 187,
+        "startChar": 8,
+        "endLine": 187,
+        "endChar": 25
+      },
+      "revId": "ed42a90c66553b09a42989e4f26f00ff906a5605",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
