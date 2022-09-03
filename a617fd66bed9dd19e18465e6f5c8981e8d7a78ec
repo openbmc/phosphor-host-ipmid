@@ -94,6 +94,30 @@
       },
       "revId": "a617fd66bed9dd19e18465e6f5c8981e8d7a78ec",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4e7fa05b_8496723f",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-03T19:03:50Z",
+      "side": 1,
+      "message": "\u003e std::distance(devices.begin(), devices.end()-1) also works and will get the correct index. \n\nCan you explain to me how two static ends of the container can possibly give you a valid index as you are iterating through it?  You\u0027re attempting to obtain a dynamic value (the index) from static ones (the begin/end).  There is no way this works.",
+      "parentUuid": "4e2fa936_19187ef8",
+      "range": {
+        "startLine": 90,
+        "startChar": 27,
+        "endLine": 90,
+        "endChar": 71
+      },
+      "revId": "a617fd66bed9dd19e18465e6f5c8981e8d7a78ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
