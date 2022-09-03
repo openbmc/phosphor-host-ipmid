@@ -118,6 +118,30 @@
       },
       "revId": "a617fd66bed9dd19e18465e6f5c8981e8d7a78ec",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08a5e0a0_bb571dea",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-03T19:30:36Z",
+      "side": 1,
+      "message": "https://godbolt.org/z/j4hPad1Tv\n\nEither of these approaches would be fine in this case.  They are both within 1 asm instruction of each other in length.\n\nI have confirmed that this works in this code:\n    index \u003d std::distance(\u0026*std::begin(devices), \u0026dev)",
+      "parentUuid": "4e7fa05b_8496723f",
+      "range": {
+        "startLine": 90,
+        "startChar": 27,
+        "endLine": 90,
+        "endChar": 71
+      },
+      "revId": "a617fd66bed9dd19e18465e6f5c8981e8d7a78ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
