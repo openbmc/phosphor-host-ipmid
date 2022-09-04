@@ -142,6 +142,30 @@
       },
       "revId": "a617fd66bed9dd19e18465e6f5c8981e8d7a78ec",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee89393d_1db2f57d",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-04T14:57:20Z",
+      "side": 1,
+      "message": "Thanks. Updated the same.",
+      "parentUuid": "08a5e0a0_bb571dea",
+      "range": {
+        "startLine": 90,
+        "startChar": 27,
+        "endLine": 90,
+        "endChar": 71
+      },
+      "revId": "a617fd66bed9dd19e18465e6f5c8981e8d7a78ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
