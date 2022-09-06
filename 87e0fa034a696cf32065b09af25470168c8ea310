@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fb7cc9cb_f7d0b413",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1001322
+      },
+      "writtenOn": "2022-09-06T07:21:57Z",
+      "side": 1,
+      "message": "better to use log\u003clevel::ERR\u003e instead of std:cerr.",
+      "revId": "87e0fa034a696cf32065b09af25470168c8ea310",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
