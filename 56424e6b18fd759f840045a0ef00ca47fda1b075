@@ -158,6 +158,23 @@
       "parentUuid": "6713b5eb_f5136225",
       "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b051eb1_51be0e6f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2022-09-06T06:16:12Z",
+      "side": 1,
+      "message": "I do not see a usage of \"NoAccess\" user in OpenBMC, so as part of the removal, let ipmid reject `NoAccess` as well.",
+      "revId": "56424e6b18fd759f840045a0ef00ca47fda1b075",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
