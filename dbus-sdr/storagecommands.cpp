@@ -242,7 +242,7 @@ void replaceCacheFru(
     boost::system::error_code ec;
 
     frus = bus->yield_method_call<ManagedObjectType>(
-        yield, ec, fruDeviceServiceName, "/",
+        yield, ec, fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
         "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
     if (ec)
     {
