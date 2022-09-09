@@ -39,6 +39,30 @@
       },
       "revId": "90eef3f4a0390dab359849a960a50a94be0d195d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08d3dece_df19e4c8",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-09-09T04:59:10Z",
+      "side": 1,
+      "message": "Sorry to make you confused, it seems this issue come from another patch in my platform. We made some changes on the fru-device. We need to discuss more to verify this issue. I will mark this patch to WIP.\n\nThanks",
+      "parentUuid": "65d0195f_ada1833a",
+      "range": {
+        "startLine": 245,
+        "startChar": 41,
+        "endLine": 245,
+        "endChar": 73
+      },
+      "revId": "90eef3f4a0390dab359849a960a50a94be0d195d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
