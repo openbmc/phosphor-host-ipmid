@@ -292,7 +292,7 @@ std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
     }
 
     fruCache.clear();
-    lastDevId = devId;
+    lastDevId = 0xFF;
     fruCache = fru;
 
     return {ipmi::ccSuccess, fru};
