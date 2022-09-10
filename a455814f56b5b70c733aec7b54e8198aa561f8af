@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "39396244_aba20d43",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-09-10T00:24:11Z",
+      "side": 1,
+      "message": "it was correct before. Since we have successfully gotten the FRU, we update it to the devId.",
+      "range": {
+        "startLine": 294,
+        "startChar": 4,
+        "endLine": 296,
+        "endChar": 19
+      },
+      "revId": "a455814f56b5b70c733aec7b54e8198aa561f8af",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
