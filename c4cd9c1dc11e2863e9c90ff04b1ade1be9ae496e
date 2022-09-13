@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "2813a489_c3b0dd0f",
         "filename": "dcmihandler.cpp",
@@ -20,10 +21,34 @@
         "endChar": 33
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "31af5e6f_3c5d32b5",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Here the length indicates the Count of non-null characters starting from offset 0 up to the first null, Which is different from the string length of second parameter.\nReference : DCMI Spec v1.5  6.4.6.1 Get Management Controller Identifier String Command",
+      "parentUuid": "2813a489_c3b0dd0f",
+      "range": {
+        "startLine": 564,
+        "startChar": 13,
+        "endLine": 565,
+        "endChar": 33
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "ee83d369_ebb0b307",
         "filename": "dcmihandler.cpp",
@@ -43,10 +68,34 @@
         "endChar": 32
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "757a8b32_3a52d50c",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Here the length indicates the Count of non-null characters starting from offset 0 up to the first null, Which is different from the string length of second parameter.\nReference : DCMI Spec v1.5  6.4.6.1 Get Management Controller Identifier String Command\nSo this changes are needed",
+      "parentUuid": "ee83d369_ebb0b307",
+      "range": {
+        "startLine": 570,
+        "startChar": 0,
+        "endLine": 571,
+        "endChar": 32
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "9659caea_109015b7",
         "filename": "dcmihandler.cpp",
@@ -66,10 +115,34 @@
         "endChar": 16
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3998f260_4079976e",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9659caea_109015b7",
+      "range": {
+        "startLine": 587,
+        "startChar": 15,
+        "endLine": 587,
+        "endChar": 16
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "113ae315_dbb3bf1e",
         "filename": "dcmihandler.cpp",
@@ -89,10 +162,34 @@
         "endChar": 47
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "786128d4_9f1f2bc0",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Here the length indicates the Count of non-null characters starting from offset 0 up to the first null, Which is different from the string length of second parameter.\nReference : DCMI Spec v1.5  6.4.6.1 Get Management Controller Identifier String Command",
+      "parentUuid": "113ae315_dbb3bf1e",
+      "range": {
+        "startLine": 592,
+        "startChar": 0,
+        "endLine": 604,
+        "endChar": 47
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "6fb6f705_74c13583",
         "filename": "dcmihandler.cpp",
@@ -112,10 +209,34 @@
         "endChar": 47
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7300a8b4_69263772",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fb6f705_74c13583",
+      "range": {
+        "startLine": 619,
+        "startChar": 63,
+        "endLine": 620,
+        "endChar": 47
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "27b26d81_4f722d3a",
         "filename": "dcmihandler.cpp",
@@ -135,10 +256,34 @@
         "endChar": 68
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7fced0f6_2f8701a3",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "27b26d81_4f722d3a",
+      "range": {
+        "startLine": 623,
+        "startChar": 0,
+        "endLine": 623,
+        "endChar": 68
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "cfa60338_e202d7a2",
         "filename": "dcmihandler.cpp",
@@ -158,10 +303,34 @@
         "endChar": 13
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "184b2ae3_8280370c",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cfa60338_e202d7a2",
+      "range": {
+        "startLine": 625,
+        "startChar": 8,
+        "endLine": 625,
+        "endChar": 13
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "b862e266_af8ff443",
         "filename": "dcmihandler.cpp",
@@ -181,8 +350,31 @@
         "endChar": 45
       },
       "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "edfce821_5239dffc",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-13T11:39:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b862e266_af8ff443",
+      "range": {
+        "startLine": 660,
+        "startChar": 21,
+        "endLine": 660,
+        "endChar": 45
+      },
+      "revId": "c4cd9c1dc11e2863e9c90ff04b1ade1be9ae496e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
