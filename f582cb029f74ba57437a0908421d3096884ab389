@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "a2ec263e_ac105c0e",
         "filename": "dcmihandler.cpp",
@@ -20,10 +21,34 @@
         "endChar": 33
       },
       "revId": "f582cb029f74ba57437a0908421d3096884ab389",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4b6d255a_2f6f3796",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T06:07:49Z",
+      "side": 1,
+      "message": "here uint8_t represent the total assettag length and vector represent the requested assettag data from the offset. So we can\u0027t use the string here. \n\nReference : 6.4.2 Get Asset Tag Command (DCMI Spec V1.5)",
+      "parentUuid": "a2ec263e_ac105c0e",
+      "range": {
+        "startLine": 410,
+        "startChar": 14,
+        "endLine": 411,
+        "endChar": 33
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "cda1a85b_1d008052",
         "filename": "dcmihandler.cpp",
@@ -43,10 +68,34 @@
         "endChar": 40
       },
       "revId": "f582cb029f74ba57437a0908421d3096884ab389",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "48dadcc1_2eb31ee0",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T06:07:49Z",
+      "side": 1,
+      "message": "assetTagData represent the Asset Tag Data (starting from offset to read)\n\nReference : 6.4.2 Get Asset Tag Command (DCMI Spec V1.5)",
+      "parentUuid": "cda1a85b_1d008052",
+      "range": {
+        "startLine": 415,
+        "startChar": 0,
+        "endLine": 415,
+        "endChar": 40
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "f05493a4_9aaedb13",
         "filename": "dcmihandler.cpp",
@@ -66,10 +115,34 @@
         "endChar": 58
       },
       "revId": "f582cb029f74ba57437a0908421d3096884ab389",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a895b73c_80013013",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T06:07:49Z",
+      "side": 1,
+      "message": "here tagLength represent the total assettag length and vector represent the requested assettag data from the offset. So we can\u0027t use the returnData alone. \n\nReference : 6.4.2 Get Asset Tag Command (DCMI Spec V1.5)",
+      "parentUuid": "f05493a4_9aaedb13",
+      "range": {
+        "startLine": 460,
+        "startChar": 4,
+        "endLine": 468,
+        "endChar": 58
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "8e1895eb_edae368f",
         "filename": "dcmihandler.cpp",
@@ -89,10 +162,34 @@
         "endChar": 49
       },
       "revId": "f582cb029f74ba57437a0908421d3096884ab389",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e664dc01_1e09d6a5",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T06:07:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e1895eb_edae368f",
+      "range": {
+        "startLine": 483,
+        "startChar": 57,
+        "endLine": 484,
+        "endChar": 49
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "db3ef54d_aad98ffc",
         "filename": "dcmihandler.cpp",
@@ -112,8 +209,31 @@
         "endChar": 0
       },
       "revId": "f582cb029f74ba57437a0908421d3096884ab389",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d4dec82_79d35be0",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T06:07:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db3ef54d_aad98ffc",
+      "range": {
+        "startLine": 507,
+        "startChar": 7,
+        "endLine": 512,
+        "endChar": 0
+      },
+      "revId": "f582cb029f74ba57437a0908421d3096884ab389",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
