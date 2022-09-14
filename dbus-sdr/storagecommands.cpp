@@ -131,8 +131,11 @@ void registerStorageFunctions() __attribute__((constructor));
 
 bool writeFru(const std::vector<uint8_t>& fru)
 {
+    printf(">> writeFru, fru.size()=%d, writeBus=%02X, writeAddr=%02X, cacheBus=%02X, cacheAddr=%02X, lastDevId=%02X\n",
+        fru.size(), writeBus, writeAddr, cacheBus, cacheAddr, lastDevId);
     if (writeBus == 0xFF && writeAddr == 0xFF)
     {
+        printf("writeBus=%d, writeAddr=%d\n", writeBus, writeAddr);
         return true;
     }
     lastDevId = 0xFF;
@@ -147,6 +150,7 @@ bool writeFru(const std::vector<uint8_t>& fru)
     }
     catch (const sdbusplus::exception_t&)
     {
+        printf("Error writing FRU\n");
         // todo: log sel?
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "error writing fru");
@@ -438,8 +442,10 @@ ipmi::RspType<uint8_t>
                             uint16_t fruInventoryOffset,
                             std::vector<uint8_t>& dataToWrite)
 {
+    printf(">> ipmiStorageWriteFruData, fruDeviceID=%d\n", fruDeviceId);
     if (fruDeviceId == 0xFF)
     {
+        printf("fru device id is 0xFF\n");
         return ipmi::responseInvalidFieldRequest();
     }
 
@@ -448,6 +454,7 @@ ipmi::RspType<uint8_t>
     auto [status, fru] = getFru(ctx, fruDeviceId);
     if (status != ipmi::ccSuccess)
     {
+        printf("GetFRU's status is %d\n", status);
         return ipmi::response(status);
     }
     size_t lastWriteAddr = fruInventoryOffset + writeLen;
@@ -460,6 +467,8 @@ ipmi::RspType<uint8_t>
               fru.begin() + fruInventoryOffset);
 
     bool atEnd = false;
+
+    printf("fru.size()=%d, sizeof(FRUHeader)=%d\n", fru.size(), sizeof(FRUHeader));
 
     if (fru.size() >= sizeof(FRUHeader))
     {
@@ -510,6 +519,8 @@ ipmi::RspType<uint8_t>
     }
     uint8_t countWritten = 0;
 
+    printf("atEnd=%d\n", atEnd);
+
     writeBus = cacheBus;
     writeAddr = cacheAddr;
     if (atEnd)
@@ -518,12 +529,14 @@ ipmi::RspType<uint8_t>
         writeTimer->stop();
         if (!writeFru(fru))
         {
+            printf("invalid field request\n");
             return ipmi::responseInvalidFieldRequest();
         }
         countWritten = std::min(fru.size(), static_cast<size_t>(0xFF));
     }
     else
     {
+        fruCache = fru; // Write-back
         // start a timer, if no further data is sent  to check to see if it is
         // valid
         writeTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
@@ -531,6 +544,7 @@ ipmi::RspType<uint8_t>
         countWritten = 0;
     }
 
+    printf("Success\n");
     return ipmi::responseSuccess(countWritten);
 }
 
