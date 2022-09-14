@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "1e8767bb_3e02e912",
         "filename": "dcmihandler.cpp",
@@ -20,10 +21,34 @@
         "endChar": 32
       },
       "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d41117c5_0b7b1ee9",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1035,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T11:15:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1e8767bb_3e02e912",
+      "range": {
+        "startLine": 1035,
+        "startChar": 21,
+        "endLine": 1035,
+        "endChar": 32
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "b9a2b7da_5089afde",
         "filename": "dcmihandler.cpp",
@@ -43,10 +68,34 @@
         "endChar": 29
       },
       "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4fb85f6f_4275461b",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T11:15:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b9a2b7da_5089afde",
+      "range": {
+        "startLine": 1040,
+        "startChar": 21,
+        "endLine": 1040,
+        "endChar": 29
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "4bf11970_a19bc81b",
         "filename": "dcmihandler.cpp",
@@ -66,10 +115,58 @@
         "endChar": 13
       },
       "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0482c22_abaf32ac",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1246,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T11:15:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4bf11970_a19bc81b",
+      "range": {
+        "startLine": 1235,
+        "startChar": 12,
+        "endLine": 1246,
+        "endChar": 13
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "047b9c6d_18303fe1",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1246,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T11:15:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4bf11970_a19bc81b",
+      "range": {
+        "startLine": 1235,
+        "startChar": 12,
+        "endLine": 1246,
+        "endChar": 13
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "fce0cf0c_682cd154",
         "filename": "dcmihandler.cpp",
@@ -89,10 +186,34 @@
         "endChar": 30
       },
       "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "36cb67dd_94afcbf5",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T11:15:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fce0cf0c_682cd154",
+      "range": {
+        "startLine": 1278,
+        "startChar": 4,
+        "endLine": 1281,
+        "endChar": 30
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "1ef59ca0_29e6d948",
         "filename": "dcmihandler.hpp",
@@ -112,10 +233,34 @@
         "endChar": 4
       },
       "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3f1d8d9_92d8a4be",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T11:15:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1ef59ca0_29e6d948",
+      "range": {
+        "startLine": 475,
+        "startChar": 0,
+        "endLine": 475,
+        "endChar": 4
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "4e5260c5_257a2d60",
         "filename": "dcmihandler.hpp",
@@ -135,8 +280,31 @@
         "endChar": 21
       },
       "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "88a63208_e4bb143f",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2022-09-14T11:15:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e5260c5_257a2d60",
+      "range": {
+        "startLine": 477,
+        "startChar": 4,
+        "endLine": 477,
+        "endChar": 21
+      },
+      "revId": "625ef7abdf28a4447cf72ccb26bfe2a07c7b5ef6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
