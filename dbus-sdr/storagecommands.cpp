@@ -524,6 +524,7 @@ ipmi::RspType<uint8_t>
     }
     else
     {
+        fruCache = fru; // Write-back
         // start a timer, if no further data is sent  to check to see if it is
         // valid
         writeTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
