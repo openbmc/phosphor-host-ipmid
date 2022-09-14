@@ -39,6 +39,30 @@
       },
       "revId": "137f04611f4203dad34f5c0deb27c3366acfb241",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fc9e8667_2a77743c",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-09-14T17:33:46Z",
+      "side": 1,
+      "message": "Yes, I realize \"health\" is better, as it resembles the \"Management Subsystem Health\" type name more closely.",
+      "parentUuid": "d941ada0_0be63667",
+      "range": {
+        "startLine": 352,
+        "startChar": 11,
+        "endLine": 352,
+        "endChar": 22
+      },
+      "revId": "137f04611f4203dad34f5c0deb27c3366acfb241",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
