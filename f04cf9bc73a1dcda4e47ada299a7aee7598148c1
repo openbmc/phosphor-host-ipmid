@@ -16,6 +16,23 @@
       "message": "oops. Thanks for the fix. ",
       "revId": "f04cf9bc73a1dcda4e47ada299a7aee7598148c1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "68479496_64139755",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000593
+      },
+      "writtenOn": "2022-09-14T17:19:29Z",
+      "side": 1,
+      "message": "fixing regression in\nhttps://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/56066\n\nThank you",
+      "revId": "f04cf9bc73a1dcda4e47ada299a7aee7598148c1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
