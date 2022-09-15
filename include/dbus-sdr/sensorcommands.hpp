@@ -167,5 +167,19 @@ struct IPMIThresholds
     std::optional<uint8_t> criticalLow;
     std::optional<uint8_t> criticalHigh;
 };
+namespace dcmi
+{
+constexpr auto groupExtIpmi = 0xdc;
+
+// Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
+static const std::map<uint8_t, uint8_t> validEntityId{
+    {0x40, 0x37}, {0x37, 0x40}, {0x41, 0x03},
+    {0x03, 0x41}, {0x42, 0x07}, {0x07, 0x42}};
+
+constexpr auto temperatureSensorType = 0x01;
+constexpr auto maxRecords = 8;
+constexpr auto cmdGetSensorInfo = 0x07;
+
+} // namespace dcmi
 
 } // namespace ipmi
