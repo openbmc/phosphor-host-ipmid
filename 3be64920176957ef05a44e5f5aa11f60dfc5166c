@@ -18,6 +18,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7aac42e_bda059d3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-15T20:10:42Z",
+      "side": 1,
+      "message": "Looks like my earlier vote was lost but there was only minor changes.",
+      "revId": "3be64920176957ef05a44e5f5aa11f60dfc5166c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b3339393_5c079f8e",
@@ -71,6 +88,30 @@
       "writtenOn": "2022-09-15T19:32:47Z",
       "side": 1,
       "message": "nit: move it after the for loop where it is used",
+      "range": {
+        "startLine": 180,
+        "startChar": 0,
+        "endLine": 181,
+        "endChar": 70
+      },
+      "revId": "3be64920176957ef05a44e5f5aa11f60dfc5166c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5b25d64f_69ea2d36",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-15T20:10:42Z",
+      "side": 1,
+      "message": "Probably should be static constexpr too.",
+      "parentUuid": "90fc6c42_0a1ef668",
       "range": {
         "startLine": 180,
         "startChar": 0,
