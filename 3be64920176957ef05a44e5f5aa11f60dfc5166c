@@ -58,6 +58,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "915ac833_892ea8d3",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-16T14:13:19Z",
+      "side": 1,
+      "message": "Done. Added comments for all the functions.\n\nThis map std::map\u003cstd::string, size_t\u003e\u0026 deviceList has key as dbus path of supported devices and value as it\u0027s index.",
+      "parentUuid": "b3339393_5c079f8e",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 34
+      },
+      "revId": "3be64920176957ef05a44e5f5aa11f60dfc5166c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5470f73a_4b5ad4f3",
@@ -71,6 +95,24 @@
       "writtenOn": "2022-09-15T19:32:47Z",
       "side": 1,
       "message": "Is there a service dependency with the settings manager that ensures the restriction modes are populated already?",
+      "revId": "3be64920176957ef05a44e5f5aa11f60dfc5166c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b071b1a0_ee42aef2",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-16T14:13:19Z",
+      "side": 1,
+      "message": "yes. Added settings daemon service(xyz.openbmc_project.Settings.service) as dependency service. will submit a separate patch for this in meta-phosphor.",
+      "parentUuid": "5470f73a_4b5ad4f3",
       "revId": "3be64920176957ef05a44e5f5aa11f60dfc5166c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -112,6 +154,30 @@
       "side": 1,
       "message": "Probably should be static constexpr too.",
       "parentUuid": "90fc6c42_0a1ef668",
+      "range": {
+        "startLine": 180,
+        "startChar": 0,
+        "endLine": 181,
+        "endChar": 70
+      },
+      "revId": "3be64920176957ef05a44e5f5aa11f60dfc5166c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "88a26260_c69975ec",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000546
+      },
+      "writtenOn": "2022-09-16T14:13:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b25d64f_69ea2d36",
       "range": {
         "startLine": 180,
         "startChar": 0,
