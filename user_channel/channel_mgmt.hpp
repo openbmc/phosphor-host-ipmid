@@ -37,7 +37,7 @@ using DbusChObjProperties = std::vector<std::pair<std::string, DbusVariant>>;
 
 static constexpr const char* ipmiChannelMutex = "ipmi_channel_mutex";
 static constexpr const char* ipmiChMutexCleanupLockFile =
-    "/var/lib/ipmi/ipmi_channel_mutex_cleanup";
+    "/var/run/ipmi/ipmi_channel_mutex_cleanup";
 
 /** @struct ChannelAccessData
  *
