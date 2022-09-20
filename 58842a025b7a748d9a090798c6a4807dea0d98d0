@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ac61f50a_df5fb0a3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2022-09-20T16:15:57Z",
+      "side": 1,
+      "message": "no exception thrown, it just returns EIO",
+      "range": {
+        "startLine": 11,
+        "startChar": 46,
+        "endLine": 11,
+        "endChar": 65
+      },
+      "revId": "58842a025b7a748d9a090798c6a4807dea0d98d0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6145aaef_5c47aab3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2022-09-20T16:15:57Z",
+      "side": 1,
+      "message": "Please remove this line, no need to reference company forks",
+      "revId": "58842a025b7a748d9a090798c6a4807dea0d98d0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "528037e0_79066495",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2022-09-20T16:15:57Z",
+      "side": 1,
+      "message": "I confirmed LuLu was on the Wistron CLA so I added you to the gerrit group and retriggered CI.",
+      "revId": "58842a025b7a748d9a090798c6a4807dea0d98d0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
