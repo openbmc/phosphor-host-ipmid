@@ -621,9 +621,11 @@ ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
 
     // todo: this should really use caching, this is a very inefficient lookup
     boost::system::error_code ec;
+
     ManagedObjectType entities = ctx->bus->yield_method_call<ManagedObjectType>(
-        ctx->yield, ec, entityManagerServiceName, "/",
-        "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
+        ctx->yield, ec, entityManagerServiceName,
+        "/xyz/openbmc_project/inventory", "org.freedesktop.DBus.ObjectManager",
+        "GetManagedObjects");
 
     if (ec)
     {

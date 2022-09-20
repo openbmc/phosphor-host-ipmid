@@ -732,8 +732,8 @@ bool isFruPresent(ipmi::Context::ptr& ctx, const std::string& fruPath)
     }
 
     ipmi::ObjectValueTree managedObjects;
-    ec = getManagedObjects(ctx, "xyz.openbmc_project.EntityManager", "/",
-                           managedObjects);
+    ec = getManagedObjects(ctx, "xyz.openbmc_project.EntityManager",
+                           "/xyz/openbmc_project/inventory", managedObjects);
     if (!ec)
     {
         auto connection = managedObjects.find(fruPath);
