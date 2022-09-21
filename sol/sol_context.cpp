@@ -40,8 +40,15 @@ void Context::enableAccumulateTimer(bool enable)
 {
     // fetch the timeout from the SOL manager
     std::chrono::microseconds interval = sol::Manager::get().accumulateInterval;
+
     if (enable)
     {
+        auto bufferSize = sol::Manager::get().dataBuffer.size();
+        if (bufferSize > sendThreshold)
+        {
+            charAccTimerHandler();
+            return;
+        }
         accumulateTimer.expires_after(interval);
         std::weak_ptr<Context> weakRef = weak_from_this();
         accumulateTimer.async_wait(
