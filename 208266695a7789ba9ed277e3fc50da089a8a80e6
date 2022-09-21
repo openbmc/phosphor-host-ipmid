@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5a1563e2_690134c1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-09-21T17:16:03Z",
+      "side": 1,
+      "message": "Added the reason why the type has to be \"utilization\" and cannot be \"health\" as is pointed out in change 57319",
+      "revId": "208266695a7789ba9ed277e3fc50da089a8a80e6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}

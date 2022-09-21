@@ -87,6 +87,30 @@
       },
       "revId": "137f04611f4203dad34f5c0deb27c3366acfb241",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8456aa8b_7be28e5f",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-09-21T17:16:03Z",
+      "side": 1,
+      "message": "Update: In change 57319 it is pointed out that the DBus paths must follow https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/yaml/xyz/openbmc_project/Sensor/Value.interface.yaml. \"health\" is not among the allowed hierarchies. \"utilization\" has been used since the start of phosphor-health-monitor. As a result this key has to be \"utilization\".",
+      "parentUuid": "4a6063f9_fe7e82d3",
+      "range": {
+        "startLine": 352,
+        "startChar": 11,
+        "endLine": 352,
+        "endChar": 22
+      },
+      "revId": "137f04611f4203dad34f5c0deb27c3366acfb241",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
