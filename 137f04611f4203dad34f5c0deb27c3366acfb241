@@ -63,6 +63,30 @@
       },
       "revId": "137f04611f4203dad34f5c0deb27c3366acfb241",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4a6063f9_fe7e82d3",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2022-09-21T16:45:46Z",
+      "side": 1,
+      "message": "To match the changes in the sensor type here, the DBus object paths in phosphor-health-monitor need to be changed accordingly.\n\nBefore: `/xyz/openbmc_project/sensors/utilization/...`\nAfter: `/xyz/openbmc_project/sensors/health/...`\n\nThe change is made here: https://gerrit.openbmc.org/c/openbmc/phosphor-health-monitor/+/57319",
+      "parentUuid": "fc9e8667_2a77743c",
+      "range": {
+        "startLine": 352,
+        "startChar": 11,
+        "endLine": 352,
+        "endChar": 22
+      },
+      "revId": "137f04611f4203dad34f5c0deb27c3366acfb241",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
