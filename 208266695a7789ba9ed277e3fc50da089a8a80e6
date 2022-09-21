@@ -16,6 +16,24 @@
       "message": "Added the reason why the type has to be \"utilization\" and cannot be \"health\" as is pointed out in change 57319",
       "revId": "208266695a7789ba9ed277e3fc50da089a8a80e6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "98eb392e_ecc446b3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-09-21T17:19:56Z",
+      "side": 1,
+      "message": "How do you know that everything under \u0027utilization\u0027 is related to the BMC though?",
+      "parentUuid": "5a1563e2_690134c1",
+      "revId": "208266695a7789ba9ed277e3fc50da089a8a80e6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
