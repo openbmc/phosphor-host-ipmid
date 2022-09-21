@@ -33,6 +33,24 @@
       "message": "As I think on this more, it would make sense to actually have this be the first check, i.e. why try and read it on line 1106 if it\u0027s 0 size. \n\nAlso a bit weird that readJsonFile retrurns a non-nullptr on a read of an empty file. I guess it must support an empty json file.",
       "revId": "1d0b3adb73b84fe2b94e51f683695c55da803842",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4fa78ee8_4f905933",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1112,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-21T18:50:20Z",
+      "side": 1,
+      "message": "I don\u0027t understand how we should even get to this point. readJsonFile will currently throw an exception in this case, which is not caught at this level.\n\nA better fix would be to change the readJsonFile to remove the throw when it catches a nlohmann::json::parse_error and simply return nullptr at that point. Then the first if statement above will catch the invalid file and return -EIO.",
+      "parentUuid": "f9ae3731_f0600eaf",
+      "revId": "1d0b3adb73b84fe2b94e51f683695c55da803842",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
