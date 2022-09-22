@@ -1,0 +1,222 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0917ce97_2228258c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2417,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "since this is not used until the end, define it down there.",
+      "range": {
+        "startLine": 2417,
+        "startChar": 30,
+        "endLine": 2417,
+        "endChar": 40
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae97c0a5_04cb4abb",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2427,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "these might be better as \u0027const auto \u0026\u0027 to avoid a copy.",
+      "range": {
+        "startLine": 2426,
+        "startChar": 0,
+        "endLine": 2427,
+        "endChar": 56
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b8e0d02f_ce8b83dc",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2477,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "Is there a better response here than unspecified error? This should be reserved for server-side issuse (like a http 5XX error).",
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "82d59b04_db7f7d9e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2562,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "groupDCMI",
+      "range": {
+        "startLine": 2562,
+        "startChar": 66,
+        "endLine": 2562,
+        "endChar": 78
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c7cf39f4_9f2b8053",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2563,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "cmdGetDcmiSensorInfo",
+      "range": {
+        "startLine": 2563,
+        "startChar": 43,
+        "endLine": 2563,
+        "endChar": 59
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21ca6500_1b48fb01",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "include/ipmi/api-types.hpp:\nconstexpr Group groupDCMI \u003d 0xDC;",
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9d3fd3bc_ec640421",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "is this needed in multiple files? If not, it is best placed in the file that uses it or there will be multiple copies (one for every cpp file that includes this header) in the binary taking up space.",
+      "range": {
+        "startLine": 175,
+        "startChar": 40,
+        "endLine": 175,
+        "endChar": 53
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "35ca0b1b_cb37736f",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "best to not use auto here. Int types should be explicit or unexpected errors creep up later.",
+      "range": {
+        "startLine": 179,
+        "startChar": 10,
+        "endLine": 179,
+        "endChar": 14
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7f72392b_1f50a267",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "This is getting compared to a uint8_t, so it should also be a uint8_t. auto here will make it an int, which should not be compared to a uint8_t.\n\nAlso, this is only used in a single place and not shared across functions. I would suggest putting it right after you define numInstances in the cpp file.",
+      "range": {
+        "startLine": 180,
+        "startChar": 0,
+        "endLine": 180,
+        "endChar": 30
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "62a4c264_eb39c5aa",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-09-22T16:30:09Z",
+      "side": 1,
+      "message": "include/ipmi/api-types.hpp:\nconstexpr Cmd cmdGetDcmiSensorInfo \u003d 0x07;",
+      "range": {
+        "startLine": 181,
+        "startChar": 15,
+        "endLine": 181,
+        "endChar": 31
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
