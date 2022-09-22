@@ -701,7 +701,7 @@ get_sdr::GetSensorThresholdsResponse
         {
             warnLow *= std::pow(10, info.scale - info.exponentR);
             resp.lowerNonCritical = static_cast<uint8_t>(
-                (warnLow - info.scaledOffset) / info.coefficientM);
+                round((warnLow - info.scaledOffset) / info.coefficientM));
             resp.validMask |= static_cast<uint8_t>(
                 ipmi::sensor::ThresholdMask::NON_CRITICAL_LOW_MASK);
         }
@@ -710,7 +710,7 @@ get_sdr::GetSensorThresholdsResponse
         {
             warnHigh *= std::pow(10, info.scale - info.exponentR);
             resp.upperNonCritical = static_cast<uint8_t>(
-                (warnHigh - info.scaledOffset) / info.coefficientM);
+                round((warnHigh - info.scaledOffset) / info.coefficientM));
             resp.validMask |= static_cast<uint8_t>(
                 ipmi::sensor::ThresholdMask::NON_CRITICAL_HIGH_MASK);
         }
@@ -730,7 +730,7 @@ get_sdr::GetSensorThresholdsResponse
         {
             critLow *= std::pow(10, info.scale - info.exponentR);
             resp.lowerCritical = static_cast<uint8_t>(
-                (critLow - info.scaledOffset) / info.coefficientM);
+                round((critLow - info.scaledOffset) / info.coefficientM));
             resp.validMask |= static_cast<uint8_t>(
                 ipmi::sensor::ThresholdMask::CRITICAL_LOW_MASK);
         }
@@ -739,7 +739,7 @@ get_sdr::GetSensorThresholdsResponse
         {
             critHigh *= std::pow(10, info.scale - info.exponentR);
             resp.upperCritical = static_cast<uint8_t>(
-                (critHigh - info.scaledOffset) / info.coefficientM);
+                round((critHigh - info.scaledOffset) / info.coefficientM));
             resp.validMask |= static_cast<uint8_t>(
                 ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK);
         }
