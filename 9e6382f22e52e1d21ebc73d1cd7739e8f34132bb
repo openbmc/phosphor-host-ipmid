@@ -22,6 +22,30 @@
       },
       "revId": "9e6382f22e52e1d21ebc73d1cd7739e8f34132bb",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "35e231d9_18534fde",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 704,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2022-09-22T16:43:12Z",
+      "side": 1,
+      "message": "As I said in the commit message, sometimes, the static casting from double to integer is incorrect.\nE.g:  static_cast\u003cuint8_t\u003e((double)2.01 * 100) \u003d 200 (I expect that should be 201).\n \nIn this case, I want to round to the nearest integer number.",
+      "parentUuid": "cc657376_57eaadba",
+      "range": {
+        "startLine": 704,
+        "startChar": 16,
+        "endLine": 704,
+        "endChar": 21
+      },
+      "revId": "9e6382f22e52e1d21ebc73d1cd7739e8f34132bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
