@@ -16,6 +16,24 @@
       "message": "this is incomplete; please catch the other entitymanager references.\n\n$ cd phosphor-host-ipmid\n$ git grep -il entitymanager\ndbus-sdr/sdrutils.cpp\ndbus-sdr/storagecommands.cpp\ninclude/dbus-sdr/sdrutils.hpp\nstoragehandler.cpp\n",
       "revId": "836acf57cf1692c850ba2c12388952958ed240c0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "88fbbbad_9c881715",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000682
+      },
+      "writtenOn": "2022-09-23T21:54:52Z",
+      "side": 1,
+      "message": "You are searching the string \"entitymanager\", right? Not all the places where \"entitymanager\" appear need to change. \n\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/5d82f47406aa1b17d55c851677a15e5d3f62f31e/dbus-sdr/sdrutils.cpp\n\nThis is not related to EntityManager ObjectManager interface.\n\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/5d82f47406aa1b17d55c851677a15e5d3f62f31e/include/dbus-sdr/sdrutils.hpp\n\nThis just contains a function whose name has \"entitymanager\" in it.\n\nI double checked I have modified all EntityManager ObjectManager related places in this repo.\n\nPTAL",
+      "parentUuid": "affa197d_09be2b27",
+      "revId": "836acf57cf1692c850ba2c12388952958ed240c0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
