@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "c04f8881_8f537d28",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -20,10 +21,10 @@
         "endChar": 67
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "1414e387_c038acf7",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -44,10 +45,10 @@
         "endChar": 67
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "48e3d6df_16ecacc8",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -67,10 +68,10 @@
         "endChar": 26
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "e1045af5_f560aa34",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -90,10 +91,10 @@
         "endChar": 47
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "e631a1fe_79073d0f",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -114,10 +115,10 @@
         "endChar": 47
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "1bcd4987_d0bc1eef",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -138,10 +139,10 @@
         "endChar": 26
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "a37a47cd_b370c6fe",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -161,10 +162,10 @@
         "endChar": 59
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "249228f3_8c37ad4c",
         "filename": "dbus-sdr/sensorcommands.cpp",
@@ -185,10 +186,10 @@
         "endChar": 59
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "3a7a3e8c_50ddc304",
         "filename": "include/dbus-sdr/sdrutils.hpp",
@@ -208,8 +209,31 @@
         "endChar": 34
       },
       "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d464b2cb_b7f42e6f",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2022-09-23T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a7a3e8c_50ddc304",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 34,
+        "endChar": 34
+      },
+      "revId": "6bdf84d801c1633c3f07b1ee069fb7216b0dec12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }

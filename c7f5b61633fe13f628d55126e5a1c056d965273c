@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c16a4c36_1afd1058",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2022-09-23T18:52:52Z",
+      "side": 1,
+      "message": "Need to use double backslash. Else, compile doesn\u0027t like it.\n```\nerror: unknown escape sequence: \u0027\\]\u0027\n```",
+      "parentUuid": "f7dca23e_fdd36dca",
+      "range": {
+        "startLine": 464,
+        "startChar": 20,
+        "endLine": 464,
+        "endChar": 72
+      },
+      "revId": "c7f5b61633fe13f628d55126e5a1c056d965273c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1ea714b2_ff47b127",
@@ -37,6 +61,30 @@
       "writtenOn": "2022-02-09T21:04:43Z",
       "side": 1,
       "message": "I don\u0027t think search is what we want here. we want match right?\nWe want to match on the whole string, not a substring.",
+      "range": {
+        "startLine": 467,
+        "startChar": 14,
+        "endLine": 467,
+        "endChar": 25
+      },
+      "revId": "c7f5b61633fe13f628d55126e5a1c056d965273c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3fb91166_f8f79921",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2022-09-23T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1ea714b2_ff47b127",
       "range": {
         "startLine": 467,
         "startChar": 14,
@@ -84,6 +132,30 @@
       "side": 1,
       "message": "To add\n\nmatches[2],[3] \u003d EMPTY is the condition where we have something like cdfp0 and so that\u0027s actually the non-indexed case..\n\nIf the match fails then you have a malformed object path at which point you should give up and report an error?",
       "parentUuid": "350340b6_cb5b1f35",
+      "range": {
+        "startLine": 470,
+        "startChar": 0,
+        "endLine": 471,
+        "endChar": 41
+      },
+      "revId": "c7f5b61633fe13f628d55126e5a1c056d965273c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd9f4f0e_10254273",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2022-09-23T18:52:52Z",
+      "side": 1,
+      "message": "I think if not matching it will go to the else block.",
+      "parentUuid": "495fb08d_814e82c9",
       "range": {
         "startLine": 470,
         "startChar": 0,
