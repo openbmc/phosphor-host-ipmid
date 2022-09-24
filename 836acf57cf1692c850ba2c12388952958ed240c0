@@ -52,6 +52,24 @@
       "parentUuid": "88fbbbad_9c881715",
       "revId": "836acf57cf1692c850ba2c12388952958ed240c0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b4f19107_746e9362",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2022-09-24T17:23:21Z",
+      "side": 1,
+      "message": "There are a number of GetAll calls in your regex, that don\u0027t need to change.",
+      "parentUuid": "a626e01f_6bec66c5",
+      "revId": "836acf57cf1692c850ba2c12388952958ed240c0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
