@@ -252,7 +252,8 @@ class Context : public std::enable_shared_from_this<Context>
      *  @param[in] input - Incoming SOL character data.
      */
     void processInboundPayload(uint8_t seqNum, uint8_t ackSeqNum, uint8_t count,
-                               bool status, const std::vector<uint8_t>& input);
+                               bool status, bool isBreak,
+                               const std::vector<uint8_t>& input);
 
     /** @brief Send the outbound SOL payload.
      *

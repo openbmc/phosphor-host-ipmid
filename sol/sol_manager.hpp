@@ -273,7 +273,8 @@ class Manager
      *
      *  @return 0 on success and errno on failure.
      */
-    int writeConsoleSocket(const std::vector<uint8_t>& input) const;
+    int writeConsoleSocket(const std::vector<uint8_t>& input,
+                           bool breakFlag) const;
     void updateSOLParameter(uint8_t channelNum);
 
   private:

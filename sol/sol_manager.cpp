@@ -70,10 +70,19 @@ void Manager::consoleInputHandler()
     dataBuffer.write(buffer);
 }
 
-int Manager::writeConsoleSocket(const std::vector<uint8_t>& input) const
+int Manager::writeConsoleSocket(const std::vector<uint8_t>& input,
+                                bool breakFlag) const
 {
     boost::system::error_code ec;
-    boost::asio::write(*consoleSocket, boost::asio::buffer(input), ec);
+    if (breakFlag)
+    {
+        consoleSocket->send(boost::asio::buffer(input), MSG_OOB, ec);
+    }
+    else
+    {
+        consoleSocket->send(boost::asio::buffer(input), 0, ec);
+    }
+
     return ec.value();
 }
 

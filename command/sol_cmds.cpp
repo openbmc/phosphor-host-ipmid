@@ -39,7 +39,8 @@ std::vector<uint8_t> payloadHandler(const std::vector<uint8_t>& inPayload,
 
         context.processInboundPayload(
             request->packetSeqNum, request->packetAckSeqNum,
-            request->acceptedCharCount, request->inOperation.ack, charData);
+            request->acceptedCharCount, request->inOperation.ack,
+            request->inOperation.generateBreak, charData);
     }
     catch (const std::exception& e)
     {
