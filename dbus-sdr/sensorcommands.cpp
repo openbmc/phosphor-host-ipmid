@@ -296,8 +296,9 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
             .count() > updatePeriod)
     {
         ObjectValueTree managedObjects;
-        boost::system::error_code ec = getManagedObjects(
-            ctx, sensorConnection.c_str(), "/", managedObjects);
+        boost::system::error_code ec =
+            getManagedObjects(ctx, sensorConnection.c_str(),
+                              "/xyz/openbmc_project/sensors", managedObjects);
         if (ec)
         {
             phosphor::logging::log<phosphor::logging::level::ERR>(
