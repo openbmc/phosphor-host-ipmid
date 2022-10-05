@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ebba5b4e_e6b04aab",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-05T00:26:59Z",
+      "side": 1,
+      "message": "Don\u0027t forget to check the return value here",
+      "revId": "8e64e62d5d901fb516a63ba10a9a2b684e1fa5c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db1ef609_5c8b903f",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 852,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-05T00:26:59Z",
+      "side": 1,
+      "message": "make it easy on yourself and make this return std::tuple\u003cstd::vector\u003cuint7_t, uint1_1, uint8_t\u003e, NumInstances\u003e\n\nThen you can just use this result directly below without any post processing.\n\nIt also removes the need for the bit-packed struct ResponseList.",
+      "range": {
+        "startLine": 852,
+        "startChar": 11,
+        "endLine": 852,
+        "endChar": 23
+      },
+      "revId": "8e64e62d5d901fb516a63ba10a9a2b684e1fa5c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c62cd937_69547885",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-05T00:26:59Z",
+      "side": 1,
+      "message": "you can remove this line",
+      "range": {
+        "startLine": 857,
+        "startChar": 0,
+        "endLine": 857,
+        "endChar": 56
+      },
+      "revId": "8e64e62d5d901fb516a63ba10a9a2b684e1fa5c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c8c77476_8b9fecc8",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 932,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-05T00:26:59Z",
+      "side": 1,
+      "message": "To avoid endian issues with packing the temperature data here, use:\nstd::vector\u003cstd::tuple\u003cuint7_t, uint1_t, uint8_t\u003e\u003e",
+      "range": {
+        "startLine": 932,
+        "startChar": 14,
+        "endLine": 932,
+        "endChar": 35
+      },
+      "revId": "8e64e62d5d901fb516a63ba10a9a2b684e1fa5c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "60289927_7f58441b",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 983,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-05T00:26:59Z",
+      "side": 1,
+      "message": "I don\u0027t think this looks right.\n\nRather than doing all this manual bit packing here, let the response packer handle it for you.",
+      "range": {
+        "startLine": 977,
+        "startChar": 1,
+        "endLine": 983,
+        "endChar": 0
+      },
+      "revId": "8e64e62d5d901fb516a63ba10a9a2b684e1fa5c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
