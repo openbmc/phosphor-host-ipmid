@@ -126,6 +126,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "77501813_da9f8df2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000192
+      },
+      "writtenOn": "2022-10-06T22:04:46Z",
+      "side": 1,
+      "message": "`ipmitool -I lanplus -C 17 -N 3 -p 623 -U user -P password -H host channel setaccess \u003cchannel-number\u003e \u003cuser-id\u003e privilege\u003d15`\n\n\nWhat this command actually does per specification is removes access for the user _from_the_specified_channel_.\n\nThe thing is that we\u0027re trying to combine IPMI with the rest of the interfaces and the more I look at it, the more I get the feeling that there is no nice way to do it.\n\nIPMI has no notion of global user privileges. User\u0027s access level is bound to channels in IPMI. Hence, the user may have access to some channels as Administrator and then be deprived of any access via other channels.\n\nOn the other hand, in OpenBMC we have priv-* groups that define what a user can do function-wise via any interface (Redfish, WebUI, shell, whatever).\n\nThose two approaches are difficult to make friends with each other.\n\nWhat I can think of right now is maybe disable the OpenBMC user (created with `priv-user`) until his privilege is set using the Set User Access command, and treat disabled users as \u0027No access\u0027 in IPMI Get User Access command. That would mimic the original behavior from the IPMI\u0027s point of view, yet allow us to get rid of the otherwise useless `priv-noaccess`. On the other hand, that will interfere with IPMI\u0027s state of enabled/disabled user that can be altered via \u0027Set User Password\u0027 command. We will end up with \u0027disable user\u0027 and \u0027set user access no-access\u0027 meaning the same, at least until we implement the per-channel access level setting.\n\nWhat do you all think?",
+      "parentUuid": "46ef74a6_bd4e04c1",
+      "revId": "3d1b47855dfa093efa87a143335cde59e467cb8f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "515ad630_348567fd",
