@@ -39,6 +39,30 @@
       },
       "revId": "d33199e6789ff4e8639828dec7314d979e642b79",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "344a8920_b3e4d214",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-10-06T07:04:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd153831_4e3d3ec4",
+      "range": {
+        "startLine": 374,
+        "startChar": 0,
+        "endLine": 374,
+        "endChar": 37
+      },
+      "revId": "d33199e6789ff4e8639828dec7314d979e642b79",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
