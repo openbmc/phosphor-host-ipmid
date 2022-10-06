@@ -104,7 +104,6 @@ generated_src = []
 
 # Subfolders
 subdir('libipmid')
-subdir('libipmid-host')
 subdir('include')
 subdir('user_channel')
 subdir('scripts')
