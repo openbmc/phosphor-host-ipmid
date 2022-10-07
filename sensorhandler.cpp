@@ -692,10 +692,10 @@ get_sdr::GetSensorThresholdsResponse
                                     warningThreshIntf, warnThresholds);
     if (!ec)
     {
-        double warnLow = std::visit(ipmi::VariantToDoubleVisitor(),
-                                    warnThresholds["WarningLow"]);
-        double warnHigh = std::visit(ipmi::VariantToDoubleVisitor(),
-                                     warnThresholds["WarningHigh"]);
+        double warnLow = ipmi::mappedVariant<double>(warnThresholds,
+            "WarningLow", std::numeric_limits<double>::quiet_NaN());
+        double warnHigh = ipmi::mappedVariant<double>(warnThresholds,
+            "WarningHigh", std::numeric_limits<double>::quiet_NaN());
 
         if (std::isfinite(warnLow))
         {
@@ -721,10 +721,10 @@ get_sdr::GetSensorThresholdsResponse
                                     criticalThreshIntf, critThresholds);
     if (!ec)
     {
-        double critLow = std::visit(ipmi::VariantToDoubleVisitor(),
-                                    critThresholds["CriticalLow"]);
-        double critHigh = std::visit(ipmi::VariantToDoubleVisitor(),
-                                     critThresholds["CriticalHigh"]);
+        double critLow = ipmi::mappedVariant<double>(critThresholds,
+            "CriticalLow", std::numeric_limits<double>::quiet_NaN());
+        double critHigh = ipmi::mappedVariant<double>(critThresholds,
+            "CriticalHigh", std::numeric_limits<double>::quiet_NaN());
 
         if (std::isfinite(critLow))
         {
