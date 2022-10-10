@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fed68b74_26f109e1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-10T21:23:21Z",
+      "side": 1,
+      "message": "This empty library was originally created by William as step one of (?). I think that fizzled out somehow.\n\nI am not opposed to this, but maybe William would like to put forward more steps here? Or has it been too long?\n\ncommit 194375f2676715a0e0697bab63234a4efe39fb96\nAuthor: William A. Kennington III \u003cwak@google.com\u003e\nDate:   Fri Dec 14 02:14:33 2018 -0800\n\n    Create libipmid and libipmid-host\n    \n    This starts a transition to common ipmid libraries that providers can\n    link against. It will allow for a cleaner separation between common\n    ipmid functionality and daemon type specific code. This is needed so we\n    can resolve all of the symbols in the providers at link time instead of\n    discovering bad linkage by building and running a full ipmi daemon.\n    \n    In future commits libraries will be packaged for libipmid and libipmid-host\n    which provide all of the symbols used by the current set of ipmid\n    providers.\n    \n    This is the first step, it just separates and renames the headers.\n    Legacy symlinks are still kept around for compatability. It also adds\n    stub libraries so that external users can start linking as intended.\n    \n    Change-Id: I6bbd7a146362012d26812a7b039d1c4075862cbd\n    Signed-off-by: William A. Kennington III \u003cwak@google.com\u003e\n",
+      "revId": "92c85d2222f17b478ad69206a1b505e0bffe43ad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
