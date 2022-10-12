@@ -843,8 +843,6 @@ auto ipmiAppGetBtCapabilities()
 
 auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
 {
-    static constexpr auto bmcInterface =
-        "xyz.openbmc_project.Inventory.Item.Bmc";
     static constexpr auto uuidInterface = "xyz.openbmc_project.Common.UUID";
     static constexpr auto uuidProperty = "UUID";
 
@@ -853,7 +851,7 @@ auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
     {
         // Get the Inventory object implementing BMC interface
         auto busPtr = getSdBus();
-        auto objectInfo = ipmi::getDbusObject(*busPtr, bmcInterface);
+        auto objectInfo = ipmi::getDbusObject(*busPtr, uuidInterface);
 
         // Read UUID property value from bmcObject
         // UUID is in RFC4122 format Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
