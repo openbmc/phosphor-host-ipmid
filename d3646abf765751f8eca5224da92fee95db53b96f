@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3febef02_6785a3a9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2417,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0917ce97_2228258c",
+      "range": {
+        "startLine": 2417,
+        "startChar": 30,
+        "endLine": 2417,
+        "endChar": 40
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ae97c0a5_04cb4abb",
@@ -37,6 +61,30 @@
       "writtenOn": "2022-09-22T16:30:09Z",
       "side": 1,
       "message": "these might be better as \u0027const auto \u0026\u0027 to avoid a copy.",
+      "range": {
+        "startLine": 2426,
+        "startChar": 0,
+        "endLine": 2427,
+        "endChar": 56
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e5157b3c_05477691",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2427,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ae97c0a5_04cb4abb",
       "range": {
         "startLine": 2426,
         "startChar": 0,
@@ -64,6 +112,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2976b990_83aa81cc",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2477,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8e0d02f_ce8b83dc",
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "82d59b04_db7f7d9e",
@@ -77,6 +143,30 @@
       "writtenOn": "2022-09-22T16:30:09Z",
       "side": 1,
       "message": "groupDCMI",
+      "range": {
+        "startLine": 2562,
+        "startChar": 66,
+        "endLine": 2562,
+        "endChar": 78
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "80a2c60e_ff8f8562",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2562,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82d59b04_db7f7d9e",
       "range": {
         "startLine": 2562,
         "startChar": 66,
@@ -110,6 +200,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "20fc8a36_ad3a4fa0",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2563,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c7cf39f4_9f2b8053",
+      "range": {
+        "startLine": 2563,
+        "startChar": 43,
+        "endLine": 2563,
+        "endChar": 59
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "21ca6500_1b48fb01",
@@ -127,6 +241,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7180e1d_24f07f88",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "21ca6500_1b48fb01",
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9d3fd3bc_ec640421",
@@ -140,6 +272,30 @@
       "writtenOn": "2022-09-22T16:30:09Z",
       "side": 1,
       "message": "is this needed in multiple files? If not, it is best placed in the file that uses it or there will be multiple copies (one for every cpp file that includes this header) in the binary taking up space.",
+      "range": {
+        "startLine": 175,
+        "startChar": 40,
+        "endLine": 175,
+        "endChar": 53
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "830794e2_73e11cc3",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d3fd3bc_ec640421",
       "range": {
         "startLine": 175,
         "startChar": 40,
@@ -173,6 +329,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7beb7e71_12e88eac",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "35ca0b1b_cb37736f",
+      "range": {
+        "startLine": 179,
+        "startChar": 10,
+        "endLine": 179,
+        "endChar": 14
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7f72392b_1f50a267",
@@ -196,6 +376,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "225cd980_52ef0af0",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7f72392b_1f50a267",
+      "range": {
+        "startLine": 180,
+        "startChar": 0,
+        "endLine": 180,
+        "endChar": 30
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "62a4c264_eb39c5aa",
@@ -209,6 +413,30 @@
       "writtenOn": "2022-09-22T16:30:09Z",
       "side": 1,
       "message": "include/ipmi/api-types.hpp:\nconstexpr Cmd cmdGetDcmiSensorInfo \u003d 0x07;",
+      "range": {
+        "startLine": 181,
+        "startChar": 15,
+        "endLine": 181,
+        "endChar": 31
+      },
+      "revId": "d3646abf765751f8eca5224da92fee95db53b96f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f5b9e49c_5b95c72b",
+        "filename": "include/dbus-sdr/sensorcommands.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1001603
+      },
+      "writtenOn": "2022-10-12T05:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62a4c264_eb39c5aa",
       "range": {
         "startLine": 181,
         "startChar": 15,
