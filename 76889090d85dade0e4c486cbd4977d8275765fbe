@@ -49,6 +49,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "b813a0e1_ca487b6d",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-10-17T19:51:49Z",
+      "side": 1,
+      "message": "I am not exactly sure here.",
+      "parentUuid": "81effb8c_da0a9abf",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 23
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "edfc1a0b_24a6cad2",
         "filename": "include/ipmid/types.hpp",
         "patchSetId": 5
@@ -60,6 +84,30 @@
       "writtenOn": "2022-10-17T17:13:26Z",
       "side": 1,
       "message": "I suspect this can be simplified. It is strange to use deference twice, and reference once on the same pointer. \n\n\u0026((*this)[0] \n\u0026(**this)\n(*this)",
+      "range": {
+        "startLine": 300,
+        "startChar": 24,
+        "endLine": 300,
+        "endChar": 37
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3c5b3d74_d6355aee",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-10-17T19:51:49Z",
+      "side": 1,
+      "message": "I am aiming to change minimum code to fix the current issue. Will update the change in a follow up change once this change is resolved. https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/57975\n\nBut I think it should just be `this-\u003edata()`? Pointing to the beginning of the data.",
+      "parentUuid": "edfc1a0b_24a6cad2",
       "range": {
         "startLine": 300,
         "startChar": 24,
