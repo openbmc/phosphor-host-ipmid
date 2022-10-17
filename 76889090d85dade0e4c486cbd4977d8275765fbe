@@ -143,6 +143,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "da6303a5_7eab2d1a",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-17T22:47:15Z",
+      "side": 1,
+      "message": "Also, only one of the dealloc calls will be called anyway. The string class will only call the allocator dealloc function if it used the allocator class to allocate in the first place. For short strings, the allocator/deallocator is not called and only the internal storage is used, which is why the OPENSSL_cleanse is needed in the securestring destructor.",
+      "parentUuid": "b204454a_c3ce9e66",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 23
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "edfc1a0b_24a6cad2",
