@@ -73,6 +73,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "29b489d3_c7f8c86e",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000593
+      },
+      "writtenOn": "2022-10-17T20:19:05Z",
+      "side": 1,
+      "message": "Your child class will deconstructs on line 300, calling OPENSSL_cleanse, then when your parent class deconstructs it will (using the child of std::allocate, SecureAllocator) call OPENSSL_cleanse again in line 280. \nwhich is a use after free/double fee issue. \n\nYou could simply not use the SecureAllocator, and use the stock std::allocator",
+      "parentUuid": "b813a0e1_ca487b6d",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 23
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "edfc1a0b_24a6cad2",
         "filename": "include/ipmid/types.hpp",
         "patchSetId": 5
@@ -108,6 +132,30 @@
       "side": 1,
       "message": "I am aiming to change minimum code to fix the current issue. Will update the change in a follow up change once this change is resolved. https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/57975\n\nBut I think it should just be `this-\u003edata()`? Pointing to the beginning of the data.",
       "parentUuid": "edfc1a0b_24a6cad2",
+      "range": {
+        "startLine": 300,
+        "startChar": 24,
+        "endLine": 300,
+        "endChar": 37
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7c644d85_e64976df",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000593
+      },
+      "writtenOn": "2022-10-17T20:19:05Z",
+      "side": 1,
+      "message": "checks out, I did not see this was the original way. \n\n(resolved)",
+      "parentUuid": "3c5b3d74_d6355aee",
       "range": {
         "startLine": 300,
         "startChar": 24,
