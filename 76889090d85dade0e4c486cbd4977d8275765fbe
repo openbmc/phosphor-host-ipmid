@@ -95,6 +95,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "450818a6_f17f54d8",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-10-17T22:41:50Z",
+      "side": 1,
+      "message": "OPENSSL_cleanse does not dealloc, only forces memset to zero",
+      "parentUuid": "29b489d3_c7f8c86e",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 23
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "edfc1a0b_24a6cad2",
