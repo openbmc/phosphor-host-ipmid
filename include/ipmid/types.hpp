@@ -281,24 +281,32 @@ class SecureAllocator : public std::allocator<T>
         return std::allocator<T>::deallocate(p, n);
     }
 };
-using SecureString =
-    std::basic_string<char, std::char_traits<char>, SecureAllocator<char>>;
+// using SecureString =
+//     std::basic_string<char, std::char_traits<char>, SecureAllocator<char>>;
 
-using SecureBuffer = std::vector<uint8_t, SecureAllocator<uint8_t>>;
+class SecureString : public std::basic_string<char, std::char_traits<char>>
+{
+  public:
+    using std::basic_string<char, std::char_traits<char>>::basic_string;
+
+    SecureString(const std::string& str) :
+        std::basic_string<char, std::char_traits<char>>(str){};
+
+    ~SecureString()
+    {
+        OPENSSL_cleanse(&((*this)[0]), this->size());
+    }
+};
+
+class SecureBuffer : public std::vector<uint8_t, SecureAllocator<uint8_t>>
+{
+  public:
+    using std::vector<uint8_t, SecureAllocator<uint8_t>>::vector;
+
+    ~SecureBuffer()
+    {
+        OPENSSL_cleanse(&((*this)[0]), this->size());
+    }
+};
 
 } // namespace ipmi
-
-namespace std
-{
-template <>
-inline ipmi::SecureString::~SecureString()
-{
-    OPENSSL_cleanse(&((*this)[0]), this->size());
-}
-
-template <>
-inline ipmi::SecureBuffer::~SecureBuffer()
-{
-    OPENSSL_cleanse(&((*this)[0]), this->size());
-}
-} // namespace std
