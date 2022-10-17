@@ -167,6 +167,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "01f9943d_5f07b544",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2022-10-17T22:58:21Z",
+      "side": 1,
+      "message": "ok, sounds good. thanks for the info.",
+      "parentUuid": "da6303a5_7eab2d1a",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 23
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "edfc1a0b_24a6cad2",
