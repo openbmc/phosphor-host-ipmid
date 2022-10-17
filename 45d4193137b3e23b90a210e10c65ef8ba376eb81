@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b864a8a4_c4f34494",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000593
+      },
+      "writtenOn": "2022-10-17T20:24:06Z",
+      "side": 1,
+      "message": "This looks good to me. \n\nGetting the raw pointer from -\u003edata() is probably better then getting the memory of the object using \"this\". ",
+      "revId": "45d4193137b3e23b90a210e10c65ef8ba376eb81",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
