@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d8417802_0f816768",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000593
+      },
+      "writtenOn": "2022-10-17T17:13:26Z",
+      "side": 1,
+      "message": "nit:\n(deprecated in C++17)(removed in C++20)",
+      "range": {
+        "startLine": 273,
+        "startChar": 11,
+        "endLine": 273,
+        "endChar": 17
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "81effb8c_da0a9abf",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000593
+      },
+      "writtenOn": "2022-10-17T17:13:26Z",
+      "side": 1,
+      "message": "won\u0027t you double de allocate?, because you are added another call to OPENSSL_cleanse, below. (this is the second time you would dealloc, so the error would be here)",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 23
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "edfc1a0b_24a6cad2",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000593
+      },
+      "writtenOn": "2022-10-17T17:13:26Z",
+      "side": 1,
+      "message": "I suspect this can be simplified. It is strange to use deference twice, and reference once on the same pointer. \n\n\u0026((*this)[0] \n\u0026(**this)\n(*this)",
+      "range": {
+        "startLine": 300,
+        "startChar": 24,
+        "endLine": 300,
+        "endChar": 37
+      },
+      "revId": "76889090d85dade0e4c486cbd4977d8275765fbe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
