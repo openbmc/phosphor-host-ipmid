@@ -269,12 +269,6 @@ template <typename T>
 class SecureAllocator : public std::allocator<T>
 {
   public:
-    template <typename U>
-    struct rebind
-    {
-        typedef SecureAllocator<U> other;
-    };
-
     void deallocate(T* p, size_t n)
     {
         OPENSSL_cleanse(p, n);
@@ -297,7 +291,7 @@ class SecureString : public SecureStringBase
 
     ~SecureString()
     {
-        OPENSSL_cleanse(&((*this)[0]), this->size());
+        OPENSSL_cleanse(this->data(), this->size());
     }
 };
 
@@ -316,7 +310,7 @@ class SecureBuffer : public SecureBufferBase
 
     ~SecureBuffer()
     {
-        OPENSSL_cleanse(&((*this)[0]), this->size());
+        OPENSSL_cleanse(this->data(), this->size());
     }
 };
 } // namespace ipmi
