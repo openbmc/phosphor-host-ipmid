@@ -52,6 +52,14 @@ add_project_arguments(
   ]),
   language : 'cpp')
 
+if not get_option('get-dbus-active-software').disabled()
+  add_project_arguments(
+    cpp.get_supported_arguments([
+      '-DGET_DBUS_ACTIVE_SOFTWARE',
+    ]),
+    language : 'cpp')
+endif
+
 feature_map = {
   'boot-flag-safe-mode-support': '-DENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT',
   'i2c-whitelist-check'        : '-DENABLE_I2C_WHITELIST_CHECK',

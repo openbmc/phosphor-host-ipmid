@@ -64,3 +64,6 @@ option('sel-logger-clears-sel', type: 'feature', value: 'disabled', description:
 option('sensor-yaml-gen', type: 'string', value: 'sensor-example.yaml')
 option('invsensor-yaml-gen', type: 'string', value: 'inventory-sensor-example.yaml')
 option('fru-yaml-gen', type: 'string', value: 'fru-read-example.yaml')
+
+# Software Version
+option('get-dbus-active-software', type: 'feature', description: 'Use the  getActiveSoftwareVersionInfo for the BMC version and dev_id.json as backup')
