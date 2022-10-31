@@ -629,6 +629,26 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
     return ipmi::responseSuccess();
 }
 
+/** @brief implements the get SEL timezone command
+ *  @returns IPMI completion code plus response data
+ *   -current timezone
+ */
+ipmi::RspType<int16_t> ipmiStorageGetSelTimeUtcOffset()
+{
+    time_t timep;
+    struct tm* gmTime;
+    struct tm* localTime;
+
+    time(&timep);
+    localTime = localtime(&timep);
+    auto validLocalTime = mktime(localTime);
+    gmTime = gmtime(&timep);
+    auto validGmTime = mktime(gmTime);
+    auto timeEquation = (validLocalTime - validGmTime) / 60;
+
+    return ipmi::responseSuccess(timeEquation);
+}
+
 /** @brief implements the reserve SEL command
  *  @returns IPMI completion code plus response data
  *   - SEL reservation ID.
@@ -877,6 +897,12 @@ void register_netfn_storage_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdSetSelTime,
                           ipmi::Privilege::Operator, ipmiStorageSetSelTime);
+
+    // <Get SEL Timezone>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdGetSelTimeUtcOffset,
+                          ipmi::Privilege::User,
+                          ipmiStorageGetSelTimeUtcOffset);
 
     // <Get SEL Entry>
     ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
