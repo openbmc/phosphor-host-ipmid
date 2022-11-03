@@ -216,7 +216,7 @@ std::time_t timeStringToRaw(const std::string& input)
         }
     }
 
-    return std::mktime(&time);
+    return timegm(&time);
 }
 
 /**
