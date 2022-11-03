@@ -209,13 +209,14 @@ std::time_t timeStringToRaw(const std::string& input)
     {
         std::istringstream timeStream(input);
         timeStream >> std::get_time(&time, pattern.c_str());
+
         if (!timeStream.fail())
         {
             break;
         }
     }
 
-    return std::mktime(&time);
+    return timegm(&time);
 }
 
 /**
