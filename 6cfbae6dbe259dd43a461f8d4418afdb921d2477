@@ -16,6 +16,24 @@
       "message": "I guess the same comment from William applies from https://gerrit.openbmc.org/c/openbmc/ipmi-fru-parser/+/58446/",
       "revId": "6cfbae6dbe259dd43a461f8d4418afdb921d2477",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ad74d9a_21b03b10",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2022-11-03T21:32:51Z",
+      "side": 1,
+      "message": "It\u0027s needed in this case because the `tm` value is dynamic based on DBus.",
+      "parentUuid": "41b78584_85b9cde7",
+      "revId": "6cfbae6dbe259dd43a461f8d4418afdb921d2477",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
