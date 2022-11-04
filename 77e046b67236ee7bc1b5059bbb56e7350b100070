@@ -16,6 +16,29 @@
       "message": "This MR can fix compilation error on Mt.Jade and Mt.Mitchell in host-ipmid which have dynamic-sensor enabled",
       "revId": "77e046b67236ee7bc1b5059bbb56e7350b100070",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5665a1c4_f3dc226a",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2421,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-11-04T17:12:20Z",
+      "side": 1,
+      "message": "prefer c++ form:\n\n[[maybe_unused]] uint8_t instanceStart",
+      "range": {
+        "startLine": 2421,
+        "startChar": 18,
+        "endLine": 2421,
+        "endChar": 63
+      },
+      "revId": "77e046b67236ee7bc1b5059bbb56e7350b100070",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
