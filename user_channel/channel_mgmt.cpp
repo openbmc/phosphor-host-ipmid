@@ -1373,6 +1373,7 @@ int ChannelConfig::syncNetworkChannelConfig()
         if (getChannelSessionSupport(chNum) != EChannelSessSupported::none)
         {
             std::string intfPrivStr;
+            uint8_t intfPriv = 0;
             try
             {
                 std::string networkIntfObj =
@@ -1389,6 +1390,8 @@ int ChannelConfig::syncNetworkChannelConfig()
                     continue;
                 }
                 intfPrivStr = std::get<std::string>(variant);
+                intfPriv =
+                    static_cast<uint8_t>(convertToPrivLimitIndex(intfPrivStr));
             }
             catch (const std::bad_variant_access& e)
             {
@@ -1402,9 +1405,12 @@ int ChannelConfig::syncNetworkChannelConfig()
                     "exception: Network interface does not exist");
                 continue;
             }
+            catch (const std::invalid_argument& e)
+            {
+                log<level::DEBUG>("exception: Invalid privilege");
+                continue;
+            }
 
-            uint8_t intfPriv =
-                static_cast<uint8_t>(convertToPrivLimitIndex(intfPrivStr));
             if (channelData[chNum].chAccess.chNonVolatileData.privLimit !=
                 intfPriv)
             {
