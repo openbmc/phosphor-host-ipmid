@@ -2417,7 +2417,8 @@ ipmi::RspType<uint8_t,              // No of instances for requested id
                                     // IDs
               >
     getSensorInfo(ipmi::Context::ptr ctx, uint8_t sensorType, uint8_t entityId,
-                  uint8_t entityInstance, uint8_t instanceStart)
+                  uint8_t entityInstance,
+                  [[maybe_unused]] uint8_t instanceStart)
 {
     auto match = ipmi::dcmi::validEntityId.find(entityId);
     if (match == ipmi::dcmi::validEntityId.end())
@@ -2443,6 +2444,7 @@ ipmi::RspType<uint8_t,              // No of instances for requested id
     std::vector<uint16_t> sensorRec{};
     uint8_t numInstances = 0;
 
+    auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
     for (const auto& sensor : sensorTree)
     {
         auto sensorTypeValue = getSensorTypeFromPath(sensor.first);
@@ -2464,9 +2466,10 @@ ipmi::RspType<uint8_t,              // No of instances for requested id
         }
         uint8_t entityIdValue = 0;
         uint8_t entityInstanceValue = 0;
-
-        updateIpmiFromAssociation(sensor.first, sensorMap, entityIdValue,
-                                  entityInstanceValue);
+        updateIpmiFromAssociation(
+            sensor.first,
+            ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
+            sensorMap, entityIdValue, entityInstanceValue);
         if (!entityInstance)
         {
             if (entityIdValue == match->first || entityIdValue == match->second)

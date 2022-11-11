@@ -260,7 +260,7 @@ executable(
 # Dynamic Sensor Stack
 subdir('dbus-sdr')
 
-if not get_option('dynamic-sensors').disabled()
+if not get_option('dynamic-sensors').disabled() or not get_option('tests').disabled()
   library(
     'dynamiccmds',
     dbus_sdr_src,
