@@ -112,11 +112,11 @@ constexpr static const char* chassisTypeMainServer = "17";
 constexpr static const uint8_t deassertionEvent = 0x80;
 
 static std::vector<uint8_t> fruCache;
-static uint8_t cacheBus = 0xFF;
+static uint16_t cacheBus = 0xFF;
 static uint8_t cacheAddr = 0XFF;
 static uint8_t lastDevId = 0xFF;
 
-static uint8_t writeBus = 0xFF;
+static uint16_t writeBus = 0xFF;
 static uint8_t writeAddr = 0XFF;
 
 std::unique_ptr<phosphor::Timer> writeTimer = nullptr;
