@@ -16,6 +16,23 @@
       "message": "This will required configuration change in the sensors.",
       "revId": "2eb04f1aaa9d5a64e0cce97eafabcff98107607c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "401cb3db_669203c2",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2022-11-16T05:25:05Z",
+      "side": 1,
+      "message": "Is this block of code, at lines 456-487, different from lines 258-289? If there is no difference, please move this block to a separate function, so it can be called from both places, to avoid code duplication.",
+      "revId": "2eb04f1aaa9d5a64e0cce97eafabcff98107607c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
