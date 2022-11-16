@@ -182,6 +182,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "3b8c589f_8913d4db",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000192
+      },
+      "writtenOn": "2022-11-16T17:48:25Z",
+      "side": 1,
+      "message": "OK. I still think this change is going to add some troubles in certain scenarios, but let it be for now. Let\u0027s deal with those troubles separately when they arise.",
+      "parentUuid": "0f0c2f85_bc6b8736",
+      "revId": "3d1b47855dfa093efa87a143335cde59e467cb8f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "515ad630_348567fd",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 1
