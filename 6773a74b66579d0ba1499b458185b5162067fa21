@@ -16,6 +16,23 @@
       "message": "Done",
       "revId": "6773a74b66579d0ba1499b458185b5162067fa21",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c49aa71f_ad390eb7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2022-11-16T04:12:46Z",
+      "side": 1,
+      "message": "https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/58647\n\nSimilar changes already commited.",
+      "revId": "6773a74b66579d0ba1499b458185b5162067fa21",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
