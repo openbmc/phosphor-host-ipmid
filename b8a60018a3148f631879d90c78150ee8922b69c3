@@ -22,6 +22,30 @@
       },
       "revId": "b8a60018a3148f631879d90c78150ee8922b69c3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "25d15049_9a310904",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1001223
+      },
+      "writtenOn": "2022-11-17T10:42:51Z",
+      "side": 1,
+      "message": "Using invalidBus will not be appropriate here as\n\ncacheBus used to get Rawfru\nstd::vector\u003cuint8_t\u003e fru \u003d\n        ctx-\u003ebus-\u003eyield_method_call\u003cstd::vector\u003cuint8_t\u003e\u003e(\n            ctx-\u003eyield, ec, fruDeviceServiceName,\n            \"/xyz/openbmc_project/FruDevice\",\n            \"xyz.openbmc_project.FruDeviceManager\", \"GetRawFru\", cacheBus,\n            cacheAddr);\n\nwriteBus used for \nsdbusplus::message_t writeFru \u003d dbus-\u003enew_method_call(\n        fruDeviceServiceName, \"/xyz/openbmc_project/FruDevice\",\n        \"xyz.openbmc_project.FruDeviceManager\", \"WriteFru\");\n    writeFru.append(writeBus, writeAddr, fru);\n\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/dbus-sdr/storagecommands.cpp#L513\n\nUpdated my changes with init value as 0xffff",
+      "parentUuid": "a4ca053e_49f322c6",
+      "range": {
+        "startLine": 115,
+        "startChar": 27,
+        "endLine": 115,
+        "endChar": 31
+      },
+      "revId": "b8a60018a3148f631879d90c78150ee8922b69c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
