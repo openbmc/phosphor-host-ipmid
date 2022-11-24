@@ -19,6 +19,7 @@
 #include <ipmid/utils.hpp>
 #include <map>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message/types.hpp>
@@ -967,53 +968,78 @@ std::optional<uint2_t> getPowerRestorePolicy()
     return std::make_optional(restorePolicy);
 }
 
+std::optional<bool> legacyGetPowerStatus(const ipmi::Context::ptr& ctx)
+{
+
+    // FIXME: some legacy modules use the older path; try that next
+    constexpr const char* legacyPwrCtrlObj = "/org/openbmc/control/power0";
+    constexpr const char* legacyPwrCtrlIntf = "org.openbmc.control.Power";
+
+    std::string service{};
+    boost::system::error_code ec;
+
+    ec = ipmi::getService(ctx, legacyPwrCtrlIntf, legacyPwrCtrlObj, service);
+    if (ec)
+    {
+        lg2::error("Failed to get legacy Power service name, {ERROR}", "ERROR",
+                   ec.message());
+        return std::nullopt;
+    }
+
+    int powerState{};
+    ipmi::getDbusProperty(ctx, service, legacyPwrCtrlObj, legacyPwrCtrlIntf,
+                          "pgood", powerState);
+
+    if (ec)
+    {
+        lg2::error("Failed to fetch pgood property, {ERROR}", "ERROR",
+                   ec.message());
+        return std::nullopt;
+    }
+
+    bool powerGood = static_cast<bool>(powerState);
+
+    return std::make_optional(powerGood);
+}
+
 /*
  * getPowerStatus
  * helper function for Get Chassis Status Command
  * return - optional value for pgood (no value on error)
  */
-std::optional<bool> getPowerStatus()
+std::optional<bool> getPowerStatus(const ipmi::Context::ptr& ctx)
 {
     bool powerGood = false;
-    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
-    try
-    {
-        constexpr const char* chassisStatePath =
-            "/xyz/openbmc_project/state/chassis0";
-        constexpr const char* chassisStateIntf =
-            "xyz.openbmc_project.State.Chassis";
-        auto service =
-            ipmi::getService(*busp, chassisStateIntf, chassisStatePath);
 
-        ipmi::Value powerState =
-            ipmi::getDbusProperty(*busp, service, chassisStatePath,
-                                  chassisStateIntf, "CurrentPowerState");
-        powerGood = std::get<std::string>(powerState) ==
-                    "xyz.openbmc_project.State.Chassis.PowerState.On";
-    }
-    catch (const std::exception& e)
-    {
-        try
-        {
-            // FIXME: some legacy modules use the older path; try that next
-            constexpr const char* legacyPwrCtrlObj =
-                "/org/openbmc/control/power0";
-            constexpr const char* legacyPwrCtrlIntf =
-                "org.openbmc.control.Power";
-            auto service =
-                ipmi::getService(*busp, legacyPwrCtrlIntf, legacyPwrCtrlObj);
+    constexpr const char* chassisStatePath =
+        "/xyz/openbmc_project/state/chassis0";
+    constexpr const char* chassisStateIntf =
+        "xyz.openbmc_project.State.Chassis";
 
-            ipmi::Value variant = ipmi::getDbusProperty(
-                *busp, service, legacyPwrCtrlObj, legacyPwrCtrlIntf, "pgood");
-            powerGood = static_cast<bool>(std::get<int>(variant));
-        }
-        catch (const std::exception& e)
-        {
-            log<level::ERR>("Failed to fetch pgood property",
-                            entry("ERROR=%s", e.what()));
-            return std::nullopt;
-        }
+    std::string service{};
+    boost::system::error_code ec;
+
+    ec = ipmi::getService(ctx, chassisStateIntf, chassisStatePath, service);
+    if (ec)
+    {
+        lg2::error("Failed to get Power service name, Try legacy, {ERROR}",
+                   "ERROR", ec.message());
+        return legacyGetPowerStatus(ctx);
     }
+
+    std::string powerState{};
+    ipmi::getDbusProperty(ctx, service, chassisStatePath, chassisStateIntf,
+                          "CurrentPowerState", powerState);
+
+    if (ec)
+    {
+        lg2::error("Failed to fetch powerState property, {ERROR}", "ERROR",
+                   ec.message());
+        return std::nullopt;
+    }
+
+    powerGood = powerState == "xyz.openbmc_project.State.Chassis.PowerState.On";
+
     return std::make_optional(powerGood);
 }
 
@@ -1130,12 +1156,13 @@ ipmi::RspType<bool,    // Power is on
               bool, // Diagnostic Interrupt button disable allowed
               bool  // Standby (sleep) button disable allowed
               >
-    ipmiGetChassisStatus()
+    ipmiGetChassisStatus(const ipmi::Context::ptr& ctx)
 {
     using namespace chassis::internal;
     std::optional<uint2_t> restorePolicy =
         power_policy::getPowerRestorePolicy();
-    std::optional<bool> powerGood = power_policy::getPowerStatus();
+    std::optional<bool> powerGood = power_policy::getPowerStatus(ctx);
+
     if (!restorePolicy || !powerGood)
     {
         return ipmi::responseUnspecifiedError();
