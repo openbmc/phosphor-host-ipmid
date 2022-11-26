@@ -37,7 +37,7 @@ class WhitelistFilter
     void postInit();
     void cacheRestrictedMode(const std::vector<std::string>& devices);
     void handleRestrictedModeChange(
-        sdbusplus::message::message& m,
+        sdbusplus::message_t& m,
         const std::map<std::string, size_t>& deviceList);
     ipmi::Cc filterMessage(ipmi::message::Request::ptr request);
 
