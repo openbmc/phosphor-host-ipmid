@@ -157,9 +157,9 @@ bool writeFru(const std::vector<uint8_t>& fru)
     return true;
 }
 
-bool writeFruCache()
+void writeFruCache()
 {
-    return writeFru(fruCache);
+    writeFru(fruCache);
 }
 
 void createTimers()
