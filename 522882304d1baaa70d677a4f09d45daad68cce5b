@@ -33,6 +33,24 @@
       "message": "Have you test ipmitool session info all after ipmitool sol activate?",
       "revId": "522882304d1baaa70d677a4f09d45daad68cce5b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f9d6dc58_acace6a2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2022-11-30T14:57:07Z",
+      "side": 1,
+      "message": "I did perform the \"Tested\" steps from the commit message. I was unable to determine if the issue the commit was supposed to fix reappeared. Neither the fail, or success, case was was described in the commit message sufficiently to know.\n\nI tested \u0027ipmitool sol activate\u0027 and the session info displayed the new ipmi session created by \u0027sol activate\u0027. I also added \u0027ipmitool shell\u0027 sessions, and each increased the session info list by one. As each was terminated the shell info list decreased.\n\nI also reviewed \u0027ipmitool raw 6 0x3d 0\u0027 commands as sol/shell items came and went. The count of active sessions matched for each LAN session created/destroyed.",
+      "parentUuid": "7b9d4240_4ea52c22",
+      "revId": "522882304d1baaa70d677a4f09d45daad68cce5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
