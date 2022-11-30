@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "270df3e4_9f633fe9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-11-30T09:32:00Z",
+      "side": 1,
+      "message": "Hi Anton,\n\nWe need to revert this commit and need your help to review it.\nAs discussed with Patrick on Discord, thus we mail to you about it before.\nCould you kindly help us to review it? Thank you.\n\nSincerely,\nTim",
+      "revId": "37b56dec8cf055f9d93920e8206abe401b288d67",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
