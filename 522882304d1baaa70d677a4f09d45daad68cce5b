@@ -69,6 +69,24 @@
       "parentUuid": "f9d6dc58_acace6a2",
       "revId": "522882304d1baaa70d677a4f09d45daad68cce5b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d6d8571b_89b61ba5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2022-12-01T14:43:09Z",
+      "side": 1,
+      "message": "Brian,\nWill you explicitly describe what behavior you consider to be incorrect?\nI do not understand what issue you were trying to solve.\nI also do not understand which example has your \u0027break;\u0027 exit in place.\n\nYour commit was causing an issue with the Get Session Info Command (App 0x3d).\nIPMI response byte 4 has to return the count of active sessions on the channel.\nEach \u0027SOL\u0027, \u0027Shell\u0027, or long running IPMI command (get sensors) invocation on the channel must increment the count reported in Byte 4.\n\nThe \u0027break;\u0027 entry causes the loop over the session entries on D-Bus to be short-circuited on the first match, causing Byte 4 to always report 1. This is incorrect behavior.\n\nPlease be more specific in describing the issue this commit was designed to resolve.",
+      "parentUuid": "aea731dd_d7c954a8",
+      "revId": "522882304d1baaa70d677a4f09d45daad68cce5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
