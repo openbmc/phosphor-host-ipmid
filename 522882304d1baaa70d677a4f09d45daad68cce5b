@@ -51,6 +51,24 @@
       "parentUuid": "7b9d4240_4ea52c22",
       "revId": "522882304d1baaa70d677a4f09d45daad68cce5b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aea731dd_d7c954a8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2022-12-01T09:47:39Z",
+      "side": 1,
+      "message": "here are my test result:\n  without this revert patch:\nbrian@brian-VirtualBox:~$ ipmitool -I lanplus -H 192.168.56.199 -C 17 -U root -P 0penBmc0 session info all\nsession handle                : 1\nslot count                    : 60\nactive sessions               : 1\nuser id                       : 1\nprivilege level               : ADMINISTRATOR\nsession type                  : IPMIv2/RMCP+\nchannel number                : 0x01\nconsole ip                    : 192.168.56.105\nconsole mac                   : 00:00:00:00:00:00\nconsole port                  : 49067\n\nsession handle                : 2\nslot count                    : 60\nactive sessions               : 2\nuser id                       : 1\nprivilege level               : ADMINISTRATOR\nsession type                  : IPMIv2/RMCP+\nchannel number                : 0x01\nconsole ip                    : 192.168.56.105\nconsole mac                   : 00:00:00:00:00:00\nconsole port                  : 56341\n\n  with this revert patch:\nbrian@brian-VirtualBox:~$ ipmitool -I lanplus -H 192.168.56.199 -C 17 -U root -P 0penBmc0 session info all\nsession handle                : 1\nslot count                    : 60\nactive sessions               : 2\nuser id                       : 1\nprivilege level               : ADMINISTRATOR\nsession type                  : IPMIv2/RMCP+\nchannel number                : 0x01\nconsole ip                    : 192.168.56.105\nconsole mac                   : 00:00:00:00:00:00\nconsole port                  : 60575\n\nsession handle                : 1\nslot count                    : 60\nactive sessions               : 2\nuser id                       : 1\nprivilege level               : ADMINISTRATOR\nsession type                  : IPMIv2/RMCP+\nchannel number                : 0x01\nconsole ip                    : 192.168.56.105\nconsole mac                   : 00:00:00:00:00:00\nconsole port                  : 38433\n\nEcho result seems exist issue.\nI think provide a good patch to fix them is better than leave the known issue again.",
+      "parentUuid": "f9d6dc58_acace6a2",
+      "revId": "522882304d1baaa70d677a4f09d45daad68cce5b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
