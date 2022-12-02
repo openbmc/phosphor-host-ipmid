@@ -1226,6 +1226,7 @@ ipmi::RspType<uint8_t, // session handle,
     uint8_t totalSessionCount = getTotalSessionCount();
     uint8_t activeSessionCount = 0;
     uint8_t sessionHandle = session::defaultSessionHandle;
+    uint8_t activeSessionHandle = 0;
     std::optional<SessionDetails> maybeDetails;
     uint8_t index = 0;
     for (auto& objectTreeItr : objectTree)
@@ -1261,28 +1262,26 @@ ipmi::RspType<uint8_t, // session handle,
             activeSessionCount++;
         }
 
-        if (index != sessionIndex && reqSessionId != sessionId &&
-            reqSessionHandle != sessionHandle)
+        if (index == sessionIndex || reqSessionId == sessionId ||
+            reqSessionHandle == sessionHandle)
         {
-            continue;
-        }
+            SessionDetails details{};
+            completionCode = getSessionDetails(ctx, service, objectPath,
+                                               sessionHandle, state, details);
 
-        SessionDetails details{};
-        completionCode = getSessionDetails(ctx, service, objectPath,
-                                           sessionHandle, state, details);
-
-        if (completionCode)
-        {
-            return ipmi::response(completionCode);
+            if (completionCode)
+            {
+                return ipmi::response(completionCode);
+            }
+            activeSessionHandle = sessionHandle;
+            maybeDetails = std::move(details);
         }
-        maybeDetails = std::move(details);
-        break;
     }
 
     if (state == static_cast<uint8_t>(session::State::active) ||
         state == static_cast<uint8_t>(session::State::tearDownInProgress))
     {
-        return ipmi::responseSuccess(sessionHandle, totalSessionCount,
+        return ipmi::responseSuccess(activeSessionHandle, totalSessionCount,
                                      activeSessionCount, maybeDetails);
     }
 
