@@ -16,6 +16,23 @@
       "message": "Hi Anton,\n\nWe need to revert this commit and need your help to review it.\nAs discussed with Patrick on Discord, thus we mail to you about it before.\nCould you kindly help us to review it? Thank you.\n\nSincerely,\nTim",
       "revId": "37b56dec8cf055f9d93920e8206abe401b288d67",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "accd71df_ec07dcbe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000294
+      },
+      "writtenOn": "2022-12-02T01:27:23Z",
+      "side": 1,
+      "message": "Dear All,\n\nCould someone help us to review this commit? We meet set password failed on 64bit.\nThus, we need your help to revert this commit and merge another commit to fix it.\nhttps://gerrit.openbmc.org/c/openbmc/pam-ipmi/+/58579\n\nIn our test after revert this commit and check in above commit in pam-ipmi,\nthen set password successful on 64bit. Below is test result:\n\nroot@evb-npcm845:~# ipmitool user set password 1 0penBmc0\nSet User Password command successful (user 1)\n\nBest regards,\nTim",
+      "revId": "37b56dec8cf055f9d93920e8206abe401b288d67",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
