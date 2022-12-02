@@ -16,6 +16,23 @@
       "message": "Similar change to intel-ipmi-oem: https://gerrit.openbmc.org/c/openbmc/intel-ipmi-oem/+/56626",
       "revId": "b439697f1e804d2f3f99f0dc4942f3c4817463ee",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4015be39_c04d1e98",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000936
+      },
+      "writtenOn": "2022-12-02T08:10:53Z",
+      "side": 1,
+      "message": "Dear maintainers, any update on this one please?",
+      "revId": "b439697f1e804d2f3f99f0dc4942f3c4817463ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
