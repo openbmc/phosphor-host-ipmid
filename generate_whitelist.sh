@@ -1,9 +1,9 @@
-#/bin/sh
+#!/bin/sh
 
 # Ensure some files have been passed.
-if [ "x$*" == "x" ]; then
+if [ -z "$*" ]; then
     echo "Usage: $0 [whitelist_files+]" >&2
-    exit -1
+    exit 1
 fi
 
 cat << EOF
@@ -19,7 +19,7 @@ EOF
 # Sort the list [numerically].
 # Remove any duplicates.
 # Turn "a:b //<NetFn>:<Command>" -> "{ a, b }, //<NetFn>:<Command>"
-cat $* | sed "s/#.*//" | sed '/^$/d' | sort -n | uniq | sed "s/^/    { /" | \
+sed "s/#.*//" "$*" | sed '/^$/d' | sort -n | uniq | sed "s/^/    { /" | \
     sed "s/\:\(....\)\(.*\)/ , \1 }, \2/"
 
 cat << EOF
