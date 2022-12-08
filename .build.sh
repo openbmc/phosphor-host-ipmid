@@ -17,4 +17,4 @@ docker build -t temp - <<< "${Dockerfile}"
 gcc --version
 
 docker run --cap-add=sys_admin --net=host --rm=true --user="${USER}" \
- -w "${PWD}" -v "${HOME}":"${HOME}" -t temp make
+    -w "${PWD}" -v "${HOME}":"${HOME}" -t temp make
