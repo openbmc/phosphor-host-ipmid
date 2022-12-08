@@ -1,7 +1,7 @@
 # Contributing Guidelines
 
 This document attempts to outline some basic rules to follow when contributing
-to OpenBMC's IPMI stack. It does *not* outline coding style; we follow the
+to OpenBMC's IPMI stack. It does _not_ outline coding style; we follow the
 [OpenBMC C++ style guide](https://github.com/openbmc/docs/blob/master/cpp-style-and-conventions)
 for that.
 
@@ -9,10 +9,11 @@ for that.
 
 A good commit does exactly one thing. We prefer many small, atomic commits to
 one large commit which makes many functional changes.
- - Too large: "convert foo to new API; also fix CVE 1234 in bar"
- - Too small: "move abc.h to top of include list" and "move xyz.h to bottom of
-   include list"
- - Just right: "convert foo to new API" and "convert foo from tab to space"
+
+- Too large: "convert foo to new API; also fix CVE 1234 in bar"
+- Too small: "move abc.h to top of include list" and "move xyz.h to bottom of
+  include list"
+- Just right: "convert foo to new API" and "convert foo from tab to space"
 
 Often, creating small commits this way results in a number of commits which are
 dependent on prior commits; Gerrit handles this situation well, so feel free to
@@ -50,19 +51,19 @@ for help writing tests, as well as best practices.
 
 Your commit message should explain:
 
- - Concisely, *what* change are you making? e.g. "docs: convert from US to UK
-   spelling" This first line of your commit message is the subject line.
- - Comprehensively, *why* are you making that change? In some cases, like a
-   small refactor, the why is fairly obvious. But in cases like the inclusion of
-   a new feature, you should explain why the feature is needed.
- - Concisely, *how* did you test? This comes in the form of a "Tested:" footer
-   in your commit message and is required for all code changes in the IPMI
-   stack. It typically consists of copy-pasted ipmitool requests and responses.
-   When possible, use the high-level ipmitool commands (e.g. "ipmitool sensor
-   read 0x1"). In cases where that's not possible, or when testing edge or error
-   cases, it is acceptable to use "ipmitool raw" - but an explanation of your
-   output is appreciated. If the change can be validated entirely by running
-   unit tests, say so in the "Tested:" tag.
+- Concisely, _what_ change are you making? e.g. "docs: convert from US to UK
+  spelling" This first line of your commit message is the subject line.
+- Comprehensively, _why_ are you making that change? In some cases, like a small
+  refactor, the why is fairly obvious. But in cases like the inclusion of a new
+  feature, you should explain why the feature is needed.
+- Concisely, _how_ did you test? This comes in the form of a "Tested:" footer in
+  your commit message and is required for all code changes in the IPMI stack. It
+  typically consists of copy-pasted ipmitool requests and responses. When
+  possible, use the high-level ipmitool commands (e.g. "ipmitool sensor read
+  0x1"). In cases where that's not possible, or when testing edge or error
+  cases, it is acceptable to use "ipmitool raw" - but an explanation of your
+  output is appreciated. If the change can be validated entirely by running unit
+  tests, say so in the "Tested:" tag.
 
 Try to include the component you are changing at the front of your subject line;
 this typically comes in the form of the class, module, handler, or directory you
@@ -75,16 +76,16 @@ characters. This is common practice in many projects which use Git.
 All commit messages must include a Signed-off-by line, which indicates that you
 the contributor have agreed to the Developer Certificate of Origin. This line
 must include the name you commonly use, often a given name and a family name or
-surname. (ok: A. U. Thor, Sam Samuelsson, robert a. heinlein; not ok:
-xXthorXx, Sam, RAH)
+surname. (ok: A. U. Thor, Sam Samuelsson, robert a. heinlein; not ok: xXthorXx,
+Sam, RAH)
 
 ## Sending Patches
 
-Like most projects in OpenBMC, we use Gerrit to review patches. Please check
-the MAINTAINERS file to determine who needs to approve your review in order for
-your change to be merged. Submitters will need to manually add their reviewers
-in Gerrit; reviewers are not currently added automatically. Maintainers may not
-see the commit if they have not been added to the review!
+Like most projects in OpenBMC, we use Gerrit to review patches. Please check the
+MAINTAINERS file to determine who needs to approve your review in order for your
+change to be merged. Submitters will need to manually add their reviewers in
+Gerrit; reviewers are not currently added automatically. Maintainers may not see
+the commit if they have not been added to the review!
 
 ## Pace of Review
 
@@ -96,10 +97,9 @@ partial-time capacity, may be in a timezone far removed from your own, and may
 have very deep review queues already of patches which have been waiting longer
 than yours.
 
-If you feel your patch has been missed entirely, of course it's
-alright to email the maintainers (addresses available in MAINTAINERS file) - but
-a reasonable timeframe to do so is on the order of a week, not on the order of
-hours.
+If you feel your patch has been missed entirely, of course it's alright to email
+the maintainers (addresses available in MAINTAINERS file) - but a reasonable
+timeframe to do so is on the order of a week, not on the order of hours.
 
 Additionally, the IPMI stack has a set of policies for when and how changes can
 be approved; please check the MAINTAINERS file for the full list ("Change
