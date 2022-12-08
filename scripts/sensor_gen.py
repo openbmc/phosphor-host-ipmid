@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 import sys
+
 import yaml
-import argparse
 from mako.template import Template
 
 
