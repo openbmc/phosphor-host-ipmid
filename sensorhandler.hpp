@@ -574,11 +574,21 @@ inline void set_id_strlen(uint8_t len, SensorDataFullRecordBody* body)
     body->id_string_info &= ~(0x1f);
     body->id_string_info |= len & 0x1f;
 };
+inline void set_id_strlen(uint8_t len, SensorDataEventRecordBody* body)
+{
+    body->id_string_info &= ~(0x1f);
+    body->id_string_info |= len & 0x1f;
+};
 inline uint8_t get_id_strlen(SensorDataFullRecordBody* body)
 {
     return body->id_string_info & 0x1f;
 };
 inline void set_id_type(uint8_t type, SensorDataFullRecordBody* body)
+{
+    body->id_string_info &= ~(3 << 6);
+    body->id_string_info |= (type & 0x3) << 6;
+};
+inline void set_id_type(uint8_t type, SensorDataEventRecordBody* body)
 {
     body->id_string_info &= ~(3 << 6);
     body->id_string_info |= (type & 0x3) << 6;
