@@ -16,6 +16,23 @@
       "message": "required for building smbios-mdr",
       "revId": "eae8859cae6655ccc000c792a4b51cf8ac38b0c1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c62a9ff0_f2c57093",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000936
+      },
+      "writtenOn": "2022-12-14T08:43:31Z",
+      "side": 1,
+      "message": "Hello Willy,\n\nSorry for breaking the build, and thank you for fixing it, the patch looks good.\n\nI wondered why CI didn\u0027t catch it and it looks like it\u0027s just because dynamic-sensors meson feature is disabled by default (I didn\u0027t realise it when compile-testing locally). It\u0027s probably worth enabling all compile-time options for the CI so that mistakes like this are caught early in the future, what do you think?",
+      "revId": "eae8859cae6655ccc000c792a4b51cf8ac38b0c1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
