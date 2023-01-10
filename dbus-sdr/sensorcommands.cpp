@@ -308,23 +308,41 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
     if (std::chrono::duration_cast<std::chrono::seconds>(now - lastUpdate)
             .count() > updatePeriod)
     {
-        ObjectValueTree managedObjects;
-        boost::system::error_code ec =
-            getManagedObjects(ctx, sensorConnection.c_str(),
-                              "/xyz/openbmc_project/sensors", managedObjects);
-        if (ec)
-        {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "GetMangagedObjects for getSensorMap failed",
-                phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+        bool found = false;
 
-            return false;
+        // Object managers for different kinds of sensors are located at
+        // different paths. For normal sensors, /xyz/openbmc_project/sensors.
+        // For voltage regulator controls, /xyz/openbmc_project/vr.
+        const char* paths[] = {
+            "/xyz/openbmc_project/sensors",
+            "/xyz/openbmc_project/vr",
+        };
+
+        for (int i=0; i<2; i++) {
+        ObjectValueTree managedObjects;
+            boost::system::error_code ec =
+                getManagedObjects(ctx, sensorConnection.c_str(),
+                                paths[i], managedObjects);
+            if (ec)
+            {
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "GetMangagedObjects for getSensorMap failed",
+                    phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+
+                continue;
+            }
+
+            SensorCache[sensorConnection] = managedObjects;
+            // Update time after finish building the map which allow the
+            // data to be cached for updatePeriod plus the build time.
+            updateTimeMap[sensorConnection] = std::chrono::steady_clock::now();
+            found = true;
+            break;
         }
 
-        SensorCache[sensorConnection] = managedObjects;
-        // Update time after finish building the map which allow the
-        // data to be cached for updatePeriod plus the build time.
-        updateTimeMap[sensorConnection] = std::chrono::steady_clock::now();
+        if (!found) {
+            return false;
+        }
     }
     auto connection = SensorCache.find(sensorConnection);
     if (connection == SensorCache.end())
