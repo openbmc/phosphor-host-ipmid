@@ -308,20 +308,40 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
     if (std::chrono::duration_cast<std::chrono::seconds>(now - lastUpdate)
             .count() > updatePeriod)
     {
-        ObjectValueTree managedObjects;
-        boost::system::error_code ec =
-            getManagedObjects(ctx, sensorConnection.c_str(),
-                              "/xyz/openbmc_project/sensors", managedObjects);
-        if (ec)
-        {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "GetMangagedObjects for getSensorMap failed",
-                phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+        bool found = false;
 
+        // Object managers for different kinds of OpenBMC DBus interfaces.
+        // Documented in the phosphor-dbus-interfaces repository.
+        const char* paths[] = {
+            "/xyz/openbmc_project/sensors",
+            "/xyz/openbmc_project/vr",
+        };
+        constexpr size_t num_paths = sizeof(paths) / sizeof(paths[0]);
+        ObjectValueTree allManagedObjects;
+
+        for (size_t i = 0; i < num_paths; i++)
+        {
+            ObjectValueTree managedObjects;
+            boost::system::error_code ec = getManagedObjects(
+                ctx, sensorConnection.c_str(), paths[i], managedObjects);
+            if (ec)
+            {
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "GetMangagedObjects for getSensorMap failed",
+                    phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+
+                continue;
+            }
+            allManagedObjects.merge(managedObjects);
+            found = true;
+        }
+
+        if (!found)
+        {
             return false;
         }
 
-        SensorCache[sensorConnection] = managedObjects;
+        SensorCache[sensorConnection] = allManagedObjects;
         // Update time after finish building the map which allow the
         // data to be cached for updatePeriod plus the build time.
         updateTimeMap[sensorConnection] = std::chrono::steady_clock::now();
