@@ -99,6 +99,7 @@ int main(int argc, char* argv[])
 
     session::Manager::get().managerInit(channel);
     // Register callback to update cache for a GUID change and cache the GUID
+    command::getUIDObjectInfo();
     command::registerGUIDChangeCallback();
     cache::guid = command::getSystemGUID();
 

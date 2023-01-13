@@ -3,17 +3,23 @@
 #include <ipmid/api.h>
 #include <mapper.h>
 
+#include <ipmid/utils.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/lg2.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 #include <sstream>
 #include <string>
 
 using namespace phosphor::logging;
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
 namespace cache
 {
 
 command::Guid guid;
+std::string guidObjService = "";
+std::string guidObjPath = "";
 
 } // namespace cache
 
@@ -22,8 +28,67 @@ namespace command
 
 std::unique_ptr<sdbusplus::bus::match_t> matchPtr(nullptr);
 
-static constexpr auto guidObjPath = "/org/openbmc/control/chassis0";
-static constexpr auto propInterface = "org.freedesktop.DBus.Properties";
+static constexpr auto propInterface = "xyz.openbmc_project.Common.UUID";
+static constexpr auto uuidProperty = "UUID";
+static constexpr auto subtreePath = "/xyz/openbmc_project/inventory/";
+
+void getUIDObjectInfo()
+{
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+    ipmi::DbusObjectInfo bmcObject;
+    try
+    {
+        // Get the Inventory object implementing BMC interface
+        bmcObject = ipmi::getDbusObject(bus, propInterface, subtreePath);
+    }
+    catch (const sdbusplus::exception_t& e)
+    {
+        lg2::error("Failed in reading BMC UUID property: {ERROR}", "ERROR", e);
+        return;
+    }
+
+    cache::guidObjService = bmcObject.second;
+    cache::guidObjPath = bmcObject.first;
+    return;
+}
+
+static void rfcToGuid(std::string rfc4122, Guid& uuid)
+{
+    using Argument = xyz::openbmc_project::Common::InvalidArgument;
+    // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
+    // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte
+    // order
+    // Ex: 0x2332fc2c40e66298e511f2782395a361
+    constexpr size_t uuidHexLength = (2 * BMC_GUID_LEN);
+    constexpr size_t uuidRfc4122Length = (uuidHexLength + 4);
+
+    if (rfc4122.size() == uuidRfc4122Length)
+    {
+        rfc4122.erase(std::remove(rfc4122.begin(), rfc4122.end(), '-'),
+                      rfc4122.end());
+    }
+    if (rfc4122.size() != uuidHexLength)
+    {
+        elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                              Argument::ARGUMENT_VALUE(rfc4122.c_str()));
+    }
+    for (size_t ind = 0; ind < uuidHexLength; ind += 2)
+    {
+        long b;
+        try
+        {
+            b = std::stoul(rfc4122.substr(ind, 2), nullptr, 16);
+        }
+        catch (const std::exception& e)
+        {
+            elog<InvalidArgument>(Argument::ARGUMENT_NAME("rfc4122"),
+                                  Argument::ARGUMENT_VALUE(rfc4122.c_str()));
+        }
+
+        uuid[BMC_GUID_LEN - (ind / 2) - 1] = static_cast<uint8_t>(b);
+    }
+    return;
+}
 
 Guid getSystemGUID()
 {
@@ -32,56 +97,35 @@ Guid getSystemGUID()
     Guid guid = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                  0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10};
 
-    constexpr auto chassisIntf = "org.openbmc.control.Chassis";
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
-    sd_bus_message* reply = nullptr;
-    sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus* bus = ipmid_get_sd_bus_connection();
-    char* uuid = nullptr;
-    char* busname = nullptr;
-
-    do
+    ipmi::Value propValue;
+    try
     {
-        int rc = mapper_get_service(bus, guidObjPath, &busname);
-        if (rc < 0)
-        {
-            lg2::error("Failed to get bus name, path: {PATH}, error: {ERROR}",
-                       "PATH", guidObjPath, "ERROR", strerror(-rc));
-            break;
-        }
+        // Read UUID property value from bmcObject
+        // UUID is in RFC4122 format Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
+        propValue = ipmi::getDbusProperty(bus, cache::guidObjService,
+                                          cache::guidObjPath, propInterface,
+                                          uuidProperty);
+    }
+    catch (const sdbusplus::exception_t& e)
+    {
+        lg2::error("Failed in reading BMC UUID property: {ERROR}", "ERROR", e);
+        return guid;
+    }
 
-        rc = sd_bus_call_method(bus, busname, guidObjPath, propInterface, "Get",
-                                &error, &reply, "ss", chassisIntf, "uuid");
-        if (rc < 0)
-        {
-            lg2::error("Failed to call Get Method: {ERROR}", "ERROR",
-                       strerror(-rc));
-            break;
-        }
-
-        rc = sd_bus_message_read(reply, "v", "s", &uuid);
-        if (rc < 0 || uuid == NULL)
-        {
-            lg2::error("Failed to get a response: {ERROR}", "ERROR",
-                       strerror(-rc));
-            break;
-        }
-
-        std::string readUUID(uuid);
-        auto len = readUUID.length();
-
-        for (size_t iter = 0, inc = 0; iter < len && inc < BMC_GUID_LEN;
-             iter += 2, inc++)
-        {
-            uint8_t hexVal = std::strtoul(readUUID.substr(iter, 2).c_str(),
-                                          NULL, 16);
-            guid[inc] = hexVal;
-        }
-    } while (0);
-
-    sd_bus_error_free(&error);
-    reply = sd_bus_message_unref(reply);
-    free(busname);
+    std::string rfc4122Uuid = std::get<std::string>(propValue);
+    try
+    {
+        // convert to IPMI format
+        rfcToGuid(rfc4122Uuid, guid);
+    }
+    catch (const InvalidArgument& e)
+    {
+        lg2::error("Failed in parsing BMC UUID property: {VALUE}", "VALUE",
+                   rfc4122Uuid.c_str());
+        return guid;
+    }
 
     return guid;
 }
@@ -94,9 +138,7 @@ void registerGUIDChangeCallback()
         sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
         matchPtr = std::make_unique<sdbusplus::bus::match_t>(
-            bus,
-            path_namespace(guidObjPath) + type::signal() +
-                member("PropertiesChanged") + interface(propInterface),
+            bus, propertiesChanged(cache::guidObjPath, propInterface),
             [](sdbusplus::message_t&) { cache::guid = getSystemGUID(); });
     }
 }

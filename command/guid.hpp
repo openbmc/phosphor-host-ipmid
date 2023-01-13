@@ -27,6 +27,7 @@ Guid getSystemGUID();
  */
 void registerGUIDChangeCallback();
 
+void getUIDObjectInfo();
 } // namespace command
 
 namespace cache
