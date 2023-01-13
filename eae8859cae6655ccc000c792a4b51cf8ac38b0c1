@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "56bc5a93_1824421c",
+        "filename": "user_channel/channel_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-01-13T19:44:34Z",
+      "side": 0,
+      "message": "Changing this from an exception to an empty string will have behavior changes elsewhere in the code. I am not a huge fan of exceptions myself, especially in non-fatal situations, but please inspect dcmihandler.cpp and transporthandler.cpp to see if changing getChannelName will affect those as well.",
+      "revId": "eae8859cae6655ccc000c792a4b51cf8ac38b0c1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}

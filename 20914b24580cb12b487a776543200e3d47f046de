@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "74c01360_035d1749",
+        "filename": "user_channel/channel_layer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-01-13T19:44:34Z",
+      "side": 1,
+      "message": "re-use the channelName string instead of calling again.",
+      "range": {
+        "startLine": 42,
+        "startChar": 44,
+        "endLine": 42,
+        "endChar": 58
+      },
+      "revId": "20914b24580cb12b487a776543200e3d47f046de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
