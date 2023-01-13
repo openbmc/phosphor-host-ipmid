@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "75df59bc_dfec6b75",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2023-01-13T00:25:42Z",
+      "side": 1,
+      "message": "I think the problem is the VR Sensor daemon is already installing ObjectManager at `/xyz/openbmc_project/vr` (\"standard locations\"), but dbus-sdr does not look for ObjectManagers located there after 9a9ac0bcfc2df48873ca0f9725eb5255f7191d84, only `/xyz/openbmc_project/sensors`.\n\nSince SDRs can come from daemons implementing the ObjectManager on both /xyz/openbmc_project/vr and /xyz/openbmc_project/sensors, dbus-sdr needs to check both DBus paths.",
+      "parentUuid": "f7ed5700_6a4c36f0",
+      "revId": "42ea182a2b6f4f3785450407c0885c445daf5fe1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7ea76ee9_01f4c510",
@@ -48,6 +66,30 @@
       "writtenOn": "2023-01-12T00:09:08Z",
       "side": 1,
       "message": "If there were sensor in both `/xyz/openbmc_project/sensors`, and in `/xyz/openbmc_project/vr` we would break, only having checked sensors?",
+      "range": {
+        "startLine": 340,
+        "startChar": 12,
+        "endLine": 340,
+        "endChar": 17
+      },
+      "revId": "42ea182a2b6f4f3785450407c0885c445daf5fe1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aed1c601_3905d2bf",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2023-01-13T00:25:42Z",
+      "side": 1,
+      "message": "Yes this is a valid concern. Now merging the ObjectValueTree.",
+      "parentUuid": "7ea76ee9_01f4c510",
       "range": {
         "startLine": 340,
         "startChar": 12,
