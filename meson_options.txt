@@ -67,3 +67,4 @@ option('fru-yaml-gen', type: 'string', value: 'fru-read-example.yaml')
 
 # Software Version
 option('get-dbus-active-software', type: 'feature', description: 'Use the  getActiveSoftwareVersionInfo for the BMC version and dev_id.json as backup')
+option('fw-ver-regex', type : 'string', value : '(\\\\d+)\\\\.(\\\\d+)[\\\\.-](\\\\d+)(-.*)?', description : 'Regular expressions for parsing firmware revision')
