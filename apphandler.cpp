@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -29,6 +31,7 @@
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <regex>
 #include <sdbusplus/message/types.hpp>
 #include <string>
 #include <string_view>
@@ -483,110 +486,80 @@ typedef struct
 /* Additional details : If the option group exists it will force Auxiliary  */
 /* Firmware Revision Information 4th byte to 1 indicating the build was     */
 /* derived with additional edits                                            */
-int convertVersion(std::string_view s, Revision& rev)
+int convertVersion(std::string s, Revision& rev)
 {
-    std::string_view token;
     uint16_t commits;
+    std::regex fw_regex(FW_VER_REGEX);
+    std::smatch m;
 
-    auto location = s.find_first_of('v');
-    if (location != std::string::npos)
+    if (!std::regex_search(s, m, fw_regex))
     {
-        s = s.substr(location + 1);
+        throw std::runtime_error("can not find matched firmware revision");
     }
 
-    if (!s.empty())
+    // convert major
+    if (!m[1].str().empty())
     {
-        location = s.find_first_of(".");
-        if (location != std::string::npos)
+        std::string_view majorView(m[1].str());
+        auto [ptr, ec]{
+            std::from_chars(majorView.begin(), majorView.end(), rev.major)};
+        if (ec != std::errc())
         {
-            std::string_view majorView = s.substr(0, location);
-            auto [ptr, ec]{
-                std::from_chars(majorView.begin(), majorView.end(), rev.major)};
-            if (ec != std::errc())
-            {
-                throw std::runtime_error(
-                    "failed to convert major string to uint8_t: " +
-                    std::make_error_code(ec).message());
-            }
-            if (ptr != majorView.begin() + majorView.size())
-            {
-                throw std::runtime_error(
-                    "converted invalid characters in major string");
-            }
-            token = s.substr(location + 1);
+            throw std::runtime_error(
+                "failed to convert major string to uint8_t: " +
+                std::make_error_code(ec).message());
         }
-
-        if (!token.empty())
+        if (ptr != majorView.begin() + majorView.size())
         {
-            location = token.find_first_of(".-");
-            if (location != std::string::npos)
-            {
-                std::string_view minorView = token.substr(0, location);
-                auto [ptr, ec]{std::from_chars(minorView.begin(),
-                                               minorView.end(), rev.minor)};
-                if (ec != std::errc())
-                {
-                    throw std::runtime_error(
-                        "failed to convert minor string to uint8_t: " +
-                        std::make_error_code(ec).message());
-                }
-                if (ptr != minorView.begin() + minorView.size())
-                {
-                    throw std::runtime_error(
-                        "converted invalid characters in minor string");
-                }
-                token = token.substr(location + 1);
-            }
+            throw std::runtime_error(
+                "converted invalid characters in major string");
         }
+    }
 
-        // Capture the number of commits on top of the minor tag.
-        // I'm using BE format like the ipmi spec asked for
-        location = token.find_first_of(".-");
-        if (!token.empty())
+    // convert minor
+    if (!m[2].str().empty())
+    {
+        std::string_view minorView(m[2].str());
+        auto [ptr, ec]{
+            std::from_chars(minorView.begin(), minorView.end(), rev.minor)};
+        if (ec != std::errc())
         {
-            std::string_view commitView = token.substr(0, location);
-            auto [ptr, ec]{std::from_chars(commitView.begin(), commitView.end(),
-                                           commits, 16)};
-            if (ec != std::errc())
-            {
-                throw std::runtime_error(
-                    "failed to convert commit string to uint16_t: " +
-                    std::make_error_code(ec).message());
-            }
-            if (ptr != commitView.begin() + commitView.size())
-            {
-                throw std::runtime_error(
-                    "converted invalid characters in commit string");
-            }
-            rev.d[0] = (commits >> 8) | (commits << 8);
-
-            // commit number we skip
-            location = token.find_first_of(".-");
-            if (location != std::string::npos)
-            {
-                token = token.substr(location + 1);
-            }
+            throw std::runtime_error(
+                "failed to convert minor string to uint8_t: " +
+                std::make_error_code(ec).message());
         }
-        else
+        if (ptr != minorView.begin() + minorView.size())
         {
-            rev.d[0] = 0;
+            throw std::runtime_error(
+                "converted invalid characters in minor string");
         }
+    }
 
-        if (location != std::string::npos)
+    // convert first additional detail
+    // using BE format like the ipmi spec asked for
+    if (!m[3].str().empty())
+    {
+        std::string_view commitView(m[3].str());
+        auto [ptr, ec]{
+            std::from_chars(commitView.begin(), commitView.end(), commits, 16)};
+        if (ec != std::errc())
         {
-            token = token.substr(location + 1);
+            throw std::runtime_error(
+                "failed to convert commit string to uint16_t: " +
+                std::make_error_code(ec).message());
         }
-
-        // Any value of the optional parameter forces it to 1
-        location = token.find_first_of(".-");
-        if (location != std::string::npos)
+        if (ptr != commitView.begin() + commitView.size())
         {
-            token = token.substr(location + 1);
+            throw std::runtime_error(
+                "converted invalid characters in commit string");
         }
-        commits = (!token.empty()) ? 1 : 0;
+        rev.d[0] = (commits >> 8) | (commits << 8);
+    }
 
-        // We do this operation to get this displayed in least significant bytes
-        // of ipmitool device id command.
+    // convert second additional detail
+    if (!m[4].str().empty())
+    {
+        commits = 1;
         rev.d[1] = (commits >> 8) | (commits << 8);
     }
 
