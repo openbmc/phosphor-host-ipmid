@@ -32,6 +32,7 @@ conf_data.set_quoted('CONTROL_HOST_OBJ_MGR', get_option('control-host-obj-mgr'))
 conf_data.set_quoted('HOST_NAME', get_option('host-name'))
 conf_data.set_quoted('POWER_READING_SENSOR', get_option('power-reading-sensor'))
 conf_data.set_quoted('HOST_IPMI_LIB_PATH', get_option('host-ipmi-lib-path'))
+conf_data.set_quoted('FW_VER_REGEX', get_option('fw-ver-regex'))
 
 conf_h = configure_file(
   output: 'config.h',
