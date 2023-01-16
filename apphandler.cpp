@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -29,6 +31,7 @@
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <regex>
 #include <sdbusplus/message/types.hpp>
 #include <string>
 #include <string_view>
@@ -468,129 +471,53 @@ typedef struct
     uint16_t d[2];
 } Revision;
 
-/* Currently supports the vx.x-x-[-x] and v1.x.x-x-[-x] format. It will     */
-/* return -1 if not in those formats, this routine knows how to parse       */
-/* version = v0.6-19-gf363f61-dirty                                         */
-/*            ^ ^ ^^          ^                                             */
-/*            | |  |----------|-- additional details                        */
-/*            | |---------------- Minor                                     */
-/*            |------------------ Major                                     */
-/* and version = v1.99.10-113-g65edf7d-r3-0-g9e4f715                        */
-/*                ^ ^  ^^ ^                                                 */
-/*                | |  |--|---------- additional details                    */
-/*                | |---------------- Minor                                 */
-/*                |------------------ Major                                 */
-/* Additional details : If the option group exists it will force Auxiliary  */
-/* Firmware Revision Information 4th byte to 1 indicating the build was     */
-/* derived with additional edits                                            */
-int convertVersion(std::string_view s, Revision& rev)
+/* Use regular expression searching matched pattern X.Y, and convert it to  */
+/* Major (X) and Minor (Y) version.                                         */
+/* Example:                                                                 */
+/* version = 2.14.0-dev                                                     */
+/*           ^ ^                                                            */
+/*           | |---------------- Minor                                      */
+/*           |------------------ Major                                      */
+/*                                                                          */
+int convertVersion(std::string s, Revision& rev)
 {
-    std::string_view token;
-    uint16_t commits;
+    std::regex fw_regex(FW_VER_REGEX);
+    std::smatch m;
+    Revision r = {0};
+    size_t val;
 
-    auto location = s.find_first_of('v');
-    if (location != std::string::npos)
+    while(std::regex_search(s, m, fw_regex))
     {
-        s = s.substr(location + 1);
+        // convert major
+        {
+            std::string_view str = m[1].str();
+            auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
+            if (ec != std::errc() ||
+                ptr != str.begin() + str.size())
+            {   // failed to convert major string
+                continue;
+            }
+            r.major = val & 0x7F;
+        }
+
+        // convert minor
+        {
+            std::string_view str = m[2].str();
+            auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
+            if (ec != std::errc() ||
+                ptr != str.begin() + str.size())
+            {   // failed to convert minor string
+                continue;
+            }
+            r.minor = val & 0xFF;
+        }
+
+        // all matched
+        rev = r;
+        return 0;
     }
 
-    if (!s.empty())
-    {
-        location = s.find_first_of(".");
-        if (location != std::string::npos)
-        {
-            std::string_view majorView = s.substr(0, location);
-            auto [ptr, ec]{
-                std::from_chars(majorView.begin(), majorView.end(), rev.major)};
-            if (ec != std::errc())
-            {
-                throw std::runtime_error(
-                    "failed to convert major string to uint8_t: " +
-                    std::make_error_code(ec).message());
-            }
-            if (ptr != majorView.begin() + majorView.size())
-            {
-                throw std::runtime_error(
-                    "converted invalid characters in major string");
-            }
-            token = s.substr(location + 1);
-        }
-
-        if (!token.empty())
-        {
-            location = token.find_first_of(".-");
-            if (location != std::string::npos)
-            {
-                std::string_view minorView = token.substr(0, location);
-                auto [ptr, ec]{std::from_chars(minorView.begin(),
-                                               minorView.end(), rev.minor)};
-                if (ec != std::errc())
-                {
-                    throw std::runtime_error(
-                        "failed to convert minor string to uint8_t: " +
-                        std::make_error_code(ec).message());
-                }
-                if (ptr != minorView.begin() + minorView.size())
-                {
-                    throw std::runtime_error(
-                        "converted invalid characters in minor string");
-                }
-                token = token.substr(location + 1);
-            }
-        }
-
-        // Capture the number of commits on top of the minor tag.
-        // I'm using BE format like the ipmi spec asked for
-        location = token.find_first_of(".-");
-        if (!token.empty())
-        {
-            std::string_view commitView = token.substr(0, location);
-            auto [ptr, ec]{std::from_chars(commitView.begin(), commitView.end(),
-                                           commits, 16)};
-            if (ec != std::errc())
-            {
-                throw std::runtime_error(
-                    "failed to convert commit string to uint16_t: " +
-                    std::make_error_code(ec).message());
-            }
-            if (ptr != commitView.begin() + commitView.size())
-            {
-                throw std::runtime_error(
-                    "converted invalid characters in commit string");
-            }
-            rev.d[0] = (commits >> 8) | (commits << 8);
-
-            // commit number we skip
-            location = token.find_first_of(".-");
-            if (location != std::string::npos)
-            {
-                token = token.substr(location + 1);
-            }
-        }
-        else
-        {
-            rev.d[0] = 0;
-        }
-
-        if (location != std::string::npos)
-        {
-            token = token.substr(location + 1);
-        }
-
-        // Any value of the optional parameter forces it to 1
-        location = token.find_first_of(".-");
-        if (location != std::string::npos)
-        {
-            token = token.substr(location + 1);
-        }
-        commits = (!token.empty()) ? 1 : 0;
-
-        // We do this operation to get this displayed in least significant bytes
-        // of ipmitool device id command.
-        rev.d[1] = (commits >> 8) | (commits << 8);
-    }
-
-    return 0;
+    return -1;
 }
 
 /* @brief: Implement the Get Device ID IPMI command per the IPMI spec
@@ -725,6 +652,8 @@ ipmi::RspType<uint8_t,  // Device ID
     {
         devId.fw[0] |= (1 << ipmiDevIdStateShift);
     }
+
+    usleep(100*1000);
 
     return ipmi::responseSuccess(
         devId.id, devId.revision, devId.fw[0], devId.fw[1], devId.ipmiVer,
