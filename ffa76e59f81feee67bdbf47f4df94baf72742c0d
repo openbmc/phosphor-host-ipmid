@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1af4a911_3f093a64",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-01-17T10:10:15Z",
+      "side": 1,
+      "message": "I think this was not a well thought https://github.com/openbmc/phosphor-host-ipmid/commit/d950f410b71e0ac4650519eb5bf7ea683e98684d solution, since another attempt was made to fix this https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/49833.\n\nThe long-term solution is to have both small string (less than 16 characters) and full name for sensors as Vernon suggested.\n\nFor a short-term solution we can truncate the sensor name to 16 characters to keep the logic consistent.",
+      "revId": "ffa76e59f81feee67bdbf47f4df94baf72742c0d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
