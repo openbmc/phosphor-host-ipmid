@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d9e0d9fc_70e641d9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-01-18T19:16:43Z",
+      "side": 1,
+      "message": "I agree with this change as an improved security posture even though it violates the IPMI specification by requiring a higher permission level to get the user list.\n\nI would like to hear comments from others in the community.",
+      "revId": "9173ae4af78bfab099b83c26f924d43dd5ce85a8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
