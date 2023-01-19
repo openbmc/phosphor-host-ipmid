@@ -33,6 +33,24 @@
       "message": "I am fine with this. What I would really like to see is a stop to all this madness. Can we just put a long_name and short_name field in the entity manager so that sensor names can have non-programmatic short names? It seems that nobody can agree on how to change the long names into short names and adding a field to the config file means that each OEM can choose how to shorten the names. Of course we could continue to default to the current method of shortening names if one is not specified, but adding that flexibility seems like a straight-forward solution.",
       "revId": "ffa76e59f81feee67bdbf47f4df94baf72742c0d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72247f97_a1d82082",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-01-19T04:09:15Z",
+      "side": 1,
+      "message": "Agree Vernon. \n\nThe long-term solution is for ipmid to programmatically pick the short name. Let me kickstart discussion in that direction.",
+      "parentUuid": "c06fa1a6_62c90a83",
+      "revId": "ffa76e59f81feee67bdbf47f4df94baf72742c0d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
