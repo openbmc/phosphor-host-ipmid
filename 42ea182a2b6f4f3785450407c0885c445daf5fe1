@@ -53,6 +53,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "307fb33e_d2b03f24",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000500
+      },
+      "writtenOn": "2023-01-24T20:03:09Z",
+      "side": 1,
+      "message": "Let me try to explain why the fix is dbus-sdr a bit more clearly:\n\n1) First, two global variables are maintained:\n\n1.1) A global variable `sensorTree` is maintained and referenced throughout the daemon. Its type is a `map\u003cstring,map\u003cstring,vector\u003cstring\u003e\u003e\u003e`. More specifically:\n\n```\nmap\u003cstring,              -\u003e DBus object name, e.g. cpu_temp\n   map\u003cstring,           -\u003e DBus service, e.g. HwMon1\n      vector\u003cstring\u003e\u003e\u003e   -\u003e List of DBus interfaces, e.g. Value\n```\n\nIt is populated and maintained by calling the ObjectMapper via `lbdUpdateSensorTree` . Note that calls to this function involve both regular sensors (can be seen from the presence of \"VoltageRegularMode\" in the argument to GetSubTree (https://github.com/openbmc/phosphor-host-ipmid/blob/4eca251085f83caec4957d3bea812d51c1a5d3b4/dbus-sdr/sdrutils.cpp#L103)).\n\n1.2) Another global variable `SensorCache` is derived from `sensorTree`.\n\nIts type is a `map\u003cstring,map\u003cobject_path,map\u003cstring,map\u003cstring,value\u003e\u003e\u003e\u003e`. More\nspecifically,\n\n```\nmap\u003cstring,            -\u003e DBus connection, e.g. HwMon1\n   map\u003cobject_path,    -\u003e Object path, e.g. cpu_temp\n       map\u003cstring,     -\u003e Interface the object implements. e.g. \"xyz.openbmc_project.Sensor.Value\"\n          map\u003cstring,  -\u003e Name of a property in the interface, e.g. \"Value\"\n              value\u003e\u003e\u003e\u003e -\u003e Value of the property, e.g. 50 degrees C\n```\n\nNote that the entry in a `sensorTree` corresponds to the `a{oa{sa{sv}}}`\nDBus type, which is the return type of `GetManagedObjects`. In other words: `SensorCache` caches the values of all managed objects of the interesting daemons.\n\n2) The sensor readings are maintained by the following flow:\n\na) ipmid obtains the list of interesting DBus services and populates `sensorTree` with `GetSubTree`.\nb) ipmid keeps updating their cached values in `SensorCache` with the `getSensorMap` function calling `GetManagedObjects`.\n\nWith change\nhttps://github.com/openbmc/phosphor-host-ipmid/commit/9a9ac0bcfc2df48873ca0f9725eb5255f7191d84, a) above still works correctly, because a) specifically calls out `/xyz/openbmc_project/sensors` and `/xyz/openbmc_project/vr`, while b) stops working for VR because b) used to query the object manager located at and under `/` and now it\u0027s only `/xyz/openbmc_project/sensors`.\n\nThe VR daemon in question has always been installing an Object Manager at `/xyz/openbmc_project/vr`. It is because of dbus-sdr accidentally skipping this path during the call to `/xyz/openbmc_project/vr` during `getSensorMap` that the VR sensors disappear from the SDR list. So the fix should be in dbus-sdr not the VR daemon.",
+      "parentUuid": "75df59bc_dfec6b75",
+      "revId": "42ea182a2b6f4f3785450407c0885c445daf5fe1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7ea76ee9_01f4c510",
