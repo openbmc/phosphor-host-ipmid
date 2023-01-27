@@ -16,6 +16,24 @@
       "message": "My take on this is each platform has different naming convention for their version string, it should be driven by a platform specific config file where each platform owner gets to decide the minor, major etc instead of massaging the version string.",
       "revId": "001632a362685e65787972889127c397b8973d4c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d98b3c2e_99ad15d2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-01-27T15:41:59Z",
+      "side": 1,
+      "message": "How do you propose we accomplish that?\n\nThe _current_ code is broken by the way we currently tag openbmc/openbmc. I think this proposal both fixes that AND allows platform owners to customize (by providing their own regex).",
+      "parentUuid": "b1e74538_e00adad0",
+      "revId": "001632a362685e65787972889127c397b8973d4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
