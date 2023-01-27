@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b1e74538_e00adad0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-01-27T14:44:25Z",
+      "side": 1,
+      "message": "My take on this is each platform has different naming convention for their version string, it should be driven by a platform specific config file where each platform owner gets to decide the minor, major etc instead of massaging the version string.",
+      "revId": "001632a362685e65787972889127c397b8973d4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
