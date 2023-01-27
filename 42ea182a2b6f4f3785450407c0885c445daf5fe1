@@ -71,6 +71,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6e58a799_192413ce",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-01-27T19:23:01Z",
+      "side": 1,
+      "message": "I understand why the VR sensors are no longer showing up, I object to this change as the fix. I believe the change should be in the VR daemon code to match the standard OpenBMC sensor object manager location of /xyz/openbmc_project/sensors",
+      "parentUuid": "307fb33e_d2b03f24",
+      "revId": "42ea182a2b6f4f3785450407c0885c445daf5fe1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7ea76ee9_01f4c510",
