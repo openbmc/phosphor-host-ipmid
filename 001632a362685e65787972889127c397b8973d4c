@@ -51,6 +51,24 @@
       "message": "Each of these makes some assumptions about the regex captures. At the very least the code should check to make sure that the match count is the expected number of matches.\n\nI like the idea of a regex, but I think we need some more work.\n\nSince the aux bytes (13:16) are just bytes, we should probably have those as separate matches and just put them together in order.\n\nSo if the matches are standardized like:\nm[0] \u003d whole match\nm[1] \u003d major\nm[2] \u003d minor\nm[3] \u003d aux[0]\nm[4] \u003d aux[1]\nm[5] \u003d aux[2]\nm[6] \u003d aux[3]\n\nThen we could put together the command response easily. The trouble would be if any of those fields were out of order from version string to match order.\n\nSo maybe we would need to have two regexs, the first to modify the string to put everything in order, and the second to pull matches out.",
       "revId": "001632a362685e65787972889127c397b8973d4c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f93e97d1_bc91fc8b",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1001264
+      },
+      "writtenOn": "2023-01-30T05:26:27Z",
+      "side": 1,
+      "message": "Hi Vernon, Thanks for the feedback.\n\nCurrent regex is `(\\d+)\\.(\\d+)[\\.-](\\d+)(-.*)?`, m[1-3] should not be empty if matched, only m[4] is optional. I can remove the check of m[1-3] and use match count to identify m[4] is avaliable or not.\n\n\nAbout aux bytes (13:16), original method converting string into hex digits.\nSomtimes it convert 2 characters into 1 byte, sometimes just 1 characters. I am not quite understand how to add regex for each aux byte, could you explain more (or examples) about this? Thank you.\n\nex: in current method, first additional string \"123\" will covert as\naux[0] \u003d 0x01\naux[1] \u003d 0x23",
+      "parentUuid": "3b6f58e6_1ab28de0",
+      "revId": "001632a362685e65787972889127c397b8973d4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
