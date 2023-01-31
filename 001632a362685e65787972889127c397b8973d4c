@@ -36,6 +36,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e6b3c62_7adb2095",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-01-31T17:07:07Z",
+      "side": 1,
+      "message": "We can process the release version string(VERSION in os-release) in a meta-xxx layerand update the dev_id.json to include major/minor also is a possibility. (https://github.com/openbmc/phosphor-host-ipmid/blob/master/apphandler.cpp#L635). \n\nI am okie, if we offer both flavors like a regex choice(one less system config JSON) and a system config JSON.",
+      "parentUuid": "d98b3c2e_99ad15d2",
+      "revId": "001632a362685e65787972889127c397b8973d4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3b6f58e6_1ab28de0",
