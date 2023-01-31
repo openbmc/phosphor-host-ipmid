@@ -15,8 +15,11 @@
 #include <sdbusplus/bus.hpp>
 #include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
 
 using namespace phosphor::logging;
+using sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface;
+
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
@@ -245,7 +248,7 @@ std::string getHostName(void)
     return std::get<std::string>(value);
 }
 
-bool getDHCPEnabled()
+EthernetInterface::DHCPConf getDHCPEnabled()
 {
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
@@ -256,7 +259,8 @@ bool getDHCPEnabled()
     auto value = ipmi::getDbusProperty(bus, service, ethernetObj.first,
                                        ethernetIntf, "DHCPEnabled");
 
-    return std::get<bool>(value);
+    return EthernetInterface::convertDHCPConfFromString(
+        std::get<std::string>(value));
 }
 
 bool getDHCPOption(std::string prop)
@@ -1050,7 +1054,8 @@ ipmi_ret_t setDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
             case dcmi::DCMIConfigParameters::ActivateDHCP:
 
                 if ((requestData->data[0] & DCMI_ACTIVATE_DHCP_MASK) &&
-                    dcmi::getDHCPEnabled())
+                    (dcmi::getDHCPEnabled() !=
+                     EthernetInterface::DHCPConf::none))
                 {
                     // When these conditions are met we have to trigger DHCP
                     // protocol restart using the latest parameter settings, but
