@@ -33,6 +33,23 @@
       "message": "Hi @Johnathan,\n\nIt seems that the data type of DHCPEnabled property has been changed from boolean to enum DHCPConf by your commit (https://github.com/openbmc/phosphor-dbus-interfaces/commit/197705962bf99000168c993ab9ac4c69847b384d).\n\nCan you help me to review this patch?\n\nThanks.",
       "revId": "3d56aa5fdb6a43489dff3431aaa1f00dac1cdde2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "efe9d682_1cece7d4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-02-01T22:38:50Z",
+      "side": 1,
+      "message": "I do not believe the new enum style controls are actually being used.\nphosphor-network was modified to stop using those values.\nbmcweb has never enabled them.\nphoshpor-ipmi-host also never completed the transition.\nNothing is using the enumeration.\nphosphor-network relies on\nDHCP4\nDHCP6\nIPv6AcceptRA\n\nI don\u0027t agree with that decision as it creates odd side effects.\n\nYour change here will not do what you think due to the enumeration contract going unused.",
+      "revId": "3d56aa5fdb6a43489dff3431aaa1f00dac1cdde2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
