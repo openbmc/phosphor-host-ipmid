@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "39a603ae_a74c4cf7",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 903,
+      "author": {
+        "id": 1001526
+      },
+      "writtenOn": "2023-02-01T05:44:45Z",
+      "side": 1,
+      "message": "As I see in phosphor-dbus-interfaces, NMI method does not have any argument. It seems that passing bmcSourceSignal in is not correct. I have tested it on our system without bmcSourceSignal and it worked fine.",
+      "revId": "f4ff91bef3f62629ab7d07fb55d522ebce697000",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
