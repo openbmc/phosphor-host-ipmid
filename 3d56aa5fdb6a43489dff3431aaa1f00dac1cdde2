@@ -68,6 +68,40 @@
       "parentUuid": "efe9d682_1cece7d4",
       "revId": "3d56aa5fdb6a43489dff3431aaa1f00dac1cdde2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "252dd7d3_8dbe913e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-02-02T16:01:16Z",
+      "side": 1,
+      "message": "It\u0027s been a long time since I made the DHCPConf code changes. I forgot some of that was accepted and merged. I have another commit that has additional functionality that has been rejected by one of the maintainers of phosphor-network. That was the basis of my prior comments.\n\nThat said I do have an enclosed comment concerning what is supposed to happen vis-a-vis IPv6 with regard to your change.",
+      "revId": "3d56aa5fdb6a43489dff3431aaa1f00dac1cdde2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "59de659b_f4fe4e93",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1058,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-02-02T16:01:16Z",
+      "side": 1,
+      "message": "I expect this requires additional investigation. In the past getDHCPEnabled() was true only for IPv4. The previous code did not check DHCPv4 enabled vs DHCPv6 enabled.\nTo maintain the original code behavior this needs to be more selective:\nEthernetIntf::DHCPConf dhcpMode \u003d getDHCPEnabled();\n\nif (( ....... \u0026\u0026\n    ((dhcpMode \u003d\u003d both) || (dhcpMode \u003d\u003d ipv4)))\n    \nI don\u0027t believe IPv6 is expected to be tested here.\n\nIt\u0027s really hard to know what the correct solution is supposed to be in IPMI land. What does it mean for \"DHCP enabled\" to encompass?\nTraditionally Get LAN Config IP Address Source was enough to know.\nNow with IPv6 more prominant we have to take into account Get LAN Config IPv6 Router Address Config too.\n\nI\u0027m not sufficiently versed in the DCMI code to provide guidance.",
+      "revId": "3d56aa5fdb6a43489dff3431aaa1f00dac1cdde2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
