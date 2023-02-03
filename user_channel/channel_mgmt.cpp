@@ -950,9 +950,6 @@ int ChannelConfig::loadChannelConfig()
             Json jsonChData = data[chKey].get<Json>();
             if (jsonChData.is_null())
             {
-                log<level::WARNING>(
-                    "Channel not configured so loading default.",
-                    entry("CHANNEL_NUM=%d", chNum));
                 // If user didn't want to configure specific channel (say
                 // reserved channel), then load that index with default values.
                 setDefaultChannelConfig(chNum, defaultChannelName);
