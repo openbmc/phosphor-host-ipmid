@@ -309,9 +309,17 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
             .count() > updatePeriod)
     {
         ObjectValueTree managedObjects;
-        boost::system::error_code ec =
-            getManagedObjects(ctx, sensorConnection.c_str(),
-                              "/xyz/openbmc_project/sensors", managedObjects);
+        boost::system::error_code ec;
+        if (sensorConnection == sensor::entityManagerService)
+        {
+            ec = getManagedObjects(ctx, sensorConnection.c_str(),
+                "/xyz/openbmc_project/inventory", managedObjects);
+        }
+        else
+        {
+            ec = getManagedObjects( ctx, sensorConnection.c_str(),
+                "/", managedObjects);
+        }
         if (ec)
         {
             phosphor::logging::log<phosphor::logging::level::ERR>(
