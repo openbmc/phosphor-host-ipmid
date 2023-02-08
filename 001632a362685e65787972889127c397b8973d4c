@@ -54,6 +54,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ad253f33_a9ce57cf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-02-08T03:38:24Z",
+      "side": 1,
+      "message": "I don\u0027t really understand how putting the version in dev_id.json is helpful for most people.  Aren\u0027t they going to want to tag a release and have the tag be somewhat represented in the IPMI version?  I don\u0027t think adding manual update requirements is a great direction.\n\n@Tom, @Vernon,\n\nWhat does Potin need to do to make progress on this, or is it a dead-end?  I\u0027m not sure I have a good understanding.\n\nAs far as I can tell the current code is broken for how we tag openbmc/openbmc.  It seems like at a minimum we should fix that.  If it is done with regex or some other way, I think you two as maintainers can decide, but we need some direction of what you want.",
+      "parentUuid": "8e6b3c62_7adb2095",
+      "revId": "001632a362685e65787972889127c397b8973d4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3b6f58e6_1ab28de0",
