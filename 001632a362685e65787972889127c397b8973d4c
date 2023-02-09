@@ -123,6 +123,24 @@
       "parentUuid": "3b6f58e6_1ab28de0",
       "revId": "001632a362685e65787972889127c397b8973d4c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4915c1e9_5e5b7d2f",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-02-09T15:49:24Z",
+      "side": 1,
+      "message": "I will prefer a separate regex for aux bytes (which can search the remainder of finding major and minor). The aux bytes regex can be empty as well.",
+      "parentUuid": "f93e97d1_bc91fc8b",
+      "revId": "001632a362685e65787972889127c397b8973d4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }

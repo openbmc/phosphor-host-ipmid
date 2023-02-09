@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e66795d_47661e26",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-02-09T15:49:24Z",
+      "side": 1,
+      "message": "I guess I came up with the initial mapping to convert openbmc versioning scheme to IPMI command response :-) https://github.com/openbmc/phosphor-host-ipmid/blob/master/apphandler.cpp#L471\n\nIt is hard to get meaning out of the aux bytes :-(\nI think this is an opportunity to simplify, and we can align with the latest OpenBMC tagging scheme and if there is a general agreement we can have only major and minor.\n\nThe examples in the test can be https://github.com/openbmc/openbmc/tags",
+      "revId": "e96f1d6f1877b36fbb428b82c3d13b421ad223ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c15b2328_d61b01f7",
+        "filename": "apphandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-02-09T15:49:24Z",
+      "side": 1,
+      "message": "Are the exceptions expected be handled by the command handler?",
+      "revId": "e96f1d6f1877b36fbb428b82c3d13b421ad223ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
