@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "be45b5f5_236ddee4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001264
+      },
+      "writtenOn": "2023-02-10T06:57:13Z",
+      "side": 1,
+      "message": "Hi Tom,\nFor most of tags, they all have similar foramt like \"A.B.C-D\".\nCould I simply take \"A\" for major and \"B\" for minor? Perhaps take \"C\" for aux if need?",
+      "parentUuid": "5e66795d_47661e26",
+      "revId": "e96f1d6f1877b36fbb428b82c3d13b421ad223ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "c15b2328_d61b01f7",
         "filename": "apphandler.cpp",
         "patchSetId": 3
@@ -31,6 +49,24 @@
       "writtenOn": "2023-02-09T15:49:24Z",
       "side": 1,
       "message": "Are the exceptions expected be handled by the command handler?",
+      "revId": "e96f1d6f1877b36fbb428b82c3d13b421ad223ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "707c4866_c640f55e",
+        "filename": "apphandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1001264
+      },
+      "writtenOn": "2023-02-10T06:57:13Z",
+      "side": 1,
+      "message": "Will update in next patch and handle the exception in convertVersion()",
+      "parentUuid": "c15b2328_d61b01f7",
       "revId": "e96f1d6f1877b36fbb428b82c3d13b421ad223ce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
