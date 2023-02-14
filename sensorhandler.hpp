@@ -189,6 +189,7 @@ inline void set_record_id(int id, SensorDataRecordHeader* hdr)
 enum SensorDataRecordType
 {
     SENSOR_DATA_FULL_RECORD = 0x1,
+    SENSOR_DATA_COMPACT_RECORD = 0x2,
     SENSOR_DATA_EVENT_RECORD = 0x3,
     SENSOR_DATA_FRU_RECORD = 0x11,
     SENSOR_DATA_ENTITY_RECORD = 0x8,
@@ -335,6 +336,33 @@ struct SensorDataFullRecordBody
     uint8_t positive_threshold_hysteresis;
     uint8_t negative_threshold_hysteresis;
     uint16_t reserved;
+    uint8_t oem_reserved;
+    uint8_t id_string_info;
+    char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
+} __attribute__((packed));
+
+/** @struct SensorDataCompactRecord
+ *
+ *  Compact Sensor Record(body) - SDR Type 2
+ */
+struct SensorDataCompactRecordBody
+{
+    uint8_t entity_id;
+    uint8_t entity_instance;
+    uint8_t sensor_initialization;
+    uint8_t sensor_capabilities; // no macro support
+    uint8_t sensor_type;
+    uint8_t event_reading_type;
+    uint8_t supported_assertions[2];          // no macro support
+    uint8_t supported_deassertions[2];        // no macro support
+    uint8_t discrete_reading_setting_mask[2]; // no macro support
+    uint8_t sensor_units_1;
+    uint8_t sensor_units_2_base;
+    uint8_t sensor_units_3_modifier;
+    uint8_t record_sharing[2];
+    uint8_t positive_threshold_hysteresis;
+    uint8_t negative_threshold_hysteresis;
+    uint8_t reserved[3];
     uint8_t oem_reserved;
     uint8_t id_string_info;
     char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
@@ -632,6 +660,17 @@ struct SensorDataFullRecord
     SensorDataRecordHeader header;
     SensorDataRecordKey key;
     SensorDataFullRecordBody body;
+} __attribute__((packed));
+
+/** @struct SensorDataComapactRecord
+ *
+ *  Compact Sensor Record - SDR Type 2
+ */
+struct SensorDataCompactRecord
+{
+    SensorDataRecordHeader header;
+    SensorDataRecordKey key;
+    SensorDataCompactRecordBody body;
 } __attribute__((packed));
 
 /** @struct SensorDataEventRecord
