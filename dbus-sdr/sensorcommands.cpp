@@ -1948,6 +1948,7 @@ static int getSensorDataRecord(
             ->getIpmiEntityRecords();
     size_t entityCount = entityRecords.size();
 
+    recordData.clear();
     size_t lastRecord = getNumberOfSensors() + fruCount +
                         ipmi::storage::type12Count + entityCount - 1;
     if (recordID == lastRecordIndex)
@@ -2000,8 +2001,9 @@ static int getSensorDataRecord(
             }
             data.header.record_id_msb = recordID >> 8;
             data.header.record_id_lsb = recordID & 0xFF;
-            recordData.insert(recordData.end(), (uint8_t*)&data,
-                              ((uint8_t*)&data) + sizeof(data));
+            recordData.insert(recordData.end(),
+                              reinterpret_cast<uint8_t*>(&data),
+                              reinterpret_cast<uint8_t*>(&data) + sizeof(data));
         }
 
         return 0;
@@ -2080,8 +2082,8 @@ static int getSensorDataRecord(
             return GENERAL_ERROR;
         }
 
-        recordData.insert(recordData.end(), (uint8_t*)&record,
-                          ((uint8_t*)&record) + sizeof(record));
+        recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&record),
+                          reinterpret_cast<uint8_t*>(&record) + sizeof(record));
 
         return 0;
     }
@@ -2105,8 +2107,8 @@ static int getSensorDataRecord(
             constructStaticSensorSdr(ctx, sensorNum, recordID, sensor, record);
         }
 
-        recordData.insert(recordData.end(), (uint8_t*)&record,
-                          ((uint8_t*)&record) + sizeof(record));
+        recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&record),
+                          reinterpret_cast<uint8_t*>(&record) + sizeof(record));
 
         return 0;
     }
@@ -2129,8 +2131,8 @@ static int getSensorDataRecord(
         {
             return GENERAL_ERROR;
         }
-        recordData.insert(recordData.end(), (uint8_t*)&record,
-                          ((uint8_t*)&record) + sizeof(record));
+        recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&record),
+                          reinterpret_cast<uint8_t*>(&record) + sizeof(record));
     }
 
     return 0;
@@ -2176,7 +2178,12 @@ static ipmi::RspType<uint8_t, // respcount
             get_sdr::SensorDataRecordHeader* hdr =
                 reinterpret_cast<get_sdr::SensorDataRecordHeader*>(
                     record.data());
-            if (hdr && hdr->record_type == get_sdr::SENSOR_DATA_FULL_RECORD)
+            if (!hdr)
+            {
+                continue;
+            }
+
+            if (hdr->record_type == get_sdr::SENSOR_DATA_FULL_RECORD)
             {
                 get_sdr::SensorDataFullRecord* recordData =
                     reinterpret_cast<get_sdr::SensorDataFullRecord*>(
@@ -2186,7 +2193,22 @@ static ipmi::RspType<uint8_t, // respcount
                     sdrCount++;
                 }
             }
+            else if (hdr->record_type == get_sdr::SENSOR_DATA_COMPACT_RECORD)
+            {
+                get_sdr::SensorDataCompactRecord* recordData =
+                    reinterpret_cast<get_sdr::SensorDataCompactRecord*>(
+                        record.data());
+                if (ctx->lun == recordData->key.owner_lun)
+                {
+                    sdrCount++;
+                }
+            }
+            else if (hdr->record_type == get_sdr::SENSOR_DATA_FRU_RECORD)
+            {
+                sdrCount++;
+            }
         }
+        sdrCount += ipmi::storage::type12Count;
     }
     else if (count.value_or(0) == getSensorCount)
     {
