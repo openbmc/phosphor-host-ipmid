@@ -2000,7 +2000,7 @@ static int getSensorDataRecord(
             }
             data.header.record_id_msb = recordID >> 8;
             data.header.record_id_lsb = recordID & 0xFF;
-            recordData.insert(recordData.end(), (uint8_t*)&data,
+            recordData.insert(recordData.begin(), (uint8_t*)&data,
                               ((uint8_t*)&data) + sizeof(data));
         }
 
@@ -2080,7 +2080,7 @@ static int getSensorDataRecord(
             return GENERAL_ERROR;
         }
 
-        recordData.insert(recordData.end(), (uint8_t*)&record,
+        recordData.insert(recordData.begin(), (uint8_t*)&record,
                           ((uint8_t*)&record) + sizeof(record));
 
         return 0;
@@ -2105,7 +2105,7 @@ static int getSensorDataRecord(
             constructStaticSensorSdr(ctx, sensorNum, recordID, sensor, record);
         }
 
-        recordData.insert(recordData.end(), (uint8_t*)&record,
+        recordData.insert(recordData.begin(), (uint8_t*)&record,
                           ((uint8_t*)&record) + sizeof(record));
 
         return 0;
@@ -2129,7 +2129,7 @@ static int getSensorDataRecord(
         {
             return GENERAL_ERROR;
         }
-        recordData.insert(recordData.end(), (uint8_t*)&record,
+        recordData.insert(recordData.begin(), (uint8_t*)&record,
                           ((uint8_t*)&record) + sizeof(record));
     }
 
@@ -2186,7 +2186,23 @@ static ipmi::RspType<uint8_t, // respcount
                     sdrCount++;
                 }
             }
+            else if (hdr &&
+                     hdr->record_type == get_sdr::SENSOR_DATA_COMPACT_RECORD)
+            {
+                get_sdr::SensorDataCompactRecord* recordData =
+                    reinterpret_cast<get_sdr::SensorDataCompactRecord*>(
+                        record.data());
+                if (ctx->lun == recordData->key.owner_lun)
+                {
+                    sdrCount++;
+                }
+            }
+            else if (hdr->record_type == get_sdr::SENSOR_DATA_FRU_RECORD)
+            {
+                sdrCount++;
+            }
         }
+        sdrCount += ipmi::storage::type12Count;
     }
     else if (count.value_or(0) == getSensorCount)
     {
