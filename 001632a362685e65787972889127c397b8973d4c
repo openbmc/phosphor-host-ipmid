@@ -159,6 +159,24 @@
       "parentUuid": "4915c1e9_5e5b7d2f",
       "revId": "001632a362685e65787972889127c397b8973d4c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ac13123_c48d3207",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-02-15T23:11:30Z",
+      "side": 1,
+      "message": "I would propose something like a regex and an array of match numbers so that the matches and parts of the version string don\u0027t need to match up.\n\nv1.99.10-113-g65edf7d-r3-0-g9e4f715\nsomething like this:\nregex \u003d \"v([\\d]+)\\.([\\d]+)\\.\\([\\d]+)-([\\d]+)-g[a-f\\d]{4}\\([a-f\\d]{2})-..-([\\d]+)-g([a-f\\d]{2}).{4}([a-f\\d]{2})\"\nmatches \u003d { 1, 2, 6, 5, 4, 3 }\n\nAnd we would place the matched parts in order where the first entry of the matches array would fill major, second to minor, and third through sixth would fill the aux bytes. The only other thing I can think of that this would not respond to is what base to parse captured data (hex or decimal).",
+      "parentUuid": "c16d884a_262bfaa4",
+      "revId": "001632a362685e65787972889127c397b8973d4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
