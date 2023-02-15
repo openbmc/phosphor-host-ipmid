@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "25355f37_80545604",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2003,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-02-15T22:48:46Z",
+      "side": 1,
+      "message": "I didn\u0027t fully understand the commit message until after I wrote this comment. I think that a better solution is to reset() the vector at the top of getSensorDataRecord so that the size() and contents match up. Otherwise, inserting at begin() will still increase the size of the vector, just with the bytes at the beginning instead of the end.",
+      "parentUuid": "cd6a769c_e918891c",
+      "range": {
+        "startLine": 2003,
+        "startChar": 40,
+        "endLine": 2003,
+        "endChar": 48
+      },
+      "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "08c94875_8eebe391",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 1
