@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cd6a769c_e918891c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2003,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-02-15T22:44:54Z",
+      "side": 1,
+      "message": "I am not sure I understand the motivation of changing the .end() to .begin(). If the vector is empty, it shouldn\u0027t make a difference. If the vector is not empty, this seems like strange behavior.",
+      "range": {
+        "startLine": 2003,
+        "startChar": 40,
+        "endLine": 2003,
+        "endChar": 48
+      },
+      "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08c94875_8eebe391",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2004,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-02-15T22:44:54Z",
+      "side": 1,
+      "message": "I recognize you did not add the c-style casts here, but since you are modifying the statement, please update it to use c++ style casts (in this case reinterpret_cast is the correct one.)\n\nSame comment for the next three chunks.",
+      "range": {
+        "startLine": 2003,
+        "startChar": 0,
+        "endLine": 2004,
+        "endChar": 1
+      },
+      "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eaf21b0e_e134beb7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2178,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-02-15T22:44:54Z",
+      "side": 1,
+      "message": "since all three if statements after this line all depend on hdr as non-NULL, maybe make a single check up here that just continues if hdr is NULL and remove the check from below.",
+      "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
