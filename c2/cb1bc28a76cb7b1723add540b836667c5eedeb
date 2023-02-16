@@ -1,0 +1,8 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Vernon Mauery <vernon.mauery@linux.intel.com>
+Code-Review+1: John Broadbent <jebr@google.com>
+Submitted-by: Sui Chen <suichen@google.com>
+Submitted-at: Thu, 16 Feb 2023 02:41:19 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/60159
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
