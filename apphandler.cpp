@@ -468,7 +468,7 @@ typedef struct
 {
     char major;
     char minor;
-    uint16_t d[2];
+    uint8_t aux[4];
 } Revision;
 
 /* Use regular expression searching matched pattern X.Y, and convert it to  */
@@ -479,6 +479,15 @@ typedef struct
 /*           | |---------------- Minor                                      */
 /*           |------------------ Major                                      */
 /*                                                                          */
+/* Default regex string only tries to match Major and Minor version,        */
+/* platforms can define it own regex string to match more for aux bytes.    */
+/*                                                                          */
+/* m[1] = major                                                             */
+/* m[2] = minor                                                             */
+/* m[3] = aux[m.size() - 4] (optional)                                      */
+/* m[4] = aux[m.size() - 5] (optional)                                      */
+/* m[5] = aux[m.size() - 6] (optional)                                      */
+/* m[6] = aux[m.size() - 7] (optional)                                      */
 int convertVersion(std::string s, Revision& rev)
 {
     std::regex fw_regex(FW_VER_REGEX);
@@ -488,6 +497,12 @@ int convertVersion(std::string s, Revision& rev)
 
     while (std::regex_search(s, m, fw_regex))
     {
+        // matched count not enough for coverting Major and Minor version
+        if (m.size() < 3)
+        {
+            continue;
+        }
+
         // convert major
         {
             std::string_view str = m[1].str();
@@ -508,6 +523,29 @@ int convertVersion(std::string s, Revision& rev)
                 continue;
             }
             r.minor = val & 0xFF;
+        }
+
+        // convert aux bytes (m[3] - m[m.size()-1])
+        if (m.size() > 3)
+        {
+            size_t i;
+            for (i = 3; i < m.size(); i++)
+            {
+                std::string_view str = m[i].str();
+                auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val,
+                                               16)};
+                if (ec != std::errc() || ptr != str.begin() + str.size())
+                { // failed to convert aux byte string
+                    break;
+                }
+
+                r.aux[m.size() - i - 1] = val & 0xFF;
+            }
+
+            if (i != m.size())
+            {   // something wrong durign converting aux bytes
+                continue;
+            }
         }
 
         // all matched
@@ -589,7 +627,7 @@ ipmi::RspType<uint8_t,  // Device ID
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            std::memcpy(&devId.aux, rev.d, 4);
+            std::memcpy(&devId.aux, rev.aux, 4);
             haveBMCVersion = true;
         }
     }
