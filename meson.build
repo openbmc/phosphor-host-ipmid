@@ -34,6 +34,14 @@ conf_data.set_quoted('POWER_READING_SENSOR', get_option('power-reading-sensor'))
 conf_data.set_quoted('HOST_IPMI_LIB_PATH', get_option('host-ipmi-lib-path'))
 conf_data.set_quoted('FW_VER_REGEX', get_option('fw-ver-regex'))
 
+matches_map = get_option('matches-map')
+conf_data.set('MAJOR_MATCH_INDEX', matches_map[0])
+conf_data.set('MINOR_MATCH_INDEX', matches_map[1])
+conf_data.set('AUX_0_MATCH_INDEX', matches_map[2])
+conf_data.set('AUX_1_MATCH_INDEX', matches_map[3])
+conf_data.set('AUX_2_MATCH_INDEX', matches_map[4])
+conf_data.set('AUX_3_MATCH_INDEX', matches_map[5])
+
 conf_h = configure_file(
   output: 'config.h',
   configuration: conf_data)

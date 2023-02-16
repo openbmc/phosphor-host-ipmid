@@ -468,7 +468,7 @@ typedef struct
 {
     char major;
     char minor;
-    uint16_t d[2];
+    uint8_t aux[4];
 } Revision;
 
 /* Use regular expression searching matched pattern X.Y, and convert it to  */
@@ -479,8 +479,38 @@ typedef struct
 /*           | |---------------- Minor                                      */
 /*           |------------------ Major                                      */
 /*                                                                          */
+/* Default regex string only tries to match Major and Minor version.        */
+/*                                                                          */
+/* To match more firmware version info, platforms need to define it own     */
+/* regex string to match more strings, and assign correct mapping index in  */
+/* matches array.                                                           */
+/*                                                                          */
+/* matches[0]: matched index for major ver                                  */
+/* matches[1]: matched index for minor ver                                  */
+/* matches[2]: matched index for aux[0] (set 0 to skip)                     */
+/* matches[3]: matched index for aux[1] (set 0 to skip)                     */
+/* matches[4]: matched index for aux[2] (set 0 to skip)                     */
+/* matches[5]: matched index for aux[3] (set 0 to skip)                     */
+/* Example:                                                                 */
+/* regex = "([\d]+).([\d]+).([\d]+)-dev-([\d]+)-g([0-9a-fA-F]{2})           */
+/*          ([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})"               */
+/* matches = {1,2,5,6,7,8}                                                  */
+/* version = 2.14.0-dev-750-g37a7c5ad1-dirty                                */
+/*           ^ ^  ^     ^    ^ ^ ^ ^                                        */
+/*           | |  |     |    | | | |                                        */
+/*           | |  |     |    | | | |-- Aux byte 3 (0xAD), index 8           */
+/*           | |  |     |    | | |---- Aux byte 2 (0xC5), index 7           */
+/*           | |  |     |    | |------ Aux byte 1 (0xA7), index 6           */
+/*           | |  |     |    |-------- Aux byte 0 (0x37), index 5           */
+/*           | |  |     |------------- Not used, index 4                    */
+/*           | |  |------------------- Not used, index 3                    */
+/*           | |---------------------- Minor (14), index 2                  */
+/*           |------------------------ Major (2), index 1                   */
 int convertVersion(std::string s, Revision& rev)
 {
+    static const std::vector<size_t> matches = {
+        MAJOR_MATCH_INDEX, MINOR_MATCH_INDEX, AUX_0_MATCH_INDEX,
+        AUX_1_MATCH_INDEX, AUX_2_MATCH_INDEX, AUX_3_MATCH_INDEX};
     std::regex fw_regex(FW_VER_REGEX);
     std::smatch m;
     Revision r = {0};
@@ -488,14 +518,14 @@ int convertVersion(std::string s, Revision& rev)
 
     if (std::regex_search(s, m, fw_regex))
     {
-        if (m.size() < 3)
-        { // required m.size() to be at lease 3 to convert both major and minor
+        if (m.size() < *std::max_element(matches.begin(), matches.end()))
+        { // max index higher than match count
             return -1;
         }
 
         // convert major
         {
-            std::string_view str = m[1].str();
+            std::string_view str = m[matches[0]].str();
             auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
             if (ec != std::errc() || ptr != str.begin() + str.size())
             { // failed to convert major string
@@ -506,13 +536,40 @@ int convertVersion(std::string s, Revision& rev)
 
         // convert minor
         {
-            std::string_view str = m[2].str();
+            std::string_view str = m[matches[1]].str();
             auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
             if (ec != std::errc() || ptr != str.begin() + str.size())
             { // failed to convert minor string
                 return -1;
             }
             r.minor = val & 0xFF;
+        }
+
+        // convert aux bytes
+        {
+            size_t i;
+            for (i = 0; i < 4; i++)
+            {
+                if (matches[i + 2] == 0)
+                {
+                    continue;
+                }
+
+                std::string_view str = m[matches[i + 2]].str();
+                auto [ptr,
+                      ec]{std::from_chars(str.begin(), str.end(), val, 16)};
+                if (ec != std::errc() || ptr != str.begin() + str.size())
+                { // failed to convert aux byte string
+                    break;
+                }
+
+                r.aux[i] = val & 0xFF;
+            }
+
+            if (i != 4)
+            { // something wrong durign converting aux bytes
+                return -1;
+            }
         }
 
         // all matched
@@ -594,7 +651,7 @@ ipmi::RspType<uint8_t,  // Device ID
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            std::memcpy(&devId.aux, rev.d, 4);
+            std::memcpy(&devId.aux, rev.aux, sizeof(rev.aux));
             haveBMCVersion = true;
         }
     }
