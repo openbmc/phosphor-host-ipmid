@@ -121,6 +121,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "623a5dbf_fe3272de",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-02-17T06:47:48Z",
+      "side": 1,
+      "message": "Can you help me vote +1 for this commit @Johnathan?",
+      "revId": "3d56aa5fdb6a43489dff3431aaa1f00dac1cdde2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "59de659b_f4fe4e93",
