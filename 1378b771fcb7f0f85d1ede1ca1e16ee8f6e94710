@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ce3abae4_80b9a1b8",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2003,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-02-17T05:00:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25355f37_80545604",
+      "range": {
+        "startLine": 2003,
+        "startChar": 40,
+        "endLine": 2003,
+        "endChar": 48
+      },
+      "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "08c94875_8eebe391",
@@ -71,6 +95,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6bdd991f_b6a1ac68",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2004,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-02-17T05:00:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08c94875_8eebe391",
+      "range": {
+        "startLine": 2003,
+        "startChar": 0,
+        "endLine": 2004,
+        "endChar": 1
+      },
+      "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "eaf21b0e_e134beb7",
@@ -84,6 +132,24 @@
       "writtenOn": "2023-02-15T22:44:54Z",
       "side": 1,
       "message": "since all three if statements after this line all depend on hdr as non-NULL, maybe make a single check up here that just continues if hdr is NULL and remove the check from below.",
+      "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b32e8d45_f05c3846",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2178,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-02-17T05:00:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eaf21b0e_e134beb7",
       "revId": "1378b771fcb7f0f85d1ede1ca1e16ee8f6e94710",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
