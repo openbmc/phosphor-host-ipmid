@@ -16,6 +16,23 @@
       "message": "Hi Tom \u0026 Vernon,\nJust wondering that is current patch looks for you?\nPlease kindly let me know if any modifications needed, thank you.",
       "revId": "12e3df2d1948f4ad0fc8d373dd40581b9185f4dc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aaaff65f_489a2d91",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2023-02-23T03:18:41Z",
+      "side": 1,
+      "message": "Vernon, any concerns with this patchset and aux bytes parsing as a follow-up patch.",
+      "revId": "12e3df2d1948f4ad0fc8d373dd40581b9185f4dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
