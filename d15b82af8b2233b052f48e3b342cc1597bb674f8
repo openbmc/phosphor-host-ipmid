@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3fcc8ba0_3bfb8df9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-02-23T18:00:28Z",
+      "side": 1,
+      "message": "This is okay, but not quite as flexible as I had put forward in my prior comment.",
+      "revId": "d15b82af8b2233b052f48e3b342cc1597bb674f8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "20df07a1_4b8798e2",
+        "filename": "apphandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-02-23T18:00:28Z",
+      "side": 1,
+      "message": "I am not clear why bytes are getting reversed here. For maximum flexibility, I had recommended allowing the user to specify the map of match number to major/minor/aux[0]/../aux[3] values.",
+      "range": {
+        "startLine": 542,
+        "startChar": 16,
+        "endLine": 542,
+        "endChar": 53
+      },
+      "revId": "d15b82af8b2233b052f48e3b342cc1597bb674f8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
