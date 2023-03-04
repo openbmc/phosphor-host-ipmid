@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "rakp12.hpp"
 
 #include "comm_module.hpp"
@@ -204,6 +206,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         logInvalidLoginRedfishEvent(message);
         return outPayload;
     }
+#ifdef PAM_AUTHENTICATE
     // Check whether user is already locked for failed attempts
     if (!ipmi::ipmiUserPamAuthenticate(userName, passwd))
     {
@@ -216,6 +219,7 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         logInvalidLoginRedfishEvent(message);
         return outPayload;
     }
+#endif
 
     uint8_t chNum = static_cast<uint8_t>(getInterfaceIndex());
     // Get channel based access information

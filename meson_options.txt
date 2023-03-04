@@ -11,3 +11,10 @@ option(
     value: 'enabled',
     description : 'Enable RMCP Ping support'
 )
+
+option(
+    'pam_authenticate',
+    type : 'feature',
+    value: 'enabled',
+    description : 'Enable Pam Authenticate'
+)
