@@ -41,7 +41,8 @@ void EventLoop::startRmcpReceive()
                           [this](const boost::system::error_code& ec) {
                               if (!ec)
                               {
-                                  io->post([this]() { startRmcpReceive(); });
+                                  boost::asio::post(
+                                      *io, [this]() { startRmcpReceive(); });
                                   handleRmcpPacket();
                               }
                           });
