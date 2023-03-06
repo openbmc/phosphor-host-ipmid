@@ -334,14 +334,15 @@ uint8_t Manager::getActiveSessionCount() const
 
 void Manager::scheduleSessionCleaner(const std::chrono::microseconds& when)
 {
-    std::chrono::duration expTime = timer.expires_from_now();
+    std::chrono::duration expTime =
+        timer.expiry() - boost::asio::steady_timer::clock_type::now();
     if (expTime > std::chrono::microseconds(0) && expTime < when)
     {
         // if timer has not already expired AND requested timeout is greater
         // than current timeout then ignore this new requested timeout
         return;
     }
-    timer.expires_from_now(when);
+    timer.expires_after(when);
     timer.async_wait([this](const boost::system::error_code& ec) {
         if (!ec)
         {
