@@ -1095,6 +1095,36 @@ static bool setButtonEnabled(ipmi::Context::ptr& ctx,
     return true;
 }
 
+static std::optional<bool> getChassisIntrusionStatus(ipmi::Context::ptr& ctx)
+{
+    constexpr const char* chassisIntrusionPath =
+        "/xyz/openbmc_project/Chassis/Intrusion";
+    constexpr const char* chassisIntrusionInf =
+        "xyz.openbmc_project.Chassis.Intrusion";
+
+    std::string service;
+    boost::system::error_code ec = ipmi::getService(
+        ctx, chassisIntrusionInf, chassisIntrusionPath, service);
+    if (!ec)
+    {
+        std::string chassisIntrusionStr;
+        ec = ipmi::getDbusProperty<std::string>(
+            ctx, service, chassisIntrusionPath, chassisIntrusionInf, "Status",
+            chassisIntrusionStr);
+        if (!ec)
+        {
+            bool ret =
+                (chassisIntrusionStr == "HardwareIntrusion") ? true : false;
+            return std::make_optional(ret);
+        }
+    }
+    log<level::ERR>("Fail to get Chassis Intrusion Status property",
+                    entry("PATH=%s", chassisIntrusionPath),
+                    entry("INTERFACE=%s", chassisIntrusionInf),
+                    entry("ERROR=%s", ec.message().c_str()));
+    return std::nullopt;
+}
+
 //----------------------------------------------------------------------
 // Get Chassis Status commands
 //----------------------------------------------------------------------
@@ -1130,7 +1160,7 @@ ipmi::RspType<bool,    // Power is on
               bool, // Diagnostic Interrupt button disable allowed
               bool  // Standby (sleep) button disable allowed
               >
-    ipmiGetChassisStatus()
+    ipmiGetChassisStatus(ipmi::Context::ptr& ctx)
 {
     using namespace chassis::internal;
     std::optional<uint2_t> restorePolicy =
@@ -1168,6 +1198,13 @@ ipmi::RspType<bool,    // Power is on
 
     bool powerDownAcFailed = power_policy::getACFailStatus();
 
+    bool chassisIntrusionActive = false;
+    std::optional<bool> chassisIntrusionStatus = getChassisIntrusionStatus(ctx);
+    if (chassisIntrusionStatus)
+    {
+        chassisIntrusionActive = chassisIntrusionStatus.value();
+    }
+
     // This response has a lot of hard-coded, unsupported fields
     // They are set to false or 0
     constexpr bool powerOverload = false;
@@ -1178,7 +1215,6 @@ ipmi::RspType<bool,    // Power is on
     constexpr bool powerDownInterlock = false;
     constexpr bool powerDownPowerFault = false;
     constexpr bool powerStatusIPMI = false;
-    constexpr bool chassisIntrusionActive = false;
     constexpr bool frontPanelLockoutActive = false;
     constexpr bool driveFault = false;
     constexpr bool coolingFanFault = false;
