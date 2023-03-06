@@ -1095,6 +1095,33 @@ static bool setButtonEnabled(ipmi::Context::ptr& ctx,
     return true;
 }
 
+static std::optional<bool> getChassisIntrusionStatus()
+{
+    constexpr const char* chassisIntrusionPath =
+        "/xyz/openbmc_project/Chassis/Intrusion";
+    constexpr const char* chassisIntrusionInf =
+        "xyz.openbmc_project.Chassis.Intrusion";
+    std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
+    try
+    {
+        std::string service =
+            ipmi::getService(*bus, chassisIntrusionInf, chassisIntrusionPath);
+        std::string chassisIntrusionStr = std::get<std::string>(
+            ipmi::getDbusProperty(*bus, service, chassisIntrusionPath,
+                                  chassisIntrusionInf, "Status"));
+        bool ret = (chassisIntrusionStr == "HardwareIntrusion") ? true : false;
+        return std::make_optional(ret);
+    }
+    catch (const sdbusplus::exception_t& e)
+    {
+        log<level::ERR>("Fail to get Chassis Intrusion Status property",
+                        entry("PATH=%s", chassisIntrusionPath),
+                        entry("INTERFACE=%s", chassisIntrusionInf),
+                        entry("ERROR=%s", e.what()));
+        return std::nullopt;
+    }
+}
+
 //----------------------------------------------------------------------
 // Get Chassis Status commands
 //----------------------------------------------------------------------
@@ -1168,6 +1195,13 @@ ipmi::RspType<bool,    // Power is on
 
     bool powerDownAcFailed = power_policy::getACFailStatus();
 
+    bool chassisIntrusionActive = false;
+    std::optional<bool> chassisIntrusionStatus = getChassisIntrusionStatus();
+    if (chassisIntrusionStatus)
+    {
+        chassisIntrusionActive = chassisIntrusionStatus.value();
+    }
+
     // This response has a lot of hard-coded, unsupported fields
     // They are set to false or 0
     constexpr bool powerOverload = false;
@@ -1178,7 +1212,6 @@ ipmi::RspType<bool,    // Power is on
     constexpr bool powerDownInterlock = false;
     constexpr bool powerDownPowerFault = false;
     constexpr bool powerStatusIPMI = false;
-    constexpr bool chassisIntrusionActive = false;
     constexpr bool frontPanelLockoutActive = false;
     constexpr bool driveFault = false;
     constexpr bool coolingFanFault = false;
