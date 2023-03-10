@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a9f6a4fa_50dd72ff",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-03-10T07:40:13Z",
+      "side": 1,
+      "message": "I see that this vector is only used by the \"convertVersion\" function, I think you should move this variable to the \"convertVersion\" function.",
+      "revId": "e8af1c3fa0d2750344e5142db71ada7884072a69",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6449c736_25c8ed18",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-03-10T07:40:13Z",
+      "side": 1,
+      "message": "It seems that this \"for\" loop is redundant, in both cases, you do nothing. You checked the indexes in the below \"for\" loop.",
+      "revId": "e8af1c3fa0d2750344e5142db71ada7884072a69",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "46242fc6_d234b670",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-03-10T07:40:13Z",
+      "side": 1,
+      "message": "I think you should break the \"while\" loop here, if not, it seems that an infinity \"while\" loop is called.\nPlease check other \"continue\" commands.",
+      "revId": "e8af1c3fa0d2750344e5142db71ada7884072a69",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6f128ab1_9ffbced5",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-03-10T07:40:13Z",
+      "side": 1,
+      "message": "What do you think if this magic number is replaced by \"sizeof(rev.aux)\"?",
+      "range": {
+        "startLine": 644,
+        "startChar": 45,
+        "endLine": 644,
+        "endChar": 46
+      },
+      "revId": "e8af1c3fa0d2750344e5142db71ada7884072a69",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
