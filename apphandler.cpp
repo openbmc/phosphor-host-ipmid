@@ -486,15 +486,20 @@ int convertVersion(std::string s, Revision& rev)
     Revision r = {0};
     size_t val;
 
-    while (std::regex_search(s, m, fw_regex))
+    if (std::regex_search(s, m, fw_regex))
     {
+        if (m.size() < 3)
+        { // required m.size() to be at lease 3 to convert both major and minor
+            return -1;
+        }
+
         // convert major
         {
             std::string_view str = m[1].str();
             auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
             if (ec != std::errc() || ptr != str.begin() + str.size())
             { // failed to convert major string
-                continue;
+                return -1;
             }
             r.major = val & 0x7F;
         }
@@ -505,17 +510,15 @@ int convertVersion(std::string s, Revision& rev)
             auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
             if (ec != std::errc() || ptr != str.begin() + str.size())
             { // failed to convert minor string
-                continue;
+                return -1;
             }
             r.minor = val & 0xFF;
         }
-
-        // all matched
-        rev = r;
-        return 0;
     }
 
-    return -1;
+    // all matched
+    rev = r;
+    return 0;
 }
 
 /* @brief: Implement the Get Device ID IPMI command per the IPMI spec
