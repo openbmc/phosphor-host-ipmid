@@ -54,6 +54,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "e3a351b5_30ebc91e",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1001264
+      },
+      "writtenOn": "2023-03-16T11:34:58Z",
+      "side": 1,
+      "message": "Yes, you\u0027re correct. I misunderstood the usage of std::regex_search().\n\nI submitted another patch to fix the wrong usage on merged code.\nWould you mind help me review the patch? then I will update this patch next.\nhttps://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/61689",
+      "parentUuid": "46242fc6_d234b670",
+      "revId": "e8af1c3fa0d2750344e5142db71ada7884072a69",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6f128ab1_9ffbced5",
         "filename": "apphandler.cpp",
         "patchSetId": 4
