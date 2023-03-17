@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7534d960_51fd31a6",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1001264
+      },
+      "writtenOn": "2023-03-17T08:21:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5cd978a0_a906d1a5",
+      "revId": "26ace37c2f79bb170a6386815b7ba255f08cc02a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0f0638be_df47f961",
@@ -31,6 +49,24 @@
       "writtenOn": "2023-03-17T03:37:19Z",
       "side": 1,
       "message": "It not in the scope of this commit, but Do you have to check the \u0027val\u0027 is less than 99 and greater than 0?",
+      "revId": "26ace37c2f79bb170a6386815b7ba255f08cc02a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8bab8b1d_570d0a8a",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1001264
+      },
+      "writtenOn": "2023-03-17T08:21:03Z",
+      "side": 1,
+      "message": "I use `size_t val` for storing convert result, which means it only accept unsigned value.\n\nI am not sure about this, does firmware major version only allow the value from 0 to 99? In IPMI `get device id` command, it only shows byte4[6:0] of response data is major version.",
+      "parentUuid": "0f0638be_df47f961",
       "revId": "26ace37c2f79bb170a6386815b7ba255f08cc02a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
