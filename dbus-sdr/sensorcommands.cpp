@@ -2190,6 +2190,15 @@ static ipmi::RspType<uint8_t, // respcount
     {
         auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
 
+        if (ctx->lun == 1)
+        {
+            recordID += maxSensorsPerLUN;
+        }
+        else if (ctx->lun == 3)
+        {
+            recordID += maxSensorsPerLUN * 2;
+        }
+
         // Count the number of Type 1 SDR entries assigned to the LUN
         while (!getSensorDataRecord(
             ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
@@ -2223,12 +2232,19 @@ static ipmi::RspType<uint8_t, // respcount
                     sdrCount++;
                 }
             }
-            else if (hdr->record_type == get_sdr::SENSOR_DATA_FRU_RECORD)
+            else if (hdr->record_type == get_sdr::SENSOR_DATA_FRU_RECORD ||
+                     hdr->record_type == get_sdr::SENSOR_DATA_MGMT_CTRL_LOCATOR)
             {
                 sdrCount++;
             }
+
+            // Because response count data is 1 byte, so sdrCount need to avoid
+            // overflow.
+            if (sdrCount == maxSensorsPerLUN)
+            {
+                break;
+            }
         }
-        sdrCount += ipmi::storage::type12Count;
     }
     else if (count.value_or(0) == getSensorCount)
     {
