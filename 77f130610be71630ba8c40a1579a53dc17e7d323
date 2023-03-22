@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a7da34ce_9eacc052",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2193,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-03-22T05:45:21Z",
+      "side": 1,
+      "message": "what does \n\nlun \u003d\u003d 1 or 3 means?\n\nMaybe define a global const so it will be easier to understand in the future.",
+      "range": {
+        "startLine": 2193,
+        "startChar": 12,
+        "endLine": 2193,
+        "endChar": 25
+      },
+      "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
