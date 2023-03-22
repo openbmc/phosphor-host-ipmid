@@ -72,6 +72,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1d6690d7_97a24cf7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2193,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2023-03-22T09:34:04Z",
+      "side": 1,
+      "message": "Commit https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/61776 to define LUN global const",
+      "parentUuid": "b68b64b3_51dec9df",
+      "range": {
+        "startLine": 2193,
+        "startChar": 12,
+        "endLine": 2193,
+        "endChar": 25
+      },
+      "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e772f4a6_e262555f",
