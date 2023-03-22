@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0fef98e6_fda6b88a",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2193,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2023-03-22T06:29:33Z",
+      "side": 1,
+      "message": "There are three lun that can save the record data(lun0, lun1, lun3), the max sensor number for each lun is 255.\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/dbus-sdr/sensorcommands.cpp#L94-L103\n\nUser can add option -l in cmd to choose the lun.\n\nThere also has if condition to detect ctx-\u003elun is 0 or 1 or 3.\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/dbus-sdr/sensorcommands.cpp#L2233-L2261",
+      "parentUuid": "a7da34ce_9eacc052",
+      "range": {
+        "startLine": 2193,
+        "startChar": 12,
+        "endLine": 2193,
+        "endChar": 25
+      },
+      "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e772f4a6_e262555f",
@@ -37,6 +61,24 @@
       "writtenOn": "2023-03-22T06:06:32Z",
       "side": 1,
       "message": "Can we do like below. since doing same function.\nelse if(hdr-\u003erecord_type \u003d\u003d FRU_RECORD || hdr-\u003erecord_type \u003d\u003d MGMT_CTRL_LOCATOR)\n{\nsdrcount++;\n}",
+      "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "27fd10dd_d0588eda",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2239,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2023-03-22T06:29:33Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "e772f4a6_e262555f",
       "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
