@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b68b64b3_51dec9df",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2193,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2023-03-22T06:34:08Z",
+      "side": 1,
+      "message": "\u003e\u003e\u003e Maybe define a global const so it will be easier to understand in the future.\n\nAgree. I will replace lun value to global const in another PR.",
+      "parentUuid": "0fef98e6_fda6b88a",
+      "range": {
+        "startLine": 2193,
+        "startChar": 12,
+        "endLine": 2193,
+        "endChar": 25
+      },
+      "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e772f4a6_e262555f",
