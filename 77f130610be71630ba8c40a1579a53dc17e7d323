@@ -22,6 +22,23 @@
       },
       "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e772f4a6_e262555f",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2239,
+      "author": {
+        "id": 1001074
+      },
+      "writtenOn": "2023-03-22T06:06:32Z",
+      "side": 1,
+      "message": "Can we do like below. since doing same function.\nelse if(hdr-\u003erecord_type \u003d\u003d FRU_RECORD || hdr-\u003erecord_type \u003d\u003d MGMT_CTRL_LOCATOR)\n{\nsdrcount++;\n}",
+      "revId": "77f130610be71630ba8c40a1579a53dc17e7d323",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
