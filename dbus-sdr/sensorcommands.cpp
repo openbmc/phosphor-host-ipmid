@@ -94,9 +94,13 @@ static constexpr size_t lastRecordIndex = 0xFFFF;
 // The IPMI spec defines four Logical Units (LUN), each capable of supporting
 // 255 sensors. The 256 values assigned to LUN 2 are special and are not used
 // for general purpose sensors. Each LUN reserves location 0xFF. The maximum
-// number of IPMI sensors are LUN 0 + LUN 1 + LUN 2, less the reserved
+// number of IPMI sensors are LUN 0 + LUN 1 + LUN 3, less the reserved
 // location.
 static constexpr size_t maxIPMISensors = ((3 * 256) - (3 * 1));
+
+static constexpr size_t lun0 = 0;
+static constexpr size_t lun1 = static_cast<uint8_t>(lun1Sensor0 >> 8);
+static constexpr size_t lun3 = static_cast<uint8_t>(lun3Sensor0 >> 8);
 
 static constexpr size_t lun0MaxSensorNum = 0xfe;
 static constexpr size_t lun1MaxSensorNum = 0x1fe;
@@ -2043,7 +2047,7 @@ static int getSensorDataRecord(
         // LUN 0 has one reserved sensor number. Compensate here by adding one
         // to the record ID
         sensNumFromRecID = recordID + 1;
-        ctx->lun = 1;
+        ctx->lun = lun1;
     }
     else if ((recordID >= lun1MaxSensorNum) && (recordID < maxIPMISensors))
     {
@@ -2051,7 +2055,7 @@ static int getSensorDataRecord(
         // to the record ID. Skip all 256 sensors in LUN 2, as it has special
         // rules governing its use.
         sensNumFromRecID = recordID + (maxSensorsPerLUN + 1) + 2;
-        ctx->lun = 3;
+        ctx->lun = lun3;
     }
 
     auto status =
@@ -2190,16 +2194,17 @@ static ipmi::RspType<uint8_t, // respcount
     {
         auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
 
-        if (ctx->lun == 1)
+        if (ctx->lun == lun1)
         {
             recordID += maxSensorsPerLUN;
         }
-        else if (ctx->lun == 3)
+        else if (ctx->lun == lun3)
         {
             recordID += maxSensorsPerLUN * 2;
         }
 
-        // Count the number of Type 1 SDR entries assigned to the LUN
+        // Count the number of Type 1h, Type 2h, Type 11h, Type 12h SDR entries
+        // assigned to the LUN
         while (!getSensorDataRecord(
             ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
             record, recordID++))
@@ -2249,18 +2254,18 @@ static ipmi::RspType<uint8_t, // respcount
     else if (count.value_or(0) == getSensorCount)
     {
         // Return the number of sensors attached to the LUN
-        if ((ctx->lun == 0) && (numSensors > 0))
+        if ((ctx->lun == lun0) && (numSensors > 0))
         {
             sdrCount =
                 (numSensors > maxSensorsPerLUN) ? maxSensorsPerLUN : numSensors;
         }
-        else if ((ctx->lun == 1) && (numSensors > maxSensorsPerLUN))
+        else if ((ctx->lun == lun1) && (numSensors > maxSensorsPerLUN))
         {
             sdrCount = (numSensors > (2 * maxSensorsPerLUN))
                            ? maxSensorsPerLUN
                            : (numSensors - maxSensorsPerLUN) & maxSensorsPerLUN;
         }
-        else if (ctx->lun == 3)
+        else if (ctx->lun == lun3)
         {
             if (numSensors <= maxIPMISensors)
             {
