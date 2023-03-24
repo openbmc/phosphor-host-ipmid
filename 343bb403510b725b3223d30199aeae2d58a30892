@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "27236b64_30a4b716",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1098,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-03-24T22:13:19Z",
+      "side": 1,
+      "message": "ipmi::Context::ptr\u0026 ctx",
+      "range": {
+        "startLine": 1098,
+        "startChar": 53,
+        "endLine": 1098,
+        "endChar": 54
+      },
+      "revId": "343bb403510b725b3223d30199aeae2d58a30892",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7982b3b2_280f4c84",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1107,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-03-24T22:13:19Z",
+      "side": 1,
+      "message": "when using the yielding variants of the dbus command (the ones that use ctx), there is no need to use getSdBus or try/catch. They are non-throwing and use boost::system::error_code to return errors.",
+      "range": {
+        "startLine": 1104,
+        "startChar": 0,
+        "endLine": 1107,
+        "endChar": 0
+      },
+      "revId": "343bb403510b725b3223d30199aeae2d58a30892",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e0a6ebc8_8f3af085",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1116,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-03-24T22:13:19Z",
+      "side": 1,
+      "message": "std::string service{};\nboost::system::error_code ec \u003d ipmi::getService(ctx, chassisIntrusionInf, chassisIntrusionPath, service);\n\nif (!ec)\n{\n    std::string chassisIntrusionStr{};\n    ec \u003d ipmi::getDbusProperty(ctx, service, chassisIntrusionPath, chassisIntrusionInf, \"Status\", chassisIntrusionStr);\n    if (!ec)\n    {\n        bool ret \u003d (chassisIntrusionStr \u003d\u003d \"HardwareIntrusion\") ? true : false;\n        return std::make_optional(ret);\n    }\n}\n// log error ...\n// return std::nullopt",
+      "range": {
+        "startLine": 1108,
+        "startChar": 0,
+        "endLine": 1116,
+        "endChar": 0
+      },
+      "revId": "343bb403510b725b3223d30199aeae2d58a30892",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "941fdc83_83209ded",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1160,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-03-24T22:13:19Z",
+      "side": 1,
+      "message": "add ipmi::Context::ptr\u0026 ctx as an argument here so it can be passed to getChassisIntrusionStatus()",
+      "revId": "343bb403510b725b3223d30199aeae2d58a30892",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "732df358_ddc47b1d",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1199,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-03-24T22:13:19Z",
+      "side": 1,
+      "message": "pass ctx here.",
+      "range": {
+        "startLine": 1199,
+        "startChar": 75,
+        "endLine": 1199,
+        "endChar": 77
+      },
+      "revId": "343bb403510b725b3223d30199aeae2d58a30892",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
