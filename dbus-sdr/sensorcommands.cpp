@@ -1663,6 +1663,7 @@ bool constructSensorSdr(
         return false;
     }
 
+    //test
     uint8_t entityId = 0;
     uint8_t entityInstance = 0x01;
 
