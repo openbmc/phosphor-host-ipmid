@@ -238,7 +238,7 @@ void registerSOLServiceChangeCallback()
     {
         auto servicePath = ipmi::getDbusObject(
             bus, "xyz.openbmc_project.Control.Service.Attributes",
-            "/xyz/openbmc_project/control/service", "obmc_2dconsole");
+            "/xyz/openbmc_project/control/service", "_6fbmc_2dconsole");
 
         if (!std::empty(servicePath.first))
         {
