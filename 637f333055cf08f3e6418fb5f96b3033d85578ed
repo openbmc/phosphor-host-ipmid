@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c77686e6_d15deb41",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000908
+      },
+      "writtenOn": "2023-03-30T18:08:24Z",
+      "side": 1,
+      "message": "This change solves problem with DHCP config for IPMI DCMI set_conf_param and get_conf_param commands.\n\nWhat is required for this change to be submitted?",
+      "revId": "637f333055cf08f3e6418fb5f96b3033d85578ed",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
