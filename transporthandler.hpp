@@ -6,6 +6,23 @@
 #include <arpa/inet.h>
 #include <netinet/ether.h>
 
+#include <ipmid/api-types.hpp>
+#include <ipmid/api.hpp>
+#include <ipmid/message.hpp>
+#include <ipmid/message/types.hpp>
+#include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/bus.hpp>
+#include <sdbusplus/exception.hpp>
+#include <user_channel/channel_layer.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
+#include <xyz/openbmc_project/Network/IP/server.hpp>
+#include <xyz/openbmc_project/Network/Neighbor/server.hpp>
+
 #include <array>
 #include <bitset>
 #include <cinttypes>
@@ -13,30 +30,14 @@
 #include <cstring>
 #include <fstream>
 #include <functional>
-#include <ipmid/api-types.hpp>
-#include <ipmid/api.hpp>
-#include <ipmid/message.hpp>
-#include <ipmid/message/types.hpp>
-#include <ipmid/types.hpp>
-#include <ipmid/utils.hpp>
 #include <optional>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/bus.hpp>
-#include <sdbusplus/exception.hpp>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
-#include <user_channel/channel_layer.hpp>
 #include <utility>
 #include <vector>
-#include <xyz/openbmc_project/Common/error.hpp>
-#include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
-#include <xyz/openbmc_project/Network/IP/server.hpp>
-#include <xyz/openbmc_project/Network/Neighbor/server.hpp>
 
 namespace ipmi
 {
@@ -257,8 +258,7 @@ auto channelCall(uint8_t channel, Args&&... args)
 /** @brief Generic paramters for different address families */
 template <int family>
 struct AddrFamily
-{
-};
+{};
 
 /** @brief Parameter specialization for IPv4 */
 template <>
@@ -339,8 +339,7 @@ class ObjectLookupCache
         bus(bus),
         params(params), intf(intf),
         objs(getAllDbusObjects(bus, params.logicalPath, intf, ""))
-    {
-    }
+    {}
 
     class iterator : public ObjectTree::const_iterator
     {
@@ -350,8 +349,7 @@ class ObjectLookupCache
         iterator(ObjectTree::const_iterator it, ObjectLookupCache& container) :
             ObjectTree::const_iterator(it), container(container),
             ret(container.cache.end())
-        {
-        }
+        {}
         value_type& operator*()
         {
             ret = container.get(ObjectTree::const_iterator::operator*().first);
@@ -635,9 +633,9 @@ void createNeighbor(sdbusplus::bus_t& bus, const ChannelParams& params,
                     const typename AddrFamily<family>::addr& address,
                     const ether_addr& mac)
 {
-    auto newreq =
-        bus.new_method_call(params.service.c_str(), params.logicalPath.c_str(),
-                            INTF_NEIGHBOR_CREATE_STATIC, "Neighbor");
+    auto newreq = bus.new_method_call(params.service.c_str(),
+                                      params.logicalPath.c_str(),
+                                      INTF_NEIGHBOR_CREATE_STATIC, "Neighbor");
     std::string macStr = ether_ntoa(&mac);
     newreq.append(addrToString<family>(address), macStr);
     bus.call_noreply(newreq);

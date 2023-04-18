@@ -15,16 +15,17 @@
  */
 #pragma once
 
-#include <algorithm>
 #include <boost/asio/spawn.hpp>
-#include <cstdint>
-#include <exception>
 #include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
 #include <ipmid/types.hpp>
-#include <memory>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/connection.hpp>
+
+#include <algorithm>
+#include <cstdint>
+#include <exception>
+#include <memory>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -50,8 +51,7 @@ struct Context
         netFn(netFn), lun(lun), cmd(cmd), channel(channel), userId(userId),
         sessionId(sessionId), priv(priv), rqSA(rqSA), hostIdx(hostIdx),
         yield(yield)
-    {
-    }
+    {}
 
     std::shared_ptr<sdbusplus::asio::connection> bus;
     // normal IPMI context (what call is this, from whence it came...)
@@ -116,9 +116,7 @@ struct Payload
     Payload(Payload&&) = default;
     Payload& operator=(Payload&&) = default;
 
-    explicit Payload(SecureBuffer&& data) : raw(std::move(data))
-    {
-    }
+    explicit Payload(SecureBuffer&& data) : raw(std::move(data)) {}
 
     ~Payload()
     {
@@ -258,8 +256,8 @@ struct Payload
     template <typename Arg, typename... Args>
     int pack(Arg&& arg, Args&&... args)
     {
-        int packRet =
-            details::PackSingle_t<Arg>::op(*this, std::forward<Arg>(arg));
+        int packRet = details::PackSingle_t<Arg>::op(*this,
+                                                     std::forward<Arg>(arg));
         if (packRet)
         {
             return packRet;
@@ -466,8 +464,8 @@ struct Payload
         size_t priorIndex = rawIndex;
         fixed_uint_t<details::bitStreamSize> priorBits = bitStream;
 
-        int ret =
-            std::apply([this](Types&... args) { return unpack(args...); }, t);
+        int ret = std::apply([this](Types&... args) { return unpack(args...); },
+                             t);
         if (ret)
         {
             bitCount = priorBitCount;
@@ -515,8 +513,7 @@ struct Response
 
     explicit Response(Context::ptr& context) :
         payload(), ctx(context), cc(ccSuccess)
-    {
-    }
+    {}
 
     /**
      * @brief pack arbitrary values (of any supported type) into the payload
@@ -597,8 +594,7 @@ struct Request
 
     explicit Request(Context::ptr context, SecureBuffer&& d) :
         payload(std::forward<SecureBuffer>(d)), ctx(context)
-    {
-    }
+    {}
 
     /**
      * @brief unpack arbitrary values (of any supported type) from the payload

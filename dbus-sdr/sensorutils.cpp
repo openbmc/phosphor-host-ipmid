@@ -312,8 +312,8 @@ uint8_t getScaledIPMIValue(const double value, const double max,
     int8_t bExp = 0;
     bool bSigned = false;
 
-    bool result =
-        getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned);
+    bool result = getSensorAttributes(max, min, mValue, rExp, bValue, bExp,
+                                      bSigned);
     if (!result)
     {
         throw std::runtime_error("Illegal sensor attributes");

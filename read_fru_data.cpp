@@ -2,14 +2,15 @@
 
 #include "fruread.hpp"
 
-#include <algorithm>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
-#include <map>
 #include <phosphor-logging/elog-errors.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+
+#include <algorithm>
+#include <map>
 
 extern const FruMap frus;
 namespace ipmi
@@ -94,9 +95,10 @@ void processFruPropChange(sdbusplus::message_t& msg)
     }
     for (const auto& [fruId, instanceList] : frus)
     {
-        auto found = std::find_if(
-            instanceList.begin(), instanceList.end(),
-            [&path](const auto& iter) { return (iter.path == path); });
+        auto found = std::find_if(instanceList.begin(), instanceList.end(),
+                                  [&path](const auto& iter) {
+            return (iter.path == path);
+        });
 
         if (found != instanceList.end())
         {
@@ -143,8 +145,8 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     {
         for (auto& intf : instance.interfaces)
         {
-            ipmi::PropertyMap allProp =
-                readAllProperties(intf.first, instance.path);
+            ipmi::PropertyMap allProp = readAllProperties(intf.first,
+                                                          instance.path);
             for (auto& properties : intf.second)
             {
                 auto iter = allProp.find(properties.first);

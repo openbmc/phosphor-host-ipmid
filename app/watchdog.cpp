@@ -4,14 +4,15 @@
 
 #include <endian.h>
 
-#include <bitset>
-#include <cstdint>
 #include <ipmid/api.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
-#include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
+
+#include <bitset>
+#include <cstdint>
+#include <string>
 
 using phosphor::logging::commit;
 using phosphor::logging::level;

@@ -2,15 +2,16 @@
 
 #include "selutility.hpp"
 
-#include <charconv>
-#include <chrono>
-#include <filesystem>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <vector>
 #include <xyz/openbmc_project/Common/error.hpp>
+
+#include <charconv>
+#include <chrono>
+#include <filesystem>
+#include <vector>
 
 extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;
@@ -291,8 +292,8 @@ GetSELEntryResponse
         // Evaluate if the event is assertion or deassertion event
         if (std::get<bool>(iterResolved->second))
         {
-            record.event.eventRecord.eventType =
-                deassertEvent | iter->second.eventReadingType;
+            record.event.eventRecord.eventType = deassertEvent |
+                                                 iter->second.eventReadingType;
         }
         else
         {
@@ -316,8 +317,8 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     auto service = ipmi::getService(bus, assocIntf, objPath);
 
     // Read the Associations interface.
-    auto methodCall =
-        bus.new_method_call(service.c_str(), objPath.c_str(), propIntf, "Get");
+    auto methodCall = bus.new_method_call(service.c_str(), objPath.c_str(),
+                                          propIntf, "Get");
     methodCall.append(assocIntf);
     methodCall.append(assocProp);
 
@@ -375,8 +376,8 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
     using namespace std::string_literals;
     static const auto propTimeStamp = "Timestamp"s;
 
-    auto methodCall =
-        bus.new_method_call(service.c_str(), objPath.c_str(), propIntf, "Get");
+    auto methodCall = bus.new_method_call(service.c_str(), objPath.c_str(),
+                                          propIntf, "Get");
     methodCall.append(logEntryIntf);
     methodCall.append(propTimeStamp);
 
@@ -423,14 +424,14 @@ void readLoggingObjectPaths(ObjectPaths& paths)
 
     std::sort(paths.begin(), paths.end(),
               [](const std::string& a, const std::string& b) {
-                  namespace fs = std::filesystem;
-                  fs::path pathA(a);
-                  fs::path pathB(b);
-                  auto idA = std::stoul(pathA.filename().string());
-                  auto idB = std::stoul(pathB.filename().string());
+        namespace fs = std::filesystem;
+        fs::path pathA(a);
+        fs::path pathB(b);
+        auto idA = std::stoul(pathA.filename().string());
+        auto idB = std::stoul(pathB.filename().string());
 
-                  return idA < idB;
-              });
+        return idA < idB;
+    });
 }
 
 } // namespace sel

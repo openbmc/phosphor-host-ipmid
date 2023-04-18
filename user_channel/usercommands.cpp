@@ -24,6 +24,7 @@
 
 #include <ipmid/api.hpp>
 #include <phosphor-logging/log.hpp>
+
 #include <regex>
 
 namespace ipmi
@@ -67,8 +68,8 @@ ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
         return ipmi::responseInvalidFieldRequest();
     }
 
-    uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    uint8_t chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
+                                             ctx->channel);
     if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Set user access - Invalid channel request");
@@ -138,8 +139,8 @@ ipmi::RspType<uint6_t, // max channel users
 
                       uint6_t userId, uint2_t reserved2)
 {
-    uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    uint8_t chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
+                                             ctx->channel);
 
     if (reserved1 || reserved2 || !isValidChannel(chNum))
     {
@@ -167,8 +168,8 @@ ipmi::RspType<uint6_t, // max channel users
     }
 
     bool enabledState = false;
-    retStatus =
-        ipmiUserCheckEnabled(static_cast<uint8_t>(userId), enabledState);
+    retStatus = ipmiUserCheckEnabled(static_cast<uint8_t>(userId),
+                                     enabledState);
     if (retStatus != ccSuccess)
     {
         return ipmi::response(retStatus);
@@ -318,8 +319,8 @@ ipmi::RspType<> // user name
     }
     else if (operation == opEnableUser || operation == opDisableUser)
     {
-        ipmi::Cc res =
-            ipmiUserUpdateEnabledState(userId, static_cast<bool>(operation));
+        ipmi::Cc res = ipmiUserUpdateEnabledState(userId,
+                                                  static_cast<bool>(operation));
         return ipmi::response(res);
     }
     else if (operation == opTestPassword)
@@ -410,8 +411,8 @@ ipmi::RspType<uint8_t,  // channel number
                                              uint4_t privLevel,
                                              uint4_t reserved2)
 {
-    uint8_t channel =
-        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
+    uint8_t channel = convertCurrentChannelNum(static_cast<uint8_t>(chNum),
+                                               ctx->channel);
 
     if (reserved1 || reserved2 || !isValidChannel(channel) ||
         !isValidPrivLimit(static_cast<uint8_t>(privLevel)))
@@ -499,8 +500,8 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
 
     uint8_t oemPayloadEnables2Reserved)
 {
-    auto chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    auto chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
+                                          ctx->channel);
     // Validate the reserved args. Only SOL payload is supported as on date.
     if (reserved || stdPayload0ipmiReserved || stdPayload2 || stdPayload3 ||
         stdPayload4 || stdPayload5 || stdPayload6 || stdPayload7 ||
@@ -594,8 +595,8 @@ ipmi::RspType<bool, // stdPayload0ipmiReserved
 
                              uint6_t userId, uint2_t reserved2)
 {
-    uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    uint8_t chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
+                                             ctx->channel);
 
     if (reserved1 || reserved2 || !isValidChannel(chNum))
     {

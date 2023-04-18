@@ -2,13 +2,14 @@
 
 #include "sensorhandler.hpp"
 
-#include <bitset>
-#include <filesystem>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
-#include <optional>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+
+#include <bitset>
+#include <filesystem>
+#include <optional>
 
 namespace ipmi
 {
@@ -259,9 +260,9 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
 ipmi_ret_t eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
                      uint8_t data)
 {
-    auto msg =
-        makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
-                    "Set", sensorInfo.sensorInterface);
+    auto msg = makeDbusMsg("org.freedesktop.DBus.Properties",
+                           sensorInfo.sensorPath, "Set",
+                           sensorInfo.sensorInterface);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);

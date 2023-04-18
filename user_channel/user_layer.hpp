@@ -15,9 +15,10 @@
 */
 #pragma once
 
-#include <bitset>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
+
+#include <bitset>
 #include <string>
 
 namespace ipmi

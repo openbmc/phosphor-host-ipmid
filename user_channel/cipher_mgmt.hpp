@@ -18,8 +18,9 @@
 
 #include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
-#include <map>
 #include <nlohmann/json.hpp>
+
+#include <map>
 
 namespace ipmi
 {

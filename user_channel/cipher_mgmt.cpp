@@ -20,9 +20,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <phosphor-logging/log.hpp>
+
 #include <filesystem>
 #include <fstream>
-#include <phosphor-logging/log.hpp>
 
 namespace ipmi
 {
@@ -117,8 +118,8 @@ Json CipherConfig::readCSPrivilegeLevels(const std::string& csFileName)
 
 int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
 {
-    std::string tmpFile =
-        static_cast<std::string>(cipherSuitePrivFileName) + "_tmpXXXXXX";
+    std::string tmpFile = static_cast<std::string>(cipherSuitePrivFileName) +
+                          "_tmpXXXXXX";
 
     std::vector<char> tmpRandomFile(tmpFile.length() + 1);
     strncpy(tmpRandomFile.data(), tmpFile.c_str(), tmpFile.length() + 1);

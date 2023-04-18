@@ -1,6 +1,7 @@
 #include <ipmid/api.hpp>
-#include <memory>
 #include <sdbusplus/asio/connection.hpp>
+
+#include <memory>
 
 namespace
 {

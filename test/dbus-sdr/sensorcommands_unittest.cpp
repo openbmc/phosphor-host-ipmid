@@ -67,8 +67,8 @@ void testValue(int x, double y, int16_t M, int8_t rExp, int16_t B, int8_t bExp,
     if (bSigned)
     {
         int8_t expect = x;
-        int8_t actual =
-            ipmi::scaleIPMIValueFromDouble(y, M, rExp, B, bExp, bSigned);
+        int8_t actual = ipmi::scaleIPMIValueFromDouble(y, M, rExp, B, bExp,
+                                                       bSigned);
 
         result = actual;
         yRoundtrip = ipmitool_y_from_x(actual, M, rExp, B, bExp, bSigned);
@@ -78,8 +78,8 @@ void testValue(int x, double y, int16_t M, int8_t rExp, int16_t B, int8_t bExp,
     else
     {
         uint8_t expect = x;
-        uint8_t actual =
-            ipmi::scaleIPMIValueFromDouble(y, M, rExp, B, bExp, bSigned);
+        uint8_t actual = ipmi::scaleIPMIValueFromDouble(y, M, rExp, B, bExp,
+                                                        bSigned);
 
         result = actual;
         yRoundtrip = ipmitool_y_from_x(actual, M, rExp, B, bExp, bSigned);
@@ -430,8 +430,8 @@ TEST(sensorutils, TranslateToIPMI)
         EXPECT_EQ(bExp, -1);
     }
 
-    scaledVal =
-        ipmi::scaleIPMIValueFromDouble(5, mValue, rExp, bValue, bExp, bSigned);
+    scaledVal = ipmi::scaleIPMIValueFromDouble(5, mValue, rExp, bValue, bExp,
+                                               bSigned);
 
     expected = 5 / (mValue * std::pow(10, rExp));
     EXPECT_NEAR(scaledVal, expected, expected * 0.01);

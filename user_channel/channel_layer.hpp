@@ -16,8 +16,9 @@
 #pragma once
 #include <openssl/crypto.h>
 
-#include <array>
 #include <ipmid/api.hpp>
+
+#include <array>
 #include <string>
 
 namespace ipmi

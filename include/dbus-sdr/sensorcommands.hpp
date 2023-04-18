@@ -15,8 +15,9 @@
 */
 
 #pragma once
-#include <cstdint>
 #include <dbus-sdr/sdrutils.hpp>
+
+#include <cstdint>
 
 #pragma pack(push, 1)
 

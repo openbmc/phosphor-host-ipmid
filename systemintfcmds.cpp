@@ -5,9 +5,10 @@
 #include "host-cmd-manager.hpp"
 #include "host-interface.hpp"
 
-#include <cstring>
 #include <ipmid-host/cmd.hpp>
 #include <ipmid/api.hpp>
+
+#include <cstring>
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -135,7 +136,6 @@ std::unique_ptr<sdbusplus::server::manager_t> objManager
 
 void register_netfn_app_functions()
 {
-
     // <Read Event Message Buffer>
     ipmi_register_callback(NETFUN_APP, IPMI_CMD_READ_EVENT, NULL,
                            ipmi_app_read_event, SYSTEM_INTERFACE);

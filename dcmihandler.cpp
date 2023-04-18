@@ -4,18 +4,19 @@
 
 #include "user_channel/channel_layer.hpp"
 
-#include <bitset>
-#include <cmath>
-#include <fstream>
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
-#include <variant>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
+
+#include <bitset>
+#include <cmath>
+#include <fstream>
+#include <variant>
 
 using namespace phosphor::logging;
 using sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface;
@@ -253,8 +254,8 @@ EthernetInterface::DHCPConf getDHCPEnabled()
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto ethdevice = ipmi::getChannelName(ethernetDefaultChannelNum);
-    auto ethernetObj =
-        ipmi::getDbusObject(bus, ethernetIntf, networkRoot, ethdevice);
+    auto ethernetObj = ipmi::getDbusObject(bus, ethernetIntf, networkRoot,
+                                           ethdevice);
     auto service = ipmi::getService(bus, ethernetIntf, ethernetObj.first);
     auto value = ipmi::getDbusProperty(bus, service, ethernetObj.first,
                                        ethernetIntf, "DHCPEnabled");
@@ -690,7 +691,6 @@ ipmi_ret_t getDCMICapabilities(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
                                ipmi_response_t response,
                                ipmi_data_len_t data_len, ipmi_context_t)
 {
-
     std::ifstream dcmiCapFile(dcmi::gDCMICapabilitiesConfig);
     if (!dcmiCapFile.is_open())
     {
@@ -776,8 +776,8 @@ Temperature readTemp(const std::string& dbusService,
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     auto result = ipmi::getAllDbusProperties(
         bus, dbusService, dbusPath, "xyz.openbmc_project.Sensor.Value");
-    auto temperature =
-        std::visit(ipmi::VariantToDoubleVisitor(), result.at("Value"));
+    auto temperature = std::visit(ipmi::VariantToDoubleVisitor(),
+                                  result.at("Value"));
     double absTemp = std::abs(temperature);
 
     auto findFactor = result.find("Scale");
@@ -828,8 +828,8 @@ std::tuple<Response, NumInstances> read(const std::string& type,
         std::string service;
         try
         {
-            service =
-                ipmi::getService(bus, "xyz.openbmc_project.Sensor.Value", path);
+            service = ipmi::getService(bus, "xyz.openbmc_project.Sensor.Value",
+                                       path);
         }
         catch (const std::exception& e)
         {
@@ -1102,7 +1102,6 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
                              ipmi_response_t response, ipmi_data_len_t data_len,
                              ipmi_context_t)
 {
-
     auto requestData =
         reinterpret_cast<const dcmi::GetConfParamsRequest*>(request);
     auto responseData =

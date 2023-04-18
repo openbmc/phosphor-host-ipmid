@@ -8,7 +8,6 @@ unsigned char g_sensortype[][2] = {
 
 uint8_t find_type_for_sensor_number(uint8_t sensor_number)
 {
-
     int i = 0;
     uint8_t rc;
 
@@ -45,10 +44,9 @@ int set_sensor_dbus_state_s(unsigned char number, const char* member,
     return 0;
 }
 
-int set_sensor_dbus_state_y(unsigned char number, char const* member,
+int set_sensor_dbus_state_y(unsigned char number, const char* member,
                             uint8_t value)
 {
-
     char val[2];
 
     snprintf(val, 2, "%d", value);
@@ -111,7 +109,6 @@ void testprep(void)
 
 int main()
 {
-
     testprep();
     check_results(updateSensorRecordFromSSRAESC(testrec_bootprogress),
                   "setValue", "FW Progress, Docking station attachment");

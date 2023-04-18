@@ -4,13 +4,14 @@
 
 #include "sensorhandler.hpp"
 
-#include <cmath>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
+
+#include <cmath>
 
 #ifdef FEATURE_SENSORS_CACHE
 
@@ -252,8 +253,8 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
     double value = std::get<T>(propValue) *
                    std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-    int32_t rawData =
-        (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
+    int32_t rawData = (value - sensorInfo.scaledOffset) /
+                      sensorInfo.coefficientM;
 
     constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
     constexpr uint8_t signedDataFormat = 0x80;
@@ -445,8 +446,8 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
 
     double value = std::get<T>(iter->second) *
                    std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-    int32_t rawData =
-        (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
+    int32_t rawData = (value - sensorInfo.scaledOffset) /
+                      sensorInfo.coefficientM;
 
     constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
     constexpr uint8_t signedDataFormat = 0x80;
@@ -523,9 +524,9 @@ template <typename T>
 ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
                             const Info& sensorInfo)
 {
-    auto msg =
-        makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
-                    "Set", sensorInfo.sensorInterface);
+    auto msg = makeDbusMsg("org.freedesktop.DBus.Properties",
+                           sensorInfo.sensorPath, "Set",
+                           sensorInfo.sensorInterface);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);
@@ -548,14 +549,14 @@ template <typename T>
 ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
                        const Info& sensorInfo)
 {
-    T raw_value =
-        (sensorInfo.coefficientM * cmdData.reading) + sensorInfo.scaledOffset;
+    T raw_value = (sensorInfo.coefficientM * cmdData.reading) +
+                  sensorInfo.scaledOffset;
 
     raw_value *= std::pow(10, sensorInfo.exponentR - sensorInfo.scale);
 
-    auto msg =
-        makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
-                    "Set", sensorInfo.sensorInterface);
+    auto msg = makeDbusMsg("org.freedesktop.DBus.Properties",
+                           sensorInfo.sensorPath, "Set",
+                           sensorInfo.sensorInterface);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);

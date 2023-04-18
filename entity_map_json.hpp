@@ -1,8 +1,9 @@
 #pragma once
 
 #include <ipmid/types.hpp>
-#include <memory>
 #include <nlohmann/json.hpp>
+
+#include <memory>
 
 namespace ipmi
 {
@@ -48,8 +49,7 @@ class EntityInfoMapContainer
   private:
     EntityInfoMapContainer(const EntityInfoMap& entityRecords) :
         entityRecords(entityRecords)
-    {
-    }
+    {}
     EntityInfoMap entityRecords;
 };
 

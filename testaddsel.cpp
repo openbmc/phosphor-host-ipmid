@@ -16,7 +16,6 @@ sd_bus* bus = NULL;
 // step for mapping IPMI
 int find_openbmc_path(const uint8_t num, dbus_interface_t* interface)
 {
-
     const char* objname = "/org/openbmc/managers/System";
 
     char *str1, *str2, *str3;

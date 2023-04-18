@@ -2,8 +2,9 @@
 
 #include "nlohmann/json.hpp"
 
-#include <map>
 #include <sdbusplus/bus.hpp>
+
+#include <map>
 #include <string>
 #include <vector>
 

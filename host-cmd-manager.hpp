@@ -1,10 +1,11 @@
 #pragma once
 
 #include <ipmid-host/cmd-utils.hpp>
-#include <queue>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/timer.hpp>
+
+#include <queue>
 #include <tuple>
 
 namespace phosphor
