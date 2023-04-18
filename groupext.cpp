@@ -1,5 +1,6 @@
-#include <cstdio>
 #include <ipmid/api.hpp>
+
+#include <cstdio>
 
 #define GRPEXT_GET_GROUP_CMD 0
 void register_netfn_groupext_functions() __attribute__((constructor));

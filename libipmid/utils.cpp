@@ -8,13 +8,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <algorithm>
-#include <chrono>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+
+#include <algorithm>
+#include <chrono>
 
 namespace ipmi
 {
@@ -82,10 +83,10 @@ DbusObjectInfo getDbusObject(sdbusplus::bus_t& bus,
     }
 
     // else search the match string in the object path
-    auto found = std::find_if(
-        objectTree.begin(), objectTree.end(), [&match](const auto& object) {
-            return (object.first.find(match) != std::string::npos);
-        });
+    auto found = std::find_if(objectTree.begin(), objectTree.end(),
+                              [&match](const auto& object) {
+        return (object.first.find(match) != std::string::npos);
+    });
 
     if (found == objectTree.end())
     {
@@ -103,7 +104,6 @@ Value getDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
                       const std::string& property,
                       std::chrono::microseconds timeout)
 {
-
     Value value;
 
     auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
@@ -200,14 +200,12 @@ void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
 ServiceCache::ServiceCache(const std::string& intf, const std::string& path) :
     intf(intf), path(path), cachedService(std::nullopt),
     cachedBusName(std::nullopt)
-{
-}
+{}
 
 ServiceCache::ServiceCache(std::string&& intf, std::string&& path) :
     intf(std::move(intf)), path(std::move(path)), cachedService(std::nullopt),
     cachedBusName(std::nullopt)
-{
-}
+{}
 
 const std::string& ServiceCache::getService(sdbusplus::bus_t& bus)
 {
@@ -241,10 +239,10 @@ bool ServiceCache::isValid(sdbusplus::bus_t& bus) const
 std::string getService(sdbusplus::bus_t& bus, const std::string& intf,
                        const std::string& path)
 {
-    auto mapperCall =
-        bus.new_method_call("xyz.openbmc_project.ObjectMapper",
-                            "/xyz/openbmc_project/object_mapper",
-                            "xyz.openbmc_project.ObjectMapper", "GetObject");
+    auto mapperCall = bus.new_method_call("xyz.openbmc_project.ObjectMapper",
+                                          "/xyz/openbmc_project/object_mapper",
+                                          "xyz.openbmc_project.ObjectMapper",
+                                          "GetObject");
 
     mapperCall.append(path);
     mapperCall.append(std::vector<std::string>({intf}));
@@ -462,10 +460,10 @@ boost::system::error_code getDbusObject(Context::ptr ctx,
     }
 
     // else search the match string in the object path
-    auto found = std::find_if(
-        objectTree.begin(), objectTree.end(), [&match](const auto& object) {
-            return (object.first.find(match) != std::string::npos);
-        });
+    auto found = std::find_if(objectTree.begin(), objectTree.end(),
+                              [&match](const auto& object) {
+        return (object.first.find(match) != std::string::npos);
+    });
 
     if (found == objectTree.end())
     {

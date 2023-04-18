@@ -12,9 +12,7 @@
 class SysInfoParamStoreIntf
 {
   public:
-    virtual ~SysInfoParamStoreIntf()
-    {
-    }
+    virtual ~SysInfoParamStoreIntf() {}
 
     /**
      * Returns true if parameter is found. If and only if s is non-null,

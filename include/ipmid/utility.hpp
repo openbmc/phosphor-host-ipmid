@@ -16,6 +16,7 @@
 #pragma once
 #include <boost/asio/spawn.hpp>
 #include <boost/callable_traits.hpp>
+
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -46,10 +47,9 @@ template <std::size_t N, typename FirstArg, typename... Rest>
 struct StripFirstArgs;
 
 template <std::size_t N, typename FirstArg, typename... Rest>
-struct StripFirstArgs<N, std::tuple<FirstArg, Rest...>>
-    : StripFirstArgs<N - 1, std::tuple<Rest...>>
-{
-};
+struct StripFirstArgs<N, std::tuple<FirstArg, Rest...>> :
+    StripFirstArgs<N - 1, std::tuple<Rest...>>
+{};
 
 template <typename FirstArg, typename... Rest>
 struct StripFirstArgs<0, std::tuple<FirstArg, Rest...>>
@@ -206,20 +206,17 @@ using TypeIdDowncast_t = typename TypeIdDowncast<T>::type;
  */
 template <typename>
 struct is_tuple : std::false_type
-{
-};
+{};
 
 template <typename... T>
 struct is_tuple<std::tuple<T...>> : std::true_type
-{
-};
+{};
 
 /** @brief used for static_assert in a constexpr-if else statement
  */
 template <typename T>
 struct dependent_false : std::false_type
-{
-};
+{};
 
 } // namespace utility
 

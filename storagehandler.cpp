@@ -11,22 +11,23 @@
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
+#include <ipmid/api.hpp>
+#include <ipmid/utils.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/server.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Logging/SEL/error.hpp>
+
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
-#include <ipmid/api.hpp>
-#include <ipmid/utils.hpp>
 #include <optional>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/server.hpp>
 #include <string>
 #include <variant>
-#include <xyz/openbmc_project/Common/error.hpp>
-#include <xyz/openbmc_project/Logging/SEL/error.hpp>
 
 void register_netfn_storage_functions() __attribute__((constructor));
 
@@ -237,12 +238,12 @@ ipmi::RspType<uint8_t,  // SEL revision.
               uint32_t, // most recent addition timestamp
               uint32_t, // most recent erase timestamp.
 
-              bool,    // SEL allocation info supported
-              bool,    // reserve SEL supported
-              bool,    // partial Add SEL Entry supported
-              bool,    // delete SEL supported
-              uint3_t, // reserved
-              bool     // overflow flag
+              bool,     // SEL allocation info supported
+              bool,     // reserve SEL supported
+              bool,     // partial Add SEL Entry supported
+              bool,     // delete SEL supported
+              uint3_t,  // reserved
+              bool      // overflow flag
               >
     ipmiStorageGetSelInfo()
 {
@@ -266,8 +267,7 @@ ipmi::RspType<uint8_t,  // SEL revision.
                 (ipmi::sel::getEntryTimeStamp(objPath).count()));
         }
         catch (const InternalFailure& e)
-        {
-        }
+        {}
         catch (const std::runtime_error& e)
         {
             log<level::ERR>(e.what());
@@ -379,8 +379,8 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         }
 
         auto diff = ipmi::sel::selRecordSize - requestData->offset;
-        auto readLength =
-            std::min(diff, static_cast<int>(requestData->readLength));
+        auto readLength = std::min(diff,
+                                   static_cast<int>(requestData->readLength));
 
         std::memcpy(response, &record.nextRecordID,
                     sizeof(record.nextRecordID));
@@ -406,7 +406,6 @@ ipmi::RspType<uint16_t // deleted record ID
               >
     deleteSELEntry(uint16_t reservationID, uint16_t selRecordID)
 {
-
     namespace fs = std::filesystem;
 
     if (!checkSELReservation(reservationID))
@@ -517,9 +516,9 @@ ipmi::RspType<uint8_t // erase status
 
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     auto service = ipmi::getService(bus, ipmi::sel::logIntf, ipmi::sel::logObj);
-    auto method =
-        bus.new_method_call(service.c_str(), ipmi::sel::logObj,
-                            ipmi::sel::logIntf, ipmi::sel::logDeleteAllMethod);
+    auto method = bus.new_method_call(service.c_str(), ipmi::sel::logObj,
+                                      ipmi::sel::logIntf,
+                                      ipmi::sel::logDeleteAllMethod);
     try
     {
         bus.call_noreply(method);
@@ -684,7 +683,6 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
     cancelSELReservation();
     if (recordType == systemRecordType)
     {
-
         for (const auto& it : invSensors)
         {
             if (it.second.sensorID == sensorNumber)
@@ -718,8 +716,8 @@ bool isFruPresent(ipmi::Context::ptr& ctx, const std::string& fruPath)
     using namespace ipmi::fru;
 
     std::string service;
-    boost::system::error_code ec =
-        getService(ctx, invItemInterface, invObjPath + fruPath, service);
+    boost::system::error_code ec = getService(ctx, invItemInterface,
+                                              invObjPath + fruPath, service);
     if (!ec)
     {
         bool result;
@@ -757,7 +755,6 @@ ipmi::RspType<uint16_t, // FRU Inventory area size in bytes,
               >
     ipmiStorageGetFruInvAreaInfo(ipmi::Context::ptr ctx, uint8_t fruID)
 {
-
     auto iter = frus.find(fruID);
     if (iter == frus.end())
     {
@@ -849,7 +846,6 @@ ipmi::RspType<uint8_t,  // SDR version
               uint8_t>  // operation Support
     ipmiGetRepositoryInfo()
 {
-
     constexpr uint8_t sdrVersion = 0x51;
     constexpr uint16_t freeSpace = 0xFFFF;
     constexpr uint32_t additionTimestamp = 0x0;
@@ -860,8 +856,8 @@ ipmi::RspType<uint8_t,  // SDR version
     const auto& entityRecords =
         ipmi::sensor::EntityInfoMapContainer::getContainer()
             ->getIpmiEntityRecords();
-    uint16_t records =
-        ipmi::sensor::sensors.size() + frus.size() + entityRecords.size();
+    uint16_t records = ipmi::sensor::sensors.size() + frus.size() +
+                       entityRecords.size();
 
     return ipmi::responseSuccess(sdrVersion, records, freeSpace,
                                  additionTimestamp, deletionTimestamp,

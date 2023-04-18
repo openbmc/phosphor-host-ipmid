@@ -141,7 +141,6 @@ Cc ipmiUserCheckEnabled(const uint8_t userId, bool& state)
 Cc ipmiUserGetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                               PrivAccess& privAccess)
 {
-
     if (!UserAccess::isValidChannel(chNum))
     {
         return ccInvalidFieldRequest;
@@ -185,7 +184,6 @@ Cc ipmiUserSetUserPayloadAccess(const uint8_t chNum, const uint8_t operation,
                                 const uint8_t userId,
                                 const PayloadAccess& payloadAccess)
 {
-
     if (!UserAccess::isValidChannel(chNum))
     {
         return ccInvalidFieldRequest;
@@ -202,7 +200,6 @@ Cc ipmiUserSetUserPayloadAccess(const uint8_t chNum, const uint8_t operation,
 Cc ipmiUserGetUserPayloadAccess(const uint8_t chNum, const uint8_t userId,
                                 PayloadAccess& payloadAccess)
 {
-
     if (!UserAccess::isValidChannel(chNum))
     {
         return ccInvalidFieldRequest;

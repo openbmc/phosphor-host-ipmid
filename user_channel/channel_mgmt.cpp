@@ -25,13 +25,14 @@
 #include <unistd.h>
 
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/bus/match.hpp>
+#include <sdbusplus/server/object.hpp>
+
 #include <cerrno>
 #include <exception>
 #include <filesystem>
 #include <fstream>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/bus/match.hpp>
-#include <sdbusplus/server/object.hpp>
 #include <unordered_map>
 
 namespace ipmi
@@ -180,7 +181,6 @@ int ChannelConfig::convertToChannelNumberFromChannelName(
 
 std::string ChannelConfig::getChannelNameFromPath(const std::string& path)
 {
-
     constexpr size_t length = strlen(networkIntfObjectBasePath);
     if (((length + 1) >= path.size()) ||
         path.compare(0, length, networkIntfObjectBasePath))
@@ -350,12 +350,12 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                     dBusPropertiesInterface) +
                 sdbusplus::bus::match::rules::argN(0, networkChConfigIntfName),
             [&](sdbusplus::message_t& msg) {
-                DbusChObjProperties props;
-                std::string iface;
-                std::string path = msg.get_path();
-                msg.read(iface, props);
-                processChAccessPropChange(path, props);
-            });
+            DbusChObjProperties props;
+            std::string iface;
+            std::string path = msg.get_path();
+            msg.read(iface, props);
+            processChAccessPropChange(path, props);
+        });
         signalHndlrObjectState = true;
 
         chInterfaceAddedSignal = std::make_unique<sdbusplus::bus::match_t>(
@@ -774,8 +774,8 @@ std::string ChannelConfig::convertToPrivLimitString(const uint8_t value)
 EChannelSessSupported
     ChannelConfig::convertToSessionSupportIndex(const std::string& value)
 {
-    auto iter =
-        std::find(sessionSupportList.begin(), sessionSupportList.end(), value);
+    auto iter = std::find(sessionSupportList.begin(), sessionSupportList.end(),
+                          value);
     if (iter == sessionSupportList.end())
     {
         log<level::ERR>("Invalid session supported.",
@@ -981,11 +981,11 @@ int ChannelConfig::loadChannelConfig()
             ChannelProperties& chData = channelData[chNum];
             chData.chID = chNum;
             chData.chName = jsonChData[nameString].get<std::string>();
-            chData.isChValid =
-                channelFound && jsonChData[isValidString].get<bool>();
+            chData.isChValid = channelFound &&
+                               jsonChData[isValidString].get<bool>();
             chData.activeSessCount = jsonChData.value(activeSessionsString, 0);
-            chData.maxTransferSize =
-                jsonChData.value(maxTransferSizeString, smallChannelSize);
+            chData.maxTransferSize = jsonChData.value(maxTransferSizeString,
+                                                      smallChannelSize);
             if (jsonChData.count(isManagementNIC) != 0)
             {
                 chData.isManagementNIC =
@@ -1310,9 +1310,9 @@ int ChannelConfig::setDbusProperty(const std::string& service,
 {
     try
     {
-        auto method =
-            bus.new_method_call(service.c_str(), objPath.c_str(),
-                                "org.freedesktop.DBus.Properties", "Set");
+        auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
+                                          "org.freedesktop.DBus.Properties",
+                                          "Set");
 
         method.append(interface, property, value);
 
@@ -1339,9 +1339,9 @@ int ChannelConfig::getDbusProperty(const std::string& service,
 {
     try
     {
-        auto method =
-            bus.new_method_call(service.c_str(), objPath.c_str(),
-                                "org.freedesktop.DBus.Properties", "Get");
+        auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
+                                          "org.freedesktop.DBus.Properties",
+                                          "Get");
 
         method.append(interface, property);
 

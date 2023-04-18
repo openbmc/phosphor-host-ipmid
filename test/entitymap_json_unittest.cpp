@@ -2,6 +2,7 @@
 
 #include <ipmid/types.hpp>
 #include <nlohmann/json.hpp>
+
 #include <utility>
 
 #include <gmock/gmock.h>

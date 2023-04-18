@@ -1,16 +1,17 @@
 #include "watchdog_service.hpp"
 
-#include <exception>
 #include <ipmid/api.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
-#include <stdexcept>
-#include <string>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Watchdog/server.hpp>
+
+#include <exception>
+#include <stdexcept>
+#include <string>
 
 using phosphor::logging::elog;
 using phosphor::logging::entry;
@@ -26,9 +27,7 @@ static constexpr char prop_intf[] = "org.freedesktop.DBus.Properties";
 
 ipmi::ServiceCache WatchdogService::wd_service(wd_intf, wd_path);
 
-WatchdogService::WatchdogService() : bus(ipmid_get_sd_bus_connection())
-{
-}
+WatchdogService::WatchdogService() : bus(ipmid_get_sd_bus_connection()) {}
 
 void WatchdogService::resetTimeRemaining(bool enableWatchdog)
 {

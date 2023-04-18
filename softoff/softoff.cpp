@@ -17,10 +17,11 @@
 
 #include "softoff.hpp"
 
-#include <chrono>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
+
+#include <chrono>
 namespace phosphor
 {
 namespace ipmi
@@ -31,8 +32,8 @@ using namespace sdbusplus::xyz::openbmc_project::Control::server;
 
 void SoftPowerOff::sendHostShutDownCmd()
 {
-    auto ctrlHostPath =
-        std::string{CONTROL_HOST_OBJ_MGR} + '/' + HOST_NAME + '0';
+    auto ctrlHostPath = std::string{CONTROL_HOST_OBJ_MGR} + '/' + HOST_NAME +
+                        '0';
     auto host = ::ipmi::getService(this->bus, CONTROL_HOST_BUSNAME,
                                    ctrlHostPath.c_str());
 

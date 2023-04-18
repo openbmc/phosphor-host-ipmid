@@ -19,6 +19,7 @@
 
 #include <ipmid/api.hpp>
 #include <phosphor-logging/log.hpp>
+
 #include <regex>
 
 using namespace phosphor::logging;
@@ -255,8 +256,8 @@ RspType<uint4_t,  // chNum
         return responseInvalidFieldRequest();
     }
 
-    uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    uint8_t chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
+                                             ctx->channel);
     if (!isValidChannel(chNum))
     {
         log<level::DEBUG>("Get channel Info - No support on channel");
@@ -323,8 +324,8 @@ RspType<uint16_t, // stdPayloadType
     ipmiGetChannelPayloadSupport(Context::ptr ctx, uint4_t channel,
                                  uint4_t reserved)
 {
-    uint8_t chNum =
-        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
+    uint8_t chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
+                                             ctx->channel);
 
     if (!doesDeviceExist(chNum) || !isValidChannel(chNum) || reserved)
     {
@@ -367,8 +368,8 @@ RspType<uint8_t> // formatVersion
     ipmiGetChannelPayloadVersion(Context::ptr ctx, uint4_t chNum,
                                  uint4_t reserved, uint8_t payloadTypeNum)
 {
-    uint8_t channel =
-        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
+    uint8_t channel = convertCurrentChannelNum(static_cast<uint8_t>(chNum),
+                                               ctx->channel);
     constexpr uint8_t payloadTypeNotSupported = 0x80;
 
     if (reserved || !isValidChannel(channel))

@@ -1,8 +1,9 @@
 #include <boost/asio/signal_set.hpp>
-#include <forward_list>
 #include <ipmid/api.hpp>
-#include <memory>
 #include <phosphor-logging/log.hpp>
+
+#include <forward_list>
+#include <memory>
 #include <vector>
 
 using namespace phosphor::logging;
@@ -100,8 +101,8 @@ void registerSignalHandler(int priority, int signalNumber,
     if (!signals[signalNumber])
     {
         std::shared_ptr<boost::asio::io_context> io = getIoContext();
-        signals[signalNumber] =
-            std::make_unique<SignalHandler>(io, signalNumber);
+        signals[signalNumber] = std::make_unique<SignalHandler>(io,
+                                                                signalNumber);
     }
     signals[signalNumber]->registerHandler(priority, handler);
 }

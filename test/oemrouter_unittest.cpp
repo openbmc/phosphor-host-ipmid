@@ -1,9 +1,10 @@
+#include "sample.h"
+
 #include <ipmid/api.h>
 
-#include <cstring>
 #include <ipmid/oemrouter.hpp>
 
-#include "sample.h"
+#include <cstring>
 
 #include <gtest/gtest.h>
 

@@ -102,8 +102,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     static constexpr const std::array vrInterfaces = {
         "xyz.openbmc_project.Control.VoltageRegulatorMode"};
 
-    bool sensorRez =
-        lbdUpdateSensorTree("/xyz/openbmc_project/sensors", sensorInterfaces);
+    bool sensorRez = lbdUpdateSensorTree("/xyz/openbmc_project/sensors",
+                                         sensorInterfaces);
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -218,8 +218,8 @@ ipmi::sensor::IdInfoMap::const_iterator
     return std::find_if(
         ipmi::sensor::sensors.begin(), ipmi::sensor::sensors.end(),
         [&path](const ipmi::sensor::IdInfoMap::value_type& findSensor) {
-            return findSensor.second.sensorPath == path;
-        });
+        return findSensor.second.sensorPath == path;
+    });
 }
 #endif
 
@@ -394,8 +394,8 @@ std::optional<std::unordered_set<std::string>>&
         return ipmiDecoratorPaths;
     }
 
-    ipmiDecoratorPaths =
-        std::unordered_set<std::string>(paths.begin(), paths.end());
+    ipmiDecoratorPaths = std::unordered_set<std::string>(paths.begin(),
+                                                         paths.end());
     return ipmiDecoratorPaths;
 }
 

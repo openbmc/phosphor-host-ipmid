@@ -1,5 +1,3 @@
-#include <algorithm>
-#include <array>
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <ipmiwhitelist.hpp>
@@ -7,6 +5,9 @@
 #include <phosphor-logging/log.hpp>
 #include <settings.hpp>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
+
+#include <algorithm>
+#include <array>
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
@@ -28,9 +29,9 @@ class WhitelistFilter
   public:
     WhitelistFilter();
     ~WhitelistFilter() = default;
-    WhitelistFilter(WhitelistFilter const&) = delete;
+    WhitelistFilter(const WhitelistFilter&) = delete;
     WhitelistFilter(WhitelistFilter&&) = delete;
-    WhitelistFilter& operator=(WhitelistFilter const&) = delete;
+    WhitelistFilter& operator=(const WhitelistFilter&) = delete;
     WhitelistFilter& operator=(WhitelistFilter&&) = delete;
 
   private:
@@ -57,8 +58,8 @@ WhitelistFilter::WhitelistFilter()
     log<level::INFO>("Loading whitelist filter");
     ipmi::registerFilter(ipmi::prioOpenBmcBase,
                          [this](ipmi::message::Request::ptr request) {
-                             return filterMessage(request);
-                         });
+        return filterMessage(request);
+    });
 
     // wait until io->run is going to fetch RestrictionMode
     post_work([this]() { postInit(); });
@@ -82,8 +83,8 @@ void WhitelistFilter::cacheRestrictedMode(
         try
         {
             restrictionModeSetting = dev;
-            restrictionModeService =
-                objects->service(restrictionModeSetting, restrictionModeIntf);
+            restrictionModeService = objects->service(restrictionModeSetting,
+                                                      restrictionModeIntf);
         }
         catch (const std::out_of_range& e)
         {
@@ -95,25 +96,25 @@ void WhitelistFilter::cacheRestrictedMode(
         bus->async_method_call(
             [this, index = std::distance(&*std::begin(devices), &dev)](
                 boost::system::error_code ec, ipmi::Value v) {
-                if (ec)
-                {
-                    log<level::ERR>("Error in RestrictionMode Get");
-                    // Fail-safe to true.
-                    restrictedMode[index] = true;
-                    return;
-                }
+            if (ec)
+            {
+                log<level::ERR>("Error in RestrictionMode Get");
+                // Fail-safe to true.
+                restrictedMode[index] = true;
+                return;
+            }
 
-                auto mode = std::get<std::string>(v);
-                auto restrictionMode =
-                    RestrictionMode::convertModesFromString(mode);
+            auto mode = std::get<std::string>(v);
+            auto restrictionMode =
+                RestrictionMode::convertModesFromString(mode);
 
-                bool restrictMode =
-                    (restrictionMode == RestrictionMode::Modes::Whitelist);
-                restrictedMode.emplace_back(restrictMode);
+            bool restrictMode =
+                (restrictionMode == RestrictionMode::Modes::Whitelist);
+            restrictedMode.emplace_back(restrictMode);
 
-                log<level::INFO>((restrictMode ? "Set restrictedMode = true"
-                                               : "Set restrictedMode = false"));
-            },
+            log<level::INFO>((restrictMode ? "Set restrictedMode = true"
+                                           : "Set restrictedMode = false"));
+        },
             restrictionModeService, restrictionModeSetting,
             "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
             "RestrictionMode");
@@ -209,8 +210,8 @@ void WhitelistFilter::postInit()
 
     modeChangeMatch = std::make_unique<sdbusplus::bus::match_t>(
         *bus, filterStr, [this, deviceList](sdbusplus::message_t& m) {
-            handleRestrictedModeChange(m, deviceList);
-        });
+        handleRestrictedModeChange(m, deviceList);
+    });
 }
 
 /** @brief Filter IPMI messages with RestrictedMode

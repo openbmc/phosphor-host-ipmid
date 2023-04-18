@@ -2,11 +2,12 @@
 
 #include <ipmid/api.h>
 
+#include <ipmid/iana.hpp>
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <ipmid/iana.hpp>
 #include <vector>
 
 namespace oem
@@ -29,9 +30,7 @@ using Handler = std::function<ipmi_ret_t(ipmi_cmd_t,          // cmd byte
 class Router
 {
   public:
-    virtual ~Router()
-    {
-    }
+    virtual ~Router() {}
 
     /// Enable message routing to begin.
     virtual void activate() = 0;
