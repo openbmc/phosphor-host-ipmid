@@ -72,7 +72,7 @@ struct PlatformEventRequest
 static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
 static constexpr char const* ipmiSELAddInterface =
     "xyz.openbmc_project.Logging.IPMI";
-static const std::string ipmiSELAddMessage = "SEL Entry";
+static const std::string ipmiSELAddMessage = "IPMI generated SEL Entry";
 
 static constexpr int selSystemEventSizeWith3Bytes = 8;
 static constexpr int selSystemEventSizeWith2Bytes = 7;
