@@ -19,7 +19,8 @@ EOF
 # Sort the list [numerically].
 # Remove any duplicates.
 # Turn "a:b //<NetFn>:<Command>" -> "{ a, b }, //<NetFn>:<Command>"
-sed "s/#.*//" "$*" | sed '/^$/d' | sort -n | uniq | sed "s/^/    { /" | \
+# shellcheck disable=SC2068
+sed "s/#.*//" $@ | sed '/^$/d' | sort -n | uniq | sed "s/^/    { /" | \
     sed "s/\:\(....\)\(.*\)/ , \1 }, \2/"
 
 cat << EOF
