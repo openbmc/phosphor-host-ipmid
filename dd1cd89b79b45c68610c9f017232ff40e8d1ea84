@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c5946b73_3f17c3a1",
+        "filename": "generate_whitelist.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-04-25T23:43:33Z",
+      "side": 1,
+      "message": "$@ needs to be quoted too as \"$@\", or spaces in file names will cause them to be parsed as separate arguments.\n```\n13: vmauery@bender:~$ cat test.sh \n#!/bin/sh\n\nfoo()\n{\n    echo\n    local i\u003d0\n    local n\u003d$#\n    while [ $i -lt $n ]; do\n        i\u003d$((i+1))\n        local j\u003d\"$1\"; shift\n        echo \"arg $i: \"\u0027\"\u0027\"$j\"\u0027\"\u0027\n    done\n}\n\necho \u0027using \"$@\"\u0027\nfoo \"$@\"\necho \u0027using $@\u0027\nfoo $@\necho \u0027using \"$*\"\u0027\nfoo \"$*\"\necho \u0027using $*\u0027\nfoo $*\n13: vmauery@bender:~$ ./test.sh \"this bud\u0027s\" for \"y o u\"\n\nusing \"$@\"\narg 1: \"this bud\u0027s\"\narg 2: \"for\"\narg 3: \"y o u\"\n\nusing $@\narg 1: \"this\"\narg 2: \"bud\u0027s\"\narg 3: \"for\"\narg 4: \"y\"\narg 5: \"o\"\narg 6: \"u\"\n\nusing \"$*\"\narg 1: \"this bud\u0027s for y o u\"\n\nusing $*\narg 1: \"this\"\narg 2: \"bud\u0027s\"\narg 3: \"for\"\narg 4: \"y\"\narg 5: \"o\"\narg 6: \"u\"\n```",
+      "range": {
+        "startLine": 23,
+        "startChar": 14,
+        "endLine": 23,
+        "endChar": 16
+      },
+      "revId": "dd1cd89b79b45c68610c9f017232ff40e8d1ea84",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
