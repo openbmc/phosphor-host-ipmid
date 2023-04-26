@@ -19,6 +19,15 @@ if_hpp = custom_target(
   install: true,
   install_dir: get_option('includedir') / 'xyz/openbmc_project/Ipmi/Internal/SoftPowerOff')
 
+if_common_hpp = custom_target(
+  'common.hpp',
+  output: 'common.hpp',
+  input: if_yaml_file,
+  capture: true,
+  command: [sdbuspp_prog, '-r', root, 'interface', 'common-header', domain],
+  install: true,
+  install_dir: get_option('includedir') / 'xyz/openbmc_project/Ipmi/Internal/SoftPowerOff')
+
 softoff_dbus_deps = [
   dependency('phosphor-dbus-interfaces'),
   dependency('sdbusplus'),
@@ -29,6 +38,7 @@ softoff_dbus_lib = library(
   [
     if_cpp,
     if_hpp,
+    if_common_hpp,
   ],
   implicit_include_directories: false,
   include_directories: root_inc,
@@ -39,7 +49,7 @@ softoff_dbus_lib = library(
 
 softoff_dbus = declare_dependency(
   dependencies: softoff_dbus_deps,
-  sources: [if_hpp],
+  sources: [if_hpp, if_common_hpp],
   link_with: softoff_dbus_lib)
 
 softoff_dbus_reqs = []
