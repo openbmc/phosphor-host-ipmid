@@ -1,6 +1,5 @@
 #include "storagehandler.hpp"
 
-#include "entity_map_json.hpp"
 #include "fruread.hpp"
 #include "read_fru_data.hpp"
 #include "selutility.hpp"
@@ -17,6 +16,7 @@
 #include <cstring>
 #include <filesystem>
 #include <ipmid/api.hpp>
+#include <ipmid/entity_map_json.hpp>
 #include <ipmid/utils.hpp>
 #include <optional>
 #include <phosphor-logging/elog-errors.hpp>

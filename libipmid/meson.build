@@ -8,11 +8,12 @@ ipmid_pre = [
 
 libipmid = library(
   'ipmid',
+  'entity_map_json.cpp',
   'sdbus-asio.cpp',
   'signals.cpp',
   'systemintf-sdbus.cpp',
   'utils.cpp',
-  dependencies: ipmid_pre,
+  dependencies: [ipmid_pre, nlohmann_json_dep],
   version: meson.project_version(),
   include_directories: root_inc,
   install: true,

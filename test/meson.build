@@ -28,7 +28,7 @@ test('entitymap_json',
     build_by_default: false,
     implicit_include_directories: false,
     dependencies: [
-        entity_map_json_dep,
+        ipmid_dep,
         gmock,
         gtest,
         nlohmann_json_dep,
