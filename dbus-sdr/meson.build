@@ -10,9 +10,9 @@ dbus_sdr_pre = declare_dependency(
   include_directories: root_inc,
   dependencies: [
     crypto,
+    nlohmann_json_dep,
     phosphor_logging_dep,
     ipmid_dep,
-    libipmi20_dep,
     sensorutils_dep,
   ])
 

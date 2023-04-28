@@ -6,13 +6,22 @@ ipmid_pre = [
   systemd,
 ]
 
+entity_map_json_lib = static_library(
+  'entity_map_json',
+  'entity_map_json.cpp',
+  include_directories: root_inc,
+  dependencies: [nlohmann_json_dep, sdbusplus_dep],
+  implicit_include_directories: false)
+
+entity_map_json_dep = declare_dependency(link_with: entity_map_json_lib)
+
 libipmid = library(
   'ipmid',
   'sdbus-asio.cpp',
   'signals.cpp',
   'systemintf-sdbus.cpp',
   'utils.cpp',
-  dependencies: ipmid_pre,
+  dependencies: [ipmid_pre, entity_map_json_dep],
   version: meson.project_version(),
   include_directories: root_inc,
   install: true,
