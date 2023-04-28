@@ -2,13 +2,13 @@
 
 #include "sensorhandler.hpp"
 
-#include "entity_map_json.hpp"
 #include "fruread.hpp"
 
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
 #include <ipmid/api.hpp>
+#include <ipmid/entity_map_json.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>

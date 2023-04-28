@@ -19,11 +19,11 @@
 #include "dbus-sdr/sdrutils.hpp"
 #include "dbus-sdr/sensorutils.hpp"
 #include "dbus-sdr/storagecommands.hpp"
-#include "entity_map_json.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/container/flat_map.hpp>
 #include <ipmid/api.hpp>
+#include <ipmid/entity_map_json.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
@@ -137,7 +137,7 @@ static sdbusplus::bus::match_t sensorAdded(
     sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
                      std::chrono::system_clock::now().time_since_epoch())
                      .count();
-    });
+});
 
 static sdbusplus::bus::match_t sensorRemoved(
     *getSdBus(),
@@ -149,7 +149,7 @@ static sdbusplus::bus::match_t sensorRemoved(
     sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
                         std::chrono::system_clock::now().time_since_epoch())
                         .count();
-    });
+});
 
 // this keeps track of deassertions for sensor event status command. A
 // deasertion can only happen if an assertion was seen first.
@@ -197,7 +197,7 @@ static sdbusplus::bus::match_t thresholdChanged(
             }
         }
     }
-    });
+});
 
 namespace sensor
 {
@@ -2654,3 +2654,4 @@ void registerSensorFunctions()
                                ipmi::dcmi::getSensorInfo);
 }
 } // namespace ipmi
+                   
