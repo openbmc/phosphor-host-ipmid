@@ -1,7 +1,6 @@
-#include "entity_map_json.hpp"
-
 #include <exception>
 #include <fstream>
+#include <ipmid/entity_map_json.hpp>
 #include <ipmid/types.hpp>
 #include <memory>
 #include <nlohmann/json.hpp>
