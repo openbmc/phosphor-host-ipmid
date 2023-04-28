@@ -19,11 +19,11 @@
 #include "dbus-sdr/sdrutils.hpp"
 #include "dbus-sdr/sensorutils.hpp"
 #include "dbus-sdr/storagecommands.hpp"
-#include "entity_map_json.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/container/flat_map.hpp>
 #include <ipmid/api.hpp>
+#include <ipmid/entity_map_json.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>

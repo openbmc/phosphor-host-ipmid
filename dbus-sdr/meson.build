@@ -12,7 +12,6 @@ dbus_sdr_pre = declare_dependency(
     crypto,
     phosphor_logging_dep,
     ipmid_dep,
-    libipmi20_dep,
     sensorutils_dep,
   ])
 
