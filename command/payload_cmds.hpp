@@ -194,7 +194,7 @@ struct GetPayloadStatusResponse
 {
     uint8_t completionCode; //!< Completion code.
 
-    uint8_t capacity; //!< Instance capacity.
+    uint8_t capacity;       //!< Instance capacity.
 
     /* @brief Activation Status. */
 #if BYTE_ORDER == LITTLE_ENDIAN

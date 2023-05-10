@@ -73,8 +73,8 @@ Guid getSystemGUID()
         for (size_t iter = 0, inc = 0; iter < len && inc < BMC_GUID_LEN;
              iter += 2, inc++)
         {
-            uint8_t hexVal =
-                std::strtoul(readUUID.substr(iter, 2).c_str(), NULL, 16);
+            uint8_t hexVal = std::strtoul(readUUID.substr(iter, 2).c_str(),
+                                          NULL, 16);
             guid[inc] = hexVal;
         }
     } while (0);

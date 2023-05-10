@@ -153,10 +153,10 @@ uint8_t closeOtherNetInstanceSession(const uint32_t reqSessionId,
 
                 auto itr = serviceMap.begin();
                 const std::string service = itr->first;
-                uint8_t closeSessionPriv =
-                    std::get<uint8_t>(ipmi::getDbusProperty(
-                        *busp, service, obj, session::sessionIntf,
-                        "CurrentPrivilege"));
+                uint8_t closeSessionPriv = std::get<uint8_t>(
+                    ipmi::getDbusProperty(*busp, service, obj,
+                                          session::sessionIntf,
+                                          "CurrentPrivilege"));
 
                 if (currentSessionPriv < closeSessionPriv)
                 {

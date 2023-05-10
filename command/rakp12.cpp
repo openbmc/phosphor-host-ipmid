@@ -75,8 +75,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    auto rakp1Size =
-        sizeof(RAKP1request) - (userNameMaxLen - request->user_name_len);
+    auto rakp1Size = sizeof(RAKP1request) -
+                     (userNameMaxLen - request->user_name_len);
 
     std::string message = "Invalid login attempted via RCMPP interface ";
     // Validate user name length in the message

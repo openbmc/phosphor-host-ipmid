@@ -56,8 +56,8 @@ void Manager::consoleInputHandler()
     }
     std::vector<uint8_t> buffer(readSize);
     ec.clear();
-    size_t readDataLen =
-        consoleSocket->read_some(boost::asio::buffer(buffer), ec);
+    size_t readDataLen = consoleSocket->read_some(boost::asio::buffer(buffer),
+                                                  ec);
     if (ec)
     {
         lg2::error("Reading from host console socket failed: {ERROR}", "ERROR",
@@ -101,12 +101,12 @@ void Manager::startHostConsole()
 
     consoleSocket->async_wait(boost::asio::socket_base::wait_read,
                               [this](const boost::system::error_code& ec) {
-                                  if (!ec)
-                                  {
-                                      consoleInputHandler();
-                                      startHostConsole();
-                                  }
-                              });
+        if (!ec)
+        {
+            consoleInputHandler();
+            startHostConsole();
+        }
+    });
 } // namespace sol
 
 void Manager::stopHostConsole()
@@ -130,8 +130,8 @@ void Manager::updateSOLParameter(uint8_t channelNum)
     {
         try
         {
-            solService =
-                ipmi::getService(dbus, solInterface, solPathWitheEthName);
+            solService = ipmi::getService(dbus, solInterface,
+                                          solPathWitheEthName);
         }
         catch (const std::runtime_error& e)
         {
@@ -251,21 +251,21 @@ void registerSOLServiceChangeCallback()
                     type::signal() + member("PropertiesChanged") +
                     interface("org.freedesktop.DBus.Properties"),
                 [](sdbusplus::message_t& msg) {
-                    std::string intfName;
-                    std::map<std::string, std::variant<bool>> properties;
-                    msg.read(intfName, properties);
+                std::string intfName;
+                std::map<std::string, std::variant<bool>> properties;
+                msg.read(intfName, properties);
 
-                    const auto it = properties.find("Enabled");
-                    if (it != properties.end())
+                const auto it = properties.find("Enabled");
+                if (it != properties.end())
+                {
+                    const bool* state = std::get_if<bool>(&it->second);
+
+                    if (state != nullptr && *state == false)
                     {
-                        const bool* state = std::get_if<bool>(&it->second);
-
-                        if (state != nullptr && *state == false)
-                        {
-                            // Stop all the payload session.
-                            sol::Manager::get().stopAllPayloadInstance();
-                        }
+                        // Stop all the payload session.
+                        sol::Manager::get().stopAllPayloadInstance();
                     }
+                }
                 });
         }
     }
@@ -335,8 +335,8 @@ void procSolConfChange(sdbusplus::message_t& msg)
         }
         else if (prop.first == "RetryIntervalMS")
         {
-            sol::Manager::get().retryInterval =
-                std::get<uint8_t>(prop.second) * sol::retryIntervalFactor * 1ms;
+            sol::Manager::get().retryInterval = std::get<uint8_t>(prop.second) *
+                                                sol::retryIntervalFactor * 1ms;
         }
     }
 }

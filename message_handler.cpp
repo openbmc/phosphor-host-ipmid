@@ -120,8 +120,8 @@ void Handler::executeCommand()
                 return;
             }
 
-            auto start =
-                inMessage->payload.begin() + sizeof(LAN::header::Request);
+            auto start = inMessage->payload.begin() +
+                         sizeof(LAN::header::Request);
             auto end = inMessage->payload.end() - sizeof(LAN::trailer::Request);
             std::vector<uint8_t> inPayload(start, end);
             command::Table::get().executeCommand(command, inPayload,

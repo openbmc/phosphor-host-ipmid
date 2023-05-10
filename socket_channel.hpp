@@ -76,8 +76,8 @@ class Channel
             const sockaddr_in* sa =
                 reinterpret_cast<const sockaddr_in*>(&remoteSockAddr);
             remoteIpv4Addr = sa->sin_addr.s_addr;
-            retval =
-                inet_ntop(AF_INET, &(sa->sin_addr), ipv4addr, sizeof(ipv4addr));
+            retval = inet_ntop(AF_INET, &(sa->sin_addr), ipv4addr,
+                               sizeof(ipv4addr));
         }
         else if (sockAddrSize == sizeof(sockaddr_in6))
         {

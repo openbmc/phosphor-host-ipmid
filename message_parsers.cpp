@@ -208,10 +208,10 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         throw std::runtime_error("Invalid data length");
     }
 
-    bool integrityMismatch =
-        session->isIntegrityAlgoEnabled() && !message->isPacketAuthenticated;
-    bool encryptMismatch =
-        session->isCryptAlgoEnabled() && !message->isPacketEncrypted;
+    bool integrityMismatch = session->isIntegrityAlgoEnabled() &&
+                             !message->isPacketAuthenticated;
+    bool encryptMismatch = session->isCryptAlgoEnabled() &&
+                           !message->isPacketEncrypted;
 
     if (sessionID != session::sessionZero &&
         (integrityMismatch || encryptMismatch))
@@ -232,8 +232,8 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     if (message->isPacketEncrypted)
     {
         // Assign the decrypted payload to the IPMI Message
-        message->payload =
-            internal::decryptPayload(inPacket, message, payloadLen, session);
+        message->payload = internal::decryptPayload(inPacket, message,
+                                                    payloadLen, session);
     }
     else
     {

@@ -14,8 +14,7 @@ namespace command
 struct CommandID
 {
     static constexpr size_t lunBits = 2;
-    CommandID(uint32_t command) : command(command)
-    {}
+    CommandID(uint32_t command) : command(command) {}
 
     uint8_t netFnLun() const
     {
@@ -216,8 +215,7 @@ class Table
     {};
 
   public:
-    explicit Table(const Private&)
-    {}
+    explicit Table(const Private&) {}
     Table() = delete;
     ~Table() = default;
     // Command Table is a singleton so copy, copy-assignment, move and

@@ -46,12 +46,12 @@ void Context::enableAccumulateTimer(bool enable)
         std::weak_ptr<Context> weakRef = weak_from_this();
         accumulateTimer.async_wait(
             [weakRef](const boost::system::error_code& ec) {
-                std::shared_ptr<Context> self = weakRef.lock();
-                if (!ec && self)
-                {
-                    self->charAccTimerHandler();
-                }
-            });
+            std::shared_ptr<Context> self = weakRef.lock();
+            if (!ec && self)
+            {
+                self->charAccTimerHandler();
+            }
+        });
     }
     else
     {

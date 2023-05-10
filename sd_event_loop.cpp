@@ -39,13 +39,12 @@ void EventLoop::startRmcpReceive()
 {
     udpSocket->async_wait(boost::asio::socket_base::wait_read,
                           [this](const boost::system::error_code& ec) {
-                              if (!ec)
-                              {
-                                  boost::asio::post(
-                                      *io, [this]() { startRmcpReceive(); });
-                                  handleRmcpPacket();
-                              }
-                          });
+        if (!ec)
+        {
+            boost::asio::post(*io, [this]() { startRmcpReceive(); });
+            handleRmcpPacket();
+        }
+    });
 }
 
 int EventLoop::getVLANID(const std::string channel)

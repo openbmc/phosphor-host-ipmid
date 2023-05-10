@@ -225,8 +225,8 @@ std::vector<uint8_t>
     static std::vector<uint8_t> supportedAlgorithms;
     static bool recordInit = false;
 
-    uint8_t rspChannel =
-        ipmi::convertCurrentChannelNum(channelNumber, getInterfaceIndex());
+    uint8_t rspChannel = ipmi::convertCurrentChannelNum(channelNumber,
+                                                        getInterfaceIndex());
 
     if (!ipmi::isValidChannel(rspChannel))
     {
@@ -253,8 +253,8 @@ std::vector<uint8_t>
         }
     }
 
-    const std::vector<uint8_t>& records =
-        algoSelectBit ? cipherRecords : supportedAlgorithms;
+    const std::vector<uint8_t>& records = algoSelectBit ? cipherRecords
+                                                        : supportedAlgorithms;
     static constexpr auto respSize = 16;
 
     // Session support is available in active LAN channels.
@@ -271,8 +271,8 @@ std::vector<uint8_t>
     // set of 16 and so on.
 
     // Calculate the number of record data bytes to be returned.
-    auto start =
-        std::min(static_cast<size_t>(listIndex) * respSize, records.size());
+    auto start = std::min(static_cast<size_t>(listIndex) * respSize,
+                          records.size());
     auto end = std::min((static_cast<size_t>(listIndex) * respSize) + respSize,
                         records.size());
     auto size = end - start;

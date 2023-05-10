@@ -62,8 +62,8 @@ void Manager::managerInit(const std::string& channel)
     objManager = std::make_unique<sdbusplus::server::manager_t>(
         *getSdBus(), session::sessionManagerRootPath);
 
-    auto objPath =
-        std::string(session::sessionManagerRootPath) + "/" + channel + "/0";
+    auto objPath = std::string(session::sessionManagerRootPath) + "/" +
+                   channel + "/0";
 
     chName = channel;
     setNetworkInstance();
@@ -232,8 +232,8 @@ void Manager::cleanStaleEntries()
     // active idle time in seconds = 60 / overflow^3
     constexpr int baseIdleMicros = 60 * 1000 * 1000;
     // no +1 for the zero session here because this is just active sessions
-    int sessionDivisor =
-        getActiveSessionCount() - session::maxSessionCountPerChannel;
+    int sessionDivisor = getActiveSessionCount() -
+                         session::maxSessionCountPerChannel;
     sessionDivisor = std::max(0, sessionDivisor) + 1;
     sessionDivisor = sessionDivisor * sessionDivisor * sessionDivisor;
     int activeMicros = baseIdleMicros / sessionDivisor;
@@ -242,8 +242,8 @@ void Manager::cleanStaleEntries()
     // setup idle time in seconds = max(3, 60 / overflow^3)
 
     // +1 for the zero session here because size() counts that too
-    int setupDivisor =
-        sessionsMap.size() - (session::maxSessionCountPerChannel + 1);
+    int setupDivisor = sessionsMap.size() -
+                       (session::maxSessionCountPerChannel + 1);
     setupDivisor = std::max(0, setupDivisor) + 1;
     setupDivisor = setupDivisor * setupDivisor * setupDivisor;
     constexpr int maxSetupMicros = 3 * 1000 * 1000;

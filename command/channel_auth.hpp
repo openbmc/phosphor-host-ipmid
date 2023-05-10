@@ -27,7 +27,7 @@ struct GetChannelCapabilitiesResp
 {
     uint8_t completionCode; // Completion Code
 
-    uint8_t channelNumber; // Channel number that the request was
+    uint8_t channelNumber;  // Channel number that the request was
     // received on
 
 #if BYTE_ORDER == LITTLE_ENDIAN

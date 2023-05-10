@@ -43,8 +43,7 @@ class Interface
     /**
      * @brief Constructor for Interface
      */
-    explicit Interface(const std::vector<uint8_t>& k2) : k2(k2)
-    {}
+    explicit Interface(const std::vector<uint8_t>& k2) : k2(k2) {}
 
     Interface() = delete;
     virtual ~Interface() = default;
@@ -143,8 +142,7 @@ class AlgoAES128 final : public Interface
      *
      * @param[in] - Session Integrity key
      */
-    explicit AlgoAES128(const std::vector<uint8_t>& k2) : Interface(k2)
-    {}
+    explicit AlgoAES128(const std::vector<uint8_t>& k2) : Interface(k2) {}
 
     AlgoAES128() = delete;
     ~AlgoAES128() = default;
