@@ -16,8 +16,9 @@
 #pragma once
 #include <openssl/evp.h>
 
-#include <ctime>
 #include <ipmid/types.hpp>
+
+#include <ctime>
 #include <string>
 #include <unordered_map>
 #include <vector>

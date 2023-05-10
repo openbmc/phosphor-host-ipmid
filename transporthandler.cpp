@@ -344,9 +344,9 @@ void createIfAddr(sdbusplus::bus_t& bus, const ChannelParams& params,
                   const typename AddrFamily<family>::addr& address,
                   uint8_t prefix)
 {
-    auto newreq =
-        bus.new_method_call(params.service.c_str(), params.logicalPath.c_str(),
-                            INTF_IP_CREATE, "IP");
+    auto newreq = bus.new_method_call(params.service.c_str(),
+                                      params.logicalPath.c_str(),
+                                      INTF_IP_CREATE, "IP");
     std::string protocol =
         sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
             AddrFamily<family>::protocol);
@@ -426,8 +426,8 @@ void reconfigureGatewayMAC(sdbusplus::bus_t& bus, const ChannelParams& params,
     }
 
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
-    auto neighbor =
-        findStaticNeighbor<family>(bus, params, *gateway, neighbors);
+    auto neighbor = findStaticNeighbor<family>(bus, params, *gateway,
+                                               neighbors);
     if (neighbor)
     {
         deleteObjectIfExists(bus, params.service, neighbor->path);
@@ -629,8 +629,8 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     std::vector<IfAddr<AF_INET6>> ifaddrs6;
     for (uint8_t i = 0; i < MAX_IPV6_STATIC_ADDRESSES; ++i)
     {
-        auto ifaddr6 =
-            findIfAddr<AF_INET6>(bus, params, i, originsV6Static, ips);
+        auto ifaddr6 = findIfAddr<AF_INET6>(bus, params, i, originsV6Static,
+                                            ips);
         if (!ifaddr6)
         {
             break;
@@ -1226,9 +1226,9 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 return responseInvalidFieldRequest();
             }
 
-            uint8_t resp =
-                getCipherConfigObject(csPrivFileName, csPrivDefaultFileName)
-                    .setCSPrivilegeLevels(channel, cipherSuitePrivs);
+            uint8_t resp = getCipherConfigObject(csPrivFileName,
+                                                 csPrivDefaultFileName)
+                               .setCSPrivilegeLevels(channel, cipherSuitePrivs);
             if (!resp)
             {
                 return responseSuccess();
@@ -1281,8 +1281,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             listInit = true;
         }
         catch (const std::exception& e)
-        {
-        }
+        {}
     }
 
     switch (static_cast<LanParam>(parameter))

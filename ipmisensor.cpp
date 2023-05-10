@@ -39,7 +39,6 @@ extern int updateDbusInterface(uint8_t, const char*, const char*);
 int set_sensor_dbus_state_simple(const sensorRES_t* pRec,
                                  const lookup_t* pTable, const char* value)
 {
-
     return set_sensor_dbus_state_s(pRec->sensor_number, pTable->member, value);
 }
 
@@ -97,7 +96,6 @@ event_data_t g_fwprogress00h[] = {
 
 char* event_data_lookup(event_data_t* p, uint8_t b)
 {
-
     while (p->data != 0xFF)
     {
         if (p->data == b)
@@ -115,13 +113,11 @@ char* event_data_lookup(event_data_t* p, uint8_t b)
 int set_sensor_dbus_state_fwprogress(const sensorRES_t* pRec,
                                      const lookup_t* pTable, const char*)
 {
-
     char valuestring[128];
     char* p = valuestring;
 
     switch (pTable->offset)
     {
-
         case 0x00:
             std::snprintf(
                 p, sizeof(valuestring), "POST Error, %s",
@@ -167,7 +163,6 @@ int set_sensor_dbus_state_system_event(const sensorRES_t* pRec,
 
     switch (pTable->offset)
     {
-
         case 0x00:
             std::snprintf(p, sizeof(valuestring), "System Reconfigured");
             break;
@@ -261,7 +256,6 @@ void reportSensorEventDeassert(const sensorRES_t* pRec, int index)
 
 int findindex(const uint8_t sensor_type, int offset, int* index)
 {
-
     int i = 0, rc = 0;
     lookup_t* pTable = g_ipmidbuslookup;
 
@@ -322,7 +316,6 @@ int updateSensorRecordFromSSRAESC(const void* record)
         // if any bit is either asserted or Deasserted.
         for (int i = 0; i < 8; i++)
         {
-
             if ((ISBITSET(pRec->assert_state7_0, i)) &&
                 (shouldReport(stype, i, &index)))
             {

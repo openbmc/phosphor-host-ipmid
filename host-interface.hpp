@@ -16,10 +16,10 @@ namespace command
  *  @details A concrete implementation for xyz.openbmc_project.Control.Host
  *  and xyz.openbmc_project.Condition.HostFirmware DBus API's.
  */
-class Host
-    : public sdbusplus::server::object_t<
-          sdbusplus::xyz::openbmc_project::Control::server::Host,
-          sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>
+class Host :
+    public sdbusplus::server::object_t<
+        sdbusplus::xyz::openbmc_project::Control::server::Host,
+        sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>
 {
   public:
     /** @brief Constructs Host Control and Condition Interfaces

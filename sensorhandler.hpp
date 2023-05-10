@@ -2,9 +2,10 @@
 
 #include <stdint.h>
 
-#include <exception>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
+
+#include <exception>
 
 // IPMI commands for net functions.
 enum ipmi_netfn_sen_cmds
@@ -69,8 +70,8 @@ struct PlatformEventRequest
     uint8_t data[3];
 };
 
-static constexpr char const* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
-static constexpr char const* ipmiSELAddInterface =
+static constexpr const char* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
+static constexpr const char* ipmiSELAddInterface =
     "xyz.openbmc_project.Logging.IPMI";
 static const std::string ipmiSELAddMessage = "SEL Entry";
 

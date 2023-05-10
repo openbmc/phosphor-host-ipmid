@@ -25,8 +25,8 @@ struct Event final : public sdbusplus::exception::generated_exception
     const char* what() const noexcept override;
 };
 
-struct MaintenanceProcedure final
-    : public sdbusplus::exception::generated_exception
+struct MaintenanceProcedure final :
+    public sdbusplus::exception::generated_exception
 {
     static constexpr auto errName =
         "org.open_power.Host.Error.MaintenanceProcedure";

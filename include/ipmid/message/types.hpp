@@ -15,10 +15,11 @@
  */
 #pragma once
 
-#include <bitset>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/version.hpp>
 #include <ipmid/utility.hpp>
+
+#include <bitset>
 #include <tuple>
 
 #if BOOST_VERSION < 107900

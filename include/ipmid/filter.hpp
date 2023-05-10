@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 #pragma once
-#include <algorithm>
 #include <boost/callable_traits.hpp>
-#include <cstdint>
 #include <ipmid/api-types.hpp>
 #include <ipmid/message.hpp>
+
+#include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -62,9 +63,7 @@ template <typename Filter>
 class IpmiFilter : public FilterBase
 {
   public:
-    IpmiFilter(Filter&& filter) : filter_(std::move(filter))
-    {
-    }
+    IpmiFilter(Filter&& filter) : filter_(std::move(filter)) {}
 
     ipmi::Cc call(message::Request::ptr request) override
     {

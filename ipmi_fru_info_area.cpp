@@ -1,11 +1,12 @@
 #include "ipmi_fru_info_area.hpp"
 
+#include <phosphor-logging/elog.hpp>
+
 #include <algorithm>
 #include <ctime>
 #include <iomanip>
 #include <map>
 #include <numeric>
-#include <phosphor-logging/elog.hpp>
 #include <sstream>
 
 namespace ipmi
@@ -45,8 +46,8 @@ static constexpr auto maxRecordAttributeValue = 0x3F;
 static constexpr auto secs_from_1970_1996 = 820454400;
 static constexpr auto maxMfgDateValue = 0xFFFFFF; // 3 Byte length
 static constexpr auto secs_per_min = 60;
-static constexpr auto secsToMaxMfgdate =
-    secs_from_1970_1996 + secs_per_min * maxMfgDateValue;
+static constexpr auto secsToMaxMfgdate = secs_from_1970_1996 +
+                                         secs_per_min * maxMfgDateValue;
 
 // Minimum size of resulting FRU blob.
 // This is also the theoretical maximum size according to the spec:
@@ -116,8 +117,8 @@ void postFormatProcessing(FruAreaData& data)
     padData(data);
 
     // Set size of data info area
-    data.at(areaSizeOffset) =
-        (data.size() + checksumSize) / (recordUnitOfMeasurement);
+    data.at(areaSizeOffset) = (data.size() + checksumSize) /
+                              (recordUnitOfMeasurement);
 
     // Finally add area checksum
     appendDataChecksum(data);

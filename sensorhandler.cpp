@@ -8,18 +8,19 @@
 #include <mapper.h>
 #include <systemd/sd-bus.h>
 
-#include <bitset>
-#include <cmath>
-#include <cstring>
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
-#include <set>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
+
+#include <bitset>
+#include <cmath>
+#include <cstring>
+#include <set>
 
 static constexpr uint8_t fruInventoryDevice = 0x10;
 static constexpr uint8_t IPMIFruInventory = 0x02;
@@ -159,11 +160,11 @@ void initSensorMatches()
             std::make_unique<sdbusplus::bus::match_t>(
                 bus, interfacesRemoved() + argNpath(0, s.second.sensorPath),
                 [id = s.first](auto& /*msg*/) {
-                    // Ideally this should work.
-                    // But when a service is terminated or crashed, it does not
-                    // emit interfacesRemoved signal. In that case it's handled
-                    // by sensorsOwnerMatch
-                    sensorCacheMap[id].reset();
+            // Ideally this should work.
+            // But when a service is terminated or crashed, it does not
+            // emit interfacesRemoved signal. In that case it's handled
+            // by sensorsOwnerMatch
+            sensorCacheMap[id].reset();
                 }));
         sensorUpdatedMatches.emplace(
             s.first, std::make_unique<sdbusplus::bus::match_t>(
@@ -172,23 +173,22 @@ void initSensorMatches()
                              member("PropertiesChanged"s) +
                              interface("org.freedesktop.DBus.Properties"s),
                          [&s](auto& msg) {
-                             fillSensorIdServiceMap(
-                                 s.second.sensorPath,
-                                 s.second.propertyInterfaces.begin()->first,
-                                 s.first);
-                             try
-                             {
-                                 // This is signal callback
-                                 std::string interfaceName;
-                                 msg.read(interfaceName);
-                                 ipmi::PropertyMap props;
-                                 msg.read(props);
-                                 s.second.getFunc(s.first, s.second, props);
-                             }
-                             catch (const std::exception& e)
-                             {
-                                 sensorCacheMap[s.first].reset();
-                             }
+            fillSensorIdServiceMap(s.second.sensorPath,
+                                   s.second.propertyInterfaces.begin()->first,
+                                   s.first);
+            try
+            {
+                // This is signal callback
+                std::string interfaceName;
+                msg.read(interfaceName);
+                ipmi::PropertyMap props;
+                msg.read(props);
+                s.second.getFunc(s.first, s.second, props);
+            }
+            catch (const std::exception& e)
+            {
+                sensorCacheMap[s.first].reset();
+            }
                          }));
     }
     sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
@@ -270,7 +270,6 @@ final:
 int set_sensor_dbus_state_s(uint8_t number, const char* method,
                             const char* value)
 {
-
     dbus_interface_t a;
     int r;
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -316,7 +315,6 @@ final:
 int set_sensor_dbus_state_y(uint8_t number, const char* method,
                             const uint8_t value)
 {
-
     dbus_interface_t a;
     int r;
     sd_bus_error error = SD_BUS_ERROR_NULL;
@@ -362,7 +360,6 @@ final:
 
 uint8_t dbus_to_sensor_type(char* p)
 {
-
     sensorTypemap_t* s = g_SensorTypeMap;
     char r = 0;
     while (s->number != 0xFF)
@@ -383,7 +380,6 @@ uint8_t dbus_to_sensor_type(char* p)
 
 uint8_t get_type_from_interface(dbus_interface_t dbus_if)
 {
-
     uint8_t type;
 
     // This is where sensors that do not exist in dbus but do
@@ -911,7 +907,6 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     // verifiy all needed fields are present
     if (lowerCriticalThreshMask || upperCriticalThreshMask)
     {
-
         ipmi::PropertyMap findThreshold;
         ec = ipmi::getAllDbusProperties(ctx, service, info.sensorPath,
                                         criticalThreshIntf, findThreshold);
@@ -1011,8 +1006,8 @@ ipmi::RspType<uint8_t, // respcount
         const auto& entityRecords =
             ipmi::sensor::EntityInfoMapContainer::getContainer()
                 ->getIpmiEntityRecords();
-        sdrCount =
-            ipmi::sensor::sensors.size() + frus.size() + entityRecords.size();
+        sdrCount = ipmi::sensor::sensors.size() + frus.size() +
+                   entityRecords.size();
     }
     else if (count.value_or(0) == getSensorCount)
     {
@@ -1185,10 +1180,10 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
         const auto& entityRecords =
             ipmi::sensor::EntityInfoMapContainer::getContainer()
                 ->getIpmiEntityRecords();
-        auto next_record_id =
-            (entityRecords.size())
-                ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
-                : END_OF_RECORD;
+        auto next_record_id = (entityRecords.size())
+                                  ? entityRecords.begin()->first +
+                                        ENTITY_RECORD_ID_START
+                                  : END_OF_RECORD;
         get_sdr::response::set_next_record_id(next_record_id, resp);
     }
     else
@@ -1392,8 +1387,8 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
                 *data_len);
 
     // data_len should include the LSB and MSB:
-    *data_len +=
-        sizeof(resp->next_record_id_lsb) + sizeof(resp->next_record_id_msb);
+    *data_len += sizeof(resp->next_record_id_lsb) +
+                 sizeof(resp->next_record_id_msb);
 
     return ret;
 }
@@ -1469,8 +1464,8 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
     std::vector<uint8_t> eventData(req->data, req->data + count);
 
     sdbusplus::bus_t dbus(bus);
-    std::string service =
-        ipmi::getService(dbus, ipmiSELAddInterface, ipmiSELPath);
+    std::string service = ipmi::getService(dbus, ipmiSELAddInterface,
+                                           ipmiSELPath);
     sdbusplus::message_t writeSEL = dbus.new_method_call(
         service.c_str(), ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
     writeSEL.append(ipmiSELAddMessage, sensorPath, eventData, assert,

@@ -5,6 +5,7 @@
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/exception.hpp>
+
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -1778,9 +1779,7 @@ namespace ibm
 namespace VPD
 {
 namespace _LocationNotFound
-{
-
-} // namespace _LocationNotFound
+{} // namespace _LocationNotFound
 
 struct LocationNotFound
 {
@@ -1810,9 +1809,7 @@ namespace ibm
 namespace VPD
 {
 namespace _NodeNotFound
-{
-
-} // namespace _NodeNotFound
+{} // namespace _NodeNotFound
 
 struct NodeNotFound
 {
@@ -1842,9 +1839,7 @@ namespace ibm
 namespace VPD
 {
 namespace _PathNotFound
-{
-
-} // namespace _PathNotFound
+{} // namespace _PathNotFound
 
 struct PathNotFound
 {
@@ -1874,9 +1869,7 @@ namespace ibm
 namespace VPD
 {
 namespace _RecordNotFound
-{
-
-} // namespace _RecordNotFound
+{} // namespace _RecordNotFound
 
 struct RecordNotFound
 {
@@ -1906,9 +1899,7 @@ namespace ibm
 namespace VPD
 {
 namespace _KeywordNotFound
-{
-
-} // namespace _KeywordNotFound
+{} // namespace _KeywordNotFound
 
 struct KeywordNotFound
 {
@@ -1938,9 +1929,7 @@ namespace ibm
 namespace VPD
 {
 namespace _BlankSystemVPD
-{
-
-} // namespace _BlankSystemVPD
+{} // namespace _BlankSystemVPD
 
 struct BlankSystemVPD
 {
@@ -1970,9 +1959,7 @@ namespace ibm
 namespace VPD
 {
 namespace _InvalidEepromPath
-{
-
-} // namespace _InvalidEepromPath
+{} // namespace _InvalidEepromPath
 
 struct InvalidEepromPath
 {
@@ -2002,9 +1989,7 @@ namespace ibm
 namespace VPD
 {
 namespace _InvalidVPD
-{
-
-} // namespace _InvalidVPD
+{} // namespace _InvalidVPD
 
 struct InvalidVPD
 {
@@ -2034,9 +2019,7 @@ namespace ibm
 namespace VPD
 {
 namespace _EccCheckFailed
-{
-
-} // namespace _EccCheckFailed
+{} // namespace _EccCheckFailed
 
 struct EccCheckFailed
 {
@@ -2066,9 +2049,7 @@ namespace ibm
 namespace VPD
 {
 namespace _InvalidJson
-{
-
-} // namespace _InvalidJson
+{} // namespace _InvalidJson
 
 struct InvalidJson
 {
@@ -2098,9 +2079,7 @@ namespace ibm
 namespace VPD
 {
 namespace _DbusFailure
-{
-
-} // namespace _DbusFailure
+{} // namespace _DbusFailure
 
 struct DbusFailure
 {
@@ -2326,9 +2305,7 @@ namespace openbmc_project
 namespace HardwareIsolation
 {
 namespace _IsolatedAlready
-{
-
-} // namespace _IsolatedAlready
+{} // namespace _IsolatedAlready
 
 struct IsolatedAlready
 {
@@ -2408,9 +2385,7 @@ namespace openbmc_project
 namespace Common
 {
 namespace _InternalFailure
-{
-
-} // namespace _InternalFailure
+{} // namespace _InternalFailure
 
 struct InternalFailure
 {
@@ -2505,9 +2480,7 @@ namespace openbmc_project
 namespace Common
 {
 namespace _InsufficientPermission
-{
-
-} // namespace _InsufficientPermission
+{} // namespace _InsufficientPermission
 
 struct InsufficientPermission
 {
@@ -2585,9 +2558,7 @@ namespace openbmc_project
 namespace Common
 {
 namespace _NoCACertificate
-{
-
-} // namespace _NoCACertificate
+{} // namespace _NoCACertificate
 
 struct NoCACertificate
 {
@@ -2618,9 +2589,7 @@ namespace openbmc_project
 namespace Common
 {
 namespace _TooManyResources
-{
-
-} // namespace _TooManyResources
+{} // namespace _TooManyResources
 
 struct TooManyResources
 {
@@ -2651,9 +2620,7 @@ namespace openbmc_project
 namespace Common
 {
 namespace _ResourceNotFound
-{
-
-} // namespace _ResourceNotFound
+{} // namespace _ResourceNotFound
 
 struct ResourceNotFound
 {
@@ -2684,9 +2651,7 @@ namespace openbmc_project
 namespace Common
 {
 namespace _Unavailable
-{
-
-} // namespace _Unavailable
+{} // namespace _Unavailable
 
 struct Unavailable
 {
@@ -2766,9 +2731,7 @@ namespace BIOSConfig
 namespace Common
 {
 namespace _AttributeNotFound
-{
-
-} // namespace _AttributeNotFound
+{} // namespace _AttributeNotFound
 
 struct AttributeNotFound
 {
@@ -2852,9 +2815,7 @@ namespace BIOSConfig
 namespace Common
 {
 namespace _InvalidCurrentPassword
-{
-
-} // namespace _InvalidCurrentPassword
+{} // namespace _InvalidCurrentPassword
 
 struct InvalidCurrentPassword
 {
@@ -2889,9 +2850,7 @@ namespace BIOSConfig
 namespace Common
 {
 namespace _PasswordNotSettable
-{
-
-} // namespace _PasswordNotSettable
+{} // namespace _PasswordNotSettable
 
 struct PasswordNotSettable
 {
@@ -2925,9 +2884,7 @@ namespace Chassis
 namespace Common
 {
 namespace _UnsupportedCommand
-{
-
-} // namespace _UnsupportedCommand
+{} // namespace _UnsupportedCommand
 
 struct UnsupportedCommand
 {
@@ -2961,9 +2918,7 @@ namespace Chassis
 namespace Common
 {
 namespace _IOError
-{
-
-} // namespace _IOError
+{} // namespace _IOError
 
 struct IOError
 {
@@ -3298,9 +3253,7 @@ namespace Common
 namespace Device
 {
 namespace _ReadFailure
-{
-
-} // namespace _ReadFailure
+{} // namespace _ReadFailure
 
 struct ReadFailure
 {
@@ -3338,9 +3291,7 @@ namespace Common
 namespace Device
 {
 namespace _WriteFailure
-{
-
-} // namespace _WriteFailure
+{} // namespace _WriteFailure
 
 struct WriteFailure
 {
@@ -3656,9 +3607,7 @@ namespace Control
 namespace Device
 {
 namespace _WriteFailure
-{
-
-} // namespace _WriteFailure
+{} // namespace _WriteFailure
 
 struct WriteFailure
 {
@@ -3696,9 +3645,7 @@ namespace Control
 namespace Host
 {
 namespace _CommandNotSupported
-{
-
-} // namespace _CommandNotSupported
+{} // namespace _CommandNotSupported
 
 struct CommandNotSupported
 {
@@ -3732,9 +3679,7 @@ namespace Dump
 namespace Create
 {
 namespace _Disabled
-{
-
-} // namespace _Disabled
+{} // namespace _Disabled
 
 struct Disabled
 {
@@ -3930,9 +3875,7 @@ namespace Memory
 namespace MemoryECC
 {
 namespace _isLoggingLimitReached
-{
-
-} // namespace _isLoggingLimitReached
+{} // namespace _isLoggingLimitReached
 
 struct isLoggingLimitReached
 {
@@ -3966,9 +3909,7 @@ namespace Memory
 namespace MemoryECC
 {
 namespace _ceCount
-{
-
-} // namespace _ceCount
+{} // namespace _ceCount
 
 struct ceCount
 {
@@ -4002,9 +3943,7 @@ namespace Memory
 namespace MemoryECC
 {
 namespace _ueCount
-{
-
-} // namespace _ueCount
+{} // namespace _ueCount
 
 struct ueCount
 {
@@ -4038,9 +3977,7 @@ namespace Nvme
 namespace Status
 {
 namespace _CapacityFault
-{
-
-} // namespace _CapacityFault
+{} // namespace _CapacityFault
 
 struct CapacityFault
 {
@@ -4074,9 +4011,7 @@ namespace Nvme
 namespace Status
 {
 namespace _TemperatureFault
-{
-
-} // namespace _TemperatureFault
+{} // namespace _TemperatureFault
 
 struct TemperatureFault
 {
@@ -4110,9 +4045,7 @@ namespace Nvme
 namespace Status
 {
 namespace _DegradesFault
-{
-
-} // namespace _DegradesFault
+{} // namespace _DegradesFault
 
 struct DegradesFault
 {
@@ -4146,9 +4079,7 @@ namespace Nvme
 namespace Status
 {
 namespace _MediaFault
-{
-
-} // namespace _MediaFault
+{} // namespace _MediaFault
 
 struct MediaFault
 {
@@ -4182,9 +4113,7 @@ namespace Nvme
 namespace Status
 {
 namespace _BackupDeviceFault
-{
-
-} // namespace _BackupDeviceFault
+{} // namespace _BackupDeviceFault
 
 struct BackupDeviceFault
 {
@@ -4218,9 +4147,7 @@ namespace Sensor
 namespace Device
 {
 namespace _ReadFailure
-{
-
-} // namespace _ReadFailure
+{} // namespace _ReadFailure
 
 struct ReadFailure
 {
@@ -4362,9 +4289,7 @@ namespace Smbios
 namespace MDR_V2
 {
 namespace _InvalidParameter
-{
-
-} // namespace _InvalidParameter
+{} // namespace _InvalidParameter
 
 struct InvalidParameter
 {
@@ -4398,9 +4323,7 @@ namespace Smbios
 namespace MDR_V2
 {
 namespace _UpdateInProgress
-{
-
-} // namespace _UpdateInProgress
+{} // namespace _UpdateInProgress
 
 struct UpdateInProgress
 {
@@ -4434,9 +4357,7 @@ namespace Smbios
 namespace MDR_V2
 {
 namespace _InvalidId
-{
-
-} // namespace _InvalidId
+{} // namespace _InvalidId
 
 struct InvalidId
 {
@@ -4605,9 +4526,7 @@ namespace State
 namespace Host
 {
 namespace _SoftOffTimeout
-{
-
-} // namespace _SoftOffTimeout
+{} // namespace _SoftOffTimeout
 
 struct SoftOffTimeout
 {
@@ -4697,9 +4616,7 @@ namespace Shutdown
 namespace Inventory
 {
 namespace _Fan
-{
-
-} // namespace _Fan
+{} // namespace _Fan
 
 struct Fan
 {
@@ -4736,9 +4653,7 @@ namespace Shutdown
 namespace ThermalEvent
 {
 namespace _Processor
-{
-
-} // namespace _Processor
+{} // namespace _Processor
 
 struct Processor
 {
@@ -4775,9 +4690,7 @@ namespace Shutdown
 namespace ThermalEvent
 {
 namespace _GPU
-{
-
-} // namespace _GPU
+{} // namespace _GPU
 
 struct GPU
 {
@@ -4814,9 +4727,7 @@ namespace Shutdown
 namespace ThermalEvent
 {
 namespace _Ambient
-{
-
-} // namespace _Ambient
+{} // namespace _Ambient
 
 struct Ambient
 {
@@ -4853,9 +4764,7 @@ namespace Shutdown
 namespace Power
 {
 namespace _Fault
-{
-
-} // namespace _Fault
+{} // namespace _Fault
 
 struct Fault
 {
@@ -4892,9 +4801,7 @@ namespace Shutdown
 namespace Power
 {
 namespace _Blackout
-{
-
-} // namespace _Blackout
+{} // namespace _Blackout
 
 struct Blackout
 {
@@ -4931,9 +4838,7 @@ namespace Shutdown
 namespace Power
 {
 namespace _Regulator
-{
-
-} // namespace _Regulator
+{} // namespace _Regulator
 
 struct Regulator
 {
@@ -4968,9 +4873,7 @@ namespace User
 namespace Common
 {
 namespace _UserNameExists
-{
-
-} // namespace _UserNameExists
+{} // namespace _UserNameExists
 
 struct UserNameExists
 {
@@ -5004,9 +4907,7 @@ namespace User
 namespace Common
 {
 namespace _UserNameDoesNotExist
-{
-
-} // namespace _UserNameDoesNotExist
+{} // namespace _UserNameDoesNotExist
 
 struct UserNameDoesNotExist
 {
@@ -5193,9 +5094,7 @@ namespace User
 namespace Common
 {
 namespace _PrivilegeMappingExists
-{
-
-} // namespace _PrivilegeMappingExists
+{} // namespace _PrivilegeMappingExists
 
 struct PrivilegeMappingExists
 {
@@ -5746,9 +5645,7 @@ namespace Proc
 namespace FSI
 {
 namespace _MasterDetectionFailure
-{
-
-} // namespace _MasterDetectionFailure
+{} // namespace _MasterDetectionFailure
 
 struct MasterDetectionFailure
 {
@@ -5784,9 +5681,7 @@ namespace openbmc_project
 namespace Inventory
 {
 namespace _NotPresent
-{
-
-} // namespace _NotPresent
+{} // namespace _NotPresent
 
 struct NotPresent
 {
@@ -5819,9 +5714,7 @@ namespace openbmc_project
 namespace Inventory
 {
 namespace _Nonfunctional
-{
-
-} // namespace _Nonfunctional
+{} // namespace _Nonfunctional
 
 struct Nonfunctional
 {
@@ -5965,9 +5858,7 @@ namespace State
 namespace BMC
 {
 namespace _MultiUserTargetFailure
-{
-
-} // namespace _MultiUserTargetFailure
+{} // namespace _MultiUserTargetFailure
 
 struct MultiUserTargetFailure
 {
@@ -6003,9 +5894,7 @@ namespace State
 namespace Chassis
 {
 namespace _PowerOnFailure
-{
-
-} // namespace _PowerOnFailure
+{} // namespace _PowerOnFailure
 
 struct PowerOnFailure
 {
@@ -6041,9 +5930,7 @@ namespace State
 namespace Chassis
 {
 namespace _PowerOffFailure
-{
-
-} // namespace _PowerOffFailure
+{} // namespace _PowerOffFailure
 
 struct PowerOffFailure
 {
@@ -6079,9 +5966,7 @@ namespace State
 namespace Host
 {
 namespace _HostStartFailure
-{
-
-} // namespace _HostStartFailure
+{} // namespace _HostStartFailure
 
 struct HostStartFailure
 {
@@ -6117,9 +6002,7 @@ namespace State
 namespace Host
 {
 namespace _HostMinStartFailure
-{
-
-} // namespace _HostMinStartFailure
+{} // namespace _HostMinStartFailure
 
 struct HostMinStartFailure
 {
@@ -6155,9 +6038,7 @@ namespace State
 namespace Host
 {
 namespace _HostShutdownFailure
-{
-
-} // namespace _HostShutdownFailure
+{} // namespace _HostShutdownFailure
 
 struct HostShutdownFailure
 {
@@ -6193,9 +6074,7 @@ namespace State
 namespace Host
 {
 namespace _HostStopFailure
-{
-
-} // namespace _HostStopFailure
+{} // namespace _HostStopFailure
 
 struct HostStopFailure
 {
@@ -6231,9 +6110,7 @@ namespace State
 namespace Host
 {
 namespace _HostRebootFailure
-{
-
-} // namespace _HostRebootFailure
+{} // namespace _HostRebootFailure
 
 struct HostRebootFailure
 {

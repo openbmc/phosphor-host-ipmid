@@ -2,12 +2,13 @@
 
 #include "config.h"
 
-#include <functional>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/server/object.hpp>
 #include <sdbusplus/timer.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 #include <xyz/openbmc_project/Ipmi/Internal/SoftPowerOff/server.hpp>
+
+#include <functional>
 namespace phosphor
 {
 namespace ipmi

@@ -26,11 +26,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <phosphor-logging/log.hpp>
+
 #include <cerrno>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
-#include <phosphor-logging/log.hpp>
 
 namespace ipmi
 {
@@ -199,8 +200,8 @@ int PasswdMgr::encryptDecryptData(bool doEncrypt, const EVP_CIPHER* cipher,
                                    inBytes, inBytesLen)))
     {
         outLen += outEVPLen;
-        if ((retval =
-                 EVP_CipherFinal(ctx.get(), outBytes + outLen, &outEVPLen)))
+        if ((retval = EVP_CipherFinal(ctx.get(), outBytes + outLen,
+                                      &outEVPLen)))
         {
             outLen += outEVPLen;
             *outBytesLen = outLen;
@@ -381,8 +382,8 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
 
     if (dataBuf.size() != 0)
     {
-        inBytesLen =
-            dataBuf.size() + newUserName.size() + EVP_CIPHER_block_size(cipher);
+        inBytesLen = dataBuf.size() + newUserName.size() +
+                     EVP_CIPHER_block_size(cipher);
     }
 
     SecureString inBytes(inBytesLen, '\0');

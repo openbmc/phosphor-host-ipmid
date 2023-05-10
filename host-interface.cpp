@@ -5,14 +5,15 @@
 
 #include "systemintfcmds.hpp"
 
-#include <functional>
 #include <ipmid-host/cmd-utils.hpp>
 #include <ipmid-host/cmd.hpp>
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
+#include <phosphor-logging/log.hpp>
+
+#include <functional>
 #include <memory>
 #include <optional>
-#include <phosphor-logging/log.hpp>
 
 namespace phosphor
 {

@@ -2,8 +2,9 @@
 
 #include "nlohmann/json.hpp"
 
-#include <map>
 #include <sdbusplus/bus.hpp>
+
+#include <map>
 #include <string>
 #include <vector>
 
@@ -90,7 +91,7 @@ struct Response
     uint8_t sign : 1;        //!< Sign bit
     uint8_t temperature : 7; //!< Temperature reading in Celsius
 #endif
-    uint8_t instance; //!< Entity instance number
+    uint8_t instance;        //!< Entity instance number
 } __attribute__((packed));
 
 using ResponseList = std::vector<Response>;

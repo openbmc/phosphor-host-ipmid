@@ -15,8 +15,9 @@
  *
  */
 #pragma once
-#include <cstdint>
 #include <ipmid/iana.hpp>
+
+#include <cstdint>
 #include <optional>
 #include <tuple>
 

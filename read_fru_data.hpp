@@ -2,6 +2,7 @@
 #include "ipmi_fru_info_area.hpp"
 
 #include <sdbusplus/bus.hpp>
+
 #include <string>
 
 namespace ipmi

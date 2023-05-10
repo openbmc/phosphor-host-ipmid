@@ -4,7 +4,6 @@
 
 #include "systemintfcmds.hpp"
 
-#include <chrono>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
@@ -12,6 +11,8 @@
 #include <sdbusplus/timer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/Host/server.hpp>
+
+#include <chrono>
 
 namespace phosphor
 {

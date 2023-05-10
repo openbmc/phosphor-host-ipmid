@@ -15,11 +15,12 @@
  */
 #pragma once
 
-#include <array>
 #include <ipmid/message/types.hpp>
+#include <phosphor-logging/log.hpp>
+
+#include <array>
 #include <memory>
 #include <optional>
-#include <phosphor-logging/log.hpp>
 #include <string_view>
 #include <tuple>
 #include <utility>
@@ -292,7 +293,7 @@ struct PackSingle<std::variant<T...>>
     {
         return std::visit(
             [&p](const auto& arg) {
-                return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
+            return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
             },
             v);
     }
