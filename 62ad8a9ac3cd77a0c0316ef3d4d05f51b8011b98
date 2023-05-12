@@ -34,6 +34,24 @@
       "parentUuid": "da097fe6_6e13c1b9",
       "revId": "62ad8a9ac3cd77a0c0316ef3d4d05f51b8011b98",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aa2cd026_dfc3b08f",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-05-12T15:46:42Z",
+      "side": 1,
+      "message": "👍",
+      "parentUuid": "de06cbbd_d310cc34",
+      "revId": "62ad8a9ac3cd77a0c0316ef3d4d05f51b8011b98",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
