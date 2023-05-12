@@ -569,7 +569,7 @@ ipmi_ret_t getFruSdrCount(ipmi::Context::ptr, size_t& count)
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
+ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
                       get_sdr::SensorDataFruRecord& resp)
 {
     if (deviceHashes.size() < index)

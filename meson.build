@@ -75,6 +75,7 @@ feature_map = {
   'update-functional-on-fail'  : '-DUPDATE_FUNCTIONAL_ON_FAIL',
   'dynamic-sensors'            : '-DFEATURE_DYNAMIC_SENSORS',
   'dynamic-sensors-write'      : '-DFEATURE_DYNAMIC_SENSORS_WRITE',
+  'entity-manager-decorators'  : '-DUSING_ENTITY_MANAGER_DECORATORS',
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
   'sel-logger-clears-sel'      : '-DFEATURE_SEL_LOGGER_CLEARS_SEL',
