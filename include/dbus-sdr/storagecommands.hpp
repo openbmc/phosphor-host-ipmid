@@ -19,8 +19,6 @@
 
 #include <cstdint>
 
-#define USING_ENTITY_MANAGER_DECORATORS
-
 static constexpr uint8_t ipmiSdrVersion = 0x51;
 
 namespace dynamic_sensors::ipmi::sel

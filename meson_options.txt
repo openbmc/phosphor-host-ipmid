@@ -49,6 +49,9 @@ option('transport-oem', type: 'feature', value: 'disabled', description: 'Enable
 option('ipmi-whitelist', type: 'feature', description: 'Enable/disable IPMI whitelist filtering')
 option('whitelist-conf', type: 'string', value: 'host-ipmid-whitelist.conf', description: 'Paths to IPMI whitelisted commands conf files')
 
+# Entity Manager Decorators
+option('entity-manager-decorators', type: 'feature', value: 'enabled', description: 'The Entity Manager Decorators flag is enabled by default; offer a way to disable it')
+
 # Dynamic Sensor Stack
 option('dynamic-sensors', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
 option('dynamic-sensors-write', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
