@@ -1306,9 +1306,9 @@ static IpmiRestartCause
 static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
 {
     constexpr const char* restartCausePath =
-        "/xyz/openbmc_project/control/host0/restart_cause";
+        "/xyz/openbmc_project/state/host0";
     constexpr const char* restartCauseIntf =
-        "xyz.openbmc_project.Control.Host.RestartCause";
+        "xyz.openbmc_project.State.Host";
 
     std::string service;
     boost::system::error_code ec = ipmi::getService(ctx, restartCauseIntf,
