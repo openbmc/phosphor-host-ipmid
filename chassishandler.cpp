@@ -11,14 +11,20 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/lg2.hpp>
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/server/object.hpp>
 #include <sdbusplus/timer.hpp>
 #include <settings.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Control/Boot/ConsoleRedirection/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/FirmwareVerbosity/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/Flags/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/Instance/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/InstanceType/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
+#include <xyz/openbmc_project/Control/Boot/MuxOverride/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Type/server.hpp>
 #include <xyz/openbmc_project/Control/Power/RestorePolicy/server.hpp>
@@ -37,6 +43,8 @@
 #include <string>
 
 std::unique_ptr<sdbusplus::Timer> identifyTimer
+    __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::bus::match_t> matchPtr
     __attribute__((init_priority(101)));
 
 static ChassisIDState chassisIDState = ChassisIDState::reserved;
@@ -117,6 +125,12 @@ static constexpr const char* resetButtonIntf =
 static constexpr const char* resetButtonPath =
     "/xyz/openbmc_project/Chassis/Buttons/Reset0";
 
+// OpenBMC Host State Manager dbus framework
+constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
+constexpr auto hostStateIntf = "xyz.openbmc_project.State.Host";
+constexpr auto IPMICommand =
+    "xyz.openbmc_project.State.Host.LastPowerOnCause.IPMICommand";
+
 // Phosphor Host State manager
 namespace State = sdbusplus::server::xyz::openbmc_project::state;
 namespace fs = std::filesystem;
@@ -141,6 +155,16 @@ constexpr auto bootOneTimeIntf = "xyz.openbmc_project.Object.Enable";
 
 constexpr auto powerRestoreIntf =
     "xyz.openbmc_project.Control.Power.RestorePolicy";
+
+constexpr auto bootFlagIntf = "xyz.openbmc_project.Control.Boot.Flags";
+constexpr auto bootInstanceIntf = "xyz.openbmc_project.Control.Boot.Instance";
+constexpr auto bootInstanceTypeIntf =
+    "xyz.openbmc_project.Control.Boot.InstanceType";
+constexpr auto bootMuxIntf = "xyz.openbmc_project.Control.Boot.MuxOverride";
+constexpr auto bootRedirectionIntf =
+    "xyz.openbmc_project.Control.Boot.ConsoleRedirection";
+constexpr auto bootVerbosityIntf =
+    "xyz.openbmc_project.Control.Boot.FirmwareVerbosity";
 sdbusplus::bus_t dbus(ipmid_get_sd_bus_connection());
 
 namespace cache
@@ -293,7 +317,7 @@ int getHostNetworkData(ipmi::message::Payload& payload)
 
     if (payloadSize < skipFirstTwoBytes + sizeof(netConfInitialBytes))
     {
-        lg2::error("Invalid net config");
+        log<level::ERR>("Invalid net config ");
         rc = -1;
         return rc;
     }
@@ -303,7 +327,7 @@ int getHostNetworkData(ipmi::message::Payload& payload)
 
     if (payloadSize < skipFirstTwoBytes + addrSizeOffset + sizeof(addrSize))
     {
-        lg2::error("Invalid length of address size");
+        log<level::ERR>("Invalid length of address size");
         rc = -1;
         return rc;
     }
@@ -393,7 +417,8 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
             std::vector<uint8_t> msgPayloadBytes(msgLen);
             if (data.unpack(msgPayloadBytes) != 0 || !data.fullyUnpacked())
             {
-                lg2::error("Error in unpacking message of setHostNetworkData");
+                log<level::ERR>(
+                    "Error in unpacking message of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
 
@@ -401,7 +426,8 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
             constexpr size_t cookieSize = 4;
             if (msgLen < cookieOffset + cookieSize)
             {
-                lg2::error("Error in cookie getting of setHostNetworkData");
+                log<level::ERR>(
+                    "Error in cookie getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
             if (std::equal(msgPayloadStartingPos + cookieOffset,
@@ -418,27 +444,28 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
                     break;
                 }
 
-                lg2::error("Invalid Cookie");
+                log<level::ERR>("Invalid Cookie");
                 elog<InternalFailure>();
             }
 
             // vesion == 0x00 0x01
             if (msgLen < versionOffset + sizeVersion)
             {
-                lg2::error("Error in version getting of setHostNetworkData");
+                log<level::ERR>(
+                    "Error in version getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
             if (std::equal(msgPayloadStartingPos + versionOffset,
                            msgPayloadStartingPos + versionOffset + sizeVersion,
                            (netConfInitialBytes + versionOffset)) != 0)
             {
-                lg2::error("Invalid Version");
+                log<level::ERR>("Invalid Version");
                 elog<InternalFailure>();
             }
 
             if (msgLen < macOffset + 6)
             {
-                lg2::error(
+                log<level::ERR>(
                     "Error in mac address getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
@@ -450,7 +477,7 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
 
             if (msgLen < addrTypeOffset + sizeof(decltype(addrOrigin)))
             {
-                lg2::error(
+                log<level::ERR>(
                     "Error in original address getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
@@ -468,7 +495,7 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
 
             if (msgLen < addrSizeOffset + sizeof(decltype(addrSize)))
             {
-                lg2::error(
+                log<level::ERR>(
                     "Error in address size getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
@@ -481,7 +508,8 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
             uint8_t prefixOffset = ipAddrOffset + addrSize;
             if (msgLen < prefixOffset + sizeof(decltype(prefix)))
             {
-                lg2::error("Error in prefix getting of setHostNetworkData");
+                log<level::ERR>(
+                    "Error in prefix getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
             // std::copy(msgPayloadStartingPos + prefixOffset,
@@ -500,7 +528,8 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
 
             if (msgLen < ipAddrOffset + addrSize)
             {
-                lg2::error("Error in IP address getting of setHostNetworkData");
+                log<level::ERR>(
+                    "Error in IP address getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
             ipAddress = getAddrStr(family, msgPayloadStartingPos, ipAddrOffset,
@@ -508,7 +537,7 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
 
             if (msgLen < gatewayOffset + addrSize)
             {
-                lg2::error(
+                log<level::ERR>(
                     "Error in gateway address getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
@@ -544,13 +573,13 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
         ipmi::setDbusProperty(bus, macObjectInfo.second, macObjectInfo.first,
                               MAC_INTERFACE, "MACAddress", std::string(mac));
 
-        lg2::debug("Network configuration changed: {NETWORKCONFIG}",
-                   "NETWORKCONFIG", hostNetworkConfig);
+        log<level::DEBUG>("Network configuration changed",
+                          entry("NETWORKCONFIG=%s", hostNetworkConfig.c_str()));
     }
     catch (const sdbusplus::exception_t& e)
     {
         commit<InternalFailure>();
-        lg2::error("Error in ipmiChassisSetSysBootOptions call");
+        log<level::ERR>("Error in  ipmiChassisSetSysBootOptions call");
         return ipmi::ccUnspecifiedError;
     }
 
@@ -623,8 +652,8 @@ ipmi::RspType<bool,    // chassis intrusion sensor
     }
     catch (const std::exception& e)
     {
-        lg2::error("Failed to fetch Chassis Capability properties: {ERROR}",
-                   "ERROR", e);
+        log<level::ERR>("Failed to fetch Chassis Capability properties",
+                        entry("ERROR=%s", e.what()));
         return ipmi::responseUnspecifiedError();
     }
 
@@ -632,62 +661,62 @@ ipmi::RspType<bool,    // chassis intrusion sensor
         std::get_if<bool>(&properties[chassisIntrusionProp]);
     if (chassisIntrusionFlag == nullptr)
     {
-        lg2::error("Error to get chassis Intrusion flags");
+        log<level::ERR>("Error to get chassis Intrusion flags");
         return ipmi::responseUnspecifiedError();
     }
     bool* chassisFrontPanelFlag =
         std::get_if<bool>(&properties[chassisFrontPanelLockoutProp]);
     if (chassisFrontPanelFlag == nullptr)
     {
-        lg2::error("Error to get chassis intrusion flags");
+        log<level::ERR>("Error to get chassis intrusion flags");
         return ipmi::responseUnspecifiedError();
     }
     bool* chassisNMIFlag = std::get_if<bool>(&properties[chassisNMIProp]);
     if (chassisNMIFlag == nullptr)
     {
-        lg2::error("Error to get chassis NMI flags");
+        log<level::ERR>("Error to get chassis NMI flags");
         return ipmi::responseUnspecifiedError();
     }
     bool* chassisPowerInterlockFlag =
         std::get_if<bool>(&properties[chassisPowerInterlockProp]);
     if (chassisPowerInterlockFlag == nullptr)
     {
-        lg2::error("Error to get chassis power interlock flags");
+        log<level::ERR>("Error to get chassis power interlock flags");
         return ipmi::responseUnspecifiedError();
     }
     uint8_t* chassisFRUInfoDevAddr =
         std::get_if<uint8_t>(&properties[chassisFRUDevAddrProp]);
     if (chassisFRUInfoDevAddr == nullptr)
     {
-        lg2::error("Error to get chassis FRU info device address");
+        log<level::ERR>("Error to get chassis FRU info device address");
         return ipmi::responseUnspecifiedError();
     }
     uint8_t* chassisSDRDevAddr =
         std::get_if<uint8_t>(&properties[chassisSDRDevAddrProp]);
     if (chassisSDRDevAddr == nullptr)
     {
-        lg2::error("Error to get chassis SDR device address");
+        log<level::ERR>("Error to get chassis SDR device address");
         return ipmi::responseUnspecifiedError();
     }
     uint8_t* chassisSELDevAddr =
         std::get_if<uint8_t>(&properties[chassisSELDevAddrProp]);
     if (chassisSELDevAddr == nullptr)
     {
-        lg2::error("Error to get chassis SEL device address");
+        log<level::ERR>("Error to get chassis SEL device address");
         return ipmi::responseUnspecifiedError();
     }
     uint8_t* chassisSMDevAddr =
         std::get_if<uint8_t>(&properties[chassisSMDevAddrProp]);
     if (chassisSMDevAddr == nullptr)
     {
-        lg2::error("Error to get chassis SM device address");
+        log<level::ERR>("Error to get chassis SM device address");
         return ipmi::responseUnspecifiedError();
     }
     uint8_t* chassisBridgeDevAddr =
         std::get_if<uint8_t>(&properties[chassisBridgeDevAddrProp]);
     if (chassisBridgeDevAddr == nullptr)
     {
-        lg2::error("Error to get chassis bridge device address");
+        log<level::ERR>("Error to get chassis bridge device address");
         return ipmi::responseUnspecifiedError();
     }
 
@@ -726,41 +755,41 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
     // check input data
     if (reserved1 != 0)
     {
-        lg2::error("Unsupported request parameter");
+        log<level::ERR>("Unsupported request parameter");
         return ipmi::responseInvalidFieldRequest();
     }
 
     if ((fruDeviceAddr & ~chassisCapAddrMask) != 0)
     {
-        lg2::error("Unsupported request parameter(FRU Addr) for REQ={REQ}",
-                   "REQ", lg2::hex, fruDeviceAddr);
+        log<level::ERR>("Unsupported request parameter(FRU Addr)",
+                        entry("REQ=0x%x", fruDeviceAddr));
         return ipmi::responseInvalidFieldRequest();
     }
     if ((sdrDeviceAddr & ~chassisCapAddrMask) != 0)
     {
-        lg2::error("Unsupported request parameter(SDR Addr) for REQ={REQ}",
-                   "REQ", lg2::hex, sdrDeviceAddr);
+        log<level::ERR>("Unsupported request parameter(SDR Addr)",
+                        entry("REQ=0x%x", sdrDeviceAddr));
         return ipmi::responseInvalidFieldRequest();
     }
 
     if ((selDeviceAddr & ~chassisCapAddrMask) != 0)
     {
-        lg2::error("Unsupported request parameter(SEL Addr) for REQ={REQ}",
-                   "REQ", lg2::hex, selDeviceAddr);
+        log<level::ERR>("Unsupported request parameter(SEL Addr)",
+                        entry("REQ=0x%x", selDeviceAddr));
         return ipmi::responseInvalidFieldRequest();
     }
 
     if ((smDeviceAddr & ~chassisCapAddrMask) != 0)
     {
-        lg2::error("Unsupported request parameter(SM Addr) for REQ={REQ}",
-                   "REQ", lg2::hex, smDeviceAddr);
+        log<level::ERR>("Unsupported request parameter(SM Addr)",
+                        entry("REQ=0x%x", smDeviceAddr));
         return ipmi::responseInvalidFieldRequest();
     }
 
     if ((bridgeDeviceAddr & ~chassisCapAddrMask) != 0)
     {
-        lg2::error("Unsupported request parameter(Bridge Addr) for REQ={REQ}",
-                   "REQ", lg2::hex, bridgeDeviceAddr);
+        log<level::ERR>("Unsupported request parameter(Bridge Addr)",
+                        entry("REQ=0x%x", bridgeDeviceAddr));
         return ipmi::responseInvalidFieldRequest();
     }
 
@@ -800,8 +829,7 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
     }
     catch (const std::exception& e)
     {
-        lg2::error("Failed to set chassis capability properties: {ERR}", "ERR",
-                   e);
+        log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();
     }
     return ipmi::responseSuccess();
@@ -813,10 +841,6 @@ ipmi::RspType<> ipmiSetChassisCap(bool intrusion, bool fpLockout,
 int initiateHostStateTransition(ipmi::Context::ptr& ctx,
                                 State::Host::Transition transition)
 {
-    // OpenBMC Host State Manager dbus framework
-    constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
-    constexpr auto hostStateIntf = "xyz.openbmc_project.State.Host";
-
     // Convert to string equivalent of the passed in transition enum.
     auto request =
         sdbusplus::common::xyz::openbmc_project::state::convertForMessage(
@@ -833,14 +857,28 @@ int initiateHostStateTransition(ipmi::Context::ptr& ctx,
     }
     if (ec)
     {
-        lg2::error(
-            "Failed to initiate transition for request {REQUEST}: {EXCEPTION}",
-            "REQUEST", request, "EXCEPTION", ec.message());
+        log<level::ERR>("Failed to initiate transition",
+                        entry("EXCEPTION=%s, REQUEST=%s", ec.message().c_str(),
+                              request.c_str()));
         return -1;
     }
-    lg2::info(
-        "Transition request {REQUEST} initiated successfully by user {USERID}",
-        "REQUEST", request, "USERID", ctx->userId);
+    log<level::INFO>(
+        "Transition request initiated successfully",
+        entry("USERID=%d, REQUEST=%s", ctx->userId, request.c_str()));
+
+    if (transition == State::Host::Transition::On ||
+        transition == State::Host::Transition::ForceWarmReboot ||
+        transition == State::Host::Transition::Reboot)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, hostStatePath, hostStateIntf,
+                                   "LastPowerOnCause", IPMICommand);
+        if (ec)
+        {
+            log<level::ERR>("Failed to set LastPowerOnCause",
+                            entry("EXCEPTION=%s, REQUEST=%s",
+                                  ec.message().c_str(), request.c_str()));
+        }
+    }
     return 0;
 }
 
@@ -871,9 +909,9 @@ int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
     }
     if (ec)
     {
-        lg2::error("Failed to initiate transition {REQUEST}: {EXCEPTION}",
-                   "REQUEST", request, "EXCEPTION", ec.message());
-
+        log<level::ERR>("Failed to initiate transition",
+                        entry("EXCEPTION=%s, REQUEST=%s", ec.message().c_str(),
+                              request.c_str()));
         return -1;
     }
 
@@ -892,8 +930,8 @@ static int doNmi(ipmi::Context::ptr& ctx)
     ec = ipmi::getDbusObject(ctx, nmiIntfName, nmiObj);
     if (ec)
     {
-        lg2::error("Failed to find NMI service: {ERROR}", "ERROR",
-                   ec.message());
+        log<level::ERR>("Failed to find NMI service",
+                        entry("ERROR=%s", ec.message().c_str()));
         return -1;
     }
 
@@ -901,7 +939,8 @@ static int doNmi(ipmi::Context::ptr& ctx)
                                       nmiObj.first, nmiIntfName, "NMI");
     if (ec)
     {
-        lg2::error("NMI call failed: {ERROR}", "ERROR", ec.message());
+        log<level::ERR>("NMI call failed",
+                        entry("ERROR=%s", ec.message().c_str()));
         elog<InternalFailure>();
         return -1;
     }
@@ -949,10 +988,10 @@ std::optional<uint2_t> getPowerRestorePolicy()
     }
     catch (const std::exception& e)
     {
-        lg2::error(
-            "Failed to fetch pgood property ({PATH}/{INTERFACE}): {ERROR}",
-            "PATH", objects.map.at(powerRestoreIntf).front(), "INTERFACE",
-            powerRestoreIntf, "ERROR", e);
+        log<level::ERR>(
+            "Failed to fetch pgood property", entry("ERROR=%s", e.what()),
+            entry("PATH=%s", objects.map.at(powerRestoreIntf).front().c_str()),
+            entry("INTERFACE=%s", powerRestoreIntf));
         cache::objectsPtr.reset();
         return std::nullopt;
     }
@@ -1001,7 +1040,8 @@ std::optional<bool> getPowerStatus()
         }
         catch (const std::exception& e)
         {
-            lg2::error("Failed to fetch pgood property: {ERROR}", "ERROR", e);
+            log<level::ERR>("Failed to fetch pgood property",
+                            entry("ERROR=%s", e.what()));
             return std::nullopt;
         }
     }
@@ -1032,11 +1072,33 @@ bool getACFailStatus()
     }
     catch (const std::exception& e)
     {
-        lg2::error(
-            "Failed to fetch PFail property ({PATH}/{INTERFAC}): {ERROR}",
-            "PATH", powerControlObj, "INTERFACE", powerControlIntf, "ERROR", e);
+        log<level::ERR>("Failed to fetch PFail property",
+                        entry("ERROR=%s", e.what()),
+                        entry("PATH=%s", powerControlObj),
+                        entry("INTERFACE=%s", powerControlIntf));
     }
     return acFail;
+}
+
+bool isLastPowerOnViaIPMI()
+{
+    std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
+    try
+    {
+        auto service = ipmi::getService(*bus, hostStateIntf, hostStatePath);
+        ipmi::Value PowerCause = ipmi::getDbusProperty(
+            *bus, service, hostStatePath, hostStateIntf, "LastPowerOnCause");
+        if (std::get<std::string>(PowerCause) == IPMICommand)
+        {
+            return true;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Fail to get LastPowerOnCause property",
+                        entry("ERROR=%s", e.what()));
+    }
+    return false;
 }
 } // namespace power_policy
 
@@ -1054,8 +1116,9 @@ static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
     }
     catch (const sdbusplus::exception_t& e)
     {
-        lg2::error("Fail to get button Enabled property ({PATH}): {ERROR}",
-                   "PATH", buttonPath, "ERROR", e);
+        log<level::ERR>("Fail to get button Enabled property",
+                        entry("PATH=%s", buttonPath.c_str()),
+                        entry("ERROR=%s", e.what()));
         return std::nullopt;
     }
     return std::make_optional(buttonDisabled);
@@ -1075,9 +1138,10 @@ static bool setButtonEnabled(ipmi::Context::ptr& ctx,
     }
     if (ec)
     {
-        lg2::error(
-            "Fail to set button Enabled property ({SERVICE}:{PATH}): {ERROR}",
-            "SERVICE", service, "PATH", buttonPath, "ERROR", ec.message());
+        log<level::ERR>("Fail to set button Enabled property",
+                        entry("SERVICE=%s", service.c_str()),
+                        entry("PATH=%s", buttonPath.c_str()),
+                        entry("ERROR=%s", ec.message().c_str()));
         return false;
     }
     return true;
@@ -1106,10 +1170,10 @@ static std::optional<bool> getChassisIntrusionStatus(ipmi::Context::ptr& ctx)
             return std::make_optional(ret);
         }
     }
-    lg2::error("Fail to get Chassis Intrusion Status property "
-               "({PATH}/{INTERFACE}): {ERROR}",
-               "PATH", chassisIntrusionPath, "INTERFACE", chassisIntrusionInf,
-               "ERROR", ec.message());
+    log<level::ERR>("Fail to get Chassis Intrusion Status property",
+                    entry("PATH=%s", chassisIntrusionPath),
+                    entry("INTERFACE=%s", chassisIntrusionInf),
+                    entry("ERROR=%s", ec.message().c_str()));
     return std::nullopt;
 }
 
@@ -1202,7 +1266,7 @@ ipmi::RspType<bool,    // Power is on
     constexpr bool powerDownOverload = false;
     constexpr bool powerDownInterlock = false;
     constexpr bool powerDownPowerFault = false;
-    constexpr bool powerStatusIPMI = false;
+    bool powerStatusIPMI = power_policy::isLastPowerOnViaIPMI();
     constexpr bool frontPanelLockoutActive = false;
     constexpr bool driveFault = false;
     constexpr bool coolingFanFault = false;
@@ -1295,10 +1359,8 @@ static IpmiRestartCause
  */
 static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
 {
-    constexpr const char* restartCausePath =
-        "/xyz/openbmc_project/control/host0/restart_cause";
-    constexpr const char* restartCauseIntf =
-        "xyz.openbmc_project.Control.Host.RestartCause";
+    constexpr const char* restartCausePath = "/xyz/openbmc_project/state/host0";
+    constexpr const char* restartCauseIntf = "xyz.openbmc_project.State.Host";
 
     std::string service;
     boost::system::error_code ec = ipmi::getService(ctx, restartCauseIntf,
@@ -1318,10 +1380,10 @@ static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
         }
     }
 
-    lg2::error(
-        "Failed to fetch RestartCause property ({PATH}/{INTERFACE}): {ERROR}",
-        "ERROR", ec.message(), "PATH", restartCausePath, "INTERFACE",
-        restartCauseIntf);
+    log<level::ERR>("Failed to fetch RestartCause property",
+                    entry("ERROR=%s", ec.message().c_str()),
+                    entry("PATH=%s", restartCausePath),
+                    entry("INTERFACE=%s", restartCauseIntf));
     return std::nullopt;
 }
 
@@ -1377,8 +1439,8 @@ ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
 
         default:
         {
-            lg2::error("Invalid Chassis Control command: {CMD}", "CMD",
-                       lg2::hex, chassisControl);
+            log<level::ERR>("Invalid Chassis Control command",
+                            entry("CMD=0x%X", chassisControl));
             return ipmi::responseInvalidFieldRequest();
         }
     }
@@ -1402,8 +1464,8 @@ std::string getEnclosureIdentifyConnection()
     }
     catch (const std::exception& e)
     {
-        lg2::error("Chassis Identify: Error communicating to mapper: {ERROR}",
-                   "ERROR", e);
+        log<level::ERR>("Chassis Identify: Error communicating to mapper.",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
@@ -1422,7 +1484,7 @@ void enclosureIdentifyLed(bool flag)
 
         auto msg = std::string("enclosureIdentifyLed(") +
                    boost::lexical_cast<std::string>(flag) + ")";
-        lg2::debug(msg.c_str());
+        log<level::DEBUG>(msg.c_str());
 
         ipmi::setDbusProperty(*getSdBus(), connection, identify_led_object_name,
                               "xyz.openbmc_project.Led.Group", "Asserted",
@@ -1430,8 +1492,9 @@ void enclosureIdentifyLed(bool flag)
     }
     catch (const std::exception& e)
     {
-        lg2::error("Chassis Identify: Error Setting State {LED_STATE}: {ERROR}",
-                   "LED_STATE", flag, "ERROR", e);
+        log<level::ERR>("Chassis Identify: Error Setting State On/Off\n",
+                        entry("LED_STATE=%d", flag),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
@@ -1526,8 +1589,74 @@ std::map<IpmiValue, Mode::Modes> modeIpmiToDbus = {
     {0x06, Mode::Modes::Setup},
     {ipmiDefault, Mode::Modes::Regular}};
 
+std::map<IpmiValue, std::pair<Source::Sources, Mode::Modes>>
+    sourceModeIpmiToDbus = {
+        {0x1, {Source::Sources::Network, Mode::Modes::Regular}},
+        {0x2, {Source::Sources::Disk, Mode::Modes::Regular}},
+#ifdef ENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT
+        {0x3, {Source::Sources::Default, Mode::Modes::Safe}},
+#endif // ENABLE_BOOT_SAFE_MODE_SUPPORT
+        {0x4, {Source::Sources::DiagnosticPartition, Mode::Modes::Regular}},
+        {0x5, {Source::Sources::ExternalMedia, Mode::Modes::Regular}},
+        {0x6, {Source::Sources::Default, Mode::Modes::Setup}},
+        {0x7, {Source::Sources::RemoteRemovableMedia, Mode::Modes::Regular}},
+        {0x8, {Source::Sources::RemoteExternalMedia, Mode::Modes::Regular}},
+        {0x9, {Source::Sources::RemoteMedia, Mode::Modes::Regular}},
+        {0xb, {Source::Sources::RemoteDisk, Mode::Modes::Regular}},
+        {0xf, {Source::Sources::RemovableMedia, Mode::Modes::Regular}},
+        {ipmiDefault, {Source::Sources::Default, Mode::Modes::Regular}}};
+
+std::map<IpmiValue, ConsoleRedirection::Redirections>
+    consoleRedirectionIpmiToDbus = {
+        {0x1, ConsoleRedirection::Redirections::Suppress},
+        {0x2, ConsoleRedirection::Redirections::Enable},
+        {ipmiDefault, ConsoleRedirection::Redirections::Default}};
+
+std::map<IpmiValue, FirmwareVerbosity::Levels> firmwareVerbosityIpmiToDbus = {
+    {0x1, FirmwareVerbosity::Levels::Quiet},
+    {0x2, FirmwareVerbosity::Levels::Verbose},
+    {ipmiDefault, FirmwareVerbosity::Levels::Default}};
+
+std::map<IpmiValue, MuxOverride::Modes> muxOverrideIpmiToDbus = {
+    {0x1, MuxOverride::Modes::BMC},
+    {0x2, MuxOverride::Modes::System},
+    {ipmiDefault, MuxOverride::Modes::Default}};
+
 std::map<Type::Types, IpmiValue> typeDbusToIpmi = {{Type::Types::Legacy, 0x00},
                                                    {Type::Types::EFI, 0x01}};
+
+std::map<std::pair<Source::Sources, Mode::Modes>, IpmiValue>
+    sourceModeDbusToIpmi = {
+        {{Source::Sources::Network, Mode::Modes::Regular}, 0x1},
+        {{Source::Sources::Disk, Mode::Modes::Regular}, 0x2},
+#ifdef ENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT
+        {{Source::Sources::Default, Mode::Modes::Safe}, 0x3},
+#endif // ENABLE_BOOT_SAFE_MODE_SUPPORT
+        {{Source::Sources::DiagnosticPartition, Mode::Modes::Regular}, 0x4},
+        {{Source::Sources::ExternalMedia, Mode::Modes::Regular}, 0x5},
+        {{Source::Sources::Default, Mode::Modes::Setup}, 0x6},
+        {{Source::Sources::RemoteRemovableMedia, Mode::Modes::Regular}, 0x7},
+        {{Source::Sources::RemoteExternalMedia, Mode::Modes::Regular}, 0x8},
+        {{Source::Sources::RemoteMedia, Mode::Modes::Regular}, 0x9},
+        {{Source::Sources::RemoteDisk, Mode::Modes::Regular}, 0xb},
+        {{Source::Sources::RemovableMedia, Mode::Modes::Regular}, 0xf},
+        {{Source::Sources::Default, Mode::Modes::Regular}, ipmiDefault}};
+
+std::map<ConsoleRedirection::Redirections, IpmiValue>
+    consoleRedirectionDbusToIpmi = {
+        {ConsoleRedirection::Redirections::Suppress, 0x1},
+        {ConsoleRedirection::Redirections::Enable, 0x2},
+        {ConsoleRedirection::Redirections::Default, ipmiDefault}};
+
+std::map<FirmwareVerbosity::Levels, IpmiValue> firmwareVerbosityDbusToIpmi = {
+    {FirmwareVerbosity::Levels::Quiet, 0x1},
+    {FirmwareVerbosity::Levels::Verbose, 0x2},
+    {FirmwareVerbosity::Levels::Default, ipmiDefault}};
+
+std::map<MuxOverride::Modes, IpmiValue> muxOverrideDbusToIpmi = {
+    {MuxOverride::Modes::BMC, 0x1},
+    {MuxOverride::Modes::System, 0x2},
+    {MuxOverride::Modes::Default, ipmiDefault}};
 
 std::map<Source::Sources, IpmiValue> sourceDbusToIpmi = {
     {Source::Sources::Network, 0x01},
@@ -1567,7 +1696,8 @@ static ipmi::Cc getBootSource(ipmi::Context::ptr& ctx, Source::Sources& source)
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in BootSource Get: {ERROR}", "ERROR", ec.message());
+    log<level::ERR>("Error in BootSource Get",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
@@ -1593,7 +1723,8 @@ static ipmi::Cc setBootSource(ipmi::Context::ptr& ctx,
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in BootSource Set: {ERROR}", "ERROR", ec.message());
+    log<level::ERR>("Error in BootSource Set",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
@@ -1619,7 +1750,8 @@ static ipmi::Cc getBootMode(ipmi::Context::ptr& ctx, Mode::Modes& mode)
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in BootMode Get: {ERROR}", "ERROR", ec.message());
+    log<level::ERR>("Error in BootMode Get",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
@@ -1643,7 +1775,8 @@ static ipmi::Cc setBootMode(ipmi::Context::ptr& ctx, const Mode::Modes& mode)
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in BootMode Set: {ERROR}", "ERROR", ec.message());
+    log<level::ERR>("Error in BootMode Set",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
@@ -1671,7 +1804,8 @@ static ipmi::Cc getBootType(ipmi::Context::ptr& ctx, Type::Types& type)
                                    "BootType", result);
         if (ec)
         {
-            lg2::error("Error in BootType Get: {ERROR}", "ERROR", ec.message());
+            log<level::ERR>("Error in BootType Get",
+                            entry("ERROR=%s", ec.message().c_str()));
             return ipmi::ccUnspecifiedError;
         }
         type = Type::convertTypesFromString(result);
@@ -1697,7 +1831,8 @@ static ipmi::Cc setBootType(ipmi::Context::ptr& ctx, const Type::Types& type)
                                    "BootType", convertForMessage(type));
         if (ec)
         {
-            lg2::error("Error in BootType Set: {ERROR}", "ERROR", ec.message());
+            log<level::ERR>("Error in BootType Set",
+                            entry("ERROR=%s", ec.message().c_str()));
             return ipmi::ccUnspecifiedError;
         }
     }
@@ -1729,8 +1864,8 @@ static ipmi::Cc getBootEnable(ipmi::Context::ptr& ctx, bool& enable)
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in Boot Override Enable Get: {ERROR}", "ERROR",
-               ec.message());
+    log<level::ERR>("Error in Boot Override Enable Get",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
@@ -1754,8 +1889,8 @@ static ipmi::Cc setBootEnable(ipmi::Context::ptr& ctx, const bool& enable)
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in Boot Source Override Enable Set: {ERROR}", "ERROR",
-               ec.message());
+    log<level::ERR>("Error in Boot Source Override Enable Set",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
@@ -1780,8 +1915,8 @@ static ipmi::Cc getBootOneTime(ipmi::Context::ptr& ctx, bool& onetime)
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in Boot Override OneTime Get: {ERROR}", "ERROR",
-               ec.message());
+    log<level::ERR>("Error in Boot Override OneTime Get",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
@@ -1805,17 +1940,386 @@ static ipmi::Cc setBootOneTime(ipmi::Context::ptr& ctx, const bool& onetime)
             return ipmi::ccSuccess;
         }
     }
-    lg2::error("Error in Boot Source Override OneTime Set: {ERROR}", "ERROR",
-               ec.message());
+    log<level::ERR>("Error in Boot Source Override OneTime Set",
+                    entry("ERROR=%s", ec.message().c_str()));
     return ipmi::ccUnspecifiedError;
 }
 
+/** @brief Get the property value for boot flags
+ *  @param[in] ctx - context pointer
+ *  @param[in] flag - flag name
+ *  @param[out] value - value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc getBootFlag(ipmi::Context::ptr& ctx, const std::string& flag,
+                            bool& value)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootFlagIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(ctx, service, bootSettingsPath, bootFlagIntf,
+                                   flag, value);
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>(("Error in Flag " + flag + " Get").c_str(),
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Set the property value for boot flags
+ *  @param[in] ctx - context pointer
+ *  @param[in] flag - flag name
+ *  @param[in] value - value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootFlag(ipmi::Context::ptr& ctx, const std::string& flag,
+                            const bool& value)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootFlagIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, bootSettingsPath, bootFlagIntf,
+                                   flag, value);
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>(("Error in Flag " + flag + " Set").c_str(),
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Get the property value for console redirection
+ *  @param[in] ctx - context pointer
+ *  @param[out] redirection - console redirection value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc
+    getBootConsoleRedirection(ipmi::Context::ptr& ctx,
+                              ConsoleRedirection::Redirections& redirection)
+{
+    using namespace chassis::internal;
+    std::string result;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootRedirectionIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(ctx, service, bootSettingsPath,
+                                   bootRedirectionIntf, "ConsoleRedirection",
+                                   result);
+        if (!ec)
+        {
+            redirection =
+                ConsoleRedirection::convertRedirectionsFromString(result);
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in ConsoleRedirection Get",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Set the property value for console redirection
+ *  @param[in] ctx - context pointer
+ *  @param[in] redirection - console redirection value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootConsoleRedirection(
+    ipmi::Context::ptr& ctx,
+    const ConsoleRedirection::Redirections& redirection)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootRedirectionIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, bootSettingsPath,
+                                   bootRedirectionIntf, "ConsoleRedirection",
+                                   convertForMessage(redirection));
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in ConsoleRedirection Set",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Get the property value for firmware verbosity
+ *  @param[in] ctx - context pointer
+ *  @param[out] level - firmware verbosity value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc getBootFirmwareVerbosity(ipmi::Context::ptr& ctx,
+                                         FirmwareVerbosity::Levels& level)
+{
+    using namespace chassis::internal;
+    std::string result;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootVerbosityIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(ctx, service, bootSettingsPath,
+                                   bootVerbosityIntf, "Verbosity", result);
+        if (!ec)
+        {
+            level = FirmwareVerbosity::convertLevelsFromString(result);
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in FirmwareVerbosity Get",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Set the property value for firmware verbosity
+ *  @param[in] ctx - context pointer
+ *  @param[in] level - firmware verbosity value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootFirmwareVerbosity(ipmi::Context::ptr& ctx,
+                                         const FirmwareVerbosity::Levels& level)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootVerbosityIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, bootSettingsPath,
+                                   bootVerbosityIntf, "Verbosity",
+                                   convertForMessage(level));
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in FirmwareVerbosity Set",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Get the property value for mux override
+ *  @param[in] ctx - context pointer
+ *  @param[out] mode - mux override value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc getBootMuxOverride(ipmi::Context::ptr& ctx,
+                                   MuxOverride::Modes& mode)
+{
+    using namespace chassis::internal;
+    std::string result;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootMuxIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(ctx, service, bootSettingsPath, bootMuxIntf,
+                                   "MuxOverride", result);
+        if (!ec)
+        {
+            mode = MuxOverride::convertModesFromString(result);
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in MuxOverride Get",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Set the property value for mux override
+ *  @param[in] ctx - context pointer
+ *  @param[in] mode - mux override value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootMuxOverride(ipmi::Context::ptr& ctx,
+                                   const MuxOverride::Modes& mode)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootMuxIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, bootSettingsPath, bootMuxIntf,
+                                   "MuxOverride", convertForMessage(mode));
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in MuxOverride Set",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Get the property value for boot instance index
+ *  @param[in] ctx - context pointer
+ *  @param[out] index - boot instance index
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc getBootInstanceIndex(ipmi::Context::ptr& ctx, uint32_t& index)
+{
+    using namespace chassis::internal;
+    std::string result;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootInstanceIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(ctx, service, bootSettingsPath,
+                                   bootInstanceIntf, "BootSourceInstance",
+                                   index);
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in Boot Instance Index Get",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Set the property value for boot instance index
+ *  @param[in] ctx - context pointer
+ *  @param[in] index - boot instance index
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootInstanceIndex(ipmi::Context::ptr& ctx,
+                                     const uint32_t& index)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootInstanceIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(ctx, service, bootSettingsPath,
+                                   bootInstanceIntf, "BootSourceInstance",
+                                   index);
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in Boot Instance Index Set",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Get the property value for instance type
+ *  @param[in] ctx - context pointer
+ *  @param[out] type - instance type value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc getBootInstanceType(ipmi::Context::ptr& ctx,
+                                    InstanceType::InstanceTypes& type)
+{
+    using namespace chassis::internal;
+    std::string result;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootInstanceTypeIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(ctx, service, bootSettingsPath,
+                                   bootInstanceTypeIntf,
+                                   "BootSourceInstanceType", result);
+        if (!ec)
+        {
+            type = InstanceType::convertInstanceTypesFromString(result);
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in InstanceType Get",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Set the property value for instance type
+ *  @param[in] ctx - context pointer
+ *  @param[in] type - instance type value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootInstanceType(ipmi::Context::ptr& ctx,
+                                    const InstanceType::InstanceTypes& type)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec = getService(ctx, bootInstanceTypeIntf,
+                                              bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(
+            ctx, service, bootSettingsPath, bootInstanceTypeIntf,
+            "BootSourceInstanceType", convertForMessage(type));
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    log<level::ERR>("Error in InstanceType Set",
+                    entry("ERROR=%s", ec.message().c_str()));
+    return ipmi::ccUnspecifiedError;
+}
 static constexpr uint8_t setComplete = 0x0;
 static constexpr uint8_t setInProgress = 0x1;
 static uint8_t transferStatus = setComplete;
 static uint8_t bootFlagValidBitClr = 0;
 static uint5_t bootInitiatorAckData = 0x0;
-static bool cmosClear = false;
+
+void initEnabledMatch()
+{
+    using namespace sdbusplus::bus::match::rules;
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+
+    std::string path = "/xyz/openbmc_project/control/host0/boot";
+    std::string inf = "xyz.openbmc_project.Object.Enable";
+
+    matchPtr = std::make_unique<sdbusplus::bus::match_t>(
+
+        *busp, sdbusplus::bus::match::rules::propertiesChanged(path, inf),
+        [](sdbusplus::message::message& msg) {
+        std::map<std::string, std::variant<bool>> props;
+        std::string iface;
+        bool enabledValue = false;
+        try
+        {
+            msg.read(iface, props);
+        }
+        catch (const std::exception& e)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                " propertiesChanged Exception caught in Get "
+                "matchPtr");
+            return;
+        }
+
+        auto it = props.find("Enabled");
+        if (it != props.end())
+        {
+            enabledValue = std::get<bool>(it->second);
+            if (enabledValue)
+            {
+                bootInitiatorAckData |= 0x1;
+            }
+        }
+    });
+}
 
 /** @brief implements the Get Chassis system boot option
  *  @param ctx - context pointer
@@ -1890,41 +2394,19 @@ ipmi::RspType<ipmi::message::Payload>
 
         try
         {
-            Source::Sources bootSource;
-            rc = getBootSource(ctx, bootSource);
-            if (rc != ipmi::ccSuccess)
-            {
-                return ipmi::response(rc);
-            }
-
+            // Data 1
+            bool valid;
+            bool oneTimeEnabled;
             Type::Types bootType;
+
             rc = getBootType(ctx, bootType);
             if (rc != ipmi::ccSuccess)
             {
                 return ipmi::response(rc);
             }
 
-            Mode::Modes bootMode;
-            rc = getBootMode(ctx, bootMode);
-            if (rc != ipmi::ccSuccess)
-            {
-                return ipmi::response(rc);
-            }
-
-            bootOption = sourceDbusToIpmi.at(bootSource);
-            if ((Mode::Modes::Regular == bootMode) &&
-                (Source::Sources::Default == bootSource))
-            {
-                bootOption = ipmiDefault;
-            }
-            else if (Source::Sources::Default == bootSource)
-            {
-                bootOption = modeDbusToIpmi.at(bootMode);
-            }
-
             IpmiValue biosBootType = typeDbusToIpmi.at(bootType);
 
-            bool oneTimeEnabled;
             rc = getBootOneTime(ctx, oneTimeEnabled);
             if (rc != ipmi::ccSuccess)
             {
@@ -1933,7 +2415,6 @@ ipmi::RspType<ipmi::message::Payload>
 
             uint1_t permanent = oneTimeEnabled ? 0 : 1;
 
-            bool valid;
             rc = getBootEnable(ctx, valid);
             if (rc != ipmi::ccSuccess)
             {
@@ -1942,11 +2423,160 @@ ipmi::RspType<ipmi::message::Payload>
 
             uint1_t validFlag = valid ? 1 : 0;
 
-            response.pack(bootOptionParameter, reserved1, uint5_t{},
-                          uint1_t{biosBootType}, uint1_t{permanent},
-                          uint1_t{validFlag}, uint2_t{}, uint4_t{bootOption},
-                          uint1_t{}, cmosClear, uint8_t{}, uint8_t{},
-                          uint8_t{});
+            // Data 2
+            bool lockOutResetButton;
+            bool screenBlank;
+            Source::Sources bootSource;
+            Mode::Modes bootMode;
+            bool lockKeyboard;
+            bool cmosClear;
+
+            rc = getBootFlag(ctx, "LockOutResetButton", lockOutResetButton);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = getBootFlag(ctx, "ScreenBlank", screenBlank);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = getBootSource(ctx, bootSource);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+            rc = getBootMode(ctx, bootMode);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            bootOption = sourceModeDbusToIpmi.at({bootSource, bootMode});
+
+            rc = getBootFlag(ctx, "LockKeyboard", lockKeyboard);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = getBootFlag(ctx, "CMOSClear", cmosClear);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            // Data 3
+            ConsoleRedirection::Redirections redirectionMode;
+            bool lockOutSleepButton;
+            bool passwordBypass;
+            bool forceProgressEventTraps;
+            FirmwareVerbosity::Levels verbosityLevel;
+            bool lockOutPowerButton;
+
+            rc = getBootConsoleRedirection(ctx, redirectionMode);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            IpmiValue consoleRedirection =
+                consoleRedirectionDbusToIpmi.at(redirectionMode);
+
+            rc = getBootFlag(ctx, "LockOutSleepButton", lockOutSleepButton);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = getBootFlag(ctx, "PasswordBypass", passwordBypass);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = getBootFlag(ctx, "ForceProgressEventTraps",
+                             forceProgressEventTraps);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = getBootFirmwareVerbosity(ctx, verbosityLevel);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            IpmiValue firmwareVerbosity =
+                firmwareVerbosityDbusToIpmi.at(verbosityLevel);
+
+            rc = getBootFlag(ctx, "LockOutPowerButton", lockOutPowerButton);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            // Data 4
+            MuxOverride::Modes overrideMode;
+            bool sharedModeOverride;
+
+            rc = getBootMuxOverride(ctx, overrideMode);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            IpmiValue muxOverride = muxOverrideDbusToIpmi.at(overrideMode);
+
+            rc = getBootFlag(ctx, "SharedModeOverride", sharedModeOverride);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            // Data 5
+            uint32_t bootInstanceIndex;
+            InstanceType::InstanceTypes bootInstanceType;
+
+            rc = getBootInstanceIndex(ctx, bootInstanceIndex);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = getBootInstanceType(ctx, bootInstanceType);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            IpmiValue deviceInstance = ipmiDefault;
+            switch (bootInstanceType)
+            {
+                case InstanceType::InstanceTypes::Internal:
+                    deviceInstance = (bootInstanceIndex & 0x0f) | 0x10;
+                    break;
+                case InstanceType::InstanceTypes::External:
+                    deviceInstance = (bootInstanceIndex & 0x0f);
+                    break;
+                default:
+                    deviceInstance = ipmiDefault;
+                    break;
+            }
+
+            response.pack(
+                bootOptionParameter, reserved1, uint5_t{},
+                uint1_t{biosBootType}, uint1_t{permanent}, uint1_t{validFlag},
+                uint1_t{lockOutResetButton}, uint1_t{screenBlank},
+                uint4_t{bootOption}, uint1_t{lockKeyboard}, uint1_t{cmosClear},
+                uint2_t{consoleRedirection}, uint1_t{lockOutSleepButton},
+                uint1_t{passwordBypass}, uint1_t{forceProgressEventTraps},
+                uint2_t{firmwareVerbosity}, uint1_t{lockOutPowerButton},
+                uint3_t{muxOverride}, uint1_t{sharedModeOverride}, uint4_t{},
+                uint5_t{deviceInstance}, uint3_t{});
             return ipmi::responseSuccess(std::move(response));
         }
         catch (const InternalFailure& e)
@@ -1969,7 +2599,7 @@ ipmi::RspType<ipmi::message::Payload>
                 if (ret < 0)
                 {
                     response.trailingOk = true;
-                    lg2::error(
+                    log<level::ERR>(
                         "getHostNetworkData failed for GetSysBootOptions.");
                     return ipmi::responseUnspecifiedError();
                 }
@@ -1980,18 +2610,18 @@ ipmi::RspType<ipmi::message::Payload>
             }
             else
             {
-                lg2::error(
-                    "ipmiChassisGetSysBootOptions: Unsupported parameter {PARAM}",
-                    "PARAM", lg2::hex,
-                    static_cast<uint8_t>(bootOptionParameter));
+                log<level::ERR>(
+                    "ipmiChassisGetSysBootOptions: Unsupported parameter",
+                    entry("PARAM=0x%x",
+                          static_cast<uint8_t>(bootOptionParameter)));
                 return ipmi::responseParmNotSupported();
             }
         }
         else
         {
-            lg2::error(
-                "ipmiChassisGetSysBootOptions: Unsupported parameter {PARAM}",
-                "PARAM", lg2::hex, static_cast<uint8_t>(bootOptionParameter));
+            log<level::ERR>(
+                "ipmiChassisGetSysBootOptions: Unsupported parameter",
+                entry("PARAM=0x%x", static_cast<uint8_t>(bootOptionParameter)));
             return ipmi::responseParmNotSupported();
         }
     }
@@ -2035,24 +2665,40 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
     if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
         BootOptionParameter::bootFlags)
     {
+        // Data 1
         uint5_t rsvd;
         bool validFlag;
         bool permanent;
         bool biosBootType;
+        // Data 2
         bool lockOutResetButton;
         bool screenBlank;
         uint4_t bootDeviceSelector;
         bool lockKeyboard;
-        uint8_t data3;
-        uint4_t biosInfo;
+        bool cmosClear;
+
+        // Data 3
+        uint2_t consoleRedirection;
+        bool lockOutSleepButton;
+        bool passwordBypass;
+        bool forceProgressEventTraps;
+        uint2_t firmwareVerbosity;
+        bool lockOutPowerButton;
+
+        // Data 4
+        uint3_t muxOverride;
+        bool sharedModeOverride;
         uint4_t rsvd1;
         uint5_t deviceInstance;
         uint3_t rsvd2;
 
         if (data.unpack(rsvd, biosBootType, permanent, validFlag,
                         lockOutResetButton, screenBlank, bootDeviceSelector,
-                        lockKeyboard, cmosClear, data3, biosInfo, rsvd1,
-                        deviceInstance, rsvd2) != 0 ||
+                        lockKeyboard, cmosClear, consoleRedirection,
+                        lockOutSleepButton, passwordBypass,
+                        forceProgressEventTraps, firmwareVerbosity,
+                        lockOutPowerButton, muxOverride, sharedModeOverride,
+                        rsvd1, deviceInstance, rsvd2) != 0 ||
             !data.fullyUnpacked())
         {
             return ipmi::responseReqDataLenInvalid();
@@ -2067,7 +2713,32 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
 
         try
         {
+            // Data 1
+            auto typeItr =
+                typeIpmiToDbus.find(static_cast<uint8_t>(biosBootType));
+            if (typeIpmiToDbus.end() != typeItr)
+            {
+                rc = setBootType(ctx, typeItr->second);
+                if (rc != ipmi::ccSuccess)
+                {
+                    return ipmi::response(rc);
+                }
+            }
+            else
+            {
+                log<level::ERR>(
+                    "ipmiChassisSetSysBootOptions: Boot type not supported");
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            // When clearing valid flag, permanent flag must also be cleared.
+            if (!validFlag)
+            {
+                permanent = false;
+            }
+
             rc = setBootOneTime(ctx, !permanent);
+
             if (rc != ipmi::ccSuccess)
             {
                 return ipmi::response(rc);
@@ -2079,78 +2750,184 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
                 return ipmi::response(rc);
             }
 
-            auto modeItr =
-                modeIpmiToDbus.find(static_cast<uint8_t>(bootDeviceSelector));
-            auto typeItr =
-                typeIpmiToDbus.find(static_cast<uint8_t>(biosBootType));
-            auto sourceItr =
-                sourceIpmiToDbus.find(static_cast<uint8_t>(bootDeviceSelector));
-            if (sourceIpmiToDbus.end() != sourceItr)
+            // Data 2
+            rc = setBootFlag(ctx, "LockOutResetButton", lockOutResetButton);
+            if (rc != ipmi::ccSuccess)
             {
-                rc = setBootSource(ctx, sourceItr->second);
-                if (rc != ipmi::ccSuccess)
-                {
-                    return ipmi::response(rc);
-                }
-                // If a set boot device is mapping to a boot source, then reset
-                // the boot mode D-Bus property to default.
-                // This way the ipmid code can determine which property is not
-                // at the default value
-                if (sourceItr->second != Source::Sources::Default)
-                {
-                    rc = setBootMode(ctx, Mode::Modes::Regular);
-                    if (rc != ipmi::ccSuccess)
-                    {
-                        return ipmi::response(rc);
-                    }
-                }
+                return ipmi::response(rc);
             }
 
-            if (typeIpmiToDbus.end() != typeItr)
+            rc = setBootFlag(ctx, "ScreenBlank", screenBlank);
+            if (rc != ipmi::ccSuccess)
             {
-                rc = setBootType(ctx, typeItr->second);
-                if (rc != ipmi::ccSuccess)
-                {
-                    return ipmi::response(rc);
-                }
+                return ipmi::response(rc);
             }
 
-            if (modeIpmiToDbus.end() != modeItr)
+            auto sourceModeItr = sourceModeIpmiToDbus.find(
+                static_cast<uint8_t>(bootDeviceSelector));
+            if (sourceModeIpmiToDbus.end() != sourceModeItr)
             {
-                rc = setBootMode(ctx, modeItr->second);
+                rc = setBootSource(ctx, sourceModeItr->second.first);
                 if (rc != ipmi::ccSuccess)
                 {
                     return ipmi::response(rc);
                 }
-                // If a set boot device is mapping to a boot mode, then reset
-                // the boot source D-Bus property to default.
-                // This way the ipmid code can determine which property is not
-                // at the default value
-                if (modeItr->second != Mode::Modes::Regular)
+
+                rc = setBootMode(ctx, sourceModeItr->second.second);
+                if (rc != ipmi::ccSuccess)
                 {
-                    rc = setBootSource(ctx, Source::Sources::Default);
-                    if (rc != ipmi::ccSuccess)
-                    {
-                        return ipmi::response(rc);
-                    }
+                    return ipmi::response(rc);
                 }
             }
-            if ((modeIpmiToDbus.end() == modeItr) &&
-                (typeIpmiToDbus.end() == typeItr) &&
-                (sourceIpmiToDbus.end() == sourceItr))
+            else
             {
                 // return error if boot option is not supported
-                lg2::error(
+                log<level::ERR>(
                     "ipmiChassisSetSysBootOptions: Boot option not supported");
                 return ipmi::responseInvalidFieldRequest();
+            }
+
+            rc = setBootFlag(ctx, "LockKeyboard", lockKeyboard);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = setBootFlag(ctx, "CMOSClear", cmosClear);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            // Data 3
+
+            auto redirectionItr = consoleRedirectionIpmiToDbus.find(
+                static_cast<uint8_t>(consoleRedirection));
+            if (consoleRedirectionIpmiToDbus.end() != redirectionItr)
+            {
+                rc = setBootConsoleRedirection(ctx, redirectionItr->second);
+                if (rc != ipmi::ccSuccess)
+                {
+                    return ipmi::response(rc);
+                }
+            }
+            else
+            {
+                log<level::ERR>("ipmiChassisSetSysBootOptions: Boot console "
+                                "redirection mode not supported");
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            rc = setBootFlag(ctx, "LockOutSleepButton", lockOutSleepButton);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = setBootFlag(ctx, "PasswordBypass", passwordBypass);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            rc = setBootFlag(ctx, "ForceProgressEventTraps",
+                             forceProgressEventTraps);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            auto verbosityItr = firmwareVerbosityIpmiToDbus.find(
+                static_cast<uint8_t>(firmwareVerbosity));
+            if (firmwareVerbosityIpmiToDbus.end() != verbosityItr)
+            {
+                rc = setBootFirmwareVerbosity(ctx, verbosityItr->second);
+                if (rc != ipmi::ccSuccess)
+                {
+                    return ipmi::response(rc);
+                }
+            }
+            else
+            {
+                log<level::ERR>("ipmiChassisSetSysBootOptions: Boot firmware "
+                                "verbosity level not supported");
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            rc = setBootFlag(ctx, "LockOutPowerButton", lockOutPowerButton);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            // Data 4
+            auto muxItr =
+                muxOverrideIpmiToDbus.find(static_cast<uint8_t>(muxOverride));
+            if (muxOverrideIpmiToDbus.end() != muxItr)
+            {
+                rc = setBootMuxOverride(ctx, muxItr->second);
+                if (rc != ipmi::ccSuccess)
+                {
+                    return ipmi::responseUnspecifiedError();
+                }
+            }
+            else
+            {
+                log<level::ERR>("ipmiChassisSetSysBootOptions: Boot mux "
+                                "override mode not supported");
+                return ipmi::responseInvalidFieldRequest();
+            }
+
+            rc = setBootFlag(ctx, "SharedModeOverride", sharedModeOverride);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
+
+            // Data 5
+            if (deviceInstance == ipmiDefault)
+            {
+                rc = setBootInstanceType(
+                    ctx, InstanceType::InstanceTypes::Unspecified);
+                if (rc != ipmi::ccSuccess)
+                {
+                    return ipmi::response(rc);
+                }
+            }
+            else if ((static_cast<uint8_t>(deviceInstance) & 0x10) == 0)
+            {
+                rc = setBootInstanceType(ctx,
+                                         InstanceType::InstanceTypes::External);
+                if (rc != ipmi::ccSuccess)
+                {
+                    return ipmi::response(rc);
+                }
+            }
+            else
+            {
+                rc = setBootInstanceType(ctx,
+                                         InstanceType::InstanceTypes::Internal);
+                if (rc != ipmi::ccSuccess)
+                {
+                    return ipmi::response(rc);
+                }
+            }
+
+            uint32_t deviceInstanceIndex =
+                static_cast<uint32_t>(deviceInstance) & 0x0f;
+            rc = setBootInstanceIndex(ctx, deviceInstanceIndex);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
             }
         }
         catch (const sdbusplus::exception_t& e)
         {
             objectsPtr.reset();
             report<InternalFailure>();
-            lg2::error("ipmiChassisSetSysBootOptions: Error in setting Boot "
-                       "flag parameters");
+            log<level::ERR>(
+                "ipmiChassisSetSysBootOptions: Error in setting Boot "
+                "flag parameters");
             return ipmi::responseUnspecifiedError();
         }
     }
@@ -2172,8 +2949,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         }
         bootInitiatorAckData &= ~writeMak;
         bootInitiatorAckData |= (writeMak & bootInfoAck);
-        lg2::info("ipmiChassisSetSysBootOptions: bootInfo parameter set "
-                  "successfully");
+        log<level::INFO>("ipmiChassisSetSysBootOptions: bootInfo parameter set "
+                         "successfully");
         data.trailingOk = true;
         return ipmi::responseSuccess();
     }
@@ -2193,10 +2970,10 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         }
         // store boot flag valid bits clear value
         bootFlagValidBitClr = static_cast<uint8_t>(bootFlagValidClr);
-        lg2::info(
+        log<level::INFO>(
             "ipmiChassisSetSysBootOptions: bootFlagValidBits parameter set "
-            "successfully to {VALUE}",
-            "VALUE", lg2::hex, bootFlagValidBitClr);
+            "successfully",
+            entry("value=0x%x", bootFlagValidBitClr));
         return ipmi::responseSuccess();
     }
     else
@@ -2210,8 +2987,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
                 ipmi::Cc ret = setHostNetworkData(data);
                 if (ret != ipmi::ccSuccess)
                 {
-                    lg2::error("ipmiChassisSetSysBootOptions: Error in "
-                               "setHostNetworkData");
+                    log<level::ERR>("ipmiChassisSetSysBootOptions: Error in "
+                                    "setHostNetworkData");
                     data.trailingOk = true;
                     return ipmi::response(ret);
                 }
@@ -2220,9 +2997,10 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
             }
             else
             {
-                lg2::error(
-                    "ipmiChassisSetSysBootOptions: Unsupported param: {PARAM}",
-                    "PARAM", lg2::hex, static_cast<uint8_t>(parameterSelector));
+                log<level::ERR>(
+                    "ipmiChassisSetSysBootOptions: Unsupported parameters",
+                    entry("PARAM=0x%x",
+                          static_cast<uint8_t>(parameterSelector)));
                 data.trailingOk = true;
                 return ipmi::responseParmNotSupported();
             }
@@ -2253,7 +3031,7 @@ ipmi::RspType<uint8_t, // Minutes per count
     }
     catch (const std::exception& e)
     {
-        lg2::error("getPOHCounter error: {ERROR}", "ERROR", e);
+        log<level::ERR>(e.what());
         return ipmi::responseUnspecifiedError();
     }
 }
@@ -2269,8 +3047,9 @@ ipmi::RspType<uint3_t, // policy support
 
     if (reserved || (policy > power_policy::noChange))
     {
-        lg2::error("Reserved request parameter: {REQ}", "REQ", lg2::hex,
-                   static_cast<int>(policy));
+        phosphor::logging::log<level::ERR>(
+            "Reserved request parameter",
+            entry("REQ=0x%x", static_cast<int>(policy)));
         return ipmi::responseInvalidFieldRequest();
     }
 
@@ -2309,7 +3088,7 @@ ipmi::RspType<uint3_t, // policy support
             property);
         if (ec)
         {
-            lg2::error("Unspecified Error");
+            phosphor::logging::log<level::ERR>("Unspecified Error");
             return ipmi::responseUnspecifiedError();
         }
     }
@@ -2349,6 +3128,7 @@ ipmi::RspType<> ipmiSetFrontPanelButtonEnables(ipmi::Context::ptr ctx,
 void register_netfn_chassis_functions()
 {
     createIdentifyTimer();
+    initEnabledMatch();
 
     // Get Chassis Capabilities
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
