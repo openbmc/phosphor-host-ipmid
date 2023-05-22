@@ -13,7 +13,8 @@ entity_map_json_lib = static_library(
   dependencies: [nlohmann_json_dep, sdbusplus_dep],
   implicit_include_directories: false)
 
-entity_map_json_dep = declare_dependency(link_with: entity_map_json_lib)
+entity_map_json_dep = declare_dependency(
+  link_whole: entity_map_json_lib)
 
 libipmid = library(
   'ipmid',
