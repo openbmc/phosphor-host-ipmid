@@ -20,7 +20,7 @@ constexpr size_t MAX_PAYLOAD_SIZE = 255;
 constexpr uint8_t MAJOR_VERSION = 0x01;
 constexpr uint8_t MINOR_VERSION = 0x00;
 
-constexpr char CONSOLE_SOCKET_PATH[] = "\0obmc-console";
+constexpr char CONSOLE_SOCKET_PATH[] = "\0obmc-console.default";
 constexpr size_t CONSOLE_SOCKET_PATH_LEN = sizeof(CONSOLE_SOCKET_PATH) - 1;
 
 constexpr uint8_t accIntervalFactor = 5;
