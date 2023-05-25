@@ -1440,7 +1440,7 @@ void register_netfn_dcmi_functions()
 #ifndef FEATURE_DYNAMIC_SENSORS
     // <Get Sensor Info>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_SENSOR_INFO, NULL,
-                           getSensorInfo, PRIVILEGE_USER);
+                           getSensorInfo, PRIVILEGE_OPERATOR);
 #endif
     // <Get DCMI Configuration Parameters>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS, NULL,

@@ -2650,7 +2650,7 @@ void registerSensorFunctions()
     // <Get DCMI Sensor Info>
     ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
                                ipmi::dcmi::cmdGetDcmiSensorInfo,
-                               ipmi::Privilege::User,
+                               ipmi::Privilege::Operator,
                                ipmi::dcmi::getSensorInfo);
 }
 } // namespace ipmi
