@@ -1441,7 +1441,7 @@ std::string getEnclosureIdentifyConnection()
 void enclosureIdentifyLed(bool flag)
 {
     using namespace chassis::internal;
-    std::string connection = std::move(getEnclosureIdentifyConnection());
+    std::string connection = getEnclosureIdentifyConnection();
     auto msg = std::string("enclosureIdentifyLed(") +
                boost::lexical_cast<std::string>(flag) + ")";
     log<level::DEBUG>(msg.c_str());
