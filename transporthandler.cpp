@@ -1613,7 +1613,7 @@ RspType<> setSolConfParams(Context::ptr ctx, uint4_t channelBits,
             }
 
             uint8_t privilege = static_cast<uint8_t>(privilegeBits);
-            if (privilege < static_cast<uint8_t>(Privilege::None) ||
+            if (privilege < static_cast<uint8_t>(Privilege::User) ||
                 privilege > static_cast<uint8_t>(Privilege::Oem))
             {
                 return ipmi::responseInvalidFieldRequest();
@@ -1848,6 +1848,39 @@ RspType<message::Payload> getSolConfParams(Context::ptr ctx,
             return responseSuccess(std::move(ret));
         }
         case SolConfParam::NonVbitrate:
+        {
+            uint64_t baudRate;
+            uint8_t encodedBitRate = 0;
+            if (ipmi::getDbusProperty(
+                    ctx, "xyz.openbmc_project.Console.default",
+                    "/xyz/openbmc_project/console/default",
+                    "xyz.openbmc_project.Console.UART", "Baud", baudRate))
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            switch (baudRate)
+            {
+                case 9600:
+                    encodedBitRate = 0x06;
+                    break;
+                case 19200:
+                    encodedBitRate = 0x07;
+                    break;
+                case 38400:
+                    encodedBitRate = 0x08;
+                    break;
+                case 57600:
+                    encodedBitRate = 0x09;
+                    break;
+                case 115200:
+                    encodedBitRate = 0x0a;
+                    break;
+                default:
+                    break;
+            }
+            ret.pack(encodedBitRate);
+            return responseSuccess(std::move(ret));
+        }
         case SolConfParam::Vbitrate:
         default:
             return response(ipmiCCParamNotSupported);
