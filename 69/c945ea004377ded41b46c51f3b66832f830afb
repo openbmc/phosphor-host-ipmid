@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Tom Joseph <rushtotom@gmail.com>
+Submitted-by: Tom Joseph <rushtotom@gmail.com>
+Submitted-at: Tue, 30 May 2023 13:15:55 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/63778
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
