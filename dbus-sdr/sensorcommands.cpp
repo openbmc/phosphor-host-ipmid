@@ -328,10 +328,6 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
                 ctx, sensorConnection.c_str(), paths[i], managedObjects);
             if (ec)
             {
-                phosphor::logging::log<phosphor::logging::level::ERR>(
-                    "GetMangagedObjects for getSensorMap failed",
-                    phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
-
                 continue;
             }
             allManagedObjects.merge(managedObjects);
@@ -340,6 +336,11 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
 
         if (!found)
         {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "GetMangagedObjects for getSensorMap failed",
+                phosphor::logging::entry("SERVICE=%s",
+                                         sensorConnection.c_str()));
+
             return false;
         }
 
