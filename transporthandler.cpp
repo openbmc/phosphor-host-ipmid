@@ -388,8 +388,12 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
         fallbackPrefix = ifaddr->prefix;
         deleteObjectIfExists(bus, params.service, ifaddr->path);
     }
-    createIfAddr<AF_INET>(bus, params, address.value_or(ifaddr->address),
-                          prefix.value_or(fallbackPrefix));
+
+    if (struct in_addr nullIPv4{0}; address.value().s_addr != nullIPv4.s_addr)
+    {
+        createIfAddr<AF_INET>(bus, params, address.value_or(ifaddr->address),
+                              prefix.value_or(fallbackPrefix));
+    }
 }
 
 template <int family>
