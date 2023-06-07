@@ -92,6 +92,11 @@ Cc ipmiUserInit();
  */
 SecureString ipmiUserGetPassword(const std::string& userName);
 
+/** @brief The IPMI call to reload password file after password file update
+ *
+ */
+void ipmiReloadPassword();
+
 /** @brief The IPMI call to clear password entry associated with specified
  * username
  *

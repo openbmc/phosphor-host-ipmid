@@ -143,6 +143,12 @@ void PasswdMgr::checkAndReload(void)
     }
 }
 
+void PasswdMgr::reloadPassword(void)
+{
+    passwdMapList.clear();
+    initPasswordMap();
+}
+
 int PasswdMgr::encryptDecryptData(bool doEncrypt, const EVP_CIPHER* cipher,
                                   uint8_t* key, size_t keyLen, uint8_t* iv,
                                   size_t ivLen, uint8_t* inBytes,
@@ -593,6 +599,8 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
         log<level::DEBUG>("Failed to rename tmp file to ipmi-pass");
         return -EIO;
     }
+
+    reloadPassword();
 
     return 0;
 }

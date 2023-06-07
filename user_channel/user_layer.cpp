@@ -38,6 +38,11 @@ SecureString ipmiUserGetPassword(const std::string& userName)
     return passwdMgr.getPasswdByUserName(userName);
 }
 
+void ipmiReloadPassword()
+{
+    return passwdMgr.reloadPassword();
+}
+
 Cc ipmiClearUserEntryPassword(const std::string& userName)
 {
     if (passwdMgr.updateUserEntry(userName, "") != 0)

@@ -780,6 +780,8 @@ Cc UserAccess::setUserPassword(const uint8_t userId, const char* userPassword)
     {
         case PAM_SUCCESS:
         {
+            // If the password is updated successfully, reload the password.
+            ipmiReloadPassword();
             return ccSuccess;
         }
         case PAM_AUTHTOK_ERR:

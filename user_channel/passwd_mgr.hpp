@@ -61,6 +61,11 @@ class PasswdMgr
     int updateUserEntry(const std::string& userName,
                         const std::string& newUserName);
 
+    /** @brief reload password map forcefully
+     *
+     */
+    void reloadPassword(void);
+
   private:
     using UserName = std::string;
     using Password = SecureString;
