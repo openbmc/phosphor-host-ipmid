@@ -1,8 +1,10 @@
 #include "transporthandler.hpp"
 
+#include <stdplus/net/addr/subnet.hpp>
 #include <stdplus/raw.hpp>
 
 #include <array>
+#include <fstream>
 
 using phosphor::logging::commit;
 using phosphor::logging::elog;
@@ -167,17 +169,6 @@ auto logWithChannel(const std::optional<ChannelParams>& params, Args&&... args)
     return log<level>(std::forward<Args>(args)...);
 }
 
-ether_addr stringToMAC(const char* mac)
-{
-    const ether_addr* ret = ether_aton(mac);
-    if (ret == nullptr)
-    {
-        log<level::ERR>("Invalid MAC Address", entry("MAC=%s", mac));
-        elog<InternalFailure>();
-    }
-    return *ret;
-}
-
 /** @brief Get / Set the Property value from phosphor-networkd EthernetInterface
  */
 template <typename T>
@@ -201,11 +192,12 @@ static void setEthProp(sdbusplus::bus_t& bus, const ChannelParams& params,
  *  @param[in] params - The parameters for the channel
  *  @return The configured mac address
  */
-ether_addr getMACProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
+stdplus::EtherAddr getMACProperty(sdbusplus::bus_t& bus,
+                                  const ChannelParams& params)
 {
-    auto macStr = std::get<std::string>(getDbusProperty(
-        bus, params.service, params.ifPath, INTF_MAC, "MACAddress"));
-    return stringToMAC(macStr.c_str());
+    auto prop = getDbusProperty(bus, params.service, params.ifPath, INTF_MAC,
+                                "MACAddress");
+    return stdplus::fromStr<stdplus::EtherAddr>(std::get<std::string>(prop));
 }
 
 /** @brief Sets the system value for MAC address on the given interface
@@ -215,11 +207,10 @@ ether_addr getMACProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
  *  @param[in] mac    - MAC address to apply
  */
 void setMACProperty(sdbusplus::bus_t& bus, const ChannelParams& params,
-                    const ether_addr& mac)
+                    stdplus::EtherAddr mac)
 {
-    std::string macStr = ether_ntoa(&mac);
     setDbusProperty(bus, params.service, params.ifPath, INTF_MAC, "MACAddress",
-                    macStr);
+                    stdplus::toStr(mac));
 }
 
 void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
@@ -258,8 +249,7 @@ void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
  */
 template <int family>
 void createIfAddr(sdbusplus::bus_t& bus, const ChannelParams& params,
-                  const typename AddrFamily<family>::addr& address,
-                  uint8_t prefix)
+                  typename AddrFamily<family>::addr address, uint8_t prefix)
 {
     auto newreq = bus.new_method_call(params.service.c_str(),
                                       params.logicalPath.c_str(),
@@ -267,7 +257,8 @@ void createIfAddr(sdbusplus::bus_t& bus, const ChannelParams& params,
     std::string protocol =
         sdbusplus::common::xyz::openbmc_project::network::convertForMessage(
             AddrFamily<family>::protocol);
-    newreq.append(protocol, addrToString<family>(address), prefix, "");
+    stdplus::ToStrHandle<stdplus::ToStr<typename AddrFamily<family>::addr>> tsh;
+    newreq.append(protocol, tsh(address), prefix, "");
     bus.call_noreply(newreq);
 }
 
@@ -290,7 +281,7 @@ auto getIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
  *  @param[in] prefix  - The new address prefix if specified
  */
 void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
-                        const std::optional<in_addr>& address,
+                        std::optional<stdplus::In4Addr> address,
                         std::optional<uint8_t> prefix)
 {
     auto ifaddr = getIfAddr4(bus, params);
@@ -305,13 +296,10 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
         fallbackPrefix = ifaddr->prefix;
         deleteObjectIfExists(bus, params.service, ifaddr->path);
     }
-
-    if (struct in_addr nullIPv4{0};
-        (address == std::nullopt && prefix != std::nullopt) ||
-        (address != std::nullopt &&
-         (address.value().s_addr != nullIPv4.s_addr)))
+    auto addr = address.value_or(ifaddr->address);
+    if (addr != stdplus::In4Addr{})
     {
-        createIfAddr<AF_INET>(bus, params, address.value_or(ifaddr->address),
+        createIfAddr<AF_INET>(bus, params, addr,
                               prefix.value_or(fallbackPrefix));
     }
 }
@@ -340,7 +328,7 @@ std::optional<IfNeigh<family>> getGatewayNeighbor(sdbusplus::bus_t& bus,
 
 template <int family>
 void reconfigureGatewayMAC(sdbusplus::bus_t& bus, const ChannelParams& params,
-                           const ether_addr& mac)
+                           stdplus::EtherAddr mac)
 {
     auto gateway = getGatewayProperty<family>(bus, params);
     if (!gateway)
@@ -385,7 +373,7 @@ void deconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
  *  @param[in] prefix  - The new address prefix
  */
 void reconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
-                        uint8_t idx, const in6_addr& address, uint8_t prefix)
+                        uint8_t idx, stdplus::In6Addr address, uint8_t prefix)
 {
     deconfigureIfAddr6(bus, params, idx);
     createIfAddr<AF_INET6>(bus, params, address, prefix);
@@ -430,7 +418,7 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
 {
     auto source = IPv6Source::Static;
     bool enabled = false;
-    in6_addr addr{};
+    stdplus::In6Addr addr{};
     uint8_t prefix{};
     auto status = IPv6AddressStatus::Disabled;
 
@@ -446,7 +434,7 @@ void getLanIPv6Address(message::Payload& ret, uint8_t channel, uint8_t set,
 
     ret.pack(set);
     ret.pack(types::enum_cast<uint4_t>(source), uint3_t{}, enabled);
-    ret.pack(std::string_view(reinterpret_cast<char*>(&addr), sizeof(addr)));
+    ret.pack(stdplus::raw::asView<char>(addr));
     ret.pack(prefix);
     ret.pack(types::enum_cast<uint8_t>(status));
 }
@@ -593,46 +581,6 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     {
         createNeighbor<AF_INET6>(bus, params, neighbor6->ip, neighbor6->mac);
     }
-}
-
-/** @brief Turns a prefix into a netmask
- *
- *  @param[in] prefix - The prefix length
- *  @return The netmask
- */
-in_addr prefixToNetmask(uint8_t prefix)
-{
-    if (prefix > 32)
-    {
-        log<level::ERR>("Invalid prefix", entry("PREFIX=%" PRIu8, prefix));
-        elog<InternalFailure>();
-    }
-    if (prefix == 0)
-    {
-        // Avoids 32-bit lshift by 32 UB
-        return {};
-    }
-    return {htobe32(~UINT32_C(0) << (32 - prefix))};
-}
-
-/** @brief Turns a a netmask into a prefix length
- *
- *  @param[in] netmask - The netmask in byte form
- *  @return The prefix length
- */
-uint8_t netmaskToPrefix(in_addr netmask)
-{
-    uint32_t x = be32toh(netmask.s_addr);
-    if ((~x & (~x + 1)) != 0)
-    {
-        char maskStr[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &netmask, maskStr, sizeof(maskStr));
-        log<level::ERR>("Invalid netmask", entry("NETMASK=%s", maskStr));
-        elog<InternalFailure>();
-    }
-    return static_cast<bool>(x)
-               ? AddrFamily<AF_INET>::defaultPrefix - __builtin_ctz(x)
-               : 0;
 }
 
 // We need to store this value so it can be returned to the client
@@ -833,7 +781,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseCommandNotAvailable();
             }
-            auto ip = unpackT<in_addr>(req);
+            auto ip = unpackT<stdplus::In4Addr>(req);
             unpackFinal(req);
             channelCall<reconfigureIfAddr4>(channel, ip, std::nullopt);
             return responseSuccess();
@@ -872,7 +820,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::MAC:
         {
-            auto mac = unpackT<ether_addr>(req);
+            auto mac = unpackT<stdplus::EtherAddr>(req);
             unpackFinal(req);
             channelCall<setMACProperty>(channel, mac);
             return responseSuccess();
@@ -883,10 +831,9 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseCommandNotAvailable();
             }
-            auto netmask = unpackT<in_addr>(req);
+            auto pfx = stdplus::maskToPfx(unpackT<stdplus::In4Addr>(req));
             unpackFinal(req);
-            channelCall<reconfigureIfAddr4>(channel, std::nullopt,
-                                            netmaskToPrefix(netmask));
+            channelCall<reconfigureIfAddr4>(channel, std::nullopt, pfx);
             return responseSuccess();
         }
         case LanParam::Gateway1:
@@ -895,14 +842,14 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseCommandNotAvailable();
             }
-            auto gateway = unpackT<in_addr>(req);
+            auto gateway = unpackT<stdplus::In4Addr>(req);
             unpackFinal(req);
             channelCall<setGatewayProperty<AF_INET>>(channel, gateway);
             return responseSuccess();
         }
         case LanParam::Gateway1MAC:
         {
-            auto gatewayMAC = unpackT<ether_addr>(req);
+            auto gatewayMAC = unpackT<stdplus::EtherAddr>(req);
             unpackFinal(req);
             channelCall<reconfigureGatewayMAC<AF_INET>>(channel, gatewayMAC);
             return responseSuccess();
@@ -976,7 +923,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseReqDataLenInvalid();
             }
-            auto ip = unpackT<in6_addr>(req);
+            auto ip = unpackT<stdplus::In6Addr>(req);
             if (req.unpack(prefix, status) != 0)
             {
                 return responseReqDataLenInvalid();
@@ -1029,14 +976,14 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::IPv6StaticRouter1IP:
         {
-            auto gateway = unpackT<in6_addr>(req);
+            auto gateway = unpackT<stdplus::In6Addr>(req);
             unpackFinal(req);
             channelCall<setGatewayProperty<AF_INET6>>(channel, gateway);
             return responseSuccess();
         }
         case LanParam::IPv6StaticRouter1MAC:
         {
-            auto mac = unpackT<ether_addr>(req);
+            auto mac = unpackT<stdplus::EtherAddr>(req);
             unpackFinal(req);
             channelCall<reconfigureGatewayMAC<AF_INET6>>(channel, mac);
             return responseSuccess();
@@ -1057,7 +1004,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::IPv6StaticRouter1PrefixValue:
         {
-            unpackT<in6_addr>(req);
+            unpackT<stdplus::In6Addr>(req);
             unpackFinal(req);
             // Accept any prefix value since our prefix length has to be 0
             return responseSuccess();
@@ -1198,7 +1145,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         case LanParam::IP:
         {
             auto ifaddr = channelCall<getIfAddr4>(channel);
-            in_addr addr{};
+            stdplus::In4Addr addr{};
             if (ifaddr)
             {
                 addr = ifaddr->address;
@@ -1216,7 +1163,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::MAC:
         {
-            ether_addr mac = channelCall<getMACProperty>(channel);
+            auto mac = channelCall<getMACProperty>(channel);
             ret.pack(stdplus::raw::asView<char>(mac));
             return responseSuccess(std::move(ret));
         }
@@ -1228,21 +1175,20 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             {
                 prefix = ifaddr->prefix;
             }
-            in_addr netmask = prefixToNetmask(prefix);
+            auto netmask = stdplus::pfxToMask<stdplus::In4Addr>(prefix);
             ret.pack(stdplus::raw::asView<char>(netmask));
             return responseSuccess(std::move(ret));
         }
         case LanParam::Gateway1:
         {
-            auto gateway =
-                channelCall<getGatewayProperty<AF_INET>>(channel).value_or(
-                    in_addr{});
-            ret.pack(stdplus::raw::asView<char>(gateway));
+            auto gateway = channelCall<getGatewayProperty<AF_INET>>(channel);
+            ret.pack(stdplus::raw::asView<char>(
+                gateway.value_or(stdplus::In4Addr{})));
             return responseSuccess(std::move(ret));
         }
         case LanParam::Gateway1MAC:
         {
-            ether_addr mac{};
+            stdplus::EtherAddr mac{};
             auto neighbor = channelCall<getGatewayNeighbor<AF_INET>>(channel);
             if (neighbor)
             {
@@ -1346,19 +1292,19 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::IPv6StaticRouter1IP:
         {
-            in6_addr gateway{};
+            stdplus::In6Addr gateway{};
             if (!channelCall<getEthProp<bool>>(channel, "IPv6AcceptRA"))
             {
                 gateway =
                     channelCall<getGatewayProperty<AF_INET6>>(channel).value_or(
-                        in6_addr{});
+                        stdplus::In6Addr{});
             }
             ret.pack(stdplus::raw::asView<char>(gateway));
             return responseSuccess(std::move(ret));
         }
         case LanParam::IPv6StaticRouter1MAC:
         {
-            ether_addr mac{};
+            stdplus::EtherAddr mac{};
             auto neighbor = channelCall<getGatewayNeighbor<AF_INET6>>(channel);
             if (neighbor)
             {
@@ -1374,8 +1320,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::IPv6StaticRouter1PrefixValue:
         {
-            in6_addr prefix{};
-            ret.pack(stdplus::raw::asView<char>(prefix));
+            ret.pack(stdplus::raw::asView<char>(stdplus::In6Addr{}));
             return responseSuccess(std::move(ret));
         }
         case LanParam::cipherSuitePrivilegeLevels:
