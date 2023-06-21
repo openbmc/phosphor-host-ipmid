@@ -1,11 +1,16 @@
 #include "transporthandler.hpp"
 
+#include <stdplus/raw.hpp>
+
+#include <array>
+
 using phosphor::logging::commit;
 using phosphor::logging::elog;
 using phosphor::logging::entry;
 using phosphor::logging::level;
 using phosphor::logging::log;
 using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+using sdbusplus::xyz::openbmc_project::Common::Error::InvalidArgument;
 using sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface;
 using sdbusplus::xyz::openbmc_project::Network::server::IP;
 using sdbusplus::xyz::openbmc_project::Network::server::Neighbor;
@@ -656,6 +661,27 @@ SetStatus& getSetStatus(uint8_t channel)
     return setStatus[channel] = SetStatus::Complete;
 }
 
+/** @brief Unpacks the trivially copyable type from the message */
+template <typename T>
+static T unpackT(message::Payload& req)
+{
+    std::array<uint8_t, sizeof(T)> bytes;
+    if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
+    {
+        throw ccReqDataLenInvalid;
+    }
+    return stdplus::raw::copyFrom<T>(bytes);
+}
+
+/** @brief Ensure the message is fully unpacked */
+static void unpackFinal(message::Payload& req)
+{
+    if (!req.fullyUnpacked())
+    {
+        throw ccReqDataTruncated;
+    }
+}
+
 /**
  * Define placeholder command handlers for the OEM Extension bytes for the Set
  * LAN Configuration Parameters and Get LAN Configuration Parameters
@@ -719,7 +745,7 @@ RspType<message::Payload> getLanOem(uint8_t, uint8_t, uint8_t, uint8_t)
 bool isValidMACAddress(const ether_addr& mac)
 {
     // check if mac address is empty
-    if (equal(mac, ether_addr{}))
+    if (stdplus::raw::equal(mac, ether_addr{}))
     {
         return false;
     }
@@ -733,8 +759,8 @@ bool isValidMACAddress(const ether_addr& mac)
     return true;
 }
 
-RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
-                 uint8_t parameter, message::Payload& req)
+RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
+                    uint8_t parameter, message::Payload& req)
 {
     const uint8_t channel = convertCurrentChannelNum(
         static_cast<uint8_t>(channelBits), ctx->channel);
@@ -751,10 +777,11 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         {
             uint2_t flag;
             uint6_t rsvd;
-            if (req.unpack(flag, rsvd) != 0 || !req.fullyUnpacked())
+            if (req.unpack(flag, rsvd) != 0)
             {
                 return responseReqDataLenInvalid();
             }
+            unpackFinal(req);
             if (rsvd)
             {
                 return responseInvalidFieldRequest();
@@ -802,13 +829,8 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseCommandNotAvailable();
             }
-            in_addr ip;
-            std::array<uint8_t, sizeof(ip)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
-            copyInto(ip, bytes);
+            auto ip = unpackT<in_addr>(req);
+            unpackFinal(req);
             channelCall<reconfigureIfAddr4>(channel, ip, std::nullopt);
             return responseSuccess();
         }
@@ -816,10 +838,11 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         {
             uint4_t flag;
             uint4_t rsvd;
-            if (req.unpack(flag, rsvd) != 0 || !req.fullyUnpacked())
+            if (req.unpack(flag, rsvd) != 0)
             {
                 return responseReqDataLenInvalid();
             }
+            unpackFinal(req);
             if (rsvd)
             {
                 return responseInvalidFieldRequest();
@@ -845,14 +868,8 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::MAC:
         {
-            ether_addr mac;
-            std::array<uint8_t, sizeof(mac)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
-            copyInto(mac, bytes);
-
+            auto mac = unpackT<ether_addr>(req);
+            unpackFinal(req);
             if (!isValidMACAddress(mac))
             {
                 return responseInvalidFieldRequest();
@@ -866,13 +883,8 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseCommandNotAvailable();
             }
-            in_addr netmask;
-            std::array<uint8_t, sizeof(netmask)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
-            copyInto(netmask, bytes);
+            auto netmask = unpackT<in_addr>(req);
+            unpackFinal(req);
             uint8_t prefix = netmaskToPrefix(netmask);
             if (prefix < MIN_IPV4_PREFIX_LENGTH)
             {
@@ -887,41 +899,31 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseCommandNotAvailable();
             }
-            in_addr gateway;
-            std::array<uint8_t, sizeof(gateway)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
-            copyInto(gateway, bytes);
+            auto gateway = unpackT<in_addr>(req);
+            unpackFinal(req);
             channelCall<setGatewayProperty<AF_INET>>(channel, gateway);
             return responseSuccess();
         }
         case LanParam::Gateway1MAC:
         {
-            ether_addr gatewayMAC;
-            std::array<uint8_t, sizeof(gatewayMAC)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
-            copyInto(gatewayMAC, bytes);
+            auto gatewayMAC = unpackT<ether_addr>(req);
+            unpackFinal(req);
             channelCall<reconfigureGatewayMAC<AF_INET>>(channel, gatewayMAC);
             return responseSuccess();
         }
         case LanParam::VLANId:
         {
-            uint12_t vlanData = 0;
-            uint3_t reserved = 0;
-            bool vlanEnable = 0;
+            uint12_t vlanData;
+            uint3_t rsvd;
+            bool vlanEnable;
 
-            if (req.unpack(vlanData) || req.unpack(reserved) ||
-                req.unpack(vlanEnable) || !req.fullyUnpacked())
+            if (req.unpack(vlanData, rsvd, vlanEnable) != 0)
             {
                 return responseReqDataLenInvalid();
             }
+            unpackFinal(req);
 
-            if (reserved)
+            if (rsvd)
             {
                 return responseInvalidFieldRequest();
             }
@@ -951,10 +953,11 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         case LanParam::IPFamilyEnables:
         {
             uint8_t enables;
-            if (req.unpack(enables) != 0 || !req.fullyUnpacked())
+            if (req.unpack(enables) != 0)
             {
                 return responseReqDataLenInvalid();
             }
+            unpackFinal(req);
             switch (static_cast<IPFamilyEnables>(enables))
             {
                 case IPFamilyEnables::DualStack:
@@ -975,20 +978,22 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             uint8_t set;
             uint7_t rsvd;
             bool enabled;
-            in6_addr ip;
-            std::array<uint8_t, sizeof(ip)> ipbytes;
             uint8_t prefix;
             uint8_t status;
-            if (req.unpack(set, rsvd, enabled, ipbytes, prefix, status) != 0 ||
-                !req.fullyUnpacked())
+            if (req.unpack(set, rsvd, enabled) != 0)
             {
                 return responseReqDataLenInvalid();
             }
+            auto ip = unpackT<in6_addr>(req);
+            if (req.unpack(prefix, status) != 0)
+            {
+                return responseReqDataLenInvalid();
+            }
+            unpackFinal(req);
             if (rsvd)
             {
                 return responseInvalidFieldRequest();
             }
-            copyInto(ip, ipbytes);
             if (enabled)
             {
                 if (prefix < MIN_IPV6_PREFIX_LENGTH ||
@@ -996,23 +1001,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 {
                     return responseParmOutOfRange();
                 }
-                try
-                {
-                    channelCall<reconfigureIfAddr6>(channel, set, ip, prefix);
-                }
-                catch (const sdbusplus::exception_t& e)
-                {
-                    if (std::string_view err{
-                            "xyz.openbmc_project.Common.Error.InvalidArgument"};
-                        err == e.name())
-                    {
-                        return responseInvalidFieldRequest();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                channelCall<reconfigureIfAddr6>(channel, set, ip, prefix);
             }
             else
             {
@@ -1029,10 +1018,11 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         {
             std::bitset<8> control;
             constexpr uint8_t reservedRACCBits = 0xfc;
-            if (req.unpack(control) != 0 || !req.fullyUnpacked())
+            if (req.unpack(control) != 0)
             {
                 return responseReqDataLenInvalid();
             }
+            unpackFinal(req);
             if (std::bitset<8> expected(control &
                                         std::bitset<8>(reservedRACCBits));
                 expected.any())
@@ -1047,35 +1037,26 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::IPv6StaticRouter1IP:
         {
-            in6_addr gateway;
-            std::array<uint8_t, sizeof(gateway)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
-            copyInto(gateway, bytes);
+            auto gateway = unpackT<in6_addr>(req);
+            unpackFinal(req);
             channelCall<setGatewayProperty<AF_INET6>>(channel, gateway);
             return responseSuccess();
         }
         case LanParam::IPv6StaticRouter1MAC:
         {
-            ether_addr mac;
-            std::array<uint8_t, sizeof(mac)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
-            copyInto(mac, bytes);
+            auto mac = unpackT<ether_addr>(req);
+            unpackFinal(req);
             channelCall<reconfigureGatewayMAC<AF_INET6>>(channel, mac);
             return responseSuccess();
         }
         case LanParam::IPv6StaticRouter1PrefixLength:
         {
             uint8_t prefix;
-            if (req.unpack(prefix) != 0 || !req.fullyUnpacked())
+            if (req.unpack(prefix) != 0)
             {
                 return responseReqDataLenInvalid();
             }
+            unpackFinal(req);
             if (prefix != 0)
             {
                 return responseInvalidFieldRequest();
@@ -1084,25 +1065,23 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::IPv6StaticRouter1PrefixValue:
         {
-            std::array<uint8_t, sizeof(in6_addr)> bytes;
-            if (req.unpack(bytes) != 0 || !req.fullyUnpacked())
-            {
-                return responseReqDataLenInvalid();
-            }
+            unpackT<in6_addr>(req);
+            unpackFinal(req);
             // Accept any prefix value since our prefix length has to be 0
             return responseSuccess();
         }
         case LanParam::cipherSuitePrivilegeLevels:
         {
-            uint8_t reserved;
+            uint8_t rsvd;
             std::array<uint4_t, ipmi::maxCSRecords> cipherSuitePrivs;
 
-            if (req.unpack(reserved, cipherSuitePrivs) || !req.fullyUnpacked())
+            if (req.unpack(rsvd, cipherSuitePrivs))
             {
                 return responseReqDataLenInvalid();
             }
+            unpackFinal(req);
 
-            if (reserved)
+            if (rsvd)
             {
                 return responseInvalidFieldRequest();
             }
@@ -1129,6 +1108,27 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
 
     req.trailingOk = true;
     return response(ccParamNotSupported);
+}
+
+RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
+                 uint8_t parameter, message::Payload& req)
+{
+    try
+    {
+        return setLanInt(ctx, channelBits, reserved1, parameter, req);
+    }
+    catch (ipmi::Cc cc)
+    {
+        return response(cc);
+    }
+    catch (const sdbusplus::exception_t& e)
+    {
+        if (std::string_view{InvalidArgument::errName} == e.name())
+        {
+            return responseInvalidFieldRequest();
+        }
+        throw;
+    }
 }
 
 RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
@@ -1205,7 +1205,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             {
                 addr = ifaddr->address;
             }
-            ret.pack(dataRef(addr));
+            ret.pack(stdplus::raw::asView<char>(addr));
             return responseSuccess(std::move(ret));
         }
         case LanParam::IPSrc:
@@ -1219,7 +1219,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         case LanParam::MAC:
         {
             ether_addr mac = channelCall<getMACProperty>(channel);
-            ret.pack(dataRef(mac));
+            ret.pack(stdplus::raw::asView<char>(mac));
             return responseSuccess(std::move(ret));
         }
         case LanParam::SubnetMask:
@@ -1231,7 +1231,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
                 prefix = ifaddr->prefix;
             }
             in_addr netmask = prefixToNetmask(prefix);
-            ret.pack(dataRef(netmask));
+            ret.pack(stdplus::raw::asView<char>(netmask));
             return responseSuccess(std::move(ret));
         }
         case LanParam::Gateway1:
@@ -1239,7 +1239,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             auto gateway =
                 channelCall<getGatewayProperty<AF_INET>>(channel).value_or(
                     in_addr{});
-            ret.pack(dataRef(gateway));
+            ret.pack(stdplus::raw::asView<char>(gateway));
             return responseSuccess(std::move(ret));
         }
         case LanParam::Gateway1MAC:
@@ -1250,7 +1250,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             {
                 mac = neighbor->mac;
             }
-            ret.pack(dataRef(mac));
+            ret.pack(stdplus::raw::asView<char>(mac));
             return responseSuccess(std::move(ret));
         }
         case LanParam::VLANId:
@@ -1355,7 +1355,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
                     channelCall<getGatewayProperty<AF_INET6>>(channel).value_or(
                         in6_addr{});
             }
-            ret.pack(dataRef(gateway));
+            ret.pack(stdplus::raw::asView<char>(gateway));
             return responseSuccess(std::move(ret));
         }
         case LanParam::IPv6StaticRouter1MAC:
@@ -1366,7 +1366,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             {
                 mac = neighbor->mac;
             }
-            ret.pack(dataRef(mac));
+            ret.pack(stdplus::raw::asView<char>(mac));
             return responseSuccess(std::move(ret));
         }
         case LanParam::IPv6StaticRouter1PrefixLength:
@@ -1377,7 +1377,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         case LanParam::IPv6StaticRouter1PrefixValue:
         {
             in6_addr prefix{};
-            ret.pack(dataRef(prefix));
+            ret.pack(stdplus::raw::asView<char>(prefix));
             return responseSuccess(std::move(ret));
         }
         case LanParam::cipherSuitePrivilegeLevels:
