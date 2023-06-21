@@ -734,30 +734,6 @@ RspType<message::Payload> getLanOem(uint8_t, uint8_t, uint8_t, uint8_t)
 {
     return response(ccParamNotSupported);
 }
-/**
- * @brief is MAC address valid.
- *
- * This function checks whether the MAC address is valid or not.
- *
- * @param[in] mac - MAC address.
- * @return true if MAC address is valid else retun false.
- **/
-bool isValidMACAddress(const ether_addr& mac)
-{
-    // check if mac address is empty
-    if (stdplus::raw::equal(mac, ether_addr{}))
-    {
-        return false;
-    }
-    // we accept only unicast MAC addresses and  same thing has been checked in
-    // phosphor-network layer. If the least significant bit of the first octet
-    // is set to 1, it is multicast MAC else it is unicast MAC address.
-    if (mac.ether_addr_octet[0] & 1)
-    {
-        return false;
-    }
-    return true;
-}
 
 RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                     uint8_t parameter, message::Payload& req)
@@ -870,10 +846,6 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         {
             auto mac = unpackT<ether_addr>(req);
             unpackFinal(req);
-            if (!isValidMACAddress(mac))
-            {
-                return responseInvalidFieldRequest();
-            }
             channelCall<setMACProperty>(channel, mac);
             return responseSuccess();
         }
@@ -885,12 +857,8 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             }
             auto netmask = unpackT<in_addr>(req);
             unpackFinal(req);
-            uint8_t prefix = netmaskToPrefix(netmask);
-            if (prefix < MIN_IPV4_PREFIX_LENGTH)
-            {
-                return responseInvalidFieldRequest();
-            }
-            channelCall<reconfigureIfAddr4>(channel, std::nullopt, prefix);
+            channelCall<reconfigureIfAddr4>(channel, std::nullopt,
+                                            netmaskToPrefix(netmask));
             return responseSuccess();
         }
         case LanParam::Gateway1:
@@ -934,10 +902,6 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 lastDisabledVlan[channel] = vlan;
                 vlan = 0;
-            }
-            else if (vlan == 0 || vlan == VLAN_VALUE_MASK)
-            {
-                return responseInvalidFieldRequest();
             }
 
             channelCall<reconfigureVLAN>(channel, vlan);
