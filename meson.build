@@ -107,6 +107,7 @@ pam = cpp.find_library('pam', required: true)
 mapper = dependency('libmapper')
 boost_coroutine = cpp.find_library('boost_coroutine', required: true)
 sdbusplus_dep = dependency('sdbusplus')
+stdplus_dep = dependency('stdplus')
 
 if cpp.has_header_symbol(
         'nlohmann/json.hpp',
@@ -190,6 +191,7 @@ sysintfcmds_lib = library(
 # ipmid
 ipmid_pre = [
   sdbusplus_dep,
+  stdplus_dep,
   phosphor_logging_dep,
   phosphor_dbus_interfaces_dep,
   boost_coroutine,
