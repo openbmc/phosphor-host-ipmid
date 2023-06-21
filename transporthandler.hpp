@@ -17,23 +17,21 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/exception.hpp>
+#include <stdplus/raw.hpp>
 #include <user_channel/channel_layer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
 #include <xyz/openbmc_project/Network/IP/server.hpp>
 #include <xyz/openbmc_project/Network/Neighbor/server.hpp>
 
-#include <array>
 #include <bitset>
 #include <cinttypes>
 #include <cstdint>
-#include <cstring>
 #include <fstream>
 #include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -182,44 +180,6 @@ struct ChannelParams
     /** @brief Logical adapter path used for address assignment */
     std::string logicalPath;
 };
-
-/** @brief A trivial helper used to determine if two PODs are equal
- *
- *  @params[in] a - The first object to compare
- *  @params[in] b - The second object to compare
- *  @return True if the objects are the same bytewise
- */
-template <typename T>
-bool equal(const T& a, const T& b)
-{
-    static_assert(std::is_trivially_copyable_v<T>);
-    return std::memcmp(&a, &b, sizeof(T)) == 0;
-}
-
-/** @brief Copies bytes from an array into a trivially copyable container
- *
- *  @params[out] t     - The container receiving the data
- *  @params[in]  bytes - The data to copy
- */
-template <size_t N, typename T>
-void copyInto(T& t, const std::array<uint8_t, N>& bytes)
-{
-    static_assert(std::is_trivially_copyable_v<T>);
-    static_assert(N == sizeof(T));
-    std::memcpy(&t, bytes.data(), bytes.size());
-}
-
-/** @brief Gets a generic view of the bytes in the input container
- *
- *  @params[in] t - The data to reference
- *  @return A string_view referencing the bytes in the container
- */
-template <typename T>
-std::string_view dataRef(const T& t)
-{
-    static_assert(std::is_trivially_copyable_v<T>);
-    return {reinterpret_cast<const char*>(&t), sizeof(T)};
-}
 
 /** @brief Determines the ethernet interface name corresponding to a channel
  *         Tries to map a VLAN object first so that the address information
@@ -586,7 +546,7 @@ std::optional<IfNeigh<family>>
         {
             continue;
         }
-        if (!equal(*neighIP, ip))
+        if (!stdplus::raw::equal(*neighIP, ip))
         {
             continue;
         }
