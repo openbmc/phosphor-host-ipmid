@@ -158,8 +158,6 @@ constexpr uint8_t MAX_IPV6_STATIC_ADDRESSES = 15;
 constexpr uint8_t MAX_IPV6_DYNAMIC_ADDRESSES = 15;
 
 // Prefix length limits of phosphor-networkd
-constexpr uint8_t MIN_IPV4_PREFIX_LENGTH = 1;
-constexpr uint8_t MAX_IPV4_PREFIX_LENGTH = 32;
 constexpr uint8_t MIN_IPV6_PREFIX_LENGTH = 1;
 constexpr uint8_t MAX_IPV6_PREFIX_LENGTH = 128;
 
