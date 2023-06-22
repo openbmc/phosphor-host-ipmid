@@ -162,111 +162,6 @@ auto logWithChannel(const std::optional<ChannelParams>& params, Args&&... args)
     return log<level>(std::forward<Args>(args)...);
 }
 
-EthernetInterface::DHCPConf getDHCPProperty(sdbusplus::bus_t& bus,
-                                            const ChannelParams& params)
-{
-    std::string dhcpstr = std::get<std::string>(getDbusProperty(
-        bus, params.service, params.logicalPath, INTF_ETHERNET, "DHCPEnabled"));
-    return EthernetInterface::convertDHCPConfFromString(dhcpstr);
-}
-
-/** @brief Sets the DHCP v4 state on the given interface
- *
- *  @param[in] bus           - The bus object used for lookups
- *  @param[in] params        - The parameters for the channel
- *  @param[in] requestedDhcp - DHCP state to assign
- *                             (EthernetInterface::DHCPConf::none,
- *                              EthernetInterface::DHCPConf::v4,
- *                              EthernetInterface::DHCPConf::v6,
- *                              EthernetInterface::DHCPConf::both)
- */
-void setDHCPv4Property(sdbusplus::bus_t& bus, const ChannelParams& params,
-                       const EthernetInterface::DHCPConf requestedDhcp)
-{
-    EthernetInterface::DHCPConf currentDhcp = getDHCPProperty(bus, params);
-    EthernetInterface::DHCPConf nextDhcp = EthernetInterface::DHCPConf::none;
-
-    // When calling setDHCPv4Property, requestedDhcp only has "v4" and "none".
-    // setDHCPv4Property is only for IPv4 management. It should not modify
-    // IPv6 state.
-    if (requestedDhcp == EthernetInterface::DHCPConf::v4)
-    {
-        if ((currentDhcp == EthernetInterface::DHCPConf::v6) ||
-            (currentDhcp == EthernetInterface::DHCPConf::both))
-            nextDhcp = EthernetInterface::DHCPConf::both;
-        else if ((currentDhcp == EthernetInterface::DHCPConf::v4) ||
-                 (currentDhcp == EthernetInterface::DHCPConf::none))
-            nextDhcp = EthernetInterface::DHCPConf::v4;
-    }
-    else if (requestedDhcp == EthernetInterface::DHCPConf::none)
-    {
-        if ((currentDhcp == EthernetInterface::DHCPConf::v6) ||
-            (currentDhcp == EthernetInterface::DHCPConf::both))
-            nextDhcp = EthernetInterface::DHCPConf::v6;
-        else if ((currentDhcp == EthernetInterface::DHCPConf::v4) ||
-                 (currentDhcp == EthernetInterface::DHCPConf::none))
-            nextDhcp = EthernetInterface::DHCPConf::none;
-    }
-    else // Stay the same.
-    {
-        nextDhcp = currentDhcp;
-    }
-    std::string newDhcp =
-        sdbusplus::common::xyz::openbmc_project::network::convertForMessage(
-            nextDhcp);
-    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
-                    "DHCPEnabled", newDhcp);
-}
-
-void setDHCPv6Property(sdbusplus::bus_t& bus, const ChannelParams& params,
-                       const EthernetInterface::DHCPConf requestedDhcp,
-                       const bool defaultMode = true)
-{
-    EthernetInterface::DHCPConf currentDhcp = getDHCPProperty(bus, params);
-    EthernetInterface::DHCPConf nextDhcp = EthernetInterface::DHCPConf::none;
-
-    if (defaultMode)
-    {
-        // When calling setDHCPv6Property, requestedDhcp only has "v6" and
-        // "none".
-        // setDHCPv6Property is only for IPv6 management. It should not modify
-        // IPv4 state.
-        if (requestedDhcp == EthernetInterface::DHCPConf::v6)
-        {
-            if ((currentDhcp == EthernetInterface::DHCPConf::v4) ||
-                (currentDhcp == EthernetInterface::DHCPConf::both))
-                nextDhcp = EthernetInterface::DHCPConf::both;
-            else if ((currentDhcp == EthernetInterface::DHCPConf::v6) ||
-                     (currentDhcp == EthernetInterface::DHCPConf::none))
-                nextDhcp = EthernetInterface::DHCPConf::v6;
-        }
-        else if (requestedDhcp == EthernetInterface::DHCPConf::none)
-        {
-            if ((currentDhcp == EthernetInterface::DHCPConf::v4) ||
-                (currentDhcp == EthernetInterface::DHCPConf::both))
-                nextDhcp = EthernetInterface::DHCPConf::v4;
-            else if ((currentDhcp == EthernetInterface::DHCPConf::v6) ||
-                     (currentDhcp == EthernetInterface::DHCPConf::none))
-                nextDhcp = EthernetInterface::DHCPConf::none;
-        }
-        else // Stay the same.
-        {
-            nextDhcp = currentDhcp;
-        }
-    }
-    else
-    {
-        // allow the v6 call to set any value
-        nextDhcp = requestedDhcp;
-    }
-
-    std::string newDhcp =
-        sdbusplus::common::xyz::openbmc_project::network::convertForMessage(
-            nextDhcp);
-    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
-                    "DHCPEnabled", newDhcp);
-}
-
 ether_addr stringToMAC(const char* mac)
 {
     const ether_addr* ret = ether_aton(mac);
@@ -276,6 +171,23 @@ ether_addr stringToMAC(const char* mac)
         elog<InternalFailure>();
     }
     return *ret;
+}
+
+/** @brief Get / Set the Property value from phosphor-networkd EthernetInterface
+ */
+template <typename T>
+static T getEthProp(sdbusplus::bus_t& bus, const ChannelParams& params,
+                    const std::string& prop)
+{
+    return std::get<T>(getDbusProperty(bus, params.service, params.logicalPath,
+                                       INTF_ETHERNET, prop));
+}
+template <typename T>
+static void setEthProp(sdbusplus::bus_t& bus, const ChannelParams& params,
+                       const std::string& prop, const T& t)
+{
+    return setDbusProperty(bus, params.service, params.logicalPath,
+                           INTF_ETHERNET, prop, t);
 }
 
 /** @brief Determines the MAC of the ethernet interface
@@ -591,7 +503,9 @@ void deconfigureChannel(sdbusplus::bus_t& bus, ChannelParams& params)
     }
 
     // Clear out any settings on the lower physical interface
-    setDHCPv6Property(bus, params, EthernetInterface::DHCPConf::none, false);
+    setEthProp(bus, params, "DHCP4", false);
+    setEthProp(bus, params, "DHCP6", false);
+    setEthProp(bus, params, "IPv6AcceptRA", false);
 }
 
 /** @brief Creates a new VLAN on the specified interface
@@ -631,6 +545,9 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     // configuration, then restore the old info.
 
     // Save info from the old logical interface
+    bool dhcp4 = getEthProp<bool>(bus, params, "DHCP4");
+    bool dhcp6 = getEthProp<bool>(bus, params, "DHCP6");
+    bool ra = getEthProp<bool>(bus, params, "IPv6AcceptRA");
     ObjectLookupCache ips(bus, params, INTF_IP);
     auto ifaddr4 = findIfAddr<AF_INET>(bus, params, 0, originsV4, ips);
     std::vector<IfAddr<AF_INET6>> ifaddrs6;
@@ -644,7 +561,6 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
         }
         ifaddrs6.push_back(std::move(*ifaddr6));
     }
-    EthernetInterface::DHCPConf dhcp = getDHCPProperty(bus, params);
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
     auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
     auto neighbor6 = findGatewayNeighbor<AF_INET6>(bus, params, neighbors);
@@ -653,7 +569,9 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     createVLAN(bus, params, vlan);
 
     // Re-establish the saved settings
-    setDHCPv6Property(bus, params, dhcp, false);
+    setEthProp(bus, params, "DHCP4", dhcp4);
+    setEthProp(bus, params, "DHCP6", dhcp6);
+    setEthProp(bus, params, "IPv6AcceptRA", ra);
     if (ifaddr4)
     {
         createIfAddr<AF_INET>(bus, params, ifaddr4->address, ifaddr4->prefix);
@@ -736,34 +654,6 @@ SetStatus& getSetStatus(uint8_t channel)
         return it->second;
     }
     return setStatus[channel] = SetStatus::Complete;
-}
-
-/** @brief Gets the IPv6 Router Advertisement value
- *
- *  @param[in] bus    - The bus object used for lookups
- *  @param[in] params - The parameters for the channel
- *  @return networkd IPV6AcceptRA value
- */
-static bool getIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params)
-{
-    auto raEnabled =
-        std::get<bool>(getDbusProperty(bus, params.service, params.logicalPath,
-                                       INTF_ETHERNET, "IPv6AcceptRA"));
-    return raEnabled;
-}
-
-/** @brief Sets the IPv6AcceptRA flag
- *
- *  @param[in] bus           - The bus object used for lookups
- *  @param[in] params        - The parameters for the channel
- *  @param[in] ipv6AcceptRA  - boolean to enable/disable IPv6 Routing
- *                             Advertisement
- */
-void setIPv6AcceptRA(sdbusplus::bus_t& bus, const ChannelParams& params,
-                     const bool ipv6AcceptRA)
-{
-    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
-                    "IPv6AcceptRA", ipv6AcceptRA);
 }
 
 /**
@@ -936,10 +826,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::IP:
         {
-            EthernetInterface::DHCPConf dhcp =
-                channelCall<getDHCPProperty>(channel);
-            if ((dhcp == EthernetInterface::DHCPConf::v4) ||
-                (dhcp == EthernetInterface::DHCPConf::both))
+            if (channelCall<getEthProp<bool>>(channel, "DHCP4"))
             {
                 return responseCommandNotAvailable();
             }
@@ -968,27 +855,19 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             switch (static_cast<IPSrc>(static_cast<uint8_t>(flag)))
             {
                 case IPSrc::DHCP:
-                {
                     // The IPSrc IPMI command is only for IPv4
                     // management. Modifying IPv6 state is done using
                     // a completely different Set LAN Configuration
                     // subcommand.
-                    channelCall<setDHCPv4Property>(
-                        channel, EthernetInterface::DHCPConf::v4);
+                    channelCall<setEthProp<bool>>(channel, "DHCP4", true);
                     return responseSuccess();
-                }
                 case IPSrc::Unspecified:
                 case IPSrc::Static:
-                {
-                    channelCall<setDHCPv4Property>(
-                        channel, EthernetInterface::DHCPConf::none);
+                    channelCall<setEthProp<bool>>(channel, "DHCP4", false);
                     return responseSuccess();
-                }
                 case IPSrc::BIOS:
                 case IPSrc::BMC:
-                {
                     return responseInvalidFieldRequest();
-                }
             }
             return response(ccParamNotSupported);
         }
@@ -1011,10 +890,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::SubnetMask:
         {
-            EthernetInterface::DHCPConf dhcp =
-                channelCall<getDHCPProperty>(channel);
-            if ((dhcp == EthernetInterface::DHCPConf::v4) ||
-                (dhcp == EthernetInterface::DHCPConf::both))
+            if (channelCall<getEthProp<bool>>(channel, "DHCP4"))
             {
                 return responseCommandNotAvailable();
             }
@@ -1035,10 +911,7 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::Gateway1:
         {
-            EthernetInterface::DHCPConf dhcp =
-                channelCall<getDHCPProperty>(channel);
-            if ((dhcp == EthernetInterface::DHCPConf::v4) ||
-                (dhcp == EthernetInterface::DHCPConf::both))
+            if (channelCall<getEthProp<bool>>(channel, "DHCP4"))
             {
                 return responseCommandNotAvailable();
             }
@@ -1196,7 +1069,8 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             }
 
             bool enableRA = control[IPv6RouterControlFlag::Dynamic];
-            channelCall<setIPv6AcceptRA>(channel, enableRA);
+            channelCall<setEthProp<bool>>(channel, "IPv6AcceptRA", enableRA);
+            channelCall<setEthProp<bool>>(channel, "DHCP6", enableRA);
             return responseSuccess();
         }
         case LanParam::IPv6StaticRouter1IP:
@@ -1370,14 +1244,9 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::IPSrc:
         {
-            auto src = IPSrc::Static;
-            EthernetInterface::DHCPConf dhcp =
-                channelCall<getDHCPProperty>(channel);
-            if ((dhcp == EthernetInterface::DHCPConf::v4) ||
-                (dhcp == EthernetInterface::DHCPConf::both))
-            {
-                src = IPSrc::DHCP;
-            }
+            auto src = channelCall<getEthProp<bool>>(channel, "DHCP4")
+                           ? IPSrc::DHCP
+                           : IPSrc::Static;
             ret.pack(types::enum_cast<uint4_t>(src), uint4_t{});
             return responseSuccess(std::move(ret));
         }
@@ -1506,7 +1375,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         {
             std::bitset<8> control;
             control[IPv6RouterControlFlag::Dynamic] =
-                channelCall<getIPv6AcceptRA>(channel);
+                channelCall<getEthProp<bool>>(channel, "IPv6AcceptRA");
             control[IPv6RouterControlFlag::Static] = 1;
             ret.pack(control);
             return responseSuccess(std::move(ret));
@@ -1514,10 +1383,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         case LanParam::IPv6StaticRouter1IP:
         {
             in6_addr gateway{};
-            EthernetInterface::DHCPConf dhcp =
-                channelCall<getDHCPProperty>(channel);
-            if ((dhcp == EthernetInterface::DHCPConf::v4) ||
-                (dhcp == EthernetInterface::DHCPConf::none))
+            if (!channelCall<getEthProp<bool>>(channel, "IPv6AcceptRA"))
             {
                 gateway =
                     channelCall<getGatewayProperty<AF_INET6>>(channel).value_or(
