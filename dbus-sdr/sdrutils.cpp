@@ -535,12 +535,12 @@ void updateIpmiFromAssociation(
         const std::string* configurationInterface =
             getSensorConfigurationInterface(sensorInterfacesResponse);
 
-        // We didnt' find a configuration interface for this sensor, but we
-        // followed the Association property to get here, so we're done
-        // searching.
+        // If there are multi association path settings and only one path exist,
+        // we need to continue if cannot find configuration interface for this
+        // sensor.
         if (!configurationInterface)
         {
-            break;
+            continue;
         }
 
         // We found a configuration interface.
