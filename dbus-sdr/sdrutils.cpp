@@ -540,7 +540,7 @@ void updateIpmiFromAssociation(
         // searching.
         if (!configurationInterface)
         {
-            break;
+            continue;
         }
 
         // We found a configuration interface.
