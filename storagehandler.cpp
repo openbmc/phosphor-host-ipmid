@@ -872,6 +872,8 @@ void register_netfn_storage_functions()
     // Do not register the hander if it dynamic sensors stack is used.
 
 #ifndef FEATURE_DYNAMIC_SENSORS
+
+#ifndef LIBIPMI_BUILD_STORAGE_CMDS
     // <Get SEL Info>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelInfo, ipmi::Privilege::User,
@@ -915,6 +917,8 @@ void register_netfn_storage_functions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdReadFruData,
                           ipmi::Privilege::Operator, ipmiStorageReadFruData);
+
+#endif // LIBIPMI_BUILD_STORAGE_CMDS
 
     // <Get Repository Info>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,

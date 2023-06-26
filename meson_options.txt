@@ -72,3 +72,6 @@ option('fru-yaml-gen', type: 'string', value: 'fru-read-example.yaml')
 option('get-dbus-active-software', type: 'feature', description: 'Use the  getActiveSoftwareVersionInfo for the BMC version and dev_id.json as backup')
 option('fw-ver-regex', type : 'string', value : '(\\\\d+)\\\\.(\\\\d+)', description : 'Regular expressions for parsing firmware revision')
 option('matches-map', type : 'array', value : ['1', '2', '0', '0', '0', '0'], description : 'An array of integers')
+
+# libipmi20.so library
+option('libipmi-build-storage-cmds', type: 'feature', value: 'disabled', description: 'Request to compile storage commands in the libipmi20 library')

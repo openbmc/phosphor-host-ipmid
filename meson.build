@@ -79,6 +79,7 @@ feature_map = {
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
   'sel-logger-clears-sel'      : '-DFEATURE_SEL_LOGGER_CLEARS_SEL',
+  'libipmi-build-storage-cmds' : '-DLIBIPMI_BUILD_STORAGE_CMDS',
 }
 
 foreach option_key, option_value : feature_map
@@ -205,6 +206,11 @@ if not get_option('transport-oem').disabled()
   transportoem_src = ['transporthandler_oem.cpp']
 endif
 
+stogare_cmds_src = []
+if get_option('dynamic-sensors').disabled() and not get_option('libipmi-build-storage-cmds').disabled()
+  stogare_cmds_src = ['dbus-sdr/storagecommands.cpp', 'dbus-sdr/sdrutils.cpp']
+endif
+
 libipmi20_src = [
   'app/channel.cpp',
   'app/watchdog.cpp',
@@ -227,6 +233,7 @@ libipmi20_src = [
   'user_channel/channelcommands.cpp',
   generated_src,
   transportoem_src,
+  stogare_cmds_src,
   conf_h,
 ]
 
