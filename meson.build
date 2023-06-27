@@ -16,12 +16,12 @@ conf_data = configuration_data()
 conf_data.set_quoted('CALLOUT_FWD_ASSOCIATION', 'callout')
 conf_data.set_quoted('BOARD_SENSOR', get_option('board-sensor'))
 conf_data.set_quoted('SYSTEM_SENSOR', get_option('system-sensor'))
+conf_data.set('IPMI_SMS_ATN_ACK_TIMEOUT_SECS', get_option('ipmi-sms-atn-ack-timeout-secs'))
 
 # Soft Power off related.
 if not get_option('softoff').disabled()
   conf_data.set_quoted('SOFTOFF_BUSNAME', get_option('softoff-busname'))
   conf_data.set_quoted('SOFTOFF_OBJPATH', get_option('softoff-objpath'))
-  conf_data.set('IPMI_SMS_ATN_ACK_TIMEOUT_SECS', get_option('ipmi-sms-atn-ack-timeout-secs'))
   conf_data.set('IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS', get_option('ipmi-host-shutdown-complete-timeout-secs'))
   conf_data.set_quoted('HOST_INBAND_REQUEST_DIR', get_option('host-inband-request-dir'))
   conf_data.set_quoted('HOST_INBAND_REQUEST_FILE', get_option('host-inband-request-file'))
