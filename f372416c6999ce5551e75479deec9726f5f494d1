@@ -16,6 +16,24 @@
       "message": "Please modify the comment above so it matches the code.",
       "revId": "f372416c6999ce5551e75479deec9726f5f494d1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec75578b_9e2b4c19",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2023-06-30T05:40:19Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "039656be_b8cd88a0",
+      "revId": "f372416c6999ce5551e75479deec9726f5f494d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
