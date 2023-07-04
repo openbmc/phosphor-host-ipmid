@@ -389,7 +389,8 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
         deleteObjectIfExists(bus, params.service, ifaddr->path);
     }
 
-    if (struct in_addr nullIPv4{0}; address.value().s_addr != nullIPv4.s_addr)
+    if (struct in_addr nullIPv4{0};
+        (address == std::nullopt || address.value().s_addr != nullIPv4.s_addr))
     {
         createIfAddr<AF_INET>(bus, params, address.value_or(ifaddr->address),
                               prefix.value_or(fallbackPrefix));
