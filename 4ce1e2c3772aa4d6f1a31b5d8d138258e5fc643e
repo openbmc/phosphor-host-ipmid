@@ -33,6 +33,47 @@
       "message": "Currently, the IPMI FRU write commands only is supported in storagecommands.cpp file. Therefore, I add one more build option to support to compile storage commands in libipmi20 library. This option is necessary in case users want to fully support IPMI FRU commands but still use static configuration for sensor commands.\n\nPlease help me to review this commit.",
       "revId": "4ce1e2c3772aa4d6f1a31b5d8d138258e5fc643e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8dc15361_d6b105d1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-07-05T20:40:09Z",
+      "side": 1,
+      "message": "is the IPMI FRU read also using the one in `storagecommands.cpp`? or the one supported in libipmi20. It might be easier to just support the IPMI FRU write with the static configuration?\n\nI am unsure how mix/matching the storage commands will break.",
+      "parentUuid": "75131a7b_974963cd",
+      "revId": "4ce1e2c3772aa4d6f1a31b5d8d138258e5fc643e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "519b6d1b_5d97397c",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-07-05T20:40:09Z",
+      "side": 1,
+      "message": "\u0027dynamic-storages-only\u0027 : \u0027-DFEATURE_DYNAMIC_STORAGES_ONLY\u0027,",
+      "range": {
+        "startLine": 82,
+        "startChar": 2,
+        "endLine": 82,
+        "endChar": 64
+      },
+      "revId": "4ce1e2c3772aa4d6f1a31b5d8d138258e5fc643e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
