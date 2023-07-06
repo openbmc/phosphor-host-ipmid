@@ -20,6 +20,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "5b786f40_598ff1c9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-07-06T03:24:34Z",
+      "side": 1,
+      "message": "It works well. I updated the commit content",
+      "parentUuid": "8c04738e_c4bf96eb",
+      "revId": "4ce1e2c3772aa4d6f1a31b5d8d138258e5fc643e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "75131a7b_974963cd",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 2
@@ -53,6 +71,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f4ecf30_527673d3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-07-06T03:24:34Z",
+      "side": 1,
+      "message": "All IPMI FRU commands shall be handled by storagecommands.cpp file.\nI don\u0027t think that is easier to support IPMI FRU write command with static configuration, and we should not take time to implement (it has been handled by storagecommands.cpp file).",
+      "parentUuid": "8dc15361_d6b105d1",
+      "revId": "4ce1e2c3772aa4d6f1a31b5d8d138258e5fc643e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "519b6d1b_5d97397c",
@@ -66,6 +102,30 @@
       "writtenOn": "2023-07-05T20:40:09Z",
       "side": 1,
       "message": "\u0027dynamic-storages-only\u0027 : \u0027-DFEATURE_DYNAMIC_STORAGES_ONLY\u0027,",
+      "range": {
+        "startLine": 82,
+        "startChar": 2,
+        "endLine": 82,
+        "endChar": 64
+      },
+      "revId": "4ce1e2c3772aa4d6f1a31b5d8d138258e5fc643e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d0426200_bd9d3c4c",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-07-06T03:24:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "519b6d1b_5d97397c",
       "range": {
         "startLine": 82,
         "startChar": 2,
