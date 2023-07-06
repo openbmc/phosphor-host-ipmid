@@ -91,6 +91,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "20da680c_615fc068",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000940
+      },
+      "writtenOn": "2023-07-06T03:28:29Z",
+      "side": 1,
+      "message": "FRU information comes from either:\n- ipmi-fru-parser\n- entity-manager\u0027s FruDevice\n\nI think that static FRU configuration is used for ipmi-fru-parser and storagecommands.cpp will use FRU information from FruDevice.\n\nNot all platforms can enable dynamic-sensor support but they still need to enable dynamic FRU support.",
+      "parentUuid": "8dc15361_d6b105d1",
+      "revId": "4ce1e2c3772aa4d6f1a31b5d8d138258e5fc643e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "519b6d1b_5d97397c",
         "filename": "meson.build",
         "patchSetId": 2
