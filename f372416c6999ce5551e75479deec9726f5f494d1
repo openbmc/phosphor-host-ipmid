@@ -52,6 +52,24 @@
       "parentUuid": "ec75578b_9e2b4c19",
       "revId": "f372416c6999ce5551e75479deec9726f5f494d1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f10e799a_977c630d",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1000847
+      },
+      "writtenOn": "2023-07-12T08:54:36Z",
+      "side": 1,
+      "message": "Sorry for the misunderstanding. Done.",
+      "parentUuid": "3404eeb1_9e72b74e",
+      "revId": "f372416c6999ce5551e75479deec9726f5f494d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
