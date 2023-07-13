@@ -405,8 +405,6 @@ ipmi::RspType<uint3_t,        // timerUse - timer use
             else
             {
                 presentCountdown = 0;
-                // Automatically clear it whenever a timer expiration occurs.
-                timerNotLogFlags = false;
             }
         }
 
