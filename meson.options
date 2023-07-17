@@ -60,6 +60,10 @@ option('hybrid-sensors', type: 'feature', value: 'disabled', description: 'Hybri
 # Sensor Cache
 option('sensors-cache', type: 'feature', value: 'disabled', description: 'Sensor cache stack is disabled by default; offer a way to enable it')
 
+# Short Sensor Names for IPMI
+option('shortname-remove-suffix', type: 'feature', value: 'enabled', description: 'shortname-remove-suffix is enabled by default')
+option('shortname-replace-words', type: 'feature', value: 'disabled', description: 'shortname-replace-words is disabled by default')
+
 # SEL Logger
 option('sel-logger-clears-sel', type: 'feature', value: 'disabled', description: 'Clearing SEL through sel-logger is disabled by default; offer a way to enable it')
 

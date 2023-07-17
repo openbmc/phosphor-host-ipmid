@@ -34,6 +34,13 @@ conf_data.set_quoted('POWER_READING_SENSOR', get_option('power-reading-sensor'))
 conf_data.set_quoted('HOST_IPMI_LIB_PATH', get_option('host-ipmi-lib-path'))
 conf_data.set_quoted('FW_VER_REGEX', get_option('fw-ver-regex'))
 
+if get_option('shortname-remove-suffix').enabled()
+  conf_data.set_quoted('SHORTNAME_REMOVE_SUFFIX', '1')
+endif
+if get_option('shortname-replace-words').enabled()
+  conf_data.set_quoted('SHORTNAME_REPLACE_WORDS', '1')
+endif
+
 matches_map = get_option('matches-map')
 conf_data.set('MAJOR_MATCH_INDEX', matches_map[0])
 conf_data.set('MINOR_MATCH_INDEX', matches_map[1])
