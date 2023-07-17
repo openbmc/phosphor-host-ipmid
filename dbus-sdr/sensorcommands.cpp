@@ -20,6 +20,8 @@
 #include "dbus-sdr/sensorutils.hpp"
 #include "dbus-sdr/storagecommands.hpp"
 
+#include "config.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/container/flat_map.hpp>
 #include <ipmid/api.hpp>
@@ -483,7 +485,7 @@ std::string parseSdrIdFromPath(const std::string& path)
 
     if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
-        // try to not truncate by replacing common words
+#ifdef SHORTNAME_REMOVE_SUFFIX
         for (const auto& suffix : suffixes)
         {
             if (boost::ends_with(name, suffix))
@@ -492,10 +494,19 @@ std::string parseSdrIdFromPath(const std::string& path)
                 break;
             }
         }
-        if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+#endif
+#ifdef SHORTNAME_REPLACE_WORDS
+        constexpr std::array<std::pair<const char*, const char*>, 2>
+            replaceWords = {std::make_pair("Output", "Out"),
+                            std::make_pair("Input", "In")};
+        for (const auto& [find, replace] : replaceWords)
         {
-            name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+            boost::replace_all(name, find, replace);
         }
+#endif
+
+        // as a backup and if nothing else is configured
+        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
     }
     return name;
 }
