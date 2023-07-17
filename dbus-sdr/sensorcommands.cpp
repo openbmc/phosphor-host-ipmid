@@ -67,9 +67,7 @@ constexpr uint8_t temperatureSensorType = 0x01;
 constexpr uint8_t maxRecords = 8;
 } // namespace dcmi
 } // namespace ipmi
-constexpr std::array<const char*, 7> suffixes = {
-    "_Output_Voltage", "_Input_Voltage", "_Output_Current", "_Input_Current",
-    "_Output_Power",   "_Input_Power",   "_Temperature"};
+
 namespace ipmi
 {
 
@@ -484,18 +482,15 @@ std::string parseSdrIdFromPath(const std::string& path)
     if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
         // try to not truncate by replacing common words
-        for (const auto& suffix : suffixes)
+        constexpr std::array<std::pair<const char*, const char*>, 2>
+            replaceWords = {std::make_pair("Output", "Out"),
+                            std::make_pair("Input", "In")};
+        for (const auto& [find, replace] : replaceWords)
         {
-            if (boost::ends_with(name, suffix))
-            {
-                boost::replace_all(name, suffix, "");
-                break;
-            }
+            boost::replace_all(name, find, replace);
         }
-        if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
-        {
-            name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
-        }
+
+        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
     }
     return name;
 }
