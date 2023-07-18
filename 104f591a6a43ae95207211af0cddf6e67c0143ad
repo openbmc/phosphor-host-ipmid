@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "9cc09336_b2269065",
         "filename": "/COMMIT_MSG",
@@ -14,10 +15,10 @@
       "side": 1,
       "message": "Is this move or copy?   Can the network still set this or do you plan to remove or disable it there?",
       "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "e027a848_cccfae2e",
         "filename": "/COMMIT_MSG",
@@ -32,10 +33,28 @@
       "message": "The plan is to remove it from netipmid. Since this command can be executed from any channel it doesn\u0027t make sense to handle it only in netipmid.",
       "parentUuid": "9cc09336_b2269065",
       "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "716659ea_acd773c2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2023-07-18T06:31:19Z",
+      "side": 1,
+      "message": "Ok I am not familiar with how the code is actually split between the repositories and did not realize from scanning the [IPMI architecture]() in our docs repository that placing it here would enable it for all channels.\n\n[IPMI architecture](https://github.com/openbmc/docs/blob/master/architecture/ipmi-architecture.md)",
+      "parentUuid": "e027a848_cccfae2e",
+      "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "2e23a52d_0a18abc2",
         "filename": "transporthandler.cpp",
@@ -55,10 +74,10 @@
         "endChar": 37
       },
       "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "1c1b08c5_d47972c2",
         "filename": "transporthandler.cpp",
@@ -78,10 +97,10 @@
         "endChar": 49
       },
       "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "bb19369a_00319b0a",
         "filename": "transporthandler.cpp",
@@ -101,8 +120,7 @@
         "endChar": 43
       },
       "revId": "104f591a6a43ae95207211af0cddf6e67c0143ad",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
