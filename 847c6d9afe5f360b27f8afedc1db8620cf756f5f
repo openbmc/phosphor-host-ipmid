@@ -16,6 +16,24 @@
       "message": "This doesn\u0027t really seem like it fixes a current problem. If the version number matches the example version strings above, it works fine. The version string that you are trying to fix this for doesn\u0027t match the same format as shown above. But it will also break if there is a v after all the helpful information as well.\n\nCan you put the -dev after the version string so it will parse correctly? Or propose a solution that is more robust?",
       "revId": "847c6d9afe5f360b27f8afedc1db8620cf756f5f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "940d359d_f2b72f01",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2023-07-19T00:48:52Z",
+      "side": 1,
+      "message": "Sorry, we don\u0027t need this patch anymore. The regular expression change https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/60291 handle this case.",
+      "parentUuid": "c2e5f8cc_86f4df38",
+      "revId": "847c6d9afe5f360b27f8afedc1db8620cf756f5f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
