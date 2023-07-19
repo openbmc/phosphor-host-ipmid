@@ -16,6 +16,46 @@
       "message": "Can you help me to review this commit @Tom \u0026 @Vernon?",
       "revId": "469dbfeac14992d24873ae0677b972a79233bffd",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ca68c56_da1703aa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-07-19T23:54:19Z",
+      "side": 1,
+      "message": "I find this change to be somewhat confusing. It is removing the SEL/FRU commands in the case of dynamic sensors disabled. But I don\u0027t see another version of these commands enabled anywhere.\n\nAre you adding the SEL/FRU commands elsewhere? If so, it is possible to simply register them at a higher priority and they will be used instead of these.\n\nI guess in short, I am not sure this change is needed.",
+      "revId": "469dbfeac14992d24873ae0677b972a79233bffd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "378a0659_28102c23",
+        "filename": "meson.build",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-07-19T23:54:19Z",
+      "side": 1,
+      "message": "replace stogare with storage\n\nlines 209, 211, 236",
+      "range": {
+        "startLine": 209,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 7
+      },
+      "revId": "469dbfeac14992d24873ae0677b972a79233bffd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
