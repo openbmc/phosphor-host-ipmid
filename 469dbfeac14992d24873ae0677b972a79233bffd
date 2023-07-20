@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b99d4b6e_6fdd9501",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-07-20T07:34:27Z",
+      "side": 1,
+      "message": "\u003e I find this change to be somewhat confusing. It is removing the SEL/FRU commands in the case of dynamic sensors disabled. But I don\u0027t see another version of these commands enabled anywhere.\n\u003e\nThe SEL/FRU commands of storagecommands.cpp file is enabled in 2 cases:\n- Dynamic-sensor feature is enabled.\n- Dynamic-sensor feature is disabled and dynamic-storages-only feature is enabled.\n\nThis commit support the second case. You can see more information in this change https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/64645/7/meson.build#209\n\n\u003e Are you adding the SEL/FRU commands elsewhere? If so, it is possible to simply register them at a higher priority and they will be used instead of these.\n\u003e \nNo, I am not adding the SEL/FRU commands elsewhere. If we register commands with higher priority, it makes the libraries are heavier due to building unused commands.\n\u003e I guess in short, I am not sure this change is needed.",
+      "parentUuid": "4ca68c56_da1703aa",
+      "revId": "469dbfeac14992d24873ae0677b972a79233bffd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "378a0659_28102c23",
@@ -48,6 +66,30 @@
       "writtenOn": "2023-07-19T23:54:19Z",
       "side": 1,
       "message": "replace stogare with storage\n\nlines 209, 211, 236",
+      "range": {
+        "startLine": 209,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 7
+      },
+      "revId": "469dbfeac14992d24873ae0677b972a79233bffd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ac307b1e_1a4a9846",
+        "filename": "meson.build",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-07-20T07:34:27Z",
+      "side": 1,
+      "message": "Thank for your comment, I will update this point when gerrit server is stable (I can not push new commit now).",
+      "parentUuid": "378a0659_28102c23",
       "range": {
         "startLine": 209,
         "startChar": 0,
