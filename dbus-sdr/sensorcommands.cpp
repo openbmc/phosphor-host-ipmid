@@ -2452,6 +2452,12 @@ ipmi::RspType<uint16_t,            // next record ID
 
     size_t sdrLength = sizeof(get_sdr::SensorDataRecordHeader) +
                        hdr->record_length;
+    if (offset >= sdrLength)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "ipmiStorageGetSDR: offset is outside the record");
+        return ipmi::responseParmOutOfRange();
+    }
     if (sdrLength < (offset + bytesToRead))
     {
         bytesToRead = sdrLength - offset;
