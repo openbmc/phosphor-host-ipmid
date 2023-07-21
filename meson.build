@@ -90,7 +90,6 @@ endforeach
 
 add_project_arguments(
   cpp.get_supported_arguments([
-    '-flto',
     '-Wno-psabi',
     '-Wno-missing-field-initializers',
     '-Wno-pedantic',
