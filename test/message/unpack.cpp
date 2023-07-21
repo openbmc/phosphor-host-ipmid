@@ -805,11 +805,7 @@ TEST(UnpackAdvanced, TupleInts)
     ipmi::SecureBuffer i = {0x02, 0x04, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55,
                             0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc};
     ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
-    uint8_t v1;
-    uint16_t v2;
-    uint32_t v3;
-    uint64_t v4;
-    auto v = std::make_tuple(v1, v2, v3, v4);
+    std::tuple<uint8_t, uint16_t, uint32_t, uint64_t> v;
     // check that the number of bytes matches
     ASSERT_EQ(p.unpack(v), 0);
     // check that the payload was fully unpacked
