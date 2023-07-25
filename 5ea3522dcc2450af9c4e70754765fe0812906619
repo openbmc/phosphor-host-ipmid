@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bd403f93_75908856",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2023-07-25T23:34:15Z",
+      "side": 1,
+      "message": "I verified that the CC returns are the same `invalidFieldRequest` value that was aleady present.",
+      "parentUuid": "a3e220ab_b1cfb927",
+      "revId": "5ea3522dcc2450af9c4e70754765fe0812906619",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "39e90ff4_39ea0a6c",
@@ -31,6 +49,24 @@
       "writtenOn": "2023-07-25T14:21:24Z",
       "side": 1,
       "message": "Doesn\u0027t this alter the Condition Code in the event of an invalid command?\nThe same is true for all other refactoring?\nIf this is the case I\u0027d rather not see this go forward.\nIntel Validation will have tests in place that expect a 0xCC code, not a 0xFF condition code.",
+      "revId": "5ea3522dcc2450af9c4e70754765fe0812906619",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "050d1312_ba666e10",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 860,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2023-07-25T23:34:15Z",
+      "side": 1,
+      "message": "It comes from the previous CL, I didn\u0027t modify the IPv6 one that would change from param out of range. These are all invalidFieldRequests and they stay that way.",
+      "parentUuid": "39e90ff4_39ea0a6c",
       "revId": "5ea3522dcc2450af9c4e70754765fe0812906619",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
