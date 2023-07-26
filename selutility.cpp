@@ -190,15 +190,18 @@ GetSELEntryResponse
                                           propIntf, "GetAll");
     methodCall.append(logEntryIntf);
 
-    auto reply = bus.call(methodCall);
-    if (reply.is_method_error())
+    entryDataMap entryData;
+    try
     {
-        log<level::ERR>("Error in reading logging property entries");
+        auto reply = bus.call(methodCall);
+        reply.read(entryData);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in reading logging property entries",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    entryDataMap entryData;
-    reply.read(entryData);
 
     // Read Id from the log entry.
     static constexpr auto propId = "Id";
@@ -322,18 +325,21 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     methodCall.append(assocIntf);
     methodCall.append(assocProp);
 
-    auto reply = bus.call(methodCall);
-    if (reply.is_method_error())
-    {
-        log<level::ERR>("Error in reading Associations interface");
-        elog<InternalFailure>();
-    }
-
     using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 
     std::variant<AssociationList> list;
-    reply.read(list);
+    try
+    {
+        auto reply = bus.call(methodCall);
+        reply.read(list);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in reading Associations interface",
+                        entry("ERROR=%s", e.what()));
+        elog<InternalFailure>();
+    }
 
     auto& assocs = std::get<AssociationList>(list);
 
@@ -381,15 +387,18 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
     methodCall.append(logEntryIntf);
     methodCall.append(propTimeStamp);
 
-    auto reply = bus.call(methodCall);
-    if (reply.is_method_error())
+    std::variant<uint64_t> timeStamp;
+    try
     {
-        log<level::ERR>("Error in reading Timestamp from Entry interface");
+        auto reply = bus.call(methodCall);
+        reply.read(timeStamp);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in reading Timestamp from Entry interface",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    std::variant<uint64_t> timeStamp;
-    reply.read(timeStamp);
 
     std::chrono::milliseconds chronoTimeStamp(std::get<uint64_t>(timeStamp));
 

@@ -55,11 +55,6 @@ DbusObjectInfo getDbusObject(sdbusplus::bus_t& bus,
     mapperCall.append(serviceRoot, depth, interfaces);
 
     auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
-    {
-        log<level::ERR>("Error in mapper call");
-        elog<InternalFailure>();
-    }
 
     ObjectTree objectTree;
     mapperReply.read(objectTree);
@@ -112,16 +107,6 @@ Value getDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
     method.append(interface, property);
 
     auto reply = bus.call(method, timeout.count());
-
-    if (reply.is_method_error())
-    {
-        log<level::ERR>("Failed to get property",
-                        entry("PROPERTY=%s", property.c_str()),
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-
     reply.read(value);
 
     return value;
@@ -141,16 +126,8 @@ PropertyMap getAllDbusProperties(sdbusplus::bus_t& bus,
     method.append(interface);
 
     auto reply = bus.call(method, timeout.count());
-
-    if (reply.is_method_error())
-    {
-        log<level::ERR>("Failed to get all properties",
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-
     reply.read(properties);
+
     return properties;
 }
 
@@ -163,17 +140,9 @@ ObjectValueTree getManagedObjects(sdbusplus::bus_t& bus,
     auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
                                       "org.freedesktop.DBus.ObjectManager",
                                       "GetManagedObjects");
-
     auto reply = bus.call(method);
-
-    if (reply.is_method_error())
-    {
-        log<level::ERR>("Failed to get managed objects",
-                        entry("PATH=%s", objPath.c_str()));
-        elog<InternalFailure>();
-    }
-
     reply.read(interfaces);
+
     return interfaces;
 }
 
@@ -249,11 +218,6 @@ std::string getService(sdbusplus::bus_t& bus, const std::string& intf,
 
     auto mapperResponseMsg = bus.call(mapperCall);
 
-    if (mapperResponseMsg.is_method_error())
-    {
-        throw std::runtime_error("ERROR in mapper call");
-    }
-
     std::map<std::string, std::vector<std::string>> mapperResponse;
     mapperResponseMsg.read(mapperResponse);
 
@@ -281,15 +245,6 @@ ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
     mapperCall.append(serviceRoot, depth, interfaces);
 
     auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
-    {
-        log<level::ERR>("Error in mapper call",
-                        entry("SERVICEROOT=%s", serviceRoot.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-
-        elog<InternalFailure>();
-    }
-
     ObjectTree objectTree;
     mapperReply.read(objectTree);
 
@@ -350,15 +305,6 @@ ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
     mapperCall.append(path, interfaces);
 
     auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
-    {
-        log<level::ERR>(
-            "Error in mapper call", entry("PATH=%s", path.c_str()),
-            entry("INTERFACES=%s", convertToString(interfaces).c_str()));
-
-        elog<InternalFailure>();
-    }
-
     ObjectTree objectTree;
     mapperReply.read(objectTree);
 
@@ -384,17 +330,7 @@ void callDbusMethod(sdbusplus::bus_t& bus, const std::string& service,
 {
     auto busMethod = bus.new_method_call(service.c_str(), objPath.c_str(),
                                          interface.c_str(), method.c_str());
-
     auto reply = bus.call(busMethod);
-
-    if (reply.is_method_error())
-    {
-        log<level::ERR>("Failed to execute method",
-                        entry("METHOD=%s", method.c_str()),
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
 }
 
 } // namespace method_no_args

@@ -1407,32 +1407,17 @@ ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
 std::string getEnclosureIdentifyConnection()
 {
     // lookup enclosure_identify group owner(s) in mapper
-    auto mapperCall = chassis::internal::dbus.new_method_call(
-        ipmi::MAPPER_BUS_NAME, ipmi::MAPPER_OBJ, ipmi::MAPPER_INTF,
-        "GetObject");
-
-    mapperCall.append(identify_led_object_name);
-    static const std::vector<std::string> interfaces = {
-        "xyz.openbmc_project.Led.Group"};
-    mapperCall.append(interfaces);
-    auto mapperReply = chassis::internal::dbus.call(mapperCall);
-    if (mapperReply.is_method_error())
+    try
     {
-        log<level::ERR>("Chassis Identify: Error communicating to mapper.");
+        return ipmi::getService(*getSdBus(), "xyz.openbmc_project.Led.Group",
+                                identify_led_object_name);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Chassis Identify: Error communicating to mapper.",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-    std::vector<std::pair<std::string, std::vector<std::string>>> mapperResp;
-    mapperReply.read(mapperResp);
-
-    if (mapperResp.size() != encIdentifyObjectsSize)
-    {
-        log<level::ERR>(
-            "Invalid number of enclosure identify objects.",
-            entry("ENC_IDENTITY_OBJECTS_SIZE=%d", mapperResp.size()));
-        elog<InternalFailure>();
-    }
-    auto pair = mapperResp[encIdentifyObjectsSize - 1];
-    return pair.first;
 }
 
 /** @brief Turn On/Off enclosure identify LED
@@ -1443,20 +1428,23 @@ std::string getEnclosureIdentifyConnection()
 void enclosureIdentifyLed(bool flag)
 {
     using namespace chassis::internal;
-    std::string connection = getEnclosureIdentifyConnection();
-    auto msg = std::string("enclosureIdentifyLed(") +
-               boost::lexical_cast<std::string>(flag) + ")";
-    log<level::DEBUG>(msg.c_str());
-    auto led = dbus.new_method_call(connection.c_str(),
-                                    identify_led_object_name,
-                                    "org.freedesktop.DBus.Properties", "Set");
-    led.append("xyz.openbmc_project.Led.Group", "Asserted",
-               std::variant<bool>(flag));
-    auto ledReply = dbus.call(led);
-    if (ledReply.is_method_error())
+    try
+    {
+        std::string connection = getEnclosureIdentifyConnection();
+
+        auto msg = std::string("enclosureIdentifyLed(") +
+                   boost::lexical_cast<std::string>(flag) + ")";
+        log<level::DEBUG>(msg.c_str());
+
+        ipmi::setDbusProperty(*getSdBus(), connection, identify_led_object_name,
+                              "xyz.openbmc_project.Led.Group", "Asserted",
+                              flag);
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Chassis Identify: Error Setting State On/Off\n",
-                        entry("LED_STATE=%d", flag));
+                        entry("LED_STATE=%d", flag),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
