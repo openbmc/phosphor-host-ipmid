@@ -54,15 +54,18 @@ DbusObjectInfo getDbusObject(sdbusplus::bus_t& bus,
 
     mapperCall.append(serviceRoot, depth, interfaces);
 
-    auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
+    ObjectTree objectTree;
+    try
     {
-        log<level::ERR>("Error in mapper call");
+        auto mapperReply = bus.call(mapperCall);
+        mapperReply.read(objectTree);
+        return std::get<uint32_t>(pcap);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in mapper call", entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    ObjectTree objectTree;
-    mapperReply.read(objectTree);
 
     if (objectTree.empty())
     {
@@ -111,20 +114,21 @@ Value getDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
 
     method.append(interface, property);
 
-    auto reply = bus.call(method, timeout.count());
-
-    if (reply.is_method_error())
+    try
+    {
+        auto reply = bus.call(method, timeout.count());
+        reply.read(value);
+        return value;
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Failed to get property",
                         entry("PROPERTY=%s", property.c_str()),
                         entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+                        entry("INTERFACE=%s", interface.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    reply.read(value);
-
-    return value;
 }
 
 PropertyMap getAllDbusProperties(sdbusplus::bus_t& bus,
@@ -140,18 +144,20 @@ PropertyMap getAllDbusProperties(sdbusplus::bus_t& bus,
 
     method.append(interface);
 
-    auto reply = bus.call(method, timeout.count());
-
-    if (reply.is_method_error())
+    try
+    {
+        auto reply = bus.call(method, timeout.count());
+        reply.read(properties);
+        return properties;
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Failed to get all properties",
                         entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+                        entry("INTERFACE=%s", interface.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    reply.read(properties);
-    return properties;
 }
 
 ObjectValueTree getManagedObjects(sdbusplus::bus_t& bus,
@@ -163,18 +169,19 @@ ObjectValueTree getManagedObjects(sdbusplus::bus_t& bus,
     auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
                                       "org.freedesktop.DBus.ObjectManager",
                                       "GetManagedObjects");
-
-    auto reply = bus.call(method);
-
-    if (reply.is_method_error())
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(interfaces);
+        return interfaces;
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Failed to get managed objects",
-                        entry("PATH=%s", objPath.c_str()));
+                        entry("PATH=%s", objPath.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    reply.read(interfaces);
-    return interfaces;
 }
 
 void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
@@ -247,15 +254,16 @@ std::string getService(sdbusplus::bus_t& bus, const std::string& intf,
     mapperCall.append(path);
     mapperCall.append(std::vector<std::string>({intf}));
 
-    auto mapperResponseMsg = bus.call(mapperCall);
-
-    if (mapperResponseMsg.is_method_error())
+    std::map<std::string, std::vector<std::string>> mapperResponse;
+    try
+    {
+        auto mapperResponseMsg = bus.call(mapperCall);
+        mapperResponseMsg.read(mapperResponse);
+    }
+    catch (const std::exception&)
     {
         throw std::runtime_error("ERROR in mapper call");
     }
-
-    std::map<std::string, std::vector<std::string>> mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
 
     if (mapperResponse.begin() == mapperResponse.end())
     {
@@ -280,18 +288,20 @@ ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
 
     mapperCall.append(serviceRoot, depth, interfaces);
 
-    auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
+    ObjectTree objectTree;
+    try
+    {
+        auto mapperReply = bus.call(mapperCall);
+        mapperReply.read(objectTree);
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Error in mapper call",
                         entry("SERVICEROOT=%s", serviceRoot.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-
+                        entry("INTERFACE=%s", interface.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    ObjectTree objectTree;
-    mapperReply.read(objectTree);
 
     for (auto it = objectTree.begin(); it != objectTree.end();)
     {
@@ -349,18 +359,20 @@ ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
                                           MAPPER_INTF, "GetAncestors");
     mapperCall.append(path, interfaces);
 
-    auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
+    ObjectTree objectTree;
+    try
+    {
+        auto mapperReply = bus.call(mapperCall);
+        mapperReply.read(objectTree);
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>(
             "Error in mapper call", entry("PATH=%s", path.c_str()),
-            entry("INTERFACES=%s", convertToString(interfaces).c_str()));
-
+            entry("INTERFACES=%s", convertToString(interfaces).c_str()),
+            entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    ObjectTree objectTree;
-    mapperReply.read(objectTree);
 
     if (objectTree.empty())
     {
@@ -384,15 +396,17 @@ void callDbusMethod(sdbusplus::bus_t& bus, const std::string& service,
 {
     auto busMethod = bus.new_method_call(service.c_str(), objPath.c_str(),
                                          interface.c_str(), method.c_str());
-
-    auto reply = bus.call(busMethod);
-
-    if (reply.is_method_error())
+    try
+    {
+        auto reply = bus.call(busMethod);
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Failed to execute method",
                         entry("METHOD=%s", method.c_str()),
                         entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+                        entry("INTERFACE=%s", interface.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }

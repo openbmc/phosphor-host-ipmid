@@ -1413,14 +1413,19 @@ std::string getEnclosureIdentifyConnection()
     static const std::vector<std::string> interfaces = {
         "xyz.openbmc_project.Led.Group"};
     mapperCall.append(interfaces);
-    auto mapperReply = chassis::internal::dbus.call(mapperCall);
-    if (mapperReply.is_method_error())
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> mapperResp;
+    try
     {
-        log<level::ERR>("Chassis Identify: Error communicating to mapper.");
+        auto mapperReply = chassis::internal::dbus.call(mapperCall);
+        mapperReply.read(mapperResp);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Chassis Identify: Error communicating to mapper.",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-    std::vector<std::pair<std::string, std::vector<std::string>>> mapperResp;
-    mapperReply.read(mapperResp);
 
     if (mapperResp.size() != encIdentifyObjectsSize)
     {
@@ -1450,11 +1455,15 @@ void enclosureIdentifyLed(bool flag)
                                     "org.freedesktop.DBus.Properties", "Set");
     led.append("xyz.openbmc_project.Led.Group", "Asserted",
                std::variant<bool>(flag));
-    auto ledReply = dbus.call(led);
-    if (ledReply.is_method_error())
+    try
+    {
+        auto ledReply = dbus.call(led);
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Chassis Identify: Error Setting State On/Off\n",
-                        entry("LED_STATE=%d", flag));
+                        entry("LED_STATE=%d", flag),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }

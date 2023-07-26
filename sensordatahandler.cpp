@@ -41,22 +41,18 @@ ServicePath getServiceAndPath(sdbusplus::bus_t& bus,
     mapperCall.append(depth);
     mapperCall.append(std::vector<Interface>({interface}));
 
-    auto mapperResponseMsg = bus.call(mapperCall);
-    if (mapperResponseMsg.is_method_error())
-    {
-        log<level::ERR>("Mapper GetSubTree failed",
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-
     MapperResponseType mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
-    if (mapperResponse.empty())
+    try
+    {
+        auto mapperResponseMsg = bus.call(mapperCall);
+        mapperResponseMsg.read(mapperResponse);
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Invalid mapper response",
                         entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+                        entry("INTERFACE=%s", interface.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 
@@ -94,14 +90,10 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
     try
     {
         auto serviceResponseMsg = bus.call(msg);
-        if (serviceResponseMsg.is_method_error())
-        {
-            log<level::ERR>("Error in D-Bus call");
-            return IPMI_CC_UNSPECIFIED_ERROR;
-        }
     }
     catch (const InternalFailure& e)
     {
+        log<level::ERR>("Error in D-Bus call", entry("ERROR=%s", e.what()));
         commit<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }

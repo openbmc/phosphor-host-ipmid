@@ -34,8 +34,11 @@ void WatchdogService::resetTimeRemaining(bool enableWatchdog)
     bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, wd_intf, "ResetTimeRemaining");
     request.append(enableWatchdog);
-    auto response = bus.call(request);
-    if (response.is_method_error())
+    try
+    {
+        auto response = bus.call(request);
+    }
+    catch (const std::exception& e)
     {
         wd_service.invalidate();
         if (wasValid)
@@ -45,7 +48,8 @@ void WatchdogService::resetTimeRemaining(bool enableWatchdog)
         }
         log<level::ERR>(
             "WatchdogService: Method error resetting time remaining",
-            entry("ENABLE_WATCHDOG=%d", !!enableWatchdog));
+            entry("ENABLE_WATCHDOG=%d", !!enableWatchdog),
+            entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
@@ -55,8 +59,11 @@ WatchdogService::Properties WatchdogService::getProperties()
     bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, prop_intf, "GetAll");
     request.append(wd_intf);
-    auto response = bus.call(request);
-    if (response.is_method_error())
+    try
+    {
+        auto response = bus.call(request);
+    }
+    catch (const std::exception& e)
     {
         wd_service.invalidate();
         if (wasValid)
@@ -64,9 +71,11 @@ WatchdogService::Properties WatchdogService::getProperties()
             // Retry the request once in case the cached service was stale
             return getProperties();
         }
-        log<level::ERR>("WatchdogService: Method error getting properties");
+        log<level::ERR>("WatchdogService: Method error getting properties",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
+
     try
     {
         std::map<std::string, std::variant<bool, uint64_t, std::string>>
@@ -107,8 +116,11 @@ T WatchdogService::getProperty(const std::string& key)
     bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, prop_intf, "Get");
     request.append(wd_intf, key);
-    auto response = bus.call(request);
-    if (response.is_method_error())
+    try
+    {
+        auto response = bus.call(request);
+    }
+    catch (const std::exception& e)
     {
         wd_service.invalidate();
         if (wasValid)
@@ -117,9 +129,11 @@ T WatchdogService::getProperty(const std::string& key)
             return getProperty<T>(key);
         }
         log<level::ERR>("WatchdogService: Method error getting property",
-                        entry("PROPERTY=%s", key.c_str()));
+                        entry("PROPERTY=%s", key.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
+
     try
     {
         std::variant<T> value;
@@ -147,8 +161,11 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
     bool wasValid = wd_service.isValid(bus);
     auto request = wd_service.newMethodCall(bus, prop_intf, "Set");
     request.append(wd_intf, key, std::variant<T>(val));
-    auto response = bus.call(request);
-    if (response.is_method_error())
+    try
+    {
+        auto response = bus.call(request);
+    }
+    catch (const std::exception& e)
     {
         wd_service.invalidate();
         if (wasValid)
@@ -158,7 +175,8 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
             return;
         }
         log<level::ERR>("WatchdogService: Method error setting property",
-                        entry("PROPERTY=%s", key.c_str()));
+                        entry("PROPERTY=%s", key.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
