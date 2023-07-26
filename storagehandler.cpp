@@ -466,8 +466,11 @@ ipmi::RspType<uint16_t // deleted record ID
 
     auto methodCall = bus.new_method_call(service.c_str(), objPath.c_str(),
                                           ipmi::sel::logDeleteIntf, "Delete");
-    auto reply = bus.call(methodCall);
-    if (reply.is_method_error())
+    try
+    {
+        auto reply = bus.call(methodCall);
+    }
+    catch (const std::exception& e)
     {
         return ipmi::responseUnspecifiedError();
     }
@@ -556,13 +559,6 @@ ipmi::RspType<uint32_t> // current time
 
         method.append(TIME_INTERFACE, PROPERTY_ELAPSED);
         auto reply = bus.call(method);
-        if (reply.is_method_error())
-        {
-            log<level::ERR>("Error getting time",
-                            entry("SERVICE=%s", service.c_str()),
-                            entry("PATH=%s", BMC_TIME_PATH));
-            return ipmi::responseUnspecifiedError();
-        }
         reply.read(value);
         bmc_time_usec = std::get<uint64_t>(value);
     }
@@ -618,13 +614,6 @@ ipmi::RspType<> ipmiStorageSetSelTime(uint32_t selDeviceTime)
 
         method.append(TIME_INTERFACE, PROPERTY_ELAPSED, value);
         auto reply = bus.call(method);
-        if (reply.is_method_error())
-        {
-            log<level::ERR>("Error setting time",
-                            entry("SERVICE=%s", service.c_str()),
-                            entry("PATH=%s", BMC_TIME_PATH));
-            return ipmi::responseUnspecifiedError();
-        }
     }
     catch (const InternalFailure& e)
     {
