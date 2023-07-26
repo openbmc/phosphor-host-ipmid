@@ -26,20 +26,19 @@ Objects::Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter) :
     mapperCall.append(root);
     mapperCall.append(depth);
     mapperCall.append(filter);
-    auto response = bus.call(mapperCall);
-    if (response.is_method_error())
-    {
-        log<level::ERR>("Error in mapper GetSubTree");
-        elog<InternalFailure>();
-    }
 
     using Interfaces = std::vector<Interface>;
     using MapperResponse = std::map<Path, std::map<Service, Interfaces>>;
     MapperResponse result;
-    response.read(result);
-    if (result.empty())
+    try
     {
-        log<level::ERR>("Invalid response from mapper");
+        auto response = bus.call(mapperCall);
+        response.read(result);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in mapper GetSubTree",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 
@@ -70,22 +69,19 @@ Service Objects::service(const Path& path, const Interface& interface) const
     mapperCall.append(path);
     mapperCall.append(Interfaces({interface}));
 
-    auto response = bus.call(mapperCall);
-    if (response.is_method_error())
-    {
-        log<level::ERR>("Error in mapper GetObject");
-        elog<InternalFailure>();
-    }
-
     std::map<Service, Interfaces> result;
-    response.read(result);
-    if (result.empty())
+    try
     {
-        log<level::ERR>("Invalid response from mapper");
+        auto response = bus.call(mapperCall);
+        response.read(result);
+        return result.begin()->first;
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Invalid response from mapper",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    return result.begin()->first;
 }
 
 namespace boot
@@ -119,17 +115,22 @@ std::tuple<Path, OneTimeEnabled> setting(const Objects& objects,
         objects.service(oneTimeSetting, iface).c_str(), oneTimeSetting.c_str(),
         ipmi::PROP_INTF, "Get");
     method.append(enabledIntf, "Enabled");
-    auto reply = objects.bus.call(method);
-    if (reply.is_method_error())
+
+    std::variant<bool> enabled;
+    try
+    {
+        auto reply = objects.bus.call(method);
+        reply.read(enabled);
+    }
+    catch (const std::exception& e)
     {
         log<level::ERR>("Error in getting Enabled property",
                         entry("OBJECT=%s", oneTimeSetting.c_str()),
-                        entry("INTERFACE=%s", iface.c_str()));
+                        entry("INTERFACE=%s", iface.c_str()),
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 
-    std::variant<bool> enabled;
-    reply.read(enabled);
     auto oneTimeEnabled = std::get<bool>(enabled);
     const Path& setting = oneTimeEnabled ? oneTimeSetting : regularSetting;
     return std::make_tuple(setting, oneTimeEnabled);

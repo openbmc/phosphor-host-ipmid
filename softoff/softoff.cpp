@@ -41,16 +41,17 @@ void SoftPowerOff::sendHostShutDownCmd()
                                       CONTROL_HOST_BUSNAME, "Execute");
 
     method.append(convertForMessage(Host::Command::SoftOff).c_str());
-
-    auto reply = bus.call(method);
-    if (reply.is_method_error())
+    try
     {
-        log<level::ERR>("Error in call to control host Execute");
+        auto reply = bus.call(method);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in call to control host Execute",
+                        entry("ERROR=%s", e.what()));
         // TODO openbmc/openbmc#851 - Once available, throw returned error
         throw std::runtime_error("Error in call to control host Execute");
     }
-
-    return;
 }
 
 // Function called on host control signals

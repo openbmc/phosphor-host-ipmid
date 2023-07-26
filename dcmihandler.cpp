@@ -81,17 +81,19 @@ uint32_t getPcap(sdbusplus::bus_t& bus)
                                       "org.freedesktop.DBus.Properties", "Get");
 
     method.append(PCAP_INTERFACE, POWER_CAP_PROP);
-    auto reply = bus.call(method);
 
-    if (reply.is_method_error())
+    std::variant<uint32_t> pcap;
+    try
     {
-        log<level::ERR>("Error in getPcap prop");
+        auto reply = bus.call(method);
+        reply.read(pcap);
+        return std::get<uint32_t>(pcap);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in getPcap prop", entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-    std::variant<uint32_t> pcap;
-    reply.read(pcap);
-
-    return std::get<uint32_t>(pcap);
 }
 
 bool getPcapEnabled(sdbusplus::bus_t& bus)
@@ -102,17 +104,20 @@ bool getPcapEnabled(sdbusplus::bus_t& bus)
                                       "org.freedesktop.DBus.Properties", "Get");
 
     method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
-    auto reply = bus.call(method);
 
-    if (reply.is_method_error())
+    std::variant<bool> pcapEnabled;
+    try
     {
-        log<level::ERR>("Error in getPcapEnabled prop");
+        auto reply = bus.call(method);
+        reply.read(pcapEnabled);
+        return std::get<bool>(pcapEnabled);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in getPcapEnabled prop",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-    std::variant<bool> pcapEnabled;
-    reply.read(pcapEnabled);
-
-    return std::get<bool>(pcapEnabled);
 }
 
 void setPcap(sdbusplus::bus_t& bus, const uint32_t powerCap)
@@ -125,11 +130,14 @@ void setPcap(sdbusplus::bus_t& bus, const uint32_t powerCap)
     method.append(PCAP_INTERFACE, POWER_CAP_PROP);
     method.append(std::variant<uint32_t>(powerCap));
 
-    auto reply = bus.call(method);
-
-    if (reply.is_method_error())
+    try
     {
-        log<level::ERR>("Error in setPcap property");
+        auto reply = bus.call(method);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in setPcap property",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
@@ -144,11 +152,14 @@ void setPcapEnable(sdbusplus::bus_t& bus, bool enabled)
     method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
     method.append(std::variant<bool>(enabled));
 
-    auto reply = bus.call(method);
-
-    if (reply.is_method_error())
+    try
     {
-        log<level::ERR>("Error in setPcapEnabled property");
+        auto reply = bus.call(method);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in setPcapEnabled property",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
@@ -170,18 +181,20 @@ void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree)
     mapperCall.append(depth);
     mapperCall.append(std::vector<std::string>({dcmi::assetTagIntf}));
 
-    auto mapperReply = bus.call(mapperCall);
-    if (mapperReply.is_method_error())
+    try
     {
-        log<level::ERR>("Error in mapper call");
-        elog<InternalFailure>();
+        auto mapperReply = bus.call(mapperCall);
+        mapperReply.read(objectTree);
+
+        if (objectTree.empty())
+        {
+            log<level::ERR>("AssetTag property is not populated");
+            elog<InternalFailure>();
+        }
     }
-
-    mapperReply.read(objectTree);
-
-    if (objectTree.empty())
+    catch (const std::exception& e)
     {
-        log<level::ERR>("AssetTag property is not populated");
+        log<level::ERR>("Error in mapper call", entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
@@ -201,17 +214,19 @@ std::string readAssetTag()
     method.append(dcmi::assetTagIntf);
     method.append(dcmi::assetTagProp);
 
-    auto reply = bus.call(method);
-    if (reply.is_method_error())
+    std::variant<std::string> assetTag;
+    try
     {
-        log<level::ERR>("Error in reading asset tag");
+        auto reply = bus.call(method);
+        reply.read(assetTag);
+        return std::get<std::string>(assetTag);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in reading asset tag",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    std::variant<std::string> assetTag;
-    reply.read(assetTag);
-
-    return std::get<std::string>(assetTag);
 }
 
 void writeAssetTag(const std::string& assetTag)
@@ -230,10 +245,14 @@ void writeAssetTag(const std::string& assetTag)
     method.append(dcmi::assetTagProp);
     method.append(std::variant<std::string>(assetTag));
 
-    auto reply = bus.call(method);
-    if (reply.is_method_error())
+    try
     {
-        log<level::ERR>("Error in writing asset tag");
+        auto reply = bus.call(method);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in writing asset tag",
+                        entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 }
