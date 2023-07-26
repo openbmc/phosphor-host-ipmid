@@ -69,6 +69,24 @@
       "parentUuid": "39e90ff4_39ea0a6c",
       "revId": "5ea3522dcc2450af9c4e70754765fe0812906619",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6ca3d82a_4daead38",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 860,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-07-26T14:29:17Z",
+      "side": 1,
+      "message": "I am unable to parse `CL`. What is that? Please avoid using obscure abbreviations without first defining the abbreviation.\n\nThanks for confirming the same error codes are being returned. The opacity of the channelCall function in combination with the defacto 0xff Condition Code raise concerns about receiving unintended return codes.",
+      "parentUuid": "050d1312_ba666e10",
+      "revId": "5ea3522dcc2450af9c4e70754765fe0812906619",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
