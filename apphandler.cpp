@@ -832,33 +832,38 @@ auto ipmiAppGetBtCapabilities()
                                  outputBufferSize, transactionTime, nrRetries);
 }
 
-auto ipmiAppGetSystemGuid() -> ipmi::RspType<std::array<uint8_t, 16>>
+auto ipmiAppGetSystemGuid(ipmi::Context::ptr& ctx)
+    -> ipmi::RspType<std::array<uint8_t, 16>>
 {
     static constexpr auto uuidInterface = "xyz.openbmc_project.Common.UUID";
     static constexpr auto uuidProperty = "UUID";
 
-    ipmi::Value propValue;
-    try
+    // Get the Inventory object implementing BMC interface
+    ipmi::DbusObjectInfo objectInfo{};
+    boost::system::error_code ec = ipmi::getDbusObject(ctx, uuidInterface,
+                                                       objectInfo);
+    if (ec.value())
     {
-        // Get the Inventory object implementing BMC interface
-        auto busPtr = getSdBus();
-        auto objectInfo = ipmi::getDbusObject(*busPtr, uuidInterface);
-
-        // Read UUID property value from bmcObject
-        // UUID is in RFC4122 format Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
-        propValue = ipmi::getDbusProperty(*busPtr, objectInfo.second,
-                                          objectInfo.first, uuidInterface,
-                                          uuidProperty);
+        log<level::ERR>("Failed to locate System UUID object",
+                        entry("INTERFACE=%s", uuidInterface),
+                        entry("ERROR=%s", ec.message().c_str()));
+        return ipmi::responseUnspecifiedError();
     }
-    catch (const InternalFailure& e)
+
+    // Read UUID property value from bmcObject
+    // UUID is in RFC4122 format Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
+    std::string rfc4122Uuid{};
+    ec = ipmi::getDbusProperty(ctx, objectInfo.second, objectInfo.first,
+                               uuidInterface, uuidProperty, rfc4122Uuid);
+    if (ec.value())
     {
         log<level::ERR>("Failed in reading BMC UUID property",
                         entry("INTERFACE=%s", uuidInterface),
-                        entry("PROPERTY=%s", uuidProperty));
+                        entry("PROPERTY=%s", uuidProperty),
+                        entry("ERROR=%s", ec.message().c_str()));
         return ipmi::responseUnspecifiedError();
     }
     std::array<uint8_t, 16> uuid;
-    std::string rfc4122Uuid = std::get<std::string>(propValue);
     try
     {
         // convert to IPMI format
