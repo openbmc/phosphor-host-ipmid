@@ -26,11 +26,11 @@ using InternalFailure =
 
 void register_netfn_dcmi_functions() __attribute__((constructor));
 
-constexpr auto PCAP_PATH = "/xyz/openbmc_project/control/host0/power_cap";
-constexpr auto PCAP_INTERFACE = "xyz.openbmc_project.Control.Power.Cap";
+constexpr auto pcapPath = "/xyz/openbmc_project/control/host0/power_cap";
+constexpr auto pcapInterface = "xyz.openbmc_project.Control.Power.Cap";
 
-constexpr auto POWER_CAP_PROP = "PowerCap";
-constexpr auto POWER_CAP_ENABLE_PROP = "PowerCapEnable";
+constexpr auto powerCapProp = "PowerCap";
+constexpr auto powerCapEnableProp = "PowerCapEnable";
 
 constexpr auto DCMI_PARAMETER_REVISION = 2;
 constexpr auto DCMI_SPEC_MAJOR_VERSION = 1;
@@ -80,95 +80,91 @@ bool isDCMIPowerMgmtSupported()
     return supported;
 }
 
-uint32_t getPcap(sdbusplus::bus_t& bus)
+std::optional<uint32_t> getPcap(ipmi::Context::ptr& ctx)
 {
-    auto settingService = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
-
-    auto method = bus.new_method_call(settingService.c_str(), PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties", "Get");
-
-    method.append(PCAP_INTERFACE, POWER_CAP_PROP);
-
-    std::variant<uint32_t> pcap;
-    try
+    std::string service{};
+    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
+                                                    pcapPath, service);
+    if (ec.value())
     {
-        auto reply = bus.call(method);
-        reply.read(pcap);
-        return std::get<uint32_t>(pcap);
+        return std::nullopt;
     }
-    catch (const std::exception& e)
+    uint32_t pcap{};
+    ec = ipmi::getDbusProperty(ctx, service, pcapPath, pcapInterface,
+                               powerCapProp, pcap);
+    if (ec.value())
     {
-        log<level::ERR>("Error in getPcap prop", entry("ERROR=%s", e.what()));
+        log<level::ERR>("Error in getPcap prop",
+                        entry("ERROR=%s", ec.message().c_str()));
         elog<InternalFailure>();
+        return std::nullopt;
     }
+    return pcap;
 }
 
-bool getPcapEnabled(sdbusplus::bus_t& bus)
+std::optional<bool> getPcapEnabled(ipmi::Context::ptr& ctx)
 {
-    auto settingService = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
-
-    auto method = bus.new_method_call(settingService.c_str(), PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties", "Get");
-
-    method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
-
-    std::variant<bool> pcapEnabled;
-    try
+    std::string service{};
+    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
+                                                    pcapPath, service);
+    if (ec.value())
     {
-        auto reply = bus.call(method);
-        reply.read(pcapEnabled);
-        return std::get<bool>(pcapEnabled);
+        return std::nullopt;
     }
-    catch (const std::exception& e)
+    bool pcapEnabled{};
+    ec = ipmi::getDbusProperty(ctx, service, pcapPath, pcapInterface,
+                               powerCapEnableProp, pcapEnabled);
+    if (ec.value())
     {
-        log<level::ERR>("Error in getPcapEnabled prop",
-                        entry("ERROR=%s", e.what()));
+        log<level::ERR>("Error in getPcap prop");
         elog<InternalFailure>();
+        return std::nullopt;
     }
+    return pcapEnabled;
 }
 
-void setPcap(sdbusplus::bus_t& bus, const uint32_t powerCap)
+bool setPcap(ipmi::Context::ptr& ctx, const uint32_t powerCap)
 {
-    auto service = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
-
-    auto method = bus.new_method_call(service.c_str(), PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties", "Set");
-
-    method.append(PCAP_INTERFACE, POWER_CAP_PROP);
-    method.append(std::variant<uint32_t>(powerCap));
-
-    try
+    std::string service{};
+    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
+                                                    pcapPath, service);
+    if (ec.value())
     {
-        auto reply = bus.call(method);
+        return false;
     }
-    catch (const std::exception& e)
+
+    ec = ipmi::setDbusProperty(ctx, service, pcapPath, pcapInterface,
+                               powerCapProp, powerCap);
+    if (ec.value())
     {
         log<level::ERR>("Error in setPcap property",
-                        entry("ERROR=%s", e.what()));
+                        entry("ERROR=%s", ec.message().c_str()));
         elog<InternalFailure>();
+        return false;
     }
+    return true;
 }
 
-void setPcapEnable(sdbusplus::bus_t& bus, bool enabled)
+bool setPcapEnable(ipmi::Context::ptr& ctx, bool enabled)
 {
-    auto service = ipmi::getService(bus, PCAP_INTERFACE, PCAP_PATH);
-
-    auto method = bus.new_method_call(service.c_str(), PCAP_PATH,
-                                      "org.freedesktop.DBus.Properties", "Set");
-
-    method.append(PCAP_INTERFACE, POWER_CAP_ENABLE_PROP);
-    method.append(std::variant<bool>(enabled));
-
-    try
+    std::string service{};
+    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
+                                                    pcapPath, service);
+    if (ec.value())
     {
-        auto reply = bus.call(method);
+        return false;
     }
-    catch (const std::exception& e)
+
+    ec = ipmi::setDbusProperty(ctx, service, pcapPath, pcapInterface,
+                               powerCapEnableProp, enabled);
+    if (ec.value())
     {
         log<level::ERR>("Error in setPcapEnabled property",
-                        entry("ERROR=%s", e.what()));
+                        entry("ERROR=%s", ec.message().c_str()));
         elog<InternalFailure>();
+        return false;
     }
+    return true;
 }
 
 void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree)
@@ -329,130 +325,108 @@ Json parseJSONConfig(const std::string& configFile)
 
 } // namespace dcmi
 
-ipmi_ret_t getPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
-                         ipmi_response_t response, ipmi_data_len_t data_len,
-                         ipmi_context_t)
+constexpr uint8_t exceptionPowerOff = 0x01;
+ipmi::RspType<uint16_t, // reserved
+              uint8_t,  // exception actions
+              uint16_t, // power limit requested in watts
+              uint32_t, // correction time in milliseconds
+              uint16_t, // reserved
+              uint16_t  // statistics sampling period in seconds
+              >
+    getPowerLimit(ipmi::Context::ptr ctx, uint16_t reserved)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        *data_len = 0;
-        log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
+        return ipmi::responseInvalidCommand();
     }
-
-    std::vector<uint8_t> outPayload(sizeof(dcmi::GetPowerLimitResponse));
-    auto responseData =
-        reinterpret_cast<dcmi::GetPowerLimitResponse*>(outPayload.data());
-
-    sdbusplus::bus_t sdbus{ipmid_get_sd_bus_connection()};
-    uint32_t pcapValue = 0;
-    bool pcapEnable = false;
-
-    try
+    if (reserved)
     {
-        pcapValue = dcmi::getPcap(sdbus);
-        pcapEnable = dcmi::getPcapEnabled(sdbus);
-    }
-    catch (const InternalFailure& e)
-    {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseInvalidFieldRequest();
     }
 
+    std::optional<uint16_t> pcapValue = dcmi::getPcap(ctx);
+    std::optional<bool> pcapEnable = dcmi::getPcapEnabled(ctx);
+    if (!pcapValue || !pcapEnable)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    constexpr uint16_t reserved1{};
+    constexpr uint16_t reserved2{};
     /*
      * Exception action if power limit is exceeded and cannot be controlled
      * with the correction time limit is hardcoded to Hard Power Off system
      * and log event to SEL.
      */
-    constexpr auto exception = 0x01;
-    responseData->exceptionAction = exception;
-
-    responseData->powerLimit = static_cast<uint16_t>(pcapValue);
-
+    constexpr uint8_t exception = exceptionPowerOff;
     /*
      * Correction time limit and Statistics sampling period is currently not
      * populated.
      */
-
-    *data_len = outPayload.size();
-    memcpy(response, outPayload.data(), *data_len);
-
-    if (pcapEnable)
+    constexpr uint32_t correctionTime{};
+    constexpr uint16_t statsPeriod{};
+    if (!pcapEnable)
     {
-        return IPMI_CC_OK;
+        constexpr ipmi::Cc responseNoPowerLimitSet = 0x80;
+        constexpr uint16_t noPcap{};
+        return ipmi::response(responseNoPowerLimitSet, reserved1, exception,
+                              noPcap, correctionTime, reserved2, statsPeriod);
     }
-    else
-    {
-        return IPMI_DCMI_CC_NO_ACTIVE_POWER_LIMIT;
-    }
+    return ipmi::responseSuccess(reserved1, exception, *pcapValue,
+                                 correctionTime, reserved2, statsPeriod);
 }
 
-ipmi_ret_t setPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                         ipmi_response_t, ipmi_data_len_t data_len,
-                         ipmi_context_t)
+ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
+                              uint8_t exceptionAction, uint16_t powerLimit,
+                              uint32_t correctionTime, uint16_t reserved2,
+                              uint16_t statsPeriod)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        *data_len = 0;
         log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
+        return ipmi::responseInvalidCommand();
     }
 
-    auto requestData =
-        reinterpret_cast<const dcmi::SetPowerLimitRequest*>(request);
-
-    sdbusplus::bus_t sdbus{ipmid_get_sd_bus_connection()};
-
-    // Only process the power limit requested in watts.
-    try
+    // Only process the power limit requested in watts. Return errors
+    // for other fields that are set
+    if (reserved1 || reserved2 || correctionTime || statsPeriod ||
+        exceptionAction != exceptionPowerOff)
     {
-        dcmi::setPcap(sdbus, requestData->powerLimit);
+        return ipmi::responseInvalidFieldRequest();
     }
-    catch (const InternalFailure& e)
+
+    if (!dcmi::setPcap(ctx, powerLimit))
     {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    log<level::INFO>("Set Power Cap",
-                     entry("POWERCAP=%u", requestData->powerLimit));
+    log<level::INFO>("Set Power Cap", entry("POWERCAP=%u", powerLimit));
 
-    *data_len = 0;
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
-ipmi_ret_t applyPowerLimit(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                           ipmi_response_t, ipmi_data_len_t data_len,
-                           ipmi_context_t)
+ipmi::RspType<> applyPowerLimit(ipmi::Context::ptr& ctx, bool enabled,
+                                uint7_t reserved1, uint16_t reserved2)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        *data_len = 0;
         log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
+        return ipmi::responseInvalidCommand();
+    }
+    if (reserved1 || reserved2)
+    {
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    auto requestData =
-        reinterpret_cast<const dcmi::ApplyPowerLimitRequest*>(request);
-
-    sdbusplus::bus_t sdbus{ipmid_get_sd_bus_connection()};
-
-    try
+    if (!dcmi::setPcapEnable(ctx, enabled))
     {
-        dcmi::setPcapEnable(sdbus,
-                            static_cast<bool>(requestData->powerLimitAction));
-    }
-    catch (const InternalFailure& e)
-    {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     log<level::INFO>("Set Power Cap Enable",
-                     entry("POWERCAPENABLE=%u", requestData->powerLimitAction));
+                     entry("POWERCAPENABLE=%u", static_cast<uint8_t>(enabled)));
 
-    *data_len = 0;
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
 ipmi_ret_t getAssetTag(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
@@ -1417,19 +1391,19 @@ ipmi_ret_t getSensorInfo(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
 void register_netfn_dcmi_functions()
 {
     // <Get Power Limit>
-
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_LIMIT, NULL,
-                           getPowerLimit, PRIVILEGE_USER);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdGetPowerLimit, ipmi::Privilege::User,
+                         getPowerLimit);
 
     // <Set Power Limit>
-
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_POWER_LIMIT, NULL,
-                           setPowerLimit, PRIVILEGE_OPERATOR);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdSetPowerLimit,
+                         ipmi::Privilege::Operator, setPowerLimit);
 
     // <Activate/Deactivate Power Limit>
-
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::APPLY_POWER_LIMIT,
-                           NULL, applyPowerLimit, PRIVILEGE_OPERATOR);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdActDeactivatePwrLimit,
+                         ipmi::Privilege::Operator, applyPowerLimit);
 
     // <Get Asset Tag>
 
