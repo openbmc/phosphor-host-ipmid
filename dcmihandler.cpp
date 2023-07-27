@@ -60,6 +60,10 @@ using namespace phosphor::logging;
 
 namespace dcmi
 {
+constexpr auto assetTagMaxOffset = 62;
+constexpr auto assetTagMaxSize = 63;
+constexpr auto maxBytes = 16;
+constexpr size_t maxCtrlIdStrLen = 63;
 
 // Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
 static const std::map<uint8_t, std::string> entityIdToName{
@@ -167,97 +171,56 @@ bool setPcapEnable(ipmi::Context::ptr& ctx, bool enabled)
     return true;
 }
 
-void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree)
+std::optional<std::string> readAssetTag(ipmi::Context::ptr& ctx)
 {
-    static constexpr auto mapperBusName = "xyz.openbmc_project.ObjectMapper";
-    static constexpr auto mapperObjPath = "/xyz/openbmc_project/object_mapper";
-    static constexpr auto mapperIface = "xyz.openbmc_project.ObjectMapper";
-    static constexpr auto inventoryRoot = "/xyz/openbmc_project/inventory/";
-
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-    auto depth = 0;
-
-    auto mapperCall = bus.new_method_call(mapperBusName, mapperObjPath,
-                                          mapperIface, "GetSubTree");
-
-    mapperCall.append(inventoryRoot);
-    mapperCall.append(depth);
-    mapperCall.append(std::vector<std::string>({dcmi::assetTagIntf}));
-
-    try
-    {
-        auto mapperReply = bus.call(mapperCall);
-        mapperReply.read(objectTree);
-
-        if (objectTree.empty())
-        {
-            log<level::ERR>("AssetTag property is not populated");
-            elog<InternalFailure>();
-        }
-    }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>("Error in mapper call", entry("ERROR=%s", e.what()));
-        elog<InternalFailure>();
-    }
-}
-
-std::string readAssetTag()
-{
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-    dcmi::assettag::ObjectTree objectTree;
-
     // Read the object tree with the inventory root to figure out the object
     // that has implemented the Asset tag interface.
-    readAssetTagObjectTree(objectTree);
-
-    auto method = bus.new_method_call(
-        (objectTree.begin()->second.begin()->first).c_str(),
-        (objectTree.begin()->first).c_str(), dcmi::propIntf, "Get");
-    method.append(dcmi::assetTagIntf);
-    method.append(dcmi::assetTagProp);
-
-    std::variant<std::string> assetTag;
-    try
+    ipmi::DbusObjectInfo objectInfo;
+    boost::system::error_code ec = getDbusObject(
+        ctx, dcmi::assetTagIntf, ipmi::sensor::inventoryRoot, "", objectInfo);
+    if (ec.value())
     {
-        auto reply = bus.call(method);
-        reply.read(assetTag);
-        return std::get<std::string>(assetTag);
+        return std::nullopt;
     }
-    catch (const std::exception& e)
+
+    std::string assetTag{};
+    ec = ipmi::getDbusProperty(ctx, objectInfo.second, objectInfo.first,
+                               dcmi::assetTagIntf, dcmi::assetTagProp,
+                               assetTag);
+    if (ec.value())
     {
         log<level::ERR>("Error in reading asset tag",
-                        entry("ERROR=%s", e.what()));
+                        entry("ERROR=%s", ec.message().c_str()));
         elog<InternalFailure>();
+        return std::nullopt;
     }
+
+    return assetTag;
 }
 
-void writeAssetTag(const std::string& assetTag)
+bool writeAssetTag(ipmi::Context::ptr& ctx, const std::string& assetTag)
 {
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-    dcmi::assettag::ObjectTree objectTree;
-
     // Read the object tree with the inventory root to figure out the object
     // that has implemented the Asset tag interface.
-    readAssetTagObjectTree(objectTree);
-
-    auto method = bus.new_method_call(
-        (objectTree.begin()->second.begin()->first).c_str(),
-        (objectTree.begin()->first).c_str(), dcmi::propIntf, "Set");
-    method.append(dcmi::assetTagIntf);
-    method.append(dcmi::assetTagProp);
-    method.append(std::variant<std::string>(assetTag));
-
-    try
+    ipmi::DbusObjectInfo objectInfo;
+    boost::system::error_code ec = getDbusObject(
+        ctx, dcmi::assetTagIntf, ipmi::sensor::inventoryRoot, "", objectInfo);
+    if (ec.value())
     {
-        auto reply = bus.call(method);
+        return false;
     }
-    catch (const std::exception& e)
+
+    ec = ipmi::setDbusProperty(ctx, objectInfo.second, objectInfo.first,
+                               dcmi::assetTagIntf, dcmi::assetTagProp,
+                               assetTag);
+    if (ec.value())
     {
         log<level::ERR>("Error in writing asset tag",
-                        entry("ERROR=%s", e.what()));
+                        entry("ERROR=%s", ec.message().c_str()));
         elog<InternalFailure>();
+        return false;
     }
+    return true;
 }
 
 std::string getHostName(void)
@@ -429,124 +392,92 @@ ipmi::RspType<> applyPowerLimit(ipmi::Context::ptr& ctx, bool enabled,
     return ipmi::responseSuccess();
 }
 
-ipmi_ret_t getAssetTag(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                       ipmi_response_t response, ipmi_data_len_t data_len,
-                       ipmi_context_t)
+ipmi::RspType<uint8_t,          // total tag length
+              std::vector<char> // tag data
+              >
+    getAssetTag(ipmi::Context::ptr& ctx, uint8_t offset, uint8_t count)
 {
-    auto requestData =
-        reinterpret_cast<const dcmi::GetAssetTagRequest*>(request);
-    std::vector<uint8_t> outPayload(sizeof(dcmi::GetAssetTagResponse));
-    auto responseData =
-        reinterpret_cast<dcmi::GetAssetTagResponse*>(outPayload.data());
-
-    // Verify offset to read and number of bytes to read are not exceeding the
-    // range.
-    if ((requestData->offset > dcmi::assetTagMaxOffset) ||
-        (requestData->bytes > dcmi::maxBytes) ||
-        ((requestData->offset + requestData->bytes) > dcmi::assetTagMaxSize))
+    // Verify offset to read and number of bytes to read are not exceeding
+    // the range.
+    if ((offset > dcmi::assetTagMaxOffset) || (count > dcmi::maxBytes) ||
+        ((offset + count) > dcmi::assetTagMaxSize))
     {
-        *data_len = 0;
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
     }
 
-    std::string assetTag;
-
-    try
+    std::optional<std::string> assetTagResp = dcmi::readAssetTag(ctx);
+    if (!assetTagResp)
     {
-        assetTag = dcmi::readAssetTag();
-    }
-    catch (const InternalFailure& e)
-    {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    // Return if the asset tag is not populated.
-    if (!assetTag.size())
-    {
-        responseData->tagLength = 0;
-        memcpy(response, outPayload.data(), outPayload.size());
-        *data_len = outPayload.size();
-        return IPMI_CC_OK;
-    }
-
-    // If the asset tag is longer than 63 bytes, restrict it to 63 bytes to suit
-    // Get Asset Tag command.
+    std::string& assetTag = assetTagResp.value();
+    // If the asset tag is longer than 63 bytes, restrict it to 63 bytes to
+    // suit Get Asset Tag command.
     if (assetTag.size() > dcmi::assetTagMaxSize)
     {
         assetTag.resize(dcmi::assetTagMaxSize);
     }
 
-    // If the requested offset is beyond the asset tag size.
-    if (requestData->offset >= assetTag.size())
+    if (offset >= assetTag.size())
     {
-        *data_len = 0;
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
     }
 
-    auto returnData = assetTag.substr(requestData->offset, requestData->bytes);
+    // silently truncate reads beyond the end of assetTag
+    if ((offset + count) >= assetTag.size())
+    {
+        count = assetTag.size() - offset;
+    }
 
-    responseData->tagLength = assetTag.size();
+    auto totalTagSize = static_cast<uint8_t>(assetTag.size());
+    std::vector<char> data{assetTag.begin() + offset,
+                           assetTag.begin() + offset + count};
 
-    memcpy(response, outPayload.data(), outPayload.size());
-    memcpy(static_cast<uint8_t*>(response) + outPayload.size(),
-           returnData.data(), returnData.size());
-    *data_len = outPayload.size() + returnData.size();
-
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(totalTagSize, data);
 }
 
-ipmi_ret_t setAssetTag(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                       ipmi_response_t response, ipmi_data_len_t data_len,
-                       ipmi_context_t)
+ipmi::RspType<uint8_t // new asset tag length
+              >
+    setAssetTag(ipmi::Context::ptr& ctx, uint8_t offset, uint8_t count,
+                const std::vector<char>& data)
 {
-    auto requestData =
-        reinterpret_cast<const dcmi::SetAssetTagRequest*>(request);
-    std::vector<uint8_t> outPayload(sizeof(dcmi::SetAssetTagResponse));
-    auto responseData =
-        reinterpret_cast<dcmi::SetAssetTagResponse*>(outPayload.data());
-
-    // Verify offset to read and number of bytes to read are not exceeding the
-    // range.
-    if ((requestData->offset > dcmi::assetTagMaxOffset) ||
-        (requestData->bytes > dcmi::maxBytes) ||
-        ((requestData->offset + requestData->bytes) > dcmi::assetTagMaxSize))
+    // Verify offset to read and number of bytes to read are not exceeding
+    // the range.
+    if ((offset > dcmi::assetTagMaxOffset) || (count > dcmi::maxBytes) ||
+        ((offset + count) > dcmi::assetTagMaxSize))
     {
-        *data_len = 0;
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
+    }
+    if (data.size() != count)
+    {
+        return ipmi::responseReqDataLenInvalid();
     }
 
-    std::string assetTag;
-
-    try
+    std::optional<std::string> assetTagResp = dcmi::readAssetTag(ctx);
+    if (!assetTagResp)
     {
-        assetTag = dcmi::readAssetTag();
-
-        if (requestData->offset > assetTag.size())
-        {
-            *data_len = 0;
-            return IPMI_CC_PARM_OUT_OF_RANGE;
-        }
-
-        assetTag.replace(requestData->offset,
-                         assetTag.size() - requestData->offset,
-                         static_cast<const char*>(request) +
-                             sizeof(dcmi::SetAssetTagRequest),
-                         requestData->bytes);
-
-        dcmi::writeAssetTag(assetTag);
-
-        responseData->tagLength = assetTag.size();
-        memcpy(response, outPayload.data(), outPayload.size());
-        *data_len = outPayload.size();
-
-        return IPMI_CC_OK;
+        return ipmi::responseUnspecifiedError();
     }
-    catch (const InternalFailure& e)
+
+    std::string& assetTag = assetTagResp.value();
+
+    if (offset > assetTag.size())
     {
-        *data_len = 0;
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseParmOutOfRange();
     }
+
+    // operation is to truncate at offset and append new data
+    assetTag.resize(offset);
+    assetTag.append(data.begin(), data.end());
+
+    if (!dcmi::writeAssetTag(ctx, assetTag))
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    auto totalTagSize = static_cast<uint8_t>(assetTag.size());
+    return ipmi::responseSuccess(totalTagSize);
 }
 
 ipmi_ret_t getMgmntCtrlIdStr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
@@ -1406,14 +1337,14 @@ void register_netfn_dcmi_functions()
                          ipmi::Privilege::Operator, applyPowerLimit);
 
     // <Get Asset Tag>
-
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_ASSET_TAG, NULL,
-                           getAssetTag, PRIVILEGE_USER);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdGetAssetTag, ipmi::Privilege::User,
+                         getAssetTag);
 
     // <Set Asset Tag>
-
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_ASSET_TAG, NULL,
-                           setAssetTag, PRIVILEGE_OPERATOR);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdSetAssetTag, ipmi::Privilege::Operator,
+                         setAssetTag);
 
     // <Get Management Controller Identifier String>
 
