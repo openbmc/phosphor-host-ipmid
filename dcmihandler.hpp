@@ -19,9 +19,6 @@ enum Commands
     // Get capability bits
     GET_CAPABILITIES = 0x01,
     GET_POWER_READING = 0x02,
-    GET_POWER_LIMIT = 0x03,
-    SET_POWER_LIMIT = 0x04,
-    APPLY_POWER_LIMIT = 0x05,
     GET_ASSET_TAG = 0x06,
     GET_SENSOR_INFO = 0x07,
     SET_ASSET_TAG = 0x08,
@@ -190,76 +187,6 @@ std::string readAssetTag();
  *  @param[in] assetTag - Asset Tag to be written to the property.
  */
 void writeAssetTag(const std::string& assetTag);
-
-/** @brief Read the current power cap value
- *
- *  @param[in] bus - dbus connection
- *
- *  @return On success return the power cap value.
- */
-uint32_t getPcap(sdbusplus::bus_t& bus);
-
-/** @brief Check if the power capping is enabled
- *
- *  @param[in] bus - dbus connection
- *
- *  @return true if the powerCap is enabled and false if the powercap
- *          is disabled.
- */
-bool getPcapEnabled(sdbusplus::bus_t& bus);
-
-/** @struct GetPowerLimitResponse
- *
- *  DCMI payload for Get Power Limit command response.
- */
-struct GetPowerLimitResponse
-{
-    uint16_t reserved;       //!< Reserved.
-    uint8_t exceptionAction; //!< Exception action.
-    uint16_t powerLimit;     //!< Power limit requested in watts.
-    uint32_t correctionTime; //!< Correction time limit in milliseconds.
-    uint16_t reserved1;      //!< Reserved.
-    uint16_t samplingPeriod; //!< Statistics sampling period in seconds.
-} __attribute__((packed));
-
-/** @brief Set the power cap value
- *
- *  @param[in] bus - dbus connection
- *  @param[in] powerCap - power cap value
- */
-void setPcap(sdbusplus::bus_t& bus, const uint32_t powerCap);
-
-/** @struct SetPowerLimitRequest
- *
- *  DCMI payload for Set Power Limit command request.
- */
-struct SetPowerLimitRequest
-{
-    uint16_t reserved;       //!< Reserved
-    uint8_t reserved1;       //!< Reserved
-    uint8_t exceptionAction; //!< Exception action.
-    uint16_t powerLimit;     //!< Power limit requested in watts.
-    uint32_t correctionTime; //!< Correction time limit in milliseconds.
-    uint16_t reserved2;      //!< Reserved.
-    uint16_t samplingPeriod; //!< Statistics sampling period in seconds.
-} __attribute__((packed));
-
-/** @brief Enable or disable the power capping
- *
- *  @param[in] bus - dbus connection
- *  @param[in] enabled - enable/disable
- */
-void setPcapEnable(sdbusplus::bus_t& bus, bool enabled);
-
-/** @struct ApplyPowerLimitRequest
- *
- *  DCMI payload for Activate/Deactivate Power Limit command request.
- */
-struct ApplyPowerLimitRequest
-{
-    uint8_t powerLimitAction; //!< Power limit activation
-    uint16_t reserved;        //!< Reserved
-} __attribute__((packed));
 
 /** @struct GetMgmntCtrlIdStrRequest
  *
