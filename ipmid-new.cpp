@@ -21,7 +21,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/io_context.hpp>
-#include <dcmihandler.hpp>
 #include <host-cmd-manager.hpp>
 #include <ipmid-host/cmd.hpp>
 #include <ipmid/api.hpp>
@@ -712,8 +711,8 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
     // all the handlers were part of the DCMI group, so default to that.
     if (netFn == NETFUN_GRPEXT)
     {
-        ipmi::impl::registerGroupHandler(ipmi::prioOpenBmcBase,
-                                         dcmi::groupExtId, cmd, realPriv, h);
+        ipmi::impl::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                                         cmd, realPriv, h);
     }
     else
     {
