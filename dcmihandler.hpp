@@ -16,7 +16,6 @@ using Json = nlohmann::json;
 
 enum Commands
 {
-    GET_POWER_READING = 0x02,
     GET_SENSOR_INFO = 0x07,
     SET_CONF_PARAMS = 0x12,
     GET_CONF_PARAMS = 0x13,
@@ -124,45 +123,6 @@ std::tuple<Response, NumInstances> read(const std::string& type,
 std::tuple<ResponseList, NumInstances>
     readAll(const std::string& type, uint8_t instanceStart, const Json& config);
 } // namespace sensor_info
-
-/** @brief Read power reading from power reading sensor object
- *
- *  @param[in] bus - dbus connection
- *
- *  @return total power reading
- */
-int64_t getPowerReading(sdbusplus::bus_t& bus);
-
-/** @struct GetPowerReadingRequest
- *
- *  DCMI Get Power Reading command request.
- *  Refer DCMI specification Version 1.1 Section 6.6.1
- */
-struct GetPowerReadingRequest
-{
-    uint8_t mode;          //!< Mode
-    uint8_t modeAttribute; //!< Mode Attributes
-} __attribute__((packed));
-
-/** @struct GetPowerReadingResponse
- *
- *  DCMI Get Power Reading command response.
- *  Refer DCMI specification Version 1.1 Section 6.6.1
- */
-struct GetPowerReadingResponse
-{
-    uint16_t currentPower;     //!< Current power in watts
-    uint16_t minimumPower;     //!< Minimum power over sampling duration
-                               //!< in watts
-    uint16_t maximumPower;     //!< Maximum power over sampling duration
-                               //!< in watts
-    uint16_t averagePower;     //!< Average power over sampling duration
-                               //!< in watts
-    uint32_t timeStamp;        //!< IPMI specification based time stamp
-    uint32_t timeFrame;        //!< Statistics reporting time period in milli
-                               //!< seconds.
-    uint8_t powerReadingState; //!< Power Reading State
-} __attribute__((packed));
 
 /** @struct GetSensorInfoRequest
  *
