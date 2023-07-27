@@ -52,9 +52,6 @@ constexpr auto DHCP_TIMING3_LOWER = 0x40;
 // SendHostNameEnabled will set to true.
 constexpr auto DHCP_OPT12_ENABLED = "SendHostNameEnabled";
 
-constexpr auto SENSOR_VALUE_INTF = "xyz.openbmc_project.Sensor.Value";
-constexpr auto SENSOR_VALUE_PROP = "Value";
-
 using namespace phosphor::logging;
 
 namespace dcmi
@@ -823,53 +820,6 @@ ipmi::RspType<uint8_t,                // total instances for entity id
     return ipmi::responseSuccess(totalInstances, numInstances, temps);
 }
 
-int64_t getPowerReading(sdbusplus::bus_t& bus)
-{
-    std::ifstream sensorFile(POWER_READING_SENSOR);
-    std::string objectPath;
-    if (!sensorFile.is_open())
-    {
-        log<level::ERR>("Power reading configuration file not found",
-                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
-        elog<InternalFailure>();
-    }
-
-    auto data = nlohmann::json::parse(sensorFile, nullptr, false);
-    if (data.is_discarded())
-    {
-        log<level::ERR>("Error in parsing configuration file",
-                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
-        elog<InternalFailure>();
-    }
-
-    objectPath = data.value("path", "");
-    if (objectPath.empty())
-    {
-        log<level::ERR>("Power sensor D-Bus object path is empty",
-                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
-        elog<InternalFailure>();
-    }
-
-    // Return default value if failed to read from D-Bus object
-    int64_t power = 0;
-    try
-    {
-        auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
-
-        // Read the sensor value and scale properties
-        auto value = ipmi::getDbusProperty(
-            bus, service, objectPath, SENSOR_VALUE_INTF, SENSOR_VALUE_PROP);
-        power = std::get<double>(value);
-    }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>("Failure to read power value from D-Bus object",
-                        entry("OBJECT_PATH=%s", objectPath.c_str()),
-                        entry("INTERFACE=%s", SENSOR_VALUE_INTF));
-    }
-    return power;
-}
-
 ipmi_ret_t setDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
                              ipmi_response_t, ipmi_data_len_t data_len,
                              ipmi_context_t)
@@ -1010,47 +960,117 @@ ipmi_ret_t getDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getPowerReading(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
-                           ipmi_response_t response, ipmi_data_len_t data_len,
-                           ipmi_context_t)
+static std::optional<uint16_t> readPower(ipmi::Context::ptr& ctx)
 {
-    *data_len = 0;
+    std::ifstream sensorFile(POWER_READING_SENSOR);
+    std::string objectPath;
+    if (!sensorFile.is_open())
+    {
+        log<level::ERR>("Power reading configuration file not found",
+                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+        return std::nullopt;
+    }
+
+    auto data = nlohmann::json::parse(sensorFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Error in parsing configuration file",
+                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+        return std::nullopt;
+    }
+
+    objectPath = data.value("path", "");
+    if (objectPath.empty())
+    {
+        log<level::ERR>("Power sensor D-Bus object path is empty",
+                        entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
+        return std::nullopt;
+    }
+
+    // Return default value if failed to read from D-Bus object
+    std::string service{};
+    boost::system::error_code ec = ipmi::getService(ctx, dcmi::sensorValueIntf,
+                                                    objectPath, service);
+    if (ec.value())
+    {
+        log<level::ERR>("Failed to fetch service for D-Bus object",
+                        entry("OBJECT_PATH=%s", objectPath.c_str()),
+                        entry("INTERFACE=%s", dcmi::sensorValueIntf));
+        return std::nullopt;
+    }
+
+    // Read the sensor value and scale properties
+    double value{};
+    ec = ipmi::getDbusProperty(ctx, service, objectPath, dcmi::sensorValueIntf,
+                               dcmi::sensorValueProp, value);
+    if (ec.value())
+    {
+        log<level::ERR>("Failure to read power value from D-Bus object",
+                        entry("OBJECT_PATH=%s", objectPath.c_str()),
+                        entry("INTERFACE=%s", dcmi::sensorValueIntf));
+        return std::nullopt;
+    }
+    auto power = static_cast<uint16_t>(value);
+    return power;
+}
+
+ipmi::RspType<uint16_t, // current power
+              uint16_t, // minimum power
+              uint16_t, // maximum power
+              uint16_t, // average power
+              uint32_t, // timestamp
+              uint32_t, // sample period ms
+              bool,     // reserved
+              bool,     // power measurement active
+              uint6_t   // reserved
+              >
+    getPowerReading(ipmi::Context::ptr& ctx, uint8_t mode, uint8_t attributes,
+                    uint8_t reserved)
+{
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
         log<level::ERR>("DCMI Power management is unsupported!");
-        return IPMI_CC_INVALID;
+        return ipmi::responseInvalidCommand();
+    }
+    if (reserved)
+    {
+        return ipmi::responseInvalidFieldRequest();
     }
 
-    ipmi_ret_t rc = IPMI_CC_OK;
-    auto responseData =
-        reinterpret_cast<dcmi::GetPowerReadingResponse*>(response);
+    enum class PowerMode : uint8_t
+    {
+        SystemPowerStatistics = 1,
+        EnhancedSystemPowerStatistics = 2,
+    };
 
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-    int64_t power = 0;
-    try
+    if (static_cast<PowerMode>(mode) != PowerMode::SystemPowerStatistics)
     {
-        power = getPowerReading(bus);
+        return ipmi::responseInvalidFieldRequest();
     }
-    catch (const InternalFailure& e)
+    if (attributes)
     {
-        log<level::ERR>("Error in reading power sensor value",
-                        entry("INTERFACE=%s", SENSOR_VALUE_INTF),
-                        entry("PROPERTY=%s", SENSOR_VALUE_PROP));
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseInvalidFieldRequest();
     }
+
+    std::optional<uint16_t> powerResp = readPower(ctx);
+    if (!powerResp)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+    auto& power = powerResp.value();
 
     // TODO: openbmc/openbmc#2819
     // Minimum, Maximum, Average power, TimeFrame, TimeStamp,
     // PowerReadingState readings need to be populated
     // after Telemetry changes.
-    uint16_t totalPower = static_cast<uint16_t>(power);
-    responseData->currentPower = totalPower;
-    responseData->minimumPower = totalPower;
-    responseData->maximumPower = totalPower;
-    responseData->averagePower = totalPower;
-
-    *data_len = sizeof(*responseData);
-    return rc;
+    constexpr uint32_t samplePeriod = 1;
+    constexpr bool reserved1 = false;
+    constexpr bool measurementActive = true;
+    constexpr uint6_t reserved2 = 0;
+    auto timestamp = static_cast<uint32_t>(time(nullptr));
+    return ipmi::responseSuccess(power, power, power, power, timestamp,
+                                 samplePeriod, reserved1, measurementActive,
+                                 reserved2);
 }
 
 namespace dcmi
@@ -1278,8 +1298,10 @@ void register_netfn_dcmi_functions()
                          ipmi::Privilege::User, getTempReadings);
 
     // <Get Power Reading>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING,
-                           NULL, getPowerReading, PRIVILEGE_USER);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdGetPowerReading, ipmi::Privilege::User,
+                         getPowerReading);
+
 // The Get sensor should get the senor details dynamically when
 // FEATURE_DYNAMIC_SENSORS is enabled.
 #ifndef FEATURE_DYNAMIC_SENSORS
