@@ -16,7 +16,6 @@ using Json = nlohmann::json;
 
 enum Commands
 {
-    GET_SENSOR_INFO = 0x07,
     SET_CONF_PARAMS = 0x12,
     GET_CONF_PARAMS = 0x13,
 };
@@ -52,22 +51,6 @@ static constexpr auto gDCMIPowerMgmtSupported = 0x1;
 static constexpr auto gMaxSELEntriesMask = 0xFFF;
 static constexpr auto gByteBitSize = 8;
 
-namespace sensor_info
-{
-
-/** @struct Response
- *
- *  DCMI payload for Get Sensor Info response
- */
-struct Response
-{
-    uint8_t recordIdLsb; //!< SDR record id LS byte
-    uint8_t recordIdMsb; //!< SDR record id MS byte
-} __attribute__((packed));
-
-using ResponseList = std::vector<Response>;
-} // namespace sensor_info
-
 static constexpr auto groupExtId = 0xDC;
 
 /** @brief Check whether DCMI power management is supported
@@ -85,66 +68,6 @@ bool isDCMIPowerMgmtSupported();
  */
 Json parseJSONConfig(const std::string& configFile);
 
-namespace sensor_info
-{
-/** @brief Create response from JSON config.
- *
- *  @param[in] config - JSON config info about DCMI sensors
- *
- *  @return Sensor info response
- */
-Response createFromJson(const Json& config);
-
-/** @brief Read sensor info and fill up DCMI response for the Get
- *         Sensor Info command. This looks at a specific
- *         instance.
- *
- *  @param[in] type - one of "inlet", "cpu", "baseboard"
- *  @param[in] instance - A non-zero Entity instance number
- *  @param[in] config - JSON config info about DCMI sensors
- *
- *  @return A tuple, containing a sensor info response and
- *          number of instances.
- */
-std::tuple<Response, NumInstances> read(const std::string& type,
-                                        uint8_t instance, const Json& config);
-
-/** @brief Read sensor info and fill up DCMI response for the Get
- *         Sensor Info command. This looks at a range of
- *         instances.
- *
- *  @param[in] type - one of "inlet", "cpu", "baseboard"
- *  @param[in] instanceStart - Entity instance start index
- *  @param[in] config - JSON config info about DCMI sensors
- *
- *  @return A tuple, containing a list of sensor info responses and the
- *          number of instances.
- */
-std::tuple<ResponseList, NumInstances>
-    readAll(const std::string& type, uint8_t instanceStart, const Json& config);
-} // namespace sensor_info
-
-/** @struct GetSensorInfoRequest
- *
- *  DCMI payload for Get Sensor Info request
- */
-struct GetSensorInfoRequest
-{
-    uint8_t sensorType;     //!< Type of the sensor
-    uint8_t entityId;       //!< Entity ID
-    uint8_t entityInstance; //!< Entity Instance (0 means all instances)
-    uint8_t instanceStart;  //!< Instance start (used if instance is 0)
-} __attribute__((packed));
-
-/** @struct GetSensorInfoResponseHdr
- *
- *  DCMI header for Get Sensor Info response
- */
-struct GetSensorInfoResponseHdr
-{
-    uint8_t numInstances; //!< No. of instances for requested id
-    uint8_t numRecords;   //!< No. of record ids in the response
-} __attribute__((packed));
 /**
  *  @brief Parameters for DCMI Configuration Parameters
  */
