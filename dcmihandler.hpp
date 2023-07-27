@@ -19,9 +19,7 @@ enum Commands
     // Get capability bits
     GET_CAPABILITIES = 0x01,
     GET_POWER_READING = 0x02,
-    GET_ASSET_TAG = 0x06,
     GET_SENSOR_INFO = 0x07,
-    SET_ASSET_TAG = 0x08,
     GET_MGMNT_CTRL_ID_STR = 0x09,
     SET_MGMNT_CTRL_ID_STR = 0x0A,
     GET_TEMP_READINGS = 0x10,
@@ -58,16 +56,6 @@ static constexpr auto gDCMIPowerMgmtCapability = "PowerManagement";
 static constexpr auto gDCMIPowerMgmtSupported = 0x1;
 static constexpr auto gMaxSELEntriesMask = 0xFFF;
 static constexpr auto gByteBitSize = 8;
-
-namespace assettag
-{
-
-using ObjectPath = std::string;
-using Service = std::string;
-using Interfaces = std::vector<std::string>;
-using ObjectTree = std::map<ObjectPath, std::map<Service, Interfaces>>;
-
-} // namespace assettag
 
 namespace temp_readings
 {
@@ -116,77 +104,12 @@ using ResponseList = std::vector<Response>;
 
 static constexpr auto groupExtId = 0xDC;
 
-static constexpr auto assetTagMaxOffset = 62;
-static constexpr auto assetTagMaxSize = 63;
-static constexpr auto maxBytes = 16;
-static constexpr size_t maxCtrlIdStrLen = 63;
-
-/** @struct GetAssetTagRequest
- *
- *  DCMI payload for Get Asset Tag command request.
- */
-struct GetAssetTagRequest
-{
-    uint8_t offset; //!< Offset to read.
-    uint8_t bytes;  //!< Number of bytes to read.
-} __attribute__((packed));
-
-/** @struct GetAssetTagResponse
- *
- *  DCMI payload for Get Asset Tag command response.
- */
-struct GetAssetTagResponse
-{
-    uint8_t tagLength; //!< Total asset tag length.
-} __attribute__((packed));
-
-/** @struct SetAssetTagRequest
- *
- *  DCMI payload for Set Asset Tag command request.
- */
-struct SetAssetTagRequest
-{
-    uint8_t offset; //!< Offset to write.
-    uint8_t bytes;  //!< Number of bytes to write.
-} __attribute__((packed));
-
-/** @struct SetAssetTagResponse
- *
- *  DCMI payload for Set Asset Tag command response.
- */
-struct SetAssetTagResponse
-{
-    uint8_t tagLength; //!< Total asset tag length.
-} __attribute__((packed));
-
 /** @brief Check whether DCMI power management is supported
  *         in the DCMI Capabilities config file.
  *
  *  @return True if DCMI power management is supported
  */
 bool isDCMIPowerMgmtSupported();
-
-/** @brief Read the object tree to fetch the object path that implemented the
- *         Asset tag interface.
- *
- *  @param[in,out] objectTree - object tree
- *
- *  @return On success return the object tree with the object path that
- *          implemented the AssetTag interface.
- */
-void readAssetTagObjectTree(dcmi::assettag::ObjectTree& objectTree);
-
-/** @brief Read the asset tag of the server
- *
- *  @return On success return the asset tag.
- */
-std::string readAssetTag();
-
-/** @brief Write the asset tag to the asset tag DBUS property
- *
- *  @param[in] assetTag - Asset Tag to be written to the property.
- */
-void writeAssetTag(const std::string& assetTag);
 
 /** @struct GetMgmntCtrlIdStrRequest
  *
