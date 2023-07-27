@@ -18,7 +18,6 @@ enum Commands
 {
     GET_POWER_READING = 0x02,
     GET_SENSOR_INFO = 0x07,
-    GET_TEMP_READINGS = 0x10,
     SET_CONF_PARAMS = 0x12,
     GET_CONF_PARAMS = 0x13,
 };
@@ -33,7 +32,8 @@ static constexpr auto networkConfigIntf =
     "xyz.openbmc_project.Network.SystemConfiguration";
 static constexpr auto hostNameProp = "HostName";
 static constexpr auto temperatureSensorType = 0x01;
-static constexpr auto maxInstances = 255;
+static constexpr size_t maxInstances = 255;
+static constexpr uint8_t maxRecords = 8;
 static constexpr auto gDCMISensorsConfig =
     "/usr/share/ipmi-providers/dcmi_sensors.json";
 static constexpr auto ethernetIntf =
@@ -53,37 +53,8 @@ static constexpr auto gDCMIPowerMgmtSupported = 0x1;
 static constexpr auto gMaxSELEntriesMask = 0xFFF;
 static constexpr auto gByteBitSize = 8;
 
-namespace temp_readings
-{
-static constexpr auto maxDataSets = 8;
-static constexpr auto maxTemp = 127; // degrees C
-
-/** @struct Response
- *
- *  DCMI payload for Get Temperature Readings response
- */
-struct Response
-{
-#if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t temperature : 7; //!< Temperature reading in Celsius
-    uint8_t sign : 1;        //!< Sign bit
-#endif
-#if BYTE_ORDER == BIG_ENDIAN
-    uint8_t sign : 1;        //!< Sign bit
-    uint8_t temperature : 7; //!< Temperature reading in Celsius
-#endif
-    uint8_t instance;        //!< Entity instance number
-} __attribute__((packed));
-
-using ResponseList = std::vector<Response>;
-using Value = uint8_t;
-using Sign = bool;
-using Temperature = std::tuple<Value, Sign>;
-} // namespace temp_readings
-
 namespace sensor_info
 {
-static constexpr auto maxRecords = 8;
 
 /** @struct Response
  *
@@ -107,28 +78,6 @@ static constexpr auto groupExtId = 0xDC;
  */
 bool isDCMIPowerMgmtSupported();
 
-/** @struct GetTempReadingsRequest
- *
- *  DCMI payload for Get Temperature Readings request
- */
-struct GetTempReadingsRequest
-{
-    uint8_t sensorType;     //!< Type of the sensor
-    uint8_t entityId;       //!< Entity ID
-    uint8_t entityInstance; //!< Entity Instance (0 means all instances)
-    uint8_t instanceStart;  //!< Instance start (used if instance is 0)
-} __attribute__((packed));
-
-/** @struct GetTempReadingsResponse
- *
- *  DCMI header for Get Temperature Readings response
- */
-struct GetTempReadingsResponseHdr
-{
-    uint8_t numInstances; //!< No. of instances for requested id
-    uint8_t numDataSets;  //!< No. of sets of temperature data
-} __attribute__((packed));
-
 /** @brief Parse out JSON config file.
  *
  *  @param[in] configFile - JSON config file name
@@ -136,46 +85,6 @@ struct GetTempReadingsResponseHdr
  *  @return A json object
  */
 Json parseJSONConfig(const std::string& configFile);
-
-namespace temp_readings
-{
-/** @brief Read temperature from a d-bus object, scale it as per dcmi
- *         get temperature reading requirements.
- *
- *  @param[in] dbusService - the D-Bus service
- *  @param[in] dbusPath - the D-Bus path
- *
- *  @return A temperature reading
- */
-Temperature readTemp(const std::string& dbusService,
-                     const std::string& dbusPath);
-
-/** @brief Read temperatures and fill up DCMI response for the Get
- *         Temperature Readings command. This looks at a specific
- *         instance.
- *
- *  @param[in] type - one of "inlet", "cpu", "baseboard"
- *  @param[in] instance - A non-zero Entity instance number
- *
- *  @return A tuple, containing a temperature reading and the
- *          number of instances.
- */
-std::tuple<Response, NumInstances> read(const std::string& type,
-                                        uint8_t instance);
-
-/** @brief Read temperatures and fill up DCMI response for the Get
- *         Temperature Readings command. This looks at a range of
- *         instances.
- *
- *  @param[in] type - one of "inlet", "cpu", "baseboard"
- *  @param[in] instanceStart - Entity instance start index
- *
- *  @return A tuple, containing a list of temperature readings and the
- *          number of instances.
- */
-std::tuple<ResponseList, NumInstances> readAll(const std::string& type,
-                                               uint8_t instanceStart);
-} // namespace temp_readings
 
 namespace sensor_info
 {
