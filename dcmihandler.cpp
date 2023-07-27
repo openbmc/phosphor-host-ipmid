@@ -68,9 +68,16 @@ static const std::map<uint8_t, std::string> entityIdToName{
 
 bool isDCMIPowerMgmtSupported()
 {
-    auto data = parseJSONConfig(gDCMICapabilitiesConfig);
+    static bool parsed = false;
+    static bool supported = false;
+    if (!parsed)
+    {
+        auto data = parseJSONConfig(gDCMICapabilitiesConfig);
 
-    return (gDCMIPowerMgmtSupported == data.value(gDCMIPowerMgmtCapability, 0));
+        supported = (gDCMIPowerMgmtSupported ==
+                     data.value(gDCMIPowerMgmtCapability, 0));
+    }
+    return supported;
 }
 
 uint32_t getPcap(sdbusplus::bus_t& bus)
