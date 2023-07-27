@@ -32,26 +32,6 @@ constexpr auto pcapInterface = "xyz.openbmc_project.Control.Power.Cap";
 constexpr auto powerCapProp = "PowerCap";
 constexpr auto powerCapEnableProp = "PowerCapEnable";
 
-constexpr auto DCMI_SPEC_MAJOR_VERSION = 1;
-constexpr auto DCMI_SPEC_MINOR_VERSION = 5;
-constexpr auto DCMI_CONFIG_PARAMETER_REVISION = 1;
-constexpr auto DCMI_RAND_BACK_OFF_MASK = 0x80;
-constexpr auto DCMI_OPTION_60_43_MASK = 0x02;
-constexpr auto DCMI_OPTION_12_MASK = 0x01;
-constexpr auto DCMI_ACTIVATE_DHCP_MASK = 0x01;
-constexpr auto DCMI_ACTIVATE_DHCP_REPLY = 0x00;
-constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE = 0x04;
-constexpr auto DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE = 0x03;
-constexpr auto DHCP_TIMING1 = 0x04;       // 4 sec
-constexpr auto DHCP_TIMING2_UPPER = 0x00; // 2 min
-constexpr auto DHCP_TIMING2_LOWER = 0x78;
-constexpr auto DHCP_TIMING3_UPPER = 0x00; // 64 sec
-constexpr auto DHCP_TIMING3_LOWER = 0x40;
-// When DHCP Option 12 is enabled the string "SendHostName=true" will be
-// added into n/w configuration file and the parameter
-// SendHostNameEnabled will set to true.
-constexpr auto DHCP_OPT12_ENABLED = "SendHostNameEnabled";
-
 using namespace phosphor::logging;
 
 namespace dcmi
@@ -66,11 +46,49 @@ constexpr uint8_t specMajorVersion = 1;
 constexpr uint8_t specMinorVersion = 5;
 constexpr auto sensorValueIntf = "xyz.openbmc_project.Sensor.Value";
 constexpr auto sensorValueProp = "Value";
+constexpr uint8_t configParameterRevision = 1;
+constexpr auto option12Mask = 0x01;
+constexpr auto activateDhcpReply = 0x00;
+constexpr uint8_t dhcpTiming1 = 0x04;  // 4 sec
+constexpr uint16_t dhcpTiming2 = 0x78; // 120 sec
+constexpr uint16_t dhcpTiming3 = 0x40; // 60 sec
+// When DHCP Option 12 is enabled the string "SendHostName=true" will be
+// added into n/w configuration file and the parameter
+// SendHostNameEnabled will set to true.
+constexpr auto dhcpOpt12Enabled = "SendHostNameEnabled";
+
+enum class DCMIConfigParameters : uint8_t
+{
+    ActivateDHCP = 1,
+    DiscoveryConfig,
+    DHCPTiming1,
+    DHCPTiming2,
+    DHCPTiming3,
+};
 
 // Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
 static const std::map<uint8_t, std::string> entityIdToName{
     {0x40, "inlet"}, {0x37, "inlet"},     {0x41, "cpu"},
     {0x03, "cpu"},   {0x42, "baseboard"}, {0x07, "baseboard"}};
+
+nlohmann::json parseJSONConfig(const std::string& configFile)
+{
+    std::ifstream jsonFile(configFile);
+    if (!jsonFile.is_open())
+    {
+        log<level::ERR>("Temperature readings JSON file not found");
+        elog<InternalFailure>();
+    }
+
+    auto data = nlohmann::json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Temperature readings JSON parser failure");
+        elog<InternalFailure>();
+    }
+
+    return data;
+}
 
 bool isDCMIPowerMgmtSupported()
 {
@@ -241,56 +259,65 @@ std::optional<std::string> getHostName(ipmi::Context::ptr& ctx)
     return hostname;
 }
 
-EthernetInterface::DHCPConf getDHCPEnabled()
+std::optional<EthernetInterface::DHCPConf>
+    getDHCPEnabled(ipmi::Context::ptr& ctx)
 {
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-
     auto ethdevice = ipmi::getChannelName(ethernetDefaultChannelNum);
-    auto ethernetObj = ipmi::getDbusObject(bus, ethernetIntf, networkRoot,
-                                           ethdevice);
-    auto service = ipmi::getService(bus, ethernetIntf, ethernetObj.first);
-    auto value = ipmi::getDbusProperty(bus, service, ethernetObj.first,
-                                       ethernetIntf, "DHCPEnabled");
-
-    return EthernetInterface::convertDHCPConfFromString(
-        std::get<std::string>(value));
-}
-
-bool getDHCPOption(std::string prop)
-{
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-
-    auto service = ipmi::getService(bus, dhcpIntf, dhcpObj);
-    auto value = ipmi::getDbusProperty(bus, service, dhcpObj, dhcpIntf, prop);
-
-    return std::get<bool>(value);
-}
-
-void setDHCPOption(std::string prop, bool value)
-{
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-
-    auto service = ipmi::getService(bus, dhcpIntf, dhcpObj);
-    ipmi::setDbusProperty(bus, service, dhcpObj, dhcpIntf, prop, value);
-}
-
-Json parseJSONConfig(const std::string& configFile)
-{
-    std::ifstream jsonFile(configFile);
-    if (!jsonFile.is_open())
+    ipmi::DbusObjectInfo ethernetObj{};
+    boost::system::error_code ec = ipmi::getDbusObject(
+        ctx, ethernetIntf, networkRoot, ethdevice, ethernetObj);
+    if (ec.value())
     {
-        log<level::ERR>("Temperature readings JSON file not found");
-        elog<InternalFailure>();
+        return std::nullopt;
+    }
+    std::string service{};
+    ec = ipmi::getService(ctx, ethernetIntf, ethernetObj.first, service);
+    if (ec.value())
+    {
+        return std::nullopt;
+    }
+    std::string dhcpVal{};
+    ec = ipmi::getDbusProperty(ctx, service, ethernetObj.first, ethernetIntf,
+                               "DHCPEnabled", dhcpVal);
+    if (ec.value())
+    {
+        return std::nullopt;
     }
 
-    auto data = Json::parse(jsonFile, nullptr, false);
-    if (data.is_discarded())
+    return EthernetInterface::convertDHCPConfFromString(dhcpVal);
+}
+
+std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
+                                  const std::string& prop)
+{
+    std::string service;
+    boost::system::error_code ec = ipmi::getService(ctx, dhcpIntf, dhcpObj,
+                                                    service);
+    if (ec.value())
     {
-        log<level::ERR>("Temperature readings JSON parser failure");
-        elog<InternalFailure>();
+        return std::nullopt;
+    }
+    bool value{};
+    ec = ipmi::getDbusProperty(ctx, service, dhcpObj, dhcpIntf, prop, value);
+    if (ec.value())
+    {
+        return std::nullopt;
     }
 
-    return data;
+    return value;
+}
+
+bool setDHCPOption(ipmi::Context::ptr& ctx, std::string prop, bool value)
+{
+    std::string service;
+    boost::system::error_code ec = ipmi::getService(ctx, dhcpIntf, dhcpObj,
+                                                    service);
+    if (!ec.value())
+    {
+        ec = ipmi::setDbusProperty(ctx, service, dhcpObj, dhcpIntf, prop,
+                                   value);
+    }
+    return (!ec.value());
 }
 
 } // namespace dcmi
@@ -815,144 +842,123 @@ ipmi::RspType<uint8_t,                // total instances for entity id
     return ipmi::responseSuccess(totalInstances, numInstances, temps);
 }
 
-ipmi_ret_t setDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                             ipmi_response_t, ipmi_data_len_t data_len,
-                             ipmi_context_t)
+ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
+                                  uint8_t setSelector,
+                                  ipmi::message::Payload& payload)
 {
-    auto requestData =
-        reinterpret_cast<const dcmi::SetConfParamsRequest*>(request);
-
-    if (*data_len < DCMI_SET_CONF_PARAM_REQ_PACKET_MIN_SIZE ||
-        *data_len > DCMI_SET_CONF_PARAM_REQ_PACKET_MAX_SIZE)
+    if (setSelector)
     {
-        log<level::ERR>("Invalid Requested Packet size",
-                        entry("PACKET SIZE=%d", *data_len));
-        *data_len = 0;
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidFieldRequest();
     }
-    *data_len = 0;
-
-    try
+    // Take action based on the Parameter Selector
+    switch (static_cast<dcmi::DCMIConfigParameters>(parameter))
     {
-        // Take action based on the Parameter Selector
-        switch (
-            static_cast<dcmi::DCMIConfigParameters>(requestData->paramSelect))
+        case dcmi::DCMIConfigParameters::ActivateDHCP:
         {
-            case dcmi::DCMIConfigParameters::ActivateDHCP:
-
-                if ((requestData->data[0] & DCMI_ACTIVATE_DHCP_MASK) &&
-                    (dcmi::getDHCPEnabled() !=
-                     EthernetInterface::DHCPConf::none))
-                {
-                    // When these conditions are met we have to trigger DHCP
-                    // protocol restart using the latest parameter settings, but
-                    // as per n/w manager design, each time when we update n/w
-                    // parameters, n/w service is restarted. So we no need to
-                    // take any action in this case.
-                }
-                break;
-
-            case dcmi::DCMIConfigParameters::DiscoveryConfig:
-
-                if (requestData->data[0] & DCMI_OPTION_12_MASK)
-                {
-                    dcmi::setDHCPOption(DHCP_OPT12_ENABLED, true);
-                }
-                else
-                {
-                    dcmi::setDHCPOption(DHCP_OPT12_ENABLED, false);
-                }
-
-                // Systemd-networkd doesn't support Random Back off
-                if (requestData->data[0] & DCMI_RAND_BACK_OFF_MASK)
-                {
-                    return IPMI_CC_INVALID;
-                }
-                break;
-            // Systemd-networkd doesn't allow to configure DHCP timigs
-            case dcmi::DCMIConfigParameters::DHCPTiming1:
-            case dcmi::DCMIConfigParameters::DHCPTiming2:
-            case dcmi::DCMIConfigParameters::DHCPTiming3:
-            default:
-                return IPMI_CC_INVALID;
+            uint7_t reserved{};
+            bool activate{};
+            if (payload.unpack(activate, reserved) || !payload.fullyUnpacked())
+            {
+                return ipmi::responseReqDataLenInvalid();
+            }
+            if (reserved)
+            {
+                return ipmi::responseInvalidFieldRequest();
+            }
+            std::optional<EthernetInterface::DHCPConf> dhcpEnabled =
+                dcmi::getDHCPEnabled(ctx);
+            if (!dhcpEnabled)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            if (activate &&
+                (dhcpEnabled.value() != EthernetInterface::DHCPConf::none))
+            {
+                // When these conditions are met we have to trigger DHCP
+                // protocol restart using the latest parameter settings,
+                // but as per n/w manager design, each time when we
+                // update n/w parameters, n/w service is restarted. So
+                // we no need to take any action in this case.
+            }
+            break;
         }
+        case dcmi::DCMIConfigParameters::DiscoveryConfig:
+        {
+            bool option12{};
+            uint6_t reserved1{};
+            bool randBackOff{};
+            if (payload.unpack(option12, reserved1, randBackOff) ||
+                !payload.fullyUnpacked())
+            {
+                return ipmi::responseReqDataLenInvalid();
+            }
+            // Systemd-networkd doesn't support Random Back off
+            if (reserved1 || randBackOff)
+            {
+                return ipmi::responseInvalidFieldRequest();
+            }
+            dcmi::setDHCPOption(ctx, dcmi::dhcpOpt12Enabled, option12);
+            break;
+        }
+        // Systemd-networkd doesn't allow to configure DHCP timigs
+        case dcmi::DCMIConfigParameters::DHCPTiming1:
+        case dcmi::DCMIConfigParameters::DHCPTiming2:
+        case dcmi::DCMIConfigParameters::DHCPTiming3:
+        default:
+            return ipmi::responseInvalidFieldRequest();
     }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
-    }
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
-ipmi_ret_t getDCMIConfParams(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                             ipmi_response_t response, ipmi_data_len_t data_len,
-                             ipmi_context_t)
+ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(ipmi::Context::ptr& ctx,
+                                                        uint8_t parameter,
+                                                        uint8_t setSelector)
 {
-    auto requestData =
-        reinterpret_cast<const dcmi::GetConfParamsRequest*>(request);
-    auto responseData =
-        reinterpret_cast<dcmi::GetConfParamsResponse*>(response);
-
-    responseData->data[0] = 0x00;
-
-    if (*data_len != sizeof(dcmi::GetConfParamsRequest))
+    if (setSelector)
     {
-        log<level::ERR>("Invalid Requested Packet size",
-                        entry("PACKET SIZE=%d", *data_len));
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::responseInvalidFieldRequest();
     }
+    ipmi::message::Payload payload;
+    payload.pack(dcmi::specMajorVersion, dcmi::specMinorVersion,
+                 dcmi::configParameterRevision);
 
-    *data_len = 0;
-
-    try
+    // Take action based on the Parameter Selector
+    switch (static_cast<dcmi::DCMIConfigParameters>(parameter))
     {
-        // Take action based on the Parameter Selector
-        switch (
-            static_cast<dcmi::DCMIConfigParameters>(requestData->paramSelect))
+        case dcmi::DCMIConfigParameters::ActivateDHCP:
+            payload.pack(dcmi::activateDhcpReply);
+            break;
+        case dcmi::DCMIConfigParameters::DiscoveryConfig:
         {
-            case dcmi::DCMIConfigParameters::ActivateDHCP:
-                responseData->data[0] = DCMI_ACTIVATE_DHCP_REPLY;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 1;
-                break;
-            case dcmi::DCMIConfigParameters::DiscoveryConfig:
-                if (dcmi::getDHCPOption(DHCP_OPT12_ENABLED))
-                {
-                    responseData->data[0] |= DCMI_OPTION_12_MASK;
-                }
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 1;
-                break;
-            // Get below values from Systemd-networkd source code
-            case dcmi::DCMIConfigParameters::DHCPTiming1:
-                responseData->data[0] = DHCP_TIMING1;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 1;
-                break;
-            case dcmi::DCMIConfigParameters::DHCPTiming2:
-                responseData->data[0] = DHCP_TIMING2_LOWER;
-                responseData->data[1] = DHCP_TIMING2_UPPER;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 2;
-                break;
-            case dcmi::DCMIConfigParameters::DHCPTiming3:
-                responseData->data[0] = DHCP_TIMING3_LOWER;
-                responseData->data[1] = DHCP_TIMING3_UPPER;
-                *data_len = sizeof(dcmi::GetConfParamsResponse) + 2;
-                break;
-            default:
-                *data_len = 0;
-                return IPMI_CC_INVALID;
+            uint8_t discovery{};
+            std::optional<bool> enabled =
+                dcmi::getDHCPOption(ctx, dcmi::dhcpOpt12Enabled);
+            if (!enabled.has_value())
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            if (enabled.value())
+            {
+                discovery = dcmi::option12Mask;
+            }
+            payload.pack(discovery);
+            break;
         }
-    }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>(e.what());
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        // Get below values from Systemd-networkd source code
+        case dcmi::DCMIConfigParameters::DHCPTiming1:
+            payload.pack(dcmi::dhcpTiming1);
+            break;
+        case dcmi::DCMIConfigParameters::DHCPTiming2:
+            payload.pack(dcmi::dhcpTiming2);
+            break;
+        case dcmi::DCMIConfigParameters::DHCPTiming3:
+            payload.pack(dcmi::dhcpTiming3);
+            break;
+        default:
+            return ipmi::responseInvalidFieldRequest();
     }
 
-    responseData->major = DCMI_SPEC_MAJOR_VERSION;
-    responseData->minor = DCMI_SPEC_MINOR_VERSION;
-    responseData->paramRevision = DCMI_CONFIG_PARAMETER_REVISION;
-
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess();
 }
 
 static std::optional<uint16_t> readPower(ipmi::Context::ptr& ctx)
@@ -1201,13 +1207,14 @@ void register_netfn_dcmi_functions()
                          ipmi::Privilege::Operator, getSensorInfo);
 #endif
     // <Get DCMI Configuration Parameters>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS, NULL,
-                           getDCMIConfParams, PRIVILEGE_USER);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdGetDcmiConfigParameters,
+                         ipmi::Privilege::User, getDCMIConfParams);
 
     // <Set DCMI Configuration Parameters>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::SET_CONF_PARAMS, NULL,
-                           setDCMIConfParams, PRIVILEGE_ADMIN);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdSetDcmiConfigParameters,
+                         ipmi::Privilege::Admin, setDCMIConfParams);
 
     return;
 }
-// 956379
