@@ -32,7 +32,6 @@ constexpr auto pcapInterface = "xyz.openbmc_project.Control.Power.Cap";
 constexpr auto powerCapProp = "PowerCap";
 constexpr auto powerCapEnableProp = "PowerCapEnable";
 
-constexpr auto DCMI_PARAMETER_REVISION = 2;
 constexpr auto DCMI_SPEC_MAJOR_VERSION = 1;
 constexpr auto DCMI_SPEC_MINOR_VERSION = 5;
 constexpr auto DCMI_CONFIG_PARAMETER_REVISION = 1;
@@ -64,6 +63,10 @@ constexpr auto assetTagMaxOffset = 62;
 constexpr auto assetTagMaxSize = 63;
 constexpr auto maxBytes = 16;
 constexpr size_t maxCtrlIdStrLen = 63;
+
+constexpr uint8_t parameterRevision = 2;
+constexpr uint8_t specMajorVersion = 1;
+constexpr uint8_t specMinorVersion = 5;
 
 // Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
 static const std::map<uint8_t, std::string> entityIdToName{
@@ -586,106 +589,105 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
     return ipmi::responseSuccess(totalIdSize);
 }
 
-// List of the capabilities under each parameter
-dcmi::DCMICaps dcmiCaps = {
-    // Supported DCMI Capabilities
-    {dcmi::DCMICapParameters::SUPPORTED_DCMI_CAPS,
-     {3,
-      {{"PowerManagement", 2, 0, 1},
-       {"OOBSecondaryLan", 3, 2, 1},
-       {"SerialTMODE", 3, 1, 1},
-       {"InBandSystemInterfaceChannel", 3, 0, 1}}}},
-    // Mandatory Platform Attributes
-    {dcmi::DCMICapParameters::MANDATORY_PLAT_ATTRIBUTES,
-     {5,
-      {{"SELAutoRollOver", 1, 15, 1},
-       {"FlushEntireSELUponRollOver", 1, 14, 1},
-       {"RecordLevelSELFlushUponRollOver", 1, 13, 1},
-       {"NumberOfSELEntries", 1, 0, 12},
-       {"TempMonitoringSamplingFreq", 5, 0, 8}}}},
-    // Optional Platform Attributes
-    {dcmi::DCMICapParameters::OPTIONAL_PLAT_ATTRIBUTES,
-     {2,
-      {{"PowerMgmtDeviceSlaveAddress", 1, 1, 7},
-       {"BMCChannelNumber", 2, 4, 4},
-       {"DeviceRivision", 2, 0, 4}}}},
-    // Manageability Access Attributes
-    {dcmi::DCMICapParameters::MANAGEABILITY_ACCESS_ATTRIBUTES,
-     {3,
-      {{"MandatoryPrimaryLanOOBSupport", 1, 0, 8},
-       {"OptionalSecondaryLanOOBSupport", 2, 0, 8},
-       {"OptionalSerialOOBMTMODECapability", 3, 0, 8}}}}};
-
-ipmi_ret_t getDCMICapabilities(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                               ipmi_response_t response,
-                               ipmi_data_len_t data_len, ipmi_context_t)
+ipmi::RspType<ipmi::message::Payload> getDCMICapabilities(uint8_t parameter)
 {
     std::ifstream dcmiCapFile(dcmi::gDCMICapabilitiesConfig);
     if (!dcmiCapFile.is_open())
     {
         log<level::ERR>("DCMI Capabilities file not found");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
     auto data = nlohmann::json::parse(dcmiCapFile, nullptr, false);
     if (data.is_discarded())
     {
         log<level::ERR>("DCMI Capabilities JSON parser failure");
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::responseUnspecifiedError();
     }
 
-    auto requestData =
-        reinterpret_cast<const dcmi::GetDCMICapRequest*>(request);
+    constexpr bool reserved1{};
+    constexpr uint5_t reserved5{};
+    constexpr uint7_t reserved7{};
+    constexpr uint8_t reserved8{};
+    constexpr uint16_t reserved16{};
 
-    // get list of capabilities in a parameter
-    auto caps =
-        dcmiCaps.find(static_cast<dcmi::DCMICapParameters>(requestData->param));
-    if (caps == dcmiCaps.end())
+    ipmi::message::Payload payload;
+    payload.pack(dcmi::specMajorVersion, dcmi::specMinorVersion,
+                 dcmi::parameterRevision);
+
+    enum class DCMICapParameters : uint8_t
     {
-        log<level::ERR>("Invalid input parameter");
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
+        SupportedDcmiCaps = 0x01,             // Supported DCMI Capabilities
+        MandatoryPlatAttributes = 0x02,       // Mandatory Platform Attributes
+        OptionalPlatAttributes = 0x03,        // Optional Platform Attributes
+        ManageabilityAccessAttributes = 0x04, // Manageability Access Attributes
+    };
 
-    auto responseData = reinterpret_cast<dcmi::GetDCMICapResponse*>(response);
-
-    // For each capabilities in a parameter fill the data from
-    // the json file based on the capability name.
-    for (auto cap : caps->second.capList)
+    switch (static_cast<DCMICapParameters>(parameter))
     {
-        // If the data is beyond first byte boundary, insert in a
-        // 16bit pattern for example number of SEL entries are represented
-        // in 12bits.
-        if ((cap.length + cap.position) > dcmi::gByteBitSize)
+        case DCMICapParameters::SupportedDcmiCaps:
         {
-            uint16_t val = data.value(cap.name.c_str(), 0);
-            // According to DCMI spec v1.5, max number of SEL entries is
-            // 4096, but bit 12b of DCMI capabilities Mandatory Platform
-            // Attributes field is reserved and therefore we can use only
-            // the provided 12 bits with maximum value of 4095.
-            // We're playing safe here by applying the mask
-            // to ensure that provided value will fit into 12 bits.
-            if (cap.length > dcmi::gByteBitSize)
-            {
-                val &= dcmi::gMaxSELEntriesMask;
-            }
-            val <<= cap.position;
-            responseData->data[cap.bytePosition - 1] |=
-                static_cast<uint8_t>(val);
-            responseData->data[cap.bytePosition] |= val >> dcmi::gByteBitSize;
+            bool powerManagement = data.value("PowerManagement", 0);
+            bool oobSecondaryLan = data.value("OOBSecondaryLan", 0);
+            bool serialTMode = data.value("SerialTMODE", 0);
+            bool inBandSystemInterfaceChannel =
+                data.value("InBandSystemInterfaceChannel", 0);
+            payload.pack(reserved8, powerManagement, reserved7,
+                         inBandSystemInterfaceChannel, serialTMode,
+                         oobSecondaryLan, reserved5);
+            break;
         }
-        else
+            // Mandatory Platform Attributes
+        case DCMICapParameters::MandatoryPlatAttributes:
         {
-            responseData->data[cap.bytePosition - 1] |=
-                data.value(cap.name.c_str(), 0) << cap.position;
+            bool selAutoRollOver = data.value("SELAutoRollOver", 0);
+            bool flushEntireSELUponRollOver =
+                data.value("FlushEntireSELUponRollOver", 0);
+            bool recordLevelSELFlushUponRollOver =
+                data.value("RecordLevelSELFlushUponRollOver", 0);
+            uint12_t numberOfSELEntries = data.value("NumberOfSELEntries",
+                                                     0xcac);
+            uint8_t tempMonitoringSamplingFreq =
+                data.value("TempMonitoringSamplingFreq", 0);
+            payload.pack(numberOfSELEntries, reserved1,
+                         recordLevelSELFlushUponRollOver,
+                         flushEntireSELUponRollOver, selAutoRollOver,
+                         reserved16, tempMonitoringSamplingFreq);
+            break;
+        }
+        // Optional Platform Attributes
+        case DCMICapParameters::OptionalPlatAttributes:
+        {
+            uint7_t powerMgmtDeviceSlaveAddress =
+                data.value("PowerMgmtDeviceSlaveAddress", 0);
+            uint4_t bmcChannelNumber = data.value("BMCChannelNumber", 0);
+            uint4_t deviceRivision = data.value("DeviceRivision", 0);
+            payload.pack(powerMgmtDeviceSlaveAddress, reserved1, deviceRivision,
+                         bmcChannelNumber);
+            break;
+        }
+        // Manageability Access Attributes
+        case DCMICapParameters::ManageabilityAccessAttributes:
+        {
+            uint8_t mandatoryPrimaryLanOOBSupport =
+                data.value("MandatoryPrimaryLanOOBSupport", 0xff);
+            uint8_t optionalSecondaryLanOOBSupport =
+                data.value("OptionalSecondaryLanOOBSupport", 0xff);
+            uint8_t optionalSerialOOBMTMODECapability =
+                data.value("OptionalSerialOOBMTMODECapability", 0xff);
+            payload.pack(mandatoryPrimaryLanOOBSupport,
+                         optionalSecondaryLanOOBSupport,
+                         optionalSerialOOBMTMODECapability);
+            break;
+        }
+        default:
+        {
+            log<level::ERR>("Invalid input parameter");
+            return ipmi::responseInvalidFieldRequest();
         }
     }
 
-    responseData->major = DCMI_SPEC_MAJOR_VERSION;
-    responseData->minor = DCMI_SPEC_MINOR_VERSION;
-    responseData->paramRevision = DCMI_PARAMETER_REVISION;
-    *data_len = sizeof(*responseData) + caps->second.size;
-
-    return IPMI_CC_OK;
+    return ipmi::responseSuccess(payload);
 }
 
 namespace dcmi
@@ -1355,8 +1357,9 @@ void register_netfn_dcmi_functions()
                          ipmi::Privilege::Admin, setMgmntCtrlIdStr);
 
     // <Get DCMI capabilities>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
-                           NULL, getDCMICapabilities, PRIVILEGE_USER);
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdGetDcmiCapabilitiesInfo,
+                         ipmi::Privilege::User, getDCMICapabilities);
 
     // <Get Temperature Readings>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_TEMP_READINGS,
