@@ -20,8 +20,6 @@ enum Commands
     GET_CAPABILITIES = 0x01,
     GET_POWER_READING = 0x02,
     GET_SENSOR_INFO = 0x07,
-    GET_MGMNT_CTRL_ID_STR = 0x09,
-    SET_MGMNT_CTRL_ID_STR = 0x0A,
     GET_TEMP_READINGS = 0x10,
     SET_CONF_PARAMS = 0x12,
     GET_CONF_PARAMS = 0x13,
@@ -110,46 +108,6 @@ static constexpr auto groupExtId = 0xDC;
  *  @return True if DCMI power management is supported
  */
 bool isDCMIPowerMgmtSupported();
-
-/** @struct GetMgmntCtrlIdStrRequest
- *
- *  DCMI payload for Get Management Controller Identifier String cmd request.
- */
-struct GetMgmntCtrlIdStrRequest
-{
-    uint8_t offset; //!< Offset to read.
-    uint8_t bytes;  //!< Number of bytes to read.
-} __attribute__((packed));
-
-/** @struct GetMgmntCtrlIdStrResponse
- *
- *  DCMI payload for Get Management Controller Identifier String cmd response.
- */
-struct GetMgmntCtrlIdStrResponse
-{
-    uint8_t strLen; //!< ID string length.
-    char data[];    //!< ID string
-} __attribute__((packed));
-
-/** @struct SetMgmntCtrlIdStrRequest
- *
- *  DCMI payload for Set Management Controller Identifier String cmd request.
- */
-struct SetMgmntCtrlIdStrRequest
-{
-    uint8_t offset; //!< Offset to write.
-    uint8_t bytes;  //!< Number of bytes to read.
-    char data[];    //!< ID string
-} __attribute__((packed));
-
-/** @struct GetMgmntCtrlIdStrResponse
- *
- *  DCMI payload for Get Management Controller Identifier String cmd response.
- */
-struct SetMgmntCtrlIdStrResponse
-{
-    uint8_t offset; //!< Last Offset Written.
-} __attribute__((packed));
 
 /** @enum DCMICapParameters
  *
