@@ -81,7 +81,7 @@ additionalDataMap parseAdditionalData(const AdditionalData& data)
 
 int convert(const std::string_view& str, int base = 10)
 {
-    int ret;
+    int ret = 0;
     std::from_chars(str.data(), str.data() + str.size(), ret, base);
     return ret;
 }

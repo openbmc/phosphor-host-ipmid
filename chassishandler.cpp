@@ -490,10 +490,12 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
                     "Error in prefix getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
-            std::copy(msgPayloadStartingPos + prefixOffset,
-                      (msgPayloadStartingPos + prefixOffset +
-                       sizeof(decltype(prefix))),
-                      &prefix);
+            // std::copy(msgPayloadStartingPos + prefixOffset,
+            //           msgPayloadStartingPos + prefixOffset +
+            //               sizeof(decltype(prefix)),
+            //           &prefix);
+            // Workaround compiler misdetecting out of bounds memcpy
+            prefix = msgPayloadStartingPos[prefixOffset];
 
             uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
             if (addrSize != ipmi::network::IPV4_ADDRESS_SIZE_BYTE)
