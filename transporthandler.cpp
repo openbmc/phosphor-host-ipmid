@@ -841,6 +841,28 @@ bool isValidMACAddress(const ether_addr& mac)
     return true;
 }
 
+/**
+ * @brief is a valid LAN channel.
+ *
+ * This function checks whether the input channel is a valid LAN channel or not.
+ *
+ * @param[in] channel: the channel number.
+ * @return nullopt if the channel is invalid, false if the channel is not a LAN
+ * channel, true if the channel is a LAN channel.
+ **/
+std::optional<bool> isLanChannel(uint8_t channel)
+{
+    ChannelInfo chInfo;
+    auto cc = getChannelInfo(channel, chInfo);
+    if (cc != ccSuccess)
+    {
+        return std::nullopt;
+    }
+
+    return chInfo.mediumType ==
+           static_cast<uint8_t>(EChannelMediumType::lan8032);
+}
+
 RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                  uint8_t parameter, message::Payload& req)
 {
@@ -850,6 +872,12 @@ RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
     {
         log<level::ERR>("Set Lan - Invalid field in request");
         req.trailingOk = true;
+        return responseInvalidFieldRequest();
+    }
+
+    if (!isLanChannel(channel).value_or(false))
+    {
+        log<level::ERR>("Set Lan - Not a LAN channel");
         return responseInvalidFieldRequest();
     }
 
@@ -1273,6 +1301,12 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
     if (reserved || !isValidChannel(channel))
     {
         log<level::ERR>("Get Lan - Invalid field in request");
+        return responseInvalidFieldRequest();
+    }
+
+    if (!isLanChannel(channel).value_or(false))
+    {
+        log<level::ERR>("Set Lan - Not a LAN channel");
         return responseInvalidFieldRequest();
     }
 
