@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cbb1391d_39317fc4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-01T22:43:03Z",
+      "side": 1,
+      "message": "Big patch. Thanks for your efforts to improve ipmid.\n\nThere are some sections that I think would benefit from using the helper functions in utils.[ch]pp\n\nIn the utils.cpp file, it makes more sense to just remove the is_method_error calls and let the caller catch the exception, since that is already how the code is flowing (it never makes it to the is_method_error call if an exception is thrown).\n\nI am currently rewriting dcmihandler.cpp, so there is no need to fix that file.",
+      "revId": "6437afd7577cbdeae49fd2ba3980911ab24b142e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ea8ade09_f385d732",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1428,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-01T22:43:03Z",
+      "side": 1,
+      "message": "this whole section could be replaced with ipmi::getService(...) from include/ipmid/utils.hpp\n\nYou will still need to catch the exception, but the helper function makes for much easier reading.",
+      "range": {
+        "startLine": 1408,
+        "startChar": 0,
+        "endLine": 1428,
+        "endChar": 1
+      },
+      "revId": "6437afd7577cbdeae49fd2ba3980911ab24b142e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a49f67aa_6cc499cf",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-01T22:43:03Z",
+      "side": 1,
+      "message": "this whole section could be replaced with ipmi::getDbusProperty()",
+      "range": {
+        "startLine": 1450,
+        "startChar": 0,
+        "endLine": 1461,
+        "endChar": 5
+      },
+      "revId": "6437afd7577cbdeae49fd2ba3980911ab24b142e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1ab4c88b_3b6ca8f1",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-01T22:43:03Z",
+      "side": 1,
+      "message": "for this function, since it throws anyway, I would prefer just removing the whole if statement for is_method_error.\n\nThe try/catch is an extra level of overhead because the elog\u003c\u003e throws. If we simply let the bus.call and message.read functions throw, they should be caught by the caller.\n\nThe same goes for all the functions in this file.",
+      "revId": "6437afd7577cbdeae49fd2ba3980911ab24b142e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
