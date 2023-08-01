@@ -14,14 +14,7 @@
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
-namespace cache
-{
-
-command::Guid guid;
-std::string guidObjService = "";
-std::string guidObjPath = "";
-
-} // namespace cache
+static std::optional<command::Guid> guid;
 
 namespace command
 {
@@ -30,27 +23,7 @@ std::unique_ptr<sdbusplus::bus::match_t> matchPtr(nullptr);
 
 static constexpr auto propInterface = "xyz.openbmc_project.Common.UUID";
 static constexpr auto uuidProperty = "UUID";
-static constexpr auto subtreePath = "/xyz/openbmc_project/inventory/";
-
-void getUIDObjectInfo()
-{
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-    ipmi::DbusObjectInfo bmcObject;
-    try
-    {
-        // Get the Inventory object implementing BMC interface
-        bmcObject = ipmi::getDbusObject(bus, propInterface, subtreePath);
-    }
-    catch (const sdbusplus::exception_t& e)
-    {
-        lg2::error("Failed in reading BMC UUID property: {ERROR}", "ERROR", e);
-        return;
-    }
-
-    cache::guidObjService = bmcObject.second;
-    cache::guidObjPath = bmcObject.first;
-    return;
-}
+static constexpr auto subtreePath = "/xyz/openbmc_project/inventory";
 
 static void rfcToGuid(std::string rfc4122, Guid& uuid)
 {
@@ -90,44 +63,50 @@ static void rfcToGuid(std::string rfc4122, Guid& uuid)
     return;
 }
 
-Guid getSystemGUID()
+// Canned System GUID for when the Chassis DBUS object is not populated
+static constexpr Guid fakeGuid = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                                  0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C,
+                                  0x0D, 0x0E, 0x0F, 0x10};
+const Guid& getSystemGUID()
 {
-    // Canned System GUID for QEMU where the Chassis DBUS object is not
-    // populated
-    Guid guid = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10};
+    if (guid.has_value())
+    {
+        return guid.value();
+    }
 
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     ipmi::Value propValue;
     try
     {
+        const auto& [objPath, service] = ipmi::getDbusObject(bus, propInterface,
+                                                             subtreePath);
         // Read UUID property value from bmcObject
         // UUID is in RFC4122 format Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
-        propValue = ipmi::getDbusProperty(bus, cache::guidObjService,
-                                          cache::guidObjPath, propInterface,
+        propValue = ipmi::getDbusProperty(bus, service, objPath, propInterface,
                                           uuidProperty);
     }
     catch (const sdbusplus::exception_t& e)
     {
         lg2::error("Failed in reading BMC UUID property: {ERROR}", "ERROR", e);
-        return guid;
+        return fakeGuid;
     }
 
     std::string rfc4122Uuid = std::get<std::string>(propValue);
     try
     {
         // convert to IPMI format
-        rfcToGuid(rfc4122Uuid, guid);
+        Guid tmpGuid{};
+        rfcToGuid(rfc4122Uuid, tmpGuid);
+        guid = tmpGuid;
     }
     catch (const InvalidArgument& e)
     {
         lg2::error("Failed in parsing BMC UUID property: {VALUE}", "VALUE",
                    rfc4122Uuid.c_str());
-        return guid;
+        return fakeGuid;
     }
-
-    return guid;
+    return guid.value();
 }
 
 void registerGUIDChangeCallback()
@@ -137,9 +116,38 @@ void registerGUIDChangeCallback()
         using namespace sdbusplus::bus::match::rules;
         sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
-        matchPtr = std::make_unique<sdbusplus::bus::match_t>(
-            bus, propertiesChanged(cache::guidObjPath, propInterface),
-            [](sdbusplus::message_t&) { cache::guid = getSystemGUID(); });
+        try
+        {
+            matchPtr = std::make_unique<sdbusplus::bus::match_t>(
+                bus, propertiesChangedNamespace(subtreePath, propInterface),
+                [](sdbusplus::message_t& m) {
+                try
+                {
+                    std::string iface{};
+                    std::map<std::string, ipmi::Value> pdict{};
+                    m.read(iface, pdict);
+                    if (iface != propInterface)
+                    {
+                        return;
+                    }
+                    auto guidStr = std::get<std::string>(pdict.at("UUID"));
+                    Guid tmpGuid{};
+                    rfcToGuid(guidStr, tmpGuid);
+                    guid = tmpGuid;
+                }
+                catch (const std::exception& e)
+                {
+                    // signal contained invalid guid; ignore it
+                    lg2::error(
+                        "Failed to parse propertiesChanged signal: {ERROR}",
+                        "ERROR", e);
+                }
+                });
+        }
+        catch (const std::exception& e)
+        {
+            lg2::error("Failed to create dbus match: {ERROR}", "ERROR", e);
+        }
     }
 }
 

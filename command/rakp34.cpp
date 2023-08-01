@@ -244,7 +244,8 @@ std::vector<uint8_t> RAKP34(const std::vector<uint8_t>& inPayload,
     std::advance(iter, sizeof(bmcSessionID));
 
     // Managed System GUID
-    std::copy_n(cache::guid.data(), cache::guid.size(), iter);
+    const Guid& guid = command::getSystemGUID();
+    std::copy_n(guid.data(), guid.size(), iter);
 
     // Integrity Check Value
     auto icv = authAlgo->generateICV(input);
