@@ -169,4 +169,18 @@ struct IPMIThresholds
     std::optional<uint8_t> criticalHigh;
 };
 
+namespace dcmi
+{
+
+typedef struct
+{
+    std::string objectPath;
+    uint8_t type;
+    uint16_t recordId;
+    uint8_t entityId;
+    uint8_t entityInstance;
+} sensorInfo;
+
+} // namespace dcmi
+
 } // namespace ipmi
