@@ -22,6 +22,30 @@
       },
       "revId": "5fb2cffaf8dc64f587c37a745a386805ee6ca471",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d7764f3c_d1cb38c7",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 878,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2023-08-02T15:13:09Z",
+      "side": 1,
+      "message": "ack, done.",
+      "parentUuid": "dbb7f1fa_a84f64e1",
+      "range": {
+        "startLine": 878,
+        "startChar": 50,
+        "endLine": 878,
+        "endChar": 52
+      },
+      "revId": "5fb2cffaf8dc64f587c37a745a386805ee6ca471",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
