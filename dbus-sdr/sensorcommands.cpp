@@ -2489,14 +2489,125 @@ ipmi::RspType<uint16_t,            // next record ID
 namespace dcmi
 {
 
+std::tuple<uint8_t,                // Total of instance sensors
+           std::vector<sensorInfo> // The list of sensors
+           >
+    getSensorsByEntityId(ipmi::Context::ptr ctx, uint8_t entityId,
+                         uint8_t entityInstance, uint8_t instanceStart)
+{
+    std::vector<sensorInfo> sensorList;
+    uint8_t totalInstSensor = 0;
+    auto match = ipmi::dcmi::validEntityId.find(entityId);
+
+    if (match == ipmi::dcmi::validEntityId.end())
+    {
+        return std::make_tuple(totalInstSensor, sensorList);
+    }
+
+    auto& sensorTree = getSensorTree();
+    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    {
+        return std::make_tuple(totalInstSensor, sensorList);
+    }
+
+    auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
+
+    for (const auto& sensor : sensorTree)
+    {
+        const std::string& sensorObjPath = sensor.first;
+        const auto& sensorTypeValue = getSensorTypeFromPath(sensorObjPath);
+
+        /*
+         * In the DCMI specification, it only supports the sensor type is 0x01
+         * (temperature type) for both Get Sensor Info and Get Temperature
+         * Readings commands.
+         */
+        if (sensorTypeValue != ipmi::dcmi::temperatureSensorType)
+        {
+            continue;
+        }
+
+        const auto& connection = sensor.second.begin()->first;
+        DbusInterfaceMap sensorMap;
+
+        if (!getSensorMap(ctx, connection, sensorObjPath, sensorMap,
+                          sensorMapSdrUpdatePeriod))
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "Failed to update sensor map for threshold sensor",
+                phosphor::logging::entry("SERVICE=%s", connection.c_str()),
+                phosphor::logging::entry("PATH=%s", sensorObjPath.c_str()));
+            continue;
+        }
+
+        uint8_t entityIdValue = 0;
+        uint8_t entityInstanceValue = 0;
+
+        /*
+         * Get the Entity ID, Entity Instance information which are configured
+         * in the Entity-Manger.
+         */
+        updateIpmiFromAssociation(
+            sensorObjPath,
+            ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
+            sensorMap, entityIdValue, entityInstanceValue);
+
+        if (entityIdValue == match->first || entityIdValue == match->second)
+        {
+            totalInstSensor++;
+
+            /*
+             * When Entity Instance parameter is not 0, we only get the first
+             * sensor whose Entity Instance number is equal input Entity
+             * Instance parameter.
+             */
+            if (entityInstance)
+            {
+                if (!sensorList.empty())
+                {
+                    continue;
+                }
+
+                if (entityInstanceValue == entityInstance)
+                {
+                    auto recordId = getSensorNumberFromPath(sensorObjPath);
+                    if (recordId != invalidSensorNumber)
+                    {
+                        sensorList.emplace_back(sensorObjPath, sensorTypeValue,
+                                                recordId, entityIdValue,
+                                                entityInstanceValue);
+                    }
+                }
+            }
+            else if (entityInstanceValue >= instanceStart)
+            {
+                auto recordId = getSensorNumberFromPath(sensorObjPath);
+                if (recordId != invalidSensorNumber)
+                {
+                    sensorList.emplace_back(sensorObjPath, sensorTypeValue,
+                                            recordId, entityIdValue,
+                                            entityInstanceValue);
+                }
+            }
+        }
+    }
+
+    auto cmpFunc = [](sensorInfo first, sensorInfo second) {
+        return first.entityInstance <= second.entityInstance;
+    };
+
+    sort(sensorList.begin(), sensorList.end(), cmpFunc);
+
+    return std::make_tuple(totalInstSensor, sensorList);
+}
+
 ipmi::RspType<uint8_t,              // No of instances for requested id
               uint8_t,              // No of record ids in the response
               std::vector<uint16_t> // SDR Record ID corresponding to the Entity
                                     // IDs
               >
     getSensorInfo(ipmi::Context::ptr ctx, uint8_t sensorType, uint8_t entityId,
-                  uint8_t entityInstance,
-                  [[maybe_unused]] uint8_t instanceStart)
+                  uint8_t entityInstance, uint8_t instanceStart)
 {
     auto match = ipmi::dcmi::validEntityId.find(entityId);
     if (match == ipmi::dcmi::validEntityId.end())
@@ -2513,78 +2624,35 @@ ipmi::RspType<uint8_t,              // No of instances for requested id
 
         return ipmi::responseInvalidFieldRequest();
     }
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
-    {
-        return ipmi::responseUnspecifiedError();
-    }
 
     std::vector<uint16_t> sensorRec{};
-    uint8_t numInstances = 0;
+    const auto& [totalSensorInst, sensorList] =
+        getSensorsByEntityId(ctx, entityId, entityInstance, instanceStart);
 
-    auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
-    for (const auto& sensor : sensorTree)
+    if (sensorList.empty())
     {
-        auto sensorTypeValue = getSensorTypeFromPath(sensor.first);
-        if (sensorTypeValue != ipmi::dcmi::temperatureSensorType)
-        {
-            continue;
-        }
-        const auto& connection = sensor.second.begin()->first;
+        return ipmi::responseSuccess(totalSensorInst, 0, sensorRec);
+    }
 
-        DbusInterfaceMap sensorMap;
-        if (!getSensorMap(ctx, connection, sensor.first, sensorMap,
-                          sensorMapSdrUpdatePeriod))
+    /*
+     * As DCMI specification, the maximum number of Record Ids of response data
+     * is 1 if Entity Instance paramter is not 0. Else the maximum number of
+     * Record Ids of response data is 8. Therefore, not all of sensors are shown
+     * in response data.
+     */
+    uint8_t numOfRec = (entityInstance != 0) ? 1 : ipmi::dcmi::maxRecords;
+
+    for (const auto& sensor : sensorList)
+    {
+        sensorRec.emplace_back(sensor.recordId);
+        if (sensorRec.size() >= numOfRec)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Failed to update sensor map for threshold sensor",
-                phosphor::logging::entry("SERVICE=%s", connection.c_str()),
-                phosphor::logging::entry("PATH=%s", sensor.first.c_str()));
-            continue;
-        }
-        uint8_t entityIdValue = 0;
-        uint8_t entityInstanceValue = 0;
-        updateIpmiFromAssociation(
-            sensor.first,
-            ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
-            sensorMap, entityIdValue, entityInstanceValue);
-        if (!entityInstance)
-        {
-            if (entityIdValue == match->first || entityIdValue == match->second)
-            {
-                auto recordId = getSensorNumberFromPath(sensor.first);
-                if (recordId != invalidSensorNumber)
-                {
-                    numInstances++;
-                    if (numInstances <= ipmi::dcmi::maxRecords)
-                    {
-                        sensorRec.push_back(recordId);
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (entityIdValue == match->first || entityIdValue == match->second)
-            {
-                if (entityInstance == entityInstanceValue)
-                {
-                    auto recordId = getSensorNumberFromPath(sensor.first);
-                    if ((recordId != invalidSensorNumber) && sensorRec.empty())
-                    {
-                        sensorRec.push_back(recordId);
-                    }
-                }
-                numInstances++;
-            }
+            break;
         }
     }
-    if (sensorRec.empty())
-    {
-        return ipmi::responseSensorInvalid();
-    }
-    uint8_t numRecords = sensorRec.size();
-    return ipmi::responseSuccess(numInstances, numRecords, sensorRec);
+
+    return ipmi::responseSuccess(
+        totalSensorInst, static_cast<uint8_t>(sensorRec.size()), sensorRec);
 }
 } // namespace dcmi
 
