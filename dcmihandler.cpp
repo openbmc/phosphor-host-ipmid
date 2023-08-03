@@ -981,6 +981,28 @@ ipmi_ret_t getTempReadings(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     return IPMI_CC_OK;
 }
 
+static int64_t getIndividualPowerReading(sdbusplus::bus_t& bus, std::string objectPath)
+{
+    int64_t power = 0;
+    // Return default value if failed to read from D-Bus object
+    try
+    {
+        auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
+
+        // Read the sensor value and scale properties
+        auto value = ipmi::getDbusProperty(
+            bus, service, objectPath, SENSOR_VALUE_INTF, SENSOR_VALUE_PROP);
+        power = std::get<double>(value);
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Failure to read power value from D-Bus object",
+                        entry("OBJECT_PATH=%s", objectPath.c_str()),
+                        entry("INTERFACE=%s", SENSOR_VALUE_INTF));
+    }
+    return power;
+}
+
 int64_t getPowerReading(sdbusplus::bus_t& bus)
 {
     std::ifstream sensorFile(POWER_READING_SENSOR);
@@ -1000,31 +1022,29 @@ int64_t getPowerReading(sdbusplus::bus_t& bus)
         elog<InternalFailure>();
     }
 
-    objectPath = data.value("path", "");
-    if (objectPath.empty())
+    int64_t power = 0;
+    int i = 0;
+
+    for(; true; i++){
+
+        std::string key = "path";
+        if(i != 0)
+            key += std::to_string(i);
+
+        if(!data.contains(key))
+            break;
+
+        power += getIndividualPowerReading(bus, data.value(key, ""));
+    }
+
+    if (i == 0)
     {
         log<level::ERR>("Power sensor D-Bus object path is empty",
                         entry("POWER_SENSOR_FILE=%s", POWER_READING_SENSOR));
         elog<InternalFailure>();
     }
 
-    // Return default value if failed to read from D-Bus object
-    int64_t power = 0;
-    try
-    {
-        auto service = ipmi::getService(bus, SENSOR_VALUE_INTF, objectPath);
 
-        // Read the sensor value and scale properties
-        auto value = ipmi::getDbusProperty(
-            bus, service, objectPath, SENSOR_VALUE_INTF, SENSOR_VALUE_PROP);
-        power = std::get<double>(value);
-    }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>("Failure to read power value from D-Bus object",
-                        entry("OBJECT_PATH=%s", objectPath.c_str()),
-                        entry("INTERFACE=%s", SENSOR_VALUE_INTF));
-    }
     return power;
 }
 
