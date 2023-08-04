@@ -16,6 +16,23 @@
       "message": "I don\u0027t really like how many of these feature flags there are. I find them to be somewhat confusing, but at this time, I don\u0027t have a better way to do this, so I guess we can go forward with this change.",
       "revId": "2ffa36c69a900cb8ed1e544811a762f0d6ee3d2b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "51171372_84971d69",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-04T18:58:50Z",
+      "side": 1,
+      "message": "Please add a PACKAGECONFIG section to meta-phosphor/recipes-phosphor/ipmi/phosphor-ipmi-host_git.bb to expose this feature.",
+      "revId": "2ffa36c69a900cb8ed1e544811a762f0d6ee3d2b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
