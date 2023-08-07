@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c3340ec9_90aa627c",
+        "filename": "app/watchdog.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-07T21:55:56Z",
+      "side": 0,
+      "message": "I don\u0027t see how this change will affect anything outside of ipmid. This variable is a static variable that is not exposed to dbus. Changing it here should only have any affect on callers of this ipmi function.\n\nI agree that this maybe is not the ideal way to reset the don\u0027t log flag, but I am pretty sure the don\u0027t log flag is superficial anyway.",
+      "revId": "d05b9dd8d56f6337839c0a896753940d543e975a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
