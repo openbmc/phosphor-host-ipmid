@@ -99,7 +99,7 @@ std::optional<uint32_t> getPcap(ipmi::Context::ptr& ctx)
     if (ec.value())
     {
         log<level::ERR>("Error in getPcap prop",
-                        entry("ERROR=%s", ec.message()));
+                        entry("ERROR=%s", ec.message().c_str()));
         elog<InternalFailure>();
         return std::nullopt;
     }
