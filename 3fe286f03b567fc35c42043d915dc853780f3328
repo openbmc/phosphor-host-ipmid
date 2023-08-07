@@ -16,6 +16,23 @@
       "message": "current behavior is clearly a bug and needs to be fixed in some way.",
       "revId": "3fe286f03b567fc35c42043d915dc853780f3328",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3c772489_1b8cbced",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-07T23:33:40Z",
+      "side": 1,
+      "message": "I can\u0027t in good conscience make another commit here that doesn\u0027t actually fix the problem. There have been so many commits trying to \u0027fix\u0027 this. They end up fixing it for one group and breaking it for another.\n\nI would propose adding a new field to the entity manager config that lists a \u0027short name\u0027 or \u0027ipmi name\u0027 that is limited to 16 characters and can be used here. If the field is present, use it. If it is not present, simply truncate the long name. Then it is up to the entity configuring the system to provide a name that works.",
+      "revId": "3fe286f03b567fc35c42043d915dc853780f3328",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
