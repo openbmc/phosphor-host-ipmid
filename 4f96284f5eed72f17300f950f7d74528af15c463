@@ -22,6 +22,30 @@
       },
       "revId": "4f96284f5eed72f17300f950f7d74528af15c463",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9e594772_069de2f9",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1033,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2023-08-08T09:26:39Z",
+      "side": 1,
+      "message": "i will probably abandon this.\n\nIt was related to https://gerrit.openbmc.org/c/openbmc/bmcweb/+/65792\nbut since phosphor-virtual-sensor implements a \u0027total_power\u0027 \nsensor, i see no need to support multiple paths.",
+      "parentUuid": "c23f4f17_5e30b393",
+      "range": {
+        "startLine": 1029,
+        "startChar": 4,
+        "endLine": 1033,
+        "endChar": 37
+      },
+      "revId": "4f96284f5eed72f17300f950f7d74528af15c463",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
