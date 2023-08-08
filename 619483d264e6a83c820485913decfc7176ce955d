@@ -16,6 +16,23 @@
       "message": "You have not added the maintainers in the review",
       "revId": "619483d264e6a83c820485913decfc7176ce955d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "efaa64d8_526ba4e8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2023-08-08T00:13:10Z",
+      "side": 1,
+      "message": "Curious why CI is not running, need to retrigger?",
+      "revId": "619483d264e6a83c820485913decfc7176ce955d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
