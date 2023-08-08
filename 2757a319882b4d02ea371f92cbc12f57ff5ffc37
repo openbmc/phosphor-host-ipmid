@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "854f594c_00dac94b",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-08-08T03:33:16Z",
+      "side": 1,
+      "message": "Should we use std::optional instead using \"parsed\" variable to indicate that Json file has been parsed or not?\nExample: \nstatic std::optional\u003cbool\u003e supported \u003d std::nullopt;\nif (supported \u003d\u003d std::nullopt)\n{\n    auto data \u003d parseJSONConfig(gDCMICapabilitiesConfig);\n    supported \u003d (gDCMIPowerMgmtSupported \u003d\u003d data.value(gDCMIPowerMgmtCapability, 0));\n}\nreturn supported;",
+      "revId": "2757a319882b4d02ea371f92cbc12f57ff5ffc37",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
