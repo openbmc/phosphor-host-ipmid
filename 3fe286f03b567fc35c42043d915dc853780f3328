@@ -33,6 +33,24 @@
       "message": "I can\u0027t in good conscience make another commit here that doesn\u0027t actually fix the problem. There have been so many commits trying to \u0027fix\u0027 this. They end up fixing it for one group and breaking it for another.\n\nI would propose adding a new field to the entity manager config that lists a \u0027short name\u0027 or \u0027ipmi name\u0027 that is limited to 16 characters and can be used here. If the field is present, use it. If it is not present, simply truncate the long name. Then it is up to the entity configuring the system to provide a name that works.",
       "revId": "3fe286f03b567fc35c42043d915dc853780f3328",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "47a745d9_4cb530d8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2023-08-08T15:18:26Z",
+      "side": 1,
+      "message": "thats a good idea but i dont see an easy way to implement it.\n\nThe short name is only required in ipmi subsystem and EM maybe should not have to deal with limitations coming from ipmi. Maybe ipmi subsystem can deal with its limitations internally.\n\nFor people who dont use ipmi it does not help them to carry around code for dealing with it. The short name provides no value to them.\n\nPersonally i would want to just go with truncation but since theres other people who want something else i propose a different solution.\n\ni see 3 implementations that are desired here:\n\n- truncation\n- using abbreviations, then truncating\n- truncating away the entire suffix, e.g. \"PSU0_Output_Power\" -\u003e \"PSU0\"\n  which leaves the unit to identify the sensor\n\nso to leave current behavior as default and provide these alternatives,\ncompile time configuration could be the solution.\n\nPlease have a look at new patchset.",
+      "parentUuid": "3c772489_1b8cbced",
+      "revId": "3fe286f03b567fc35c42043d915dc853780f3328",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
