@@ -16,6 +16,24 @@
       "message": "Missing \"Enhanced System Power Statistics attributes\"",
       "revId": "cd934b29bdba8751d9c57bf71e98ab2a03f64650",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5baabe86_36f45897",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-14T20:20:09Z",
+      "side": 1,
+      "message": "This was not supported before, so I did not add it as part of this commit.\n\nIf you would like to see this as a new feature, that can be added later.",
+      "parentUuid": "2e7b4150_a4fa8f60",
+      "revId": "cd934b29bdba8751d9c57bf71e98ab2a03f64650",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
