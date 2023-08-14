@@ -33,6 +33,24 @@
       "message": "Should we use std::optional instead using \"parsed\" variable to indicate that Json file has been parsed or not?\nExample: \nstatic std::optional\u003cbool\u003e supported \u003d std::nullopt;\nif (supported \u003d\u003d std::nullopt)\n{\n    auto data \u003d parseJSONConfig(gDCMICapabilitiesConfig);\n    supported \u003d (gDCMIPowerMgmtSupported \u003d\u003d data.value(gDCMIPowerMgmtCapability, 0));\n}\nreturn supported;",
       "revId": "2757a319882b4d02ea371f92cbc12f57ff5ffc37",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "809f44c6_0d30e763",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-14T20:23:43Z",
+      "side": 1,
+      "message": "I considered that when writing it, but it seemed like introducing the overhead of a std::optional to store a boolean was excessive. So I chose two bools instead.",
+      "parentUuid": "854f594c_00dac94b",
+      "revId": "2757a319882b4d02ea371f92cbc12f57ff5ffc37",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
