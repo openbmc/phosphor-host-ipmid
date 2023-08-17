@@ -2601,6 +2601,54 @@ std::tuple<uint8_t,                // Total of instance sensors
     return std::make_tuple(totalInstSensor, sensorList);
 }
 
+std::tuple<bool,    // Reading result
+           uint7_t, // Temp value
+           bool>    // Sign bit
+    readTemp(ipmi::Context::ptr ctx, const std::string& objectPath)
+{
+    std::string service{};
+    boost::system::error_code ec =
+        ipmi::getService(ctx, sensor::sensorInterface, objectPath, service);
+    if (ec.value())
+    {
+        return std::make_tuple(false, 0, false);
+    }
+
+    ipmi::PropertyMap properties{};
+    ec = ipmi::getAllDbusProperties(ctx, service, objectPath,
+                                    sensor::sensorInterface, properties);
+    if (ec.value())
+    {
+        return std::make_tuple(false, 0, false);
+    }
+
+    auto scaleIt = properties.find("Scale");
+    double scaleVal = 0.0;
+    if (scaleIt != properties.end())
+    {
+        scaleVal = std::visit(ipmi::VariantToDoubleVisitor(), scaleIt->second);
+    }
+
+    auto tempValIt = properties.find("Value");
+    double tempVal = 0.0;
+    if (tempValIt == properties.end())
+    {
+        return std::make_tuple(false, 0, false);
+    }
+
+    const double maxTemp = 127;
+    double absTempVal = 0.0;
+    bool signBit = false;
+
+    tempVal = std::visit(ipmi::VariantToDoubleVisitor(), tempValIt->second);
+    tempVal = std::pow(10, scaleVal) * tempVal;
+    absTempVal = std::abs(tempVal);
+    absTempVal = std::min(absTempVal, maxTemp);
+    signBit = (tempVal < 0) ? true : false;
+
+    return std::make_tuple(true, static_cast<uint7_t>(absTempVal), signBit);
+}
+
 ipmi::RspType<uint8_t,              // No of instances for requested id
               uint8_t,              // No of record ids in the response
               std::vector<uint16_t> // SDR Record ID corresponding to the Entity
@@ -2654,6 +2702,73 @@ ipmi::RspType<uint8_t,              // No of instances for requested id
     return ipmi::responseSuccess(
         totalSensorInst, static_cast<uint8_t>(sensorRec.size()), sensorRec);
 }
+
+ipmi::RspType<uint8_t,                // No of instances for requested id
+              uint8_t,                // No of record ids in the response
+              std::vector<            // Temperature Data
+                  std::tuple<uint7_t, // Temperature value
+                             bool,    // Sign bit
+                             uint8_t  // Entity Instance of sensor
+                             >>>
+    getTempReadings(ipmi::Context::ptr ctx, uint8_t sensorType,
+                    uint8_t entityId, uint8_t entityInstance,
+                    uint8_t instanceStart)
+{
+    auto match = ipmi::dcmi::validEntityId.find(entityId);
+    if (match == ipmi::dcmi::validEntityId.end())
+    {
+        log<level::ERR>("Unknown Entity ID", entry("ENTITY_ID=%d", entityId));
+
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (sensorType != ipmi::dcmi::temperatureSensorType)
+    {
+        log<level::ERR>("Invalid sensor type",
+                        entry("SENSOR_TYPE=%d", sensorType));
+
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    std::vector<std::tuple<uint7_t, bool, uint8_t>> tempReadingVal{};
+    const auto& [totalSensorInst, sensorList] =
+        getSensorsByEntityId(ctx, entityId, entityInstance, instanceStart);
+
+    if (sensorList.empty())
+    {
+        return ipmi::responseSuccess(totalSensorInst, 0, tempReadingVal);
+    }
+
+    /*
+     * As DCMI specification, the maximum number of Record Ids of response data
+     * is 1 if Entity Instance paramter is not 0. Else the maximum number of
+     * Record Ids of response data is 8. Therefore, not all of sensors are shown
+     * in response data.
+     */
+    uint8_t numOfRec = (entityInstance != 0) ? 1 : ipmi::dcmi::maxRecords;
+
+    for (const auto& sensor : sensorList)
+    {
+        const auto& [readResult, tempVal,
+                     signBit] = readTemp(ctx, sensor.objectPath);
+
+        if (readResult)
+        {
+            tempReadingVal.emplace_back(
+                std::make_tuple(tempVal, signBit, sensor.entityInstance));
+
+            if (tempReadingVal.size() >= numOfRec)
+            {
+                break;
+            }
+        }
+    }
+
+    return ipmi::responseSuccess(totalSensorInst,
+                                 static_cast<uint8_t>(tempReadingVal.size()),
+                                 tempReadingVal);
+}
+
 } // namespace dcmi
 
 /* end storage commands */
@@ -2738,5 +2853,10 @@ void registerSensorFunctions()
                                ipmi::dcmi::cmdGetDcmiSensorInfo,
                                ipmi::Privilege::Operator,
                                ipmi::dcmi::getSensorInfo);
+    // <Get Temperature Readings>
+    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                               ipmi::dcmi::cmdGetTemperatureReadings,
+                               ipmi::Privilege::User,
+                               ipmi::dcmi::getTempReadings);
 }
 } // namespace ipmi

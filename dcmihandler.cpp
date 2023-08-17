@@ -1193,11 +1193,6 @@ void register_netfn_dcmi_functions()
                          ipmi::dcmi::cmdGetDcmiCapabilitiesInfo,
                          ipmi::Privilege::User, getDCMICapabilities);
 
-    // <Get Temperature Readings>
-    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
-                         ipmi::dcmi::cmdGetTemperatureReadings,
-                         ipmi::Privilege::User, getTempReadings);
-
     // <Get Power Reading>
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
                          ipmi::dcmi::cmdGetPowerReading, ipmi::Privilege::User,
@@ -1210,6 +1205,11 @@ void register_netfn_dcmi_functions()
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
                          ipmi::dcmi::cmdGetDcmiSensorInfo,
                          ipmi::Privilege::Operator, getSensorInfo);
+
+    // <Get Temperature Readings>
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdGetTemperatureReadings,
+                         ipmi::Privilege::User, getTempReadings);
 #endif
     // <Get DCMI Configuration Parameters>
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
