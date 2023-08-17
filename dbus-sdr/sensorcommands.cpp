@@ -1756,8 +1756,8 @@ bool constructSensorSdr(
     auto name = sensor::parseSdrIdFromPath(path);
     get_sdr::body::set_id_strlen(name.size(), &record.body);
     get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
-    std::strncpy(record.body.id_string, name.c_str(),
-                 sizeof(record.body.id_string));
+    std::memcpy(record.body.id_string, name.c_str(),
+                std::min(name.length() + 1, sizeof(record.body.id_string)));
 
     // Remember the sensor name, as determined for this sensor number
     details::sdrStatsTable.updateName(sensorNum, name);
