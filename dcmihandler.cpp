@@ -1447,10 +1447,6 @@ void register_netfn_dcmi_functions()
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CAPABILITIES,
                            NULL, getDCMICapabilities, PRIVILEGE_USER);
 
-    // <Get Temperature Readings>
-    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_TEMP_READINGS,
-                           NULL, getTempReadings, PRIVILEGE_USER);
-
     // <Get Power Reading>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_POWER_READING,
                            NULL, getPowerReading, PRIVILEGE_USER);
@@ -1460,6 +1456,10 @@ void register_netfn_dcmi_functions()
     // <Get Sensor Info>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_SENSOR_INFO, NULL,
                            getSensorInfo, PRIVILEGE_OPERATOR);
+
+    // <Get Temperature Readings>
+    ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_TEMP_READINGS,
+                           NULL, getTempReadings, PRIVILEGE_USER);
 #endif
     // <Get DCMI Configuration Parameters>
     ipmi_register_callback(NETFUN_GRPEXT, dcmi::Commands::GET_CONF_PARAMS, NULL,
