@@ -51,6 +51,24 @@
       "parentUuid": "edc161b9_7bf6e282",
       "revId": "9c674151a70f70b702d181ccbe20f524a0e95a01",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9dc521f8_bb881668",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 793,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-21T16:11:05Z",
+      "side": 1,
+      "message": "The packer will resolve big/little endian issues automatically. But you are right, the packer will also fill up the least-sig bits first. I will push a fix.",
+      "parentUuid": "477a4d99_430bdb4d",
+      "revId": "9c674151a70f70b702d181ccbe20f524a0e95a01",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
