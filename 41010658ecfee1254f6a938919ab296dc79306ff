@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ee1373a1_923d88ae",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2023-08-21T07:40:48Z",
+      "side": 1,
+      "message": "please give some feedback on my latest patchset :) \n\nAs it is currently, there will be sensors with the same name for certain powersupplies which is not good.\n\nThe newest patchset aims to provide both the current and some other options regarding ipmi short names and thus aims to provide satisfactory solution to the creators of the previous patches for this function.\n\nCould also be extended in the future to provide more alternatives. I agree that it is not optimal to have alternatives here but as the patches have shown people do not agree on how the short names should look.",
+      "revId": "41010658ecfee1254f6a938919ab296dc79306ff",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
