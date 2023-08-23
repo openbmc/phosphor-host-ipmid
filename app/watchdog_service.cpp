@@ -183,6 +183,11 @@ void WatchdogService::setEnabled(bool enabled)
     setProperty("Enabled", enabled);
 }
 
+void WatchdogService::setNotlog(bool Notlog)
+{
+    setProperty("Notlog", Notlog);
+}
+
 void WatchdogService::setExpireAction(Action expireAction)
 {
     setProperty("ExpireAction", convertForMessage(expireAction));
