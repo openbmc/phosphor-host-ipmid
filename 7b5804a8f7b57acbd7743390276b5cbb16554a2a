@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "703dbc42_3cf58151",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2023-08-23T18:13:39Z",
+      "side": 1,
+      "message": "Strange. I wonder why the error does not happen here, but it happens in other situations such as what https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/66098 and https://gerrit.openbmc.org/c/openbmc/phosphor-ipmi-blobs/+/66234 addressed.",
+      "revId": "7b5804a8f7b57acbd7743390276b5cbb16554a2a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
