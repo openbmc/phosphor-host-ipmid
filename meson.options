@@ -1,5 +1,5 @@
 
-option('tests', type: 'feature', description: 'Build tests')
+option('tests', type: 'feature', value: 'enabled', description: 'Build tests')
 option('boot-flag-safe-mode-support', type: 'feature', description: 'Add option to enable/disable safe mode in boot flags')
 option('i2c-whitelist-check', type: 'feature', description: 'Add option to enable/disable i2c master write read command white list checking')
 
@@ -53,7 +53,7 @@ option('whitelist-conf', type: 'string', value: 'host-ipmid-whitelist.conf', des
 option('entity-manager-decorators', type: 'feature', value: 'enabled', description: 'The Entity Manager Decorators flag is enabled by default; offer a way to disable it')
 
 # Dynamic Sensor Stack
-option('dynamic-sensors', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
+option('dynamic-sensors', type: 'feature', value: 'enabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
 option('dynamic-sensors-write', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
 option('hybrid-sensors', type: 'feature', value: 'disabled', description: 'Hybrid sensors stack is disabled by default; offer a way to enable it')
 
