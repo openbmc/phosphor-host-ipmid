@@ -1,5 +1,5 @@
 
-option('tests', type: 'feature', description: 'Build tests')
+option('tests', type: 'feature', value: 'auto', description: 'Build tests')
 option('boot-flag-safe-mode-support', type: 'feature', description: 'Add option to enable/disable safe mode in boot flags')
 option('i2c-whitelist-check', type: 'feature', description: 'Add option to enable/disable i2c master write read command white list checking')
 
