@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "63687d87_c1cdf2e3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-08-23T23:29:32Z",
+      "side": 1,
+      "message": "I guess this is fine for now. If adding something to entity manager is too much effort, maybe we should just have a configuration file in the phosphor-ipmi-config package.",
+      "revId": "f57f69307de3492126951008a315a4b23623813b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
