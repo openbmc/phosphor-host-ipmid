@@ -260,9 +260,16 @@ class IpmiHandler final : public HandlerBase
                 inputArgs = std::move(unpackArgs);
             }
 
+// g++ sometimes complains that *inputArgs might be uninitialized
+// This is never the case. If the unpacker fails to fill every
+// item in unpackArgs, this function returns early. So this is
+// just to silence the build.
+#pragma GCC diagnostic push // save current diagnostics state
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
             // execute the registered callback function and get the
             // ipmi::RspType<>
             result = std::apply(handler_, *inputArgs);
+#pragma GCC diagnostic pop // restore previous diagnostics state
         }
         catch (const HandlerException& e)
         {
