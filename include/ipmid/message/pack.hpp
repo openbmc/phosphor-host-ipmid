@@ -21,6 +21,7 @@
 #include <array>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <tuple>
 #include <utility>
@@ -269,6 +270,22 @@ struct PackSingle<SecureBuffer>
     }
 };
 
+/** @brief Specialization of PackSingle for std::span<const uint8_t> */
+template <>
+struct PackSingle<std::span<const uint8_t>>
+{
+    static int op(Payload& p, const std::span<const uint8_t>& t)
+    {
+        if (p.bitCount != 0)
+        {
+            return 1;
+        }
+        p.raw.reserve(p.raw.size() + t.size());
+        p.raw.insert(p.raw.end(), t.begin(), t.end());
+        return 0;
+    }
+};
+
 /** @brief Specialization of PackSingle for std::string_view */
 template <>
 struct PackSingle<std::string_view>
@@ -294,7 +311,7 @@ struct PackSingle<std::variant<T...>>
         return std::visit(
             [&p](const auto& arg) {
             return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
-            },
+        },
             v);
     }
 };
