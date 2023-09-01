@@ -232,6 +232,8 @@ struct UnpackSingle<std::optional<T>>
         // more stuff to unroll if partial bytes are out
         size_t priorBitCount = p.bitCount;
         fixed_uint_t<details::bitStreamSize> priorBits = p.bitStream;
+        # Test presubmit only for now.
+        # t = std::nullopt;
         t.emplace();
         int ret = UnpackSingle<T>::op(p, *t);
         if (ret != 0)
