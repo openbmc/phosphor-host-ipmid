@@ -1,4 +1,3 @@
-#include "elog-errors.hpp"
 #include "error-HostEvent.hpp"
 #include "sensorhandler.hpp"
 #include "storagehandler.hpp"
@@ -8,6 +7,7 @@
 
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
+#include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <xyz/openbmc_project/Logging/Entry/server.hpp>
 

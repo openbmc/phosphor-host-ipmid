@@ -4,6 +4,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <settings.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
 
 #include <algorithm>
