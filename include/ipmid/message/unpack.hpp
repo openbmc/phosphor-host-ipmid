@@ -232,7 +232,7 @@ struct UnpackSingle<std::optional<T>>
         // more stuff to unroll if partial bytes are out
         size_t priorBitCount = p.bitCount;
         fixed_uint_t<details::bitStreamSize> priorBits = p.bitStream;
-        t.emplace();
+        t = std::nullopt;
         int ret = UnpackSingle<T>::op(p, *t);
         if (ret != 0)
         {
