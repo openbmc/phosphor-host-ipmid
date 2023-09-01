@@ -19,6 +19,7 @@
 
 #include <array>
 #include <optional>
+#include <span>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -334,6 +335,19 @@ struct UnpackSingle<SecureBuffer>
         // copy out the remainder of the message
         t.reserve(p.raw.size() - p.rawIndex);
         t.insert(t.begin(), p.raw.begin() + p.rawIndex, p.raw.end());
+        p.rawIndex = p.raw.size();
+        return 0;
+    }
+};
+
+/** @brief Specialization of UnpackSingle for std::span<const uint8_t> */
+template <>
+struct UnpackSingle<std::span<const uint8_t>>
+{
+    static int op(Payload& p, std::span<const uint8_t>& t)
+    {
+        // copy out the remainder of the message
+        t = std::span<const uint8_t>(p.raw.begin() + p.rawIndex, p.raw.end());
         p.rawIndex = p.raw.size();
         return 0;
     }
