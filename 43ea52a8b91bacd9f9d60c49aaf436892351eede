@@ -16,6 +16,24 @@
       "message": "Wow, there are a lot of Jenkins errors. The new compiler version is really giving the code a shakedown.",
       "revId": "43ea52a8b91bacd9f9d60c49aaf436892351eede",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fafced00_5bcdfbf9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-09-02T19:08:23Z",
+      "side": 1,
+      "message": "The errors are due to https://github.com/openbmc/sdbusplus/commit/43fcd1cebdab4c650536a01e314312e46ae2adbb\n\n\nhowever, it shouldn\u0027t be failing until we removed `SDBUSPP_REMOVE_DEPRECATED_NAMESPACE`.\n\nI was trying to clean it up but will take some time.",
+      "parentUuid": "f9558157_853eeb43",
+      "revId": "43ea52a8b91bacd9f9d60c49aaf436892351eede",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
