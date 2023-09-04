@@ -579,10 +579,11 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     auto device = deviceHashes.begin() + index;
     uint16_t& bus = device->second.first;
     uint8_t& address = device->second.second;
+    std::string name;
 
     boost::container::flat_map<std::string, Value>* fruData = nullptr;
     auto fru = std::find_if(frus.begin(), frus.end(),
-                            [bus, address, &fruData](ManagedEntry& entry) {
+                            [bus, address, &fruData, &name](ManagedEntry& entry) {
         auto findFruDevice = entry.second.find("xyz.openbmc_project.FruDevice");
         if (findFruDevice == entry.second.end())
         {
@@ -604,13 +605,29 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
         {
             return false;
         }
+
+        std::vector<std::string> nameProperties = {
+            "PRODUCT_PRODUCT_NAME",  "BOARD_PRODUCT_NAME",
+            "PRODUCT_PART_NUMBER",   "BOARD_PART_NUMBER",
+            "PRODUCT_MANUFACTURER",  "BOARD_MANUFACTURER",
+            "PRODUCT_SERIAL_NUMBER", "BOARD_SERIAL_NUMBER"};
+
+        for (std::string prop : nameProperties)
+        {
+            auto findProp = findFruDevice->second.find(prop);
+            if (findProp != findFruDevice->second.end())
+            {
+                name = std::get<std::string>(findProp->second);
+                break;
+            }
+        }
+
         return true;
-    });
+        });
     if (fru == frus.end())
     {
         return IPMI_CC_RESPONSE_ERROR;
     }
-    std::string name;
 
 #ifdef USING_ENTITY_MANAGER_DECORATORS
 
