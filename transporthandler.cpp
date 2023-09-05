@@ -5,10 +5,10 @@ using phosphor::logging::elog;
 using phosphor::logging::entry;
 using phosphor::logging::level;
 using phosphor::logging::log;
-using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
-using sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface;
-using sdbusplus::xyz::openbmc_project::Network::server::IP;
-using sdbusplus::xyz::openbmc_project::Network::server::Neighbor;
+using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
+using sdbusplus::server::xyz::openbmc_project::network::EthernetInterface;
+using sdbusplus::server::xyz::openbmc_project::network::IP;
+using sdbusplus::server::xyz::openbmc_project::network::Neighbor;
 
 namespace cipher
 {
@@ -212,7 +212,7 @@ void setDHCPv4Property(sdbusplus::bus_t& bus, const ChannelParams& params,
         nextDhcp = currentDhcp;
     }
     std::string newDhcp =
-        sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+        sdbusplus::common::xyz::openbmc_project::network::convertForMessage(
             nextDhcp);
     setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
                     "DHCPEnabled", newDhcp);
@@ -261,7 +261,7 @@ void setDHCPv6Property(sdbusplus::bus_t& bus, const ChannelParams& params,
     }
 
     std::string newDhcp =
-        sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+        sdbusplus::common::xyz::openbmc_project::network::convertForMessage(
             nextDhcp);
     setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
                     "DHCPEnabled", newDhcp);
@@ -348,7 +348,7 @@ void createIfAddr(sdbusplus::bus_t& bus, const ChannelParams& params,
                                       params.logicalPath.c_str(),
                                       INTF_IP_CREATE, "IP");
     std::string protocol =
-        sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+        sdbusplus::common::xyz::openbmc_project::network::convertForMessage(
             AddrFamily<family>::protocol);
     newreq.append(protocol, addrToString<family>(address), prefix, "");
     bus.call_noreply(newreq);
@@ -491,7 +491,7 @@ IPv6Source originToSourceType(IP::AddressOrigin origin)
             return IPv6Source::SLAAC;
         default:
         {
-            auto originStr = sdbusplus::xyz::openbmc_project::Network::server::
+            auto originStr = sdbusplus::common::xyz::openbmc_project::network::
                 convertForMessage(origin);
             log<level::ERR>(
                 "Invalid IP::AddressOrigin conversion to IPv6Source",

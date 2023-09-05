@@ -19,10 +19,10 @@
 #include <variant>
 
 using namespace phosphor::logging;
-using sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface;
+using sdbusplus::server::xyz::openbmc_project::network::EthernetInterface;
 
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 void register_netfn_dcmi_functions() __attribute__((constructor));
 

@@ -28,7 +28,7 @@ namespace ipmi
 {
 
 using namespace phosphor::logging;
-using namespace sdbusplus::xyz::openbmc_project::Control::server;
+using namespace sdbusplus::server::xyz::openbmc_project::control;
 
 void SoftPowerOff::sendHostShutDownCmd()
 {
@@ -69,7 +69,7 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message_t& msg)
     if (Host::convertResultFromString(cmdStatus) == Host::Result::Success)
     {
         // Set our internal property indicating we got host attention
-        sdbusplus::xyz::openbmc_project::Ipmi::Internal ::server::SoftPowerOff::
+        sdbusplus::server::xyz::openbmc_project::ipmi::internal::SoftPowerOff::
             responseReceived(HostResponse::SoftOffReceived);
 
         // Start timer for host shutdown
@@ -128,7 +128,7 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
         completed = true;
     }
 
-    return sdbusplus::xyz::openbmc_project::Ipmi::Internal ::server::
+    return sdbusplus::server::xyz::openbmc_project::ipmi::internal::
         SoftPowerOff::responseReceived(response);
 }
 
