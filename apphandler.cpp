@@ -673,7 +673,13 @@ ipmi::RspType<uint8_t,  // Device ID
                 devId.addnDevSupport = data.value("addn_dev_support", 0);
                 devId.manufId = data.value("manuf_id", 0);
                 devId.prodId = data.value("prod_id", 0);
-                devId.aux = data.value("aux", 0);
+#ifdef GET_DBUS_ACTIVE_SOFTWARE
+                if (!(AUX_0_MATCH_INDEX || AUX_1_MATCH_INDEX ||
+                      AUX_2_MATCH_INDEX || AUX_3_MATCH_INDEX))
+#endif
+                {
+                    devId.aux = data.value("aux", 0);
+                }
 
                 if (data.contains("firmware_revision"))
                 {
