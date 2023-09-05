@@ -14,8 +14,8 @@ namespace phosphor
 namespace ipmi
 {
 
-namespace Base = sdbusplus::xyz::openbmc_project::Ipmi::Internal::server;
-using namespace sdbusplus::xyz::openbmc_project::Control::server;
+namespace Base = sdbusplus::server::xyz::openbmc_project::ipmi::internal;
+using namespace sdbusplus::server::xyz::openbmc_project::control;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
 

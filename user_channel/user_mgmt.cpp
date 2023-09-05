@@ -116,10 +116,10 @@ using Json = nlohmann::json;
 using PrivAndGroupType = std::variant<std::string, std::vector<std::string>>;
 
 using NoResource =
-    sdbusplus::xyz::openbmc_project::User::Common::Error::NoResource;
+    sdbusplus::error::xyz::openbmc_project::user::common::NoResource;
 
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal
     __attribute__((init_priority(101)));
@@ -175,7 +175,7 @@ void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
     }
 }
 
-static std::string getUserServiceName()
+std::string getUserServiceName()
 {
     static sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
     static std::string userMgmtService;
@@ -1664,7 +1664,7 @@ void UserAccess::cacheUserDataFile()
                 sdbusplus::bus::match::rules::path(userMgrObjBasePath),
             [&](sdbusplus::message_t& msg) {
             userUpdatedSignalHandler(*this, msg);
-            });
+        });
         userMgrRenamedSignal = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
@@ -1672,7 +1672,7 @@ void UserAccess::cacheUserDataFile()
                 sdbusplus::bus::match::rules::path(userMgrObjBasePath),
             [&](sdbusplus::message_t& msg) {
             userUpdatedSignalHandler(*this, msg);
-            });
+        });
         userPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
@@ -1683,7 +1683,7 @@ void UserAccess::cacheUserDataFile()
                 sdbusplus::bus::match::rules::argN(0, usersInterface),
             [&](sdbusplus::message_t& msg) {
             userUpdatedSignalHandler(*this, msg);
-            });
+        });
         signalHndlrObject = true;
     }
     std::map<DbusUserObjPath, DbusUserObjValue> managedObjs;

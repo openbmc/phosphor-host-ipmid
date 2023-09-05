@@ -17,9 +17,9 @@ using phosphor::logging::elog;
 using phosphor::logging::entry;
 using phosphor::logging::level;
 using phosphor::logging::log;
-using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
-using sdbusplus::xyz::openbmc_project::State::server::convertForMessage;
-using sdbusplus::xyz::openbmc_project::State::server::Watchdog;
+using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
+using sdbusplus::common::xyz::openbmc_project::state::convertForMessage;
+using sdbusplus::server::xyz::openbmc_project::state::Watchdog;
 
 static constexpr char wd_path[] = "/xyz/openbmc_project/watchdog/host0";
 static constexpr char wd_intf[] = "xyz.openbmc_project.State.Watchdog";

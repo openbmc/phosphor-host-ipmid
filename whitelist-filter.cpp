@@ -10,7 +10,7 @@
 #include <array>
 
 using namespace phosphor::logging;
-using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+using namespace sdbusplus::error::xyz::openbmc_project::common;
 
 namespace ipmi
 {
@@ -74,7 +74,7 @@ WhitelistFilter::WhitelistFilter()
 void WhitelistFilter::cacheRestrictedMode(
     const std::vector<std::string>& devices)
 {
-    using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
+    using namespace sdbusplus::server::xyz::openbmc_project::control::security;
     std::string restrictionModeSetting;
     std::string restrictionModeService;
 
@@ -130,7 +130,7 @@ void WhitelistFilter::cacheRestrictedMode(
 void WhitelistFilter::handleRestrictedModeChange(
     sdbusplus::message_t& m, const std::map<std::string, size_t>& deviceList)
 {
-    using namespace sdbusplus::xyz::openbmc_project::Control::Security::server;
+    using namespace sdbusplus::server::xyz::openbmc_project::control::security;
     std::string intf;
     std::vector<std::pair<std::string, ipmi::Value>> propertyList;
     m.read(intf, propertyList);
