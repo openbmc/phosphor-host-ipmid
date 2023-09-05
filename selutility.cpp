@@ -16,7 +16,7 @@
 extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 namespace
 {

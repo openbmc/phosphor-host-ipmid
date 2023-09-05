@@ -14,9 +14,9 @@ class WatchdogService
     WatchdogService();
 
     using Action =
-        sdbusplus::xyz::openbmc_project::State::server::Watchdog::Action;
+        sdbusplus::server::xyz::openbmc_project::state::Watchdog::Action;
     using TimerUse =
-        sdbusplus::xyz::openbmc_project::State::server::Watchdog::TimerUse;
+        sdbusplus::server::xyz::openbmc_project::state::Watchdog::TimerUse;
 
     /** @brief Resets the time remaining on the watchdog.
      *         Equivalent to setTimeRemaining(getInterval()).

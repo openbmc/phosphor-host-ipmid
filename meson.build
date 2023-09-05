@@ -98,6 +98,7 @@ endforeach
 
 add_project_arguments(
   cpp.get_supported_arguments([
+    '-DSDBUSPP_REMOVE_DEPRECATED_NAMESPACE=1',
     '-Wno-psabi',
     '-Wno-missing-field-initializers',
     '-Wno-pedantic',

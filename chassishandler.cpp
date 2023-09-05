@@ -119,13 +119,12 @@ static constexpr const char* resetButtonPath =
     "/xyz/openbmc_project/Chassis/Buttons/Reset0";
 
 // Phosphor Host State manager
-namespace State = sdbusplus::xyz::openbmc_project::State::server;
-
+namespace State = sdbusplus::server::xyz::openbmc_project::state;
 namespace fs = std::filesystem;
 
 using namespace phosphor::logging;
-using namespace sdbusplus::xyz::openbmc_project::Common::Error;
-using namespace sdbusplus::xyz::openbmc_project::Control::Boot::server;
+using namespace sdbusplus::error::xyz::openbmc_project::common;
+using namespace sdbusplus::server::xyz::openbmc_project::control::boot;
 
 namespace chassis
 {
@@ -824,7 +823,9 @@ int initiateHostStateTransition(ipmi::Context::ptr& ctx,
     constexpr auto hostStateIntf = "xyz.openbmc_project.State.Host";
 
     // Convert to string equivalent of the passed in transition enum.
-    auto request = State::convertForMessage(transition);
+    auto request =
+        sdbusplus::common::xyz::openbmc_project::state::convertForMessage(
+            transition);
 
     std::string service;
     boost::system::error_code ec = ipmi::getService(ctx, hostStateIntf,
@@ -863,7 +864,9 @@ int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
                                                     chassisStatePath, service);
 
     // Convert to string equivalent of the passed in transition enum.
-    auto request = State::convertForMessage(transition);
+    auto request =
+        sdbusplus::common::xyz::openbmc_project::state::convertForMessage(
+            transition);
 
     if (!ec)
     {
@@ -921,7 +924,7 @@ int setNmiProperty(ipmi::Context::ptr& ctx, const bool value)
 namespace power_policy
 {
 
-using namespace sdbusplus::xyz::openbmc_project::Control::Power::server;
+using namespace sdbusplus::server::xyz::openbmc_project::control::power;
 using IpmiValue = uint8_t;
 using DbusValue = RestorePolicy::Policy;
 
@@ -1518,7 +1521,7 @@ ipmi::RspType<> ipmiChassisIdentify(std::optional<uint8_t> interval,
 namespace boot_options
 {
 
-using namespace sdbusplus::xyz::openbmc_project::Control::Boot::server;
+using namespace sdbusplus::server::xyz::openbmc_project::control::boot;
 using IpmiValue = uint8_t;
 constexpr auto ipmiDefault = 0;
 

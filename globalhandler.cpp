@@ -15,7 +15,7 @@ static constexpr auto reqTransition = "RequestedBMCTransition";
 static constexpr auto match = "bmc0";
 
 using namespace phosphor::logging;
-using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
+using BMC = sdbusplus::server::xyz::openbmc_project::state::BMC;
 
 void register_netfn_global_functions() __attribute__((constructor));
 
