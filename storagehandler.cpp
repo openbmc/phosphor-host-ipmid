@@ -62,12 +62,12 @@ constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 } // namespace
 
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 using namespace phosphor::logging;
 using namespace ipmi::fru;
-using namespace xyz::openbmc_project::Logging::SEL;
+using namespace xyz::openbmc_project::logging::sel;
 using SELCreated =
-    sdbusplus::xyz::openbmc_project::Logging::SEL::Error::Created;
+    sdbusplus::error::xyz::openbmc_project::logging::sel::Created;
 
 using SELRecordID = uint16_t;
 using SELEntry = ipmi::sel::SELEventRecordFormat;

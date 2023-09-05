@@ -60,11 +60,11 @@ static constexpr auto softwareRoot = "/xyz/openbmc_project/software";
 void register_netfn_app_functions() __attribute__((constructor));
 
 using namespace phosphor::logging;
-using namespace sdbusplus::xyz::openbmc_project::Common::Error;
-using Version = sdbusplus::xyz::openbmc_project::Software::server::Version;
+using namespace sdbusplus::error::xyz::openbmc_project::common;
+using Version = sdbusplus::server::xyz::openbmc_project::software::Version;
 using Activation =
-    sdbusplus::xyz::openbmc_project::Software::server::Activation;
-using BMC = sdbusplus::xyz::openbmc_project::State::server::BMC;
+    sdbusplus::server::xyz::openbmc_project::software::Activation;
+using BMC = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
 #ifdef ENABLE_I2C_WHITELIST_CHECK
@@ -214,7 +214,7 @@ bool getCurrentBmcStateWithFallback(const bool fallbackAvailability)
 
 namespace acpi_state
 {
-using namespace sdbusplus::xyz::openbmc_project::Control::Power::server;
+using namespace sdbusplus::server::xyz::openbmc_project::control::power;
 
 const static constexpr char* acpiObjPath =
     "/xyz/openbmc_project/control/host0/acpi_power_state";
@@ -755,7 +755,7 @@ auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
 static constexpr size_t uuidBinaryLength = 16;
 static std::array<uint8_t, uuidBinaryLength> rfc4122ToIpmi(std::string rfc4122)
 {
-    using Argument = xyz::openbmc_project::Common::InvalidArgument;
+    using Argument = xyz::openbmc_project::common::InvalidArgument;
     // UUID is in RFC4122 format. Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
     // Per IPMI Spec 2.0 need to convert to 16 hex bytes and reverse the byte
     // order
