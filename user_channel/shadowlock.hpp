@@ -12,7 +12,7 @@ namespace shadow
 {
 
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 using namespace phosphor::logging;
 
 /** @class Lock
