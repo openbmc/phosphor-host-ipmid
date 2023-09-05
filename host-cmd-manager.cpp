@@ -28,7 +28,7 @@ constexpr auto HOST_TRANS_PROP = "RequestedHostTransition";
 // For throwing exceptions
 using namespace phosphor::logging;
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
@@ -169,7 +169,7 @@ void Manager::execute(CommandHandler command)
 
 void Manager::clearQueueOnPowerOn(sdbusplus::message_t& msg)
 {
-    namespace server = sdbusplus::xyz::openbmc_project::State::server;
+    namespace server = sdbusplus::server::xyz::openbmc_project::state;
 
     ::ipmi::DbusInterface interface;
     ::ipmi::PropertyMap properties;

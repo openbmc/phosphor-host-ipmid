@@ -20,7 +20,7 @@ namespace fru
 
 using namespace phosphor::logging;
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 std::unique_ptr<sdbusplus::bus::match_t> matchPtr
     __attribute__((init_priority(101)));
 

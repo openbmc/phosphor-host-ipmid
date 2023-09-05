@@ -16,7 +16,7 @@
 #include <string>
 
 using namespace phosphor::logging;
-using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+using namespace sdbusplus::error::xyz::openbmc_project::common;
 
 namespace cipher
 {
