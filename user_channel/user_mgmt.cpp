@@ -116,10 +116,10 @@ using Json = nlohmann::json;
 using PrivAndGroupType = std::variant<std::string, std::vector<std::string>>;
 
 using NoResource =
-    sdbusplus::xyz::openbmc_project::User::Common::Error::NoResource;
+    sdbusplus::error::xyz::openbmc_project::user::common::NoResource;
 
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal
     __attribute__((init_priority(101)));
@@ -175,7 +175,7 @@ void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
     }
 }
 
-static std::string getUserServiceName()
+std::string getUserServiceName()
 {
     static sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
     static std::string userMgmtService;

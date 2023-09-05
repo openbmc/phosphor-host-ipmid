@@ -17,7 +17,7 @@
 using phosphor::logging::commit;
 using phosphor::logging::level;
 using phosphor::logging::log;
-using sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 static bool lastCallSuccessful = false;
 

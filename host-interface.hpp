@@ -18,8 +18,8 @@ namespace command
  */
 class Host :
     public sdbusplus::server::object_t<
-        sdbusplus::xyz::openbmc_project::Control::server::Host,
-        sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>
+        sdbusplus::server::xyz::openbmc_project::control::Host,
+        sdbusplus::server::xyz::openbmc_project::condition::HostFirmware>
 {
   public:
     /** @brief Constructs Host Control and Condition Interfaces
@@ -29,8 +29,8 @@ class Host :
      */
     Host(sdbusplus::bus_t& bus, const char* objPath) :
         sdbusplus::server::object_t<
-            sdbusplus::xyz::openbmc_project::Control::server::Host,
-            sdbusplus::xyz::openbmc_project::Condition::server::HostFirmware>(
+            sdbusplus::server::xyz::openbmc_project::control::Host,
+            sdbusplus::server::xyz::openbmc_project::condition::HostFirmware>(
             bus, objPath),
         bus(bus)
     {
