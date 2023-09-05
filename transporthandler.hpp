@@ -266,7 +266,7 @@ struct AddrFamily<AF_INET>
 {
     using addr = in_addr;
     static constexpr auto protocol =
-        sdbusplus::xyz::openbmc_project::Network::server::IP::Protocol::IPv4;
+        sdbusplus::server::xyz::openbmc_project::network::IP::Protocol::IPv4;
     static constexpr size_t maxStrLen = INET6_ADDRSTRLEN;
     static constexpr uint8_t defaultPrefix = 32;
     static constexpr char propertyGateway[] = "DefaultGateway";
@@ -278,7 +278,7 @@ struct AddrFamily<AF_INET6>
 {
     using addr = in6_addr;
     static constexpr auto protocol =
-        sdbusplus::xyz::openbmc_project::Network::server::IP::Protocol::IPv6;
+        sdbusplus::server::xyz::openbmc_project::network::IP::Protocol::IPv6;
     static constexpr size_t maxStrLen = INET6_ADDRSTRLEN;
     static constexpr uint8_t defaultPrefix = 128;
     static constexpr char propertyGateway[] = "DefaultGateway6";
@@ -299,21 +299,21 @@ struct IfAddr
 {
     std::string path;
     typename AddrFamily<family>::addr address;
-    sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin origin;
+    sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin origin;
     uint8_t prefix;
 };
 
 /** @brief Valid address origins for IPv6 */
 static inline const std::unordered_set<
-    sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>
-    originsV6Static = {sdbusplus::xyz::openbmc_project::Network::server::IP::
+    sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin>
+    originsV6Static = {sdbusplus::server::xyz::openbmc_project::network::IP::
                            AddressOrigin::Static};
 static inline const std::unordered_set<
-    sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>
+    sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin>
     originsV6Dynamic = {
-        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin::
+        sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin::
             DHCP,
-        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin::
+        sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin::
             SLAAC,
 };
 
@@ -435,7 +435,7 @@ typename AddrFamily<family>::addr stringToAddr(const char* address)
             phosphor::logging::entry("FAMILY=%d", family),
             phosphor::logging::entry("ADDRESS=%s", address));
         phosphor::logging::elog<
-            sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure>();
+            sdbusplus::error::xyz::openbmc_project::common::InternalFailure>();
     }
     return *ret;
 }
@@ -476,7 +476,7 @@ std::optional<IfAddr<family>> findIfAddr(
     [[maybe_unused]] sdbusplus::bus_t& bus,
     [[maybe_unused]] const ChannelParams& params, uint8_t idx,
     const std::unordered_set<
-        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>&
+        sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin>&
         origins,
     ObjectLookupCache& ips)
 {
@@ -489,8 +489,8 @@ std::optional<IfAddr<family>> findIfAddr(
             continue;
         }
 
-        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin
-            origin = sdbusplus::xyz::openbmc_project::Network::server::IP::
+        sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin
+            origin = sdbusplus::server::xyz::openbmc_project::network::IP::
                 convertAddressOriginFromString(
                     std::get<std::string>(properties.at("Origin")));
         if (origins.find(origin) == origins.end())
@@ -528,7 +528,7 @@ template <int family>
 auto getIfAddr(
     sdbusplus::bus_t& bus, const ChannelParams& params, uint8_t idx,
     const std::unordered_set<
-        sdbusplus::xyz::openbmc_project::Network::server::IP::AddressOrigin>&
+        sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin>&
         origins)
 {
     ObjectLookupCache ips(bus, params, INTF_IP);
@@ -541,7 +541,7 @@ auto getIfAddr(
  *  @param[in] params - The parameters for the channel
  *  @return DHCPConf enumeration
  */
-sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface::DHCPConf
+sdbusplus::server::xyz::openbmc_project::network::EthernetInterface::DHCPConf
     getDHCPProperty(sdbusplus::bus_t& bus, const ChannelParams& params);
 
 /** @brief Sets the DHCP v6 state on the given interface
@@ -553,7 +553,7 @@ sdbusplus::xyz::openbmc_project::Network::server::EthernetInterface::DHCPConf
  *                             False: requestedDhcp assigned unconditionally
  */
 void setDHCPv6Property(sdbusplus::bus_t& bus, const ChannelParams& params,
-                       const sdbusplus::xyz::openbmc_project::Network::server::
+                       const sdbusplus::server::xyz::openbmc_project::network::
                            EthernetInterface::DHCPConf requestedDhcp,
                        const bool defaultMode);
 
@@ -596,9 +596,9 @@ std::optional<IfNeigh<family>>
                        const typename AddrFamily<family>::addr& ip,
                        ObjectLookupCache& neighbors)
 {
-    using sdbusplus::xyz::openbmc_project::Network::server::Neighbor;
+    using sdbusplus::server::xyz::openbmc_project::network::Neighbor;
     const auto state =
-        sdbusplus::xyz::openbmc_project::Network::server::convertForMessage(
+        sdbusplus::common::xyz::openbmc_project::network::convertForMessage(
             Neighbor::State::Permanent);
     for (const auto& [path, neighbor] : neighbors)
     {
