@@ -41,7 +41,7 @@ extern const FruMap frus;
 
 using namespace phosphor::logging;
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 void register_netfn_sen_functions() __attribute__((constructor));
 
@@ -1040,7 +1040,7 @@ ipmi::RspType<uint16_t> ipmiSensorReserveSdr()
 void setUnitFieldsForObject(const ipmi::sensor::Info* info,
                             get_sdr::SensorDataFullRecordBody* body)
 {
-    namespace server = sdbusplus::xyz::openbmc_project::Sensor::server;
+    namespace server = sdbusplus::server::xyz::openbmc_project::sensor;
     try
     {
         auto unit = server::Value::convertUnitFromString(info->unit);

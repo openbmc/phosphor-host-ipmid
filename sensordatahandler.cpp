@@ -18,7 +18,7 @@ namespace sensor
 
 using namespace phosphor::logging;
 using InternalFailure =
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 static constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
 static constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";

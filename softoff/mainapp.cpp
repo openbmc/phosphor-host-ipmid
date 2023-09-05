@@ -72,8 +72,8 @@ int main(int, char**)
          phosphor::ipmi::Base::SoftPowerOff::HostResponse::SoftOffReceived))
     {
         using error =
-            sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout;
-        using errorMetadata = xyz::openbmc_project::State::Host::SoftOffTimeout;
+            sdbusplus::error::xyz::openbmc_project::state::host::SoftOffTimeout;
+        using errorMetadata = xyz::openbmc_project::state::host::SoftOffTimeout;
         report<error>(prev_entry<errorMetadata::TIMEOUT_IN_MSEC>());
         return -1;
     }

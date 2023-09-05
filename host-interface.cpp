@@ -25,7 +25,7 @@ namespace command
 using namespace phosphor::logging;
 
 // When you see Base:: you know we're referencing our base class
-namespace Base = sdbusplus::xyz::openbmc_project::Control::server;
+namespace Base = sdbusplus::server::xyz::openbmc_project::control;
 
 // IPMI OEM command.
 // https://github.com/openbmc/openbmc/issues/2082 for handling

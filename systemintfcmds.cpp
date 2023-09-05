@@ -12,7 +12,7 @@
 
 void register_netfn_app_functions() __attribute__((constructor));
 
-using namespace sdbusplus::xyz::openbmc_project::Control::server;
+using namespace sdbusplus::server::xyz::openbmc_project::control;
 
 // For accessing Host command manager
 using cmdManagerPtr = std::unique_ptr<phosphor::host::command::Manager>;

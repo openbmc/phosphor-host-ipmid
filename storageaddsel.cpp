@@ -21,7 +21,7 @@
 
 using namespace std;
 using namespace phosphor::logging;
-using namespace sdbusplus::xyz::openbmc_project::Logging::server;
+using namespace sdbusplus::server::xyz::openbmc_project::logging;
 
 std::string readESEL(const char* fileName)
 {
@@ -43,7 +43,7 @@ std::string readESEL(const char* fileName)
     return content;
 }
 
-void createProcedureLogEntry(uint8_t procedureNum)
+void createProcedureLogEntry(uint8_t)
 {
     // Read the eSEL data from the file.
     static constexpr auto eSELFile = "/tmp/esel";
@@ -61,9 +61,47 @@ void createProcedureLogEntry(uint8_t procedureNum)
     }
     data[eSELData.size() * byteSeparator] = '\0';
 
-    using error = sdbusplus::org::open_power::Host::Error::MaintenanceProcedure;
-    using metadata = org::open_power::Host::MaintenanceProcedure;
+    /*
+    TODO: This is the only failure right now.
+    /usr/include/c++/13/type_traits: In instantiation of 'struct
+    std::is_base_of<sdbusplus::exception::exception,
+    sdbusplus::error::org::open_power::host::MaintenanceProcedure>':
+    /usr/local/include/phosphor-logging/elog.hpp:191:63:   required from
+    'uint32_t phosphor::logging::report(Args ...) [with T =
+    sdbusplus::error::org::open_power::host::MaintenanceProcedure; Args =
+    {org::open_power::host::_MaintenanceProcedure::ESEL,
+    org::open_power::common::callout::_Procedure::PROCEDURE}; uint32_t =
+    unsigned int]'
+    ../storageaddsel.cpp:67:18:   required from here
+    /usr/include/c++/13/type_traits:1411:38: error: invalid use of incomplete
+    type 'struct sdbusplus::error::org::open_power::host::MaintenanceProcedure'
+     1411 |     : public integral_constant<bool, __is_base_of(_Base, _Derived)>
+          |                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ../elog-errors.hpp:106:8: note: forward declaration of 'struct
+    sdbusplus::error::org::open_power::host::MaintenanceProcedure' 106 | struct
+    MaintenanceProcedure; |        ^~~~~~~~~~~~~~~~~~~~
+    /usr/local/include/phosphor-logging/elog.hpp: In instantiation of 'uint32_t
+    phosphor::logging::report(Args ...) [with T =
+    sdbusplus::error::org::open_power::host::MaintenanceProcedure; Args =
+    {org::open_power::host::_MaintenanceProcedure::ESEL,
+    org::open_power::common::callout::_Procedure::PROCEDURE}; uint32_t =
+    unsigned int]':
+    ../storageaddsel.cpp:67:18:   required from here
+    /usr/local/include/phosphor-logging/elog.hpp:191:63: error: 'value' is not a
+    member of 'std::is_base_of<sdbusplus::exception::exception,
+    sdbusplus::error::org::open_power::host::MaintenanceProcedure>' 191 |
+    static_assert(std::is_base_of<sdbusplus::exception_t, T>::value, | ^~~~~
+    /usr/local/include/phosphor-logging/elog.hpp:201:12: error: incomplete type
+    'sdbusplus::error::org::open_power::host::MaintenanceProcedure' used in
+    nested name specifier 201 |         T::errDesc,
+    details::deduce_entry_type<Args>{i_args}.get()...); |            ^~~~~~~
+    ninja: build stopped: subcommand failed.
 
-    report<error>(metadata::ESEL(data.get()),
-                  metadata::PROCEDURE(static_cast<uint32_t>(procedureNum)));
+    */
+    // using error =
+    // sdbusplus::error::org::open_power::host::MaintenanceProcedure; using
+    // metadata = org::open_power::host::MaintenanceProcedure;
+
+    // report<error>(metadata::ESEL(data.get()),
+    //               metadata::PROCEDURE(static_cast<uint32_t>(procedureNum)));
 }

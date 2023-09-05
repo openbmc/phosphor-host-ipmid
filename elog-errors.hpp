@@ -10,2109 +10,474 @@
 #include <tuple>
 #include <type_traits>
 
-namespace sdbusplus
+namespace sdbusplus::error::com::google::gbmc::hoth
 {
-namespace com
+struct CommandFailure;
+} // namespace sdbusplus::error::com::google::gbmc::hoth
+namespace sdbusplus::error::com::google::gbmc::hoth
 {
-namespace ibm
+struct ExpectedInfoNotFound;
+} // namespace sdbusplus::error::com::google::gbmc::hoth
+namespace sdbusplus::error::com::google::gbmc::hoth
 {
-namespace VPD
+struct FirmwareFailure;
+} // namespace sdbusplus::error::com::google::gbmc::hoth
+namespace sdbusplus::error::com::google::gbmc::hoth
 {
-namespace Error
+struct InterfaceError;
+} // namespace sdbusplus::error::com::google::gbmc::hoth
+namespace sdbusplus::error::com::google::gbmc::hoth
+{
+struct ResponseFailure;
+} // namespace sdbusplus::error::com::google::gbmc::hoth
+namespace sdbusplus::error::com::google::gbmc::hoth
+{
+struct ResponseNotFound;
+} // namespace sdbusplus::error::com::google::gbmc::hoth
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct BlankSystemVPD;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct DbusFailure;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct EccCheckFailed;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct InvalidEepromPath;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct InvalidJson;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct InvalidVPD;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct KeywordNotFound;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct LocationNotFound;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct NodeNotFound;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct PathNotFound;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::com::ibm::vpd
 {
 struct RecordNotFound;
-} // namespace Error
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace org
-{
-namespace open_power
-{
-namespace Common
-{
-namespace Callout
-{
-namespace Error
+} // namespace sdbusplus::error::com::ibm::vpd
+namespace sdbusplus::error::org::open_power::common::callout
 {
 struct Procedure;
-} // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace Access
-{
-namespace Error
+} // namespace sdbusplus::error::org::open_power::common::callout
+namespace sdbusplus::error::org::open_power::host::access
 {
 struct ReadCFAM;
-} // namespace Error
-} // namespace Access
-} // namespace Host
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace Access
-{
-namespace Error
+} // namespace sdbusplus::error::org::open_power::host::access
+namespace sdbusplus::error::org::open_power::host::access
 {
 struct WriteCFAM;
-} // namespace Error
-} // namespace Access
-} // namespace Host
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-namespace sdbusplus
+} // namespace sdbusplus::error::org::open_power::host::access
+namespace sdbusplus::error::org::open_power::host::boot
 {
-namespace org
+struct Checkstop;
+} // namespace sdbusplus::error::org::open_power::host::boot
+namespace sdbusplus::error::org::open_power::host::boot
 {
-namespace open_power
-{
-namespace Host
-{
-namespace Error
+struct WatchdogTimedOut;
+} // namespace sdbusplus::error::org::open_power::host::boot
+namespace sdbusplus::error::org::open_power::host
 {
 struct Event;
-} // namespace Error
-} // namespace Host
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace Error
+} // namespace sdbusplus::error::org::open_power::host
+namespace sdbusplus::error::org::open_power::host
 {
 struct MaintenanceProcedure;
-} // namespace Error
-} // namespace Host
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-namespace sdbusplus
+} // namespace sdbusplus::error::org::open_power::host
+namespace sdbusplus::error::org::open_power::occ::device
 {
-namespace org
+struct ConfigFailure;
+} // namespace sdbusplus::error::org::open_power::occ::device
+namespace sdbusplus::error::org::open_power::occ::device
 {
-namespace open_power
+struct OpenFailure;
+} // namespace sdbusplus::error::org::open_power::occ::device
+namespace sdbusplus::error::org::open_power::occ::device
 {
-namespace Proc
+struct ReadFailure;
+} // namespace sdbusplus::error::org::open_power::occ::device
+namespace sdbusplus::error::org::open_power::occ::device
 {
-namespace FSI
-{
-namespace Error
+struct WriteFailure;
+} // namespace sdbusplus::error::org::open_power::occ::device
+namespace sdbusplus::error::org::open_power::proc::fsi
 {
 struct MasterDetectionFailure;
-} // namespace Error
-} // namespace FSI
-} // namespace Proc
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace org
-{
-namespace open_power
-{
-namespace Proc
-{
-namespace FSI
-{
-namespace Error
+} // namespace sdbusplus::error::org::open_power::proc::fsi
+namespace sdbusplus::error::org::open_power::proc::fsi
 {
 struct SlaveDetectionFailure;
-} // namespace Error
-} // namespace FSI
-} // namespace Proc
-} // namespace open_power
-} // namespace org
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::org::open_power::proc::fsi
+namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
 {
 struct AttributeNotFound;
-} // namespace Error
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
+namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
 {
 struct AttributeReadOnly;
-} // namespace Error
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
+namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
 {
 struct InvalidCurrentPassword;
-} // namespace Error
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
+namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
 {
 struct PasswordNotSettable;
-} // namespace Error
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Certs
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::bios_config::common
+namespace sdbusplus::error::xyz::openbmc_project::certs
 {
 struct InvalidCertificate;
-} // namespace Error
-} // namespace Certs
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Chassis
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::certs
+namespace sdbusplus::error::xyz::openbmc_project::chassis::common
 {
 struct IOError;
-} // namespace Error
-} // namespace Common
-} // namespace Chassis
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Chassis
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::chassis::common
+namespace sdbusplus::error::xyz::openbmc_project::chassis::common
 {
 struct UnsupportedCommand;
-} // namespace Error
-} // namespace Common
-} // namespace Chassis
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::chassis::common
+namespace sdbusplus::error::xyz::openbmc_project::common::callout
 {
 struct Device;
-} // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::callout
+namespace sdbusplus::error::xyz::openbmc_project::common::callout
 {
 struct GPIO;
-} // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::callout
+namespace sdbusplus::error::xyz::openbmc_project::common::callout
 {
 struct IIC;
-} // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::callout
+namespace sdbusplus::error::xyz::openbmc_project::common::callout
 {
 struct IPMISensor;
-} // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::callout
+namespace sdbusplus::error::xyz::openbmc_project::common::callout
 {
 struct Inventory;
-} // namespace Error
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Device
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::callout
+namespace sdbusplus::error::xyz::openbmc_project::common::device
 {
 struct ReadFailure;
-} // namespace Error
-} // namespace Device
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Device
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::device
+namespace sdbusplus::error::xyz::openbmc_project::common::device
 {
 struct WriteFailure;
-} // namespace Error
-} // namespace Device
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct InsufficientPermission;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct InternalFailure;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct InvalidArgument;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct NoCACertificate;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct NotAllowed;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct ResourceNotFound;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct Timeout;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct TooManyResources;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct Unavailable;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Error
-{
-struct UnsupportedRequest;
-} // namespace Error
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::device
+namespace sdbusplus::error::xyz::openbmc_project::common::file
 {
 struct Open;
-} // namespace Error
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::file
+namespace sdbusplus::error::xyz::openbmc_project::common::file
 {
 struct Read;
-} // namespace Error
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::file
+namespace sdbusplus::error::xyz::openbmc_project::common::file
 {
 struct Seek;
-} // namespace Error
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::file
+namespace sdbusplus::error::xyz::openbmc_project::common::file
 {
 struct Write;
-} // namespace Error
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Control
-{
-namespace Device
-{
-namespace Error
-{
-struct WriteFailure;
-} // namespace Error
-} // namespace Device
-} // namespace Control
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Control
-{
-namespace Host
-{
-namespace Error
-{
-struct CommandNotSupported;
-} // namespace Error
-} // namespace Host
-} // namespace Control
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Dump
-{
-namespace Create
-{
-namespace Error
-{
-struct Disabled;
-} // namespace Error
-} // namespace Create
-} // namespace Dump
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Dump
-{
-namespace Create
-{
-namespace Error
-{
-struct QuotaExceeded;
-} // namespace Error
-} // namespace Create
-} // namespace Dump
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace HardwareIsolation
-{
-namespace Error
-{
-struct IsolatedAlready;
-} // namespace Error
-} // namespace HardwareIsolation
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Inventory
-{
-namespace Error
-{
-struct Nonfunctional;
-} // namespace Error
-} // namespace Inventory
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Inventory
-{
-namespace Error
-{
-struct NotPresent;
-} // namespace Error
-} // namespace Inventory
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Logging
-{
-namespace SEL
-{
-namespace Error
-{
-struct Created;
-} // namespace Error
-} // namespace SEL
-} // namespace Logging
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Memory
-{
-namespace MemoryECC
-{
-namespace Error
-{
-struct ceCount;
-} // namespace Error
-} // namespace MemoryECC
-} // namespace Memory
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Memory
-{
-namespace MemoryECC
-{
-namespace Error
-{
-struct isLoggingLimitReached;
-} // namespace Error
-} // namespace MemoryECC
-} // namespace Memory
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Memory
-{
-namespace MemoryECC
-{
-namespace Error
-{
-struct ueCount;
-} // namespace Error
-} // namespace MemoryECC
-} // namespace Memory
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace Error
-{
-struct BackupDeviceFault;
-} // namespace Error
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace Error
-{
-struct CapacityFault;
-} // namespace Error
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace Error
-{
-struct DegradesFault;
-} // namespace Error
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace Error
-{
-struct MediaFault;
-} // namespace Error
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace Error
-{
-struct TemperatureFault;
-} // namespace Error
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace ScheduledTime
-{
-namespace Error
-{
-struct InvalidTime;
-} // namespace Error
-} // namespace ScheduledTime
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Sensor
-{
-namespace Device
-{
-namespace Error
-{
-struct ReadFailure;
-} // namespace Error
-} // namespace Device
-} // namespace Sensor
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Sensor
-{
-namespace Threshold
-{
-namespace Error
-{
-struct CriticalHigh;
-} // namespace Error
-} // namespace Threshold
-} // namespace Sensor
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Sensor
-{
-namespace Threshold
-{
-namespace Error
-{
-struct CriticalLow;
-} // namespace Error
-} // namespace Threshold
-} // namespace Sensor
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Smbios
-{
-namespace MDR_V2
-{
-namespace Error
-{
-struct InvalidId;
-} // namespace Error
-} // namespace MDR_V2
-} // namespace Smbios
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Smbios
-{
-namespace MDR_V2
-{
-namespace Error
-{
-struct InvalidParameter;
-} // namespace Error
-} // namespace MDR_V2
-} // namespace Smbios
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Smbios
-{
-namespace MDR_V2
-{
-namespace Error
-{
-struct UpdateInProgress;
-} // namespace Error
-} // namespace MDR_V2
-} // namespace Smbios
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Software
-{
-namespace Version
-{
-namespace Error
-{
-struct AlreadyExists;
-} // namespace Error
-} // namespace Version
-} // namespace Software
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Software
-{
-namespace Version
-{
-namespace Error
-{
-struct Incompatible;
-} // namespace Error
-} // namespace Version
-} // namespace Software
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace BMC
-{
-namespace Error
-{
-struct MultiUserTargetFailure;
-} // namespace Error
-} // namespace BMC
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Chassis
-{
-namespace Error
-{
-struct PowerOffFailure;
-} // namespace Error
-} // namespace Chassis
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Chassis
-{
-namespace Error
-{
-struct PowerOnFailure;
-} // namespace Error
-} // namespace Chassis
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace Error
-{
-struct HostMinStartFailure;
-} // namespace Error
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace Error
-{
-struct HostRebootFailure;
-} // namespace Error
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace Error
-{
-struct HostShutdownFailure;
-} // namespace Error
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace Error
-{
-struct HostStartFailure;
-} // namespace Error
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace Error
-{
-struct HostStopFailure;
-} // namespace Error
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace Error
-{
-struct SoftOffTimeout;
-} // namespace Error
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Inventory
-{
-namespace Error
-{
-struct Fan;
-} // namespace Error
-} // namespace Inventory
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Power
-{
-namespace Error
-{
-struct Blackout;
-} // namespace Error
-} // namespace Power
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Power
-{
-namespace Error
-{
-struct Fault;
-} // namespace Error
-} // namespace Power
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Power
-{
-namespace Error
-{
-struct Regulator;
-} // namespace Error
-} // namespace Power
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace ThermalEvent
-{
-namespace Error
-{
-struct Ambient;
-} // namespace Error
-} // namespace ThermalEvent
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace ThermalEvent
-{
-namespace Error
-{
-struct GPU;
-} // namespace Error
-} // namespace ThermalEvent
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace ThermalEvent
-{
-namespace Error
-{
-struct Processor;
-} // namespace Error
-} // namespace ThermalEvent
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace SystemdTarget
-{
-namespace Error
-{
-struct Failure;
-} // namespace Error
-} // namespace SystemdTarget
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Time
-{
-namespace Error
-{
-struct Failed;
-} // namespace Error
-} // namespace Time
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Time
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::common::file
+namespace sdbusplus::error::xyz::openbmc_project::common
+{
+struct InsufficientPermission;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
+{
+struct InternalFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
+{
+struct InvalidArgument;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
+{
+struct NoCACertificate;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
 {
 struct NotAllowed;
-} // namespace Error
-} // namespace Time
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
 {
-namespace xyz
+struct ResourceNotFound;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
 {
-namespace openbmc_project
+struct Timeout;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
 {
-namespace User
+struct TooManyResources;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
 {
-namespace Common
+struct Unavailable;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::common
 {
-namespace Error
+struct UnsupportedRequest;
+} // namespace sdbusplus::error::xyz::openbmc_project::common
+namespace sdbusplus::error::xyz::openbmc_project::control::device
+{
+struct WriteFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::control::device
+namespace sdbusplus::error::xyz::openbmc_project::control::host
+{
+struct CommandNotSupported;
+} // namespace sdbusplus::error::xyz::openbmc_project::control::host
+namespace sdbusplus::error::xyz::openbmc_project::dump::create
+{
+struct Disabled;
+} // namespace sdbusplus::error::xyz::openbmc_project::dump::create
+namespace sdbusplus::error::xyz::openbmc_project::dump::create
+{
+struct QuotaExceeded;
+} // namespace sdbusplus::error::xyz::openbmc_project::dump::create
+namespace sdbusplus::error::xyz::openbmc_project::hardware_isolation
+{
+struct IsolatedAlready;
+} // namespace sdbusplus::error::xyz::openbmc_project::hardware_isolation
+namespace sdbusplus::error::xyz::openbmc_project::inventory
+{
+struct Nonfunctional;
+} // namespace sdbusplus::error::xyz::openbmc_project::inventory
+namespace sdbusplus::error::xyz::openbmc_project::inventory
+{
+struct NotPresent;
+} // namespace sdbusplus::error::xyz::openbmc_project::inventory
+namespace sdbusplus::error::xyz::openbmc_project::logging::sel
+{
+struct Created;
+} // namespace sdbusplus::error::xyz::openbmc_project::logging::sel
+namespace sdbusplus::error::xyz::openbmc_project::memory::memory_ecc
+{
+struct CeCount;
+} // namespace sdbusplus::error::xyz::openbmc_project::memory::memory_ecc
+namespace sdbusplus::error::xyz::openbmc_project::memory::memory_ecc
+{
+struct IsLoggingLimitReached;
+} // namespace sdbusplus::error::xyz::openbmc_project::memory::memory_ecc
+namespace sdbusplus::error::xyz::openbmc_project::memory::memory_ecc
+{
+struct UeCount;
+} // namespace sdbusplus::error::xyz::openbmc_project::memory::memory_ecc
+namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+{
+struct BackupDeviceFault;
+} // namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+{
+struct CapacityFault;
+} // namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+{
+struct DegradesFault;
+} // namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+{
+struct MediaFault;
+} // namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+{
+struct TemperatureFault;
+} // namespace sdbusplus::error::xyz::openbmc_project::nvme::status
+namespace sdbusplus::error::xyz::openbmc_project::scheduled_time
+{
+struct InvalidTime;
+} // namespace sdbusplus::error::xyz::openbmc_project::scheduled_time
+namespace sdbusplus::error::xyz::openbmc_project::sensor::device
+{
+struct ReadFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::sensor::device
+namespace sdbusplus::error::xyz::openbmc_project::sensor::threshold
+{
+struct CriticalHigh;
+} // namespace sdbusplus::error::xyz::openbmc_project::sensor::threshold
+namespace sdbusplus::error::xyz::openbmc_project::sensor::threshold
+{
+struct CriticalLow;
+} // namespace sdbusplus::error::xyz::openbmc_project::sensor::threshold
+namespace sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2
+{
+struct InvalidId;
+} // namespace sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2
+namespace sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2
+{
+struct InvalidParameter;
+} // namespace sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2
+namespace sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2
+{
+struct UpdateInProgress;
+} // namespace sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2
+namespace sdbusplus::error::xyz::openbmc_project::software::version
+{
+struct AlreadyExists;
+} // namespace sdbusplus::error::xyz::openbmc_project::software::version
+namespace sdbusplus::error::xyz::openbmc_project::software::version
+{
+struct Incompatible;
+} // namespace sdbusplus::error::xyz::openbmc_project::software::version
+namespace sdbusplus::error::xyz::openbmc_project::software::version
+{
+struct InvalidSignature;
+} // namespace sdbusplus::error::xyz::openbmc_project::software::version
+namespace sdbusplus::error::xyz::openbmc_project::state::bmc
+{
+struct MultiUserTargetFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::bmc
+namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+{
+struct BMCNotReady;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+{
+struct PowerCycleFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+{
+struct PowerOffFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+{
+struct PowerOnFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::chassis
+namespace sdbusplus::error::xyz::openbmc_project::state::host
+{
+struct BMCNotReady;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::host
+namespace sdbusplus::error::xyz::openbmc_project::state::host
+{
+struct HostMinStartFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::host
+namespace sdbusplus::error::xyz::openbmc_project::state::host
+{
+struct HostRebootFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::host
+namespace sdbusplus::error::xyz::openbmc_project::state::host
+{
+struct HostShutdownFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::host
+namespace sdbusplus::error::xyz::openbmc_project::state::host
+{
+struct HostStartFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::host
+namespace sdbusplus::error::xyz::openbmc_project::state::host
+{
+struct HostStopFailure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::host
+namespace sdbusplus::error::xyz::openbmc_project::state::host
+{
+struct SoftOffTimeout;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::host
+namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::inventory
+{
+struct Fan;
+} // namespace
+  // sdbusplus::error::xyz::openbmc_project::state::shutdown::inventory
+namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::power
+{
+struct Blackout;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::power
+namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::power
+{
+struct Fault;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::power
+namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::power
+{
+struct Regulator;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::power
+namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::thermal_event
+{
+struct Ambient;
+} // namespace
+  // sdbusplus::error::xyz::openbmc_project::state::shutdown::thermal_event
+namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::thermal_event
+{
+struct GPU;
+} // namespace
+  // sdbusplus::error::xyz::openbmc_project::state::shutdown::thermal_event
+namespace sdbusplus::error::xyz::openbmc_project::state::shutdown::thermal_event
+{
+struct Processor;
+} // namespace
+  // sdbusplus::error::xyz::openbmc_project::state::shutdown::thermal_event
+namespace sdbusplus::error::xyz::openbmc_project::state::systemd_target
+{
+struct Failure;
+} // namespace sdbusplus::error::xyz::openbmc_project::state::systemd_target
+namespace sdbusplus::error::xyz::openbmc_project::time
+{
+struct Failed;
+} // namespace sdbusplus::error::xyz::openbmc_project::time
+namespace sdbusplus::error::xyz::openbmc_project::time
+{
+struct NotAllowed;
+} // namespace sdbusplus::error::xyz::openbmc_project::time
+namespace sdbusplus::error::xyz::openbmc_project::user::common
+{
+struct GroupNameDoesNotExist;
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
+namespace sdbusplus::error::xyz::openbmc_project::user::common
+{
+struct GroupNameExists;
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
+namespace sdbusplus::error::xyz::openbmc_project::user::common
 {
 struct NoResource;
-} // namespace Error
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
+namespace sdbusplus::error::xyz::openbmc_project::user::common
 {
 struct PrivilegeMappingExists;
-} // namespace Error
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
+namespace sdbusplus::error::xyz::openbmc_project::user::common
 {
 struct UserNameDoesNotExist;
-} // namespace Error
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
+namespace sdbusplus::error::xyz::openbmc_project::user::common
 {
 struct UserNameExists;
-} // namespace Error
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
+namespace sdbusplus::error::xyz::openbmc_project::user::common
 {
 struct UserNameGroupFail;
-} // namespace Error
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
-namespace sdbusplus
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace Error
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
+namespace sdbusplus::error::xyz::openbmc_project::user::common
 {
 struct UserNamePrivFail;
-} // namespace Error
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace sdbusplus
+} // namespace sdbusplus::error::xyz::openbmc_project::user::common
 
-namespace phosphor
+namespace phosphor::logging
 {
 
-namespace logging
-{
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _LocationNotFound
-{} // namespace _LocationNotFound
-
-struct LocationNotFound
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::LocationNotFound>
-{
-    using type = com::ibm::VPD::LocationNotFound;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _NodeNotFound
-{} // namespace _NodeNotFound
-
-struct NodeNotFound
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::NodeNotFound>
-{
-    using type = com::ibm::VPD::NodeNotFound;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _PathNotFound
-{} // namespace _PathNotFound
-
-struct PathNotFound
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::PathNotFound>
-{
-    using type = com::ibm::VPD::PathNotFound;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _RecordNotFound
-{} // namespace _RecordNotFound
-
-struct RecordNotFound
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::RecordNotFound>
-{
-    using type = com::ibm::VPD::RecordNotFound;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _KeywordNotFound
-{} // namespace _KeywordNotFound
-
-struct KeywordNotFound
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::KeywordNotFound>
-{
-    using type = com::ibm::VPD::KeywordNotFound;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _BlankSystemVPD
-{} // namespace _BlankSystemVPD
-
-struct BlankSystemVPD
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::BlankSystemVPD>
-{
-    using type = com::ibm::VPD::BlankSystemVPD;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _InvalidEepromPath
-{} // namespace _InvalidEepromPath
-
-struct InvalidEepromPath
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::InvalidEepromPath>
-{
-    using type = com::ibm::VPD::InvalidEepromPath;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _InvalidVPD
-{} // namespace _InvalidVPD
-
-struct InvalidVPD
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::InvalidVPD>
-{
-    using type = com::ibm::VPD::InvalidVPD;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _EccCheckFailed
-{} // namespace _EccCheckFailed
-
-struct EccCheckFailed
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::EccCheckFailed>
-{
-    using type = com::ibm::VPD::EccCheckFailed;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _InvalidJson
-{} // namespace _InvalidJson
-
-struct InvalidJson
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::InvalidJson>
-{
-    using type = com::ibm::VPD::InvalidJson;
-};
-
-} // namespace details
-
-namespace com
-{
-namespace ibm
-{
-namespace VPD
-{
-namespace _DbusFailure
-{} // namespace _DbusFailure
-
-struct DbusFailure
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace VPD
-} // namespace ibm
-} // namespace com
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::com::ibm::VPD::Error::DbusFailure>
-{
-    using type = com::ibm::VPD::DbusFailure;
-};
-
-} // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Common
-{
-namespace Callout
+namespace org::open_power::common::callout
 {
 namespace _Procedure
 {
-
 struct PROCEDURE
 {
     /*
@@ -2126,7 +491,6 @@ struct PROCEDURE
         _entry(entry("PROCEDURE=%u", a)){};
     type _entry;
 };
-
 } // namespace _Procedure
 
 struct Procedure
@@ -2136,34 +500,31 @@ struct Procedure
     using metadata_types = std::tuple<PROCEDURE>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace open_power
-} // namespace org
+} // namespace org::open_power::common::callout
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Common::Callout
+{
+using Procedure =
+    phosphor::logging::org::open_power::common::callout::Procedure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::org::open_power::Common::Callout::Error::Procedure>
+    sdbusplus::error::org::open_power::common::callout::Procedure>
 {
-    using type = org::open_power::Common::Callout::Procedure;
+    using type = phosphor::logging::org::open_power::common::callout::Procedure;
 };
 
 } // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Proc
-{
-namespace FSI
+namespace org::open_power::proc::fsi
 {
 namespace _SlaveDetectionFailure
 {
-
 struct ERRNO
 {
     /*
@@ -2176,7 +537,6 @@ struct ERRNO
     explicit constexpr ERRNO(int32_t a) : _entry(entry("ERRNO=%d", a)){};
     type _entry;
 };
-
 } // namespace _SlaveDetectionFailure
 
 struct SlaveDetectionFailure
@@ -2186,158 +546,581 @@ struct SlaveDetectionFailure
     using metadata_types = std::tuple<ERRNO>;
 };
 
-} // namespace FSI
-} // namespace Proc
-} // namespace open_power
-} // namespace org
+} // namespace org::open_power::proc::fsi
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Proc::FSI
+{
+using SlaveDetectionFailure =
+    phosphor::logging::org::open_power::proc::fsi::SlaveDetectionFailure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::org::open_power::Proc::FSI::Error::SlaveDetectionFailure>
+    sdbusplus::error::org::open_power::proc::fsi::SlaveDetectionFailure>
 {
-    using type = org::open_power::Proc::FSI::SlaveDetectionFailure;
+    using type =
+        phosphor::logging::org::open_power::proc::fsi::SlaveDetectionFailure;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Certs
-{
-namespace _InvalidCertificate
+namespace org::open_power::host::boot
 {
 
-struct REASON
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "REASON ";
-    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
-    explicit constexpr REASON(const char* a) :
-        _entry(entry("REASON = %s", a)){};
-    type _entry;
-};
-
-} // namespace _InvalidCertificate
-
-struct InvalidCertificate
-{
-    static constexpr auto L = level::ERR;
-    using REASON = _InvalidCertificate::REASON;
-    using metadata_types = std::tuple<REASON>;
-};
-
-} // namespace Certs
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Certs::Error::InvalidCertificate>
-{
-    using type = xyz::openbmc_project::Certs::InvalidCertificate;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace ScheduledTime
-{
-namespace _InvalidTime
-{
-
-struct REASON
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "REASON";
-    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
-    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
-    type _entry;
-};
-
-} // namespace _InvalidTime
-
-struct InvalidTime
-{
-    static constexpr auto L = level::ERR;
-    using REASON = _InvalidTime::REASON;
-    using metadata_types = std::tuple<REASON>;
-};
-
-} // namespace ScheduledTime
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::ScheduledTime::Error::InvalidTime>
-{
-    using type = xyz::openbmc_project::ScheduledTime::InvalidTime;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace HardwareIsolation
-{
-namespace _IsolatedAlready
-{} // namespace _IsolatedAlready
-
-struct IsolatedAlready
+struct Checkstop
 {
     static constexpr auto L = level::ERR;
     using metadata_types = std::tuple<>;
 };
 
-} // namespace HardwareIsolation
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace org::open_power::host::boot
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Host::Boot
+{
+using Checkstop = phosphor::logging::org::open_power::host::boot::Checkstop;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::HardwareIsolation::Error::IsolatedAlready>
+    sdbusplus::error::org::open_power::host::boot::Checkstop>
 {
-    using type = xyz::openbmc_project::HardwareIsolation::IsolatedAlready;
+    using type = phosphor::logging::org::open_power::host::boot::Checkstop;
 };
 
 } // namespace details
+namespace org::open_power::host::boot
+{
 
-namespace xyz
+struct WatchdogTimedOut
 {
-namespace openbmc_project
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace org::open_power::host::boot
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Host::Boot
 {
-namespace Common
+using WatchdogTimedOut =
+    phosphor::logging::org::open_power::host::boot::WatchdogTimedOut;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::org::open_power::host::boot::WatchdogTimedOut>
+{
+    using type =
+        phosphor::logging::org::open_power::host::boot::WatchdogTimedOut;
+};
+
+} // namespace details
+namespace com::google::gbmc::hoth
+{
+
+struct CommandFailure
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::google::gbmc::hoth
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::google::gbmc::Hoth
+{
+using CommandFailure =
+    phosphor::logging::com::google::gbmc::hoth::CommandFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::com::google::gbmc::hoth::CommandFailure>
+{
+    using type = phosphor::logging::com::google::gbmc::hoth::CommandFailure;
+};
+
+} // namespace details
+namespace com::google::gbmc::hoth
+{
+
+struct ResponseFailure
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::google::gbmc::hoth
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::google::gbmc::Hoth
+{
+using ResponseFailure =
+    phosphor::logging::com::google::gbmc::hoth::ResponseFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::com::google::gbmc::hoth::ResponseFailure>
+{
+    using type = phosphor::logging::com::google::gbmc::hoth::ResponseFailure;
+};
+
+} // namespace details
+namespace com::google::gbmc::hoth
+{
+
+struct FirmwareFailure
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::google::gbmc::hoth
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::google::gbmc::Hoth
+{
+using FirmwareFailure =
+    phosphor::logging::com::google::gbmc::hoth::FirmwareFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::com::google::gbmc::hoth::FirmwareFailure>
+{
+    using type = phosphor::logging::com::google::gbmc::hoth::FirmwareFailure;
+};
+
+} // namespace details
+namespace com::google::gbmc::hoth
+{
+
+struct ResponseNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::google::gbmc::hoth
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::google::gbmc::Hoth
+{
+using ResponseNotFound =
+    phosphor::logging::com::google::gbmc::hoth::ResponseNotFound;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::com::google::gbmc::hoth::ResponseNotFound>
+{
+    using type = phosphor::logging::com::google::gbmc::hoth::ResponseNotFound;
+};
+
+} // namespace details
+namespace com::google::gbmc::hoth
+{
+
+struct InterfaceError
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::google::gbmc::hoth
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::google::gbmc::Hoth
+{
+using InterfaceError =
+    phosphor::logging::com::google::gbmc::hoth::InterfaceError;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::com::google::gbmc::hoth::InterfaceError>
+{
+    using type = phosphor::logging::com::google::gbmc::hoth::InterfaceError;
+};
+
+} // namespace details
+namespace com::google::gbmc::hoth
+{
+
+struct ExpectedInfoNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::google::gbmc::hoth
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::google::gbmc::Hoth
+{
+using ExpectedInfoNotFound =
+    phosphor::logging::com::google::gbmc::hoth::ExpectedInfoNotFound;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::com::google::gbmc::hoth::ExpectedInfoNotFound>
+{
+    using type =
+        phosphor::logging::com::google::gbmc::hoth::ExpectedInfoNotFound;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct LocationNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using LocationNotFound = phosphor::logging::com::ibm::vpd::LocationNotFound;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::LocationNotFound>
+{
+    using type = phosphor::logging::com::ibm::vpd::LocationNotFound;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct NodeNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using NodeNotFound = phosphor::logging::com::ibm::vpd::NodeNotFound;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::NodeNotFound>
+{
+    using type = phosphor::logging::com::ibm::vpd::NodeNotFound;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct PathNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using PathNotFound = phosphor::logging::com::ibm::vpd::PathNotFound;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::PathNotFound>
+{
+    using type = phosphor::logging::com::ibm::vpd::PathNotFound;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct RecordNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using RecordNotFound = phosphor::logging::com::ibm::vpd::RecordNotFound;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::RecordNotFound>
+{
+    using type = phosphor::logging::com::ibm::vpd::RecordNotFound;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct KeywordNotFound
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using KeywordNotFound = phosphor::logging::com::ibm::vpd::KeywordNotFound;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::KeywordNotFound>
+{
+    using type = phosphor::logging::com::ibm::vpd::KeywordNotFound;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct BlankSystemVPD
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using BlankSystemVPD = phosphor::logging::com::ibm::vpd::BlankSystemVPD;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::BlankSystemVPD>
+{
+    using type = phosphor::logging::com::ibm::vpd::BlankSystemVPD;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct InvalidEepromPath
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using InvalidEepromPath = phosphor::logging::com::ibm::vpd::InvalidEepromPath;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::InvalidEepromPath>
+{
+    using type = phosphor::logging::com::ibm::vpd::InvalidEepromPath;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct InvalidVPD
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using InvalidVPD = phosphor::logging::com::ibm::vpd::InvalidVPD;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::InvalidVPD>
+{
+    using type = phosphor::logging::com::ibm::vpd::InvalidVPD;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct EccCheckFailed
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using EccCheckFailed = phosphor::logging::com::ibm::vpd::EccCheckFailed;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::EccCheckFailed>
+{
+    using type = phosphor::logging::com::ibm::vpd::EccCheckFailed;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct InvalidJson
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using InvalidJson = phosphor::logging::com::ibm::vpd::InvalidJson;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::InvalidJson>
+{
+    using type = phosphor::logging::com::ibm::vpd::InvalidJson;
+};
+
+} // namespace details
+namespace com::ibm::vpd
+{
+
+struct DbusFailure
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace com::ibm::vpd
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace com::ibm::VPD
+{
+using DbusFailure = phosphor::logging::com::ibm::vpd::DbusFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::com::ibm::vpd::DbusFailure>
+{
+    using type = phosphor::logging::com::ibm::vpd::DbusFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::common
 {
 namespace _Timeout
 {
-
 struct TIMEOUT_IN_MSEC
 {
     /*
@@ -2352,7 +1135,6 @@ struct TIMEOUT_IN_MSEC
         _entry(entry("TIMEOUT_IN_MSEC=%llu", a)){};
     type _entry;
 };
-
 } // namespace _Timeout
 
 struct Timeout
@@ -2362,30 +1144,28 @@ struct Timeout
     using metadata_types = std::tuple<TIMEOUT_IN_MSEC>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using Timeout = phosphor::logging::xyz::openbmc_project::common::Timeout;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::Timeout>
+    sdbusplus::error::xyz::openbmc_project::common::Timeout>
 {
-    using type = xyz::openbmc_project::Common::Timeout;
+    using type = phosphor::logging::xyz::openbmc_project::common::Timeout;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::common
 {
-namespace openbmc_project
-{
-namespace Common
-{
-namespace _InternalFailure
-{} // namespace _InternalFailure
 
 struct InternalFailure
 {
@@ -2393,31 +1173,32 @@ struct InternalFailure
     using metadata_types = std::tuple<>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using InternalFailure =
+    phosphor::logging::xyz::openbmc_project::common::InternalFailure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure>
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure>
 {
-    using type = xyz::openbmc_project::Common::InternalFailure;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::InternalFailure;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
+namespace xyz::openbmc_project::common
 {
 namespace _InvalidArgument
 {
-
 struct ARGUMENT_NAME
 {
     /*
@@ -2446,7 +1227,6 @@ struct ARGUMENT_VALUE
         _entry(entry("ARGUMENT_VALUE=%s", a)){};
     type _entry;
 };
-
 } // namespace _InvalidArgument
 
 struct InvalidArgument
@@ -2457,30 +1237,30 @@ struct InvalidArgument
     using metadata_types = std::tuple<ARGUMENT_NAME, ARGUMENT_VALUE>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using InvalidArgument =
+    phosphor::logging::xyz::openbmc_project::common::InvalidArgument;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::InvalidArgument>
+    sdbusplus::error::xyz::openbmc_project::common::InvalidArgument>
 {
-    using type = xyz::openbmc_project::Common::InvalidArgument;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::InvalidArgument;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::common
 {
-namespace openbmc_project
-{
-namespace Common
-{
-namespace _InsufficientPermission
-{} // namespace _InsufficientPermission
 
 struct InsufficientPermission
 {
@@ -2488,31 +1268,32 @@ struct InsufficientPermission
     using metadata_types = std::tuple<>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using InsufficientPermission =
+    phosphor::logging::xyz::openbmc_project::common::InsufficientPermission;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::InsufficientPermission>
+    sdbusplus::error::xyz::openbmc_project::common::InsufficientPermission>
 {
-    using type = xyz::openbmc_project::Common::InsufficientPermission;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::InsufficientPermission;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
+namespace xyz::openbmc_project::common
 {
 namespace _NotAllowed
 {
-
 struct REASON
 {
     /*
@@ -2525,7 +1306,6 @@ struct REASON
     explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
     type _entry;
 };
-
 } // namespace _NotAllowed
 
 struct NotAllowed
@@ -2535,30 +1315,28 @@ struct NotAllowed
     using metadata_types = std::tuple<REASON>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using NotAllowed = phosphor::logging::xyz::openbmc_project::common::NotAllowed;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::NotAllowed>
+    sdbusplus::error::xyz::openbmc_project::common::NotAllowed>
 {
-    using type = xyz::openbmc_project::Common::NotAllowed;
+    using type = phosphor::logging::xyz::openbmc_project::common::NotAllowed;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::common
 {
-namespace openbmc_project
-{
-namespace Common
-{
-namespace _NoCACertificate
-{} // namespace _NoCACertificate
 
 struct NoCACertificate
 {
@@ -2566,30 +1344,30 @@ struct NoCACertificate
     using metadata_types = std::tuple<>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using NoCACertificate =
+    phosphor::logging::xyz::openbmc_project::common::NoCACertificate;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::NoCACertificate>
+    sdbusplus::error::xyz::openbmc_project::common::NoCACertificate>
 {
-    using type = xyz::openbmc_project::Common::NoCACertificate;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::NoCACertificate;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::common
 {
-namespace openbmc_project
-{
-namespace Common
-{
-namespace _TooManyResources
-{} // namespace _TooManyResources
 
 struct TooManyResources
 {
@@ -2597,61 +1375,78 @@ struct TooManyResources
     using metadata_types = std::tuple<>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using TooManyResources =
+    phosphor::logging::xyz::openbmc_project::common::TooManyResources;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::TooManyResources>
+    sdbusplus::error::xyz::openbmc_project::common::TooManyResources>
 {
-    using type = xyz::openbmc_project::Common::TooManyResources;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::TooManyResources;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
+namespace xyz::openbmc_project::common
 {
 namespace _ResourceNotFound
-{} // namespace _ResourceNotFound
+{
+struct RESOURCE
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "RESOURCE";
+    using type = std::tuple<std::decay_t<decltype("RESOURCE=%s")>, const char*>;
+    explicit constexpr RESOURCE(const char* a) :
+        _entry(entry("RESOURCE=%s", a)){};
+    type _entry;
+};
+} // namespace _ResourceNotFound
 
 struct ResourceNotFound
 {
     static constexpr auto L = level::INFO;
-    using metadata_types = std::tuple<>;
+    using RESOURCE = _ResourceNotFound::RESOURCE;
+    using metadata_types = std::tuple<RESOURCE>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using ResourceNotFound =
+    phosphor::logging::xyz::openbmc_project::common::ResourceNotFound;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::ResourceNotFound>
+    sdbusplus::error::xyz::openbmc_project::common::ResourceNotFound>
 {
-    using type = xyz::openbmc_project::Common::ResourceNotFound;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::ResourceNotFound;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::common
 {
-namespace openbmc_project
-{
-namespace Common
-{
-namespace _Unavailable
-{} // namespace _Unavailable
 
 struct Unavailable
 {
@@ -2659,31 +1454,31 @@ struct Unavailable
     using metadata_types = std::tuple<>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using Unavailable =
+    phosphor::logging::xyz::openbmc_project::common::Unavailable;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::Unavailable>
+    sdbusplus::error::xyz::openbmc_project::common::Unavailable>
 {
-    using type = xyz::openbmc_project::Common::Unavailable;
+    using type = phosphor::logging::xyz::openbmc_project::common::Unavailable;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
+namespace xyz::openbmc_project::common
 {
 namespace _UnsupportedRequest
 {
-
 struct REASON
 {
     /*
@@ -2696,7 +1491,6 @@ struct REASON
     explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
     type _entry;
 };
-
 } // namespace _UnsupportedRequest
 
 struct UnsupportedRequest
@@ -2706,67 +1500,32 @@ struct UnsupportedRequest
     using metadata_types = std::tuple<REASON>;
 };
 
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common
+{
+using UnsupportedRequest =
+    phosphor::logging::xyz::openbmc_project::common::UnsupportedRequest;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Error::UnsupportedRequest>
+    sdbusplus::error::xyz::openbmc_project::common::UnsupportedRequest>
 {
-    using type = xyz::openbmc_project::Common::UnsupportedRequest;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::UnsupportedRequest;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::certs
 {
-namespace openbmc_project
+namespace _InvalidCertificate
 {
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace _AttributeNotFound
-{} // namespace _AttributeNotFound
-
-struct AttributeNotFound
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
-                              Error::AttributeNotFound>
-{
-    using type = xyz::openbmc_project::BIOSConfig::Common::AttributeNotFound;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace _AttributeReadOnly
-{
-
 struct REASON
 {
     /*
@@ -2779,181 +1538,150 @@ struct REASON
     explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
     type _entry;
 };
+} // namespace _InvalidCertificate
 
-} // namespace _AttributeReadOnly
-
-struct AttributeReadOnly
+struct InvalidCertificate
 {
     static constexpr auto L = level::ERR;
-    using REASON = _AttributeReadOnly::REASON;
+    using REASON = _InvalidCertificate::REASON;
     using metadata_types = std::tuple<REASON>;
 };
 
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::certs
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Certs
+{
+using InvalidCertificate =
+    phosphor::logging::xyz::openbmc_project::certs::InvalidCertificate;
+}
+#endif
 
 namespace details
 {
 
 template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
-                              Error::AttributeReadOnly>
-{
-    using type = xyz::openbmc_project::BIOSConfig::Common::AttributeReadOnly;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace _InvalidCurrentPassword
-{} // namespace _InvalidCurrentPassword
-
-struct InvalidCurrentPassword
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
-                              Error::InvalidCurrentPassword>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::certs::InvalidCertificate>
 {
     using type =
-        xyz::openbmc_project::BIOSConfig::Common::InvalidCurrentPassword;
+        phosphor::logging::xyz::openbmc_project::certs::InvalidCertificate;
 };
 
 } // namespace details
+namespace xyz::openbmc_project::hardware_isolation
+{
 
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace BIOSConfig
-{
-namespace Common
-{
-namespace _PasswordNotSettable
-{} // namespace _PasswordNotSettable
-
-struct PasswordNotSettable
+struct IsolatedAlready
 {
     static constexpr auto L = level::ERR;
     using metadata_types = std::tuple<>;
 };
 
-} // namespace Common
-} // namespace BIOSConfig
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::hardware_isolation
 
-namespace details
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::HardwareIsolation
 {
-
-template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::BIOSConfig::Common::
-                              Error::PasswordNotSettable>
-{
-    using type = xyz::openbmc_project::BIOSConfig::Common::PasswordNotSettable;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Chassis
-{
-namespace Common
-{
-namespace _UnsupportedCommand
-{} // namespace _UnsupportedCommand
-
-struct UnsupportedCommand
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Common
-} // namespace Chassis
-} // namespace openbmc_project
-} // namespace xyz
+using IsolatedAlready = phosphor::logging::xyz::openbmc_project::
+    hardware_isolation::IsolatedAlready;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Chassis::Common::Error::UnsupportedCommand>
+    sdbusplus::error::xyz::openbmc_project::hardware_isolation::IsolatedAlready>
 {
-    using type = xyz::openbmc_project::Chassis::Common::UnsupportedCommand;
+    using type = phosphor::logging::xyz::openbmc_project::hardware_isolation::
+        IsolatedAlready;
 };
 
 } // namespace details
+namespace xyz::openbmc_project::scheduled_time
+{
+namespace _InvalidTime
+{
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+} // namespace _InvalidTime
 
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Chassis
-{
-namespace Common
-{
-namespace _IOError
-{} // namespace _IOError
-
-struct IOError
+struct InvalidTime
 {
     static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
+    using REASON = _InvalidTime::REASON;
+    using metadata_types = std::tuple<REASON>;
 };
 
-} // namespace Common
-} // namespace Chassis
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::scheduled_time
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::ScheduledTime
+{
+using InvalidTime =
+    phosphor::logging::xyz::openbmc_project::scheduled_time::InvalidTime;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Chassis::Common::Error::IOError>
+    sdbusplus::error::xyz::openbmc_project::scheduled_time::InvalidTime>
 {
-    using type = xyz::openbmc_project::Chassis::Common::IOError;
+    using type =
+        phosphor::logging::xyz::openbmc_project::scheduled_time::InvalidTime;
 };
 
 } // namespace details
+namespace xyz::openbmc_project::control::host
+{
 
-namespace xyz
+struct CommandNotSupported
 {
-namespace openbmc_project
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::control::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Control::Host
 {
-namespace Common
+using CommandNotSupported =
+    phosphor::logging::xyz::openbmc_project::control::host::CommandNotSupported;
+}
+#endif
+
+namespace details
 {
-namespace Callout
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::control::host::CommandNotSupported>
+{
+    using type = phosphor::logging::xyz::openbmc_project::control::host::
+        CommandNotSupported;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::common::callout
 {
 namespace _Device
 {
-
 struct CALLOUT_ERRNO
 {
     /*
@@ -2982,7 +1710,6 @@ struct CALLOUT_DEVICE_PATH
         _entry(entry("CALLOUT_DEVICE_PATH=%s", a)){};
     type _entry;
 };
-
 } // namespace _Device
 
 struct Device
@@ -2993,34 +1720,31 @@ struct Device
     using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::callout
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::Callout
+{
+using Device = phosphor::logging::xyz::openbmc_project::common::callout::Device;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::Device>
+    sdbusplus::error::xyz::openbmc_project::common::callout::Device>
 {
-    using type = xyz::openbmc_project::Common::Callout::Device;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::callout::Device;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
+namespace xyz::openbmc_project::common::callout
 {
 namespace _GPIO
 {
-
 struct CALLOUT_GPIO_NUM
 {
     /*
@@ -3035,49 +1759,44 @@ struct CALLOUT_GPIO_NUM
         _entry(entry("CALLOUT_GPIO_NUM=%u", a)){};
     type _entry;
 };
-
 } // namespace _GPIO
 
 struct GPIO
 {
     static constexpr auto L = level::ERR;
     using CALLOUT_GPIO_NUM = _GPIO::CALLOUT_GPIO_NUM;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
     using metadata_types =
         std::tuple<CALLOUT_GPIO_NUM, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::callout
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::Callout
+{
+using GPIO = phosphor::logging::xyz::openbmc_project::common::callout::GPIO;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::GPIO>
+    sdbusplus::error::xyz::openbmc_project::common::callout::GPIO>
 {
-    using type = xyz::openbmc_project::Common::Callout::GPIO;
+    using type = phosphor::logging::xyz::openbmc_project::common::callout::GPIO;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
+namespace xyz::openbmc_project::common::callout
 {
 namespace _IIC
 {
-
 struct CALLOUT_IIC_BUS
 {
     /*
@@ -3106,7 +1825,6 @@ struct CALLOUT_IIC_ADDR
         _entry(entry("CALLOUT_IIC_ADDR=0x%hx", a)){};
     type _entry;
 };
-
 } // namespace _IIC
 
 struct IIC
@@ -3114,42 +1832,38 @@ struct IIC
     static constexpr auto L = level::ERR;
     using CALLOUT_IIC_BUS = _IIC::CALLOUT_IIC_BUS;
     using CALLOUT_IIC_ADDR = _IIC::CALLOUT_IIC_ADDR;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
     using metadata_types = std::tuple<CALLOUT_IIC_BUS, CALLOUT_IIC_ADDR,
                                       CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::callout
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::Callout
+{
+using IIC = phosphor::logging::xyz::openbmc_project::common::callout::IIC;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::IIC>
+    sdbusplus::error::xyz::openbmc_project::common::callout::IIC>
 {
-    using type = xyz::openbmc_project::Common::Callout::IIC;
+    using type = phosphor::logging::xyz::openbmc_project::common::callout::IIC;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
+namespace xyz::openbmc_project::common::callout
 {
 namespace _Inventory
 {
-
 struct CALLOUT_INVENTORY_PATH
 {
     /*
@@ -3164,7 +1878,6 @@ struct CALLOUT_INVENTORY_PATH
         _entry(entry("CALLOUT_INVENTORY_PATH=%s", a)){};
     type _entry;
 };
-
 } // namespace _Inventory
 
 struct Inventory
@@ -3174,34 +1887,32 @@ struct Inventory
     using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::callout
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::Callout
+{
+using Inventory =
+    phosphor::logging::xyz::openbmc_project::common::callout::Inventory;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::Inventory>
+    sdbusplus::error::xyz::openbmc_project::common::callout::Inventory>
 {
-    using type = xyz::openbmc_project::Common::Callout::Inventory;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::callout::Inventory;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Callout
+namespace xyz::openbmc_project::common::callout
 {
 namespace _IPMISensor
 {
-
 struct CALLOUT_IPMI_SENSOR_NUM
 {
     /*
@@ -3217,7 +1928,6 @@ struct CALLOUT_IPMI_SENSOR_NUM
         _entry(entry("CALLOUT_IPMI_SENSOR_NUM=%u", a)){};
     type _entry;
 };
-
 } // namespace _IPMISensor
 
 struct IPMISensor
@@ -3227,110 +1937,102 @@ struct IPMISensor
     using metadata_types = std::tuple<CALLOUT_IPMI_SENSOR_NUM>;
 };
 
-} // namespace Callout
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::callout
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::Callout
+{
+using IPMISensor =
+    phosphor::logging::xyz::openbmc_project::common::callout::IPMISensor;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Callout::Error::IPMISensor>
+    sdbusplus::error::xyz::openbmc_project::common::callout::IPMISensor>
 {
-    using type = xyz::openbmc_project::Common::Callout::IPMISensor;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::callout::IPMISensor;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::common::device
 {
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Device
-{
-namespace _ReadFailure
-{} // namespace _ReadFailure
 
 struct ReadFailure
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
     using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Device
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::Device
+{
+using ReadFailure =
+    phosphor::logging::xyz::openbmc_project::common::device::ReadFailure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Device::Error::ReadFailure>
+    sdbusplus::error::xyz::openbmc_project::common::device::ReadFailure>
 {
-    using type = xyz::openbmc_project::Common::Device::ReadFailure;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::device::ReadFailure;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::common::device
 {
-namespace openbmc_project
-{
-namespace Common
-{
-namespace Device
-{
-namespace _WriteFailure
-{} // namespace _WriteFailure
 
 struct WriteFailure
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
     using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Device
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::Device
+{
+using WriteFailure =
+    phosphor::logging::xyz::openbmc_project::common::device::WriteFailure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::Device::Error::WriteFailure>
+    sdbusplus::error::xyz::openbmc_project::common::device::WriteFailure>
 {
-    using type = xyz::openbmc_project::Common::Device::WriteFailure;
+    using type =
+        phosphor::logging::xyz::openbmc_project::common::device::WriteFailure;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
+namespace xyz::openbmc_project::common::file
 {
 namespace _Open
 {
-
 struct ERRNO
 {
     /*
@@ -3355,7 +2057,6 @@ struct PATH
     explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
     type _entry;
 };
-
 } // namespace _Open
 
 struct Open
@@ -3366,34 +2067,30 @@ struct Open
     using metadata_types = std::tuple<ERRNO, PATH>;
 };
 
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::file
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::File
+{
+using Open = phosphor::logging::xyz::openbmc_project::common::file::Open;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::File::Error::Open>
+    sdbusplus::error::xyz::openbmc_project::common::file::Open>
 {
-    using type = xyz::openbmc_project::Common::File::Open;
+    using type = phosphor::logging::xyz::openbmc_project::common::file::Open;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
+namespace xyz::openbmc_project::common::file
 {
 namespace _Seek
 {
-
 struct OFFSET
 {
     /*
@@ -3442,7 +2139,6 @@ struct PATH
     explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
     type _entry;
 };
-
 } // namespace _Seek
 
 struct Seek
@@ -3455,34 +2151,30 @@ struct Seek
     using metadata_types = std::tuple<OFFSET, WHENCE, ERRNO, PATH>;
 };
 
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::file
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::File
+{
+using Seek = phosphor::logging::xyz::openbmc_project::common::file::Seek;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::File::Error::Seek>
+    sdbusplus::error::xyz::openbmc_project::common::file::Seek>
 {
-    using type = xyz::openbmc_project::Common::File::Seek;
+    using type = phosphor::logging::xyz::openbmc_project::common::file::Seek;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
+namespace xyz::openbmc_project::common::file
 {
 namespace _Write
 {
-
 struct ERRNO
 {
     /*
@@ -3507,7 +2199,6 @@ struct PATH
     explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
     type _entry;
 };
-
 } // namespace _Write
 
 struct Write
@@ -3518,34 +2209,30 @@ struct Write
     using metadata_types = std::tuple<ERRNO, PATH>;
 };
 
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::file
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::File
+{
+using Write = phosphor::logging::xyz::openbmc_project::common::file::Write;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::File::Error::Write>
+    sdbusplus::error::xyz::openbmc_project::common::file::Write>
 {
-    using type = xyz::openbmc_project::Common::File::Write;
+    using type = phosphor::logging::xyz::openbmc_project::common::file::Write;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Common
-{
-namespace File
+namespace xyz::openbmc_project::common::file
 {
 namespace _Read
 {
-
 struct ERRNO
 {
     /*
@@ -3570,7 +2257,6 @@ struct PATH
     explicit constexpr PATH(const char* a) : _entry(entry("PATH=%s", a)){};
     type _entry;
 };
-
 } // namespace _Read
 
 struct Read
@@ -3581,140 +2267,61 @@ struct Read
     using metadata_types = std::tuple<ERRNO, PATH>;
 };
 
-} // namespace File
-} // namespace Common
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::common::file
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Common::File
+{
+using Read = phosphor::logging::xyz::openbmc_project::common::file::Read;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Common::File::Error::Read>
+    sdbusplus::error::xyz::openbmc_project::common::file::Read>
 {
-    using type = xyz::openbmc_project::Common::File::Read;
+    using type = phosphor::logging::xyz::openbmc_project::common::file::Read;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Control
-{
-namespace Device
-{
-namespace _WriteFailure
-{} // namespace _WriteFailure
-
-struct WriteFailure
-{
-    static constexpr auto L = level::ERR;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
-    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
-};
-
-} // namespace Device
-} // namespace Control
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
+namespace xyz::openbmc_project::bios_config::common
 {
 
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Control::Device::Error::WriteFailure>
-{
-    using type = xyz::openbmc_project::Control::Device::WriteFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Control
-{
-namespace Host
-{
-namespace _CommandNotSupported
-{} // namespace _CommandNotSupported
-
-struct CommandNotSupported
+struct AttributeNotFound
 {
     static constexpr auto L = level::ERR;
     using metadata_types = std::tuple<>;
 };
 
-} // namespace Host
-} // namespace Control
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::bios_config::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::BIOSConfig::Common
+{
+using AttributeNotFound = phosphor::logging::xyz::openbmc_project::bios_config::
+    common::AttributeNotFound;
+}
+#endif
 
 namespace details
 {
 
 template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Control::Host::Error::CommandNotSupported>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::bios_config::
+                              common::AttributeNotFound>
 {
-    using type = xyz::openbmc_project::Control::Host::CommandNotSupported;
+    using type = phosphor::logging::xyz::openbmc_project::bios_config::common::
+        AttributeNotFound;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::bios_config::common
 {
-namespace openbmc_project
+namespace _AttributeReadOnly
 {
-namespace Dump
-{
-namespace Create
-{
-namespace _Disabled
-{} // namespace _Disabled
-
-struct Disabled
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Create
-} // namespace Dump
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Dump::Create::Error::Disabled>
-{
-    using type = xyz::openbmc_project::Dump::Create::Disabled;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Dump
-{
-namespace Create
-{
-namespace _QuotaExceeded
-{
-
 struct REASON
 {
     /*
@@ -3722,13 +2329,306 @@ struct REASON
      * 'static constexpr auto str' member, so don't. Instead, open-code the
      * mako template lookups.
      */
-    static constexpr auto str_short = "REASON ";
-    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
-    explicit constexpr REASON(const char* a) :
-        _entry(entry("REASON = %s", a)){};
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
     type _entry;
 };
+} // namespace _AttributeReadOnly
 
+struct AttributeReadOnly
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _AttributeReadOnly::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace xyz::openbmc_project::bios_config::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::BIOSConfig::Common
+{
+using AttributeReadOnly = phosphor::logging::xyz::openbmc_project::bios_config::
+    common::AttributeReadOnly;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::bios_config::
+                              common::AttributeReadOnly>
+{
+    using type = phosphor::logging::xyz::openbmc_project::bios_config::common::
+        AttributeReadOnly;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::bios_config::common
+{
+
+struct InvalidCurrentPassword
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::bios_config::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::BIOSConfig::Common
+{
+using InvalidCurrentPassword = phosphor::logging::xyz::openbmc_project::
+    bios_config::common::InvalidCurrentPassword;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::bios_config::
+                              common::InvalidCurrentPassword>
+{
+    using type = phosphor::logging::xyz::openbmc_project::bios_config::common::
+        InvalidCurrentPassword;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::bios_config::common
+{
+
+struct PasswordNotSettable
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::bios_config::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::BIOSConfig::Common
+{
+using PasswordNotSettable = phosphor::logging::xyz::openbmc_project::
+    bios_config::common::PasswordNotSettable;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::bios_config::
+                              common::PasswordNotSettable>
+{
+    using type = phosphor::logging::xyz::openbmc_project::bios_config::common::
+        PasswordNotSettable;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::nvme::status
+{
+
+struct CapacityFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::nvme::status
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Nvme::Status
+{
+using CapacityFault =
+    phosphor::logging::xyz::openbmc_project::nvme::status::CapacityFault;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::nvme::status::CapacityFault>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::nvme::status::CapacityFault;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::nvme::status
+{
+
+struct TemperatureFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::nvme::status
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Nvme::Status
+{
+using TemperatureFault =
+    phosphor::logging::xyz::openbmc_project::nvme::status::TemperatureFault;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::nvme::status::TemperatureFault>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::nvme::status::TemperatureFault;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::nvme::status
+{
+
+struct DegradesFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::nvme::status
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Nvme::Status
+{
+using DegradesFault =
+    phosphor::logging::xyz::openbmc_project::nvme::status::DegradesFault;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::nvme::status::DegradesFault>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::nvme::status::DegradesFault;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::nvme::status
+{
+
+struct MediaFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::nvme::status
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Nvme::Status
+{
+using MediaFault =
+    phosphor::logging::xyz::openbmc_project::nvme::status::MediaFault;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::nvme::status::MediaFault>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::nvme::status::MediaFault;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::nvme::status
+{
+
+struct BackupDeviceFault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::nvme::status
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Nvme::Status
+{
+using BackupDeviceFault =
+    phosphor::logging::xyz::openbmc_project::nvme::status::BackupDeviceFault;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::nvme::status::BackupDeviceFault>
+{
+    using type = phosphor::logging::xyz::openbmc_project::nvme::status::
+        BackupDeviceFault;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::dump::create
+{
+
+struct Disabled
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::dump::create
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Dump::Create
+{
+using Disabled =
+    phosphor::logging::xyz::openbmc_project::dump::create::Disabled;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::dump::create::Disabled>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::dump::create::Disabled;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::dump::create
+{
+namespace _QuotaExceeded
+{
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
 } // namespace _QuotaExceeded
 
 struct QuotaExceeded
@@ -3738,34 +2638,1359 @@ struct QuotaExceeded
     using metadata_types = std::tuple<REASON>;
 };
 
-} // namespace Create
-} // namespace Dump
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::dump::create
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Dump::Create
+{
+using QuotaExceeded =
+    phosphor::logging::xyz::openbmc_project::dump::create::QuotaExceeded;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Dump::Create::Error::QuotaExceeded>
+    sdbusplus::error::xyz::openbmc_project::dump::create::QuotaExceeded>
 {
-    using type = xyz::openbmc_project::Dump::Create::QuotaExceeded;
+    using type =
+        phosphor::logging::xyz::openbmc_project::dump::create::QuotaExceeded;
 };
 
 } // namespace details
+namespace xyz::openbmc_project::user::common
+{
 
-namespace xyz
+struct UserNameExists
 {
-namespace openbmc_project
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
 {
-namespace Logging
+using UserNameExists =
+    phosphor::logging::xyz::openbmc_project::user::common::UserNameExists;
+}
+#endif
+
+namespace details
 {
-namespace SEL
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::user::common::UserNameExists>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::user::common::UserNameExists;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::user::common
+{
+
+struct UserNameDoesNotExist
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
+{
+using UserNameDoesNotExist =
+    phosphor::logging::xyz::openbmc_project::user::common::UserNameDoesNotExist;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::user::common::UserNameDoesNotExist>
+{
+    using type = phosphor::logging::xyz::openbmc_project::user::common::
+        UserNameDoesNotExist;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::user::common
+{
+namespace _UserNameGroupFail
+{
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+} // namespace _UserNameGroupFail
+
+struct UserNameGroupFail
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _UserNameGroupFail::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
+{
+using UserNameGroupFail =
+    phosphor::logging::xyz::openbmc_project::user::common::UserNameGroupFail;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::user::common::UserNameGroupFail>
+{
+    using type = phosphor::logging::xyz::openbmc_project::user::common::
+        UserNameGroupFail;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::user::common
+{
+namespace _UserNamePrivFail
+{
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+} // namespace _UserNamePrivFail
+
+struct UserNamePrivFail
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _UserNamePrivFail::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
+{
+using UserNamePrivFail =
+    phosphor::logging::xyz::openbmc_project::user::common::UserNamePrivFail;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::user::common::UserNamePrivFail>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::user::common::UserNamePrivFail;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::user::common
+{
+namespace _NoResource
+{
+struct REASON
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "REASON";
+    using type = std::tuple<std::decay_t<decltype("REASON=%s")>, const char*>;
+    explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
+    type _entry;
+};
+} // namespace _NoResource
+
+struct NoResource
+{
+    static constexpr auto L = level::ERR;
+    using REASON = _NoResource::REASON;
+    using metadata_types = std::tuple<REASON>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
+{
+using NoResource =
+    phosphor::logging::xyz::openbmc_project::user::common::NoResource;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::user::common::NoResource>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::user::common::NoResource;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::user::common
+{
+
+struct PrivilegeMappingExists
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
+{
+using PrivilegeMappingExists = phosphor::logging::xyz::openbmc_project::user::
+    common::PrivilegeMappingExists;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::user::common::
+                              PrivilegeMappingExists>
+{
+    using type = phosphor::logging::xyz::openbmc_project::user::common::
+        PrivilegeMappingExists;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::user::common
+{
+
+struct GroupNameExists
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
+{
+using GroupNameExists =
+    phosphor::logging::xyz::openbmc_project::user::common::GroupNameExists;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::user::common::GroupNameExists>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::user::common::GroupNameExists;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::user::common
+{
+
+struct GroupNameDoesNotExist
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::user::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::User::Common
+{
+using GroupNameDoesNotExist = phosphor::logging::xyz::openbmc_project::user::
+    common::GroupNameDoesNotExist;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::user::common::GroupNameDoesNotExist>
+{
+    using type = phosphor::logging::xyz::openbmc_project::user::common::
+        GroupNameDoesNotExist;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::software::version
+{
+namespace _Incompatible
+{
+struct MIN_VERSION
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "MIN_VERSION";
+    using type =
+        std::tuple<std::decay_t<decltype("MIN_VERSION=%s")>, const char*>;
+    explicit constexpr MIN_VERSION(const char* a) :
+        _entry(entry("MIN_VERSION=%s", a)){};
+    type _entry;
+};
+struct ACTUAL_VERSION
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "ACTUAL_VERSION";
+    using type =
+        std::tuple<std::decay_t<decltype("ACTUAL_VERSION=%s")>, const char*>;
+    explicit constexpr ACTUAL_VERSION(const char* a) :
+        _entry(entry("ACTUAL_VERSION=%s", a)){};
+    type _entry;
+};
+struct VERSION_PURPOSE
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "VERSION_PURPOSE";
+    using type =
+        std::tuple<std::decay_t<decltype("VERSION_PURPOSE=%s")>, const char*>;
+    explicit constexpr VERSION_PURPOSE(const char* a) :
+        _entry(entry("VERSION_PURPOSE=%s", a)){};
+    type _entry;
+};
+} // namespace _Incompatible
+
+struct Incompatible
+{
+    static constexpr auto L = level::ERR;
+    using MIN_VERSION = _Incompatible::MIN_VERSION;
+    using ACTUAL_VERSION = _Incompatible::ACTUAL_VERSION;
+    using VERSION_PURPOSE = _Incompatible::VERSION_PURPOSE;
+    using metadata_types =
+        std::tuple<MIN_VERSION, ACTUAL_VERSION, VERSION_PURPOSE>;
+};
+
+} // namespace xyz::openbmc_project::software::version
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Software::Version
+{
+using Incompatible =
+    phosphor::logging::xyz::openbmc_project::software::version::Incompatible;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::software::version::Incompatible>
+{
+    using type = phosphor::logging::xyz::openbmc_project::software::version::
+        Incompatible;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::software::version
+{
+namespace _AlreadyExists
+{
+struct IMAGE_VERSION
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "IMAGE_VERSION";
+    using type =
+        std::tuple<std::decay_t<decltype("IMAGE_VERSION=%s")>, const char*>;
+    explicit constexpr IMAGE_VERSION(const char* a) :
+        _entry(entry("IMAGE_VERSION=%s", a)){};
+    type _entry;
+};
+} // namespace _AlreadyExists
+
+struct AlreadyExists
+{
+    static constexpr auto L = level::ERR;
+    using IMAGE_VERSION = _AlreadyExists::IMAGE_VERSION;
+    using metadata_types = std::tuple<IMAGE_VERSION>;
+};
+
+} // namespace xyz::openbmc_project::software::version
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Software::Version
+{
+using AlreadyExists =
+    phosphor::logging::xyz::openbmc_project::software::version::AlreadyExists;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::software::version::AlreadyExists>
+{
+    using type = phosphor::logging::xyz::openbmc_project::software::version::
+        AlreadyExists;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::software::version
+{
+
+struct InvalidSignature
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::software::version
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Software::Version
+{
+using InvalidSignature = phosphor::logging::xyz::openbmc_project::software::
+    version::InvalidSignature;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::software::version::InvalidSignature>
+{
+    using type = phosphor::logging::xyz::openbmc_project::software::version::
+        InvalidSignature;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::systemd_target
+{
+namespace _Failure
+{
+struct SYSTEMD_RESULT
+{
+    /*
+     * We can't use -fsanitize=undefined if we declare a
+     * 'static constexpr auto str' member, so don't. Instead, open-code the
+     * mako template lookups.
+     */
+    static constexpr auto str_short = "SYSTEMD_RESULT";
+    using type =
+        std::tuple<std::decay_t<decltype("SYSTEMD_RESULT=%s")>, const char*>;
+    explicit constexpr SYSTEMD_RESULT(const char* a) :
+        _entry(entry("SYSTEMD_RESULT=%s", a)){};
+    type _entry;
+};
+} // namespace _Failure
+
+struct Failure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = _Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::systemd_target
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::SystemdTarget
+{
+using Failure =
+    phosphor::logging::xyz::openbmc_project::state::systemd_target::Failure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::systemd_target::Failure>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::systemd_target::Failure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::host
+{
+
+struct SoftOffTimeout
+{
+    static constexpr auto L = level::ERR;
+    using TIMEOUT_IN_MSEC = phosphor::logging::xyz::openbmc_project::common::
+        Timeout::TIMEOUT_IN_MSEC;
+    using metadata_types = std::tuple<TIMEOUT_IN_MSEC>;
+};
+
+} // namespace xyz::openbmc_project::state::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Host
+{
+using SoftOffTimeout =
+    phosphor::logging::xyz::openbmc_project::state::host::SoftOffTimeout;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::host::SoftOffTimeout>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::host::SoftOffTimeout;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::host
+{
+
+struct HostStartFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Host
+{
+using HostStartFailure =
+    phosphor::logging::xyz::openbmc_project::state::host::HostStartFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::host::HostStartFailure>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::host::HostStartFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::host
+{
+
+struct HostMinStartFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Host
+{
+using HostMinStartFailure =
+    phosphor::logging::xyz::openbmc_project::state::host::HostMinStartFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::host::HostMinStartFailure>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::host::
+        HostMinStartFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::host
+{
+
+struct HostShutdownFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Host
+{
+using HostShutdownFailure =
+    phosphor::logging::xyz::openbmc_project::state::host::HostShutdownFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::host::HostShutdownFailure>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::host::
+        HostShutdownFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::host
+{
+
+struct HostStopFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Host
+{
+using HostStopFailure =
+    phosphor::logging::xyz::openbmc_project::state::host::HostStopFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::host::HostStopFailure>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::host::HostStopFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::host
+{
+
+struct HostRebootFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Host
+{
+using HostRebootFailure =
+    phosphor::logging::xyz::openbmc_project::state::host::HostRebootFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::host::HostRebootFailure>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::host::HostRebootFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::host
+{
+
+struct BMCNotReady
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Host
+{
+using BMCNotReady =
+    phosphor::logging::xyz::openbmc_project::state::host::BMCNotReady;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::host::BMCNotReady>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::host::BMCNotReady;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::chassis
+{
+
+struct PowerOnFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::chassis
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Chassis
+{
+using PowerOnFailure =
+    phosphor::logging::xyz::openbmc_project::state::chassis::PowerOnFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::chassis::PowerOnFailure>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::chassis::PowerOnFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::chassis
+{
+
+struct PowerOffFailure
+{
+    static constexpr auto L = level::ERR;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
+    using metadata_types = std::tuple<SYSTEMD_RESULT>;
+};
+
+} // namespace xyz::openbmc_project::state::chassis
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Chassis
+{
+using PowerOffFailure =
+    phosphor::logging::xyz::openbmc_project::state::chassis::PowerOffFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::chassis::PowerOffFailure>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::chassis::
+        PowerOffFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::chassis
+{
+
+struct PowerCycleFailure
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::chassis
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Chassis
+{
+using PowerCycleFailure =
+    phosphor::logging::xyz::openbmc_project::state::chassis::PowerCycleFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::chassis::PowerCycleFailure>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::chassis::
+        PowerCycleFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::chassis
+{
+
+struct BMCNotReady
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::chassis
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Chassis
+{
+using BMCNotReady =
+    phosphor::logging::xyz::openbmc_project::state::chassis::BMCNotReady;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::chassis::BMCNotReady>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::chassis::BMCNotReady;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::shutdown::power
+{
+
+struct Fault
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::shutdown::power
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Shutdown::Power
+{
+using Fault =
+    phosphor::logging::xyz::openbmc_project::state::shutdown::power::Fault;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::shutdown::power::Fault>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::state::shutdown::power::Fault;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::shutdown::power
+{
+
+struct Blackout
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::shutdown::power
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Shutdown::Power
+{
+using Blackout =
+    phosphor::logging::xyz::openbmc_project::state::shutdown::power::Blackout;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::shutdown::power::Blackout>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::shutdown::
+        power::Blackout;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::shutdown::power
+{
+
+struct Regulator
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::shutdown::power
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Shutdown::Power
+{
+using Regulator =
+    phosphor::logging::xyz::openbmc_project::state::shutdown::power::Regulator;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::shutdown::power::Regulator>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::shutdown::
+        power::Regulator;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::shutdown::thermal_event
+{
+
+struct Processor
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::shutdown::thermal_event
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Shutdown::ThermalEvent
+{
+using Processor = phosphor::logging::xyz::openbmc_project::state::shutdown::
+    thermal_event::Processor;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::state::
+                              shutdown::thermal_event::Processor>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::shutdown::
+        thermal_event::Processor;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::shutdown::thermal_event
+{
+
+struct GPU
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::shutdown::thermal_event
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Shutdown::ThermalEvent
+{
+using GPU = phosphor::logging::xyz::openbmc_project::state::shutdown::
+    thermal_event::GPU;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::shutdown::thermal_event::GPU>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::shutdown::
+        thermal_event::GPU;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::shutdown::thermal_event
+{
+
+struct Ambient
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::shutdown::thermal_event
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Shutdown::ThermalEvent
+{
+using Ambient = phosphor::logging::xyz::openbmc_project::state::shutdown::
+    thermal_event::Ambient;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::state::
+                              shutdown::thermal_event::Ambient>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::shutdown::
+        thermal_event::Ambient;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::shutdown::inventory
+{
+
+struct Fan
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::state::shutdown::inventory
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::Shutdown::Inventory
+{
+using Fan =
+    phosphor::logging::xyz::openbmc_project::state::shutdown::inventory::Fan;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::state::shutdown::inventory::Fan>
+{
+    using type = phosphor::logging::xyz::openbmc_project::state::shutdown::
+        inventory::Fan;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::memory::memory_ecc
+{
+
+struct IsLoggingLimitReached
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::memory::memory_ecc
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Memory::MemoryECC
+{
+using isLoggingLimitReached = phosphor::logging::xyz::openbmc_project::memory::
+    memory_ecc::IsLoggingLimitReached;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::memory::
+                              memory_ecc::IsLoggingLimitReached>
+{
+    using type = phosphor::logging::xyz::openbmc_project::memory::memory_ecc::
+        IsLoggingLimitReached;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::memory::memory_ecc
+{
+
+struct CeCount
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::memory::memory_ecc
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Memory::MemoryECC
+{
+using ceCount =
+    phosphor::logging::xyz::openbmc_project::memory::memory_ecc::CeCount;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::memory::memory_ecc::CeCount>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::memory::memory_ecc::CeCount;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::memory::memory_ecc
+{
+
+struct UeCount
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::memory::memory_ecc
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Memory::MemoryECC
+{
+using ueCount =
+    phosphor::logging::xyz::openbmc_project::memory::memory_ecc::UeCount;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::memory::memory_ecc::UeCount>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::memory::memory_ecc::UeCount;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::chassis::common
+{
+
+struct UnsupportedCommand
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::chassis::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Chassis::Common
+{
+using UnsupportedCommand = phosphor::logging::xyz::openbmc_project::chassis::
+    common::UnsupportedCommand;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::chassis::common::UnsupportedCommand>
+{
+    using type = phosphor::logging::xyz::openbmc_project::chassis::common::
+        UnsupportedCommand;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::chassis::common
+{
+
+struct IOError
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::chassis::common
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Chassis::Common
+{
+using IOError =
+    phosphor::logging::xyz::openbmc_project::chassis::common::IOError;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::chassis::common::IOError>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::chassis::common::IOError;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::smbios::mdr_v2
+{
+
+struct InvalidParameter
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::smbios::mdr_v2
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Smbios::MDR_V2
+{
+using InvalidParameter =
+    phosphor::logging::xyz::openbmc_project::smbios::mdr_v2::InvalidParameter;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2::InvalidParameter>
+{
+    using type = phosphor::logging::xyz::openbmc_project::smbios::mdr_v2::
+        InvalidParameter;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::smbios::mdr_v2
+{
+
+struct UpdateInProgress
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::smbios::mdr_v2
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Smbios::MDR_V2
+{
+using UpdateInProgress =
+    phosphor::logging::xyz::openbmc_project::smbios::mdr_v2::UpdateInProgress;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2::UpdateInProgress>
+{
+    using type = phosphor::logging::xyz::openbmc_project::smbios::mdr_v2::
+        UpdateInProgress;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::smbios::mdr_v2
+{
+
+struct InvalidId
+{
+    static constexpr auto L = level::ERR;
+    using metadata_types = std::tuple<>;
+};
+
+} // namespace xyz::openbmc_project::smbios::mdr_v2
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Smbios::MDR_V2
+{
+using InvalidId =
+    phosphor::logging::xyz::openbmc_project::smbios::mdr_v2::InvalidId;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::smbios::mdr_v2::InvalidId>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::smbios::mdr_v2::InvalidId;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::logging::sel
 {
 namespace _Created
 {
-
 struct RECORD_TYPE
 {
     /*
@@ -3834,7 +4059,6 @@ struct SENSOR_PATH
         _entry(entry("SENSOR_PATH=%s", a)){};
     type _entry;
 };
-
 } // namespace _Created
 
 struct Created
@@ -3849,344 +4073,65 @@ struct Created
                                       EVENT_DIR, SENSOR_PATH>;
 };
 
-} // namespace SEL
-} // namespace Logging
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::logging::sel
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Logging::SEL
+{
+using Created = phosphor::logging::xyz::openbmc_project::logging::sel::Created;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Logging::SEL::Error::Created>
+    sdbusplus::error::xyz::openbmc_project::logging::sel::Created>
 {
-    using type = xyz::openbmc_project::Logging::SEL::Created;
+    using type = phosphor::logging::xyz::openbmc_project::logging::sel::Created;
 };
 
 } // namespace details
-
-namespace xyz
+namespace xyz::openbmc_project::sensor::device
 {
-namespace openbmc_project
-{
-namespace Memory
-{
-namespace MemoryECC
-{
-namespace _isLoggingLimitReached
-{} // namespace _isLoggingLimitReached
-
-struct isLoggingLimitReached
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace MemoryECC
-} // namespace Memory
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::Memory::MemoryECC::
-                              Error::isLoggingLimitReached>
-{
-    using type = xyz::openbmc_project::Memory::MemoryECC::isLoggingLimitReached;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Memory
-{
-namespace MemoryECC
-{
-namespace _ceCount
-{} // namespace _ceCount
-
-struct ceCount
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace MemoryECC
-} // namespace Memory
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Memory::MemoryECC::Error::ceCount>
-{
-    using type = xyz::openbmc_project::Memory::MemoryECC::ceCount;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Memory
-{
-namespace MemoryECC
-{
-namespace _ueCount
-{} // namespace _ueCount
-
-struct ueCount
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace MemoryECC
-} // namespace Memory
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Memory::MemoryECC::Error::ueCount>
-{
-    using type = xyz::openbmc_project::Memory::MemoryECC::ueCount;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace _CapacityFault
-{} // namespace _CapacityFault
-
-struct CapacityFault
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::CapacityFault>
-{
-    using type = xyz::openbmc_project::Nvme::Status::CapacityFault;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace _TemperatureFault
-{} // namespace _TemperatureFault
-
-struct TemperatureFault
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::TemperatureFault>
-{
-    using type = xyz::openbmc_project::Nvme::Status::TemperatureFault;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace _DegradesFault
-{} // namespace _DegradesFault
-
-struct DegradesFault
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::DegradesFault>
-{
-    using type = xyz::openbmc_project::Nvme::Status::DegradesFault;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace _MediaFault
-{} // namespace _MediaFault
-
-struct MediaFault
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::MediaFault>
-{
-    using type = xyz::openbmc_project::Nvme::Status::MediaFault;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Nvme
-{
-namespace Status
-{
-namespace _BackupDeviceFault
-{} // namespace _BackupDeviceFault
-
-struct BackupDeviceFault
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Status
-} // namespace Nvme
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Nvme::Status::Error::BackupDeviceFault>
-{
-    using type = xyz::openbmc_project::Nvme::Status::BackupDeviceFault;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Sensor
-{
-namespace Device
-{
-namespace _ReadFailure
-{} // namespace _ReadFailure
 
 struct ReadFailure
 {
     static constexpr auto L = level::ERR;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
     using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Device
-} // namespace Sensor
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::sensor::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Sensor::Device
+{
+using ReadFailure =
+    phosphor::logging::xyz::openbmc_project::sensor::device::ReadFailure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Sensor::Device::Error::ReadFailure>
+    sdbusplus::error::xyz::openbmc_project::sensor::device::ReadFailure>
 {
-    using type = xyz::openbmc_project::Sensor::Device::ReadFailure;
+    using type =
+        phosphor::logging::xyz::openbmc_project::sensor::device::ReadFailure;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Sensor
-{
-namespace Threshold
+namespace xyz::openbmc_project::sensor::threshold
 {
 namespace _CriticalHigh
 {
-
 struct SENSOR_DATA
 {
     /*
@@ -4201,7 +4146,6 @@ struct SENSOR_DATA
         _entry(entry("SENSOR_DATA=%s", a)){};
     type _entry;
 };
-
 } // namespace _CriticalHigh
 
 struct CriticalHigh
@@ -4211,34 +4155,32 @@ struct CriticalHigh
     using metadata_types = std::tuple<SENSOR_DATA>;
 };
 
-} // namespace Threshold
-} // namespace Sensor
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::sensor::threshold
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Sensor::Threshold
+{
+using CriticalHigh =
+    phosphor::logging::xyz::openbmc_project::sensor::threshold::CriticalHigh;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Sensor::Threshold::Error::CriticalHigh>
+    sdbusplus::error::xyz::openbmc_project::sensor::threshold::CriticalHigh>
 {
-    using type = xyz::openbmc_project::Sensor::Threshold::CriticalHigh;
+    using type = phosphor::logging::xyz::openbmc_project::sensor::threshold::
+        CriticalHigh;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Sensor
-{
-namespace Threshold
+namespace xyz::openbmc_project::sensor::threshold
 {
 namespace _CriticalLow
 {
-
 struct SENSOR_DATA
 {
     /*
@@ -4253,7 +4195,6 @@ struct SENSOR_DATA
         _entry(entry("SENSOR_DATA=%s", a)){};
     type _entry;
 };
-
 } // namespace _CriticalLow
 
 struct CriticalLow
@@ -4263,875 +4204,32 @@ struct CriticalLow
     using metadata_types = std::tuple<SENSOR_DATA>;
 };
 
-} // namespace Threshold
-} // namespace Sensor
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::sensor::threshold
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Sensor::Threshold
+{
+using CriticalLow =
+    phosphor::logging::xyz::openbmc_project::sensor::threshold::CriticalLow;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Sensor::Threshold::Error::CriticalLow>
+    sdbusplus::error::xyz::openbmc_project::sensor::threshold::CriticalLow>
 {
-    using type = xyz::openbmc_project::Sensor::Threshold::CriticalLow;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Smbios
-{
-namespace MDR_V2
-{
-namespace _InvalidParameter
-{} // namespace _InvalidParameter
-
-struct InvalidParameter
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace MDR_V2
-} // namespace Smbios
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Smbios::MDR_V2::Error::InvalidParameter>
-{
-    using type = xyz::openbmc_project::Smbios::MDR_V2::InvalidParameter;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Smbios
-{
-namespace MDR_V2
-{
-namespace _UpdateInProgress
-{} // namespace _UpdateInProgress
-
-struct UpdateInProgress
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace MDR_V2
-} // namespace Smbios
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Smbios::MDR_V2::Error::UpdateInProgress>
-{
-    using type = xyz::openbmc_project::Smbios::MDR_V2::UpdateInProgress;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Smbios
-{
-namespace MDR_V2
-{
-namespace _InvalidId
-{} // namespace _InvalidId
-
-struct InvalidId
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace MDR_V2
-} // namespace Smbios
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Smbios::MDR_V2::Error::InvalidId>
-{
-    using type = xyz::openbmc_project::Smbios::MDR_V2::InvalidId;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Software
-{
-namespace Version
-{
-namespace _Incompatible
-{
-
-struct MIN_VERSION
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "MIN_VERSION";
     using type =
-        std::tuple<std::decay_t<decltype("MIN_VERSION=%s")>, const char*>;
-    explicit constexpr MIN_VERSION(const char* a) :
-        _entry(entry("MIN_VERSION=%s", a)){};
-    type _entry;
-};
-struct ACTUAL_VERSION
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "ACTUAL_VERSION";
-    using type =
-        std::tuple<std::decay_t<decltype("ACTUAL_VERSION=%s")>, const char*>;
-    explicit constexpr ACTUAL_VERSION(const char* a) :
-        _entry(entry("ACTUAL_VERSION=%s", a)){};
-    type _entry;
-};
-struct VERSION_PURPOSE
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "VERSION_PURPOSE";
-    using type =
-        std::tuple<std::decay_t<decltype("VERSION_PURPOSE=%s")>, const char*>;
-    explicit constexpr VERSION_PURPOSE(const char* a) :
-        _entry(entry("VERSION_PURPOSE=%s", a)){};
-    type _entry;
-};
-
-} // namespace _Incompatible
-
-struct Incompatible
-{
-    static constexpr auto L = level::ERR;
-    using MIN_VERSION = _Incompatible::MIN_VERSION;
-    using ACTUAL_VERSION = _Incompatible::ACTUAL_VERSION;
-    using VERSION_PURPOSE = _Incompatible::VERSION_PURPOSE;
-    using metadata_types =
-        std::tuple<MIN_VERSION, ACTUAL_VERSION, VERSION_PURPOSE>;
-};
-
-} // namespace Version
-} // namespace Software
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Software::Version::Error::Incompatible>
-{
-    using type = xyz::openbmc_project::Software::Version::Incompatible;
+        phosphor::logging::xyz::openbmc_project::sensor::threshold::CriticalLow;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Software
-{
-namespace Version
-{
-namespace _AlreadyExists
-{
-
-struct IMAGE_VERSION
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "IMAGE_VERSION";
-    using type =
-        std::tuple<std::decay_t<decltype("IMAGE_VERSION=%s")>, const char*>;
-    explicit constexpr IMAGE_VERSION(const char* a) :
-        _entry(entry("IMAGE_VERSION=%s", a)){};
-    type _entry;
-};
-
-} // namespace _AlreadyExists
-
-struct AlreadyExists
-{
-    static constexpr auto L = level::ERR;
-    using IMAGE_VERSION = _AlreadyExists::IMAGE_VERSION;
-    using metadata_types = std::tuple<IMAGE_VERSION>;
-};
-
-} // namespace Version
-} // namespace Software
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Software::Version::Error::AlreadyExists>
-{
-    using type = xyz::openbmc_project::Software::Version::AlreadyExists;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace _SoftOffTimeout
-{} // namespace _SoftOffTimeout
-
-struct SoftOffTimeout
-{
-    static constexpr auto L = level::ERR;
-    using TIMEOUT_IN_MSEC =
-        xyz::openbmc_project::Common::Timeout::TIMEOUT_IN_MSEC;
-    using metadata_types = std::tuple<TIMEOUT_IN_MSEC>;
-};
-
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Host::Error::SoftOffTimeout>
-{
-    using type = xyz::openbmc_project::State::Host::SoftOffTimeout;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace SystemdTarget
-{
-namespace _Failure
-{
-
-struct SYSTEMD_RESULT
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "SYSTEMD_RESULT";
-    using type =
-        std::tuple<std::decay_t<decltype("SYSTEMD_RESULT=%s")>, const char*>;
-    explicit constexpr SYSTEMD_RESULT(const char* a) :
-        _entry(entry("SYSTEMD_RESULT=%s", a)){};
-    type _entry;
-};
-
-} // namespace _Failure
-
-struct Failure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT = _Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace SystemdTarget
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::SystemdTarget::Error::Failure>
-{
-    using type = xyz::openbmc_project::State::SystemdTarget::Failure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Inventory
-{
-namespace _Fan
-{} // namespace _Fan
-
-struct Fan
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Inventory
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Shutdown::Inventory::Error::Fan>
-{
-    using type = xyz::openbmc_project::State::Shutdown::Inventory::Fan;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace ThermalEvent
-{
-namespace _Processor
-{} // namespace _Processor
-
-struct Processor
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace ThermalEvent
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::State::Shutdown::
-                              ThermalEvent::Error::Processor>
-{
-    using type = xyz::openbmc_project::State::Shutdown::ThermalEvent::Processor;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace ThermalEvent
-{
-namespace _GPU
-{} // namespace _GPU
-
-struct GPU
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace ThermalEvent
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Shutdown::ThermalEvent::Error::GPU>
-{
-    using type = xyz::openbmc_project::State::Shutdown::ThermalEvent::GPU;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace ThermalEvent
-{
-namespace _Ambient
-{} // namespace _Ambient
-
-struct Ambient
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace ThermalEvent
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::State::Shutdown::
-                              ThermalEvent::Error::Ambient>
-{
-    using type = xyz::openbmc_project::State::Shutdown::ThermalEvent::Ambient;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Power
-{
-namespace _Fault
-{} // namespace _Fault
-
-struct Fault
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Power
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Shutdown::Power::Error::Fault>
-{
-    using type = xyz::openbmc_project::State::Shutdown::Power::Fault;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Power
-{
-namespace _Blackout
-{} // namespace _Blackout
-
-struct Blackout
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Power
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Shutdown::Power::Error::Blackout>
-{
-    using type = xyz::openbmc_project::State::Shutdown::Power::Blackout;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Shutdown
-{
-namespace Power
-{
-namespace _Regulator
-{} // namespace _Regulator
-
-struct Regulator
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Power
-} // namespace Shutdown
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Shutdown::Power::Error::Regulator>
-{
-    using type = xyz::openbmc_project::State::Shutdown::Power::Regulator;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace _UserNameExists
-{} // namespace _UserNameExists
-
-struct UserNameExists
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNameExists>
-{
-    using type = xyz::openbmc_project::User::Common::UserNameExists;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace _UserNameDoesNotExist
-{} // namespace _UserNameDoesNotExist
-
-struct UserNameDoesNotExist
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNameDoesNotExist>
-{
-    using type = xyz::openbmc_project::User::Common::UserNameDoesNotExist;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace _UserNameGroupFail
-{
-
-struct REASON
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "REASON ";
-    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
-    explicit constexpr REASON(const char* a) :
-        _entry(entry("REASON = %s", a)){};
-    type _entry;
-};
-
-} // namespace _UserNameGroupFail
-
-struct UserNameGroupFail
-{
-    static constexpr auto L = level::ERR;
-    using REASON = _UserNameGroupFail::REASON;
-    using metadata_types = std::tuple<REASON>;
-};
-
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNameGroupFail>
-{
-    using type = xyz::openbmc_project::User::Common::UserNameGroupFail;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace _UserNamePrivFail
-{
-
-struct REASON
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "REASON ";
-    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
-    explicit constexpr REASON(const char* a) :
-        _entry(entry("REASON = %s", a)){};
-    type _entry;
-};
-
-} // namespace _UserNamePrivFail
-
-struct UserNamePrivFail
-{
-    static constexpr auto L = level::ERR;
-    using REASON = _UserNamePrivFail::REASON;
-    using metadata_types = std::tuple<REASON>;
-};
-
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::User::Common::Error::UserNamePrivFail>
-{
-    using type = xyz::openbmc_project::User::Common::UserNamePrivFail;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace _NoResource
-{
-
-struct REASON
-{
-    /*
-     * We can't use -fsanitize=undefined if we declare a
-     * 'static constexpr auto str' member, so don't. Instead, open-code the
-     * mako template lookups.
-     */
-    static constexpr auto str_short = "REASON ";
-    using type = std::tuple<std::decay_t<decltype("REASON = %s")>, const char*>;
-    explicit constexpr REASON(const char* a) :
-        _entry(entry("REASON = %s", a)){};
-    type _entry;
-};
-
-} // namespace _NoResource
-
-struct NoResource
-{
-    static constexpr auto L = level::ERR;
-    using REASON = _NoResource::REASON;
-    using metadata_types = std::tuple<REASON>;
-};
-
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::User::Common::Error::NoResource>
-{
-    using type = xyz::openbmc_project::User::Common::NoResource;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace User
-{
-namespace Common
-{
-namespace _PrivilegeMappingExists
-{} // namespace _PrivilegeMappingExists
-
-struct PrivilegeMappingExists
-{
-    static constexpr auto L = level::ERR;
-    using metadata_types = std::tuple<>;
-};
-
-} // namespace Common
-} // namespace User
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::User::Common::Error::
-                              PrivilegeMappingExists>
-{
-    using type = xyz::openbmc_project::User::Common::PrivilegeMappingExists;
-};
-
-} // namespace details
-
-namespace example
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Device
+namespace example::xyz::openbmc_project::example2::device
 {
 namespace _Callout
 {
-
 struct CALLOUT_ERRNO_TEST
 {
     /*
@@ -5161,13 +4259,12 @@ struct CALLOUT_DEVICE_PATH_TEST
         _entry(entry("CALLOUT_DEVICE_PATH_TEST=%s", a)){};
     type _entry;
 };
-
 } // namespace _Callout
 
 struct Callout : public sdbusplus::exception_t
 {
     static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Device.Callout";
+        "example.xyz.openbmc_project.Example2.Device.Callout";
     static constexpr auto errDesc = "Generic device callout";
     static constexpr auto L = level::ERR;
     using CALLOUT_ERRNO_TEST = _Callout::CALLOUT_ERRNO_TEST;
@@ -5196,25 +4293,20 @@ struct Callout : public sdbusplus::exception_t
     }
 };
 
-} // namespace Device
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
+} // namespace example::xyz::openbmc_project::example2::device
 
-namespace example
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace example::xyz::openbmc_project::Example2::Device
 {
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Elog
+using Callout =
+    phosphor::logging::example::xyz::openbmc_project::example2::device::Callout;
+}
+#endif
+
+namespace example::xyz::openbmc_project::example2::elog
 {
 namespace _TestErrorTwo
 {
-
 struct DEV_ADDR
 {
     /*
@@ -5254,13 +4346,12 @@ struct DEV_NAME
         _entry(entry("DEV_NAME=%s", a)){};
     type _entry;
 };
-
 } // namespace _TestErrorTwo
 
 struct TestErrorTwo : public sdbusplus::exception_t
 {
     static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Elog.TestErrorTwo";
+        "example.xyz.openbmc_project.Example2.Elog.TestErrorTwo";
     static constexpr auto errDesc = "This is test error two";
     static constexpr auto L = level::ERR;
     using DEV_ADDR = _TestErrorTwo::DEV_ADDR;
@@ -5289,25 +4380,20 @@ struct TestErrorTwo : public sdbusplus::exception_t
     }
 };
 
-} // namespace Elog
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
+} // namespace example::xyz::openbmc_project::example2::elog
 
-namespace example
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace example::xyz::openbmc_project::Example2::Elog
 {
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Elog
+using TestErrorTwo = phosphor::logging::example::xyz::openbmc_project::
+    example2::elog::TestErrorTwo;
+}
+#endif
+
+namespace example::xyz::openbmc_project::example2::elog
 {
 namespace _AutoTestSimple
 {
-
 struct STRING
 {
     /*
@@ -5320,13 +4406,12 @@ struct STRING
     explicit constexpr STRING(const char* a) : _entry(entry("STRING=%s", a)){};
     type _entry;
 };
-
 } // namespace _AutoTestSimple
 
 struct AutoTestSimple : public sdbusplus::exception_t
 {
     static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Elog.AutoTestSimple";
+        "example.xyz.openbmc_project.Example2.Elog.AutoTestSimple";
     static constexpr auto errDesc = "This is a simple test error.";
     static constexpr auto L = level::ERR;
     using STRING = _AutoTestSimple::STRING;
@@ -5353,25 +4438,20 @@ struct AutoTestSimple : public sdbusplus::exception_t
     }
 };
 
-} // namespace Elog
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
+} // namespace example::xyz::openbmc_project::example2::elog
 
-namespace example
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace example::xyz::openbmc_project::Example2::Elog
 {
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Elog
+using AutoTestSimple = phosphor::logging::example::xyz::openbmc_project::
+    example2::elog::AutoTestSimple;
+}
+#endif
+
+namespace example::xyz::openbmc_project::example2::elog
 {
 namespace _TestCallout
 {
-
 struct DEV_ADDR
 {
     /*
@@ -5386,20 +4466,19 @@ struct DEV_ADDR
         _entry(entry("DEV_ADDR=0x%.8X", a)){};
     type _entry;
 };
-
 } // namespace _TestCallout
 
 struct TestCallout : public sdbusplus::exception_t
 {
     static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Elog.TestCallout";
+        "example.xyz.openbmc_project.Example2.Elog.TestCallout";
     static constexpr auto errDesc = "This is test error TestCallout";
     static constexpr auto L = level::ERR;
     using DEV_ADDR = _TestCallout::DEV_ADDR;
-    using CALLOUT_ERRNO_TEST = example::xyz::openbmc_project::Example::Device::
-        Callout::CALLOUT_ERRNO_TEST;
-    using CALLOUT_DEVICE_PATH_TEST = example::xyz::openbmc_project::Example::
-        Device::Callout::CALLOUT_DEVICE_PATH_TEST;
+    using CALLOUT_ERRNO_TEST = phosphor::logging::example::xyz::
+        openbmc_project::example2::device::Callout::CALLOUT_ERRNO_TEST;
+    using CALLOUT_DEVICE_PATH_TEST = phosphor::logging::example::xyz::
+        openbmc_project::example2::device::Callout::CALLOUT_DEVICE_PATH_TEST;
     using metadata_types =
         std::tuple<DEV_ADDR, CALLOUT_ERRNO_TEST, CALLOUT_DEVICE_PATH_TEST>;
 
@@ -5424,21 +4503,20 @@ struct TestCallout : public sdbusplus::exception_t
     }
 };
 
-} // namespace Elog
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
+} // namespace example::xyz::openbmc_project::example2::elog
 
-namespace org
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace example::xyz::openbmc_project::Example2::Elog
 {
-namespace open_power
-{
-namespace Host
+using TestCallout = phosphor::logging::example::xyz::openbmc_project::example2::
+    elog::TestCallout;
+}
+#endif
+
+namespace org::open_power::host
 {
 namespace _Event
 {
-
 struct ESEL
 {
     /*
@@ -5451,42 +4529,40 @@ struct ESEL
     explicit constexpr ESEL(const char* a) : _entry(entry("ESEL=%s", a)){};
     type _entry;
 };
-
 } // namespace _Event
 
 struct Event
 {
     static constexpr auto L = level::ERR;
     using ESEL = _Event::ESEL;
-    using CALLOUT_INVENTORY_PATH = xyz::openbmc_project::Common::Callout::
-        Inventory::CALLOUT_INVENTORY_PATH;
+    using CALLOUT_INVENTORY_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Inventory::CALLOUT_INVENTORY_PATH;
     using metadata_types = std::tuple<ESEL, CALLOUT_INVENTORY_PATH>;
 };
 
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace org::open_power::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Host
+{
+using Event = phosphor::logging::org::open_power::host::Event;
+}
+#endif
 
 namespace details
 {
 
 template <>
-struct map_exception_type<sdbusplus::org::open_power::Host::Error::Event>
+struct map_exception_type<sdbusplus::error::org::open_power::host::Event>
 {
-    using type = org::open_power::Host::Event;
+    using type = phosphor::logging::org::open_power::host::Event;
 };
 
 } // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Host
+namespace org::open_power::host
 {
 namespace _MaintenanceProcedure
 {
-
 struct ESEL
 {
     /*
@@ -5499,44 +4575,213 @@ struct ESEL
     explicit constexpr ESEL(const char* a) : _entry(entry("ESEL=%s", a)){};
     type _entry;
 };
-
 } // namespace _MaintenanceProcedure
 
 struct MaintenanceProcedure
 {
     static constexpr auto L = level::ERR;
     using ESEL = _MaintenanceProcedure::ESEL;
-    using PROCEDURE = org::open_power::Common::Callout::Procedure::PROCEDURE;
+    using PROCEDURE = phosphor::logging::org::open_power::common::callout::
+        Procedure::PROCEDURE;
     using metadata_types = std::tuple<ESEL, PROCEDURE>;
 };
 
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace org::open_power::host
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Host
+{
+using MaintenanceProcedure =
+    phosphor::logging::org::open_power::host::MaintenanceProcedure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::org::open_power::Host::Error::MaintenanceProcedure>
+    sdbusplus::error::org::open_power::host::MaintenanceProcedure>
 {
-    using type = org::open_power::Host::MaintenanceProcedure;
+    using type = phosphor::logging::org::open_power::host::MaintenanceProcedure;
 };
 
 } // namespace details
+namespace org::open_power::proc::fsi
+{
 
-namespace org
+struct MasterDetectionFailure
 {
-namespace open_power
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace org::open_power::proc::fsi
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Proc::FSI
 {
-namespace Host
+using MasterDetectionFailure =
+    phosphor::logging::org::open_power::proc::fsi::MasterDetectionFailure;
+}
+#endif
+
+namespace details
 {
-namespace Access
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::org::open_power::proc::fsi::MasterDetectionFailure>
+{
+    using type =
+        phosphor::logging::org::open_power::proc::fsi::MasterDetectionFailure;
+};
+
+} // namespace details
+namespace org::open_power::occ::device
+{
+
+struct OpenFailure
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace org::open_power::occ::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::OCC::Device
+{
+using OpenFailure =
+    phosphor::logging::org::open_power::occ::device::OpenFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::org::open_power::occ::device::OpenFailure>
+{
+    using type = phosphor::logging::org::open_power::occ::device::OpenFailure;
+};
+
+} // namespace details
+namespace org::open_power::occ::device
+{
+
+struct ReadFailure
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace org::open_power::occ::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::OCC::Device
+{
+using ReadFailure =
+    phosphor::logging::org::open_power::occ::device::ReadFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::org::open_power::occ::device::ReadFailure>
+{
+    using type = phosphor::logging::org::open_power::occ::device::ReadFailure;
+};
+
+} // namespace details
+namespace org::open_power::occ::device
+{
+
+struct WriteFailure
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace org::open_power::occ::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::OCC::Device
+{
+using WriteFailure =
+    phosphor::logging::org::open_power::occ::device::WriteFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::org::open_power::occ::device::WriteFailure>
+{
+    using type = phosphor::logging::org::open_power::occ::device::WriteFailure;
+};
+
+} // namespace details
+namespace org::open_power::occ::device
+{
+
+struct ConfigFailure
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace org::open_power::occ::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::OCC::Device
+{
+using ConfigFailure =
+    phosphor::logging::org::open_power::occ::device::ConfigFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::org::open_power::occ::device::ConfigFailure>
+{
+    using type = phosphor::logging::org::open_power::occ::device::ConfigFailure;
+};
+
+} // namespace details
+namespace org::open_power::host::access
 {
 namespace _WriteCFAM
 {
-
 struct ADDRESS
 {
     /*
@@ -5549,49 +4794,44 @@ struct ADDRESS
     explicit constexpr ADDRESS(uint32_t a) : _entry(entry("ADDRESS=0x%X", a)){};
     type _entry;
 };
-
 } // namespace _WriteCFAM
 
 struct WriteCFAM
 {
     static constexpr auto L = level::ERR;
     using ADDRESS = _WriteCFAM::ADDRESS;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
     using metadata_types =
         std::tuple<ADDRESS, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Access
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace org::open_power::host::access
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Host::Access
+{
+using WriteCFAM = phosphor::logging::org::open_power::host::access::WriteCFAM;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::org::open_power::Host::Access::Error::WriteCFAM>
+    sdbusplus::error::org::open_power::host::access::WriteCFAM>
 {
-    using type = org::open_power::Host::Access::WriteCFAM;
+    using type = phosphor::logging::org::open_power::host::access::WriteCFAM;
 };
 
 } // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Host
-{
-namespace Access
+namespace org::open_power::host::access
 {
 namespace _ReadCFAM
 {
-
 struct ADDRESS
 {
     /*
@@ -5604,151 +4844,44 @@ struct ADDRESS
     explicit constexpr ADDRESS(uint32_t a) : _entry(entry("ADDRESS=0x%X", a)){};
     type _entry;
 };
-
 } // namespace _ReadCFAM
 
 struct ReadCFAM
 {
     static constexpr auto L = level::ERR;
     using ADDRESS = _ReadCFAM::ADDRESS;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
     using metadata_types =
         std::tuple<ADDRESS, CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
 };
 
-} // namespace Access
-} // namespace Host
-} // namespace open_power
-} // namespace org
+} // namespace org::open_power::host::access
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace org::open_power::Host::Access
+{
+using ReadCFAM = phosphor::logging::org::open_power::host::access::ReadCFAM;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::org::open_power::Host::Access::Error::ReadCFAM>
+    sdbusplus::error::org::open_power::host::access::ReadCFAM>
 {
-    using type = org::open_power::Host::Access::ReadCFAM;
+    using type = phosphor::logging::org::open_power::host::access::ReadCFAM;
 };
 
 } // namespace details
-
-namespace org
-{
-namespace open_power
-{
-namespace Proc
-{
-namespace FSI
-{
-namespace _MasterDetectionFailure
-{} // namespace _MasterDetectionFailure
-
-struct MasterDetectionFailure
-{
-    static constexpr auto L = level::ERR;
-    using CALLOUT_ERRNO =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_ERRNO;
-    using CALLOUT_DEVICE_PATH =
-        xyz::openbmc_project::Common::Callout::Device::CALLOUT_DEVICE_PATH;
-    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
-};
-
-} // namespace FSI
-} // namespace Proc
-} // namespace open_power
-} // namespace org
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::org::open_power::Proc::FSI::Error::MasterDetectionFailure>
-{
-    using type = org::open_power::Proc::FSI::MasterDetectionFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Inventory
-{
-namespace _NotPresent
-{} // namespace _NotPresent
-
-struct NotPresent
-{
-    static constexpr auto L = level::ERR;
-    using CALLOUT_INVENTORY_PATH = xyz::openbmc_project::Common::Callout::
-        Inventory::CALLOUT_INVENTORY_PATH;
-    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
-};
-
-} // namespace Inventory
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Inventory::Error::NotPresent>
-{
-    using type = xyz::openbmc_project::Inventory::NotPresent;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Inventory
-{
-namespace _Nonfunctional
-{} // namespace _Nonfunctional
-
-struct Nonfunctional
-{
-    static constexpr auto L = level::ERR;
-    using CALLOUT_INVENTORY_PATH = xyz::openbmc_project::Common::Callout::
-        Inventory::CALLOUT_INVENTORY_PATH;
-    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
-};
-
-} // namespace Inventory
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Inventory::Error::Nonfunctional>
-{
-    using type = xyz::openbmc_project::Inventory::Nonfunctional;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Time
+namespace xyz::openbmc_project::time
 {
 namespace _NotAllowed
 {
-
 struct OWNER
 {
     /*
@@ -5775,7 +4908,6 @@ struct SYNC_METHOD
         _entry(entry("SYNC_METHOD=%s", a)){};
     type _entry;
 };
-
 } // namespace _NotAllowed
 
 struct NotAllowed
@@ -5783,35 +4915,35 @@ struct NotAllowed
     static constexpr auto L = level::ERR;
     using OWNER = _NotAllowed::OWNER;
     using SYNC_METHOD = _NotAllowed::SYNC_METHOD;
-    using REASON = xyz::openbmc_project::Common::NotAllowed::REASON;
+    using REASON =
+        phosphor::logging::xyz::openbmc_project::common::NotAllowed::REASON;
     using metadata_types = std::tuple<OWNER, SYNC_METHOD, REASON>;
 };
 
-} // namespace Time
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::time
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Time
+{
+using NotAllowed = phosphor::logging::xyz::openbmc_project::time::NotAllowed;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::Time::Error::NotAllowed>
+    sdbusplus::error::xyz::openbmc_project::time::NotAllowed>
 {
-    using type = xyz::openbmc_project::Time::NotAllowed;
+    using type = phosphor::logging::xyz::openbmc_project::time::NotAllowed;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Time
+namespace xyz::openbmc_project::time
 {
 namespace _Failed
 {
-
 struct REASON
 {
     /*
@@ -5824,7 +4956,6 @@ struct REASON
     explicit constexpr REASON(const char* a) : _entry(entry("REASON=%s", a)){};
     type _entry;
 };
-
 } // namespace _Failed
 
 struct Failed
@@ -5834,322 +4965,162 @@ struct Failed
     using metadata_types = std::tuple<REASON>;
 };
 
-} // namespace Time
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::time
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Time
+{
+using Failed = phosphor::logging::xyz::openbmc_project::time::Failed;
+}
+#endif
 
 namespace details
 {
 
 template <>
-struct map_exception_type<sdbusplus::xyz::openbmc_project::Time::Error::Failed>
+struct map_exception_type<sdbusplus::error::xyz::openbmc_project::time::Failed>
 {
-    using type = xyz::openbmc_project::Time::Failed;
+    using type = phosphor::logging::xyz::openbmc_project::time::Failed;
 };
 
 } // namespace details
+namespace xyz::openbmc_project::inventory
+{
 
-namespace xyz
+struct NotPresent
 {
-namespace openbmc_project
+    static constexpr auto L = level::ERR;
+    using CALLOUT_INVENTORY_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Inventory::CALLOUT_INVENTORY_PATH;
+    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
+};
+
+} // namespace xyz::openbmc_project::inventory
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Inventory
 {
-namespace State
+using NotPresent =
+    phosphor::logging::xyz::openbmc_project::inventory::NotPresent;
+}
+#endif
+
+namespace details
 {
-namespace BMC
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::inventory::NotPresent>
 {
-namespace _MultiUserTargetFailure
-{} // namespace _MultiUserTargetFailure
+    using type = phosphor::logging::xyz::openbmc_project::inventory::NotPresent;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::inventory
+{
+
+struct Nonfunctional
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_INVENTORY_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Inventory::CALLOUT_INVENTORY_PATH;
+    using metadata_types = std::tuple<CALLOUT_INVENTORY_PATH>;
+};
+
+} // namespace xyz::openbmc_project::inventory
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Inventory
+{
+using Nonfunctional =
+    phosphor::logging::xyz::openbmc_project::inventory::Nonfunctional;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::inventory::Nonfunctional>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::inventory::Nonfunctional;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::control::device
+{
+
+struct WriteFailure
+{
+    static constexpr auto L = level::ERR;
+    using CALLOUT_ERRNO = phosphor::logging::xyz::openbmc_project::common::
+        callout::Device::CALLOUT_ERRNO;
+    using CALLOUT_DEVICE_PATH = phosphor::logging::xyz::openbmc_project::
+        common::callout::Device::CALLOUT_DEVICE_PATH;
+    using metadata_types = std::tuple<CALLOUT_ERRNO, CALLOUT_DEVICE_PATH>;
+};
+
+} // namespace xyz::openbmc_project::control::device
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::Control::Device
+{
+using WriteFailure =
+    phosphor::logging::xyz::openbmc_project::control::device::WriteFailure;
+}
+#endif
+
+namespace details
+{
+
+template <>
+struct map_exception_type<
+    sdbusplus::error::xyz::openbmc_project::control::device::WriteFailure>
+{
+    using type =
+        phosphor::logging::xyz::openbmc_project::control::device::WriteFailure;
+};
+
+} // namespace details
+namespace xyz::openbmc_project::state::bmc
+{
 
 struct MultiUserTargetFailure
 {
     static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
+    using SYSTEMD_RESULT = phosphor::logging::xyz::openbmc_project::state::
+        systemd_target::Failure::SYSTEMD_RESULT;
     using metadata_types = std::tuple<SYSTEMD_RESULT>;
 };
 
-} // namespace BMC
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
+} // namespace xyz::openbmc_project::state::bmc
+
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace xyz::openbmc_project::State::BMC
+{
+using MultiUserTargetFailure =
+    phosphor::logging::xyz::openbmc_project::state::bmc::MultiUserTargetFailure;
+}
+#endif
 
 namespace details
 {
 
 template <>
 struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::BMC::Error::MultiUserTargetFailure>
+    sdbusplus::error::xyz::openbmc_project::state::bmc::MultiUserTargetFailure>
 {
-    using type = xyz::openbmc_project::State::BMC::MultiUserTargetFailure;
+    using type = phosphor::logging::xyz::openbmc_project::state::bmc::
+        MultiUserTargetFailure;
 };
 
 } // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Chassis
-{
-namespace _PowerOnFailure
-{} // namespace _PowerOnFailure
-
-struct PowerOnFailure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace Chassis
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Chassis::Error::PowerOnFailure>
-{
-    using type = xyz::openbmc_project::State::Chassis::PowerOnFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Chassis
-{
-namespace _PowerOffFailure
-{} // namespace _PowerOffFailure
-
-struct PowerOffFailure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace Chassis
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Chassis::Error::PowerOffFailure>
-{
-    using type = xyz::openbmc_project::State::Chassis::PowerOffFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace _HostStartFailure
-{} // namespace _HostStartFailure
-
-struct HostStartFailure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Host::Error::HostStartFailure>
-{
-    using type = xyz::openbmc_project::State::Host::HostStartFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace _HostMinStartFailure
-{} // namespace _HostMinStartFailure
-
-struct HostMinStartFailure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Host::Error::HostMinStartFailure>
-{
-    using type = xyz::openbmc_project::State::Host::HostMinStartFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace _HostShutdownFailure
-{} // namespace _HostShutdownFailure
-
-struct HostShutdownFailure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Host::Error::HostShutdownFailure>
-{
-    using type = xyz::openbmc_project::State::Host::HostShutdownFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace _HostStopFailure
-{} // namespace _HostStopFailure
-
-struct HostStopFailure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Host::Error::HostStopFailure>
-{
-    using type = xyz::openbmc_project::State::Host::HostStopFailure;
-};
-
-} // namespace details
-
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace State
-{
-namespace Host
-{
-namespace _HostRebootFailure
-{} // namespace _HostRebootFailure
-
-struct HostRebootFailure
-{
-    static constexpr auto L = level::ERR;
-    using SYSTEMD_RESULT =
-        xyz::openbmc_project::State::SystemdTarget::Failure::SYSTEMD_RESULT;
-    using metadata_types = std::tuple<SYSTEMD_RESULT>;
-};
-
-} // namespace Host
-} // namespace State
-} // namespace openbmc_project
-} // namespace xyz
-
-namespace details
-{
-
-template <>
-struct map_exception_type<
-    sdbusplus::xyz::openbmc_project::State::Host::Error::HostRebootFailure>
-{
-    using type = xyz::openbmc_project::State::Host::HostRebootFailure;
-};
-
-} // namespace details
-
-namespace example
-{
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Elog
+namespace example::xyz::openbmc_project::example2::elog
 {
 namespace _TestErrorOne
 {
-
 struct ERRNUM
 {
     /*
@@ -6190,24 +5161,23 @@ struct FILE_NAME
         _entry(entry("FILE_NAME=%s", a)){};
     type _entry;
 };
-
 } // namespace _TestErrorOne
 
 struct TestErrorOne : public sdbusplus::exception_t
 {
     static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Elog.TestErrorOne";
+        "example.xyz.openbmc_project.Example2.Elog.TestErrorOne";
     static constexpr auto errDesc = "this is test error one";
     static constexpr auto L = level::INFO;
     using ERRNUM = _TestErrorOne::ERRNUM;
     using FILE_PATH = _TestErrorOne::FILE_PATH;
     using FILE_NAME = _TestErrorOne::FILE_NAME;
-    using DEV_ADDR =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_ADDR;
-    using DEV_ID =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_ID;
-    using DEV_NAME =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_NAME;
+    using DEV_ADDR = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorTwo::DEV_ADDR;
+    using DEV_ID = phosphor::logging::example::xyz::openbmc_project::example2::
+        elog::TestErrorTwo::DEV_ID;
+    using DEV_NAME = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorTwo::DEV_NAME;
     using metadata_types =
         std::tuple<ERRNUM, FILE_PATH, FILE_NAME, DEV_ADDR, DEV_ID, DEV_NAME>;
 
@@ -6232,25 +5202,20 @@ struct TestErrorOne : public sdbusplus::exception_t
     }
 };
 
-} // namespace Elog
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
+} // namespace example::xyz::openbmc_project::example2::elog
 
-namespace example
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace example::xyz::openbmc_project::Example2::Elog
 {
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Foo
+using TestErrorOne = phosphor::logging::example::xyz::openbmc_project::
+    example2::elog::TestErrorOne;
+}
+#endif
+
+namespace example::xyz::openbmc_project::example2::foo
 {
 namespace _Foo
 {
-
 struct FOO_DATA
 {
     /*
@@ -6264,28 +5229,27 @@ struct FOO_DATA
         _entry(entry("FOO_DATA=%s", a)){};
     type _entry;
 };
-
 } // namespace _Foo
 
 struct Foo : public sdbusplus::exception_t
 {
     static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Foo.Foo";
+        "example.xyz.openbmc_project.Example2.Foo.Foo";
     static constexpr auto errDesc = "this is test error Foo";
     static constexpr auto L = level::INFO;
     using FOO_DATA = _Foo::FOO_DATA;
-    using ERRNUM =
-        example::xyz::openbmc_project::Example::Elog::TestErrorOne::ERRNUM;
-    using FILE_PATH =
-        example::xyz::openbmc_project::Example::Elog::TestErrorOne::FILE_PATH;
-    using FILE_NAME =
-        example::xyz::openbmc_project::Example::Elog::TestErrorOne::FILE_NAME;
-    using DEV_ADDR =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_ADDR;
-    using DEV_ID =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_ID;
-    using DEV_NAME =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_NAME;
+    using ERRNUM = phosphor::logging::example::xyz::openbmc_project::example2::
+        elog::TestErrorOne::ERRNUM;
+    using FILE_PATH = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorOne::FILE_PATH;
+    using FILE_NAME = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorOne::FILE_NAME;
+    using DEV_ADDR = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorTwo::DEV_ADDR;
+    using DEV_ID = phosphor::logging::example::xyz::openbmc_project::example2::
+        elog::TestErrorTwo::DEV_ID;
+    using DEV_NAME = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorTwo::DEV_NAME;
     using metadata_types = std::tuple<FOO_DATA, ERRNUM, FILE_PATH, FILE_NAME,
                                       DEV_ADDR, DEV_ID, DEV_NAME>;
 
@@ -6310,25 +5274,20 @@ struct Foo : public sdbusplus::exception_t
     }
 };
 
-} // namespace Foo
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
+} // namespace example::xyz::openbmc_project::example2::foo
 
-namespace example
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace example::xyz::openbmc_project::Example2::Foo
 {
-namespace xyz
-{
-namespace openbmc_project
-{
-namespace Example
-{
-namespace Bar
+using Foo =
+    phosphor::logging::example::xyz::openbmc_project::example2::foo::Foo;
+}
+#endif
+
+namespace example::xyz::openbmc_project::example2::bar
 {
 namespace _Bar
 {
-
 struct BAR_DATA
 {
     /*
@@ -6342,29 +5301,29 @@ struct BAR_DATA
         _entry(entry("BAR_DATA=%s", a)){};
     type _entry;
 };
-
 } // namespace _Bar
 
 struct Bar : public sdbusplus::exception_t
 {
     static constexpr auto errName =
-        "example.xyz.openbmc_project.Example.Bar.Bar";
+        "example.xyz.openbmc_project.Example2.Bar.Bar";
     static constexpr auto errDesc = "this is test error Bar";
     static constexpr auto L = level::INFO;
     using BAR_DATA = _Bar::BAR_DATA;
-    using FOO_DATA = example::xyz::openbmc_project::Example::Foo::Foo::FOO_DATA;
-    using ERRNUM =
-        example::xyz::openbmc_project::Example::Elog::TestErrorOne::ERRNUM;
-    using FILE_PATH =
-        example::xyz::openbmc_project::Example::Elog::TestErrorOne::FILE_PATH;
-    using FILE_NAME =
-        example::xyz::openbmc_project::Example::Elog::TestErrorOne::FILE_NAME;
-    using DEV_ADDR =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_ADDR;
-    using DEV_ID =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_ID;
-    using DEV_NAME =
-        example::xyz::openbmc_project::Example::Elog::TestErrorTwo::DEV_NAME;
+    using FOO_DATA = phosphor::logging::example::xyz::openbmc_project::
+        example2::foo::Foo::FOO_DATA;
+    using ERRNUM = phosphor::logging::example::xyz::openbmc_project::example2::
+        elog::TestErrorOne::ERRNUM;
+    using FILE_PATH = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorOne::FILE_PATH;
+    using FILE_NAME = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorOne::FILE_NAME;
+    using DEV_ADDR = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorTwo::DEV_ADDR;
+    using DEV_ID = phosphor::logging::example::xyz::openbmc_project::example2::
+        elog::TestErrorTwo::DEV_ID;
+    using DEV_NAME = phosphor::logging::example::xyz::openbmc_project::
+        example2::elog::TestErrorTwo::DEV_NAME;
     using metadata_types = std::tuple<BAR_DATA, FOO_DATA, ERRNUM, FILE_PATH,
                                       FILE_NAME, DEV_ADDR, DEV_ID, DEV_NAME>;
 
@@ -6389,12 +5348,14 @@ struct Bar : public sdbusplus::exception_t
     }
 };
 
-} // namespace Bar
-} // namespace Example
-} // namespace openbmc_project
-} // namespace xyz
-} // namespace example
+} // namespace example::xyz::openbmc_project::example2::bar
 
-} // namespace logging
+#ifndef SDBUSPP_REMOVE_DEPRECATED_NAMESPACE
+namespace example::xyz::openbmc_project::Example2::Bar
+{
+using Bar =
+    phosphor::logging::example::xyz::openbmc_project::example2::bar::Bar;
+}
+#endif
 
-} // namespace phosphor
+} // namespace phosphor::logging
