@@ -187,8 +187,15 @@ bool registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
     if (!std::get<HandlerBase::ptr>(mapCmd) || std::get<int>(mapCmd) <= prio)
     {
         mapCmd = item;
+        log<level::DEBUG>("registered OEM Handler", entry("IANA=0x%x", iana),
+                          entry("CMD=0x%x", cmd),
+                          entry("netFnCmd=0x%x", netFnCmd));
         return true;
     }
+
+    log<level::WARNING>("could not register OEM Handler",
+                        entry("IANA=0x%x", iana), entry("CMD=0x%x", cmd),
+                        entry("netFnCmd=0x%x", netFnCmd));
     return false;
 }
 
@@ -245,6 +252,7 @@ message::Response::ptr executeIpmiCommandCommon(
         // only return the filter response if the command is found
         if (filterResponse)
         {
+            log<level::DEBUG>("request has been filtered");
             return filterResponse;
         }
         HandlerTuple& chosen = cmdIter->second;
@@ -263,6 +271,7 @@ message::Response::ptr executeIpmiCommandCommon(
             // only return the filter response if the command is found
             if (filterResponse)
             {
+                log<level::DEBUG>("request has been filtered");
                 return filterResponse;
             }
             HandlerTuple& chosen = cmdIter->second;
@@ -302,6 +311,9 @@ message::Response::ptr executeIpmiOemCommand(message::Request::ptr request)
         return errorResponse(request, ccReqDataLenInvalid);
     }
     auto iana = static_cast<Iana>(bytes);
+
+    log<level::DEBUG>("unpack IANA", entry("IANA=0x%x", iana));
+
     message::Response::ptr response = executeIpmiCommandCommon(oemHandlerMap,
                                                                iana, request);
     ipmi::message::Payload prefix;
