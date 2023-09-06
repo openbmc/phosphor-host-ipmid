@@ -55,6 +55,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "5c13772a_06e61afa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-09-06T13:51:56Z",
+      "side": 1,
+      "message": "ok, sounds good.\n\nWe will go with https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/66465 instead.",
+      "parentUuid": "004a8cc8_f48cfdc4",
+      "revId": "43ea52a8b91bacd9f9d60c49aaf436892351eede",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "90be0936_6b178651",
         "filename": "include/ipmid/message/unpack.hpp",
         "patchSetId": 5
