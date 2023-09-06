@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f9ec86c0_0c3b1e15",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-09-06T06:53:50Z",
+      "side": 1,
+      "message": "Hi all, I updated the DCMI get Sensor Info command to check instance start parameter. Please help me to review this commit",
+      "revId": "01a88b630cb778a2a44a1c933b31a02612013c73",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
