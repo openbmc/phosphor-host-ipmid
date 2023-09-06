@@ -79,3 +79,6 @@ option('matches-map', type : 'array', value : ['1', '2', '0', '0', '0', '0'], de
 
 # libipmi20.so library
 option('dynamic-storages-only', type: 'feature', value: 'disabled', description: 'Request to compile storage commands in the libipmi20 library')
+
+# open-power specific functionality.
+option('open-power', type: 'feature', description: 'Support open-power specific functions')

@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "storagehandler.hpp"
 
 #include "fruread.hpp"
@@ -710,12 +712,14 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
                                       Created::EVENT_DIR(assert),
                                       Created::SENSOR_PATH(objpath.c_str()));
     }
+#ifdef OPEN_POWER_SUPPORT
     else if (recordType == procedureType)
     {
         // In the OEM record type 0xDE, byte 11 in the SEL record indicate the
         // procedure number.
         createProcedureLogEntry(sensorType);
     }
+#endif
 
     return ipmi::responseSuccess(recordID);
 }
