@@ -40,6 +40,9 @@ endif
 if get_option('shortname-replace-words').enabled()
   conf_data.set_quoted('SHORTNAME_REPLACE_WORDS', '1')
 endif
+if get_option('open-power').allowed()
+  conf_data.set_quoted('OPEN_POWER_SUPPORT', '1')
+endif
 
 matches_map = get_option('matches-map')
 conf_data.set('MAJOR_MATCH_INDEX', matches_map[0])
@@ -217,6 +220,11 @@ if get_option('dynamic-sensors').disabled() and not get_option('dynamic-storages
   storage_cmds_src = ['dbus-sdr/storagecommands.cpp', 'dbus-sdr/sdrutils.cpp']
 endif
 
+openpower_cmds_src = []
+if get_option('open-power').allowed()
+  openpower_cmds_src = [ 'storageaddsel.cpp' ]
+endif
+
 libipmi20_src = [
   'app/channel.cpp',
   'app/watchdog.cpp',
@@ -228,7 +236,6 @@ libipmi20_src = [
   'chassishandler.cpp',
   'dcmihandler.cpp',
   'ipmisensor.cpp',
-  'storageaddsel.cpp',
   'transporthandler.cpp',
   'globalhandler.cpp',
   'groupext.cpp',
@@ -240,6 +247,7 @@ libipmi20_src = [
   generated_src,
   transportoem_src,
   storage_cmds_src,
+  openpower_cmds_src,
   conf_h,
 ]
 
