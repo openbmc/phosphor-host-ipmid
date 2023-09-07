@@ -532,7 +532,18 @@ int convertVersion(std::string s, Revision& rev)
             { // failed to convert major string
                 return -1;
             }
-            r.major = val & 0x7F;
+
+            if (val >= 2000)
+            { // For the platforms use year as major version, it would expect to
+              // have major version between 0 - 99. If the major version is
+              // greater than or equal to 2000, it is treated as a year and
+              // converted to 0 - 99.
+                r.major = val % 100;
+            }
+            else
+            {
+                r.major = val & 0x7F;
+            }
         }
 
         // convert minor
