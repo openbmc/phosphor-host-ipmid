@@ -33,6 +33,24 @@
       "message": "Is this the same unpackArgs error I see from Jenkins? The compilation treats all warnings as errors, so it fails here: https://jenkins.openbmc.org/job/ci-repository/73969/console",
       "revId": "f707071afbf4246d4c1ee507d96edc4781a6f120",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d4f328ee_fbf28c1e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-09-08T21:12:26Z",
+      "side": 1,
+      "message": "Yup, it\u0027s the same.",
+      "parentUuid": "370a4726_7e302430",
+      "revId": "f707071afbf4246d4c1ee507d96edc4781a6f120",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
