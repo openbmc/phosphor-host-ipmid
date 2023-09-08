@@ -156,7 +156,8 @@ std::vector<uint8_t>
         session::Manager::get().getSession(handler->sessionID);
     auto solSessionID =
         sol::Manager::get().getContext(request->payloadInstance).sessionID;
-    auto solActiveSession = session::Manager::get().getSession(solSessionID);
+    auto solActiveSession =
+        sol::Manager::get().getContext(request->payloadInstance).session;
     // The session owner or the ADMIN could deactivate the session
     if (currentSession->userName != solActiveSession->userName &&
         currentSession->currentPrivilege() !=
@@ -181,9 +182,12 @@ std::vector<uint8_t>
             /*
              * In case session has been closed (like in the case of inactivity
              * timeout), then activating function would throw an exception,
-             * since solSessionID is not found. IPMI success completion code is
-             * returned, since the session is closed.
+             * since solSessionID is not found. As session is already closed,
+             * returning IPMI status code for Payload already deactivated
+             * as BMC automatically deactivates all active payloads when
+             * session is terminated.
              */
+            response->completionCode = IPMI_CC_PAYLOAD_DEACTIVATED;
             return outPayload;
         }
     }
