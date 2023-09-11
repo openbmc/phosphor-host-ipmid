@@ -51,6 +51,24 @@
       "message": "@Willy, I think it is still worthwhile for you to rebase and add all of the fixups for the SDBUSPP_REMOVE_DEPRECATED_NAMESPACE.  Don\u0027t you agree?",
       "revId": "32fb4655d4ebf87636a75e418237332c221ba892",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e190fee_fb250b75",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-09-11T13:45:11Z",
+      "side": 1,
+      "message": "oh right. I have rebased it.",
+      "parentUuid": "891348b3_a4d2b65d",
+      "revId": "32fb4655d4ebf87636a75e418237332c221ba892",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ],
   "submitRequirementResults": []
