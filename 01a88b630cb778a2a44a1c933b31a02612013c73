@@ -67,6 +67,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ed3c8c09_584beb10",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2589,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-09-14T18:08:57Z",
+      "side": 1,
+      "message": "We can try to return `std::pair\u003csize_t, std::vector\u003cuint16_t\u003e\u003e`?",
+      "parentUuid": "446c54cb_67baca43",
+      "range": {
+        "startLine": 2579,
+        "startChar": 4,
+        "endLine": 2589,
+        "endChar": 5
+      },
+      "revId": "01a88b630cb778a2a44a1c933b31a02612013c73",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "05faf1ea_e98467f6",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 2
