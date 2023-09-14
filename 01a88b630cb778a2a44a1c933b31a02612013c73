@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "446c54cb_67baca43",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2589,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-09-14T06:51:36Z",
+      "side": 1,
+      "message": "In the `Get Sensor Info` and `Get Temperature Readings` commands, the response code includes the number of Sensors which have this Entity ID. Therefore, I can not pass `instanceStart` and `entityInstance` to `getSensorsByEntityId` function.",
+      "parentUuid": "880896a7_308bce9b",
+      "range": {
+        "startLine": 2579,
+        "startChar": 4,
+        "endLine": 2589,
+        "endChar": 5
+      },
+      "revId": "01a88b630cb778a2a44a1c933b31a02612013c73",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "05faf1ea_e98467f6",
@@ -54,6 +78,30 @@
       "writtenOn": "2023-09-06T16:50:39Z",
       "side": 1,
       "message": "emplace_back",
+      "range": {
+        "startLine": 2594,
+        "startChar": 26,
+        "endLine": 2594,
+        "endChar": 35
+      },
+      "revId": "01a88b630cb778a2a44a1c933b31a02612013c73",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "17a38fc3_da393a04",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2594,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-09-14T06:51:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05faf1ea_e98467f6",
       "range": {
         "startLine": 2594,
         "startChar": 26,
