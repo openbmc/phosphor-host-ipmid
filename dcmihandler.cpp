@@ -367,21 +367,21 @@ ipmi::RspType<uint16_t, // reserved
      */
     constexpr uint32_t correctionTime{};
     constexpr uint16_t statsPeriod{};
-    if (!pcapEnable)
+    if (*pcapEnable == false)
     {
         constexpr ipmi::Cc responseNoPowerLimitSet = 0x80;
-        constexpr uint16_t noPcap{};
         return ipmi::response(responseNoPowerLimitSet, reserved1, exception,
-                              noPcap, correctionTime, reserved2, statsPeriod);
+                              *pcapValue, correctionTime, reserved2,
+                              statsPeriod);
     }
     return ipmi::responseSuccess(reserved1, exception, *pcapValue,
                                  correctionTime, reserved2, statsPeriod);
 }
 
 ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
-                              uint8_t exceptionAction, uint16_t powerLimit,
-                              uint32_t correctionTime, uint16_t reserved2,
-                              uint16_t statsPeriod)
+                              uint8_t reserved2, uint8_t exceptionAction,
+                              uint16_t powerLimit, uint32_t correctionTime,
+                              uint16_t reserved3, uint16_t statsPeriod)
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
@@ -391,7 +391,7 @@ ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
 
     // Only process the power limit requested in watts. Return errors
     // for other fields that are set
-    if (reserved1 || reserved2 || correctionTime || statsPeriod ||
+    if (reserved1 || reserved2 || reserved3 || correctionTime || statsPeriod ||
         exceptionAction != exceptionPowerOff)
     {
         return ipmi::responseInvalidFieldRequest();
