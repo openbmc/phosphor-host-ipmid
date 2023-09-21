@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cf9ed6cf_409157f5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-09-21T07:45:47Z",
+      "side": 1,
+      "message": "Hi all, I add code to support OEM SEL logs. The OEM SEL record format as below:\n- OEM SEL record - Type C0h-DFh:\n    Byte 1-2: Record ID\n    Byte 3: Record Type\n    Byte 4-7: Timestamp.\n    Byte 8-10: Manufacturer ID\n    Byte 11-16: OEM defined.\n- OEM SEL record - Type E0h-FFh:\n    Byte 1-2: Record ID\n    Byte 3: Record Type\n    Byte 4-16: OEM defined.\n\nThe Manufacturer ID and OEM defined fields are defined in SELdata parameter of IpmiSelAddOem method. Please refer to https://github.com/openbmc/phosphor-dbus-interfaces/blob/262b9220e59434f8031d9dc24e481b28f420c73a/yaml/xyz/openbmc_project/Logging/IPMI.interface.yaml#L103 for more information.\n\nPlease help me to review this commit.\n\nThanks",
+      "revId": "02f750dcebf7b3850e3d0c57c5169d8a623e80db",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
