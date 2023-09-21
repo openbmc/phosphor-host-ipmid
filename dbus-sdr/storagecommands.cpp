@@ -1197,24 +1197,6 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
     return ipmi::responseSuccess(ipmi::sel::eraseComplete);
 }
 
-ipmi::RspType<uint32_t> ipmiStorageGetSELTime()
-{
-    struct timespec selTime = {};
-
-    if (clock_gettime(CLOCK_REALTIME, &selTime) < 0)
-    {
-        return ipmi::responseUnspecifiedError();
-    }
-
-    return ipmi::responseSuccess(selTime.tv_sec);
-}
-
-ipmi::RspType<> ipmiStorageSetSELTime(uint32_t)
-{
-    // Set SEL Time is not supported
-    return ipmi::responseInvalidCommand();
-}
-
 std::vector<uint8_t>
     getType8SDRs(ipmi::sensor::EntityInfoMap::const_iterator& entity,
                  uint16_t recordId)
@@ -1314,16 +1296,6 @@ void registerStorageFunctions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdClearSel, ipmi::Privilege::Operator,
                           ipmiStorageClearSEL);
-
-    // <Get SEL Time>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
-                          ipmi::storage::cmdGetSelTime, ipmi::Privilege::User,
-                          ipmiStorageGetSELTime);
-
-    // <Set SEL Time>
-    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
-                          ipmi::storage::cmdSetSelTime,
-                          ipmi::Privilege::Operator, ipmiStorageSetSELTime);
 }
 } // namespace storage
 } // namespace ipmi
