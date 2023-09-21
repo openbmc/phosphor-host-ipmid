@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d43a1ed_43ae6ac0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-09-21T06:25:36Z",
+      "side": 1,
+      "message": "Hi @Vernon, this commit fix issues from your commit https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/65689, please help me take a look.\n\nThanks",
+      "revId": "4569ad91ccca3989e7817ac92860ee52ca3256fc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
