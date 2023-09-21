@@ -1079,6 +1079,44 @@ ipmi::RspType<uint16_t,                   // Next Record ID
                             sensorNum, eventType, eventDir, eventData});
     }
 
+    if (recordType >= dynamic_sensors::ipmi::sel::oemTsEventFirst &&
+        recordType <= dynamic_sensors::ipmi::sel::oemTsEventLast)
+    {
+        // Get the timestamp
+        std::tm timeStruct = {};
+        std::istringstream entryStream(entryTimestamp);
+
+        uint32_t timestamp = ipmi::sel::invalidTimeStamp;
+        if (entryStream >> std::get_time(&timeStruct, "%Y-%m-%dT%H:%M:%S"))
+        {
+            timeStruct.tm_isdst = -1;
+            timestamp = std::mktime(&timeStruct);
+        }
+
+        // Only keep the bytes that fit in the record
+        std::array<uint8_t, dynamic_sensors::ipmi::sel::oemTsEventSize>
+            eventData{};
+        std::copy_n(eventDataBytes.begin(),
+                    std::min(eventDataBytes.size(), eventData.size()),
+                    eventData.begin());
+
+        return ipmi::responseSuccess(nextRecordID, recordID, recordType,
+                                     oemTsEventType{timestamp, eventData});
+    }
+
+    if (recordType >= dynamic_sensors::ipmi::sel::oemEventFirst)
+    {
+        // Only keep the bytes that fit in the record
+        std::array<uint8_t, dynamic_sensors::ipmi::sel::oemEventSize>
+            eventData{};
+        std::copy_n(eventDataBytes.begin(),
+                    std::min(eventDataBytes.size(), eventData.size()),
+                    eventData.begin());
+
+        return ipmi::responseSuccess(nextRecordID, recordID, recordType,
+                                     eventData);
+    }
+
     return ipmi::responseUnspecifiedError();
 }
 
