@@ -1010,6 +1010,7 @@ ipmi::RspType<uint16_t,                   // Next Record ID
         uint32_t timestamp = ipmi::sel::invalidTimeStamp;
         if (entryStream >> std::get_time(&timeStruct, "%Y-%m-%dT%H:%M:%S"))
         {
+            timeStruct.tm_isdst = -1;
             timestamp = std::mktime(&timeStruct);
         }
 
