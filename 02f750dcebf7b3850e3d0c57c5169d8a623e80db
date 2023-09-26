@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "32d51172_1b49e88c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1100,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-09-26T03:49:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3214ab3_cf5985c0",
+      "range": {
+        "startLine": 1100,
+        "startChar": 4,
+        "endLine": 1100,
+        "endChar": 11
+      },
+      "revId": "02f750dcebf7b3850e3d0c57c5169d8a623e80db",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c799d830_257387b0",
@@ -54,6 +78,30 @@
       "writtenOn": "2023-09-26T00:01:24Z",
       "side": 1,
       "message": "I have https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/66785 which we might want here too if that\u0027s the right change.",
+      "range": {
+        "startLine": 1107,
+        "startChar": 0,
+        "endLine": 1111,
+        "endChar": 9
+      },
+      "revId": "02f750dcebf7b3850e3d0c57c5169d8a623e80db",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f874c67d_e96bf344",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1111,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-09-26T03:49:31Z",
+      "side": 1,
+      "message": "Please find out my comment in your commit. I think we don\u0027t have to change this code.",
+      "parentUuid": "c799d830_257387b0",
       "range": {
         "startLine": 1107,
         "startChar": 0,
