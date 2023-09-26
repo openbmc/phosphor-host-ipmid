@@ -58,25 +58,6 @@ namespace erase_time
 {
 static constexpr const char* selEraseTimestamp = "/var/lib/ipmi/sel_erase_time";
 
-void save()
-{
-    // open the file, creating it if necessary
-    int fd = open(selEraseTimestamp, O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
-    if (fd < 0)
-    {
-        std::cerr << "Failed to open file\n";
-        return;
-    }
-
-    // update the file timestamp to the current time
-    if (futimens(fd, NULL) < 0)
-    {
-        std::cerr << "Failed to update timestamp: "
-                  << std::string(strerror(errno));
-    }
-    close(fd);
-}
-
 int get()
 {
     return getFileTimestamp(selEraseTimestamp);
@@ -1154,33 +1135,6 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
     // cleared
     cancelSELReservation();
 
-#ifndef FEATURE_SEL_LOGGER_CLEARS_SEL
-    // Save the erase time
-    dynamic_sensors::ipmi::sel::erase_time::save();
-
-    // Clear the SEL by deleting the log files
-    std::vector<std::filesystem::path> selLogFiles;
-    if (getSELLogFiles(selLogFiles))
-    {
-        for (const std::filesystem::path& file : selLogFiles)
-        {
-            std::error_code ec;
-            std::filesystem::remove(file, ec);
-        }
-    }
-
-    // Reload rsyslog so it knows to start new log files
-    boost::system::error_code ec;
-    ctx->bus->yield_method_call<>(ctx->yield, ec, "org.freedesktop.systemd1",
-                                  "/org/freedesktop/systemd1",
-                                  "org.freedesktop.systemd1.Manager",
-                                  "ReloadUnit", "rsyslog.service", "replace");
-    if (ec)
-    {
-        std::cerr << "error in reload rsyslog: " << ec << std::endl;
-        return ipmi::responseUnspecifiedError();
-    }
-#else
     boost::system::error_code ec;
     ctx->bus->yield_method_call<>(ctx->yield, ec, selLoggerServiceName,
                                   "/xyz/openbmc_project/Logging/IPMI",
@@ -1191,9 +1145,6 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
         return ipmi::responseUnspecifiedError();
     }
 
-    // Save the erase time
-    dynamic_sensors::ipmi::sel::erase_time::save();
-#endif
     return ipmi::responseSuccess(ipmi::sel::eraseComplete);
 }
 
