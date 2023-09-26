@@ -16,6 +16,24 @@
       "message": "As I saw in the chapter 37 of IPMI specification, the timestamp format presents the `local time` as number of seconds from 0:0:0 1/1/1970, therefore we don\u0027t have to change the timestamp to UTC format.",
       "revId": "b57069b95e241332286f1249b6bbac2e2629b190",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b7547aba_b2df0d15",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2023-09-26T15:59:10Z",
+      "side": 1,
+      "message": "The end result is still local time, the issue that was hit is that `std::mktime` doesn\u0027t take into account of daylight saying... so right now the result is one hour off the actual time.\n\nCurrent using PDT, but it seems like std::mktime is always using PST.",
+      "parentUuid": "6ea13ffe_ef4b9e02",
+      "revId": "b57069b95e241332286f1249b6bbac2e2629b190",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
