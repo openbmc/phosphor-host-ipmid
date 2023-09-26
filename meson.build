@@ -88,7 +88,6 @@ feature_map = {
   'entity-manager-decorators'  : '-DUSING_ENTITY_MANAGER_DECORATORS',
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
-  'sel-logger-clears-sel'      : '-DFEATURE_SEL_LOGGER_CLEARS_SEL',
   'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',
 }
 
