@@ -57,6 +57,9 @@ option('dynamic-sensors', type: 'feature', value: 'disabled', description: 'Dyna
 option('dynamic-sensors-write', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
 option('hybrid-sensors', type: 'feature', value: 'disabled', description: 'Hybrid sensors stack is disabled by default; offer a way to enable it')
 
+# SDR ID String Naming
+option('six-bit-encode', type: 'feature', value: 'disabled', description: 'Use IPMI 6-bit ASCII, packed encoding for SDR ID strings; offer a way to enable it')
+
 # Sensor Cache
 option('sensors-cache', type: 'feature', value: 'disabled', description: 'Sensor cache stack is disabled by default; offer a way to enable it')
 

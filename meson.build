@@ -89,6 +89,7 @@ feature_map = {
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
   'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',
+  'six-bit-encode'             : '-DFEATURE_SIX_BIT_ENCODE',
 }
 
 foreach option_key, option_value : feature_map
