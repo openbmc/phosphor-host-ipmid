@@ -209,6 +209,72 @@ static constexpr const char* sensorInterface =
     "xyz.openbmc_project.Sensor.Value";
 } // namespace sensor
 
+#if FEATURE_SIX_BIT_ENCODE
+// Six bit packing requires realigning the 8-bit bytes
+//  The first entry in the pair defines a right shift
+//  The second entry in the pair defines a left shift
+static std::array<std::pair<int, int>, 3> sixBitShiftValues = {
+    {{0, 6}, {2, 4}, {4, 2}}};
+static constexpr uint8_t asciiSpace = ' ';
+static constexpr uint8_t asciiUnderscore = '_';
+static constexpr uint8_t encodedQuestionMark = 0x1f;
+// Four letters have been encoded in three loops. Skip ahead to the
+// next group of four letters
+static constexpr uint8_t skipToNextLetter = 3;
+
+static uint8_t
+    createSixBitPackedSensorName(const std::string& name,
+                                 get_sdr::SensorDataFullRecord& record)
+{
+    std::string tmpName = name;
+    for (auto it = tmpName.begin(); it != tmpName.end(); *it++)
+    {
+        *it = static_cast<char>(std::toupper(static_cast<unsigned char>(*it)));
+    }
+    uint8_t nameLength = tmpName.length();
+    char currentLetter = 0;
+    char nextLetter;
+    uint8_t leftShift, rightShift;
+    uint8_t letterIdx = 0;
+    uint8_t id_string_idx = 0;
+    uint8_t maximum6bitEncodingChars =
+        ((sizeof(record.body.id_string) / 3) * 4) +
+        (sizeof(record.body.id_string) % 3);
+    if (nameLength > maximum6bitEncodingChars)
+        nameLength = maximum6bitEncodingChars;
+    for (uint8_t lv = 0; lv < nameLength; lv++)
+    {
+        rightShift = std::get<0>(sixBitShiftValues[letterIdx]);
+        leftShift = std::get<1>(sixBitShiftValues[letterIdx]);
+        currentLetter = tmpName[lv] - asciiSpace;
+        if (tmpName[lv] < asciiSpace || tmpName[lv] > asciiUnderscore)
+        {
+            currentLetter = encodedQuestionMark;
+        }
+        nextLetter = 0;
+        if (lv + 1 < nameLength)
+        {
+            if (tmpName[lv + 1] < asciiSpace ||
+                tmpName[lv + 1] > asciiUnderscore)
+            {
+                nextLetter = encodedQuestionMark;
+            }
+            nextLetter = tmpName[lv + 1] - asciiSpace;
+        }
+        record.body.id_string[id_string_idx] = (currentLetter >> rightShift) |
+                                               (nextLetter << leftShift);
+        ++id_string_idx;
+        if (++letterIdx == skipToNextLetter)
+        {
+            letterIdx = 0;
+            lv++;
+            continue;
+        }
+    }
+    return id_string_idx;
+}
+#endif
+
 static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
                             double& min)
 {
@@ -1754,10 +1820,17 @@ bool constructSensorSdr(
 
     // populate sensor name from path
     auto name = sensor::parseSdrIdFromPath(path);
-    get_sdr::body::set_id_strlen(name.size(), &record.body);
+#if FEATURE_SIX_BIT_ENCODE
+    uint8_t id_string_len = createSixBitPackedSensorName(name, record);
+    get_sdr::body::set_id_type(2, &record.body); // 6-bit packed
+    get_sdr::body::set_id_strlen(id_string_len, &record.body);
+#else
+    int nameSize = std::min(name.size(), sizeof(record.body.id_string));
+    get_sdr::body::set_id_strlen(nameSize, &record.body);
     get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
     std::memcpy(record.body.id_string, name.c_str(),
                 std::min(name.length() + 1, sizeof(record.body.id_string)));
+#endif
 
     // Remember the sensor name, as determined for this sensor number
     details::sdrStatsTable.updateName(sensorNum, name);
