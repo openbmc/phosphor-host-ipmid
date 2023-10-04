@@ -14,8 +14,6 @@
 // limitations under the License.
 */
 
-#include "config.h"
-
 #include "dbus-sdr/sensorcommands.hpp"
 
 #include "dbus-sdr/sdrutils.hpp"
@@ -208,6 +206,65 @@ static constexpr const char* vrInterface =
 static constexpr const char* sensorInterface =
     "xyz.openbmc_project.Sensor.Value";
 } // namespace sensor
+
+static size_t createSixBitPackedSensorName(const std::string& name,
+                                           char* id_string_array,
+                                           uint8_t bytesStorage)
+{
+    // Six bit packing requires realigning the 8-bit bytes
+    //  The first entry in the pair defines a right shift
+    //  The second entry in the pair defines a left shift
+    static const std::array<std::pair<int, int>, 3> sixBitShiftValues = {
+        {{0, 6}, {2, 4}, {4, 2}}};
+    constexpr char asciiSpace = ' ';
+    constexpr char asciiUnderscore = '_';
+    constexpr char encodedQuestionMark = 0x1f;
+
+    std::string tmpName = name;
+    size_t nameLength = tmpName.length();
+    char currentLetter = 0;
+    char nextLetter;
+    int leftShift, rightShift;
+    size_t letterIdx = 0;
+    size_t id_string_idx = 0;
+    size_t maximum6bitEncodingChars = (bytesStorage * 4) / 3;
+
+    if (nameLength > maximum6bitEncodingChars)
+    {
+        tmpName.resize(maximum6bitEncodingChars);
+        nameLength = tmpName.length();
+    }
+    for (size_t lv = 0; lv < nameLength; lv++)
+    {
+        rightShift = std::get<0>(sixBitShiftValues[letterIdx]);
+        leftShift = std::get<1>(sixBitShiftValues[letterIdx]);
+        currentLetter = tmpName[lv] - asciiSpace;
+        if (tmpName[lv] < asciiSpace || tmpName[lv] > asciiUnderscore)
+        {
+            currentLetter = encodedQuestionMark;
+        }
+        nextLetter = 0;
+        if (lv + 1 < nameLength)
+        {
+            nextLetter = tmpName[lv + 1] - asciiSpace;
+            if (tmpName[lv + 1] < asciiSpace ||
+                tmpName[lv + 1] > asciiUnderscore)
+            {
+                nextLetter = encodedQuestionMark;
+            }
+        }
+        id_string_array[id_string_idx] = (currentLetter >> rightShift) |
+                                         (nextLetter << leftShift);
+        ++id_string_idx;
+        if (++letterIdx == sixBitShiftValues.size())
+        {
+            letterIdx = 0;
+            lv++;
+            continue; // prevent trailing code from being run
+        }
+    }
+    return id_string_idx;
+}
 
 static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
                             double& min)
@@ -472,42 +529,35 @@ static std::optional<double>
     return value;
 }
 
-// Extract file name from sensor path as the sensors SDR ID. Simplify the name
-// if it is too long.
+// Extract file name from sensor path as the sensors SDR ID. Optionally
+// simplify the name if it is too long.
 std::string parseSdrIdFromPath(const std::string& path)
 {
-    std::string name;
+    std::string name{};
     size_t nameStart = path.rfind("/");
     if (nameStart != std::string::npos)
     {
         name = path.substr(nameStart + 1, std::string::npos - nameStart);
     }
 
-    if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
-    {
 #ifdef SHORTNAME_REMOVE_SUFFIX
-        for (const auto& suffix : suffixes)
+    for (const auto& suffix : suffixes)
+    {
+        if (boost::ends_with(name, suffix))
         {
-            if (boost::ends_with(name, suffix))
-            {
-                boost::replace_all(name, suffix, "");
-                break;
-            }
+            boost::replace_all(name, suffix, "");
+            break;
         }
+    }
 #endif
 #ifdef SHORTNAME_REPLACE_WORDS
-        constexpr std::array<std::pair<const char*, const char*>, 2>
-            replaceWords = {std::make_pair("Output", "Out"),
-                            std::make_pair("Input", "In")};
-        for (const auto& [find, replace] : replaceWords)
-        {
-            boost::replace_all(name, find, replace);
-        }
-#endif
-
-        // as a backup and if nothing else is configured
-        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+    constexpr std::array<std::pair<const char*, const char*>, 2> replaceWords =
+        {std::make_pair("Output", "Out"), std::make_pair("Input", "In")};
+    for (const auto& [find, replace] : replaceWords)
+    {
+        boost::replace_all(name, find, replace);
     }
+#endif
     return name;
 }
 
@@ -1754,10 +1804,26 @@ bool constructSensorSdr(
 
     // populate sensor name from path
     auto name = sensor::parseSdrIdFromPath(path);
-    get_sdr::body::set_id_strlen(name.size(), &record.body);
-    get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
-    std::memcpy(record.body.id_string, name.c_str(),
-                std::min(name.length() + 1, sizeof(record.body.id_string)));
+    for (auto it = name.begin(); it != name.end(); *it++)
+    {
+        *it = static_cast<char>(std::toupper(static_cast<unsigned char>(*it)));
+    }
+
+    if (size_t nameSize{}; name.length() > sizeof(record.body.id_string))
+    {
+        nameSize = createSixBitPackedSensorName(name, record.body.id_string,
+                                                sizeof(record.body.id_string));
+        get_sdr::body::set_id_type(2, &record.body); // 6-bit packed
+        get_sdr::body::set_id_strlen(nameSize, &record.body);
+    }
+    else
+    {
+        nameSize = std::min(name.size(), sizeof(record.body.id_string));
+        get_sdr::body::set_id_strlen(nameSize, &record.body);
+        get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
+        std::memcpy(record.body.id_string, name.c_str(),
+                    std::min(name.length() + 1, sizeof(record.body.id_string)));
+    }
 
     // Remember the sensor name, as determined for this sensor number
     details::sdrStatsTable.updateName(sensorNum, name);
@@ -1942,11 +2008,26 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
 
     // populate sensor name from path
     auto name = sensor::parseSdrIdFromPath(path);
-    int nameSize = std::min(name.size(), sizeof(record.body.id_string));
-    get_sdr::body::set_id_strlen(nameSize, &record.body);
-    get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
-    std::memset(record.body.id_string, 0x00, sizeof(record.body.id_string));
-    std::memcpy(record.body.id_string, name.c_str(), nameSize);
+    for (auto it = name.begin(); it != name.end(); *it++)
+    {
+        *it = static_cast<char>(std::toupper(static_cast<unsigned char>(*it)));
+    }
+
+    if (size_t nameSize{}; name.length() > sizeof(record.body.id_string))
+    {
+        nameSize = createSixBitPackedSensorName(name, record.body.id_string,
+                                                sizeof(record.body.id_string));
+        get_sdr::body::set_id_type(2, &record.body); // 6-bit packed
+        get_sdr::body::set_id_strlen(nameSize, &record.body);
+    }
+    else
+    {
+        nameSize = std::min(name.size(), sizeof(record.body.id_string));
+        get_sdr::body::set_id_strlen(nameSize, &record.body);
+        get_sdr::body::set_id_type(3, &record.body); // "8-bit ASCII + Latin 1"
+        std::memcpy(record.body.id_string, name.c_str(),
+                    std::min(name.length() + 1, sizeof(record.body.id_string)));
+    }
 
     // Remember the sensor name, as determined for this sensor number
     details::sdrStatsTable.updateName(sensorNum, name);
