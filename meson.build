@@ -80,6 +80,7 @@ feature_map = {
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
   'sel-logger-clears-sel'      : '-DFEATURE_SEL_LOGGER_CLEARS_SEL',
   'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',
+  'six-bit-encode'             : '-DFEATURE_SIX_BIT_ENCODE',
 }
 
 foreach option_key, option_value : feature_map
