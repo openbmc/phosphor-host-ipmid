@@ -249,7 +249,6 @@ ipmi::RspType<>
 
         // Mark as initialized so that future resets behave correctly
         wd_service.setInitialized(true);
-        wd_service.setNotlog(dontLog);
 
         lastCallSuccessful = true;
         return ipmi::responseSuccess();

@@ -67,12 +67,6 @@ class WatchdogService
      */
     void setEnabled(bool enabled);
 
-    /** @brief Sets the value of the Notlog property on the host watchdog
-     *
-     *  @param[in] Notlog - The new Notlog value
-     */
-    void setNotlog(bool Notlog);
-
     /** @brief Sets the value of the expireAction property on the host watchdog
      *
      *  @param[in] expireAction - The new expireAction value
