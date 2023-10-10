@@ -593,6 +593,18 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     }
     std::string name;
 
+#if PRODUCT_NAME_FROM_FRU
+    auto findProductName = fruData->find("BOARD_PRODUCT_NAME");
+    auto findBoardName = fruData->find("PRODUCT_PRODUCT_NAME");
+    if (findProductName != fruData->end())
+    {
+        name = std::get<std::string>(findProductName->second);
+    }
+    else if (findBoardName != fruData->end())
+    {
+        name = std::get<std::string>(findBoardName->second);
+    }
+
 #ifdef USING_ENTITY_MANAGER_DECORATORS
 
     boost::container::flat_map<std::string, Value>* entityData = nullptr;

@@ -89,6 +89,7 @@ feature_map = {
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
   'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',
+  'get-id-from-fru'            : '-DPRODUCT_NAME_FROM_FRU',
 }
 
 foreach option_key, option_value : feature_map
