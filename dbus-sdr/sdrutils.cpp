@@ -16,6 +16,9 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#include <nlohmann/json.hpp>
+
+#include <fstream>
 #include <optional>
 #include <unordered_set>
 
@@ -34,6 +37,47 @@ extern const IdInfoMap sensors;
 
 namespace details
 {
+
+// IPMI supports a smaller number of sensors than are available via Redfish.
+// Trim the list of sensors, via a configuration file.
+// Add a JSON file, via a Yocto bbappend file, that contains:
+//     {
+//        "ServiceFilter" : [
+//           "xyz.openbmc_project.ServiceToTrim"
+//        ]
+//     }
+static void filterSensors(SensorSubTree& subtree)
+{
+    const char* filterFilename = "/usr/share/ipmi-providers/sensor_filter.json";
+    std::ifstream filterFile(filterFilename);
+    if (!filterFile.good())
+    {
+        return;
+    }
+    nlohmann::json sensorFilterJSON = nlohmann::json::parse(filterFile, nullptr,
+                                                            false);
+    nlohmann::json::iterator svcFilterit =
+        sensorFilterJSON.find("ServiceFilter");
+    if (svcFilterit == sensorFilterJSON.end())
+    {
+        return;
+    }
+
+    subtree.erase(std::remove_if(
+                      subtree.begin(), subtree.end(),
+                      [svcFilterit](SensorSubTree::value_type& kv) {
+        auto& [_, serviceToIfaces] = kv;
+
+        for (auto service = svcFilterit->begin(); service != svcFilterit->end();
+             ++service)
+        {
+            serviceToIfaces.erase(*service);
+        }
+        return serviceToIfaces.empty();
+                      }),
+                  subtree.end());
+}
+
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 {
     static std::shared_ptr<SensorSubTree> sensorTreePtr;
@@ -136,6 +180,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         return sensorUpdatedIndex;
     }
 
+    filterSensors(*sensorTreePtr);
     // Add VR control as optional search path.
     (void)lbdUpdateSensorTree("/xyz/openbmc_project/vr", vrInterfaces);
 
