@@ -16,6 +16,23 @@
       "message": "Hi all, I create this commit to fix the DCMI Get Sensor Info command issue. Please help me review this commit.\n\nThanks,\nThang Tran",
       "revId": "5ea83fad72af5389c215c5da45c6342c63e9557f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1e88ce8c_8569611d",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1112,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2023-10-16T18:14:26Z",
+      "side": 1,
+      "message": "since the behavior of the function has changed, would it be possible to write a test for this function (like dcmihandler_unittest.cpp) which would test it?\n\nI don\u0027t know the context of the function but all parameter types should be constructible without much external requirements, right?\n\nThis would protect this function from being broken in the future,\nand document how to construct its parameters and how they should look like.",
+      "revId": "5ea83fad72af5389c215c5da45c6342c63e9557f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
