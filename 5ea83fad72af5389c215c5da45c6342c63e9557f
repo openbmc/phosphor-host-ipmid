@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5c240f72_9d515015",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-10-16T09:18:16Z",
+      "side": 1,
+      "message": "Hi all, I create this commit to fix the DCMI Get Sensor Info command issue. Please help me review this commit.\n\nThanks,\nThang Tran",
+      "revId": "5ea83fad72af5389c215c5da45c6342c63e9557f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
