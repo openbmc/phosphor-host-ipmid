@@ -1109,7 +1109,7 @@ std::tuple<std::vector<uint16_t>, uint8_t> read(const std::string& type,
             continue;
         }
 
-        uint16_t recordId = config.value("record_id", 0);
+        uint16_t recordId = reading.value("record_id", 0);
         responses.emplace_back(recordId);
     }
 
