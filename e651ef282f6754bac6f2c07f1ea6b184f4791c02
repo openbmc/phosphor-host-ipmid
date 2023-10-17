@@ -16,6 +16,270 @@
       "message": "I identified a corner case in the encoding.\nThe sensor names are hard to use when the trailing characters are blank spaces.\nFor example: ipmitool sensor reading ABCDE\ndoesn\u0027t work because the real sensor name has 3 invisible trailing spaces.\nI selected to use traling \u0027_\u0027 characters to make it easy to see what the actual sensor name is within the record.\nIn order to get rid of the trailing spaces it will be necessary to modify ipmitool. The ipmitool handling can be discussed.",
       "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21e4261a_8c09dd6f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "This looks like a lot, but it is mostly a few changes on types of variables and stuff.\n\nOverall, the algorithm looks pretty good to me. The only bit I don\u0027t really agree with is the padding part. This seems unnecesary to me.",
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8b90eba3_fd786149",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "static constexpr std::array\u003cstd::pair\u003cint, int\u003e, 3\u003e sixBitShiftValues \u003d {\n    {{0, 6}, {2, 4}, {4, 2}}};\n\nThis line and the next four constants can be moved down into the function that uses them to reduce scope. And in the function, the uint8_t values don\u0027t really need to be static, just constexpr.",
+      "range": {
+        "startLine": 216,
+        "startChar": 1,
+        "endLine": 217,
+        "endChar": 30
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8dff64c4_525f9be0",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "sizeof(sixBitShiftValues)\n\nOr, use this constexpr value as the N parameter for the array. The two should be tied together, imo.",
+      "range": {
+        "startLine": 223,
+        "startChar": 44,
+        "endLine": 223,
+        "endChar": 45
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c4776542_5a2f3a5d",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "size_t",
+      "range": {
+        "startLine": 225,
+        "startChar": 7,
+        "endLine": 225,
+        "endChar": 14
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c8e732c6_fc72abee",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "size_t",
+      "range": {
+        "startLine": 234,
+        "startChar": 4,
+        "endLine": 234,
+        "endChar": 11
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3a0a9770_c88f41bb",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "int",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 11
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9ac19895_a90c0366",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "size_t for 238-239",
+      "range": {
+        "startLine": 238,
+        "startChar": 4,
+        "endLine": 238,
+        "endChar": 11
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e321a2f3_e313b1b4",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "constexpr size_t",
+      "range": {
+        "startLine": 240,
+        "startChar": 4,
+        "endLine": 240,
+        "endChar": 11
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d5fc7a1e_5ac235ac",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "((sizeof(record.body.id_string) * 4 ) / 3)\n\nWith the rounding of integer math can make this 20 or 21, depending on order.",
+      "range": {
+        "startLine": 241,
+        "startChar": 40,
+        "endLine": 241,
+        "endChar": 48
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3b19369e_b5f21f18",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "The spec doesn\u0027t mention a requirement for four-byte bounded inputs here. It seems that a lack of input bytes would just be zeros on the output bits with the length truncated.\n\nThen within the 16 bytes of encoded data, it would expand to 21 bytes with two bits (MSB) of zero that don\u0027t get decoded.\n\ninversely, the 21 bytes would get mashed down to 15 full bytes with the final byte that only has 6 bits of meaningful data.\n\nIn the loop below, it looks like it can already handle this type of partial-block encoding.",
+      "range": {
+        "startLine": 243,
+        "startChar": 4,
+        "endLine": 248,
+        "endChar": 5
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fd5535d2_d051e8e4",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "size_t",
+      "range": {
+        "startLine": 255,
+        "startChar": 9,
+        "endLine": 255,
+        "endChar": 16
+      },
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8eff7617_0228d596",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-17T00:04:15Z",
+      "side": 1,
+      "message": "this shouldn\u0027t be needed. Either way, the loop is headed back to the top on the next line.",
+      "revId": "e651ef282f6754bac6f2c07f1ea6b184f4791c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
