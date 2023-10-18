@@ -33,6 +33,23 @@
       "message": "Are there any further questions/concerns?\nFor me this is a practical fix.",
       "revId": "5daf01b06cdf8485e02bc1d71a5d3015d98b90ee",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4a2c2110_05316a1b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-10-18T14:03:13Z",
+      "side": 1,
+      "message": "Alexander,\nI submitted https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/67006.\nThis is code that is intel-ipmi-oem, and it targets a smaller subset of FRU strings in order to populate the FRU Device Description.\n\nWhy are you including items like the part number, manufacturer, or serial number?\n\nI also added compile directives to enable/disable the code. It\u0027s not clear to me how other OBMC users are getting these strings. As a result I wanted to leave the existing behavior dominant, and allow for an opt-in model instead.",
+      "revId": "5daf01b06cdf8485e02bc1d71a5d3015d98b90ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
