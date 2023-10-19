@@ -17,6 +17,7 @@
 #include <stdplus/net/addr/ether.hpp>
 #include <stdplus/net/addr/ip.hpp>
 #include <stdplus/str/conv.hpp>
+#include <stdplus/zstring_view.hpp>
 #include <user_channel/channel_layer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
@@ -37,8 +38,10 @@ namespace ipmi
 namespace transport
 {
 
+using stdplus::operator""_zsv;
+
 // D-Bus Network Daemon definitions
-constexpr auto PATH_ROOT = "/xyz/openbmc_project/network";
+constexpr auto PATH_ROOT = "/xyz/openbmc_project/network"_zsv;
 constexpr auto INTF_ETHERNET = "xyz.openbmc_project.Network.EthernetInterface";
 constexpr auto INTF_IP = "xyz.openbmc_project.Network.IP";
 constexpr auto INTF_IP_CREATE = "xyz.openbmc_project.Network.IP.Create";

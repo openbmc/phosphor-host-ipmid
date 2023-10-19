@@ -64,6 +64,16 @@ const std::unordered_set<IP::AddressOrigin> originsV4 = {
 static constexpr uint8_t oemCmdStart = 192;
 static constexpr uint8_t oemCmdEnd = 255;
 
+// Checks if the ifname is part of the networkd path
+// This assumes the path came from the network subtree PATH_ROOT
+bool ifnameInPath(std::string_view ifname, std::string_view path)
+{
+    constexpr auto rs = PATH_ROOT.size() + 1; // ROOT + separator
+    const auto is = rs + ifname.size();       // ROOT + sep + ifname
+    return path.size() > rs && path.substr(rs).starts_with(ifname) &&
+           (path.size() == is || path[is] == '/');
+}
+
 std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
                                                    uint8_t channel)
 {
@@ -76,7 +86,7 @@ std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
     // Enumerate all VLAN + ETHERNET interfaces
     auto req = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
                                    "GetSubTree");
-    req.append(PATH_ROOT, 0,
+    req.append(std::string_view(PATH_ROOT), 0,
                std::vector<std::string>{INTF_VLAN, INTF_ETHERNET});
     auto reply = bus.call(req);
     ObjectTree objs;
@@ -85,7 +95,7 @@ std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
     ChannelParams params;
     for (const auto& [path, impls] : objs)
     {
-        if (path.find(ifname) == path.npos)
+        if (!ifnameInPath(ifname, path))
         {
             continue;
         }
@@ -474,13 +484,14 @@ void deconfigureChannel(sdbusplus::bus_t& bus, ChannelParams& params)
     // Delete all objects associated with the interface
     auto objreq = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
                                       "GetSubTree");
-    objreq.append(PATH_ROOT, 0, std::vector<std::string>{DELETE_INTERFACE});
+    objreq.append(std::string_view(PATH_ROOT), 0,
+                  std::vector<std::string>{DELETE_INTERFACE});
     auto objreply = bus.call(objreq);
     ObjectTree objs;
     objreply.read(objs);
     for (const auto& [path, impls] : objs)
     {
-        if (path.find(params.ifname) == path.npos)
+        if (!ifnameInPath(params.ifname, path))
         {
             continue;
         }
@@ -514,7 +525,7 @@ void createVLAN(sdbusplus::bus_t& bus, ChannelParams& params, uint16_t vlan)
         return;
     }
 
-    auto req = bus.new_method_call(params.service.c_str(), PATH_ROOT,
+    auto req = bus.new_method_call(params.service.c_str(), PATH_ROOT.c_str(),
                                    INTF_VLAN_CREATE, "VLAN");
     req.append(params.ifname, static_cast<uint32_t>(vlan));
     auto reply = bus.call(req);
