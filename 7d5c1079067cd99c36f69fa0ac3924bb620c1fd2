@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "831bf0a8_5633d82f",
+        "filename": "meson.build",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2023-10-19T23:43:13Z",
+      "side": 1,
+      "message": "Ack. I was planning to take care of it once the bump landed.",
+      "parentUuid": "73d56c4d_989f1f07",
+      "revId": "7d5c1079067cd99c36f69fa0ac3924bb620c1fd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8f3a66e7_c8aabb87",
@@ -48,6 +66,24 @@
       "writtenOn": "2023-07-29T00:02:18Z",
       "side": 1,
       "message": "This is one of those \"don\u0027t be evil\" situations. Trivially copyable structures might be valid to simply copy from the payload, but only if they don\u0027t contain bitfields or multi-byte structures. In this case, you are copying over mac and ethernet addresses, which are not \u0027endian\u0027 byte structures, so it works fine.\n\nI am fine with this in this case, but keep in mind that you are opening up a bit of a loophole that could be abused for non-conforming payloads. The only saving grace is that the scope is limited (at the moment) to transporthandler.cpp.",
+      "revId": "7d5c1079067cd99c36f69fa0ac3924bb620c1fd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e2a95be9_2ef2b994",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 666,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2023-10-19T23:43:13Z",
+      "side": 1,
+      "message": "Yeah, that was intentionally why I limited the scope of this. I wouldn\u0027t directly copy into a trivially copyable type unless it had accessors that guaranteed the proper conversion from the underlying bytes.",
+      "parentUuid": "8f3a66e7_c8aabb87",
       "revId": "7d5c1079067cd99c36f69fa0ac3924bb620c1fd2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
