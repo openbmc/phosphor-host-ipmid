@@ -7,6 +7,9 @@
 *~
 .cscope/
 
+# Generated
+ipmiwhitelist.cpp
+
 # Meson
 /build*/
 /subprojects/*
