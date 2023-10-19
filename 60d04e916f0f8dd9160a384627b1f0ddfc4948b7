@@ -34,6 +34,24 @@
       "parentUuid": "daebf9c1_b94fb31f",
       "revId": "60d04e916f0f8dd9160a384627b1f0ddfc4948b7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b9d14e2_00c1e10a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001059
+      },
+      "writtenOn": "2023-10-19T21:21:35Z",
+      "side": 1,
+      "message": "Updated to exclude the \"wrap-redirect\" .wrap files.",
+      "parentUuid": "f39bd222_77defb2a",
+      "revId": "60d04e916f0f8dd9160a384627b1f0ddfc4948b7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
