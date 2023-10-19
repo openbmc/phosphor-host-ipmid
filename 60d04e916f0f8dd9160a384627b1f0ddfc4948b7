@@ -16,6 +16,24 @@
       "message": "We should just be gitignoring these as they are subject to change by the underlying projects.",
       "revId": "60d04e916f0f8dd9160a384627b1f0ddfc4948b7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f39bd222_77defb2a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001059
+      },
+      "writtenOn": "2023-10-19T21:12:52Z",
+      "side": 1,
+      "message": "They were explicitly unignored in https://gerrit.openbmc.org/plugins/gitiles/openbmc/phosphor-host-ipmid/+/25035b8898367bc25a3b5ace7ad08728de7476c6%5E%21/#F0.\n\nI assume that was done for a reason.\n\nOr should it have been restricted to a subset?",
+      "parentUuid": "daebf9c1_b94fb31f",
+      "revId": "60d04e916f0f8dd9160a384627b1f0ddfc4948b7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
