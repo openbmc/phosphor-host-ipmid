@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "78e8f9ca_06e0d978",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2023-10-20T20:32:17Z",
+      "side": 1,
+      "message": "It\u0027s fine to do this, but I think it is more maintainable to explicitly allow only the ones you care about? Then downstream changes never bubble up and require this file to change.",
+      "revId": "508a9851b138a0c87fb882b4410afe5e504d2de8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
