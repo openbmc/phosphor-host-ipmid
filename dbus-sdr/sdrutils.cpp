@@ -61,8 +61,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     static constexpr const int32_t depth = 2;
 
-    auto lbdUpdateSensorTree =
-        [&dbus](const char* path, const auto& interfaces) {
+    auto lbdUpdateSensorTree = [&dbus](const char* path,
+                                       const auto& interfaces) {
         auto mapperCall = dbus->new_method_call(
             "xyz.openbmc_project.ObjectMapper",
             "/xyz/openbmc_project/object_mapper",
@@ -219,7 +219,7 @@ ipmi::sensor::IdInfoMap::const_iterator
         ipmi::sensor::sensors.begin(), ipmi::sensor::sensors.end(),
         [&path](const ipmi::sensor::IdInfoMap::value_type& findSensor) {
         return findSensor.second.sensorPath == path;
-        });
+    });
 }
 #endif
 

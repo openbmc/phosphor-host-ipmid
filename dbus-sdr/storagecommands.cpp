@@ -656,7 +656,7 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
         }
 
         return true;
-        });
+    });
 
     if (entity == entities.end())
     {

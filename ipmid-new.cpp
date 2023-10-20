@@ -384,7 +384,7 @@ void updateOwners(sdbusplus::asio::connection& conn, const std::string& name)
             log<level::INFO>("Failed interface mapping, no such name",
                              entry("INTERFACE=%s", name.c_str()));
         }
-        },
+    },
         "org.freedesktop.DBus", "/", "org.freedesktop.DBus", "GetNameOwner",
         name);
 }
@@ -412,7 +412,7 @@ void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
                 updateOwners(conn, busName);
             }
         }
-        },
+    },
         "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
         "ListNames");
 }

@@ -95,10 +95,9 @@ void processFruPropChange(sdbusplus::message_t& msg)
     }
     for (const auto& [fruId, instanceList] : frus)
     {
-        auto found = std::find_if(instanceList.begin(), instanceList.end(),
-                                  [&path](const auto& iter) {
-            return (iter.path == path);
-        });
+        auto found = std::find_if(
+            instanceList.begin(), instanceList.end(),
+            [&path](const auto& iter) { return (iter.path == path); });
 
         if (found != instanceList.end())
         {

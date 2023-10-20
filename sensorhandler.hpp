@@ -111,7 +111,7 @@ namespace request
 // raw value for this call.
 inline bool get_count(void* req)
 {
-    return (bool)((uint64_t)(req)&1);
+    return (bool)((uint64_t)(req) & 1);
 }
 } // namespace request
 } // namespace get_sdr_info

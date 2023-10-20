@@ -1664,7 +1664,7 @@ void UserAccess::cacheUserDataFile()
                 sdbusplus::bus::match::rules::path(userMgrObjBasePath),
             [&](sdbusplus::message_t& msg) {
             userUpdatedSignalHandler(*this, msg);
-            });
+        });
         userMgrRenamedSignal = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
@@ -1672,7 +1672,7 @@ void UserAccess::cacheUserDataFile()
                 sdbusplus::bus::match::rules::path(userMgrObjBasePath),
             [&](sdbusplus::message_t& msg) {
             userUpdatedSignalHandler(*this, msg);
-            });
+        });
         userPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
@@ -1683,7 +1683,7 @@ void UserAccess::cacheUserDataFile()
                 sdbusplus::bus::match::rules::argN(0, usersInterface),
             [&](sdbusplus::message_t& msg) {
             userUpdatedSignalHandler(*this, msg);
-            });
+        });
         signalHndlrObject = true;
     }
     std::map<DbusUserObjPath, DbusUserObjValue> managedObjs;
