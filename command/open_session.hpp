@@ -17,13 +17,13 @@ struct OpenSessionRequest
     uint8_t messageTag; // Message tag from request buffer
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t maxPrivLevel : 4; // Requested maximum privilege level
-    uint8_t reserved1 : 4;    // Reserved for future definition
+    uint8_t maxPrivLevel:4; // Requested maximum privilege level
+    uint8_t reserved1:4;    // Reserved for future definition
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 4;    // Reserved for future definition
-    uint8_t maxPrivLevel : 4; // Requested maximum privilege level
+    uint8_t reserved1:4;    // Reserved for future definition
+    uint8_t maxPrivLevel:4; // Requested maximum privilege level
 
 #endif
 
@@ -35,13 +35,13 @@ struct OpenSessionRequest
     uint8_t authPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t authAlgo : 6;
-    uint8_t reserved4 : 2;
+    uint8_t authAlgo:6;
+    uint8_t reserved4:2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved4 : 2;
-    uint8_t authAlgo : 6;
+    uint8_t reserved4:2;
+    uint8_t authAlgo:6;
 #endif
 
     uint8_t reserved5;
@@ -52,13 +52,13 @@ struct OpenSessionRequest
     uint8_t intPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t intAlgo : 6;
-    uint8_t reserved8 : 2;
+    uint8_t intAlgo:6;
+    uint8_t reserved8:2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved8 : 2;
-    uint8_t intAlgo : 6;
+    uint8_t reserved8:2;
+    uint8_t intAlgo:6;
 #endif
 
     uint8_t reserved9;
@@ -69,13 +69,13 @@ struct OpenSessionRequest
     uint8_t confPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t confAlgo : 6;
-    uint8_t reserved12 : 2;
+    uint8_t confAlgo:6;
+    uint8_t reserved12:2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved12 : 2;
-    uint8_t confAlgo : 6;
+    uint8_t reserved12:2;
+    uint8_t confAlgo:6;
 #endif
 
     uint8_t reserved13;
@@ -93,13 +93,13 @@ struct OpenSessionResponse
     uint8_t status_code;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t maxPrivLevel : 4;
-    uint8_t reserved1 : 4;
+    uint8_t maxPrivLevel:4;
+    uint8_t reserved1:4;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 4;
-    uint8_t maxPrivLevel : 4;
+    uint8_t reserved1:4;
+    uint8_t maxPrivLevel:4;
 #endif
 
     uint8_t reserved2;
@@ -111,13 +111,13 @@ struct OpenSessionResponse
     uint8_t authPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t authAlgo : 6;
-    uint8_t reserved4 : 2;
+    uint8_t authAlgo:6;
+    uint8_t reserved4:2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved4 : 2;
-    uint8_t authAlgo : 6;
+    uint8_t reserved4:2;
+    uint8_t authAlgo:6;
 #endif
 
     uint8_t reserved5;
@@ -128,13 +128,13 @@ struct OpenSessionResponse
     uint8_t intPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t intAlgo : 6;
-    uint8_t reserved8 : 2;
+    uint8_t intAlgo:6;
+    uint8_t reserved8:2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved8 : 2;
-    uint8_t intAlgo : 6;
+    uint8_t reserved8:2;
+    uint8_t intAlgo:6;
 
 #endif
 
@@ -146,13 +146,13 @@ struct OpenSessionResponse
     uint8_t confPayloadLen;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t confAlgo : 6;
-    uint8_t reserved12 : 2;
+    uint8_t confAlgo:6;
+    uint8_t reserved12:2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved12 : 2;
-    uint8_t confAlgo : 6;
+    uint8_t reserved12:2;
+    uint8_t confAlgo:6;
 #endif
 
     uint8_t reserved13;

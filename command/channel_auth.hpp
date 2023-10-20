@@ -31,69 +31,69 @@ struct GetChannelCapabilitiesResp
     // received on
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t none : 1;
-    uint8_t md2 : 1;
-    uint8_t md5 : 1;
-    uint8_t reserved2 : 1;
-    uint8_t straightKey : 1; // Straight password/key support
+    uint8_t none:1;
+    uint8_t md2:1;
+    uint8_t md5:1;
+    uint8_t reserved2:1;
+    uint8_t straightKey:1; // Straight password/key support
     // Support OEM identified by the IANA OEM ID in RMCP+ ping response
-    uint8_t oem : 1;
-    uint8_t reserved1 : 1;
-    uint8_t ipmiVersion : 1; // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
+    uint8_t oem:1;
+    uint8_t reserved1:1;
+    uint8_t ipmiVersion:1; // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
     // support
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t ipmiVersion : 1; // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
+    uint8_t ipmiVersion:1; // 0b = IPMIV1.5 support only, 1B = IPMI V2.0
     // support
-    uint8_t reserved1 : 1;
+    uint8_t reserved1:1;
     // Support OEM identified by the IANA OEM ID in RMCP+ ping response
-    uint8_t oem : 1;
-    uint8_t straightKey : 1; // Straight password/key support
-    uint8_t reserved2 : 1;
-    uint8_t md5 : 1;
-    uint8_t md2 : 1;
-    uint8_t none : 1;
+    uint8_t oem:1;
+    uint8_t straightKey:1; // Straight password/key support
+    uint8_t reserved2:1;
+    uint8_t md5:1;
+    uint8_t md2:1;
+    uint8_t none:1;
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     // Anonymous login status for anonymous login enabled/disabled
-    uint8_t anonymousLogin : 1;
+    uint8_t anonymousLogin:1;
     // Anonymous login status for null usernames enabled/disabled
-    uint8_t nullUsers : 1;
+    uint8_t nullUsers:1;
     // Anonymous login status for non-null usernames enabled/disabled
-    uint8_t nonNullUsers : 1;
-    uint8_t userAuth : 1;       // User level authentication status
-    uint8_t perMessageAuth : 1; // Per-message authentication support
+    uint8_t nonNullUsers:1;
+    uint8_t userAuth:1;       // User level authentication status
+    uint8_t perMessageAuth:1; // Per-message authentication support
     // Two key login status . only for IPMI V2.0 RMCP+ RAKP
-    uint8_t KGStatus : 1;
-    uint8_t reserved3 : 2;
+    uint8_t KGStatus:1;
+    uint8_t reserved3:2;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved3 : 2;
+    uint8_t reserved3:2;
     // Two key login status . only for IPMI V2.0 RMCP+ RAKP
-    uint8_t KGStatus : 1;
-    uint8_t perMessageAuth : 1; // Per-message authentication support
-    uint8_t userAuth : 1;       // User level authentication status
+    uint8_t KGStatus:1;
+    uint8_t perMessageAuth:1; // Per-message authentication support
+    uint8_t userAuth:1;       // User level authentication status
     // Anonymous login status for non-null usernames enabled/disabled
-    uint8_t nonNullUsers : 1;
+    uint8_t nonNullUsers:1;
     // Anonymous login status for null usernames enabled/disabled
-    uint8_t nullUsers : 1;
+    uint8_t nullUsers:1;
     // Anonymous login status for anonymous login enabled/disabled
-    uint8_t anonymousLogin : 1;
+    uint8_t anonymousLogin:1;
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
     // Extended capabilities will be present only if IPMI version is V2.0
-    uint8_t extCapabilities : 2; // Channel support for IPMI V2.0 connections
-    uint8_t reserved4 : 6;
+    uint8_t extCapabilities:2; // Channel support for IPMI V2.0 connections
+    uint8_t reserved4:6;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
     // Extended capabilities will be present only if IPMI version is V2.0
-    uint8_t reserved4 : 6;
-    uint8_t extCapabilities : 2; // Channel support for IPMI V2.0 connections
+    uint8_t reserved4:6;
+    uint8_t extCapabilities:2; // Channel support for IPMI V2.0 connections
 #endif
 
     // Below 4 bytes will all the 0's if no OEM authentication type available.

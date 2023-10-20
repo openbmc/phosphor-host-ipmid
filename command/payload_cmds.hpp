@@ -23,46 +23,46 @@ constexpr uint8_t IPMI_CC_PAYLOAD_WITHOUT_ENCRYPTION = 0x84;
 struct ActivatePayloadRequest
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t payloadType : 6; //!< Payload type.
-    uint8_t reserved1 : 2;   //!< Reserved.
+    uint8_t payloadType:6; //!< Payload type.
+    uint8_t reserved1:2;   //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 2;   //!< Payload type.
-    uint8_t payloadType : 6; //!< Payload type.
+    uint8_t reserved1:2;   //!< Payload type.
+    uint8_t payloadType:6; //!< Payload type.
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t payloadInstance : 4; //!< Payload instance.
-    uint8_t reserved2 : 4;       //!< Reserved.
+    uint8_t payloadInstance:4; //!< Payload instance.
+    uint8_t reserved2:4;       //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved2 : 4;       //!< Reserved.
-    uint8_t payloadInstance : 4; //!< Payload instance.
+    uint8_t reserved2:4;       //!< Reserved.
+    uint8_t payloadInstance:4; //!< Payload instance.
 #endif
 
     /** @brief The following Auxiliary Request Data applies only for payload
      *         SOL only.
      */
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t reserved4 : 1;  //!< Reserved.
-    uint8_t handshake : 1;  //!< SOL startup handshake.
-    uint8_t alert : 2;      //!< Shared serial alert behavior.
-    uint8_t reserved3 : 1;  //!< Reserved.
-    uint8_t testMode : 1;   //!< Test mode.
-    uint8_t auth : 1;       //!< If true, activate payload with authentication.
-    uint8_t encryption : 1; //!< If true, activate payload with encryption.
+    uint8_t reserved4:1;  //!< Reserved.
+    uint8_t handshake:1;  //!< SOL startup handshake.
+    uint8_t alert:2;      //!< Shared serial alert behavior.
+    uint8_t reserved3:1;  //!< Reserved.
+    uint8_t testMode:1;   //!< Test mode.
+    uint8_t auth:1;       //!< If true, activate payload with authentication.
+    uint8_t encryption:1; //!< If true, activate payload with encryption.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t encryption : 1; //!< If true, activate payload with encryption.
-    uint8_t auth : 1;       //!< If true, activate payload with authentication.
-    uint8_t testMode : 1;   //!< Test mode.
-    uint8_t reserved3 : 1;  //!< Reserved.
-    uint8_t alert : 2;      //!< Shared serial alert behavior.
-    uint8_t handshake : 1;  //!< SOL startup handshake.
-    uint8_t reserved4 : 1;  //!< Reserved.
+    uint8_t encryption:1; //!< If true, activate payload with encryption.
+    uint8_t auth:1;       //!< If true, activate payload with authentication.
+    uint8_t testMode:1;   //!< Test mode.
+    uint8_t reserved3:1;  //!< Reserved.
+    uint8_t alert:2;      //!< Shared serial alert behavior.
+    uint8_t handshake:1;  //!< SOL startup handshake.
+    uint8_t reserved4:1;  //!< Reserved.
 #endif
 
     uint8_t reserved5; //!< Reserved.
@@ -83,13 +83,13 @@ struct ActivatePayloadResponse
 
     // Test Mode
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t testMode : 1;  //!< Test mode.
-    uint8_t reserved4 : 7; //!< Reserved.
+    uint8_t testMode:1;  //!< Test mode.
+    uint8_t reserved4:7; //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved4 : 7; //!< Reserved.
-    uint8_t testMode : 1;  //!< Test mode.
+    uint8_t reserved4:7; //!< Reserved.
+    uint8_t testMode:1;  //!< Test mode.
 #endif
 
     uint16_t inPayloadSize;  //!< Inbound payload size
@@ -122,23 +122,23 @@ constexpr uint8_t IPMI_CC_PAYLOAD_DEACTIVATED = 0x80;
 struct DeactivatePayloadRequest
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t payloadType : 6; //!< Payload type.
-    uint8_t reserved1 : 2;   //!< Reserved.
+    uint8_t payloadType:6; //!< Payload type.
+    uint8_t reserved1:2;   //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved1 : 2;   //!< Payload type.
-    uint8_t payloadType : 6; //!< Reserved.
+    uint8_t reserved1:2;   //!< Payload type.
+    uint8_t payloadType:6; //!< Reserved.
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t payloadInstance : 4; //!< Payload instance.
-    uint8_t reserved2 : 4;       //!< Reserved.
+    uint8_t payloadInstance:4; //!< Payload instance.
+    uint8_t reserved2:4;       //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved2 : 4;       //!< Reserved.
-    uint8_t payloadInstance : 4; //!< Payload instance.
+    uint8_t reserved2:4;       //!< Reserved.
+    uint8_t payloadInstance:4; //!< Payload instance.
 #endif
 
     /** @brief No auxiliary data for payload type SOL */
@@ -198,47 +198,47 @@ struct GetPayloadStatusResponse
 
     /* @brief Activation Status. */
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t instance1 : 1; //!< If true, Instance 1 is activated.
-    uint8_t instance2 : 1; //!< If true, Instance 2 is activated.
-    uint8_t instance3 : 1; //!< If true, Instance 3 is activated.
-    uint8_t instance4 : 1; //!< If true, Instance 4 is activated.
-    uint8_t instance5 : 1; //!< If true, Instance 5 is activated.
-    uint8_t instance6 : 1; //!< If true, Instance 6 is activated.
-    uint8_t instance7 : 1; //!< If true, Instance 7 is activated.
-    uint8_t instance8 : 1; //!< If true, Instance 8 is activated.
+    uint8_t instance1:1; //!< If true, Instance 1 is activated.
+    uint8_t instance2:1; //!< If true, Instance 2 is activated.
+    uint8_t instance3:1; //!< If true, Instance 3 is activated.
+    uint8_t instance4:1; //!< If true, Instance 4 is activated.
+    uint8_t instance5:1; //!< If true, Instance 5 is activated.
+    uint8_t instance6:1; //!< If true, Instance 6 is activated.
+    uint8_t instance7:1; //!< If true, Instance 7 is activated.
+    uint8_t instance8:1; //!< If true, Instance 8 is activated.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t instance8 : 1; //!< If true, Instance 8 is activated.
-    uint8_t instance7 : 1; //!< If true, Instance 7 is activated.
-    uint8_t instance6 : 1; //!< If true, Instance 6 is activated.
-    uint8_t instance5 : 1; //!< If true, Instance 5 is activated.
-    uint8_t instance4 : 1; //!< If true, Instance 4 is activated.
-    uint8_t instance3 : 1; //!< If true, Instance 3 is activated.
-    uint8_t instance2 : 1; //!< If true, Instance 2 is activated.
-    uint8_t instance1 : 1; //!< If true, Instance 1 is activated.
+    uint8_t instance8:1; //!< If true, Instance 8 is activated.
+    uint8_t instance7:1; //!< If true, Instance 7 is activated.
+    uint8_t instance6:1; //!< If true, Instance 6 is activated.
+    uint8_t instance5:1; //!< If true, Instance 5 is activated.
+    uint8_t instance4:1; //!< If true, Instance 4 is activated.
+    uint8_t instance3:1; //!< If true, Instance 3 is activated.
+    uint8_t instance2:1; //!< If true, Instance 2 is activated.
+    uint8_t instance1:1; //!< If true, Instance 1 is activated.
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t instance9 : 1;  //!< If true, Instance 9 is activated.
-    uint8_t instance10 : 1; //!< If true, Instance 10 is activated.
-    uint8_t instance11 : 1; //!< If true, Instance 11 is activated.
-    uint8_t instance12 : 1; //!< If true, Instance 12 is activated.
-    uint8_t instance13 : 1; //!< If true, Instance 13 is activated.
-    uint8_t instance14 : 1; //!< If true, Instance 14 is activated.
-    uint8_t instance15 : 1; //!< If true, Instance 15 is activated.
-    uint8_t instance16 : 1; //!< If true, Instance 16 is activated.
+    uint8_t instance9:1;  //!< If true, Instance 9 is activated.
+    uint8_t instance10:1; //!< If true, Instance 10 is activated.
+    uint8_t instance11:1; //!< If true, Instance 11 is activated.
+    uint8_t instance12:1; //!< If true, Instance 12 is activated.
+    uint8_t instance13:1; //!< If true, Instance 13 is activated.
+    uint8_t instance14:1; //!< If true, Instance 14 is activated.
+    uint8_t instance15:1; //!< If true, Instance 15 is activated.
+    uint8_t instance16:1; //!< If true, Instance 16 is activated.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t instance16 : 1; //!< If true, Instance 16 is activated.
-    uint8_t instance15 : 1; //!< If true, Instance 15 is activated.
-    uint8_t instance14 : 1; //!< If true, Instance 14 is activated.
-    uint8_t instance13 : 1; //!< If true, Instance 13 is activated.
-    uint8_t instance12 : 1; //!< If true, Instance 12 is activated.
-    uint8_t instance11 : 1; //!< If true, Instance 11 is activated.
-    uint8_t instance10 : 1; //!< If true, Instance 10 is activated.
-    uint8_t instance9 : 1;  //!< If true, Instance 9 is activated.
+    uint8_t instance16:1; //!< If true, Instance 16 is activated.
+    uint8_t instance15:1; //!< If true, Instance 15 is activated.
+    uint8_t instance14:1; //!< If true, Instance 14 is activated.
+    uint8_t instance13:1; //!< If true, Instance 13 is activated.
+    uint8_t instance12:1; //!< If true, Instance 12 is activated.
+    uint8_t instance11:1; //!< If true, Instance 11 is activated.
+    uint8_t instance10:1; //!< If true, Instance 10 is activated.
+    uint8_t instance9:1;  //!< If true, Instance 9 is activated.
 #endif
 } __attribute__((packed));
 

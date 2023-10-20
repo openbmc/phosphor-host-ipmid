@@ -210,8 +210,8 @@ std::shared_ptr<Session> Manager::getSession(SessionID sessionID,
                 [sessionID](
                     const std::pair<const uint32_t, std::shared_ptr<Session>>&
                         in) -> bool {
-                    return sessionID == in.second->getRCSessionID();
-                });
+                return sessionID == in.second->getRCSessionID();
+            });
 
             if (iter != sessionsMap.end())
             {
@@ -327,9 +327,9 @@ uint8_t Manager::getActiveSessionCount() const
         sessionsMap.begin(), sessionsMap.end(),
         [](const std::pair<const uint32_t, std::shared_ptr<Session>>& in)
             -> bool {
-            return in.second->state() ==
-                   static_cast<uint8_t>(session::State::active);
-        }));
+        return in.second->state() ==
+               static_cast<uint8_t>(session::State::active);
+    }));
 }
 
 void Manager::scheduleSessionCleaner(const std::chrono::microseconds& when)

@@ -18,23 +18,23 @@ namespace sol
 struct Outbound
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t testMode : 2;        //!< Not supported.
-    uint8_t breakDetected : 1;   //!< Not supported.
-    uint8_t transmitOverrun : 1; //!< Not supported.
-    uint8_t SOLDeactivating : 1; //!< 0 : SOL is active, 1 : SOL deactivated.
-    uint8_t charUnavailable : 1; //!< 0 : Available, 1 : Unavailable.
-    uint8_t ack : 1;             //!< 0 : ACK, 1 : NACK.
-    uint8_t reserved : 1;        //!< Reserved.
+    uint8_t testMode:2;        //!< Not supported.
+    uint8_t breakDetected:1;   //!< Not supported.
+    uint8_t transmitOverrun:1; //!< Not supported.
+    uint8_t SOLDeactivating:1; //!< 0 : SOL is active, 1 : SOL deactivated.
+    uint8_t charUnavailable:1; //!< 0 : Available, 1 : Unavailable.
+    uint8_t ack:1;             //!< 0 : ACK, 1 : NACK.
+    uint8_t reserved:1;        //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved : 1;        //!< Reserved.
-    uint8_t ack : 1;             //!< 0 : ACK, 1 : NACK.
-    uint8_t charUnavailable : 1; //!< 0 : Available, 1 : Unavailable.
-    uint8_t SOLDeactivating : 1; //!< 0 : SOL is active, 1 : SOL deactivated.
-    uint8_t transmitOverrun : 1; //!< Not supported.
-    uint8_t breakDetected : 1;   //!< Not supported.
-    uint8_t testMode : 2;        //!< Not supported.
+    uint8_t reserved:1;        //!< Reserved.
+    uint8_t ack:1;             //!< 0 : ACK, 1 : NACK.
+    uint8_t charUnavailable:1; //!< 0 : Available, 1 : Unavailable.
+    uint8_t SOLDeactivating:1; //!< 0 : SOL is active, 1 : SOL deactivated.
+    uint8_t transmitOverrun:1; //!< Not supported.
+    uint8_t breakDetected:1;   //!< Not supported.
+    uint8_t testMode:2;        //!< Not supported.
 #endif
 } __attribute__((packed));
 
@@ -45,25 +45,25 @@ struct Outbound
 struct Inbound
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t flushOut : 1;      //!< Not supported.
-    uint8_t flushIn : 1;       //!< Not supported.
-    uint8_t dcd : 1;           //!< Not supported.
-    uint8_t cts : 1;           //!< Not supported.
-    uint8_t generateBreak : 1; //!< Not supported.
-    uint8_t ring : 1;          //!< Not supported.
-    uint8_t ack : 1;           //!< 0 : ACK, 1 : NACK.
-    uint8_t reserved : 1;      //!< Reserved.
+    uint8_t flushOut:1;      //!< Not supported.
+    uint8_t flushIn:1;       //!< Not supported.
+    uint8_t dcd:1;           //!< Not supported.
+    uint8_t cts:1;           //!< Not supported.
+    uint8_t generateBreak:1; //!< Not supported.
+    uint8_t ring:1;          //!< Not supported.
+    uint8_t ack:1;           //!< 0 : ACK, 1 : NACK.
+    uint8_t reserved:1;      //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved : 1;      //!< Reserved.
-    uint8_t ack : 1;           //!< 0 : ACK, 1 : NACK.
-    uint8_t ring : 1;          //!< Not supported.
-    uint8_t generateBreak : 1; //!< Not supported.
-    uint8_t cts : 1;           //!< Not supported.
-    uint8_t dcd : 1;           //!< Not supported.
-    uint8_t flushIn : 1;       //!< Not supported.
-    uint8_t flushOut : 1;      //!< Not supported.
+    uint8_t reserved:1;      //!< Reserved.
+    uint8_t ack:1;           //!< 0 : ACK, 1 : NACK.
+    uint8_t ring:1;          //!< Not supported.
+    uint8_t generateBreak:1; //!< Not supported.
+    uint8_t cts:1;           //!< Not supported.
+    uint8_t dcd:1;           //!< Not supported.
+    uint8_t flushIn:1;       //!< Not supported.
+    uint8_t flushOut:1;      //!< Not supported.
 #endif
 } __attribute__((packed));
 

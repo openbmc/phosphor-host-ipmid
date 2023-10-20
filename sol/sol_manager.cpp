@@ -266,7 +266,7 @@ void registerSOLServiceChangeCallback()
                         sol::Manager::get().stopAllPayloadInstance();
                     }
                 }
-                });
+            });
         }
     }
     catch (const sdbusplus::exception_t& e)

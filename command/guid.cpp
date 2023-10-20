@@ -142,7 +142,7 @@ void registerGUIDChangeCallback()
                         "Failed to parse propertiesChanged signal: {ERROR}",
                         "ERROR", e);
                 }
-                });
+            });
         }
         catch (const std::exception& e)
         {

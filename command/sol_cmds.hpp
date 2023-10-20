@@ -34,13 +34,13 @@ constexpr uint8_t solActivatingCmd = 0x20;
 struct ActivatingRequest
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t sessionState : 4; //!< SOL session state.
-    uint8_t reserved : 4;     //!< Reserved.
+    uint8_t sessionState:4; //!< SOL session state.
+    uint8_t reserved:4;     //!< Reserved.
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved : 4;     //!< Reserved.
-    uint8_t sessionState : 4; //!< SOL session state.
+    uint8_t reserved:4;     //!< Reserved.
+    uint8_t sessionState:4; //!< SOL session state.
 #endif
 
     uint8_t payloadInstance; //!< Payload instance.

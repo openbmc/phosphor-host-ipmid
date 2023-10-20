@@ -65,8 +65,8 @@ struct BasicHeader_t
     // IPMI partial session header
     union
     {
-        uint8_t reserved1 : 4;
-        uint8_t authType : 4;
+        uint8_t reserved1:4;
+        uint8_t authType:4;
         uint8_t formatType;
     } format;
 } __attribute__((packed));

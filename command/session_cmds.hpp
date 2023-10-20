@@ -22,13 +22,13 @@ constexpr uint8_t myNetInstanceSessionHandleShiftMask = 6;
 struct SetSessionPrivLevelReq
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t reqPrivLevel : 4;
-    uint8_t reserved : 4;
+    uint8_t reqPrivLevel:4;
+    uint8_t reserved:4;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved : 4;
-    uint8_t reqPrivLevel : 4;
+    uint8_t reserved:4;
+    uint8_t reqPrivLevel:4;
 #endif
 
 } __attribute__((packed));
@@ -43,13 +43,13 @@ struct SetSessionPrivLevelResp
     uint8_t completionCode;
 
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint8_t newPrivLevel : 4;
-    uint8_t reserved : 4;
+    uint8_t newPrivLevel:4;
+    uint8_t reserved:4;
 #endif
 
 #if BYTE_ORDER == BIG_ENDIAN
-    uint8_t reserved : 4;
-    uint8_t newPrivLevel : 4;
+    uint8_t reserved:4;
+    uint8_t newPrivLevel:4;
 #endif
 
 } __attribute__((packed));

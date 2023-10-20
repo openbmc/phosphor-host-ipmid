@@ -97,7 +97,7 @@ void Table::executeCommand(uint32_t inCommand,
                 payload.push_back(IPMI_CC_UNSPECIFIED_ERROR);
                 handler->outPayload = std::move(payload);
             }
-            },
+        },
             "xyz.openbmc_project.Ipmi.Host", "/xyz/openbmc_project/Ipmi",
             "xyz.openbmc_project.Ipmi.Server", "execute", netFn, lun, cmd,
             commandData, options);
