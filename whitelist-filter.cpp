@@ -115,7 +115,7 @@ void WhitelistFilter::cacheRestrictedMode(
 
             log<level::INFO>((restrictMode ? "Set restrictedMode = true"
                                            : "Set restrictedMode = false"));
-            },
+        },
             restrictionModeService, restrictionModeSetting,
             "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
             "RestrictionMode");
@@ -211,8 +211,8 @@ void WhitelistFilter::postInit()
 
     modeChangeMatch = std::make_unique<sdbusplus::bus::match_t>(
         *bus, filterStr, [this, deviceList](sdbusplus::message_t& m) {
-            handleRestrictedModeChange(m, deviceList);
-        });
+        handleRestrictedModeChange(m, deviceList);
+    });
 }
 
 /** @brief Filter IPMI messages with RestrictedMode

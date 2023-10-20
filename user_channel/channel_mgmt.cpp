@@ -355,7 +355,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
             std::string path = msg.get_path();
             msg.read(iface, props);
             processChAccessPropChange(path, props);
-            });
+        });
         signalHndlrObjectState = true;
 
         chInterfaceAddedSignal = std::make_unique<sdbusplus::bus::match_t>(

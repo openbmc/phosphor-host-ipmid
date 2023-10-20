@@ -165,7 +165,7 @@ void initSensorMatches()
             // emit interfacesRemoved signal. In that case it's handled
             // by sensorsOwnerMatch
             sensorCacheMap[id].reset();
-                }));
+        }));
         sensorUpdatedMatches.emplace(
             s.first, std::make_unique<sdbusplus::bus::match_t>(
                          bus,
@@ -189,30 +189,30 @@ void initSensorMatches()
             {
                 sensorCacheMap[s.first].reset();
             }
-                         }));
+        }));
     }
     sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
         bus, nameOwnerChanged(), [](auto& msg) {
-            std::string name;
-            std::string oldOwner;
-            std::string newOwner;
-            msg.read(name, oldOwner, newOwner);
+        std::string name;
+        std::string oldOwner;
+        std::string newOwner;
+        msg.read(name, oldOwner, newOwner);
 
-            if (!name.empty() && newOwner.empty())
+        if (!name.empty() && newOwner.empty())
+        {
+            // The service exits
+            const auto it = serviceToIdMap.find(name);
+            if (it == serviceToIdMap.end())
             {
-                // The service exits
-                const auto it = serviceToIdMap.find(name);
-                if (it == serviceToIdMap.end())
-                {
-                    return;
-                }
-                for (const auto& id : it->second)
-                {
-                    // Invalidate cache
-                    sensorCacheMap[id].reset();
-                }
+                return;
             }
-        });
+            for (const auto& id : it->second)
+            {
+                // Invalidate cache
+                sensorCacheMap[id].reset();
+            }
+        }
+    });
 }
 #endif
 
