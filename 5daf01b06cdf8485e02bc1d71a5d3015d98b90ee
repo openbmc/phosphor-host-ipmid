@@ -108,6 +108,30 @@
       },
       "revId": "5daf01b06cdf8485e02bc1d71a5d3015d98b90ee",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "925275a2_cac251fe",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2023-10-23T18:32:53Z",
+      "side": 1,
+      "message": "adjusted and tested the patch.",
+      "parentUuid": "766cb3a4_887a132f",
+      "range": {
+        "startLine": 610,
+        "startChar": 2,
+        "endLine": 625,
+        "endChar": 0
+      },
+      "revId": "5daf01b06cdf8485e02bc1d71a5d3015d98b90ee",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
