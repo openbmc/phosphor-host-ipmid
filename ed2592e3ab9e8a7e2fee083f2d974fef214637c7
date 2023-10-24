@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "39904426_8f9ac43f",
         "filename": "configure.ac",
@@ -20,10 +21,10 @@
         "endChar": 102
       },
       "revId": "ed2592e3ab9e8a7e2fee083f2d974fef214637c7",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "c687fadd_318db376",
         "filename": "configure.ac",
@@ -44,10 +45,10 @@
         "endChar": 102
       },
       "revId": "ed2592e3ab9e8a7e2fee083f2d974fef214637c7",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "8cd70c7d_a62ddf9a",
         "filename": "configure.ac",
@@ -67,10 +68,10 @@
         "endChar": 0
       },
       "revId": "ed2592e3ab9e8a7e2fee083f2d974fef214637c7",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "3c01bf5d_7fb46b0b",
         "filename": "configure.ac",
@@ -91,8 +92,8 @@
         "endChar": 0
       },
       "revId": "ed2592e3ab9e8a7e2fee083f2d974fef214637c7",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
-  ]
+  ],
+  "submitRequirementResults": []
 }
