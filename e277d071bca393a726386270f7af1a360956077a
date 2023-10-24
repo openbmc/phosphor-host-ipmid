@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cdfcfc8b_a2459caf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-10-24T23:59:19Z",
+      "side": 1,
+      "message": "Thx for the follow up.",
+      "revId": "e277d071bca393a726386270f7af1a360956077a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bbc6c8f9_bb7c2b02",
@@ -14,6 +31,30 @@
       "writtenOn": "2023-10-24T23:43:05Z",
       "side": 1,
       "message": "The build is failing because this is a get_sdr::SensorDataEventRecord instead of a get_sdr::SensorDataFullRecord",
+      "range": {
+        "startLine": 2019,
+        "startChar": 54,
+        "endLine": 2019,
+        "endChar": 60
+      },
+      "revId": "e277d071bca393a726386270f7af1a360956077a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1b473a82_a7bcf00c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2019,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-10-24T23:59:19Z",
+      "side": 1,
+      "message": "Yup.... I\u0027m trying to make that a smart ptr to the char array instead. The record type is not very interesting.",
+      "parentUuid": "bbc6c8f9_bb7c2b02",
       "range": {
         "startLine": 2019,
         "startChar": 54,
