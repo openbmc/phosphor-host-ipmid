@@ -35,6 +35,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "577ef848_9ba4845e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-10-24T16:05:30Z",
+      "side": 1,
+      "message": "I updated the code to remove the conditional compilation flags.\nShort strings will be UTF8/Latin-1, while longer strings will be 6-bit encoded.",
+      "revId": "fc73e97d0f24bb39cfb163114ab253b9268da2f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "39ea7a65_1449a2bb",
@@ -48,6 +65,24 @@
       "writtenOn": "2023-10-23T23:53:04Z",
       "side": 1,
       "message": "this one should be static constexpr so it doesn\u0027t have to get reconstructed every time through this function.",
+      "revId": "fc73e97d0f24bb39cfb163114ab253b9268da2f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8c9af305_55df23f1",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000278
+      },
+      "writtenOn": "2023-10-24T16:05:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39ea7a65_1449a2bb",
       "revId": "fc73e97d0f24bb39cfb163114ab253b9268da2f7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
