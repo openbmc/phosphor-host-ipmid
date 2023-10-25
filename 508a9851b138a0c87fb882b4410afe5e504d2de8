@@ -16,6 +16,24 @@
       "message": "It\u0027s fine to do this, but I think it is more maintainable to explicitly allow only the ones you care about? Then downstream changes never bubble up and require this file to change.",
       "revId": "508a9851b138a0c87fb882b4410afe5e504d2de8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7cf69b9e_7ce68aa2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-25T20:34:53Z",
+      "side": 1,
+      "message": "I can see both sides here. Either way, it\u0027s not really a big deal, so this is fine for now.",
+      "parentUuid": "78e8f9ca_06e0d978",
+      "revId": "508a9851b138a0c87fb882b4410afe5e504d2de8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
