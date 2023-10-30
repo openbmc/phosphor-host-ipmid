@@ -113,6 +113,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3aba4f56_12381a88",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2589,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-10-30T14:09:38Z",
+      "side": 1,
+      "message": "I updated the getSensorsByEntityId to return std::tuple\u003cuint8_t, std::vector\u003cSensorInfo\u003e\u003e.\nThe getSensorsByEntityId function shall ben re-use to handle the Get Temperature Reading command, therefore, it is vector\u003cSensorInfo\u003e instead vector\u003cuint16_t\u003e",
+      "parentUuid": "63a11313_789b5548",
+      "range": {
+        "startLine": 2579,
+        "startChar": 4,
+        "endLine": 2589,
+        "endChar": 5
+      },
+      "revId": "01a88b630cb778a2a44a1c933b31a02612013c73",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "05faf1ea_e98467f6",
