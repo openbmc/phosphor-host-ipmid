@@ -65,6 +65,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f251ef6c_aebd6f54",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2701,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2023-10-30T14:10:27Z",
+      "side": 1,
+      "message": "I updated as your comment in the https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/66199",
+      "parentUuid": "e5b79f63_c899b075",
+      "range": {
+        "startLine": 2696,
+        "startChar": 0,
+        "endLine": 2701,
+        "endChar": 41
+      },
+      "revId": "3fc396287a865454725a68bcab828e3595c45394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4135144a_dd1a53df",
