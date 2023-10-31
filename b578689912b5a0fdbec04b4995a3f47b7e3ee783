@@ -34,6 +34,24 @@
       "parentUuid": "605dc710_17003622",
       "revId": "b578689912b5a0fdbec04b4995a3f47b7e3ee783",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7e172e61_2a2d446f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-10-31T22:14:10Z",
+      "side": 1,
+      "message": "Ideally the fix would be to change the meson.build file to properly generate the cpp file in the build/ directory and then depend on that file. Then it is already ignored by git.",
+      "parentUuid": "24c41239_44afa1a9",
+      "revId": "b578689912b5a0fdbec04b4995a3f47b7e3ee783",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
