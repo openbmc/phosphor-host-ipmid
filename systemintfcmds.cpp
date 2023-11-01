@@ -7,8 +7,10 @@
 
 #include <ipmid-host/cmd.hpp>
 #include <ipmid/api.hpp>
+#include <nlohmann/json.hpp>
 
 #include <cstring>
+#include <fstream>
 
 void register_netfn_app_functions() __attribute__((constructor));
 
@@ -21,40 +23,54 @@ extern cmdManagerPtr& ipmid_get_host_cmd_manager();
 //-------------------------------------------------------------------
 // Called by Host post response from Get_Message_Flags
 //-------------------------------------------------------------------
-ipmi_ret_t ipmi_app_read_event(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
-                               ipmi_response_t response,
-                               ipmi_data_len_t data_len, ipmi_context_t)
+ipmi::RspType<uint16_t,              // id
+              uint8_t,               // type
+              uint24_t,              //  manuf_id
+              uint32_t,              // timestamp
+              uint8_t,               // netfun
+              uint8_t,               // cmd
+              std::array<uint8_t, 4> // data
+              >
+    ipmiAppReadEventBuffer([[maybe_unused]] ipmi::Context::ptr& ctx)
 {
-    ipmi_ret_t rc = IPMI_CC_OK;
+    // require this to be limited to system interface
+    // if (ctx->channel != ipmi::channelSystemIface)
+    // {
+    //     return ipmi::responseInvalidCommand();
+    // }
 
-    struct oem_sel_timestamped oem_sel = {};
-    *data_len = sizeof(struct oem_sel_timestamped);
+    constexpr uint16_t selOemId = 0x5555;
+    constexpr uint8_t selRecordTypeOem = 0xc0;
 
-    // either id[0] -or- id[1] can be filled in. We will use id[0]
-    oem_sel.id[0] = SEL_OEM_ID_0;
-    oem_sel.id[1] = SEL_OEM_ID_0;
-    oem_sel.type = SEL_RECORD_TYPE_OEM;
+    // read manufacturer ID from dev_id file
+    static uint24_t manufId{};
+    if (!manufId)
+    {
+        const char* filename = "/usr/share/ipmi-providers/dev_id.json";
+        std::ifstream devIdFile(filename);
+        if (devIdFile.is_open())
+        {
+            auto data = nlohmann::json::parse(devIdFile, nullptr, false);
+            if (!data.is_discarded())
+            {
+                manufId = data.value("manuf_id", 0);
+            }
+        }
+    }
 
-    // Following 3 bytes are from IANA Manufactre_Id field. See below
-    oem_sel.manuf_id[0] = 0x41;
-    oem_sel.manuf_id[1] = 0xA7;
-    oem_sel.manuf_id[2] = 0x00;
+    constexpr uint32_t timestamp{0};
 
     // per IPMI spec NetFuntion for OEM
-    oem_sel.netfun = 0x3A;
+    constexpr uint8_t netfun = 0x3a;
 
     // Read from the Command Manager queue. What gets returned is a
     // pair of <command, data> that can be directly used here
-    auto hostCmd = ipmid_get_host_cmd_manager()->getNextCommand();
-    oem_sel.cmd = hostCmd.first;
-    oem_sel.data[0] = hostCmd.second;
+    const auto& [cmd, data0] = ipmid_get_host_cmd_manager()->getNextCommand();
+    constexpr uint8_t dataUnused = 0xff;
 
-    // All '0xFF' since unused.
-    std::memset(&oem_sel.data[1], 0xFF, 3);
-
-    // Pack the actual response
-    std::memcpy(response, &oem_sel, *data_len);
-    return rc;
+    return ipmi::responseSuccess(
+        selOemId, selRecordTypeOem, manufId, timestamp, netfun, cmd,
+        std::to_array<uint8_t>({data0, dataUnused, dataUnused, dataUnused}));
 }
 
 //---------------------------------------------------------------------
@@ -137,8 +153,9 @@ std::unique_ptr<sdbusplus::server::manager_t> objManager
 void register_netfn_app_functions()
 {
     // <Read Event Message Buffer>
-    ipmi_register_callback(NETFUN_APP, IPMI_CMD_READ_EVENT, NULL,
-                           ipmi_app_read_event, SYSTEM_INTERFACE);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdReadEventMessageBuffer,
+                          ipmi::Privilege::Admin, ipmiAppReadEventBuffer);
 
     // <Set BMC Global Enables>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
