@@ -223,7 +223,7 @@ message::Response::ptr filterIpmiCommand(message::Request::ptr request)
 {
     // pass the command through the filter mechanism
     // This can be the firmware firewall or any OEM mechanism like
-    // whitelist filtering based on operational mode
+    // allowlist filtering based on operational mode
     for (auto& item : filterList)
     {
         FilterBase::ptr filter = std::get<FilterBase::ptr>(item);
