@@ -270,6 +270,12 @@ template <typename T>
 class SecureAllocator : public std::allocator<T>
 {
   public:
+    template <typename U>
+    struct rebind
+    {
+        typedef SecureAllocator<U> other;
+    };
+
     void deallocate(T* p, size_t n)
     {
         OPENSSL_cleanse(p, n);
