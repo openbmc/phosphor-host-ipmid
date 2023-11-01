@@ -1,7 +1,7 @@
 
 option('tests', type: 'feature', description: 'Build tests')
 option('boot-flag-safe-mode-support', type: 'feature', description: 'Add option to enable/disable safe mode in boot flags')
-option('i2c-whitelist-check', type: 'feature', description: 'Add option to enable/disable i2c master write read command white list checking')
+option('i2c-allowlist-check', type: 'feature', description: 'Add option to enable/disable i2c controller write read command allow list checking')
 
 # SoftPowerOff
 option('softoff', type: 'feature', description: 'Builds soft power off')
@@ -45,9 +45,9 @@ option('libuserlayer', type: 'feature', description: 'Option to exclue exclude l
 # unless OEM Parameter extensions are required.
 option('transport-oem', type: 'feature', value: 'disabled', description: 'Enable transporthandler_oem contents')
 
-# IPMI whitelist mechanism is not needed by everyone; offer a way to disable it
-option('ipmi-whitelist', type: 'feature', description: 'Enable/disable IPMI whitelist filtering')
-option('whitelist-conf', type: 'string', value: 'host-ipmid-whitelist.conf', description: 'Paths to IPMI whitelisted commands conf files')
+# IPMI allowlist mechanism is not needed by everyone; offer a way to disable it
+option('ipmi-allowlist', type: 'feature', description: 'Enable/disable IPMI allowlist filtering')
+option('allowlist-conf', type: 'string', value: 'host-ipmid-allowlist.conf', description: 'Paths to IPMI allowlisted commands conf files')
 
 # Entity Manager Decorators
 option('entity-manager-decorators', type: 'feature', value: 'enabled', description: 'The Entity Manager Decorators flag is enabled by default; offer a way to disable it')

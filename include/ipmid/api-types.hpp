@@ -141,7 +141,7 @@ constexpr Cmd cmdGetChannelPayloadSupport = 0x4E;
 constexpr Cmd cmdGetChannelPayloadVersion = 0x4F;
 constexpr Cmd cmdGetChannelOemPayloadInfo = 0x50;
 // 0x51 unassigned
-constexpr Cmd cmdMasterWriteRead = 0x52;
+constexpr Cmd cmdControllerWriteRead = 0x52;
 // 0x53 unassigned
 constexpr Cmd cmdGetChannelCipherSuites = 0x54;
 constexpr Cmd cmdSuspendResumePayloadEnc = 0x55;

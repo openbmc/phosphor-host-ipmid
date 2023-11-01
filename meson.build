@@ -81,7 +81,7 @@ endif
 
 feature_map = {
   'boot-flag-safe-mode-support': '-DENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT',
-  'i2c-whitelist-check'        : '-DENABLE_I2C_WHITELIST_CHECK',
+  'i2c-allowlist-check'        : '-DENABLE_I2C_ALLOWLIST_CHECK',
   'update-functional-on-fail'  : '-DUPDATE_FUNCTIONAL_ON_FAIL',
   'dynamic-sensors'            : '-DFEATURE_DYNAMIC_SENSORS',
   'dynamic-sensors-write'      : '-DFEATURE_DYNAMIC_SENSORS_WRITE',
@@ -141,17 +141,17 @@ if not get_option('softoff').disabled()
   subdir('softoff')
 endif
 
-# whitelist
-if not get_option('ipmi-whitelist').disabled()
-  generate_whitelist_script = files('generate_whitelist_create.sh')
+# allowlist
+if not get_option('ipmi-allowlist').disabled()
+  generate_allowlist_script = files('generate_allowlist_create.sh')
 
-  whitelist_conf = get_option('whitelist-conf')
-  ipmiwhitelist = run_command( \
+  allowlist_conf = get_option('allowlist-conf')
+  ipmiallowlist = run_command( \
     'bash', \
-    generate_whitelist_script, \
-    whitelist_conf)
+    generate_allowlist_script, \
+    allowlist_conf)
 
-  whitelist_pre = declare_dependency(
+  allowlist_pre = declare_dependency(
     include_directories: root_inc,
     dependencies: [
       crypto,
@@ -162,12 +162,12 @@ if not get_option('ipmi-whitelist').disabled()
     ],
   )
 
-  whitelist_lib = library(
-    'whitelist',
-    'whitelist-filter.cpp',
-    'ipmiwhitelist.cpp',
+  allowlist_lib = library(
+    'allowlist',
+    'allowlist-filter.cpp',
+    'ipmiallowlist.cpp',
     implicit_include_directories: false,
-    dependencies: whitelist_pre,
+    dependencies: allowlist_pre,
     version: meson.project_version(),
     override_options: ['b_lundef=false'],
     install: true,
