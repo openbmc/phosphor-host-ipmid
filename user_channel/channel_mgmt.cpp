@@ -181,7 +181,7 @@ int ChannelConfig::convertToChannelNumberFromChannelName(
 
 std::string ChannelConfig::getChannelNameFromPath(const std::string& path)
 {
-    constexpr size_t length = strlen(networkIntfObjectBasePath);
+    const size_t length = strlen(networkIntfObjectBasePath);
     if (((length + 1) >= path.size()) ||
         path.compare(0, length, networkIntfObjectBasePath))
     {
