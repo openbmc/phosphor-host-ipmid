@@ -181,6 +181,7 @@ sysintfcmds_pre = declare_dependency(
     channellayer_dep,
     crypto,
     mapper,
+    nlohmann_json_dep,
     phosphor_dbus_interfaces_dep,
     phosphor_logging_dep,
     sdbusplus_dep,
