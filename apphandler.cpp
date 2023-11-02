@@ -94,9 +94,7 @@ static constexpr const char* cmdStr = "command";
 static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
 #endif // ENABLE_I2C_WHITELIST_CHECK
-static constexpr uint8_t maxIPMIWriteReadSize = 255;
 static constexpr uint8_t oemCmdStart = 192;
-static constexpr uint8_t oemCmdEnd = 255;
 static constexpr uint8_t invalidParamSelectorStart = 8;
 static constexpr uint8_t invalidParamSelectorEnd = 191;
 
@@ -1360,7 +1358,7 @@ ipmi::RspType<uint8_t,                // Parameter revision
     {
         return ipmi::responseInvalidFieldRequest();
     }
-    if ((paramSelector >= oemCmdStart) && (paramSelector <= oemCmdEnd))
+    if (paramSelector >= oemCmdStart)
     {
         return ipmi::responseParmNotSupported();
     }
@@ -1437,7 +1435,7 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
     {
         return ipmi::responseInvalidFieldRequest();
     }
-    if ((paramSelector >= oemCmdStart) && (paramSelector <= oemCmdEnd))
+    if (paramSelector >= oemCmdStart)
     {
         return ipmi::responseParmNotSupported();
     }
@@ -1701,11 +1699,6 @@ ipmi::RspType<std::vector<uint8_t>>
     if (reserved)
     {
         return ipmi::responseInvalidFieldRequest();
-    }
-    if (readCount > maxIPMIWriteReadSize)
-    {
-        log<level::ERR>("Master write read command: Read count exceeds limit");
-        return ipmi::responseParmOutOfRange();
     }
     const size_t writeCount = writeData.size();
     if (!readCount && !writeCount)
