@@ -62,7 +62,6 @@ const std::unordered_set<IP::AddressOrigin> originsV4 = {
 };
 
 static constexpr uint8_t oemCmdStart = 192;
-static constexpr uint8_t oemCmdEnd = 255;
 
 // Checks if the ifname is part of the networkd path
 // This assumes the path came from the network subtree PATH_ROOT
@@ -1051,7 +1050,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
     }
 
-    if ((parameter >= oemCmdStart) && (parameter <= oemCmdEnd))
+    if (parameter >= oemCmdStart)
     {
         return setLanOem(channel, parameter, req);
     }
@@ -1354,7 +1353,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
     }
 
-    if ((parameter >= oemCmdStart) && (parameter <= oemCmdEnd))
+    if (parameter >= oemCmdStart)
     {
         return getLanOem(channel, parameter, set, block);
     }
