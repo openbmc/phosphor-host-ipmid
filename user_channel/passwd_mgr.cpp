@@ -75,7 +75,10 @@ void PasswdMgr::restrictFilesPermission(void)
     {
         if ((st.st_mode & modeMask) != (S_IRUSR | S_IWUSR))
         {
-            chmod(passwdFileName, S_IRUSR | S_IWUSR);
+            if (chmod(passwdFileName, S_IRUSR | S_IWUSR) == -1)
+            {
+                log<level::DEBUG>("Error setting chmod for ipmi_pass file");
+            }
         }
     }
 
@@ -83,7 +86,10 @@ void PasswdMgr::restrictFilesPermission(void)
     {
         if ((st.st_mode & modeMask) != (S_IRUSR | S_IWUSR))
         {
-            chmod(encryptKeyFileName, S_IRUSR | S_IWUSR);
+            if (chmod(encryptKeyFileName, S_IRUSR | S_IWUSR) == -1)
+            {
+                log<level::DEBUG>("Error setting chmod for ipmi_pass file");
+            }
         }
     }
 }
