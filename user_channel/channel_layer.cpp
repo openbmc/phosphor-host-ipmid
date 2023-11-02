@@ -51,9 +51,7 @@ bool isValidPrivLimit(const uint8_t privLimit)
 
 bool isValidAccessMode(const uint8_t accessMode)
 {
-    return (
-        (accessMode >= static_cast<uint8_t>(EChannelAccessMode::disabled)) &&
-        (accessMode <= static_cast<uint8_t>(EChannelAccessMode::shared)));
+    return (accessMode <= static_cast<uint8_t>(EChannelAccessMode::shared));
 }
 
 bool isValidChannel(const uint8_t chNum)
