@@ -195,7 +195,7 @@ ipmi ::RspType<uint3_t, // access mode,
         return response(ccActionNotSupportedForChannel);
     }
 
-    ChannelAccess chAccess;
+    ChannelAccess chAccess = {};
 
     Cc compCode = ipmi::ccUnspecifiedError;
 
