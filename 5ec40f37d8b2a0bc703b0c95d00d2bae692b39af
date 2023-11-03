@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6ecd6793_bcd1c251",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-11-03T17:02:18Z",
+      "side": 1,
+      "message": "If I understand correctly, strlen can be implemented as a builtin that gets executed at compile time for const char inputs. It\u0027s not technically a constexpr because it is a C function, but I think it can be safely used in constexpr functions because it can be calculated at compile time.",
+      "revId": "5ec40f37d8b2a0bc703b0c95d00d2bae692b39af",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
