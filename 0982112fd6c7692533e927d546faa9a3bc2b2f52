@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "577e028e_8ebf4df2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-11-03T16:45:57Z",
+      "side": 1,
+      "message": "This seems like it should have built fine; and I don\u0027t have any issue with this, given that it will basically allow the same thing as std::vector but with less copying.",
+      "revId": "0982112fd6c7692533e927d546faa9a3bc2b2f52",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
