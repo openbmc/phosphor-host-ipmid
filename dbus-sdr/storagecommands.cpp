@@ -25,9 +25,11 @@
 #include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
 #include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -73,6 +75,7 @@ namespace storage
 
 constexpr static const size_t maxMessageSize = 64;
 constexpr static const size_t maxFruSdrNameSize = 16;
+using namespace phosphor::logging;
 using ObjectType =
     boost::container::flat_map<std::string,
                                boost::container::flat_map<std::string, Value>>;
@@ -89,6 +92,18 @@ constexpr static const char* entityManagerServiceName =
 constexpr static const size_t writeTimeoutSeconds = 10;
 constexpr static const char* chassisTypeRackMount = "23";
 constexpr static const char* chassisTypeMainServer = "17";
+
+constexpr auto SystemdTimeService = "org.freedesktop.timedate1";
+constexpr auto SystemdTimePath = "/org/freedesktop/timedate1";
+constexpr auto SystemdTimeInterface = "org.freedesktop.timedate1";
+
+constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
+constexpr auto BMC_TIME_PATH = "/xyz/openbmc_project/time/bmc";
+constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
+constexpr auto PROPERTY_ELAPSED = "Elapsed";
+
+using InternalFailure =
+    sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 // event direction is bit[7] of eventType where 1b = Deassertion event
 constexpr static const uint8_t deassertionEvent = 0x80;
@@ -1160,10 +1175,49 @@ ipmi::RspType<uint32_t> ipmiStorageGetSELTime()
     return ipmi::responseSuccess(selTime.tv_sec);
 }
 
-ipmi::RspType<> ipmiStorageSetSELTime(uint32_t)
+/** @brief implements the set SEL time command
+ *  @param selDeviceTime - epoch time
+ *        -local time as the number of seconds from 00:00:00, January 1, 1970
+ *  @returns IPMI completion code
+ */
+ipmi::RspType<> ipmiStorageSetSELTime(uint32_t selDeviceTime)
 {
-    // Set SEL Time is not supported
-    return ipmi::responseInvalidCommand();
+    using namespace std::chrono;
+    microseconds usec{seconds(selDeviceTime)};
+
+    try
+    {
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+        bool ntp = std::get<bool>(
+            ipmi::getDbusProperty(bus, SystemdTimeService, SystemdTimePath,
+                                  SystemdTimeInterface, "NTP"));
+        if (ntp)
+        {
+            return ipmi::responseCommandNotAvailable();
+        }
+
+        auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
+        std::variant<uint64_t> value{(uint64_t)usec.count()};
+
+        // Set bmc time
+        auto method = bus.new_method_call(service.c_str(), BMC_TIME_PATH,
+                                          DBUS_PROPERTIES, "Set");
+
+        method.append(TIME_INTERFACE, PROPERTY_ELAPSED, value);
+        auto reply = bus.call(method);
+    }
+    catch (const InternalFailure& e)
+    {
+        log<level::ERR>(e.what());
+        return ipmi::responseUnspecifiedError();
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>(e.what());
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess();
 }
 
 std::vector<uint8_t>
