@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5176466d_9031952f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-11-03T16:55:21Z",
+      "side": 1,
+      "message": "Looks like a formatting error. Make sure you run your code through the correct clang-format (currently clang-format-17)",
+      "revId": "31a67439a5ea225a4232ba2bcaf3657f65d4a8c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
