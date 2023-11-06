@@ -1315,6 +1315,7 @@ static constexpr size_t configParameterLength = 16;
 static constexpr size_t smallChunkSize = 14;
 static constexpr size_t fullChunkSize = 16;
 static constexpr uint8_t progressMask = 0x3;
+static constexpr uint8_t maxValidEncodingData = 0x02;
 
 static constexpr uint8_t setComplete = 0x0;
 static constexpr uint8_t setInProgress = 0x1;
@@ -1492,8 +1493,14 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
 
     uint8_t setSelector = data1;
     size_t count = 0;
-    if (setSelector == 0)                    // First chunk has only 14 bytes.
+    if (setSelector == 0) // First chunk has only 14 bytes.
     {
+        uint8_t encoding = configData.at(0);
+        if (encoding > maxValidEncodingData)
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+
         size_t stringLen = configData.at(1); // string length
         // maxBytesPerParamter is 256. It will always be greater than stringLen
         // (unit8_t) if maxBytes changes in future, then following line is
