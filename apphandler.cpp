@@ -1496,6 +1496,12 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
     size_t count = 0;
     if (setSelector == 0)                    // First chunk has only 14 bytes.
     {
+        uint8_t encoding = configData.at(0);
+        if (encoding > 0x02) // Only 0x0h - 0x02h data allowed as per IPMI Spec.
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+
         size_t stringLen = configData.at(1); // string length
         // maxBytesPerParamter is 256. It will always be greater than stringLen
         // (unit8_t) if maxBytes changes in future, then following line is
