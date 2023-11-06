@@ -16,6 +16,24 @@
       "message": "incase ntp is enabled, can we add a clear message to let user know that the source of fetching time is already in place?",
       "revId": "5e82916687af9e33b97f9fda9e2f1d011d88470e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6d17abce_383fc431",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1196,
+      "author": {
+        "id": 1001140
+      },
+      "writtenOn": "2023-11-06T14:30:45Z",
+      "side": 1,
+      "message": "This is a good idea, it tripped me up at first too, but I would consider this request out of scope for this change. This change has simply copied existing code from https://github.com/openbmc/phosphor-host-ipmid/blob/master/storagehandler.cpp#L594 to enable in the dynamic sensors path.",
+      "parentUuid": "336e3342_42b8398e",
+      "revId": "5e82916687af9e33b97f9fda9e2f1d011d88470e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
