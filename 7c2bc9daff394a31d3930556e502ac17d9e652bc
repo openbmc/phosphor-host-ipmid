@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3ee238a_3b86179c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 677,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-11-07T23:27:46Z",
+      "side": 1,
+      "message": "should be:\nfor (const std::string\u0026 prop : nameProperties)\n\nto avoid the string copy",
+      "range": {
+        "startLine": 677,
+        "startChar": 9,
+        "endLine": 677,
+        "endChar": 12
+      },
+      "revId": "7c2bc9daff394a31d3930556e502ac17d9e652bc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
