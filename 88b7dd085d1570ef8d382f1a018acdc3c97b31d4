@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "075f6279_418faa60",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-11-09T12:50:47Z",
+      "side": 1,
+      "message": "Please split this into a few distinct commits.  Here are some that come to mind to me:\n\n- Code changes that have no external impact.\n- Code changes that depend on the PDI changes.\n- Code changes for JSON option names.\n- Meson option changes.\n- Allowlist file lookup changes.",
+      "revId": "88b7dd085d1570ef8d382f1a018acdc3c97b31d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "9d69b51c_05bba541",
@@ -31,6 +48,58 @@
       "writtenOn": "2023-11-09T05:37:16Z",
       "side": 1,
       "message": "Can\u0027t we add check if valid input is provided to this script or not?",
+      "revId": "88b7dd085d1570ef8d382f1a018acdc3c97b31d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e6dc70f_c4f8172d",
+        "filename": "generate_allowlist_create.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-11-09T12:50:47Z",
+      "side": 1,
+      "message": "Let\u0027s not recommend enhancements to a simple rename.  Enhancements can be done in separate commits.",
+      "parentUuid": "977abc5e_04c3912f",
+      "revId": "88b7dd085d1570ef8d382f1a018acdc3c97b31d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "530dd065_4488e0df",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-11-09T12:50:47Z",
+      "side": 1,
+      "message": "This name comes from a spec.  We should not deviate from what the spec uses.",
+      "revId": "88b7dd085d1570ef8d382f1a018acdc3c97b31d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08bca1c0_078e0e97",
+        "filename": "transporthandler_oem.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-11-09T12:50:47Z",
+      "side": 1,
+      "message": "What does this file have to do with the commit?  I am surprised to see this large add.",
       "revId": "88b7dd085d1570ef8d382f1a018acdc3c97b31d4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
