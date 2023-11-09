@@ -684,11 +684,11 @@ ipmi::RspType<ipmi::message::Payload> getDCMICapabilities(uint8_t parameter)
         // Optional Platform Attributes
         case DCMICapParameters::OptionalPlatAttributes:
         {
-            uint7_t powerMgmtDeviceSlaveAddress =
+            uint7_t powerMgmtDeviceTargetAddress =
                 data.value("PowerMgmtDeviceSlaveAddress", 0);
             uint4_t bmcChannelNumber = data.value("BMCChannelNumber", 0);
             uint4_t deviceRivision = data.value("DeviceRivision", 0);
-            payload.pack(powerMgmtDeviceSlaveAddress, reserved1, deviceRivision,
+            payload.pack(powerMgmtDeviceTargetAddress, reserved1, deviceRivision,
                          bmcChannelNumber);
             break;
         }
