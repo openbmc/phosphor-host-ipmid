@@ -564,7 +564,7 @@ boost::system::error_code callDbusMethod(Context::ptr ctx,
 
 /********* End co-routine yielding alternatives ***************/
 
-ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
+ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
                       std::vector<uint8_t> writeData,
                       std::vector<uint8_t>& readBuf)
 {
@@ -583,8 +583,8 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
     i2c_msg i2cmsg[2] = {};
     if (writeCount)
     {
-        // Data will be writtern to the slave address
-        i2cmsg[msgCount].addr = slaveAddr;
+        // Data will be writtern to the target address
+        i2cmsg[msgCount].addr = targetAddr;
         i2cmsg[msgCount].flags = 0x00;
         i2cmsg[msgCount].len = writeCount;
         i2cmsg[msgCount].buf = writeData.data();
@@ -592,8 +592,8 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t slaveAddr,
     }
     if (readCount)
     {
-        // Data will be read into the buffer from the slave address
-        i2cmsg[msgCount].addr = slaveAddr;
+        // Data will be read into the buffer from the target address
+        i2cmsg[msgCount].addr = targetAddr;
         i2cmsg[msgCount].flags = I2C_M_RD;
         i2cmsg[msgCount].len = readCount;
         i2cmsg[msgCount].buf = readBuf.data();
