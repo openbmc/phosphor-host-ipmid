@@ -7,7 +7,7 @@ if [ -z "$*" ]; then
 fi
 
 cat << EOF
-#include <ipmiwhitelist.hpp>
+#include <ipmiallowlist.hpp>
 
 const std::vector<netfncmd_pair> whitelist = {
 
