@@ -24,7 +24,7 @@
 
 static constexpr uint8_t fruInventoryDevice = 0x10;
 static constexpr uint8_t IPMIFruInventory = 0x02;
-static constexpr uint8_t BMCSlaveAddress = 0x20;
+static constexpr uint8_t BMCTargetAddress = 0x20;
 
 extern int updateSensorRecordFromSSRAESC(const void*);
 extern sd_bus* bus;
@@ -1150,7 +1150,7 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     /* Key */
     record.key.fruID = fruID;
     record.key.accessLun |= IPMI_LOGICAL_FRU;
-    record.key.deviceAddress = BMCSlaveAddress;
+    record.key.deviceAddress = BMCTargetAddress;
 
     /* Body */
     record.body.entityID = fru->second[0].entityID;
