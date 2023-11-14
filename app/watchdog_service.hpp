@@ -67,6 +67,12 @@ class WatchdogService
      */
     void setEnabled(bool enabled);
 
+    /** @brief Sets the value of the LogTimeout property on the host watchdog
+     *
+     *  @param[in] LogTimeout - The new LogTimeout value
+     */
+    void setLogTimeout(bool LogTimeout);
+
     /** @brief Sets the value of the expireAction property on the host watchdog
      *
      *  @param[in] expireAction - The new expireAction value
