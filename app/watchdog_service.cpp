@@ -183,6 +183,11 @@ void WatchdogService::setEnabled(bool enabled)
     setProperty("Enabled", enabled);
 }
 
+void WatchdogService::setLogTimeout(bool LogTimeout)
+{
+    setProperty("LogTimeout", LogTimeout);
+}
+
 void WatchdogService::setExpireAction(Action expireAction)
 {
     setProperty("ExpireAction", convertForMessage(expireAction));
