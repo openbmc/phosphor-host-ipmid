@@ -125,6 +125,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "662be6f7_fd19adfb",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-11-14T19:42:37Z",
+      "side": 1,
+      "message": "You\u0027re the maintainer; your choice.\n\nMy thinking is that we cannot [easily] look back up into the spec if we deviate from the spec.",
+      "parentUuid": "f208bfaa_cbf8ea70",
+      "revId": "88b7dd085d1570ef8d382f1a018acdc3c97b31d4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "08bca1c0_078e0e97",
         "filename": "transporthandler_oem.cpp",
         "patchSetId": 5
