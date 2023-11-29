@@ -34,10 +34,10 @@ conf_data.set_quoted('POWER_READING_SENSOR', get_option('power-reading-sensor'))
 conf_data.set_quoted('HOST_IPMI_LIB_PATH', get_option('host-ipmi-lib-path'))
 conf_data.set_quoted('FW_VER_REGEX', get_option('fw-ver-regex'))
 
-if get_option('shortname-remove-suffix').enabled()
+if get_option('shortname-remove-suffix').allowed()
   conf_data.set_quoted('SHORTNAME_REMOVE_SUFFIX', '1')
 endif
-if get_option('shortname-replace-words').enabled()
+if get_option('shortname-replace-words').allowed()
   conf_data.set_quoted('SHORTNAME_REPLACE_WORDS', '1')
 endif
 if get_option('open-power').allowed()
@@ -92,7 +92,7 @@ feature_map = {
 }
 
 foreach option_key, option_value : feature_map
-  if(get_option(option_key).enabled())
+  if(get_option(option_key).allowed())
     summary(option_key,option_value, section : 'Enabled Features')
     add_project_arguments(option_value,language:'cpp')
   endif
