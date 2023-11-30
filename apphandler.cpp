@@ -67,7 +67,7 @@ using Activation =
 using BMC = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
-#ifdef ENABLE_I2C_WHITELIST_CHECK
+#ifdef ENABLE_I2C_ALLOWLIST_CHECK
 typedef struct
 {
     uint8_t busId;
@@ -93,7 +93,7 @@ static constexpr const char* targetAddrMaskStr = "slaveAddrMask";
 static constexpr const char* cmdStr = "command";
 static constexpr const char* cmdMaskStr = "commandMask";
 static constexpr int base_16 = 16;
-#endif // ENABLE_I2C_WHITELIST_CHECK
+#endif // ENABLE_I2C_ALLOWLIST_CHECK
 static constexpr uint8_t oemCmdStart = 192;
 static constexpr uint8_t invalidParamSelectorStart = 8;
 static constexpr uint8_t invalidParamSelectorEnd = 191;
@@ -1572,7 +1572,7 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
     return ipmi::responseSuccess();
 }
 
-#ifdef ENABLE_I2C_WHITELIST_CHECK
+#ifdef ENABLE_I2C_ALLOWLIST_CHECK
 inline std::vector<uint8_t> convertStringToData(const std::string& command)
 {
     std::istringstream iss(command);
@@ -1726,10 +1726,10 @@ static bool isCmdAllowlisted(uint8_t busId, uint8_t targetAddr,
 #else
 static bool populateI2CControllerWRAllowlist()
 {
-    lg2::info("I2C_WHITELIST_CHECK is disabled, do not populate allowlist");
+    lg2::info("I2C_ALLOWLIST_CHECK is disabled, do not populate allowlist");
     return true;
 }
-#endif // ENABLE_I2C_WHITELIST_CHECK
+#endif // ENABLE_I2C_ALLOWLIST_CHECK
 
 /** @brief implements controller write read IPMI command which can be used for
  * low-level I2C/SMBus write, read or write-read access
@@ -1759,7 +1759,7 @@ ipmi::RspType<std::vector<uint8_t>> ipmiControllerWriteRead(
         lg2::error("Controller write read command: Read & write count are 0");
         return ipmi::responseInvalidFieldRequest();
     }
-#ifdef ENABLE_I2C_WHITELIST_CHECK
+#ifdef ENABLE_I2C_ALLOWLIST_CHECK
     if (!isCmdAllowlisted(static_cast<uint8_t>(busId),
                           static_cast<uint8_t>(targetAddr), writeData))
     {
@@ -1768,7 +1768,7 @@ ipmi::RspType<std::vector<uint8_t>> ipmiControllerWriteRead(
                    "BUS", static_cast<uint8_t>(busId), "ADDR", lg2::hex,
                    static_cast<uint8_t>(targetAddr));
     }
-#endif // ENABLE_I2C_WHITELIST_CHECK
+#endif // ENABLE_I2C_ALLOWLIST_CHECK
     std::vector<uint8_t> readBuf(readCount);
     std::string i2cBus =
         "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
