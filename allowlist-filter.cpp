@@ -110,7 +110,7 @@ void AllowlistFilter::cacheRestrictedMode(
                 RestrictionMode::convertModesFromString(mode);
 
             bool restrictMode =
-                (restrictionMode == RestrictionMode::Modes::Allowlist);
+                (restrictionMode == RestrictionMode::Modes::Whitelist);
             restrictedMode.emplace_back(restrictMode);
 
             log<level::INFO>((restrictMode ? "Set restrictedMode = true"
@@ -157,7 +157,7 @@ void AllowlistFilter::handleRestrictedModeChange(
                 RestrictionMode::convertModesFromString(
                     std::get<std::string>(property.second));
             bool restrictMode =
-                (restrictionMode == RestrictionMode::Modes::Allowlist);
+                (restrictionMode == RestrictionMode::Modes::Whitelist);
             restrictedMode[hostId] = restrictMode;
             log<level::INFO>((restrictMode ? "Updated restrictedMode = true"
                                            : "Updated restrictedMode = false"));
