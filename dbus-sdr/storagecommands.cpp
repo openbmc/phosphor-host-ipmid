@@ -103,7 +103,7 @@ static uint8_t lastDevId = 0xFF;
 static uint16_t writeBus = invalidBus;
 static uint8_t writeAddr = invalidAddr;
 
-std::unique_ptr<phosphor::Timer> writeTimer = nullptr;
+std::unique_ptr<sdbusplus::Timer> writeTimer = nullptr;
 static std::vector<sdbusplus::bus::match_t> fruMatches;
 
 ManagedObjectType frus;
@@ -148,7 +148,7 @@ void writeFruCache()
 
 void createTimers()
 {
-    writeTimer = std::make_unique<phosphor::Timer>(writeFruCache);
+    writeTimer = std::make_unique<sdbusplus::Timer>(writeFruCache);
 }
 
 void recalculateHashes()
