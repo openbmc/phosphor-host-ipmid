@@ -840,7 +840,7 @@ int main(int argc, char* argv[])
 
     // TODO: Hack to keep the sdEvents running.... Not sure why the sd_event
     //       queue stops running if we don't have a timer that keeps re-arming
-    phosphor::Timer t2([]() { ; });
+    sdbusplus::Timer t2([]() { ; });
     t2.start(std::chrono::microseconds(500000), true);
 
     // TODO: Remove all vestiges of sd_event from phosphor-host-ipmid

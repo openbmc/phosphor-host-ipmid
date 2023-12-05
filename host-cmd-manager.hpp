@@ -102,7 +102,7 @@ class Manager
     std::queue<CommandHandler> workQueue{};
 
     /** @brief Timer for commands to host */
-    phosphor::Timer timer;
+    sdbusplus::Timer timer;
 
     /** @brief Match handler for the requested host state */
     sdbusplus::bus::match_t hostTransitionMatch;
