@@ -644,7 +644,7 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
     std::vector<std::string> interfaces;
 
     ipmi::Cc status = getSensorConnection(ctx, sensorNumber, connection, path,
-                                          &interfaces);
+                                          &interfaces, true);
     if (status)
     {
         return ipmi::response(status);
