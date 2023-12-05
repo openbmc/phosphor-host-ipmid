@@ -128,7 +128,8 @@ SensorSubTree& getSensorTree()
 static ipmi_ret_t
     getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
                         std::string& connection, std::string& path,
-                        std::vector<std::string>* interfaces = nullptr)
+                        std::vector<std::string>* interfaces = nullptr,
+                        bool buildingSDR = false)
 {
     auto& sensorTree = getSensorTree();
     if (!getSensorSubtree(sensorTree) && sensorTree.empty())
@@ -141,7 +142,7 @@ static ipmi_ret_t
         return IPMI_CC_RESPONSE_ERROR;
     }
 
-    path = getPathFromSensorNumber((ctx->lun << 8) | sensnum);
+    path = getPathFromSensorNumber((ctx->lun << 8) | sensnum, buildingSDR);
     if (path.empty())
     {
         return IPMI_CC_INVALID_FIELD_REQUEST;

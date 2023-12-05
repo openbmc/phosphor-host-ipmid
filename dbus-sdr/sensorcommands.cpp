@@ -644,7 +644,7 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
     std::vector<std::string> interfaces;
 
     ipmi::Cc status = getSensorConnection(ctx, sensorNumber, connection, path,
-                                          &interfaces);
+                                          &interfaces, true);
     if (status)
     {
         return ipmi::response(status);
@@ -774,9 +774,7 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
 
 #ifdef FEATURE_HYBRID_SENSORS
     if (auto sensor = findStaticSensor(path);
-        sensor != ipmi::sensor::sensors.end() &&
-        getSensorEventTypeFromPath(path) !=
-            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+        sensor != ipmi::sensor::sensors.end())
     {
         if (ipmi::sensor::Mutability::Read !=
             (sensor->second.mutability & ipmi::sensor::Mutability::Read))
@@ -1332,9 +1330,7 @@ ipmi::RspType<uint8_t, // enabled
 
 #ifdef FEATURE_HYBRID_SENSORS
     if (auto sensor = findStaticSensor(path);
-        sensor != ipmi::sensor::sensors.end() &&
-        getSensorEventTypeFromPath(path) !=
-            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+        sensor != ipmi::sensor::sensors.end())
     {
         enabled = static_cast<uint8_t>(
             IPMISensorEventEnableByte2::sensorScanningEnable);
@@ -1452,9 +1448,7 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
 
 #ifdef FEATURE_HYBRID_SENSORS
     if (auto sensor = findStaticSensor(path);
-        sensor != ipmi::sensor::sensors.end() &&
-        getSensorEventTypeFromPath(path) !=
-            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+        sensor != ipmi::sensor::sensors.end())
     {
         auto response = ipmi::sensor::get::mapDbusToAssertion(
             sensor->second, path, sensor->second.sensorInterface);
@@ -2121,9 +2115,7 @@ static int getSensorDataRecord(
 
 #ifdef FEATURE_HYBRID_SENSORS
     if (auto sensor = findStaticSensor(path);
-        sensor != ipmi::sensor::sensors.end() &&
-        getSensorEventTypeFromPath(path) !=
-            static_cast<uint8_t>(SensorEventTypeCodes::threshold))
+        sensor != ipmi::sensor::sensors.end())
     {
         get_sdr::SensorDataFullRecord record = {};
 
