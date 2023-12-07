@@ -119,14 +119,7 @@ boost_coroutine = cpp.find_library('boost_coroutine', required: true)
 sdbusplus_dep = dependency('sdbusplus')
 stdplus_dep = dependency('stdplus')
 
-if cpp.has_header_symbol(
-        'nlohmann/json.hpp',
-        'nlohmann::json::string_t',
-        required:false)
-    nlohmann_json_dep = declare_dependency()
-else
-    nlohmann_json_dep = dependency('nlohmann-json')
-endif
+nlohmann_json_dep = dependency('nlohmann_json', include_type: 'system')
 
 generated_src = []
 
