@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bbe56cfd_83281248",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2023-12-13T23:48:38Z",
+      "side": 0,
+      "message": "I am not sure about the best way to make this change and make sure that it is in lockstep with the bitbake recipe. One way would be to keep the old option but make it behave like the new option, change the recipe, then remove the old option.\n\nAlternately, it would be fine to bump the SRCREV in the recipe in the same commit as the one that changes the PKGCFG stuff.\n\nYour choice. I don\u0027t really care either way.",
+      "revId": "1075283267013364f30f5135ffefb772a24297d0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
