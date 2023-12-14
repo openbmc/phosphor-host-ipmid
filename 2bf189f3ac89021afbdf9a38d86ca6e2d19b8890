@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f0e118f_72e2f324",
+        "filename": "test/meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-12-14T02:53:23Z",
+      "side": 1,
+      "message": "This shouldn\u0027t have been changed from enabled.",
+      "revId": "2bf189f3ac89021afbdf9a38d86ca6e2d19b8890",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
