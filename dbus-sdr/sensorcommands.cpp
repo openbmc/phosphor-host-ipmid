@@ -506,7 +506,10 @@ std::string parseSdrIdFromPath(const std::string& path)
 #endif
 
         // as a backup and if nothing else is configured
-        name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+        if (name.size() > FULL_RECORD_ID_STR_MAX_LENGTH)
+        {
+            name.resize(FULL_RECORD_ID_STR_MAX_LENGTH);
+        }
     }
     return name;
 }
