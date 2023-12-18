@@ -963,7 +963,7 @@ ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(ipmi::Context::ptr& ctx,
             return ipmi::responseInvalidFieldRequest();
     }
 
-    return ipmi::responseSuccess();
+    return ipmi::responseSuccess(payload);
 }
 
 static std::optional<uint16_t> readPower(ipmi::Context::ptr& ctx)
