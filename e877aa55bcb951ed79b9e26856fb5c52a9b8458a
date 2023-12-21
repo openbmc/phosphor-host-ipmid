@@ -16,6 +16,40 @@
       "message": "Looks good to me",
       "revId": "e877aa55bcb951ed79b9e26856fb5c52a9b8458a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c11dac09_ce6e1330",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2023-12-21T17:21:25Z",
+      "side": 1,
+      "message": "Good catch.",
+      "revId": "e877aa55bcb951ed79b9e26856fb5c52a9b8458a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ce49cf3_93d31d96",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 737,
+      "author": {
+        "id": 1000559
+      },
+      "writtenOn": "2023-12-21T17:21:25Z",
+      "side": 1,
+      "message": "deviceIDLen definition 7:6 represents Type.\nNot part of this change, do we ensure name.size() is within 5 bits (4:0)\ni answered my own question: size is checked at line 692",
+      "revId": "e877aa55bcb951ed79b9e26856fb5c52a9b8458a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
