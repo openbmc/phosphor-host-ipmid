@@ -96,6 +96,7 @@ constexpr static const uint8_t deassertionEvent = 0x80;
 static std::vector<uint8_t> fruCache;
 static constexpr uint16_t invalidBus = 0xFFFF;
 static constexpr uint8_t invalidAddr = 0xFF;
+static constexpr uint8_t typeASCIILatin8 = 0xC0;
 static uint16_t cacheBus = invalidBus;
 static uint8_t cacheAddr = invalidAddr;
 static uint8_t lastDevId = 0xFF;
@@ -733,7 +734,7 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     resp.body.entityInstance = entityInstance;
 
     resp.body.oem = 0x0;
-    resp.body.deviceIDLen = name.size();
+    resp.body.deviceIDLen = ipmi::storage::typeASCIILatin8 | name.size();
     name.copy(resp.body.deviceID, name.size());
 
     return IPMI_CC_OK;
