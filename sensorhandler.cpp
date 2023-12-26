@@ -1334,7 +1334,11 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     ipmi_ret_t ret = IPMI_CC_OK;
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
     get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
-
+    
+    if (*data_len != sizeof(get_sdr::GetSdrReq))
+    {
+        return IPMI_CC_REQ_DATA_LEN_INVALID;
+    }
     // Note: we use an iterator so we can provide the next ID at the end of
     // the call.
     auto sensor = ipmi::sensor::sensors.begin();
