@@ -10,6 +10,8 @@
 #include <ipmid/api.hpp>
 #include <ipmid/entity_map_json.hpp>
 #ifdef IPMI_USE_JSON
+#include "sensor_map_json.hpp"
+
 #include <ipmid/fru_map_json.hpp>
 #endif
 #include <ipmid/types.hpp>
@@ -36,7 +38,12 @@ namespace ipmi
 {
 namespace sensor
 {
+#ifdef IPMI_USE_JSON
+const IdInfoMap sensors =
+    ipmi::sensor::SensorMapContainer::getContainer()->getIdInfoSensors();
+#else
 extern const IdInfoMap sensors;
+#endif
 } // namespace sensor
 } // namespace ipmi
 

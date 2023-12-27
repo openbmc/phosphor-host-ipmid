@@ -43,7 +43,12 @@ namespace ipmi
 {
 namespace sensor
 {
+#ifdef IPMI_USE_JSON
+const IdInfoMap sensors =
+    ipmi::sensor::SensorMapContainer::getContainer()->getIdInfoSensors();
+#else
 extern const IdInfoMap sensors;
+#endif
 } // namespace sensor
 } // namespace ipmi
 #ifdef IPMI_USE_JSON
