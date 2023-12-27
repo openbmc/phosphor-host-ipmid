@@ -1,0 +1,32 @@
+{
+    "Extras": {
+        "/system/chassis/motherboard/cpu0": {
+            "xyz.openbmc_project.Inventory.Decorator.Replaceable": {
+                "FieldReplaceable": {
+                    "type": "bool",
+                    "value": true
+                }
+            },
+            "xyz.openbmc_project.Inventory.Decorator.Cacheable": {
+                "Cached": {
+                    "type": "bool",
+                    "value": true
+                }
+            }
+        },
+        "/system/chassis/motherboard/dimm0": {
+            "xyz.openbmc_project.Inventory.Decorator.Replaceable": {
+                "FieldReplaceable": {
+                    "type": "bool",
+                    "value": true
+                }
+            },
+            "xyz.openbmc_project.Inventory.Decorator.Cacheable": {
+                "Cached": {
+                    "type": "bool",
+                    "value": true
+                }
+            }
+        }
+    }
+}

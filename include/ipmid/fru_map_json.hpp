@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ipmid/fruread.hpp>
+#include <ipmid/types.hpp>
 #include <nlohmann/json.hpp>
 
 namespace ipmi
@@ -20,6 +21,9 @@ class FruMapContainer
     /** Get Fru Maps. */
     const FruMap& getFruMap();
 
+    /** Get Fru Extras Maps. */
+    const ExtrasMap& getFruExtras();
+
   private:
     FruMapContainer()
     {
@@ -28,8 +32,12 @@ class FruMapContainer
 
     void loadConfigurations();
     void loadFruMap(const nlohmann::json& fruJson);
+    void loadFruExtras(const nlohmann::json& extrasJson);
+    Value jsonEntryToDbusVal(const std::string& type,
+                             const nlohmann::json& value);
 
     FruMap frus;
+    ExtrasMap extras;
 };
 
 } // namespace fru

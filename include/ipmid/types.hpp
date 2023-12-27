@@ -37,6 +37,7 @@ using DbusInterfaceMap = std::map<DbusInterface, PropertyMap>;
 
 using ObjectValueTree =
     std::map<sdbusplus::message::object_path, DbusInterfaceMap>;
+using ExtrasMap = std::map<DbusObjectPath, DbusInterfaceMap>;
 
 namespace sensor
 {
