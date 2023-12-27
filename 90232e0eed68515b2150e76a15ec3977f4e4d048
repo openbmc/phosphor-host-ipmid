@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7cce4ca3_b31625f5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2023-12-27T00:48:52Z",
+      "side": 1,
+      "message": "This is a good idea. I have ran into the same problem myself. The SDR sensor numbers need to be locked down, so they don\u0027t change, whenever the SDR table is reshuffled for any reason (adding sensors, deleting sensors, and so on).",
+      "revId": "90232e0eed68515b2150e76a15ec3977f4e4d048",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
