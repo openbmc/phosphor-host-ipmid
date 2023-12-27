@@ -250,6 +250,7 @@ libipmi20_src = [
 if get_option('use-json').enabled()
   libipmi20_src += [
     'fru_map_json.cpp',
+    'sensor_map_json.cpp',
   ]
 endif
 
