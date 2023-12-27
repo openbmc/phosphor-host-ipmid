@@ -22,11 +22,19 @@
 #ifdef FEATURE_HYBRID_SENSORS
 
 #include <ipmid/utils.hpp>
+#ifdef IPMI_USE_JSON
+#include "sensor_map_json.hpp"
+#endif
 namespace ipmi
 {
 namespace sensor
 {
+#ifdef IPMI_USE_JSON
+const IdInfoMap sensors =
+    ipmi::sensor::SensorMapContainer::getContainer()->getIdInfoSensors();
+#else
 extern const IdInfoMap sensors;
+#endif
 } // namespace sensor
 } // namespace ipmi
 
