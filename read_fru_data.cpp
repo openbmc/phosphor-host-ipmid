@@ -5,6 +5,9 @@
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
+#ifdef IPMI_USE_JSON
+#include <ipmid/fru_map_json.hpp>
+#endif
 #include <phosphor-logging/elog-errors.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -12,7 +15,11 @@
 #include <algorithm>
 #include <map>
 
+#ifdef IPMI_USE_JSON
+const FruMap frus = ipmi::fru::FruMapContainer::getContainer()->getFruMap();
+#else
 extern const FruMap frus;
+#endif
 namespace ipmi
 {
 namespace fru

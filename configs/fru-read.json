@@ -1,0 +1,202 @@
+{
+    "Frus": [
+        {
+            "Id": 0,
+            "Instances": {
+                "/system": {
+                    "EntityID": 23,
+                    "EntityInstance": 1,
+                    "Interfaces": {
+                        "xyz.openbmc_project.Inventory.Item": {
+                            "PrettyName": {
+                                "IPMIFruProperty": "Product Name",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Asset": {
+                            "Manufacturer": {
+                                "IPMIFruProperty": "Manufacturer",
+                                "IPMIFruSection": "Product"
+                            },
+                            "PartNumber": {
+                                "IPMIFruProperty": "Part Number",
+                                "IPMIFruSection": "Product"
+                            },
+                            "SerialNumber": {
+                                "IPMIFruProperty": "Serial Number",
+                                "IPMIFruSection": "Product"
+                            },
+                            "BuildDate": {
+                                "IPMIFruProperty": "Mfg Date",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Revision": {
+                            "Version": {
+                                "IPMIFruProperty": "Version",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Item.System": null
+                    }
+                }
+            }
+        },
+        {
+            "Id": 1,
+            "Instances": {
+                "/system/chassis/motherboard/dimm0": {
+                    "entityID": 32,
+                    "entityInstance": 1,
+                    "interfaces": {
+                        "xyz.openbmc_project.Inventory.Item": {
+                            "PrettyName": {
+                                "IPMIFruProperty": "Product Name",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Asset": {
+                            "Manufacturer": {
+                                "IPMIFruProperty": "Manufacturer",
+                                "IPMIFruSection": "Product"
+                            },
+                            "PartNumber": {
+                                "IPMIFruProperty": "Part Number",
+                                "IPMIFruSection": "Product"
+                            },
+                            "SerialNumber": {
+                                "IPMIFruProperty": "Serial Number",
+                                "IPMIFruSection": "Product"
+                            },
+                            "BuildDate": {
+                                "IPMIFruProperty": "Mfg Date",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Revision": {
+                            "Version": {
+                                "IPMIFruProperty": "Version",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Item.Dimm": null
+                    }
+                }
+            }
+        },
+        {
+            "Id": 2,
+            "Instances": {
+                "/system/chassis/motherboard/dimm1": {
+                    "entityID": 32,
+                    "entityInstance": 2,
+                    "interfaces": {
+                        "xyz.openbmc_project.Inventory.Item": {
+                            "PrettyName": {
+                                "IPMIFruProperty": "Product Name",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Asset": {
+                            "Manufacturer": {
+                                "IPMIFruProperty": "Manufacturer",
+                                "IPMIFruSection": "Product"
+                            },
+                            "PartNumber": {
+                                "IPMIFruProperty": "Part Number",
+                                "IPMIFruSection": "Product"
+                            },
+                            "SerialNumber": {
+                                "IPMIFruProperty": "Serial Number",
+                                "IPMIFruSection": "Product"
+                            },
+                            "BuildDate": {
+                                "IPMIFruProperty": "Mfg Date",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Revision": {
+                            "Version": {
+                                "IPMIFruProperty": "Version",
+                                "IPMIFruSection": "Product"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Item.Dimm": null
+                    }
+                }
+            }
+        },
+        {
+            "Id": 3,
+            "Instances": {
+                "/system/chassis/motherboard/cpu0": {
+                    "entityID": 3,
+                    "entityInstance": 1,
+                    "interfaces": {
+                        "xyz.openbmc_project.Inventory.Item": {
+                            "PrettyName": {
+                                "IPMIFruProperty": "Product Name",
+                                "IPMIFruSection": "Board"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Asset": {
+                            "Manufacturer": {
+                                "IPMIFruProperty": "Manufacturer",
+                                "IPMIFruSection": "Board"
+                            },
+                            "PartNumber": {
+                                "IPMIFruProperty": "Part Number",
+                                "IPMIFruSection": "Board"
+                            },
+                            "SerialNumber": {
+                                "IPMIFruProperty": "Serial Number",
+                                "IPMIFruSection": "Board"
+                            },
+                            "BuildDate": {
+                                "IPMIFruProperty": "Mfg Date",
+                                "IPMIFruSection": "Board"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Item.Cpu": null
+                    }
+                }
+            }
+        },
+        {
+            "Id": 4,
+            "Instances": {
+                "/system/chassis/motherboard/cpu1": {
+                    "entityID": 3,
+                    "entityInstance": 2,
+                    "interfaces": {
+                        "xyz.openbmc_project.Inventory.Item": {
+                            "PrettyName": {
+                                "IPMIFruProperty": "Product Name",
+                                "IPMIFruSection": "Board"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Decorator.Asset": {
+                            "Manufacturer": {
+                                "IPMIFruProperty": "Manufacturer",
+                                "IPMIFruSection": "Board"
+                            },
+                            "PartNumber": {
+                                "IPMIFruProperty": "Part Number",
+                                "IPMIFruSection": "Board"
+                            },
+                            "SerialNumber": {
+                                "IPMIFruProperty": "Serial Number",
+                                "IPMIFruSection": "Board"
+                            },
+                            "BuildDate": {
+                                "IPMIFruProperty": "Mfg Date",
+                                "IPMIFruSection": "Board"
+                            }
+                        },
+                        "xyz.openbmc_project.Inventory.Item.Cpu": null
+                    }
+                }
+            }
+        }
+    ]
+}

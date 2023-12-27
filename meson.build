@@ -17,6 +17,7 @@ conf_data.set_quoted('CALLOUT_FWD_ASSOCIATION', 'callout')
 conf_data.set_quoted('BOARD_SENSOR', get_option('board-sensor'))
 conf_data.set_quoted('SYSTEM_SENSOR', get_option('system-sensor'))
 conf_data.set('IPMI_SMS_ATN_ACK_TIMEOUT_SECS', get_option('ipmi-sms-atn-ack-timeout-secs'))
+conf_data.set('IPMI_USE_JSON', get_option('use-json').enabled())
 
 # Soft Power off related.
 if not get_option('softoff').disabled()
@@ -245,6 +246,12 @@ libipmi20_src = [
   openpower_cmds_src,
   conf_h,
 ]
+
+if get_option('use-json').enabled()
+  libipmi20_src += [
+    'fru_map_json.cpp',
+  ]
+endif
 
 ipmi20_lib = library(
   'ipmi20',

@@ -14,6 +14,9 @@
 
 #include <ipmid/api.hpp>
 #include <ipmid/entity_map_json.hpp>
+#ifdef IPMI_USE_JSON
+#include <ipmid/fru_map_json.hpp>
+#endif
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
@@ -42,7 +45,11 @@ extern const IdInfoMap sensors;
 } // namespace sensor
 } // namespace ipmi
 extern const ipmi::sensor::InvObjectIDMap invSensors;
+#ifdef IPMI_USE_JSON
+const FruMap frus = ipmi::fru::FruMapContainer::getContainer()->getFruMap();
+#else
 extern const FruMap frus;
+#endif
 constexpr uint8_t eventDataSize = 3;
 namespace
 {

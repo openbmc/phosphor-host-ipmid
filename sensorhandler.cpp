@@ -9,6 +9,9 @@
 
 #include <ipmid/api.hpp>
 #include <ipmid/entity_map_json.hpp>
+#ifdef IPMI_USE_JSON
+#include <ipmid/fru_map_json.hpp>
+#endif
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
@@ -37,7 +40,11 @@ extern const IdInfoMap sensors;
 } // namespace sensor
 } // namespace ipmi
 
+#ifdef IPMI_USE_JSON
+const FruMap frus = ipmi::fru::FruMapContainer::getContainer()->getFruMap();
+#else
 extern const FruMap frus;
+#endif
 
 using namespace phosphor::logging;
 using InternalFailure =

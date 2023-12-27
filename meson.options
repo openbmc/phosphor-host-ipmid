@@ -79,3 +79,6 @@ option('dynamic-storages-only', type: 'feature', value: 'disabled', description:
 
 # open-power specific functionality.
 option('open-power', type: 'feature', description: 'Support open-power specific functions')
+
+# Support JSON configuration
+option('use-json', type: 'feature', value: 'disabled', description: 'FRUs and Sensors JSON filepath')

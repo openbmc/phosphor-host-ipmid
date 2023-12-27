@@ -16,12 +16,22 @@ entity_map_json_lib = static_library(
 entity_map_json_dep = declare_dependency(
   link_whole: entity_map_json_lib)
 
-libipmid = library(
-  'ipmid',
+libipmid_src = [
   'sdbus-asio.cpp',
   'signals.cpp',
   'systemintf-sdbus.cpp',
   'utils.cpp',
+]
+
+if get_option('use-json').enabled()
+  libipmid_src += [
+    '../fru_map_json.cpp',
+  ]
+endif
+
+libipmid = library(
+  'ipmid',
+  libipmid_src,
   dependencies: [ipmid_pre, entity_map_json_dep],
   version: meson.project_version(),
   include_directories: root_inc,
