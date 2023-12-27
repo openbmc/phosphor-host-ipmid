@@ -1,0 +1,412 @@
+{
+    "InventorySensors": {
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm0": {
+            "sensorID": 166,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm1": {
+            "sensorID": 168,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm2": {
+            "sensorID": 170,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm3": {
+            "sensorID": 172,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm4": {
+            "sensorID": 174,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm5": {
+            "sensorID": 176,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm6": {
+            "sensorID": 178,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm7": {
+            "sensorID": 180,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm8": {
+            "sensorID": 182,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm9": {
+            "sensorID": 184,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm10": {
+            "sensorID": 186,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm11": {
+            "sensorID": 188,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm12": {
+            "sensorID": 190,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm13": {
+            "sensorID": 192,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm14": {
+            "sensorID": 194,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm15": {
+            "sensorID": 196,
+            "sensorType": 12,
+            "eventReadingType": 111,
+            "offset": 4
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0": {
+            "sensorID": 90,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core0": {
+            "sensorID": 18,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core1": {
+            "sensorID": 21,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core2": {
+            "sensorID": 24,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core3": {
+            "sensorID": 27,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core4": {
+            "sensorID": 30,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core5": {
+            "sensorID": 33,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core6": {
+            "sensorID": 36,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core7": {
+            "sensorID": 39,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core8": {
+            "sensorID": 42,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core9": {
+            "sensorID": 45,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core10": {
+            "sensorID": 48,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core11": {
+            "sensorID": 51,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core12": {
+            "sensorID": 54,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core13": {
+            "sensorID": 57,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core14": {
+            "sensorID": 60,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core15": {
+            "sensorID": 63,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core16": {
+            "sensorID": 66,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core17": {
+            "sensorID": 69,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core18": {
+            "sensorID": 72,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core19": {
+            "sensorID": 75,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core20": {
+            "sensorID": 78,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core21": {
+            "sensorID": 81,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core22": {
+            "sensorID": 84,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu0/core23": {
+            "sensorID": 87,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1": {
+            "sensorID": 164,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core0": {
+            "sensorID": 92,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core1": {
+            "sensorID": 95,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core2": {
+            "sensorID": 98,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core3": {
+            "sensorID": 101,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core4": {
+            "sensorID": 104,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core5": {
+            "sensorID": 107,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core6": {
+            "sensorID": 110,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core7": {
+            "sensorID": 113,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core8": {
+            "sensorID": 116,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core9": {
+            "sensorID": 119,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core10": {
+            "sensorID": 122,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core11": {
+            "sensorID": 125,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core12": {
+            "sensorID": 128,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core13": {
+            "sensorID": 131,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core14": {
+            "sensorID": 134,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core15": {
+            "sensorID": 137,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core16": {
+            "sensorID": 140,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core17": {
+            "sensorID": 143,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core18": {
+            "sensorID": 146,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core19": {
+            "sensorID": 149,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core20": {
+            "sensorID": 152,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core21": {
+            "sensorID": 155,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core22": {
+            "sensorID": 158,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/cpu1/core23": {
+            "sensorID": 161,
+            "sensorType": 7,
+            "eventReadingType": 111,
+            "offset": 8
+        },
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard": {
+            "sensorID": 12,
+            "sensorType": 199,
+            "eventReadingType": 3,
+            "offset": 0
+        },
+        "/xyz/openbmc_project/inventory/system": {
+            "sensorID": 1,
+            "sensorType": 18,
+            "eventReadingType": 111,
+            "offset": 2
+        }
+    }
+}

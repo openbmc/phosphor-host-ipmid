@@ -2,6 +2,10 @@
 
 #include "selutility.hpp"
 
+#ifdef IPMI_USE_JSON
+#include "sensor_map_json.hpp"
+#endif
+
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
@@ -13,7 +17,12 @@
 #include <filesystem>
 #include <vector>
 
+#ifdef IPMI_USE_JSON
+const ipmi::sensor::InvObjectIDMap invSensors =
+    ipmi::sensor::SensorMapContainer::getContainer()->getInvSensors();
+#else
 extern const ipmi::sensor::InvObjectIDMap invSensors;
+#endif
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
