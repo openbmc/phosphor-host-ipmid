@@ -1,0 +1,276 @@
+{
+    "IdInfoSensors": [
+        {
+            "Id": 96,
+            "Instances": {
+                "entityType": 7,
+                "sensorReadingType": 111,
+                "path": "/org/open_power/control/occ0",
+                "sensorName": "occ0",
+                "serviceInterface": "org.freedesktop.DBus.Properties",
+                "readingType": "assertion",
+                "mutability": [
+                    "write",
+                    "read"
+                ],
+                "eventType": 111,
+                "interfaces": {
+                    "org.open_power.OCC.Status": {
+                        "OccActive": {
+                            "Offsets": [
+                                {
+                                    "offset": 6,
+                                    "type": "bool",
+                                    "assert": false,
+                                    "deassert": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "Id": 97,
+            "Instances": {
+                "entityType": 4,
+                "sensorReadingType": 111,
+                "path": "/system/chassis/motherboard/dimm1",
+                "sensorName": "dimm1",
+                "serviceInterface": "xyz.openbmc_project.Inventory.Manager",
+                "readingType": "assertion",
+                "mutability": [
+                    "write",
+                    "read"
+                ],
+                "interfaces": {
+                    "xyz.openbmc_project.State.Decorator.OperationalStatus": {
+                        "Functional": {
+                            "Offsets": [
+                                {
+                                    "offset": 6,
+                                    "type": "bool",
+                                    "assert": true,
+                                    "deassert": false
+                                }
+                            ],
+                            "Prereqs": [
+                                {
+                                    "offset": 4,
+                                    "type": "bool",
+                                    "assert": false,
+                                    "deassert": true
+                                }
+                            ]
+                        }
+                    },
+                    "xyz.openbmc_project.Inventory.Item": {
+                        "Present": {
+                            "Offsets": [
+                                {
+                                    "offset": 4,
+                                    "type": "bool",
+                                    "assert": false,
+                                    "deassert": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "Id": 99,
+            "Instances": {
+                "path": "/xyz/openbmc_project/state/host0",
+                "sensorName": "AttemptsLeft",
+                "serviceInterface": "org.freedesktop.DBus.Properties",
+                "readingType": "readingAssertion",
+                "sensorReadingType": 111,
+                "sensorType": 195,
+                "mutability": [
+                    "write",
+                    "read"
+                ],
+                "interfaces": {
+                    "xyz.openbmc_project.Control.Boot.RebootAttempts": {
+                        "AttemptsLeft": {
+                            "Offsets": [
+                                {
+                                    "offset": 255,
+                                    "type": "uint32_t"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "Id": 98,
+            "Instances": {
+                "path": "/xyz/openbmc_project/state/host1",
+                "sensorName": "RebootAttempts",
+                "serviceInterface": "org.freedesktop.DBus.Properties",
+                "readingType": "readingAssertion",
+                "sensorReadingType": 111,
+                "sensorType": 195,
+                "mutability": [
+                    "write",
+                    "read"
+                ],
+                "interfaces": {
+                    "xyz.openbmc_project.Control.Boot.RebootAttempts": {
+                        "AttemptsLeft": {
+                            "Offsets": [
+                                {
+                                    "offset": 255,
+                                    "type": "uint32_t"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "Id": 208,
+            "Instances": {
+                "path": "/xyz/openbmc_project/sensors/temperature/fleeting0",
+                "sensorName": "fleeting0",
+                "serviceInterface": "org.freedesktop.DBus.Properties",
+                "readingType": "readingData",
+                "sensorReadingType": 1,
+                "sensorType": 1,
+                "multiplierM": 511,
+                "offsetB": 0,
+                "bExp": 0,
+                "scale": -3,
+                "sensorUnits1": 128,
+                "mutability": [
+                    "write",
+                    "read"
+                ],
+                "interfaces": {
+                    "xyz.openbmc_project.Sensor.Value": {
+                        "Value": {
+                            "Offsets": [
+                                {
+                                    "offset": 255,
+                                    "type": "int64_t"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "Id": 84,
+            "Instances": {
+                "path": "/system/chassis/motherboard/cpu0/core22",
+                "sensorName": "cpu0_core22",
+                "serviceInterface": "xyz.openbmc_project.Inventory.Manager",
+                "readingType": "assertion",
+                "sensorReadingType": 111,
+                "sensorType": 7,
+                "mutability": [
+                    "write",
+                    "read"
+                ],
+                "interfaces": {
+                    "xyz.openbmc_project.State.Decorator.OperationalStatus": {
+                        "Functional": {
+                            "Offsets": [
+                                {
+                                    "offset": 8,
+                                    "type": "bool",
+                                    "assert": false,
+                                    "deassert": true
+                                }
+                            ],
+                            "Prereqs": [
+                                {
+                                    "offset": 7,
+                                    "assert": true,
+                                    "deassert": false
+                                }
+                            ]
+                        }
+                    },
+                    "xyz.openbmc_project.Inventory.Item": {
+                        "Present": {
+                            "Offsets": [
+                                {
+                                    "offset": 7,
+                                    "type": "bool",
+                                    "assert": true,
+                                    "deassert": false,
+                                    "skipOn": "deassert"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "Id": 197,
+            "Instances": {
+                "path": "/system/chassis/motherboard/gv100card0",
+                "sensorName": "gv100card0",
+                "serviceInterface": "xyz.openbmc_project.Inventory.Manager",
+                "readingType": "assertion",
+                "sensorReadingType": 1,
+                "sensorType": 23,
+                "mutability": [
+                    "write",
+                    "read"
+                ],
+                "interfaces": {
+                    "xyz.openbmc_project.State.Decorator.Replaceable": {
+                        "FieldReplaceable": {
+                            "Offsets": [
+                                {
+                                    "offset": 7,
+                                    "type": "bool",
+                                    "assert": true
+                                }
+                            ]
+                        }
+                    },
+                    "xyz.openbmc_project.Inventory.Item": {
+                        "Present": {
+                            "Offsets": [
+                                {
+                                    "offset": 7,
+                                    "type": "bool",
+                                    "assert": true,
+                                    "deassert": false
+                                }
+                            ]
+                        }
+                    },
+                    "xyz.openbmc_project.Inventory.Item.Accelerator": null,
+                    "xyz.openbmc_project.State.Decorator.OperationalStatus": {
+                        "Functional": {
+                            "Offsets": [
+                                {
+                                    "offset": 8,
+                                    "type": "bool",
+                                    "assert": false
+                                }
+                            ],
+                            "Prereqs": [
+                                {
+                                    "offset": 7,
+                                    "assert": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
