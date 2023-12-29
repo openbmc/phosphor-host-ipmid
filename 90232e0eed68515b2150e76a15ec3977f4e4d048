@@ -16,6 +16,40 @@
       "message": "This is a good idea. I have ran into the same problem myself. The SDR sensor numbers need to be locked down, so they don\u0027t change, whenever the SDR table is reshuffled for any reason (adding sensors, deleting sensors, and so on).",
       "revId": "90232e0eed68515b2150e76a15ec3977f4e4d048",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2b8e56e2_b568fd68",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2023-12-29T08:52:27Z",
+      "side": 1,
+      "message": "Can you change cerr to phosphor logging?",
+      "revId": "90232e0eed68515b2150e76a15ec3977f4e4d048",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "49ec3635_660e30c2",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2023-12-29T08:52:27Z",
+      "side": 1,
+      "message": "In the same code file phosphor logging is used everywhere, it will be good to keep consistency. Please change to phosphor logging.",
+      "revId": "90232e0eed68515b2150e76a15ec3977f4e4d048",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
