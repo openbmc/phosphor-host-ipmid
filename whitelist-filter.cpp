@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <array>
+#include <map>
 
 using namespace phosphor::logging;
 using namespace sdbusplus::error::xyz::openbmc_project::common;
@@ -43,7 +44,7 @@ class AllowlistFilter
         const std::map<std::string, size_t>& deviceList);
     ipmi::Cc filterMessage(ipmi::message::Request::ptr request);
 
-    std::vector<bool> restrictedMode;
+    std::map<int, bool> restrictedMode;
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::unique_ptr<settings::Objects> objects;
     std::unique_ptr<sdbusplus::bus::match_t> modeChangeMatch;
@@ -101,7 +102,7 @@ void AllowlistFilter::cacheRestrictedMode(
             {
                 log<level::ERR>("Error in RestrictionMode Get");
                 // Fail-safe to true.
-                restrictedMode[index] = true;
+                restrictedMode.insert_or_assign(index, true);
                 return;
             }
 
@@ -111,7 +112,7 @@ void AllowlistFilter::cacheRestrictedMode(
 
             bool restrictMode =
                 (restrictionMode == RestrictionMode::Modes::Whitelist);
-            restrictedMode.emplace_back(restrictMode);
+            restrictedMode.insert_or_assign(index, restrictMode);
 
             log<level::INFO>((restrictMode ? "Set restrictedMode = true"
                                            : "Set restrictedMode = false"));
@@ -158,7 +159,7 @@ void AllowlistFilter::handleRestrictedModeChange(
                     std::get<std::string>(property.second));
             bool restrictMode =
                 (restrictionMode == RestrictionMode::Modes::Whitelist);
-            restrictedMode[hostId] = restrictMode;
+            restrictedMode.insert_or_assign(hostId, restrictMode);
             log<level::INFO>((restrictMode ? "Updated restrictedMode = true"
                                            : "Updated restrictedMode = false"));
         }
@@ -229,7 +230,7 @@ ipmi::Cc AllowlistFilter::filterMessage(ipmi::message::Request::ptr request)
     size_t hostIdx = request->ctx->hostIdx;
 
     if (request->ctx->channel == ipmi::channelSystemIface &&
-        restrictedMode[hostIdx])
+        restrictedMode.contains(hostIdx) && restrictedMode[hostIdx])
     {
         if (!std::binary_search(
                 allowlist.cbegin(), allowlist.cend(),
