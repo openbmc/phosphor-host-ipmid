@@ -43,6 +43,9 @@ class AllowlistFilter
         const std::map<std::string, size_t>& deviceList);
     ipmi::Cc filterMessage(ipmi::message::Request::ptr request);
 
+    bool getRestrictedMode(int index);
+    void setRestrictedMode(int index, bool value);
+
     std::vector<bool> restrictedMode;
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::unique_ptr<settings::Objects> objects;
@@ -101,7 +104,7 @@ void AllowlistFilter::cacheRestrictedMode(
             {
                 log<level::ERR>("Error in RestrictionMode Get");
                 // Fail-safe to true.
-                restrictedMode[index] = true;
+                setRestrictedMode(index, true);
                 return;
             }
 
@@ -111,7 +114,7 @@ void AllowlistFilter::cacheRestrictedMode(
 
             bool restrictMode =
                 (restrictionMode == RestrictionMode::Modes::Whitelist);
-            restrictedMode.emplace_back(restrictMode);
+            setRestrictedMode(index, restrictMode);
 
             log<level::INFO>((restrictMode ? "Set restrictedMode = true"
                                            : "Set restrictedMode = false"));
@@ -158,7 +161,7 @@ void AllowlistFilter::handleRestrictedModeChange(
                     std::get<std::string>(property.second));
             bool restrictMode =
                 (restrictionMode == RestrictionMode::Modes::Whitelist);
-            restrictedMode[hostId] = restrictMode;
+            setRestrictedMode(hostId, restrictMode);
             log<level::INFO>((restrictMode ? "Updated restrictedMode = true"
                                            : "Updated restrictedMode = false"));
         }
@@ -229,7 +232,7 @@ ipmi::Cc AllowlistFilter::filterMessage(ipmi::message::Request::ptr request)
     size_t hostIdx = request->ctx->hostIdx;
 
     if (request->ctx->channel == ipmi::channelSystemIface &&
-        restrictedMode[hostIdx])
+        getRestrictedMode(hostIdx))
     {
         if (!std::binary_search(
                 allowlist.cbegin(), allowlist.cend(),
@@ -243,6 +246,24 @@ ipmi::Cc AllowlistFilter::filterMessage(ipmi::message::Request::ptr request)
         }
     }
     return ipmi::ccSuccess;
+}
+
+bool AllowlistFilter::getRestrictedMode(int index)
+{
+    if (restrictedMode.size() <= index)
+    {
+        restrictedMode.resize(index + 1, false);
+    }
+    return restrictedMode[index];
+}
+
+void AllowlistFilter::setRestrictedMode(int index, bool value)
+{
+    if (restrictedMode.size() <= index)
+    {
+        restrictedMode.resize(index + 1, false);
+    }
+    restrictedMode[index] = value;
 }
 
 // instantiate the AllowlistFilter when this shared object is loaded
