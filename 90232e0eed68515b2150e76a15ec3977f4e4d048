@@ -52,6 +52,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a2ade0ff_46898608",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1001312
+      },
+      "writtenOn": "2024-01-03T08:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b8e56e2_b568fd68",
+      "revId": "90232e0eed68515b2150e76a15ec3977f4e4d048",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "49ec3635_660e30c2",
@@ -65,6 +83,24 @@
       "writtenOn": "2023-12-29T08:52:27Z",
       "side": 1,
       "message": "In the same code file phosphor logging is used everywhere, it will be good to keep consistency. Please change to phosphor logging.",
+      "revId": "90232e0eed68515b2150e76a15ec3977f4e4d048",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99207327_10486134",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1001312
+      },
+      "writtenOn": "2024-01-03T08:25:30Z",
+      "side": 1,
+      "message": "Done. Thanks for your reminder.",
+      "parentUuid": "49ec3635_660e30c2",
       "revId": "90232e0eed68515b2150e76a15ec3977f4e4d048",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
