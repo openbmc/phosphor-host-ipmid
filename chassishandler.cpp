@@ -971,8 +971,12 @@ std::optional<bool> getPowerStatus()
         ipmi::Value powerState =
             ipmi::getDbusProperty(*busp, service, chassisStatePath,
                                   chassisStateIntf, "CurrentPowerState");
-        powerGood = std::get<std::string>(powerState) ==
-                    "xyz.openbmc_project.State.Chassis.PowerState.On";
+        std::string powerStateStr = std::get<std::string>(powerState);
+        if (powerStateStr.ends_with(".On") ||
+            powerStateStr.ends_with(".TransitioningToOff"))
+        {
+            powerGood = true;
+        }
     }
     catch (const std::exception& e)
     {
