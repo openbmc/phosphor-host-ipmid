@@ -1110,8 +1110,7 @@ static std::optional<bool> getChassisIntrusionStatus(ipmi::Context::ptr& ctx)
             chassisIntrusionStr);
         if (!ec)
         {
-            bool ret = (chassisIntrusionStr == "HardwareIntrusion") ? true
-                                                                    : false;
+            bool ret = (chassisIntrusionStr.ends_with("Normal")) ? false : true;
             return std::make_optional(ret);
         }
     }
