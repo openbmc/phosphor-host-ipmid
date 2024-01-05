@@ -17,6 +17,7 @@
 #include <sdbusplus/server/object.hpp>
 #include <sdbusplus/timer.hpp>
 #include <settings.hpp>
+#include <xyz/openbmc_project/Chassis/Intrusion/client.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
@@ -117,6 +118,7 @@ namespace fs = std::filesystem;
 using namespace phosphor::logging;
 using namespace sdbusplus::error::xyz::openbmc_project::common;
 using namespace sdbusplus::server::xyz::openbmc_project::control::boot;
+using Intrusion = sdbusplus::client::xyz::openbmc_project::chassis::Intrusion<>;
 
 namespace chassis
 {
@@ -1076,32 +1078,57 @@ static bool setButtonEnabled(ipmi::Context::ptr& ctx,
 
 static std::optional<bool> getChassisIntrusionStatus(ipmi::Context::ptr& ctx)
 {
-    constexpr const char* chassisIntrusionPath =
-        "/xyz/openbmc_project/Chassis/Intrusion";
-    constexpr const char* chassisIntrusionInf =
-        "xyz.openbmc_project.Chassis.Intrusion";
+    std::vector<std::string> interfaces = {std::string(Intrusion::interface)};
+    ipmi::ObjectTree objs;
+    std::string propVal;
+    std::optional<bool> ret = std::nullopt;
 
-    std::string service;
-    boost::system::error_code ec = ipmi::getService(
-        ctx, chassisIntrusionInf, chassisIntrusionPath, service);
-    if (!ec)
+    boost::system::error_code ec =
+        ipmi::getSubTree(ctx, interfaces, std::string("/"), 0, objs);
+
+    if (ec)
     {
-        std::string chassisIntrusionStr;
-        ec = ipmi::getDbusProperty<std::string>(
-            ctx, service, chassisIntrusionPath, chassisIntrusionInf, "Status",
-            chassisIntrusionStr);
-        if (!ec)
+        lg2::error("Fail to find Chassis Intrusion Interface on D-Bus "
+                   "({INTERFACE}): {ERROR}",
+                   "INTERFACE", Intrusion::interface, "ERROR", ec.message());
+        return ret;
+    }
+
+    for (const auto& [path, map] : objs)
+    {
+        for (const auto& [service, intfs] : map)
         {
-            bool ret =
-                (chassisIntrusionStr == "HardwareIntrusion") ? true : false;
-            return std::make_optional(ret);
+            ec = ipmi::getDbusProperty<std::string>(
+                ctx, service, path, Intrusion::interface, "Status", propVal);
+            if (ec)
+            {
+                lg2::error("Fail to get Chassis Intrusion Status property "
+                           "({SERVICE}/{PATH}/{INTERFACE}): {ERROR}",
+                           "SERVICE", service, "PATH", path, "INTERFACE",
+                           Intrusion::interface, "ERROR", ec.message());
+            }
+            else
+            {
+                // return false if all values are Normal
+                // return true if one value is not Normal
+                // return nullopt when no value can be retrieved from D-Bus
+                auto status =
+                    sdbusplus::message::convert_from_string<Intrusion::Status>(
+                        propVal)
+                        .value();
+                if (status == Intrusion::Status::Normal)
+                {
+                    ret = std::make_optional(false);
+                }
+                else
+                {
+                    ret = std::make_optional(true);
+                    return ret;
+                }
+            }
         }
     }
-    lg2::error("Fail to get Chassis Intrusion Status property "
-               "({PATH}/{INTERFACE}): {ERROR}",
-               "PATH", chassisIntrusionPath, "INTERFACE", chassisIntrusionInf,
-               "ERROR", ec.message());
-    return std::nullopt;
+    return ret;
 }
 
 //----------------------------------------------------------------------
