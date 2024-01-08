@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f1d842e_28a45007",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-01-08T21:57:50Z",
+      "side": 1,
+      "message": "Changing to a map seems to introduce unnecessary complexity. Why not simply resize the vector to have the correct number of elements all defaulting to a safe value (true)? The the value always exists and it would exhibit the same behavior as checking for existence and then returning the safe value if it is not ready yet.",
+      "revId": "9f7e52923df61d729c5ed502218bfeb82aa3eeef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
