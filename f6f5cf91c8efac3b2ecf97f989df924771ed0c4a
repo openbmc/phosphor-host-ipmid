@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "10d1ab2b_c56e46c4",
+        "filename": "read_fru_data.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2024-01-10T02:54:52Z",
+      "side": 1,
+      "message": "I think this could be simplified to `propertiesChangedNamespace()`\n\nBut since it\u0027s already the object path, why not use `propertiesChanged()` to match the exact path?",
+      "revId": "f6f5cf91c8efac3b2ecf97f989df924771ed0c4a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
