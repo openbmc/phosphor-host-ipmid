@@ -729,13 +729,18 @@ bool isFruPresent(ipmi::Context::ptr& ctx, const std::string& fruPath)
     using namespace ipmi::fru;
 
     std::string service;
-    boost::system::error_code ec = getService(ctx, invItemInterface,
-                                              invObjPath + fruPath, service);
+#ifdef REMOVE_INV_PATH
+    std::string path = invObjPath + fruPath;
+#else
+    std::string path = fruPath;
+#endif
+    boost::system::error_code ec = getService(ctx, invItemInterface, path,
+                                              service);
     if (!ec)
     {
         bool result;
-        ec = ipmi::getDbusProperty(ctx, service, invObjPath + fruPath,
-                                   invItemInterface, itemPresentProp, result);
+        ec = ipmi::getDbusProperty(ctx, service, path, invItemInterface,
+                                   itemPresentProp, result);
         if (!ec)
         {
             return result;

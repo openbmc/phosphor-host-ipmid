@@ -79,3 +79,6 @@ option('dynamic-storages-only', type: 'feature', value: 'disabled', description:
 
 # open-power specific functionality.
 option('open-power', type: 'feature', description: 'Support open-power specific functions')
+
+# remove inventory path by default
+option('remove-inventory-path', type: 'feature', value: 'enabled', description: 'Remove the `/xyz/openbmc_project/inventory` path')
