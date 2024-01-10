@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "06ca7bf1_d30c2c65",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-01-10T17:24:26Z",
+      "side": 1,
+      "message": "Yeah, we\u0027ll squash the bump and bitbake fixes together.  Looks like Matt is pretty close on the bitbake side of it (I left one minor comment).  We should be able to +2 this.  There aren\u0027t enough changes typically in host-ipmid that I would worry about it causing a backlog.",
+      "revId": "863b57710cbe7d30a09209c7fd8beefcbc1c16cb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
