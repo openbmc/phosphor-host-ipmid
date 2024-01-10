@@ -11,6 +11,8 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
+#include <vector>
 
 extern const FruMap frus;
 namespace ipmi
@@ -21,7 +23,7 @@ namespace fru
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
-std::unique_ptr<sdbusplus::bus::match_t> matchPtr
+std::vector<std::unique_ptr<sdbusplus::bus::match_t>> matches
     __attribute__((init_priority(101)));
 
 namespace cache
@@ -110,15 +112,24 @@ void processFruPropChange(sdbusplus::message_t& msg)
 // register for fru property change
 int registerCallbackHandler()
 {
-    if (matchPtr == nullptr)
+    using namespace sdbusplus::bus::match::rules;
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+    for (const auto& [fruId, instanceList] : frus)
     {
-        using namespace sdbusplus::bus::match::rules;
-        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-        matchPtr = std::make_unique<sdbusplus::bus::match_t>(
-            bus,
-            path_namespace(invObjPath) + type::signal() +
-                member("PropertiesChanged") + interface(propInterface),
-            std::bind(processFruPropChange, std::placeholders::_1));
+        for (const auto& instanceObj : instanceList)
+        {
+            std::string objPath = instanceObj.path;
+            if (objPath.find(xyzPrefix) == std::string::npos)
+            {
+                objPath = invObjPath + instanceObj.path;
+            }
+            auto matchPtr = std::make_unique<sdbusplus::bus::match_t>(
+                bus,
+                path_namespace(objPath) + type::signal() +
+                    member("PropertiesChanged") + interface(propInterface),
+                std::bind(processFruPropChange, std::placeholders::_1));
+            matches.emplace_back(std::move(matchPtr));
+        }
     }
     return 0;
 }
