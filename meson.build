@@ -33,6 +33,7 @@ conf_data.set_quoted('HOST_NAME', get_option('host-name'))
 conf_data.set_quoted('POWER_READING_SENSOR', get_option('power-reading-sensor'))
 conf_data.set_quoted('HOST_IPMI_LIB_PATH', get_option('host-ipmi-lib-path'))
 conf_data.set_quoted('FW_VER_REGEX', get_option('fw-ver-regex'))
+conf_data.set_quoted('REMOVE_INV_PATH', get_option('remove-inventory-path'))
 
 if get_option('shortname-remove-suffix').allowed()
   conf_data.set_quoted('SHORTNAME_REMOVE_SUFFIX', '1')

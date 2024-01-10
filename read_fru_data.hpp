@@ -1,4 +1,6 @@
 #pragma once
+#include "config.h"
+
 #include "ipmi_fru_info_area.hpp"
 
 #include <sdbusplus/bus.hpp>
@@ -12,9 +14,11 @@ namespace fru
 using FRUId = uint8_t;
 using FRUAreaMap = std::map<FRUId, FruAreaData>;
 
+#ifdef REMOVE_INV_PATH
 static constexpr auto xyzPrefix = "/xyz/openbmc_project/";
-static constexpr auto invMgrInterface = "xyz.openbmc_project.Inventory.Manager";
 static constexpr auto invObjPath = "/xyz/openbmc_project/inventory";
+#endif
+static constexpr auto invMgrInterface = "xyz.openbmc_project.Inventory.Manager";
 static constexpr auto propInterface = "org.freedesktop.DBus.Properties";
 static constexpr auto invItemInterface = "xyz.openbmc_project.Inventory.Item";
 static constexpr auto itemPresentProp = "Present";
