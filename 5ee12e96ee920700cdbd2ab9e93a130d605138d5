@@ -62,6 +62,23 @@
       "message": "Add @Andrew to get more view about Chassis\u0027s state. This commit is impacted by https://gerrit.openbmc.org/c/openbmc/phosphor-state-manager/+/67811 commit",
       "revId": "5ee12e96ee920700cdbd2ab9e93a130d605138d5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec31acec_1e7b5f67",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001526
+      },
+      "writtenOn": "2024-01-11T06:08:07Z",
+      "side": 1,
+      "message": "Wrong reviewer adding, remove.",
+      "revId": "5ee12e96ee920700cdbd2ab9e93a130d605138d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
