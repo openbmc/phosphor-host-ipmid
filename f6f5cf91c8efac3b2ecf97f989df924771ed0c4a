@@ -16,6 +16,24 @@
       "message": "I think this could be simplified to `propertiesChangedNamespace()`\n\nBut since it\u0027s already the object path, why not use `propertiesChanged()` to match the exact path?",
       "revId": "f6f5cf91c8efac3b2ecf97f989df924771ed0c4a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d780aa14_516d50b8",
+        "filename": "read_fru_data.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-01-15T02:06:39Z",
+      "side": 1,
+      "message": "\u003e I think this could be simplified to `propertiesChangedNamespace()`\n\u003e \n\u003e But since it\u0027s already the object path, why not use `propertiesChanged()` to match the exact path?\n\nBecause for the previous logic, only the path under PIM is monitored, and in the yaml configuration file, the path prefix `/xyz/openbmc_project/inventory` is omitted\nI think the previous logic is not perfect. If we force the exact path to match here, this will cause the yaml configuration files of all previous machines to be updated (PIM prefix added by default)\n\nHere I add a switch to control(remove_inventory_path, enabled by default), but this is only a temporary solution, and the judgment logic for removing the prefix in the future is reasonable.",
+      "parentUuid": "10d1ab2b_c56e46c4",
+      "revId": "f6f5cf91c8efac3b2ecf97f989df924771ed0c4a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
