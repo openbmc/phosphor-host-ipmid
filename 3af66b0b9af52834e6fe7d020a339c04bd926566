@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b781dbf5_fd1dbb5f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2024-01-17T03:26:32Z",
+      "side": 1,
+      "message": "I think you should investigate why restrictedMode did not include the information of device rather than fix like that.\n\nMaybe you need monitoring a signal to know the list of devices and update the restrictedMode variable.",
+      "revId": "3af66b0b9af52834e6fe7d020a339c04bd926566",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
