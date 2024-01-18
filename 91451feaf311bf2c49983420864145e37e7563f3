@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c3a3ae80_64c500d3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2024-01-18T00:18:42Z",
+      "side": 1,
+      "message": "Please reformat the commit message as described [here](https://github.com/openbmc/docs/blob/a8fff53a66656f884632322841d697c89bdba871/CONTRIBUTING.md#formatting-commit-messages).",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 21
+      },
+      "revId": "91451feaf311bf2c49983420864145e37e7563f3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37b65886_1cc81a59",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2024-01-18T00:18:42Z",
+      "side": 1,
+      "message": "Patch looks like a good catch, just needs a formatting fix.",
+      "revId": "91451feaf311bf2c49983420864145e37e7563f3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
