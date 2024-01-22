@@ -295,34 +295,54 @@ std::optional<EthernetInterface::DHCPConf>
 std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
                                   const std::string& prop)
 {
-    std::string service;
-    boost::system::error_code ec = ipmi::getService(ctx, dhcpIntf, dhcpObj,
-                                                    service);
-    if (ec.value())
-    {
-        return std::nullopt;
-    }
-    bool value{};
-    ec = ipmi::getDbusProperty(ctx, service, dhcpObj, dhcpIntf, prop, value);
-    if (ec.value())
+    ipmi::ObjectTree objectTree;
+    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
     {
         return std::nullopt;
     }
 
-    return value;
+    for (const auto& [path, serviceMap] : objectTree)
+    {
+        for (const auto& [service, object] : serviceMap)
+        {
+            bool value{};
+            if (ipmi::getDbusProperty(ctx, service, path, dhcpIntf, prop,
+                                      value))
+            {
+                return std::nullopt;
+            }
+
+            if (value)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 bool setDHCPOption(ipmi::Context::ptr& ctx, std::string prop, bool value)
 {
-    std::string service;
-    boost::system::error_code ec = ipmi::getService(ctx, dhcpIntf, dhcpObj,
-                                                    service);
-    if (!ec.value())
+    ipmi::ObjectTree objectTree;
+    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
     {
-        ec = ipmi::setDbusProperty(ctx, service, dhcpObj, dhcpIntf, prop,
-                                   value);
+        return false;
     }
-    return (!ec.value());
+
+    for (const auto& [path, serviceMap] : objectTree)
+    {
+        for (const auto& [service, object] : serviceMap)
+        {
+            if (ipmi::setDbusProperty(ctx, service, path, dhcpIntf, prop,
+                                      value))
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 } // namespace dcmi
