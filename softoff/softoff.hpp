@@ -102,7 +102,7 @@ class SoftPowerOff : public SoftPowerOffInherit
     sdbusplus::bus_t& bus;
 
     /** @brief Reference to Timer object */
-    Timer timer;
+    sdbusplus::Timer timer;
 
     /** @brief Marks the end of life of this application.
      *
