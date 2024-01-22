@@ -29,7 +29,6 @@ static constexpr auto ethernetIntf =
     "xyz.openbmc_project.Network.EthernetInterface";
 static constexpr auto ethernetDefaultChannelNum = 0x1;
 static constexpr auto networkRoot = "/xyz/openbmc_project/network";
-static constexpr auto dhcpObj = "/xyz/openbmc_project/network/dhcp";
 static constexpr auto dhcpIntf =
     "xyz.openbmc_project.Network.DHCPConfiguration";
 static constexpr auto systemBusName = "org.freedesktop.systemd1";
