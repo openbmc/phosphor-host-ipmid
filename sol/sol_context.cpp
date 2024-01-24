@@ -44,13 +44,19 @@ void Context::enableAccumulateTimer(bool enable)
     if (enable)
     {
         auto bufferSize = sol::Manager::get().dataBuffer.size();
+        std::weak_ptr<Context> weakRef = weak_from_this();
         if (bufferSize > sendThreshold)
         {
-            charAccTimerHandler();
+            getIo()->post([weakRef]() {
+                std::shared_ptr<Context> self = weakRef.lock();
+                if (self)
+                {
+                    self->charAccTimerHandler();
+                }
+            });
             return;
         }
         accumulateTimer.expires_after(interval);
-        std::weak_ptr<Context> weakRef = weak_from_this();
         accumulateTimer.async_wait(
             [weakRef](const boost::system::error_code& ec) {
             std::shared_ptr<Context> self = weakRef.lock();
