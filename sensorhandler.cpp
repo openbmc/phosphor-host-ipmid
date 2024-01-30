@@ -4,7 +4,6 @@
 
 #include "fruread.hpp"
 
-#include <mapper.h>
 #include <systemd/sd-bus.h>
 
 #include <ipmid/api.hpp>
@@ -216,18 +215,11 @@ void initSensorMatches()
 }
 #endif
 
-int get_bus_for_path(const char* path, char** busname)
-{
-    return mapper_get_service(bus, path, busname);
-}
-
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
 // step for mapping IPMI
 int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
 {
-    int rc;
-
     const auto& sensor_it = ipmi::sensor::sensors.find(num);
     if (sensor_it == ipmi::sensor::sensors.end())
     {
@@ -237,17 +229,22 @@ int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
 
     const auto& info = sensor_it->second;
 
-    char* busname = nullptr;
-    rc = get_bus_for_path(info.sensorPath.c_str(), &busname);
-    if (rc < 0)
+    std::string serviceName{};
+    try
+    {
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+        serviceName = ipmi::getService(bus, info.sensorInterface,
+                                       info.sensorPath);
+    }
+    catch (const sdbusplus::exception_t&)
     {
         std::fprintf(stderr, "Failed to get %s busname: %s\n",
-                     info.sensorPath.c_str(), busname);
-        goto final;
+                     info.sensorPath.c_str(), serviceName.c_str());
+        return -EINVAL;
     }
 
     interface->sensortype = info.sensorType;
-    strcpy(interface->bus, busname);
+    strcpy(interface->bus, serviceName.c_str());
     strcpy(interface->path, info.sensorPath.c_str());
     // Take the interface name from the beginning of the DbusInterfaceMap. This
     // works for the Value interface but may not suffice for more complex
@@ -257,9 +254,7 @@ int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
            info.propertyInterfaces.begin()->first.c_str());
     interface->sensornumber = num;
 
-final:
-    free(busname);
-    return rc;
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////
