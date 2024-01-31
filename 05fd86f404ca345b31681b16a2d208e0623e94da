@@ -16,6 +16,23 @@
       "message": "https://gerrit.openbmc.org/c/openbmc/phosphor-networkd/+/63124 is the networkd backend implementation. Please merge this after the backend is merged",
       "revId": "05fd86f404ca345b31681b16a2d208e0623e94da",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ebeb63b3_166b6790",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2024-01-31T20:32:53Z",
+      "side": 1,
+      "message": "Verified the ipmitool \"dcmi get_conf_param\" works with the network changes.",
+      "revId": "05fd86f404ca345b31681b16a2d208e0623e94da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
