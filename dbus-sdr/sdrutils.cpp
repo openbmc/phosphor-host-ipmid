@@ -271,7 +271,6 @@ uint16_t getSensorNumberFromPath(const std::string& path)
     }
     catch (const std::out_of_range& e)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
         return invalidSensorNumber;
     }
 }
@@ -305,7 +304,6 @@ std::string getPathFromSensorNumber(uint16_t sensorNum)
     }
     catch (const std::out_of_range& e)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
         return std::string();
     }
 }
