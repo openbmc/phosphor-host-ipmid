@@ -1325,7 +1325,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::IPv6StaticRouter1PrefixLength:
         {
-            ret.pack(UINT8_C(0));
+            ret.pack(uint8_t{0});
             return responseSuccess(std::move(ret));
         }
         case LanParam::IPv6StaticRouter1PrefixValue:
