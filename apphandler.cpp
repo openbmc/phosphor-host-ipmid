@@ -5,7 +5,6 @@
 #include <limits.h>
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
-#include <mapper.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>

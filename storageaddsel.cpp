@@ -2,7 +2,6 @@
 #include "sensorhandler.hpp"
 #include "storagehandler.hpp"
 
-#include <mapper.h>
 #include <systemd/sd-bus.h>
 
 #include <ipmid/api.hpp>
