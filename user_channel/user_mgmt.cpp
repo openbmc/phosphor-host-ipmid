@@ -65,7 +65,6 @@ static constexpr const char* objMapperPath =
     "/xyz/openbmc_project/object_mapper";
 static constexpr const char* objMapperInterface =
     "xyz.openbmc_project.ObjectMapper";
-static constexpr const char* getSubTreeMethod = "GetSubTree";
 static constexpr const char* getObjectMethod = "GetObject";
 
 static constexpr const char* ipmiUserMutex = "ipmi_usr_mutex";
@@ -587,7 +586,7 @@ bool UserAccess::isValidUserName(const std::string& userName)
     catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Failed to excute method",
-                        entry("METHOD=%s", getSubTreeMethod),
+                        entry("METHOD=%s", getManagedObjectsMethod),
                         entry("PATH=%s", userMgrObjBasePath));
         return false;
     }
@@ -1698,7 +1697,7 @@ void UserAccess::cacheUserDataFile()
     catch (const sdbusplus::exception_t& e)
     {
         log<level::DEBUG>("Failed to excute method",
-                          entry("METHOD=%s", getSubTreeMethod),
+                          entry("METHOD=%s", getManagedObjectsMethod),
                           entry("PATH=%s", userMgrObjBasePath));
         return;
     }
