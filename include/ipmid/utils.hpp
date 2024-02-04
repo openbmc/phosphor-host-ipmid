@@ -22,7 +22,6 @@ constexpr auto ROOT = "/";
 constexpr auto HOST_MATCH = "host0";
 
 constexpr auto PROP_INTF = "org.freedesktop.DBus.Properties";
-constexpr auto DELETE_INTERFACE = "xyz.openbmc_project.Object.Delete";
 
 constexpr auto METHOD_GET = "Get";
 constexpr auto METHOD_GET_ALL = "GetAll";
@@ -180,27 +179,6 @@ ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
                              const std::string& interface,
                              const std::string& match = {});
 
-/** @brief Deletes all the dbus objects from the given service root
-           which matches the object identifier.
- *  @param[in] bus - DBUS Bus Object.
- *  @param[in] serviceRoot - Service root path.
- *  @param[in] interface - Dbus interface.
- *  @param[in] match - Identifier for object.
- */
-void deleteAllDbusObjects(sdbusplus::bus_t& bus, const std::string& serviceRoot,
-                          const std::string& interface,
-                          const std::string& match = {});
-
-/** @brief Gets the ancestor objects of the given object
-           which implements the given interface.
- *  @param[in] bus - Dbus bus object.
- *  @param[in] path - Child Dbus object path.
- *  @param[in] interfaces - Dbus interface list.
- *  @return map of object path and service info.
- */
-ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
-                           InterfaceList&& interfaces);
-
 /********* Begin co-routine yielding alternatives ***************/
 
 /** @brief Get the D-Bus Service name for the input D-Bus path
@@ -334,19 +312,6 @@ static inline boost::system::error_code
     return getAllDbusObjects(ctx, serviceRoot, interface, {}, objectTree);
 }
 
-/** @brief Deletes all the D-Bus objects from the given service root
-           which matches the object identifier.
- *  @param[in] ctx - ipmi::Context::ptr
- *  @param[out] ec - boost error code object
- *  @param[in] serviceRoot - Service root path.
- *  @param[in] interface - D-Bus interface.
- *  @param[in] match - Identifier for object.
- */
-boost::system::error_code deleteAllDbusObjects(Context::ptr ctx,
-                                               const std::string& serviceRoot,
-                                               const std::string& interface,
-                                               const std::string& match = {});
-
 /** @brief Gets all managed objects associated with the given object
  *         path and service.
  *  @param[in] ctx - ipmi::Context::ptr
@@ -359,19 +324,6 @@ boost::system::error_code getManagedObjects(Context::ptr ctx,
                                             const std::string& service,
                                             const std::string& objPath,
                                             ObjectValueTree& objects);
-
-/** @brief Gets the ancestor objects of the given object
-           which implements the given interface.
- *  @param[in] ctx - ipmi::Context::ptr
- *  @param[in] path - Child D-Bus object path.
- *  @param[in] interfaces - D-Bus interface list.
- *  @param[out] ObjectTree - map of object path and service info.
- *  @return - boost error code object
- */
-boost::system::error_code getAllAncestors(Context::ptr ctx,
-                                          const std::string& path,
-                                          const InterfaceList& interfaces,
-                                          ObjectTree& objectTree);
 
 /** @brief Gets the value associated with the given object
  *         and the interface.
