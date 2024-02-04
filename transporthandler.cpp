@@ -1,5 +1,6 @@
 #include "transporthandler.hpp"
 
+#include <ipmid/utils.hpp>
 #include <stdplus/net/addr/subnet.hpp>
 #include <stdplus/raw.hpp>
 
@@ -83,13 +84,9 @@ std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
     }
 
     // Enumerate all VLAN + ETHERNET interfaces
-    auto req = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
-                                   "GetSubTree");
-    req.append(std::string_view(PATH_ROOT), 0,
-               std::vector<std::string>{INTF_VLAN, INTF_ETHERNET});
-    auto reply = bus.call(req);
-    ObjectTree objs;
-    reply.read(objs);
+    std::vector<std::string> interfaces = {INTF_VLAN, INTF_ETHERNET};
+    ipmi::ObjectTree objs = ipmi::getSubTree(bus, interfaces,
+                                             std::string{PATH_ROOT});
 
     ChannelParams params;
     for (const auto& [path, impls] : objs)
@@ -482,14 +479,9 @@ uint16_t getVLANProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
 void deconfigureChannel(sdbusplus::bus_t& bus, ChannelParams& params)
 {
     // Delete all objects associated with the interface
-    auto objreq = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
-                                      "GetSubTree");
-    objreq.append(
-        std::string_view(PATH_ROOT), 0,
-        std::vector<std::string>{"xyz.openbmc_project.Object.Delete"});
-    auto objreply = bus.call(objreq);
-    ObjectTree objs;
-    objreply.read(objs);
+    ObjectTree objs = ipmi::getSubTree(
+        bus, std::vector<std::string>{"xyz.openbmc_project.Object.Delete"},
+        std::string{PATH_ROOT});
     for (const auto& [path, impls] : objs)
     {
         if (!ifnameInPath(params.ifname, path))
