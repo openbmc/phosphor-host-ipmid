@@ -20,59 +20,6 @@ using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
-static constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
-static constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
-static constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
-
-/** @brief get the D-Bus service and service path
- *  @param[in] bus - The Dbus bus object
- *  @param[in] interface - interface to the service
- *  @param[in] path - interested path in the list of objects
- *  @return pair of service path and service
- */
-ServicePath getServiceAndPath(sdbusplus::bus_t& bus,
-                              const std::string& interface,
-                              const std::string& path)
-{
-    auto depth = 0;
-    auto mapperCall = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
-                                          MAPPER_INTERFACE, "GetSubTree");
-    mapperCall.append("/");
-    mapperCall.append(depth);
-    mapperCall.append(std::vector<Interface>({interface}));
-
-    MapperResponseType mapperResponse;
-    try
-    {
-        auto mapperResponseMsg = bus.call(mapperCall);
-        mapperResponseMsg.read(mapperResponse);
-    }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>("Invalid mapper response",
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()),
-                        entry("ERROR=%s", e.what()));
-        elog<InternalFailure>();
-    }
-
-    if (path.empty())
-    {
-        // Get the first one if the path is not in list.
-        return std::make_pair(mapperResponse.begin()->first,
-                              mapperResponse.begin()->second.begin()->first);
-    }
-    const auto& iter = mapperResponse.find(path);
-    if (iter == mapperResponse.end())
-    {
-        log<level::ERR>("Couldn't find D-Bus path",
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
-        elog<InternalFailure>();
-    }
-    return std::make_pair(iter->first, iter->second.begin()->first);
-}
-
 AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData)
 {
     Assertion assertionStates =
