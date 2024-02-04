@@ -232,7 +232,8 @@ void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
     try
     {
         auto req = bus.new_method_call(service.c_str(), path.c_str(),
-                                       ipmi::DELETE_INTERFACE, "Delete");
+                                       "xyz.openbmc_project.Object.Delete",
+                                       "Delete");
         bus.call_noreply(req);
     }
     catch (const sdbusplus::exception_t& e)
@@ -483,8 +484,9 @@ void deconfigureChannel(sdbusplus::bus_t& bus, ChannelParams& params)
     // Delete all objects associated with the interface
     auto objreq = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
                                       "GetSubTree");
-    objreq.append(std::string_view(PATH_ROOT), 0,
-                  std::vector<std::string>{DELETE_INTERFACE});
+    objreq.append(
+        std::string_view(PATH_ROOT), 0,
+        std::vector<std::string>{"xyz.openbmc_project.Object.Delete"});
     auto objreply = bus.call(objreq);
     ObjectTree objs;
     objreply.read(objs);
