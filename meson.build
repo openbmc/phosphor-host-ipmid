@@ -26,7 +26,6 @@ libcrypto_dep = dependency('libcrypto')
 ipmid_dep = dependency('libipmid')
 userlayer_dep = dependency('libuserlayer')
 channellayer_dep = dependency('libchannellayer')
-mapper = dependency('libmapper')
 
 # Project Arguments
 cpp = meson.get_compiler('cpp')
@@ -49,7 +48,6 @@ deps = [
     phosphor_dbus_interfaces_dep,
     phosphor_logging_dep,
     sdbusplus_dep,
-    mapper,
 ]
 
 sources = [

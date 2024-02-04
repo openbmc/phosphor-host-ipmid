@@ -1,7 +1,6 @@
 #include "guid.hpp"
 
 #include <ipmid/api.h>
-#include <mapper.h>
 
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
