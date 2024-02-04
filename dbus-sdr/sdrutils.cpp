@@ -16,12 +16,12 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#include <ipmid/utils.hpp>
+
 #include <optional>
 #include <unordered_set>
 
 #ifdef FEATURE_HYBRID_SENSORS
-
-#include <ipmid/utils.hpp>
 namespace ipmi
 {
 namespace sensor
