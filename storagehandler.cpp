@@ -515,6 +515,12 @@ ipmi::RspType<uint8_t // erase status
             static_cast<uint8_t>(ipmi::sel::eraseComplete));
     }
 
+    // Check that initiate erase is correct
+    if (eraseOperation != ipmi::sel::initiateErase)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     // Per the IPMI spec, need to cancel any reservation when the SEL is cleared
     cancelSELReservation();
 
