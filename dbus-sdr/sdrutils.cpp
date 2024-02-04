@@ -16,12 +16,12 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#include <ipmid/utils.hpp>
+
 #include <optional>
 #include <unordered_set>
 
 #ifdef FEATURE_HYBRID_SENSORS
-
-#include <ipmid/utils.hpp>
 namespace ipmi
 {
 namespace sensor
@@ -59,22 +59,14 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     sensorTreePtr = std::make_shared<SensorSubTree>();
 
-    static constexpr const int32_t depth = 2;
-
     auto lbdUpdateSensorTree = [&dbus](const char* path,
                                        const auto& interfaces) {
-        auto mapperCall = dbus->new_method_call(
-            "xyz.openbmc_project.ObjectMapper",
-            "/xyz/openbmc_project/object_mapper",
-            "xyz.openbmc_project.ObjectMapper", "GetSubTree");
+        static constexpr const int32_t depth = 2;
         SensorSubTree sensorTreePartial;
-
-        mapperCall.append(path, depth, interfaces);
-
         try
         {
-            auto mapperReply = dbus->call(mapperCall);
-            mapperReply.read(sensorTreePartial);
+            sensorTreePartial = ipmi::getSubTree(*dbus, interfaces, path,
+                                                 depth);
         }
         catch (const sdbusplus::exception_t& e)
         {
@@ -94,12 +86,12 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     };
 
     // Add sensors to SensorTree
-    static constexpr const std::array sensorInterfaces = {
+    constexpr std::vector<std::string> sensorInterfaces = {
         "xyz.openbmc_project.Sensor.Value",
         "xyz.openbmc_project.Sensor.ValueMutability",
         "xyz.openbmc_project.Sensor.Threshold.Warning",
         "xyz.openbmc_project.Sensor.Threshold.Critical"};
-    static constexpr const std::array vrInterfaces = {
+    constexpr std::vector<std::string> vrInterfaces = {
         "xyz.openbmc_project.Control.VoltageRegulatorMode"};
 
     bool sensorRez = lbdUpdateSensorTree("/xyz/openbmc_project/sensors",
