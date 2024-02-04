@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 #include <endian.h>
 #include <limits.h>
-#include <mapper.h>
 #include <netinet/in.h>
 
 #include <ipmid/api.hpp>
