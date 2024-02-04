@@ -16,12 +16,12 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#include <ipmid/utils.hpp>
+
 #include <optional>
 #include <unordered_set>
 
 #ifdef FEATURE_HYBRID_SENSORS
-
-#include <ipmid/utils.hpp>
 namespace ipmi
 {
 namespace sensor
@@ -63,18 +63,10 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     auto lbdUpdateSensorTree = [&dbus](const char* path,
                                        const auto& interfaces) {
-        auto mapperCall = dbus->new_method_call(
-            "xyz.openbmc_project.ObjectMapper",
-            "/xyz/openbmc_project/object_mapper",
-            "xyz.openbmc_project.ObjectMapper", "GetSubTree");
-        SensorSubTree sensorTreePartial;
-
-        mapperCall.append(path, depth, interfaces);
-
         try
         {
-            auto mapperReply = dbus->call(mapperCall);
-            mapperReply.read(sensorTreePartial);
+            sensorTreePartial = ipmi::getSubTree(*dbus, interfaces, path,
+                                                 depth);
         }
         catch (const sdbusplus::exception_t& e)
         {
