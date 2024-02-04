@@ -257,6 +257,8 @@ ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
     return objectTree;
 }
 
+// deprecated("Unused internally, marked for removal after 2025-03-30 unless
+// disputed")
 void deleteAllDbusObjects(sdbusplus::bus_t& bus, const std::string& serviceRoot,
                           const std::string& interface,
                           const std::string& match)
@@ -291,6 +293,8 @@ static inline std::string convertToString(const InterfaceList& interfaces)
     return intfStr;
 }
 
+// deprecated("Unused internally, marked for removal after 2025-03-30 unless
+// disputed")
 ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
                            InterfaceList&& interfaces)
 {
@@ -480,6 +484,8 @@ boost::system::error_code getAllDbusObjects(Context::ptr ctx,
     return ec;
 }
 
+// deprecated("Unused internally, marked for removal after 2025-03-30 unless
+// disputed")
 boost::system::error_code deleteAllDbusObjects(Context::ptr ctx,
                                                const std::string& serviceRoot,
                                                const std::string& interface,
@@ -524,6 +530,8 @@ boost::system::error_code getManagedObjects(Context::ptr ctx,
     return ec;
 }
 
+// deprecated("Unused internally, marked for removal after 2025-03-30 unless
+// disputed")
 boost::system::error_code getAllAncestors(Context::ptr ctx,
                                           const std::string& path,
                                           const InterfaceList& interfaces,
