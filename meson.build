@@ -29,6 +29,12 @@ channellayer_dep = dependency('libchannellayer')
 
 # Project Arguments
 cpp = meson.get_compiler('cpp')
+if cpp.has_header('CLI/CLI.hpp')
+    cli11_dep = declare_dependency()
+else
+    cli11_dep = dependency('CLI11')
+endif
+
 add_project_arguments(
   cpp.get_supported_arguments([
     '-DBOOST_ERROR_CODE_HEADER_ONLY',
@@ -40,6 +46,7 @@ add_project_arguments(
   language : 'cpp')
 
 deps = [
+    cli11_dep,
     ipmid_dep,
     userlayer_dep,
     channellayer_dep,
