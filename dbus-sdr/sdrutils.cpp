@@ -16,6 +16,7 @@
 
 #include "dbus-sdr/sdrutils.hpp"
 
+#include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
 
 #include <fstream>

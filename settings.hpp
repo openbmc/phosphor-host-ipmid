@@ -12,8 +12,6 @@ using Path = std::string;
 using Service = std::string;
 using Interface = std::string;
 
-constexpr auto root = "/";
-
 /** @class Objects
  *  @brief Fetch paths of settings d-bus objects of interest, upon construction
  */
