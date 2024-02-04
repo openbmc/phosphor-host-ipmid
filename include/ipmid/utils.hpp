@@ -199,7 +199,8 @@ ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
  */
 void deleteAllDbusObjects(sdbusplus::bus_t& bus, const std::string& serviceRoot,
                           const std::string& interface,
-                          const std::string& match = {});
+                          const std::string& match = {})
+    __attribute__((deprecated));
 
 /** @brief Gets the ancestor objects of the given object
            which implements the given interface.
@@ -209,7 +210,8 @@ void deleteAllDbusObjects(sdbusplus::bus_t& bus, const std::string& serviceRoot,
  *  @return map of object path and service info.
  */
 ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
-                           InterfaceList&& interfaces);
+                           InterfaceList&& interfaces)
+    __attribute__((deprecated));
 
 /********* Begin co-routine yielding alternatives ***************/
 
@@ -369,7 +371,8 @@ static inline boost::system::error_code
 boost::system::error_code deleteAllDbusObjects(Context::ptr ctx,
                                                const std::string& serviceRoot,
                                                const std::string& interface,
-                                               const std::string& match = {});
+                                               const std::string& match = {})
+    __attribute__((deprecated));
 
 /** @brief Gets all managed objects associated with the given object
  *         path and service.
@@ -392,10 +395,10 @@ boost::system::error_code getManagedObjects(Context::ptr ctx,
  *  @param[out] ObjectTree - map of object path and service info.
  *  @return - boost error code object
  */
-boost::system::error_code getAllAncestors(Context::ptr ctx,
-                                          const std::string& path,
-                                          const InterfaceList& interfaces,
-                                          ObjectTree& objectTree);
+boost::system::error_code
+    getAllAncestors(Context::ptr ctx, const std::string& path,
+                    const InterfaceList& interfaces, ObjectTree& objectTree)
+        __attribute__((deprecated));
 
 /** @brief Gets the value associated with the given object
  *         and the interface.
