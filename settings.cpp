@@ -19,30 +19,19 @@ constexpr auto mapperIntf = "xyz.openbmc_project.ObjectMapper";
 Objects::Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter) :
     bus(bus)
 {
-    auto depth = 0;
-
-    auto mapperCall = bus.new_method_call(mapperService, mapperPath, mapperIntf,
-                                          "GetSubTree");
-    mapperCall.append(root);
-    mapperCall.append(depth);
-    mapperCall.append(filter);
-
-    using Interfaces = std::vector<Interface>;
-    using MapperResponse = std::map<Path, std::map<Service, Interfaces>>;
-    MapperResponse result;
+    ipmi::ObjectTree objectTree;
     try
     {
-        auto response = bus.call(mapperCall);
-        response.read(result);
+        objectTree = ipmi::getSubTree(bus, filter, root);
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Error in mapper GetSubTree",
+        log<level::ERR>("Failed to call the getSubTree method.",
                         entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
 
-    for (auto& iter : result)
+    for (auto& iter : objectTree)
     {
         const auto& path = iter.first;
         for (auto& interface : iter.second.begin()->second)
