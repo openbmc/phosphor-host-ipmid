@@ -47,18 +47,7 @@ DbusObjectInfo getDbusObject(sdbusplus::bus_t& bus,
     std::vector<DbusInterface> interfaces;
     interfaces.emplace_back(interface);
 
-    auto depth = 0;
-
-    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ,
-                                          MAPPER_INTF, "GetSubTree");
-
-    mapperCall.append(serviceRoot, depth, interfaces);
-
-    auto mapperReply = bus.call(mapperCall);
-
-    ObjectTree objectTree;
-    mapperReply.read(objectTree);
-
+    ObjectTree objectTree = getSubTree(bus, interfaces, serviceRoot);
     if (objectTree.empty())
     {
         log<level::ERR>("No Object has implemented the interface",
@@ -229,6 +218,21 @@ std::string getService(sdbusplus::bus_t& bus, const std::string& intf,
     return mapperResponse.begin()->first;
 }
 
+ObjectTree getSubTree(sdbusplus::bus_t& bus, const InterfaceList& interfaces,
+                      const std::string& subtreePath, int32_t depth)
+{
+    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ,
+                                          MAPPER_INTF, "GetSubTree");
+
+    mapperCall.append(subtreePath, depth, interfaces);
+
+    auto mapperReply = bus.call(mapperCall);
+    ObjectTree objectTree;
+    mapperReply.read(objectTree);
+
+    return objectTree;
+}
+
 ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
                                    const std::string& serviceRoot,
                                    const std::string& interface,
@@ -237,17 +241,7 @@ ipmi::ObjectTree getAllDbusObjects(sdbusplus::bus_t& bus,
     std::vector<std::string> interfaces;
     interfaces.emplace_back(interface);
 
-    auto depth = 0;
-
-    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ,
-                                          MAPPER_INTF, "GetSubTree");
-
-    mapperCall.append(serviceRoot, depth, interfaces);
-
-    auto mapperReply = bus.call(mapperCall);
-    ObjectTree objectTree;
-    mapperReply.read(objectTree);
-
+    ObjectTree objectTree = getSubTree(bus, interfaces, serviceRoot);
     for (auto it = objectTree.begin(); it != objectTree.end();)
     {
         if (it->first.find(match) == std::string::npos)
@@ -309,6 +303,19 @@ boost::system::error_code getService(Context::ptr ctx, const std::string& intf,
     return ec;
 }
 
+boost::system::error_code getSubTree(Context::ptr ctx,
+                                     const InterfaceList& interfaces,
+                                     const std::string& subtreePath,
+                                     int32_t depth, ObjectTree& objectTree)
+{
+    boost::system::error_code ec;
+    objectTree = ctx->bus->yield_method_call<ObjectTree>(
+        ctx->yield, ec, MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF, "GetSubTree",
+        subtreePath, depth, interfaces);
+
+    return ec;
+}
+
 boost::system::error_code getDbusObject(Context::ptr ctx,
                                         const std::string& interface,
                                         const std::string& subtreePath,
@@ -319,10 +326,9 @@ boost::system::error_code getDbusObject(Context::ptr ctx,
     interfaces.emplace_back(interface);
 
     auto depth = 0;
-    boost::system::error_code ec;
-    ObjectTree objectTree = ctx->bus->yield_method_call<ObjectTree>(
-        ctx->yield, ec, MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF, "GetSubTree",
-        subtreePath, depth, interfaces);
+    ObjectTree objectTree;
+    boost::system::error_code ec = getSubTree(ctx, interfaces, subtreePath,
+                                              depth, objectTree);
 
     if (ec)
     {
@@ -401,16 +407,12 @@ boost::system::error_code getAllDbusObjects(Context::ptr ctx,
                                             const std::string& match,
                                             ObjectTree& objectTree)
 {
-    boost::system::error_code ec;
     std::vector<std::string> interfaces;
     interfaces.emplace_back(interface);
 
     auto depth = 0;
-
-    objectTree = ctx->bus->yield_method_call<ObjectTree>(
-        ctx->yield, ec, MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF, "GetSubTree",
-        serviceRoot, depth, interfaces);
-
+    boost::system::error_code ec = getSubTree(ctx, interfaces, serviceRoot,
+                                              depth, objectTree);
     if (ec)
     {
         return ec;
