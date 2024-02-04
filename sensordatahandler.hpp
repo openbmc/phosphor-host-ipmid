@@ -41,16 +41,6 @@ using PropertyMap = ipmi::PropertyMap;
 
 using namespace phosphor::logging;
 
-/** @brief get the D-Bus service and service path
- *  @param[in] bus - The Dbus bus object
- *  @param[in] interface - interface to the service
- *  @param[in] path - interested path in the list of objects
- *  @return pair of service path and service
- */
-ServicePath getServiceAndPath(sdbusplus::bus_t& bus,
-                              const std::string& interface,
-                              const std::string& path = std::string());
-
 /** @brief Make assertion set from input data
  *  @param[in] cmdData - Input sensor data
  *  @return pair of assertion and deassertion set
