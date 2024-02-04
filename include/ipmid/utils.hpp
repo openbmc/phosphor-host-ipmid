@@ -101,6 +101,16 @@ class ServiceCache
 std::string getService(sdbusplus::bus_t& bus, const std::string& intf,
                        const std::string& path);
 
+/** @brief Gets the dbus sub tree implementing the given interface.
+ *  @param[in] bus - DBUS Bus Object.
+ *  @param[in] interfaces - Dbus interface.
+ *  @param[in] subtreePath - subtree from where the search should start.
+ *  @param[in] depth - Search depth
+ *  @return map of object path and service info.
+ */
+ObjectTree getSubTree(sdbusplus::bus_t& bus, const InterfaceList& interface,
+                      const std::string& subtreePath = ROOT, int32_t depth = 0);
+
 /** @brief Gets the dbus object info implementing the given interface
  *         from the given subtree.
  *  @param[in] bus - DBUS Bus Object.
@@ -194,6 +204,20 @@ boost::system::error_code getService(Context::ptr ctx, const std::string& intf,
                                      const std::string& path,
                                      std::string& service);
 
+/** @brief Gets the dbus sub tree implementing the given interface.
+ *  @param[in] ctx - ipmi::Context::ptr
+ *  @param[in] bus - DBUS Bus Object.
+ *  @param[in] interfaces - Dbus interface.
+ *  @param[in] subtreePath - subtree from where the search should start.
+ *  @param[in] depth - Search depth
+ *  @param[out] objectTree - map of object path and service info.
+ *  @return map of object path and service info.
+ */
+boost::system::error_code getSubTree(Context::ptr ctx,
+                                     const InterfaceList& interface,
+                                     const std::string& subtreePath,
+                                     int32_t depth, ObjectTree& objectTree);
+
 /** @brief Gets the D-Bus object info implementing the given interface
  *         from the given subtree.
  *  @param[in] ctx - ipmi::Context::ptr
@@ -204,7 +228,7 @@ boost::system::error_code getService(Context::ptr ctx, const std::string& intf,
  *  @return - boost error code object
  */
 boost::system::error_code getDbusObject(Context::ptr ctx,
-                                        const std::string& interface,
+                                        const std::string& interfaces,
                                         const std::string& subtreePath,
                                         const std::string& match,
                                         DbusObjectInfo& dbusObject);
