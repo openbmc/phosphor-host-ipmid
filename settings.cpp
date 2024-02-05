@@ -12,10 +12,6 @@ namespace settings
 using namespace phosphor::logging;
 using namespace sdbusplus::error::xyz::openbmc_project::common;
 
-constexpr auto mapperService = "xyz.openbmc_project.ObjectMapper";
-constexpr auto mapperPath = "/xyz/openbmc_project/object_mapper";
-constexpr auto mapperIntf = "xyz.openbmc_project.ObjectMapper";
-
 Objects::Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter) :
     bus(bus)
 {
@@ -31,45 +27,36 @@ Objects::Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter) :
         elog<InternalFailure>();
     }
 
-    for (auto& iter : objectTree)
+    for (const auto& [path, serverMappers] : objectTree)
     {
-        const auto& path = iter.first;
-        for (auto& interface : iter.second.begin()->second)
+        for (const auto& [service, interfaces] : serverMappers)
         {
-            auto found = map.find(interface);
-            if (map.end() != found)
+            for (const auto& interface : interfaces)
             {
-                auto& paths = found->second;
-                paths.push_back(path);
-            }
-            else
-            {
-                map.emplace(std::move(interface), std::vector<Path>({path}));
+                auto found = std::find_if(
+                    filter.begin(), filter.end(),
+                    [&](const std::string& intf) { return interface == intf; });
+
+                if (found == filter.end())
+                {
+                    continue;
+                }
+
+                if (settingMaps.contains(interface))
+                {
+                    std::tuple<std::string, std::string> services =
+                        std::make_tuple(service, path);
+                    settingMaps.emplace(
+                        interface,
+                        std::vector<std::tuple<std::string, std::string>>(
+                            {std::move(services)}));
+                }
+                else
+                {
+                    settingMaps[interface].push_back({service, path});
+                }
             }
         }
-    }
-}
-
-Service Objects::service(const Path& path, const Interface& interface) const
-{
-    using Interfaces = std::vector<Interface>;
-    auto mapperCall = bus.new_method_call(mapperService, mapperPath, mapperIntf,
-                                          "GetObject");
-    mapperCall.append(path);
-    mapperCall.append(Interfaces({interface}));
-
-    std::map<Service, Interfaces> result;
-    try
-    {
-        auto response = bus.call(mapperCall);
-        response.read(result);
-        return result.begin()->first;
-    }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>("Invalid response from mapper",
-                        entry("ERROR=%s", e.what()));
-        elog<InternalFailure>();
     }
 }
 
