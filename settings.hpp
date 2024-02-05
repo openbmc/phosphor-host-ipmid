@@ -31,19 +31,8 @@ struct Objects
     Objects& operator=(Objects&&) = delete;
     ~Objects() = default;
 
-    /** @brief Fetch d-bus service, given a path and an interface. The
-     *         service can't be cached because mapper returns unique
-     *         service names.
-     *
-     * @param[in] path - The Dbus object
-     * @param[in] interface - The Dbus interface
-     *
-     * @return std::string - the dbus service
-     */
-    Service service(const Path& path, const Interface& interface) const;
-
     /** @brief map of settings objects */
-    std::map<Interface, std::vector<Path>> map;
+    std::map<Interface, std::vector<std::tuple<Service, Path>>> settingMaps;
 
     /** @brief The Dbus bus object */
     sdbusplus::bus_t& bus;

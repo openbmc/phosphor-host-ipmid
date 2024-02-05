@@ -37,7 +37,8 @@ class AllowlistFilter
 
   private:
     void postInit();
-    void cacheRestrictedMode(const std::vector<std::string>& devices);
+    void cacheRestrictedMode(
+        const std::vector<std::tuple<std::string, std::string>>& devices);
     void handleRestrictedModeChange(
         sdbusplus::message_t& m,
         const std::map<std::string, size_t>& deviceList);
@@ -73,30 +74,16 @@ AllowlistFilter::AllowlistFilter()
  */
 
 void AllowlistFilter::cacheRestrictedMode(
-    const std::vector<std::string>& devices)
+    const std::vector<std::tuple<std::string, std::string>>& devices)
 {
     using namespace sdbusplus::server::xyz::openbmc_project::control::security;
-    std::string restrictionModeSetting;
-    std::string restrictionModeService;
 
-    for (auto& dev : devices)
+    size_t index = 0;
+    for (const auto& [service, path] : devices)
     {
-        try
-        {
-            restrictionModeSetting = dev;
-            restrictionModeService = objects->service(restrictionModeSetting,
-                                                      restrictionModeIntf);
-        }
-        catch (const std::out_of_range& e)
-        {
-            log<level::ERR>(
-                "Could not look up restriction mode interface from cache");
-            return;
-        }
-
+        index++;
         bus->async_method_call(
-            [this, index = std::distance(&*std::begin(devices), &dev)](
-                boost::system::error_code ec, ipmi::Value v) {
+            [this, index](boost::system::error_code ec, ipmi::Value v) {
             if (ec)
             {
                 log<level::ERR>("Error in RestrictionMode Get");
@@ -116,9 +103,8 @@ void AllowlistFilter::cacheRestrictedMode(
             log<level::INFO>((restrictMode ? "Set restrictedMode = true"
                                            : "Set restrictedMode = false"));
         },
-            restrictionModeService, restrictionModeSetting,
-            "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
-            "RestrictionMode");
+            service, path, "org.freedesktop.DBus.Properties", "Get",
+            restrictionModeIntf, "RestrictionMode");
     }
 }
 
@@ -181,17 +167,15 @@ void AllowlistFilter::postInit()
         return;
     }
 
-    std::vector<std::string> devices;
-    try
-    {
-        devices = objects->map.at(restrictionModeIntf);
-    }
-    catch (const std::out_of_range& e)
+    const auto& iter = objects->settingMaps.find(restrictionModeIntf);
+    if (iter == objects->settingMaps.end())
     {
         log<level::ERR>(
             "Could not look up restriction mode interface from cache");
         return;
     }
+
+    std::vector<std::tuple<std::string, std::string>> devices = iter->second;
 
     // Initialize restricted mode
     cacheRestrictedMode(devices);
@@ -200,7 +184,8 @@ void AllowlistFilter::postInit()
 
     for (size_t index = 0; index < devices.size(); index++)
     {
-        deviceList.emplace(devices[index], index);
+        const auto& [service, path] = devices[index];
+        deviceList.emplace(path, index);
     }
 
     std::string filterStr;

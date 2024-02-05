@@ -944,26 +944,25 @@ std::optional<uint2_t> getPowerRestorePolicy()
     using namespace chassis::internal;
 
     settings::Objects& objects = cache::getObjects();
-
+    std::string service;
+    std::string path;
     try
     {
-        const auto& powerRestoreSetting =
-            objects.map.at(powerRestoreIntf).front();
-        ipmi::Value result = ipmi::getDbusProperty(
-            *getSdBus(),
-            objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
-            powerRestoreSetting.c_str(), powerRestoreIntf,
-            "PowerRestorePolicy");
+        std::tie(service,
+                 path) = objects.settingMaps.at(powerRestoreIntf).front();
+        ipmi::Value result =
+            ipmi::getDbusProperty(*getSdBus(), service.c_str(), path.c_str(),
+                                  powerRestoreIntf, "PowerRestorePolicy");
         auto powerRestore = RestorePolicy::convertPolicyFromString(
             std::get<std::string>(result));
         restorePolicy = dbusToIpmi.at(powerRestore);
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(
-            "Failed to fetch pgood property", entry("ERROR=%s", e.what()),
-            entry("PATH=%s", objects.map.at(powerRestoreIntf).front().c_str()),
-            entry("INTERFACE=%s", powerRestoreIntf));
+        log<level::ERR>("Failed to fetch pgood property",
+                        entry("ERROR=%s", e.what()),
+                        entry("PATH=%s", path.c_str()),
+                        entry("INTERFACE=%s", powerRestoreIntf));
         cache::objectsPtr.reset();
         return std::nullopt;
     }
@@ -2317,21 +2316,16 @@ ipmi::RspType<uint3_t, // policy support
     try
     {
         settings::Objects& objects = chassis::internal::cache::getObjects();
-        const settings::Path& powerRestoreSetting =
-            objects.map.at(chassis::internal::powerRestoreIntf).front();
+        const auto& [service, path] =
+            objects.settingMaps.at(chassis::internal::powerRestoreIntf).front();
         std::variant<std::string> property = convertForMessage(value);
 
         auto sdbusp = getSdBus();
         boost::system::error_code ec;
-        sdbusp->yield_method_call<void>(
-            yield, ec,
-            objects
-                .service(powerRestoreSetting,
-                         chassis::internal::powerRestoreIntf)
-                .c_str(),
-            powerRestoreSetting, ipmi::PROP_INTF, "Set",
-            chassis::internal::powerRestoreIntf, "PowerRestorePolicy",
-            property);
+        sdbusp->yield_method_call<void>(yield, ec, service.c_str(), path,
+                                        ipmi::PROP_INTF, "Set",
+                                        chassis::internal::powerRestoreIntf,
+                                        "PowerRestorePolicy", property);
         if (ec)
         {
             phosphor::logging::log<level::ERR>("Unspecified Error");
