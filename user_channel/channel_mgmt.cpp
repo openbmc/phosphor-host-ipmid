@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/server/object.hpp>
@@ -1331,35 +1332,6 @@ int ChannelConfig::setDbusProperty(const std::string& service,
     return 0;
 }
 
-int ChannelConfig::getDbusProperty(const std::string& service,
-                                   const std::string& objPath,
-                                   const std::string& interface,
-                                   const std::string& property,
-                                   DbusVariant& value)
-{
-    try
-    {
-        auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                          "org.freedesktop.DBus.Properties",
-                                          "Get");
-
-        method.append(interface, property);
-
-        auto reply = bus.call(method);
-        reply.read(value);
-    }
-    catch (const sdbusplus::exception_t& e)
-    {
-        log<level::DEBUG>("get-property failed",
-                          entry("SERVICE=%s", service.c_str()),
-                          entry("OBJPATH=%s", objPath.c_str()),
-                          entry("INTERFACE=%s", interface.c_str()),
-                          entry("PROP=%s", property.c_str()));
-        return -EIO;
-    }
-    return 0;
-}
-
 int ChannelConfig::syncNetworkChannelConfig()
 {
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
@@ -1376,17 +1348,11 @@ int ChannelConfig::syncNetworkChannelConfig()
                 std::string networkIntfObj =
                     std::string(networkIntfObjectBasePath) + "/" +
                     channelData[chNum].chName;
-                DbusVariant variant;
-                if (0 != getDbusProperty(networkIntfServiceName, networkIntfObj,
-                                         networkChConfigIntfName,
-                                         privilegePropertyString, variant))
-                {
-                    log<level::DEBUG>("Network interface does not exist",
-                                      entry("INTERFACE=%s",
-                                            channelData[chNum].chName.c_str()));
-                    continue;
-                }
-                intfPrivStr = std::get<std::string>(variant);
+                auto propValue = ipmi::getDbusProperty(
+                    bus, networkIntfServiceName, networkIntfObj,
+                    networkChConfigIntfName, privilegePropertyString);
+
+                intfPrivStr = std::get<std::string>(propValue);
                 intfPriv =
                     static_cast<uint8_t>(convertToPrivLimitIndex(intfPrivStr));
             }
