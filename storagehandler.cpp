@@ -552,16 +552,9 @@ ipmi::RspType<uint32_t> // current time
     {
         sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
         auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
-        std::variant<uint64_t> value;
-
-        // Get bmc time
-        auto method = bus.new_method_call(service.c_str(), BMC_TIME_PATH,
-                                          DBUS_PROPERTIES, "Get");
-
-        method.append(TIME_INTERFACE, PROPERTY_ELAPSED);
-        auto reply = bus.call(method);
-        reply.read(value);
-        bmc_time_usec = std::get<uint64_t>(value);
+        auto propValue = ipmi::getDbusProperty(
+            bus, service, BMC_TIME_PATH, TIME_INTERFACE, PROPERTY_ELAPSED);
+        bmc_time_usec = std::get<uint64_t>(propValue);
     }
     catch (const InternalFailure& e)
     {
