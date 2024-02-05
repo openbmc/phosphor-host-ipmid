@@ -317,22 +317,13 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
         "xyz.openbmc_project.Association.Definitions";
     static constexpr auto assocProp = "Associations";
 
-    auto service = ipmi::getService(bus, assocIntf, objPath);
-
-    // Read the Associations interface.
-    auto methodCall = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                          propIntf, "Get");
-    methodCall.append(assocIntf);
-    methodCall.append(assocProp);
-
-    using AssociationList =
-        std::vector<std::tuple<std::string, std::string, std::string>>;
-
-    std::variant<AssociationList> list;
+    std::vector<ipmi::Association> assocs;
     try
     {
-        auto reply = bus.call(methodCall);
-        reply.read(list);
+        auto service = ipmi::getService(bus, assocIntf, objPath);
+        auto propValue = ipmi::getDbusProperty(bus, service, objPath, assocIntf,
+                                               assocProp);
+        assocs = std::get<std::vector<ipmi::Association>>(propValue);
     }
     catch (const std::exception& e)
     {
@@ -340,8 +331,6 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
                         entry("ERROR=%s", e.what()));
         elog<InternalFailure>();
     }
-
-    auto& assocs = std::get<AssociationList>(list);
 
     /*
      * Check if the log entry has any callout associations, if there is a
@@ -377,21 +366,15 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
 {
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
-    auto service = ipmi::getService(bus, logEntryIntf, objPath);
+    static constexpr auto propTimeStamp = "Timestamp";
 
-    using namespace std::string_literals;
-    static const auto propTimeStamp = "Timestamp"s;
-
-    auto methodCall = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                          propIntf, "Get");
-    methodCall.append(logEntryIntf);
-    methodCall.append(propTimeStamp);
-
-    std::variant<uint64_t> timeStamp;
+    uint64_t timeStamp;
     try
     {
-        auto reply = bus.call(methodCall);
-        reply.read(timeStamp);
+        auto service = ipmi::getService(bus, logEntryIntf, objPath);
+        auto propValue = ipmi::getDbusProperty(bus, service, objPath,
+                                               logEntryIntf, propTimeStamp);
+        timeStamp = std::get<uint64_t>(propValue);
     }
     catch (const std::exception& e)
     {
@@ -400,7 +383,7 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
         elog<InternalFailure>();
     }
 
-    std::chrono::milliseconds chronoTimeStamp(std::get<uint64_t>(timeStamp));
+    std::chrono::milliseconds chronoTimeStamp(timeStamp);
 
     return std::chrono::duration_cast<std::chrono::seconds>(chronoTimeStamp);
 }
