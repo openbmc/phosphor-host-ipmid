@@ -94,31 +94,30 @@ void AllowlistFilter::cacheRestrictedMode(
             return;
         }
 
-        bus->async_method_call(
-            [this, index = std::distance(&*std::begin(devices), &dev)](
-                boost::system::error_code ec, ipmi::Value v) {
-            if (ec)
-            {
-                log<level::ERR>("Error in RestrictionMode Get");
-                // Fail-safe to true.
-                restrictedMode[index] = true;
-                return;
-            }
+        std::string mode;
+        try
+        {
+            auto propValue = ipmi::getDbusProperty(
+                *bus, restrictionModeService, restrictionModeSetting,
+                restrictionModeIntf, "RestrictionMode");
+            mode = std::get<std::string>(propValue);
+        }
+        catch (const std::exception& e)
+        {
+            log<level::ERR>("Error in RestrictionMode Get");
+            // Fail-safe to true.
+            size_t index = std::distance(&*std::begin(devices), &dev);
+            restrictedMode[index] = true;
+        }
 
-            auto mode = std::get<std::string>(v);
-            auto restrictionMode =
-                RestrictionMode::convertModesFromString(mode);
+        auto restrictionMode = RestrictionMode::convertModesFromString(mode);
 
-            bool restrictMode =
-                (restrictionMode == RestrictionMode::Modes::Allowlist);
-            restrictedMode.emplace_back(restrictMode);
+        bool restrictMode =
+            (restrictionMode == RestrictionMode::Modes::Allowlist);
+        restrictedMode.emplace_back(restrictMode);
 
-            log<level::INFO>((restrictMode ? "Set restrictedMode = true"
-                                           : "Set restrictedMode = false"));
-        },
-            restrictionModeService, restrictionModeSetting,
-            "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
-            "RestrictionMode");
+        log<level::INFO>((restrictMode ? "Set restrictedMode = true"
+                                       : "Set restrictedMode = false"));
     }
 }
 
