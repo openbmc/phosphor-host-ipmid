@@ -322,20 +322,6 @@ class ChannelConfig
                         const std::string& interface,
                         const std::string& property, const DbusVariant& value);
 
-    /** @brief function to get D-Bus property value
-     *
-     *  @param[in] service - service name
-     *  @param[in] objPath - object path
-     *  @param[in] interface - interface
-     *  @param[in] property - property name
-     *  @param[out] value - property value
-     *
-     *  @return 0 for success, -errno for failure.
-     */
-    int getDbusProperty(const std::string& service, const std::string& objPath,
-                        const std::string& interface,
-                        const std::string& property, DbusVariant& value);
-
     /** @brief function to read json config file
      *
      *  @param[in] configFile - configuration file name
