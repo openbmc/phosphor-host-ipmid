@@ -1053,7 +1053,8 @@ ipmi::RspType<uint16_t,                   // Next Record ID
             }
             catch (const std::invalid_argument&)
             {
-                std::cerr << "Invalid Generator ID\n";
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "Invalid Generator ID");
             }
 
             // Get the sensor type, sensor number, and event type for the sensor
@@ -1079,7 +1080,8 @@ ipmi::RspType<uint16_t,                   // Next Record ID
             }
             catch (const std::invalid_argument&)
             {
-                std::cerr << "Invalid Event Direction\n";
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "Invalid Event Direction");
             }
         }
 
@@ -1137,24 +1139,73 @@ ipmi::RspType<uint16_t,                   // Next Record ID
     return ipmi::responseUnspecifiedError();
 }
 
-/*
-Unused arguments
-  uint16_t recordID, uint8_t recordType, uint32_t timestamp,
-  uint16_t generatorID, uint8_t evmRev, uint8_t sensorType, uint8_t sensorNum,
-  uint8_t eventType, uint8_t eventData1, uint8_t eventData2,
-  uint8_t eventData3
-*/
-ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t,
-                                               uint16_t, uint8_t, uint8_t,
-                                               uint8_t, uint8_t, uint8_t,
-                                               uint8_t, uint8_t)
+ipmi::RspType<uint16_t>
+    ipmiStorageAddSELEntry(ipmi::Context::ptr ctx, uint16_t, uint8_t recordType,
+                           uint32_t, uint16_t generatorID, uint8_t evmRev,
+                           uint8_t sensorType, uint8_t sensorNum,
+                           uint8_t eventType, uint8_t eventData1,
+                           uint8_t eventData2, uint8_t eventData3)
 {
     // Per the IPMI spec, need to cancel any reservation when a SEL entry is
     // added
     cancelSELReservation();
 
-    uint16_t responseID = 0xFFFF;
-    return ipmi::responseSuccess(responseID);
+    if (recordType == 0x02) // System SEL
+    {
+        std::string message = "System User Generated SEL";
+        std::string sensorPath = getPathFromSensorNumber(sensorNum);
+        if (sensorPath.empty())
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "ADDSELEntry: Error Sensor path not found");
+        }
+
+        boost::system::error_code ec;
+        std::vector<uint8_t> eventData = {eventData1, eventData2, eventData3};
+
+        // Perform sdbus IpmiSelAdd from phosphor-sel-logger
+        uint16_t responseID = ctx->bus->yield_method_call<uint16_t>(
+            ctx->yield, ec, selLoggerServiceName, ipmiSELPath,
+            ipmiSELAddInterface, "IpmiSelAdd", message, sensorPath, eventData,
+            (bool)(eventType >> 7), generatorID);
+
+        if (ec)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "ADDSELEntry: Failed to add System SEL through sdbus");
+            return ipmi::responseUnspecifiedError();
+        }
+        return ipmi::responseSuccess(responseID);
+    }
+    else if ((recordType >= 0xC0) && (recordType <= 0xDF)) // OEM SEL
+    {
+        std::string message = "OEM User Generated SEL";
+        boost::system::error_code ec;
+        uint8_t partA = static_cast<uint8_t>((generatorID & 0xFF00) >> 8);
+        uint8_t partB = static_cast<uint8_t>(generatorID & 0x00FF);
+
+        // Following the IPMI spec for OEM commands the generatorID and evmRev
+        // are used as ManufactureID and sensorType, sensorNum, eventType and
+        // eventData 1,2,3 are sent as the OEM Defined
+        std::vector<uint8_t> eventData = {partA,      partB,      evmRev,
+                                          sensorType, sensorNum,  eventType,
+                                          eventData1, eventData2, eventData3};
+
+        // Perform sdbus IpmiSelAddOEM from phosphor-sel-logger
+        uint16_t responseID = ctx->bus->yield_method_call<uint16_t>(
+            ctx->yield, ec, selLoggerServiceName, ipmiSELPath,
+            ipmiSELAddInterface, "IpmiSelAddOem", message, eventData,
+            recordType);
+
+        if (ec)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "ADDSELEntry: Failed to add OEM SEL through sdbus");
+            return ipmi::responseUnspecifiedError();
+        }
+        return ipmi::responseSuccess(responseID);
+    }
+    return ipmi::responseUnspecifiedError();
 }
 
 ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
@@ -1192,11 +1243,12 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
 
     boost::system::error_code ec;
     ctx->bus->yield_method_call<>(ctx->yield, ec, selLoggerServiceName,
-                                  "/xyz/openbmc_project/Logging/IPMI",
-                                  "xyz.openbmc_project.Logging.IPMI", "Clear");
+                                  ipmiSELPath, ipmiSELAddInterface, "Clear");
     if (ec)
     {
-        std::cerr << "error in clear SEL: " << ec << std::endl;
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "error in clear SEL: ",
+            phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
         return ipmi::responseUnspecifiedError();
     }
 
