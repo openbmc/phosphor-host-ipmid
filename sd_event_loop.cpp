@@ -12,7 +12,6 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <phosphor-logging/lg2.hpp>
-#include <sdbusplus/asio/sd_event.hpp>
 #include <user_channel/channel_layer.hpp>
 
 namespace eventloop
