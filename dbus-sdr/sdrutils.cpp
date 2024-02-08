@@ -39,18 +39,6 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     static std::shared_ptr<SensorSubTree> sensorTreePtr;
     static uint16_t sensorUpdatedIndex = 0;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
-    static sdbusplus::bus::match_t sensorAdded(
-        *dbus,
-        "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
-        "sensors/'",
-        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
-
-    static sdbusplus::bus::match_t sensorRemoved(
-        *dbus,
-        "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
-        "openbmc_project/sensors/'",
-        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
-
     if (sensorTreePtr)
     {
         subtree = sensorTreePtr;
