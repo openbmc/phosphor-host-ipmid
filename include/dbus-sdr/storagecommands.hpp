@@ -16,6 +16,7 @@
 
 #pragma once
 #include "sensorhandler.hpp"
+#include <filesystem>
 
 #include <cstdint>
 
@@ -121,6 +122,23 @@ namespace ipmi
 namespace storage
 {
 
+using systemEventType = std::tuple<
+    uint32_t, // Timestamp
+    uint16_t, // Generator ID
+    uint8_t,  // EvM Rev
+    uint8_t,  // Sensor Type
+    uint8_t,  // Sensor Number
+    uint7_t,  // Event Type
+    bool,     // Event Direction
+    std::array<uint8_t, dynamic_sensors::ipmi::sel::systemEventSize>>; // Event
+                                                                       // Data
+using oemTsEventType = std::tuple<
+    uint32_t, // Timestamp
+    std::array<uint8_t, dynamic_sensors::ipmi::sel::oemTsEventSize>>; // Event
+                                                                      // Data
+using oemEventType =
+    std::array<uint8_t, dynamic_sensors::ipmi::sel::oemEventSize>; // Event Data
+
 constexpr const size_t type12Count = 2;
 ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
                       get_sdr::SensorDataFruRecord& resp);
@@ -131,6 +149,39 @@ std::vector<uint8_t>
     getType8SDRs(ipmi::sensor::EntityInfoMap::const_iterator& entity,
                  uint16_t recordId);
 std::vector<uint8_t> getType12SDRs(uint16_t index, uint16_t recordId);
-std::vector<uint8_t> getNMDiscoverySDR(uint16_t index, uint16_t recordId);
+
+ipmi::RspType<uint16_t, // inventorySize
+              uint8_t>  // accessType
+    ipmiStorageGetFruInvAreaInfo(ipmi::Context::ptr ctx, uint8_t fruDeviceId);
+
+ipmi::RspType<uint8_t,             // Count
+              std::vector<uint8_t> // Requested data
+              >
+    ipmiStorageReadFruData(ipmi::Context::ptr ctx, uint8_t fruDeviceId,
+                           uint16_t fruInventoryOffset, uint8_t countToRead);
+
+ipmi::RspType<uint8_t>
+    ipmiStorageWriteFruData(ipmi::Context::ptr ctx, uint8_t fruDeviceId,
+                            uint16_t fruInventoryOffset,
+                            std::vector<uint8_t>& dataToWrite);
+
+ipmi::RspType<uint8_t,  // SEL version
+              uint16_t, // SEL entry count
+              uint16_t, // free space
+              uint32_t, // last add timestamp
+              uint32_t, // last erase timestamp
+              uint8_t>  // operation support
+    ipmiStorageGetSELInfo();
+
+bool getSELLogFiles(std::vector<std::filesystem::path>& selLogFiles);
+bool findSELEntry(const int recordID,
+                  const std::vector<std::filesystem::path>& selLogFiles,
+                  std::string& entry);
+uint16_t getNextRecordID(const uint16_t recordID,
+                         const std::vector<std::filesystem::path>& selLogFiles);
+int fromHexStr(const std::string& hexStr, std::vector<uint8_t>& data);
+void createTimers();
+void startMatch();
+
 } // namespace storage
 } // namespace ipmi

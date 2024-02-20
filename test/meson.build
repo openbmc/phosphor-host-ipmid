@@ -80,5 +80,5 @@ test('dbus-sdr/sensorcommands',
     include_directories: root_inc,
     build_by_default: false,
     implicit_include_directories: false,
-    dependencies: [sensorutils_dep, gtest, gmock]
+    dependencies: [dbus_sdr_dep, gtest, gmock]
   ))

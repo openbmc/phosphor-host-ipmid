@@ -119,48 +119,6 @@ enum class IPMINetfnSensorCmds : ipmi_cmd_t
 namespace ipmi
 {
 
-SensorSubTree& getSensorTree()
-{
-    static SensorSubTree sensorTree;
-    return sensorTree;
-}
-
-static ipmi_ret_t
-    getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
-                        std::string& connection, std::string& path,
-                        std::vector<std::string>* interfaces = nullptr)
-{
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
-    {
-        return IPMI_CC_RESPONSE_ERROR;
-    }
-
-    if (ctx == nullptr)
-    {
-        return IPMI_CC_RESPONSE_ERROR;
-    }
-
-    path = getPathFromSensorNumber((ctx->lun << 8) | sensnum);
-    if (path.empty())
-    {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
-    for (const auto& sensor : sensorTree)
-    {
-        if (path == sensor.first)
-        {
-            connection = sensor.second.begin()->first;
-            if (interfaces)
-                *interfaces = sensor.second.begin()->second;
-            break;
-        }
-    }
-
-    return 0;
-}
-
 struct IPMIThresholds
 {
     std::optional<uint8_t> warningLow;
@@ -181,6 +139,95 @@ struct sensorInfo
     uint8_t entityInstance;
 };
 
+ipmi::RspType<uint8_t,              // No of instances for requested id
+              uint8_t,              // No of record ids in the response
+              std::vector<uint16_t> // SDR Record ID corresponding to the Entity
+                                    // IDs
+              >
+    getSensorInfo(ipmi::Context::ptr ctx, uint8_t sensorType, uint8_t entityId,
+                  uint8_t entityInstance, uint8_t instanceStart);
+
+ipmi::RspType<uint8_t,                // No of instances for requested id
+              uint8_t,                // No of record ids in the response
+              std::vector<            // Temperature Data
+                  std::tuple<uint7_t, // Temperature value
+                             bool,    // Sign bit
+                             uint8_t  // Entity Instance of sensor
+                             >>>
+    getTempReadings(ipmi::Context::ptr ctx, uint8_t sensorType,
+                    uint8_t entityId, uint8_t entityInstance,
+                    uint8_t instanceStart);
 } // namespace dcmi
 
+ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
+                                     uint8_t sensorNumber, uint8_t,
+                                     uint8_t reading, uint15_t assertOffset,
+                                     bool, uint15_t, bool, uint8_t, uint8_t,
+                                     uint8_t);
+
+ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
+    ipmiSenGetSensorReading(ipmi::Context::ptr ctx, uint8_t sensnum);
+
+ipmi::RspType<uint8_t, // readable
+              uint8_t, // lowerNCrit
+              uint8_t, // lowerCrit
+              uint8_t, // lowerNrecoverable
+              uint8_t, // upperNC
+              uint8_t, // upperCrit
+              uint8_t> // upperNRecoverable
+    ipmiSenGetSensorThresholds(ipmi::Context::ptr ctx, uint8_t sensorNumber);
+
+ipmi::RspType<> ipmiSenSetSensorThresholds(
+    ipmi::Context::ptr ctx, uint8_t sensorNum, bool lowerNonCriticalThreshMask,
+    bool lowerCriticalThreshMask, bool lowerNonRecovThreshMask,
+    bool upperNonCriticalThreshMask, bool upperCriticalThreshMask,
+    bool upperNonRecovThreshMask, uint2_t reserved, uint8_t lowerNonCritical,
+    uint8_t lowerCritical, [[maybe_unused]] uint8_t lowerNonRecoverable,
+    uint8_t upperNonCritical, uint8_t upperCritical,
+    [[maybe_unused]] uint8_t upperNonRecoverable);
+
+ipmi::RspType<uint8_t, // enabled
+              uint8_t, // assertionEnabledLsb
+              uint8_t, // assertionEnabledMsb
+              uint8_t, // deassertionEnabledLsb
+              uint8_t> // deassertionEnabledMsb
+    ipmiSenGetSensorEventEnable(ipmi::Context::ptr ctx, uint8_t sensorNum);
+
+ipmi::RspType<uint8_t,         // sensorEventStatus
+              std::bitset<16>, // assertions
+              std::bitset<16>  // deassertion
+              >
+    ipmiSenGetSensorEventStatus(ipmi::Context::ptr ctx, uint8_t sensorNum);
+
+ipmi::RspType<uint8_t,  // sdr version
+              uint16_t, // record count
+              uint16_t, // free space
+              uint32_t, // most recent addition
+              uint32_t, // most recent erase
+              uint8_t   // operationSupport
+              >
+    ipmiStorageGetSDRRepositoryInfo(ipmi::Context::ptr ctx);
+
+ipmi::RspType<uint8_t, // respcount
+              uint8_t, // dynamic population flags
+              uint32_t // last time a sensor was added
+              >
+    ipmiSensorGetDeviceSdrInfo(ipmi::Context::ptr ctx,
+                               std::optional<uint8_t> count);
+
+ipmi::RspType<uint16_t, // allocUnits
+              uint16_t, // allocUnitSize
+              uint16_t, // allocUnitFree
+              uint16_t, // allocUnitLargestFree
+              uint8_t   // maxRecordSize
+              >
+    ipmiStorageGetSDRAllocationInfo();
+
+ipmi::RspType<uint16_t> ipmiStorageReserveSDR();
+
+ipmi::RspType<uint16_t,            // next record ID
+              std::vector<uint8_t> // payload
+              >
+    ipmiStorageGetSDR(ipmi::Context::ptr ctx, uint16_t reservationID,
+                      uint16_t recordID, uint8_t offset, uint8_t bytesToRead);
 } // namespace ipmi

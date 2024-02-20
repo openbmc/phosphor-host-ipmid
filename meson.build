@@ -211,7 +211,7 @@ if not get_option('transport-oem').disabled()
 endif
 
 storage_cmds_src = []
-if get_option('dynamic-sensors').disabled() and not get_option('dynamic-storages-only').disabled()
+if get_option('dynamic-sensors').allowed()
   storage_cmds_src = ['dbus-sdr/storagecommands.cpp', 'dbus-sdr/sdrutils.cpp']
 endif
 
@@ -275,14 +275,14 @@ executable(
   install_dir: get_option('bindir'))
 
 # Dynamic Sensor Stack
-subdir('dbus-sdr')
+if get_option('dynamic-sensors').allowed() or get_option('tests').allowed()
+  subdir('dbus-sdr')
 
-if not get_option('dynamic-sensors').disabled() or not get_option('tests').disabled()
   library(
     'dynamiccmds',
     dbus_sdr_src,
     implicit_include_directories: false,
-    dependencies: dbus_sdr_pre,
+    dependencies: [dbus_sdr_dep],
     version: meson.project_version(),
     override_options: ['b_lundef=false'],
     install: true,

@@ -37,4 +37,6 @@ uint8_t scaleIPMIValueFromDouble(const double value, const int16_t mValue,
 
 uint8_t getScaledIPMIValue(const double value, const double max,
                            const double min);
+
+int testing();
 } // namespace ipmi

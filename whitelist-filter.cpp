@@ -106,15 +106,15 @@ void AllowlistFilter::cacheRestrictedMode(
             }
 
             auto mode = std::get<std::string>(v);
-            auto restrictionMode =
-                RestrictionMode::convertModesFromString(mode);
+            // auto restrictionMode =
+            //     RestrictionMode::convertModesFromString(mode);
 
-            bool restrictMode =
-                (restrictionMode == RestrictionMode::Modes::Allowlist);
-            restrictedMode.emplace_back(restrictMode);
+            // bool restrictMode =
+            //     (restrictionMode == RestrictionMode::Modes::Allowlist);
+            // restrictedMode.emplace_back(restrictMode);
 
-            log<level::INFO>((restrictMode ? "Set restrictedMode = true"
-                                           : "Set restrictedMode = false"));
+            // log<level::INFO>((restrictMode ? "Set restrictedMode = true"
+            //                                : "Set restrictedMode = false"));
         },
             restrictionModeService, restrictionModeSetting,
             "org.freedesktop.DBus.Properties", "Get", restrictionModeIntf,
@@ -137,7 +137,7 @@ void AllowlistFilter::handleRestrictedModeChange(
     m.read(intf, propertyList);
 
     std::string path = m.get_path();
-    size_t hostId = 0;
+    // size_t hostId = 0;
     auto it = deviceList.find(path);
 
     if (it == deviceList.end())
@@ -146,21 +146,21 @@ void AllowlistFilter::handleRestrictedModeChange(
     }
     else
     {
-        hostId = it->second;
+        // hostId = it->second;
     }
 
     for (const auto& property : propertyList)
     {
         if (property.first == "RestrictionMode")
         {
-            RestrictionMode::Modes restrictionMode =
-                RestrictionMode::convertModesFromString(
-                    std::get<std::string>(property.second));
-            bool restrictMode =
-                (restrictionMode == RestrictionMode::Modes::Allowlist);
-            restrictedMode[hostId] = restrictMode;
-            log<level::INFO>((restrictMode ? "Updated restrictedMode = true"
-                                           : "Updated restrictedMode = false"));
+            // RestrictionMode::Modes restrictionMode =
+            //     RestrictionMode::convertModesFromString(
+            //         std::get<std::string>(property.second));
+            // bool restrictMode =
+            //     (restrictionMode == RestrictionMode::Modes::Allowlist);
+            // restrictedMode[hostId] = restrictMode;
+            // log<level::INFO>((restrictMode ? "Updated restrictedMode = true"
+            //                                : "Updated restrictedMode = false"));
         }
     }
 }
