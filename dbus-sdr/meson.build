@@ -1,15 +1,6 @@
-sensorutils_lib = static_library(
-  'sensorutils',
-  'sensorutils.cpp',
-  include_directories: root_inc,
-  implicit_include_directories: false)
-
-sensorutils_dep = declare_dependency(link_with: sensorutils_lib)
-
 hybrid_dep = []
 hybrid_src = []
-
-if not get_option('hybrid-sensors').disabled()
+if get_option('hybrid-sensors').allowed()
   hybrid_dep = [
     mapper,
   ]
@@ -22,20 +13,33 @@ if not get_option('hybrid-sensors').disabled()
   ]
 endif
 
-dbus_sdr_pre = declare_dependency(
-  include_directories: root_inc,
-  dependencies: [
-    crypto,
-    nlohmann_json_dep,
-    phosphor_logging_dep,
-    ipmid_dep,
-    sensorutils_dep,
-    hybrid_dep,
-  ])
-
 dbus_sdr_src = [
-  'dbus-sdr/sdrutils.cpp',
   'dbus-sdr/sensorcommands.cpp',
   'dbus-sdr/storagecommands.cpp',
   hybrid_src,
 ]
+
+dbus_sdr_pre = [
+  crypto,
+  nlohmann_json_dep,
+  phosphor_logging_dep,
+  ipmid_dep,
+]
+
+dbus_sdr_lib = library(
+  'dbus_sdr',
+  'sensorutils.cpp',
+  'sdrutils.cpp',
+  'sensorcommands_utils.cpp',
+  'storagecommands_utils.cpp',
+  include_directories: root_inc,
+  dependencies: dbus_sdr_pre,
+  implicit_include_directories: false,
+  install: true,
+  install_dir: get_option('libdir'),
+)
+
+dbus_sdr_dep = declare_dependency(
+  dependencies: dbus_sdr_pre + hybrid_dep,
+  link_with: dbus_sdr_lib
+)
