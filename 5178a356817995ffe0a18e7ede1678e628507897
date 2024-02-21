@@ -34,6 +34,24 @@
       "parentUuid": "017cd81e_d6966ad1",
       "revId": "5178a356817995ffe0a18e7ede1678e628507897",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7773eb53_3e6117df",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-02-21T02:05:50Z",
+      "side": 1,
+      "message": "they are actually the same. It is populated via `getSensorSubtree` in https://github.com/openbmc/phosphor-host-ipmid/blob/f027bf0334b91de5c829d21082dd42b75b45a405/include/dbus-sdr/sensorcommands.hpp#L133-L134C10\n\nI don\u0027t think we `getSensorTree` since it is just confusing at this point. I can try to clean it up.",
+      "parentUuid": "7ef54885_0785a8db",
+      "revId": "5178a356817995ffe0a18e7ede1678e628507897",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
