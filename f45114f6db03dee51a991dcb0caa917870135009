@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e086f3c7_d0eea33e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2171,
+      "author": {
+        "id": 1001504
+      },
+      "writtenOn": "2024-02-21T04:55:21Z",
+      "side": 1,
+      "message": "It\u0027s much simple after the clean up. \nNow the `getSensorSubtree` returns an `uint16_t` update index. In most time, it will be true. Consider ignore the return value here. It looks like only `bool getSensorNumMap(std::shared_ptr\u003cSensorNumMap\u003e\u0026 sensorNumMap)` is interested at the return value.",
+      "range": {
+        "startLine": 2171,
+        "startChar": 18,
+        "endLine": 2171,
+        "endChar": 34
+      },
+      "revId": "f45114f6db03dee51a991dcb0caa917870135009",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
