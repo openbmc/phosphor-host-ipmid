@@ -119,19 +119,14 @@ enum class IPMINetfnSensorCmds : ipmi_cmd_t
 namespace ipmi
 {
 
-SensorSubTree& getSensorTree()
-{
-    static SensorSubTree sensorTree;
-    return sensorTree;
-}
-
 static ipmi_ret_t
     getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
                         std::string& connection, std::string& path,
                         std::vector<std::string>* interfaces = nullptr)
 {
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    std::shared_ptr<SensorSubTree> sensorTree;
+    details::getSensorSubtree(sensorTree);
+    if (sensorTree->empty())
     {
         return IPMI_CC_RESPONSE_ERROR;
     }
@@ -147,7 +142,7 @@ static ipmi_ret_t
         return IPMI_CC_INVALID_FIELD_REQUEST;
     }
 
-    for (const auto& sensor : sensorTree)
+    for (const auto& sensor : *sensorTree)
     {
         if (path == sensor.first)
         {

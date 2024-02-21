@@ -281,10 +281,11 @@ inline IPMIWriteTable sdrWriteTable;
  */
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
 
+uint32_t getSdrLastAdd();
+uint32_t getSdrLastRemove();
+
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
 } // namespace details
-
-bool getSensorSubtree(SensorSubTree& subtree);
 
 #ifdef FEATURE_HYBRID_SENSORS
 ipmi::sensor::IdInfoMap::const_iterator
