@@ -88,11 +88,8 @@ static constexpr uint8_t bmcI2CAddr = 0x20;
 
 constexpr size_t maxSDRTotalSize =
     76; // Largest SDR Record Size (type 01) + SDR Overheader Size
-constexpr static const uint32_t noTimestamp = 0xFFFFFFFF;
 
 static uint16_t sdrReservationID;
-static uint32_t sdrLastAdd = noTimestamp;
-static uint32_t sdrLastRemove = noTimestamp;
 static constexpr size_t lastRecordIndex = 0xFFFF;
 
 // The IPMI spec defines four Logical Units (LUN), each capable of supporting
@@ -130,6 +127,7 @@ const static boost::container::flat_map<const char*, SensorUnits, CmpStr>
 
 void registerSensorFunctions() __attribute__((constructor));
 
+<<<<<<< HEAD
 static sdbusplus::bus::match_t sensorAdded(
     *getSdBus(),
     "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
@@ -154,6 +152,8 @@ static sdbusplus::bus::match_t sensorRemoved(
                         .count();
 });
 
+=======
+>>>>>>> 0dc52d6 (dbus-sdr: Remove getSensorTree)
 // this keeps track of deassertions for sensor event status command. A
 // deasertion can only happen if an assertion was seen first.
 static boost::container::flat_map<
@@ -1957,7 +1957,9 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
 
 static inline uint16_t getNumberOfSensors()
 {
-    return std::min(getSensorTree().size(), maxIPMISensors);
+    std::shared_ptr<SensorSubTree> sensorTree;
+    details::getSensorSubtree(sensorTree);
+    return std::min(sensorTree->size(), maxIPMISensors);
 }
 
 static int getSensorDataRecord(
@@ -2184,7 +2186,6 @@ static ipmi::RspType<uint8_t, // respcount
     ipmiSensorGetDeviceSdrInfo(ipmi::Context::ptr ctx,
                                std::optional<uint8_t> count)
 {
-    auto& sensorTree = getSensorTree();
     uint8_t sdrCount = 0;
     uint16_t recordID = 0;
     std::vector<uint8_t> record;
@@ -2193,7 +2194,8 @@ static ipmi::RspType<uint8_t, // respcount
     constexpr uint8_t getSdrCount = 0x01;
     constexpr uint8_t getSensorCount = 0x00;
 
-    if (!getSensorSubtree(sensorTree) || sensorTree.empty())
+    std::shared_ptr<SensorSubTree> sensorTree;
+    if (!details::getSensorSubtree(sensorTree) && sensorTree->empty())
     {
         return ipmi::responseResponseError();
     }
@@ -2313,7 +2315,7 @@ static ipmi::RspType<uint8_t, // respcount
     }
 
     return ipmi::responseSuccess(sdrCount, lunsAndDynamicPopulation,
-                                 sdrLastAdd);
+                                 details::getSdrLastAdd());
 }
 
 /* end sensor commands */
@@ -2329,9 +2331,9 @@ ipmi::RspType<uint8_t,  // sdr version
               >
     ipmiStorageGetSDRRepositoryInfo(ipmi::Context::ptr ctx)
 {
-    auto& sensorTree = getSensorTree();
     constexpr const uint16_t unspecifiedFreeSpace = 0xFFFF;
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    std::shared_ptr<SensorSubTree> sensorTree;
+    if (!details::getSensorSubtree(sensorTree) && sensorTree->empty())
     {
         return ipmi::responseResponseError();
     }
@@ -2354,8 +2356,8 @@ ipmi::RspType<uint8_t,  // sdr version
     operationSupport |= static_cast<uint8_t>(
         SdrRepositoryInfoOps::reserveSDRRepositoryCommandSupported);
     return ipmi::responseSuccess(ipmiSdrVersion, recordCount,
-                                 unspecifiedFreeSpace, sdrLastAdd,
-                                 sdrLastRemove, operationSupport);
+                                 unspecifiedFreeSpace, details::getSdrLastAdd(),
+                                 details::getSdrLastRemove(), operationSupport);
 }
 
 /** @brief implements the get SDR allocation info command
@@ -2430,12 +2432,12 @@ ipmi::RspType<uint16_t,            // next record ID
             ->getIpmiEntityRecords();
     int entityCount = entityRecords.size();
 
-    auto& sensorTree = getSensorTree();
     size_t lastRecord = getNumberOfSensors() + fruCount +
                         ipmi::storage::type12Count + entityCount - 1;
     uint16_t nextRecordId = lastRecord > recordID ? recordID + 1 : 0XFFFF;
 
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    std::shared_ptr<SensorSubTree> sensorTree;
+    if (!details::getSensorSubtree(sensorTree) && sensorTree->empty())
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "ipmiStorageGetSDR: getSensorSubtree error");
@@ -2505,8 +2507,8 @@ std::tuple<uint8_t,                // Total of instance sensors
         return std::make_tuple(totalInstSensor, sensorList);
     }
 
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    std::shared_ptr<SensorSubTree> sensorTree;
+    if (!details::getSensorSubtree(sensorTree) && sensorTree->empty())
     {
         return std::make_tuple(totalInstSensor, sensorList);
     }
@@ -2514,7 +2516,7 @@ std::tuple<uint8_t,                // Total of instance sensors
     auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
 
     size_t invalidSensorNumberErrCount = 0;
-    for (const auto& sensor : sensorTree)
+    for (const auto& sensor : *sensorTree)
     {
         const std::string& sensorObjPath = sensor.first;
         const auto& sensorTypeValue = getSensorTypeFromPath(sensorObjPath);
