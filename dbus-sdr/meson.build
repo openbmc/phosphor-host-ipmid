@@ -9,7 +9,7 @@ sensorutils_dep = declare_dependency(link_with: sensorutils_lib)
 hybrid_dep = []
 hybrid_src = []
 
-if not get_option('hybrid-sensors').disabled()
+if get_option('hybrid-sensors').allowed()
   hybrid_dep = [
     mapper,
   ]

@@ -84,7 +84,6 @@ feature_map = {
   'i2c-whitelist-check'        : '-DENABLE_I2C_WHITELIST_CHECK',
   'update-functional-on-fail'  : '-DUPDATE_FUNCTIONAL_ON_FAIL',
   'dynamic-sensors'            : '-DFEATURE_DYNAMIC_SENSORS',
-  'dynamic-sensors-write'      : '-DFEATURE_DYNAMIC_SENSORS_WRITE',
   'entity-manager-decorators'  : '-DUSING_ENTITY_MANAGER_DECORATORS',
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
@@ -277,7 +276,7 @@ executable(
 # Dynamic Sensor Stack
 subdir('dbus-sdr')
 
-if not get_option('dynamic-sensors').disabled() or not get_option('tests').disabled()
+if get_option('dynamic-sensors').allowed()
   library(
     'dynamiccmds',
     dbus_sdr_src,
