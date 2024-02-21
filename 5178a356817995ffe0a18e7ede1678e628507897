@@ -16,6 +16,24 @@
       "message": "The matcher in `dbus-sdr/sensorcommands.cpp` may not take effect on some platform.  Let me do more testing and get it back to you.",
       "revId": "5178a356817995ffe0a18e7ede1678e628507897",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7ef54885_0785a8db",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001504
+      },
+      "writtenOn": "2024-02-21T01:17:18Z",
+      "side": 1,
+      "message": "It seems that the `sensorTree` in https://github.com/openbmc/phosphor-host-ipmid/blob/f027bf0334b91de5c829d21082dd42b75b45a405/include/dbus-sdr/sensorcommands.hpp#L122-L126 is a different copy with the `sensorTreePtr` in https://github.com/openbmc/phosphor-host-ipmid/blob/f027bf0334b91de5c829d21082dd42b75b45a405/dbus-sdr/sdrutils.cpp#L60.\n\nWe may need more investigating how to remove the duplicate.",
+      "parentUuid": "017cd81e_d6966ad1",
+      "revId": "5178a356817995ffe0a18e7ede1678e628507897",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
