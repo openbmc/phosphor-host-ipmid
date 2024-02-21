@@ -70,6 +70,30 @@
       },
       "revId": "f45114f6db03dee51a991dcb0caa917870135009",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "35c9e051_f6e614cb",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2171,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-02-21T19:29:34Z",
+      "side": 1,
+      "message": "Done.\n\nOh wait... actually..\n\n`!details::getSensorSubtree(sensorTree) \u0026\u0026 sensorTree-\u003eempty())`\n\nif `details::getSensorSubtree(sensorTree)` is never `false`... then that statement is never true... Maybe we are never in there?\n\nAlso note that the line here uses `||`. I don\u0027t know if that\u0027s a bug or not.",
+      "parentUuid": "58679c7b_ccd8b162",
+      "range": {
+        "startLine": 2171,
+        "startChar": 18,
+        "endLine": 2171,
+        "endChar": 34
+      },
+      "revId": "f45114f6db03dee51a991dcb0caa917870135009",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
