@@ -34,6 +34,19 @@ extern const IdInfoMap sensors;
 
 namespace details
 {
+constexpr static const uint32_t noTimestamp = 0xFFFFFFFF;
+static uint32_t sdrLastAdd = noTimestamp;
+static uint32_t sdrLastRemove = noTimestamp;
+
+uint32_t getSdrLastAdd()
+{
+    return sdrLastAdd;
+}
+uint32_t getSdrLastRemove()
+{
+    return sdrLastRemove;
+}
+
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 {
     static std::shared_ptr<SensorSubTree> sensorTreePtr;
@@ -43,13 +56,25 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         *dbus,
         "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
         "sensors/'",
-        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+        [](sdbusplus::message_t&) {
+        sensorTreePtr.reset();
+        ipmi::getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
+        sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
+                         std::chrono::system_clock::now().time_since_epoch())
+                         .count();
+    });
 
     static sdbusplus::bus::match_t sensorRemoved(
         *dbus,
         "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
         "openbmc_project/sensors/'",
-        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+        [](sdbusplus::message_t&) {
+        sensorTreePtr.reset();
+        ipmi::getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
+        sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count();
+    });
 
     if (sensorTreePtr)
     {
@@ -196,19 +221,6 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
     return sensorNumMapUpated;
 }
 } // namespace details
-
-bool getSensorSubtree(SensorSubTree& subtree)
-{
-    std::shared_ptr<SensorSubTree> sensorTree;
-    details::getSensorSubtree(sensorTree);
-    if (!sensorTree)
-    {
-        return false;
-    }
-
-    subtree = *sensorTree;
-    return true;
-}
 
 #ifdef FEATURE_HYBRID_SENSORS
 // Static sensors are listed in sensor-gen.cpp.
