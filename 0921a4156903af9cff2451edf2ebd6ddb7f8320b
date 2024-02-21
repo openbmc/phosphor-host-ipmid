@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cdf0d9eb_7f7124e3",
+        "filename": "dbus-sdr/sensorcommands_utils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-02-21T00:19:21Z",
+      "side": 1,
+      "message": "all of the FEATURE_HYBRID_SENSORS has is depended on a lib that has undefined libs... so we need to move this out of the shared lib...\n\nMaybe this is not worth doing.",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 6
+      },
+      "revId": "0921a4156903af9cff2451edf2ebd6ddb7f8320b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
