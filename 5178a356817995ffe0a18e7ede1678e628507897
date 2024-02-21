@@ -52,6 +52,24 @@
       "parentUuid": "7ef54885_0785a8db",
       "revId": "5178a356817995ffe0a18e7ede1678e628507897",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "496b0531_a6ab01fe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001504
+      },
+      "writtenOn": "2024-02-21T02:51:37Z",
+      "side": 1,
+      "message": "There does exits two copies(versions) of sensor tree:\n1) `SensorSubTree\u0026 getSensorTree()` provides a `storage location` for sensor tree. 2) `uint16_t getSensorSubtree(std::shared_ptr\u003cSensorSubTree\u003e\u0026 subtree)` creates another sensor tree at `sensorTreePtr \u003d std::make_shared\u003cSensorSubTree\u003e();`.\n3) The shared_ptr version will be assigned (by value) to `static SensorSubTree sensorTree` when `bool getSensorSubtree(SensorSubTree\u0026 subtree)` is called.\n\nI feel like if we remove the matcher in `sdrutils.cpp`, `sensorTreePtr` won\u0027t be reset. So we will always get old copy of shared_ptr version?",
+      "parentUuid": "7773eb53_3e6117df",
+      "revId": "5178a356817995ffe0a18e7ede1678e628507897",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
