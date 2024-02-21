@@ -70,6 +70,24 @@
       "parentUuid": "7773eb53_3e6117df",
       "revId": "5178a356817995ffe0a18e7ede1678e628507897",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "47cd26c5_58a6665c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-02-21T03:54:54Z",
+      "side": 1,
+      "message": "I am trying some cleanup in https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/69520\n\nAnd yeah, I think we need to keep the one in `sdrutils.cpp`, but maybe not the one in `sensorcommand.cpp`.",
+      "parentUuid": "496b0531_a6ab01fe",
+      "revId": "5178a356817995ffe0a18e7ede1678e628507897",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
