@@ -22,6 +22,30 @@
       },
       "revId": "f45114f6db03dee51a991dcb0caa917870135009",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8f0607f3_7cc97472",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2171,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-02-21T19:14:04Z",
+      "side": 1,
+      "message": "actually, the logic is a bit different right now, before it uses\n\n```\nbool getSensorSubtree(SensorSubTree\u0026 subtree)\n{\n    std::shared_ptr\u003cSensorSubTree\u003e sensorTree;\n    details::getSensorSubtree(sensorTree);\n    if (!sensorTree)\n    {\n        return false;\n    }\n\n    subtree \u003d *sensorTree;\n    return true;\n}\n```\n\nIt used to check if the shapred_pointer is `nullptr` or not, but now it checks the index. but tbh, I think just checking for `sensorTree-\u003eempty()` is enough since it is the same as `!details::getSensorSubtree(sensorTree)`.\n\nIn the old logic, I believe we actuall never enter\n\n```\n    if (!sensorTree)\n    {\n        return false;\n    }\n```\n\nsince we never return `sensorTree` when it is nullptr.",
+      "parentUuid": "e086f3c7_d0eea33e",
+      "range": {
+        "startLine": 2171,
+        "startChar": 18,
+        "endLine": 2171,
+        "endChar": 34
+      },
+      "revId": "f45114f6db03dee51a991dcb0caa917870135009",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
