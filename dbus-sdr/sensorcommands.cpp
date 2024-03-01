@@ -2245,6 +2245,16 @@ static ipmi::RspType<uint8_t, // respcount
                     sdrCount++;
                 }
             }
+            else if (hdr->record_type == get_sdr::SENSOR_DATA_EVENT_RECORD)
+            {
+                get_sdr::SensorDataEventRecord* recordData =
+                    reinterpret_cast<get_sdr::SensorDataEventRecord*>(
+                        record.data());
+                if (ctx->lun == recordData->key.owner_lun)
+                {
+                    sdrCount++;
+                }
+            }
             else if (hdr->record_type == get_sdr::SENSOR_DATA_FRU_RECORD ||
                      hdr->record_type == get_sdr::SENSOR_DATA_MGMT_CTRL_LOCATOR)
             {
