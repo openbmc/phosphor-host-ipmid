@@ -651,6 +651,23 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         return ipmi::response(status);
     }
 
+    // Setting write permission to external sensor
+    DbusInterfaceMap sensorMap;
+    if (!getSensorMap(ctx, connection, path, sensorMap))
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "Failed to update sensor map for threshold sensor");
+    }
+    auto mutability =
+        sensorMap.find("xyz.openbmc_project.Sensor.ValueMutability");
+
+    if (mutability != sensorMap.end() &&
+        mappedVariant<bool>(mutability->second, "Mutable", false))
+    {
+        details::sdrWriteTable.setWritePermission(
+            ((ctx->lun << 8) | sensorNumber), true);
+    }
+
     // we can tell the sensor type by its interface type
     if (std::find(interfaces.begin(), interfaces.end(),
                   sensor::sensorInterface) != interfaces.end())
