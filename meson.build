@@ -113,7 +113,6 @@ sdeventplus_dep = dependency('sdeventplus')
 systemd = dependency('systemd')
 crypto = dependency('libcrypto', version : '>=1.0.2g')
 pam = cpp.find_library('pam', required: true)
-mapper = dependency('libmapper')
 boost_coroutine = cpp.find_library('boost_coroutine', required: true)
 sdbusplus_dep = dependency('sdbusplus')
 stdplus_dep = dependency('stdplus')
@@ -172,7 +171,6 @@ sysintfcmds_pre = declare_dependency(
   dependencies: [
     channellayer_dep,
     crypto,
-    mapper,
     nlohmann_json_dep,
     phosphor_dbus_interfaces_dep,
     phosphor_logging_dep,
@@ -201,7 +199,6 @@ ipmid_pre = [
   crypto,
   ipmid_dep,
   channellayer_dep,
-  mapper,
 ]
 
 transportoem_src = []

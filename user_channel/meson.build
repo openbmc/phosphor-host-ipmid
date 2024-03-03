@@ -74,7 +74,6 @@ if not get_option('libuserlayer').disabled()
   usercmds_pre = declare_dependency(
     include_directories: [root_inc, user_channel_inc],
     dependencies: [
-      mapper,
       phosphor_logging_dep,
       ipmid_dep,
       userlayer_dep,
