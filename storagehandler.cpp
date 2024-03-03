@@ -9,7 +9,6 @@
 #include "storageaddsel.hpp"
 
 #include <arpa/inet.h>
-#include <mapper.h>
 #include <systemd/sd-bus.h>
 
 #include <ipmid/api.hpp>
