@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e4efe7d0_b76439a7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 671,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-03-04T16:57:18Z",
+      "side": 1,
+      "message": "do we still need to set this to if `sensorSettable` is false?\n\nI was thinking of just having this in like\n```\nif (mutability !\u003d sensorMap.end() \u0026\u0026 mappedVariant\u003cbool\u003e(\n                                                mutability-\u003esecond, \"Mutable\",\n                                                false))\n{\n  details::sdrWriteTable.setWritePermission(((ctx-\u003elun \u003c\u003c 8) | sensorNumber), true);\n}\n```\nif we don\u0027t need to set it unless it is true.",
+      "range": {
+        "startLine": 670,
+        "startChar": 4,
+        "endLine": 671,
+        "endChar": 62
+      },
+      "revId": "92fc03a13ea33fa25857883d3bcbb5cb272ef0f5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
