@@ -52,6 +52,9 @@ option('whitelist-conf', type: 'string', value: 'host-ipmid-whitelist.conf', des
 # Entity Manager Decorators
 option('entity-manager-decorators', type: 'feature', value: 'enabled', description: 'The Entity Manager Decorators flag is enabled by default; offer a way to disable it')
 
+# Fre Device Properties
+option('fru-device-property-override-fru-name', type: 'feature', value: 'enabled', description: 'The Fru Device Property flag is enabled by default; offer a way to disable it')
+
 # Dynamic Sensor Stack
 option('dynamic-sensors', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
 option('dynamic-sensors-write', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')

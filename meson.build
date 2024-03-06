@@ -86,6 +86,7 @@ feature_map = {
   'dynamic-sensors'            : '-DFEATURE_DYNAMIC_SENSORS',
   'dynamic-sensors-write'      : '-DFEATURE_DYNAMIC_SENSORS_WRITE',
   'entity-manager-decorators'  : '-DUSING_ENTITY_MANAGER_DECORATORS',
+  'fru-device-property-override-fru-name' : '-DUSING_FRU_DEVICE_PROPERTY_OVERRIDE_FRU_NAME',
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
   'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',

@@ -670,6 +670,7 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
 
 #endif
 
+#ifdef USING_FRU_DEVICE_PROPERTY_OVERRIDE_FRU_NAME
     std::vector<std::string> nameProperties = {
         "PRODUCT_PRODUCT_NAME",  "BOARD_PRODUCT_NAME",   "PRODUCT_PART_NUMBER",
         "BOARD_PART_NUMBER",     "PRODUCT_MANUFACTURER", "BOARD_MANUFACTURER",
@@ -684,6 +685,7 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
             break;
         }
     }
+#endif
 
     if (name.empty())
     {
