@@ -885,35 +885,29 @@ int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
 }
 
 //------------------------------------------
-// Set Enabled property to inform NMI source
-// handling to trigger a NMI_OUT BSOD.
+// Trigger an NMI on the host via dbus
 //------------------------------------------
-int setNmiProperty(ipmi::Context::ptr& ctx, const bool value)
+static int doNmi(ipmi::Context::ptr& ctx)
 {
-    constexpr const char* nmiSourceObjPath =
-        "/xyz/openbmc_project/Chassis/Control/NMISource";
-    constexpr const char* nmiSourceIntf =
-        "xyz.openbmc_project.Chassis.Control.NMISource";
-    std::string bmcSourceSignal = "xyz.openbmc_project.Chassis.Control."
-                                  "NMISource.BMCSourceSignal.ChassisCmd";
+    constexpr const char* nmiIntfName = "xyz.openbmc_project.Control.Host.NMI";
+    ipmi::DbusObjectInfo nmiObj{};
+    boost::system::error_code ec;
 
-    std::string service;
-    boost::system::error_code ec = ipmi::getService(ctx, nmiSourceIntf,
-                                                    nmiSourceObjPath, service);
-    if (!ec)
-    {
-        ec = ipmi::setDbusProperty(ctx, service, nmiSourceObjPath,
-                                   nmiSourceIntf, "BMCSource", bmcSourceSignal);
-    }
-    if (!ec)
-    {
-        ec = ipmi::setDbusProperty(ctx, service, nmiSourceObjPath,
-                                   nmiSourceIntf, "Enabled", value);
-    }
+    ec = ipmi::getDbusObject(ctx, nmiIntfName, nmiObj);
     if (ec)
     {
-        log<level::ERR>("Failed to trigger NMI_OUT",
-                        entry("EXCEPTION=%s", ec.message().c_str()));
+        log<level::ERR>("Failed to find NMI service",
+                        entry("ERROR=%s", ec.message().c_str()));
+        return -1;
+    }
+
+    ctx->bus->yield_method_call<void>(ctx->yield, ec, nmiObj.second,
+                                      nmiObj.first, nmiIntfName, "NMI");
+    if (ec)
+    {
+        log<level::ERR>("NMI call failed",
+                        entry("ERROR=%s", ec.message().c_str()));
+        elog<InternalFailure>();
         return -1;
     }
 
@@ -1387,7 +1381,7 @@ ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
             rc = initiateHostStateTransition(ctx, State::Host::Transition::Off);
             break;
         case CMD_PULSE_DIAGNOSTIC_INTR:
-            rc = setNmiProperty(ctx, true);
+            rc = doNmi(ctx);
             break;
 
         default:
