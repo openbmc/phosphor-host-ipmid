@@ -1525,6 +1525,14 @@ void UserAccess::checkAndReloadUserData()
     return;
 }
 
+void UserAccess::reloadUserData()
+{
+    std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
+              reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
+    readUserData();
+    return;
+}
+
 UsersTbl* UserAccess::getUsersTblPtr()
 {
     // reload data before using it.

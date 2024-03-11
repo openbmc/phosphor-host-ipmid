@@ -43,6 +43,11 @@ void ipmiReloadPassword()
     return passwdMgr.reloadPassword();
 }
 
+void ipmiReloadUserAccess()
+{
+    return getUserAccessObject().reloadUserData();
+}
+
 Cc ipmiClearUserEntryPassword(const std::string& userName)
 {
     if (passwdMgr.updateUserEntry(userName, "") != 0)

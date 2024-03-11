@@ -97,6 +97,11 @@ SecureString ipmiUserGetPassword(const std::string& userName);
  */
 void ipmiReloadPassword();
 
+/** @brief The IPMI call to reload user json file when file update
+ *
+ */
+void ipmiReloadUserAccess();
+
 /** @brief The IPMI call to clear password entry associated with specified
  * username
  *
