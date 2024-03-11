@@ -323,6 +323,12 @@ class UserAccess
      */
     void checkAndReloadUserData();
 
+    /** @brief Funtion which force reload configuration file data if
+     * needed.
+     *
+     */
+    void reloadUserData();
+
     /** @brief provides user details from D-Bus user property data
      *
      *  @param[in] properties - D-Bus user property
