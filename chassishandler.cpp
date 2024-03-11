@@ -1020,6 +1020,7 @@ std::optional<bool> getPowerStatus()
     return std::make_optional(powerGood);
 }
 
+#ifdef ENABLE_CHASSIS_STATUS_AC_FAIL
 /*
  * getACFailStatus
  * helper function for Get Chassis Status Command
@@ -1051,8 +1052,11 @@ bool getACFailStatus()
     }
     return acFail;
 }
+#endif
 } // namespace power_policy
 
+#if defined(ENABLE_CHASSIS_STATUS_POWER_BUTTON) ||                             \
+    defined(ENABLE_CHASSIS_STATUS_RESET_BUTTON)
 static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
                                             const std::string& buttonIntf)
 {
@@ -1074,6 +1078,7 @@ static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
     }
     return std::make_optional(buttonDisabled);
 }
+#endif
 
 static bool setButtonEnabled(ipmi::Context::ptr& ctx,
                              const std::string& buttonPath,
@@ -1098,6 +1103,7 @@ static bool setButtonEnabled(ipmi::Context::ptr& ctx,
     return true;
 }
 
+#ifdef ENABLE_CHASSIS_STATUS_INTRUSION
 static std::optional<bool> getChassisIntrusionStatus(ipmi::Context::ptr& ctx)
 {
     constexpr const char* chassisIntrusionPath =
@@ -1127,6 +1133,7 @@ static std::optional<bool> getChassisIntrusionStatus(ipmi::Context::ptr& ctx)
                     entry("ERROR=%s", ec.message().c_str()));
     return std::nullopt;
 }
+#endif
 
 //----------------------------------------------------------------------
 // Get Chassis Status commands
@@ -1163,7 +1170,7 @@ ipmi::RspType<bool,    // Power is on
               bool,    // Diagnostic Interrupt button disable allowed
               bool     // Standby (sleep) button disable allowed
               >
-    ipmiGetChassisStatus(ipmi::Context::ptr& ctx)
+    ipmiGetChassisStatus([[maybe_unused]] ipmi::Context::ptr& ctx)
 {
     using namespace chassis::internal;
     std::optional<uint2_t> restorePolicy =
@@ -1175,38 +1182,47 @@ ipmi::RspType<bool,    // Power is on
     }
 
     //  Front Panel Button Capabilities and disable/enable status(Optional)
+    bool powerButtonDisableAllow = false;
+    bool powerButtonDisabled = false;
+#ifdef ENABLE_CHASSIS_STATUS_POWER_BUTTON
     std::optional<bool> powerButtonReading = getButtonEnabled(powerButtonPath,
                                                               powerButtonIntf);
     // allow disable if the interface is present
-    bool powerButtonDisableAllow = static_cast<bool>(powerButtonReading);
-    // default return the button is enabled (not disabled)
-    bool powerButtonDisabled = false;
+    powerButtonDisableAllow = static_cast<bool>(powerButtonReading);
     if (powerButtonDisableAllow)
     {
         // return the real value of the button status, if present
         powerButtonDisabled = *powerButtonReading;
     }
+#endif
 
+    bool resetButtonDisableAllow = false;
+    bool resetButtonDisabled = false;
+#ifdef ENABLE_CHASSIS_STATUS_RESET_BUTTON
     std::optional<bool> resetButtonReading = getButtonEnabled(resetButtonPath,
                                                               resetButtonIntf);
     // allow disable if the interface is present
-    bool resetButtonDisableAllow = static_cast<bool>(resetButtonReading);
-    // default return the button is enabled (not disabled)
-    bool resetButtonDisabled = false;
+    resetButtonDisableAllow = static_cast<bool>(resetButtonReading);
     if (resetButtonDisableAllow)
     {
         // return the real value of the button status, if present
         resetButtonDisabled = *resetButtonReading;
     }
+#endif
 
-    bool powerDownAcFailed = power_policy::getACFailStatus();
+    bool powerDownAcFailed = false;
+#ifdef ENABLE_CHASSIS_STATUS_AC_FAIL
+    powerDownAcFailed = power_policy::getACFailStatus();
+#endif
 
     bool chassisIntrusionActive = false;
+#ifdef ENABLE_CHASSIS_STATUS_INTRUSION
     std::optional<bool> chassisIntrusionStatus = getChassisIntrusionStatus(ctx);
     if (chassisIntrusionStatus)
     {
         chassisIntrusionActive = chassisIntrusionStatus.value();
     }
+#endif
 
     // This response has a lot of hard-coded, unsupported fields
     // They are set to false or 0

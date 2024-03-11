@@ -79,3 +79,9 @@ option('dynamic-storages-only', type: 'feature', value: 'disabled', description:
 
 # open-power specific functionality.
 option('open-power', type: 'feature', description: 'Support open-power specific functions')
+
+# Get Chassis Status
+option('chassis-status-power-btn', type: 'feature', value: 'enabled', description: 'Support power button status in Get Chassis Status command')
+option('chassis-status-reset-btn', type: 'feature', value: 'enabled', description: 'Support reset button status in Get Chassis Status command')
+option('chassis-status-ac-fail', type: 'feature', value: 'enabled', description: 'Support AC fail status in Get Chassis Status command')
+option('chassis-status-intrusion', type: 'feature', value: 'enabled', description: 'Support intrusion status in Get Chassis Status command')

@@ -89,6 +89,10 @@ feature_map = {
   'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
   'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
   'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',
+  'chassis-status-power-btn'   : '-DENABLE_CHASSIS_STATUS_POWER_BUTTON',
+  'chassis-status-reset-btn'   : '-DENABLE_CHASSIS_STATUS_RESET_BUTTON',
+  'chassis-status-ac-fail'     : '-DENABLE_CHASSIS_STATUS_AC_FAIL',
+  'chassis-status-intrusion'   : '-DENABLE_CHASSIS_STATUS_INTRUSION',
 }
 
 foreach option_key, option_value : feature_map
