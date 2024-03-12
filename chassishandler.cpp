@@ -931,7 +931,8 @@ using DbusValue = RestorePolicy::Policy;
 const std::map<DbusValue, IpmiValue> dbusToIpmi = {
     {RestorePolicy::Policy::AlwaysOff, 0x00},
     {RestorePolicy::Policy::Restore, 0x01},
-    {RestorePolicy::Policy::AlwaysOn, 0x02}};
+    {RestorePolicy::Policy::AlwaysOn, 0x02},
+    {RestorePolicy::Policy::None, 0x07}};
 
 static constexpr uint8_t noChange = 0x03;
 static constexpr uint8_t allSupport = 0x01 | 0x02 | 0x04;
