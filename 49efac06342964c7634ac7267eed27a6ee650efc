@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3983f15_78b8892c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-03-13T16:30:16Z",
+      "side": 1,
+      "message": "I don\u0027t think this commit is needed. It attempts to remove functions that might be called from external ipmi provider modules.",
+      "revId": "49efac06342964c7634ac7267eed27a6ee650efc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ff9bd2c6_9c074431",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-03-13T16:30:16Z",
+      "side": 1,
+      "message": "this change is not needed",
+      "revId": "49efac06342964c7634ac7267eed27a6ee650efc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26c8b45f_480c9a1e",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-03-13T16:30:16Z",
+      "side": 1,
+      "message": "this change is not needed",
+      "revId": "49efac06342964c7634ac7267eed27a6ee650efc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
