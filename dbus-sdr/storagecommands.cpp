@@ -1180,6 +1180,42 @@ ipmi::RspType<uint16_t,                   // Next Record ID
     return ipmi::responseUnspecifiedError();
 }
 
+ipmi::RspType<uint16_t> ipmiDeleteSELEntry(ipmi::Context::ptr ctx,
+                                           uint16_t reservationID,
+                                           uint16_t targetID)
+{
+    if (!checkSELReservation(reservationID))
+    {
+        return ipmi::responseInvalidReservationId();
+    }
+
+    cancelSELReservation();
+    boost::system::error_code ec;
+
+    ctx->bus->yield_method_call<void>(
+        ctx->yield, ec, selLoggerServiceName, ipmiSELPath,
+        ipmiSELAddInterface, "SELDelete", targetID);
+
+    if (ec)
+    {
+        if (ec == boost::system::error_condition(EIO,
+            boost::system::generic_category()))
+        {
+            return ipmi::responseSensorInvalid();
+        }
+        if (ec == boost::system::error_condition(EBADR,
+            boost::system::generic_category()))
+        {
+            return ipmi::responseCommandNotAvailable();
+        }
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "DeleteSELEntry: Failed to delete System SEL through sdbus");
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess(targetID);
+}
+
 /*
 Unused arguments
   uint16_t recordID, uint8_t recordType, uint32_t timestamp,
@@ -1335,6 +1371,11 @@ void registerStorageFunctions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelEntry, ipmi::Privilege::User,
                           ipmiStorageGetSELEntry);
+
+    // <Delete SEL Entry>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdDeleteSelEntry,
+                          ipmi::Privilege::User, ipmiDeleteSELEntry);
 
     // <Add SEL Entry>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
