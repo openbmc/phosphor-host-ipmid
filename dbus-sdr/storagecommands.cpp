@@ -824,16 +824,58 @@ static uint16_t
     getNextRecordID(const uint16_t recordID,
                     const std::vector<std::filesystem::path>& selLogFiles)
 {
-    uint16_t nextRecordID = recordID + 1;
+    // Record ID is the first entry field following the timestamp. It is
+    // preceded by a space and followed by a comma
+    std::string search = " " + std::to_string(recordID) + ",";
     std::string entry;
-    if (findSELEntry(nextRecordID, selLogFiles, entry))
+    uint16_t nextRecordID = ipmi::sel::lastEntry;
+
+    // Loop through the ipmi_sel log entries in event order
+    for (auto selFileIter = selLogFiles.rbegin(); selFileIter != selLogFiles.rend(); selFileIter++)
     {
-        return nextRecordID;
+        std::ifstream logStream(*selFileIter);
+        if (!logStream.is_open())
+        {
+            continue;
+        }
+
+        while (std::getline(logStream, entry))
+        {
+            // Check if the record ID matches
+            if (entry.find(search) == std::string::npos)
+            {
+                continue;
+            }
+            // Check if the next line contains the next record
+            std::getline(logStream, entry);
+            if (logStream.eof())
+            {
+                if (++selFileIter == selLogFiles.rend())
+                {
+                    logStream.close();
+                    return ipmi::sel::lastEntry;
+                }
+                logStream.close();
+                logStream.open(*selFileIter);
+                std::getline(logStream, entry);
+                // Check for an empty file
+                if (logStream.eof())
+                {
+                    logStream.close();
+                    return ipmi::sel::lastEntry;
+                }
+                logStream.close();
+            }
+            // Retrieve the Record ID of the next entry
+            int left = entry.find(" ");
+            int right = entry.find(",");
+            int idLen = right - left;
+            std::string nextRecordIdString = entry.substr(left, idLen);
+            nextRecordID = std::stoi(nextRecordIdString);
+            return nextRecordID;
+        }
     }
-    else
-    {
-        return ipmi::sel::lastEntry;
-    }
+    return ipmi::sel::lastEntry;
 }
 
 static int fromHexStr(const std::string& hexStr, std::vector<uint8_t>& data)
