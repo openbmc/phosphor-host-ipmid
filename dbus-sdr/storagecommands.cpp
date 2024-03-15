@@ -820,20 +820,99 @@ static bool findSELEntry(const int recordID,
     return false;
 }
 
+static std::filesystem::path retrievePrevFile(const std::filesystem::path& file)
+{
+    std::string fileNumStr = file.extension();
+    if (!fileNumStr.empty())
+    {
+        std::filesystem::path prevPath(dynamic_sensors::ipmi::sel::selLogDir);
+        prevPath /= dynamic_sensors::ipmi::sel::selLogFilename;
+        fileNumStr.erase(fileNumStr.begin());
+        int fileNum = std::stoi(fileNumStr);
+        if (fileNum > 1)
+        {
+            prevPath += ".";
+            prevPath += std::to_string(fileNum - 1);
+        }
+        return prevPath;
+    }
+    else
+    {
+        return {};
+    }
+}
+
 static uint16_t
     getNextRecordID(const uint16_t recordID,
                     const std::vector<std::filesystem::path>& selLogFiles)
 {
-    uint16_t nextRecordID = recordID + 1;
+    // Record ID is the first entry field following the timestamp. It is
+    // preceded by a space and followed by a comma
+    std::string search = " " + std::to_string(recordID) + ",";
     std::string entry;
-    if (findSELEntry(nextRecordID, selLogFiles, entry))
+    uint16_t nextRecordID = ipmi::sel::lastEntry;
+
+    // Loop through the ipmi_sel log entries
+    for (const std::filesystem::path& file : selLogFiles)
     {
-        return nextRecordID;
+        std::ifstream logStream(file);
+        if (!logStream.is_open())
+        {
+            continue;
+        }
+
+        while (std::getline(logStream, entry))
+        {
+            // Check if the record ID matches
+            if (entry.find(search) != std::string::npos)
+            {
+                // Check if the next line contains the next record
+                std::getline(logStream, entry);
+                if (logStream.eof())
+                {
+                    logStream.close();
+                    std::string fileNumStr = file.extension();
+                    std::filesystem::path prevPath = retrievePrevFile(file);
+                    // Check if there is no previous file
+                    if (!prevPath.empty())
+                    {
+                        logStream.open(prevPath);
+                        std::getline(logStream, entry);
+                        // Check for an empty file
+                        if (logStream.eof())
+                        {
+                            logStream.close();
+                            return ipmi::sel::lastEntry;
+                        }
+                        // Retrieve the Record ID of the next entry
+                        int left = entry.find(" ");
+                        int right = entry.find(",");
+                        int idLen = right - left;
+                        std::string nextRecordIdString = entry.substr(left,
+                                                                      idLen);
+                        nextRecordID = std::stoi(nextRecordIdString);
+                        logStream.close();
+                        return nextRecordID;
+                    }
+                    else
+                    {
+                        return ipmi::sel::lastEntry;
+                    }
+                }
+                else
+                {
+                    // Retrieve the Record ID of the next entry
+                    int left = entry.find(" ");
+                    int right = entry.find(",");
+                    int idLen = right - left;
+                    std::string nextRecordIdString = entry.substr(left, idLen);
+                    nextRecordID = std::stoi(nextRecordIdString);
+                    return nextRecordID;
+                }
+            }
+        }
     }
-    else
-    {
-        return ipmi::sel::lastEntry;
-    }
+    return ipmi::sel::lastEntry;
 }
 
 static int fromHexStr(const std::string& hexStr, std::vector<uint8_t>& data)
