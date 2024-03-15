@@ -1216,6 +1216,40 @@ ipmi::RspType<uint16_t,                   // Next Record ID
     return ipmi::responseUnspecifiedError();
 }
 
+ipmi::RspType<uint16_t> ipmiDeleteSELEntry(ipmi::Context::ptr ctx,
+                                           uint16_t reservationID,
+                                           uint16_t targetID)
+{
+    if (!checkSELReservation(reservationID))
+    {
+        return ipmi::responseInvalidReservationId();
+    }
+
+    static constexpr uint16_t selInvalidRecID =
+        std::numeric_limits<uint16_t>::max();
+    cancelSELReservation();
+    boost::system::error_code ec;
+
+    uint16_t responseID = ctx->bus->yield_method_call<uint16_t>(
+        ctx->yield, ec, "xyz.openbmc_project.Logging.IPMI",
+        "/xyz/openbmc_project/Logging/IPMI", "xyz.openbmc_project.Logging.IPMI",
+        "IpmiSelDelete", targetID);
+
+    if (responseID == selInvalidRecID)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (ec)
+    {
+        std::cout << "DeleteSELEntry: Failed to delete System SEL through sdbus"
+                  << std::endl;
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess(responseID);
+}
+
 /*
 Unused arguments
   uint16_t recordID, uint8_t recordType, uint32_t timestamp,
@@ -1371,6 +1405,11 @@ void registerStorageFunctions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
                           ipmi::storage::cmdGetSelEntry, ipmi::Privilege::User,
                           ipmiStorageGetSELEntry);
+
+    // <Delete SEL Entry>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdDeleteSelEntry, ipmi::Privilege::User,
+                          ipmiDeleteSELEntry);
 
     // <Add SEL Entry>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
