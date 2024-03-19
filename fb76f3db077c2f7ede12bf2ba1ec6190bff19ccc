@@ -51,6 +51,24 @@
       "parentUuid": "62c9f3bb_06d31ffd",
       "revId": "fb76f3db077c2f7ede12bf2ba1ec6190bff19ccc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b0571b7d_37aaad68",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-03-19T20:31:19Z",
+      "side": 0,
+      "message": "I don\u0027t see any in the public openbmc repos, but that doesn\u0027t mean they aren\u0027t used in repos that are not public.\n\nI don\u0027t really see them as a problem. If you are looking to trim the size of the library, I guess that is fine, but before we remove things, we need to give the users a grace period  by marking them as deprecated:\n\n[[deprecated(\"Unused internally, marked for removal after 2025-03-30 unless disputed\")]]\n\nPut that line in front of the function declarations to mark them as deprecated.",
+      "parentUuid": "cefd6b2c_cec5b24f",
+      "revId": "fb76f3db077c2f7ede12bf2ba1ec6190bff19ccc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
