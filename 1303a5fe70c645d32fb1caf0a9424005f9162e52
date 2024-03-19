@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2c13fc14_46e56800",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-03-19T23:54:00Z",
+      "side": 1,
+      "message": "I don\u0027t really like the idea of adding a temporary fix just to turn around and replace it with a real fix later. Let\u0027s just get the real fix put in and then move on.\n\nThere are a lot of options here.\n1) use some type of IPC to inform other programs linked to libuser_channel that they need to reload. Pick your poison: semaphores, shared memory, dbus signals, pipes, etc.\n2) add a timestamp file or modify the format of the file to incorporate a timestamp. If jffs2 has insufficient resolution, put a microsecond timestamp value into a file.\n3) something else?",
+      "revId": "1303a5fe70c645d32fb1caf0a9424005f9162e52",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
