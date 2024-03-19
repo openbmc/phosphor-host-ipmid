@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "400f7158_b1541d52",
+        "filename": "settings.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-03-19T23:08:49Z",
+      "side": 0,
+      "message": "This comment describes why this change should not be made. I recall caching of any information was hotly contested even when this interface went in. But since it is possible for a service to be restarted in the meantime, caching the unique name is not a good idea.",
+      "revId": "7ff60bcce3f60b2aee677c87bb51b51cc39e4e62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
