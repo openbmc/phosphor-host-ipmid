@@ -87,6 +87,24 @@
       "parentUuid": "cefd6b2c_cec5b24f",
       "revId": "fb76f3db077c2f7ede12bf2ba1ec6190bff19ccc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4936eab7_cca08896",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-03-25T01:15:51Z",
+      "side": 0,
+      "message": "Acknowledged",
+      "parentUuid": "b0571b7d_37aaad68",
+      "revId": "fb76f3db077c2f7ede12bf2ba1ec6190bff19ccc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
