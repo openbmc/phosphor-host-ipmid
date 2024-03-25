@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2bc98488_fa81016d",
+        "filename": "include/ipmid/utils.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-03-25T01:15:06Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "7ea60214_2ae40ddb",
+      "revId": "fb76f3db077c2f7ede12bf2ba1ec6190bff19ccc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "62c9f3bb_06d31ffd",

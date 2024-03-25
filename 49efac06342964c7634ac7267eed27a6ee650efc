@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b7c70938_8e23cb9c",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-03-25T01:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ff9bd2c6_9c074431",
+      "revId": "49efac06342964c7634ac7267eed27a6ee650efc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "26c8b45f_480c9a1e",
@@ -48,6 +66,24 @@
       "writtenOn": "2024-03-13T16:30:16Z",
       "side": 1,
       "message": "this change is not needed",
+      "revId": "49efac06342964c7634ac7267eed27a6ee650efc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bfc2b1a8_08be2ea1",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-03-25T01:15:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "26c8b45f_480c9a1e",
       "revId": "49efac06342964c7634ac7267eed27a6ee650efc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
