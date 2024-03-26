@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "24c7cae1_142c26ce",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2024-03-26T03:44:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "555aace7_ad777784",
+      "revId": "90daefd1c95794ee713ccbe8e113c62109a20f20",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "81b8d1ac_8519ad5b",
@@ -48,6 +66,24 @@
       "writtenOn": "2024-03-22T23:58:41Z",
       "side": 1,
       "message": "please make this a yielding call instead of a blocking call.\n\nFor an example, consult see getSubTree(Context::ptr...) in libipmid/utils.cpp",
+      "revId": "90daefd1c95794ee713ccbe8e113c62109a20f20",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c80d1df_129f63d0",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1000733
+      },
+      "writtenOn": "2024-03-26T03:44:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "81b8d1ac_8519ad5b",
       "revId": "90daefd1c95794ee713ccbe8e113c62109a20f20",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
