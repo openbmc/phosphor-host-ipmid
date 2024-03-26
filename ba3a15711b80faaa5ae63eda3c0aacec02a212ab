@@ -16,6 +16,24 @@
       "message": "Please use https://github.com/openbmc/phosphor-host-ipmid/blob/master/include/ipmid/utils.hpp#L252 method instead. You don\u0027t have to get the bus.",
       "revId": "ba3a15711b80faaa5ae63eda3c0aacec02a212ab",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "86f1929c_a4465de7",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 898,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2024-03-26T04:59:05Z",
+      "side": 1,
+      "message": "I update the interface that I referred https://github.com/openbmc/phosphor-host-ipmid/blob/master/include/ipmid/utils.hpp#L259",
+      "parentUuid": "7170cf1c_6b507683",
+      "revId": "ba3a15711b80faaa5ae63eda3c0aacec02a212ab",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
