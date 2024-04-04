@@ -1,5 +1,5 @@
 ipmid_pre = [
-  boost_coroutine,
+  boost,
   phosphor_dbus_interfaces_dep,
   phosphor_logging_dep,
   sdbusplus_dep,

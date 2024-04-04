@@ -7,6 +7,7 @@ project(
     'werror=true',
     'warning_level=3',
     'cpp_std=c++23',
+    'b_lto=true',
   ])
 
 # Setting up config data
@@ -108,13 +109,40 @@ add_project_arguments(
   language: 'cpp')
 
 # Dependencies
+
+boost = dependency(
+  'boost',
+  modules: [
+    'coroutine',
+  ],
+  required : false,
+)
+
+if not boost.found()
+  cmake = import('cmake')
+  opt = cmake.subproject_options()
+  opt.add_cmake_defines({
+    'BOOST_INCLUDE_LIBRARIES': 'asio;bimap;callable_traits;context;coroutine;interprocess;multiprecision;process',
+    'CMAKE_POSITION_INDEPENDENT_CODE': true
+  })
+  boost_cmake = cmake.subproject('boost', required: true, options: opt)
+  boost_asio = boost_cmake.dependency('boost_asio').as_system()
+  boost_bimap = boost_cmake.dependency('boost_bimap').as_system()
+  boost_callable_traits = boost_cmake.dependency('boost_callable_traits').as_system()
+  boost_context = boost_cmake.dependency('boost_context').as_system()
+  boost_coroutine = boost_cmake.dependency('boost_coroutine').as_system()
+  boost_interprocess = boost_cmake.dependency('boost_interprocess').as_system()
+  boost_multiprecision = boost_cmake.dependency('boost_multiprecision').as_system()
+  boost_process = boost_cmake.dependency('boost_process').as_system()
+  boost = [boost_asio, boost_bimap, boost_callable_traits, boost_context, boost_coroutine, boost_interprocess, boost_multiprecision, boost_process]
+endif
+
 phosphor_logging_dep = dependency('phosphor-logging')
 phosphor_dbus_interfaces_dep = dependency('phosphor-dbus-interfaces')
 sdeventplus_dep = dependency('sdeventplus')
 systemd = dependency('systemd')
 crypto = dependency('libcrypto', version : '>=1.0.2g')
 pam = cpp.find_library('pam', required: true)
-boost_coroutine = cpp.find_library('boost_coroutine', required: true)
 sdbusplus_dep = dependency('sdbusplus')
 stdplus_dep = dependency('stdplus')
 
@@ -196,7 +224,7 @@ ipmid_pre = [
   stdplus_dep,
   phosphor_logging_dep,
   phosphor_dbus_interfaces_dep,
-  boost_coroutine,
+  boost,
   crypto,
   ipmid_dep,
   channellayer_dep,

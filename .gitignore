@@ -12,7 +12,6 @@
 /subprojects/*
 !/subprojects/*.wrap
 subprojects/CLI11.wrap
-subprojects/boost.wrap
 subprojects/function2.wrap
 subprojects/googletest.wrap
 subprojects/stdplus.wrap

@@ -6,7 +6,7 @@ softpower_pre = [
   sdbusplus_dep,
   systemd,
   softoff_dbus,
-  boost_coroutine
+  boost
 ]
 
 softpower_lib = static_library(
