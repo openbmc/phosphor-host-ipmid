@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5d6c85f5_d2582637",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1158,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-05T15:33:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab6b2253_92199c8a",
+      "range": {
+        "startLine": 1157,
+        "startChar": 12,
+        "endLine": 1158,
+        "endChar": 35
+      },
+      "revId": "74eb45d725cd8b96b8da739eea260e6ce47a5d8b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6b27cb22_cdc6e5eb",
@@ -37,6 +61,30 @@
       "writtenOn": "2024-03-28T17:12:45Z",
       "side": 1,
       "message": "Is this necessary? sensorPath is already empty.",
+      "range": {
+        "startLine": 1159,
+        "startChar": 12,
+        "endLine": 1159,
+        "endChar": 66
+      },
+      "revId": "74eb45d725cd8b96b8da739eea260e6ce47a5d8b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "48cb59f6_c7ffd0ad",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1159,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-05T15:33:45Z",
+      "side": 1,
+      "message": "Removed as it was unnecessary",
+      "parentUuid": "6b27cb22_cdc6e5eb",
       "range": {
         "startLine": 1159,
         "startChar": 12,
@@ -70,6 +118,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cc25b07e_4b418464",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1167,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-05T15:33:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "491166fe_70f7d725",
+      "range": {
+        "startLine": 1167,
+        "startChar": 28,
+        "endLine": 1167,
+        "endChar": 62
+      },
+      "revId": "74eb45d725cd8b96b8da739eea260e6ce47a5d8b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d2bb59ee_e1d08212",
@@ -93,6 +165,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "16e102bd_69fcc8eb",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1168,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-05T15:33:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d2bb59ee_e1d08212",
+      "range": {
+        "startLine": 1168,
+        "startChar": 13,
+        "endLine": 1168,
+        "endChar": 46
+      },
+      "revId": "74eb45d725cd8b96b8da739eea260e6ce47a5d8b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5db87dd3_ce4a1e24",
@@ -106,6 +202,30 @@
       "writtenOn": "2024-03-28T17:12:45Z",
       "side": 1,
       "message": "You can use ipmiSELAddInterface defined in sensorhandler.hpp.",
+      "range": {
+        "startLine": 1169,
+        "startChar": 12,
+        "endLine": 1169,
+        "endChar": 46
+      },
+      "revId": "74eb45d725cd8b96b8da739eea260e6ce47a5d8b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "27115fc1_57991962",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-05T15:33:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5db87dd3_ce4a1e24",
       "range": {
         "startLine": 1169,
         "startChar": 12,
