@@ -22,6 +22,30 @@
       },
       "revId": "10202d61df07909df7abdd22345aea5a8acc7cf7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "98c7bcaa_ed9b642d",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-10T20:51:14Z",
+      "side": 1,
+      "message": "Yes, since it is possible that the record ID number may appear in other sections of a SEL entry such as the timestamp. The space and comma in the string guarantees it has found the record ID of the SEL entry.",
+      "parentUuid": "6a1cf6e3_72442efc",
+      "range": {
+        "startLine": 829,
+        "startChar": 4,
+        "endLine": 829,
+        "endChar": 62
+      },
+      "revId": "10202d61df07909df7abdd22345aea5a8acc7cf7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
