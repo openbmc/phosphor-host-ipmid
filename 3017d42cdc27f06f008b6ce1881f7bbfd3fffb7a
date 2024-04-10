@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7641105_dfd8d398",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-10T18:45:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9cd4f408_c97a4e95",
+      "range": {
+        "startLine": 867,
+        "startChar": 12,
+        "endLine": 867,
+        "endChar": 56
+      },
+      "revId": "3017d42cdc27f06f008b6ce1881f7bbfd3fffb7a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "83071fe1_b5f6f54c",
@@ -37,6 +61,30 @@
       "writtenOn": "2024-03-28T18:22:44Z",
       "side": 1,
       "message": "It might be slightly more readable to negate this if statement and not use an \"else\" clause:\n\n```\nif (prevPath.empty())\n{\n    return ipmi::sel::lastEntry;\n}\n\n// Rest of the code here (less indented)\n```",
+      "range": {
+        "startLine": 877,
+        "startChar": 20,
+        "endLine": 900,
+        "endChar": 21
+      },
+      "revId": "3017d42cdc27f06f008b6ce1881f7bbfd3fffb7a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "df03cdee_9bce8942",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 900,
+      "author": {
+        "id": 1001538
+      },
+      "writtenOn": "2024-04-10T18:45:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83071fe1_b5f6f54c",
       "range": {
         "startLine": 877,
         "startChar": 20,
