@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "436878b5_af6363a4",
+        "filename": ".gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-04-18T00:37:48Z",
+      "side": 0,
+      "message": "Why remove this?",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 22
+      },
+      "revId": "c5bb3a73342b422f6795efe9987c8ee4f674942f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
