@@ -22,6 +22,30 @@
       },
       "revId": "7ff60bcce3f60b2aee677c87bb51b51cc39e4e62",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a249d9f_950f0d20",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-04-23T08:54:17Z",
+      "side": 1,
+      "message": "Good idea.\nI found a lot of duplicate statements.\nI will push a new patch to refactor this problem.",
+      "parentUuid": "3804a6ee_2d3714d5",
+      "range": {
+        "startLine": 483,
+        "startChar": 39,
+        "endLine": 483,
+        "endChar": 72
+      },
+      "revId": "7ff60bcce3f60b2aee677c87bb51b51cc39e4e62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
