@@ -308,11 +308,9 @@ struct PackSingle<std::variant<T...>>
 {
     static int op(Payload& p, const std::variant<T...>& v)
     {
-        return std::visit(
-            [&p](const auto& arg) {
+        return std::visit([&p](const auto& arg) {
             return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
-        },
-            v);
+        }, v);
     }
 };
 

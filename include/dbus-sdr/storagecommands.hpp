@@ -98,8 +98,8 @@ struct Type12Record
                  uint8_t pwrStateNotification, uint8_t capabilities,
                  uint8_t eid, uint8_t entityInst, uint8_t mfrDefined,
                  const std::string& sensorname) :
-        targetAddress(address),
-        channelNumber(chNumber), powerStateNotification(pwrStateNotification),
+        targetAddress(address), channelNumber(chNumber),
+        powerStateNotification(pwrStateNotification),
         deviceCapabilities(capabilities), reserved{}, entityID(eid),
         entityInstance(entityInst), oem(mfrDefined)
     {

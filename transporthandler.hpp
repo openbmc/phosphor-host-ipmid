@@ -172,8 +172,7 @@ class ObjectLookupCache
      */
     ObjectLookupCache(sdbusplus::bus_t& bus, const ChannelParams& params,
                       const char* intf) :
-        bus(bus),
-        params(params), intf(intf),
+        bus(bus), params(params), intf(intf),
         objs(getAllDbusObjects(bus, params.logicalPath, intf, ""))
     {}
 

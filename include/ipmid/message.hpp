@@ -47,10 +47,9 @@ struct Context
             uint8_t lun, Cmd cmd, int channel, int userId, uint32_t sessionId,
             Privilege priv, int rqSA, int hostIdx,
             boost::asio::yield_context& yield) :
-        bus(bus),
-        netFn(netFn), lun(lun), cmd(cmd), channel(channel), userId(userId),
-        sessionId(sessionId), priv(priv), rqSA(rqSA), hostIdx(hostIdx),
-        yield(yield)
+        bus(bus), netFn(netFn), lun(lun), cmd(cmd), channel(channel),
+        userId(userId), sessionId(sessionId), priv(priv), rqSA(rqSA),
+        hostIdx(hostIdx), yield(yield)
     {}
 
     std::shared_ptr<sdbusplus::asio::connection> bus;
