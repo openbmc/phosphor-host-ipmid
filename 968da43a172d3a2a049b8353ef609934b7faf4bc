@@ -16,6 +16,23 @@
       "message": "I am not sure what this code is for. It seems to be a stand-in for entitymanager, which exposes so much of this information on dbus (and is read in from a json config).",
       "revId": "968da43a172d3a2a049b8353ef609934b7faf4bc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e9b6c1a7_4af9b97c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-05-09T22:22:16Z",
+      "side": 1,
+      "message": "how is this different than using entity-manager? All its configs are in json and can be dynamically loaded and updated. If you want to use json instead of yaml, I suggest using the dbus-sdr sensor implementation and entity-manager.",
+      "revId": "968da43a172d3a2a049b8353ef609934b7faf4bc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
