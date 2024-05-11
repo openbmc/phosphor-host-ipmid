@@ -51,6 +51,24 @@
       "parentUuid": "e9b6c1a7_4af9b97c",
       "revId": "968da43a172d3a2a049b8353ef609934b7faf4bc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8c2e2736_5fc75e97",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000305
+      },
+      "writtenOn": "2024-05-11T00:57:25Z",
+      "side": 1,
+      "message": "Sometimes we need a certain sensor to have a fixed sensor number, and when a sensor does not appear on the dbus due to a fault, we hope that ipmitool can list the corresponding sensor and identify the disable status.\n\nThere appears to be no way to achieve this with dbus-sdr",
+      "parentUuid": "d6cb97ca_9e66370b",
+      "revId": "968da43a172d3a2a049b8353ef609934b7faf4bc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
