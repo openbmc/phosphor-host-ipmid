@@ -23,7 +23,6 @@ static constexpr uint8_t ipmiSdrVersion = 0x51;
 
 namespace dynamic_sensors::ipmi::sel
 {
-static constexpr uint8_t selOperationSupport = 0x02;
 static constexpr uint8_t systemEvent = 0x02;
 static constexpr size_t systemEventSize = 3;
 static constexpr uint8_t oemTsEventFirst = 0xC0;
