@@ -42,27 +42,6 @@ namespace dynamic_sensors::ipmi::sel
 {
 static const std::filesystem::path selLogDir = "/var/log";
 static const std::string selLogFilename = "ipmi_sel";
-
-static int getFileTimestamp(const std::filesystem::path& file)
-{
-    struct stat st;
-
-    if (stat(file.c_str(), &st) >= 0)
-    {
-        return st.st_mtime;
-    }
-    return ::ipmi::sel::invalidTimeStamp;
-}
-
-namespace erase_time
-{
-static constexpr const char* selEraseTimestamp = "/var/lib/ipmi/sel_erase_time";
-
-int get()
-{
-    return getFileTimestamp(selEraseTimestamp);
-}
-} // namespace erase_time
 } // namespace dynamic_sensors::ipmi::sel
 
 namespace ipmi
@@ -764,33 +743,6 @@ static bool getSELLogFiles(std::vector<std::filesystem::path>& selLogFiles)
     return !selLogFiles.empty();
 }
 
-static int countSELEntries()
-{
-    // Get the list of ipmi_sel log files
-    std::vector<std::filesystem::path> selLogFiles;
-    if (!getSELLogFiles(selLogFiles))
-    {
-        return 0;
-    }
-    int numSELEntries = 0;
-    // Loop through each log file and count the number of logs
-    for (const std::filesystem::path& file : selLogFiles)
-    {
-        std::ifstream logStream(file);
-        if (!logStream.is_open())
-        {
-            continue;
-        }
-
-        std::string line;
-        while (std::getline(logStream, line))
-        {
-            numSELEntries++;
-        }
-    }
-    return numSELEntries;
-}
-
 static bool findSELEntry(const int recordID,
                          const std::vector<std::filesystem::path>& selLogFiles,
                          std::string& entry)
@@ -865,21 +817,23 @@ ipmi::RspType<uint8_t,  // SEL version
               uint32_t, // last add timestamp
               uint32_t, // last erase timestamp
               uint8_t>  // operation support
-    ipmiStorageGetSELInfo()
+    ipmiStorageGetSELInfo(ipmi::Context::ptr ctx)
 {
     constexpr uint8_t selVersion = ipmi::sel::selVersion;
-    uint16_t entries = countSELEntries();
-    uint32_t addTimeStamp = dynamic_sensors::ipmi::sel::getFileTimestamp(
-        dynamic_sensors::ipmi::sel::selLogDir /
-        dynamic_sensors::ipmi::sel::selLogFilename);
-    uint32_t eraseTimeStamp = dynamic_sensors::ipmi::sel::erase_time::get();
-    constexpr uint8_t operationSupport =
-        dynamic_sensors::ipmi::sel::selOperationSupport;
-    constexpr uint16_t freeSpace =
-        0xffff; // Spec indicates that more than 64kB is free
-
-    return ipmi::responseSuccess(selVersion, entries, freeSpace, addTimeStamp,
-                                 eraseTimeStamp, operationSupport);
+    boost::system::error_code ec;
+    auto [entries, freeSpace, lastAddTime, lastDelTime, operationSupport] =
+        ctx->bus->yield_method_call<
+            std::tuple<uint16_t, uint16_t, uint32_t, uint32_t, uint8_t>>(
+            ctx->yield, ec, selLoggerServiceName, ipmiSELPath,
+            ipmiSELAddInterface, "GetSELInfo");
+    if (ec)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "SELInfo: Cannot execute command");
+        return ipmi::responseUnspecifiedError();
+    }
+    return ipmi::responseSuccess(selVersion, entries, freeSpace, lastAddTime,
+                                 lastDelTime, operationSupport);
 }
 
 using systemEventType = std::tuple<
