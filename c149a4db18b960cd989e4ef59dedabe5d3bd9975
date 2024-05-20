@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37051780_88dff5dc",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-05-20T18:10:25Z",
+      "side": 1,
+      "message": "clang_format actually wants it this way. It\u0027s weird ...\n\nhttps://jenkins.openbmc.org/job/ci-repository/84668/console",
+      "range": {
+        "startLine": 110,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 0
+      },
+      "revId": "c149a4db18b960cd989e4ef59dedabe5d3bd9975",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
