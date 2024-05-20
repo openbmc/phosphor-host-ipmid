@@ -22,6 +22,52 @@
       },
       "revId": "c149a4db18b960cd989e4ef59dedabe5d3bd9975",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d67f9e7e_10504139",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-05-20T23:58:23Z",
+      "side": 1,
+      "message": "I was about to say `std::span\u003cuint8_t\u003e` however... I don\u0027t see any benefits or difference in doing so.",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 133,
+        "endChar": 26
+      },
+      "revId": "c149a4db18b960cd989e4ef59dedabe5d3bd9975",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dbcdbfbd_87eeb243",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-05-20T23:58:23Z",
+      "side": 1,
+      "message": "do we need to change this type?\n\nshouldn\u0027t we just return cache.data() instead?\n\nOr just not return at all and use cache.data() where we called getFru?\nI guess you want a copy to prevent some race condition where the data might change in the middle of accessing it if you do this.",
+      "range": {
+        "startLine": 296,
+        "startChar": 20,
+        "endLine": 296,
+        "endChar": 28
+      },
+      "revId": "c149a4db18b960cd989e4ef59dedabe5d3bd9975",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
