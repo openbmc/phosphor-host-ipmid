@@ -93,16 +93,77 @@ constexpr static const char* chassisTypeMainServer = "17";
 // event direction is bit[7] of eventType where 1b = Deassertion event
 constexpr static const uint8_t deassertionEvent = 0x80;
 
-static std::vector<uint8_t> fruCache;
+static constexpr uint8_t invalidDevId = 0xFF;
 static constexpr uint16_t invalidBus = 0xFFFF;
 static constexpr uint8_t invalidAddr = 0xFF;
-static constexpr uint8_t typeASCIILatin8 = 0xC0;
-static uint16_t cacheBus = invalidBus;
-static uint8_t cacheAddr = invalidAddr;
-static uint8_t lastDevId = 0xFF;
 
-static uint16_t writeBus = invalidBus;
-static uint8_t writeAddr = invalidAddr;
+static constexpr uint8_t typeASCIILatin8 = 0xC0;
+
+// A cache for FRU data.
+// Each instance stores the FRU data alongside the originating IPMI device ID
+// and i2c bus and address.
+class FruCache
+{
+  public:
+    FruCache() :
+        mData(), mDevId(invalidDevId), mBus(invalidBus), mAddr(invalidAddr)
+    {}
+
+    FruCache(const std::vector<uint8_t>& data, uint8_t devId, uint16_t bus,
+             uint8_t addr) :
+        mData(data),
+        mDevId(devId), mBus(bus), mAddr(addr)
+    {}
+
+    void clear()
+    {
+        mData.clear();
+        mDevId = invalidDevId;
+        mBus = invalidBus;
+        mAddr = invalidAddr;
+    }
+
+    bool isValid()
+    {
+        return mBus != invalidBus || mAddr != invalidAddr;
+    }
+
+    bool matchesDevId(uint8_t devId)
+    {
+        return mDevId == devId && devId != invalidDevId;
+    }
+
+    std::vector<uint8_t>& data()
+    {
+        return mData;
+    }
+
+    uint16_t bus()
+    {
+        return mBus;
+    }
+
+    uint8_t addr()
+    {
+        return mAddr;
+    }
+
+  private:
+    std::vector<uint8_t> mData;
+    uint8_t mDevId;
+    uint16_t mBus;
+    uint8_t mAddr;
+};
+
+// Caches for IPMI read / write requests of FRU data.
+// We split these caches up to ensure that a concurrent read and write request
+// do not interfere with each other. Write requests are only actually written
+// to the underlying storage device once the FRU data has been received
+// completely or after a timeout occurred.
+// Read and write cache are cleared when the underlying storage system informs
+// us that new data is available; see startMatch().
+static FruCache fruCacheForReading;
+static FruCache fruCacheForWriting;
 
 std::unique_ptr<sdbusplus::Timer> writeTimer = nullptr;
 static std::vector<sdbusplus::bus::match_t> fruMatches;
@@ -114,18 +175,18 @@ ManagedObjectType frus;
 boost::container::flat_map<uint8_t, std::pair<uint16_t, uint8_t>> deviceHashes;
 void registerStorageFunctions() __attribute__((constructor));
 
-bool writeFru(const std::vector<uint8_t>& fru)
+bool writeFru(FruCache& cache)
 {
-    if (writeBus == invalidBus && writeAddr == invalidAddr)
+    if (!cache.isValid())
     {
+        // There was nothing to do here, so claim success.
         return true;
     }
-    lastDevId = 0xFF;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
     sdbusplus::message_t writeFru = dbus->new_method_call(
         fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
         "xyz.openbmc_project.FruDeviceManager", "WriteFru");
-    writeFru.append(writeBus, writeAddr, fru);
+    writeFru.append(cache.bus(), cache.addr(), cache.data());
     try
     {
         sdbusplus::message_t writeFruResp = dbus->call(writeFru);
@@ -136,19 +197,22 @@ bool writeFru(const std::vector<uint8_t>& fru)
         lg2::error("error writing fru");
         return false;
     }
-    writeBus = invalidBus;
-    writeAddr = invalidAddr;
     return true;
 }
 
-void writeFruCache()
+void writeFruCacheOnTimer()
 {
-    writeFru(fruCache);
+    if (writeFru(fruCacheForWriting))
+    {
+        // We successfully wrote the cache, so we're done with it now.
+        // Make sure we're not trying to write again.
+        fruCacheForWriting.clear();
+    }
 }
 
 void createTimers()
 {
-    writeTimer = std::make_unique<sdbusplus::Timer>(writeFruCache);
+    writeTimer = std::make_unique<sdbusplus::Timer>(writeFruCacheOnTimer);
 }
 
 void recalculateHashes()
@@ -236,45 +300,48 @@ void replaceCacheFru(
     recalculateHashes();
 }
 
-std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
-                                                 uint8_t devId)
+/** @brief Primes the FruCache for the specified FRU Device ID
+ *  @param cache              - FRU Cache
+ *  @param ctx                - Context to load the FRU from
+ *  @param devId              - FRU Device ID
+ *
+ *  @returns ipmi completion code
+ */
+ipmi::Cc getFru(FruCache& cache, ipmi::Context::ptr ctx, uint8_t devId)
 {
-    if (lastDevId == devId && devId != 0xFF)
+    if (cache.matchesDevId(devId))
     {
-        return {ipmi::ccSuccess, fruCache};
+        return ipmi::ccSuccess;
     }
 
     auto deviceFind = deviceHashes.find(devId);
     if (deviceFind == deviceHashes.end())
     {
-        return {IPMI_CC_SENSOR_INVALID, {}};
+        return IPMI_CC_SENSOR_INVALID;
     }
 
-    cacheBus = deviceFind->second.first;
-    cacheAddr = deviceFind->second.second;
-
+    auto bus = deviceFind->second.first;
+    auto addr = deviceFind->second.second;
     boost::system::error_code ec;
 
-    std::vector<uint8_t> fru =
+    std::vector<uint8_t> data =
         ctx->bus->yield_method_call<std::vector<uint8_t>>(
             ctx->yield, ec, fruDeviceServiceName,
             "/xyz/openbmc_project/FruDevice",
-            "xyz.openbmc_project.FruDeviceManager", "GetRawFru", cacheBus,
-            cacheAddr);
+            "xyz.openbmc_project.FruDeviceManager", "GetRawFru", bus, addr);
     if (ec)
     {
         lg2::error("Couldn't get raw fru: {ERROR}", "ERROR", ec.message());
 
-        cacheBus = invalidBus;
-        cacheAddr = invalidAddr;
-        return {ipmi::ccResponseError, {}};
+        // Explicitly clear the cache since the "get" failed.
+        cache.clear();
+
+        return ipmi::ccResponseError;
     }
 
-    fruCache.clear();
-    lastDevId = devId;
-    fruCache = fru;
+    cache = FruCache(data, devId, bus, addr);
 
-    return {ipmi::ccSuccess, fru};
+    return ipmi::ccSuccess;
 }
 
 void writeFruIfRunning()
@@ -284,7 +351,9 @@ void writeFruIfRunning()
         return;
     }
     writeTimer->stop();
-    writeFruCache();
+
+    // Pretend that we're the timer.
+    writeFruCacheOnTimer();
 }
 
 void startMatch(void)
@@ -319,7 +388,8 @@ void startMatch(void)
         writeFruIfRunning();
         frus[path] = object;
         recalculateHashes();
-        lastDevId = 0xFF;
+        fruCacheForReading.clear();
+        fruCacheForWriting.clear();
     });
 
     fruMatches.emplace_back(*bus,
@@ -344,7 +414,8 @@ void startMatch(void)
         writeFruIfRunning();
         frus.erase(path);
         recalculateHashes();
-        lastDevId = 0xFF;
+        fruCacheForReading.clear();
+        fruCacheForWriting.clear();
     });
 
     // call once to populate
@@ -372,20 +443,20 @@ ipmi::RspType<uint8_t,             // Count
         return ipmi::responseInvalidFieldRequest();
     }
 
-    auto [status, fru] = getFru(ctx, fruDeviceId);
+    const auto status = getFru(fruCacheForReading, ctx, fruDeviceId);
     if (status != ipmi::ccSuccess)
     {
         return ipmi::response(status);
     }
 
     size_t fromFruByteLen = 0;
-    if (countToRead + fruInventoryOffset < fru.size())
+    if (countToRead + fruInventoryOffset < fruCacheForReading.data().size())
     {
         fromFruByteLen = countToRead;
     }
-    else if (fru.size() > fruInventoryOffset)
+    else if (fruCacheForReading.data().size() > fruInventoryOffset)
     {
-        fromFruByteLen = fru.size() - fruInventoryOffset;
+        fromFruByteLen = fruCacheForReading.data().size() - fruInventoryOffset;
     }
     else
     {
@@ -394,9 +465,11 @@ ipmi::RspType<uint8_t,             // Count
 
     std::vector<uint8_t> requestedData;
 
-    requestedData.insert(requestedData.begin(),
-                         fru.begin() + fruInventoryOffset,
-                         fru.begin() + fruInventoryOffset + fromFruByteLen);
+    requestedData.insert(
+        requestedData.begin(),
+        fruCacheForReading.data().begin() + fruInventoryOffset,
+        fruCacheForReading.data().begin() + fruInventoryOffset
+        + fromFruByteLen);
 
     return ipmi::responseSuccess(static_cast<uint8_t>(requestedData.size()),
                                  requestedData);
@@ -422,26 +495,31 @@ ipmi::RspType<uint8_t>
 
     size_t writeLen = dataToWrite.size();
 
-    auto [status, fru] = getFru(ctx, fruDeviceId);
+    const auto status = getFru(fruCacheForWriting, ctx, fruDeviceId);
     if (status != ipmi::ccSuccess)
     {
         return ipmi::response(status);
     }
-    size_t lastWriteAddr = fruInventoryOffset + writeLen;
-    if (fru.size() < lastWriteAddr)
+
+    // We'll make any updates to a copy of the FRU.
+    auto fru = fruCacheForWriting;
+
+    size_t lastWriteOffset = fruInventoryOffset + writeLen;
+    if (fru.data().size() < lastWriteOffset)
     {
-        fru.resize(fruInventoryOffset + writeLen);
+        fru.data().resize(fruInventoryOffset + writeLen);
     }
 
     std::copy(dataToWrite.begin(), dataToWrite.begin() + writeLen,
-              fru.begin() + fruInventoryOffset);
+              fru.data().begin() + fruInventoryOffset);
 
     bool atEnd = false;
 
-    if (fru.size() >= sizeof(FRUHeader))
+    if (fru.data().size() >= sizeof(FRUHeader))
     {
-        FRUHeader* header = reinterpret_cast<FRUHeader*>(fru.data());
+        FRUHeader* header = reinterpret_cast<FRUHeader*>(fru.data().data());
 
+        bool haveAreaLength = false;
         size_t areaLength = 0;
         size_t lastRecordStart = std::max(
             {header->internalOffset, header->chassisOffset, header->boardOffset,
@@ -457,9 +535,9 @@ ipmi::RspType<uint8_t>
             {
                 // The MSB in the second byte of the MultiRecord header signals
                 // "End of list"
-                endOfList = fru[lastRecordStart + 1] & 0x80;
+                endOfList = fru.data()[lastRecordStart + 1] & 0x80;
                 // Third byte in the MultiRecord header is the length
-                areaLength = fru[lastRecordStart + 2];
+                areaLength = fru.data()[lastRecordStart + 2];
                 // This length is in bytes (not 8 bytes like other headers)
                 areaLength += 5; // The length omits the 5 byte header
                 if (!endOfList)
@@ -473,41 +551,59 @@ ipmi::RspType<uint8_t>
         {
             // This FRU does not have a MultiRecord Area
             // Get the length of the area in multiples of 8 bytes
-            if (lastWriteAddr > (lastRecordStart + 1))
+            if (lastWriteOffset > (lastRecordStart + 1))
             {
                 // second byte in record area is the length
-                areaLength = fru[lastRecordStart + 1];
+                areaLength = fru.data()[lastRecordStart + 1];
                 areaLength *= 8; // it is in multiples of 8 bytes
+                haveAreaLength = true;
             }
         }
-        if (lastWriteAddr >= (areaLength + lastRecordStart))
+
+        // We just wrote the end of the FRU if:
+        // - we were able to get the last record's length
+        // - AND our start offset is before the calculated FRU end
+        // - AND the last write byte is at or after the end
+        if (haveAreaLength &&
+            fruInventoryOffset < (areaLength + lastRecordStart) &&
+            lastWriteOffset >= (areaLength + lastRecordStart))
         {
             atEnd = true;
         }
     }
     uint8_t countWritten = 0;
 
-    writeBus = cacheBus;
-    writeAddr = cacheAddr;
+    // Write the updated FRU back to the cache but prevent the timer from using
+    // the cache while we're doing so.
+    writeTimer->stop();
+    fruCacheForWriting = fru;
+
     if (atEnd)
     {
-        // cancel timer, we're at the end so might as well send it
-        writeTimer->stop();
-        if (!writeFru(fru))
+        // We just wrote the end of the FRU so send it immediately.
+        // This will not invalidate the cache, in case there are additional
+        // writes past the end of the FRU (which is possible and valid).
+        // This allows the writer to read a full FRU EEPROM (which likely
+        // contains trailing 0x00 or 0xFF) and lateron write it back.
+        // Note that subsequent writes will be sent when the writeTimer expires.
+        if (!writeFru(fruCacheForWriting))
         {
             return ipmi::responseInvalidFieldRequest();
         }
-        countWritten = std::min(fru.size(), static_cast<size_t>(0xFF));
+        countWritten = std::min(fru.data().size(), static_cast<size_t>(0xFF));
     }
     else
     {
-        fruCache = fru; // Write-back
-        // start a timer, if no further data is sent  to check to see if it is
-        // valid
-        writeTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::seconds(writeTimeoutSeconds)));
+        // We are not yet at the end or we have written beyond the end of
+        // the FRU. In these cases we wait up to the below timeout or until
+        // we write the end of the FRU befor submitting the FRU data.
         countWritten = 0;
     }
+
+    // (Re-)start timer. If no further data is received, this will send the
+    // remaining data.
+    writeTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::seconds(writeTimeoutSeconds)));
 
     return ipmi::responseSuccess(countWritten);
 }
@@ -528,7 +624,7 @@ ipmi::RspType<uint16_t, // inventorySize
         return ipmi::responseInvalidFieldRequest();
     }
 
-    auto [ret, fru] = getFru(ctx, fruDeviceId);
+    auto ret = getFru(fruCacheForReading, ctx, fruDeviceId);
     if (ret != ipmi::ccSuccess)
     {
         return ipmi::response(ret);
@@ -537,7 +633,7 @@ ipmi::RspType<uint16_t, // inventorySize
     constexpr uint8_t accessType =
         static_cast<uint8_t>(GetFRUAreaAccessType::byte);
 
-    return ipmi::responseSuccess(fru.size(), accessType);
+    return ipmi::responseSuccess(fruCacheForReading.data().size(), accessType);
 }
 
 ipmi_ret_t getFruSdrCount(ipmi::Context::ptr, size_t& count)
