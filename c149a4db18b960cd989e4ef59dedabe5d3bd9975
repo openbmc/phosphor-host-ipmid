@@ -47,6 +47,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4d593420_93ae76b1",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-05-21T14:57:20Z",
+      "side": 1,
+      "message": "There\u0027se a .data().resize() in line 493, which won\u0027t work on a std::span. I think we should leave it as a std::vector.",
+      "parentUuid": "d67f9e7e_10504139",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 133,
+        "endChar": 26
+      },
+      "revId": "c149a4db18b960cd989e4ef59dedabe5d3bd9975",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dbcdbfbd_87eeb243",
@@ -60,6 +84,30 @@
       "writtenOn": "2024-05-20T23:58:23Z",
       "side": 1,
       "message": "do we need to change this type?\n\nshouldn\u0027t we just return cache.data() instead?\n\nOr just not return at all and use cache.data() where we called getFru?\nI guess you want a copy to prevent some race condition where the data might change in the middle of accessing it if you do this.",
+      "range": {
+        "startLine": 296,
+        "startChar": 20,
+        "endLine": 296,
+        "endChar": 28
+      },
+      "revId": "c149a4db18b960cd989e4ef59dedabe5d3bd9975",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bbb3b3f4_5ee3e782",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-05-21T14:57:20Z",
+      "side": 1,
+      "message": "Yes. Look at the caller in line 485 where the data is only swapped out later in line 561.",
+      "parentUuid": "dbcdbfbd_87eeb243",
       "range": {
         "startLine": 296,
         "startChar": 20,
