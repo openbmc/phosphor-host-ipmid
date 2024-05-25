@@ -33,6 +33,23 @@
       "message": "Giving +2 because somebody else gave +1",
       "revId": "f85b77abc5f520075ed30a164a1b3ee53f061390",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1b300d83_064d8d3f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000520
+      },
+      "writtenOn": "2024-05-25T09:42:23Z",
+      "side": 1,
+      "message": "Oops, remembered I\u0027m not supposed to give +2 in this repository",
+      "revId": "f85b77abc5f520075ed30a164a1b3ee53f061390",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
