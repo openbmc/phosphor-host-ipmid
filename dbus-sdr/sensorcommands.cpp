@@ -134,7 +134,10 @@ static sdbusplus::bus::match_t sensorAdded(
     *getSdBus(),
     "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
     "sensors/'",
-    [](sdbusplus::message_t&) {
+    [](sdbusplus::message_t& msg) {
+    std::string path;
+    msg.read(path);
+    details::logCacheReset(path.str);
     getSensorTree().clear();
     getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
     sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
@@ -146,7 +149,10 @@ static sdbusplus::bus::match_t sensorRemoved(
     *getSdBus(),
     "type='signal',member='InterfacesRemoved',arg0path='/xyz/openbmc_project/"
     "sensors/'",
-    [](sdbusplus::message_t&) {
+    [](sdbusplus::message_t& msg) {
+    std::string path;
+    msg.read(path);
+    details::logCacheReset(path.str);
     getSensorTree().clear();
     getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
     sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
