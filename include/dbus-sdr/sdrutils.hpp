@@ -282,6 +282,7 @@ inline IPMIWriteTable sdrWriteTable;
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
 
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
+void logCacheReset(std::string_view path);
 } // namespace details
 
 bool getSensorSubtree(SensorSubTree& subtree);
