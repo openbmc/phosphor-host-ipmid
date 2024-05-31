@@ -74,6 +74,36 @@ static void filterSensors(SensorSubTree& subtree)
                   subtree.end());
 }
 
+void logCacheReset(sdbusplus::message_t& msg)
+{
+    static std::chrono::time_point cacheLogTime =
+        std::chrono::system_clock::now();
+    constexpr std::chrono::seconds cacheLogTimeout(30);
+    constexpr uint8_t loggingLimit = 30;
+    static uint8_t logCount = 0;
+
+    std::chrono::time_point now = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsedSeconds = now - cacheLogTime;
+    // If the logCount is greater than the limit and we haven't timedout... then
+    // should stop logging until the timer resets.
+    if (logCount > loggingLimit && elapsedSeconds < cacheLogTimeout)
+    {
+        return;
+    }
+
+    // Reset logCount and start of cacheLogTime if we have already timedout.
+    if (elapsedSeconds >= cacheLogTimeout)
+    {
+        logCount = 0;
+        cacheLogTime = now;
+    }
+
+    sdbusplus::message::object_path path;
+    msg.read(path);
+    logCount++;
+    std::cerr << "Sensor Cache Tree reset with " << path.str << std::endl;
+}
+
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 {
     static std::shared_ptr<SensorSubTree> sensorTreePtr;
@@ -83,13 +113,19 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         *dbus,
         "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
         "sensors/'",
-        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+        [](sdbusplus::message_t& msg) {
+        logCacheReset(msg);
+        sensorTreePtr.reset();
+    });
 
     static sdbusplus::bus::match_t sensorRemoved(
         *dbus,
         "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
         "openbmc_project/sensors/'",
-        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+        [](sdbusplus::message_t& msg) {
+        logCacheReset(msg);
+        sensorTreePtr.reset();
+    });
 
     if (sensorTreePtr)
     {
