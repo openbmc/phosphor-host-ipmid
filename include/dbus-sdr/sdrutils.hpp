@@ -282,6 +282,7 @@ inline IPMIWriteTable sdrWriteTable;
 uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
 
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
+void logCacheReset(const sdbusplus::message_t& msg);
 } // namespace details
 
 bool getSensorSubtree(SensorSubTree& subtree);
