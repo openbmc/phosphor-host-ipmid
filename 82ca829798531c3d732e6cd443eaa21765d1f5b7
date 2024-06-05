@@ -16,6 +16,23 @@
       "message": "@Vernon\nAny comments on this one?",
       "revId": "82ca829798531c3d732e6cd443eaa21765d1f5b7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b665309f_da8e5169",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-06-05T17:08:22Z",
+      "side": 1,
+      "message": "in the corresponding declaration, please use the \n\n```\n__attribute__ ((deprecated))\n```\nmarker to cause the compiler to emit warning messages for usages of these functions.",
+      "revId": "82ca829798531c3d732e6cd443eaa21765d1f5b7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
