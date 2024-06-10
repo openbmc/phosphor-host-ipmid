@@ -151,7 +151,6 @@ typedef enum
 EInterfaceIndex getInterfaceIndex(void);
 
 sd_bus* ipmid_get_sd_bus_connection(void);
-sd_event* ipmid_get_sd_event_connection(void);
 sd_bus_slot* ipmid_get_sd_bus_slot(void);
 
 // move this from ipmid.hpp, which is now gone

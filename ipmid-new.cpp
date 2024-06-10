@@ -31,7 +31,6 @@
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>
-#include <sdbusplus/asio/sd_event.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/timer.hpp>
@@ -85,11 +84,6 @@ EInterfaceIndex getInterfaceIndex(void)
 }
 
 sd_bus* bus;
-sd_event* events = nullptr;
-sd_event* ipmid_get_sd_event_connection(void)
-{
-    return events;
-}
 sd_bus* ipmid_get_sd_bus_connection(void)
 {
     return bus;
@@ -836,15 +830,6 @@ int main(int argc, char* argv[])
     }
     auto sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
     setSdBus(sdbusp);
-
-    // TODO: Hack to keep the sdEvents running.... Not sure why the sd_event
-    //       queue stops running if we don't have a timer that keeps re-arming
-    sdbusplus::Timer t2([]() { ; });
-    t2.start(std::chrono::microseconds(500000), true);
-
-    // TODO: Remove all vestiges of sd_event from phosphor-host-ipmid
-    //       until that is done, add the sd_event wrapper to the io object
-    sdbusplus::asio::sd_event_wrapper sdEvents(*io);
 
     cmdManager = std::make_unique<phosphor::host::command::Manager>(*sdbusp);
 
