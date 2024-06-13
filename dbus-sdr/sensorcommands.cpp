@@ -40,7 +40,6 @@
 #include <format>
 #include <iostream>
 #include <map>
-#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -135,24 +134,65 @@ static sdbusplus::bus::match_t sensorAdded(
     "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
     "sensors/'",
     [](sdbusplus::message_t&) {
-    getSensorTree().clear();
-    getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
-    sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
-                     std::chrono::system_clock::now().time_since_epoch())
-                     .count();
-});
+        getSensorTree().clear();
+        getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
+        sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
+                         std::chrono::system_clock::now().time_since_epoch())
+                         .count();
+    });
 
 static sdbusplus::bus::match_t sensorRemoved(
     *getSdBus(),
     "type='signal',member='InterfacesRemoved',arg0path='/xyz/openbmc_project/"
     "sensors/'",
     [](sdbusplus::message_t&) {
-    getSensorTree().clear();
-    getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
-    sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::system_clock::now().time_since_epoch())
-                        .count();
-});
+        getSensorTree().clear();
+        getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
+        sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count();
+    });
+
+static ipmi_ret_t getSensorConnection(
+    ipmi::Context::ptr ctx, uint8_t sensnum, std::string& connection,
+    std::string& path, std::vector<std::string>* interfaces = nullptr)
+{
+    auto& sensorTree = getSensorTree();
+    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    {
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+
+    if (ctx == nullptr)
+    {
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+
+    path = getPathFromSensorNumber((ctx->lun << 8) | sensnum);
+    if (path.empty())
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+
+    for (const auto& sensor : sensorTree)
+    {
+        if (path == sensor.first)
+        {
+            connection = sensor.second.begin()->first;
+            if (interfaces)
+                *interfaces = sensor.second.begin()->second;
+            break;
+        }
+    }
+
+    return 0;
+}
+
+SensorSubTree& getSensorTree()
+{
+    static SensorSubTree sensorTree;
+    return sensorTree;
+}
 
 // this keeps track of deassertions for sensor event status command. A
 // deasertion can only happen if an assertion was seen first.
@@ -165,42 +205,44 @@ static sdbusplus::bus::match_t thresholdChanged(
     "type='signal',member='PropertiesChanged',interface='org.freedesktop.DBus."
     "Properties',arg0namespace='xyz.openbmc_project.Sensor.Threshold'",
     [](sdbusplus::message_t& m) {
-    boost::container::flat_map<std::string, std::variant<bool, double>> values;
-    m.read(std::string(), values);
+        boost::container::flat_map<std::string, std::variant<bool, double>>
+            values;
+        m.read(std::string(), values);
 
-    auto findAssert = std::find_if(values.begin(), values.end(),
-                                   [](const auto& pair) {
-        return pair.first.find("Alarm") != std::string::npos;
-    });
-    if (findAssert != values.end())
-    {
-        auto ptr = std::get_if<bool>(&(findAssert->second));
-        if (ptr == nullptr)
+        auto findAssert =
+            std::find_if(values.begin(), values.end(), [](const auto& pair) {
+                return pair.first.find("Alarm") != std::string::npos;
+            });
+        if (findAssert != values.end())
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "thresholdChanged: Assert non bool");
-            return;
-        }
-        if (*ptr)
-        {
-            phosphor::logging::log<phosphor::logging::level::INFO>(
-                "thresholdChanged: Assert",
-                phosphor::logging::entry("SENSOR=%s", m.get_path()));
-            thresholdDeassertMap[m.get_path()][findAssert->first] = *ptr;
-        }
-        else
-        {
-            auto& value = thresholdDeassertMap[m.get_path()][findAssert->first];
-            if (value)
+            auto ptr = std::get_if<bool>(&(findAssert->second));
+            if (ptr == nullptr)
+            {
+                phosphor::logging::log<phosphor::logging::level::ERR>(
+                    "thresholdChanged: Assert non bool");
+                return;
+            }
+            if (*ptr)
             {
                 phosphor::logging::log<phosphor::logging::level::INFO>(
-                    "thresholdChanged: deassert",
+                    "thresholdChanged: Assert",
                     phosphor::logging::entry("SENSOR=%s", m.get_path()));
-                value = *ptr;
+                thresholdDeassertMap[m.get_path()][findAssert->first] = *ptr;
+            }
+            else
+            {
+                auto& value =
+                    thresholdDeassertMap[m.get_path()][findAssert->first];
+                if (value)
+                {
+                    phosphor::logging::log<phosphor::logging::level::INFO>(
+                        "thresholdChanged: deassert",
+                        phosphor::logging::entry("SENSOR=%s", m.get_path()));
+                    value = *ptr;
+                }
             }
         }
-    }
-});
+    });
 
 namespace sensor
 {
@@ -396,9 +438,8 @@ static std::optional<std::vector<std::string>>
 }
 
 // Calculate VR Mode from input IPMI discrete event bytes
-static std::optional<std::string>
-    calculateVRMode(uint15_t assertOffset,
-                    const ipmi::DbusInterfaceMap::mapped_type& VRObject)
+static std::optional<std::string> calculateVRMode(
+    uint15_t assertOffset, const ipmi::DbusInterfaceMap::mapped_type& VRObject)
 {
     // get VR mode profiles from Supported Interface
     auto profiles = getSupportedVrProfiles(VRObject);
@@ -566,6 +607,115 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     }
     return true;
 }
+
+/*
+ * Handle every Sensor Data Record besides Type 01
+ *
+ * The D-Bus sensors work well for generating Type 01 SDRs.
+ * After the Type 01 sensors are processed the remaining sensor types require
+ * special handling. Each BMC vendor is going to have their own requirements for
+ * insertion of non-Type 01 records.
+ * Manage non-Type 01 records:
+ *
+ * Create a new file: dbus-sdr/sensorcommands_oem.cpp
+ * Populate it with the two weakly linked functions below, without adding the
+ * 'weak' attribute definition prior to the function definition.
+ *    getOtherSensorsCount(...)
+ *    getOtherSensorsDataRecord(...)
+ *    Example contents are provided in the weak definitions below
+ *    Enable 'sensors-oem' in your phosphor-ipmi-host bbappend file
+ *      'EXTRA_OEMESON:append = " -Dsensors-oem=enabled"'
+ * The contents of the sensorcommands_oem.cpp file will then override the code
+ * provided below.
+ */
+
+size_t getOtherSensorsCount(ipmi::Context::ptr ctx) __attribute__((weak));
+size_t getOtherSensorsCount(ipmi::Context::ptr ctx)
+{
+    size_t fruCount = 0;
+
+    ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
+    if (ret != ipmi::ccSuccess)
+    {
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "getOtherSensorsCount: getFruSdrCount error");
+        return std::numeric_limits<size_t>::max();
+    }
+
+    const auto& entityRecords =
+        ipmi::sensor::EntityInfoMapContainer::getContainer()
+            ->getIpmiEntityRecords();
+    size_t entityCount = entityRecords.size();
+
+    return fruCount + ipmi::storage::type12Count + entityCount;
+}
+
+int getOtherSensorsDataRecord(ipmi::Context::ptr ctx, uint16_t recordID,
+                              std::vector<uint8_t>& recordData)
+    __attribute__((weak));
+int getOtherSensorsDataRecord(ipmi::Context::ptr ctx, uint16_t recordID,
+                              std::vector<uint8_t>& recordData)
+{
+    size_t otherCount{ipmi::sensor::getOtherSensorsCount(ctx)};
+    if (otherCount == std::numeric_limits<size_t>::max())
+    {
+        return GENERAL_ERROR;
+    }
+    const auto& entityRecords =
+        ipmi::sensor::EntityInfoMapContainer::getContainer()
+            ->getIpmiEntityRecords();
+
+    size_t sdrIndex(recordID - ipmi::getNumberOfSensors());
+    size_t entityCount{entityRecords.size()};
+    size_t fruCount{otherCount - ipmi::storage::type12Count - entityCount};
+
+    if (sdrIndex > otherCount)
+    {
+        return std::numeric_limits<int>::min();
+    }
+    else if (sdrIndex >= fruCount + ipmi::storage::type12Count)
+    {
+        // handle type 8 entity map records
+        ipmi::sensor::EntityInfoMap::const_iterator entity =
+            entityRecords.find(static_cast<uint8_t>(
+                sdrIndex - fruCount - ipmi::storage::type12Count));
+
+        if (entity == entityRecords.end())
+        {
+            return GENERAL_ERROR;
+        }
+        recordData = ipmi::storage::getType8SDRs(entity, recordID);
+    }
+    else if (sdrIndex >= fruCount)
+    {
+        // handle type 12 hardcoded records
+        size_t type12Index = sdrIndex - fruCount;
+        if (type12Index >= ipmi::storage::type12Count)
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "getSensorDataRecord: type12Index error");
+            return GENERAL_ERROR;
+        }
+        recordData = ipmi::storage::getType12SDRs(type12Index, recordID);
+    }
+    else
+    {
+        // handle fru records
+        get_sdr::SensorDataFruRecord data;
+        if (ipmi::Cc ret = ipmi::storage::getFruSdrs(ctx, sdrIndex, data);
+            ret != IPMI_CC_OK)
+        {
+            return GENERAL_ERROR;
+        }
+        data.header.record_id_msb = recordID >> 8;
+        data.header.record_id_lsb = recordID & 0xFF;
+        recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&data),
+                          reinterpret_cast<uint8_t*>(&data) + sizeof(data));
+    }
+
+    return 0;
+}
+
 } // namespace sensor
 
 ipmi::RspType<> ipmiSenPlatformEvent(ipmi::Context::ptr ctx,
@@ -634,18 +784,16 @@ ipmi::RspType<> ipmiSenPlatformEvent(ipmi::Context::ptr ctx,
     return ipmi::responseSuccess();
 }
 
-ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
-                                     uint8_t sensorNumber, uint8_t,
-                                     uint8_t reading, uint15_t assertOffset,
-                                     bool, uint15_t, bool, uint8_t, uint8_t,
-                                     uint8_t)
+ipmi::RspType<> ipmiSetSensorReading(
+    ipmi::Context::ptr ctx, uint8_t sensorNumber, uint8_t, uint8_t reading,
+    uint15_t assertOffset, bool, uint15_t, bool, uint8_t, uint8_t, uint8_t)
 {
     std::string connection;
     std::string path;
     std::vector<std::string> interfaces;
 
-    ipmi::Cc status = getSensorConnection(ctx, sensorNumber, connection, path,
-                                          &interfaces);
+    ipmi::Cc status =
+        getSensorConnection(ctx, sensorNumber, connection, path, &interfaces);
     if (status)
     {
         return ipmi::response(status);
@@ -667,14 +815,14 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         }
 
         // Only allow external SetSensor if write permission granted
-        if (!details::sdrWriteTable.getWritePermission((ctx->lun << 8) |
-                                                       sensorNumber))
+        if (!details::sdrWriteTable.getWritePermission(
+                (ctx->lun << 8) | sensorNumber))
         {
             return ipmi::responseResponseError();
         }
 
-        auto value = sensor::calculateValue(reading, sensorMap,
-                                            sensorObject->second);
+        auto value =
+            sensor::calculateValue(reading, sensorMap, sensorObject->second);
         if (!value)
         {
             return ipmi::responseResponseError();
@@ -726,8 +874,8 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         // VR sensors are treated as a special case and we will not check the
         // write permission for VR sensors, since they always deemed writable
         // and permission table are not applied to VR sensors.
-        auto vrMode = sensor::calculateVRMode(assertOffset,
-                                              sensorObject->second);
+        auto vrMode =
+            sensor::calculateVRMode(assertOffset, sensorObject->second);
         if (!vrMode)
         {
             return ipmi::responseResponseError();
@@ -850,8 +998,8 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
         return ipmi::responseResponseError();
     }
 
-    uint8_t value = scaleIPMIValueFromDouble(reading, mValue, rExp, bValue,
-                                             bExp, bSigned);
+    uint8_t value =
+        scaleIPMIValueFromDouble(reading, mValue, rExp, bValue, bExp, bSigned);
     uint8_t operation =
         static_cast<uint8_t>(IPMISensorReadingByte2::sensorScanningEnable);
     operation |=
@@ -900,16 +1048,15 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
         {
             // This is the first reading, show the coefficients
             double step = (max - min) / 255.0;
-            std::cerr << "IPMI sensor "
-                      << details::sdrStatsTable.getName((ctx->lun << 8) |
-                                                        sensnum)
-                      << ": Range min=" << min << " max=" << max
-                      << ", step=" << step
-                      << ", Coefficients mValue=" << static_cast<int>(mValue)
-                      << " rExp=" << static_cast<int>(rExp)
-                      << " bValue=" << static_cast<int>(bValue)
-                      << " bExp=" << static_cast<int>(bExp)
-                      << " bSigned=" << static_cast<int>(bSigned) << "\n";
+            std::cerr
+                << "IPMI sensor "
+                << details::sdrStatsTable.getName((ctx->lun << 8) | sensnum)
+                << ": Range min=" << min << " max=" << max << ", step=" << step
+                << ", Coefficients mValue=" << static_cast<int>(mValue)
+                << " rExp=" << static_cast<int>(rExp)
+                << " bValue=" << static_cast<int>(bValue)
+                << " bExp=" << static_cast<int>(bExp)
+                << " bSigned=" << static_cast<int>(bSigned) << "\n";
         }
     }
 
@@ -1164,8 +1311,8 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
 
             if (warningHigh != warningMap.end())
             {
-                double value = std::visit(VariantToDoubleVisitor(),
-                                          warningHigh->second);
+                double value =
+                    std::visit(VariantToDoubleVisitor(), warningHigh->second);
                 if (std::isfinite(value))
                 {
                     resp.warningHigh = scaleIPMIValueFromDouble(
@@ -1174,8 +1321,8 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
             }
             if (warningLow != warningMap.end())
             {
-                double value = std::visit(VariantToDoubleVisitor(),
-                                          warningLow->second);
+                double value =
+                    std::visit(VariantToDoubleVisitor(), warningLow->second);
                 if (std::isfinite(value))
                 {
                     resp.warningLow = scaleIPMIValueFromDouble(
@@ -1192,8 +1339,8 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
 
             if (criticalHigh != criticalMap.end())
             {
-                double value = std::visit(VariantToDoubleVisitor(),
-                                          criticalHigh->second);
+                double value =
+                    std::visit(VariantToDoubleVisitor(), criticalHigh->second);
                 if (std::isfinite(value))
                 {
                     resp.criticalHigh = scaleIPMIValueFromDouble(
@@ -1202,8 +1349,8 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
             }
             if (criticalLow != criticalMap.end())
             {
-                double value = std::visit(VariantToDoubleVisitor(),
-                                          criticalLow->second);
+                double value =
+                    std::visit(VariantToDoubleVisitor(), criticalLow->second);
                 if (std::isfinite(value))
                 {
                     resp.criticalLow = scaleIPMIValueFromDouble(
@@ -1573,15 +1720,15 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
             }
             if (warningHighAlarm)
             {
-                assertions.set(
-                    static_cast<size_t>(IPMIGetSensorEventEnableThresholds::
-                                            upperNonCriticalGoingHigh));
+                assertions.set(static_cast<size_t>(
+                    IPMIGetSensorEventEnableThresholds::
+                        upperNonCriticalGoingHigh));
             }
             if (warningLowAlarm)
             {
-                assertions.set(
-                    static_cast<size_t>(IPMIGetSensorEventEnableThresholds::
-                                            lowerNonCriticalGoingLow));
+                assertions.set(static_cast<size_t>(
+                    IPMIGetSensorEventEnableThresholds::
+                        lowerNonCriticalGoingLow));
             }
         }
         if (criticalInterface != sensorMap.end())
@@ -1603,9 +1750,9 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
             }
             if (criticalHighAlarm)
             {
-                assertions.set(
-                    static_cast<size_t>(IPMIGetSensorEventEnableThresholds::
-                                            upperCriticalGoingHigh));
+                assertions.set(static_cast<size_t>(
+                    IPMIGetSensorEventEnableThresholds::
+                        upperCriticalGoingHigh));
             }
             if (criticalLowAlarm)
             {
@@ -1671,7 +1818,7 @@ bool constructSensorSdr(
     if (sensorObject == sensorMap.end())
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: sensorObject error");
+            "constructSensorSdr: sensorObject error");
         return false;
     }
 
@@ -1699,7 +1846,7 @@ bool constructSensorSdr(
     if (!getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned))
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: getSensorAttributes error");
+            "constructSensorSdr: getSensorAttributes error");
         return false;
     }
 
@@ -1743,8 +1890,8 @@ bool constructSensorSdr(
     uint8_t bExpBits = bExp & 0x07;
 
     // move rExp and bExp into place
-    record.body.r_b_exponents = (rExpSign << 7) | (rExpBits << 4) |
-                                (bExpSign << 3) | bExpBits;
+    record.body.r_b_exponents =
+        (rExpSign << 7) | (rExpBits << 4) | (bExpSign << 3) | bExpBits;
 
     // Set the analog reading byte interpretation accordingly
     record.body.sensor_units_1 = (bSigned ? 1 : 0) << 7;
@@ -1768,8 +1915,8 @@ bool constructSensorSdr(
         sensorMap.find("xyz.openbmc_project.Sensor.ValueMutability");
     if (mutability != sensorMap.end())
     {
-        sensorSettable = mappedVariant<bool>(mutability->second, "Mutable",
-                                             false);
+        sensorSettable =
+            mappedVariant<bool>(mutability->second, "Mutable", false);
     }
     get_sdr::body::init_settable_state(sensorSettable, &record.body);
 
@@ -1784,7 +1931,7 @@ bool constructSensorSdr(
     catch (const std::exception&)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: getIPMIThresholds error");
+            "constructSensorSdr: getIPMIThresholds error");
         return false;
     }
 
@@ -1955,7 +2102,7 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
     return true;
 }
 
-static inline uint16_t getNumberOfSensors()
+uint16_t getNumberOfSensors()
 {
     return std::min(getSensorTree().size(), maxIPMISensors);
 }
@@ -1966,26 +2113,18 @@ static int getSensorDataRecord(
     std::vector<uint8_t>& recordData, uint16_t recordID,
     uint8_t readBytes = std::numeric_limits<uint8_t>::max())
 {
-    size_t fruCount = 0;
-    ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
-    if (ret != ipmi::ccSuccess)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: getFruSdrCount error");
-        return GENERAL_ERROR;
-    }
-
-    const auto& entityRecords =
-        ipmi::sensor::EntityInfoMapContainer::getContainer()
-            ->getIpmiEntityRecords();
-    size_t entityCount = entityRecords.size();
-
     recordData.clear();
-    size_t lastRecord = getNumberOfSensors() + fruCount +
-                        ipmi::storage::type12Count + entityCount - 1;
+    size_t lastRecord = ipmi::getNumberOfSensors() +
+                        ipmi::sensor::getOtherSensorsCount(ctx) - 1;
+    uint16_t nextRecord(recordID + 1);
+
     if (recordID == lastRecordIndex)
     {
         recordID = lastRecord;
+    }
+    if (recordID == lastRecord)
+    {
+        nextRecord = lastRecordIndex;
     }
     if (recordID > lastRecord)
     {
@@ -1993,52 +2132,17 @@ static int getSensorDataRecord(
             "getSensorDataRecord: recordID > lastRecord error");
         return GENERAL_ERROR;
     }
-
-    if (recordID >= getNumberOfSensors())
+    if (recordID >= ipmi::getNumberOfSensors())
     {
-        size_t sdrIndex = recordID - getNumberOfSensors();
-
-        if (sdrIndex >= fruCount + ipmi::storage::type12Count)
+        if (auto err = ipmi::sensor::getOtherSensorsDataRecord(ctx, recordID,
+                                                               recordData);
+            err < 0)
         {
-            // handle type 8 entity map records
-            ipmi::sensor::EntityInfoMap::const_iterator entity =
-                entityRecords.find(static_cast<uint8_t>(
-                    sdrIndex - fruCount - ipmi::storage::type12Count));
-            if (entity == entityRecords.end())
-            {
-                return IPMI_CC_SENSOR_INVALID;
-            }
-            recordData = ipmi::storage::getType8SDRs(entity, recordID);
+            // phosphor::logging::log<phosphor::logging::level::ERR>(
+            //     "getSensorDataRecord: Error getting custom record");
+            return lastRecordIndex;
         }
-        else if (sdrIndex >= fruCount)
-        {
-            // handle type 12 hardcoded records
-            size_t type12Index = sdrIndex - fruCount;
-            if (type12Index >= ipmi::storage::type12Count)
-            {
-                phosphor::logging::log<phosphor::logging::level::ERR>(
-                    "getSensorDataRecord: type12Index error");
-                return GENERAL_ERROR;
-            }
-            recordData = ipmi::storage::getType12SDRs(type12Index, recordID);
-        }
-        else
-        {
-            // handle fru records
-            get_sdr::SensorDataFruRecord data;
-            ret = ipmi::storage::getFruSdrs(ctx, sdrIndex, data);
-            if (ret != IPMI_CC_OK)
-            {
-                return GENERAL_ERROR;
-            }
-            data.header.record_id_msb = recordID >> 8;
-            data.header.record_id_lsb = recordID & 0xFF;
-            recordData.insert(recordData.end(),
-                              reinterpret_cast<uint8_t*>(&data),
-                              reinterpret_cast<uint8_t*>(&data) + sizeof(data));
-        }
-
-        return 0;
+        return nextRecord;
     }
 
     // Perform a incremental scan of the SDR Record ID's and translate the
@@ -2066,9 +2170,9 @@ static int getSensorDataRecord(
         ctx->lun = lun3;
     }
 
-    auto status = getSensorConnection(ctx,
-                                      static_cast<uint8_t>(sensNumFromRecID),
-                                      connection, path, &interfaces);
+    auto status =
+        getSensorConnection(ctx, static_cast<uint8_t>(sensNumFromRecID),
+                            connection, path, &interfaces);
     if (status)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
@@ -2117,7 +2221,7 @@ static int getSensorDataRecord(
         recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&record),
                           reinterpret_cast<uint8_t*>(&record) + sizeof(record));
 
-        return 0;
+        return nextRecord;
     }
 
 #ifdef FEATURE_HYBRID_SENSORS
@@ -2142,7 +2246,7 @@ static int getSensorDataRecord(
         recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&record),
                           reinterpret_cast<uint8_t*>(&record) + sizeof(record));
 
-        return 0;
+        return nextRecord;
     }
 #endif
 
@@ -2167,7 +2271,7 @@ static int getSensorDataRecord(
                           reinterpret_cast<uint8_t*>(&record) + sizeof(record));
     }
 
-    return 0;
+    return nextRecord;
 }
 
 /** @brief implements the get SDR Info command
@@ -2197,7 +2301,7 @@ static ipmi::RspType<uint8_t, // respcount
     {
         return ipmi::responseResponseError();
     }
-    uint16_t numSensors = getNumberOfSensors();
+    uint16_t numSensors = ipmi::getNumberOfSensors();
     if (count.value_or(0) == getSdrCount)
     {
         auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
@@ -2213,9 +2317,10 @@ static ipmi::RspType<uint8_t, // respcount
 
         // Count the number of Type 1h, Type 2h, Type 11h, Type 12h SDR entries
         // assigned to the LUN
-        while (!getSensorDataRecord(
-            ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
-            record, recordID++))
+        while (getSensorDataRecord(ctx,
+                                   ipmiDecoratorPaths.value_or(
+                                       std::unordered_set<std::string>()),
+                                   record, recordID++) >= 0)
         {
             get_sdr::SensorDataRecordHeader* hdr =
                 reinterpret_cast<get_sdr::SensorDataRecordHeader*>(
@@ -2264,8 +2369,8 @@ static ipmi::RspType<uint8_t, // respcount
         // Return the number of sensors attached to the LUN
         if ((ctx->lun == lun0) && (numSensors > 0))
         {
-            sdrCount = (numSensors > maxSensorsPerLUN) ? maxSensorsPerLUN
-                                                       : numSensors;
+            sdrCount =
+                (numSensors > maxSensorsPerLUN) ? maxSensorsPerLUN : numSensors;
         }
         else if ((ctx->lun == lun1) && (numSensors > maxSensorsPerLUN))
         {
@@ -2343,8 +2448,8 @@ ipmi::RspType<uint8_t,  // sdr version
         return ipmi::response(ret);
     }
 
-    uint16_t recordCount = getNumberOfSensors() + fruCount +
-                           ipmi::storage::type12Count;
+    uint16_t recordCount =
+        ipmi::getNumberOfSensors() + fruCount + ipmi::storage::type12Count;
 
     uint8_t operationSupport = static_cast<uint8_t>(
         SdrRepositoryInfoOps::overflow); // write not supported
@@ -2408,7 +2513,7 @@ ipmi::RspType<uint16_t,            // next record ID
     ipmiStorageGetSDR(ipmi::Context::ptr ctx, uint16_t reservationID,
                       uint16_t recordID, uint8_t offset, uint8_t bytesToRead)
 {
-    size_t fruCount = 0;
+    // size_t fruCount = 0;
     // reservation required for partial reads with non zero offset into
     // record
     if ((sdrReservationID == 0 || reservationID != sdrReservationID) && offset)
@@ -2417,23 +2522,23 @@ ipmi::RspType<uint16_t,            // next record ID
             "ipmiStorageGetSDR: responseInvalidReservationId");
         return ipmi::responseInvalidReservationId();
     }
-    ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
-    if (ret != ipmi::ccSuccess)
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiStorageGetSDR: getFruSdrCount error");
-        return ipmi::response(ret);
-    }
+    // ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
+    // if (ret != ipmi::ccSuccess)
+    // {
+    //     phosphor::logging::log<phosphor::logging::level::ERR>(
+    //         "ipmiStorageGetSDR: getFruSdrCount error");
+    //     return ipmi::response(ret);
+    // }
 
-    const auto& entityRecords =
-        ipmi::sensor::EntityInfoMapContainer::getContainer()
-            ->getIpmiEntityRecords();
-    int entityCount = entityRecords.size();
+    // const auto& entityRecords =
+    //     ipmi::sensor::EntityInfoMapContainer::getContainer()
+    //         ->getIpmiEntityRecords();
+    // int entityCount = entityRecords.size();
 
     auto& sensorTree = getSensorTree();
-    size_t lastRecord = getNumberOfSensors() + fruCount +
-                        ipmi::storage::type12Count + entityCount - 1;
-    uint16_t nextRecordId = lastRecord > recordID ? recordID + 1 : 0XFFFF;
+    // size_t lastRecord = ipmi::getNumberOfSensors() + fruCount +
+    //                     ipmi::storage::type12Count + entityCount - 1;
+    // uint16_t nextRecordId = lastRecord > recordID ? recordID + 1 : 0XFFFF;
 
     if (!getSensorSubtree(sensorTree) && sensorTree.empty())
     {
@@ -2445,9 +2550,11 @@ ipmi::RspType<uint16_t,            // next record ID
     auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
 
     std::vector<uint8_t> record;
-    if (getSensorDataRecord(
-            ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
-            record, recordID, offset + bytesToRead))
+    int nextRecordId = getSensorDataRecord(
+        ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
+        record, recordID, offset + bytesToRead);
+
+    if (nextRecordId < 0)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
             "ipmiStorageGetSDR: fail to get SDR");
@@ -2462,8 +2569,8 @@ ipmi::RspType<uint16_t,            // next record ID
         return ipmi::responseSuccess(nextRecordId, record);
     }
 
-    size_t sdrLength = sizeof(get_sdr::SensorDataRecordHeader) +
-                       hdr->record_length;
+    size_t sdrLength =
+        sizeof(get_sdr::SensorDataRecordHeader) + hdr->record_length;
     if (offset >= sdrLength)
     {
         phosphor::logging::log<phosphor::logging::level::ERR>(
@@ -2763,8 +2870,8 @@ ipmi::RspType<uint8_t,                // No of instances for requested id
 
     for (const auto& sensor : sensorList)
     {
-        const auto& [readResult, tempVal,
-                     signBit] = readTemp(ctx, sensor.objectPath);
+        const auto& [readResult, tempVal, signBit] =
+            readTemp(ctx, sensor.objectPath);
 
         if (readResult)
         {
@@ -2863,14 +2970,14 @@ void registerSensorFunctions()
                           ipmi::storage::cmdGetSdr, ipmi::Privilege::User,
                           ipmiStorageGetSDR);
     // <Get DCMI Sensor Info>
-    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
-                               ipmi::dcmi::cmdGetDcmiSensorInfo,
-                               ipmi::Privilege::Operator,
-                               ipmi::dcmi::getSensorInfo);
+    ipmi::registerGroupHandler(
+        ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+        ipmi::dcmi::cmdGetDcmiSensorInfo, ipmi::Privilege::Operator,
+        ipmi::dcmi::getSensorInfo);
     // <Get Temperature Readings>
-    ipmi::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
-                               ipmi::dcmi::cmdGetTemperatureReadings,
-                               ipmi::Privilege::User,
-                               ipmi::dcmi::getTempReadings);
+    ipmi::registerGroupHandler(
+        ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+        ipmi::dcmi::cmdGetTemperatureReadings, ipmi::Privilege::User,
+        ipmi::dcmi::getTempReadings);
 }
 } // namespace ipmi

@@ -98,8 +98,8 @@ struct Type12Record
                  uint8_t pwrStateNotification, uint8_t capabilities,
                  uint8_t eid, uint8_t entityInst, uint8_t mfrDefined,
                  const std::string& sensorname) :
-        targetAddress(address),
-        channelNumber(chNumber), powerStateNotification(pwrStateNotification),
+        targetAddress(address), channelNumber(chNumber),
+        powerStateNotification(pwrStateNotification),
         deviceCapabilities(capabilities), reserved{}, entityID(eid),
         entityInstance(entityInst), oem(mfrDefined)
     {
@@ -107,9 +107,9 @@ struct Type12Record
         header.sdr_version = ipmiSdrVersion;
         header.record_type = 0x12;
         size_t nameLen = std::min(sensorname.size(), sizeof(name));
-        header.record_length = sizeof(Type12Record) -
-                               sizeof(get_sdr::SensorDataRecordHeader) -
-                               sizeof(name) + nameLen;
+        header.record_length =
+            sizeof(Type12Record) - sizeof(get_sdr::SensorDataRecordHeader) -
+            sizeof(name) + nameLen;
         typeLengthCode = 0xc0 | nameLen;
         std::copy(sensorname.begin(), sensorname.begin() + nameLen, name);
     }
@@ -127,9 +127,8 @@ ipmi_ret_t getFruSdrs(ipmi::Context::ptr ctx, size_t index,
 
 ipmi_ret_t getFruSdrCount(ipmi::Context::ptr ctx, size_t& count);
 
-std::vector<uint8_t>
-    getType8SDRs(ipmi::sensor::EntityInfoMap::const_iterator& entity,
-                 uint16_t recordId);
+std::vector<uint8_t> getType8SDRs(
+    ipmi::sensor::EntityInfoMap::const_iterator& entity, uint16_t recordId);
 std::vector<uint8_t> getType12SDRs(uint16_t index, uint16_t recordId);
 std::vector<uint8_t> getNMDiscoverySDR(uint16_t index, uint16_t recordId);
 } // namespace storage
