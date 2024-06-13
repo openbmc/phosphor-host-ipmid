@@ -119,47 +119,9 @@ enum class IPMINetfnSensorCmds : ipmi_cmd_t
 namespace ipmi
 {
 
-SensorSubTree& getSensorTree()
-{
-    static SensorSubTree sensorTree;
-    return sensorTree;
-}
+uint16_t getNumberOfSensors();
 
-static ipmi_ret_t
-    getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
-                        std::string& connection, std::string& path,
-                        std::vector<std::string>* interfaces = nullptr)
-{
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
-    {
-        return IPMI_CC_RESPONSE_ERROR;
-    }
-
-    if (ctx == nullptr)
-    {
-        return IPMI_CC_RESPONSE_ERROR;
-    }
-
-    path = getPathFromSensorNumber((ctx->lun << 8) | sensnum);
-    if (path.empty())
-    {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-
-    for (const auto& sensor : sensorTree)
-    {
-        if (path == sensor.first)
-        {
-            connection = sensor.second.begin()->first;
-            if (interfaces)
-                *interfaces = sensor.second.begin()->second;
-            break;
-        }
-    }
-
-    return 0;
-}
+SensorSubTree& getSensorTree();
 
 struct IPMIThresholds
 {
@@ -168,6 +130,31 @@ struct IPMIThresholds
     std::optional<uint8_t> criticalLow;
     std::optional<uint8_t> criticalHigh;
 };
+
+namespace sensor
+{
+/**
+ * @brief Retrieve the number of sensors that are not included in the list of
+ * sensors published via D-Bus
+ *
+ * @param[in]: ctx: the pointer to the D-Bus context
+ * @return: The number of additional sensors separate from those published
+ * dynamically on D-Bus
+ */
+size_t getOtherSensorsCount(ipmi::Context::ptr ctx);
+
+/**
+ * @brief Retrieve the record data for the sensors not published via D-Bus
+ *
+ * @param[in]: ctx: the pointer to the D-Bus context
+ * @param[in]: recordID: the integer index for the sensor to retrieve
+ * @param[out]: SDR data for the indexed sensor
+ * @return: 0: success
+ *          negative number: error condition
+ */
+int getOtherSensorsDataRecord(ipmi::Context::ptr ctx, uint16_t recordID,
+                              std::vector<uint8_t>& recordData);
+} // namespace sensor
 
 namespace dcmi
 {
