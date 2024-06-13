@@ -17,6 +17,11 @@ if not get_option('hybrid-sensors').disabled()
   ]
 endif
 
+sensorsoem_src = []
+if not get_option('sensors-oem').disabled()
+  sensorsoem_src = ['dbus-sdr/sensorcommands_oem.cpp']
+endif
+
 dbus_sdr_pre = declare_dependency(
   include_directories: root_inc,
   dependencies: [
@@ -32,4 +37,5 @@ dbus_sdr_src = [
   'dbus-sdr/sensorcommands.cpp',
   'dbus-sdr/storagecommands.cpp',
   hybrid_src,
+  sensorsoem_src,
 ]
