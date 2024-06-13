@@ -56,6 +56,7 @@ option('entity-manager-decorators', type: 'feature', value: 'enabled', descripti
 option('dynamic-sensors', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
 option('dynamic-sensors-write', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
 option('hybrid-sensors', type: 'feature', value: 'disabled', description: 'Hybrid sensors stack is disabled by default; offer a way to enable it')
+option('sensors-oem', type: 'feature', value: 'disabled', description: 'OEM sensor SDR parsing is disabled by default; offer a way to enable it')
 
 # Sensor Cache
 option('sensors-cache', type: 'feature', value: 'disabled', description: 'Sensor cache stack is disabled by default; offer a way to enable it')
