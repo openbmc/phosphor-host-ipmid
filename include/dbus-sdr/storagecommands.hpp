@@ -60,6 +60,7 @@ enum class SensorUnits : uint8_t
     volts = 0x4,
     amps = 0x5,
     watts = 0x6,
+    joules = 0x7,
     rpm = 0x12,
 };
 
