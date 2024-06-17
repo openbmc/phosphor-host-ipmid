@@ -20,6 +20,46 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "bf9e7bf1_b73cc7a0",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-06-17T22:17:39Z",
+      "side": 1,
+      "message": "not static; this needs to be a publicly available function.",
+      "range": {
+        "startLine": 156,
+        "startChar": 0,
+        "endLine": 156,
+        "endChar": 7
+      },
+      "revId": "9e6bbe11d350a3e37b4fcf4b95bba38fac32c686",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "19ced83e_e941ebf9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2519,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-06-17T22:17:39Z",
+      "side": 1,
+      "message": "Just remove the unused lines; don\u0027t leave them as comments.",
+      "revId": "9e6bbe11d350a3e37b4fcf4b95bba38fac32c686",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "47903543_5c1bcd3b",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 3
