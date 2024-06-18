@@ -39,7 +39,7 @@ reviewers:
 - anoo@us.ibm.com
 - deepak.kodihalli.83@gmail.com
 - liuxiwei@ieisystem.com
-- ratagupt@linux.vnet.ibm.com
+- ratankgupta31@gmail.com
 
 matchers:
 
@@ -54,7 +54,7 @@ openbmc:
   email: liuxiwei@ieisystem.com
   discord: George Liu
 - name: Ratan Gupta
-  email: ratagupt@linux.vnet.ibm.com
+  email: ratankgupta31@gmail.com
   discord: rgupta
 - name: Tom Joseph
   email: rushtotom@gmail.com
