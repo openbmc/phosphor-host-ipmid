@@ -38,7 +38,7 @@ owners:
 reviewers:
 - anoo@us.ibm.com
 - deepak.kodihalli.83@gmail.com
-- ratagupt@linux.vnet.ibm.com
+- ratankgupta31@gmail.com
 
 matchers:
 
@@ -50,7 +50,7 @@ openbmc:
   email: deepak.kodihalli.83@gmail.com
   discord: dkodihal
 - name: Ratan Gupta
-  email: ratagupt@linux.vnet.ibm.com
+  email: ratankgupta31@gmail.com
   discord: rgupta
 - name: Tom Joseph
   email: rushtotom@gmail.com
