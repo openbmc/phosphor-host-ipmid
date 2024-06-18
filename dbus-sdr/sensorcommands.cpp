@@ -2274,7 +2274,8 @@ static int getSensorDataRecord(
 }
 
 /** @brief implements the get SDR Info command
- *  @param count - Operation
+ *  @param operation : 0 or not supplied returns sensor count
+ *                     1 return SDR count
  *
  *  @returns IPMI completion code plus response data
  *   - sdrCount - sensor/SDR count
@@ -2285,85 +2286,25 @@ static ipmi::RspType<uint8_t, // respcount
                      uint32_t // last time a sensor was added
                      >
     ipmiSensorGetDeviceSdrInfo(ipmi::Context::ptr ctx,
-                               std::optional<uint8_t> count)
+                               std::optional<uint8_t> operation)
 {
-    auto& sensorTree = getSensorTree();
-    uint8_t sdrCount = 0;
-    uint16_t recordID = 0;
-    std::vector<uint8_t> record;
-    // Sensors are dynamically allocated, and there is at least one LUN
-    uint8_t lunsAndDynamicPopulation = 0x80;
-    constexpr uint8_t getSdrCount = 0x01;
-    constexpr uint8_t getSensorCount = 0x00;
+    auto& sensorTree{getSensorTree()};
+    uint8_t sdrCount{};
+    // Sensors are dynamically allocated
+    uint8_t lunsAndDynamicPopulation{0x80};
+    constexpr uint8_t getSdrCount{1};
+    constexpr uint8_t getSensorCount{0};
 
     if (!getSensorSubtree(sensorTree) || sensorTree.empty())
     {
         return ipmi::responseResponseError();
     }
-    uint16_t numSensors = ipmi::getNumberOfSensors();
-    if (count.value_or(0) == getSdrCount)
+    uint16_t numSensors{ipmi::getNumberOfSensors()};
+    if (operation.value_or(0) == getSdrCount)
     {
-        auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
-
-        if (ctx->lun == lun1)
-        {
-            recordID += maxSensorsPerLUN;
-        }
-        else if (ctx->lun == lun3)
-        {
-            recordID += maxSensorsPerLUN * 2;
-        }
-
-        // Count the number of Type 1h, Type 2h, Type 11h, Type 12h SDR entries
-        // assigned to the LUN
-        while (getSensorDataRecord(ctx,
-                                   ipmiDecoratorPaths.value_or(
-                                       std::unordered_set<std::string>()),
-                                   record, recordID++) >= 0)
-        {
-            get_sdr::SensorDataRecordHeader* hdr =
-                reinterpret_cast<get_sdr::SensorDataRecordHeader*>(
-                    record.data());
-            if (!hdr)
-            {
-                continue;
-            }
-
-            if (hdr->record_type == get_sdr::SENSOR_DATA_FULL_RECORD)
-            {
-                get_sdr::SensorDataFullRecord* recordData =
-                    reinterpret_cast<get_sdr::SensorDataFullRecord*>(
-                        record.data());
-                if (ctx->lun == recordData->key.owner_lun)
-                {
-                    sdrCount++;
-                }
-            }
-            else if (hdr->record_type == get_sdr::SENSOR_DATA_COMPACT_RECORD)
-            {
-                get_sdr::SensorDataCompactRecord* recordData =
-                    reinterpret_cast<get_sdr::SensorDataCompactRecord*>(
-                        record.data());
-                if (ctx->lun == recordData->key.owner_lun)
-                {
-                    sdrCount++;
-                }
-            }
-            else if (hdr->record_type == get_sdr::SENSOR_DATA_FRU_RECORD ||
-                     hdr->record_type == get_sdr::SENSOR_DATA_MGMT_CTRL_LOCATOR)
-            {
-                sdrCount++;
-            }
-
-            // Because response count data is 1 byte, so sdrCount need to avoid
-            // overflow.
-            if (sdrCount == maxSensorsPerLUN)
-            {
-                break;
-            }
-        }
+        sdrCount = numSensors + ipmi::sensor::getOtherSensorsCount(ctx) - 1;
     }
-    else if (count.value_or(0) == getSensorCount)
+    else if (operation.value_or(0) == getSensorCount)
     {
         // Return the number of sensors attached to the LUN
         if ((ctx->lun == lun0) && (numSensors > 0))
@@ -2386,7 +2327,6 @@ static ipmi::RspType<uint8_t, // respcount
             }
             else
             {
-                // error
                 throw std::out_of_range(
                     "Maximum number of IPMI sensors exceeded.");
             }
@@ -2397,7 +2337,7 @@ static ipmi::RspType<uint8_t, // respcount
         return ipmi::responseInvalidFieldRequest();
     }
 
-    // Get Sensor count. This returns the number of sensors
+    // Flag which LUNs have sensors associated
     if (numSensors > 0)
     {
         lunsAndDynamicPopulation |= 1;
@@ -2412,7 +2352,6 @@ static ipmi::RspType<uint8_t, // respcount
     }
     if (numSensors > maxIPMISensors)
     {
-        // error
         throw std::out_of_range("Maximum number of IPMI sensors exceeded.");
     }
 
