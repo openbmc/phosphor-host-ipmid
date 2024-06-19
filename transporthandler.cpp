@@ -888,6 +888,10 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 lastDisabledVlan[channel] = vlan;
                 vlan = 0;
             }
+            else if (vlan == 0 || vlan == VLAN_VALUE_MASK)
+            {
+                return responseInvalidFieldRequest();
+            }
 
             channelCall<reconfigureVLAN>(channel, vlan);
             return responseSuccess();
