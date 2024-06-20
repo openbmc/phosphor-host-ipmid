@@ -2436,22 +2436,9 @@ ipmi::RspType<uint8_t,  // sdr version
               >
     ipmiStorageGetSDRRepositoryInfo(ipmi::Context::ptr ctx)
 {
-    auto& sensorTree = getSensorTree();
     constexpr const uint16_t unspecifiedFreeSpace = 0xFFFF;
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
-    {
-        return ipmi::responseResponseError();
-    }
-
-    size_t fruCount = 0;
-    ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
-    if (ret != ipmi::ccSuccess)
-    {
-        return ipmi::response(ret);
-    }
-
-    uint16_t recordCount = ipmi::getNumberOfSensors() + fruCount +
-                           ipmi::storage::type12Count;
+    uint16_t recordCount = ipmi::getNumberOfSensors() +
+                           ipmi::sensor::getOtherSensorsCount(ctx);
 
     uint8_t operationSupport = static_cast<uint8_t>(
         SdrRepositoryInfoOps::overflow); // write not supported
