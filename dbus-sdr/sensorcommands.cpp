@@ -748,11 +748,16 @@ ipmi::RspType<> ipmiSenPlatformEvent(ipmi::Context::ptr ctx,
     {
         p.unpack(sysgeneratorID, evmRev, sensorType, sensorNum, eventType,
                  eventData1, eventData2, eventData3);
+        constexpr const uint8_t isSoftwareID = 0x01;
+        if (!(sysgeneratorID & isSoftwareID))
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
         // Refer to IPMI Spec Table 32: SEL Event Records
         generatorID = (ctx->channel << 12) // Channel
                       | (0x0 << 10)        // Reserved
                       | (0x0 << 8)         // 0x0 for sys-soft ID
-                      | ((sysgeneratorID << 1) | 0x1);
+                      | sysgeneratorID;
     }
     else
     {
