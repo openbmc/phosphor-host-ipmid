@@ -285,7 +285,7 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
             double value = std::visit(VariantToDoubleVisitor(), lower->second);
             if (std::isfinite(value))
             {
-                min = std::min(value, min);
+                min = std::fmin(value, min);
             }
         }
         if (upper != critical->second.end())
@@ -293,7 +293,7 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
             double value = std::visit(VariantToDoubleVisitor(), upper->second);
             if (std::isfinite(value))
             {
-                max = std::max(value, max);
+                max = std::fmax(value, max);
             }
         }
     }
@@ -306,7 +306,7 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
             double value = std::visit(VariantToDoubleVisitor(), lower->second);
             if (std::isfinite(value))
             {
-                min = std::min(value, min);
+                min = std::fmin(value, min);
             }
         }
         if (upper != warning->second.end())
@@ -314,7 +314,7 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
             double value = std::visit(VariantToDoubleVisitor(), upper->second);
             if (std::isfinite(value))
             {
-                max = std::max(value, max);
+                max = std::fmax(value, max);
             }
         }
     }
@@ -1528,17 +1528,31 @@ ipmi::RspType<uint8_t, // enabled
             auto warningLow = warningMap.find("WarningLow");
             if (warningHigh != warningMap.end())
             {
-                assertionEnabledLsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::upperNonCriticalGoingHigh);
-                deassertionEnabledLsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::upperNonCriticalGoingLow);
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          warningHigh->second);
+                if (std::isfinite(value))
+                {
+                    assertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            upperNonCriticalGoingHigh);
+                    deassertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            upperNonCriticalGoingLow);
+                }
             }
             if (warningLow != warningMap.end())
             {
-                assertionEnabledLsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::lowerNonCriticalGoingLow);
-                deassertionEnabledLsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::lowerNonCriticalGoingHigh);
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          warningLow->second);
+                if (std::isfinite(value))
+                {
+                    assertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            lowerNonCriticalGoingLow);
+                    deassertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            lowerNonCriticalGoingHigh);
+                }
             }
         }
         if (criticalInterface != sensorMap.end())
@@ -1550,17 +1564,29 @@ ipmi::RspType<uint8_t, // enabled
 
             if (criticalHigh != criticalMap.end())
             {
-                assertionEnabledMsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::upperCriticalGoingHigh);
-                deassertionEnabledMsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::upperCriticalGoingLow);
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          criticalHigh->second);
+                if (std::isfinite(value))
+                {
+                    assertionEnabledMsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            upperCriticalGoingHigh);
+                    deassertionEnabledMsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::upperCriticalGoingLow);
+                }
             }
             if (criticalLow != criticalMap.end())
             {
-                assertionEnabledLsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::lowerCriticalGoingLow);
-                deassertionEnabledLsb |= static_cast<uint8_t>(
-                    IPMISensorEventEnableThresholds::lowerCriticalGoingHigh);
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          criticalLow->second);
+                if (std::isfinite(value))
+                {
+                    assertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::lowerCriticalGoingLow);
+                    deassertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            lowerCriticalGoingHigh);
+                }
             }
         }
     }
