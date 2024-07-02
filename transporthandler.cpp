@@ -8,11 +8,7 @@
 #include <array>
 #include <fstream>
 
-using phosphor::logging::commit;
 using phosphor::logging::elog;
-using phosphor::logging::entry;
-using phosphor::logging::level;
-using phosphor::logging::log;
 using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 using sdbusplus::error::xyz::openbmc_project::common::InvalidArgument;
 using sdbusplus::server::xyz::openbmc_project::network::EthernetInterface;
@@ -152,28 +148,6 @@ ChannelParams getChannelParams(sdbusplus::bus_t& bus, uint8_t channel)
         elog<InternalFailure>();
     }
     return std::move(*params);
-}
-
-/** @brief Wraps the phosphor logging method to insert some additional metadata
- *
- *  @param[in] params - The parameters for the channel
- *  ...
- */
-template <auto level, typename... Args>
-auto logWithChannel(const ChannelParams& params, Args&&... args)
-{
-    return log<level>(std::forward<Args>(args)...,
-                      entry("CHANNEL=%d", params.id),
-                      entry("IFNAME=%s", params.ifname.c_str()));
-}
-template <auto level, typename... Args>
-auto logWithChannel(const std::optional<ChannelParams>& params, Args&&... args)
-{
-    if (params)
-    {
-        return logWithChannel<level>(*params, std::forward<Args>(args)...);
-    }
-    return log<level>(std::forward<Args>(args)...);
 }
 
 /** @brief Get / Set the Property value from phosphor-networkd EthernetInterface
@@ -493,8 +467,9 @@ uint16_t getVLANProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
         bus, params.service, params.logicalPath, INTF_VLAN, "Id"));
     if ((vlan & VLAN_VALUE_MASK) != vlan)
     {
-        logWithChannel<level::ERR>(params, "networkd returned an invalid vlan",
-                                   entry("VLAN=%" PRIu32, vlan));
+        lg2::error("networkd returned an invalid vlan: {VLAN} "
+                   "(CH={CHANNEL}, IF={IFNAME})",
+                   "CHANNEL", params.id, "IFNAME", params.ifname, "VLAN", vlan);
         elog<InternalFailure>();
     }
     return vlan;
