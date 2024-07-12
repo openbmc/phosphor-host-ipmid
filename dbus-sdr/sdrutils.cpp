@@ -210,10 +210,38 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
 
     sensorNumMapPtr = std::make_shared<SensorNumMap>();
 
+#ifdef FEATURE_HYBRID_SENSORS
+    // Reserve specified sensor numbers for static sensors.
+    for (const auto& it : ipmi::sensor::sensors)
+    {
+        if (sensorNumMapPtr->left.find(it.first) != sensorNumMapPtr->left.end())
+        {
+            continue;
+        }
+        sensorNumMapPtr->insert(
+            SensorNumMap::value_type(it.first, it.second.sensorPath));
+    }
+#endif
+
     uint16_t sensorNum = 0;
     uint16_t sensorIndex = 0;
     for (const auto& sensor : *sensorTree)
     {
+#ifdef FEATURE_HYBRID_SENSORS
+        if (auto sensorName = findStaticSensor(sensor.first);
+            sensorName != ipmi::sensor::sensors.end())
+        {
+            continue;
+        }
+
+        // If the sensor number is reserved, increase the sensor number.
+        while (sensorNumMapPtr->left.find(sensorNum) !=
+               sensorNumMapPtr->left.end())
+        {
+            sensorNum++;
+            sensorIndex++;
+        }
+#endif
         sensorNumMapPtr->insert(
             SensorNumMap::value_type(sensorNum, sensor.first));
         sensorIndex++;
@@ -331,7 +359,7 @@ uint8_t getSensorEventTypeFromPath(const std::string& path)
     return sensorEventType;
 }
 
-std::string getPathFromSensorNumber(uint16_t sensorNum)
+std::string getPathFromSensorNumber(uint16_t sensorNum, bool buildingSDR)
 {
     std::shared_ptr<SensorNumMap> sensorNumMapPtr;
     details::getSensorNumMap(sensorNumMapPtr);
@@ -340,6 +368,29 @@ std::string getPathFromSensorNumber(uint16_t sensorNum)
         return std::string();
     }
 
+#ifdef FEATURE_HYBRID_SENSORS
+    if (buildingSDR)
+    {
+        if (sensorNum > sensorNumMapPtr->size())
+        {
+            phosphor::logging::log<phosphor::logging::level::ERR>(
+                "recordID is bigger then the sensor subtree",
+                phosphor::logging::entry("RECORDID: %u", sensorNum));
+            return std::string();
+        }
+        for (auto it : sensorNumMapPtr->left)
+        {
+            if (sensorNum-- == 0)
+            {
+                return it.second;
+            }
+        }
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            "recordID is out of range",
+            phosphor::logging::entry("RECORDID: %u", sensorNum));
+        return std::string();
+    }
+#endif
     try
     {
         return sensorNumMapPtr->left.at(sensorNum);
