@@ -365,7 +365,8 @@ uint16_t getSensorNumberFromPath(const std::string& path);
 
 uint8_t getSensorEventTypeFromPath(const std::string& path);
 
-std::string getPathFromSensorNumber(uint16_t sensorNum);
+std::string getPathFromSensorNumber(uint16_t sensorNum,
+                                    [[maybe_unused]] bool buildingSDR);
 
 namespace ipmi
 {
