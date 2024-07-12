@@ -16,6 +16,24 @@
       "message": "use lg2 for output, not std::cerr/cout",
       "revId": "2da18e2c231ba10656f0a09362ffa0839b9afe4a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f35e43ee_6b3850f1",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-07-12T04:36:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3bb0d000_f4b6f41e",
+      "revId": "2da18e2c231ba10656f0a09362ffa0839b9afe4a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
