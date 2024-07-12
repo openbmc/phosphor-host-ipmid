@@ -111,7 +111,8 @@ SensorSubTree& getSensorTree();
 
 ipmi_ret_t getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
                                std::string& connection, std::string& path,
-                               std::vector<std::string>* interfaces = nullptr);
+                               std::vector<std::string>* interfaces = nullptr,
+                               bool buildingSDR = false);
 
 struct IPMIThresholds
 {
