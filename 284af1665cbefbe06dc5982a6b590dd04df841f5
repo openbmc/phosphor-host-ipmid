@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dfeeb366_5fe879bf",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 767,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-07-16T15:18:25Z",
+      "side": 1,
+      "message": "Rather than adding what is basically a copy of something that is already in the code twice, I would prefer that this proto-function is parameterized and made into an actual function to reduce the amount of code duplication.",
+      "revId": "284af1665cbefbe06dc5982a6b590dd04df841f5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
