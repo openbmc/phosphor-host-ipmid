@@ -1433,6 +1433,112 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     return ret;
 }
 
+/** @brief implements the get Sensor event enable command
+ *  @param sensorNumber - sensor number
+ *
+ *  @returns IPMI completion code plus response data
+ *   - enabled               - Sensor Event messages
+ *   - assertionEnabledLsb   - Assertion event messages
+ *   - assertionEnabledMsb   - Assertion event messages
+ *   - deassertionEnabledLsb - Deassertion event messages
+ *   - deassertionEnabledMsb - Deassertion event messages
+ */
+
+ipmi::RspType<uint8_t, // enabled
+              uint8_t, // assertionEnabledLsb
+              uint8_t, // assertionEnabledMsb
+              uint8_t, // deassertionEnabledLsb
+              uint8_t> // deassertionEnabledMsb
+    ipmiSenGetSensorEventEnable(ipmi::Context::ptr ctx, uint8_t sensorNum)
+{
+    std::string connection;
+    std::string path;
+
+    uint8_t enabled = 0;
+    uint8_t assertionEnabledLsb = 0;
+    uint8_t assertionEnabledMsb = 0;
+    uint8_t deassertionEnabledLsb = 0;
+    uint8_t deassertionEnabledMsb = 0;
+
+    auto iter = ipmi::sensor::sensors.find(sensorNum);
+    if (iter == ipmi::sensor::sensors.end())
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    const auto info = iter->second;
+    auto it = sensorThresholdMap.find(sensorNum);
+    if (it == sensorThresholdMap.end())
+    {
+        auto temp = getSensorThresholds(ctx, sensorNum);
+        if (temp.validMask != 0)
+        {
+            sensorThresholdMap[sensorNum] = std::move(temp);
+        }
+    }
+
+    const auto& senThreshold = sensorThresholdMap[sensorNum];
+    if (senThreshold.upperNonRecoverable || senThreshold.lowerNonRecoverable ||
+        senThreshold.upperCritical || senThreshold.lowerCritical ||
+        senThreshold.upperNonCritical || senThreshold.lowerNonCritical)
+    {
+        enabled = static_cast<uint8_t>(
+            IPMISensorEventEnableByte2::eventMessagesEnable);
+    }
+
+    if (senThreshold.upperNonRecoverable)
+    {
+        assertionEnabledMsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::upperNonRecoverableGoingHigh);
+        deassertionEnabledMsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::upperNonRecoverableGoingLow);
+    }
+
+    if (senThreshold.lowerNonRecoverable)
+    {
+        assertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::lowerNonRecoverableGoingLow);
+        deassertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::lowerNonRecoverableGoingHigh);
+    }
+
+    if (senThreshold.upperCritical)
+    {
+        assertionEnabledMsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::upperCriticalGoingHigh);
+        deassertionEnabledMsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::upperCriticalGoingLow);
+    }
+
+    if (senThreshold.lowerCritical)
+    {
+        assertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::lowerCriticalGoingLow);
+        deassertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::lowerCriticalGoingHigh);
+    }
+
+    if (senThreshold.upperNonCritical)
+    {
+        assertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::upperNonCriticalGoingHigh);
+        deassertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::upperNonCriticalGoingLow);
+    }
+
+    if (senThreshold.lowerNonCritical)
+    {
+        assertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::lowerNonCriticalGoingLow);
+        deassertionEnabledLsb |= static_cast<uint8_t>(
+            IPMISensorEventEnableThresholds::lowerNonCriticalGoingHigh);
+    }
+
+    return ipmi::responseSuccess(enabled, assertionEnabledLsb,
+                                 assertionEnabledMsb, deassertionEnabledLsb,
+                                 deassertionEnabledMsb);
+}
+
 static bool isFromSystemChannel()
 {
     // TODO we could not figure out where the request is from based on IPMI
@@ -1566,6 +1672,11 @@ void register_netfn_sen_functions()
     // <Get Device SDR>
     ipmi_register_callback(NETFUN_SENSOR, IPMI_CMD_GET_DEVICE_SDR, nullptr,
                            ipmi_sen_get_sdr, PRIVILEGE_USER);
+
+    // <Get Sensor Event Enable>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorEventEnable,
+                          ipmi::Privilege::User, ipmiSenGetSensorEventEnable);
 
 #endif
 
