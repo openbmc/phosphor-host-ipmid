@@ -102,20 +102,6 @@ enum class IPMIGetSensorEventEnableThresholds : uint8_t
     upperNonRecoverableGoingHigh = 11,
 };
 
-enum class IPMINetfnSensorCmds : ipmi_cmd_t
-{
-    ipmiCmdGetDeviceSDRInfo = 0x20,
-    ipmiCmdGetDeviceSDR = 0x21,
-    ipmiCmdReserveDeviceSDRRepo = 0x22,
-    ipmiCmdSetSensorThreshold = 0x26,
-    ipmiCmdGetSensorThreshold = 0x27,
-    ipmiCmdGetSensorEventEnable = 0x29,
-    ipmiCmdGetSensorEventStatus = 0x2B,
-    ipmiCmdGetSensorReading = 0x2D,
-    ipmiCmdGetSensorType = 0x2F,
-    ipmiCmdSetSensorReadingAndEventStatus = 0x30,
-};
-
 namespace ipmi
 {
 
