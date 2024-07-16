@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5241725d_00534aec",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1534,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-07-16T15:57:49Z",
+      "side": 1,
+      "message": "If you define the response to the image as a bunch of boolean values, then you can just return responseSuccess(reserved6, scanningEnabled, eventsEnabled, senThreshold.lowerNonCritical, senThreshold.lowerNonCritical, senThreshold.lowerCritical, senThreshold.lowerCritical, ...);",
+      "range": {
+        "startLine": 1484,
+        "startChar": 0,
+        "endLine": 1534,
+        "endChar": 56
+      },
+      "revId": "3d685a4a3a49dba3305fd78fdc78df057e8e3d8a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
