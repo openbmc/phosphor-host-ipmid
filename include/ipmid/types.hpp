@@ -323,3 +323,71 @@ class SecureBuffer : public SecureBufferBase
     }
 };
 } // namespace ipmi
+
+enum class IPMIThresholdRespBits
+{
+    lowerNonCritical,
+    lowerCritical,
+    lowerNonRecoverable,
+    upperNonCritical,
+    upperCritical,
+    upperNonRecoverable
+};
+
+enum class IPMISensorReadingByte2 : uint8_t
+{
+    eventMessagesEnable = (1 << 7),
+    sensorScanningEnable = (1 << 6),
+    readingStateUnavailable = (1 << 5),
+};
+
+enum class IPMISensorReadingByte3 : uint8_t
+{
+    upperNonRecoverable = (1 << 5),
+    upperCritical = (1 << 4),
+    upperNonCritical = (1 << 3),
+    lowerNonRecoverable = (1 << 2),
+    lowerCritical = (1 << 1),
+    lowerNonCritical = (1 << 0),
+};
+
+enum class IPMISensorEventEnableByte2 : uint8_t
+{
+    eventMessagesEnable = (1 << 7),
+    sensorScanningEnable = (1 << 6),
+};
+
+enum class IPMISensorEventEnableThresholds : uint8_t
+{
+    nonRecoverableThreshold = (1 << 6),
+    criticalThreshold = (1 << 5),
+    nonCriticalThreshold = (1 << 4),
+    upperNonRecoverableGoingHigh = (1 << 3),
+    upperNonRecoverableGoingLow = (1 << 2),
+    upperCriticalGoingHigh = (1 << 1),
+    upperCriticalGoingLow = (1 << 0),
+    upperNonCriticalGoingHigh = (1 << 7),
+    upperNonCriticalGoingLow = (1 << 6),
+    lowerNonRecoverableGoingHigh = (1 << 5),
+    lowerNonRecoverableGoingLow = (1 << 4),
+    lowerCriticalGoingHigh = (1 << 3),
+    lowerCriticalGoingLow = (1 << 2),
+    lowerNonCriticalGoingHigh = (1 << 1),
+    lowerNonCriticalGoingLow = (1 << 0),
+};
+
+enum class IPMIGetSensorEventEnableThresholds : uint8_t
+{
+    lowerNonCriticalGoingLow = 0,
+    lowerNonCriticalGoingHigh = 1,
+    lowerCriticalGoingLow = 2,
+    lowerCriticalGoingHigh = 3,
+    lowerNonRecoverableGoingLow = 4,
+    lowerNonRecoverableGoingHigh = 5,
+    upperNonCriticalGoingLow = 6,
+    upperNonCriticalGoingHigh = 7,
+    upperCriticalGoingLow = 8,
+    upperCriticalGoingHigh = 9,
+    upperNonRecoverableGoingLow = 10,
+    upperNonRecoverableGoingHigh = 11,
+};
