@@ -1424,6 +1424,142 @@ ipmi::RspType<uint16_t,            // nextRecordId
     return ipmi::responseSuccess(nextRecordId, recordData);
 }
 
+/** @brief implements the get Sensor event enable command
+ *
+ *  @return ipmi::RspType<std::vector<uint8_t>>
+ *         - Completion Code
+ *         - Byte1: Global Event/Scanning enable status
+ *         - Byte2: Assertion enable (LSB)
+ *         - Byte3: Assertion enable (MSB)
+ *         - Byte4: Deassertion enable (LSB)
+ *         - Byte5: Deassertion enable (MSB)
+ */
+ipmi::RspType<std::vector<uint8_t>> ipmiSenGetSensorEventEnable(
+    ipmi::Context::ptr ctx, uint8_t sensorNum)
+{
+    auto iter = ipmi::sensor::sensors.find(sensorNum);
+    if (iter == ipmi::sensor::sensors.end())
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    auto it = sensorThresholdMap.find(sensorNum);
+    if (it == sensorThresholdMap.end())
+    {
+        auto temp = getSensorThresholds(ctx, sensorNum);
+        if (temp.validMask != 0)
+        {
+            sensorThresholdMap[sensorNum] = std::move(temp);
+        }
+    }
+
+    const auto& senThreshold = sensorThresholdMap[sensorNum];
+
+    bool anyThreshold =
+        senThreshold.upperNonRecoverable || senThreshold.lowerNonRecoverable ||
+        senThreshold.upperCritical || senThreshold.lowerCritical ||
+        senThreshold.upperNonCritical || senThreshold.lowerNonCritical;
+
+    std::vector<uint8_t> resp;
+    resp.reserve(5);
+
+    // Byte1 Global Event/Scanning enable status
+    uint8_t byte1 = 0;
+
+    if (anyThreshold)
+    {
+        ipmi::sensor::setBit(byte1,
+                             IPMISensorEventEnableByte2::eventMessagesEnable);
+        ipmi::sensor::setBit(byte1,
+                             IPMISensorEventEnableByte2::sensorScanningEnable);
+    }
+
+    resp.push_back(byte1);
+
+    if (!anyThreshold)
+    {
+        return ipmi::responseSuccess(resp);
+    }
+
+    // Byte2 Assertion LSB
+    uint8_t assertionLsb = 0;
+    uint8_t assertionMsb = 0;
+
+    if (senThreshold.lowerNonCritical)
+    {
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::lowerNonCriticalGoingLow);
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::lowerNonCriticalGoingHigh);
+    }
+
+    if (senThreshold.lowerCritical)
+    {
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::lowerCriticalGoingLow);
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::lowerCriticalGoingHigh);
+    }
+
+    if (senThreshold.lowerNonRecoverable)
+    {
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::lowerNonRecoverableGoingLow);
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::lowerNonRecoverableGoingHigh);
+    }
+
+    if (senThreshold.upperNonCritical)
+    {
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::upperNonCriticalGoingLow);
+        ipmi::sensor::setBit(
+            assertionLsb,
+            IPMISensorEventEnableThresholds::upperNonCriticalGoingHigh);
+    }
+
+    // Byte3 Assertion MSB
+    if (senThreshold.upperCritical)
+    {
+        ipmi::sensor::setBit(
+            assertionMsb,
+            IPMISensorEventEnableThresholds::upperCriticalGoingLow);
+        ipmi::sensor::setBit(
+            assertionMsb,
+            IPMISensorEventEnableThresholds::upperCriticalGoingHigh);
+    }
+
+    if (senThreshold.upperNonRecoverable)
+    {
+        ipmi::sensor::setBit(
+            assertionMsb,
+            IPMISensorEventEnableThresholds::upperNonRecoverableGoingLow);
+        ipmi::sensor::setBit(
+            assertionMsb,
+            IPMISensorEventEnableThresholds::upperNonRecoverableGoingHigh);
+    }
+
+    // Byte4 Deassertion LSB
+    uint8_t deassertionLsb = assertionLsb;
+
+    // Byte5 Deassertion MSB
+    uint8_t deassertionMsb = assertionMsb;
+
+    resp.push_back(assertionLsb);
+    resp.push_back(assertionMsb);
+    resp.push_back(deassertionLsb);
+    resp.push_back(deassertionMsb);
+
+    return ipmi::responseSuccess(resp);
+}
+
 static bool isFromSystemChannel()
 {
     // TODO we could not figure out where the request is from based on IPMI
@@ -1548,6 +1684,11 @@ void registerNetFnSenFunctions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetDeviceSdr,
                           ipmi::Privilege::User, ipmiSensorGetSdr);
+
+    // <Get Sensor Event Enable>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorEventEnable,
+                          ipmi::Privilege::User, ipmiSenGetSensorEventEnable);
 
 #endif
 
