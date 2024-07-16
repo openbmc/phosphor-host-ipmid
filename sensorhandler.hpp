@@ -711,6 +711,12 @@ inline void enableScanning(ipmi::sensor::GetSensorResponse& resp)
     resp.allEventMessagesEnabled = false;
 }
 
+template <typename Enum>
+inline void setBit(uint8_t& byte, Enum bit)
+{
+    byte |= static_cast<uint8_t>(bit);
+}
+
 } // namespace sensor
 
 } // namespace ipmi
