@@ -205,13 +205,19 @@ inline void setFlags(bool isList, bool isLinked, SensorDataEntityRecordKey& key)
  */
 struct GetSensorThresholdsResponse
 {
-    uint8_t validMask;           //!< valid mask
-    uint8_t lowerNonCritical;    //!< lower non-critical threshold
-    uint8_t lowerCritical;       //!< lower critical threshold
-    uint8_t lowerNonRecoverable; //!< lower non-recoverable threshold
-    uint8_t upperNonCritical;    //!< upper non-critical threshold
-    uint8_t upperCritical;       //!< upper critical threshold
-    uint8_t upperNonRecoverable; //!< upper non-recoverable threshold
+    uint8_t validMask;             //!< valid mask
+    uint8_t lowerNonCritical;      //!< lower non-critical threshold
+    uint8_t lowerCritical;         //!< lower critical threshold
+    uint8_t lowerNonRecoverable;   //!< lower non-recoverable threshold
+    uint8_t upperNonCritical;      //!< upper non-critical threshold
+    uint8_t upperCritical;         //!< upper critical threshold
+    uint8_t upperNonRecoverable;   //!< upper non-recoverable threshold
+    bool lowerNonCriticalAlarm;    //!< lower non-critical alarm
+    bool lowerCriticalAlarm;       //!< lower critical alarm
+    bool lowerNonRecoverableAlarm; //!< lower non-recoverable alarm
+    bool upperNonCriticalAlarm;    //!< upper non-critical alarm
+    bool upperCriticalAlarm;       //!< upper critical alarm
+    bool upperNonRecoverableAlarm; //!< upper non-recoverable alarm
 } __attribute__((packed));
 
 // Body - full record

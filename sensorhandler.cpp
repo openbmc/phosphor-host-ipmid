@@ -675,10 +675,13 @@ ipmi::RspType<uint8_t, // sensor reading
 }
 
 void updateWarningThreshold(uint8_t lowerValue, uint8_t upperValue,
+                            bool lowAlarm, bool highAlarm,
                             get_sdr::GetSensorThresholdsResponse& resp)
 {
     resp.lowerNonCritical = lowerValue;
     resp.upperNonCritical = upperValue;
+    resp.lowerNonCriticalAlarm = lowAlarm;
+    resp.upperNonCriticalAlarm = highAlarm;
     if (lowerValue)
     {
         resp.validMask |= static_cast<uint8_t>(
@@ -693,10 +696,13 @@ void updateWarningThreshold(uint8_t lowerValue, uint8_t upperValue,
 }
 
 void updateCriticalThreshold(uint8_t lowerValue, uint8_t upperValue,
+                             bool lowAlarm, bool highAlarm,
                              get_sdr::GetSensorThresholdsResponse& resp)
 {
     resp.lowerCritical = lowerValue;
     resp.upperCritical = upperValue;
+    resp.lowerCriticalAlarm = lowAlarm;
+    resp.upperCriticalAlarm = highAlarm;
     if (lowerValue)
     {
         resp.validMask |= static_cast<uint8_t>(
@@ -711,10 +717,13 @@ void updateCriticalThreshold(uint8_t lowerValue, uint8_t upperValue,
 }
 
 void updateNonRecoverableThreshold(uint8_t lowerValue, uint8_t upperValue,
+                                   bool lowAlarm, bool highAlarm,
                                    get_sdr::GetSensorThresholdsResponse& resp)
 {
     resp.lowerNonRecoverable = lowerValue;
     resp.upperNonRecoverable = upperValue;
+    resp.lowerNonRecoverableAlarm = lowAlarm;
+    resp.upperNonRecoverableAlarm = highAlarm;
     if (lowerValue)
     {
         resp.validMask |= static_cast<uint8_t>(
@@ -748,11 +757,17 @@ void updateThresholds(
 {
     std::string thresholdLow = thresholdName + "Low";
     std::string thresholdHigh = thresholdName + "High";
+    std::string thresholdAlarmLow = thresholdName + "AlarmLow";
+    std::string thresholdAlarmHigh = thresholdName + "AlarmHigh";
 
     double lowValue = ipmi::mappedVariant<double>(
         thresholds, thresholdLow, std::numeric_limits<double>::quiet_NaN());
     double highValue = ipmi::mappedVariant<double>(
         thresholds, thresholdHigh, std::numeric_limits<double>::quiet_NaN());
+    bool lowAlarm =
+        ipmi::mappedVariant<bool>(thresholds, thresholdAlarmLow, false);
+    bool highAlarm =
+        ipmi::mappedVariant<bool>(thresholds, thresholdAlarmHigh, false);
 
     uint8_t lowerValue = 0;
     uint8_t upperValue = 0;
@@ -776,15 +791,18 @@ void updateThresholds(
 
     if (thresholdName == "Warning")
     {
-        updateWarningThreshold(lowerValue, upperValue, resp);
+        updateWarningThreshold(lowerValue, upperValue, lowAlarm, highAlarm,
+                               resp);
     }
     else if (thresholdName == "Critical")
     {
-        updateCriticalThreshold(lowerValue, upperValue, resp);
+        updateCriticalThreshold(lowerValue, upperValue, lowAlarm, highAlarm,
+                                resp);
     }
     else if (thresholdName == "NonRecoverable")
     {
-        updateNonRecoverableThreshold(lowerValue, upperValue, resp);
+        updateNonRecoverableThreshold(lowerValue, upperValue, lowAlarm,
+                                      highAlarm, resp);
     }
 }
 
@@ -1559,6 +1577,84 @@ ipmi::RspType<
         t.upperNonRecoverable, 0, 0, 0, 0);
 }
 
+/** @brief implements the get Sensor event status command
+ *
+ *  @return ipmi::RspType<std::vector<uint8_t>>
+ *         - Completion Code
+ *         - Byte1: Global Sensor Event messages state
+ *         - Byte2: Assertion enable (LSB)
+ *         - Byte3: Assertion enable (MSB)
+ *         - Byte4: Deassertion enable (LSB)
+ *         - Byte5: Deassertion enable (MSB)
+ */
+ipmi::RspType<
+    uint5_t, bool, bool, bool, // Byte1: unavailable + scanning + eventsDisabled
+    bool, bool, bool, bool, bool, bool, bool, bool, // Byte2 assertion LSB
+    bool, bool, bool, bool, bool, bool, bool, bool, // Byte3 assertion MSB
+    bool, bool, bool, bool, bool, bool, bool, bool, // Byte4 deassertion LSB
+    bool, bool, bool, bool, bool, bool, bool, bool  // Byte5 deassertion MSB
+    >
+    ipmiSenGetSensorEventStatus(ipmi::Context::ptr ctx, uint8_t sensorNum)
+{
+    auto iter = ipmi::sensor::sensors.find(sensorNum);
+    if (iter == ipmi::sensor::sensors.end())
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    ipmi::sensor::ReadingType eventReadingType =
+        static_cast<uint8_t>(iter->second.sensorReadingType);
+    if (eventReadingType == 0x00)
+    {
+        // 00h: Event/Reading Type unspecified.
+        return ipmi::responseSensorInvalid();
+    }
+
+    if (eventReadingType != 0x01)
+    {
+        // TODO: Discrete
+        return ipmi::responseSensorInvalid();
+    }
+
+    // Threshold
+    auto it = sensorThresholdMap.find(sensorNum);
+    if (it == sensorThresholdMap.end())
+    {
+        auto temp = getSensorThresholds(ctx, sensorNum);
+        if (temp.validMask == 0)
+        {
+            return ipmi::responseSensorInvalid();
+        }
+        sensorThresholdMap[sensorNum] = std::move(temp);
+    }
+
+    const auto& t = sensorThresholdMap[sensorNum];
+
+    return ipmi::responseSuccess(
+        // Byte1
+        uint5_t{}, false, true, true,
+
+        // Byte2
+        t.lowerNonCriticalAlarm, t.lowerNonCriticalAlarm, t.lowerCriticalAlarm,
+        t.lowerCriticalAlarm, t.lowerNonRecoverableAlarm,
+        t.lowerNonRecoverableAlarm, t.upperNonCriticalAlarm,
+        t.upperNonCriticalAlarm,
+
+        // Byte3
+        t.upperCriticalAlarm, t.upperCriticalAlarm, t.upperNonRecoverableAlarm,
+        t.upperNonRecoverableAlarm, 0, 0, 0, 0,
+
+        // Byte4
+        t.lowerNonCriticalAlarm, t.lowerNonCriticalAlarm, t.lowerCriticalAlarm,
+        t.lowerCriticalAlarm, t.lowerNonRecoverableAlarm,
+        t.lowerNonRecoverableAlarm, t.upperNonCriticalAlarm,
+        t.upperNonCriticalAlarm,
+
+        // Byte5
+        t.upperCriticalAlarm, t.upperCriticalAlarm, t.upperNonRecoverableAlarm,
+        t.upperNonRecoverableAlarm, 0, 0, 0, 0);
+}
+
 static bool isFromSystemChannel()
 {
     // TODO we could not figure out where the request is from based on IPMI
@@ -1691,6 +1787,11 @@ void registerNetFnSenFunctions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdGetSensorEventEnable,
                           ipmi::Privilege::User, ipmiSenGetSensorEventEnable);
+
+    // <Get Sensor Event Status>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetSensorEventStatus,
+                          ipmi::Privilege::User, ipmiSenGetSensorEventStatus);
 
 #endif
 
