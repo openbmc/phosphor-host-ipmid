@@ -669,6 +669,8 @@ get_sdr::GetSensorThresholdsResponse
         "xyz.openbmc_project.Sensor.Threshold.Warning";
     constexpr auto criticalThreshIntf =
         "xyz.openbmc_project.Sensor.Threshold.Critical";
+    constexpr auto nonRecoverableThreshIntf =
+        "xyz.openbmc_project.Sensor.Threshold.NonRecoverable";
 
     const auto iter = ipmi::sensor::sensors.find(sensorNum);
     const auto info = iter->second;
@@ -759,6 +761,41 @@ get_sdr::GetSensorThresholdsResponse
                 static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp));
             resp.validMask |= static_cast<uint8_t>(
                 ipmi::sensor::ThresholdMask::CRITICAL_HIGH_MASK);
+        }
+    }
+
+    ipmi::PropertyMap nonRecThresholds;
+    ec = ipmi::getAllDbusProperties(ctx, service, info.sensorPath,
+                                    nonRecoverableThreshIntf, nonRecThresholds);
+    if (!ec)
+    {
+        double nonRecLow = ipmi::mappedVariant<double>(
+            nonRecThresholds, "NonRecoverableLow",
+            std::numeric_limits<double>::quiet_NaN());
+        double nonRecHigh = ipmi::mappedVariant<double>(
+            nonRecThresholds, "NonRecoverableHigh",
+            std::numeric_limits<double>::quiet_NaN());
+
+        if (std::isfinite(nonRecLow))
+        {
+            nonRecLow *= std::pow(10, info.scale - info.exponentR);
+            rawData =
+                round((nonRecLow - info.scaledOffset) / info.coefficientM);
+            resp.lowerNonRecoverable =
+                static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp));
+            resp.validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::NON_RECOVERABLE_LOW_MASK);
+        }
+
+        if (std::isfinite(nonRecHigh))
+        {
+            nonRecHigh *= std::pow(10, info.scale - info.exponentR);
+            rawData =
+                round((nonRecHigh - info.scaledOffset) / info.coefficientM);
+            resp.upperNonRecoverable =
+                static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp));
+            resp.validMask |= static_cast<uint8_t>(
+                ipmi::sensor::ThresholdMask::NON_RECOVERABLE_HIGH_MASK);
         }
     }
 

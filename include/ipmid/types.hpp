@@ -216,8 +216,10 @@ enum class ThresholdMask
 {
     NON_CRITICAL_LOW_MASK = 0x01,
     CRITICAL_LOW_MASK = 0x02,
+    NON_RECOVERABLE_LOW_MASK = 0x4,
     NON_CRITICAL_HIGH_MASK = 0x08,
     CRITICAL_HIGH_MASK = 0x10,
+    NON_RECOVERABLE_HIGH_MASK = 0x20,
 };
 
 static constexpr uint8_t maxContainedEntities = 4;
