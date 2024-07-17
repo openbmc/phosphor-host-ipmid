@@ -57,6 +57,7 @@ test('message',
     'message/unpack.cpp',
     include_directories: root_inc,
     build_by_default: false,
+    override_options: ['b_lundef=true'],
     implicit_include_directories: false,
     dependencies: [boost, phosphor_logging_dep, crypto, systemd, sdbusplus_dep, gtest, gmock]
   ))

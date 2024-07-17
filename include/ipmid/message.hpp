@@ -19,7 +19,7 @@
 #include <ipmid/api-types.hpp>
 #include <ipmid/message/types.hpp>
 #include <ipmid/types.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/asio/connection.hpp>
 
 #include <algorithm>
@@ -119,11 +119,12 @@ struct Payload
 
     ~Payload()
     {
-        using namespace phosphor::logging;
         if (raw.size() != 0 && std::uncaught_exceptions() == 0 && !trailingOk &&
             !unpackCheck && !unpackError)
         {
-            log<level::ERR>("Failed to check request for full unpack");
+            lg2::error(
+                "Failed to check request for full unpack: raw size: {RAW_SIZE}",
+                "RAW_SIZE", raw.size());
         }
     }
 
