@@ -16,7 +16,7 @@
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Logging/SEL/error.hpp>
@@ -120,7 +120,7 @@ static void selAddedCallback(sdbusplus::message_t& m)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>("Failed to read object path");
+        lg2::error("Failed to read object path");
         return;
     }
     std::string p = objPath;
@@ -140,7 +140,7 @@ static void selRemovedCallback(sdbusplus::message_t& m)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>("Failed to read object path");
+        lg2::error("Failed to read object path");
     }
     try
     {
@@ -149,7 +149,7 @@ static void selRemovedCallback(sdbusplus::message_t& m)
     }
     catch (const std::invalid_argument& e)
     {
-        log<level::ERR>("Invalid logging entry ID");
+        lg2::error("Invalid logging entry ID");
     }
 }
 
@@ -200,7 +200,7 @@ void initSELCache()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>("Failed to get logging object paths");
+        lg2::error("Failed to get logging object paths");
         return;
     }
     for (const auto& p : paths)
@@ -271,7 +271,7 @@ ipmi::RspType<uint8_t,  // SEL revision.
         {}
         catch (const std::runtime_error& e)
         {
-            log<level::ERR>(e.what());
+            lg2::error("runtime error: {ERROR}", "ERROR", e);
         }
     }
 
@@ -461,7 +461,7 @@ ipmi::RspType<uint16_t // deleted record ID
     }
     catch (const std::runtime_error& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("runtime error: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
 
@@ -535,7 +535,7 @@ ipmi::RspType<uint8_t // erase status
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>("Error eraseAll ", entry("ERROR=%s", e.what()));
+        lg2::error("Error eraseAll: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
 
@@ -564,18 +564,17 @@ ipmi::RspType<uint32_t> // current time
     }
     catch (const InternalFailure& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("Internal Failure: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("exception message: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
 
-    bmcTime << "BMC time:"
-            << duration_cast<seconds>(microseconds(bmc_time_usec)).count();
-    log<level::DEBUG>(bmcTime.str().c_str());
+    lg2::debug("BMC time: {BMC_TIME}", "BMC_TIME",
+               duration_cast<seconds>(microseconds(bmc_time_usec)).count());
 
     // Time is really long int but IPMI wants just uint32. This works okay until
     // the number of seconds since 1970 overflows uint32 size.. Still a whole
