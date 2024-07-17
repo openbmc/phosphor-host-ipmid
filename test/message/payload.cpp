@@ -329,6 +329,12 @@ int sd_journal_send_with_location(const char* /*file*/, const char* /*line*/,
     logs.push_back(format);
     return 0;
 }
+
+int sd_journal_sendv(const struct iovec* iov, int /* n */)
+{
+    logs.push_back(std::string((char*)iov[0].iov_base, iov[0].iov_len));
+    return 0;
+}
 }
 
 class PayloadLogging : public testing::Test
