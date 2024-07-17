@@ -18,6 +18,7 @@
 
 #include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <fstream>
 #include <optional>
@@ -151,10 +152,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "fail to update subtree",
-                phosphor::logging::entry("PATH=%s", path),
-                phosphor::logging::entry("WHAT=%s", e.what()));
+            lg2::error("Failed to update subtree, path: {PATH}, error: {ERROR}",
+                       "PATH", path, "ERROR", e);
             return false;
         }
         if constexpr (debug)
@@ -429,10 +428,9 @@ std::map<std::string, Value> getEntityManagerProperties(const char* path,
     }
     catch (const std::exception& e)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Failed to GetAll", phosphor::logging::entry("PATH=%s", path),
-            phosphor::logging::entry("INTF=%s", interface),
-            phosphor::logging::entry("WHAT=%s", e.what()));
+        lg2::error("Failed to GetAll, path: {PATH}, interface: {INTERFACE}, "
+                   "error: {ERROR}",
+                   "PATH", path, "INTERFACE", interface, "ERROR", e);
     }
 
     return properties;
@@ -604,9 +602,8 @@ void updateIpmiFromAssociation(
 
         if (!sensorInterfacesResponseOpt.has_value())
         {
-            phosphor::logging::log<phosphor::logging::level::DEBUG>(
-                "Failed to GetObject",
-                phosphor::logging::entry("PATH=%s", sensorConfigPath.c_str()));
+            lg2::debug("Failed to GetObject, path: {PATH}", "PATH",
+                       sensorConfigPath);
             continue;
         }
 

@@ -25,7 +25,7 @@
 #include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
 #include <ipmid/types.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
 
@@ -133,8 +133,7 @@ bool writeFru(const std::vector<uint8_t>& fru)
     catch (const sdbusplus::exception_t&)
     {
         // todo: log sel?
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "error writing fru");
+        lg2::error("error writing fru");
         return false;
     }
     writeBus = invalidBus;
@@ -171,9 +170,8 @@ void recalculateHashes()
         if (busFind == fruIface->second.end() ||
             addrFind == fruIface->second.end())
         {
-            phosphor::logging::log<phosphor::logging::level::INFO>(
-                "fru device missing Bus or Address",
-                phosphor::logging::entry("FRU=%s", fru.first.str.c_str()));
+            lg2::info("fru device missing Bus or Address, fru: {FRU}", "FRU",
+                      fru.first.str);
             continue;
         }
 
@@ -230,9 +228,8 @@ void replaceCacheFru(
         "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
     if (ec)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "GetMangagedObjects for replaceCacheFru failed",
-            phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+        lg2::error("GetMangagedObjects for replaceCacheFru failed: {ERROR}",
+                   "ERROR", ec.message());
 
         return;
     }
@@ -266,9 +263,7 @@ std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
             cacheAddr);
     if (ec)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Couldn't get raw fru",
-            phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+        lg2::error("Couldn't get raw fru: {ERROR}", "ERROR", ec.message());
 
         cacheBus = invalidBus;
         cacheAddr = invalidAddr;
@@ -608,9 +603,9 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
 
     if (ec)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "GetMangagedObjects for ipmiStorageGetFruInvAreaInfo failed",
-            phosphor::logging::entry("ERROR=%s", ec.message().c_str()));
+        lg2::error("GetMangagedObjects for ipmiStorageGetFruInvAreaInfo "
+                   "failed: {ERROR}",
+                   "ERROR", ec.message());
 
         return ipmi::ccResponseError;
     }
@@ -847,12 +842,12 @@ static int fromHexStr(const std::string& hexStr, std::vector<uint8_t>& data)
         }
         catch (const std::invalid_argument& e)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
+            lg2::error("Invalid argument: {ERROR}", "ERROR", e);
             return -1;
         }
         catch (const std::out_of_range& e)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
+            lg2::error("Out of range: {ERROR}", "ERROR", e);
             return -1;
         }
     }
