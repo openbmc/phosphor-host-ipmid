@@ -6,7 +6,7 @@
 
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -49,15 +49,14 @@ IpmiCmdData Manager::getNextCommand()
     auto r = timer.stop();
     if (r < 0)
     {
-        log<level::ERR>("Failure to STOP the timer",
-                        entry("ERROR=%s", strerror(-r)));
+        lg2::error("Failure to STOP the timer: {ERROR}", "ERROR", strerror(-r));
     }
 
     if (this->workQueue.empty())
     {
         // Just return a heartbeat in this case.  A spurious SMS_ATN was
         // asserted for the host (probably from a previous boot).
-        log<level::DEBUG>("Control Host work queue is empty!");
+        lg2::debug("Control Host work queue is empty!");
 
         return std::make_pair(CMD_HEARTBEAT, 0x00);
     }
@@ -84,7 +83,7 @@ IpmiCmdData Manager::getNextCommand()
 // Called when initial timer goes off post sending SMS_ATN
 void Manager::hostTimeout()
 {
-    log<level::ERR>("Host control timeout hit!");
+    lg2::error("Host control timeout hit!");
 
     clearQueue();
 }
@@ -111,7 +110,7 @@ void Manager::checkQueueAndAlertHost()
 {
     if (this->workQueue.size() >= 1)
     {
-        log<level::DEBUG>("Asserting SMS Attention");
+        lg2::debug("Asserting SMS Attention");
 
         std::string HOST_IPMI_SVC("org.openbmc.HostIpmi");
         std::string IPMI_PATH("/org/openbmc/HostIpmi/1");
@@ -124,7 +123,7 @@ void Manager::checkQueueAndAlertHost()
         auto r = timer.start(time);
         if (r < 0)
         {
-            log<level::ERR>("Error starting timer for control host");
+            lg2::error("Error starting timer for control host");
             return;
         }
 
@@ -136,11 +135,11 @@ void Manager::checkQueueAndAlertHost()
         {
             auto reply = this->bus.call(method);
 
-            log<level::DEBUG>("SMS Attention asserted");
+            lg2::debug("SMS Attention asserted");
         }
         catch (sdbusplus::exception_t& e)
         {
-            log<level::ERR>("Error when call setAttention method");
+            lg2::error("Error when call setAttention method");
         }
     }
 }
@@ -148,8 +147,8 @@ void Manager::checkQueueAndAlertHost()
 // Called by specific implementations that provide commands
 void Manager::execute(CommandHandler command)
 {
-    log<level::DEBUG>("Pushing cmd on to queue",
-                      entry("COMMAND=%d", std::get<0>(command).first));
+    lg2::debug("Pushing cmd on to queue, command: {COMMAND}", "COMMAND",
+               std::get<0>(command).first);
 
     this->workQueue.emplace(command);
 
@@ -161,7 +160,7 @@ void Manager::execute(CommandHandler command)
     }
     else
     {
-        log<level::INFO>("Command in process, no attention");
+        lg2::info("Command in process, no attention");
     }
 
     return;
