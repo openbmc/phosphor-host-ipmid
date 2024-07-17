@@ -23,14 +23,12 @@
 #include <security/pam_appl.h>
 
 #include <ipmid/api.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <regex>
 
 namespace ipmi
 {
-
-using namespace phosphor::logging;
 
 static constexpr uint8_t enableOperation = 0x00;
 static constexpr uint8_t disableOperation = 0x01;
@@ -64,7 +62,7 @@ ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
     if (reserved1 || reserved2 || sessLimit ||
         !ipmiUserIsValidPrivilege(static_cast<uint8_t>(privilege)))
     {
-        log<level::DEBUG>("Set user access - Invalid field in request");
+        lg2::debug("Set user access - Invalid field in request");
         return ipmi::responseInvalidFieldRequest();
     }
 
@@ -72,17 +70,17 @@ ipmi::RspType<> ipmiSetUserAccess(ipmi::Context::ptr ctx, uint4_t channel,
                                              ctx->channel);
     if (!isValidChannel(chNum))
     {
-        log<level::DEBUG>("Set user access - Invalid channel request");
+        lg2::debug("Set user access - Invalid channel request");
         return ipmi::response(invalidChannel);
     }
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
-        log<level::DEBUG>("Set user access - No support on channel");
+        lg2::debug("Set user access - No support on channel");
         return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
-        log<level::DEBUG>("Set user access - Parameter out of range");
+        lg2::debug("Set user access - Parameter out of range");
         return ipmi::responseParmOutOfRange();
     }
 
@@ -144,18 +142,18 @@ ipmi::RspType<uint6_t, // max channel users
 
     if (reserved1 || reserved2 || !isValidChannel(chNum))
     {
-        log<level::DEBUG>("Get user access - Invalid field in request");
+        lg2::debug("Get user access - Invalid field in request");
         return ipmi::responseInvalidFieldRequest();
     }
 
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
-        log<level::DEBUG>("Get user access - No support on channel");
+        lg2::debug("Get user access - No support on channel");
         return ipmi::response(ccActionNotSupportedForChannel);
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
-        log<level::DEBUG>("Get user access - Parameter out of range");
+        lg2::debug("Get user access - Parameter out of range");
         return ipmi::responseParmOutOfRange();
     }
 
@@ -219,7 +217,7 @@ ipmi::RspType<>
     uint8_t userId = static_cast<uint8_t>(id);
     if (!ipmiUserIsValidUserId(userId))
     {
-        log<level::DEBUG>("Set user name - Invalid user id");
+        lg2::debug("Set user name - Invalid user id");
         return ipmi::responseParmOutOfRange();
     }
 
@@ -252,7 +250,8 @@ ipmi::RspType<std::array<uint8_t, ipmi::ipmiMaxUserName>> // user name
     std::string userName;
     if (ipmiUserGetUserName(userId, userName) != ccSuccess)
     { // Invalid User ID
-        log<level::DEBUG>("User Name not found", entry("USER-ID=%u", userId));
+        lg2::debug("User Name not found, user Id: {USER_ID}", "USER_ID",
+                   userId);
         return ipmi::responseParmOutOfRange();
     }
     // copy the std::string into a fixed array
@@ -280,7 +279,7 @@ ipmi::RspType<> // user name
 {
     if (reserved1 || reserved2)
     {
-        log<level::DEBUG>("Invalid data field in request");
+        lg2::debug("Invalid data field in request");
         return ipmi::responseInvalidFieldRequest();
     }
 
@@ -295,7 +294,7 @@ ipmi::RspType<> // user name
         ((pwLen20 && (userPassword.size() != maxIpmi20PasswordSize)) ||
          (!pwLen20 && (userPassword.size() != maxIpmi15PasswordSize))))
     {
-        log<level::DEBUG>("Invalid Length");
+        lg2::debug("Invalid Length");
         return ipmi::responseReqDataLenInvalid();
     }
 
@@ -305,7 +304,8 @@ ipmi::RspType<> // user name
     std::string userName;
     if (ipmiUserGetUserName(userId, userName) != ccSuccess)
     {
-        log<level::DEBUG>("User Name not found", entry("USER-ID=%d", userId));
+        lg2::debug("User Name not found, user Id: {USER_ID}", "USER_ID",
+                   userId);
         return ipmi::responseParmOutOfRange();
     }
 
@@ -352,8 +352,8 @@ ipmi::RspType<> // user name
         pwBad |= pwLenDiffers;
         if (pwBad)
         {
-            log<level::DEBUG>("Test password failed",
-                              entry("USER-ID=%d", userId));
+            lg2::debug("Test password failed, user Id: {USER_ID}", "USER_ID",
+                       userId);
             static constexpr ipmi::Cc ipmiCCPasswdFailMismatch = 0x80;
             return ipmi::response(ipmiCCPasswdFailMismatch);
         }
@@ -417,15 +417,13 @@ ipmi::RspType<uint8_t,  // channel number
     if (reserved1 || reserved2 || !isValidChannel(channel) ||
         !isValidPrivLimit(static_cast<uint8_t>(privLevel)))
     {
-        log<level::DEBUG>(
-            "Get channel auth capabilities - Invalid field in request");
+        lg2::debug("Get channel auth capabilities - Invalid field in request");
         return ipmi::responseInvalidFieldRequest();
     }
 
     if (getChannelSessionSupport(channel) == EChannelSessSupported::none)
     {
-        log<level::DEBUG>(
-            "Get channel auth capabilities - No support on channel");
+        lg2::debug("Get channel auth capabilities - No support on channel");
         return ipmi::response(ccActionNotSupportedForChannel);
     }
 
