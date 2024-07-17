@@ -1,6 +1,7 @@
 #include "transporthandler.hpp"
 
 #include <ipmid/utils.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <stdplus/net/addr/subnet.hpp>
 #include <stdplus/raw.hpp>
 
@@ -28,14 +29,14 @@ std::vector<uint8_t> getCipherList()
     std::ifstream jsonFile(cipher::configFile);
     if (!jsonFile.is_open())
     {
-        log<level::ERR>("Channel Cipher suites file not found");
+        lg2::error("Channel Cipher suites file not found");
         elog<InternalFailure>();
     }
 
     auto data = Json::parse(jsonFile, nullptr, false);
     if (data.is_discarded())
     {
-        log<level::ERR>("Parsing channel cipher suites JSON failed");
+        lg2::error("Parsing channel cipher suites JSON failed");
         elog<InternalFailure>();
     }
 
@@ -146,8 +147,8 @@ ChannelParams getChannelParams(sdbusplus::bus_t& bus, uint8_t channel)
     auto params = maybeGetChannelParams(bus, channel);
     if (!params)
     {
-        log<level::ERR>("Failed to get channel params",
-                        entry("CHANNEL=%" PRIu8, channel));
+        lg2::error("Failed to get channel params: {CHANNEL}", "CHANNEL",
+                   channel);
         elog<InternalFailure>();
     }
     return std::move(*params);
@@ -293,7 +294,7 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
     auto ifaddr = getIfAddr4(bus, params);
     if (!ifaddr && !address)
     {
-        log<level::ERR>("Missing address for IPv4 assignment");
+        lg2::error("Missing address for IPv4 assignment");
         elog<InternalFailure>();
     }
     uint8_t fallbackPrefix = AddrFamily<AF_INET>::defaultPrefix;
@@ -339,7 +340,7 @@ void reconfigureGatewayMAC(sdbusplus::bus_t& bus, const ChannelParams& params,
     auto gateway = getGatewayProperty<family>(bus, params);
     if (!gateway)
     {
-        log<level::ERR>("Tried to set Gateway MAC without Gateway");
+        lg2::error("Tried to set Gateway MAC without Gateway");
         elog<InternalFailure>();
     }
 
@@ -404,9 +405,9 @@ IPv6Source originToSourceType(IP::AddressOrigin origin)
         {
             auto originStr = sdbusplus::common::xyz::openbmc_project::network::
                 convertForMessage(origin);
-            log<level::ERR>(
-                "Invalid IP::AddressOrigin conversion to IPv6Source",
-                entry("ORIGIN=%s", originStr.c_str()));
+            lg2::error(
+                "Invalid IP::AddressOrigin conversion to IPv6Source, origin: {ORIGIN}",
+                "ORIGIN", originStr);
             elog<InternalFailure>();
         }
     }
@@ -715,14 +716,14 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         static_cast<uint8_t>(channelBits), ctx->channel);
     if (reserved1 || !isValidChannel(channel))
     {
-        log<level::ERR>("Set Lan - Invalid field in request");
+        lg2::error("Set Lan - Invalid field in request");
         req.trailingOk = true;
         return responseInvalidFieldRequest();
     }
 
     if (!isLanChannel(channel).value_or(false))
     {
-        log<level::ERR>("Set Lan - Not a LAN channel");
+        lg2::error("Set Lan - Not a LAN channel");
         return responseInvalidFieldRequest();
     }
 
@@ -1094,13 +1095,13 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         static_cast<uint8_t>(channelBits), ctx->channel);
     if (reserved || !isValidChannel(channel))
     {
-        log<level::ERR>("Get Lan - Invalid field in request");
+        lg2::error("Get Lan - Invalid field in request");
         return responseInvalidFieldRequest();
     }
 
     if (!isLanChannel(channel).value_or(false))
     {
-        log<level::ERR>("Set Lan - Not a LAN channel");
+        lg2::error("Set Lan - Not a LAN channel");
         return responseInvalidFieldRequest();
     }
 
@@ -1371,7 +1372,7 @@ RspType<> setSolConfParams(Context::ptr ctx, uint4_t channelBits,
 
     if (!isValidChannel(channel))
     {
-        log<level::ERR>("Set Sol Config - Invalid channel in request");
+        lg2::error("Set Sol Config - Invalid channel in request");
         return responseInvalidFieldRequest();
     }
 
@@ -1380,10 +1381,10 @@ RspType<> setSolConfParams(Context::ptr ctx, uint4_t channelBits,
 
     if (ipmi::getService(ctx, solInterface, solPathWitheEthName, solService))
     {
-        log<level::ERR>("Set Sol Config - Invalid solInterface",
-                        entry("SERVICE=%s", solService.c_str()),
-                        entry("OBJPATH=%s", solPathWitheEthName.c_str()),
-                        entry("INTERFACE=%s", solInterface));
+        lg2::error(
+            "Set Sol Config - Invalid solInterface, service: {SERVICE}, object path: {OBJPATH}, interface: {INTERFACE}",
+            "SERVICE", solService, "OBJPATH", solPathWitheEthName, "INTERFACE",
+            solInterface);
         return responseInvalidFieldRequest();
     }
 
@@ -1550,7 +1551,7 @@ RspType<message::Payload> getSolConfParams(Context::ptr ctx,
 
     if (!isValidChannel(channel))
     {
-        log<level::ERR>("Get Sol Config - Invalid channel in request");
+        lg2::error("Get Sol Config - Invalid channel in request");
         return responseInvalidFieldRequest();
     }
 
@@ -1559,10 +1560,10 @@ RspType<message::Payload> getSolConfParams(Context::ptr ctx,
 
     if (ipmi::getService(ctx, solInterface, solPathWitheEthName, solService))
     {
-        log<level::ERR>("Set Sol Config - Invalid solInterface",
-                        entry("SERVICE=%s", solService.c_str()),
-                        entry("OBJPATH=%s", solPathWitheEthName.c_str()),
-                        entry("INTERFACE=%s", solInterface));
+        lg2::error(
+            "Set Sol Config - Invalid solInterface, service: {SERVICE}, object path: {OBJPATH}, interface: {INTERFACE}",
+            "SERVICE", solService, "OBJPATH", solPathWitheEthName, "INTERFACE",
+            solInterface);
         return responseInvalidFieldRequest();
     }
 
