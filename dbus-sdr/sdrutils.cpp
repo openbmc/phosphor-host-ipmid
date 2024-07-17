@@ -36,6 +36,38 @@ extern const IdInfoMap sensors;
 
 #endif
 
+boost::container::flat_map<
+    const char*, std::pair<SensorTypeCodes, SensorEventTypeCodes>, CmpStr>
+    sensorTypes{
+        {{"temperature", std::make_pair(SensorTypeCodes::temperature,
+                                        SensorEventTypeCodes::threshold)},
+         {"voltage", std::make_pair(SensorTypeCodes::voltage,
+                                    SensorEventTypeCodes::threshold)},
+         {"current", std::make_pair(SensorTypeCodes::current,
+                                    SensorEventTypeCodes::threshold)},
+         {"fan_tach", std::make_pair(SensorTypeCodes::fan,
+                                     SensorEventTypeCodes::threshold)},
+         {"fan_pwm", std::make_pair(SensorTypeCodes::fan,
+                                    SensorEventTypeCodes::threshold)},
+         {"intrusion", std::make_pair(SensorTypeCodes::physical_security,
+                                      SensorEventTypeCodes::sensorSpecified)},
+         {"processor", std::make_pair(SensorTypeCodes::processor,
+                                      SensorEventTypeCodes::sensorSpecified)},
+         {"power", std::make_pair(SensorTypeCodes::other,
+                                  SensorEventTypeCodes::threshold)},
+         {"memory", std::make_pair(SensorTypeCodes::memory,
+                                   SensorEventTypeCodes::sensorSpecified)},
+         {"state", std::make_pair(SensorTypeCodes::power_unit,
+                                  SensorEventTypeCodes::sensorSpecified)},
+         {"buttons", std::make_pair(SensorTypeCodes::buttons,
+                                    SensorEventTypeCodes::sensorSpecified)},
+         {"watchdog", std::make_pair(SensorTypeCodes::watchdog2,
+                                     SensorEventTypeCodes::sensorSpecified)},
+         {"entity", std::make_pair(SensorTypeCodes::entity,
+                                   SensorEventTypeCodes::sensorSpecified)},
+         {"energy", std::make_pair(SensorTypeCodes::other,
+                                   SensorEventTypeCodes::threshold)}}};
+
 namespace details
 {
 
