@@ -7,7 +7,7 @@
 #include <ipmid/api.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 #include <bitset>
@@ -68,13 +68,12 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
     }
     catch (const std::exception& e)
     {
-        const std::string e_str = std::string("wd_reset: ") + e.what();
-        log<level::ERR>(e_str.c_str());
+        lg2::error("wd_reset: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
     catch (...)
     {
-        log<level::ERR>("wd_reset: Unknown Error");
+        lg2::error("wd_reset: Unknown Error");
         return ipmi::responseUnspecifiedError();
     }
 }
@@ -265,13 +264,12 @@ ipmi::RspType<>
     }
     catch (const std::exception& e)
     {
-        const std::string e_str = std::string("wd_set: ") + e.what();
-        log<level::ERR>(e_str.c_str());
+        lg2::error("wd_set: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
     catch (...)
     {
-        log<level::ERR>("wd_set: Unknown Error");
+        lg2::error("wd_set: Unknown Error");
         return ipmi::responseUnspecifiedError();
     }
 }
@@ -431,13 +429,12 @@ ipmi::RspType<uint3_t,        // timerUse - timer use
     }
     catch (const std::exception& e)
     {
-        const std::string e_str = std::string("wd_get: ") + e.what();
-        log<level::ERR>(e_str.c_str());
+        lg2::error("wd_get: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
     catch (...)
     {
-        log<level::ERR>("wd_get: Unknown Error");
+        lg2::error("wd_get: Unknown Error");
         return ipmi::responseUnspecifiedError();
     }
 }
