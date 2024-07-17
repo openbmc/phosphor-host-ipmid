@@ -34,6 +34,24 @@
       "parentUuid": "dfeeb366_5fe879bf",
       "revId": "284af1665cbefbe06dc5982a6b590dd04df841f5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d580092c_2176c8a9",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 767,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-17T01:42:07Z",
+      "side": 1,
+      "message": "Updated",
+      "parentUuid": "c71d8c8a_9f3f5314",
+      "revId": "284af1665cbefbe06dc5982a6b590dd04df841f5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
