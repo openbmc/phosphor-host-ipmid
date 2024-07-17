@@ -6,6 +6,7 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 #include <charconv>
@@ -133,7 +134,7 @@ void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
 {
     if (recordType != systemEventRecord)
     {
-        log<level::ERR>("Invalid recordType");
+        lg2::error("Invalid recordType");
         elog<InternalFailure>();
     }
 
@@ -198,8 +199,8 @@ GetSELEntryResponse
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Error in reading logging property entries",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("Error in reading logging property entries: {ERROR}",
+                   "ERROR", e);
         elog<InternalFailure>();
     }
 
@@ -208,7 +209,7 @@ GetSELEntryResponse
     auto iterId = entryData.find(propId);
     if (iterId == entryData.end())
     {
-        log<level::ERR>("Error in reading Id of logging entry");
+        lg2::error("Error in reading Id of logging entry");
         elog<InternalFailure>();
     }
 
@@ -217,7 +218,7 @@ GetSELEntryResponse
     auto iterTimeStamp = entryData.find(propTimeStamp);
     if (iterTimeStamp == entryData.end())
     {
-        log<level::ERR>("Error in reading Timestamp of logging entry");
+        lg2::error("Error in reading Timestamp of logging entry");
         elog<InternalFailure>();
     }
     std::chrono::milliseconds chronoTimeStamp(
@@ -250,7 +251,7 @@ GetSELEntryResponse
             // invSensor
             if (iter == invSensors.end())
             {
-                log<level::ERR>("System event sensor not found");
+                lg2::error("System event sensor not found");
                 elog<InternalFailure>();
             }
         }
@@ -288,7 +289,7 @@ GetSELEntryResponse
         auto iterResolved = entryData.find(propResolved);
         if (iterResolved == entryData.end())
         {
-            log<level::ERR>("Error in reading Resolved field of logging entry");
+            lg2::error("Error in reading Resolved field of logging entry");
             elog<InternalFailure>();
         }
 
@@ -327,8 +328,8 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Error in reading Associations interface",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("Error in reading Associations interface: {ERROR}", "ERROR",
+                   e);
         elog<InternalFailure>();
     }
 
@@ -347,7 +348,7 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
                 iter = invSensors.find(BOARD_SENSOR);
                 if (iter == invSensors.end())
                 {
-                    log<level::ERR>("Motherboard sensor not found");
+                    lg2::error("Motherboard sensor not found");
                     elog<InternalFailure>();
                 }
             }
@@ -378,8 +379,8 @@ std::chrono::seconds getEntryTimeStamp(const std::string& objPath)
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Error in reading Timestamp from Entry interface",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("Error in reading Timestamp from Entry interface: {ERROR}",
+                   "ERROR", e);
         elog<InternalFailure>();
     }
 
