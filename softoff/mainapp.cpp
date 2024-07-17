@@ -19,6 +19,7 @@
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdeventplus/event.hpp>
 #include <sdeventplus/exception.hpp>
 #include <xyz/openbmc_project/State/Host/error.hpp>
@@ -59,8 +60,7 @@ int main(int, char**)
         }
         catch (const sdeventplus::SdEventError& e)
         {
-            log<level::ERR>("Failure in processing request",
-                            entry("ERROR=%s", e.what()));
+            lg2::error("Failure in processing request: {ERROR}", "ERROR", e);
             return 1;
         }
     }
