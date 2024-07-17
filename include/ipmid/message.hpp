@@ -124,6 +124,9 @@ struct Payload
         if (raw.size() != 0 && std::uncaught_exceptions() == 0 && !trailingOk &&
             !unpackCheck && !unpackError)
         {
+            // Since the sd_journal_send method is called in
+            // test/message/payload.cpp, there is no need to convert it to
+            // lg2:error here
             log<level::ERR>("Failed to check request for full unpack");
         }
     }

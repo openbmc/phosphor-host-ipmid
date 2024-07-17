@@ -20,6 +20,7 @@
 #include <boost/callable_traits.hpp>
 #include <ipmid/api-types.hpp>
 #include <ipmid/message.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <phosphor-logging/log.hpp>
 #include <user_channel/channel_layer.hpp>
 
@@ -266,21 +267,18 @@ class IpmiHandler final : public HandlerBase
         }
         catch (const HandlerException& e)
         {
-            phosphor::logging::log<phosphor::logging::level::INFO>(
-                "Handler produced exception",
-                phosphor::logging::entry("CC=%x", e.code()),
-                phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::info("Handler produced exception, NetFn: {NETFN}, "
+                      "Cmd: {CMD}: {ERROR}",
+                      "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                      request->ctx->cmd, "ERROR", e);
             return errorResponse(request, e.code());
         }
         catch (const std::exception& e)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Handler failed to catch exception",
-                phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::error("Handler failed to catch exception, NetFn: {NETFN}, "
+                       "Cmd: {CMD}: {ERROR}",
+                       "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                       request->ctx->cmd, "ERROR", e);
             return errorResponse(request, ccUnspecifiedError);
         }
         catch (const HandlerCompletion& c)
@@ -290,11 +288,10 @@ class IpmiHandler final : public HandlerBase
         catch (...)
         {
             const char* what = currentExceptionType();
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Handler failed to catch exception",
-                phosphor::logging::entry("EXCEPTION=%s", what),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::error("Handler failed to catch exception, NetFn: {NETFN}, "
+                       "Cmd: {CMD}: {ERROR}",
+                       "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                       request->ctx->cmd, "ERROR", what);
             return errorResponse(request, ccUnspecifiedError);
         }
 
@@ -367,21 +364,18 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         }
         catch (const HandlerException& e)
         {
-            phosphor::logging::log<phosphor::logging::level::INFO>(
-                "Legacy Handler produced exception",
-                phosphor::logging::entry("CC=%x", e.code()),
-                phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::info("Legacy Handler produced exception, NetFn: {NETFN}, "
+                      "Cmd: {CMD}: {ERROR}",
+                      "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                      request->ctx->cmd, "ERROR", e);
             return errorResponse(request, e.code());
         }
         catch (const std::exception& e)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Legacy Handler failed to catch exception",
-                phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::error("Legacy Handler failed to catch exception, "
+                       "NetFn: {NETFN}, Cmd: {CMD}: {ERROR}",
+                       "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                       request->ctx->cmd, "ERROR", e);
             return errorResponse(request, ccUnspecifiedError);
         }
         catch (const HandlerCompletion& c)
@@ -391,11 +385,10 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
         catch (...)
         {
             const char* what = currentExceptionType();
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Handler failed to catch exception",
-                phosphor::logging::entry("EXCEPTION=%s", what),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::error("Handler failed to catch exception, NetFn: {NETFN}, "
+                       "Cmd: {CMD}: {ERROR}",
+                       "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                       request->ctx->cmd, "ERROR", what);
             return errorResponse(request, ccUnspecifiedError);
         }
         response->cc = ccRet;
@@ -457,21 +450,18 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
         }
         catch (const HandlerException& e)
         {
-            phosphor::logging::log<phosphor::logging::level::INFO>(
-                "Legacy OEM Handler produced exception",
-                phosphor::logging::entry("CC=%x", e.code()),
-                phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::info("Legacy OEM Handler produced exception, NetFn: {NETFN}, "
+                      "Cmd: {CMD}: {ERROR}",
+                      "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                      request->ctx->cmd, "ERROR", e);
             return errorResponse(request, e.code());
         }
         catch (const std::exception& e)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Legacy OEM Handler failed to catch exception",
-                phosphor::logging::entry("EXCEPTION=%s", e.what()),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::error("Legacy OEM Handler failed to catch exception, "
+                       "NetFn: {NETFN}, Cmd: {CMD}: {ERROR}",
+                       "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                       request->ctx->cmd, "ERROR", e);
             return errorResponse(request, ccUnspecifiedError);
         }
         catch (const HandlerCompletion& c)
@@ -481,11 +471,10 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
         catch (...)
         {
             const char* what = currentExceptionType();
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Handler failed to catch exception",
-                phosphor::logging::entry("EXCEPTION=%s", what),
-                phosphor::logging::entry("NETFN=%x", request->ctx->netFn),
-                phosphor::logging::entry("CMD=%x", request->ctx->cmd));
+            lg2::error("Legacy failed to catch exception, NetFn: {NETFN}, "
+                       "Cmd: {CMD}: {ERROR}",
+                       "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                       request->ctx->cmd, "ERROR", what);
             return errorResponse(request, ccUnspecifiedError);
         }
         response->cc = ccRet;
