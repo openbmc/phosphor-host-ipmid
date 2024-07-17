@@ -28,7 +28,7 @@
 #include <ipmid/entity_map_json.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <user_channel/channel_layer.hpp>
 
@@ -218,15 +218,13 @@ static sdbusplus::bus::match_t thresholdChanged(
         auto ptr = std::get_if<bool>(&(findAssert->second));
         if (ptr == nullptr)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "thresholdChanged: Assert non bool");
+            lg2::error("thresholdChanged: Assert non bool");
             return;
         }
         if (*ptr)
         {
-            phosphor::logging::log<phosphor::logging::level::INFO>(
-                "thresholdChanged: Assert",
-                phosphor::logging::entry("SENSOR=%s", m.get_path()));
+            lg2::info("thresholdChanged: Assert, sensor path: {SENSOR_PATH}",
+                      "SENSOR_PATH", m.get_path());
             thresholdDeassertMap[m.get_path()][findAssert->first] = *ptr;
         }
         else
@@ -234,9 +232,9 @@ static sdbusplus::bus::match_t thresholdChanged(
             auto& value = thresholdDeassertMap[m.get_path()][findAssert->first];
             if (value)
             {
-                phosphor::logging::log<phosphor::logging::level::INFO>(
-                    "thresholdChanged: deassert",
-                    phosphor::logging::entry("SENSOR=%s", m.get_path()));
+                lg2::info(
+                    "thresholdChanged: deassert, sensor path: {SENSOR_PATH}",
+                    "SENSOR_PATH", m.get_path());
                 value = *ptr;
             }
         }
@@ -380,10 +378,9 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
 
         if (!found)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "GetMangagedObjects for getSensorMap failed",
-                phosphor::logging::entry("SERVICE=%s",
-                                         sensorConnection.c_str()));
+            lg2::error(
+                "GetMangagedObjects for getSensorMap failed, service: {SERVICE}",
+                "SERVICE", sensorConnection);
 
             return false;
         }
@@ -419,8 +416,7 @@ static std::optional<std::vector<std::string>>
     if (supportedProperty == object.end() ||
         object.find("Selected") == object.end())
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Missing the required Supported and Selected properties");
+        lg2::error("Missing the required Supported and Selected properties");
         return std::nullopt;
     }
 
@@ -429,8 +425,7 @@ static std::optional<std::vector<std::string>>
 
     if (profilesPtr == nullptr)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "property is not array of string");
+        lg2::error("property is not array of string");
         return std::nullopt;
     }
     return *profilesPtr;
@@ -454,11 +449,8 @@ static std::optional<std::string>
     if (assertOffset == 0 || assertOffset == (1u << 15) ||
         (assertOffset & (assertOffset - 1)))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "IPMI cmd format incorrect",
-
-            phosphor::logging::entry("BYTES=%#02x",
-                                     static_cast<uint16_t>(assertOffset)));
+        lg2::error("IPMI cmd format incorrect, bytes: {BYTES}", "BYTES",
+                   lg2::hex, static_cast<uint16_t>(assertOffset));
         return std::nullopt;
     }
 
@@ -470,8 +462,7 @@ static std::optional<std::string>
 
     if (index >= profiles->size())
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "profile index out of boundary");
+        lg2::error("profile index out of boundary");
         return std::nullopt;
     }
 
@@ -485,8 +476,7 @@ static std::optional<double>
 {
     if (valueObject.find("Value") == valueObject.end())
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Missing the required Value property");
+        lg2::error("Missing the required Value property");
         return std::nullopt;
     }
 
@@ -569,20 +559,18 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
                               "Selected", mode);
     if (ec)
     {
-        log<level::ERR>("Failed to get property",
-                        entry("PROPERTY=%s", "Selected"),
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", sensor::sensorInterface),
-                        entry("WHAT=%s", ec.message().c_str()));
+        lg2::error(
+            "Failed to get Selected, path: {PATH}, interface: {INTERFACE}, ERROR: {ERROR}",
+            "PATH", path, "INTERFACE", sensor::sensorInterface, "ERROR",
+            ec.message());
         return false;
     }
 
     auto itr = std::find(profiles->begin(), profiles->end(), mode);
     if (itr == profiles->end())
     {
-        using namespace phosphor::logging;
-        log<level::ERR>("VR mode doesn't match any of its profiles",
-                        entry("PATH=%s", path.c_str()));
+        lg2::error("VR mode doesn't match any of its profiles, path: {PATH}",
+                   "PATH", path);
         return false;
     }
     std::size_t index =
@@ -595,9 +583,9 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     }
     else
     {
-        log<level::ERR>("VR profile index reaches max assertion bit",
-                        entry("PATH=%s", path.c_str()),
-                        entry("INDEX=%uz", index));
+        lg2::error(
+            "VR profile index reaches max assertion bit, path: {PATH}, index: {INDEX}",
+            "PATH", path, "INDEX", index);
         return false;
     }
     if constexpr (debug)
@@ -637,8 +625,7 @@ size_t getOtherSensorsCount(ipmi::Context::ptr ctx)
     ipmi::Cc ret = ipmi::storage::getFruSdrCount(ctx, fruCount);
     if (ret != ipmi::ccSuccess)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getOtherSensorsCount: getFruSdrCount error");
+        lg2::error("getOtherSensorsCount: getFruSdrCount error");
         return std::numeric_limits<size_t>::max();
     }
 
@@ -692,8 +679,7 @@ int getOtherSensorsDataRecord(ipmi::Context::ptr ctx, uint16_t recordID,
         size_t type12Index = sdrIndex - fruCount;
         if (type12Index >= ipmi::storage::type12Count)
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "getSensorDataRecord: type12Index error");
+            lg2::error("getSensorDataRecord: type12Index error");
             return GENERAL_ERROR;
         }
         recordData = ipmi::storage::getType12SDRs(type12Index, recordID);
@@ -738,9 +724,8 @@ ipmi::RspType<> ipmiSenPlatformEvent(ipmi::Context::ptr ctx,
 
     if (ipmi::getChannelInfo(ctx->channel, chInfo) != ipmi::ccSuccess)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Failed to get Channel Info",
-            phosphor::logging::entry("CHANNEL=%d", ctx->channel));
+        lg2::error("Failed to get Channel Info, channel: {CHANNEL}", "CHANNEL",
+                   ctx->channel);
         return ipmi::responseUnspecifiedError();
     }
 
@@ -832,11 +817,10 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
 
         if constexpr (debug)
         {
-            phosphor::logging::log<phosphor::logging::level::INFO>(
-                "IPMI SET_SENSOR",
-                phosphor::logging::entry("SENSOR_NUM=%d", sensorNumber),
-                phosphor::logging::entry("BYTE=%u", (unsigned int)reading),
-                phosphor::logging::entry("VALUE=%f", *value));
+            lg2::info(
+                "IPMI SET_SENSOR, sensor number: {SENSOR_NUM}, byte: {BYTE}, value: {VALUE}",
+                "SENSOR_NUM", sensorNumber, "BYTE", (unsigned int)reading,
+                "VALUE", *value);
         }
 
         boost::system::error_code ec =
@@ -848,12 +832,10 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         // callback functions for now (e.g. ipmiSetSensorReading).
         if (ec)
         {
-            using namespace phosphor::logging;
-            log<level::ERR>("Failed to set property",
-                            entry("PROPERTY=%s", "Value"),
-                            entry("PATH=%s", path.c_str()),
-                            entry("INTERFACE=%s", sensor::sensorInterface),
-                            entry("WHAT=%s", ec.message().c_str()));
+            lg2::error(
+                "Failed to set Value, path: {PATH}, interface: {INTERFACE}, ERROR: {ERROR}",
+                "PATH", path, "INTERFACE", sensor::sensorInterface, "ERROR",
+                ec.message());
             return ipmi::responseResponseError();
         }
         return ipmi::responseSuccess();
@@ -889,20 +871,15 @@ ipmi::RspType<> ipmiSetSensorReading(ipmi::Context::ptr ctx,
         // callback functions for now (e.g. ipmiSetSensorReading).
         if (ec)
         {
-            using namespace phosphor::logging;
-            log<level::ERR>("Failed to set property",
-                            entry("PROPERTY=%s", "Selected"),
-                            entry("PATH=%s", path.c_str()),
-                            entry("INTERFACE=%s", sensor::sensorInterface),
-                            entry("WHAT=%s", ec.message().c_str()));
-            return ipmi::responseResponseError();
+            lg2::error(
+                "Failed to set Selected, path: {PATH}, interface: {INTERFACE}, ERROR: {ERROR}",
+                "PATH", path, "INTERFACE", sensor::sensorInterface, "ERROR",
+                ec.message());
         }
         return ipmi::responseSuccess();
     }
 
-    phosphor::logging::log<phosphor::logging::level::ERR>(
-        "unknown sensor type",
-        phosphor::logging::entry("PATH=%s", path.c_str()));
+    lg2::error("unknown sensor type, path: {PATH}", "PATH", path);
     return ipmi::responseResponseError();
 }
 
@@ -1595,9 +1572,9 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
     auto status = getSensorConnection(ctx, sensorNum, connection, path);
     if (status)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiSenGetSensorEventStatus: Sensor connection Error",
-            phosphor::logging::entry("SENSOR=%d", sensorNum));
+        lg2::error(
+            "ipmiSenGetSensorEventStatus: Sensor connection Error, sensor number: {SENSOR_NUM}",
+            "SENSOR_NUM", sensorNum);
         return ipmi::response(status);
     }
 
@@ -1638,9 +1615,9 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
     DbusInterfaceMap sensorMap;
     if (!getSensorMap(ctx, connection, path, sensorMap))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiSenGetSensorEventStatus: Sensor Mapping Error",
-            phosphor::logging::entry("SENSOR=%s", path.c_str()));
+        lg2::error(
+            "ipmiSenGetSensorEventStatus: Sensor Mapping Error, sensor path: {SENSOR_PATH}",
+            "SENSOR_PATH", path);
         return ipmi::responseResponseError();
     }
 
@@ -1797,10 +1774,9 @@ bool constructSensorSdr(
     DbusInterfaceMap sensorMap;
     if (!getSensorMap(ctx, service, path, sensorMap, sensorMapSdrUpdatePeriod))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Failed to update sensor map for threshold sensor",
-            phosphor::logging::entry("SERVICE=%s", service.c_str()),
-            phosphor::logging::entry("PATH=%s", path.c_str()));
+        lg2::error(
+            "Failed to update sensor map for threshold sensor, service: {SERVICE}, path: {PATH}",
+            "SERVICE", service, "PATH", path);
         return false;
     }
 
@@ -1820,8 +1796,7 @@ bool constructSensorSdr(
     auto sensorObject = sensorMap.find(sensor::sensorInterface);
     if (sensorObject == sensorMap.end())
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "constructSensorSdr: sensorObject error");
+        lg2::error("constructSensorSdr: sensorObject error");
         return false;
     }
 
@@ -1848,8 +1823,7 @@ bool constructSensorSdr(
 
     if (!getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "constructSensorSdr: getSensorAttributes error");
+        lg2::error("constructSensorSdr: getSensorAttributes error");
         return false;
     }
 
@@ -1933,8 +1907,7 @@ bool constructSensorSdr(
     }
     catch (const std::exception&)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "constructSensorSdr: getIPMIThresholds error");
+        lg2::error("constructSensorSdr: getIPMIThresholds error");
         return false;
     }
 
@@ -2068,10 +2041,9 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
     DbusInterfaceMap sensorMap;
     if (!getSensorMap(ctx, service, path, sensorMap, sensorMapSdrUpdatePeriod))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "Failed to update sensor map for VR sensor",
-            phosphor::logging::entry("SERVICE=%s", service.c_str()),
-            phosphor::logging::entry("PATH=%s", path.c_str()));
+        lg2::error(
+            "Failed to update sensor map for VR sensor, service: {SERVICE}, path: {PATH}",
+            "SERVICE", service, "PATH", path);
         return false;
     }
     // follow the association chain to get the parent board's entityid and
@@ -2131,8 +2103,7 @@ static int getSensorDataRecord(
     }
     if (recordID > lastRecord)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: recordID > lastRecord error");
+        lg2::error("getSensorDataRecord: recordID > lastRecord error");
         return GENERAL_ERROR;
     }
     if (recordID >= ipmi::getNumberOfSensors())
@@ -2141,8 +2112,6 @@ static int getSensorDataRecord(
                                                                recordData);
             err < 0)
         {
-            // phosphor::logging::log<phosphor::logging::level::ERR>(
-            //     "getSensorDataRecord: Error getting custom record");
             return lastRecordIndex;
         }
         return nextRecord;
@@ -2178,8 +2147,7 @@ static int getSensorDataRecord(
                                       connection, path, &interfaces);
     if (status)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: getSensorConnection error");
+        lg2::error("getSensorDataRecord: getSensorConnection error");
         return GENERAL_ERROR;
     }
     uint16_t sensorNum = getSensorNumberFromPath(path);
@@ -2188,8 +2156,7 @@ static int getSensorDataRecord(
     if (((sensorNum > lun1MaxSensorNum) && (sensorNum <= maxIPMISensors)) ||
         (sensorNum > lun3MaxSensorNum))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: invalidSensorNumber");
+        lg2::error("getSensorDataRecord: invalidSensorNumber");
         return GENERAL_ERROR;
     }
     uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
@@ -2198,8 +2165,7 @@ static int getSensorDataRecord(
     if ((sensornumber != static_cast<uint8_t>(sensNumFromRecID)) &&
         (lun != ctx->lun))
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "getSensorDataRecord: sensor record mismatch");
+        lg2::error("getSensorDataRecord: sensor record mismatch");
         return GENERAL_ERROR;
     }
 
@@ -2507,16 +2473,14 @@ ipmi::RspType<uint16_t,            // next record ID
     // record
     if ((sdrReservationID == 0 || reservationID != sdrReservationID) && offset)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiStorageGetSDR: responseInvalidReservationId");
+        lg2::error("ipmiStorageGetSDR: responseInvalidReservationId");
         return ipmi::responseInvalidReservationId();
     }
 
     auto& sensorTree = getSensorTree();
     if (!getSensorSubtree(sensorTree) && sensorTree.empty())
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiStorageGetSDR: getSensorSubtree error");
+        lg2::error("ipmiStorageGetSDR: getSensorSubtree error");
         return ipmi::responseResponseError();
     }
 
@@ -2529,16 +2493,14 @@ ipmi::RspType<uint16_t,            // next record ID
 
     if (nextRecordId < 0)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiStorageGetSDR: fail to get SDR");
+        lg2::error("ipmiStorageGetSDR: fail to get SDR");
         return ipmi::responseInvalidFieldRequest();
     }
     get_sdr::SensorDataRecordHeader* hdr =
         reinterpret_cast<get_sdr::SensorDataRecordHeader*>(record.data());
     if (!hdr)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiStorageGetSDR: record header is null");
+        lg2::error("ipmiStorageGetSDR: record header is null");
         return ipmi::responseSuccess(nextRecordId, record);
     }
 
@@ -2546,8 +2508,7 @@ ipmi::RspType<uint16_t,            // next record ID
                        hdr->record_length;
     if (offset >= sdrLength)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiStorageGetSDR: offset is outside the record");
+        lg2::error("ipmiStorageGetSDR: offset is outside the record");
         return ipmi::responseParmOutOfRange();
     }
     if (sdrLength < (offset + bytesToRead))
@@ -2558,8 +2519,7 @@ ipmi::RspType<uint16_t,            // next record ID
     uint8_t* respStart = reinterpret_cast<uint8_t*>(hdr) + offset;
     if (!respStart)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            "ipmiStorageGetSDR: record is null");
+        lg2::error("ipmiStorageGetSDR: record is null");
         return ipmi::responseSuccess(nextRecordId, record);
     }
 
@@ -2615,10 +2575,9 @@ std::tuple<uint8_t,                // Total of instance sensors
         if (!getSensorMap(ctx, connection, sensorObjPath, sensorMap,
                           sensorMapSdrUpdatePeriod))
         {
-            phosphor::logging::log<phosphor::logging::level::ERR>(
-                "Failed to update sensor map for threshold sensor",
-                phosphor::logging::entry("SERVICE=%s", connection.c_str()),
-                phosphor::logging::entry("PATH=%s", sensorObjPath.c_str()));
+            lg2::error(
+                "Failed to update sensor map for threshold sensor, service: {SERVICE}, path: {PATH}",
+                "SERVICE", connection, "PATH", sensorObjPath);
             continue;
         }
 
@@ -2679,11 +2638,9 @@ std::tuple<uint8_t,                // Total of instance sensors
     }
     if (invalidSensorNumberErrCount != 0)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            std::format(
-                "getSensorNumberFromPath returned invalidSensorNumber {} times",
-                invalidSensorNumberErrCount)
-                .data());
+        lg2::error(
+            "getSensorNumberFromPath returned invalidSensorNumber {ERR_COUNT} times",
+            "ERR_COUNT", invalidSensorNumberErrCount);
     }
 
     auto cmpFunc = [](sensorInfo first, sensorInfo second) {
@@ -2754,15 +2711,15 @@ ipmi::RspType<uint8_t,              // No of instances for requested id
     auto match = ipmi::dcmi::validEntityId.find(entityId);
     if (match == ipmi::dcmi::validEntityId.end())
     {
-        log<level::ERR>("Unknown Entity ID", entry("ENTITY_ID=%d", entityId));
+        lg2::error("Unknown Entity ID: {ENTITY_ID}", "ENTITY_ID", entityId);
 
         return ipmi::responseInvalidFieldRequest();
     }
 
     if (sensorType != ipmi::dcmi::temperatureSensorType)
     {
-        log<level::ERR>("Invalid sensor type",
-                        entry("SENSOR_TYPE=%d", sensorType));
+        lg2::error("Invalid sensor type: {SENSOR_TYPE}", "SENSOR_TYPE",
+                   sensorType);
 
         return ipmi::responseInvalidFieldRequest();
     }
@@ -2811,15 +2768,15 @@ ipmi::RspType<uint8_t,                // No of instances for requested id
     auto match = ipmi::dcmi::validEntityId.find(entityId);
     if (match == ipmi::dcmi::validEntityId.end())
     {
-        log<level::ERR>("Unknown Entity ID", entry("ENTITY_ID=%d", entityId));
+        lg2::error("Unknown Entity ID: {ENTITY_ID}", "ENTITY_ID", entityId);
 
         return ipmi::responseInvalidFieldRequest();
     }
 
     if (sensorType != ipmi::dcmi::temperatureSensorType)
     {
-        log<level::ERR>("Invalid sensor type",
-                        entry("SENSOR_TYPE=%d", sensorType));
+        lg2::error("Invalid sensor type: {SENSOR_TYPE}", "SENSOR_TYPE",
+                   sensorType);
 
         return ipmi::responseInvalidFieldRequest();
     }
