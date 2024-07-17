@@ -2,7 +2,7 @@
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <settings.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Control/Security/RestrictionMode/server.hpp>
@@ -56,7 +56,7 @@ AllowlistFilter::AllowlistFilter()
 {
     bus = getSdBus();
 
-    log<level::INFO>("Loading allowlist filter");
+    lg2::info("Loading allowlist filter");
     ipmi::registerFilter(ipmi::prioOpenBmcBase,
                          [this](ipmi::message::Request::ptr request) {
         return filterMessage(request);
@@ -89,7 +89,7 @@ void AllowlistFilter::cacheRestrictedMode(
         }
         catch (const std::out_of_range& e)
         {
-            log<level::ERR>(
+            lg2::error(
                 "Could not look up restriction mode interface from cache");
             return;
         }
@@ -104,7 +104,7 @@ void AllowlistFilter::cacheRestrictedMode(
         }
         catch (const std::exception& e)
         {
-            log<level::ERR>("Error in RestrictionMode Get");
+            lg2::error("Error in RestrictionMode Get");
             // Fail-safe to true.
             size_t index = std::distance(&*std::begin(devices), &dev);
             restrictedMode[index] = true;
@@ -116,8 +116,14 @@ void AllowlistFilter::cacheRestrictedMode(
             (restrictionMode == RestrictionMode::Modes::Allowlist);
         restrictedMode.emplace_back(restrictMode);
 
-        log<level::INFO>((restrictMode ? "Set restrictedMode = true"
-                                       : "Set restrictedMode = false"));
+        if (restrictMode)
+        {
+            lg2::info("Set restrictedMode = true");
+        }
+        else
+        {
+            lg2::info("Set restrictedMode = false");
+        }
     }
 }
 
@@ -141,7 +147,7 @@ void AllowlistFilter::handleRestrictedModeChange(
 
     if (it == deviceList.end())
     {
-        log<level::ERR>("Key not found in deviceList ");
+        lg2::error("Key not found in deviceList ");
     }
     else
     {
@@ -158,8 +164,15 @@ void AllowlistFilter::handleRestrictedModeChange(
             bool restrictMode =
                 (restrictionMode == RestrictionMode::Modes::Allowlist);
             restrictedMode[hostId] = restrictMode;
-            log<level::INFO>((restrictMode ? "Updated restrictedMode = true"
-                                           : "Updated restrictedMode = false"));
+
+            if (restrictMode)
+            {
+                lg2::info("Updated restrictedMode = true");
+            }
+            else
+            {
+                lg2::info("Updated restrictedMode = false");
+            }
         }
     }
 }
@@ -175,7 +188,7 @@ void AllowlistFilter::postInit()
         *bus, std::vector<settings::Interface>({restrictionModeIntf}));
     if (!objects)
     {
-        log<level::ERR>(
+        lg2::error(
             "Failed to create settings object; defaulting to restricted mode");
         return;
     }
@@ -187,8 +200,7 @@ void AllowlistFilter::postInit()
     }
     catch (const std::out_of_range& e)
     {
-        log<level::ERR>(
-            "Could not look up restriction mode interface from cache");
+        lg2::error("Could not look up restriction mode interface from cache");
         return;
     }
 
@@ -234,9 +246,10 @@ ipmi::Cc AllowlistFilter::filterMessage(ipmi::message::Request::ptr request)
                 allowlist.cbegin(), allowlist.cend(),
                 std::make_pair(request->ctx->netFn, request->ctx->cmd)))
         {
-            log<level::ERR>("Net function not allowlisted",
-                            entry("NETFN=0x%X", int(request->ctx->netFn)),
-                            entry("CMD=0x%X", int(request->ctx->cmd)));
+            lg2::error(
+                "Net function not allowlisted, NetFn: {NETFN}, Cmd: {CMD}",
+                "NETFN", lg2::hex, request->ctx->netFn, "CMD", lg2::hex,
+                request->ctx->cmd);
 
             return ipmi::ccInsufficientPrivilege;
         }
