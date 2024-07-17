@@ -28,7 +28,7 @@
 #include <ipmid/types.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/server/object.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -166,10 +166,10 @@ void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>("Failed to set property",
-                        entry("PROPERTY=%s", property.c_str()),
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+        lg2::error("Failed to set {PROPERTY}, path: {PATH}, "
+                   "interface: {INTERFACE}",
+                   "PROPERTY", property, "PATH", objPath, "INTERFACE",
+                   interface);
         throw;
     }
 }
@@ -234,9 +234,9 @@ void userUpdateHelper(UserAccess& usrAccess, const UserUpdateEvent& userEvent,
         }
         if (usrIndex > ipmiMaxUsers)
         {
-            log<level::DEBUG>("User not found for signal",
-                              entry("USER_NAME=%s", userName.c_str()),
-                              entry("USER_EVENT=%d", userEvent));
+            lg2::debug("User not found for signal, user name: {USER_NAME}, "
+                       "user event: {USER_EVENT}",
+                       "USER_NAME", userName, "USER_EVENT", userEvent);
             return;
         }
         switch (userEvent)
@@ -288,16 +288,16 @@ void userUpdateHelper(UserAccess& usrAccess, const UserUpdateEvent& userEvent,
             }
             default:
             {
-                log<level::ERR>("Unhandled user event",
-                                entry("USER_EVENT=%d", userEvent));
+                lg2::error("Unhandled user event: {USER_EVENT}", "USER_EVENT",
+                           userEvent);
                 return;
             }
         }
     }
     usrAccess.writeUserData();
-    log<level::DEBUG>("User event handled successfully",
-                      entry("USER_NAME=%s", userName.c_str()),
-                      entry("USER_EVENT=%d", userEvent));
+    lg2::debug("User event handled successfully, user name: {USER_NAME}, "
+               "user event: {USER_EVENT}",
+               "USER_NAME", userName.c_str(), "USER_EVENT", userEvent);
 
     return;
 }
@@ -347,15 +347,14 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
     }
     else
     {
-        log<level::ERR>("Unknown user update signal",
-                        entry("SIGNAL=%s", signal.c_str()));
+        lg2::error("Unknown user update signal: {SIGNAL}", "SIGNAL", signal);
         return;
     }
 
     if (signal.empty() || userName.empty() ||
         (signal == userRenamedSignal && newUserName.empty()))
     {
-        log<level::ERR>("Invalid inputs received");
+        lg2::error("Invalid inputs received");
         return;
     }
 
@@ -411,10 +410,9 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
                     }
                     catch (const sdbusplus::exception_t& e)
                     {
-                        log<level::DEBUG>(
-                            "Failed to excute method",
-                            entry("METHOD=%s", getAllPropertiesMethod),
-                            entry("PATH=%s", msg.get_path()));
+                        lg2::debug("Failed to excute {METHOD}, path: {PATH}",
+                                   "METHOD", getAllPropertiesMethod, "PATH",
+                                   msg.get_path());
                         return;
                     }
                     usrAccess.getUserProperties(properties, groups, priv,
@@ -457,7 +455,7 @@ UserAccess::UserAccess() : bus(ipmid_get_sd_bus_connection())
                           std::ofstream::out | std::ofstream::app);
     if (!mutexCleanUpFile.good())
     {
-        log<level::DEBUG>("Unable to open mutex cleanup file");
+        lg2::debug("Unable to open mutex cleanup file");
         return;
     }
     mutexCleanUpFile.close();
@@ -527,8 +525,8 @@ CommandPrivilege UserAccess::convertToIPMIPrivilege(const std::string& value)
         {
             return static_cast<CommandPrivilege>(privNoAccess);
         }
-        log<level::ERR>("Error in converting to IPMI privilege",
-                        entry("PRIV=%s", value.c_str()));
+        lg2::error("Error in converting to IPMI privilege: {PRIV}", "PRIV",
+                   value);
         throw std::out_of_range("Out of range - convertToIPMIPrivilege");
     }
     else
@@ -550,8 +548,8 @@ std::string UserAccess::convertToSystemPrivilege(const CommandPrivilege& value)
     }
     catch (const std::out_of_range& e)
     {
-        log<level::ERR>("Error in converting to system privilege",
-                        entry("PRIV=%d", static_cast<uint8_t>(value)));
+        lg2::error("Error in converting to system privilege: {PRIV}", "PRIV",
+                   value);
         throw std::out_of_range("Out of range - convertToSystemPrivilege");
     }
 }
@@ -560,18 +558,18 @@ bool UserAccess::isValidUserName(const std::string& userName)
 {
     if (userName.empty())
     {
-        log<level::ERR>("userName is empty");
+        lg2::error("userName is empty");
         return false;
     }
     if (!std::regex_match(userName.c_str(),
                           std::regex("[a-zA-Z_][a-zA-Z_0-9]*")))
     {
-        log<level::ERR>("Unsupported characters in user name");
+        lg2::error("Unsupported characters in user name");
         return false;
     }
     if (userName == "root")
     {
-        log<level::ERR>("Invalid user name - root");
+        lg2::error("Invalid user name - root");
         return false;
     }
     std::map<DbusUserObjPath, DbusUserObjValue> properties;
@@ -585,9 +583,8 @@ bool UserAccess::isValidUserName(const std::string& userName)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>("Failed to excute method",
-                        entry("METHOD=%s", getManagedObjectsMethod),
-                        entry("PATH=%s", userMgrObjBasePath));
+        lg2::error("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+                   getManagedObjectsMethod, "PATH", userMgrObjBasePath);
         return false;
     }
 
@@ -597,8 +594,8 @@ bool UserAccess::isValidUserName(const std::string& userName)
 
     if (properties.find(usersPath) != properties.end())
     {
-        log<level::DEBUG>("User name already exists",
-                          entry("USER_NAME=%s", userName.c_str()));
+        lg2::debug("Username {USER_NAME} already exists", "USER_NAME",
+                   userName);
         return false;
     }
 
@@ -719,7 +716,7 @@ bool pamUserCheckAuthenticate(std::string_view username,
     if (pam_start("dropbear", username.data(), &localConversation,
                   &localAuthHandle) != PAM_SUCCESS)
     {
-        log<level::ERR>("User Authentication Failure");
+        lg2::error("User Authentication Failure");
         return false;
     }
 
@@ -728,8 +725,8 @@ bool pamUserCheckAuthenticate(std::string_view username,
 
     if (retval != PAM_SUCCESS)
     {
-        log<level::DEBUG>("pam_authenticate returned failure",
-                          entry("ERROR=%d", retval));
+        lg2::debug("pam_authenticate returned failure: {ERROR}", "ERROR",
+                   retval);
 
         pam_end(localAuthHandle, retval);
         return false;
@@ -754,7 +751,7 @@ Cc UserAccess::setSpecialUserPassword(const std::string& userName,
 {
     if (pamUpdatePasswd(userName.c_str(), userPassword.c_str()) != PAM_SUCCESS)
     {
-        log<level::DEBUG>("Failed to update password");
+        lg2::debug("Failed to update password");
         return ccUnspecifiedError;
     }
     return ccSuccess;
@@ -765,8 +762,8 @@ Cc UserAccess::setUserPassword(const uint8_t userId, const char* userPassword)
     std::string userName;
     if (ipmiUserGetUserName(userId, userName) != ccSuccess)
     {
-        log<level::DEBUG>("User Name not found",
-                          entry("USER-ID=%d", (uint8_t)userId));
+        lg2::debug("User Name not found, user Id: {USER_ID}", "USER_ID",
+                   userId);
         return ccParmOutOfRange;
     }
 
@@ -783,13 +780,13 @@ Cc UserAccess::setUserPassword(const uint8_t userId, const char* userPassword)
         }
         case PAM_AUTHTOK_ERR:
         {
-            log<level::DEBUG>("Bad authentication token");
+            lg2::debug("Bad authentication token");
             return ccInvalidFieldRequest;
         }
         default:
         {
-            log<level::DEBUG>("Failed to update password",
-                              entry("USER-ID=%d", (uint8_t)userId));
+            lg2::debug("Failed to update password, user Id: {USER_ID}",
+                       "USER_ID", userId);
             return ccUnspecifiedError;
         }
     }
@@ -810,7 +807,7 @@ Cc UserAccess::setUserEnabledState(const uint8_t userId,
                     ipmiMaxUserName);
     if (userName.empty())
     {
-        log<level::DEBUG>("User name not set / invalid");
+        lg2::debug("User name not set / invalid");
         return ccUnspecifiedError;
     }
     if (userInfo->userEnabled != enabledState)
@@ -827,7 +824,7 @@ Cc UserAccess::setUserEnabledState(const uint8_t userId,
         }
         catch (const std::exception& e)
         {
-            log<level::DEBUG>("Write user data failed");
+            lg2::debug("Write user data failed");
             return ccUnspecifiedError;
         }
     }
@@ -882,7 +879,7 @@ Cc UserAccess::setUserPayloadAccess(const uint8_t chNum,
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Write user data failed");
+        lg2::error("Write user data failed");
         return ccUnspecifiedError;
     }
     return ccSuccess;
@@ -908,7 +905,7 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                     ipmiMaxUserName);
     if (userName.empty())
     {
-        log<level::DEBUG>("User name not set / invalid");
+        lg2::debug("User name not set / invalid");
         return ccUnspecifiedError;
     }
     std::string priv = convertToSystemPrivilege(
@@ -939,7 +936,7 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     }
     catch (const std::exception& e)
     {
-        log<level::DEBUG>("Write user data failed");
+        lg2::debug("Write user data failed");
         return ccUnspecifiedError;
     }
     return ccSuccess;
@@ -964,8 +961,7 @@ uint8_t UserAccess::getUserId(const std::string& userName)
     }
     if (usrIndex > ipmiMaxUsers)
     {
-        log<level::DEBUG>("User not found",
-                          entry("USER_NAME=%s", userName.c_str()));
+        lg2::debug("Username {USER_NAME} not found", "USER_NAME", userName);
         return invalidUserId;
     }
 
@@ -1039,9 +1035,8 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            log<level::DEBUG>("Failed to excute method",
-                              entry("METHOD=%s", deleteUserMethod),
-                              entry("PATH=%s", userPath.c_str()));
+            lg2::debug("Failed to excute {METHOD}, path:{PATH}", "METHOD",
+                       deleteUserMethod, "PATH", userPath);
             return ccUnspecifiedError;
         }
         deleteUserIndex(userId);
@@ -1064,9 +1059,8 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            log<level::DEBUG>("Failed to excute method",
-                              entry("METHOD=%s", createUserMethod),
-                              entry("PATH=%s", userMgrObjBasePath));
+            lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+                       createUserMethod, "PATH", userMgrObjBasePath);
             return ccUnspecifiedError;
         }
 
@@ -1093,9 +1087,8 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            log<level::DEBUG>("Failed to excute method",
-                              entry("METHOD=%s", renameUserMethod),
-                              entry("PATH=%s", userMgrObjBasePath));
+            lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+                       renameUserMethod, "PATH", userMgrObjBasePath);
             return ccUnspecifiedError;
         }
         std::fill(static_cast<uint8_t*>(userInfo->userName),
@@ -1120,7 +1113,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
     }
     catch (const std::exception& e)
     {
-        log<level::DEBUG>("Write user data failed");
+        lg2::debug("Write user data failed");
         return ccUnspecifiedError;
     }
     return ccSuccess;
@@ -1234,7 +1227,7 @@ void UserAccess::readUserData()
     std::ifstream iUsrData(ipmiUserDataFile, std::ios::in | std::ios::binary);
     if (!iUsrData.good())
     {
-        log<level::ERR>("Error in reading IPMI user data file");
+        lg2::error("Error in reading IPMI user data file");
         throw std::ios_base::failure("Error opening IPMI user data file");
     }
 
@@ -1243,8 +1236,7 @@ void UserAccess::readUserData()
 
     if (jsonUsersTbl.size() != ipmiMaxUsers)
     {
-        log<level::ERR>(
-            "Error in reading IPMI user data file - User count issues");
+        lg2::error("Error in reading IPMI user data file - User count issues");
         throw std::runtime_error(
             "Corrupted IPMI user data file - invalid user count");
     }
@@ -1255,8 +1247,8 @@ void UserAccess::readUserData()
         Json userInfo = jsonUsersTbl[usrIndex - 1]; // json array starts with 0.
         if (userInfo.is_null())
         {
-            log<level::ERR>("Error in reading IPMI user data file - "
-                            "user info corrupted");
+            lg2::error("Error in reading IPMI user data file - "
+                       "user info corrupted");
             throw std::runtime_error(
                 "Corrupted IPMI user data file - invalid user info");
         }
@@ -1300,8 +1292,8 @@ void UserAccess::readUserData()
                 if (stdPayload[payloadNum].size() != ipmiMaxChannels ||
                     oemPayload[payloadNum].size() != ipmiMaxChannels)
                 {
-                    log<level::ERR>("Error in reading IPMI user data file - "
-                                    "payload properties corrupted");
+                    lg2::error("Error in reading IPMI user data file - "
+                               "payload properties corrupted");
                     throw std::runtime_error(
                         "Corrupted IPMI user data file - payload properties");
                 }
@@ -1319,8 +1311,8 @@ void UserAccess::readUserData()
             linkAuthEnabled.size() != ipmiMaxChannels ||
             accessCallback.size() != ipmiMaxChannels)
         {
-            log<level::ERR>("Error in reading IPMI user data file - "
-                            "properties corrupted");
+            lg2::error("Error in reading IPMI user data file - "
+                       "properties corrupted");
             throw std::runtime_error(
                 "Corrupted IPMI user data file - properties");
         }
@@ -1346,7 +1338,7 @@ void UserAccess::readUserData()
             userInfo[jsonFixedUser].get<bool>();
     }
 
-    log<level::DEBUG>("User data read from IPMI data file");
+    lg2::debug("User data read from IPMI data file");
     iUsrData.close();
     // Update the timestamp
     fileLastUpdatedTime = getUpdatedFileTime();
@@ -1410,7 +1402,7 @@ void UserAccess::writeUserData()
                   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0)
     {
-        log<level::ERR>("Error in creating temporary IPMI user data file");
+        lg2::error("Error in creating temporary IPMI user data file");
         throw std::ios_base::failure(
             "Error in creating temporary IPMI user data file");
     }
@@ -1419,7 +1411,7 @@ void UserAccess::writeUserData()
         static_cast<ssize_t>(writeStr.size()))
     {
         close(fd);
-        log<level::ERR>("Error in writing temporary IPMI user data file");
+        lg2::error("Error in writing temporary IPMI user data file");
         throw std::ios_base::failure(
             "Error in writing temporary IPMI user data file");
     }
@@ -1427,7 +1419,7 @@ void UserAccess::writeUserData()
 
     if (std::rename(tmpFile.c_str(), ipmiUserDataFile) != 0)
     {
-        log<level::ERR>("Error in renaming temporary IPMI user data file");
+        lg2::error("Error in renaming temporary IPMI user data file");
         throw std::runtime_error("Error in renaming IPMI user data file");
     }
     // Update the timestamp
@@ -1448,8 +1440,7 @@ bool UserAccess::addUserEntry(const std::string& userName,
             ipmiMaxUserName);
         if (userName == curName)
         {
-            log<level::DEBUG>("User name exists",
-                              entry("USER_NAME=%s", userName.c_str()));
+            lg2::debug("Username {USER_NAME} exists", "USER_NAME", userName);
             return false; // user name exists.
         }
 
@@ -1462,7 +1453,7 @@ bool UserAccess::addUserEntry(const std::string& userName,
     }
     if (freeIndex == 0xFF)
     {
-        log<level::ERR>("No empty slots found");
+        lg2::error("No empty slots found");
         return false;
     }
     std::strncpy(reinterpret_cast<char*>(userData->user[freeIndex].userName),
@@ -1544,9 +1535,8 @@ void UserAccess::getSystemPrivAndGroups()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::DEBUG>("Failed to excute method",
-                          entry("METHOD=%s", getAllPropertiesMethod),
-                          entry("PATH=%s", userMgrObjBasePath));
+        lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+                   getAllPropertiesMethod, "PATH", userMgrObjBasePath);
         return;
     }
     for (const auto& t : properties)
@@ -1570,7 +1560,7 @@ std::timespec UserAccess::getUpdatedFileTime()
     struct stat fileStat;
     if (stat(ipmiUserDataFile, &fileStat) != 0)
     {
-        log<level::DEBUG>("Error in getting last updated time stamp");
+        lg2::debug("Error in getting last updated time stamp");
         return std::timespec{0, 0};
     }
     return fileStat.st_mtim;
@@ -1644,7 +1634,7 @@ void UserAccess::cacheUserDataFile()
                   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0)
     {
-        log<level::ERR>("Error in creating IPMI user signal lock file");
+        lg2::error("Error in creating IPMI user signal lock file");
         throw std::ios_base::failure(
             "Error in creating temporary IPMI user signal lock file");
     }
@@ -1655,7 +1645,7 @@ void UserAccess::cacheUserDataFile()
     // host-ipmid
     if (userUpdatedSignal == nullptr && sigHndlrLock.try_lock())
     {
-        log<level::DEBUG>("Registering signal handler");
+        lg2::debug("Registering signal handler");
         userUpdatedSignal = std::make_unique<sdbusplus::bus::match_t>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
@@ -1696,9 +1686,8 @@ void UserAccess::cacheUserDataFile()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::DEBUG>("Failed to excute method",
-                          entry("METHOD=%s", getManagedObjectsMethod),
-                          entry("PATH=%s", userMgrObjBasePath));
+        lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+                   getManagedObjectsMethod, "PATH", userMgrObjBasePath);
         return;
     }
     bool updateRequired = false;
@@ -1783,7 +1772,7 @@ void UserAccess::cacheUserDataFile()
         std::string usrObjPath = std::string(usrObj.first);
         if (getUserNameFromPath(usrObj.first.str, userName) != 0)
         {
-            log<level::ERR>("Error in user object path");
+            lg2::error("Error in user object path");
             continue;
         }
         getUserObjProperties(usrObj.second, usrGrps, usrPriv, usrEnabled);
