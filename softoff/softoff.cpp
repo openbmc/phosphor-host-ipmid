@@ -18,7 +18,7 @@
 #include "softoff.hpp"
 
 #include <ipmid/utils.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Control/Host/server.hpp>
 
 #include <chrono>
@@ -27,7 +27,6 @@ namespace phosphor
 namespace ipmi
 {
 
-using namespace phosphor::logging;
 using namespace sdbusplus::server::xyz::openbmc_project::control;
 
 void SoftPowerOff::sendHostShutDownCmd()
@@ -47,8 +46,8 @@ void SoftPowerOff::sendHostShutDownCmd()
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Error in call to control host Execute",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("Error in call to control host Execute: {ERROR}", "ERROR",
+                   e);
         // TODO openbmc/openbmc#851 - Once available, throw returned error
         throw std::runtime_error("Error in call to control host Execute");
     }
@@ -62,9 +61,9 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message_t& msg)
 
     msg.read(cmdCompleted, cmdStatus);
 
-    log<level::DEBUG>("Host control signal values",
-                      entry("COMMAND=%s", cmdCompleted.c_str()),
-                      entry("STATUS=%s", cmdStatus.c_str()));
+    lg2::debug(
+        "Host control signal values, command: {COMMAND}, status:{STATUS}",
+        "COMMAND", cmdCompleted, "STATUS", cmdStatus);
 
     if (Host::convertResultFromString(cmdStatus) == Host::Result::Success)
     {
@@ -79,24 +78,25 @@ void SoftPowerOff::hostControlEvent(sdbusplus::message_t& msg)
         auto r = startTimer(time);
         if (r < 0)
         {
-            log<level::ERR>("Failure to start Host shutdown wait timer",
-                            entry("ERRNO=0x%X", -r));
+            lg2::error(
+                "Failure to start Host shutdown wait timer, ERRNO: {ERRNO}",
+                "ERRNO", lg2::hex, -r);
         }
         else
         {
-            log<level::INFO>(
-                "Timer started waiting for host to shutdown",
-                entry("TIMEOUT_IN_MSEC=%llu",
+            lg2::info("Timer started waiting for host to shutdown, "
+                      "TIMEOUT_IN_MSEC: {TIMEOUT_IN_MSEC}",
+                      "TIMEOUT_IN_MSEC",
                       (duration_cast<milliseconds>(
                            seconds(IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS)))
-                          .count()));
+                          .count());
         }
     }
     else
     {
         // An error on the initial attention is not considered an error, just
         // exit normally and allow remaining shutdown targets to run
-        log<level::INFO>("Timeout on host attention, continue with power down");
+        lg2::info("Timeout on host attention, continue with power down");
         completed = true;
     }
     return;
@@ -120,8 +120,8 @@ auto SoftPowerOff::responseReceived(HostResponse response) -> HostResponse
         auto r = timer.stop();
         if (r < 0)
         {
-            log<level::ERR>("Failure to STOP the timer",
-                            entry("ERRNO=0x%X", -r));
+            lg2::error("Failure to STOP the timer, ERRNO: {ERRNO}", "ERRNO",
+                       lg2::hex, -r);
         }
 
         // This marks the completion of soft power off sequence.
