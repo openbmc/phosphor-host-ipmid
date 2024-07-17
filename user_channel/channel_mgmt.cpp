@@ -39,8 +39,6 @@
 namespace ipmi
 {
 
-using namespace phosphor::logging;
-
 static constexpr const char* channelAccessDefaultFilename =
     "/usr/share/ipmi-providers/channel_access.json";
 static constexpr const char* channelConfigDefaultFilename =

@@ -19,7 +19,7 @@
 #include "channel_mgmt.hpp"
 #include "cipher_mgmt.hpp"
 
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 namespace ipmi
 {
@@ -34,8 +34,7 @@ bool doesDeviceExist(const uint8_t chNum)
 
     if (stat(devName.data(), &fileStat) != 0)
     {
-        phosphor::logging::log<phosphor::logging::level::DEBUG>(
-            "Ethernet device not found");
+        lg2::debug("Ethernet device not found");
         return false;
     }
 
