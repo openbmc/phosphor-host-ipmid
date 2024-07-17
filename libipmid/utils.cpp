@@ -10,7 +10,7 @@
 
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -50,8 +50,8 @@ DbusObjectInfo getDbusObject(sdbusplus::bus_t& bus,
     ObjectTree objectTree = getSubTree(bus, interfaces, serviceRoot);
     if (objectTree.empty())
     {
-        log<level::ERR>("No Object has implemented the interface",
-                        entry("INTERFACE=%s", interface.c_str()));
+        lg2::error("No Object has implemented the interface: {INTERFACE}",
+                   "INTERFACE", interface);
         elog<InternalFailure>();
     }
 
@@ -74,8 +74,8 @@ DbusObjectInfo getDbusObject(sdbusplus::bus_t& bus,
 
     if (found == objectTree.end())
     {
-        log<level::ERR>("Failed to find object which matches",
-                        entry("MATCH=%s", match.c_str()));
+        lg2::error("Failed to find object which matches: {MATCH}", "MATCH",
+                   match);
         elog<InternalFailure>();
         // elog<> throws an exception.
     }
@@ -147,10 +147,9 @@ void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
 
     if (!bus.call(method, timeout.count()))
     {
-        log<level::ERR>("Failed to set property",
-                        entry("PROPERTY=%s", property.c_str()),
-                        entry("PATH=%s", objPath.c_str()),
-                        entry("INTERFACE=%s", interface.c_str()));
+        lg2::error(
+            "Failed to set {PROPERTY}, path: {PATH}, interface: {INTERFACE}",
+            "PROPERTY", property, "PATH", objPath, "INTERFACE", interface);
         elog<InternalFailure>();
     }
 }
@@ -274,10 +273,9 @@ void deleteAllDbusObjects(sdbusplus::bus_t& bus, const std::string& serviceRoot,
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::INFO>("sdbusplus exception - Unable to delete the objects",
-                         entry("ERROR=%s", e.what()),
-                         entry("INTERFACE=%s", interface.c_str()),
-                         entry("SERVICE=%s", serviceRoot.c_str()));
+        lg2::info(
+            "sdbusplus exception - Unable to delete the objects, service: {SERVICE}, interface: {INTERFACE}, error: {ERROR}",
+            "SERVICE", serviceRoot, "INTERFACE", interface, "ERROR", e);
     }
 }
 
@@ -304,10 +302,9 @@ ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
 
     if (objectTree.empty())
     {
-        log<level::ERR>(
-            "No Object has implemented the interface",
-            entry("PATH=%s", path.c_str()),
-            entry("INTERFACES=%s", convertToString(interfaces).c_str()));
+        lg2::error(
+            "No Object has implemented the interface: {INTERFACE}, path: {PATH}",
+            "INTERFACE", convertToString(interfaces), "PATH", path);
         elog<InternalFailure>();
     }
 
@@ -384,10 +381,10 @@ boost::system::error_code getDbusObject(Context::ptr ctx,
 
     if (objectTree.empty())
     {
-        log<level::ERR>("No Object has implemented the interface",
-                        entry("INTERFACE=%s", interface.c_str()),
-                        entry("NETFN=%x", ctx->netFn),
-                        entry("CMD=%x,", ctx->cmd));
+        lg2::error(
+            "No Object has implemented the interface: {INTERFACE}, NetFn: {NETFN}, Cmd: {CMD}",
+            "INTERFACE", interface, "NETFN", lg2::hex, ctx->netFn, "CMD",
+            lg2::hex, ctx->cmd);
         return boost::system::errc::make_error_code(
             boost::system::errc::no_such_process);
     }
@@ -409,10 +406,10 @@ boost::system::error_code getDbusObject(Context::ptr ctx,
 
     if (found == objectTree.end())
     {
-        log<level::ERR>("Failed to find object which matches",
-                        entry("MATCH=%s", match.c_str()),
-                        entry("NETFN=%x", ctx->netFn),
-                        entry("CMD=%x,", ctx->cmd));
+        lg2::error(
+            "Failed to find object which matches: {MATCH}, NetFn: {NETFN}, Cmd: {CMD}",
+            "MATCH", match, "NETFN", lg2::hex, ctx->netFn, "CMD", lg2::hex,
+            ctx->cmd);
         // set ec
         return boost::system::errc::make_error_code(
             boost::system::errc::no_such_file_or_directory);
@@ -500,12 +497,11 @@ boost::system::error_code deleteAllDbusObjects(Context::ptr ctx,
                                     DELETE_INTERFACE, "Delete");
         if (ec)
         {
-            log<level::ERR>("Failed to delete all objects",
-                            entry("INTERFACE=%s", interface.c_str()),
-                            entry("SERVICE=%s", serviceRoot.c_str()),
-                            entry("NETFN=%x", ctx->netFn),
-                            entry("CMD=%x,", ctx->cmd),
-                            entry("ERROR=%s", ec.message().c_str()));
+            lg2::error(
+                "Failed to delete all objects, service: {SERVICE}, interface: {INTERFACE}, NetFn: {NETFN}, Cmd: {CMD}, Error: {ERROR}",
+                "SERVICE", serviceRoot, "INTERFACE", interface, "NETFN",
+                lg2::hex, ctx->netFn, "CMD", lg2::hex, ctx->cmd, "ERROR",
+                ec.message());
             break;
         }
     }
@@ -543,9 +539,9 @@ boost::system::error_code getAllAncestors(Context::ptr ctx,
 
     if (objectTree.empty())
     {
-        log<level::ERR>("No Object has implemented the interface",
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACES=%s", interfaceList.c_str()));
+        lg2::error(
+            "No Object has implemented the interface: {INTERFACE}, path: {PATH}",
+            "INTERFACE", interfaceList, "PATH", path);
         elog<InternalFailure>();
     }
 
@@ -574,8 +570,7 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
     int i2cDev = ::open(i2cBus.c_str(), O_RDWR | O_CLOEXEC);
     if (i2cDev < 0)
     {
-        log<level::ERR>("Failed to open i2c bus",
-                        phosphor::logging::entry("BUS=%s", i2cBus.c_str()));
+        lg2::error("Failed to open i2c bus: {BUS}", "BUS", i2cBus);
         return ipmi::ccInvalidFieldRequest;
     }
 
@@ -612,8 +607,7 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
 
     if (ret < 0)
     {
-        log<level::ERR>("I2C WR Failed!",
-                        phosphor::logging::entry("RET=%d", ret));
+        lg2::error("I2C WR Failed! {RET}", "RET", ret);
         return ipmi::ccUnspecifiedError;
     }
     if (readCount)
