@@ -3,7 +3,7 @@
 #include <ipmid/api.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -46,10 +46,9 @@ void WatchdogService::resetTimeRemaining(bool enableWatchdog)
             // Retry the request once in case the cached service was stale
             return resetTimeRemaining(enableWatchdog);
         }
-        log<level::ERR>(
-            "WatchdogService: Method error resetting time remaining",
-            entry("ENABLE_WATCHDOG=%d", !!enableWatchdog),
-            entry("ERROR=%s", e.what()));
+        lg2::error(
+            "WatchdogService: Method error resetting time remaining, ENABLE_WATCHDOG: {ENABLE_WATCHDOG}, ERROR: {ERROR}",
+            "ENABLE_WATCHDOG", enableWatchdog, "ERROR", e);
         elog<InternalFailure>();
     }
 }
@@ -74,8 +73,8 @@ WatchdogService::Properties WatchdogService::getProperties()
             // Retry the request once in case the cached service was stale
             return getProperties();
         }
-        log<level::ERR>("WatchdogService: Method error getting properties",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("WatchdogService: Method error getting properties: {ERROR}",
+                   "ERROR", e);
         elog<InternalFailure>();
     }
 
@@ -98,8 +97,8 @@ WatchdogService::Properties WatchdogService::getProperties()
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("WatchdogService: Decode error in get properties",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("WatchdogService: Decode error in get properties: {ERROR}",
+                   "ERROR", e);
         elog<InternalFailure>();
     }
 
@@ -130,9 +129,8 @@ T WatchdogService::getProperty(const std::string& key)
             // Retry the request once in case the cached service was stale
             return getProperty<T>(key);
         }
-        log<level::ERR>("WatchdogService: Method error getting property",
-                        entry("PROPERTY=%s", key.c_str()),
-                        entry("ERROR=%s", e.what()));
+        lg2::error("WatchdogService: Method error getting {PROPERTY}: {ERROR}",
+                   "PROPERTY", key, "ERROR", e);
         elog<InternalFailure>();
     }
 
@@ -161,9 +159,8 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
             setProperty(key, val);
             return;
         }
-        log<level::ERR>("WatchdogService: Method error setting property",
-                        entry("PROPERTY=%s", key.c_str()),
-                        entry("ERROR=%s", e.what()));
+        lg2::error("WatchdogService: Method error setting {PROPERTY}: {ERROR}",
+                   "PROPERTY", key, "ERROR", e);
         elog<InternalFailure>();
     }
 }
