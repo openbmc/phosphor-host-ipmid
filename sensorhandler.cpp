@@ -11,7 +11,7 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
@@ -478,8 +478,8 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
                                      uint8_t eventData1, uint8_t eventData2,
                                      uint8_t eventData3)
 {
-    log<level::DEBUG>("IPMI SET_SENSOR",
-                      entry("SENSOR_NUM=0x%02x", sensorNumber));
+    lg2::debug("IPMI SET_SENSOR, sensorNumber: {SENSOR_NUM}", "SENSOR_NUM",
+               lg2::hex, sensorNumber);
 
     if (sensorNumber == 0xFF)
     {
@@ -511,8 +511,9 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
         if (ipmi::sensor::Mutability::Write !=
             (iter->second.mutability & ipmi::sensor::Mutability::Write))
         {
-            log<level::ERR>("Sensor Set operation is not allowed",
-                            entry("SENSOR_NUM=%d", sensorNumber));
+            lg2::error(
+                "Sensor Set operation is not allowed, sensorNumber: {SENSOR_NUM}",
+                "SENSOR_NUM", sensorNumber);
             return ipmi::responseIllegalCommand();
         }
         auto ipmiRC = iter->second.updateFunc(cmdData, iter->second);
@@ -520,14 +521,14 @@ ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
     }
     catch (const InternalFailure& e)
     {
-        log<level::ERR>("Set sensor failed",
-                        entry("SENSOR_NUM=%d", sensorNumber));
+        lg2::error("Set sensor failed, sensorNumber: {SENSOR_NUM}",
+                   "SENSOR_NUM", sensorNumber);
         commit<InternalFailure>();
         return ipmi::responseUnspecifiedError();
     }
     catch (const std::runtime_error& e)
     {
-        log<level::ERR>(e.what());
+        lg2::error("runtime error: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
 }
@@ -1072,7 +1073,7 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
     }
     catch (const sdbusplus::exception::InvalidEnumString& e)
     {
-        log<level::WARNING>("Warning: no unit provided for sensor!");
+        lg2::warning("Warning: no unit provided for sensor!");
     }
 }
 
@@ -1474,7 +1475,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
     }
     catch (const sdbusplus::exception_t& e)
     {
-        phosphor::logging::log<phosphor::logging::level::ERR>(e.what());
+        lg2::error("exception message: {ERROR}", "ERROR", e);
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
     return IPMI_CC_OK;
