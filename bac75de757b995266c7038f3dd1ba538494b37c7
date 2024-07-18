@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c87eb597_e7bd30f3",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 995,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-07-18T17:56:02Z",
+      "side": 1,
+      "message": "string_view might be more appropriate here; no need to instantiate a string for this.",
+      "range": {
+        "startLine": 995,
+        "startChar": 38,
+        "endLine": 995,
+        "endChar": 44
+      },
+      "revId": "bac75de757b995266c7038f3dd1ba538494b37c7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "735e037c_22037104",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-07-18T17:56:02Z",
+      "side": 1,
+      "message": "string_view",
+      "revId": "bac75de757b995266c7038f3dd1ba538494b37c7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1737d76a_ef8478e8",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-07-18T17:56:02Z",
+      "side": 1,
+      "message": "string_view",
+      "revId": "bac75de757b995266c7038f3dd1ba538494b37c7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0a54a217_4526a3c9",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-07-18T17:56:02Z",
+      "side": 1,
+      "message": "long line, please break up.",
+      "revId": "bac75de757b995266c7038f3dd1ba538494b37c7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cf62f180_05a41e83",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1035,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-07-18T17:56:02Z",
+      "side": 1,
+      "message": "long line, please break up.",
+      "revId": "bac75de757b995266c7038f3dd1ba538494b37c7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
