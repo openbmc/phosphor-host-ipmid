@@ -8,7 +8,7 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 
 #include <cmath>
@@ -447,7 +447,7 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
         if (rawData > std::numeric_limits<int8_t>::max() ||
             rawData < std::numeric_limits<int8_t>::lowest())
         {
-            log<level::ERR>("Value out of range");
+            lg2::error("Value out of range");
             throw std::out_of_range("Value out of range");
         }
         setReading(static_cast<int8_t>(rawData), &response);
@@ -457,7 +457,7 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
         if (rawData > std::numeric_limits<uint8_t>::max() ||
             rawData < std::numeric_limits<uint8_t>::lowest())
         {
-            log<level::ERR>("Value out of range");
+            lg2::error("Value out of range");
             throw std::out_of_range("Value out of range");
         }
         setReading(static_cast<uint8_t>(rawData), &response);
