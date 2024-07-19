@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "28a6545b_f301da8e",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:42:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "874595c1_4cf5308e",
+      "revId": "292d6435409f8fed9428b2e8f416f925ed1df5e2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f3fafaab_18f0ea91",
@@ -31,6 +49,24 @@
       "writtenOn": "2024-07-18T18:01:02Z",
       "side": 1,
       "message": "I know the original is %d, but line 481 logs it with %x; Let\u0027s stick with hex for both.",
+      "revId": "292d6435409f8fed9428b2e8f416f925ed1df5e2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f4cc319_5942ab9f",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:42:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f3fafaab_18f0ea91",
       "revId": "292d6435409f8fed9428b2e8f416f925ed1df5e2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
