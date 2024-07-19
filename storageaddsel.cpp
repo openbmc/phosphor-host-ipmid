@@ -8,6 +8,7 @@
 #include <ipmid/types.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Logging/Entry/server.hpp>
 
 #include <algorithm>
@@ -29,7 +30,8 @@ std::string readESEL(const char* fileName)
 
     if (handle.fail())
     {
-        log<level::ERR>("Failed to open eSEL", entry("FILENAME=%s", fileName));
+        lg2::error("Failed to open eSEL, file name: {FILENAME}", "FILENAME",
+                   fileName);
         return content;
     }
 
