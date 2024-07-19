@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b9222f5_1b88d2ae",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2f205c42_8d4415ba",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4385ae08_0efb8d80",
@@ -31,6 +49,24 @@
       "writtenOn": "2024-07-18T17:42:45Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "356cfb8e_2666e27d",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4385ae08_0efb8d80",
       "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -52,6 +88,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4b633ae4_fa026a8d",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8efbbfb_0ca68b1e",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "86bd1c4b_c28b623a",
@@ -65,6 +119,24 @@
       "writtenOn": "2024-07-18T17:42:45Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5840e7cc_2bbc6e34",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86bd1c4b_c28b623a",
       "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -86,6 +158,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c0254e03_682e59a8",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b159525_ba2e5d2b",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e85dd861_4cb7cfcb",
@@ -99,6 +189,24 @@
       "writtenOn": "2024-07-18T17:42:45Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "36027a88_8a9fbed3",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e85dd861_4cb7cfcb",
       "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -120,6 +228,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9522fa55_04b9911e",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31c87fde_eb07bf14",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2fc5cac1_f14d7531",
@@ -133,6 +259,24 @@
       "writtenOn": "2024-07-18T17:42:45Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "47324845_2d3a9858",
+        "filename": "include/ipmid/handler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2fc5cac1_f14d7531",
       "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -154,6 +298,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "745e67dc_95e805eb",
+        "filename": "libipmid/signals.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a03ec5fd_3092c779",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cb86286d_0a07cdd9",
@@ -167,6 +329,24 @@
       "writtenOn": "2024-07-18T17:42:45Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f7e11d4_3fc1d852",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb86286d_0a07cdd9",
       "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -188,6 +368,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a9d1fa7_564c234f",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c1661ba4_f62d8c06",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "522a5135_dbe16bad",
@@ -201,6 +399,24 @@
       "writtenOn": "2024-07-18T17:42:45Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "81553b5e_c4b52ccb",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "522a5135_dbe16bad",
       "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -222,6 +438,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "52f3f508_4b01b499",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1e91a657_024a9fe1",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3647304a_783ace6f",
@@ -239,6 +473,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f3f643b8_08eeeed5",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3647304a_783ace6f",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6a09dfc9_a2aabcc1",
@@ -252,6 +504,24 @@
       "writtenOn": "2024-07-18T17:42:45Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5dc25f47_c7ce89e3",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a09dfc9_a2aabcc1",
       "revId": "17a043fd6a5b8214f9ef6990041bb719d1e71b90",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
