@@ -22,6 +22,30 @@
       },
       "revId": "1594560ec76025c744b8a7c8b1abddf61a1d98ef",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "93d4831f_5115460a",
+        "filename": "softoff/softoff.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "45de2cc8_d55b9081",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 97
+      },
+      "revId": "1594560ec76025c744b8a7c8b1abddf61a1d98ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
