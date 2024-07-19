@@ -2,7 +2,7 @@
 
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -26,8 +26,7 @@ Objects::Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter) :
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Failed to call the getSubTree method.",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("Failed to call the getSubTree method: {ERROR}", "ERROR", e);
         elog<InternalFailure>();
     }
 
@@ -67,8 +66,7 @@ Service Objects::service(const Path& path, const Interface& interface) const
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Invalid response from mapper",
-                        entry("ERROR=%s", e.what()));
+        lg2::error("Invalid response from mapper: {ERROR}", "ERROR", e);
         elog<InternalFailure>();
     }
 }
