@@ -2,6 +2,8 @@
 
 #include <malloc.h>
 
+#include <phosphor-logging/lg2.hpp>
+
 extern uint8_t find_type_for_sensor_number(uint8_t);
 
 struct sensorRES_t
@@ -285,9 +287,10 @@ bool shouldReport(uint8_t sensorType, int offset, int* index)
     if (rc == false)
     {
 #ifdef __IPMI_DEBUG__
-        log<level::DEBUG>("LOOKATME: Sensor should not be reported",
-                          entry("SENSORTYPE=0x%02x", sensorType),
-                          entry("OFFSET=0x%02x", offset));
+        lg2::debug("LOOKATME: Sensor should not be reported, "
+                   "sensor type: {SENSORTYPE}, offset: {OFFSET}",
+                   SENSORTYPE, lg2::hex, sensorType, "OFFSET", lg2::hex,
+                   offset);
 #endif
     }
 
