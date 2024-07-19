@@ -6,6 +6,7 @@
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -72,10 +73,9 @@ ipmi::PropertyMap readAllProperties(const std::string& intf,
     catch (const sdbusplus::exception_t& e)
     {
         // If property is not found simply return empty value
-        log<level::ERR>("Error in reading property values",
-                        entry("EXCEPTION=%s", e.what()),
-                        entry("INTERFACE=%s", intf.c_str()),
-                        entry("PATH=%s", objPath.c_str()));
+        lg2::error("Error in reading property values: {ERROR}, path: {PATH}, "
+                   "interface: {INTERFACE}",
+                   "ERROR", e, "PATH", objPath, "INTERFACE", intf);
     }
 
     return properties;
@@ -134,7 +134,7 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     auto iter = frus.find(fruNum);
     if (iter == frus.end())
     {
-        log<level::ERR>("Unsupported FRU ID ", entry("FRUID=%d", fruNum));
+        lg2::error("Unsupported FRU ID: {FRUID}", "FRUID", fruNum);
         elog<InternalFailure>();
     }
 
