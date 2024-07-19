@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b72ab8e_fcb06d20",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ff9b73a1_5987ea76",
+      "range": {
+        "startLine": 119,
+        "startChar": 6,
+        "endLine": 126,
+        "endChar": 9
+      },
+      "revId": "67b770be3b5a8369b9b15049d1828527f348e554",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a9cf023d_b6c3b589",
@@ -37,6 +61,24 @@
       "writtenOn": "2024-07-18T17:59:06Z",
       "side": 1,
       "message": "same ideas as line 119",
+      "revId": "67b770be3b5a8369b9b15049d1828527f348e554",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d010f172_786444f4",
+        "filename": "whitelist-filter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9cf023d_b6c3b589",
       "revId": "67b770be3b5a8369b9b15049d1828527f348e554",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
