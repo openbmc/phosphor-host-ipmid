@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "851f10ce_6b1e6cd9",
+        "filename": "user_channel/channelcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2fad1424_43bfdb33",
+      "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b6d3b796_fb144edd",
@@ -31,6 +49,24 @@
       "writtenOn": "2024-07-18T17:49:39Z",
       "side": 1,
       "message": "add chNum to the log; same comment as line 261",
+      "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f129a0b_2f45e5db",
+        "filename": "user_channel/channelcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6d3b796_fb144edd",
       "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -52,6 +88,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a3fd3726_246de6bb",
+        "filename": "user_channel/channelcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8a2f221_dadf08f5",
+      "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "aa390870_a1eb6ff2",
@@ -65,6 +119,24 @@
       "writtenOn": "2024-07-18T17:49:39Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6e5552e6_453f8584",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa390870_a1eb6ff2",
       "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -86,6 +158,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e59b520c_36ec90a7",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6bbde1cd_affc1d80",
+      "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "afc9ae88_7de1be45",
@@ -99,6 +189,24 @@
       "writtenOn": "2024-07-18T17:49:39Z",
       "side": 1,
       "message": "\"Username {USER_NAME} already exists\" to ensure the reader knows the first word is a username, not some other entity.",
+      "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e19dd670_59fecf8f",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "afc9ae88_7de1be45",
       "revId": "e2d9225c68453109958c3d9c2dcf7cecb2e555d6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
