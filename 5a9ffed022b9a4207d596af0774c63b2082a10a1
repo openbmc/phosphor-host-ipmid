@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c697a980_acf8a59b",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0204302a_43a96fc6",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "11512343_d996b8dc",
@@ -52,6 +70,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f0ea709e_861afee9",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4819f58_fa2d6d96",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5d3f96ea_10a8bf06",
@@ -65,6 +101,24 @@
       "writtenOn": "2024-07-18T17:38:53Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee8f4998_3ac92b36",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5d3f96ea_10a8bf06",
       "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -86,6 +140,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0b35489_f49bc92c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d007fe9_7afb05f4",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "41d8e390_5aa96b3c",
@@ -99,6 +171,24 @@
       "writtenOn": "2024-07-18T17:38:53Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "24c19a61_f20a4830",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "41d8e390_5aa96b3c",
       "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -120,6 +210,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "15f522fb_ebca86b4",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2775def2_7853eba1",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5a2b447c_aa306470",
@@ -133,6 +241,24 @@
       "writtenOn": "2024-07-18T17:38:53Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "48121ee7_e2765f2e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1576,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a2b447c_aa306470",
       "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -154,6 +280,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "44c03075_5cdd7b4b",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1619,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a129981b_f7736738",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "aa23849a_aeecbc5a",
@@ -167,6 +311,24 @@
       "writtenOn": "2024-07-18T17:38:53Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "704adbd3_fcaf704e",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1778,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa23849a_aeecbc5a",
       "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -188,6 +350,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cc04a663_948d3d78",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2045,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99af1ef1_2ebeb46e",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a37e3b0c_452de4ed",
@@ -201,6 +381,24 @@
       "writtenOn": "2024-07-18T17:38:53Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "68dcfd7e_a268ddc3",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2579,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a37e3b0c_452de4ed",
       "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -222,6 +420,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8c412bef_2ceef884",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2642,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3463459c_12a5c7ad",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1cd6c0e3_b256ff18",
@@ -235,6 +451,24 @@
       "writtenOn": "2024-07-18T17:38:53Z",
       "side": 1,
       "message": "long line, please break up.",
+      "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e8d13ca6_cafd3b21",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-19T01:41:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1cd6c0e3_b256ff18",
       "revId": "5a9ffed022b9a4207d596af0774c63b2082a10a1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
