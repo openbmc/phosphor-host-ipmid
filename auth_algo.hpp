@@ -15,7 +15,6 @@ namespace rakp_auth
 constexpr size_t USER_KEY_MAX_LENGTH = 20;
 constexpr size_t BMC_RANDOM_NUMBER_LEN = 16;
 constexpr size_t REMOTE_CONSOLE_RANDOM_NUMBER_LEN = 16;
-extern const std::string userName;
 
 /**
  * @enum RAKP Authentication Algorithms
