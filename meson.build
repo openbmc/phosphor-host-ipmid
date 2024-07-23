@@ -230,11 +230,6 @@ ipmid_pre = [
   channellayer_dep,
 ]
 
-transportoem_src = []
-if not get_option('transport-oem').disabled()
-  transportoem_src = ['transporthandler_oem.cpp']
-endif
-
 storage_cmds_src = []
 if get_option('dynamic-sensors').disabled() and not get_option('dynamic-storages-only').disabled()
   storage_cmds_src = ['dbus-sdr/storagecommands.cpp', 'dbus-sdr/sdrutils.cpp']
@@ -265,7 +260,6 @@ libipmi20_src = [
   'sensordatahandler.cpp',
   'user_channel/channelcommands.cpp',
   generated_src,
-  transportoem_src,
   storage_cmds_src,
   openpower_cmds_src,
   conf_h,

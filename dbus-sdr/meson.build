@@ -17,9 +17,14 @@ if not get_option('hybrid-sensors').disabled()
   ]
 endif
 
+transportoem_src = []
+if not get_option('transport-oem').disabled()
+  transportoem_src = ['oe-local-files/transporthandler_oem.cpp']
+endif
+
 sensorsoem_src = []
 if not get_option('sensors-oem').disabled()
-  sensorsoem_src = ['dbus-sdr/sensorcommands_oem.cpp']
+  sensorsoem_src = ['oe-local-files/sensorcommands_oem.cpp']
 endif
 
 dbus_sdr_pre = declare_dependency(
@@ -37,5 +42,6 @@ dbus_sdr_src = [
   'dbus-sdr/sensorcommands.cpp',
   'dbus-sdr/storagecommands.cpp',
   hybrid_src,
+  transportoem_src,
   sensorsoem_src,
 ]
