@@ -65,6 +65,29 @@ int get()
 } // namespace erase_time
 } // namespace dynamic_sensors::ipmi::sel
 
+// If users enable dynamic-storages-only w/o dynamic-sensors, the sensor's
+// information will be got from static configuration in sensor-gen.cpp.
+#ifndef FEATURE_DYNAMIC_SENSORS
+namespace ipmi
+{
+namespace sensor
+{
+extern const IdInfoMap sensors;
+
+ipmi::sensor::IdInfoMap::const_iterator
+    getSensorInfoFromStaticCfg(const std::string& sensorPath)
+{
+    return std::find_if(
+        ipmi::sensor::sensors.begin(), ipmi::sensor::sensors.end(),
+        [&sensorPath](const ipmi::sensor::IdInfoMap::value_type& findSensor) {
+        return findSensor.second.sensorPath == sensorPath;
+    });
+}
+
+} // namespace sensor
+} // namespace ipmi
+#endif // FEATURE_DYNAMIC_SENSORS
+
 namespace ipmi
 {
 
@@ -1051,10 +1074,28 @@ ipmi::RspType<uint16_t,                   // Next Record ID
                 std::cerr << "Invalid Generator ID\n";
             }
 
+#ifndef FEATURE_DYNAMIC_SENSORS
+            // Get the Sensor's information from Static configuration.
+            // The sensors are generated in sensor-gen.cpp file.
+            auto sensorInfo =
+                ipmi::sensor::getSensorInfoFromStaticCfg(sensorPath);
+            if (sensorInfo != ipmi::sensor::sensors.end())
+            {
+                sensorType = sensorInfo->second.sensorType;
+                eventType = sensorInfo->second.sensorReadingType;
+                sensorNum = sensorInfo->first;
+                // In the static configuration, maximum Sensor Number is 255,
+                // therefore, the LUN value always is 0.
+                sensorAndLun = sensorNum;
+            }
+#else
             // Get the sensor type, sensor number, and event type for the sensor
             sensorType = getSensorTypeFromPath(sensorPath);
             sensorAndLun = getSensorNumberFromPath(sensorPath);
             sensorNum = static_cast<uint8_t>(sensorAndLun);
+            eventType = getSensorEventTypeFromPath(sensorPath);
+#endif // FEATURE_DYNAMIC_SENSORS
+
             if ((generatorID & 0x0001) == 0)
             {
                 // IPMB Address
@@ -1065,7 +1106,6 @@ ipmi::RspType<uint16_t,                   // Next Record ID
                 // system software
                 generatorID |= sensorAndLun >> 8;
             }
-            eventType = getSensorEventTypeFromPath(sensorPath);
 
             // Get the event direction
             try
