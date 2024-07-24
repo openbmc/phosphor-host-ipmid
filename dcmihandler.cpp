@@ -10,6 +10,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
+#include <sdbusplus/timer.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
 
@@ -65,6 +66,8 @@ enum class DCMIConfigParameters : uint8_t
     DHCPTiming2,
     DHCPTiming3,
 };
+
+std::optional<std::string> assetTagCache = std::nullopt;
 
 // Refer Table 6-14, DCMI Entity ID Extension, DCMI v1.5 spec
 static const std::map<uint8_t, std::string> entityIdToName{
@@ -191,11 +194,20 @@ bool setPcapEnable(ipmi::Context::ptr& ctx, bool enabled)
 
 std::optional<std::string> readAssetTag(ipmi::Context::ptr& ctx)
 {
-    // Read the object tree with the inventory root to figure out the object
-    // that has implemented the Asset tag interface.
+    if (assetTagCache != std::nullopt)
+    {
+        return assetTagCache;
+    }
+
+    /*
+     * Asume that each system only has 1 object path that includes Item.System
+     * interface, therefore, we shall get the first object path that is found
+     * out via dbus getSubTree method.
+     */
     ipmi::DbusObjectInfo objectInfo;
-    boost::system::error_code ec = getDbusObject(
-        ctx, dcmi::assetTagIntf, ipmi::sensor::inventoryRoot, "", objectInfo);
+    boost::system::error_code ec = ipmi::getDbusObject(
+        ctx, dcmi::itemSystemIntf,
+        std::string(ipmi::sensor::inventoryRoot) + "/system", "", objectInfo);
     if (ec.value())
     {
         return std::nullopt;
@@ -216,28 +228,102 @@ std::optional<std::string> readAssetTag(ipmi::Context::ptr& ctx)
     return assetTag;
 }
 
-bool writeAssetTag(ipmi::Context::ptr& ctx, const std::string& assetTag)
+void writeAssetTagToFru()
 {
-    // Read the object tree with the inventory root to figure out the object
-    // that has implemented the Asset tag interface.
-    ipmi::DbusObjectInfo objectInfo;
-    boost::system::error_code ec = getDbusObject(
-        ctx, dcmi::assetTagIntf, ipmi::sensor::inventoryRoot, "", objectInfo);
-    if (ec.value())
+    /*
+     * Writing Asset Tag to FRU follow steps:
+     * - Get the object path that includes Inventory.Item.System and
+     *   Inventory.Decorator.AssetTag interfaces.
+     * - Base on above object path, get I2C Bus and Address of FRU device that
+     *   includes Asset Tag information.
+     * - Loop all FRU devices to find out the FRU device that has Bus and
+     *   Address as step 2.
+     * - Update the "PRODUCT_ASSET_TAG" property of FRU device in step 3.
+     */
+    try
+    {
+        sdbusplus::bus_t dbus(ipmid_get_sd_bus_connection());
+        ipmi::DbusObjectInfo objectInfo = ipmi::getDbusObject(
+            dbus, dcmi::itemSystemIntf,
+            std::string(ipmi::sensor::inventoryRoot) + "/system", "");
+
+        ipmi::PropertyMap props = ipmi::getAllDbusProperties(
+            dbus, objectInfo.second, objectInfo.first, dcmi::i2cDeviceInf);
+        uint64_t i2cBusProp = ipmi::mappedVariant<uint64_t>(props, "Bus", 0);
+        uint64_t i2cAddrProp =
+            ipmi::mappedVariant<uint64_t>(props, "Address", 0);
+
+        ipmi::ObjectTree objectTree =
+            ipmi::getAllDbusObjects(dbus, fruDeviceRoot, fruDeviceIntf);
+
+        for (const auto& [path, serviceMap] : objectTree)
+        {
+            for (const auto& [service, intfs] : serviceMap)
+            {
+                props = ipmi::getAllDbusProperties(dbus, service, path,
+                                                   fruDeviceIntf);
+
+                uint64_t fruBusProp =
+                    uint64_t(ipmi::mappedVariant<uint32_t>(props, "BUS", 0));
+                uint64_t fruAddrProp = uint64_t(
+                    ipmi::mappedVariant<uint32_t>(props, "ADDRESS", 0));
+                if ((fruBusProp != i2cBusProp) || (fruAddrProp != i2cAddrProp))
+                {
+                    continue;
+                }
+
+                ipmi::setDbusProperty(dbus, service, path, fruDeviceIntf,
+                                      "PRODUCT_ASSET_TAG",
+                                      assetTagCache.value());
+                assetTagCache = std::nullopt;
+                return;
+            }
+        }
+    }
+    catch (const sdbusplus::exception_t&)
+    {
+        lg2::error("Error writing Asset Tag to FRU");
+        elog<InternalFailure>();
+    }
+}
+
+bool writeAssetTag([[maybe_unused]] ipmi::Context::ptr& ctx,
+                   const std::string& assetTag)
+{
+    /*
+     * As defined in the Table 6-9 of DCMI specification version 1.5, the
+     * maximum length of AssetTag is 63, but each time, only 16 bytes can be
+     * updated. Therefore, when users try to update more than 16 bytes, they
+     * have to send multiple "Set Asset Tag" command. If ipmid immediately write
+     * data to FRU, some errors can occur due to so much EEPROM writing request
+     * is sent.
+     *
+     * To avoid writing data to FRU multiple time, ipmid adds a small delay
+     * before writing data to hardware. If no more "Set Asset Tag" command from
+     * users, ipmid writes the AssetTag to FRU.
+     */
+    if (assetTag.size() > dcmi::assetTagMaxSize)
     {
         return false;
     }
 
-    ec =
-        ipmi::setDbusProperty(ctx, objectInfo.second, objectInfo.first,
-                              dcmi::assetTagIntf, dcmi::assetTagProp, assetTag);
-    if (ec.value())
+    // The delay time before ipmid write Asset Tag to FRU device in seconds
+    constexpr auto writeAssetTagDelay = 5;
+    static std::unique_ptr<sdbusplus::Timer> assetTagWriteTimer = nullptr;
+
+    if (assetTagWriteTimer == nullptr)
     {
-        lg2::error("Error in writing asset tag: {ERROR}", "ERROR",
-                   ec.message());
-        elog<InternalFailure>();
-        return false;
+        assetTagWriteTimer =
+            std::make_unique<sdbusplus::Timer>(writeAssetTagToFru);
     }
+
+    assetTagCache = assetTag;
+
+    /* Start a timer to delay writing Asset Tag to FRU */
+    assetTagWriteTimer->start(
+        std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::seconds(writeAssetTagDelay)));
+
     return true;
 }
 
