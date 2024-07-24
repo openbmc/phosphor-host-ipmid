@@ -12,8 +12,14 @@ namespace dcmi
 {
 
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
+static constexpr auto itemSystemIntf =
+    "xyz.openbmc_project.Inventory.Item.System";
+static constexpr auto i2cDeviceInf =
+    "xyz.openbmc_project.Inventory.Decorator.I2CDevice";
 static constexpr auto assetTagIntf =
     "xyz.openbmc_project.Inventory.Decorator.AssetTag";
+static constexpr auto fruDeviceRoot = "/xyz/openbmc_project/FruDevice";
+static constexpr auto fruDeviceIntf = "xyz.openbmc_project.FruDevice";
 static constexpr auto assetTagProp = "AssetTag";
 static constexpr auto networkServiceName = "xyz.openbmc_project.Network";
 static constexpr auto networkConfigObj = "/xyz/openbmc_project/network/config";
