@@ -16,6 +16,24 @@
       "message": "I am not sure what this comment is supposed to mean. Deep down in the bowels of logging, both log\u003cERR\u003e() and lg::error() call sd_journal_send, I think this one should be changed too.",
       "revId": "d69967b7829c6ecb420cdfa7468b951edad069ca",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "59c43a44_baae048d",
+        "filename": "include/ipmid/message.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-07-24T01:18:39Z",
+      "side": 1,
+      "message": "lg2 uses the sd_journal_sendv method. After adding the sd_journal_sendv method in the test, UT passes",
+      "parentUuid": "597814d9_98f793ba",
+      "revId": "d69967b7829c6ecb420cdfa7468b951edad069ca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
