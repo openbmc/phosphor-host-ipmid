@@ -35,7 +35,7 @@ enum ipmi_netfn_user_cmds
 /**
  * @enum IPMI set password return codes (refer spec sec 22.30)
  */
-enum class IPMISetPasswordReturnCodes
+enum ipmi_set_password_return_codes : uint8_t
 {
     ipmiCCPasswdFailMismatch = 0x80,
     ipmiCCPasswdFailWrongSize = 0x81,
