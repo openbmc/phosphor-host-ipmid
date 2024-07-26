@@ -295,7 +295,7 @@ ipmi::RspType<> // user name
          (!pwLen20 && (userPassword.size() != maxIpmi15PasswordSize))))
     {
         lg2::debug("Invalid Length");
-        return ipmi::responseReqDataLenInvalid();
+        return ipmi::response(ipmiCCPasswdFailWrongSize);
     }
 
     size_t passwordLength = userPassword.size();
@@ -354,7 +354,6 @@ ipmi::RspType<> // user name
         {
             lg2::debug("Test password failed, user Id: {USER_ID}", "USER_ID",
                        userId);
-            static constexpr ipmi::Cc ipmiCCPasswdFailMismatch = 0x80;
             return ipmi::response(ipmiCCPasswdFailMismatch);
         }
         return ipmi::responseSuccess();
