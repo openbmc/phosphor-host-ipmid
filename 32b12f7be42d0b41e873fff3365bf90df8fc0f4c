@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f5e76096_7ee4b620",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-08-05T16:45:50Z",
+      "side": 1,
+      "message": "shouldn\u0027t `sensorNum/sensorIndex` just be `sensorNumMapPtr-\u003esize()` and we just skip\n```\n        while (sensorNumMapPtr-\u003eleft.find(sensorNum) !\u003d\n               sensorNumMapPtr-\u003eleft.end())\n        {\n            sensorNum++;\n            sensorIndex++;\n        }\n```\n?",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 258,
+        "endChar": 29
+      },
+      "revId": "32b12f7be42d0b41e873fff3365bf90df8fc0f4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1a73d99e_cc8beefd",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2024-08-05T16:45:50Z",
+      "side": 1,
+      "message": "probably don\u0027t want to decrease if it is already 0?",
+      "range": {
+        "startLine": 414,
+        "startChar": 0,
+        "endLine": 415,
+        "endChar": 13
+      },
+      "revId": "32b12f7be42d0b41e873fff3365bf90df8fc0f4c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
