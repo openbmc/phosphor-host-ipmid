@@ -33,6 +33,23 @@
       "message": "Ping ... anyone?",
       "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c29e830_d01b0011",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-08-05T16:39:33Z",
+      "side": 1,
+      "message": "Ed, would you be ok +2-ing this change?",
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
