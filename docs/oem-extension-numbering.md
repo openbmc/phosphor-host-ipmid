@@ -10,7 +10,7 @@ Number.
 - For each such code, describe the associated messages, including
   representation, function, meaning, limits, and so on.
 
-### OEM Extensions, Block Transfer Transport Example.
+### OEM Extensions, Block Transfer Transport Example
 
 This table and the next briefly recap OEM Extension messages as described in the
 [IPMI Specification](http://www.intel.com/content/www/us/en/servers/ipmi/ipmi-second-gen-interface-spec-v2-rev1-1.html).
