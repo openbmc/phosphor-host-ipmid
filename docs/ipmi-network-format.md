@@ -1,3 +1,5 @@
+# IPMI network format
+
 On platforms running AMI BMC firmware (Habanero and Firestone at the moment),
 the 'Get/Set' System Boot Options' command has been extended to allow overrides
 to the network configuration to be specified. In Petitboot this will cause any
