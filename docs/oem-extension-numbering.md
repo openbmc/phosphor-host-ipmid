@@ -56,7 +56,7 @@ Per section 11.2 of IPMI Spec
 
 ### OpenBMC OEM Cmd Codes
 
-```
+```c
 /*
  * This is the OpenBMC IANA OEM Number
  */

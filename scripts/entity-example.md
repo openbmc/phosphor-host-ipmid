@@ -3,20 +3,20 @@
 If your platform requires the entity container map, you can provide a json file
 of the format:
 
-```
+```json
 [
   {
-     "id" : 1,
-     "containerEntityId" : 2,
-     "containerEntityInstance" : 3,
-     "isList" : false,
-     "isLinked" : false,
-     "entities" : [
-         {"id" : 1, "instance" : 2},
-         {"id" : 1, "instance" : 3},
-         {"id" : 1, "instance" : 4},
-         {"id" : 1, "instance" : 5}
-     ]
+    "id": 1,
+    "containerEntityId": 2,
+    "containerEntityInstance": 3,
+    "isList": false,
+    "isLinked": false,
+    "entities": [
+      { "id": 1, "instance": 2 },
+      { "id": 1, "instance": 3 },
+      { "id": 1, "instance": 4 },
+      { "id": 1, "instance": 5 }
+    ]
   }
 ]
 ```
@@ -25,7 +25,7 @@ as part of your `phosphor-ipmi-config`
 
 The above json is identical to the original YAML documented below:
 
-```
+```text
 # This record has:
 # Container Entity Id and Container Entity Instance = (0x13, 0x81)
 # Contained Entity Id and Contained Entity Instance = (0x0A, 0x1),
