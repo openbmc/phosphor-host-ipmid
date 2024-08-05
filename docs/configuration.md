@@ -9,9 +9,7 @@ Any target can override the default json file by providing a
 phosphor-ipmi-host.bbappend with an ODM or platform customizable configuration.
 
 For a specific example, see:
-[Witherspoon](https://github.com/openbmc/openbmc/blob/master/
-meta-openbmc-machines/meta-openpower/meta-ibm/meta-witherspoon/
-recipes-phosphor/ipmi/phosphor-ipmi-host.bbappend)
+[Witherspoon](https://github.com/openbmc/openbmc/blob/master/meta-openbmc-machines/meta-openpower/meta-ibm/meta-witherspoon/recipes-phosphor/ipmi/phosphor-ipmi-host.bbappend)
 
 The JSON format for get_device_id:
 
