@@ -1,3 +1,5 @@
+# Entity-example
+
 If your platform requires the entity container map, you can provide a json file
 of the format:
 
