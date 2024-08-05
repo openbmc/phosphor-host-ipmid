@@ -1,13 +1,13 @@
 # phosphor-host-ipmid
 
-## Compile ipmid with default options:
+## Compile ipmid with default options
 
 ```ascii
 meson builddir
 ninja -C builddir
 ```
 
-## Compile ipmid with yocto defaults:
+## Compile ipmid with yocto defaults
 
 ```ascii
 meson builddir -Dbuildtype=minsize -Db_lto=true -Dtests=disabled
@@ -32,7 +32,7 @@ meson builddir -Dbuildtype=debug
 ninja -C builddir
 ```
 
-## Generate test coverage report:
+## Generate test coverage report
 
 ```ascii
 meson builddir -Db_coverage=true -Dtests=enabled
