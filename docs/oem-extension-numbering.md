@@ -115,10 +115,10 @@ Notes
 
 | Bytes | Bits | Identifier     | Description                                   |
 | :---: | :--: | :------------- | :-------------------------------------------- |
-|   0   |      | devAndDir      |
+|   0   |      | devAndDir      |                                               |
 |       | 7:1  | dev            | 7-bit I2C device address.                     |
 |       |  0   | isRead         | 1 = read, 0 = write.                          |
-|   1   |      | stepFlags      |
+|   1   |      | stepFlags      |                                               |
 |       |  7   | i2cFlagRecvLen | 1 if block read, else regular; see table.     |
 |       |  6   | i2cFlagNoStart | 1 to suppress I2C start.                      |
 |       | 5:0  |                | Reserved(0)                                   |
