@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "597cfe68_96cb6913",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2024-08-08T22:20:55Z",
+      "side": 1,
+      "message": "The first paragraph makes total sense, and is a great simplification.\n\nThe second paragraph is where I\u0027m not quite understanding.  You\u0027re wanting to use the IPMI commands to write non IPMI compliant data that doesn\u0027t match the FRU format?  That seems like a specification abuse, but I of understand, that kind of thing probably worked on older systems, and I could see the argument we should support it if we can.\n\nThe part where it breaks down for me is why we have to separate out the read/write caches to accomplish that.  Won\u0027t that lead to user Reads looking like they didn\u0027t persist?\n\nKeep in mind, the read commands read from the cache because there are IPMI fru writing implementations that write one byte (or a chunk of bytes) at a time, then immediately read them back and verify they were the same before continuing to the next chunk.  If we split the caches into separate read and write, won\u0027t we break that, because the read will return the \"old\" data that hasn\u0027t been persisted yet?\n\n\nI wonder if a better approach might be to just detect the case where we\u0027re writing beyond the valid fru area, and persist any bytes that are past the FRU area immediately.\n\nThe point of the cache is to allow rollback in the case where a user writes an invalid FRU or partially writes it but never completes writing the full thing.  If we\u0027re writing bytes beyond the valid FRU area, there really isn\u0027t any way to know that those writes are \"complete\" or \"correct\" (assuming they\u0027re not just all 0xFF)\n\n\nTl; DR, I\u0027m confused.",
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "dac1fb91_91fe2337",
@@ -48,6 +65,24 @@
       "writtenOn": "2024-08-05T16:39:33Z",
       "side": 1,
       "message": "Ed, would you be ok +2-ing this change?",
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9f24881f_20c57759",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2024-08-08T22:20:55Z",
+      "side": 1,
+      "message": "Looks like Vernon replied, and I don\u0027t have a good sense of exactly what we\u0027re doing here.",
+      "parentUuid": "6c29e830_d01b0011",
       "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
