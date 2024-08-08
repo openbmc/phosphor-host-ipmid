@@ -50,6 +50,46 @@
       "message": "Ed, would you be ok +2-ing this change?",
       "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0b600ce3_9f469b4e",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-08-08T02:19:57Z",
+      "side": 1,
+      "message": "I don\u0027t understand the duplication of FruCaches here. The cache parameter is passed in as a l-value ref, it is modified and then copied into the response.\n\nI would vote to simply respond with an ipmi::Cc to avoid the copy. Or at the very least, return an l-value ref.",
+      "range": {
+        "startLine": 296,
+        "startChar": 20,
+        "endLine": 296,
+        "endChar": 52
+      },
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "da9dde35_0b2e9984",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-08-08T02:19:57Z",
+      "side": 1,
+      "message": "const auto \u0026[status, fru] \u003d ...\n\nThis assumes that you have chosen to return an l-value ref. Otherwise, no need for structured binding.",
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
