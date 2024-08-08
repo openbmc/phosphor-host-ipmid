@@ -48,6 +48,7 @@ extern sd_bus* bus;
 
 constexpr auto bmc_state_interface = "xyz.openbmc_project.State.BMC";
 constexpr auto bmc_state_property = "CurrentBMCState";
+constexpr auto versionPurposeHostEnd = ".Host";
 
 static constexpr auto redundancyIntf =
     "xyz.openbmc_project.Software.RedundancyPriority";
@@ -1295,6 +1296,58 @@ ipmi::RspType<uint8_t, // session handle,
     return ipmi::responseInvalidFieldRequest();
 }
 
+std::optional<std::string> getSysFWVersion(ipmi::Context::ptr& ctx)
+{
+    /*
+     * The System Firmware version is detected via following steps:
+     * - Get all of object paths that include
+     * "xyz.openbmc_project.Software.Version" interface.
+     * - Get the Purpose property of above object paths.
+     * - If the Purpose is Host then get the Version property.
+     */
+    ipmi::ObjectTree objectTree;
+    boost::system::error_code ec =
+        ipmi::getAllDbusObjects(ctx, softwareRoot, versionIntf, objectTree);
+    if (ec.value())
+    {
+        return std::nullopt;
+    }
+
+    for (const auto& [objPath, serviceMap] : objectTree)
+    {
+        for (const auto& [service, intfs] : serviceMap)
+        {
+            ipmi::PropertyMap props;
+            ec = ipmi::getAllDbusProperties(ctx, service, objPath, versionIntf,
+                                            props);
+            if (ec.value())
+            {
+                continue;
+            }
+
+            std::string purposeProp = std::string(
+                ipmi::mappedVariant<std::string>(props, "Purpose", ""));
+
+            if (!purposeProp.ends_with(versionPurposeHostEnd))
+            {
+                continue;
+            }
+
+            std::string sysFWVersion = std::string(
+                ipmi::mappedVariant<std::string>(props, "Version", ""));
+
+            if (sysFWVersion.empty())
+            {
+                return std::nullopt
+            }
+
+            return sysFWVersion;
+        }
+    }
+
+    return std::nullopt;
+}
+
 static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
 static std::string sysInfoReadSystemName()
@@ -1349,9 +1402,9 @@ static inline auto responseSystemInfoParameterSetReadOnly()
 ipmi::RspType<uint8_t,                // Parameter revision
               std::optional<uint8_t>, // data1 / setSelector / ProgressStatus
               std::optional<std::vector<uint8_t>>> // data2-17
-    ipmiAppGetSystemInfo(uint7_t reserved, bool getRevision,
-                         uint8_t paramSelector, uint8_t setSelector,
-                         uint8_t BlockSelector)
+    ipmiAppGetSystemInfo(ipmi::Context::ptr ctx, uint7_t reserved,
+                         bool getRevision, uint8_t paramSelector,
+                         uint8_t setSelector, uint8_t BlockSelector)
 {
     if (reserved || (paramSelector >= invalidParamSelectorStart &&
                      paramSelector <= invalidParamSelectorEnd))
@@ -1383,6 +1436,17 @@ ipmi::RspType<uint8_t,                // Parameter revision
         sysInfoParamStore = std::make_unique<SysInfoParamStore>();
         sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_NAME,
                                   sysInfoReadSystemName);
+    }
+
+    if (paramSelector == IPMI_SYSINFO_SYSTEM_FW_VERSION)
+    {
+        auto fwVersion = getSysFWVersion(ctx);
+
+        if (fwVersion == std::nullopt)
+        {
+            return ipmi::responseUnspecifiedError();
+        }
+        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_FW_VERSION, *fwVersion);
     }
 
     // Parameters other than Set In Progress are assumed to be strings.
