@@ -20,6 +20,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "739bd015_634a05dd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-08-09T01:08:07Z",
+      "side": 1,
+      "message": "Thanks, valid question! And I\u0027m sorry this caused confusion.\n\nI updated the description to better explain the use case.\n\nYou\u0027re right, additional bytes beyond the FRU data should not matter. The problem is that in the current implementation, these additional bytes ultimately cause the overall write process to fail or the written data to be corrupted.\n\nDetails are in the referenced post in https://lists.ozlabs.org/pipermail/openbmc/2024-May/035222.html.",
+      "parentUuid": "597cfe68_96cb6913",
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "dac1fb91_91fe2337",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 6
@@ -87,6 +105,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "415f946b_98355a2f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-08-09T01:08:07Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "9f24881f_20c57759",
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0b600ce3_9f469b4e",
@@ -110,6 +146,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6f1d2c2e_3e7c844f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-08-09T01:08:07Z",
+      "side": 1,
+      "message": "Good point, thank you for noticing that. I had maintained the original interface (minus the type change) without considering whether this would still make sense. I changed it to simply update the contents of the passed in `cache` in place. It\u0027s then up to the caller to either take a copy or just use the cache object directly.",
+      "parentUuid": "0b600ce3_9f469b4e",
+      "range": {
+        "startLine": 296,
+        "startChar": 20,
+        "endLine": 296,
+        "endChar": 52
+      },
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "da9dde35_0b2e9984",
@@ -123,6 +183,24 @@
       "writtenOn": "2024-08-08T02:19:57Z",
       "side": 1,
       "message": "const auto \u0026[status, fru] \u003d ...\n\nThis assumes that you have chosen to return an l-value ref. Otherwise, no need for structured binding.",
+      "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "21945dfe_99985167",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000265
+      },
+      "writtenOn": "2024-08-09T01:08:07Z",
+      "side": 1,
+      "message": "This is now obsolete.",
+      "parentUuid": "da9dde35_0b2e9984",
       "revId": "58b1c560133181cf98ef64408d57a029e4c75a62",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
