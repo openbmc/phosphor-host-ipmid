@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "12936fce_6ca28b1b",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1325,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-08-09T02:57:59Z",
+      "side": 1,
+      "message": "continue ?",
+      "range": {
+        "startLine": 1325,
+        "startChar": 16,
+        "endLine": 1325,
+        "endChar": 36
+      },
+      "revId": "daf57cac99d13faf83771bfbea64d8701e5b334e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
