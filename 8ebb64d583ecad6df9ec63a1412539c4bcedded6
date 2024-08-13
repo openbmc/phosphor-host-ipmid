@@ -16,6 +16,23 @@
       "message": "PTAL",
       "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "01bf01c8_39ee8261",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-08-13T17:46:52Z",
+      "side": 1,
+      "message": "I am a a bit anti-cache unless there is a good performance (or other) improvement. They increase complexity and contribute to bugs like this. I would prefer that ipmid did not cache the fru at all, and only have the cache (and write timeout) at the level that is actually doing the writing.\n\nIf we have to send the fru data over D-BUS and then have no guarantees that when we read back the value that it is not coherent, our caches are very broken. I don\u0027t like the idea of adding (or changing) the ipmid fru cache to paper over what seems to be a bug in the ipmi-fru-parser code. We should just fix the improper caching there.\n\nI think the correct behavior is that ipmid merely extracts the fru data and address/offset from the ipmi command and passes it on to the ipmi-fru-parser. That code should keep a coherent cache (so that even if it hasn\u0027t written through to the backing storage, it will still present the freshest data). It should keep the timer to minimize read/copy/erase/write cycles in the storage by grouping writes together. It can also be the arbiter of what writes are in and out of bounds and respond with an error when ipmid tries to write beyond the end of storage.",
+      "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
