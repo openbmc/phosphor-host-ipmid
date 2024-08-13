@@ -1680,7 +1680,7 @@ RspType<message::Payload> getSolConfParams(Context::ptr ctx,
                     "/xyz/openbmc_project/console/default",
                     "xyz.openbmc_project.Console.UART", "Baud", baudRate))
             {
-                return ipmi::responseUnspecifiedError();
+                return response(ccParamNotSupported);
             }
             switch (baudRate)
             {
