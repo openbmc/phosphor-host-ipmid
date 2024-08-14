@@ -16,6 +16,29 @@
       "message": "@Vernon\nCould you please reveiw this one?",
       "revId": "6da252b45705481dd8d63ff8d03a7eff79ac3328",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f5fe88c2_0d237fe5",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-08-14T16:57:46Z",
+      "side": 1,
+      "message": "If we want to strictly follow the spec, ipmiCCPasswordFailWrongSize should only be returned if the password size is incorrect during a test. For a set, responseReqDataLenInvalid should be returned.",
+      "range": {
+        "startLine": 293,
+        "startChar": 0,
+        "endLine": 300,
+        "endChar": 0
+      },
+      "revId": "6da252b45705481dd8d63ff8d03a7eff79ac3328",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
