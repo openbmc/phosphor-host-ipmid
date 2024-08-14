@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f72e3950_d8a17163",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1302,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-08-14T17:05:13Z",
+      "side": 1,
+      "message": "sp: via following",
+      "range": {
+        "startLine": 1302,
+        "startChar": 47,
+        "endLine": 1302,
+        "endChar": 56
+      },
+      "revId": "33641e2a2b7116fb54323176f398f6039c486b15",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bb42c264_7fc4ecaa",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1337,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-08-14T17:05:13Z",
+      "side": 1,
+      "message": "If the sysFWVersion string is empty, should this function return std::nullopt? What\u0027s the difference between a missing Version property and an empty one?",
+      "revId": "33641e2a2b7116fb54323176f398f6039c486b15",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
