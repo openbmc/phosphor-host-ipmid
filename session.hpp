@@ -117,8 +117,7 @@ class Session : public SessionIface
      */
     Session(sdbusplus::bus_t& bus, const char* path,
             SessionID inRemoteConsoleSessID, SessionID BMCSessionID,
-            char priv) :
-        SessionIface(bus, path)
+            char priv) : SessionIface(bus, path)
     {
         reqMaxPrivLevel = static_cast<session::Privilege>(priv);
         bmcSessionID = BMCSessionID;
@@ -248,8 +247,8 @@ class Session : public SessionIface
     {
         auto currentTime = std::chrono::steady_clock::now();
         auto elapsedMicros =
-            std::chrono::duration_cast<std::chrono::microseconds>(currentTime -
-                                                                  lastTime);
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                currentTime - lastTime);
 
         State state = static_cast<session::State>(this->state());
 

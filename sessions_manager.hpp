@@ -44,7 +44,7 @@ class Manager
 
     Manager() = delete;
     Manager(std::shared_ptr<boost::asio::io_context>& io, const Private&) :
-        io(io), timer(*io){};
+        io(io), timer(*io) {};
     ~Manager() = default;
     Manager(const Manager&) = delete;
     Manager& operator=(const Manager&) = delete;

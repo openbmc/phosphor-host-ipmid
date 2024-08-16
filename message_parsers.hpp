@@ -234,10 +234,9 @@ void addIntegrityData(std::vector<uint8_t>& packet,
  *
  * @return on successful completion, return the plain text payload
  */
-std::vector<uint8_t>
-    decryptPayload(const std::vector<uint8_t>& packet,
-                   const std::shared_ptr<Message>& message, size_t payloadLen,
-                   const std::shared_ptr<session::Session>& session);
+std::vector<uint8_t> decryptPayload(
+    const std::vector<uint8_t>& packet, const std::shared_ptr<Message>& message,
+    size_t payloadLen, const std::shared_ptr<session::Session>& session);
 
 /**
  * @brief Encrypt the plain text payload for the outgoing IPMI packet

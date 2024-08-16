@@ -18,8 +18,8 @@ AlgoSHA1::AlgoSHA1(const std::vector<uint8_t>& sik) :
     k1 = generateKn(sik, rmcp::const_1);
 }
 
-std::vector<uint8_t> AlgoSHA1::generateHMAC(const uint8_t* input,
-                                            const size_t len) const
+std::vector<uint8_t>
+    AlgoSHA1::generateHMAC(const uint8_t* input, const size_t len) const
 {
     std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -84,8 +84,8 @@ AlgoSHA256::AlgoSHA256(const std::vector<uint8_t>& sik) :
     k1 = generateKn(sik, rmcp::const_1);
 }
 
-std::vector<uint8_t> AlgoSHA256::generateHMAC(const uint8_t* input,
-                                              const size_t len) const
+std::vector<uint8_t>
+    AlgoSHA256::generateHMAC(const uint8_t* input, const size_t len) const
 {
     std::vector<uint8_t> output(SHA256_DIGEST_LENGTH);
     unsigned int mdLen = 0;

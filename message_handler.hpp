@@ -21,8 +21,7 @@ class Handler : public std::enable_shared_from_this<Handler>
     Handler(std::shared_ptr<udpsocket::Channel> channel,
             std::shared_ptr<boost::asio::io_context> io,
             uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
-        sessionID(sessionID),
-        channel(channel), io(io)
+        sessionID(sessionID), channel(channel), io(io)
     {
         if (sessionID != message::Message::MESSAGE_INVALID_SESSION_ID)
         {
@@ -35,8 +34,7 @@ class Handler : public std::enable_shared_from_this<Handler>
      */
     Handler(std::shared_ptr<udpsocket::Channel> channel,
             uint32_t sessionID = message::Message::MESSAGE_INVALID_SESSION_ID) :
-        sessionID(sessionID),
-        channel(channel), io(nullptr)
+        sessionID(sessionID), channel(channel), io(nullptr)
     {
         if (sessionID != message::Message::MESSAGE_INVALID_SESSION_ID)
         {

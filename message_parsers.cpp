@@ -208,8 +208,8 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
         throw std::runtime_error("Invalid data length");
     }
 
-    bool integrityMismatch = session->isIntegrityAlgoEnabled() &&
-                             !message->isPacketAuthenticated;
+    bool integrityMismatch =
+        session->isIntegrityAlgoEnabled() && !message->isPacketAuthenticated;
     bool encryptMismatch = session->isCryptAlgoEnabled() &&
                            !message->isPacketEncrypted;
 
@@ -232,14 +232,14 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     if (message->isPacketEncrypted)
     {
         // Assign the decrypted payload to the IPMI Message
-        message->payload = internal::decryptPayload(inPacket, message,
-                                                    payloadLen, session);
+        message->payload =
+            internal::decryptPayload(inPacket, message, payloadLen, session);
     }
     else
     {
-        message->payload.assign(inPacket.begin() + sizeof(SessionHeader_t),
-                                inPacket.begin() + sizeof(SessionHeader_t) +
-                                    payloadLen);
+        message->payload.assign(
+            inPacket.begin() + sizeof(SessionHeader_t),
+            inPacket.begin() + sizeof(SessionHeader_t) + payloadLen);
     }
 
     return message;
@@ -337,8 +337,8 @@ bool verifyPacketIntegrity(const std::vector<uint8_t>& packet,
         return false;
     }
 
-    auto trailer = reinterpret_cast<const SessionTrailer_t*>(packet.data() +
-                                                             sessTrailerPos);
+    auto trailer = reinterpret_cast<const SessionTrailer_t*>(
+        packet.data() + sessTrailerPos);
 
     // Check trailer->padLength against paddingLen, both should match up,
     // return false if the lengths don't match
@@ -394,11 +394,10 @@ void addIntegrityData(std::vector<uint8_t>& packet,
     packet.insert(packet.end(), integrityData.begin(), integrityData.end());
 }
 
-std::vector<uint8_t>
-    decryptPayload(const std::vector<uint8_t>& packet,
-                   const std::shared_ptr<Message>& /* message */,
-                   size_t payloadLen,
-                   const std::shared_ptr<session::Session>& session)
+std::vector<uint8_t> decryptPayload(
+    const std::vector<uint8_t>& packet,
+    const std::shared_ptr<Message>& /* message */, size_t payloadLen,
+    const std::shared_ptr<session::Session>& session)
 {
     return session->getCryptAlgo()->decryptPayload(
         packet, sizeof(SessionHeader_t), payloadLen);

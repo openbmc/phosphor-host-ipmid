@@ -174,10 +174,9 @@ class Context : public std::enable_shared_from_this<Context>
      *  @param[in] instance - SOL payload instance.
      *  @param[in] sessionID - BMC session ID.
      */
-    static std::shared_ptr<Context>
-        makeContext(std::shared_ptr<boost::asio::io_context> io,
-                    uint8_t maxRetryCount, uint8_t sendThreshold,
-                    uint8_t instance, session::SessionID sessionID);
+    static std::shared_ptr<Context> makeContext(
+        std::shared_ptr<boost::asio::io_context> io, uint8_t maxRetryCount,
+        uint8_t sendThreshold, uint8_t instance, session::SessionID sessionID);
 
     /** @brief Context Constructor.
      *

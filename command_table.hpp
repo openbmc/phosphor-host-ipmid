@@ -171,8 +171,7 @@ class NetIpmidEntry final : public Entry
   public:
     NetIpmidEntry(CommandID command, CommandFunctor functor,
                   session::Privilege privilege, bool sessionless) :
-        Entry(command, privilege),
-        functor(functor), sessionless(sessionless)
+        Entry(command, privilege), functor(functor), sessionless(sessionless)
     {}
 
     /**

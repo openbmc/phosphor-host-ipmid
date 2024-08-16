@@ -61,10 +61,9 @@ class Interface
      *
      * @return decrypted payload if the operation is successful
      */
-    virtual std::vector<uint8_t>
-        decryptPayload(const std::vector<uint8_t>& packet,
-                       const size_t sessHeaderLen,
-                       const size_t payloadLen) const = 0;
+    virtual std::vector<uint8_t> decryptPayload(
+        const std::vector<uint8_t>& packet, const size_t sessHeaderLen,
+        const size_t payloadLen) const = 0;
 
     /**
      * @brief Encrypt the outgoing payload

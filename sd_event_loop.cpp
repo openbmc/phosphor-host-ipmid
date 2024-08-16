@@ -37,14 +37,15 @@ void EventLoop::handleRmcpPacket()
 
 void EventLoop::startRmcpReceive()
 {
-    udpSocket->async_wait(boost::asio::socket_base::wait_read,
-                          [this](const boost::system::error_code& ec) {
-        if (!ec)
-        {
-            boost::asio::post(*io, [this]() { startRmcpReceive(); });
-            handleRmcpPacket();
-        }
-    });
+    udpSocket->async_wait(
+        boost::asio::socket_base::wait_read,
+        [this](const boost::system::error_code& ec) {
+            if (!ec)
+            {
+                boost::asio::post(*io, [this]() { startRmcpReceive(); });
+                handleRmcpPacket();
+            }
+        });
 }
 
 int EventLoop::getVLANID(const std::string channel)
@@ -204,8 +205,8 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
     {
         // SO_BINDTODEVICE
         if ((::setsockopt(udpSocket->native_handle(), SOL_SOCKET,
-                          SO_BINDTODEVICE, iface.c_str(),
-                          iface.size() + 1) == -1))
+                          SO_BINDTODEVICE, iface.c_str(), iface.size() + 1) ==
+             -1))
         {
             lg2::error("Failed to bind to requested interface: {ERROR}",
                        "ERROR", strerror(errno));

@@ -17,18 +17,16 @@ using namespace phosphor::logging;
 Context::Context(std::shared_ptr<boost::asio::io_context> io,
                  uint8_t maxRetryCount, uint8_t sendThreshold, uint8_t instance,
                  session::SessionID sessionID) :
-    accumulateTimer(*io),
-    retryTimer(*io), maxRetryCount(maxRetryCount), retryCounter(maxRetryCount),
-    sendThreshold(sendThreshold), payloadInstance(instance),
-    sessionID(sessionID)
+    accumulateTimer(*io), retryTimer(*io), maxRetryCount(maxRetryCount),
+    retryCounter(maxRetryCount), sendThreshold(sendThreshold),
+    payloadInstance(instance), sessionID(sessionID)
 {
     session = session::Manager::get().getSession(sessionID);
 }
 
-std::shared_ptr<Context>
-    Context::makeContext(std::shared_ptr<boost::asio::io_context> io,
-                         uint8_t maxRetryCount, uint8_t sendThreshold,
-                         uint8_t instance, session::SessionID sessionID)
+std::shared_ptr<Context> Context::makeContext(
+    std::shared_ptr<boost::asio::io_context> io, uint8_t maxRetryCount,
+    uint8_t sendThreshold, uint8_t instance, session::SessionID sessionID)
 {
     auto ctx = std::make_shared<Context>(io, maxRetryCount, sendThreshold,
                                          instance, sessionID);
@@ -66,12 +64,12 @@ void Context::enableAccumulateTimer(bool enable)
         std::weak_ptr<Context> weakRef = weak_from_this();
         accumulateTimer.async_wait(
             [weakRef](const boost::system::error_code& ec) {
-            std::shared_ptr<Context> self = weakRef.lock();
-            if (!ec && self)
-            {
-                self->charAccTimerHandler();
-            }
-        });
+                std::shared_ptr<Context> self = weakRef.lock();
+                if (!ec && self)
+                {
+                    self->charAccTimerHandler();
+                }
+            });
     }
     else
     {

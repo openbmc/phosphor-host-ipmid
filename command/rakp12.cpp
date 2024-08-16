@@ -29,9 +29,9 @@ void logInvalidLoginRedfishEvent(const std::string& journalMsg,
                                  const std::optional<std::string>& messageArgs)
 {
     static constexpr std::string_view openBMCMessageRegistryVersion = "0.1.";
-    std::string messageID = "OpenBMC." +
-                            std::string(openBMCMessageRegistryVersion) +
-                            "InvalidLoginAttempted";
+    std::string messageID =
+        "OpenBMC." + std::string(openBMCMessageRegistryVersion) +
+        "InvalidLoginAttempted";
     lg2::error(
         "message: {MSG}, id: {REDFISH_MESSAGE_ID}, args: {REDFISH_MESSAGE_ARGS}",
         "MSG", journalMsg, "REDFISH_MESSAGE_ID", messageID,
@@ -75,8 +75,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
         return outPayload;
     }
 
-    auto rakp1Size = sizeof(RAKP1request) -
-                     (userNameMaxLen - request->user_name_len);
+    auto rakp1Size =
+        sizeof(RAKP1request) - (userNameMaxLen - request->user_name_len);
 
     std::string message = "Invalid login attempted via RCMPP interface ";
     // Validate user name length in the message
@@ -154,8 +154,8 @@ std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
     // be established with USER privilege as well as all other sessions are
     // initially set to USER privilege, regardless of the requested maximum
     // privilege.
-    if (!(static_cast<session::Privilege>(request->req_max_privilege_level &
-                                          session::reqMaxPrivMask) >
+    if (!(static_cast<session::Privilege>(
+              request->req_max_privilege_level & session::reqMaxPrivMask) >
           session::Privilege::CALLBACK))
     {
         response->rmcpStatusCode =

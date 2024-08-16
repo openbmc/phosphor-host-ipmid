@@ -205,9 +205,9 @@ struct Message
         {
             outMessage->payloadType = PayloadType::IPMI;
 
-            outMessage->payload.resize(sizeof(LAN::header::Response) +
-                                       output.size() +
-                                       sizeof(LAN::trailer::Response));
+            outMessage->payload.resize(
+                sizeof(LAN::header::Response) + output.size() +
+                sizeof(LAN::trailer::Response));
 
             auto reqHeader =
                 reinterpret_cast<LAN::header::Request*>(payload.data());

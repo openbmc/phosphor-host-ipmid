@@ -384,8 +384,8 @@ TEST(CryptAlgo, AES_CBC_128_EncryptPayloadValidate)
     }
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
-    std::vector<uint8_t> output(cipher.size() +
-                                cipher::crypt::AlgoAES128::AESCBC128BlockSize);
+    std::vector<uint8_t> output(
+        cipher.size() + cipher::crypt::AlgoAES128::AESCBC128BlockSize);
     int outputLen = 0;
 
     if (!EVP_DecryptUpdate(
@@ -429,8 +429,8 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
     constexpr rmcp::Const_n const1 = {0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
                                       0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02,
                                       0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
-    std::vector<uint8_t> output(payload.size() +
-                                cipher::crypt::AlgoAES128::AESCBC128BlockSize);
+    std::vector<uint8_t> output(
+        payload.size() + cipher::crypt::AlgoAES128::AESCBC128BlockSize);
 
     if (!RAND_bytes(output.data(),
                     cipher::crypt::AlgoAES128::AESCBC128ConfHeader))

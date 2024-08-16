@@ -74,11 +74,10 @@ void Manager::managerInit(const std::string& channel)
     scheduleSessionCleaner(std::chrono::microseconds(3 * 1000 * 1000));
 }
 
-std::shared_ptr<Session>
-    Manager::startSession(SessionID remoteConsoleSessID, Privilege priv,
-                          cipher::rakp_auth::Algorithms authAlgo,
-                          cipher::integrity::Algorithms intAlgo,
-                          cipher::crypt::Algorithms cryptAlgo)
+std::shared_ptr<Session> Manager::startSession(
+    SessionID remoteConsoleSessID, Privilege priv,
+    cipher::rakp_auth::Algorithms authAlgo,
+    cipher::integrity::Algorithms intAlgo, cipher::crypt::Algorithms cryptAlgo)
 {
     std::shared_ptr<Session> session = nullptr;
     SessionID bmcSessionID = 0;
@@ -189,8 +188,8 @@ bool Manager::stopSession(SessionID bmcSessionID)
     }
 }
 
-std::shared_ptr<Session> Manager::getSession(SessionID sessionID,
-                                             RetrieveOption option)
+std::shared_ptr<Session>
+    Manager::getSession(SessionID sessionID, RetrieveOption option)
 {
     switch (option)
     {
@@ -210,8 +209,8 @@ std::shared_ptr<Session> Manager::getSession(SessionID sessionID,
                 [sessionID](
                     const std::pair<const uint32_t, std::shared_ptr<Session>>&
                         in) -> bool {
-                return sessionID == in.second->getRCSessionID();
-            });
+                    return sessionID == in.second->getRCSessionID();
+                });
 
             if (iter != sessionsMap.end())
             {
@@ -232,8 +231,8 @@ void Manager::cleanStaleEntries()
     // active idle time in seconds = 60 / overflow^3
     constexpr int baseIdleMicros = 60 * 1000 * 1000;
     // no +1 for the zero session here because this is just active sessions
-    int sessionDivisor = getActiveSessionCount() -
-                         session::maxSessionCountPerChannel;
+    int sessionDivisor =
+        getActiveSessionCount() - session::maxSessionCountPerChannel;
     sessionDivisor = std::max(0, sessionDivisor) + 1;
     sessionDivisor = sessionDivisor * sessionDivisor * sessionDivisor;
     int activeMicros = baseIdleMicros / sessionDivisor;
@@ -242,8 +241,8 @@ void Manager::cleanStaleEntries()
     // setup idle time in seconds = max(3, 60 / overflow^3)
 
     // +1 for the zero session here because size() counts that too
-    int setupDivisor = sessionsMap.size() -
-                       (session::maxSessionCountPerChannel + 1);
+    int setupDivisor =
+        sessionsMap.size() - (session::maxSessionCountPerChannel + 1);
     setupDivisor = std::max(0, setupDivisor) + 1;
     setupDivisor = setupDivisor * setupDivisor * setupDivisor;
     constexpr int maxSetupMicros = 3 * 1000 * 1000;
@@ -327,9 +326,9 @@ uint8_t Manager::getActiveSessionCount() const
         sessionsMap.begin(), sessionsMap.end(),
         [](const std::pair<const uint32_t, std::shared_ptr<Session>>& in)
             -> bool {
-        return in.second->state() ==
-               static_cast<uint8_t>(session::State::active);
-    }));
+            return in.second->state() ==
+                   static_cast<uint8_t>(session::State::active);
+        }));
 }
 
 void Manager::scheduleSessionCleaner(const std::chrono::microseconds& when)

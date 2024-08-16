@@ -78,8 +78,8 @@ const Guid& getSystemGUID()
     ipmi::Value propValue;
     try
     {
-        const auto& [objPath, service] = ipmi::getDbusObject(bus, propInterface,
-                                                             subtreePath);
+        const auto& [objPath, service] =
+            ipmi::getDbusObject(bus, propInterface, subtreePath);
         // Read UUID property value from bmcObject
         // UUID is in RFC4122 format Ex: 61a39523-78f2-11e5-9862-e6402cfc3223
         propValue = ipmi::getDbusProperty(bus, service, objPath, propInterface,
@@ -120,28 +120,28 @@ void registerGUIDChangeCallback()
             matchPtr = std::make_unique<sdbusplus::bus::match_t>(
                 bus, propertiesChangedNamespace(subtreePath, propInterface),
                 [](sdbusplus::message_t& m) {
-                try
-                {
-                    std::string iface{};
-                    std::map<std::string, ipmi::Value> pdict{};
-                    m.read(iface, pdict);
-                    if (iface != propInterface)
+                    try
                     {
-                        return;
+                        std::string iface{};
+                        std::map<std::string, ipmi::Value> pdict{};
+                        m.read(iface, pdict);
+                        if (iface != propInterface)
+                        {
+                            return;
+                        }
+                        auto guidStr = std::get<std::string>(pdict.at("UUID"));
+                        Guid tmpGuid{};
+                        rfcToGuid(guidStr, tmpGuid);
+                        guid = tmpGuid;
                     }
-                    auto guidStr = std::get<std::string>(pdict.at("UUID"));
-                    Guid tmpGuid{};
-                    rfcToGuid(guidStr, tmpGuid);
-                    guid = tmpGuid;
-                }
-                catch (const std::exception& e)
-                {
-                    // signal contained invalid guid; ignore it
-                    lg2::error(
-                        "Failed to parse propertiesChanged signal: {ERROR}",
-                        "ERROR", e);
-                }
-            });
+                    catch (const std::exception& e)
+                    {
+                        // signal contained invalid guid; ignore it
+                        lg2::error(
+                            "Failed to parse propertiesChanged signal: {ERROR}",
+                            "ERROR", e);
+                    }
+                });
         }
         catch (const std::exception& e)
         {

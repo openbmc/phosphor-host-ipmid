@@ -18,10 +18,9 @@ namespace crypt
 constexpr std::array<uint8_t, AlgoAES128::AESCBC128BlockSize - 1>
     AlgoAES128::confPadBytes;
 
-std::vector<uint8_t>
-    AlgoAES128::decryptPayload(const std::vector<uint8_t>& packet,
-                               const size_t sessHeaderLen,
-                               const size_t payloadLen) const
+std::vector<uint8_t> AlgoAES128::decryptPayload(
+    const std::vector<uint8_t>& packet, const size_t sessHeaderLen,
+    const size_t payloadLen) const
 {
     // verify packet size minimal: sessHeaderLen + payloadLen
     // and payloadLen is more than AESCBC128ConfHeader
@@ -96,17 +95,16 @@ std::vector<uint8_t>
     return encryptData(payload.data(), payload.size());
 }
 
-std::vector<uint8_t> AlgoAES128::decryptData(const uint8_t* iv,
-                                             const uint8_t* input,
-                                             const int inputLen) const
+std::vector<uint8_t> AlgoAES128::decryptData(
+    const uint8_t* iv, const uint8_t* input, const int inputLen) const
 {
     // Initializes Cipher context
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
     auto cleanupFunc = [](EVP_CIPHER_CTX* ctx) { EVP_CIPHER_CTX_free(ctx); };
 
-    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)> ctxPtr(ctx,
-                                                                  cleanupFunc);
+    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)> ctxPtr(
+        ctx, cleanupFunc);
 
     /*
      * EVP_DecryptInit_ex sets up cipher context ctx for encryption with type
@@ -150,8 +148,8 @@ std::vector<uint8_t> AlgoAES128::decryptData(const uint8_t* iv,
     return output;
 }
 
-std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
-                                             const int inputLen) const
+std::vector<uint8_t>
+    AlgoAES128::encryptData(const uint8_t* input, const int inputLen) const
 {
     std::vector<uint8_t> output(inputLen + AESCBC128BlockSize);
 
@@ -166,8 +164,8 @@ std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
 
     auto cleanupFunc = [](EVP_CIPHER_CTX* ctx) { EVP_CIPHER_CTX_free(ctx); };
 
-    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)> ctxPtr(ctx,
-                                                                  cleanupFunc);
+    std::unique_ptr<EVP_CIPHER_CTX, decltype(cleanupFunc)> ctxPtr(
+        ctx, cleanupFunc);
 
     /*
      * EVP_EncryptInit_ex sets up cipher context ctx for encryption with type
