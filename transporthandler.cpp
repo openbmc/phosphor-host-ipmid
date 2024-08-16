@@ -68,7 +68,7 @@ bool ifnameInPath(std::string_view ifname, std::string_view path)
     constexpr auto rs = PATH_ROOT.size() + 1; // ROOT + separator
     const auto is = rs + ifname.size();       // ROOT + sep + ifname
     return path.size() > rs && path.substr(rs).starts_with(ifname) &&
-           (path.size() == is || path[is] == '/');
+           (path.size() == is || path[is] == '/' || path[is] == '_');
 }
 
 std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
@@ -209,9 +209,12 @@ void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
     }
     catch (const sdbusplus::exception_t& e)
     {
+	// handle Delete Interface DBus errors
         if (strcmp(e.name(),
                    "xyz.openbmc_project.Common.Error.InternalFailure") != 0 &&
-            strcmp(e.name(), "org.freedesktop.DBus.Error.UnknownObject") != 0)
+            strcmp(e.name(), "org.freedesktop.DBus.Error.UnknownObject") != 0 &&
+            strcmp(e.name(), "xyz.openbmc_project.Common.Error.NotAllowed") !=
+                0)
         {
             // We want to rethrow real errors
             throw;
@@ -567,11 +570,17 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
     auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
     auto neighbor6 = findGatewayNeighbor<AF_INET6>(bus, params, neighbors);
+    // Make copy of params to retain the previous configs
+    ChannelParams parentIntParams = params;
 
     deconfigureChannel(bus, params);
     createVLAN(bus, params, vlan);
 
     // Re-establish the saved settings
+    setEthProp(bus, parentIntParams, "DHCP4", dhcp4);
+    setEthProp(bus, parentIntParams, "DHCP6", dhcp6);
+    setEthProp(bus, parentIntParams, "IPv6AcceptRA", ra);
+
     setEthProp(bus, params, "DHCP4", dhcp4);
     setEthProp(bus, params, "DHCP6", dhcp6);
     setEthProp(bus, params, "IPv6AcceptRA", ra);
