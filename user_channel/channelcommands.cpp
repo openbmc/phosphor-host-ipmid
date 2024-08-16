@@ -40,11 +40,10 @@ namespace ipmi
  *
  *  @ returns IPMI completion code
  **/
-RspType<> ipmiSetChannelAccess(Context::ptr ctx, uint4_t channel,
-                               uint4_t reserved1, uint3_t accessMode,
-                               bool usrAuth, bool msgAuth, bool alertDisabled,
-                               uint2_t chanAccess, uint4_t channelPrivLimit,
-                               uint2_t reserved2, uint2_t channelPrivMode)
+RspType<> ipmiSetChannelAccess(
+    Context::ptr ctx, uint4_t channel, uint4_t reserved1, uint3_t accessMode,
+    bool usrAuth, bool msgAuth, bool alertDisabled, uint2_t chanAccess,
+    uint4_t channelPrivLimit, uint2_t reserved2, uint2_t channelPrivMode)
 {
     if (reserved1 || reserved2 ||
         !isValidPrivLimit(static_cast<uint8_t>(channelPrivLimit)))
@@ -256,8 +255,8 @@ RspType<uint4_t,  // chNum
         return responseInvalidFieldRequest();
     }
 
-    uint8_t chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
-                                             ctx->channel);
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
     if (!isValidChannel(chNum))
     {
         lg2::debug("Get channel Info - No support on channel: {CHANNEL}",
@@ -325,8 +324,8 @@ RspType<uint16_t, // stdPayloadType
     ipmiGetChannelPayloadSupport(Context::ptr ctx, uint4_t channel,
                                  uint4_t reserved)
 {
-    uint8_t chNum = convertCurrentChannelNum(static_cast<uint8_t>(channel),
-                                             ctx->channel);
+    uint8_t chNum =
+        convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
 
     if (!doesDeviceExist(chNum) || !isValidChannel(chNum) || reserved)
     {
@@ -369,8 +368,8 @@ RspType<uint8_t> // formatVersion
     ipmiGetChannelPayloadVersion(Context::ptr ctx, uint4_t chNum,
                                  uint4_t reserved, uint8_t payloadTypeNum)
 {
-    uint8_t channel = convertCurrentChannelNum(static_cast<uint8_t>(chNum),
-                                               ctx->channel);
+    uint8_t channel =
+        convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
     constexpr uint8_t payloadTypeNotSupported = 0x80;
 
     if (reserved || !isValidChannel(channel))

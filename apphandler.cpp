@@ -114,8 +114,8 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
     ipmi::ObjectTree objectTree;
     try
     {
-        objectTree = ipmi::getAllDbusObjects(*ctx->bus, softwareRoot,
-                                             redundancyIntf);
+        objectTree =
+            ipmi::getAllDbusObjects(*ctx->bus, softwareRoot, redundancyIntf);
     }
     catch (const sdbusplus::exception_t& e)
     {
@@ -128,10 +128,10 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
     auto objectFound = false;
     for (auto& softObject : objectTree)
     {
-        auto service = ipmi::getService(*ctx->bus, redundancyIntf,
-                                        softObject.first);
-        auto objValueTree = ipmi::getManagedObjects(*ctx->bus, service,
-                                                    softwareRoot);
+        auto service =
+            ipmi::getService(*ctx->bus, redundancyIntf, softObject.first);
+        auto objValueTree =
+            ipmi::getManagedObjects(*ctx->bus, service, softwareRoot);
 
         auto minPriority = 0xFF;
         for (const auto& objIter : objValueTree)
@@ -184,11 +184,11 @@ bool getCurrentBmcState()
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     // Get the Inventory object implementing the BMC interface
-    ipmi::DbusObjectInfo bmcObject = ipmi::getDbusObject(bus,
-                                                         bmc_state_interface);
-    auto variant = ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
-                                         bmc_state_interface,
-                                         bmc_state_property);
+    ipmi::DbusObjectInfo bmcObject =
+        ipmi::getDbusObject(bus, bmc_state_interface);
+    auto variant =
+        ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
+                              bmc_state_interface, bmc_state_property);
 
     return std::holds_alternative<std::string>(variant) &&
            BMC::convertBMCStateFromString(std::get<std::string>(variant)) ==
@@ -337,11 +337,11 @@ ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
         }
         else
         {
-            auto found = std::find_if(acpi_state::dbusToIPMI.begin(),
-                                      acpi_state::dbusToIPMI.end(),
-                                      [&s](const auto& iter) {
-                return (static_cast<uint8_t>(iter.second) == s);
-            });
+            auto found = std::find_if(
+                acpi_state::dbusToIPMI.begin(), acpi_state::dbusToIPMI.end(),
+                [&s](const auto& iter) {
+                    return (static_cast<uint8_t>(iter.second) == s);
+                });
 
             value = found->first;
 
@@ -385,11 +385,11 @@ ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
         }
         else
         {
-            auto found = std::find_if(acpi_state::dbusToIPMI.begin(),
-                                      acpi_state::dbusToIPMI.end(),
-                                      [&s](const auto& iter) {
-                return (static_cast<uint8_t>(iter.second) == s);
-            });
+            auto found = std::find_if(
+                acpi_state::dbusToIPMI.begin(), acpi_state::dbusToIPMI.end(),
+                [&s](const auto& iter) {
+                    return (static_cast<uint8_t>(iter.second) == s);
+                });
 
             value = found->first;
 
@@ -852,8 +852,8 @@ auto ipmiAppGetSystemGuid(ipmi::Context::ptr& ctx)
 
     // Get the Inventory object implementing BMC interface
     ipmi::DbusObjectInfo objectInfo{};
-    boost::system::error_code ec = ipmi::getDbusObject(ctx, uuidInterface,
-                                                       objectInfo);
+    boost::system::error_code ec =
+        ipmi::getDbusObject(ctx, uuidInterface, objectInfo);
     if (ec.value())
     {
         lg2::error("Failed to locate System UUID object, "
@@ -1034,11 +1034,10 @@ uint8_t getTotalSessionCount()
  * @return success completion code if request data is valid
  * else return the correcponding error completion code.
  **/
-uint8_t getSessionInfoRequestData(const ipmi::Context::ptr ctx,
-                                  const uint8_t sessionIndex,
-                                  ipmi::message::Payload& payload,
-                                  uint32_t& reqSessionId,
-                                  uint8_t& reqSessionHandle)
+uint8_t getSessionInfoRequestData(
+    const ipmi::Context::ptr ctx, const uint8_t sessionIndex,
+    ipmi::message::Payload& payload, uint32_t& reqSessionId,
+    uint8_t& reqSessionHandle)
 {
     if ((sessionIndex > session::maxSessionCountPerChannel) &&
         (sessionIndex < session::searchSessionByHandle))
@@ -1178,23 +1177,23 @@ ipmi::Cc getSessionDetails(ipmi::Context::ptr ctx, const std::string& service,
         sessionProps, "State", static_cast<uint8_t>(session::State::inactive));
     if (sessionState == static_cast<uint8_t>(session::State::active))
     {
-        sessionHandle = ipmi::mappedVariant<uint8_t>(sessionProps,
-                                                     "SessionHandle", 0);
-        std::get<0>(details) = ipmi::mappedVariant<uint8_t>(sessionProps,
-                                                            "UserID", 0xff);
+        sessionHandle =
+            ipmi::mappedVariant<uint8_t>(sessionProps, "SessionHandle", 0);
+        std::get<0>(details) =
+            ipmi::mappedVariant<uint8_t>(sessionProps, "UserID", 0xff);
         // std::get<1>(details) = 0; // (default constructed to 0)
         std::get<2>(details) =
             ipmi::mappedVariant<uint8_t>(sessionProps, "CurrentPrivilege", 0);
         // std::get<3>(details) = 0; // (default constructed to 0)
-        std::get<4>(details) = ipmi::mappedVariant<uint8_t>(sessionProps,
-                                                            "ChannelNum", 0xff);
+        std::get<4>(details) =
+            ipmi::mappedVariant<uint8_t>(sessionProps, "ChannelNum", 0xff);
         constexpr uint4_t rmcpPlusProtocol = 1;
         std::get<5>(details) = rmcpPlusProtocol;
-        std::get<6>(details) = ipmi::mappedVariant<uint32_t>(sessionProps,
-                                                             "RemoteIPAddr", 0);
+        std::get<6>(details) =
+            ipmi::mappedVariant<uint32_t>(sessionProps, "RemoteIPAddr", 0);
         // std::get<7>(details) = {{0}}; // default constructed to all 0
-        std::get<8>(details) = ipmi::mappedVariant<uint16_t>(sessionProps,
-                                                             "RemotePort", 0);
+        std::get<8>(details) =
+            ipmi::mappedVariant<uint16_t>(sessionProps, "RemotePort", 0);
     }
 
     return ipmi::ccSuccess;
@@ -1257,8 +1256,8 @@ ipmi::RspType<uint8_t, // session handle,
 
         std::string service = itr->first;
         uint8_t sessionState = 0;
-        completionCode = getSessionState(ctx, service, objectPath,
-                                         sessionState);
+        completionCode =
+            getSessionState(ctx, service, objectPath, sessionState);
         if (completionCode)
         {
             return ipmi::response(completionCode);
@@ -1696,11 +1695,10 @@ static bool populateI2CControllerWRAllowlist()
  *  @returns IPMI completion code plus response data
  *   - readData - i2c response data
  */
-ipmi::RspType<std::vector<uint8_t>>
-    ipmiControllerWriteRead([[maybe_unused]] bool isPrivateBus, uint3_t busId,
-                            [[maybe_unused]] uint4_t channelNum, bool reserved,
-                            uint7_t targetAddr, uint8_t readCount,
-                            std::vector<uint8_t> writeData)
+ipmi::RspType<std::vector<uint8_t>> ipmiControllerWriteRead(
+    [[maybe_unused]] bool isPrivateBus, uint3_t busId,
+    [[maybe_unused]] uint4_t channelNum, bool reserved, uint7_t targetAddr,
+    uint8_t readCount, std::vector<uint8_t> writeData)
 {
     if (reserved)
     {
@@ -1723,8 +1721,8 @@ ipmi::RspType<std::vector<uint8_t>>
     }
 #endif // ENABLE_I2C_WHITELIST_CHECK
     std::vector<uint8_t> readBuf(readCount);
-    std::string i2cBus = "/dev/i2c-" +
-                         std::to_string(static_cast<uint8_t>(busId));
+    std::string i2cBus =
+        "/dev/i2c-" + std::to_string(static_cast<uint8_t>(busId));
 
     ipmi::Cc ret = ipmi::i2cWriteRead(i2cBus, static_cast<uint8_t>(targetAddr),
                                       writeData, readBuf);

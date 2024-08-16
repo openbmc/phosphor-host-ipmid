@@ -236,8 +236,8 @@ void replaceCacheFru(
     recalculateHashes();
 }
 
-std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
-                                                 uint8_t devId)
+std::pair<ipmi::Cc, std::vector<uint8_t>>
+    getFru(ipmi::Context::ptr ctx, uint8_t devId)
 {
     if (lastDevId == devId && devId != 0xFF)
     {
@@ -297,55 +297,57 @@ void startMatch(void)
     fruMatches.reserve(2);
 
     auto bus = getSdBus();
-    fruMatches.emplace_back(*bus,
-                            "type='signal',arg0path='/xyz/openbmc_project/"
-                            "FruDevice/',member='InterfacesAdded'",
-                            [](sdbusplus::message_t& message) {
-        sdbusplus::message::object_path path;
-        ObjectType object;
-        try
-        {
-            message.read(path, object);
-        }
-        catch (const sdbusplus::exception_t&)
-        {
-            return;
-        }
-        auto findType = object.find("xyz.openbmc_project.FruDevice");
-        if (findType == object.end())
-        {
-            return;
-        }
-        writeFruIfRunning();
-        frus[path] = object;
-        recalculateHashes();
-        lastDevId = 0xFF;
-    });
+    fruMatches.emplace_back(
+        *bus,
+        "type='signal',arg0path='/xyz/openbmc_project/"
+        "FruDevice/',member='InterfacesAdded'",
+        [](sdbusplus::message_t& message) {
+            sdbusplus::message::object_path path;
+            ObjectType object;
+            try
+            {
+                message.read(path, object);
+            }
+            catch (const sdbusplus::exception_t&)
+            {
+                return;
+            }
+            auto findType = object.find("xyz.openbmc_project.FruDevice");
+            if (findType == object.end())
+            {
+                return;
+            }
+            writeFruIfRunning();
+            frus[path] = object;
+            recalculateHashes();
+            lastDevId = 0xFF;
+        });
 
-    fruMatches.emplace_back(*bus,
-                            "type='signal',arg0path='/xyz/openbmc_project/"
-                            "FruDevice/',member='InterfacesRemoved'",
-                            [](sdbusplus::message_t& message) {
-        sdbusplus::message::object_path path;
-        std::set<std::string> interfaces;
-        try
-        {
-            message.read(path, interfaces);
-        }
-        catch (const sdbusplus::exception_t&)
-        {
-            return;
-        }
-        auto findType = interfaces.find("xyz.openbmc_project.FruDevice");
-        if (findType == interfaces.end())
-        {
-            return;
-        }
-        writeFruIfRunning();
-        frus.erase(path);
-        recalculateHashes();
-        lastDevId = 0xFF;
-    });
+    fruMatches.emplace_back(
+        *bus,
+        "type='signal',arg0path='/xyz/openbmc_project/"
+        "FruDevice/',member='InterfacesRemoved'",
+        [](sdbusplus::message_t& message) {
+            sdbusplus::message::object_path path;
+            std::set<std::string> interfaces;
+            try
+            {
+                message.read(path, interfaces);
+            }
+            catch (const sdbusplus::exception_t&)
+            {
+                return;
+            }
+            auto findType = interfaces.find("xyz.openbmc_project.FruDevice");
+            if (findType == interfaces.end())
+            {
+                return;
+            }
+            writeFruIfRunning();
+            frus.erase(path);
+            recalculateHashes();
+            lastDevId = 0xFF;
+        });
 
     // call once to populate
     boost::asio::spawn(*getIoContext(), [](boost::asio::yield_context yield) {
@@ -410,10 +412,9 @@ ipmi::RspType<uint8_t,             // Count
  *  @returns ipmi completion code plus response data
  *   - countWritten  - Count written
  */
-ipmi::RspType<uint8_t>
-    ipmiStorageWriteFruData(ipmi::Context::ptr ctx, uint8_t fruDeviceId,
-                            uint16_t fruInventoryOffset,
-                            std::vector<uint8_t>& dataToWrite)
+ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
+    ipmi::Context::ptr ctx, uint8_t fruDeviceId, uint16_t fruInventoryOffset,
+    std::vector<uint8_t>& dataToWrite)
 {
     if (fruDeviceId == 0xFF)
     {
@@ -558,31 +559,33 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     uint8_t& address = device->second.second;
 
     boost::container::flat_map<std::string, Value>* fruData = nullptr;
-    auto fru = std::find_if(frus.begin(), frus.end(),
-                            [bus, address, &fruData](ManagedEntry& entry) {
-        auto findFruDevice = entry.second.find("xyz.openbmc_project.FruDevice");
-        if (findFruDevice == entry.second.end())
-        {
-            return false;
-        }
-        fruData = &(findFruDevice->second);
-        auto findBus = findFruDevice->second.find("BUS");
-        auto findAddress = findFruDevice->second.find("ADDRESS");
-        if (findBus == findFruDevice->second.end() ||
-            findAddress == findFruDevice->second.end())
-        {
-            return false;
-        }
-        if (std::get<uint32_t>(findBus->second) != bus)
-        {
-            return false;
-        }
-        if (std::get<uint32_t>(findAddress->second) != address)
-        {
-            return false;
-        }
-        return true;
-    });
+    auto fru = std::find_if(
+        frus.begin(), frus.end(),
+        [bus, address, &fruData](ManagedEntry& entry) {
+            auto findFruDevice =
+                entry.second.find("xyz.openbmc_project.FruDevice");
+            if (findFruDevice == entry.second.end())
+            {
+                return false;
+            }
+            fruData = &(findFruDevice->second);
+            auto findBus = findFruDevice->second.find("BUS");
+            auto findAddress = findFruDevice->second.find("ADDRESS");
+            if (findBus == findFruDevice->second.end() ||
+                findAddress == findFruDevice->second.end())
+            {
+                return false;
+            }
+            if (std::get<uint32_t>(findBus->second) != bus)
+            {
+                return false;
+            }
+            if (std::get<uint32_t>(findAddress->second) != address)
+            {
+                return false;
+            }
+            return true;
+        });
     if (fru == frus.end())
     {
         return IPMI_CC_RESPONSE_ERROR;
@@ -610,49 +613,49 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
         return ipmi::ccResponseError;
     }
 
-    auto entity =
-        std::find_if(entities.begin(), entities.end(),
-                     [bus, address, &entityData, &name](ManagedEntry& entry) {
-        auto findFruDevice = entry.second.find(
-            "xyz.openbmc_project.Inventory.Decorator.I2CDevice");
-        if (findFruDevice == entry.second.end())
-        {
-            return false;
-        }
+    auto entity = std::find_if(
+        entities.begin(), entities.end(),
+        [bus, address, &entityData, &name](ManagedEntry& entry) {
+            auto findFruDevice = entry.second.find(
+                "xyz.openbmc_project.Inventory.Decorator.I2CDevice");
+            if (findFruDevice == entry.second.end())
+            {
+                return false;
+            }
 
-        // Integer fields added via Entity-Manager json are uint64_ts by
-        // default.
-        auto findBus = findFruDevice->second.find("Bus");
-        auto findAddress = findFruDevice->second.find("Address");
+            // Integer fields added via Entity-Manager json are uint64_ts by
+            // default.
+            auto findBus = findFruDevice->second.find("Bus");
+            auto findAddress = findFruDevice->second.find("Address");
 
-        if (findBus == findFruDevice->second.end() ||
-            findAddress == findFruDevice->second.end())
-        {
-            return false;
-        }
-        if ((std::get<uint64_t>(findBus->second) != bus) ||
-            (std::get<uint64_t>(findAddress->second) != address))
-        {
-            return false;
-        }
+            if (findBus == findFruDevice->second.end() ||
+                findAddress == findFruDevice->second.end())
+            {
+                return false;
+            }
+            if ((std::get<uint64_t>(findBus->second) != bus) ||
+                (std::get<uint64_t>(findAddress->second) != address))
+            {
+                return false;
+            }
 
-        auto fruName = findFruDevice->second.find("Name");
-        if (fruName != findFruDevice->second.end())
-        {
-            name = std::get<std::string>(fruName->second);
-        }
+            auto fruName = findFruDevice->second.find("Name");
+            if (fruName != findFruDevice->second.end())
+            {
+                name = std::get<std::string>(fruName->second);
+            }
 
-        // At this point we found the device entry and should return
-        // true.
-        auto findIpmiDevice =
-            entry.second.find("xyz.openbmc_project.Inventory.Decorator.Ipmi");
-        if (findIpmiDevice != entry.second.end())
-        {
-            entityData = &(findIpmiDevice->second);
-        }
+            // At this point we found the device entry and should return
+            // true.
+            auto findIpmiDevice = entry.second.find(
+                "xyz.openbmc_project.Inventory.Decorator.Ipmi");
+            if (findIpmiDevice != entry.second.end())
+            {
+                entityData = &(findIpmiDevice->second);
+            }
 
-        return true;
-    });
+            return true;
+        });
 
     if (entity == entities.end())
     {
@@ -747,8 +750,8 @@ static bool getSELLogFiles(std::vector<std::filesystem::path>& selLogFiles)
                                dynamic_sensors::ipmi::sel::selLogFilename))
         {
             // If we find an ipmi_sel log file, save the path
-            selLogFiles.emplace_back(dynamic_sensors::ipmi::sel::selLogDir /
-                                     filename);
+            selLogFiles.emplace_back(
+                dynamic_sensors::ipmi::sel::selLogDir / filename);
         }
     }
     // As the log files rotate, they are appended with a ".#" that is higher for
@@ -1139,10 +1142,9 @@ Unused arguments
   uint8_t eventType, uint8_t eventData1, uint8_t eventData2,
   uint8_t eventData3
 */
-ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t,
-                                               uint16_t, uint8_t, uint8_t,
-                                               uint8_t, uint8_t, uint8_t,
-                                               uint8_t, uint8_t)
+ipmi::RspType<uint16_t>
+    ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t, uint16_t, uint8_t,
+                           uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)
 {
     // Per the IPMI spec, need to cancel any reservation when a SEL entry is
     // added
@@ -1152,10 +1154,9 @@ ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t,
     return ipmi::responseSuccess(responseID);
 }
 
-ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
-                                           uint16_t reservationID,
-                                           const std::array<uint8_t, 3>& clr,
-                                           uint8_t eraseOperation)
+ipmi::RspType<uint8_t> ipmiStorageClearSEL(
+    ipmi::Context::ptr ctx, uint16_t reservationID,
+    const std::array<uint8_t, 3>& clr, uint8_t eraseOperation)
 {
     if (!checkSELReservation(reservationID))
     {
@@ -1198,9 +1199,8 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(ipmi::Context::ptr ctx,
     return ipmi::responseSuccess(ipmi::sel::eraseComplete);
 }
 
-std::vector<uint8_t>
-    getType8SDRs(ipmi::sensor::EntityInfoMap::const_iterator& entity,
-                 uint16_t recordId)
+std::vector<uint8_t> getType8SDRs(
+    ipmi::sensor::EntityInfoMap::const_iterator& entity, uint16_t recordId)
 {
     std::vector<uint8_t> resp;
     get_sdr::SensorDataEntityRecord data{};
@@ -1252,8 +1252,8 @@ std::vector<uint8_t> getType12SDRs(uint16_t index, uint16_t recordId)
     }
     else
     {
-        throw std::runtime_error("getType12SDRs:: Illegal index " +
-                                 std::to_string(index));
+        throw std::runtime_error(
+            "getType12SDRs:: Illegal index " + std::to_string(index));
     }
 
     return resp;

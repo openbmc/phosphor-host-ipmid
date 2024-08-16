@@ -20,8 +20,8 @@ void resetBMC()
 {
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
-    auto bmcStateObj = ipmi::getDbusObject(bus, bmcStateIntf, bmcStateRoot,
-                                           match);
+    auto bmcStateObj =
+        ipmi::getDbusObject(bus, bmcStateIntf, bmcStateRoot, match);
 
     auto service = ipmi::getService(bus, bmcStateIntf, bmcStateObj.first);
 

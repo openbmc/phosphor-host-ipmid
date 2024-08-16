@@ -479,19 +479,19 @@ TEST(PackAdvanced, ComplexOptionalTuple)
 
     ipmi::message::Payload p;
     p.pack(handle, maxSessions, currentSessions, activeSession, lanSession);
-    ASSERT_EQ(p.size(), sizeof(handle) + sizeof(maxSessions) +
-                            sizeof(currentSessions) + 3 * sizeof(uint8_t) +
-                            sizeof(uint32_t) + sizeof(uint8_t) * macSize +
-                            sizeof(uint16_t));
-    uint8_t protocol_channel = (static_cast<uint8_t>(protocol) << 4) |
-                               static_cast<uint8_t>(channel);
-    ipmi::SecureBuffer k = {handle, maxSessions, currentSessions, userID, priv,
-                            protocol_channel,
-                            // ip addr
-                            0x05, 0x01, 0x01, 0x0a,
-                            // mac addr
-                            0, 0, 0, 0, 0, 0,
-                            // port
-                            0x1f, 0xd8};
+    ASSERT_EQ(p.size(),
+              sizeof(handle) + sizeof(maxSessions) + sizeof(currentSessions) +
+                  3 * sizeof(uint8_t) + sizeof(uint32_t) +
+                  sizeof(uint8_t) * macSize + sizeof(uint16_t));
+    uint8_t protocol_channel =
+        (static_cast<uint8_t>(protocol) << 4) | static_cast<uint8_t>(channel);
+    ipmi::SecureBuffer k = {
+        handle, maxSessions, currentSessions, userID, priv, protocol_channel,
+        // ip addr
+        0x05, 0x01, 0x01, 0x0a,
+        // mac addr
+        0, 0, 0, 0, 0, 0,
+        // port
+        0x1f, 0xd8};
     ASSERT_EQ(p.raw, k);
 }

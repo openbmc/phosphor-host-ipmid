@@ -59,8 +59,8 @@ AllowlistFilter::AllowlistFilter()
     lg2::info("Loading allowlist filter");
     ipmi::registerFilter(ipmi::prioOpenBmcBase,
                          [this](ipmi::message::Request::ptr request) {
-        return filterMessage(request);
-    });
+                             return filterMessage(request);
+                         });
 
     // wait until io->run is going to fetch RestrictionMode
     post_work([this]() { postInit(); });
@@ -84,8 +84,8 @@ void AllowlistFilter::cacheRestrictedMode(
         try
         {
             restrictionModeSetting = dev;
-            restrictionModeService = objects->service(restrictionModeSetting,
-                                                      restrictionModeIntf);
+            restrictionModeService =
+                objects->service(restrictionModeSetting, restrictionModeIntf);
         }
         catch (const std::out_of_range& e)
         {
@@ -210,8 +210,8 @@ void AllowlistFilter::postInit()
 
     modeChangeMatch = std::make_unique<sdbusplus::bus::match_t>(
         *bus, filterStr, [this, deviceList](sdbusplus::message_t& m) {
-        handleRestrictedModeChange(m, deviceList);
-    });
+            handleRestrictedModeChange(m, deviceList);
+        });
 }
 
 /** @brief Filter IPMI messages with RestrictedMode

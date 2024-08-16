@@ -47,10 +47,9 @@ struct Context
             uint8_t lun, Cmd cmd, int channel, int userId, uint32_t sessionId,
             Privilege priv, int rqSA, int hostIdx,
             boost::asio::yield_context& yield) :
-        bus(bus),
-        netFn(netFn), lun(lun), cmd(cmd), channel(channel), userId(userId),
-        sessionId(sessionId), priv(priv), rqSA(rqSA), hostIdx(hostIdx),
-        yield(yield)
+        bus(bus), netFn(netFn), lun(lun), cmd(cmd), channel(channel),
+        userId(userId), sessionId(sessionId), priv(priv), rqSA(rqSA),
+        hostIdx(hostIdx), yield(yield)
     {}
 
     std::shared_ptr<sdbusplus::asio::connection> bus;
@@ -256,8 +255,8 @@ struct Payload
     template <typename Arg, typename... Args>
     int pack(Arg&& arg, Args&&... args)
     {
-        int packRet = details::PackSingle_t<Arg>::op(*this,
-                                                     std::forward<Arg>(arg));
+        int packRet =
+            details::PackSingle_t<Arg>::op(*this, std::forward<Arg>(arg));
         if (packRet)
         {
             return packRet;
@@ -464,8 +463,8 @@ struct Payload
         size_t priorIndex = rawIndex;
         fixed_uint_t<details::bitStreamSize> priorBits = bitStream;
 
-        int ret = std::apply([this](Types&... args) { return unpack(args...); },
-                             t);
+        int ret =
+            std::apply([this](Types&... args) { return unpack(args...); }, t);
         if (ret)
         {
             bitCount = priorBitCount;

@@ -310,8 +310,8 @@ struct PackSingle<std::variant<T...>>
     {
         return std::visit(
             [&p](const auto& arg) {
-            return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
-        },
+                return PackSingle<std::decay_t<decltype(arg)>>::op(p, arg);
+            },
             v);
     }
 };

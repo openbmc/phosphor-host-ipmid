@@ -199,9 +199,9 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
 ipmi_ret_t eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
                      uint8_t data)
 {
-    auto msg = makeDbusMsg("org.freedesktop.DBus.Properties",
-                           sensorInfo.sensorPath, "Set",
-                           sensorInfo.sensorInterface);
+    auto msg =
+        makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
+                    "Set", sensorInfo.sensorInterface);
 
     const auto& interface = sensorInfo.propertyInterfaces.begin();
     msg.append(interface->first);

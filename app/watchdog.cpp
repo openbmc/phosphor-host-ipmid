@@ -192,12 +192,11 @@ static constexpr uint8_t wdExpirationFlagReservedBit7 = 0x7;
  *
  * @return completion code on success.
  **/
-ipmi::RspType<>
-    ipmiSetWatchdogTimer(uint3_t timerUse, uint3_t reserved, bool dontStopTimer,
-                         bool dontLog, uint3_t timeoutAction, uint1_t reserved1,
-                         uint3_t preTimeoutInterrupt, uint1_t reserved2,
-                         uint8_t preTimeoutInterval,
-                         std::bitset<8> expFlagValue, uint16_t initialCountdown)
+ipmi::RspType<> ipmiSetWatchdogTimer(
+    uint3_t timerUse, uint3_t reserved, bool dontStopTimer, bool dontLog,
+    uint3_t timeoutAction, uint1_t reserved1, uint3_t preTimeoutInterrupt,
+    uint1_t reserved2, uint8_t preTimeoutInterval, std::bitset<8> expFlagValue,
+    uint16_t initialCountdown)
 {
     if ((timerUse == wdTimerUseResTimer1) ||
         (timerUse == wdTimerUseResTimer2) ||
