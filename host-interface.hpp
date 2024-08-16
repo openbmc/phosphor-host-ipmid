@@ -50,7 +50,7 @@ class Host :
 
   private:
     /** @brief sdbusplus DBus bus connection. */
-    sdbusplus::bus_t& bus;
+    [[maybe_unused]] sdbusplus::bus_t& bus;
 
     /** @brief  Callback function to be invoked by command manager
      *
