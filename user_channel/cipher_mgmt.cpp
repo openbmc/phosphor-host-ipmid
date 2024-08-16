@@ -118,8 +118,8 @@ Json CipherConfig::readCSPrivilegeLevels(const std::string& csFileName)
 
 int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
 {
-    std::string tmpFile = static_cast<std::string>(cipherSuitePrivFileName) +
-                          "_tmpXXXXXX";
+    std::string tmpFile =
+        static_cast<std::string>(cipherSuitePrivFileName) + "_tmpXXXXXX";
 
     std::vector<char> tmpRandomFile(tmpFile.length() + 1);
     strncpy(tmpRandomFile.data(), tmpFile.c_str(), tmpFile.length() + 1);

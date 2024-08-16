@@ -144,8 +144,8 @@ FruInventoryData readDataFromInventory(const FRUId& fruNum)
     {
         for (auto& intf : instance.interfaces)
         {
-            ipmi::PropertyMap allProp = readAllProperties(intf.first,
-                                                          instance.path);
+            ipmi::PropertyMap allProp =
+                readAllProperties(intf.first, instance.path);
             for (auto& properties : intf.second)
             {
                 auto iter = allProp.find(properties.first);

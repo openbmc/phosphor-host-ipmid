@@ -346,12 +346,12 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                     dBusPropertiesInterface) +
                 sdbusplus::bus::match::rules::argN(0, networkChConfigIntfName),
             [&](sdbusplus::message_t& msg) {
-            DbusChObjProperties props;
-            std::string iface;
-            std::string path = msg.get_path();
-            msg.read(iface, props);
-            processChAccessPropChange(path, props);
-        });
+                DbusChObjProperties props;
+                std::string iface;
+                std::string path = msg.get_path();
+                msg.read(iface, props);
+                processChAccessPropChange(path, props);
+            });
         signalHndlrObjectState = true;
 
         chInterfaceAddedSignal = std::make_unique<sdbusplus::bus::match_t>(
@@ -676,9 +676,8 @@ Cc ChannelConfig::getChannelAuthTypeSupported(const uint8_t chNum,
     return ccSuccess;
 }
 
-Cc ChannelConfig::getChannelEnabledAuthType(const uint8_t chNum,
-                                            const uint8_t priv,
-                                            EAuthType& authType)
+Cc ChannelConfig::getChannelEnabledAuthType(
+    const uint8_t chNum, const uint8_t priv, EAuthType& authType)
 {
     if (!isValidChannel(chNum))
     {
@@ -767,8 +766,8 @@ std::string ChannelConfig::convertToPrivLimitString(const uint8_t value)
 EChannelSessSupported
     ChannelConfig::convertToSessionSupportIndex(const std::string& value)
 {
-    auto iter = std::find(sessionSupportList.begin(), sessionSupportList.end(),
-                          value);
+    auto iter =
+        std::find(sessionSupportList.begin(), sessionSupportList.end(), value);
     if (iter == sessionSupportList.end())
     {
         lg2::error("Invalid session supported: {SESS_STR}", "SESS_STR", value);
@@ -972,8 +971,8 @@ int ChannelConfig::loadChannelConfig()
             chData.isChValid = channelFound &&
                                jsonChData[isValidString].get<bool>();
             chData.activeSessCount = jsonChData.value(activeSessionsString, 0);
-            chData.maxTransferSize = jsonChData.value(maxTransferSizeString,
-                                                      smallChannelSize);
+            chData.maxTransferSize =
+                jsonChData.value(maxTransferSizeString, smallChannelSize);
             if (jsonChData.count(isManagementNIC) != 0)
             {
                 chData.isManagementNIC =
@@ -1287,17 +1286,16 @@ int ChannelConfig::checkAndReloadVolatileData()
     return ret;
 }
 
-int ChannelConfig::setDbusProperty(const std::string& service,
-                                   const std::string& objPath,
-                                   const std::string& interface,
-                                   const std::string& property,
-                                   const DbusVariant& value)
+int ChannelConfig::setDbusProperty(
+    const std::string& service, const std::string& objPath,
+    const std::string& interface, const std::string& property,
+    const DbusVariant& value)
 {
     try
     {
-        auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                          "org.freedesktop.DBus.Properties",
-                                          "Set");
+        auto method =
+            bus.new_method_call(service.c_str(), objPath.c_str(),
+                                "org.freedesktop.DBus.Properties", "Set");
 
         method.append(interface, property, value);
 

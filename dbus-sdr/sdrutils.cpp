@@ -85,8 +85,8 @@ static void filterSensors(SensorSubTree& subtree)
     {
         return;
     }
-    nlohmann::json sensorFilterJSON = nlohmann::json::parse(filterFile, nullptr,
-                                                            false);
+    nlohmann::json sensorFilterJSON =
+        nlohmann::json::parse(filterFile, nullptr, false);
     nlohmann::json::iterator svcFilterit =
         sensorFilterJSON.find("ServiceFilter");
     if (svcFilterit == sensorFilterJSON.end())
@@ -96,15 +96,16 @@ static void filterSensors(SensorSubTree& subtree)
 
     subtree.erase(std::remove_if(subtree.begin(), subtree.end(),
                                  [svcFilterit](SensorSubTree::value_type& kv) {
-        auto& [_, serviceToIfaces] = kv;
+                                     auto& [_, serviceToIfaces] = kv;
 
-        for (auto service = svcFilterit->begin(); service != svcFilterit->end();
-             ++service)
-        {
-            serviceToIfaces.erase(*service);
-        }
-        return serviceToIfaces.empty();
-    }),
+                                     for (auto service = svcFilterit->begin();
+                                          service != svcFilterit->end();
+                                          ++service)
+                                     {
+                                         serviceToIfaces.erase(*service);
+                                     }
+                                     return serviceToIfaces.empty();
+                                 }),
                   subtree.end());
 }
 
@@ -174,8 +175,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     static constexpr const std::array vrInterfaces = {
         "xyz.openbmc_project.Control.VoltageRegulatorMode"};
 
-    bool sensorRez = lbdUpdateSensorTree("/xyz/openbmc_project/sensors",
-                                         sensorInterfaces);
+    bool sensorRez =
+        lbdUpdateSensorTree("/xyz/openbmc_project/sensors", sensorInterfaces);
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -291,8 +292,8 @@ ipmi::sensor::IdInfoMap::const_iterator
     return std::find_if(
         ipmi::sensor::sensors.begin(), ipmi::sensor::sensors.end(),
         [&path](const ipmi::sensor::IdInfoMap::value_type& findSensor) {
-        return findSensor.second.sensorPath == path;
-    });
+            return findSensor.second.sensorPath == path;
+        });
 }
 #endif
 
@@ -410,8 +411,8 @@ std::optional<std::map<std::string, std::vector<std::string>>>
     return interfacesResponse;
 }
 
-std::map<std::string, Value> getEntityManagerProperties(const char* path,
-                                                        const char* interface)
+std::map<std::string, Value>
+    getEntityManagerProperties(const char* path, const char* interface)
 {
     std::map<std::string, Value> properties;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
@@ -462,8 +463,8 @@ std::optional<std::unordered_set<std::string>>&
         return ipmiDecoratorPaths;
     }
 
-    ipmiDecoratorPaths = std::unordered_set<std::string>(paths.begin(),
-                                                         paths.end());
+    ipmiDecoratorPaths =
+        std::unordered_set<std::string>(paths.begin(), paths.end());
     return ipmiDecoratorPaths;
 }
 

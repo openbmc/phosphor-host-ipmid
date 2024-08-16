@@ -107,8 +107,8 @@ bool isDCMIPowerMgmtSupported()
 std::optional<uint32_t> getPcap(ipmi::Context::ptr& ctx)
 {
     std::string service{};
-    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
-                                                    pcapPath, service);
+    boost::system::error_code ec =
+        ipmi::getService(ctx, pcapInterface, pcapPath, service);
     if (ec.value())
     {
         return std::nullopt;
@@ -128,8 +128,8 @@ std::optional<uint32_t> getPcap(ipmi::Context::ptr& ctx)
 std::optional<bool> getPcapEnabled(ipmi::Context::ptr& ctx)
 {
     std::string service{};
-    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
-                                                    pcapPath, service);
+    boost::system::error_code ec =
+        ipmi::getService(ctx, pcapInterface, pcapPath, service);
     if (ec.value())
     {
         return std::nullopt;
@@ -149,8 +149,8 @@ std::optional<bool> getPcapEnabled(ipmi::Context::ptr& ctx)
 bool setPcap(ipmi::Context::ptr& ctx, const uint32_t powerCap)
 {
     std::string service{};
-    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
-                                                    pcapPath, service);
+    boost::system::error_code ec =
+        ipmi::getService(ctx, pcapInterface, pcapPath, service);
     if (ec.value())
     {
         return false;
@@ -170,8 +170,8 @@ bool setPcap(ipmi::Context::ptr& ctx, const uint32_t powerCap)
 bool setPcapEnable(ipmi::Context::ptr& ctx, bool enabled)
 {
     std::string service{};
-    boost::system::error_code ec = ipmi::getService(ctx, pcapInterface,
-                                                    pcapPath, service);
+    boost::system::error_code ec =
+        ipmi::getService(ctx, pcapInterface, pcapPath, service);
     if (ec.value())
     {
         return false;
@@ -202,9 +202,9 @@ std::optional<std::string> readAssetTag(ipmi::Context::ptr& ctx)
     }
 
     std::string assetTag{};
-    ec = ipmi::getDbusProperty(ctx, objectInfo.second, objectInfo.first,
-                               dcmi::assetTagIntf, dcmi::assetTagProp,
-                               assetTag);
+    ec =
+        ipmi::getDbusProperty(ctx, objectInfo.second, objectInfo.first,
+                              dcmi::assetTagIntf, dcmi::assetTagProp, assetTag);
     if (ec.value())
     {
         lg2::error("Error in reading asset tag: {ERROR}", "ERROR",
@@ -228,9 +228,9 @@ bool writeAssetTag(ipmi::Context::ptr& ctx, const std::string& assetTag)
         return false;
     }
 
-    ec = ipmi::setDbusProperty(ctx, objectInfo.second, objectInfo.first,
-                               dcmi::assetTagIntf, dcmi::assetTagProp,
-                               assetTag);
+    ec =
+        ipmi::setDbusProperty(ctx, objectInfo.second, objectInfo.first,
+                              dcmi::assetTagIntf, dcmi::assetTagProp, assetTag);
     if (ec.value())
     {
         lg2::error("Error in writing asset tag: {ERROR}", "ERROR",
@@ -244,8 +244,8 @@ bool writeAssetTag(ipmi::Context::ptr& ctx, const std::string& assetTag)
 std::optional<std::string> getHostName(ipmi::Context::ptr& ctx)
 {
     std::string service{};
-    boost::system::error_code ec = ipmi::getService(ctx, networkConfigIntf,
-                                                    networkConfigObj, service);
+    boost::system::error_code ec =
+        ipmi::getService(ctx, networkConfigIntf, networkConfigObj, service);
     if (ec.value())
     {
         return std::nullopt;
@@ -579,9 +579,9 @@ ipmi::RspType<uint8_t,          // length
     return ipmi::responseSuccess(nameSize, data);
 }
 
-ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
-                                         uint8_t offset, uint8_t count,
-                                         std::vector<char> data)
+ipmi::RspType<uint8_t>
+    setMgmntCtrlIdStr(ipmi::Context::ptr& ctx, uint8_t offset, uint8_t count,
+                      std::vector<char> data)
 {
     if ((offset > dcmi::maxCtrlIdStrLen) || (count > dcmi::maxBytes) ||
         ((offset + count) > dcmi::maxCtrlIdStrLen))
@@ -689,8 +689,8 @@ ipmi::RspType<ipmi::message::Payload> getDCMICapabilities(uint8_t parameter)
                 data.value("FlushEntireSELUponRollOver", 0);
             bool recordLevelSELFlushUponRollOver =
                 data.value("RecordLevelSELFlushUponRollOver", 0);
-            uint12_t numberOfSELEntries = data.value("NumberOfSELEntries",
-                                                     0xcac);
+            uint12_t numberOfSELEntries =
+                data.value("NumberOfSELEntries", 0xcac);
             uint8_t tempMonitoringSamplingFreq =
                 data.value("TempMonitoringSamplingFreq", 0);
             payload.pack(numberOfSELEntries, reserved1,
@@ -739,9 +739,9 @@ namespace dcmi
 namespace temp_readings
 {
 
-std::tuple<bool, bool, uint8_t> readTemp(ipmi::Context::ptr& ctx,
-                                         const std::string& dbusService,
-                                         const std::string& dbusPath)
+std::tuple<bool, bool, uint8_t>
+    readTemp(ipmi::Context::ptr& ctx, const std::string& dbusService,
+             const std::string& dbusPath)
 {
     // Read the temperature value from d-bus object. Need some conversion.
     // As per the interface xyz.openbmc_project.Sensor.Value, the
@@ -756,8 +756,8 @@ std::tuple<bool, bool, uint8_t> readTemp(ipmi::Context::ptr& ctx,
     {
         return std::make_tuple(false, false, 0);
     }
-    auto temperature = std::visit(ipmi::VariantToDoubleVisitor(),
-                                  result.at("Value"));
+    auto temperature =
+        std::visit(ipmi::VariantToDoubleVisitor(), result.at("Value"));
     double absTemp = std::abs(temperature);
 
     auto findFactor = result.find("Scale");
@@ -933,9 +933,8 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
     return ipmi::responseSuccess();
 }
 
-ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(ipmi::Context::ptr& ctx,
-                                                        uint8_t parameter,
-                                                        uint8_t setSelector)
+ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(
+    ipmi::Context::ptr& ctx, uint8_t parameter, uint8_t setSelector)
 {
     if (setSelector)
     {
@@ -1015,8 +1014,8 @@ static std::optional<uint16_t> readPower(ipmi::Context::ptr& ctx)
 
     // Return default value if failed to read from D-Bus object
     std::string service{};
-    boost::system::error_code ec = ipmi::getService(ctx, dcmi::sensorValueIntf,
-                                                    objectPath, service);
+    boost::system::error_code ec =
+        ipmi::getService(ctx, dcmi::sensorValueIntf, objectPath, service);
     if (ec.value())
     {
         lg2::error("Failed to fetch service for D-Bus object, "
@@ -1106,10 +1105,9 @@ namespace dcmi
 namespace sensor_info
 {
 
-std::tuple<std::vector<uint16_t>, uint8_t> read(const std::string& type,
-                                                uint8_t instance,
-                                                const nlohmann::json& config,
-                                                uint8_t count)
+std::tuple<std::vector<uint16_t>, uint8_t>
+    read(const std::string& type, uint8_t instance,
+         const nlohmann::json& config, uint8_t count)
 {
     std::vector<uint16_t> responses{};
 

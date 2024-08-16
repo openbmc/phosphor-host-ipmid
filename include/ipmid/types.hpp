@@ -147,14 +147,14 @@ enum class Mutability
 
 inline Mutability operator|(Mutability lhs, Mutability rhs)
 {
-    return static_cast<Mutability>(static_cast<uint8_t>(lhs) |
-                                   static_cast<uint8_t>(rhs));
+    return static_cast<Mutability>(
+        static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
 }
 
 inline Mutability operator&(Mutability lhs, Mutability rhs)
 {
-    return static_cast<Mutability>(static_cast<uint8_t>(lhs) &
-                                   static_cast<uint8_t>(rhs));
+    return static_cast<Mutability>(
+        static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
 }
 
 struct Info
@@ -289,7 +289,7 @@ class SecureString : public SecureStringBase
 {
   public:
     using SecureStringBase::basic_string;
-    SecureString(const SecureStringBase& other) : SecureStringBase(other){};
+    SecureString(const SecureStringBase& other) : SecureStringBase(other) {};
     SecureString(SecureString&) = default;
     SecureString(const SecureString&) = default;
     SecureString(SecureString&&) = default;
@@ -308,7 +308,7 @@ class SecureBuffer : public SecureBufferBase
 {
   public:
     using SecureBufferBase::vector;
-    SecureBuffer(const SecureBufferBase& other) : SecureBufferBase(other){};
+    SecureBuffer(const SecureBufferBase& other) : SecureBufferBase(other) {};
     SecureBuffer(SecureBuffer&) = default;
     SecureBuffer(const SecureBuffer&) = default;
     SecureBuffer(SecureBuffer&&) = default;

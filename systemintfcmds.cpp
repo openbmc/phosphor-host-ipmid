@@ -181,8 +181,8 @@ void register_netfn_app_functions()
     objManager = std::make_unique<sdbusplus::server::manager_t>(
         *sdbusp, CONTROL_HOST_OBJ_MGR);
 
-    host = std::make_unique<phosphor::host::command::Host>(*sdbusp,
-                                                           objPath.c_str());
+    host = std::make_unique<phosphor::host::command::Host>(
+        *sdbusp, objPath.c_str());
     sdbusp->request_name(CONTROL_HOST_BUSNAME);
 
     return;

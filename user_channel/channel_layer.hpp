@@ -284,8 +284,8 @@ Cc getChannelAccessData(const uint8_t chNum, ChannelAccess& chAccessData);
  *  @return same channel number or proper channel number for current channel
  * number (0xE).
  */
-static inline uint8_t convertCurrentChannelNum(const uint8_t chNum,
-                                               const uint8_t devChannel)
+static inline uint8_t
+    convertCurrentChannelNum(const uint8_t chNum, const uint8_t devChannel)
 {
     if (chNum == currentChNum)
     {

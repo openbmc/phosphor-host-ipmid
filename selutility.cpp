@@ -296,8 +296,8 @@ GetSELEntryResponse
         // Evaluate if the event is assertion or deassertion event
         if (std::get<bool>(iterResolved->second))
         {
-            record.event.eventRecord.eventType = deassertEvent |
-                                                 iter->second.eventReadingType;
+            record.event.eventRecord.eventType =
+                deassertEvent | iter->second.eventReadingType;
         }
         else
         {
@@ -322,8 +322,8 @@ GetSELEntryResponse convertLogEntrytoSEL(const std::string& objPath)
     try
     {
         auto service = ipmi::getService(bus, assocIntf, objPath);
-        auto propValue = ipmi::getDbusProperty(bus, service, objPath, assocIntf,
-                                               assocProp);
+        auto propValue =
+            ipmi::getDbusProperty(bus, service, objPath, assocIntf, assocProp);
         assocs = std::get<std::vector<ipmi::Association>>(propValue);
     }
     catch (const std::exception& e)
@@ -417,14 +417,14 @@ void readLoggingObjectPaths(ObjectPaths& paths)
 
     std::sort(paths.begin(), paths.end(),
               [](const std::string& a, const std::string& b) {
-        namespace fs = std::filesystem;
-        fs::path pathA(a);
-        fs::path pathB(b);
-        auto idA = std::stoul(pathA.filename().string());
-        auto idB = std::stoul(pathB.filename().string());
+                  namespace fs = std::filesystem;
+                  fs::path pathA(a);
+                  fs::path pathB(b);
+                  auto idA = std::stoul(pathA.filename().string());
+                  auto idB = std::stoul(pathB.filename().string());
 
-        return idA < idB;
-    });
+                  return idA < idB;
+              });
 }
 
 } // namespace sel

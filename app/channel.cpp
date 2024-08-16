@@ -140,8 +140,8 @@ ipmi::RspType<uint8_t,             // Channel Number
     {
         try
         {
-            std::tie(cipherRecords,
-                     supportedAlgorithms) = cipher::getCipherRecords();
+            std::tie(cipherRecords, supportedAlgorithms) =
+                cipher::getCipherRecords();
             recordInit = true;
         }
         catch (const std::exception& e)
@@ -150,8 +150,8 @@ ipmi::RspType<uint8_t,             // Channel Number
         }
     }
 
-    const std::vector<uint8_t>& records = algoSelectBit ? cipherRecords
-                                                        : supportedAlgorithms;
+    const std::vector<uint8_t>& records =
+        algoSelectBit ? cipherRecords : supportedAlgorithms;
     static constexpr auto respSize = 16;
 
     // Session support is available in active LAN channels.
@@ -167,8 +167,8 @@ ipmi::RspType<uint8_t,             // Channel Number
     // set of 16 and so on.
 
     // Calculate the number of record data bytes to be returned.
-    auto start = std::min(static_cast<size_t>(listIndex) * respSize,
-                          records.size());
+    auto start =
+        std::min(static_cast<size_t>(listIndex) * respSize, records.size());
     auto end = std::min((static_cast<size_t>(listIndex) * respSize) + respSize,
                         records.size());
     auto size = end - start;

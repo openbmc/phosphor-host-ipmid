@@ -159,59 +159,60 @@ void initSensorMatches()
             std::make_unique<sdbusplus::bus::match_t>(
                 bus, interfacesRemoved() + argNpath(0, s.second.sensorPath),
                 [id = s.first](auto& /*msg*/) {
-            // Ideally this should work.
-            // But when a service is terminated or crashed, it does not
-            // emit interfacesRemoved signal. In that case it's handled
-            // by sensorsOwnerMatch
-            sensorCacheMap[id].reset();
-        }));
+                    // Ideally this should work.
+                    // But when a service is terminated or crashed, it does not
+                    // emit interfacesRemoved signal. In that case it's handled
+                    // by sensorsOwnerMatch
+                    sensorCacheMap[id].reset();
+                }));
         sensorUpdatedMatches.emplace(
-            s.first, std::make_unique<sdbusplus::bus::match_t>(
-                         bus,
-                         type::signal() + path(s.second.sensorPath) +
-                             member("PropertiesChanged"s) +
-                             interface("org.freedesktop.DBus.Properties"s),
-                         [&s](auto& msg) {
-            fillSensorIdServiceMap(s.second.sensorPath,
-                                   s.second.propertyInterfaces.begin()->first,
-                                   s.first);
-            try
-            {
-                // This is signal callback
-                std::string interfaceName;
-                msg.read(interfaceName);
-                ipmi::PropertyMap props;
-                msg.read(props);
-                s.second.getFunc(s.first, s.second, props);
-            }
-            catch (const std::exception& e)
-            {
-                sensorCacheMap[s.first].reset();
-            }
-        }));
+            s.first,
+            std::make_unique<sdbusplus::bus::match_t>(
+                bus,
+                type::signal() + path(s.second.sensorPath) +
+                    member("PropertiesChanged"s) +
+                    interface("org.freedesktop.DBus.Properties"s),
+                [&s](auto& msg) {
+                    fillSensorIdServiceMap(
+                        s.second.sensorPath,
+                        s.second.propertyInterfaces.begin()->first, s.first);
+                    try
+                    {
+                        // This is signal callback
+                        std::string interfaceName;
+                        msg.read(interfaceName);
+                        ipmi::PropertyMap props;
+                        msg.read(props);
+                        s.second.getFunc(s.first, s.second, props);
+                    }
+                    catch (const std::exception& e)
+                    {
+                        sensorCacheMap[s.first].reset();
+                    }
+                }));
     }
     sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
         bus, nameOwnerChanged(), [](auto& msg) {
-        std::string name;
-        std::string oldOwner;
-        std::string newOwner;
-        msg.read(name, oldOwner, newOwner);
+            std::string name;
+            std::string oldOwner;
+            std::string newOwner;
+            msg.read(name, oldOwner, newOwner);
 
-        if (!name.empty() && newOwner.empty())
-        {
-            // The service exits
-            const auto it = serviceToIdMap.find(name);
-            if (it == serviceToIdMap.end())
+            if (!name.empty() && newOwner.empty())
             {
-                return;
+                // The service exits
+                const auto it = serviceToIdMap.find(name);
+                if (it == serviceToIdMap.end())
+                {
+                    return;
+                }
+                for (const auto& id : it->second)
+                {
+                    // Invalidate cache
+                    sensorCacheMap[id].reset();
+                }
             }
-            for (const auto& id : it->second)
-            {
-                // Invalidate cache
-                sensorCacheMap[id].reset();
-            }
-        }
-    });
+        });
 }
 #endif
 
@@ -233,8 +234,8 @@ int find_openbmc_path(uint8_t num, dbus_interface_t* interface)
     try
     {
         sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-        serviceName = ipmi::getService(bus, info.sensorInterface,
-                                       info.sensorPath);
+        serviceName =
+            ipmi::getService(bus, info.sensorInterface, info.sensorPath);
     }
     catch (const sdbusplus::exception_t&)
     {
@@ -470,13 +471,11 @@ bool isAnalogSensor(const std::string& interface)
 @return completion code on success.
 **/
 
-ipmi::RspType<> ipmiSetSensorReading(uint8_t sensorNumber, uint8_t operation,
-                                     uint8_t reading, uint8_t assertOffset0_7,
-                                     uint8_t assertOffset8_14,
-                                     uint8_t deassertOffset0_7,
-                                     uint8_t deassertOffset8_14,
-                                     uint8_t eventData1, uint8_t eventData2,
-                                     uint8_t eventData3)
+ipmi::RspType<> ipmiSetSensorReading(
+    uint8_t sensorNumber, uint8_t operation, uint8_t reading,
+    uint8_t assertOffset0_7, uint8_t assertOffset8_14,
+    uint8_t deassertOffset0_7, uint8_t deassertOffset8_14, uint8_t eventData1,
+    uint8_t eventData2, uint8_t eventData3)
 {
     lg2::debug("IPMI SET_SENSOR, sensorNumber: {SENSOR_NUM}", "SENSOR_NUM",
                lg2::hex, sensorNumber);
@@ -612,10 +611,10 @@ ipmi::RspType<uint8_t, // sensor reading
                 constexpr uint8_t assertionStatesLsb = 0;
                 constexpr uint8_t assertionStatesMsb = 0;
 
-                return ipmi::responseSuccess(senReading, reserved, readState,
-                                             senScanState, allEventMessageState,
-                                             assertionStatesLsb,
-                                             assertionStatesMsb);
+                return ipmi::responseSuccess(
+                    senReading, reserved, readState, senScanState,
+                    allEventMessageState, assertionStatesLsb,
+                    assertionStatesMsb);
             }
             sensorInfo.getFunc(sensorNum, sensorInfo, props);
         }
@@ -631,12 +630,12 @@ ipmi::RspType<uint8_t, // sensor reading
         ipmi::sensor::GetSensorResponse getResponse =
             iter->second.getFunc(iter->second);
 
-        return ipmi::responseSuccess(getResponse.reading, uint5_t(0),
-                                     getResponse.readingOrStateUnavailable,
-                                     getResponse.scanningEnabled,
-                                     getResponse.allEventMessagesEnabled,
-                                     getResponse.thresholdLevelsStates,
-                                     getResponse.discreteReadingSensorStates);
+        return ipmi::responseSuccess(
+            getResponse.reading, uint5_t(0),
+            getResponse.readingOrStateUnavailable, getResponse.scanningEnabled,
+            getResponse.allEventMessagesEnabled,
+            getResponse.thresholdLevelsStates,
+            getResponse.discreteReadingSensorStates);
 #endif
     }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
@@ -815,10 +814,10 @@ ipmi::RspType<uint8_t, // validMask
 
     const auto& resp = sensorThresholdMap[sensorNum];
 
-    return ipmi::responseSuccess(resp.validMask, resp.lowerNonCritical,
-                                 resp.lowerCritical, resp.lowerNonRecoverable,
-                                 resp.upperNonCritical, resp.upperCritical,
-                                 resp.upperNonRecoverable);
+    return ipmi::responseSuccess(
+        resp.validMask, resp.lowerNonCritical, resp.lowerCritical,
+        resp.lowerNonRecoverable, resp.upperNonCritical, resp.upperCritical,
+        resp.upperNonRecoverable);
 }
 
 /** @brief implements the Set Sensor threshold command
@@ -1179,10 +1178,10 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
         const auto& entityRecords =
             ipmi::sensor::EntityInfoMapContainer::getContainer()
                 ->getIpmiEntityRecords();
-        auto next_record_id = (entityRecords.size())
-                                  ? entityRecords.begin()->first +
-                                        ENTITY_RECORD_ID_START
-                                  : END_OF_RECORD;
+        auto next_record_id =
+            (entityRecords.size())
+                ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
+                : END_OF_RECORD;
         get_sdr::response::set_next_record_id(next_record_id, resp);
     }
     else
@@ -1463,8 +1462,8 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
     std::vector<uint8_t> eventData(req->data, req->data + count);
 
     sdbusplus::bus_t dbus(bus);
-    std::string service = ipmi::getService(dbus, ipmiSELAddInterface,
-                                           ipmiSELPath);
+    std::string service =
+        ipmi::getService(dbus, ipmiSELAddInterface, ipmiSELPath);
     sdbusplus::message_t writeSEL = dbus.new_method_call(
         service.c_str(), ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
     writeSEL.append(ipmiSELAddMessage, sensorPath, eventData, assert,

@@ -51,10 +51,10 @@ void Host::execute(Base::Host::Command command)
     lg2::debug("Pushing cmd on to queue, control host cmd: {CONTROL_HOST_CMD}",
                "CONTROL_HOST_CMD", convertForMessage(command));
 
-    auto cmd = std::make_tuple(ipmiCommand.at(command),
-                               std::bind(&Host::commandStatusHandler, this,
-                                         std::placeholders::_1,
-                                         std::placeholders::_2));
+    auto cmd = std::make_tuple(
+        ipmiCommand.at(command),
+        std::bind(&Host::commandStatusHandler, this, std::placeholders::_1,
+                  std::placeholders::_2));
 
     ipmid_send_cmd_to_host(std::move(cmd));
 }

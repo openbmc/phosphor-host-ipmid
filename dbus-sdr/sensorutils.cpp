@@ -240,9 +240,8 @@ bool getSensorAttributes(const double max, const double min, int16_t& mValue,
     // Step 4: Constrain B, and set bExp accordingly
     if (!(scaleFloatExp(dB, bExp)))
     {
-        std::cerr << "getSensorAttributes: Offset (B=" << dB
-                  << ", bExp=" << (int)bExp
-                  << ") exceeds multiplier scale (M=" << dM
+        std::cerr << "getSensorAttributes: Offset (B=" << dB << ", bExp="
+                  << (int)bExp << ") exceeds multiplier scale (M=" << dM
                   << ", rExp=" << (int)rExp << ")\n";
         return false;
     }
@@ -312,8 +311,8 @@ uint8_t getScaledIPMIValue(const double value, const double max,
     int8_t bExp = 0;
     bool bSigned = false;
 
-    bool result = getSensorAttributes(max, min, mValue, rExp, bValue, bExp,
-                                      bSigned);
+    bool result =
+        getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned);
     if (!result)
     {
         throw std::runtime_error("Illegal sensor attributes");

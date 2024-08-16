@@ -101,8 +101,8 @@ void registerSignalHandler(int priority, int signalNumber,
     if (!signals[signalNumber])
     {
         std::shared_ptr<boost::asio::io_context> io = getIoContext();
-        signals[signalNumber] = std::make_unique<SignalHandler>(io,
-                                                                signalNumber);
+        signals[signalNumber] =
+            std::make_unique<SignalHandler>(io, signalNumber);
     }
     signals[signalNumber]->registerHandler(priority, handler);
 }

@@ -65,8 +65,8 @@ struct ChannelParams
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return Ethernet interface service and object path if it exists
  */
-std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
-                                                   uint8_t channel);
+std::optional<ChannelParams>
+    maybeGetChannelParams(sdbusplus::bus_t& bus, uint8_t channel);
 
 /** @brief A trivial helper around maybeGetChannelParams() that throws an
  *         exception when it is unable to acquire parameters for the channel.
@@ -172,8 +172,7 @@ class ObjectLookupCache
      */
     ObjectLookupCache(sdbusplus::bus_t& bus, const ChannelParams& params,
                       const char* intf) :
-        bus(bus),
-        params(params), intf(intf),
+        bus(bus), params(params), intf(intf),
         objs(getAllDbusObjects(bus, params.logicalPath, intf, ""))
     {}
 
@@ -349,10 +348,9 @@ std::optional<typename AddrFamily<family>::addr>
 }
 
 template <int family>
-std::optional<IfNeigh<family>>
-    findStaticNeighbor(sdbusplus::bus_t&, const ChannelParams&,
-                       typename AddrFamily<family>::addr ip,
-                       ObjectLookupCache& neighbors)
+std::optional<IfNeigh<family>> findStaticNeighbor(
+    sdbusplus::bus_t&, const ChannelParams&,
+    typename AddrFamily<family>::addr ip, ObjectLookupCache& neighbors)
 {
     using sdbusplus::server::xyz::openbmc_project::network::Neighbor;
     const auto state =
@@ -395,9 +393,9 @@ void createNeighbor(sdbusplus::bus_t& bus, const ChannelParams& params,
                     typename AddrFamily<family>::addr address,
                     stdplus::EtherAddr mac)
 {
-    auto newreq = bus.new_method_call(params.service.c_str(),
-                                      params.logicalPath.c_str(),
-                                      INTF_NEIGHBOR_CREATE_STATIC, "Neighbor");
+    auto newreq =
+        bus.new_method_call(params.service.c_str(), params.logicalPath.c_str(),
+                            INTF_NEIGHBOR_CREATE_STATIC, "Neighbor");
     stdplus::ToStrHandle<stdplus::ToStr<stdplus::EtherAddr>> macToStr;
     stdplus::ToStrHandle<stdplus::ToStr<typename AddrFamily<family>::addr>>
         addrToStr;
