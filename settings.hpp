@@ -26,7 +26,7 @@ struct Objects
      */
     Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter);
     Objects(const Objects&) = default;
-    Objects& operator=(const Objects&) = default;
+    Objects& operator=(const Objects&) = delete;
     Objects(Objects&&) = delete;
     Objects& operator=(Objects&&) = delete;
     ~Objects() = default;
