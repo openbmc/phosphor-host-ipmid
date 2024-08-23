@@ -73,13 +73,11 @@ static constexpr const char* protocolTypeString = "protocol_type";
 static constexpr const char* sessionSupportedString = "session_supported";
 static constexpr const char* isIpmiString = "is_ipmi";
 static constexpr const char* isManagementNIC = "is_management_nic";
-static constexpr const char* authTypeSupportedString = "auth_type_supported";
 static constexpr const char* accessModeString = "access_mode";
 static constexpr const char* userAuthDisabledString = "user_auth_disabled";
 static constexpr const char* perMsgAuthDisabledString = "per_msg_auth_disabled";
 static constexpr const char* alertingDisabledString = "alerting_disabled";
 static constexpr const char* privLimitString = "priv_limit";
-static constexpr const char* authTypeEnabledString = "auth_type_enabled";
 
 // Default values
 static constexpr const char* defaultChannelName = "RESERVED";

@@ -78,7 +78,6 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
     }
 }
 
-static constexpr uint8_t wd_dont_stop = 0x1 << 6;
 static constexpr uint8_t wd_timeout_action_mask = 0x3;
 
 static constexpr uint8_t wdTimerUseResTimer1 = 0x0;
@@ -342,8 +341,6 @@ IpmiTimerUse wdTimerUseToIpmiTimerUse(WatchdogService::TimerUse wdTimerUse)
         }
     }
 }
-
-static constexpr uint8_t wd_running = 0x1 << 6;
 
 /**@brief The getWatchdogTimer ipmi command.
  *

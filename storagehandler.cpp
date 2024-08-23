@@ -53,11 +53,6 @@ constexpr auto TIME_INTERFACE = "xyz.openbmc_project.Time.EpochTime";
 constexpr auto BMC_TIME_PATH = "/xyz/openbmc_project/time/bmc";
 constexpr auto DBUS_PROPERTIES = "org.freedesktop.DBus.Properties";
 constexpr auto PROPERTY_ELAPSED = "Elapsed";
-
-constexpr auto logWatchPath = "/xyz/openbmc_project/logging";
-constexpr auto logBasePath = "/xyz/openbmc_project/logging/entry";
-constexpr auto logEntryIntf = "xyz.openbmc_project.Logging.Entry";
-constexpr auto logDeleteIntf = "xyz.openbmc_project.Object.Delete";
 } // namespace
 
 using InternalFailure =
@@ -170,13 +165,13 @@ void registerSelCallbackHandler()
     if (!selAddedMatch)
     {
         selAddedMatch = std::make_unique<sdbusplus::bus::match_t>(
-            bus, interfacesAdded(logWatchPath),
+            bus, interfacesAdded(ipmi::sel::logWatchPath),
             std::bind(selAddedCallback, std::placeholders::_1));
     }
     if (!selRemovedMatch)
     {
         selRemovedMatch = std::make_unique<sdbusplus::bus::match_t>(
-            bus, interfacesRemoved(logWatchPath),
+            bus, interfacesRemoved(ipmi::sel::logWatchPath),
             std::bind(selRemovedCallback, std::placeholders::_1));
     }
     if (!selUpdatedMatch)
@@ -185,7 +180,7 @@ void registerSelCallbackHandler()
             bus,
             type::signal() + member("PropertiesChanged"s) +
                 interface("org.freedesktop.DBus.Properties"s) +
-                argN(0, logEntryIntf),
+                argN(0, ipmi::sel::logEntryIntf),
             std::bind(selUpdatedCallback, std::placeholders::_1));
     }
 }

@@ -39,7 +39,6 @@ static constexpr auto englishLanguageCode = 0x0;
 static constexpr auto typeLengthByteNull = 0x0;
 static constexpr auto endOfCustomFields = 0xC1;
 static constexpr auto commonHeaderFormatSize = 0x8; // size in bytes
-static constexpr auto manufacturingDateSize = 0x3;
 static constexpr auto areaSizeOffset = 0x1;
 static constexpr uint8_t typeASCII = 0xC0;
 static constexpr auto maxRecordAttributeValue = 0x3F;

@@ -40,7 +40,6 @@ std::unique_ptr<sdbusplus::Timer> identifyTimer
     __attribute__((init_priority(101)));
 
 static ChassisIDState chassisIDState = ChassisIDState::reserved;
-static constexpr uint8_t setParmVersion = 0x01;
 
 constexpr size_t sizeVersion = 2;
 constexpr size_t DEFAULT_IDENTIFY_TIME_OUT = 15;
@@ -57,11 +56,6 @@ static constexpr size_t addrSizeOffset = 8;
 static constexpr size_t macOffset = 9;
 static constexpr size_t addrTypeOffset = 16;
 static constexpr size_t ipAddrOffset = 17;
-
-static constexpr size_t encIdentifyObjectsSize = 1;
-static constexpr size_t chassisIdentifyReqLength = 2;
-static constexpr size_t identifyIntervalPos = 0;
-static constexpr size_t forceIdentifyPos = 1;
 
 namespace ipmi
 {
@@ -106,7 +100,6 @@ const static constexpr char chassisSDRDevAddrProp[] = "SDRDeviceAddress";
 const static constexpr char chassisSELDevAddrProp[] = "SELDeviceAddress";
 const static constexpr char chassisSMDevAddrProp[] = "SMDeviceAddress";
 const static constexpr char chassisBridgeDevAddrProp[] = "BridgeDeviceAddress";
-static constexpr uint8_t chassisCapFlagMask = 0x0f;
 static constexpr uint8_t chassisCapAddrMask = 0xfe;
 static constexpr const char* powerButtonIntf =
     "xyz.openbmc_project.Chassis.Buttons.Power";

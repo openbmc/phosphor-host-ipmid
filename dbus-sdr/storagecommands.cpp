@@ -71,7 +71,6 @@ namespace ipmi
 namespace storage
 {
 
-constexpr static const size_t maxMessageSize = 64;
 constexpr static const size_t maxFruSdrNameSize = 16;
 using ObjectType =
     boost::container::flat_map<std::string,
@@ -89,9 +88,6 @@ constexpr static const char* entityManagerServiceName =
 constexpr static const size_t writeTimeoutSeconds = 10;
 constexpr static const char* chassisTypeRackMount = "23";
 constexpr static const char* chassisTypeMainServer = "17";
-
-// event direction is bit[7] of eventType where 1b = Deassertion event
-constexpr static const uint8_t deassertionEvent = 0x80;
 
 static std::vector<uint8_t> fruCache;
 static constexpr uint16_t invalidBus = 0xFFFF;

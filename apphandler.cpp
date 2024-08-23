@@ -213,8 +213,6 @@ namespace acpi_state
 {
 using namespace sdbusplus::server::xyz::openbmc_project::control::power;
 
-const static constexpr char* acpiObjPath =
-    "/xyz/openbmc_project/control/host0/acpi_power_state";
 const static constexpr char* acpiInterface =
     "xyz.openbmc_project.Control.Power.ACPIPowerState";
 const static constexpr char* sysACPIProp = "SysACPIStatus";
@@ -1317,19 +1315,14 @@ static constexpr uint8_t maxValidEncodingData = 0x02;
 
 static constexpr uint8_t setComplete = 0x0;
 static constexpr uint8_t setInProgress = 0x1;
-static constexpr uint8_t commitWrite = 0x2;
 static uint8_t transferStatus = setComplete;
 
 static constexpr uint8_t configDataOverhead = 2;
-
-// For EFI based system, 256 bytes is recommended.
-static constexpr size_t maxBytesPerParameter = 256;
 
 namespace ipmi
 {
 constexpr Cc ccParmNotSupported = 0x80;
 constexpr Cc ccSetInProgressActive = 0x81;
-constexpr Cc ccSystemInfoParameterSetReadOnly = 0x82;
 
 static inline auto responseParmNotSupported()
 {
@@ -1338,10 +1331,6 @@ static inline auto responseParmNotSupported()
 static inline auto responseSetInProgressActive()
 {
     return response(ccSetInProgressActive);
-}
-static inline auto responseSystemInfoParameterSetReadOnly()
-{
-    return response(ccSystemInfoParameterSetReadOnly);
 }
 } // namespace ipmi
 
@@ -1499,10 +1488,6 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
         }
 
         size_t stringLen = configData.at(1); // string length
-        // maxBytesPerParamter is 256. It will always be greater than stringLen
-        // (unit8_t) if maxBytes changes in future, then following line is
-        // needed.
-        // stringLen = std::min(stringLen, maxBytesPerParameter);
         count = std::min(stringLen, smallChunkSize);
         count = std::min(count, configData.size());
         paramString.resize(stringLen); // reserve space

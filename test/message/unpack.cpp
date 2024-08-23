@@ -500,7 +500,6 @@ TEST(Bitsets, Bitset33InsufficientBits)
     ASSERT_NE(p.unpack(v), 0);
     // check that the payload was not fully unpacked (comprehends unpack errors)
     ASSERT_FALSE(p.fullyUnpacked());
-    std::bitset<33> k(0);
     // check that v is zero
     ASSERT_EQ(v, 0);
 }
