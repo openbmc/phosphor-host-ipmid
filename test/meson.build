@@ -59,7 +59,15 @@ test('message',
     build_by_default: false,
     override_options: ['b_lundef=true'],
     implicit_include_directories: false,
-    dependencies: [boost, phosphor_logging_dep, crypto, systemd, sdbusplus_dep, gtest, gmock]
+    dependencies: [
+        boost,
+        crypto,
+        gmock,
+        gtest,
+        libsystemd_dep,
+        phosphor_logging_dep,
+        sdbusplus_dep,
+    ]
   ))
 
 # Build/add closesession_unittest to test suite

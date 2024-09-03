@@ -1,12 +1,12 @@
 softpower_pre = [
+  boost,
   ipmid_dep,
-  phosphor_logging_dep,
+  libsystemd_dep,
   phosphor_dbus_interfaces_dep,
-  sdeventplus_dep,
+  phosphor_logging_dep,
   sdbusplus_dep,
-  systemd,
+  sdeventplus_dep,
   softoff_dbus,
-  boost
 ]
 
 softpower_lib = static_library(
