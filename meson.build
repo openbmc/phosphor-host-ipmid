@@ -140,7 +140,7 @@ endif
 phosphor_logging_dep = dependency('phosphor-logging')
 phosphor_dbus_interfaces_dep = dependency('phosphor-dbus-interfaces')
 sdeventplus_dep = dependency('sdeventplus')
-systemd = dependency('systemd')
+libsystemd_dep = dependency('libsystemd')
 crypto = dependency('libcrypto', version : '>=1.0.2g')
 pam = cpp.find_library('pam', required: true)
 sdbusplus_dep = dependency('sdbusplus')
