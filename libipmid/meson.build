@@ -1,9 +1,9 @@
 ipmid_pre = [
   boost,
+  libsystemd_dep,
   phosphor_dbus_interfaces_dep,
   phosphor_logging_dep,
   sdbusplus_dep,
-  systemd,
 ]
 
 entity_map_json_lib = static_library(
