@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "63ae569b_1cf5f3e3",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-09-09T17:53:53Z",
+      "side": 1,
+      "message": "This seems to only be used in one function. Please limit the scope and place it closer to where it is used.",
+      "revId": "50d04d9e6b48a65d4887905e50ae2b331a4e1464",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
