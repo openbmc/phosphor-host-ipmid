@@ -257,38 +257,39 @@ std::optional<IfAddr<family>> findIfAddr(
 {
     for (const auto& [path, properties] : ips)
     {
-        std::optional<typename AddrFamily<family>::addr> addr;
         try
         {
-            addr.emplace(stdplus::fromStr<typename AddrFamily<family>::addr>(
-                std::get<std::string>(properties.at("Address"))));
+            typename AddrFamily<family>::addr addr;
+            addr = stdplus::fromStr<typename AddrFamily<family>::addr>(
+                std::get<std::string>(properties.at("Address")));
+
+            sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin
+                origin = sdbusplus::server::xyz::openbmc_project::network::IP::
+                    convertAddressOriginFromString(
+                        std::get<std::string>(properties.at("Origin")));
+            if (origins.find(origin) == origins.end())
+            {
+                continue;
+            }
+
+            if (idx > 0)
+            {
+                idx--;
+                continue;
+            }
+
+            IfAddr<family> ifaddr;
+            ifaddr.path = path;
+            ifaddr.address = addr;
+            ifaddr.prefix = std::get<uint8_t>(properties.at("PrefixLength"));
+            ifaddr.origin = origin;
+
+            return ifaddr;
         }
         catch (...)
         {
             continue;
         }
-
-        sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin
-            origin = sdbusplus::server::xyz::openbmc_project::network::IP::
-                convertAddressOriginFromString(
-                    std::get<std::string>(properties.at("Origin")));
-        if (origins.find(origin) == origins.end())
-        {
-            continue;
-        }
-
-        if (idx > 0)
-        {
-            idx--;
-            continue;
-        }
-
-        IfAddr<family> ifaddr;
-        ifaddr.path = path;
-        ifaddr.address = *addr;
-        ifaddr.prefix = std::get<uint8_t>(properties.at("PrefixLength"));
-        ifaddr.origin = origin;
-        return ifaddr;
     }
 
     return std::nullopt;
@@ -358,31 +359,33 @@ std::optional<IfNeigh<family>> findStaticNeighbor(
             Neighbor::State::Permanent);
     for (const auto& [path, neighbor] : neighbors)
     {
-        std::optional<typename AddrFamily<family>::addr> neighIP;
         try
         {
-            neighIP.emplace(stdplus::fromStr<typename AddrFamily<family>::addr>(
-                std::get<std::string>(neighbor.at("IPAddress"))));
+            typename AddrFamily<family>::addr neighIP;
+            neighIP = stdplus::fromStr<typename AddrFamily<family>::addr>(
+                std::get<std::string>(neighbor.at("IPAddress")));
+
+            if (neighIP != ip)
+            {
+                continue;
+            }
+            if (state != std::get<std::string>(neighbor.at("State")))
+            {
+                continue;
+            }
+
+            IfNeigh<family> ret;
+            ret.path = path;
+            ret.ip = ip;
+            ret.mac = stdplus::fromStr<stdplus::EtherAddr>(
+                std::get<std::string>(neighbor.at("MACAddress")));
+
+            return ret;
         }
         catch (...)
         {
             continue;
         }
-        if (*neighIP != ip)
-        {
-            continue;
-        }
-        if (state != std::get<std::string>(neighbor.at("State")))
-        {
-            continue;
-        }
-
-        IfNeigh<family> ret;
-        ret.path = path;
-        ret.ip = ip;
-        ret.mac = stdplus::fromStr<stdplus::EtherAddr>(
-            std::get<std::string>(neighbor.at("MACAddress")));
-        return ret;
     }
 
     return std::nullopt;
