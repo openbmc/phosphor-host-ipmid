@@ -809,7 +809,11 @@ ipmi::RspType<uint8_t, // validMask
     auto it = sensorThresholdMap.find(sensorNum);
     if (it == sensorThresholdMap.end())
     {
-        sensorThresholdMap[sensorNum] = getSensorThresholds(ctx, sensorNum);
+        auto resp = getSensorThresholds(ctx, sensorNum);
+        if (resp.validMask != 0)
+        {
+            sensorThresholdMap[sensorNum] = std::move(resp);
+        }
     }
 
     const auto& resp = sensorThresholdMap[sensorNum];
