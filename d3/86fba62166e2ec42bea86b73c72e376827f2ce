@@ -1,0 +1,9 @@
+Code-Review+1: George Liu <liuxiwei@ieisystem.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Vernon Mauery <vernon.mauery@linux.intel.com>
+Submitted-by: Hieu Huynh <hieuh@os.amperecomputing.com>
+Submitted-at: Tue, 01 Oct 2024 02:17:54 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/74471
+Comments-Total: 3
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
