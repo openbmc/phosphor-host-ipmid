@@ -52,6 +52,24 @@
       "parentUuid": "59c43a44_baae048d",
       "revId": "d69967b7829c6ecb420cdfa7468b951edad069ca",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "93239a30_a2aed7a0",
+        "filename": "include/ipmid/message.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-10-10T02:03:18Z",
+      "side": 1,
+      "message": "In openbmc-build-scripts/unit-test.py, -Db_lundef\u003dfalseis set when running testlog-ubasan[1], resulting in the sd_journal_sendv method in test/message/payload.cpp not being hit[2].\nSo here we set b_lundef to true in test/meson.build[3].\n\n[1]: https://gerrit.openbmc.org/c/openbmc/openbmc-build-scripts/+/16765/7/scripts/unit-test.py#728\n[2]: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/72847/7/test/message/payload.cpp#320\n[3]: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/72847/7/test/meson.build#60",
+      "parentUuid": "9049bd3d_ee9cc198",
+      "revId": "d69967b7829c6ecb420cdfa7468b951edad069ca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
