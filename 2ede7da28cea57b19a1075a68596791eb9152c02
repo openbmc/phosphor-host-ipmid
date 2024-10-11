@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a6eba4fa_56c8b3bd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2024-10-11T03:56:58Z",
+      "side": 1,
+      "message": "Do you have any comments for this commit? @Vernon",
+      "revId": "2ede7da28cea57b19a1075a68596791eb9152c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
