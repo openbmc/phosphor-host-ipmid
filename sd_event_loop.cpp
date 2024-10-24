@@ -239,7 +239,15 @@ int EventLoop::setupSocket(std::shared_ptr<sdbusplus::asio::connection>& bus,
 
 int EventLoop::startEventLoop()
 {
-    // set up boost::asio signal handling
+    startRmcpReceive();
+
+    io->run();
+
+    return EXIT_SUCCESS;
+}
+
+void EventLoop::setupSignal()
+{
     boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
     signals.async_wait([this](const boost::system::error_code& /* error */,
                               int /* signalNumber */) {
@@ -247,12 +255,6 @@ int EventLoop::startEventLoop()
         udpSocket->close();
         io->stop();
     });
-
-    startRmcpReceive();
-
-    io->run();
-
-    return EXIT_SUCCESS;
 }
 
 } // namespace eventloop

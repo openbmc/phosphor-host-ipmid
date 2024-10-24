@@ -91,6 +91,9 @@ int main(int argc, char* argv[])
     }
     sdbusp = std::make_shared<sdbusplus::asio::connection>(*io, bus);
 
+    auto& loop = eventloop::EventLoop::get();
+    loop.setupSignal();
+
     ipmi::ipmiChannelInit();
     if (channel.size())
     {
@@ -110,7 +113,6 @@ int main(int argc, char* argv[])
     // Register the phosphor-net-ipmid SOL commands
     sol::command::registerCommands();
 
-    auto& loop = eventloop::EventLoop::get();
     if (loop.setupSocket(sdbusp, channel))
     {
         return EXIT_FAILURE;

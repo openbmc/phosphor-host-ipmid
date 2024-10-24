@@ -87,6 +87,9 @@ class EventLoop
                     std::string iface,
                     uint16_t reqPort = ipmi::rmcpp::defaultPort);
 
+    /** @brief set up boost::asio signal handling */
+    void setupSignal();
+
   private:
     /** @brief async handler for incoming udp packets */
     void handleRmcpPacket();
