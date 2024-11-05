@@ -51,6 +51,114 @@
       "parentUuid": "01bf01c8_39ee8261",
       "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5c57fa94_08d1999c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-11-05T00:07:23Z",
+      "side": 1,
+      "message": "adding const to functions that don\u0027t change the object makes it easier to use const objects and const refs.",
+      "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a9cbd17b_fce71c14",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-11-05T00:07:23Z",
+      "side": 1,
+      "message": "It might be more appropriate to have an append_data function and make this return a const\u0026.",
+      "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd634de3_b5eedafc",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-11-05T00:07:23Z",
+      "side": 1,
+      "message": "Please don\u0027t use m as a prefix for member variables. Just give them names.",
+      "range": {
+        "startLine": 152,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 18
+      },
+      "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1b94c83d_dd6b00d7",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-11-05T00:07:23Z",
+      "side": 1,
+      "message": "const FruCache\u0026",
+      "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "228ab45e_3c5b60bb",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-11-05T00:07:23Z",
+      "side": 1,
+      "message": "Is there a retry mechanism for if the write failed?",
+      "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc0b92f7_4d4b4d4a",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-11-05T00:07:23Z",
+      "side": 1,
+      "message": "I think there\u0027s a race condition here between the write timer and modifying the fruCacheForWriting. Before calling getFru, you need to stop the write timer.",
+      "revId": "8ebb64d583ecad6df9ec63a1412539c4bcedded6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
