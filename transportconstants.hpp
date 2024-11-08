@@ -123,6 +123,9 @@ constexpr Cc ccParamReadOnly = 0x82;
 constexpr uint16_t VLAN_VALUE_MASK = 0x0fff;
 constexpr uint16_t VLAN_ENABLE_FLAG = 0x8000;
 
+// Arbitrary v4 Address Limits
+constexpr uint8_t MAX_IPV4_ADDRESSES = 2;
+
 // Arbitrary v6 Address Limits to prevent too much output in ipmitool
 constexpr uint8_t MAX_IPV6_STATIC_ADDRESSES = 15;
 constexpr uint8_t MAX_IPV6_DYNAMIC_ADDRESSES = 15;
