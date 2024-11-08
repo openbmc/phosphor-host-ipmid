@@ -277,7 +277,27 @@ void createIfAddr(sdbusplus::bus_t& bus, const ChannelParams& params,
  */
 auto getIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
 {
-    return getIfAddr<AF_INET>(bus, params, 0, originsV4);
+    std::optional<IfAddr<AF_INET>> ifaddr4 = std::nullopt;
+    sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin src =
+        std::get<bool>(getDbusProperty(bus, params.service, params.logicalPath,
+                                       INTF_ETHERNET, "DHCP4"))
+            ? sdbusplus::server::xyz::openbmc_project::network::IP::
+                  AddressOrigin::DHCP
+            : sdbusplus::server::xyz::openbmc_project::network::IP::
+                  AddressOrigin::Static;
+    for (uint8_t i = 0; i < MAX_IPV4_ADDRESSES; ++i)
+    {
+        ifaddr4 = getIfAddr<AF_INET>(bus, params, i, originsV4);
+        if (src == ifaddr4->origin)
+        {
+            break;
+        }
+        else
+        {
+            ifaddr4 = std::nullopt;
+        }
+    }
+    return ifaddr4;
 }
 
 /** @brief Reconfigures the IPv4 address info configured for the interface
