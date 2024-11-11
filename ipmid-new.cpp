@@ -764,41 +764,44 @@ void handleLegacyIpmiCommand(sdbusplus::message_t& m)
 {
     // make a copy so the next two moves don't wreak havoc on the stack
     sdbusplus::message_t b{m};
-    boost::asio::spawn(*getIoContext(), [b = std::move(b)](
-                                            boost::asio::yield_context yield) {
-        sdbusplus::message_t m{std::move(b)};
-        unsigned char seq = 0, netFn = 0, lun = 0, cmd = 0;
-        ipmi::SecureBuffer data;
+    boost::asio::spawn(
+        *getIoContext(),
+        [b = std::move(b)](boost::asio::yield_context yield) {
+            sdbusplus::message_t m{std::move(b)};
+            unsigned char seq = 0, netFn = 0, lun = 0, cmd = 0;
+            ipmi::SecureBuffer data;
 
-        m.read(seq, netFn, lun, cmd, data);
-        std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
-        auto ctx = std::make_shared<ipmi::Context>(
-            bus, netFn, lun, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, 0, yield);
-        auto request = std::make_shared<ipmi::message::Request>(
-            ctx, std::forward<ipmi::SecureBuffer>(data));
-        ipmi::message::Response::ptr response =
-            ipmi::executeIpmiCommand(request);
+            m.read(seq, netFn, lun, cmd, data);
+            std::shared_ptr<sdbusplus::asio::connection> bus = getSdBus();
+            auto ctx = std::make_shared<ipmi::Context>(
+                bus, netFn, lun, cmd, 0, 0, 0, ipmi::Privilege::Admin, 0, 0,
+                yield);
+            auto request = std::make_shared<ipmi::message::Request>(
+                ctx, std::forward<ipmi::SecureBuffer>(data));
+            ipmi::message::Response::ptr response =
+                ipmi::executeIpmiCommand(request);
 
-        // Responses in IPMI require a bit set.  So there ya go...
-        netFn |= 0x01;
+            // Responses in IPMI require a bit set.  So there ya go...
+            netFn |= 0x01;
 
-        const char *dest, *path;
-        constexpr const char* DBUS_INTF = "org.openbmc.HostIpmi";
+            const char *dest, *path;
+            constexpr const char* DBUS_INTF = "org.openbmc.HostIpmi";
 
-        dest = m.get_sender();
-        path = m.get_path();
-        boost::system::error_code ec;
-        bus->yield_method_call(yield, ec, dest, path, DBUS_INTF, "sendMessage",
-                               seq, netFn, lun, cmd, response->cc,
-                               response->payload.raw);
-        if (ec)
-        {
-            lg2::error(
-                "Failed to send response to requestor ({NETFN}/{CMD}): {ERROR}",
-                "ERROR", ec.message(), "SENDER", dest, "NETFN", lg2::hex, netFn,
-                "CMD", lg2::hex, cmd);
-        }
-    });
+            dest = m.get_sender();
+            path = m.get_path();
+            boost::system::error_code ec;
+            bus->yield_method_call(yield, ec, dest, path, DBUS_INTF,
+                                   "sendMessage", seq, netFn, lun, cmd,
+                                   response->cc, response->payload.raw);
+            if (ec)
+            {
+                lg2::error(
+                    "Failed to send response to requestor ({NETFN}/{CMD}): {ERROR}",
+                    "ERROR", ec.message(), "SENDER", dest, "NETFN", lg2::hex,
+                    netFn, "CMD", lg2::hex, cmd);
+            }
+        },
+        {});
 }
 
 #endif /* ALLOW_DEPRECATED_API */
