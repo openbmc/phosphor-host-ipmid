@@ -114,6 +114,7 @@ boost = dependency(
   'boost',
   modules: [
     'coroutine',
+    'context',
   ],
   required : false,
 )
