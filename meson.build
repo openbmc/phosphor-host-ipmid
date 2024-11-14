@@ -347,6 +347,7 @@ endif
 
 if not get_option('tests').disabled()
     subdir('test')
+    subdir('transport/serialbridge')
 endif
 
 install_subdir(
@@ -355,3 +356,6 @@ install_subdir(
     strip_directory: false,
     exclude_files: '*.cpp',
 )
+
+# HW Transport
+subdir('transport')
