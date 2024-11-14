@@ -251,8 +251,11 @@ void EventLoop::setupSignal()
     boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
     signals.async_wait([this](const boost::system::error_code& /* error */,
                               int /* signalNumber */) {
-        udpSocket->cancel();
-        udpSocket->close();
+        if (udpSocket)
+        {
+            udpSocket->cancel();
+            udpSocket->close();
+        }
         io->stop();
     });
 }
