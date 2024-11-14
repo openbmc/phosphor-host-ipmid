@@ -80,3 +80,11 @@ option('dynamic-storages-only', type: 'feature', value: 'disabled', description:
 
 # open-power specific functionality.
 option('open-power', type: 'feature', description: 'Support open-power specific functions')
+
+# HW transport
+option(
+    'transport-implementation',
+    type: 'combo',
+    choices: ['null', 'serial'],
+    description: 'transport'
+)
