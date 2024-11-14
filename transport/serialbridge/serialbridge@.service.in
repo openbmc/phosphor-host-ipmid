@@ -1,0 +1,18 @@
+[Unit]
+Description=Phosphor IPMI Serial DBus Bridge
+StartLimitBurst=3
+StartLimitIntervalSec=300
+After=phosphor-ipmi-host.service
+
+[Service]
+Restart=always
+RestartSec=10
+TimeoutStartSec=60
+TimeoutStopSec=60
+ExecStartPre=/bin/stty -F /dev/"%i" 115200 litout -crtscts -ixon -echo raw
+ExecStart=@BIN@ -d "%i"
+SyslogIdentifier=serialbridged-%i
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=
