@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3736db86_c979d240",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1740,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-11-16T02:26:11Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 1740,
+        "startChar": 0,
+        "endLine": 1740,
+        "endChar": 1
+      },
+      "revId": "b46bfa1bb0b090b161ac50ea0001f0e86b52829e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
