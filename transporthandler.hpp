@@ -338,14 +338,21 @@ std::optional<typename AddrFamily<family>::addr>
     getGatewayProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
 {
     auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
-    auto gatewayStr = std::get<std::string>(
-        getDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
-                        AddrFamily<family>::propertyGateway));
-    if (gatewayStr.empty())
+    try
     {
-        return std::nullopt;
+        auto gatewayStr = std::get<std::string>(
+            getDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
+                            AddrFamily<family>::propertyGateway));
+        if (!gatewayStr.empty())
+        {
+            return stdplus::fromStr<typename AddrFamily<family>::addr>(
+                gatewayStr);
+        }
     }
-    return stdplus::fromStr<typename AddrFamily<family>::addr>(gatewayStr);
+    catch (...)
+    {}
+
+    return std::nullopt;
 }
 
 template <int family>

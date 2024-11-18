@@ -180,12 +180,18 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
 
-    auto propValue = ipmi::getDbusProperty(
-        bus, service, sensorInfo.sensorPath,
-        sensorInfo.propertyInterfaces.begin()->first,
-        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+    try
+    {
+        auto propValue = ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)), &response);
+        setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)),
+                          &response);
+    }
+    catch (...)
+    {}
 
     return response;
 }
@@ -236,13 +242,22 @@ GetSensorResponse readingData(const Info& sensorInfo)
     }
 #endif
 
-    auto propValue = ipmi::getDbusProperty(
-        bus, service, sensorInfo.sensorPath,
-        sensorInfo.propertyInterfaces.begin()->first,
-        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+    double value{};
+    try
+    {
+        auto propValue = ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    double value = std::get<T>(propValue) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+        value = std::get<T>(propValue) *
+                std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+    }
+    catch (...)
+    {
+        return response;
+    }
+
     int32_t rawData =
         (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
 
