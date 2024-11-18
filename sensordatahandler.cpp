@@ -77,20 +77,31 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
 
     const auto& interfaceList = sensorInfo.propertyInterfaces;
 
-    for (const auto& interface : interfaceList)
+    for (const auto& [intf, propertyMap] : interfaceList)
     {
-        for (const auto& property : interface.second)
+        for (const auto& [property, values] : propertyMap)
         {
-            auto propValue = ipmi::getDbusProperty(
-                bus, service, path, interface.first, property.first);
-
-            for (const auto& value : std::get<OffsetValueMap>(property.second))
+            try
             {
-                if (propValue == value.second.assert)
+                auto propValue =
+                    ipmi::getDbusProperty(bus, service, path, intf, property);
+
+                for (const auto& value : std::get<OffsetValueMap>(values))
                 {
-                    setOffset(value.first, &response);
-                    break;
+                    if (propValue == value.second.assert)
+                    {
+                        setOffset(value.first, &response);
+                        break;
+                    }
                 }
+            }
+            catch (const std::exception& e)
+            {
+                lg2::error(
+                    "mapDbusToAssertion: Failed to get property, service: {SERVICE},"
+                    " path: {PATH}, interface: {INTERFACE}, property name: {PRONAME}: {ERROR}",
+                    "SERVICE", service, "PATH", path, "INTERFACE", intf,
+                    "PRONAME", property, "ERROR", e);
             }
         }
     }
@@ -110,21 +121,31 @@ GetSensorResponse mapDbusToEventdata2(const Info& sensorInfo)
 
     const auto& interfaceList = sensorInfo.propertyInterfaces;
 
-    for (const auto& interface : interfaceList)
+    for (const auto& [intf, propertyMap] : interfaceList)
     {
-        for (const auto& property : interface.second)
+        for (const auto& [property, values] : propertyMap)
         {
-            auto propValue =
-                ipmi::getDbusProperty(bus, service, sensorInfo.sensorPath,
-                                      interface.first, property.first);
-
-            for (const auto& value : std::get<OffsetValueMap>(property.second))
+            try
             {
-                if (propValue == value.second.assert)
+                auto propValue = ipmi::getDbusProperty(
+                    bus, service, sensorInfo.sensorPath, intf, property);
+
+                for (const auto& value : std::get<OffsetValueMap>(values))
                 {
-                    setReading(value.first, &response);
-                    break;
+                    if (propValue == value.second.assert)
+                    {
+                        setReading(value.first, &response);
+                        break;
+                    }
                 }
+            }
+            catch (const std::exception& e)
+            {
+                lg2::error(
+                    "mapDbusToEventdata2: Failed to get property, service: {SERVICE},"
+                    " path: {PATH}, interface: {INTERFACE}, property name: {PRONAME}: {ERROR}",
+                    "SERVICE", service, "PATH", sensorInfo.sensorPath,
+                    "INTERFACE", intf, "PRONAME", property, "ERROR", e);
             }
         }
     }

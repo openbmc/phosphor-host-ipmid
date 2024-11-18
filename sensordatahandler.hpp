@@ -176,16 +176,25 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
     GetSensorResponse response{};
 
     enableScanning(&response);
+    try
+    {
+        auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
+                                        sensorInfo.sensorPath);
+        auto propValue = ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
-                                    sensorInfo.sensorPath);
-
-    auto propValue = ipmi::getDbusProperty(
-        bus, service, sensorInfo.sensorPath,
-        sensorInfo.propertyInterfaces.begin()->first,
-        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
-
-    setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)), &response);
+        setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)),
+                          &response);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error(
+            "Failed to call readingAssertion, path: {PATH}, interface: {INTERFACE}: {ERROR}",
+            "PATH", sensorInfo.sensorPath, "INTERFACE",
+            sensorInfo.sensorInterface, "ERROR", e);
+    }
 
     return response;
 }
@@ -236,13 +245,26 @@ GetSensorResponse readingData(const Info& sensorInfo)
     }
 #endif
 
-    auto propValue = ipmi::getDbusProperty(
-        bus, service, sensorInfo.sensorPath,
-        sensorInfo.propertyInterfaces.begin()->first,
-        sensorInfo.propertyInterfaces.begin()->second.begin()->first);
+    double value{};
+    try
+    {
+        auto propValue = ipmi::getDbusProperty(
+            bus, service, sensorInfo.sensorPath,
+            sensorInfo.propertyInterfaces.begin()->first,
+            sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
-    double value = std::get<T>(propValue) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+        value = std::get<T>(propValue) *
+                std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error(
+            "Failed to call readingData, path: {PATH}, interface: {INTERFACE}: {ERROR}",
+            "PATH", sensorInfo.sensorPath, "INTERFACE",
+            sensorInfo.sensorInterface, "ERROR", e);
+        return response;
+    }
+
     int32_t rawData =
         (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
 
