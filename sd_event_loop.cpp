@@ -248,7 +248,7 @@ int EventLoop::startEventLoop()
 
 void EventLoop::setupSignal()
 {
-    boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
+    static boost::asio::signal_set signals(*io, SIGINT, SIGTERM);
     signals.async_wait([this](const boost::system::error_code& /* error */,
                               int /* signalNumber */) {
         if (udpSocket)
