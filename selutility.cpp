@@ -31,7 +31,7 @@ constexpr auto selDataSize = 3;
 constexpr auto oemCDDataSize = 9;
 constexpr auto oemEFDataSize = 13;
 
-constexpr auto propAdditionalData = "AdditionalData";
+constexpr auto propAdditionalData = "AdditionalData2";
 constexpr auto propResolved = "Resolved";
 
 constexpr auto strEventDir = "EVENT_DIR";
@@ -58,27 +58,6 @@ inline bool isRecordOEM(uint8_t recordType)
 
 using additionalDataMap = std::map<std::string, std::string>;
 using entryDataMap = std::map<PropertyName, PropertyType>;
-/** Parse the entry with format like key=val */
-std::pair<std::string, std::string> parseEntry(const std::string& entry)
-{
-    constexpr auto equalSign = "=";
-    auto pos = entry.find(equalSign);
-    assert(pos != std::string::npos);
-    auto key = entry.substr(0, pos);
-    auto val = entry.substr(pos + 1);
-    return {key, val};
-}
-
-additionalDataMap parseAdditionalData(const AdditionalData& data)
-{
-    std::map<std::string, std::string> ret;
-
-    for (const auto& d : data)
-    {
-        ret.insert(parseEntry(d));
-    }
-    return ret;
-}
 
 int convert(const std::string_view& str, int base = 10)
 {
@@ -237,10 +216,9 @@ GetSELEntryResponse
     {
         // Check if it's a SEL from phosphor-sel-logger which shall contain
         // the record ID, etc
-        const auto& addData = std::get<AdditionalData>(iterId->second);
-        m = parseAdditionalData(addData);
-        auto recordTypeIter = m.find(strRecordType);
-        if (recordTypeIter != m.end())
+        const auto& addData = std::get<AdditionalData2>(iterId->second);
+        auto recordTypeIter = addData.find(strRecordType);
+        if (recordTypeIter != addData.end())
         {
             // It is a SEL from phosphor-sel-logger
             isFromSELLogger = true;

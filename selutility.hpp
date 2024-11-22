@@ -37,8 +37,9 @@ using Id = uint32_t;
 using Timestamp = uint64_t;
 using Message = std::string;
 using AdditionalData = std::vector<std::string>;
-using PropertyType =
-    std::variant<Resolved, Id, Timestamp, Message, AdditionalData>;
+using AdditionalData2 = std::map<std::string, std::string>;
+using PropertyType = std::variant<Resolved, Id, Timestamp, Message,
+                                  AdditionalData, AdditionalData2>;
 
 static constexpr auto selVersion = 0x51;
 static constexpr auto invalidTimeStamp = 0xFFFFFFFF;
