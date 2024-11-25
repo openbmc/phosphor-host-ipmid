@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0944ea0b_d81ea5a7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2024-11-25T02:57:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f06fd6f4_ababb642",
+      "range": {
+        "startLine": 7,
+        "startChar": 16,
+        "endLine": 7,
+        "endChar": 48
+      },
+      "revId": "5ee12e96ee920700cdbd2ab9e93a130d605138d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a83f5730_d5cbfdc7",
@@ -61,6 +85,30 @@
       "side": 1,
       "message": "https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/yaml/xyz/openbmc_project/State/Chassis.interface.yaml",
       "parentUuid": "a83f5730_d5cbfdc7",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 22
+      },
+      "revId": "5ee12e96ee920700cdbd2ab9e93a130d605138d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "573953ae_e805a90a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2024-11-25T02:57:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54be4c19_1cbe939e",
       "range": {
         "startLine": 9,
         "startChar": 0,
