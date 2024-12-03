@@ -1,0 +1,226 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "75126bc8_94b64b16",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "Your interface doesn\u0027t have any methods, why create it at all?",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e3f245c_d22808ca",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "Rather than having this file as a loose association of variables and functions, held together with a namespace, make it more c++-like and use a class.",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "619c4d77_0b8a6c16",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "rather than a uint8_t* and length, it might be more appropriate to use a std::span\u003cuint8_t\u003e",
+      "range": {
+        "startLine": 46,
+        "startChar": 26,
+        "endLine": 46,
+        "endChar": 34
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "60a8f6f0_a1943a7b",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "This is more of a coding for fun and learning new things, but the escaped/unescaped streams seem to be begging to be implemented with std::ranges transformations and/or filters.",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "505abe3a_32119527",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "unescapedDataBytes.reserve(escapedDataBytes.size());",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9ed65da3_9fb4b2ec",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "before pushing things into the buffer, make a call to buffer.reserve(data.size() + encoding_extras_size) where encoding_extras_size is the size of all the extra bytes added to frame the packet (this includes the escape chars). This will eliminate the need for a realloc and copy. Instead of looping through buffer twice to determine the number of characters that need to be escaped, it is reasonable to just use buffer.size() * 2 plus the other header/trailer bytes.",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b5357157_899725fe",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "don\u0027t format the string and then log it, use lg2 as intended so it can log useful metadata as well:\n\n```\nlg2::info(\"Write serial request message with len\u003d{LEN}, netfn\u003d{NETFN}, \"\n          \"lun\u003d{LUN}, cmd\u003d{CMD}, seq\u003d{SEQ}\",\n          \"LEN\", requestBuffer.size(), \"NETFN\", netfn, \"LUN\", lun,\n          \"CMD\", cmd, \"SEQ\", seq);\n```",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5c91fc30_efa4ea48",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "use lg2 for all output to make sure stuff gets appropriately logged.",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "19073882_50d87274",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "serial",
+      "range": {
+        "startLine": 274,
+        "startChar": 21,
+        "endLine": 274,
+        "endChar": 28
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e0b25321_5bd1efca",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "don\u0027t format the string and then log it, use lg2 as intended so it can log useful metadata as well:\n\n```\nlg2::info(\"Read serial request message with len\u003d{LEN}, netfn\u003d{NETFN}, \"\n          \"lun\u003d{LUN}, cmd\u003d{CMD}, seq\u003d{SEQ}\",\n          \"LEN\", requestBuffer.size(), \"NETFN\", netfn, \"LUN\", lun,\n          \"CMD\", cmd, \"SEQ\", seq);\n```",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6899c2cc_b9ccd74e",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "please use static constexpr for values like this in a header file instead of c-style #define",
+      "range": {
+        "startLine": 7,
+        "startChar": 1,
+        "endLine": 17,
+        "endChar": 39
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "12591033_c1e89d8f",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-03T19:51:03Z",
+      "side": 1,
+      "message": "data should not be part of the \u0027header\u0027 struct.\n\nAlso, to ensure that your struct doesn\u0027t get word or dword aligned by the compiler, you might want to use ```__attribute__((packed))```",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
