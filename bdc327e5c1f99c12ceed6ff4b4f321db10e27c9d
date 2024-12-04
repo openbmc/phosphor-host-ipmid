@@ -3,6 +3,52 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6d54cb19_ff8777cf",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-12-04T07:24:18Z",
+      "side": 1,
+      "message": "I don\u0027t think this is necessary.",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 319,
+        "endChar": 34
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "24a94d77_53c92fdc",
+        "filename": "transport/serialbridge/meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-12-04T07:24:18Z",
+      "side": 1,
+      "message": "meson.build has been declared and can be used directly",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 35
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "75126bc8_94b64b16",
         "filename": "transport/serialbridge/serialbridged.cpp",
         "patchSetId": 1
@@ -14,6 +60,52 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "Your interface doesn\u0027t have any methods, why create it at all?",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c38ad48a_2ffce9d5",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-12-04T07:24:18Z",
+      "side": 1,
+      "message": "Hard-code is not a good choice. If the device parameter does not exist, we can exit directly.",
+      "range": {
+        "startLine": 85,
+        "startChar": 34,
+        "endLine": 85,
+        "endChar": 40
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b0a814ed_5dd295f8",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-12-04T07:24:18Z",
+      "side": 1,
+      "message": "lg2::error?",
+      "range": {
+        "startLine": 97,
+        "startChar": 8,
+        "endLine": 97,
+        "endChar": 22
+      },
       "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -128,6 +220,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "8e131074_08f8b4d7",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-12-04T07:24:18Z",
+      "side": 1,
+      "message": "No need for c_str() at all.",
+      "range": {
+        "startLine": 232,
+        "startChar": 22,
+        "endLine": 232,
+        "endChar": 37
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "5c91fc30_efa4ea48",
         "filename": "transport/serialbridge/serialcmd.cpp",
         "patchSetId": 1
@@ -196,6 +311,30 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "please use static constexpr for values like this in a header file instead of c-style #define",
+      "range": {
+        "startLine": 7,
+        "startChar": 1,
+        "endLine": 17,
+        "endChar": 39
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "64dd0840_8053fd5d",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2024-12-04T07:24:18Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "6899c2cc_b9ccd74e",
       "range": {
         "startLine": 7,
         "startChar": 1,
