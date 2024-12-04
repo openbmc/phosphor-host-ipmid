@@ -16,6 +16,23 @@
       "message": "LGTM",
       "revId": "609f601842b690d971d3cded05732a296a37df02",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "df947775_e0a34f8d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001526
+      },
+      "writtenOn": "2024-12-04T08:26:46Z",
+      "side": 1,
+      "message": "Hi, there\u0027s request not to hardcode the object path of intrusion sensor in dbus-sensors (https://gerrit.openbmc.org/c/openbmc/dbus-sensors/+/68060/11) and might affect this. I plan to fix it within this CL. Moreover, PDIs class and getSubTree shall be used instead of getting DBus property directly. Can we withhold this one until then so everything can be completed with this one CL?",
+      "revId": "609f601842b690d971d3cded05732a296a37df02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
