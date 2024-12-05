@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "154c46f9_3e74fb6d",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "It used to build `serialbridge` and its unit test since the default transport is null. So it will not build in CI test.",
+      "parentUuid": "6d54cb19_ff8777cf",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 319,
+        "endChar": 34
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "24a94d77_53c92fdc",
         "filename": "transport/serialbridge/meson.build",
         "patchSetId": 1
@@ -37,6 +61,30 @@
       "writtenOn": "2024-12-04T07:24:18Z",
       "side": 1,
       "message": "meson.build has been declared and can be used directly",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 35
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ed3ed87d_fddabd9c",
+        "filename": "transport/serialbridge/meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "24a94d77_53c92fdc",
       "range": {
         "startLine": 1,
         "startChar": 0,
@@ -64,6 +112,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec14ce46_0f8919fe",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acked. I thought it was needed for `ipmid`, but actually it doesnot. Removed.",
+      "parentUuid": "75126bc8_94b64b16",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c38ad48a_2ffce9d5",
@@ -77,6 +143,30 @@
       "writtenOn": "2024-12-04T07:24:18Z",
       "side": 1,
       "message": "Hard-code is not a good choice. If the device parameter does not exist, we can exit directly.",
+      "range": {
+        "startLine": 85,
+        "startChar": 34,
+        "endLine": 85,
+        "endChar": 40
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "95f1f93f_e40ecb3a",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "c38ad48a_2ffce9d5",
       "range": {
         "startLine": 85,
         "startChar": 34,
@@ -110,6 +200,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bb5f6bb6_7443265a",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "b0a814ed_5dd295f8",
+      "range": {
+        "startLine": 97,
+        "startChar": 8,
+        "endLine": 97,
+        "endChar": 22
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5e3f245c_d22808ca",
@@ -127,6 +241,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a1f3b8db_5e849fa0",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "5e3f245c_d22808ca",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "619c4d77_0b8a6c16",
@@ -140,6 +272,30 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "rather than a uint8_t* and length, it might be more appropriate to use a std::span\u003cuint8_t\u003e",
+      "range": {
+        "startLine": 46,
+        "startChar": 26,
+        "endLine": 46,
+        "endChar": 34
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b6eeef08_9b922c33",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "619c4d77_0b8a6c16",
       "range": {
         "startLine": 46,
         "startChar": 26,
@@ -169,6 +325,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "75e9710f_1889a660",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "It needs to add extra byte before the escaped byte. Transform might not be able to handle. Move to use `for_each` to iterate byte stream.",
+      "parentUuid": "60a8f6f0_a1943a7b",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "505abe3a_32119527",
         "filename": "transport/serialbridge/serialcmd.cpp",
         "patchSetId": 1
@@ -180,6 +354,24 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "unescapedDataBytes.reserve(escapedDataBytes.size());",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "29fbd943_ed10272f",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "505abe3a_32119527",
       "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -201,6 +393,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b090ecd_d4ff500e",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "9ed65da3_9fb4b2ec",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b5357157_899725fe",
@@ -214,6 +424,24 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "don\u0027t format the string and then log it, use lg2 as intended so it can log useful metadata as well:\n\n```\nlg2::info(\"Write serial request message with len\u003d{LEN}, netfn\u003d{NETFN}, \"\n          \"lun\u003d{LUN}, cmd\u003d{CMD}, seq\u003d{SEQ}\",\n          \"LEN\", requestBuffer.size(), \"NETFN\", netfn, \"LUN\", lun,\n          \"CMD\", cmd, \"SEQ\", seq);\n```",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f298b7f7_e07fca4e",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "b5357157_899725fe",
       "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -241,6 +469,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee551e34_419b9b93",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "It seems need to use `c_str()`. Otherwise, it got a compiler error.",
+      "parentUuid": "8e131074_08f8b4d7",
+      "range": {
+        "startLine": 232,
+        "startChar": 22,
+        "endLine": 232,
+        "endChar": 37
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5c91fc30_efa4ea48",
@@ -254,6 +506,24 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "use lg2 for all output to make sure stuff gets appropriately logged.",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7dbd753_61899535",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "5c91fc30_efa4ea48",
       "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -281,6 +551,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "25dd4679_30058a17",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "19073882_50d87274",
+      "range": {
+        "startLine": 274,
+        "startChar": 21,
+        "endLine": 274,
+        "endChar": 28
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e0b25321_5bd1efca",
@@ -294,6 +588,24 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "don\u0027t format the string and then log it, use lg2 as intended so it can log useful metadata as well:\n\n```\nlg2::info(\"Read serial request message with len\u003d{LEN}, netfn\u003d{NETFN}, \"\n          \"lun\u003d{LUN}, cmd\u003d{CMD}, seq\u003d{SEQ}\",\n          \"LEN\", requestBuffer.size(), \"NETFN\", netfn, \"LUN\", lun,\n          \"CMD\", cmd, \"SEQ\", seq);\n```",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6418e6fe_b75ce81b",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "e0b25321_5bd1efca",
       "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -345,6 +657,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "03841672_9fa79ab7",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "64dd0840_8053fd5d",
+      "range": {
+        "startLine": 7,
+        "startChar": 1,
+        "endLine": 17,
+        "endChar": 39
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "12591033_c1e89d8f",
@@ -358,6 +694,24 @@
       "writtenOn": "2024-12-03T19:51:03Z",
       "side": 1,
       "message": "data should not be part of the \u0027header\u0027 struct.\n\nAlso, to ensure that your struct doesn\u0027t get word or dword aligned by the compiler, you might want to use ```__attribute__((packed))```",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9c9d4606_db9f2eb7",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2024-12-05T21:01:19Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "12591033_c1e89d8f",
       "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
