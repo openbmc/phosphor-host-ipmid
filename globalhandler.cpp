@@ -1,5 +1,3 @@
-#include "globalhandler.hpp"
-
 #include <ipmid/api.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/lg2.hpp>
