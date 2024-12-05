@@ -103,7 +103,6 @@ enum ipmi_net_fns
 // Return (completion) codes from a IPMI operation as needed by IPMI V2.0 spec.
 enum ipmi_return_codes
 {
-    IPMI_CC_OK = 0x00,
     IPMI_DCMI_CC_NO_ACTIVE_POWER_LIMIT = 0x80,
     IPMI_WDOG_CC_NOT_INIT = 0x80,
     IPMI_CC_SYSTEM_INFO_PARAMETER_NOT_SUPPORTED = 0x80,

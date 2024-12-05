@@ -542,7 +542,7 @@ ipmi::RspType<uint16_t, // inventorySize
 ipmi_ret_t getFruSdrCount(ipmi::Context::ptr, size_t& count)
 {
     count = deviceHashes.size();
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
@@ -733,7 +733,7 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     resp.body.deviceIDLen = ipmi::storage::typeASCIILatin8 | name.size();
     name.copy(resp.body.deviceID, name.size());
 
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 static bool getSELLogFiles(std::vector<std::filesystem::path>& selLogFiles)
