@@ -21,7 +21,7 @@ void ipmi_register_callback(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
                             ipmi_cmd_privilege_t priv)
 {
     EXPECT_EQ(NETFUN_OEM_GROUP, netfn);
-    EXPECT_EQ(IPMI_CMD_WILDCARD, cmd);
+    EXPECT_EQ(cmdWildcard, cmd);
     EXPECT_EQ(reinterpret_cast<void*>(singletonUnderTest), context);
     EXPECT_EQ(PRIVILEGE_OEM, priv);
     lastNetFunction = netfn;
@@ -75,7 +75,7 @@ void RegisterTwoWays(ipmi_cmd_t* nextCmd)
     };
     RegisterWithRouter(0x123456, 0x78, f);
 
-    *nextCmd = IPMI_CMD_WILDCARD;
+    *nextCmd = cmdWildcard;
     Handler g = [nextCmd](ipmi_cmd_t cmd, const uint8_t* reqBuf,
                           uint8_t* replyBuf, size_t* dataLen) {
         // Check inputs
@@ -92,7 +92,7 @@ void RegisterTwoWays(ipmi_cmd_t* nextCmd)
         *dataLen = 0;
         return 0;
     };
-    RegisterWithRouter(0x234567, IPMI_CMD_WILDCARD, g);
+    RegisterWithRouter(0x234567, cmdWildcard, g);
 }
 } // namespace
 

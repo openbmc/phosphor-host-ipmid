@@ -100,14 +100,6 @@ enum ipmi_net_fns
     NETFUN_IBM_OEM = 0x3A
 };
 
-// IPMI commands for net functions. Since this is to be used both by the ipmi
-// function router and also the callback handler registration function, its put
-// in this .H file.
-enum ipmi_netfn_wild_card_cmd
-{
-    IPMI_CMD_WILDCARD = 0xFF,
-};
-
 // Return (completion) codes from a IPMI operation as needed by IPMI V2.0 spec.
 enum ipmi_return_codes
 {

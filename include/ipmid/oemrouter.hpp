@@ -36,7 +36,7 @@ class Router
     virtual void activate() = 0;
 
     /// Register a handler for given OEMNumber & cmd.
-    /// Use IPMI_CMD_WILDCARD to catch any unregistered cmd
+    /// Use cmdWildcard to catch any unregistered cmd
     /// for the given OEMNumber.
     ///
     /// @param[in] oen - the OEM Number.
