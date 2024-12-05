@@ -4,22 +4,6 @@
 
 #include <cstddef>
 
-// IPMI commands for Chassis net functions.
-enum ipmi_netfn_chassis_cmds
-{
-    IPMI_CMD_GET_CHASSIS_CAP = 0x00,
-    // Chassis Status
-    IPMI_CMD_CHASSIS_STATUS = 0x01,
-    // Chassis Control
-    IPMI_CMD_CHASSIS_CONTROL = 0x02,
-    IPMI_CMD_CHASSIS_IDENTIFY = 0x04,
-    IPMI_CMD_SET_CHASSIS_CAP = 0x05,
-    // Get capability bits
-    IPMI_CMD_SET_SYS_BOOT_OPTIONS = 0x08,
-    IPMI_CMD_GET_SYS_BOOT_OPTIONS = 0x09,
-    IPMI_CMD_GET_POH_COUNTER = 0x0F,
-};
-
 // Command specific completion codes
 enum ipmi_chassis_return_codes
 {
