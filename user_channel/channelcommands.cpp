@@ -14,7 +14,6 @@
 // limitations under the License.
 */
 
-#include "apphandler.hpp"
 #include "channel_layer.hpp"
 
 #include <ipmid/api.hpp>

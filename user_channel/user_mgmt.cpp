@@ -15,7 +15,6 @@
 */
 #include "user_mgmt.hpp"
 
-#include "apphandler.hpp"
 #include "channel_layer.hpp"
 #include "channel_mgmt.hpp"
 

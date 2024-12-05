@@ -16,7 +16,6 @@
 
 #include "usercommands.hpp"
 
-#include "apphandler.hpp"
 #include "channel_layer.hpp"
 #include "user_layer.hpp"
 
