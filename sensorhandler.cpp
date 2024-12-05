@@ -1160,7 +1160,7 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     strncpy(body->id_string, id_string.c_str(),
             get_sdr::body::get_id_strlen(body));
 
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 };
 
 ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
@@ -1251,7 +1251,7 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     *data_len = dataLength;
     *data_len += 2; // additional 2 bytes for next record ID
 
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
@@ -1324,14 +1324,14 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     *data_len = dataLength;
     *data_len += 2; // additional 2 bytes for next record ID
 
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
                             ipmi_response_t response, ipmi_data_len_t data_len,
                             ipmi_context_t)
 {
-    ipmi_ret_t ret = IPMI_CC_OK;
+    ipmi_ret_t ret = ipmi::ccSuccess;
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
     get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
 
@@ -1523,7 +1523,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
         lg2::error("exception message: {ERROR}", "ERROR", e);
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 void register_netfn_sen_functions()
