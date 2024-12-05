@@ -691,7 +691,7 @@ int getOtherSensorsDataRecord(ipmi::Context::ptr ctx, uint16_t recordID,
         // handle fru records
         get_sdr::SensorDataFruRecord data;
         if (ipmi::Cc ret = ipmi::storage::getFruSdrs(ctx, sdrIndex, data);
-            ret != IPMI_CC_OK)
+            ret != ipmi::ccSuccess)
         {
             return GENERAL_ERROR;
         }

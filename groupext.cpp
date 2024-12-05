@@ -10,7 +10,7 @@ ipmi_ret_t ipmi_groupext(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
                          ipmi_context_t)
 {
     // Generic return from IPMI commands.
-    ipmi_ret_t rc = IPMI_CC_OK;
+    ipmi_ret_t rc = ipmi::ccSuccess;
     uint8_t* p = (uint8_t*)response;
 
     std::printf("IPMI GROUP EXTENSIONS\n");

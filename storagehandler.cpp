@@ -386,7 +386,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         *data_len = sizeof(nextRecordID) + readLength;
     }
 
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 /** @brief implements the delete SEL entry command

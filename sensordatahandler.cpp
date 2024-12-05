@@ -44,7 +44,7 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
         commit<InternalFailure>();
         return IPMI_CC_UNSPECIFIED_ERROR;
     }
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 namespace get
@@ -267,7 +267,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
         }
     }
 
-    return IPMI_CC_OK;
+    return ipmi::ccSuccess;
 }
 
 } // namespace set
@@ -323,7 +323,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     // Skip update if skipOn is ASSERT
                     if (SkipAssertion::ASSERT == value.second.skip)
                     {
-                        return IPMI_CC_OK;
+                        return ipmi::ccSuccess;
                     }
                     result = result && std::get<bool>(value.second.assert);
                     valid = true;
@@ -333,7 +333,7 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
                     // Skip update if skipOn is DEASSERT
                     if (SkipAssertion::DEASSERT == value.second.skip)
                     {
-                        return IPMI_CC_OK;
+                        return ipmi::ccSuccess;
                     }
                     result = result && std::get<bool>(value.second.deassert);
                     valid = true;
