@@ -1,6 +1,5 @@
 #include "error-HostEvent.hpp"
 #include "sensorhandler.hpp"
-#include "storagehandler.hpp"
 
 #include <systemd/sd-bus.h>
 

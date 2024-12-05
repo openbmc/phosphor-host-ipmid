@@ -1,7 +1,5 @@
 #include "config.h"
 
-#include "storagehandler.hpp"
-
 #include "fruread.hpp"
 #include "read_fru_data.hpp"
 #include "selutility.hpp"
@@ -894,7 +892,7 @@ void register_netfn_storage_functions()
                           ipmiStorageGetSelTimeUtcOffset);
 
     // <Get SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
+    ipmi_register_callback(NETFUN_STORAGE, ipmi::storage::cmdGetSelEntry, NULL,
                            getSELEntry, PRIVILEGE_USER);
 
     // <Delete SEL Entry>
@@ -935,7 +933,7 @@ void register_netfn_storage_functions()
                           ipmi::Privilege::User, ipmiSensorReserveSdr);
 
     // <Get SDR>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SDR, nullptr,
+    ipmi_register_callback(NETFUN_STORAGE, ipmi::storage::cmdGetSdr, nullptr,
                            ipmi_sen_get_sdr, PRIVILEGE_USER);
 
 #endif
