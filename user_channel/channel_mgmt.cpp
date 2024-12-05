@@ -16,7 +16,6 @@
 
 #include "channel_mgmt.hpp"
 
-#include "apphandler.hpp"
 #include "user_layer.hpp"
 
 #include <ifaddrs.h>
