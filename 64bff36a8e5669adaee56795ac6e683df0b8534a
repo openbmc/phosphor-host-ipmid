@@ -16,6 +16,24 @@
       "message": "Ipmid is a client, you should include \u003cxyz/openbmc_project/Chassis/Intrusion/client.hpp\u003e instead.",
       "revId": "64bff36a8e5669adaee56795ac6e683df0b8534a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e5c0ae17_d673e88d",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001526
+      },
+      "writtenOn": "2024-12-06T08:02:15Z",
+      "side": 1,
+      "message": "Agreed. Updated the patch to enlist the client class. However, I see there are still many server classes used here. Are these bugs?",
+      "parentUuid": "053d486d_efd4dc52",
+      "revId": "64bff36a8e5669adaee56795ac6e683df0b8534a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
