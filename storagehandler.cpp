@@ -380,10 +380,17 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
 
         std::memcpy(response, &record.nextRecordID,
                     sizeof(record.nextRecordID));
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Waddress-of-packed-member"
+#endif
         std::memcpy(static_cast<uint8_t*>(response) +
                         sizeof(record.nextRecordID),
                     &record.event.eventRecord.recordID + requestData->offset,
                     readLength);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
         *data_len = sizeof(record.nextRecordID) + readLength;
     }
 
