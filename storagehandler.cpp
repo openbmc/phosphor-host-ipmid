@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
@@ -380,9 +381,11 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
 
         std::memcpy(response, &record.nextRecordID,
                     sizeof(record.nextRecordID));
+        auto tempRecordID = record.event.eventRecord.recordID;
         std::memcpy(static_cast<uint8_t*>(response) +
                         sizeof(record.nextRecordID),
-                    &record.event.eventRecord.recordID + requestData->offset,
+                    reinterpret_cast<const uint8_t*>(&tempRecordID) +
+                        requestData->offset,
                     readLength);
         *data_len = sizeof(record.nextRecordID) + readLength;
     }
