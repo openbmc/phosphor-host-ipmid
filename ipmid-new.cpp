@@ -394,11 +394,11 @@ void updateOwners(sdbusplus::asio::connection& conn, const std::string& name)
         name);
 }
 
-void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
+void doListNames(sdbusplus::asio::connection& conn)
 {
     conn.async_method_call(
-        [&io, &conn](const boost::system::error_code ec,
-                     std::vector<std::string> busNames) {
+        [&conn](const boost::system::error_code ec,
+                std::vector<std::string> busNames) {
             if (ec)
             {
                 lg2::error("Error getting dbus names: {ERROR}", "ERROR",
@@ -871,7 +871,7 @@ int main(int argc, char* argv[])
             sdbusplus::bus::match::rules::arg0namespace(
                 ipmi::ipmiDbusChannelMatch),
         ipmi::nameChangeHandler);
-    ipmi::doListNames(*io, *sdbusp);
+    ipmi::doListNames(*sdbusp);
 
     int exitCode = 0;
     // set up boost::asio signal handling
