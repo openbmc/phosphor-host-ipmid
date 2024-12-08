@@ -634,7 +634,15 @@ ipmi::RspType<uint8_t,  // Device ID
     static bool dev_id_initialized = false;
     static bool defaultActivationSetting = true;
     const char* filename = "/usr/share/ipmi-providers/dev_id.json";
+    // Warning Fix Suggest Braces Around Initialization
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
     constexpr auto ipmiDevIdStateShift = 7;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     constexpr auto ipmiDevIdFw1Mask = ~(1 << ipmiDevIdStateShift);
 
 #ifdef GET_DBUS_ACTIVE_SOFTWARE
