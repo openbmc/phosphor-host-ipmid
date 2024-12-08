@@ -503,6 +503,11 @@ typedef struct
 /*           |------------------------ Major (2), index 1                   */
 int convertVersion(std::string s, Revision& rev)
 {
+// To disable the dangling pointer warning.
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdangling-gsl"
+#endif
     static const std::vector<size_t> matches = {
         MAJOR_MATCH_INDEX, MINOR_MATCH_INDEX, AUX_0_MATCH_INDEX,
         AUX_1_MATCH_INDEX, AUX_2_MATCH_INDEX, AUX_3_MATCH_INDEX};
@@ -584,6 +589,9 @@ int convertVersion(std::string s, Revision& rev)
     }
 
     return -1;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 }
 
 /* @brief: Implement the Get Device ID IPMI command per the IPMI spec
