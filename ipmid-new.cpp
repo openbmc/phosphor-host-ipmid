@@ -395,6 +395,10 @@ void updateOwners(sdbusplus::asio::connection& conn, const std::string& name)
 
 void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
 {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-lambda-capture"
+#endif
     conn.async_method_call(
         [&io, &conn](const boost::system::error_code ec,
                      std::vector<std::string> busNames) {
@@ -420,6 +424,9 @@ void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
         },
         "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
         "ListNames");
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 }
 
 void nameChangeHandler(sdbusplus::message_t& message)
