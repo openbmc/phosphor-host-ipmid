@@ -520,7 +520,7 @@ int convertVersion(std::string s, Revision& rev)
 
         // convert major
         {
-            std::string_view str = m[matches[0]].str();
+            std::string str = m[matches[0]].str();
             auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
             if (ec != std::errc() || ptr != str.begin() + str.size())
             { // failed to convert major string
