@@ -637,7 +637,7 @@ ipmi::RspType<uint8_t,  // Device ID
     if (!haveBMCVersion || !dev_id_initialized)
     {
         int r = -1;
-        Revision rev = {0, 0, 0, 0};
+        Revision rev = {0, 0, {0, 0, 0, 0}};
         try
         {
             auto version = getActiveSoftwareVersionInfo(ctx);
