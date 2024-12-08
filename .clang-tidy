@@ -1,0 +1,13 @@
+Checks: '
+-*,
+bugprone-unchecked-optional-access,
+modernize-use-nullptr,
+'
+
+# Treat all warnings as errors
+WarningsAsErrors: '*'
+
+# Apply checks to all files
+HeaderFilterRegex: '(?!^subprojects).*'
+
+CheckOptions: []
