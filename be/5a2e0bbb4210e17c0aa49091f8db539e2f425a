@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Vernon Mauery <vernon.mauery@linux.intel.com>
+Submitted-by: Patrick Williams <patrick@stwcx.xyz>
+Submitted-at: Wed, 11 Dec 2024 19:37:11 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/76009
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
