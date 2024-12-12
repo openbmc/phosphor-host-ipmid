@@ -31,7 +31,7 @@ constexpr auto selDataSize = 3;
 constexpr auto oemCDDataSize = 9;
 constexpr auto oemEFDataSize = 13;
 
-constexpr auto propAdditionalData = "AdditionalData2";
+constexpr auto propAdditionalData = "AdditionalData";
 constexpr auto propResolved = "Resolved";
 
 constexpr auto strEventDir = "EVENT_DIR";
@@ -216,7 +216,7 @@ GetSELEntryResponse
     {
         // Check if it's a SEL from phosphor-sel-logger which shall contain
         // the record ID, etc
-        const auto& addData = std::get<AdditionalData2>(iterId->second);
+        const auto& addData = std::get<AdditionalData>(iterId->second);
         auto recordTypeIter = addData.find(strRecordType);
         if (recordTypeIter != addData.end())
         {
