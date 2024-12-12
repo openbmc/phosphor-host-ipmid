@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2a3841e7_a16a451a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-12-12T14:41:28Z",
+      "side": 1,
+      "message": "Do not sprinkle pragmas around the codebase.  Fix the issues or don\u0027t use the tools.",
+      "revId": "20ec6e6aba139c7521d3c70282f6a29470024179",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
