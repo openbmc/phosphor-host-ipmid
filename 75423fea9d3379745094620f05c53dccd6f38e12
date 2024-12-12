@@ -16,6 +16,23 @@
       "message": "Do not sprinkle pragmas around the codebase.  Fix the issues or don\u0027t use the tools.",
       "revId": "75423fea9d3379745094620f05c53dccd6f38e12",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7cd2c5c6_76790142",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2024-12-12T19:56:01Z",
+      "side": 1,
+      "message": "correct change is to make str a proper string instead of a string_view. \n\nThe error message is saying that once m[matches[0]].str() finishes executing (and assigning to the string_view), it will deconstruct, which means that the string_view will be left with dangling references to a string that doesn\u0027t exist. By making str a std::string, it will keep that string alive while it is being used.\n\nSame goes for the other matches below.",
+      "revId": "75423fea9d3379745094620f05c53dccd6f38e12",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
