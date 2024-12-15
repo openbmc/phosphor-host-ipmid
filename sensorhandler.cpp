@@ -269,7 +269,7 @@ int set_sensor_dbus_state_s(uint8_t number, const char* method,
     dbus_interface_t a;
     int r;
     sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message* m = NULL;
+    sd_bus_message* m = nullptr;
 
     r = find_openbmc_path(number, &a);
 
@@ -296,7 +296,7 @@ int set_sensor_dbus_state_s(uint8_t number, const char* method,
         goto final;
     }
 
-    r = sd_bus_call(bus, m, 0, &error, NULL);
+    r = sd_bus_call(bus, m, 0, &error, nullptr);
     if (r < 0)
     {
         std::fprintf(stderr, "Failed to call the method: %s", strerror(-r));
@@ -314,7 +314,7 @@ int set_sensor_dbus_state_y(uint8_t number, const char* method,
     dbus_interface_t a;
     int r;
     sd_bus_error error = SD_BUS_ERROR_NULL;
-    sd_bus_message* m = NULL;
+    sd_bus_message* m = nullptr;
 
     r = find_openbmc_path(number, &a);
 
@@ -341,7 +341,7 @@ int set_sensor_dbus_state_y(uint8_t number, const char* method,
         goto final;
     }
 
-    r = sd_bus_call(bus, m, 0, &error, NULL);
+    r = sd_bus_call(bus, m, 0, &error, nullptr);
     if (r < 0)
     {
         std::fprintf(stderr, "12 Failed to call the method: %s", strerror(-r));

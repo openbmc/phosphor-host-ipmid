@@ -244,7 +244,7 @@ lookup_t g_ipmidbuslookup[] = {
     {0x12, 0x04, set_sensor_dbus_state_system_event, "setValue", "", ""},
     {0xCA, 0x00, set_sensor_dbus_state_simple, "setValue", "Disabled", ""},
     {0xCA, 0x01, set_sensor_dbus_state_simple, "setValue", "Enabled", ""},
-    {0xFF, 0xFF, NULL, "", "", ""}};
+    {0xFF, 0xFF, nullptr, "", "", ""}};
 
 void reportSensorEventAssert(const sensorRES_t* pRec, int index)
 {

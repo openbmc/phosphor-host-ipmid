@@ -952,7 +952,7 @@ int ChannelConfig::loadChannelConfig()
             if (jsonChInfo[mediumTypeString].get<std::string>() == "lan-802.3")
             {
                 channelFound = false;
-                for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+                for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next)
                 {
                     if (jsonChData[nameString].get<std::string>() ==
                         ifa->ifa_name)
