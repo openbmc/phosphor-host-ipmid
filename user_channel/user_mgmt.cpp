@@ -685,7 +685,7 @@ int pamUpdatePasswd(const char* username, const char* password)
 {
     const struct pam_conv localConversation = {pamFunctionConversation,
                                                const_cast<char*>(password)};
-    pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
+    pam_handle_t* localAuthHandle = nullptr; // this gets set by pam_start
 
     int retval =
         pam_start("passwd", username, &localConversation, &localAuthHandle);
@@ -711,7 +711,7 @@ bool pamUserCheckAuthenticate(std::string_view username,
     const struct pam_conv localConversation = {
         pamFunctionConversation, const_cast<char*>(password.data())};
 
-    pam_handle_t* localAuthHandle = NULL; // this gets set by pam_start
+    pam_handle_t* localAuthHandle = nullptr; // this gets set by pam_start
 
     if (pam_start("dropbear", username.data(), &localConversation,
                   &localAuthHandle) != PAM_SUCCESS)
