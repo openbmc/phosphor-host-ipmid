@@ -24,7 +24,7 @@ ipmi_ret_t ipmi_groupext(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
 void register_netfn_groupext_functions()
 {
     // <Group Extension Command>
-    ipmi_register_callback(NETFUN_GRPEXT, GRPEXT_GET_GROUP_CMD, NULL,
+    ipmi_register_callback(NETFUN_GRPEXT, GRPEXT_GET_GROUP_CMD, nullptr,
                            ipmi_groupext, PRIVILEGE_USER);
 
     return;

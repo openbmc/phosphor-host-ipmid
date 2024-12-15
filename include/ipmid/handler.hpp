@@ -90,8 +90,8 @@ class HandlerException : public HandlerCompletion, public std::runtime_error
 static inline const char* currentExceptionType()
 {
     int status;
-    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0,
-                               0, &status);
+    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(),
+                               nullptr, nullptr, &status);
 }
 
 /**

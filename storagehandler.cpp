@@ -894,7 +894,7 @@ void register_netfn_storage_functions()
                           ipmiStorageGetSelTimeUtcOffset);
 
     // <Get SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, NULL,
+    ipmi_register_callback(NETFUN_STORAGE, IPMI_CMD_GET_SEL_ENTRY, nullptr,
                            getSELEntry, PRIVILEGE_USER);
 
     // <Delete SEL Entry>
