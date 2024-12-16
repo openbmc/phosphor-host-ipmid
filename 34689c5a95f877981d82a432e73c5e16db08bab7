@@ -16,6 +16,24 @@
       "message": "Do not sprinkle pragmas around the codebase.  Fix the issues or don\u0027t use the tools.",
       "revId": "34689c5a95f877981d82a432e73c5e16db08bab7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b1652c75_3864bd8e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2024-12-16T02:54:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11043cf5_b6081236",
+      "revId": "34689c5a95f877981d82a432e73c5e16db08bab7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
