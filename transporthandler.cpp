@@ -271,7 +271,7 @@ auto getIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
     for (uint8_t i = 0; i < MAX_IPV4_ADDRESSES; ++i)
     {
         ifaddr4 = getIfAddr<AF_INET>(bus, params, i, originsV4);
-        if (src == ifaddr4->origin)
+        if (ifaddr4 && src == ifaddr4->origin)
         {
             break;
         }
@@ -301,12 +301,14 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
         elog<InternalFailure>();
     }
     uint8_t fallbackPrefix = AddrFamily<AF_INET>::defaultPrefix;
+    auto addr = stdplus::In4Addr{};
     if (ifaddr)
     {
+        addr = ifaddr->address;
         fallbackPrefix = ifaddr->prefix;
         deleteObjectIfExists(bus, params.service, ifaddr->path);
     }
-    auto addr = address.value_or(ifaddr->address);
+    addr = address.value_or(addr);
     if (addr != stdplus::In4Addr{})
     {
         createIfAddr<AF_INET>(bus, params, addr,
