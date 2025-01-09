@@ -1807,6 +1807,7 @@ static uint8_t transferStatus = setComplete;
 static uint8_t bootFlagValidBitClr = 0;
 static uint5_t bootInitiatorAckData = 0x0;
 static bool cmosClear = false;
+static uint2_t biosVerbosity = 0x0;
 
 /** @brief implements the Get Chassis system boot option
  *  @param ctx - context pointer
@@ -1932,11 +1933,12 @@ ipmi::RspType<ipmi::message::Payload> ipmiChassisGetSysBootOptions(
 
             uint1_t validFlag = valid ? 1 : 0;
 
+            uint8_t data3 = static_cast<uint8_t>(biosVerbosity) << 5;
+
             response.pack(bootOptionParameter, reserved1, uint5_t{},
                           uint1_t{biosBootType}, uint1_t{permanent},
                           uint1_t{validFlag}, uint2_t{}, uint4_t{bootOption},
-                          uint1_t{}, cmosClear, uint8_t{}, uint8_t{},
-                          uint8_t{});
+                          uint1_t{}, cmosClear, data3, uint8_t{}, uint8_t{});
             return ipmi::responseSuccess(std::move(response));
         }
         catch (const InternalFailure& e)
@@ -2051,6 +2053,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         {
             return ipmi::responseInvalidFieldRequest();
         }
+
+        biosVerbosity = (data3 >> 5) & 0x03;
 
         using namespace chassis::internal;
         using namespace chassis::internal::cache;
