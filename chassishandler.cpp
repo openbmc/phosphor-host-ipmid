@@ -1840,6 +1840,7 @@ static uint8_t transferStatus = setComplete;
 static uint8_t bootFlagValidBitClr = 0;
 static uint5_t bootInitiatorAckData = 0x0;
 static bool cmosClear = false;
+static uint2_t biosVerbosity = 0x0;
 
 /** @brief implements the Get Chassis system boot option
  *  @param ctx - context pointer
@@ -1965,11 +1966,11 @@ ipmi::RspType<ipmi::message::Payload> ipmiChassisGetSysBootOptions(
 
             uint1_t validFlag = valid ? 1 : 0;
 
-            response.pack(bootOptionParameter, reserved1, uint5_t{},
-                          uint1_t{biosBootType}, uint1_t{permanent},
-                          uint1_t{validFlag}, uint2_t{}, uint4_t{bootOption},
-                          uint1_t{}, cmosClear, uint8_t{}, uint8_t{},
-                          uint8_t{});
+            response.pack(
+                bootOptionParameter, reserved1, uint5_t{},
+                uint1_t{biosBootType}, uint1_t{permanent}, uint1_t{validFlag},
+                uint2_t{}, uint4_t{bootOption}, uint1_t{}, cmosClear, uint5_t{},
+                uint2_t{biosVerbosity}, uint1_t{}, uint8_t{}, uint8_t{});
             return ipmi::responseSuccess(std::move(response));
         }
         catch (const InternalFailure& e)
@@ -2066,7 +2067,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         bool screenBlank;
         uint4_t bootDeviceSelector;
         bool lockKeyboard;
-        uint8_t data3;
+        uint5_t biosCtrls;
+        bool lockOutPower;
         uint4_t biosInfo;
         uint4_t rsvd1;
         uint5_t deviceInstance;
@@ -2074,8 +2076,9 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
 
         if (data.unpack(rsvd, biosBootType, permanent, validFlag,
                         lockOutResetButton, screenBlank, bootDeviceSelector,
-                        lockKeyboard, cmosClear, data3, biosInfo, rsvd1,
-                        deviceInstance, rsvd2) != 0 ||
+                        lockKeyboard, cmosClear, biosCtrls, biosVerbosity,
+                        lockOutPower, biosInfo, rsvd1, deviceInstance, rsvd2) !=
+                0 ||
             !data.fullyUnpacked())
         {
             return ipmi::responseReqDataLenInvalid();
