@@ -332,8 +332,7 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
     {
         case AF_INET:
         {
-            struct sockaddr_in addr4
-            {};
+            struct sockaddr_in addr4{};
             std::memcpy(&addr4.sin_addr.s_addr, &data[offset], addrSize);
 
             inet_ntop(AF_INET, &addr4.sin_addr, ipAddr, INET_ADDRSTRLEN);
@@ -342,8 +341,7 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
         }
         case AF_INET6:
         {
-            struct sockaddr_in6 addr6
-            {};
+            struct sockaddr_in6 addr6{};
             std::memcpy(&addr6.sin6_addr.s6_addr, &data[offset], addrSize);
 
             inet_ntop(AF_INET6, &addr6.sin6_addr, ipAddr, INET6_ADDRSTRLEN);
@@ -1121,7 +1119,7 @@ ipmi::RspType<bool,    // Power is on
               bool,    // last power down caused by a Power overload
               bool,    // last power down caused by a power interlock
               bool,    // last power down caused by power fault
-              bool, // last ‘Power is on’ state was entered via IPMI command
+              bool,    // last ‘Power is on’ state was entered via IPMI command
               uint3_t, // reserved
 
               bool,    // Chassis intrusion active
