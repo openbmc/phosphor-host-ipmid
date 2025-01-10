@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c545d093_171bac4e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-01-10T08:35:47Z",
+      "side": 1,
+      "message": "Conflicts with this patch\nhttps://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/76741\n\nplease abandon it.",
+      "revId": "d82aeb4604c9103597f141679bfba912bdc4ae7a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
