@@ -56,7 +56,6 @@ inline bool isRecordOEM(uint8_t recordType)
     return recordType != systemEventRecord;
 }
 
-using additionalDataMap = std::map<std::string, std::string>;
 using entryDataMap = std::map<PropertyName, PropertyType>;
 
 int convert(const std::string_view& str, int base = 10)
@@ -82,10 +81,10 @@ std::vector<uint8_t> convertVec(const std::string_view& str)
 
 /** Construct OEM SEL record according to IPMI spec 32.2, 32.3. */
 void constructOEMSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
-                     const additionalDataMap& m, GetSELEntryResponse& record)
+                     const AdditionalData& data, GetSELEntryResponse& record)
 {
-    auto dataIter = m.find(strSensorData);
-    assert(dataIter != m.end());
+    auto dataIter = data.find(strSensorData);
+    assert(dataIter != data.end());
     auto sensorData = convertVec(dataIter->second);
     if (recordType >= 0xC0 && recordType < 0xE0)
     {
@@ -108,7 +107,7 @@ void constructOEMSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
 }
 
 void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
-                  const additionalDataMap& m, const entryDataMap&,
+                  const AdditionalData& data, const entryDataMap&,
                   GetSELEntryResponse& record)
 {
     if (recordType != systemEventRecord)
@@ -122,8 +121,8 @@ void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
     record.event.eventRecord.sensorNum = 0xFF;
     record.event.eventRecord.eventType = 0;
 
-    auto iter = m.find(strSensorPath);
-    assert(iter != m.end());
+    auto iter = data.find(strSensorPath);
+    assert(iter != data.end());
     const auto& sensorPath = iter->second;
     auto sensorIter = invSensors.find(sensorPath);
 
@@ -133,8 +132,8 @@ void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
         record.event.eventRecord.sensorType = sensorIter->second.sensorType;
         record.event.eventRecord.sensorNum = sensorIter->second.sensorID;
 
-        iter = m.find(strEventDir);
-        assert(iter != m.end());
+        iter = data.find(strEventDir);
+        assert(iter != data.end());
         auto eventDir = static_cast<uint8_t>(convert(iter->second));
         uint8_t assert = eventDir ? assertEvent : deassertEvent;
         record.event.eventRecord.eventType =
@@ -143,13 +142,13 @@ void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
     record.event.eventRecord.recordType = recordType;
     record.event.eventRecord.timeStamp = static_cast<uint32_t>(
         std::chrono::duration_cast<std::chrono::seconds>(timestamp).count());
-    iter = m.find(strGenerateId);
-    assert(iter != m.end());
+    iter = data.find(strGenerateId);
+    assert(iter != data.end());
     record.event.eventRecord.generatorID =
         static_cast<uint16_t>(convert(iter->second));
     record.event.eventRecord.eventMsgRevision = eventMsgRevision;
-    iter = m.find(strSensorData);
-    assert(iter != m.end());
+    iter = data.find(strSensorData);
+    assert(iter != data.end());
     auto sensorData = convertVec(iter->second);
     // The remaining 3 bytes are the sensor data
     memcpy(&record.event.eventRecord.eventData1, sensorData.data(),
@@ -204,7 +203,6 @@ GetSELEntryResponse
         std::get<uint64_t>(iterTimeStamp->second));
 
     bool isFromSELLogger = false;
-    additionalDataMap m;
 
     // The recordID are with the same offset between different types,
     // so we are safe to set the recordID here
@@ -238,15 +236,18 @@ GetSELEntryResponse
     if (isFromSELLogger)
     {
         // It is expected to be a custom SEL entry
-        auto recordType = static_cast<uint8_t>(convert(m[strRecordType]));
+        const auto& addData = std::get<AdditionalData>(iterId->second);
+        auto recordType =
+            static_cast<uint8_t>(convert(addData.find(strRecordType)->second));
         auto isOEM = isRecordOEM(recordType);
         if (isOEM)
         {
-            constructOEMSEL(recordType, chronoTimeStamp, m, record);
+            constructOEMSEL(recordType, chronoTimeStamp, addData, record);
         }
         else
         {
-            constructSEL(recordType, chronoTimeStamp, m, entryData, record);
+            constructSEL(recordType, chronoTimeStamp, addData, entryData,
+                         record);
         }
     }
     else
