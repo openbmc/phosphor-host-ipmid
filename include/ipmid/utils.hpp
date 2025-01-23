@@ -478,4 +478,11 @@ void callDbusMethod(sdbusplus::bus_t& bus, const std::string& service,
 ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
                       std::vector<uint8_t> writeData,
                       std::vector<uint8_t>& readBuf);
+
+/** @brief Convert bytes to hex string.
+ *  @param[in] bytes - Byte stream data.
+ *  @return - Hexadecimal string starts with 0x
+ */
+std::string bytesToHexString(const std::vector<uint8_t>& data);
+
 } // namespace ipmi
