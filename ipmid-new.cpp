@@ -300,6 +300,8 @@ message::Response::ptr executeIpmiGroupCommand(message::Request::ptr request)
         return errorResponse(request, ccReqDataLenInvalid);
     }
     auto group = static_cast<Group>(bytes);
+    // Set defining body code
+    request->ctx->group = group;
     message::Response::ptr response =
         executeIpmiCommandCommon(groupHandlerMap, group, request);
     ipmi::message::Payload prefix;
