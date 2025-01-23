@@ -272,6 +272,11 @@ if get_option('open-power').allowed()
     openpower_cmds_src = ['storageaddsel.cpp']
 endif
 
+arm_sbmr_cmds_src = []
+if get_option('arm-sbmr').allowed()
+    arm_sbmr_cmds_src = ['sbmrhandler.cpp']
+endif
+
 libipmi20_src = [
     'app/channel.cpp',
     'app/watchdog.cpp',
@@ -295,6 +300,7 @@ libipmi20_src = [
     transportoem_src,
     storage_cmds_src,
     openpower_cmds_src,
+    arm_sbmr_cmds_src,
     conf_h,
 ]
 
