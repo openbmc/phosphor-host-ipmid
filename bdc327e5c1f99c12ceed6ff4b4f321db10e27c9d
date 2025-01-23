@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d3c0eae0_b0f8004a",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-01-23T05:22:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "154c46f9_3e74fb6d",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 319,
+        "endChar": 34
+      },
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "24a94d77_53c92fdc",
@@ -337,6 +361,24 @@
       "side": 1,
       "message": "It needs to add extra byte before the escaped byte. Transform might not be able to handle. Move to use `for_each` to iterate byte stream.",
       "parentUuid": "60a8f6f0_a1943a7b",
+      "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e440fa47_6b658b4f",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-01-23T05:22:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75e9710f_1889a660",
       "revId": "bdc327e5c1f99c12ceed6ff4b4f321db10e27c9d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
