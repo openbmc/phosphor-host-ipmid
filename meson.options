@@ -243,3 +243,10 @@ option(
     type: 'feature',
     description: 'Support open-power specific functions',
 )
+
+# arm-sbmr specific functionality.
+option(
+    'arm-sbmr',
+    type: 'feature',
+    description: 'Support Arm SBMR specific functions'
+)

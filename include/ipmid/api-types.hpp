@@ -32,6 +32,7 @@ constexpr Group groupDMTG = 0x01;
 constexpr Group groupSSI = 0x02;
 constexpr Group groupVSO = 0x03;
 constexpr Group groupDCMI = 0xDC;
+constexpr Group groupSBMR = 0xAE;
 
 /*
  * Set the priority as the lowest number that is necessary so
@@ -326,6 +327,12 @@ constexpr Cmd cmdGetTemperatureReadings = 0x10;
 constexpr Cmd cmdSetDcmiConfigParameters = 0x12;
 constexpr Cmd cmdGetDcmiConfigParameters = 0x13;
 } // namespace dcmi
+
+namespace sbmr
+{
+constexpr Cmd cmdSendBootProgressCode = 0x02;
+constexpr Cmd cmdGetBootProgressCode = 0x03;
+} // namespace sbmr
 
 // These are the command network functions, the response
 // network functions are the function + 1. So to determine
