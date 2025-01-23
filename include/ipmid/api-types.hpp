@@ -15,6 +15,8 @@
  *
  */
 #pragma once
+#include "config.h"
+
 #include <ipmid/iana.hpp>
 
 #include <cstdint>
@@ -31,6 +33,9 @@ constexpr Group groupPICMG = 0x00;
 constexpr Group groupDMTG = 0x01;
 constexpr Group groupSSI = 0x02;
 constexpr Group groupVSO = 0x03;
+#ifdef ARM_SBMR_SUPPORT
+constexpr Group groupSBMR = 0xAE;
+#endif
 constexpr Group groupDCMI = 0xDC;
 
 /*
@@ -326,6 +331,14 @@ constexpr Cmd cmdGetTemperatureReadings = 0x10;
 constexpr Cmd cmdSetDcmiConfigParameters = 0x12;
 constexpr Cmd cmdGetDcmiConfigParameters = 0x13;
 } // namespace dcmi
+
+#ifdef ARM_SBMR_SUPPORT
+namespace sbmr
+{
+constexpr Cmd cmdSendBootProgressCode = 0x02;
+constexpr Cmd cmdGetBootProgressCode = 0x03;
+} // namespace sbmr
+#endif
 
 // These are the command network functions, the response
 // network functions are the function + 1. So to determine

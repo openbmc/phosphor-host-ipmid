@@ -57,6 +57,9 @@ endif
 if get_option('open-power').allowed()
     conf_data.set_quoted('OPEN_POWER_SUPPORT', '1')
 endif
+if get_option('arm-sbmr').allowed()
+    conf_data.set_quoted('ARM_SBMR_SUPPORT', '1')
+endif
 
 matches_map = get_option('matches-map')
 conf_data.set('MAJOR_MATCH_INDEX', matches_map[0])
@@ -272,6 +275,11 @@ if get_option('open-power').allowed()
     openpower_cmds_src = ['storageaddsel.cpp']
 endif
 
+arm_sbmr_cmds_src = []
+if get_option('arm-sbmr').allowed()
+    arm_sbmr_cmds_src = ['sbmrhandler.cpp']
+endif
+
 libipmi20_src = [
     'app/channel.cpp',
     'app/watchdog.cpp',
@@ -295,6 +303,7 @@ libipmi20_src = [
     transportoem_src,
     storage_cmds_src,
     openpower_cmds_src,
+    arm_sbmr_cmds_src,
     conf_h,
 ]
 
