@@ -606,4 +606,17 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
     return ipmi::ccSuccess;
 }
 
+std::string bytesToHexString(const std::vector<uint8_t>& data)
+{
+    std::stringstream hexCode;
+
+    hexCode << "0x" << std::hex << std::setfill('0');
+    for (auto byte : data)
+    {
+        hexCode << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
+    }
+
+    return hexCode.str();
+}
+
 } // namespace ipmi

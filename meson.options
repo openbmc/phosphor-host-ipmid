@@ -251,3 +251,10 @@ option(
     choices: ['null', 'serial'],
     description: 'transport',
 )
+
+# arm-sbmr specific functionality.
+option(
+    'arm-sbmr',
+    type: 'feature',
+    description: 'Support Arm SBMR specific functions',
+)
