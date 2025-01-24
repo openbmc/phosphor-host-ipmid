@@ -178,7 +178,9 @@ ipmi::Cc CipherConfig::getCSPrivilegeLevels(
 {
     if (!isValidChannel(chNum))
     {
-        lg2::error("Invalid channel number: {CHANNEL}", "CHANNEL", chNum);
+        lg2::error(
+            "Get CS Privilege levels - Invalid channel number: {CHANNEL}",
+            "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
 
@@ -194,7 +196,9 @@ ipmi::Cc CipherConfig::setCSPrivilegeLevels(
 {
     if (!isValidChannel(chNum))
     {
-        lg2::error("Invalid channel number: {CHANNEL}", "CHANNEL", chNum);
+        lg2::error(
+            "Set CS Privilege levels - Invalid channel number: {CHANNEL}",
+            "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
 
