@@ -674,15 +674,18 @@ ipmi::RspType<uint16_t // recordID of the Added SEL entry
               >
     ipmiStorageAddSEL(uint16_t recordID, uint8_t recordType,
                       [[maybe_unused]] uint32_t timeStamp, uint16_t generatorID,
-                      [[maybe_unused]] uint8_t evmRev, uint8_t sensorType,
-                      uint8_t sensorNumber, uint8_t eventDir,
+                      [[maybe_unused]] uint8_t evmRev,
+                      [[maybe_unused]] uint8_t sensorType, uint8_t sensorNumber,
+                      uint8_t eventDir,
                       std::array<uint8_t, eventDataSize> eventData)
 {
     std::string objpath;
     static constexpr auto systemRecordType = 0x02;
+#ifdef OPEN_POWER_SUPPORT
     // Hostboot sends SEL with OEM record type 0xDE to indicate that there is
     // a maintenance procedure associated with eSEL record.
     static constexpr auto procedureType = 0xDE;
+#endif
     cancelSELReservation();
     if (recordType == systemRecordType)
     {
