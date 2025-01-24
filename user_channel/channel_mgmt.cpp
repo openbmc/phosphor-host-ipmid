@@ -151,7 +151,8 @@ std::string ChannelConfig::getChannelName(const uint8_t chNum)
 {
     if (!isValidChannel(chNum))
     {
-        lg2::error("Invalid channel number: {CHANNEL_ID}", "CHANNEL_ID", chNum);
+        lg2::error("Get channel name - Invalid channel number: {CHANNEL_ID}",
+                   "CHANNEL_ID", chNum);
         throw std::invalid_argument("Invalid channel number");
     }
 
@@ -378,11 +379,6 @@ bool ChannelConfig::isValidChannel(const uint8_t chNum)
         return false;
     }
 
-    if (channelData[chNum].isChValid == false)
-    {
-        lg2::debug("Channel is not valid");
-    }
-
     return channelData[chNum].isChValid;
 }
 
@@ -432,7 +428,8 @@ Cc ChannelConfig::getChannelInfo(const uint8_t chNum, ChannelInfo& chInfo)
 {
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Invalid channel");
+        lg2::debug("Get channel info - Invalid channel: {CHANNEL}", "CHANNEL",
+                   chNum);
         return ccInvalidFieldRequest;
     }
 
@@ -447,7 +444,8 @@ Cc ChannelConfig::getChannelAccessData(const uint8_t chNum,
 {
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Invalid channel");
+        lg2::debug("Get channel access data - Invalid channel: {CHANNEL}",
+                   "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
 
@@ -476,7 +474,8 @@ Cc ChannelConfig::setChannelAccessData(const uint8_t chNum,
 {
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Invalid channel");
+        lg2::debug("Set channel info - Invalid channel: {CHANNEL}", "CHANNEL",
+                   chNum);
         return ccInvalidFieldRequest;
     }
 
@@ -546,7 +545,9 @@ Cc ChannelConfig::getChannelAccessPersistData(const uint8_t chNum,
 {
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Invalid channel");
+        lg2::debug(
+            "Get channel access persist data - Invalid channel: {CHANNEL}",
+            "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
 
@@ -575,7 +576,9 @@ Cc ChannelConfig::setChannelAccessPersistData(const uint8_t chNum,
 {
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Invalid channel");
+        lg2::debug(
+            "Set channel access persist data - Invalid channel: {CHANNEL}",
+            "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
 
@@ -666,7 +669,9 @@ Cc ChannelConfig::getChannelAuthTypeSupported(const uint8_t chNum,
 {
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Invalid channel");
+        lg2::debug(
+            "Get channel auth type supported - Invalid channel: {CHANNEL}",
+            "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
 
@@ -679,7 +684,8 @@ Cc ChannelConfig::getChannelEnabledAuthType(
 {
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Invalid channel");
+        lg2::debug("Get channel enabled auth type - Invalid channel: {CHANNEL}",
+                   "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
 

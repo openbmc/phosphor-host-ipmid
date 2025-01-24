@@ -70,7 +70,8 @@ ipmi::RspType<> ipmiSetUserAccess(
         convertCurrentChannelNum(static_cast<uint8_t>(channel), ctx->channel);
     if (!isValidChannel(chNum))
     {
-        lg2::debug("Set user access - Invalid channel request");
+        lg2::debug("Set user access - Invalid channel request: {CHANNEL}",
+                   "CHANNEL", chNum);
         return ipmi::response(invalidChannel);
     }
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)

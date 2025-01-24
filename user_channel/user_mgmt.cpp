@@ -840,6 +840,9 @@ Cc UserAccess::setUserPayloadAccess(
 
     if (!isValidChannel(chNum))
     {
+        lg2::debug(
+            "Set user payload access - Invalid channel request: {CHANNEL}",
+            "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
     if (!isValidUserId(userId))
@@ -890,6 +893,9 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
 {
     if (!isValidChannel(chNum))
     {
+        lg2::debug(
+            "Set user privilege access - Invalid channel request: {CHANNEL}",
+            "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
     if (!isValidUserId(userId))
