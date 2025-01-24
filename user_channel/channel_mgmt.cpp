@@ -1304,7 +1304,7 @@ int ChannelConfig::setDbusProperty(
         lg2::debug(
             "set-property {SERVICE}:{OBJPATH}/{INTERFACE}.{PROP} failed: {MSG}",
             "SERVICE", service, "OBJPATH", objPath, "INTERFACE", interface,
-            "PROP", property);
+            "PROP", property, "MSG", e);
         return -EIO;
     }
 
