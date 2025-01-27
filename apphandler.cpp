@@ -520,7 +520,8 @@ int convertVersion(std::string s, Revision& rev)
 
         // convert major
         {
-            std::string_view str = m[matches[0]].str();
+            std::string tmp = m[matches[0]].str();
+            std::string_view str = tmp;
             auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
             if (ec != std::errc() || ptr != str.begin() + str.size())
             { // failed to convert major string
@@ -542,7 +543,8 @@ int convertVersion(std::string s, Revision& rev)
 
         // convert minor
         {
-            std::string_view str = m[matches[1]].str();
+            std::string tmp = m[matches[1]].str();
+            std::string_view str = tmp;
             auto [ptr, ec]{std::from_chars(str.begin(), str.end(), val)};
             if (ec != std::errc() || ptr != str.begin() + str.size())
             { // failed to convert minor string
@@ -561,7 +563,8 @@ int convertVersion(std::string s, Revision& rev)
                     continue;
                 }
 
-                std::string_view str = m[matches[i + 2]].str();
+                std::string tmp = m[matches[i + 2]].str();
+                std::string_view str = tmp;
                 auto [ptr,
                       ec]{std::from_chars(str.begin(), str.end(), val, 16)};
                 if (ec != std::errc() || ptr != str.begin() + str.size())
@@ -634,7 +637,7 @@ ipmi::RspType<uint8_t,  // Device ID
     if (!haveBMCVersion || !dev_id_initialized)
     {
         int r = -1;
-        Revision rev = {0, 0, 0, 0};
+        Revision rev{};
         try
         {
             auto version = getActiveSoftwareVersionInfo(ctx);

@@ -378,12 +378,19 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         auto readLength =
             std::min(diff, static_cast<int>(requestData->readLength));
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Waddress-of-packed-member"
+#endif
         std::memcpy(response, &record.nextRecordID,
                     sizeof(record.nextRecordID));
         std::memcpy(static_cast<uint8_t*>(response) +
                         sizeof(record.nextRecordID),
                     &record.event.eventRecord.recordID + requestData->offset,
                     readLength);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
         *data_len = sizeof(record.nextRecordID) + readLength;
     }
 
