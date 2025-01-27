@@ -1,6 +1,7 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
+#include <string>
 
 /** @brief Read eSEL data into a string
  *
