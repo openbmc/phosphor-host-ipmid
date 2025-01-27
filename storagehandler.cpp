@@ -376,13 +376,14 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         auto readLength =
             std::min(diff, static_cast<int>(requestData->readLength));
 
-        std::memcpy(response, &record.nextRecordID,
-                    sizeof(record.nextRecordID));
-        std::memcpy(static_cast<uint8_t*>(response) +
-                        sizeof(record.nextRecordID),
-                    &record.event.eventRecord.recordID + requestData->offset,
+        uint16_t nextRecordID = record.nextRecordID;
+        std::memcpy(response, &nextRecordID, sizeof(nextRecordID));
+
+        const ipmi::sel::SELEventRecordFormat* evt = &record.event;
+        std::memcpy(static_cast<uint8_t*>(response) + sizeof(nextRecordID),
+                    reinterpret_cast<const uint8_t*>(evt) + requestData->offset,
                     readLength);
-        *data_len = sizeof(record.nextRecordID) + readLength;
+        *data_len = sizeof(nextRecordID) + readLength;
     }
 
     return IPMI_CC_OK;
