@@ -394,11 +394,11 @@ void updateOwners(sdbusplus::asio::connection& conn, const std::string& name)
         name);
 }
 
-void doListNames(boost::asio::io_context& io, sdbusplus::asio::connection& conn)
+void doListNames(boost::asio::io_context&, sdbusplus::asio::connection& conn)
 {
     conn.async_method_call(
-        [&io, &conn](const boost::system::error_code ec,
-                     std::vector<std::string> busNames) {
+        [&conn](const boost::system::error_code ec,
+                std::vector<std::string> busNames) {
             if (ec)
             {
                 lg2::error("Error getting dbus names: {ERROR}", "ERROR",
