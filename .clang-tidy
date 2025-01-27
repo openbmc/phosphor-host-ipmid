@@ -1,6 +1,7 @@
 Checks: '-*,
     bugprone-unchecked-optional-access,
-    modernize-use-nullptr
+    modernize-use-nullptr,
+    readability-identifier-naming
     '
 
 CheckOptions: []
