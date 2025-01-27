@@ -170,6 +170,12 @@ const std::string& ServiceCache::getService(sdbusplus::bus_t& bus)
         cachedBusName = bus.get_unique_name();
         cachedService = ::ipmi::getService(bus, intf, path);
     }
+    if (!cachedService.has_value())
+    {
+        // It returns a reference, make a one.
+        static std::string emptyService{};
+        return emptyService;
+    }
     return cachedService.value();
 }
 

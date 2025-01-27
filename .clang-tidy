@@ -1,0 +1,7 @@
+Checks: '
+    -*,
+    bugprone-unchecked-optional-access,
+    readability-identifier-naming
+'
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(?!^subprojects).*'

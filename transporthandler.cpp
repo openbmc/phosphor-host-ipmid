@@ -271,7 +271,7 @@ auto getIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
     for (uint8_t i = 0; i < MAX_IPV4_ADDRESSES; ++i)
     {
         ifaddr4 = getIfAddr<AF_INET>(bus, params, i, originsV4);
-        if (src == ifaddr4->origin)
+        if (ifaddr4.has_value() && src == ifaddr4->origin)
         {
             break;
         }
@@ -295,6 +295,8 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
                         std::optional<uint8_t> prefix)
 {
     auto ifaddr = getIfAddr4(bus, params);
+    stdplus::In4Addr addr{};
+
     if (!ifaddr && !address)
     {
         lg2::error("Missing address for IPv4 assignment");
@@ -305,8 +307,8 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
     {
         fallbackPrefix = ifaddr->prefix;
         deleteObjectIfExists(bus, params.service, ifaddr->path);
+        addr = address.value_or(ifaddr->address);
     }
-    auto addr = address.value_or(ifaddr->address);
     if (addr != stdplus::In4Addr{})
     {
         createIfAddr<AF_INET>(bus, params, addr,
