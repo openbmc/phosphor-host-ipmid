@@ -9,7 +9,7 @@ fi
 cat << EOF
 #include <ipmiallowlist.hpp>
 
-const std::vector<netfncmd_pair> whitelist = {
+const std::vector<netfncmd_pair> allowlist = {
 
 EOF
 
