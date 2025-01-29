@@ -1024,7 +1024,7 @@ bool getACFailStatus()
     catch (const std::exception& e)
     {
         lg2::error(
-            "Failed to fetch PFail property ({PATH}/{INTERFAC}): {ERROR}",
+            "Failed to fetch PFail property ({PATH}/{INTERFACE}): {ERROR}",
             "PATH", powerControlObj, "INTERFACE", powerControlIntf, "ERROR", e);
     }
     return acFail;
