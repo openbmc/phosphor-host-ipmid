@@ -57,7 +57,7 @@ Handler::~Handler()
     try
     {
 #ifdef RMCP_PING
-        if (ClassOfMsg::ASF == inMessage->rmcpMsgClass)
+        if (inMessage && (ClassOfMsg::ASF == inMessage->rmcpMsgClass))
         {
             sendASF();
         }
@@ -93,7 +93,7 @@ void Handler::processIncoming()
 
 #ifdef RMCP_PING
     // Execute the Command, possibly asynchronously
-    if (ClassOfMsg::ASF != inMessage->rmcpMsgClass)
+    if (inMessage && (ClassOfMsg::ASF != inMessage->rmcpMsgClass))
 #endif // RMCP_PING
     {
         updSessionData(inMessage);
