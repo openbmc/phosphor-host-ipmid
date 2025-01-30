@@ -37,7 +37,7 @@ import('pkgconfig').generate(
   version: meson.project_version(),
   description: 'libchannellayer')
 
-if not get_option('libuserlayer').disabled()
+if get_option('libuserlayer').allowed()
   userlayer_pre = declare_dependency(
     include_directories: [root_inc, user_channel_inc],
     dependencies: [
