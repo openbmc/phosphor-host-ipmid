@@ -8,7 +8,7 @@ sensorutils_dep = declare_dependency(link_with: sensorutils_lib)
 
 hybrid_src = []
 
-if not get_option('hybrid-sensors').disabled()
+if get_option('hybrid-sensors').allowed()
   hybrid_src = [
     'sensorhandler.cpp',
     'sensordatahandler.cpp',
@@ -18,7 +18,7 @@ if not get_option('hybrid-sensors').disabled()
 endif
 
 sensorsoem_src = []
-if not get_option('sensors-oem').disabled()
+if get_option('sensors-oem').allowed()
   sensorsoem_src = ['dbus-sdr/sensorcommands_oem.cpp']
 endif
 

@@ -20,7 +20,7 @@ conf_data.set_quoted('SYSTEM_SENSOR', get_option('system-sensor'))
 conf_data.set('IPMI_SMS_ATN_ACK_TIMEOUT_SECS', get_option('ipmi-sms-atn-ack-timeout-secs'))
 
 # Soft Power off related.
-if not get_option('softoff').disabled()
+if get_option('softoff').allowed()
   conf_data.set_quoted('SOFTOFF_BUSNAME', get_option('softoff-busname'))
   conf_data.set_quoted('SOFTOFF_OBJPATH', get_option('softoff-objpath'))
   conf_data.set('IPMI_HOST_SHUTDOWN_COMPLETE_TIMEOUT_SECS', get_option('ipmi-host-shutdown-complete-timeout-secs'))
@@ -72,7 +72,7 @@ add_project_arguments(
   ]),
   language : 'cpp')
 
-if not get_option('get-dbus-active-software').disabled()
+if get_option('get-dbus-active-software').allowed()
   add_project_arguments(
     cpp.get_supported_arguments([
       '-DGET_DBUS_ACTIVE_SOFTWARE',
@@ -156,13 +156,13 @@ subdir('include')
 subdir('user_channel')
 subdir('scripts')
 
-if not get_option('softoff').disabled()
+if get_option('softoff').allowed()
   subdir('xyz/openbmc_project/Ipmi/Internal/SoftPowerOff')
   subdir('softoff')
 endif
 
 # whitelist
-if not get_option('ipmi-whitelist').disabled()
+if get_option('ipmi-whitelist').allowed()
   generate_whitelist_script = files('generate_whitelist_create.sh')
 
   whitelist_conf = get_option('whitelist-conf')
@@ -231,12 +231,12 @@ ipmid_pre = [
 ]
 
 transportoem_src = []
-if not get_option('transport-oem').disabled()
+if get_option('transport-oem').allowed()
   transportoem_src = ['transporthandler_oem.cpp']
 endif
 
 storage_cmds_src = []
-if get_option('dynamic-sensors').disabled() and not get_option('dynamic-storages-only').disabled()
+if get_option('dynamic-sensors').disabled() and get_option('dynamic-storages-only').allowed()
   storage_cmds_src = ['dbus-sdr/storagecommands.cpp', 'dbus-sdr/sdrutils.cpp']
 endif
 
@@ -302,7 +302,7 @@ executable(
 # Dynamic Sensor Stack
 subdir('dbus-sdr')
 
-if not get_option('dynamic-sensors').disabled() or not get_option('tests').disabled()
+if get_option('dynamic-sensors').disabled() or not get_option('tests').allowed()
   library(
     'dynamiccmds',
     dbus_sdr_src,
@@ -314,7 +314,7 @@ if not get_option('dynamic-sensors').disabled() or not get_option('tests').disab
     install_dir: get_option('libdir') / 'ipmid-providers')
 endif
 
-if not get_option('tests').disabled()
+if get_option('tests').allowed()
   subdir('test')
 endif
 
