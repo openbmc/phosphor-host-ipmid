@@ -12,8 +12,8 @@ project(
 )
 
 conf_data = configuration_data()
-conf_data.set('RMCP_PING', get_option('rmcp_ping').enabled())
-conf_data.set('PAM_AUTHENTICATE', get_option('pam_authenticate').enabled())
+conf_data.set('RMCP_PING', get_option('rmcp_ping').allowed())
+conf_data.set('PAM_AUTHENTICATE', get_option('pam_authenticate').allowed())
 
 configure_file(output: 'config.h',
     configuration: conf_data
@@ -108,6 +108,6 @@ configure_file(input: 'phosphor-ipmi-net@.socket',
                 install_dir: systemd_system_unit_dir)
 
 build_tests = get_option('tests')
-if not build_tests.disabled()
+if build_tests.allowed()
   subdir('test')
 endif
