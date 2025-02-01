@@ -715,8 +715,8 @@ void updateNonRecoverableThreshold(uint8_t lowerValue, uint8_t upperValue,
     }
 }
 
-get_sdr::GetSensorThresholdsResponse
-    getSensorThresholds(ipmi::Context::ptr& ctx, uint8_t sensorNum)
+get_sdr::GetSensorThresholdsResponse getSensorThresholds(
+    ipmi::Context::ptr& ctx, uint8_t sensorNum)
 {
     get_sdr::GetSensorThresholdsResponse resp{};
     const auto iter = ipmi::sensor::sensors.find(sensorNum);

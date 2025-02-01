@@ -71,8 +71,8 @@ bool ifnameInPath(std::string_view ifname, std::string_view path)
            (path.size() == is || path[is] == '/');
 }
 
-std::optional<ChannelParams>
-    maybeGetChannelParams(sdbusplus::bus_t& bus, uint8_t channel)
+std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
+                                                   uint8_t channel)
 {
     auto ifname = getChannelName(channel);
     if (ifname.empty())
@@ -315,9 +315,9 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
 }
 
 template <int family>
-std::optional<IfNeigh<family>>
-    findGatewayNeighbor(sdbusplus::bus_t& bus, const ChannelParams& params,
-                        ObjectLookupCache& neighbors)
+std::optional<IfNeigh<family>> findGatewayNeighbor(sdbusplus::bus_t& bus,
+                                                   const ChannelParams& params,
+                                                   ObjectLookupCache& neighbors)
 {
     auto gateway = getGatewayProperty<family>(bus, params);
     if (!gateway)
@@ -329,8 +329,8 @@ std::optional<IfNeigh<family>>
 }
 
 template <int family>
-std::optional<IfNeigh<family>>
-    getGatewayNeighbor(sdbusplus::bus_t& bus, const ChannelParams& params)
+std::optional<IfNeigh<family>> getGatewayNeighbor(sdbusplus::bus_t& bus,
+                                                  const ChannelParams& params)
 {
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
     return findGatewayNeighbor<family>(bus, params, neighbors);
@@ -676,9 +676,9 @@ static void unpackFinal(message::Payload& req)
  */
 RspType<> setLanOem(uint8_t channel, uint8_t parameter, message::Payload& req)
     __attribute__((weak));
-RspType<message::Payload>
-    getLanOem(uint8_t channel, uint8_t parameter, uint8_t set, uint8_t block)
-        __attribute__((weak));
+RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
+                                    uint8_t set, uint8_t block)
+    __attribute__((weak));
 
 RspType<> setLanOem(uint8_t, uint8_t, message::Payload& req)
 {

@@ -386,8 +386,8 @@ bool ChannelConfig::isValidChannel(const uint8_t chNum)
     return channelData[chNum].isChValid;
 }
 
-EChannelSessSupported
-    ChannelConfig::getChannelSessionSupport(const uint8_t chNum)
+EChannelSessSupported ChannelConfig::getChannelSessionSupport(
+    const uint8_t chNum)
 {
     EChannelSessSupported chSessSupport =
         (EChannelSessSupported)channelData[chNum].chInfo.sessionSupported;
@@ -712,8 +712,8 @@ std::time_t ChannelConfig::getUpdatedFileTime(const std::string& fileName)
     return fileStat.st_mtime;
 }
 
-EChannelAccessMode
-    ChannelConfig::convertToAccessModeIndex(const std::string& mode)
+EChannelAccessMode ChannelConfig::convertToAccessModeIndex(
+    const std::string& mode)
 {
     auto iter = std::find(accessModeList.begin(), accessModeList.end(), mode);
     if (iter == accessModeList.end())
@@ -737,8 +737,8 @@ std::string ChannelConfig::convertToAccessModeString(const uint8_t value)
     return accessModeList.at(value);
 }
 
-CommandPrivilege
-    ChannelConfig::convertToPrivLimitIndex(const std::string& value)
+CommandPrivilege ChannelConfig::convertToPrivLimitIndex(
+    const std::string& value)
 {
     auto iter = std::find(privList.begin(), privList.end(), value);
     if (iter == privList.end())
@@ -761,8 +761,8 @@ std::string ChannelConfig::convertToPrivLimitString(const uint8_t value)
     return privList.at(value);
 }
 
-EChannelSessSupported
-    ChannelConfig::convertToSessionSupportIndex(const std::string& value)
+EChannelSessSupported ChannelConfig::convertToSessionSupportIndex(
+    const std::string& value)
 {
     auto iter =
         std::find(sessionSupportList.begin(), sessionSupportList.end(), value);
@@ -776,8 +776,8 @@ EChannelSessSupported
         std::distance(sessionSupportList.begin(), iter));
 }
 
-EChannelMediumType
-    ChannelConfig::convertToMediumTypeIndex(const std::string& value)
+EChannelMediumType ChannelConfig::convertToMediumTypeIndex(
+    const std::string& value)
 {
     std::unordered_map<std::string, EChannelMediumType>::iterator it =
         mediumTypeMap.find(value);
@@ -790,8 +790,8 @@ EChannelMediumType
     return static_cast<EChannelMediumType>(it->second);
 }
 
-EChannelProtocolType
-    ChannelConfig::convertToProtocolTypeIndex(const std::string& value)
+EChannelProtocolType ChannelConfig::convertToProtocolTypeIndex(
+    const std::string& value)
 {
     std::unordered_map<std::string, EChannelProtocolType>::iterator it =
         protocolTypeMap.find(value);
