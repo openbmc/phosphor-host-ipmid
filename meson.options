@@ -1,82 +1,245 @@
 
 option('tests', type: 'feature', description: 'Build tests')
-option('boot-flag-safe-mode-support', type: 'feature', description: 'Add option to enable/disable safe mode in boot flags')
-option('i2c-whitelist-check', type: 'feature', description: 'Add option to enable/disable i2c master write read command white list checking')
+option(
+    'boot-flag-safe-mode-support',
+    type: 'feature',
+    description: 'Add option to enable/disable safe mode in boot flags',
+)
+option(
+    'i2c-whitelist-check',
+    type: 'feature',
+    description: 'Add option to enable/disable i2c master write read command white list checking',
+)
 
 # SoftPowerOff
 option('softoff', type: 'feature', description: 'Builds soft power off')
-option('softoff-busname', type: 'string', value: 'xyz.openbmc_project.Ipmi.Internal.SoftPowerOff', description: 'The Dbus busname to own for SoftPowerOff')
-option('softoff-objpath', type: 'string', value: '/xyz/openbmc_project/ipmi/internal/soft_power_off', description: 'The SoftPowerOff Dbus root')
-option('ipmi-sms-atn-ack-timeout-secs', type: 'integer', value: 3, description: 'Timeout for host to ack and query SMS_ATN from BMC')
-option('ipmi-host-shutdown-complete-timeout-secs', type: 'integer', value: 2700, description: 'Wait time for host to shutdown')
+option(
+    'softoff-busname',
+    type: 'string',
+    value: 'xyz.openbmc_project.Ipmi.Internal.SoftPowerOff',
+    description: 'The Dbus busname to own for SoftPowerOff',
+)
+option(
+    'softoff-objpath',
+    type: 'string',
+    value: '/xyz/openbmc_project/ipmi/internal/soft_power_off',
+    description: 'The SoftPowerOff Dbus root',
+)
+option(
+    'ipmi-sms-atn-ack-timeout-secs',
+    type: 'integer',
+    value: 3,
+    description: 'Timeout for host to ack and query SMS_ATN from BMC',
+)
+option(
+    'ipmi-host-shutdown-complete-timeout-secs',
+    type: 'integer',
+    value: 2700,
+    description: 'Wait time for host to shutdown',
+)
 # Indicates an in-band power off or reboot request from the host
 # This file is used to ensure the soft off service does not run for host
 # initiated shutdown or reboot requests
-option('host-inband-request-dir', type: 'string', value: '/run/openbmc/', description: 'Directory to store host initiated shutdown file')
-option('host-inband-request-file', type: 'string', value: 'host@%u-request', description: 'File to create if host has initiated shutdown or reboot')
+option(
+    'host-inband-request-dir',
+    type: 'string',
+    value: '/run/openbmc/',
+    description: 'Directory to store host initiated shutdown file',
+)
+option(
+    'host-inband-request-file',
+    type: 'string',
+    value: 'host@%u-request',
+    description: 'File to create if host has initiated shutdown or reboot',
+)
 
 
 # Config Variables
-option('board-sensor', type: 'string', value: '/xyz/openbmc_project/inventory/system/chassis/motherboard', description: 'The inventory path to the motherboard fault sensor')
-option('system-sensor', type: 'string', value: '/xyz/openbmc_project/inventory/system', description: 'The inventory path to the system event sensor')
+option(
+    'board-sensor',
+    type: 'string',
+    value: '/xyz/openbmc_project/inventory/system/chassis/motherboard',
+    description: 'The inventory path to the motherboard fault sensor',
+)
+option(
+    'system-sensor',
+    type: 'string',
+    value: '/xyz/openbmc_project/inventory/system',
+    description: 'The inventory path to the system event sensor',
+)
 
 # Control Host Interfaces
-option('control-host-busname', type: 'string', value: 'xyz.openbmc_project.Control.Host', description: 'The Control Host Dbus busname to own')
-option('control-host-obj-mgr', type: 'string', value: '/xyz/openbmc_project/control', description: 'The Control Host D-Bus Object Manager')
-option('host-name', type: 'string', value: 'host', description: 'The Control Host D-Bus Object Manager')
+option(
+    'control-host-busname',
+    type: 'string',
+    value: 'xyz.openbmc_project.Control.Host',
+    description: 'The Control Host Dbus busname to own',
+)
+option(
+    'control-host-obj-mgr',
+    type: 'string',
+    value: '/xyz/openbmc_project/control',
+    description: 'The Control Host D-Bus Object Manager',
+)
+option(
+    'host-name',
+    type: 'string',
+    value: 'host',
+    description: 'The Control Host D-Bus Object Manager',
+)
 
 # Power reading sensor configuration file
-option('power-reading-sensor', type: 'string', value: '/usr/share/ipmi-providers/power_reading.json', description: 'Power reading sensor configuration file')
-option('host-ipmi-lib-path', type: 'string', value: '/usr/lib/ipmid-providers/', description: 'The file path to search for libraries')
+option(
+    'power-reading-sensor',
+    type: 'string',
+    value: '/usr/share/ipmi-providers/power_reading.json',
+    description: 'Power reading sensor configuration file',
+)
+option(
+    'host-ipmi-lib-path',
+    type: 'string',
+    value: '/usr/lib/ipmid-providers/',
+    description: 'The file path to search for libraries',
+)
 
 # When a sensor read fails, hwmon will update the OperationalState interface's Functional property.
 # This will mark the sensor as not functional and we will skip reading from that sensor.
-option('update-functional-on-fail', type: 'feature', value: 'disabled', description: 'Check functional property to skip reading from faulty sensors')
+option(
+    'update-functional-on-fail',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Check functional property to skip reading from faulty sensors',
+)
 
 # Features
 
 # When libuserlayer is disabled, libuserlayer won't be included in the build.
-option('libuserlayer', type: 'feature', description: 'Option to exclue exclude libuserlayer')
+option(
+    'libuserlayer',
+    type: 'feature',
+    description: 'Option to exclue exclude libuserlayer',
+)
 
 # When transport-oem is enabled, the transporthandler_oem.cpp contents
 # are compiled and added to the project. The transporthandler_oem.cpp file is
 # copied from your own customization layer in the
 # phosphor-ipmi-host_%.bbappend file. It is not necessary to create this file
 # unless OEM Parameter extensions are required.
-option('transport-oem', type: 'feature', value: 'disabled', description: 'Enable transporthandler_oem contents')
+option(
+    'transport-oem',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable transporthandler_oem contents',
+)
 
 # IPMI whitelist mechanism is not needed by everyone; offer a way to disable it
-option('ipmi-whitelist', type: 'feature', description: 'Enable/disable IPMI whitelist filtering')
-option('whitelist-conf', type: 'string', value: 'host-ipmid-whitelist.conf', description: 'Paths to IPMI whitelisted commands conf files')
+option(
+    'ipmi-whitelist',
+    type: 'feature',
+    description: 'Enable/disable IPMI whitelist filtering',
+)
+option(
+    'whitelist-conf',
+    type: 'string',
+    value: 'host-ipmid-whitelist.conf',
+    description: 'Paths to IPMI whitelisted commands conf files',
+)
 
 # Entity Manager Decorators
-option('entity-manager-decorators', type: 'feature', value: 'enabled', description: 'The Entity Manager Decorators flag is enabled by default; offer a way to disable it')
+option(
+    'entity-manager-decorators',
+    type: 'feature',
+    value: 'enabled',
+    description: 'The Entity Manager Decorators flag is enabled by default; offer a way to disable it',
+)
 
 # Dynamic Sensor Stack
-option('dynamic-sensors', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
-option('dynamic-sensors-write', type: 'feature', value: 'disabled', description: 'Dynamic sensors stack is enabled by default; offer a way to disable it')
-option('hybrid-sensors', type: 'feature', value: 'disabled', description: 'Hybrid sensors stack is disabled by default; offer a way to enable it')
-option('sensors-oem', type: 'feature', value: 'disabled', description: 'OEM sensor SDR parsing is disabled by default; offer a way to enable it')
+option(
+    'dynamic-sensors',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Dynamic sensors stack is enabled by default; offer a way to disable it',
+)
+option(
+    'dynamic-sensors-write',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Dynamic sensors stack is enabled by default; offer a way to disable it',
+)
+option(
+    'hybrid-sensors',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Hybrid sensors stack is disabled by default; offer a way to enable it',
+)
+option(
+    'sensors-oem',
+    type: 'feature',
+    value: 'disabled',
+    description: 'OEM sensor SDR parsing is disabled by default; offer a way to enable it',
+)
 
 # Sensor Cache
-option('sensors-cache', type: 'feature', value: 'disabled', description: 'Sensor cache stack is disabled by default; offer a way to enable it')
+option(
+    'sensors-cache',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Sensor cache stack is disabled by default; offer a way to enable it',
+)
 
 # Short Sensor Names for IPMI
-option('shortname-remove-suffix', type: 'feature', value: 'enabled', description: 'shortname-remove-suffix is enabled by default')
-option('shortname-replace-words', type: 'feature', value: 'disabled', description: 'shortname-replace-words is disabled by default')
+option(
+    'shortname-remove-suffix',
+    type: 'feature',
+    value: 'enabled',
+    description: 'shortname-remove-suffix is enabled by default',
+)
+option(
+    'shortname-replace-words',
+    type: 'feature',
+    value: 'disabled',
+    description: 'shortname-replace-words is disabled by default',
+)
 
 # Generate configuration from Yaml
 option('sensor-yaml-gen', type: 'string', value: 'sensor-example.yaml')
-option('invsensor-yaml-gen', type: 'string', value: 'inventory-sensor-example.yaml')
+option(
+    'invsensor-yaml-gen',
+    type: 'string',
+    value: 'inventory-sensor-example.yaml',
+)
 option('fru-yaml-gen', type: 'string', value: 'fru-read-example.yaml')
 
 # Software Version
-option('get-dbus-active-software', type: 'feature', description: 'Use the  getActiveSoftwareVersionInfo for the BMC version and dev_id.json as backup')
-option('fw-ver-regex', type : 'string', value : '(\\\\d+)\\\\.(\\\\d+)', description : 'Regular expressions for parsing firmware revision')
-option('matches-map', type : 'array', value : ['1', '2', '0', '0', '0', '0'], description : 'An array of integers')
+option(
+    'get-dbus-active-software',
+    type: 'feature',
+    description: 'Use the  getActiveSoftwareVersionInfo for the BMC version and dev_id.json as backup',
+)
+option(
+    'fw-ver-regex',
+    type: 'string',
+    value: '(\\\\d+)\\\\.(\\\\d+)',
+    description: 'Regular expressions for parsing firmware revision',
+)
+option(
+    'matches-map',
+    type: 'array',
+    value: ['1', '2', '0', '0', '0', '0'],
+    description: 'An array of integers',
+)
 
 # libipmi20.so library
-option('dynamic-storages-only', type: 'feature', value: 'disabled', description: 'Request to compile storage commands in the libipmi20 library')
+option(
+    'dynamic-storages-only',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Request to compile storage commands in the libipmi20 library',
+)
 
 # open-power specific functionality.
-option('open-power', type: 'feature', description: 'Support open-power specific functions')
+option(
+    'open-power',
+    type: 'feature',
+    description: 'Support open-power specific functions',
+)
