@@ -73,8 +73,8 @@ class Interface
      * @return encrypted payload if the operation is successful
      *
      */
-    virtual std::vector<uint8_t>
-        encryptPayload(std::vector<uint8_t>& payload) const = 0;
+    virtual std::vector<uint8_t> encryptPayload(
+        std::vector<uint8_t>& payload) const = 0;
 
     /**
      * @brief Check if the Confidentiality algorithm is supported
@@ -171,8 +171,8 @@ class AlgoAES128 final : public Interface
      * @return encrypted payload if the operation is successful
      *
      */
-    std::vector<uint8_t>
-        encryptPayload(std::vector<uint8_t>& payload) const override;
+    std::vector<uint8_t> encryptPayload(
+        std::vector<uint8_t>& payload) const override;
 
   private:
     /**

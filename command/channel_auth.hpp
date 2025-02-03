@@ -118,9 +118,9 @@ struct GetChannelCapabilitiesResp
  *
  * @return Response data for the command
  */
-std::vector<uint8_t>
-    GetChannelCapabilities(const std::vector<uint8_t>& inPayload,
-                           std::shared_ptr<message::Handler>& handler);
+std::vector<uint8_t> GetChannelCapabilities(
+    const std::vector<uint8_t>& inPayload,
+    std::shared_ptr<message::Handler>& handler);
 
 /**
  * @brief Get Channel Cipher Suites
@@ -136,8 +136,8 @@ std::vector<uint8_t>
  *
  * @return Response data for the command
  */
-std::vector<uint8_t>
-    getChannelCipherSuites(const std::vector<uint8_t>& inPayload,
-                           std::shared_ptr<message::Handler>& handler);
+std::vector<uint8_t> getChannelCipherSuites(
+    const std::vector<uint8_t>& inPayload,
+    std::shared_ptr<message::Handler>& handler);
 
 } // namespace command

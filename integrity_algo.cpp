@@ -18,8 +18,8 @@ AlgoSHA1::AlgoSHA1(const std::vector<uint8_t>& sik) :
     k1 = generateKn(sik, rmcp::const_1);
 }
 
-std::vector<uint8_t>
-    AlgoSHA1::generateHMAC(const uint8_t* input, const size_t len) const
+std::vector<uint8_t> AlgoSHA1::generateHMAC(const uint8_t* input,
+                                            const size_t len) const
 {
     std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -53,8 +53,8 @@ bool AlgoSHA1::verifyIntegrityData(
                        integrityDataEnd));
 }
 
-std::vector<uint8_t>
-    AlgoSHA1::generateIntegrityData(const std::vector<uint8_t>& packet) const
+std::vector<uint8_t> AlgoSHA1::generateIntegrityData(
+    const std::vector<uint8_t>& packet) const
 {
     return generateHMAC(
         packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE,
@@ -84,8 +84,8 @@ AlgoSHA256::AlgoSHA256(const std::vector<uint8_t>& sik) :
     k1 = generateKn(sik, rmcp::const_1);
 }
 
-std::vector<uint8_t>
-    AlgoSHA256::generateHMAC(const uint8_t* input, const size_t len) const
+std::vector<uint8_t> AlgoSHA256::generateHMAC(const uint8_t* input,
+                                              const size_t len) const
 {
     std::vector<uint8_t> output(SHA256_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -119,8 +119,8 @@ bool AlgoSHA256::verifyIntegrityData(
                        integrityDataEnd));
 }
 
-std::vector<uint8_t>
-    AlgoSHA256::generateIntegrityData(const std::vector<uint8_t>& packet) const
+std::vector<uint8_t> AlgoSHA256::generateIntegrityData(
+    const std::vector<uint8_t>& packet) const
 {
     return generateHMAC(
         packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE,

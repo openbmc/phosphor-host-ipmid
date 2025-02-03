@@ -58,8 +58,8 @@ std::vector<uint8_t> AlgoAES128::decryptPayload(
     return plainPayload;
 }
 
-std::vector<uint8_t>
-    AlgoAES128::encryptPayload(std::vector<uint8_t>& payload) const
+std::vector<uint8_t> AlgoAES128::encryptPayload(
+    std::vector<uint8_t>& payload) const
 {
     auto payloadLen = payload.size();
 
@@ -148,8 +148,8 @@ std::vector<uint8_t> AlgoAES128::decryptData(
     return output;
 }
 
-std::vector<uint8_t>
-    AlgoAES128::encryptData(const uint8_t* input, const int inputLen) const
+std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
+                                             const int inputLen) const
 {
     std::vector<uint8_t> output(inputLen + AESCBC128BlockSize);
 

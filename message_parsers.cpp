@@ -13,8 +13,8 @@ namespace message
 namespace parser
 {
 
-std::tuple<std::shared_ptr<Message>, SessionHeader>
-    unflatten(std::vector<uint8_t>& inPacket)
+std::tuple<std::shared_ptr<Message>, SessionHeader> unflatten(
+    std::vector<uint8_t>& inPacket)
 {
     // Check if the packet has atleast the size of the RMCP Header
     if (inPacket.size() < sizeof(RmcpHeader_t))
@@ -133,9 +133,9 @@ std::shared_ptr<Message> unflatten(std::vector<uint8_t>& inPacket)
     return message;
 }
 
-std::vector<uint8_t>
-    flatten(const std::shared_ptr<Message>& outMessage,
-            const std::shared_ptr<session::Session>& /* session */)
+std::vector<uint8_t> flatten(
+    const std::shared_ptr<Message>& outMessage,
+    const std::shared_ptr<session::Session>& /* session */)
 {
     std::vector<uint8_t> packet(sizeof(SessionHeader_t));
 
@@ -403,9 +403,9 @@ std::vector<uint8_t> decryptPayload(
         packet, sizeof(SessionHeader_t), payloadLen);
 }
 
-std::vector<uint8_t>
-    encryptPayload(const std::shared_ptr<Message>& message,
-                   const std::shared_ptr<session::Session>& session)
+std::vector<uint8_t> encryptPayload(
+    const std::shared_ptr<Message>& message,
+    const std::shared_ptr<session::Session>& session)
 {
     return session->getCryptAlgo()->encryptPayload(message->payload);
 }

@@ -173,11 +173,11 @@ class AlgoSHA1 : public Interface
     AlgoSHA1(AlgoSHA1&&) = default;
     AlgoSHA1& operator=(AlgoSHA1&&) = default;
 
-    std::vector<uint8_t>
-        generateHMAC(const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t> generateHMAC(
+        const std::vector<uint8_t>& input) const override;
 
-    std::vector<uint8_t>
-        generateICV(const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t> generateICV(
+        const std::vector<uint8_t>& input) const override;
 };
 
 /**
@@ -207,11 +207,11 @@ class AlgoSHA256 : public Interface
     AlgoSHA256(AlgoSHA256&&) = default;
     AlgoSHA256& operator=(AlgoSHA256&&) = default;
 
-    std::vector<uint8_t>
-        generateHMAC(const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t> generateHMAC(
+        const std::vector<uint8_t>& input) const override;
 
-    std::vector<uint8_t>
-        generateICV(const std::vector<uint8_t>& input) const override;
+    std::vector<uint8_t> generateICV(
+        const std::vector<uint8_t>& input) const override;
 };
 
 } // namespace rakp_auth

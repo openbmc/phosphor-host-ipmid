@@ -188,8 +188,8 @@ bool Manager::stopSession(SessionID bmcSessionID)
     }
 }
 
-std::shared_ptr<Session>
-    Manager::getSession(SessionID sessionID, RetrieveOption option)
+std::shared_ptr<Session> Manager::getSession(SessionID sessionID,
+                                             RetrieveOption option)
 {
     switch (option)
     {

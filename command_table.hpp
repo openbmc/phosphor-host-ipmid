@@ -128,9 +128,9 @@ class Entry
      *
      * @return Response data for the command
      */
-    virtual std::vector<uint8_t>
-        executeCommand(std::vector<uint8_t>& commandData,
-                       std::shared_ptr<message::Handler> handler) = 0;
+    virtual std::vector<uint8_t> executeCommand(
+        std::vector<uint8_t>& commandData,
+        std::shared_ptr<message::Handler> handler) = 0;
 
     auto getCommand() const
     {
@@ -184,9 +184,9 @@ class NetIpmidEntry final : public Entry
      *
      * @return Response data for the command
      */
-    std::vector<uint8_t>
-        executeCommand(std::vector<uint8_t>& commandData,
-                       std::shared_ptr<message::Handler> handler) override;
+    std::vector<uint8_t> executeCommand(
+        std::vector<uint8_t>& commandData,
+        std::shared_ptr<message::Handler> handler) override;
 
     virtual ~NetIpmidEntry() = default;
     NetIpmidEntry(const NetIpmidEntry&) = default;

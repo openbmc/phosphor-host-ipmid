@@ -137,9 +137,9 @@ void Table::executeCommand(uint32_t inCommand,
     }
 }
 
-std::vector<uint8_t>
-    NetIpmidEntry::executeCommand(std::vector<uint8_t>& commandData,
-                                  std::shared_ptr<message::Handler> handler)
+std::vector<uint8_t> NetIpmidEntry::executeCommand(
+    std::vector<uint8_t>& commandData,
+    std::shared_ptr<message::Handler> handler)
 {
     std::vector<uint8_t> errResponse;
 

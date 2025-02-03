@@ -114,9 +114,9 @@ std::vector<uint8_t> activatePayload(const std::vector<uint8_t>& inPayload,
     return outPayload;
 }
 
-std::vector<uint8_t>
-    deactivatePayload(const std::vector<uint8_t>& inPayload,
-                      std::shared_ptr<message::Handler>& handler)
+std::vector<uint8_t> deactivatePayload(
+    const std::vector<uint8_t>& inPayload,
+    std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const DeactivatePayloadRequest*>(inPayload.data());
@@ -201,9 +201,9 @@ std::vector<uint8_t>
     return outPayload;
 }
 
-std::vector<uint8_t>
-    getPayloadStatus(const std::vector<uint8_t>& inPayload,
-                     std::shared_ptr<message::Handler>& /* handler */)
+std::vector<uint8_t> getPayloadStatus(
+    const std::vector<uint8_t>& inPayload,
+    std::shared_ptr<message::Handler>& /* handler */)
 {
     auto request =
         reinterpret_cast<const GetPayloadStatusRequest*>(inPayload.data());
@@ -235,9 +235,9 @@ std::vector<uint8_t>
     return outPayload;
 }
 
-std::vector<uint8_t>
-    getPayloadInfo(const std::vector<uint8_t>& inPayload,
-                   std::shared_ptr<message::Handler>& /* handler */)
+std::vector<uint8_t> getPayloadInfo(
+    const std::vector<uint8_t>& inPayload,
+    std::shared_ptr<message::Handler>& /* handler */)
 {
     auto request =
         reinterpret_cast<const GetPayloadInfoRequest*>(inPayload.data());

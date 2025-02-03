@@ -14,8 +14,8 @@ namespace cipher
 namespace rakp_auth
 {
 
-std::vector<uint8_t>
-    AlgoSHA1::generateHMAC(const std::vector<uint8_t>& input) const
+std::vector<uint8_t> AlgoSHA1::generateHMAC(
+    const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -30,8 +30,8 @@ std::vector<uint8_t>
     return output;
 }
 
-std::vector<uint8_t>
-    AlgoSHA1::generateICV(const std::vector<uint8_t>& input) const
+std::vector<uint8_t> AlgoSHA1::generateICV(
+    const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -48,8 +48,8 @@ std::vector<uint8_t>
     return output;
 }
 
-std::vector<uint8_t>
-    AlgoSHA256::generateHMAC(const std::vector<uint8_t>& input) const
+std::vector<uint8_t> AlgoSHA256::generateHMAC(
+    const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA256_DIGEST_LENGTH);
     unsigned int mdLen = 0;
@@ -65,8 +65,8 @@ std::vector<uint8_t>
     return output;
 }
 
-std::vector<uint8_t>
-    AlgoSHA256::generateICV(const std::vector<uint8_t>& input) const
+std::vector<uint8_t> AlgoSHA256::generateICV(
+    const std::vector<uint8_t>& input) const
 {
     std::vector<uint8_t> output(SHA256_DIGEST_LENGTH);
     unsigned int mdLen = 0;

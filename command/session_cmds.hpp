@@ -74,9 +74,9 @@ struct SetSessionPrivLevelResp
  *
  * @return Response data for the command
  */
-std::vector<uint8_t>
-    setSessionPrivilegeLevel(const std::vector<uint8_t>& inPayload,
-                             std::shared_ptr<message::Handler>& handler);
+std::vector<uint8_t> setSessionPrivilegeLevel(
+    const std::vector<uint8_t>& inPayload,
+    std::shared_ptr<message::Handler>& handler);
 /**
  * @struct CloseSessionRequest
  *

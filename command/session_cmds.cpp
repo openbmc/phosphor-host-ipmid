@@ -16,9 +16,9 @@ using namespace std::chrono_literals;
 namespace command
 {
 
-std::vector<uint8_t>
-    setSessionPrivilegeLevel(const std::vector<uint8_t>& inPayload,
-                             std::shared_ptr<message::Handler>& handler)
+std::vector<uint8_t> setSessionPrivilegeLevel(
+    const std::vector<uint8_t>& inPayload,
+    std::shared_ptr<message::Handler>& handler)
 {
     auto request =
         reinterpret_cast<const SetSessionPrivLevelReq*>(inPayload.data());
