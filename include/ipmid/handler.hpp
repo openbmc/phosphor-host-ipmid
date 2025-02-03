@@ -43,16 +43,16 @@ namespace ipmi
 {
 
 template <typename... Args>
-static inline message::Response::ptr
-    errorResponse(message::Request::ptr request, ipmi::Cc cc, Args&&... args)
+static inline message::Response::ptr errorResponse(
+    message::Request::ptr request, ipmi::Cc cc, Args&&... args)
 {
     message::Response::ptr response = request->makeResponse();
     response->cc = cc;
     response->pack(args...);
     return response;
 }
-static inline message::Response::ptr
-    errorResponse(message::Request::ptr request, ipmi::Cc cc)
+static inline message::Response::ptr errorResponse(
+    message::Request::ptr request, ipmi::Cc cc)
 {
     message::Response::ptr response = request->makeResponse();
     response->cc = cc;
@@ -141,8 +141,8 @@ class HandlerBase
      *
      * @return a shared_ptr to a Response object
      */
-    virtual message::Response::ptr
-        executeCallback(message::Request::ptr request) = 0;
+    virtual message::Response::ptr executeCallback(
+        message::Request::ptr request) = 0;
 };
 
 /**
@@ -181,8 +181,8 @@ class IpmiHandler final : public HandlerBase
      *
      * @return a shared_ptr to a Response object
      */
-    message::Response::ptr
-        executeCallback(message::Request::ptr request) override
+    message::Response::ptr executeCallback(
+        message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
 
@@ -346,8 +346,8 @@ class IpmiHandler<ipmid_callback_t> final : public HandlerBase
      *
      * @return a shared_ptr to a Response object
      */
-    message::Response::ptr
-        executeCallback(message::Request::ptr request) override
+    message::Response::ptr executeCallback(
+        message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
         // allocate a big response buffer here
@@ -432,8 +432,8 @@ class IpmiHandler<oem::Handler> final : public HandlerBase
      *
      * @return a shared_ptr to a Response object
      */
-    message::Response::ptr
-        executeCallback(message::Request::ptr request) override
+    message::Response::ptr executeCallback(
+        message::Request::ptr request) override
     {
         message::Response::ptr response = request->makeResponse();
         // allocate a big response buffer here

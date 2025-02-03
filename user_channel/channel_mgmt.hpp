@@ -370,8 +370,8 @@ class ChannelConfig
      *
      *  @return support session type
      */
-    EChannelSessSupported
-        convertToSessionSupportIndex(const std::string& value);
+    EChannelSessSupported convertToSessionSupportIndex(
+        const std::string& value);
 
     /** @brief function to convert medium type string to value type
      *

@@ -286,8 +286,8 @@ bool getSensorSubtree(SensorSubTree& subtree)
 
 #ifdef FEATURE_HYBRID_SENSORS
 // Static sensors are listed in sensor-gen.cpp.
-ipmi::sensor::IdInfoMap::const_iterator
-    findStaticSensor(const std::string& path)
+ipmi::sensor::IdInfoMap::const_iterator findStaticSensor(
+    const std::string& path)
 {
     return std::find_if(
         ipmi::sensor::sensors.begin(), ipmi::sensor::sensors.end(),
@@ -411,8 +411,8 @@ std::optional<std::map<std::string, std::vector<std::string>>>
     return interfacesResponse;
 }
 
-std::map<std::string, Value>
-    getEntityManagerProperties(const char* path, const char* interface)
+std::map<std::string, Value> getEntityManagerProperties(const char* path,
+                                                        const char* interface)
 {
     std::map<std::string, Value> properties;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
@@ -439,8 +439,8 @@ std::map<std::string, Value>
 
 // Fetch the ipmiDecoratorPaths to get the list of dbus objects that
 // have ipmi decorator to prevent unnessary dbus call to fetch the info
-std::optional<std::unordered_set<std::string>>&
-    getIpmiDecoratorPaths(const std::optional<ipmi::Context::ptr>& ctx)
+std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
+    const std::optional<ipmi::Context::ptr>& ctx)
 {
     static std::optional<std::unordered_set<std::string>> ipmiDecoratorPaths;
 
