@@ -19,7 +19,6 @@
 
 constexpr const char* solInterface = "xyz.openbmc_project.Ipmi.SOL";
 constexpr const char* solPath = "/xyz/openbmc_project/ipmi/sol/";
-constexpr const char* PROP_INTF = "org.freedesktop.DBus.Properties";
 
 namespace sol
 {
@@ -120,7 +119,6 @@ void Manager::stopHostConsole()
 
 void Manager::updateSOLParameter(uint8_t channelNum)
 {
-    std::variant<uint8_t, bool> value;
     sdbusplus::bus_t dbus(ipmid_get_sd_bus_connection());
     static std::string solService{};
     ipmi::PropertyMap properties;

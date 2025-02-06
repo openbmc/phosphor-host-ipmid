@@ -35,7 +35,7 @@ void logInvalidLoginRedfishEvent(const std::string& journalMsg,
     lg2::error(
         "message: {MSG}, id: {REDFISH_MESSAGE_ID}, args: {REDFISH_MESSAGE_ARGS}",
         "MSG", journalMsg, "REDFISH_MESSAGE_ID", messageID,
-        "REDFISH_MESSAGE_ARGS", messageArgs.value());
+        "REDFISH_MESSAGE_ARGS", messageArgs.value_or(std::string{}));
 }
 std::vector<uint8_t> RAKP12(const std::vector<uint8_t>& inPayload,
                             std::shared_ptr<message::Handler>& /* handler */)

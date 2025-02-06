@@ -77,8 +77,8 @@ void Table::executeCommand(uint32_t inCommand,
              ipmi::Value(static_cast<uint32_t>(session->getBMCSessionID()))},
         };
         bus->async_method_call(
-            [handler, this](const boost::system::error_code& ec,
-                            const IpmiDbusRspType& response) {
+            [handler](const boost::system::error_code& ec,
+                      const IpmiDbusRspType& response) {
                 if (!ec)
                 {
                     const uint8_t& cc = std::get<3>(response);

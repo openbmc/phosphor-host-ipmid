@@ -212,8 +212,9 @@ class AlgoSHA1 final : public Interface
      * @return on success returns the Kn based on HMAC-SHA1
      *
      */
-    std::vector<uint8_t> generateKn(const std::vector<uint8_t>& sik,
-                                    const rmcp::Const_n& const_n) const;
+    std::vector<uint8_t> generateKn(
+        const std::vector<uint8_t>& sik,
+        const rmcp::Const_n& const_n) const override;
 
   private:
     /**
@@ -297,8 +298,9 @@ class AlgoSHA256 final : public Interface
      * @return on success returns the Kn based on HMAC-SHA256
      *
      */
-    std::vector<uint8_t> generateKn(const std::vector<uint8_t>& sik,
-                                    const rmcp::Const_n& const_n) const;
+    std::vector<uint8_t> generateKn(
+        const std::vector<uint8_t>& sik,
+        const rmcp::Const_n& const_n) const override;
 
   private:
     /**
