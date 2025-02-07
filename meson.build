@@ -24,7 +24,7 @@ conf_data.set(
 )
 
 # Soft Power off related.
-if not get_option('softoff').disabled()
+if get_option('softoff').allowed()
     conf_data.set_quoted('SOFTOFF_BUSNAME', get_option('softoff-busname'))
     conf_data.set_quoted('SOFTOFF_OBJPATH', get_option('softoff-objpath'))
     conf_data.set(
@@ -86,7 +86,7 @@ add_project_arguments(
     language: 'cpp',
 )
 
-if not get_option('get-dbus-active-software').disabled()
+if get_option('get-dbus-active-software').allowed()
     add_project_arguments(
         cpp.get_supported_arguments(['-DGET_DBUS_ACTIVE_SOFTWARE']),
         language: 'cpp',
@@ -177,13 +177,13 @@ subdir('include')
 subdir('user_channel')
 subdir('scripts')
 
-if not get_option('softoff').disabled()
+if get_option('softoff').allowed()
     subdir('xyz/openbmc_project/Ipmi/Internal/SoftPowerOff')
     subdir('softoff')
 endif
 
 # whitelist
-if not get_option('ipmi-whitelist').disabled()
+if get_option('ipmi-whitelist').allowed()
     generate_whitelist_script = files('generate_whitelist_create.sh')
 
     whitelist_conf = get_option('whitelist-conf')
@@ -256,7 +256,7 @@ ipmid_pre = [
 ]
 
 transportoem_src = []
-if not get_option('transport-oem').disabled()
+if get_option('transport-oem').allowed()
     transportoem_src = ['transporthandler_oem.cpp']
 endif
 
@@ -332,7 +332,7 @@ executable(
 # Dynamic Sensor Stack
 subdir('dbus-sdr')
 
-if not get_option('dynamic-sensors').disabled() or not get_option('tests').disabled()
+if get_option('dynamic-sensors').disabled() or not get_option('tests').allowed()
     library(
         'dynamiccmds',
         dbus_sdr_src,
@@ -345,7 +345,7 @@ if not get_option('dynamic-sensors').disabled() or not get_option('tests').disab
     )
 endif
 
-if not get_option('tests').disabled()
+if get_option('tests').allowed()
     subdir('test')
 endif
 
