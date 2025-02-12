@@ -2,7 +2,7 @@
 
 # Ensure some files have been passed.
 if [ -z "$*" ]; then
-    echo "Usage: $0 [whitelist_files+]" >&2
+    echo "Usage: $0 [allowlist_files+]" >&2
     exit 1
 fi
 
@@ -13,7 +13,7 @@ const std::vector<netfncmd_pair> allowlist = {
 
 EOF
 
-# Output each row of whitelist vector.
+# Output each row of allowlist vector.
 # Concatenate all the passed files.
 # Remove comments and empty lines.
 # Sort the list [numerically].
