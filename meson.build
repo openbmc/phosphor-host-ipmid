@@ -126,7 +126,7 @@ add_project_arguments(
 
 # Dependencies
 
-boost = dependency('boost', modules: ['coroutine'], required: false)
+boost = dependency('boost', modules: ['context', 'coroutine'], required: false)
 
 if not boost.found()
     cmake = import('cmake')
