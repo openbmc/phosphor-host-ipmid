@@ -1031,19 +1031,23 @@ bool getACFailStatus()
 }
 } // namespace power_policy
 
-static std::optional<bool> getButtonDisabled(const std::string& buttonPath,
-                                             const std::string& buttonIntf)
+static std::optional<bool>
+    getButtonDisabled(ipmi::Context::ptr& ctx, const std::string& buttonPath,
+                      const std::string& buttonIntf)
 {
-    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
     bool buttonDisabled = false;
-    try
+    boost::system::error_code ec;
+    std::string service;
+    ec = ipmi::getService(ctx, buttonIntf, buttonPath, service);
+    if (!ec)
     {
-        auto service = ipmi::getService(*busp, buttonIntf, buttonPath);
-        ipmi::Value enabled = ipmi::getDbusProperty(*busp, service, buttonPath,
-                                                    buttonIntf, "Enabled");
-        buttonDisabled = !std::get<bool>(enabled);
+        bool enabled;
+        ec = ipmi::getDbusProperty(ctx, service, buttonPath, buttonIntf,
+                                   "Enabled", enabled);
+        buttonDisabled = !enabled;
     }
-    catch (const sdbusplus::exception_t& e)
+
+    if (ec)
     {
         lg2::error("Fail to get button Enabled property ({PATH}): {ERROR}",
                    "PATH", buttonPath, "ERROR", e);
@@ -1152,7 +1156,7 @@ ipmi::RspType<bool,    // Power is on
 
     //  Front Panel Button Capabilities and disable/enable status(Optional)
     std::optional<bool> powerButtonReading =
-        getButtonDisabled(powerButtonPath, powerButtonIntf);
+        getButtonDisabled(ctx, powerButtonPath, powerButtonIntf);
     // allow disable if the interface is present
     bool powerButtonDisableAllow = static_cast<bool>(powerButtonReading);
     // default return the button is enabled (not disabled)
@@ -1164,7 +1168,7 @@ ipmi::RspType<bool,    // Power is on
     }
 
     std::optional<bool> resetButtonReading =
-        getButtonDisabled(resetButtonPath, resetButtonIntf);
+        getButtonDisabled(ctx, resetButtonPath, resetButtonIntf);
     // allow disable if the interface is present
     bool resetButtonDisableAllow = static_cast<bool>(resetButtonReading);
     // default return the button is enabled (not disabled)
