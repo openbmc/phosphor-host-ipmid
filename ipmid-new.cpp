@@ -20,6 +20,7 @@
 #include <dlfcn.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/spawn.hpp>
 #include <host-cmd-manager.hpp>
