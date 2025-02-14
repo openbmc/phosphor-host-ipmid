@@ -20,6 +20,7 @@
 #include <dlfcn.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/spawn.hpp>
 #include <host-cmd-manager.hpp>
@@ -765,7 +766,7 @@ void handleLegacyIpmiCommand(sdbusplus::message_t& m)
 {
     // make a copy so the next two moves don't wreak havoc on the stack
     sdbusplus::message_t b{m};
-    (void)boost::asio::spawn(
+    boost::asio::spawn(
         *getIoContext(),
         [b = std::move(b)](boost::asio::yield_context yield) {
             sdbusplus::message_t m{std::move(b)};
@@ -802,7 +803,7 @@ void handleLegacyIpmiCommand(sdbusplus::message_t& m)
                     netFn, "CMD", lg2::hex, cmd);
             }
         },
-        {});
+        boost::asio::detached);
 }
 
 #endif /* ALLOW_DEPRECATED_API */
