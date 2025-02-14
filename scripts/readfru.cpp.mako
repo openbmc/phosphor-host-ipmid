@@ -1,6 +1,7 @@
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
-#include <iostream>
 #include "fruread.hpp"
+
+#include <iostream>
 
 extern const FruMap __attribute__((init_priority(101))) frus = {
 % for key in fruDict.keys():

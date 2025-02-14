@@ -1,5 +1,4 @@
-## This file is a template.  The comment below is emitted
-## into the rendered file; feel free to edit this file.
+##This file is a template.The comment below is emitted##into the rendered file; feel free to edit this file.
 // !!! WARNING: This is a GENERATED Code..Please do NOT Edit !!!
 <%
 interfaceDict = {}
@@ -7,22 +6,18 @@ sensorNameMaxLength = 16
 %>\
 %for key in sensorDict.keys():
 <%
-    sensor = sensorDict[key]
-    serviceInterface = sensor["serviceInterface"]
-    if serviceInterface == "org.freedesktop.DBus.Properties":
-        updateFunc = "set::"
-        getFunc = "get::"
-    elif serviceInterface == "xyz.openbmc_project.Inventory.Manager":
-        updateFunc = "notify::"
-        getFunc = "inventory::get::"
-    else:
-        assert "Un-supported interface: " + serviceInterface
-    endif
-    if serviceInterface not in interfaceDict:
-        interfaceDict[serviceInterface] = {}
-        interfaceDict[serviceInterface]["updateFunc"] = updateFunc
-        interfaceDict[serviceInterface]["getFunc"] = getFunc
-%>\
+    sensor = sensorDict[key] serviceInterface =
+        sensor["serviceInterface"] if serviceInterface ==
+        "org.freedesktop.DBus.Properties" :
+        updateFunc = "set::" getFunc = "get::" elif serviceInterface ==
+                                       "xyz.openbmc_project.Inventory.Manager" :
+        updateFunc = "notify::" getFunc = "inventory::get::" else :
+        assert "Un-supported interface: " +
+        serviceInterface endif if serviceInterface not in interfaceDict :
+        interfaceDict[serviceInterface] =
+    {} interfaceDict[serviceInterface]["updateFunc"] =
+        updateFunc interfaceDict[serviceInterface]["getFunc"] = getFunc
+%>
 % endfor
 
 #include "sensordatahandler.hpp"
