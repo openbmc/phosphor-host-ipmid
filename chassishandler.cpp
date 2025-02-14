@@ -1037,8 +1037,8 @@ bool getACFailStatus()
 }
 } // namespace power_policy
 
-static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
-                                            const std::string& buttonIntf)
+static std::optional<bool> getButtonDisabled(const std::string& buttonPath,
+                                             const std::string& buttonIntf)
 {
     std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
     bool buttonDisabled = false;
@@ -1058,9 +1058,9 @@ static std::optional<bool> getButtonEnabled(const std::string& buttonPath,
     return std::make_optional(buttonDisabled);
 }
 
-static bool setButtonEnabled(ipmi::Context::ptr& ctx,
-                             const std::string& buttonPath,
-                             const std::string& buttonIntf, bool enable)
+static bool setButtonDisabled(ipmi::Context::ptr& ctx,
+                              const std::string& buttonPath,
+                              const std::string& buttonIntf, bool disable)
 {
     std::string service;
     boost::system::error_code ec;
@@ -1068,7 +1068,7 @@ static bool setButtonEnabled(ipmi::Context::ptr& ctx,
     if (!ec)
     {
         ec = ipmi::setDbusProperty(ctx, service, buttonPath, buttonIntf,
-                                   "Enabled", enable);
+                                   "Enabled", !disable);
     }
     if (ec)
     {
@@ -1183,7 +1183,7 @@ ipmi::RspType<bool,    // Power is on
 
     //  Front Panel Button Capabilities and disable/enable status(Optional)
     std::optional<bool> powerButtonReading =
-        getButtonEnabled(powerButtonPath, powerButtonIntf);
+        getButtonDisabled(powerButtonPath, powerButtonIntf);
     // allow disable if the interface is present
     bool powerButtonDisableAllow = static_cast<bool>(powerButtonReading);
     // default return the button is enabled (not disabled)
@@ -1195,7 +1195,7 @@ ipmi::RspType<bool,    // Power is on
     }
 
     std::optional<bool> resetButtonReading =
-        getButtonEnabled(resetButtonPath, resetButtonIntf);
+        getButtonDisabled(resetButtonPath, resetButtonIntf);
     // allow disable if the interface is present
     bool resetButtonDisableAllow = static_cast<bool>(resetButtonReading);
     // default return the button is enabled (not disabled)
@@ -2343,12 +2343,12 @@ ipmi::RspType<> ipmiSetFrontPanelButtonEnables(
     using namespace chassis::internal;
 
     // set power button Enabled property
-    bool success = setButtonEnabled(ctx, powerButtonPath, powerButtonIntf,
-                                    !disablePowerButton);
+    bool success = setButtonDisabled(ctx, powerButtonPath, powerButtonIntf,
+                                     disablePowerButton);
 
     // set reset button Enabled property
-    success &= setButtonEnabled(ctx, resetButtonPath, resetButtonIntf,
-                                !disableResetButton);
+    success &= setButtonDisabled(ctx, resetButtonPath, resetButtonIntf,
+                                 disableResetButton);
 
     if (!success)
     {
