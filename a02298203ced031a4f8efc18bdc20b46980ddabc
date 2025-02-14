@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e54bf387_ef075e3f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2025-02-14T22:09:26Z",
+      "side": 1,
+      "message": "I fixed this bug recently\n`77520: Fix bug in the name of array of whitelisted commands` | https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/77520\n\nSo the patch description probably should be corrected",
+      "revId": "a02298203ced031a4f8efc18bdc20b46980ddabc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
