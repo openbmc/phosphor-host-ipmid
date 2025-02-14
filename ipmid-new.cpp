@@ -21,6 +21,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/spawn.hpp>
 #include <host-cmd-manager.hpp>
 #include <ipmid-host/cmd.hpp>
 #include <ipmid/api.hpp>
@@ -764,7 +765,7 @@ void handleLegacyIpmiCommand(sdbusplus::message_t& m)
 {
     // make a copy so the next two moves don't wreak havoc on the stack
     sdbusplus::message_t b{m};
-    boost::asio::spawn(
+    [[maybe_unused]] auto f = boost::asio::spawn(
         *getIoContext(),
         [b = std::move(b)](boost::asio::yield_context yield) {
             sdbusplus::message_t m{std::move(b)};
