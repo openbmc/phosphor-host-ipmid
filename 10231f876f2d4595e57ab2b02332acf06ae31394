@@ -16,6 +16,401 @@
       "message": "Update patchset per review feedback.",
       "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "986db669_6e73b620",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "Rather than commenting this out, the best practice would be to find a way that the global variable is not needed. Often this means putting the variable in a class that allows access to the methods that need it and then putting an instance of that class on the stack at an appropriate level.",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "40abc427_a691a1e2",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "from my perusal of the code, serialchannel is not used outside of this file nor outside of this function, so you could declare it here and it can go out of scope when this function ends.",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6fc5da71_91e523cf",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "I don\u0027t think you need the .what() here. I though that lg2 could process std::exceptions internally.",
+      "range": {
+        "startLine": 84,
+        "startChar": 45,
+        "endLine": 84,
+        "endChar": 53
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d6435241_f891ad98",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "static const",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3a949d8d_fd0da838",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "why getUnescapedCharact with no er? Below is proccessEscapedCharacter.\n\n\n```suggestion\nuint8_t SerialChannel::getUnescapedCharacter(uint8_t c)\n```",
+      "range": {
+        "startLine": 48,
+        "startChar": 23,
+        "endLine": 48,
+        "endChar": 42
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3fb4d669_d701f5d9",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "ctx_escape \u003d false;",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "da4c6535_cd274576",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "ctx_escape \u003d false;",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 2
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "44fa75bc_6aa519fd",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "ctx_escape \u003d true;",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "96aa6e0b_fad06661",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "```suggestion\n        uint8_t netFn;\n        uint8_t lun;\n        uint8_t cmd;\n        uint8_t cc;\n        std::vector\u003cuint8_t\u003e data;\n        m.read(netFn, lun, cmd, cc, data);\n```",
+      "range": {
+        "startLine": 167,
+        "startChar": 8,
+        "endLine": 171,
+        "endChar": 54
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "18df2f2e_82425342",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "should be + 4; need bmStart, bmStop and two checksums",
+      "range": {
+        "startLine": 181,
+        "startChar": 49,
+        "endLine": 181,
+        "endChar": 50
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a188ca4f_b681086f",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "```suggestion\n        lg2::error(\"IPMI Response failure: {MSG}\", \"MSG\", e);\n```",
+      "range": {
+        "startLine": 219,
+        "startChar": 58,
+        "endLine": 219,
+        "endChar": 66
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1d13c672_a9d3d1d7",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "this can throw, you should probably catch its errors and report like the other errors. Maybe just move it up into the previous try/catch block",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "36f93e87_f3c91708",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "lowerCamelCase",
+      "range": {
+        "startLine": 301,
+        "startChar": 14,
+        "endLine": 301,
+        "endChar": 22
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7fdf5a6c_edc4e97a",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "is there a reason for ignoring exceptions here? It seems that you would want to report them. Maybe by writing an error response back the the serial caller?",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2d7731db_0f874c31",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "Please don\u0027t put using lines in the header file; put them in the cpp file to minimize namespace pollution.",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 28
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cff91769_b1f3edf4",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "constants should be lowerCamelCase",
+      "range": {
+        "startLine": 14,
+        "startChar": 22,
+        "endLine": 24,
+        "endChar": 52
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21a425c4_d626cc62",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "ctx_state only has two values inProgress or idle; it might make sense to treat this as a bool with a name that has meaning:\n\n```suggestion\n    bool ctxMsgInProgress;\n```",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 2
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ce686ab0_e71fcba8",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "Alternately, it would be acceptable to combine the two variables into a three-state enum:\n\n```suggestion\n    enum class MsgState\n    {\n        idle \u003d 0,\n        inProgress,\n        inEscape,\n        max\n    };\n    MsgState msgState;\n```\n\nThen you have a state machine that can move from idle to inProgress on a start char, inProgress to inEscape on an escape char and then back to inProgress on the next char or back to idle on end of message.",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 23
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "04eb707f_e9ff84b9",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-23T21:32:34Z",
+      "side": 1,
+      "message": "this is used as a bool in the code, so just make it a bool here. Also variables should be lowerCamelCase.\n\nbool ctx\n```suggestion\n    bool ctxEscape;\n```",
+      "range": {
+        "startLine": 62,
+        "startChar": 4,
+        "endLine": 62,
+        "endChar": 11
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
