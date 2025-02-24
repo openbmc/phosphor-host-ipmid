@@ -33,7 +33,7 @@
 
 owners:
 - rushtotom@gmail.com
-- vernon.mauery@linux.intel.com
+- vernon.mauery@gmail.com
 
 reviewers:
 
@@ -44,5 +44,5 @@ openbmc:
   email: rushtotom@gmail.com
   discord: tomjose
 - name: Vernon Mauery
-  email: vernon.mauery@linux.intel.com
+  email: vernon.mauery@gmail.com
   discord: vmauery
