@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7980e4b8_0774a471",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "986db669_6e73b620",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "40abc427_a691a1e2",
@@ -48,6 +66,24 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "from my perusal of the code, serialchannel is not used outside of this file nor outside of this function, so you could declare it here and it can go out of scope when this function ends.",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a43fd72_faec8735",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "40abc427_a691a1e2",
       "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -75,6 +111,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "825613fc_48185f8c",
+        "filename": "transport/serialbridge/serialbridged.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "6fc5da71_91e523cf",
+      "range": {
+        "startLine": 84,
+        "startChar": 45,
+        "endLine": 84,
+        "endChar": 53
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d6435241_f891ad98",
@@ -88,6 +148,24 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "static const",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "db9e9208_309ae59e",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "d6435241_f891ad98",
       "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -115,6 +193,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d0c3bb0_e9626e34",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "3a949d8d_fd0da838",
+      "range": {
+        "startLine": 48,
+        "startChar": 23,
+        "endLine": 48,
+        "endChar": 42
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3fb4d669_d701f5d9",
@@ -128,6 +230,24 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "ctx_escape \u003d false;",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99e92ab9_179a8657",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "3fb4d669_d701f5d9",
       "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -155,6 +275,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bc0ef61e_eefb45bb",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "da4c6535_cd274576",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 2
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "44fa75bc_6aa519fd",
@@ -172,6 +316,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e91d16ea_f36c9dcb",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "44fa75bc_6aa519fd",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "96aa6e0b_fad06661",
@@ -185,6 +347,30 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "```suggestion\n        uint8_t netFn;\n        uint8_t lun;\n        uint8_t cmd;\n        uint8_t cc;\n        std::vector\u003cuint8_t\u003e data;\n        m.read(netFn, lun, cmd, cc, data);\n```",
+      "range": {
+        "startLine": 167,
+        "startChar": 8,
+        "endLine": 171,
+        "endChar": 54
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5081399a_80966083",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged. Using `std::tie` since the response is `std::tuple`.",
+      "parentUuid": "96aa6e0b_fad06661",
       "range": {
         "startLine": 167,
         "startChar": 8,
@@ -218,6 +404,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ef230e55_91daf3f7",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "18df2f2e_82425342",
+      "range": {
+        "startLine": 181,
+        "startChar": 49,
+        "endLine": 181,
+        "endChar": 50
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a188ca4f_b681086f",
@@ -231,6 +441,30 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "```suggestion\n        lg2::error(\"IPMI Response failure: {MSG}\", \"MSG\", e);\n```",
+      "range": {
+        "startLine": 219,
+        "startChar": 58,
+        "endLine": 219,
+        "endChar": 66
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9055ff58_296ae8a6",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "a188ca4f_b681086f",
       "range": {
         "startLine": 219,
         "startChar": 58,
@@ -258,6 +492,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4054d6b0_dc2dc9e4",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "1d13c672_a9d3d1d7",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "36f93e87_f3c91708",
@@ -271,6 +523,30 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "lowerCamelCase",
+      "range": {
+        "startLine": 301,
+        "startChar": 14,
+        "endLine": 301,
+        "endChar": 22
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "74ff9488_eebfd5c2",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "36f93e87_f3c91708",
       "range": {
         "startLine": 301,
         "startChar": 14,
@@ -298,6 +574,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6f321b6b_0b5484d5",
+        "filename": "transport/serialbridge/serialcmd.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Exception is captured in `write` function. Also adding return code for capture error.",
+      "parentUuid": "7fdf5a6c_edc4e97a",
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2d7731db_0f874c31",
@@ -311,6 +605,30 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "Please don\u0027t put using lines in the header file; put them in the cpp file to minimize namespace pollution.",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 28
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ba6e15f9_cdeee515",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "2d7731db_0f874c31",
       "range": {
         "startLine": 10,
         "startChar": 0,
@@ -344,6 +662,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1eac9951_7d14e112",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "cff91769_b1f3edf4",
+      "range": {
+        "startLine": 14,
+        "startChar": 22,
+        "endLine": 24,
+        "endChar": 52
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "21a425c4_d626cc62",
@@ -357,6 +699,30 @@
       "writtenOn": "2025-02-23T21:32:34Z",
       "side": 1,
       "message": "ctx_state only has two values inProgress or idle; it might make sense to treat this as a bool with a name that has meaning:\n\n```suggestion\n    bool ctxMsgInProgress;\n```",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 2
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "53d1cafc_175f0e6b",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged. Combine them into a three-state enum.",
+      "parentUuid": "21a425c4_d626cc62",
       "range": {
         "startLine": 61,
         "startChar": 0,
@@ -408,6 +774,54 @@
         "startChar": 4,
         "endLine": 62,
         "endChar": 11
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "afbbd333_635d6f98",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged. Combine them into a three-state enum.",
+      "parentUuid": "04eb707f_e9ff84b9",
+      "range": {
+        "startLine": 62,
+        "startChar": 4,
+        "endLine": 62,
+        "endChar": 11
+      },
+      "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f34f563f_dcd82f8e",
+        "filename": "transport/serialbridge/serialcmd.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-02-25T01:04:42Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "ce686ab0_e71fcba8",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 23
       },
       "revId": "10231f876f2d4595e57ab2b02332acf06ae31394",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
