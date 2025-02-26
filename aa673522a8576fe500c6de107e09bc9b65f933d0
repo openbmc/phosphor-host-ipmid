@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c9776a45_ed90826b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2025-02-26T22:53:40Z",
+      "side": 1,
+      "message": "This looks exactly like https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/78225",
+      "revId": "aa673522a8576fe500c6de107e09bc9b65f933d0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
