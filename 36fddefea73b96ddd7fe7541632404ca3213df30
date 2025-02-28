@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "13f77da8_9250ce72",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-28T19:13:43Z",
+      "side": 1,
+      "message": "I would prefer that these functions were all updated to the yielding variant of getDbusProperty. They will still need to have error checking, but if we are touching these lines, we should just get them up to date rather than putting on a bandaid.\n\nThis will mean a change to update channelCall to accept a Context::ptr and pass it on to the function, but that seems like the better way to go.",
+      "revId": "36fddefea73b96ddd7fe7541632404ca3213df30",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
