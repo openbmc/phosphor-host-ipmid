@@ -271,7 +271,7 @@ auto getIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params)
     for (uint8_t i = 0; i < MAX_IPV4_ADDRESSES; ++i)
     {
         ifaddr4 = getIfAddr<AF_INET>(bus, params, i, originsV4);
-        if (src == ifaddr4->origin)
+        if (ifaddr4 && src == ifaddr4->origin)
         {
             break;
         }
