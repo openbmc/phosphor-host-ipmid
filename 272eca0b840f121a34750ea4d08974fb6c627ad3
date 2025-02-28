@@ -16,6 +16,24 @@
       "message": "Someone needs to look at this with a better understanding of boost yield_context coroutines.  I can\u0027t get this to pass on both 1.87 and 1.86 with the same code, nor do I understand it enough to figure out if this is a boost bug we need to file.\n\nSo far as I can tell, to support c++20 coroutines boost::asio::spawn added the ability to potentially return a co_return object.  Because of this, the prototype of spawn became no_discard.  When used with yield_context coroutines, the return type of boost::asio::spawn is void (80% sure of this), but with no_discard, we need to explicitly [[maybe_unused]] the \"returned\" void value.\n\nIf we capture that to a variable, boost 1.86 fails to build (because it actually returns void).  If we don\u0027t capture, we fail the nodiscard check on 1.87.",
       "revId": "272eca0b840f121a34750ea4d08974fb6c627ad3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb40c5f4_8f1038b3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2025-02-28T00:23:43Z",
+      "side": 1,
+      "message": "Jasons Idea was better than mine.  I tried to get too modern",
+      "parentUuid": "a13d7d45_148c2f9e",
+      "revId": "272eca0b840f121a34750ea4d08974fb6c627ad3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
