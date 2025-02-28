@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0309ee3e_b75b2a40",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-28T18:52:13Z",
+      "side": 1,
+      "message": "This mostly looks fine, but the commit message should match the new contents of the change.",
+      "revId": "30e0bcd4f5be601fe3290c594e2ea71b9dfe43e4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
