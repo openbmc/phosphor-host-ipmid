@@ -16,6 +16,23 @@
       "message": "The values are the same, but the types are different. I didn\u0027t check to see if this would add any new warnings. Ideally, the two functions using the old-style handlers could be rewritten to use the new-style handlers and then there would be no problem here.",
       "revId": "a7008f687346a62542c6b6653c62eaffed073a4a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "33da0023_e90131a6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-28T19:25:17Z",
+      "side": 1,
+      "message": "I take it back, the types are compatible.",
+      "revId": "a7008f687346a62542c6b6653c62eaffed073a4a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
