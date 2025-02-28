@@ -16,6 +16,29 @@
       "message": "I would prefer that these functions were all updated to the yielding variant of getDbusProperty. They will still need to have error checking, but if we are touching these lines, we should just get them up to date rather than putting on a bandaid.\n\nThis will mean a change to update channelCall to accept a Context::ptr and pass it on to the function, but that seems like the better way to go.",
       "revId": "36fddefea73b96ddd7fe7541632404ca3213df30",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f1b95c8b_214f5ec0",
+        "filename": "transporthandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-28T19:16:13Z",
+      "side": 1,
+      "message": "```suggestion\ntemplate \u003cauto func, typename... Args\u003e\nauto channelCall(Context::ptr\u0026 ctx, uint8_t channel, Args\u0026\u0026... args)\n{\n    auto params \u003d getChannelParams(bus, channel);\n    return std::invoke(func, ctx, params, std::forward\u003cArgs\u003e(args)...);\n}\n\n```",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 1
+      },
+      "revId": "36fddefea73b96ddd7fe7541632404ca3213df30",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
