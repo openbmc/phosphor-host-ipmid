@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "67c5b586_dfa261ae",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-02-28T19:20:20Z",
+      "side": 1,
+      "message": "The values are the same, but the types are different. I didn\u0027t check to see if this would add any new warnings. Ideally, the two functions using the old-style handlers could be rewritten to use the new-style handlers and then there would be no problem here.",
+      "revId": "6a274f5a3e9356c893ab0385b9a07031feee9475",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
