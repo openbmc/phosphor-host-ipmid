@@ -1,6 +1,7 @@
 project(
-    'phosphor-net-ipmid', 'cpp',
-    version : '1.0.0',
+    'phosphor-net-ipmid',
+    'cpp',
+    version: '1.0.0',
     meson_version: '>=1.1.1',
     default_options: [
         'warning_level=3',
@@ -8,16 +9,14 @@ project(
         'cpp_std=c++23',
         'buildtype=debugoptimized',
         'b_lto=true',
-    ]
+    ],
 )
 
 conf_data = configuration_data()
 conf_data.set('RMCP_PING', get_option('rmcp_ping').allowed())
 conf_data.set('PAM_AUTHENTICATE', get_option('pam_authenticate').allowed())
 
-configure_file(output: 'config.h',
-    configuration: conf_data
-)
+configure_file(output: 'config.h', configuration: conf_data)
 
 sdbusplus_dep = dependency('sdbusplus')
 phosphor_dbus_interfaces_dep = dependency('phosphor-dbus-interfaces')
@@ -37,14 +36,17 @@ else
 endif
 
 add_project_arguments(
-  cpp.get_supported_arguments([
-    '-DBOOST_ERROR_CODE_HEADER_ONLY',
-    '-DBOOST_SYSTEM_NO_DEPRECATED',
-    '-DBOOST_COROUTINES_NO_DEPRECATION_WARNING',
-    '-DBOOST_ASIO_DISABLE_THREADS',
-    '-DBOOST_ALL_NO_LIB',
-  ]),
-  language : 'cpp')
+    cpp.get_supported_arguments(
+        [
+            '-DBOOST_ERROR_CODE_HEADER_ONLY',
+            '-DBOOST_SYSTEM_NO_DEPRECATED',
+            '-DBOOST_COROUTINES_NO_DEPRECATION_WARNING',
+            '-DBOOST_ASIO_DISABLE_THREADS',
+            '-DBOOST_ALL_NO_LIB',
+        ],
+    ),
+    language: 'cpp',
+)
 
 deps = [
     cli11_dep,
@@ -89,25 +91,30 @@ executable(
     include_directories: ['command', 'sol'],
     dependencies: deps,
     install: true,
-    install_dir: get_option('bindir')
+    install_dir: get_option('bindir'),
 )
 
 systemd = dependency('systemd')
 systemd_system_unit_dir = systemd.get_variable(
-        'systemdsystemunitdir',
-        pkgconfig_define: ['prefix', get_option('prefix')])
+    'systemdsystemunitdir',
+    pkgconfig_define: ['prefix', get_option('prefix')],
+)
 
-configure_file(input: 'phosphor-ipmi-net@.service',
-                output: 'phosphor-ipmi-net@.service',
-                copy: true,
-                install_dir: systemd_system_unit_dir)
+configure_file(
+    input: 'phosphor-ipmi-net@.service',
+    output: 'phosphor-ipmi-net@.service',
+    copy: true,
+    install_dir: systemd_system_unit_dir,
+)
 
-configure_file(input: 'phosphor-ipmi-net@.socket',
-                output: 'phosphor-ipmi-net@.socket',
-                copy: true,
-                install_dir: systemd_system_unit_dir)
+configure_file(
+    input: 'phosphor-ipmi-net@.socket',
+    output: 'phosphor-ipmi-net@.socket',
+    copy: true,
+    install_dir: systemd_system_unit_dir,
+)
 
 build_tests = get_option('tests')
 if build_tests.allowed()
-  subdir('test')
+    subdir('test')
 endif

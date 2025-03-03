@@ -8,34 +8,31 @@ if not gtest_dep.found() or not gmock_dep.found()
                 dependency('threads'),
                 gtest_proj.dependency('gtest'),
                 gtest_proj.dependency('gtest_main'),
-            ]
+            ],
         )
         gmock_dep = gtest_proj.dependency('gmock')
-  else
+    else
         assert(
             not get_option('tests').enabled(),
-            'Googletest is required if tests are enabled'
+            'Googletest is required if tests are enabled',
         )
-  endif
+    endif
 endif
 
-test_sources = [
-  '../integrity_algo.cpp',
-  '../crypt_algo.cpp',
-]
+test_sources = ['../integrity_algo.cpp', '../crypt_algo.cpp']
 
-tests = [
-  'cipher.cpp',
-]
+tests = ['cipher.cpp']
 
 foreach t : tests
-  test(t, executable(t.underscorify(), t,
-                     test_sources,
-                     include_directories: ['..'],
-                     dependencies: [
-                         gtest_dep,
-                         gmock_dep,
-                         libcrypto_dep,
-                         ]),
-       workdir: meson.current_source_dir())
+    test(
+        t,
+        executable(
+            t.underscorify(),
+            t,
+            test_sources,
+            include_directories: ['..'],
+            dependencies: [gtest_dep, gmock_dep, libcrypto_dep],
+        ),
+        workdir: meson.current_source_dir(),
+    )
 endforeach
