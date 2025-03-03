@@ -411,8 +411,8 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
 namespace sensor
 {
 // Read VR profiles from sensor(daemon) interface
-static std::optional<std::vector<std::string>>
-    getSupportedVrProfiles(const ipmi::DbusInterfaceMap::mapped_type& object)
+static std::optional<std::vector<std::string>> getSupportedVrProfiles(
+    const ipmi::DbusInterfaceMap::mapped_type& object)
 {
     // get VR mode profiles from Supported Interface
     auto supportedProperty = object.find("Supported");
@@ -472,9 +472,9 @@ static std::optional<std::string> calculateVRMode(
 }
 
 // Calculate sensor value from IPMI reading byte
-static std::optional<double>
-    calculateValue(uint8_t reading, const ipmi::DbusInterfaceMap& sensorMap,
-                   const ipmi::DbusInterfaceMap::mapped_type& valueObject)
+static std::optional<double> calculateValue(
+    uint8_t reading, const ipmi::DbusInterfaceMap& sensorMap,
+    const ipmi::DbusInterfaceMap::mapped_type& valueObject)
 {
     if (valueObject.find("Value") == valueObject.end())
     {

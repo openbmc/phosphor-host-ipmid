@@ -1,7 +1,7 @@
 #include "sys_info_param.hpp"
 
-std::tuple<bool, std::string>
-    SysInfoParamStore::lookup(uint8_t paramSelector) const
+std::tuple<bool, std::string> SysInfoParamStore::lookup(
+    uint8_t paramSelector) const
 {
     const auto iterator = params.find(paramSelector);
     if (iterator == params.end())

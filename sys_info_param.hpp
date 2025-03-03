@@ -22,8 +22,8 @@ class SysInfoParamStoreIntf
      * @return tuple of bool and string, true if parameter is found and
      * string set accordingly.
      */
-    virtual std::tuple<bool, std::string>
-        lookup(uint8_t paramSelector) const = 0;
+    virtual std::tuple<bool, std::string> lookup(
+        uint8_t paramSelector) const = 0;
 
     /**
      * Update a parameter by its code with a string value.
