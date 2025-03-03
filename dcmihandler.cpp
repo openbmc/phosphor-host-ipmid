@@ -262,8 +262,8 @@ std::optional<std::string> getHostName(ipmi::Context::ptr& ctx)
     return hostname;
 }
 
-std::optional<EthernetInterface::DHCPConf>
-    getDHCPEnabled(ipmi::Context::ptr& ctx)
+std::optional<EthernetInterface::DHCPConf> getDHCPEnabled(
+    ipmi::Context::ptr& ctx)
 {
     auto ethdevice = ipmi::getChannelName(ethernetDefaultChannelNum);
     ipmi::DbusObjectInfo ethernetObj{};
@@ -579,9 +579,9 @@ ipmi::RspType<uint8_t,          // length
     return ipmi::responseSuccess(nameSize, data);
 }
 
-ipmi::RspType<uint8_t>
-    setMgmntCtrlIdStr(ipmi::Context::ptr& ctx, uint8_t offset, uint8_t count,
-                      std::vector<char> data)
+ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
+                                         uint8_t offset, uint8_t count,
+                                         std::vector<char> data)
 {
     if ((offset > dcmi::maxCtrlIdStrLen) || (count > dcmi::maxBytes) ||
         ((offset + count) > dcmi::maxCtrlIdStrLen))
@@ -739,9 +739,9 @@ namespace dcmi
 namespace temp_readings
 {
 
-std::tuple<bool, bool, uint8_t>
-    readTemp(ipmi::Context::ptr& ctx, const std::string& dbusService,
-             const std::string& dbusPath)
+std::tuple<bool, bool, uint8_t> readTemp(ipmi::Context::ptr& ctx,
+                                         const std::string& dbusService,
+                                         const std::string& dbusPath)
 {
     // Read the temperature value from d-bus object. Need some conversion.
     // As per the interface xyz.openbmc_project.Sensor.Value, the
@@ -780,9 +780,9 @@ std::tuple<bool, bool, uint8_t>
                            static_cast<uint8_t>(tempDegrees));
 }
 
-std::tuple<std::vector<std::tuple<uint7_t, bool, uint8_t>>, uint8_t>
-    read(ipmi::Context::ptr& ctx, const std::string& type, uint8_t instance,
-         size_t count)
+std::tuple<std::vector<std::tuple<uint7_t, bool, uint8_t>>, uint8_t> read(
+    ipmi::Context::ptr& ctx, const std::string& type, uint8_t instance,
+    size_t count)
 {
     std::vector<std::tuple<uint7_t, bool, uint8_t>> response{};
 
@@ -1105,9 +1105,9 @@ namespace dcmi
 namespace sensor_info
 {
 
-std::tuple<std::vector<uint16_t>, uint8_t>
-    read(const std::string& type, uint8_t instance,
-         const nlohmann::json& config, uint8_t count)
+std::tuple<std::vector<uint16_t>, uint8_t> read(
+    const std::string& type, uint8_t instance, const nlohmann::json& config,
+    uint8_t count)
 {
     std::vector<uint16_t> responses{};
 

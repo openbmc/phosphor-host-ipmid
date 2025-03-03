@@ -232,8 +232,8 @@ void replaceCacheFru(
     recalculateHashes();
 }
 
-std::pair<ipmi::Cc, std::vector<uint8_t>>
-    getFru(ipmi::Context::ptr ctx, uint8_t devId)
+std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
+                                                 uint8_t devId)
 {
     if (lastDevId == devId && devId != 0xFF)
     {
@@ -816,9 +816,9 @@ static bool findSELEntry(const int recordID,
     return false;
 }
 
-static uint16_t
-    getNextRecordID(const uint16_t recordID,
-                    const std::vector<std::filesystem::path>& selLogFiles)
+static uint16_t getNextRecordID(
+    const uint16_t recordID,
+    const std::vector<std::filesystem::path>& selLogFiles)
 {
     uint16_t nextRecordID = recordID + 1;
     std::string entry;
@@ -1140,9 +1140,9 @@ Unused arguments
   uint8_t eventType, uint8_t eventData1, uint8_t eventData2,
   uint8_t eventData3
 */
-ipmi::RspType<uint16_t>
-    ipmiStorageAddSELEntry(uint16_t, uint8_t, uint32_t, uint16_t, uint8_t,
-                           uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)
+ipmi::RspType<uint16_t> ipmiStorageAddSELEntry(
+    uint16_t, uint8_t, uint32_t, uint16_t, uint8_t, uint8_t, uint8_t, uint8_t,
+    uint8_t, uint8_t, uint8_t)
 {
     // Per the IPMI spec, need to cancel any reservation when a SEL entry is
     // added

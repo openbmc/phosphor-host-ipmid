@@ -1239,8 +1239,8 @@ enum class IpmiRestartCause
     SoftReset = 0xa,
 };
 
-static IpmiRestartCause
-    restartCauseToIpmiRestartCause(State::Host::RestartCause cause)
+static IpmiRestartCause restartCauseToIpmiRestartCause(
+    State::Host::RestartCause cause)
 {
     switch (cause)
     {
