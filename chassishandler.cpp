@@ -585,8 +585,7 @@ ipmi::RspType<bool,    // chassis intrusion sensor
               uint8_t, // chassis SEL device address
               uint8_t, // chassis system management device address
               uint8_t  // chassis bridge device address
-              >
-    ipmiGetChassisCap()
+              > ipmiGetChassisCap()
 {
     ipmi::PropertyMap properties;
     try
@@ -888,8 +887,8 @@ static int doNmi(ipmi::Context::ptr& ctx)
         return -1;
     }
 
-    ctx->bus->yield_method_call<void>(ctx->yield, ec, nmiObj.second,
-                                      nmiObj.first, nmiIntfName, "NMI");
+    ec = ipmi::callDbusMethod(ctx, nmiObj.second, nmiObj.first, nmiIntfName,
+                              "NMI");
     if (ec)
     {
         lg2::error("NMI call failed: {ERROR}", "ERROR", ec.message());
@@ -1142,8 +1141,7 @@ ipmi::RspType<bool,    // Power is on
               bool,    // Reset button disable allowed
               bool,    // Diagnostic Interrupt button disable allowed
               bool     // Standby (sleep) button disable allowed
-              >
-    ipmiGetChassisStatus(ipmi::Context::ptr& ctx)
+              > ipmiGetChassisStatus(ipmi::Context::ptr& ctx)
 {
     using namespace chassis::internal;
     std::optional<uint2_t> restorePolicy =
@@ -1321,8 +1319,7 @@ static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
 ipmi::RspType<uint4_t, // Restart Cause
               uint4_t, // reserved
               uint8_t  // channel number (not supported)
-              >
-    ipmiGetSystemRestartCause(ipmi::Context::ptr ctx)
+              > ipmiGetSystemRestartCause(ipmi::Context::ptr ctx)
 {
     std::optional<uint4_t> cause = getRestartCause(ctx);
     if (!cause)
@@ -2234,8 +2231,7 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
  */
 ipmi::RspType<uint8_t, // Minutes per count
               uint32_t // Counter reading
-              >
-    ipmiGetPOHCounter()
+              > ipmiGetPOHCounter()
 {
     // sd_bus error
     try
@@ -2252,9 +2248,9 @@ ipmi::RspType<uint8_t, // Minutes per count
 
 ipmi::RspType<uint3_t, // policy support
               uint5_t  // reserved
-              >
-    ipmiChassisSetPowerRestorePolicy(boost::asio::yield_context yield,
-                                     uint3_t policy, uint5_t reserved)
+              > ipmiChassisSetPowerRestorePolicy(ipmi::Context::ptr ctx,
+                                                 uint3_t policy,
+                                                 uint5_t reserved)
 {
     power_policy::DbusValue value =
         power_policy::RestorePolicy::Policy::AlwaysOff;
@@ -2286,19 +2282,13 @@ ipmi::RspType<uint3_t, // policy support
         settings::Objects& objects = chassis::internal::cache::getObjects();
         const settings::Path& powerRestoreSetting =
             objects.map.at(chassis::internal::powerRestoreIntf).front();
-        std::variant<std::string> property = convertForMessage(value);
 
-        auto sdbusp = getSdBus();
-        boost::system::error_code ec;
-        sdbusp->yield_method_call<void>(
-            yield, ec,
-            objects
-                .service(powerRestoreSetting,
-                         chassis::internal::powerRestoreIntf)
-                .c_str(),
-            powerRestoreSetting, ipmi::PROP_INTF, "Set",
-            chassis::internal::powerRestoreIntf, "PowerRestorePolicy",
-            property);
+        boost::system::error_code ec = ipmi::setDbusProperty(
+            ctx,
+            objects.service(powerRestoreSetting,
+                            chassis::internal::powerRestoreIntf),
+            powerRestoreSetting, chassis::internal::powerRestoreIntf,
+            "PowerRestorePolicy", convertForMessage(value));
         if (ec)
         {
             lg2::error("Unspecified Error");
