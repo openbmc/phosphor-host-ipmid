@@ -8,7 +8,6 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <systemd/sd-bus.h>
 #include <unistd.h>
 
 #include <app/channel.hpp>
@@ -43,8 +42,6 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
-
-extern sd_bus* bus;
 
 constexpr auto bmc_state_interface = "xyz.openbmc_project.State.BMC";
 constexpr auto bmc_state_property = "CurrentBMCState";
@@ -113,26 +110,34 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
 {
     std::string revision{};
     ipmi::ObjectTree objectTree;
-    try
-    {
-        objectTree =
-            ipmi::getAllDbusObjects(*ctx->bus, softwareRoot, redundancyIntf);
-    }
-    catch (const sdbusplus::exception_t& e)
+    boost::system::error_code ec =
+        ipmi::getAllDbusObjects(ctx, softwareRoot, redundancyIntf, objectTree);
+    if (ec)
     {
         lg2::error("Failed to fetch redundancy object from dbus, "
                    "interface: {INTERFACE},  error: {ERROR}",
-                   "INTERFACE", redundancyIntf, "ERROR", e);
+                   "INTERFACE", redundancyIntf, "ERROR", ec.message());
         elog<InternalFailure>();
     }
 
     auto objectFound = false;
     for (auto& softObject : objectTree)
     {
-        auto service =
-            ipmi::getService(*ctx->bus, redundancyIntf, softObject.first);
-        auto objValueTree =
-            ipmi::getManagedObjects(*ctx->bus, service, softwareRoot);
+        ipmi::ObjectValueTree objValueTree;
+        std::string service;
+        boost::system::error_code ec =
+            ipmi::getService(ctx, redundancyIntf, softObject.first, service);
+        if (!ec)
+        {
+            ec = ipmi::getManagedObjects(ctx, service, softwareRoot,
+                                         objValueTree);
+        }
+        if (ec)
+        {
+            lg2::error("Failed to get managed objects, error: {ERROR}", "ERROR",
+                       ec.message());
+            continue;
+        }
 
         auto minPriority = 0xFF;
         for (const auto& objIter : objValueTree)
@@ -180,34 +185,27 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
     return revision;
 }
 
-bool getCurrentBmcState()
+bool getCurrentBmcStateWithFallback(ipmi::Context::ptr ctx,
+                                    const bool fallbackAvailability)
 {
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-
     // Get the Inventory object implementing the BMC interface
-    ipmi::DbusObjectInfo bmcObject =
-        ipmi::getDbusObject(bus, bmc_state_interface);
-    auto variant =
-        ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
-                              bmc_state_interface, bmc_state_property);
-
-    return std::holds_alternative<std::string>(variant) &&
-           BMC::convertBMCStateFromString(std::get<std::string>(variant)) ==
-               BMC::BMCState::Ready;
-}
-
-bool getCurrentBmcStateWithFallback(const bool fallbackAvailability)
-{
-    try
+    ipmi::DbusObjectInfo bmcObject;
+    boost::system::error_code ec =
+        ipmi::getDbusObject(ctx, bmc_state_interface, "/", {}, bmcObject);
+    if (ec)
     {
-        return getCurrentBmcState();
-    }
-    catch (...)
-    {
-        // Nothing provided the BMC interface, therefore return whatever was
-        // configured as the default.
         return fallbackAvailability;
     }
+
+    std::string state;
+    ec = ipmi::getDbusProperty(ctx, bmcObject.second, bmcObject.first,
+                               bmc_state_interface, bmc_state_property, state);
+    if (ec)
+    {
+        return fallbackAvailability;
+    }
+
+    return BMC::convertBMCStateFromString(state) == BMC::BMCState::Ready;
 }
 
 namespace acpi_state
@@ -308,12 +306,10 @@ bool isValidACPIState(acpi_state::PowerStateType type, uint8_t state)
  *
  * @return IPMI completion code on success
  **/
-ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
-                                      uint8_t devAcpiState)
+ipmi::RspType<> ipmiSetAcpiPowerState(
+    ipmi::Context::ptr ctx, uint8_t sysAcpiState, uint8_t devAcpiState)
 {
     auto s = static_cast<uint8_t>(acpi_state::PowerState::unknown);
-
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
 
     auto value = acpi_state::ACPIPowerState::ACPI::Unknown;
 
@@ -344,19 +340,20 @@ ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
 
             value = found->first;
 
-            try
+            ipmi::DbusObjectInfo acpiObject;
+            boost::system::error_code ec = ipmi::getDbusObject(
+                ctx, acpi_state::acpiInterface, "/", {}, acpiObject);
+            if (!ec)
             {
-                auto acpiObject =
-                    ipmi::getDbusObject(bus, acpi_state::acpiInterface);
-                ipmi::setDbusProperty(bus, acpiObject.second, acpiObject.first,
-                                      acpi_state::acpiInterface,
-                                      acpi_state::sysACPIProp,
-                                      convertForMessage(value));
+                ec = ipmi::setDbusProperty(
+                    ctx, acpiObject.second, acpiObject.first,
+                    acpi_state::acpiInterface, acpi_state::sysACPIProp,
+                    convertForMessage(value));
             }
-            catch (const InternalFailure& e)
+            if (ec)
             {
                 lg2::error("Failed in set ACPI system property: {ERROR}",
-                           "ERROR", e);
+                           "ERROR", ec.message());
                 return ipmi::responseUnspecifiedError();
             }
         }
@@ -392,19 +389,20 @@ ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
 
             value = found->first;
 
-            try
+            ipmi::DbusObjectInfo acpiObject;
+            boost::system::error_code ec = ipmi::getDbusObject(
+                ctx, acpi_state::acpiInterface, "/", {}, acpiObject);
+            if (!ec)
             {
-                auto acpiObject =
-                    ipmi::getDbusObject(bus, acpi_state::acpiInterface);
-                ipmi::setDbusProperty(bus, acpiObject.second, acpiObject.first,
-                                      acpi_state::acpiInterface,
-                                      acpi_state::devACPIProp,
-                                      convertForMessage(value));
+                ec = ipmi::setDbusProperty(
+                    ctx, acpiObject.second, acpiObject.first,
+                    acpi_state::acpiInterface, acpi_state::devACPIProp,
+                    convertForMessage(value));
             }
-            catch (const InternalFailure& e)
+            if (ec)
             {
                 lg2::error("Failed in set ACPI device property: {ERROR}",
-                           "ERROR", e);
+                           "ERROR", ec.message());
                 return ipmi::responseUnspecifiedError();
             }
         }
@@ -426,32 +424,36 @@ ipmi::RspType<> ipmiSetAcpiPowerState(uint8_t sysAcpiState,
 ipmi::RspType<uint8_t, // acpiSystemPowerState
               uint8_t  // acpiDevicePowerState
               >
-    ipmiGetAcpiPowerState()
+    ipmiGetAcpiPowerState(ipmi::Context::ptr ctx)
 {
     uint8_t sysAcpiState;
     uint8_t devAcpiState;
 
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-
-    try
+    ipmi::DbusObjectInfo acpiObject;
+    boost::system::error_code ec = ipmi::getDbusObject(
+        ctx, acpi_state::acpiInterface, "/", {}, acpiObject);
+    if (!ec)
     {
-        auto acpiObject = ipmi::getDbusObject(bus, acpi_state::acpiInterface);
-
-        auto sysACPIVal = ipmi::getDbusProperty(
-            bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
-            acpi_state::sysACPIProp);
-        auto sysACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            std::get<std::string>(sysACPIVal));
+        std::string sysACPIVal;
+        ec = ipmi::getDbusProperty(ctx, acpiObject.second, acpiObject.first,
+                                   acpi_state::acpiInterface,
+                                   acpi_state::sysACPIProp, sysACPIVal);
+        auto sysACPI =
+            acpi_state::ACPIPowerState::convertACPIFromString(sysACPIVal);
         sysAcpiState = static_cast<uint8_t>(acpi_state::dbusToIPMI.at(sysACPI));
-
-        auto devACPIVal = ipmi::getDbusProperty(
-            bus, acpiObject.second, acpiObject.first, acpi_state::acpiInterface,
-            acpi_state::devACPIProp);
-        auto devACPI = acpi_state::ACPIPowerState::convertACPIFromString(
-            std::get<std::string>(devACPIVal));
-        devAcpiState = static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
+        if (!ec)
+        {
+            std::string devACPIVal;
+            ec = ipmi::getDbusProperty(ctx, acpiObject.second, acpiObject.first,
+                                       acpi_state::acpiInterface,
+                                       acpi_state::devACPIProp, devACPIVal);
+            auto devACPI =
+                acpi_state::ACPIPowerState::convertACPIFromString(devACPIVal);
+            devAcpiState =
+                static_cast<uint8_t>(acpi_state::dbusToIPMI.at(devACPI));
+        }
     }
-    catch (const InternalFailure& e)
+    if (ec)
     {
         return ipmi::responseUnspecifiedError();
     }
@@ -610,7 +612,7 @@ ipmi::RspType<uint8_t,  // Device ID
               uint16_t, // Product ID
               uint32_t  // AUX info
               >
-    ipmiAppGetDeviceId([[maybe_unused]] ipmi::Context::ptr ctx)
+    ipmiAppGetDeviceId(ipmi::Context::ptr ctx)
 {
     static struct
     {
@@ -720,7 +722,7 @@ ipmi::RspType<uint8_t,  // Device ID
 
     // Set availability to the actual current BMC state
     devId.fw[0] &= ipmiDevIdFw1Mask;
-    if (!getCurrentBmcStateWithFallback(defaultActivationSetting))
+    if (!getCurrentBmcStateWithFallback(ctx, defaultActivationSetting))
     {
         devId.fw[0] |= (1 << ipmiDevIdStateShift);
     }
@@ -898,46 +900,49 @@ auto ipmiAppGetSystemGuid(ipmi::Context::ptr& ctx)
  * This function is to set the session state to tear down in progress if the
  * state is active.
  *
- * @param[in] busp - Dbus obj
+ * @param[in] ctx     - Context pointer
  * @param[in] service - service name
  * @param[in] obj - object path
  *
  * @return success completion code if it sets the session state to
  * tearDownInProgress else return the corresponding error completion code.
  **/
-uint8_t setSessionState(std::shared_ptr<sdbusplus::asio::connection>& busp,
-                        const std::string& service, const std::string& obj)
+uint8_t setSessionState(ipmi::Context::ptr ctx, const std::string& service,
+                        const std::string& obj)
 {
-    try
+    uint8_t sessionState;
+    boost::system::error_code ec = ipmi::getDbusProperty(
+        ctx, service, obj, session::sessionIntf, "State", sessionState);
+    if (!ec)
     {
-        uint8_t sessionState = std::get<uint8_t>(ipmi::getDbusProperty(
-            *busp, service, obj, session::sessionIntf, "State"));
-
         if (sessionState == static_cast<uint8_t>(session::State::active))
         {
-            ipmi::setDbusProperty(
-                *busp, service, obj, session::sessionIntf, "State",
+            ec = ipmi::setDbusProperty(
+                ctx, service, obj, session::sessionIntf, "State",
                 static_cast<uint8_t>(session::State::tearDownInProgress));
-            return ipmi::ccSuccess;
+            if (!ec)
+            {
+                return ipmi::ccSuccess;
+            }
         }
     }
-    catch (const std::exception& e)
+    if (ec)
     {
         lg2::error("Failed in getting session state property, "
                    "service: {SERVICE}, object path: {OBJECT_PATH}, "
                    "interface: {INTERFACE}, error: {ERROR}",
                    "SERVICE", service, "OBJECT_PATH", obj, "INTERFACE",
-                   session::sessionIntf, "ERROR", e);
+                   session::sessionIntf, "ERROR", ec.message());
         return ipmi::ccUnspecifiedError;
     }
 
     return ipmi::ccInvalidFieldRequest;
 }
 
-ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
+ipmi::RspType<> ipmiAppCloseSession(ipmi::Context::ptr ctx,
+                                    uint32_t reqSessionId,
                                     std::optional<uint8_t> requestSessionHandle)
 {
-    auto busp = getSdBus();
     uint8_t reqSessionHandle =
         requestSessionHandle.value_or(session::defaultSessionHandle);
 
@@ -959,19 +964,15 @@ ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
         return ipmi::response(ipmi::ccInvalidFieldRequest);
     }
 
-    try
+    ipmi::ObjectTree objectTree;
+    boost::system::error_code ec = ipmi::getAllDbusObjects(
+        ctx, session::sessionManagerRootPath, session::sessionIntf, objectTree);
+    if (!ec)
     {
-        ipmi::ObjectTree objectTree = ipmi::getAllDbusObjects(
-            *busp, session::sessionManagerRootPath, session::sessionIntf);
-
-        for (auto& objectTreeItr : objectTree)
+        for (const auto& [obj, serviceMap] : objectTree)
         {
-            const std::string obj = objectTreeItr.first;
-
             if (isSessionObjectMatched(obj, reqSessionId, reqSessionHandle))
             {
-                auto& serviceMap = objectTreeItr.second;
-
                 // Session id and session handle are unique for each session.
                 // Session id and handler are retrived from the object path and
                 // object path will be unique for each session. Checking if
@@ -984,15 +985,15 @@ ipmi::RspType<> ipmiAppCloseSession(uint32_t reqSessionId,
 
                 auto itr = serviceMap.begin();
                 const std::string service = itr->first;
-                return ipmi::response(setSessionState(busp, service, obj));
+                return ipmi::response(setSessionState(ctx, service, obj));
             }
         }
     }
-    catch (const sdbusplus::exception_t& e)
+    if (ec)
     {
         lg2::error("Failed to fetch object from dbus, "
                    "interface: {INTERFACE}, error: {ERROR}",
-                   "INTERFACE", session::sessionIntf, "ERROR", e);
+                   "INTERFACE", session::sessionIntf, "ERROR", ec.message());
         return ipmi::responseUnspecifiedError();
     }
 
