@@ -86,8 +86,8 @@ static inline std::string getLoggingObjPath(uint16_t id)
     return std::string(ipmi::sel::logBasePath) + "/" + std::to_string(id);
 }
 
-std::optional<std::pair<uint16_t, SELEntry>>
-    parseLoggingEntry(const std::string& p)
+std::optional<std::pair<uint16_t, SELEntry>> parseLoggingEntry(
+    const std::string& p)
 {
     try
     {

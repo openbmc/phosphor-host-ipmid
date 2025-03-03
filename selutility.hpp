@@ -199,9 +199,9 @@ namespace internal
  *  @return On success return the SEL event record, throw an exception in case
  *          of failure.
  */
-GetSELEntryResponse
-    prepareSELEntry(const std::string& objPath,
-                    ipmi::sensor::InvObjectIDMap::const_iterator iter);
+GetSELEntryResponse prepareSELEntry(
+    const std::string& objPath,
+    ipmi::sensor::InvObjectIDMap::const_iterator iter);
 
 } // namespace internal
 
