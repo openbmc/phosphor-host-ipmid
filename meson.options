@@ -249,5 +249,5 @@ option(
     'transport-implementation',
     type: 'combo',
     choices: ['null', 'serial'],
-    description: 'transport'
+    description: 'transport',
 )
