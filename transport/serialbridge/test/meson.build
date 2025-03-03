@@ -6,7 +6,7 @@ if not gtest.found() or not gmock.found()
     gtest_proj = import('cmake').subproject(
         'googletest',
         options: gtest_opts,
-        required: false
+        required: false,
     )
     if gtest_proj.found()
         gtest = declare_dependency(
@@ -14,7 +14,8 @@ if not gtest.found() or not gmock.found()
                 dependency('threads'),
                 gtest_proj.dependency('gtest'),
                 gtest_proj.dependency('gtest_main'),
-            ])
+            ],
+        )
         gmock = gtest_proj.dependency('gmock')
     else
         assert(not get_option('tests').enabled(), 'Googletest is required')
@@ -22,7 +23,8 @@ if not gtest.found() or not gmock.found()
 endif
 
 # Build/add serial_unittest to test suite
-test('transport_serial',
+test(
+    'transport_serial',
     executable(
         'transport_serial_unittest',
         'serial_unittest.cpp',
@@ -36,7 +38,7 @@ test('transport_serial',
             phosphor_logging_dep,
             sdeventplus_dep,
             gtest,
-            gmock
-        ]
-    )
+            gmock,
+        ],
+    ),
 )
