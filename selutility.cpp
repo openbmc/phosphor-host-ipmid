@@ -155,9 +155,9 @@ void constructSEL(uint8_t recordType, std::chrono::milliseconds timestamp,
            std::min(sensorData.size(), static_cast<size_t>(selDataSize)));
 }
 
-GetSELEntryResponse
-    prepareSELEntry(const std::string& objPath,
-                    ipmi::sensor::InvObjectIDMap::const_iterator iter)
+GetSELEntryResponse prepareSELEntry(
+    const std::string& objPath,
+    ipmi::sensor::InvObjectIDMap::const_iterator iter)
 {
     GetSELEntryResponse record{};
 
