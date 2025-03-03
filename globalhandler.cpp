@@ -14,33 +14,29 @@ using BMC = sdbusplus::server::xyz::openbmc_project::state::BMC;
 
 void register_netfn_global_functions() __attribute__((constructor));
 
-void resetBMC()
-{
-    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-
-    auto bmcStateObj =
-        ipmi::getDbusObject(bus, bmcStateIntf, bmcStateRoot, match);
-
-    auto service = ipmi::getService(bus, bmcStateIntf, bmcStateObj.first);
-
-    ipmi::setDbusProperty(bus, service, bmcStateObj.first, bmcStateIntf,
-                          reqTransition,
-                          convertForMessage(BMC::Transition::Reboot));
-}
-
 /** @brief implements cold and warm reset commands
  *  @param - None
  *  @returns IPMI completion code.
  */
-ipmi::RspType<> ipmiGlobalReset()
+ipmi::RspType<> ipmiGlobalReset(ipmi::Context::ptr ctx)
 {
-    try
+    ipmi::DbusObjectInfo bmcStateObj;
+    boost::system::error_code ec = ipmi::getDbusObject(
+        ctx, bmcStateIntf, bmcStateRoot, match, bmcStateObj);
+    if (!ec)
     {
-        resetBMC();
+        std::string service;
+        ec = ipmi::getService(ctx, bmcStateIntf, bmcStateObj.first, service);
+        if (!ec)
+        {
+            ec = ipmi::setDbusProperty(
+                ctx, service, bmcStateObj.first, bmcStateIntf, reqTransition,
+                convertForMessage(BMC::Transition::Reboot));
+        }
     }
-    catch (const std::exception& e)
+    if (ec)
     {
-        lg2::error("Exception in Global Reset: {ERROR}", "ERROR", e);
+        lg2::error("Exception in Global Reset: {ERROR}", "ERROR", ec.message());
         return ipmi::responseUnspecifiedError();
     }
 
