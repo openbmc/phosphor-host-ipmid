@@ -65,8 +65,8 @@ struct ChannelParams
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return Ethernet interface service and object path if it exists
  */
-std::optional<ChannelParams>
-    maybeGetChannelParams(sdbusplus::bus_t& bus, uint8_t channel);
+std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
+                                                   uint8_t channel);
 
 /** @brief A trivial helper around maybeGetChannelParams() that throws an
  *         exception when it is unable to acquire parameters for the channel.
@@ -334,8 +334,8 @@ void reconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
  *  @return An address representing the gateway address if it exists
  */
 template <int family>
-std::optional<typename AddrFamily<family>::addr>
-    getGatewayProperty(sdbusplus::bus_t& bus, const ChannelParams& params)
+std::optional<typename AddrFamily<family>::addr> getGatewayProperty(
+    sdbusplus::bus_t& bus, const ChannelParams& params)
 {
     auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
     auto gatewayStr = std::get<std::string>(

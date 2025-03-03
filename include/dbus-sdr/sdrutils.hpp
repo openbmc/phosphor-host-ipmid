@@ -286,8 +286,8 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
 bool getSensorSubtree(SensorSubTree& subtree);
 
 #ifdef FEATURE_HYBRID_SENSORS
-ipmi::sensor::IdInfoMap::const_iterator
-    findStaticSensor(const std::string& path);
+ipmi::sensor::IdInfoMap::const_iterator findStaticSensor(
+    const std::string& path);
 #endif
 
 struct CmpStr
@@ -345,11 +345,11 @@ namespace ipmi
 std::optional<std::map<std::string, std::vector<std::string>>>
     getObjectInterfaces(const char* path);
 
-std::map<std::string, Value>
-    getEntityManagerProperties(const char* path, const char* interface);
+std::map<std::string, Value> getEntityManagerProperties(const char* path,
+                                                        const char* interface);
 
-std::optional<std::unordered_set<std::string>>&
-    getIpmiDecoratorPaths(const std::optional<ipmi::Context::ptr>& ctx);
+std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
+    const std::optional<ipmi::Context::ptr>& ctx);
 
 const std::string* getSensorConfigurationInterface(
     const std::map<std::string, std::vector<std::string>>&
