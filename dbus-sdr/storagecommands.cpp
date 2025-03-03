@@ -25,6 +25,7 @@
 #include <ipmid/api.hpp>
 #include <ipmid/message.hpp>
 #include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
@@ -79,12 +80,8 @@ using ManagedObjectType =
     boost::container::flat_map<sdbusplus::message::object_path, ObjectType>;
 using ManagedEntry = std::pair<sdbusplus::message::object_path, ObjectType>;
 
-constexpr static const char* selLoggerServiceName =
-    "xyz.openbmc_project.Logging.IPMI";
 constexpr static const char* fruDeviceServiceName =
     "xyz.openbmc_project.FruDevice";
-constexpr static const char* entityManagerServiceName =
-    "xyz.openbmc_project.EntityManager";
 constexpr static const size_t writeTimeoutSeconds = 10;
 constexpr static const char* chassisTypeRackMount = "23";
 constexpr static const char* chassisTypeMainServer = "17";
@@ -250,13 +247,11 @@ std::pair<ipmi::Cc, std::vector<uint8_t>>
     cacheAddr = deviceFind->second.second;
 
     boost::system::error_code ec;
+    std::vector<uint8_t> fru = ipmi::callDbusMethod<std::vector<uint8_t>>(
+        ctx, ec, fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
+        "xyz.openbmc_project.FruDeviceManager", "GetRawFru", cacheBus,
+        cacheAddr);
 
-    std::vector<uint8_t> fru =
-        ctx->bus->yield_method_call<std::vector<uint8_t>>(
-            ctx->yield, ec, fruDeviceServiceName,
-            "/xyz/openbmc_project/FruDevice",
-            "xyz.openbmc_project.FruDeviceManager", "GetRawFru", cacheBus,
-            cacheAddr);
     if (ec)
     {
         lg2::error("Couldn't get raw fru: {ERROR}", "ERROR", ec.message());
@@ -596,9 +591,8 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
 
     // todo: this should really use caching, this is a very inefficient lookup
     boost::system::error_code ec;
-
-    ManagedObjectType entities = ctx->bus->yield_method_call<ManagedObjectType>(
-        ctx->yield, ec, entityManagerServiceName,
+    ManagedObjectType entities = ipmi::callDbusMethod<ManagedObjectType>(
+        ctx, ec, "xyz.openbmc_project.EntityManager",
         "/xyz/openbmc_project/inventory", "org.freedesktop.DBus.ObjectManager",
         "GetManagedObjects");
 
@@ -1184,13 +1178,13 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(
     // cleared
     cancelSELReservation();
 
-    boost::system::error_code ec;
-    ctx->bus->yield_method_call<>(ctx->yield, ec, selLoggerServiceName,
-                                  "/xyz/openbmc_project/Logging/IPMI",
-                                  "xyz.openbmc_project.Logging.IPMI", "Clear");
+    boost::system::error_code ec =
+        ipmi::callDbusMethod(ctx, "xyz.openbmc_project.Logging.IPMI",
+                             "/xyz/openbmc_project/Logging/IPMI",
+                             "xyz.openbmc_project.Logging.IPMI", "Clear");
     if (ec)
     {
-        std::cerr << "error in clear SEL: " << ec << std::endl;
+        std::cerr << "error in clear SEL: " << ec.message() << std::endl;
         return ipmi::responseUnspecifiedError();
     }
 
