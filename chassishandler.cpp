@@ -888,8 +888,8 @@ static int doNmi(ipmi::Context::ptr& ctx)
         return -1;
     }
 
-    ctx->bus->yield_method_call<void>(ctx->yield, ec, nmiObj.second,
-                                      nmiObj.first, nmiIntfName, "NMI");
+    ec = ipmi::callDbusMethod(ctx, nmiObj.second, nmiObj.first, nmiIntfName,
+                              "NMI");
     if (ec)
     {
         lg2::error("NMI call failed: {ERROR}", "ERROR", ec.message());
@@ -2253,8 +2253,8 @@ ipmi::RspType<uint8_t, // Minutes per count
 ipmi::RspType<uint3_t, // policy support
               uint5_t  // reserved
               >
-    ipmiChassisSetPowerRestorePolicy(boost::asio::yield_context yield,
-                                     uint3_t policy, uint5_t reserved)
+    ipmiChassisSetPowerRestorePolicy(ipmi::Context::ptr ctx, uint3_t policy,
+                                     uint5_t reserved)
 {
     power_policy::DbusValue value =
         power_policy::RestorePolicy::Policy::AlwaysOff;
@@ -2286,19 +2286,13 @@ ipmi::RspType<uint3_t, // policy support
         settings::Objects& objects = chassis::internal::cache::getObjects();
         const settings::Path& powerRestoreSetting =
             objects.map.at(chassis::internal::powerRestoreIntf).front();
-        std::variant<std::string> property = convertForMessage(value);
 
-        auto sdbusp = getSdBus();
-        boost::system::error_code ec;
-        sdbusp->yield_method_call<void>(
-            yield, ec,
-            objects
-                .service(powerRestoreSetting,
-                         chassis::internal::powerRestoreIntf)
-                .c_str(),
-            powerRestoreSetting, ipmi::PROP_INTF, "Set",
-            chassis::internal::powerRestoreIntf, "PowerRestorePolicy",
-            property);
+        boost::system::error_code ec = ipmi::setDbusProperty(
+            ctx,
+            objects.service(powerRestoreSetting,
+                            chassis::internal::powerRestoreIntf),
+            powerRestoreSetting, chassis::internal::powerRestoreIntf,
+            "PowerRestorePolicy", convertForMessage(value));
         if (ec)
         {
             lg2::error("Unspecified Error");
