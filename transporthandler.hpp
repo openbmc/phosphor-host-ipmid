@@ -13,7 +13,6 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
-#include <sdbusplus/bus.hpp>
 #include <sdbusplus/exception.hpp>
 #include <stdplus/net/addr/ether.hpp>
 #include <stdplus/net/addr/ip.hpp>
@@ -61,34 +60,34 @@ struct ChannelParams
  *         Tries to map a VLAN object first so that the address information
  *         is accurate. Otherwise it gets the standard ethernet interface.
  *
- *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] ctx     - Context pointer
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return Ethernet interface service and object path if it exists
  */
-std::optional<ChannelParams> maybeGetChannelParams(sdbusplus::bus_t& bus,
-                                                   uint8_t channel);
+std::optional<ChannelParams>
+    maybeGetChannelParams(ipmi::Context::ptr& ctx, uint8_t channel);
 
 /** @brief A trivial helper around maybeGetChannelParams() that throws an
  *         exception when it is unable to acquire parameters for the channel.
  *
- *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] ctx     - Context pointer
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return Ethernet interface service and object path
  */
-ChannelParams getChannelParams(sdbusplus::bus_t& bus, uint8_t channel);
+ChannelParams getChannelParams(ipmi::Context::ptr& ctx, uint8_t channel);
 
 /** @brief Trivializes using parameter getter functions by providing a bus
  *         and channel parameters automatically.
  *
+ *  @param[in] ctx     - Context pointer
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  ...
  */
 template <auto func, typename... Args>
-auto channelCall(uint8_t channel, Args&&... args)
+auto channelCall(ipmi::Context::ptr& ctx, uint8_t channel, Args&&... args)
 {
-    sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
-    auto params = getChannelParams(bus, channel);
-    return std::invoke(func, bus, params, std::forward<Args>(args)...);
+    auto params = getChannelParams(ctx, channel);
+    return std::invoke(func, ctx, params, std::forward<Args>(args)...);
 }
 
 /** @brief Generic paramters for different address families */
@@ -166,15 +165,15 @@ class ObjectLookupCache
      *         NOTE: The inputs to this object must outlive the object since
      *         they are only referenced by it.
      *
-     *  @param[in] bus    - The bus object used for lookups
+     *  @param[in] ctx    - Context pointer
      *  @param[in] params - The parameters for the channel
      *  @param[in] intf   - The interface we are looking up
      */
-    ObjectLookupCache(sdbusplus::bus_t& bus, const ChannelParams& params,
-                      const char* intf) :
-        bus(bus), params(params), intf(intf),
-        objs(getAllDbusObjects(bus, params.logicalPath, intf, ""))
-    {}
+    ObjectLookupCache(ipmi::Context::ptr& ctx, const ChannelParams& params,
+                      const char* intf) : ctx(ctx), params(params), intf(intf)
+    {
+        ipmi::getAllDbusObjects(ctx, params.logicalPath, intf, "", objs);
+    }
 
     class iterator : public ObjectTree::const_iterator
     {
@@ -211,10 +210,10 @@ class ObjectLookupCache
     }
 
   private:
-    sdbusplus::bus_t& bus;
+    ipmi::Context::ptr& ctx;
     const ChannelParams& params;
     const char* const intf;
-    const ObjectTree objs;
+    ObjectTree objs;
     PropertiesCache cache;
 
     /** @brief Gets a cached copy of the object properties if possible
@@ -230,7 +229,8 @@ class ObjectLookupCache
         {
             return it;
         }
-        auto properties = getAllDbusProperties(bus, params.service, path, intf);
+        ipmi::PropertyMap properties{};
+        getAllDbusProperties(ctx, params.service, path, intf, properties);
         return cache.insert({path, std::move(properties)}).first;
     }
 };
@@ -239,8 +239,6 @@ class ObjectLookupCache
  *         the input parameters. NOTE: The index lacks stability across address
  *         changes since the network daemon has no notion of stable indicies.
  *
- *  @param[in] bus     - The bus object used for lookups
- *  @param[in] params  - The parameters for the channel
  *  @param[in] idx     - The index of the desired address on the interface
  *  @param[in] origins - The allowed origins for the address objects
  *  @param[in] ips     - The object lookup cache holding all of the address info
@@ -248,8 +246,7 @@ class ObjectLookupCache
  */
 template <int family>
 std::optional<IfAddr<family>> findIfAddr(
-    [[maybe_unused]] sdbusplus::bus_t& bus,
-    [[maybe_unused]] const ChannelParams& params, uint8_t idx,
+    uint8_t idx,
     const std::unordered_set<
         sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin>&
         origins,
@@ -298,7 +295,7 @@ std::optional<IfAddr<family>> findIfAddr(
  *         for one off lookups. Don't use this if you intend to do multiple
  *         lookups at a time.
  *
- *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] ctx     - Context pointer
  *  @param[in] params  - The parameters for the channel
  *  @param[in] idx     - The index of the desired address on the interface
  *  @param[in] origins - The allowed origins for the address objects
@@ -306,42 +303,43 @@ std::optional<IfAddr<family>> findIfAddr(
  */
 template <int family>
 auto getIfAddr(
-    sdbusplus::bus_t& bus, const ChannelParams& params, uint8_t idx,
+    ipmi::Context::ptr& ctx, const ChannelParams& params, uint8_t idx,
     const std::unordered_set<
         sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin>&
         origins)
 {
-    ObjectLookupCache ips(bus, params, INTF_IP);
-    return findIfAddr<family>(bus, params, idx, origins, ips);
+    ObjectLookupCache ips(ctx, params, INTF_IP);
+    return findIfAddr<family>(idx, origins, ips);
 }
 
 /** @brief Reconfigures the IPv6 address info configured for the interface
  *
- *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] ctx     - Context pointer
  *  @param[in] params  - The parameters for the channel
  *  @param[in] idx     - The address index to operate on
  *  @param[in] address - The new address
  *  @param[in] prefix  - The new address prefix
  */
-void reconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
+void reconfigureIfAddr6(ipmi::Context::ptr& ctx, const ChannelParams& params,
                         uint8_t idx, stdplus::In6Addr address, uint8_t prefix);
 
 /** @brief Retrieves the current gateway for the address family on the system
  *         NOTE: The gateway is per channel instead of the system wide one.
  *
- *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] ctx    - Context pointer
  *  @param[in] params - The parameters for the channel
  *  @return An address representing the gateway address if it exists
  */
 template <int family>
-std::optional<typename AddrFamily<family>::addr> getGatewayProperty(
-    sdbusplus::bus_t& bus, const ChannelParams& params)
+std::optional<typename AddrFamily<family>::addr>
+    getGatewayProperty(ipmi::Context::ptr& ctx, const ChannelParams& params)
 {
     auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
-    auto gatewayStr = std::get<std::string>(
-        getDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
-                        AddrFamily<family>::propertyGateway));
-    if (gatewayStr.empty())
+    std::string gatewayStr;
+    boost::system::error_code ec =
+        ipmi::getDbusProperty(ctx, params.service, objPath, INTF_ETHERNET,
+                              AddrFamily<family>::propertyGateway, gatewayStr);
+    if (ec || gatewayStr.empty())
     {
         return std::nullopt;
     }
@@ -350,7 +348,6 @@ std::optional<typename AddrFamily<family>::addr> getGatewayProperty(
 
 template <int family>
 std::optional<IfNeigh<family>> findStaticNeighbor(
-    sdbusplus::bus_t&, const ChannelParams&,
     typename AddrFamily<family>::addr ip, ObjectLookupCache& neighbors)
 {
     using sdbusplus::server::xyz::openbmc_project::network::Neighbor;
@@ -392,59 +389,57 @@ std::optional<IfNeigh<family>> findStaticNeighbor(
 }
 
 template <int family>
-void createNeighbor(sdbusplus::bus_t& bus, const ChannelParams& params,
+void createNeighbor(ipmi::Context::ptr& ctx, const ChannelParams& params,
                     typename AddrFamily<family>::addr address,
                     stdplus::EtherAddr mac)
 {
-    auto newreq =
-        bus.new_method_call(params.service.c_str(), params.logicalPath.c_str(),
-                            INTF_NEIGHBOR_CREATE_STATIC, "Neighbor");
     stdplus::ToStrHandle<stdplus::ToStr<stdplus::EtherAddr>> macToStr;
     stdplus::ToStrHandle<stdplus::ToStr<typename AddrFamily<family>::addr>>
         addrToStr;
-    newreq.append(addrToStr(address), macToStr(mac));
-    bus.call_noreply(newreq);
+    ipmi::callDbusMethod(ctx, params.service, params.logicalPath,
+                         INTF_NEIGHBOR_CREATE_STATIC, "Neighbor",
+                         addrToStr(address), macToStr(mac));
 }
 
 /** @brief Deletes the dbus object. Ignores empty objects or objects that are
  *         missing from the bus.
  *
- *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] ctx     - Context pointer
  *  @param[in] service - The name of the service
  *  @param[in] path    - The path of the object to delete
  */
-void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
+void deleteObjectIfExists(ipmi::Context::ptr& ctx, const std::string& service,
                           const std::string& path);
 
 /** @brief Sets the value for the default gateway of the channel
  *
- *  @param[in] bus     - The bus object used for lookups
+ *  @param[in] ctx     - Context pointer
  *  @param[in] params  - The parameters for the channel
  *  @param[in] gateway - Gateway address to apply
  */
 template <int family>
-void setGatewayProperty(sdbusplus::bus_t& bus, const ChannelParams& params,
+void setGatewayProperty(ipmi::Context::ptr& ctx, const ChannelParams& params,
                         typename AddrFamily<family>::addr address)
 {
     // Save the old gateway MAC address if it exists so we can recreate it
-    auto gateway = getGatewayProperty<family>(bus, params);
+    auto gateway = getGatewayProperty<family>(ctx, params);
     std::optional<IfNeigh<family>> neighbor;
     if (gateway)
     {
-        ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
-        neighbor = findStaticNeighbor<family>(bus, params, *gateway, neighbors);
+        ObjectLookupCache neighbors(ctx, params, INTF_NEIGHBOR);
+        neighbor = findStaticNeighbor<family>(*gateway, neighbors);
     }
 
     auto objPath = "/xyz/openbmc_project/network/" + params.ifname;
-    setDbusProperty(bus, params.service, objPath, INTF_ETHERNET,
-                    AddrFamily<family>::propertyGateway,
-                    stdplus::toStr(address));
+    boost::system::error_code ec = ipmi::setDbusProperty(
+        ctx, params.service, objPath, INTF_ETHERNET,
+        AddrFamily<family>::propertyGateway, stdplus::toStr(address));
 
     // Restore the gateway MAC if we had one
-    if (neighbor)
+    if (ec || neighbor)
     {
-        deleteObjectIfExists(bus, params.service, neighbor->path);
-        createNeighbor<family>(bus, params, address, neighbor->mac);
+        deleteObjectIfExists(ctx, params.service, neighbor->path);
+        createNeighbor<family>(ctx, params, address, neighbor->mac);
     }
 }
 
