@@ -4,6 +4,7 @@
 #include <ipmid/api-types.hpp>
 #include <ipmid/message.hpp>
 #include <ipmid/types.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/server.hpp>
 
 #include <chrono>
@@ -467,6 +468,31 @@ void callDbusMethod(sdbusplus::bus_t& bus, const std::string& service,
                     const std::string& method);
 
 } // namespace method_no_args
+
+template <typename... InputArgs>
+boost::system::error_code callDbusMethod(
+    ipmi::Context::ptr ctx, const std::string& service,
+    const std::string& objPath, const std::string& interface,
+    const std::string& method, const InputArgs&... args)
+{
+    boost::system::error_code ec;
+    ctx->bus->yield_method_call(ctx->yield, ec, service, objPath, interface,
+                                method, args...);
+
+    return ec;
+}
+
+template <typename RetType, typename... InputArgs>
+RetType callDbusMethod(ipmi::Context::ptr ctx, boost::system::error_code& ec,
+                       const std::string& service, const std::string& objPath,
+                       const std::string& interface, const std::string& method,
+                       const InputArgs&... args)
+{
+    auto rc = ctx->bus->yield_method_call<RetType>(
+        ctx->yield, ec, service, objPath, interface, method, args...);
+
+    return rc;
+}
 
 /** @brief Perform the low-level i2c bus write-read.
  *  @param[in] i2cBus - i2c bus device node name, such as /dev/i2c-2.
