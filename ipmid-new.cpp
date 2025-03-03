@@ -29,6 +29,7 @@
 #include <ipmid/message.hpp>
 #include <ipmid/oemrouter.hpp>
 #include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -785,15 +786,14 @@ void handleLegacyIpmiCommand(sdbusplus::message_t& m)
             // Responses in IPMI require a bit set.  So there ya go...
             netFn |= 0x01;
 
-            const char *dest, *path;
             constexpr const char* DBUS_INTF = "org.openbmc.HostIpmi";
 
-            dest = m.get_sender();
-            path = m.get_path();
-            boost::system::error_code ec;
-            bus->yield_method_call(yield, ec, dest, path, DBUS_INTF,
-                                   "sendMessage", seq, netFn, lun, cmd,
-                                   response->cc, response->payload.raw);
+            std::string dest = m.get_sender();
+            std::string path = m.get_path();
+            boost::system::error_code ec = ipmi::callDbusMethod(
+                ctx, dest, path, DBUS_INTF, "sendMessage", seq, netFn, lun, cmd,
+                response->cc, response->payload.raw);
+
             if (ec)
             {
                 lg2::error(
