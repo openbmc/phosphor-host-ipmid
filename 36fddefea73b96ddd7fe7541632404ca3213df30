@@ -39,6 +39,30 @@
       },
       "revId": "36fddefea73b96ddd7fe7541632404ca3213df30",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "19d9a131_8a3827d0",
+        "filename": "transporthandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-03T11:06:36Z",
+      "side": 1,
+      "message": "updated: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/78580",
+      "parentUuid": "f1b95c8b_214f5ec0",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 1
+      },
+      "revId": "36fddefea73b96ddd7fe7541632404ca3213df30",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
