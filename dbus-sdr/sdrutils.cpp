@@ -449,15 +449,15 @@ std::optional<std::unordered_set<std::string>>&
         return ipmiDecoratorPaths;
     }
 
+    using Paths = std::vector<std::string>;
     boost::system::error_code ec;
-    std::vector<std::string> paths =
-        (*ctx)->bus->yield_method_call<std::vector<std::string>>(
-            (*ctx)->yield, ec, "xyz.openbmc_project.ObjectMapper",
-            "/xyz/openbmc_project/object_mapper",
-            "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths", "/",
-            int32_t(0),
-            std::array<const char*, 1>{
-                "xyz.openbmc_project.Inventory.Decorator.Ipmi"});
+    Paths paths = ipmi::callDbusMethod<Paths>(
+        *ctx, ec, "xyz.openbmc_project.ObjectMapper",
+        "/xyz/openbmc_project/object_mapper",
+        "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths", "/", int32_t(0),
+        std::array<const char*, 1>{
+            "xyz.openbmc_project.Inventory.Decorator.Ipmi"});
+
     if (ec)
     {
         return ipmiDecoratorPaths;
