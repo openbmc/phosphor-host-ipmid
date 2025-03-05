@@ -32,13 +32,13 @@
 # data within them will be kept sorted.
 
 owners:
+- liuxiwei@ieisystem.com
 - rushtotom@gmail.com
 - vernon.mauery@gmail.com
 
 reviewers:
 - anoo@us.ibm.com
 - deepak.kodihalli.83@gmail.com
-- liuxiwei@ieisystem.com
 - ratankgupta31@gmail.com
 
 matchers:
