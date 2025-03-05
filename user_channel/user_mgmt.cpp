@@ -57,15 +57,6 @@ static constexpr const char* getManagedObjectsMethod = "GetManagedObjects";
 static constexpr const char* intfAddedSignal = "InterfacesAdded";
 static constexpr const char* intfRemovedSignal = "InterfacesRemoved";
 
-// Object Mapper related
-static constexpr const char* objMapperService =
-    "xyz.openbmc_project.ObjectMapper";
-static constexpr const char* objMapperPath =
-    "/xyz/openbmc_project/object_mapper";
-static constexpr const char* objMapperInterface =
-    "xyz.openbmc_project.ObjectMapper";
-static constexpr const char* getObjectMethod = "GetObject";
-
 static constexpr const char* ipmiUserMutex = "ipmi_usr_mutex";
 static constexpr const char* ipmiMutexCleanupLockFile =
     "/var/lib/ipmi/ipmi_usr_mutex_cleanup";
@@ -77,6 +68,8 @@ static constexpr size_t privNoAccess = 0xF;
 static constexpr size_t privMask = 0xF;
 
 // User manager related
+static constexpr const char* userMgrService =
+    "xyz.openbmc_project.User.Manager";
 static constexpr const char* userMgrObjBasePath = "/xyz/openbmc_project/user";
 static constexpr const char* userObjBasePath = "/xyz/openbmc_project/user";
 static constexpr const char* userMgrInterface =
@@ -126,30 +119,6 @@ std::unique_ptr<sdbusplus::bus::match_t> userMgrRenamedSignal
 std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal
     __attribute__((init_priority(101)));
 
-// TODO:  Below code can be removed once it is moved to common layer libmiscutil
-std::string getUserService(sdbusplus::bus_t& bus, const std::string& intf,
-                           const std::string& path)
-{
-    auto mapperCall = bus.new_method_call(objMapperService, objMapperPath,
-                                          objMapperInterface, getObjectMethod);
-
-    mapperCall.append(path);
-    mapperCall.append(std::vector<std::string>({intf}));
-
-    auto mapperResponseMsg = bus.call(mapperCall);
-
-    std::map<std::string, std::vector<std::string>> mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
-
-    if (mapperResponse.begin() == mapperResponse.end())
-    {
-        throw sdbusplus::exception::SdBusError(
-            -EIO, "ERROR in reading the mapper response");
-    }
-
-    return mapperResponse.begin()->first;
-}
-
 void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
                      const std::string& objPath, const std::string& interface,
                      const std::string& property,
@@ -171,25 +140,6 @@ void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
                    interface);
         throw;
     }
-}
-
-std::string getUserServiceName()
-{
-    static sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
-    static std::string userMgmtService;
-    if (userMgmtService.empty())
-    {
-        try
-        {
-            userMgmtService =
-                ipmi::getUserService(bus, userMgrInterface, userMgrObjBasePath);
-        }
-        catch (const sdbusplus::exception_t& e)
-        {
-            userMgmtService.clear();
-        }
-    }
-    return userMgmtService;
 }
 
 UserAccess& getUserAccessObject()
@@ -401,7 +351,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
                     try
                     {
                         auto method = bus.new_method_call(
-                            getUserServiceName().c_str(), msg.get_path(),
+                            userMgrService, msg.get_path(),
                             dBusPropertiesInterface, getAllPropertiesMethod);
                         method.append(usersInterface);
                         auto reply = bus.call(method);
@@ -574,9 +524,9 @@ bool UserAccess::isValidUserName(const std::string& userName)
     std::map<DbusUserObjPath, DbusUserObjValue> properties;
     try
     {
-        auto method = bus.new_method_call(getUserServiceName().c_str(),
-                                          userMgrObjBasePath, dBusObjManager,
-                                          getManagedObjectsMethod);
+        auto method =
+            bus.new_method_call(userMgrService, userMgrObjBasePath,
+                                dBusObjManager, getManagedObjectsMethod);
         auto reply = bus.call(method);
         reply.read(properties);
     }
@@ -814,7 +764,7 @@ Cc UserAccess::setUserEnabledState(const uint8_t userId,
         sdbusplus::message::object_path tempUserPath(userObjBasePath);
         tempUserPath /= userName;
         std::string userPath(tempUserPath);
-        setDbusProperty(bus, getUserServiceName(), userPath, usersInterface,
+        setDbusProperty(bus, userMgrService, userPath, usersInterface,
                         userEnabledProperty, enabledState);
         userInfo->userEnabled = enabledState;
         try
@@ -915,7 +865,7 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
         sdbusplus::message::object_path tempUserPath(userObjBasePath);
         tempUserPath /= userName;
         std::string userPath(tempUserPath);
-        setDbusProperty(bus, getUserServiceName(), userPath, usersInterface,
+        setDbusProperty(bus, userMgrService, userPath, usersInterface,
                         userPrivProperty, priv);
     }
     userInfo->userPrivAccess[chNum].privilege = privAccess.privilege;
@@ -1026,9 +976,9 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         std::string userPath(tempUserPath);
         try
         {
-            auto method = bus.new_method_call(
-                getUserServiceName().c_str(), userPath.c_str(),
-                deleteUserInterface, deleteUserMethod);
+            auto method =
+                bus.new_method_call(userMgrService, userPath.c_str(),
+                                    deleteUserInterface, deleteUserMethod);
             auto reply = bus.call(method);
         }
         catch (const sdbusplus::exception_t& e)
@@ -1048,9 +998,9 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
                 return ccUnspecifiedError;
             }
             // Create new user
-            auto method = bus.new_method_call(
-                getUserServiceName().c_str(), userMgrObjBasePath,
-                userMgrInterface, createUserMethod);
+            auto method =
+                bus.new_method_call(userMgrService, userMgrObjBasePath,
+                                    userMgrInterface, createUserMethod);
             method.append(userName.c_str(), availableGroups,
                           ipmiPrivIndex[PRIVILEGE_USER], false);
             auto reply = bus.call(method);
@@ -1077,9 +1027,9 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         try
         {
             // User rename
-            auto method = bus.new_method_call(
-                getUserServiceName().c_str(), userMgrObjBasePath,
-                userMgrInterface, renameUserMethod);
+            auto method =
+                bus.new_method_call(userMgrService, userMgrObjBasePath,
+                                    userMgrInterface, renameUserMethod);
             method.append(oldUser.c_str(), userName.c_str());
             auto reply = bus.call(method);
         }
@@ -1523,9 +1473,9 @@ void UserAccess::getSystemPrivAndGroups()
     std::map<std::string, PrivAndGroupType> properties;
     try
     {
-        auto method = bus.new_method_call(
-            getUserServiceName().c_str(), userMgrObjBasePath,
-            dBusPropertiesInterface, getAllPropertiesMethod);
+        auto method = bus.new_method_call(userMgrService, userMgrObjBasePath,
+                                          dBusPropertiesInterface,
+                                          getAllPropertiesMethod);
         method.append(userMgrInterface);
 
         auto reply = bus.call(method);
@@ -1676,9 +1626,9 @@ void UserAccess::cacheUserDataFile()
     std::map<DbusUserObjPath, DbusUserObjValue> managedObjs;
     try
     {
-        auto method = bus.new_method_call(getUserServiceName().c_str(),
-                                          userMgrObjBasePath, dBusObjManager,
-                                          getManagedObjectsMethod);
+        auto method =
+            bus.new_method_call(userMgrService, userMgrObjBasePath,
+                                dBusObjManager, getManagedObjectsMethod);
         auto reply = bus.call(method);
         reply.read(managedObjs);
     }
