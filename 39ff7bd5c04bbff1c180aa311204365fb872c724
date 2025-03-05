@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "593b2190_aa69d881",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-05T23:53:33Z",
+      "side": 1,
+      "message": "You are correct that the IPMI projects do have a bunch of outstanding changes that are not yet merged. We do need help.\n\nYou do have a nice history of contributing. I would like to see more of a history of reviewing. As an maintainer of a repo, you will need to do a lot of reviewing, which is a thankless task (not nearly as much fun as writing new code :) ). Show me a history of 20 reviews so I can see your work and investment in reviewing and I am happy to have you join us.",
+      "revId": "39ff7bd5c04bbff1c180aa311204365fb872c724",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
