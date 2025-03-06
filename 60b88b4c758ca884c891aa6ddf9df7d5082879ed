@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bf51f18f_d0745994",
+        "filename": "meson.build",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-06T01:56:44Z",
+      "side": 1,
+      "message": "Please use `meson format` to format",
+      "range": {
+        "startLine": 277,
+        "startChar": 24,
+        "endLine": 277,
+        "endChar": 45
+      },
+      "revId": "60b88b4c758ca884c891aa6ddf9df7d5082879ed",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d27be58a_6221eb11",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-06T01:56:44Z",
+      "side": 1,
+      "message": "Please use utils/setDbusProperty:\n```\nboost::system::error_code\n    setDbusProperty(Context::ptr ctx, const std::string\u0026 service,\n                    const std::string\u0026 objPath, const std::string\u0026 interface,\n                    const std::string\u0026 property, const Value\u0026 value);\n```",
+      "range": {
+        "startLine": 85,
+        "startChar": 22,
+        "endLine": 85,
+        "endChar": 47
+      },
+      "revId": "60b88b4c758ca884c891aa6ddf9df7d5082879ed",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0ef84a97_8409fd97",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-06T01:56:44Z",
+      "side": 1,
+      "message": "move to utils?",
+      "range": {
+        "startLine": 99,
+        "startChar": 2,
+        "endLine": 104,
+        "endChar": 5
+      },
+      "revId": "60b88b4c758ca884c891aa6ddf9df7d5082879ed",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f928878_00cac903",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-06T01:56:44Z",
+      "side": 1,
+      "message": "Please use utils/getDbusProperty:\n```\nboost::system::error_code\n    getDbusProperty(Context::ptr ctx, const std::string\u0026 service,\n                    const std::string\u0026 objPath, const std::string\u0026 interface,\n                    const std::string\u0026 property, Type\u0026 propertyValue)\n```",
+      "range": {
+        "startLine": 129,
+        "startChar": 8,
+        "endLine": 129,
+        "endChar": 48
+      },
+      "revId": "60b88b4c758ca884c891aa6ddf9df7d5082879ed",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
