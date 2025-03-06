@@ -16,6 +16,24 @@
       "message": "```suggestion\n            const auto \u0026[ptr, ec] \u003d\n```\n\nHere and below",
       "revId": "eeb3008ac2a1d174a43045916c0be844a937f3ef",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c7f111ee_56d44a18",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-03-06T09:50:23Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "b74b2ae3_650e079f",
+      "revId": "eeb3008ac2a1d174a43045916c0be844a937f3ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }

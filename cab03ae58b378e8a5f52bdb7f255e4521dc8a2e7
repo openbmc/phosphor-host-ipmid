@@ -22,6 +22,30 @@
       },
       "revId": "cab03ae58b378e8a5f52bdb7f255e4521dc8a2e7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "32ae5052_7ef3e724",
+        "filename": "apphandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-03-06T09:50:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aabb18ef_3d97f857",
+      "range": {
+        "startLine": 524,
+        "startChar": 0,
+        "endLine": 526,
+        "endChar": 62
+      },
+      "revId": "cab03ae58b378e8a5f52bdb7f255e4521dc8a2e7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
