@@ -16,6 +16,24 @@
       "message": "Why the change from the standard getService/getDbusProperty to getSubTree?",
       "revId": "7acb4e2e99a996ecc47f29ffd1481f67afdf9a13",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "92c9ac15_35f8f47f",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 1001526
+      },
+      "writtenOn": "2025-03-07T03:17:33Z",
+      "side": 1,
+      "message": "This used to rely on the hardcoded object path. But when this https://gerrit.openbmc.org/c/openbmc/dbus-sensors/+/76254 is applied, object name will be retrieved from Entity-Manager configuration and won\u0027t be fined. Therefore, I use getSubTree to look for those that implement the Chassis.Intrusion interface.",
+      "parentUuid": "27ffd22d_1487d705",
+      "revId": "7acb4e2e99a996ecc47f29ffd1481f67afdf9a13",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
