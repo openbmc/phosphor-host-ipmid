@@ -34,6 +34,24 @@
       "parentUuid": "27ffd22d_1487d705",
       "revId": "7acb4e2e99a996ecc47f29ffd1481f67afdf9a13",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd0d5f33_0dbcfc3e",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 1001526
+      },
+      "writtenOn": "2025-03-07T03:18:14Z",
+      "side": 1,
+      "message": "Typo fix: *won\u0027t be fixed",
+      "parentUuid": "92c9ac15_35f8f47f",
+      "revId": "7acb4e2e99a996ecc47f29ffd1481f67afdf9a13",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
