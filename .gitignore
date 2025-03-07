@@ -9,6 +9,9 @@
 
 # Meson
 /build*/
+/scripts/*
+!scripts/.clang-tidy
+!scripts/.clang-format
 /subprojects/*
 !/subprojects/*.wrap
 subprojects/CLI11.wrap
