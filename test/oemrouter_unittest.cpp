@@ -1,5 +1,3 @@
-#include "sample.h"
-
 #include <ipmid/api.h>
 
 #include <ipmid/oemrouter.hpp>
