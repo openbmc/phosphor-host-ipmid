@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <string>
+
 /** @brief Read eSEL data into a string
  *
  *  @param[in] filename - filename of file containing eSEL

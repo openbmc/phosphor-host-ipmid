@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <include/ipmid/message.hpp>
 #include <ipmid/message/types.hpp>
 
 #include <array>
