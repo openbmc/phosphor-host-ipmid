@@ -61,8 +61,8 @@ uint8_t msgBadOen[] = {0x57, 0x34, 0x12};
 
 void RegisterTwoWays(ipmi_cmd_t* nextCmd)
 {
-    Handler f = [](ipmi_cmd_t cmd, const uint8_t* reqBuf, uint8_t* replyBuf,
-                   size_t* dataLen) {
+    Handler f = [](ipmi_cmd_t cmd, [[maybe_unused]] const uint8_t* reqBuf,
+                   uint8_t* replyBuf, size_t* dataLen) {
         // Check inputs
         EXPECT_EQ(0x78, cmd);
         EXPECT_EQ(0, *dataLen); // Excludes OEN
@@ -76,7 +76,7 @@ void RegisterTwoWays(ipmi_cmd_t* nextCmd)
 
     *nextCmd = ipmi::cmdWildcard;
     Handler g = [nextCmd](ipmi_cmd_t cmd, const uint8_t* reqBuf,
-                          uint8_t* replyBuf, size_t* dataLen) {
+                          [[maybe_unused]] uint8_t* replyBuf, size_t* dataLen) {
         // Check inputs
         EXPECT_EQ(*nextCmd, cmd);
         EXPECT_EQ(2, *dataLen); // Excludes OEN
