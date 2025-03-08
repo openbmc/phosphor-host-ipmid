@@ -16,7 +16,7 @@ def generate_cpp(sensor_yaml, output_dir):
 
         # Render the mako template
 
-        t = Template(filename=os.path.join(script_dir, "writesensor.mako.cpp"))
+        t = Template(filename=os.path.join(script_dir, "writesensor.cpp.mako"))
 
         output_cpp = os.path.join(output_dir, "sensor-gen.cpp")
         with open(output_cpp, "w") as fd:
