@@ -17,7 +17,7 @@ def generate_cpp(sensor_yaml, output_dir):
         # Render the mako template
 
         t = Template(
-            filename=os.path.join(script_dir, "inventorysensor.mako.cpp")
+            filename=os.path.join(script_dir, "inventorysensor.cpp.mako")
         )
 
         output_cpp = os.path.join(output_dir, "inventory-sensor-gen.cpp")
