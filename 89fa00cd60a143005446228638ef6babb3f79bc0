@@ -46,6 +46,29 @@
       },
       "revId": "89fa00cd60a143005446228638ef6babb3f79bc0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0f28f62a_597b412c",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1934,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-11T21:22:12Z",
+      "side": 1,
+      "message": "the intent of the packing/unpacking framework is that you don\u0027t need to do the shifting and masking yourself.\n\nSplit the byte up below like byte2 is split up so that the things that have names show up.",
+      "range": {
+        "startLine": 1934,
+        "startChar": 0,
+        "endLine": 1934,
+        "endChar": 2
+      },
+      "revId": "89fa00cd60a143005446228638ef6babb3f79bc0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
