@@ -28,7 +28,7 @@
 #include <string>
 #include <variant>
 
-void register_netfn_storage_functions() __attribute__((constructor));
+void registerNetFnStorageFunctions() __attribute__((constructor));
 
 unsigned int g_sel_time = 0xFFFFFFFF;
 namespace ipmi
@@ -870,7 +870,7 @@ ipmi::RspType<uint8_t,  // SDR version
                                  operationSupport);
 }
 
-void register_netfn_storage_functions()
+void registerNetFnStorageFunctions()
 {
     selCacheMapInitialized = false;
     initSELCache();

@@ -1720,9 +1720,9 @@ RspType<message::Payload> getSolConfParams(
 } // namespace transport
 } // namespace ipmi
 
-void register_netfn_transport_functions() __attribute__((constructor));
+void registerNetFnTransportFunctions() __attribute__((constructor));
 
-void register_netfn_transport_functions()
+void registerNetFnTransportFunctions()
 {
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnTransport,
                           ipmi::transport::cmdSetLanConfigParameters,

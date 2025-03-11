@@ -13,7 +13,7 @@
 #include <cstring>
 #include <fstream>
 
-void register_netfn_app_functions() __attribute__((constructor));
+void registerNetFnAppFunctions() __attribute__((constructor));
 
 using namespace sdbusplus::server::xyz::openbmc_project::control;
 
@@ -149,7 +149,7 @@ std::unique_ptr<sdbusplus::server::manager_t> objManager
     __attribute__((init_priority(101)));
 } // namespace
 
-void register_netfn_app_functions()
+void registerNetFnAppFunctions()
 {
     // <Read Event Message Buffer>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,

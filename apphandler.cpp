@@ -57,7 +57,7 @@ static constexpr auto activationIntf =
     "xyz.openbmc_project.Software.Activation";
 static constexpr auto softwareRoot = "/xyz/openbmc_project/software";
 
-void register_netfn_app_functions() __attribute__((constructor));
+void registerNetFnAppFunctions() __attribute__((constructor));
 
 using namespace phosphor::logging;
 using namespace sdbusplus::error::xyz::openbmc_project::common;
@@ -1782,7 +1782,7 @@ ipmi::RspType<std::vector<uint8_t>> ipmiControllerWriteRead(
     return ipmi::responseSuccess(readBuf);
 }
 
-void register_netfn_app_functions()
+void registerNetFnAppFunctions()
 {
     // <Get Device ID>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,

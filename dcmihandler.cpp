@@ -24,7 +24,7 @@ using sdbusplus::server::xyz::openbmc_project::network::EthernetInterface;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
-void register_netfn_dcmi_functions() __attribute__((constructor));
+void registerNetFnDcmiFunctions() __attribute__((constructor));
 
 constexpr auto pcapPath = "/xyz/openbmc_project/control/host0/power_cap";
 constexpr auto pcapInterface = "xyz.openbmc_project.Control.Power.Cap";
@@ -1171,7 +1171,7 @@ ipmi::RspType<uint8_t,              // total available instances
     return ipmi::responseSuccess(totalInstances, numRecords, sensors);
 }
 
-void register_netfn_dcmi_functions()
+void registerNetFnDcmiFunctions()
 {
     // <Get Power Limit>
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,

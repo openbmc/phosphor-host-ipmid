@@ -42,7 +42,7 @@ using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
-void register_netfn_sen_functions() __attribute__((constructor));
+void registerNetFnSenFunctions() __attribute__((constructor));
 
 struct sensorTypemap_t
 {
@@ -1526,7 +1526,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
     return IPMI_CC_OK;
 }
 
-void register_netfn_sen_functions()
+void registerNetFnSenFunctions()
 {
     // Handlers with dbus-sdr handler implementation.
     // Do not register the hander if it dynamic sensors stack is used.

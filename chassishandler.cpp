@@ -67,7 +67,7 @@ static inline auto responseParmNotSupported()
 }
 } // namespace ipmi
 
-void register_netfn_chassis_functions() __attribute__((constructor));
+void registerNetFnChassisFunctions() __attribute__((constructor));
 
 // Host settings in dbus
 // Service name should be referenced by connection name got via object mapper
@@ -2337,7 +2337,7 @@ ipmi::RspType<> ipmiSetFrontPanelButtonEnables(
     return ipmi::responseSuccess();
 }
 
-void register_netfn_chassis_functions()
+void registerNetFnChassisFunctions()
 {
     createIdentifyTimer();
 
