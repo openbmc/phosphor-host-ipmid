@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cd0bc1a5_0e858f04",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "Nit: sort by value",
+      "range": {
+        "startLine": 35,
+        "startChar": 28,
+        "endLine": 35,
+        "endChar": 32
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7d847bca_5f5742ca",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "Please use\n```\nusing SbmrBootProgressCode \u003d std::tuple\u003cstd::vector\u003cuint8_t\u003e, std::vector\u003cuint8_t\u003e\u003e;\n```",
+      "range": {
+        "startLine": 27,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 58
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "41925f78_f628be2c",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "const \u0026",
+      "range": {
+        "startLine": 23,
+        "startChar": 32,
+        "endLine": 23,
+        "endChar": 43
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dfb00039_318a0b3f",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "```\nboost::system::error_code\n    setDbusProperty(Context::ptr ctx, const std::string\u0026 service,\n                    const std::string\u0026 objPath, const std::string\u0026 interface,\n                    const std::string\u0026 property, const Value\u0026 value);\n···",
+      "range": {
+        "startLine": 30,
+        "startChar": 8,
+        "endLine": 30,
+        "endChar": 29
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "990891a2_0ceb8983",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "as above",
+      "range": {
+        "startLine": 44,
+        "startChar": 8,
+        "endLine": 44,
+        "endChar": 29
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2ee07b1a_b00cf0ce",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "This method will return `boost::system::error_code`, so try-catch is not required.",
+      "range": {
+        "startLine": 84,
+        "startChar": 8,
+        "endLine": 84,
+        "endChar": 23
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "15196425_dd66e6b7",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "as above",
+      "range": {
+        "startLine": 120,
+        "startChar": 8,
+        "endLine": 120,
+        "endChar": 23
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c43c8a69_55b1dffe",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-11T00:51:45Z",
+      "side": 1,
+      "message": "`respBootProgressCode.empty()` is a redundant condition because `sbmrBootProgressCodeSize` defaults to 9.",
+      "range": {
+        "startLine": 124,
+        "startChar": 12,
+        "endLine": 125,
+        "endChar": 68
+      },
+      "revId": "14e790e2cbc498e6733f93887ecef7d3ea01903d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
