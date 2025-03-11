@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7bb3e9ac_7d62ee50",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-11T17:53:42Z",
+      "side": 1,
+      "message": "Ideally, we would fix the code rather than suppress the warnings.\n```suggestion\n        uint16_t nextRecordID \u003d record.nextRecordID;\n        std::memcpy(response, \u0026nextRecordID,\n                    sizeof(nextRecordID));\n```",
+      "range": {
+        "startLine": 383,
+        "startChar": 0,
+        "endLine": 384,
+        "endChar": 49
+      },
+      "revId": "5193589b81ca65f9528f977434ba5621c283da2b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dafd3517_f05b9c4d",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-11T17:53:42Z",
+      "side": 1,
+      "message": "I don\u0027t know if this would fix it or not, but maybe try something like this:\n\n\n\nIf that doesn\u0027t fix the problem, I am okay with suppressing the warning on on the second memcpy.\n```suggestion\n        SELEventRecordFormat *evt \u003d \u0026record.event;\n        std::memcpy(response, static_cast\u003cchar *\u003e(evt) + requestData-\u003eoffset,\n                    readLength);\n```",
+      "range": {
+        "startLine": 385,
+        "startChar": 0,
+        "endLine": 388,
+        "endChar": 32
+      },
+      "revId": "5193589b81ca65f9528f977434ba5621c283da2b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
