@@ -44,11 +44,11 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
 {
     try
     {
-        WatchdogService wd_service;
+        WatchdogService wdService;
 
         // Notify the caller if we haven't initialized our timer yet
         // so it can configure actions and timeouts
-        if (!wd_service.getInitialized())
+        if (!wdService.getInitialized())
         {
             lastCallSuccessful = true;
 
@@ -57,7 +57,7 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
         }
 
         // The ipmi standard dictates we enable the watchdog during reset
-        wd_service.resetTimeRemaining(true);
+        wdService.resetTimeRemaining(true);
         lastCallSuccessful = true;
         return ipmi::responseSuccess();
     }
@@ -220,33 +220,33 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
 
     try
     {
-        WatchdogService wd_service;
+        WatchdogService wdService;
         // Stop the timer if the don't stop bit is not set
         if (!(dontStopTimer))
         {
-            wd_service.setEnabled(false);
+            wdService.setEnabled(false);
         }
 
         // Set the action based on the request
         const auto ipmi_action = static_cast<IpmiAction>(
             static_cast<uint8_t>(timeoutAction) & wd_timeout_action_mask);
-        wd_service.setExpireAction(ipmiActionToWdAction(ipmi_action));
+        wdService.setExpireAction(ipmiActionToWdAction(ipmi_action));
 
         const auto ipmiTimerUse = types::enum_cast<IpmiTimerUse>(timerUse);
-        wd_service.setTimerUse(ipmiTimerUseToWdTimerUse(ipmiTimerUse));
+        wdService.setTimerUse(ipmiTimerUseToWdTimerUse(ipmiTimerUse));
 
-        wd_service.setExpiredTimerUse(WatchdogService::TimerUse::Reserved);
+        wdService.setExpiredTimerUse(WatchdogService::TimerUse::Reserved);
 
         timerUseExpirationFlags &= ~expFlagValue;
 
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = initialCountdown * 100;
-        wd_service.setInterval(interval);
-        wd_service.resetTimeRemaining(false);
+        wdService.setInterval(interval);
+        wdService.resetTimeRemaining(false);
 
         // Mark as initialized so that future resets behave correctly
-        wd_service.setInitialized(true);
-        wd_service.setLogTimeout(!dontLog);
+        wdService.setInitialized(true);
+        wdService.setLogTimeout(!dontLog);
 
         lastCallSuccessful = true;
         return ipmi::responseSuccess();
@@ -374,8 +374,8 @@ ipmi::RspType<uint3_t,        // timerUse - timer use
 
     try
     {
-        WatchdogService wd_service;
-        WatchdogService::Properties wd_prop = wd_service.getProperties();
+        WatchdogService wdService;
+        WatchdogService::Properties wd_prop = wdService.getProperties();
 
         // Build and return the response
         // Interval and timeRemaining need converted from milli -> deci seconds
