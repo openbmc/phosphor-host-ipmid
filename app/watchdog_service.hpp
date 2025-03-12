@@ -102,7 +102,7 @@ class WatchdogService
     /** @brief sdbusplus handle */
     sdbusplus::bus_t bus;
     /** @brief The name of the mapped host watchdog service */
-    static ipmi::ServiceCache wd_service;
+    static ipmi::ServiceCache wdService;
 
     /** @brief Gets the value of the property on the host watchdog
      *

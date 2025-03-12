@@ -44,11 +44,11 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
 {
     try
     {
-        WatchdogService wd_service;
+        WatchdogService wdService;
 
         // Notify the caller if we haven't initialized our timer yet
         // so it can configure actions and timeouts
-        if (!wd_service.getInitialized())
+        if (!wdService.getInitialized())
         {
             lastCallSuccessful = true;
 
@@ -57,7 +57,7 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
         }
 
         // The ipmi standard dictates we enable the watchdog during reset
-        wd_service.resetTimeRemaining(true);
+        wdService.resetTimeRemaining(true);
         lastCallSuccessful = true;
         return ipmi::responseSuccess();
     }
@@ -78,7 +78,7 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
     }
 }
 
-static constexpr uint8_t wd_timeout_action_mask = 0x3;
+static constexpr uint8_t wdTimeoutActionMask = 0x3;
 
 static constexpr uint8_t wdTimerUseResTimer1 = 0x0;
 static constexpr uint8_t wdTimerUseResTimer2 = 0x6;
@@ -96,12 +96,12 @@ enum class IpmiAction : uint8_t
 };
 
 /** @brief Converts an IPMI Watchdog Action to DBUS defined action
- *  @param[in] ipmi_action The IPMI Watchdog Action
- *  @return The Watchdog Action that the ipmi_action maps to
+ *  @param[in] ipmiAction The IPMI Watchdog Action
+ *  @return The Watchdog Action that the ipmiAction maps to
  */
-WatchdogService::Action ipmiActionToWdAction(IpmiAction ipmi_action)
+WatchdogService::Action ipmiActionToWdAction(IpmiAction ipmiAction)
 {
-    switch (ipmi_action)
+    switch (ipmiAction)
     {
         case IpmiAction::None:
         {
@@ -220,33 +220,33 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
 
     try
     {
-        WatchdogService wd_service;
+        WatchdogService wdService;
         // Stop the timer if the don't stop bit is not set
         if (!(dontStopTimer))
         {
-            wd_service.setEnabled(false);
+            wdService.setEnabled(false);
         }
 
         // Set the action based on the request
-        const auto ipmi_action = static_cast<IpmiAction>(
-            static_cast<uint8_t>(timeoutAction) & wd_timeout_action_mask);
-        wd_service.setExpireAction(ipmiActionToWdAction(ipmi_action));
+        const auto ipmiAction = static_cast<IpmiAction>(
+            static_cast<uint8_t>(timeoutAction) & wdTimeoutActionMask);
+        wdService.setExpireAction(ipmiActionToWdAction(ipmiAction));
 
         const auto ipmiTimerUse = types::enum_cast<IpmiTimerUse>(timerUse);
-        wd_service.setTimerUse(ipmiTimerUseToWdTimerUse(ipmiTimerUse));
+        wdService.setTimerUse(ipmiTimerUseToWdTimerUse(ipmiTimerUse));
 
-        wd_service.setExpiredTimerUse(WatchdogService::TimerUse::Reserved);
+        wdService.setExpiredTimerUse(WatchdogService::TimerUse::Reserved);
 
         timerUseExpirationFlags &= ~expFlagValue;
 
         // Set the new interval and the time remaining deci -> mill seconds
         const uint64_t interval = initialCountdown * 100;
-        wd_service.setInterval(interval);
-        wd_service.resetTimeRemaining(false);
+        wdService.setInterval(interval);
+        wdService.resetTimeRemaining(false);
 
         // Mark as initialized so that future resets behave correctly
-        wd_service.setInitialized(true);
-        wd_service.setLogTimeout(!dontLog);
+        wdService.setInitialized(true);
+        wdService.setLogTimeout(!dontLog);
 
         lastCallSuccessful = true;
         return ipmi::responseSuccess();
@@ -273,12 +273,12 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
 }
 
 /** @brief Converts a DBUS Watchdog Action to IPMI defined action
- *  @param[in] wd_action The DBUS Watchdog Action
- *  @return The IpmiAction that the wd_action maps to
+ *  @param[in] wdAction The DBUS Watchdog Action
+ *  @return The IpmiAction that the wdAction maps to
  */
-IpmiAction wdActionToIpmiAction(WatchdogService::Action wd_action)
+IpmiAction wdActionToIpmiAction(WatchdogService::Action wdAction)
 {
-    switch (wd_action)
+    switch (wdAction)
     {
         case WatchdogService::Action::None:
         {
@@ -374,26 +374,26 @@ ipmi::RspType<uint3_t,        // timerUse - timer use
 
     try
     {
-        WatchdogService wd_service;
-        WatchdogService::Properties wd_prop = wd_service.getProperties();
+        WatchdogService wdService;
+        WatchdogService::Properties wdProp = wdService.getProperties();
 
         // Build and return the response
         // Interval and timeRemaining need converted from milli -> deci seconds
-        uint16_t initialCountdown = htole16(wd_prop.interval / 100);
+        uint16_t initialCountdown = htole16(wdProp.interval / 100);
 
-        if (wd_prop.expiredTimerUse != WatchdogService::TimerUse::Reserved)
+        if (wdProp.expiredTimerUse != WatchdogService::TimerUse::Reserved)
         {
             timerUseExpirationFlags.set(static_cast<uint8_t>(
-                wdTimerUseToIpmiTimerUse(wd_prop.expiredTimerUse)));
+                wdTimerUseToIpmiTimerUse(wdProp.expiredTimerUse)));
         }
 
-        if (wd_prop.enabled)
+        if (wdProp.enabled)
         {
-            presentCountdown = htole16(wd_prop.timeRemaining / 100);
+            presentCountdown = htole16(wdProp.timeRemaining / 100);
         }
         else
         {
-            if (wd_prop.expiredTimerUse == WatchdogService::TimerUse::Reserved)
+            if (wdProp.expiredTimerUse == WatchdogService::TimerUse::Reserved)
             {
                 presentCountdown = initialCountdown;
             }
@@ -411,10 +411,10 @@ ipmi::RspType<uint3_t,        // timerUse - timer use
         lastCallSuccessful = true;
         return ipmi::responseSuccess(
             types::enum_cast<uint3_t>(
-                wdTimerUseToIpmiTimerUse(wd_prop.timerUse)),
-            0, wd_prop.enabled, timerNotLogFlags,
+                wdTimerUseToIpmiTimerUse(wdProp.timerUse)),
+            0, wdProp.enabled, timerNotLogFlags,
             types::enum_cast<uint3_t>(
-                wdActionToIpmiAction(wd_prop.expireAction)),
+                wdActionToIpmiAction(wdProp.expireAction)),
             0, timerPreTimeoutInterrupt, 0, pretimeout, timerUseExpirationFlags,
             initialCountdown, presentCountdown);
     }
