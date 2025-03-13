@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cfee7fde_c7f37fb2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001839
+      },
+      "writtenOn": "2025-03-13T06:55:56Z",
+      "side": 1,
+      "message": "I am also more than happy to change this patch if what bmcweb is doing is also wrong and there is some other ways to help phosphor-host-ipmid be robust against ObjectMapper failure. Thanks",
+      "revId": "ed4c933262452471a23172f803991361c08d370c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
