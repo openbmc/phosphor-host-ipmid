@@ -109,50 +109,6 @@ inline bool get_count(void* req)
 namespace get_sdr
 {
 
-struct GetSdrReq
-{
-    uint8_t reservation_id_lsb;
-    uint8_t reservation_id_msb;
-    uint8_t record_id_lsb;
-    uint8_t record_id_msb;
-    uint8_t offset;
-    uint8_t bytes_to_read;
-} __attribute__((packed));
-
-namespace request
-{
-
-inline uint16_t get_reservation_id(GetSdrReq* req)
-{
-    return (req->reservation_id_lsb + (req->reservation_id_msb << 8));
-};
-
-inline uint16_t get_record_id(GetSdrReq* req)
-{
-    return (req->record_id_lsb + (req->record_id_msb << 8));
-};
-
-} // namespace request
-
-// Response
-struct GetSdrResp
-{
-    uint8_t next_record_id_lsb;
-    uint8_t next_record_id_msb;
-    uint8_t record_data[64];
-} __attribute__((packed));
-
-namespace response
-{
-
-inline void set_next_record_id(uint16_t next, GetSdrResp* resp)
-{
-    resp->next_record_id_lsb = next & 0xff;
-    resp->next_record_id_msb = (next >> 8) & 0xff;
-};
-
-} // namespace response
-
 // Record header
 struct SensorDataRecordHeader
 {

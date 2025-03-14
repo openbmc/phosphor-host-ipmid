@@ -1122,8 +1122,8 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
     }
 }
 
-ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
-                                     const ipmi::sensor::Info* info)
+ipmi_ret_t populateRecordFromDbus(get_sdr::SensorDataFullRecordBody* body,
+                                  const ipmi::sensor::Info* info)
 {
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
@@ -1162,9 +1162,8 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     return IPMI_CC_OK;
 };
 
-ipmi::Cc ipmi_fru_get_sdr(uint16_t recordID, uint8_t offset,
-                          uint8_t bytesToRead, uint16_t& nextRecordID,
-                          std::vector<uint8_t>& recordData)
+ipmi::Cc ipmiFruGetSdr(uint16_t recordID, uint8_t offset, uint8_t bytesToRead,
+                       uint16_t& nextRecordID, std::vector<uint8_t>& recordData)
 {
     get_sdr::SensorDataFruRecord record{};
     auto dataLength = 0;
@@ -1247,9 +1246,9 @@ ipmi::Cc ipmi_fru_get_sdr(uint16_t recordID, uint8_t offset,
     return IPMI_CC_OK;
 }
 
-ipmi::Cc ipmi_entity_get_sdr(uint16_t recordID, uint8_t offset,
-                             uint8_t bytesToRead, uint16_t& nextRecordID,
-                             std::vector<uint8_t>& recordData)
+ipmi::Cc ipmiEntityGetSdr(uint16_t recordID, uint8_t offset,
+                          uint8_t bytesToRead, uint16_t& nextRecordID,
+                          std::vector<uint8_t>& recordData)
 {
     get_sdr::SensorDataEntityRecord record{};
     auto dataLength = 0;
@@ -1334,8 +1333,8 @@ ipmi::RspType<uint16_t, std::vector<uint8_t>> ipmiSenGetSdr(
         // record, FRU record and Enttiy Association record.
         if (recordID >= ENTITY_RECORD_ID_START)
         {
-            auto cc = ipmi_entity_get_sdr(recordID, offset, bytesToRead,
-                                          nextRecordID, recordData);
+            auto cc = ipmiEntityGetSdr(recordID, offset, bytesToRead,
+                                       nextRecordID, recordData);
             if (cc != IPMI_CC_OK)
             {
                 return ipmi::response(cc);
@@ -1345,8 +1344,8 @@ ipmi::RspType<uint16_t, std::vector<uint8_t>> ipmiSenGetSdr(
         else if (recordID >= FRU_RECORD_ID_START &&
                  recordID < ENTITY_RECORD_ID_START)
         {
-            auto cc = ipmi_fru_get_sdr(recordID, offset, bytesToRead,
-                                       nextRecordID, recordData);
+            auto cc = ipmiFruGetSdr(recordID, offset, bytesToRead, nextRecordID,
+                                    recordData);
             if (cc != IPMI_CC_OK)
             {
                 return ipmi::response(cc);
@@ -1391,7 +1390,7 @@ ipmi::RspType<uint16_t, std::vector<uint8_t>> ipmiSenGetSdr(
         }
 
         // Set the type-specific details given the DBus interface
-        populate_record_from_dbus(&(record.body), &(sensor->second));
+        populateRecordFromDbus(&(record.body), &(sensor->second));
         sdrCacheMap[sensor_id] = std::move(record);
     }
 
