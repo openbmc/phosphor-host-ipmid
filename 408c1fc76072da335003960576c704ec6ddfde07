@@ -16,6 +16,24 @@
       "message": "Rather than putting a bandaid on it, would you be willing to rework the function using the new API, which does all the range checking automatically?",
       "revId": "408c1fc76072da335003960576c704ec6ddfde07",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed204b4b_98ac857d",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1338,
+      "author": {
+        "id": 1001371
+      },
+      "writtenOn": "2025-03-14T07:43:46Z",
+      "side": 1,
+      "message": "sure, I\u0027ve completed a version. Could you help review it?",
+      "parentUuid": "aa694632_fde88780",
+      "revId": "408c1fc76072da335003960576c704ec6ddfde07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
