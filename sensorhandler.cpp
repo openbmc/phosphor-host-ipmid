@@ -1123,8 +1123,7 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
 }
 
 ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
-                                     const ipmi::sensor::Info* info,
-                                     ipmi_data_len_t)
+                                     const ipmi::sensor::Info* info)
 {
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
@@ -1163,17 +1162,15 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     return IPMI_CC_OK;
 };
 
-ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
-                            ipmi_data_len_t data_len)
+ipmi::Cc ipmi_fru_get_sdr(uint16_t recordID, uint8_t offset,
+                          uint8_t bytesToRead, uint16_t& nextRecordID,
+                          std::vector<uint8_t>& recordData)
 {
-    auto req = reinterpret_cast<get_sdr::GetSdrReq*>(request);
-    auto resp = reinterpret_cast<get_sdr::GetSdrResp*>(response);
     get_sdr::SensorDataFruRecord record{};
     auto dataLength = 0;
 
     auto fru = frus.begin();
     uint8_t fruID{};
-    auto recordID = get_sdr::request::get_record_id(req);
 
     fruID = recordID - FRU_RECORD_ID_START;
     fru = frus.find(fruID);
@@ -1224,41 +1221,36 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
         const auto& entityRecords =
             ipmi::sensor::EntityInfoMapContainer::getContainer()
                 ->getIpmiEntityRecords();
-        auto next_record_id =
+        nextRecordID =
             (entityRecords.size())
                 ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
                 : END_OF_RECORD;
-        get_sdr::response::set_next_record_id(next_record_id, resp);
     }
     else
     {
-        get_sdr::response::set_next_record_id(
-            (FRU_RECORD_ID_START + fru->first), resp);
+        nextRecordID = (FRU_RECORD_ID_START + fru->first);
     }
 
     // Check for invalid offset size
-    if (req->offset > sizeof(record))
+    if (offset > sizeof(record))
     {
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
 
-    dataLength = std::min(static_cast<size_t>(req->bytes_to_read),
-                          sizeof(record) - req->offset);
+    dataLength =
+        std::min(static_cast<size_t>(bytesToRead), sizeof(record) - offset);
 
-    std::memcpy(resp->record_data,
-                reinterpret_cast<uint8_t*>(&record) + req->offset, dataLength);
-
-    *data_len = dataLength;
-    *data_len += 2; // additional 2 bytes for next record ID
+    recordData.resize(dataLength);
+    std::memcpy(recordData.data(), reinterpret_cast<uint8_t*>(&record) + offset,
+                dataLength);
 
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
-                               ipmi_data_len_t data_len)
+ipmi::Cc ipmi_entity_get_sdr(uint16_t recordID, uint8_t offset,
+                             uint8_t bytesToRead, uint16_t& nextRecordID,
+                             std::vector<uint8_t>& recordData)
 {
-    auto req = reinterpret_cast<get_sdr::GetSdrReq*>(request);
-    auto resp = reinterpret_cast<get_sdr::GetSdrResp*>(response);
     get_sdr::SensorDataEntityRecord record{};
     auto dataLength = 0;
 
@@ -1267,7 +1259,6 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
             ->getIpmiEntityRecords();
     auto entity = entityRecords.begin();
     uint8_t entityRecordID;
-    auto recordID = get_sdr::request::get_record_id(req);
 
     entityRecordID = recordID - ENTITY_RECORD_ID_START;
     entity = entityRecords.find(entityRecordID);
@@ -1300,45 +1291,38 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
 
     if (++entity == entityRecords.end())
     {
-        get_sdr::response::set_next_record_id(END_OF_RECORD,
-                                              resp); // last record
+        nextRecordID = END_OF_RECORD;
     }
     else
     {
-        get_sdr::response::set_next_record_id(
-            (ENTITY_RECORD_ID_START + entity->first), resp);
+        nextRecordID = (ENTITY_RECORD_ID_START + entity->first);
     }
 
     // Check for invalid offset size
-    if (req->offset > sizeof(record))
+    if (offset > sizeof(record))
     {
         return IPMI_CC_PARM_OUT_OF_RANGE;
     }
 
-    dataLength = std::min(static_cast<size_t>(req->bytes_to_read),
-                          sizeof(record) - req->offset);
-
-    std::memcpy(resp->record_data,
-                reinterpret_cast<uint8_t*>(&record) + req->offset, dataLength);
-
-    *data_len = dataLength;
-    *data_len += 2; // additional 2 bytes for next record ID
+    dataLength =
+        std::min(static_cast<size_t>(bytesToRead), sizeof(record) - offset);
+    recordData.resize(dataLength);
+    std::memcpy(recordData.data(), reinterpret_cast<uint8_t*>(&record) + offset,
+                dataLength);
 
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                            ipmi_response_t response, ipmi_data_len_t data_len,
-                            ipmi_context_t)
+ipmi::RspType<uint16_t, std::vector<uint8_t>> ipmiSenGetSdr(
+    ipmi::Context::ptr&, uint16_t, uint16_t recordID, uint8_t offset,
+    uint8_t bytesToRead)
 {
-    ipmi_ret_t ret = IPMI_CC_OK;
-    get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
-    get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
+    uint16_t nextRecordID = 0;
+    std::vector<uint8_t> recordData;
 
     // Note: we use an iterator so we can provide the next ID at the end of
     // the call.
     auto sensor = ipmi::sensor::sensors.begin();
-    auto recordID = get_sdr::request::get_record_id(req);
 
     // At the beginning of a scan, the host side will send us id=0.
     if (recordID != 0)
@@ -1350,19 +1334,31 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         // record, FRU record and Enttiy Association record.
         if (recordID >= ENTITY_RECORD_ID_START)
         {
-            return ipmi_entity_get_sdr(request, response, data_len);
+            auto cc = ipmi_entity_get_sdr(recordID, offset, bytesToRead,
+                                          nextRecordID, recordData);
+            if (cc != IPMI_CC_OK)
+            {
+                return ipmi::response(cc);
+            }
+            return ipmi::responseSuccess(nextRecordID, recordData);
         }
         else if (recordID >= FRU_RECORD_ID_START &&
                  recordID < ENTITY_RECORD_ID_START)
         {
-            return ipmi_fru_get_sdr(request, response, data_len);
+            auto cc = ipmi_fru_get_sdr(recordID, offset, bytesToRead,
+                                       nextRecordID, recordData);
+            if (cc != IPMI_CC_OK)
+            {
+                return ipmi::response(cc);
+            }
+            return ipmi::responseSuccess(nextRecordID, recordData);
         }
         else
         {
             sensor = ipmi::sensor::sensors.find(recordID);
             if (sensor == ipmi::sensor::sensors.end())
             {
-                return IPMI_CC_SENSOR_INVALID;
+                return ipmi::responseSensorInvalid();
             }
         }
     }
@@ -1395,7 +1391,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         }
 
         // Set the type-specific details given the DBus interface
-        populate_record_from_dbus(&(record.body), &(sensor->second), data_len);
+        populate_record_from_dbus(&(record.body), &(sensor->second));
         sdrCacheMap[sensor_id] = std::move(record);
     }
 
@@ -1405,36 +1401,26 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     {
         // we have reached till end of sensor, so assign the next record id
         // to 256(Max Sensor ID = 255) + FRU ID(may start with 0).
-        auto next_record_id = (frus.size())
-                                  ? frus.begin()->first + FRU_RECORD_ID_START
-                                  : END_OF_RECORD;
-
-        get_sdr::response::set_next_record_id(next_record_id, resp);
+        nextRecordID = (frus.size()) ? frus.begin()->first + FRU_RECORD_ID_START
+                                     : END_OF_RECORD;
     }
     else
     {
-        get_sdr::response::set_next_record_id(sensor->first, resp);
+        nextRecordID = sensor->first;
     }
 
-    if (req->offset > sizeof(record))
+    if (offset > sizeof(record))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::responseParmOutOfRange();
     }
 
-    // data_len will ultimately be the size of the record, plus
-    // the size of the next record ID:
-    *data_len = std::min(static_cast<size_t>(req->bytes_to_read),
-                         sizeof(record) - req->offset);
+    recordData.resize(
+        std::min(static_cast<size_t>(bytesToRead), sizeof(record) - offset));
+    std::memcpy(recordData.data(),
+                reinterpret_cast<const uint8_t*>(&record) + offset,
+                recordData.size());
 
-    std::memcpy(resp->record_data,
-                reinterpret_cast<const uint8_t*>(&record) + req->offset,
-                *data_len);
-
-    // data_len should include the LSB and MSB:
-    *data_len += sizeof(resp->next_record_id_lsb) +
-                 sizeof(resp->next_record_id_msb);
-
-    return ret;
+    return ipmi::responseSuccess(nextRecordID, recordData);
 }
 
 static bool isFromSystemChannel()
@@ -1568,8 +1554,9 @@ void registerNetFnSenFunctions()
                           ipmi::Privilege::User, ipmiSenSetSensorThresholds);
 
     // <Get Device SDR>
-    ipmi_register_callback(NETFUN_SENSOR, ipmi::sensor_event::cmdGetDeviceSdr,
-                           nullptr, ipmi_sen_get_sdr, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdGetDeviceSdr,
+                          ipmi::Privilege::User, ipmiSenGetSdr);
 
 #endif
 

@@ -74,9 +74,9 @@ int set_sensor_dbus_state_s(uint8_t, const char*, const char*);
 int set_sensor_dbus_state_y(uint8_t, const char*, const uint8_t);
 int find_openbmc_path(uint8_t, dbus_interface_t*);
 
-ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                            ipmi_request_t request, ipmi_response_t response,
-                            ipmi_data_len_t data_len, ipmi_context_t context);
+ipmi::RspType<uint16_t, std::vector<uint8_t>> ipmiSenGetSdr(
+    ipmi::Context::ptr&, uint16_t, uint16_t recordID, uint8_t offset,
+    uint8_t bytesToRead);
 
 ipmi::RspType<uint16_t> ipmiSensorReserveSdr();
 

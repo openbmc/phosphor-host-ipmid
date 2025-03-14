@@ -933,8 +933,9 @@ void registerNetFnStorageFunctions()
                           ipmi::Privilege::User, ipmiSensorReserveSdr);
 
     // <Get SDR>
-    ipmi_register_callback(NETFUN_STORAGE, ipmi::storage::cmdGetSdr, nullptr,
-                           ipmi_sen_get_sdr, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdGetSdr, ipmi::Privilege::User,
+                          ipmiSenGetSdr);
 
 #endif
 
