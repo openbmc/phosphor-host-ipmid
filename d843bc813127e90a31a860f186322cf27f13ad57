@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f0748aad_546a46e8",
+        "filename": ".clang-tidy-ignore",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-03-14T13:46:06Z",
+      "side": 1,
+      "message": "This is also not required , most of errors fixed with latest version code merged today . please look.",
+      "revId": "d843bc813127e90a31a860f186322cf27f13ad57",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1b549da2_cc146a90",
+        "filename": ".clang-tidy-ignore",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-03-14T13:46:06Z",
+      "side": 1,
+      "message": "macko.cpp file extension already renamed to cpp.macko. https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/78764",
+      "revId": "d843bc813127e90a31a860f186322cf27f13ad57",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1411278e_31b51250",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-03-14T13:46:06Z",
+      "side": 1,
+      "message": "Lei , can you please look the latest code in this repo. Most of the clang-tidy is already fixed and only pending issue need to fix details available in https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/76361/10 CI.",
+      "revId": "d843bc813127e90a31a860f186322cf27f13ad57",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
