@@ -15,7 +15,8 @@
  */
 #pragma once
 
-#include <include/ipmid/message.hpp>
+#include "ipmid/message.hpp"
+
 #include <ipmid/message/types.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <phosphor-logging/log.hpp>
