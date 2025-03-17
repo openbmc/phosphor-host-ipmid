@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd4a5eca_e303749d",
+        "filename": "meson.options",
+        "patchSetId": 6
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2025-03-17T20:08:10Z",
+      "side": 1,
+      "message": "I don\u0027t know how this is going to work with CI going forward.  I think we need some changes here.\n\nI get that we\u0027re adding a provider here where we previously created them as separate repositories, and we now have the option to migrate the other implementations here.  That\u0027s good.\n\nThe way this is written though, we end up with none of the code being tested in CI.  This is bad.\n\nGenerally we require meson.options to be written where everything is enabled by default, so we get fully compile / unit-testing in CI and then the PACKAGECONFIG in Yocto removes it.  Please revisit this.",
+      "revId": "e2fae4b9fe17e30149b077b38ea513d7207c5405",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
