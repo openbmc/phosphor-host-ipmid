@@ -46,6 +46,30 @@
       },
       "revId": "2e2c76d25a98abf99dfaab09765dfee659dd7467",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d52e5a22_f7595916",
+        "filename": "test/oemrouter_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2025-03-17T08:43:11Z",
+      "side": 1,
+      "message": "To align with Handler signature , need to keep this format. Removing variable is failing now.",
+      "parentUuid": "83bd7495_e88ff164",
+      "range": {
+        "startLine": 64,
+        "startChar": 35,
+        "endLine": 64,
+        "endChar": 73
+      },
+      "revId": "2e2c76d25a98abf99dfaab09765dfee659dd7467",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
