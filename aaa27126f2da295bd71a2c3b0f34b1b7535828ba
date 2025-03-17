@@ -22,6 +22,29 @@
       },
       "revId": "aaa27126f2da295bd71a2c3b0f34b1b7535828ba",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f4b7787_bf3e1a17",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-17T08:30:03Z",
+      "side": 1,
+      "message": "@Lei has updated there: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/77489",
+      "range": {
+        "startLine": 380,
+        "startChar": 8,
+        "endLine": 387,
+        "endChar": 32
+      },
+      "revId": "aaa27126f2da295bd71a2c3b0f34b1b7535828ba",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
