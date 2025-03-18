@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d4719064_55b68afe",
+        "filename": "include/ipmid/message/pack.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-18T00:33:24Z",
+      "side": 1,
+      "message": "#include \u003cipmid/message.hpp\u003e",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 28
+      },
+      "revId": "7905c50108d2f852c0cc1b5af971f797166259c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c4ecc6c_3acc7f32",
+        "filename": "include/ipmid/message/unpack.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-03-18T00:33:24Z",
+      "side": 1,
+      "message": "#include \u003cipmid/message.hpp\u003e",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 28
+      },
+      "revId": "7905c50108d2f852c0cc1b5af971f797166259c2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
