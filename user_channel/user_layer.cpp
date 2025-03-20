@@ -16,6 +16,7 @@
 
 #include "user_layer.hpp"
 
+#include "file.hpp"
 #include "passwd_mgr.hpp"
 #include "user_mgmt.hpp"
 
@@ -30,6 +31,24 @@ namespace ipmi
 Cc ipmiUserInit()
 {
     getUserAccessObject();
+    static phosphor::user::FileWatch userWatch(
+        *getIoContext(), false, ipmiUserDataFile,
+        [](uint32_t, const std::string& path) {
+            if (path == ipmiUserDataFile)
+            {
+                getUserAccessObject().resetFileLastUpdatedTime();
+            }
+        });
+
+    static phosphor::user::FileWatch passwdWatch(
+        *getIoContext(), false, passwdFileName,
+        [](uint32_t, const std::string& path) {
+            if (path == passwdFileName)
+            {
+                passwdMgr.resetFileLastUpdatedTime();
+            }
+        });
+
     return ccSuccess;
 }
 

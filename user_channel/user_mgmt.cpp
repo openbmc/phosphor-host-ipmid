@@ -70,8 +70,7 @@ static constexpr const char* ipmiUserMutex = "ipmi_usr_mutex";
 static constexpr const char* ipmiMutexCleanupLockFile =
     "/var/run/ipmi/ipmi_usr_mutex_cleanup";
 static constexpr const char* ipmiUserSignalLockFile =
-    "/var/run/ipmi/ipmi_usr_signal_mutex";
-static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
+    "/var/lib/ipmi/ipmi_usr_signal_mutex";
 static constexpr const char* ipmiGrpName = "ipmi";
 static constexpr size_t privNoAccess = 0xF;
 static constexpr size_t privMask = 0xF;
@@ -1509,6 +1508,11 @@ void UserAccess::checkAndReloadUserData()
         readUserData();
     }
     return;
+}
+
+void UserAccess::resetFileLastUpdatedTime()
+{
+    fileLastUpdatedTime = std::timespec{0, 0};
 }
 
 UsersTbl* UserAccess::getUsersTblPtr()
