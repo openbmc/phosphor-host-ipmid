@@ -1511,6 +1511,11 @@ void UserAccess::checkAndReloadUserData()
     return;
 }
 
+void UserAccess::resetFileLastUpdatedTime()
+{
+    fileLastUpdatedTime = std::timespec{0, 0};
+}
+
 UsersTbl* UserAccess::getUsersTblPtr()
 {
     // reload data before using it.

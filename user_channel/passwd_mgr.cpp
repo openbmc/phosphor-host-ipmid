@@ -141,6 +141,11 @@ void PasswdMgr::checkAndReload(void)
     }
 }
 
+void PasswdMgr::resetFileLastUpdatedTime()
+{
+    fileLastUpdatedTime = 0;
+}
+
 int PasswdMgr::encryptDecryptData(
     bool doEncrypt, const EVP_CIPHER* cipher, uint8_t* key, size_t keyLen,
     uint8_t* iv, size_t ivLen, uint8_t* inBytes, size_t inBytesLen,

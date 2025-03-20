@@ -1,8 +1,18 @@
 #pragma once
 
 #include <stdio.h>
+#include <sys/inotify.h>
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/posix/stream_descriptor.hpp>
+#include <phosphor-logging/lg2.hpp>
+
+#include <array>
 #include <filesystem>
+#include <functional>
+#include <memory>
+#include <string>
+
 namespace phosphor
 {
 namespace user
@@ -78,6 +88,102 @@ class File
     {
         return fp;
     }
+};
+
+class FileWatch
+{
+  public:
+    FileWatch(const FileWatch&) = delete;
+    FileWatch& operator=(const FileWatch&) = delete;
+    FileWatch(FileWatch&&) = delete;
+    FileWatch& operator=(FileWatch&&) = delete;
+
+    FileWatch(boost::asio::io_context& io, const std::string& path,
+              std::function<void()>&& cb) :
+        inotifyConn(io), watchPath(path), callback(std::move(cb))
+    {
+        registerInotify();
+    }
+
+    ~FileWatch()
+    {
+        inotify_rm_watch(inotifyConn.native_handle(), IN_ALL_EVENTS);
+    }
+
+  private:
+    void registerInotify()
+    {
+        int fd = inotify_init1(IN_NONBLOCK);
+        if (fd < 0)
+        {
+            lg2::error("Failed to initialize inotify");
+            return;
+        }
+
+        inotifyConn.assign(fd);
+
+        auto parentPath = std::filesystem::path(watchPath).parent_path();
+
+        int wdDir =
+            inotify_add_watch(inotifyConn.native_handle(), parentPath.c_str(),
+                              IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVE);
+        if (wdDir < 0)
+        {
+            lg2::error("Failed to add watch for inotify");
+            return;
+        }
+
+        startInotify();
+    }
+
+    void onInotify(const boost::system::error_code& ec, std::size_t length)
+    {
+        if (ec)
+        {
+            lg2::error("Failed to read inotify");
+            return;
+        }
+
+        struct inotify_event* event = nullptr;
+        for (char* ptr = readBuffer.data(); ptr < readBuffer.data() + length;
+             ptr += sizeof(struct inotify_event) + event->len)
+        {
+            event = reinterpret_cast<struct inotify_event*>(ptr);
+            if (event->mask & IN_CREATE)
+            {
+                lg2::debug("File {FILE} created", "FILE", event->name);
+            }
+            else if (event->mask & IN_DELETE)
+            {
+                lg2::debug("File {FILE} deleted", "FILE", event->name);
+            }
+            else if (event->mask & IN_MOVE)
+            {
+                lg2::debug("File {FILE} moved", "FILE", event->name);
+            }
+
+            if (std::string(event->name) ==
+                std::filesystem::path(watchPath).filename().string())
+            {
+                lg2::info("File {FILE} changed", "FILE", event->name);
+                callback();
+            }
+        }
+
+        startInotify();
+    }
+
+    void startInotify()
+    {
+        inotifyConn.async_read_some(
+            boost::asio::buffer(readBuffer),
+            std::bind_front(&FileWatch::onInotify, this));
+    }
+
+    boost::asio::posix::stream_descriptor inotifyConn;
+    std::string watchPath;
+    std::function<void()> callback;
+    std::array<char, 1024> readBuffer{};
 };
 
 } // namespace user

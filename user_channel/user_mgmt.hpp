@@ -323,6 +323,11 @@ class UserAccess
      */
     void checkAndReloadUserData();
 
+    /** @brief function to reset file last updated time to initial value
+     *
+     */
+    void resetFileLastUpdatedTime();
+
     /** @brief provides user details from D-Bus user property data
      *
      *  @param[in] properties - D-Bus user property
