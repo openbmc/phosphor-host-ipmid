@@ -38,6 +38,8 @@ using DbusUserObjProperties =
 
 using DbusUserObjValue = std::map<std::string, DbusUserObjProperties>;
 
+static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
+
 /**
  * @enum User update events.
  */
@@ -322,6 +324,11 @@ class UserAccess
      *
      */
     void checkAndReloadUserData();
+
+    /** @brief function to reset file last updated time to initial value
+     *
+     */
+    void resetFileLastUpdatedTime();
 
     /** @brief provides user details from D-Bus user property data
      *

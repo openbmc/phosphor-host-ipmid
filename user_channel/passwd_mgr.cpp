@@ -36,7 +36,6 @@
 namespace ipmi
 {
 
-static const char* passwdFileName = "/etc/ipmi_pass";
 static const char* encryptKeyFileName = "/etc/key_file";
 static const size_t maxKeySize = 8;
 
@@ -139,6 +138,11 @@ void PasswdMgr::checkAndReload(void)
         passwdMapList.clear();
         initPasswordMap();
     }
+}
+
+void PasswdMgr::resetFileLastUpdatedTime()
+{
+    fileLastUpdatedTime = 0;
 }
 
 int PasswdMgr::encryptDecryptData(
