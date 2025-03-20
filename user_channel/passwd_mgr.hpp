@@ -26,6 +26,8 @@
 namespace ipmi
 {
 
+static const char* passwdFileName = "/etc/ipmi_pass";
+
 class PasswdMgr
 {
   public:
@@ -60,6 +62,11 @@ class PasswdMgr
      */
     int updateUserEntry(const std::string& userName,
                         const std::string& newUserName);
+
+    /** @brief reset file last updated time to initial value
+     *
+     */
+    void resetFileLastUpdatedTime();
 
   private:
     using UserName = std::string;
