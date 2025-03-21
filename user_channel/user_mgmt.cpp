@@ -68,9 +68,9 @@ static constexpr const char* getObjectMethod = "GetObject";
 
 static constexpr const char* ipmiUserMutex = "ipmi_usr_mutex";
 static constexpr const char* ipmiMutexCleanupLockFile =
-    "/var/run/ipmi/ipmi_usr_mutex_cleanup";
+    "/run/ipmi/ipmi_usr_mutex_cleanup";
 static constexpr const char* ipmiUserSignalLockFile =
-    "/var/run/ipmi/ipmi_usr_signal_mutex";
+    "/run/ipmi/ipmi_usr_signal_mutex";
 static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
 static constexpr const char* ipmiGrpName = "ipmi";
 static constexpr size_t privNoAccess = 0xF;
