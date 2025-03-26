@@ -1,0 +1,290 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "182af0cc_ada1183b",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "this should be on the previous line to keep the values sorted.",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 2
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4fa83d45_0b851452",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "this is only used in smbrhandler.cpp; define it there.",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "03c22ce3_8c4d1e7a",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "no need to put this here. The yielding dbus calls are templated, so they return whatever type you tell them, not an ipmi::Value.",
+      "range": {
+        "startLine": 29,
+        "startChar": 53,
+        "endLine": 29,
+        "endChar": 73
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "04227e93_30f84a8f",
+        "filename": "include/ipmid/utils.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "make this a std::span\u003cuint8_t\u003e so it can handle a vector or an array",
+      "range": {
+        "startLine": 486,
+        "startChar": 30,
+        "endLine": 486,
+        "endChar": 56
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "63610a75_7462af3e",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "make this a std::span\u003cuint8_t\u003e so it can handle a vector or an array",
+      "range": {
+        "startLine": 609,
+        "startChar": 35,
+        "endLine": 609,
+        "endChar": 55
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d3604967_a9f4458f",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "I\u0027m not a fan of streams.\n```suggestion\n    std::string hexCode;\n    // reserve space for 0x and 2 chars per byte\n    hexCode.reserve(data.size() * 2 + 2);\n    hexCode +\u003d \"0x\";\n    for (const auto b: data)\n    {\n        hexCode +\u003d std::format(\"{:02x}\", b);\n    }\n    return hexCode;\n```",
+      "range": {
+        "startLine": 611,
+        "startChar": 0,
+        "endLine": 619,
+        "endChar": 25
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "78e4620a_3ce5f4ab",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "registerNetfnSBMRFunctions",
+      "range": {
+        "startLine": 7,
+        "startChar": 5,
+        "endLine": 7,
+        "endChar": 34
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c2934e29_8a09e376",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "You aren\u0027t returning an error here; the IPMI caller will not know if this function fails unless they check the journal log.",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9f7855d2_637911a0",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "You aren\u0027t returning an error here; the IPMI caller will not know if this function fails unless they check the journal log.",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0f40b89b_629f54c9",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "By setting the type as an array, the unpacker will check the size for you.\n\n```suggestion\n    sendBootProgressCode(ipmi::Context::ptr ctx, const std::array\u003cuint8_t, smbrBootProgressCodeSize\u003e\u0026 data)\n```",
+      "range": {
+        "startLine": 54,
+        "startChar": 49,
+        "endLine": 54,
+        "endChar": 74
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6bdd0bfd_9b183f84",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "I don\u0027t usually like this sort of filtering to happen in the handler because it can\u0027t be overridden without overriding the entire function. This is usually an implementation-specific detail that OEMs would put in their own filter function.",
+      "range": {
+        "startLine": 65,
+        "startChar": 5,
+        "endLine": 66,
+        "endChar": 65
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "30e48539_b92905b9",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "if you set the type to array, then you don\u0027t need to check the length; it will be automatic",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "843e9cdc_aaab0ac7",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "Do you want to return an error to the caller if this fails? Here and updateBootProgressProperty below",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ceaa3b1b_b44aac53",
+        "filename": "sbmrhandler.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T20:46:08Z",
+      "side": 1,
+      "message": "Unless these are needed outside the scope of sbmrhandler.cpp, please just put them in the cpp file.",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
