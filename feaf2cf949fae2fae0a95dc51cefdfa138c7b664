@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "696a91ae_fcf08c4e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T23:18:11Z",
+      "side": 1,
+      "message": "This is closer, and I like the approach. The usage of the inotify interface is incorrect though. https://man7.org/linux/man-pages/man7/inotify.7.html\nThe idea is that per process there is a single inotify handle that will be used for all the things that are watched. Watch descriptors are created for each thing you want to watch. When the event happens, the inotify handle will yield which of the watch descriptors has the event. There are a bunch of ways to do this in C++ with managed descriptors and stuff. I have provided some ideas.",
+      "revId": "feaf2cf949fae2fae0a95dc51cefdfa138c7b664",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2359d333_3408ef0b",
+        "filename": "user_channel/file.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T23:18:11Z",
+      "side": 1,
+      "message": "the handle returned by inotify_init1 should be static and shared among all FileWatch objects. This would need to be managed by the FileWatch object with a counter to close that file handle. Alternately, this could be managed by a separate class that is like a singleton (but needs to be destructable) that could use shared_ptr to do the counting and then each FileWatch class holds an instance of the shared_ptr to keep it alive.\n\nThen each watch descriptor returned by the inotify_add_watch call is specific to this FileWatch. Then in ~FileWatch, inotify_rm_watch(watch_descriptor).",
+      "revId": "feaf2cf949fae2fae0a95dc51cefdfa138c7b664",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6834e4a9_c4b52352",
+        "filename": "user_channel/file.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-03-26T23:18:11Z",
+      "side": 1,
+      "message": "The watch descriptor is what is read out here. This function would need to be a sort of mux to call the right notify function based on the watch descriptor.",
+      "revId": "feaf2cf949fae2fae0a95dc51cefdfa138c7b664",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
