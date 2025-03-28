@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "75a10cab_7b8b23b4",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "182af0cc_ada1183b",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 2
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4fa83d45_0b851452",
@@ -43,6 +67,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "2cc5e911_eb005941",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "`setDbusProperty` still needs ipmi::Value for dbus calls.",
+      "parentUuid": "4fa83d45_0b851452",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "03c22ce3_8c4d1e7a",
         "filename": "include/ipmid/types.hpp",
         "patchSetId": 5
@@ -54,6 +96,30 @@
       "writtenOn": "2025-03-26T20:46:08Z",
       "side": 1,
       "message": "no need to put this here. The yielding dbus calls are templated, so they return whatever type you tell them, not an ipmi::Value.",
+      "range": {
+        "startLine": 29,
+        "startChar": 53,
+        "endLine": 29,
+        "endChar": 73
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "518ec7c9_5c812684",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Adding this for `setDbusProperty` that needs ipmi::Value for dbus calls.",
+      "parentUuid": "03c22ce3_8c4d1e7a",
       "range": {
         "startLine": 29,
         "startChar": 53,
@@ -87,6 +153,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a5c86d4_b54eec3c",
+        "filename": "include/ipmid/utils.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "04227e93_30f84a8f",
+      "range": {
+        "startLine": 486,
+        "startChar": 30,
+        "endLine": 486,
+        "endChar": 56
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "63610a75_7462af3e",
@@ -100,6 +190,30 @@
       "writtenOn": "2025-03-26T20:46:08Z",
       "side": 1,
       "message": "make this a std::span\u003cuint8_t\u003e so it can handle a vector or an array",
+      "range": {
+        "startLine": 609,
+        "startChar": 35,
+        "endLine": 609,
+        "endChar": 55
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eac5ad7e_1edbac8e",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "63610a75_7462af3e",
       "range": {
         "startLine": 609,
         "startChar": 35,
@@ -133,6 +247,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e78d353e_4468e077",
+        "filename": "libipmid/utils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "d3604967_a9f4458f",
+      "range": {
+        "startLine": 611,
+        "startChar": 0,
+        "endLine": 619,
+        "endChar": 25
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "78e4620a_3ce5f4ab",
@@ -146,6 +284,30 @@
       "writtenOn": "2025-03-26T20:46:08Z",
       "side": 1,
       "message": "registerNetfnSBMRFunctions",
+      "range": {
+        "startLine": 7,
+        "startChar": 5,
+        "endLine": 7,
+        "endChar": 34
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b29c464d_39bc5a90",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "78e4620a_3ce5f4ab",
       "range": {
         "startLine": 7,
         "startChar": 5,
@@ -173,6 +335,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5659426a_9fa0791b",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "c2934e29_8a09e376",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9f7855d2_637911a0",
@@ -190,6 +370,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a1e112ba_18744915",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "9f7855d2_637911a0",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0f40b89b_629f54c9",
@@ -203,6 +401,30 @@
       "writtenOn": "2025-03-26T20:46:08Z",
       "side": 1,
       "message": "By setting the type as an array, the unpacker will check the size for you.\n\n```suggestion\n    sendBootProgressCode(ipmi::Context::ptr ctx, const std::array\u003cuint8_t, smbrBootProgressCodeSize\u003e\u0026 data)\n```",
+      "range": {
+        "startLine": 54,
+        "startChar": 49,
+        "endLine": 54,
+        "endChar": 74
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ad1e0e2_3ae851b5",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "0f40b89b_629f54c9",
       "range": {
         "startLine": 54,
         "startChar": 49,
@@ -238,6 +460,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "9c840502_fea20a83",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acked. Move it to filter function. Adding `group` in Context structure since it might be conflict from different group with same NetFn (group extenstion) and Cmds.",
+      "parentUuid": "6bdd0bfd_9b183f84",
+      "range": {
+        "startLine": 65,
+        "startChar": 5,
+        "endLine": 66,
+        "endChar": 65
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "30e48539_b92905b9",
         "filename": "sbmrhandler.cpp",
         "patchSetId": 5
@@ -249,6 +495,24 @@
       "writtenOn": "2025-03-26T20:46:08Z",
       "side": 1,
       "message": "if you set the type to array, then you don\u0027t need to check the length; it will be automatic",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "67ec2585_3f950ad9",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "30e48539_b92905b9",
       "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -270,6 +534,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "62ff995f_7f21cafe",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "843e9cdc_aaab0ac7",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ceaa3b1b_b44aac53",
@@ -283,6 +565,24 @@
       "writtenOn": "2025-03-26T20:46:08Z",
       "side": 1,
       "message": "Unless these are needed outside the scope of sbmrhandler.cpp, please just put them in the cpp file.",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "11073c78_9ce15a02",
+        "filename": "sbmrhandler.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-03-28T16:34:05Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "ceaa3b1b_b44aac53",
       "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
