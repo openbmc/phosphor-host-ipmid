@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc92d083_09a2c212",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-04-01T21:35:45Z",
+      "side": 1,
+      "message": "previously, this would throw on an error. To keep parity, we need to have it return success or failure.",
+      "revId": "03700f43e379c923d9b80ab80a7fd6486a3175bd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
