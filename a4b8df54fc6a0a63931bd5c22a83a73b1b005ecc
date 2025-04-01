@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dffd87c6_83a077c4",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2047,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-04-01T17:50:00Z",
+      "side": 1,
+      "message": "same thing here; use the unpacker to extract the biosVerbosity field.",
+      "range": {
+        "startLine": 2047,
+        "startChar": 49,
+        "endLine": 2047,
+        "endChar": 54
+      },
+      "revId": "a4b8df54fc6a0a63931bd5c22a83a73b1b005ecc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
