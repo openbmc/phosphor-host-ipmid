@@ -893,7 +893,7 @@ void registerNetFnStorageFunctions()
                           ipmiStorageGetSelTimeUtcOffset);
 
     // <Get SEL Entry>
-    ipmi_register_callback(NETFUN_STORAGE, ipmi::storage::cmdGetSelEntry,
+    ipmi_register_callback(ipmi::netFnStorage, ipmi::storage::cmdGetSelEntry,
                            nullptr, getSELEntry, PRIVILEGE_USER);
 
     // <Delete SEL Entry>
@@ -934,7 +934,7 @@ void registerNetFnStorageFunctions()
                           ipmi::Privilege::User, ipmiSensorReserveSdr);
 
     // <Get SDR>
-    ipmi_register_callback(NETFUN_STORAGE, ipmi::storage::cmdGetSdr, nullptr,
+    ipmi_register_callback(ipmi::netFnStorage, ipmi::storage::cmdGetSdr, nullptr,
                            ipmi_sen_get_sdr, PRIVILEGE_USER);
 
 #endif

@@ -1568,16 +1568,18 @@ void registerNetFnSenFunctions()
                           ipmi::Privilege::User, ipmiSenSetSensorThresholds);
 
     // <Get Device SDR>
-    ipmi_register_callback(NETFUN_SENSOR, ipmi::sensor_event::cmdGetDeviceSdr,
-                           nullptr, ipmi_sen_get_sdr, PRIVILEGE_USER);
+    ipmi_register_callback(ipmi::netFnSensor,
+                           ipmi::sensor_event::cmdGetDeviceSdr, nullptr,
+                           ipmi_sen_get_sdr, PRIVILEGE_USER);
 
 #endif
 
     // Common Handers used by both implementation.
 
     // <Platform Event Message>
-    ipmi_register_callback(NETFUN_SENSOR, ipmi::sensor_event::cmdPlatformEvent,
-                           nullptr, ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
+    ipmi_register_callback(ipmi::netFnSensor,
+                           ipmi::sensor_event::cmdPlatformEvent, nullptr,
+                           ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
 
     // <Get Sensor Type>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
