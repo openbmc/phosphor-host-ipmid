@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "27b47c04_a63d4c4a",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1034,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-04-03T17:28:07Z",
+      "side": 1,
+      "message": "I would prefer that the name remains getButtonEnabled since the property name is \"Enabled\". Instead, change the variables and stuff inside of the function to return the appropriate value.\n\nwhile you are refactoring here, please turn the dbus calls into yielding calls instead of blocking calls.\n```suggestion\nstatic std::optional\u003cbool\u003e getButtonEnabled(ipmi::Context::ptr\u0026 ctx, const std::string\u0026 buttonPath,\n```",
+      "revId": "acd85950f05310a17c284caf3f0f78c189718645",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2b2da57a_5adc08b2",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1055,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-04-03T17:28:07Z",
+      "side": 1,
+      "message": "Don\u0027t change the name; it should match the property name.",
+      "revId": "acd85950f05310a17c284caf3f0f78c189718645",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
