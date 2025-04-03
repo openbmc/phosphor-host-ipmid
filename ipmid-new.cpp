@@ -34,7 +34,6 @@
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>
-#include <sdbusplus/asio/sd_event.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/timer.hpp>
@@ -88,11 +87,6 @@ EInterfaceIndex getInterfaceIndex(void)
 }
 
 sd_bus* bus;
-sd_event* events = nullptr;
-sd_event* ipmid_get_sd_event_connection(void)
-{
-    return events;
-}
 sd_bus* ipmid_get_sd_bus_connection(void)
 {
     return bus;

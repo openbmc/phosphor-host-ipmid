@@ -140,7 +140,6 @@ typedef enum
 EInterfaceIndex getInterfaceIndex(void);
 
 sd_bus* ipmid_get_sd_bus_connection(void);
-sd_event* ipmid_get_sd_event_connection(void);
 
 // move this from ipmid.hpp, which is now gone
 // this should not be used. Use the channel API to get the channel size
