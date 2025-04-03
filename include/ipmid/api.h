@@ -21,9 +21,6 @@ enum CommandPrivilege
     SYSTEM_INTERFACE = 0xFF,
 };
 
-// length of Completion Code and its ALWAYS _1_
-#define IPMI_CC_LEN 1
-
 // IPMI Net Function number as specified by IPMI V2.0 spec.
 // Example :
 // NETFUN_APP      =   (0x06 << 2),
