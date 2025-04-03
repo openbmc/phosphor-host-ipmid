@@ -717,7 +717,7 @@ void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,
     // The original ipmi_register_callback allowed for group OEM handlers
     // to be registered via this same interface. It just so happened that
     // all the handlers were part of the DCMI group, so default to that.
-    if (netFn == NETFUN_GRPEXT)
+    if (netFn == ipmi::netFnGroup)
     {
         ipmi::impl::registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
                                          cmd, realPriv, h);
