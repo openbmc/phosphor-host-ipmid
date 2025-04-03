@@ -16,6 +16,29 @@
       "message": "Do you have any comments for this commit? @Vernon",
       "revId": "2ede7da28cea57b19a1075a68596791eb9152c02",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "42508cb6_3df21697",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-04-03T03:42:40Z",
+      "side": 1,
+      "message": "please use asynchronous method\nhttps://github.com/openbmc/phosphor-host-ipmid/blob/master/include/ipmid/utils.hpp#L315",
+      "range": {
+        "startLine": 245,
+        "startChar": 8,
+        "endLine": 245,
+        "endChar": 61
+      },
+      "revId": "2ede7da28cea57b19a1075a68596791eb9152c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
