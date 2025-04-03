@@ -363,10 +363,10 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
             "/xyz/openbmc_project/sensors",
             "/xyz/openbmc_project/vr",
         };
-        constexpr size_t num_paths = sizeof(paths) / sizeof(paths[0]);
+        constexpr size_t numPaths = sizeof(paths) / sizeof(paths[0]);
         ObjectValueTree allManagedObjects;
 
-        for (size_t i = 0; i < num_paths; i++)
+        for (size_t i = 0; i < numPaths; i++)
         {
             ObjectValueTree managedObjects;
             boost::system::error_code ec = getManagedObjects(
@@ -2086,8 +2086,8 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
     // sensor path. This is because VR control is allocated in an independent
     // path(/xyz/openbmc_project/vr/profile/...) which is not categorized by
     // types.
-    static constexpr const uint8_t module_board_type = 0x15;
-    record.body.sensor_type = module_board_type;
+    static constexpr const uint8_t moduleBoardType = 0x15;
+    record.body.sensor_type = moduleBoardType;
     record.body.event_reading_type = 0x00;
 
     record.body.sensor_record_sharing_1 = 0x00;
