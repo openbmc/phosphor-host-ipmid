@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "2fc67477_9bc8d408",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1034,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2025-04-04T08:11:15Z",
+      "side": 1,
+      "message": "If `x86-power-control` is used, the actual property name that should be used is `ButtonMasked`. So in this case it is really \"ButtonDisabled\"\n\nhttps://github.com/openbmc/x86-power-control/blob/2947720bc30cdc081ebe2ecaba093268cf115b90/src/power_control.cpp#L3312\n\nIf we want to be able to handle both implementations, wouldn\u0027t it be better to stick with the IPMI naming? Since IPMI spec cares about button disable funtionality particularly.\n\nAs for the yielding calls, I\u0027ve already did that, please see next patch in the chain \"78253: Use ctx in getButtonDisabled function\" | https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/78253",
+      "parentUuid": "27b47c04_a63d4c4a",
+      "revId": "acd85950f05310a17c284caf3f0f78c189718645",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2b2da57a_5adc08b2",
         "filename": "chassishandler.cpp",
         "patchSetId": 1
