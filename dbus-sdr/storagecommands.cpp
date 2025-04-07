@@ -81,7 +81,20 @@ using ObjectType =
 using ManagedObjectType =
     boost::container::flat_map<sdbusplus::message::object_path, ObjectType>;
 using ManagedEntry = std::pair<sdbusplus::message::object_path, ObjectType>;
+
+#ifdef USING_ENTITY_MANAGER_DECORATORS
+struct EntityInstance
+{
+    std::string name;
+    uint64_t entityInstance;
+    uint64_t entityId;
+};
+
+using EntityInstanceCache =
+    boost::container::flat_map<std::pair<uint16_t /*bus*/, uint8_t /*address*/>,
+                               EntityInstance>;
 using Paths = std::vector<std::string>;
+#endif
 
 constexpr static const char* fruDeviceServiceName =
     "xyz.openbmc_project.FruDevice";
@@ -544,54 +557,17 @@ ipmi_ret_t getFruSdrCount(ipmi::Context::ptr, size_t& count)
     return IPMI_CC_OK;
 }
 
-ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
-                      get_sdr::SensorDataFruRecord& resp)
-{
-    if (deviceHashes.size() < index)
-    {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
-    }
-    auto device = deviceHashes.begin() + index;
-    uint16_t& bus = device->second.first;
-    uint8_t& address = device->second.second;
-
-    boost::container::flat_map<std::string, Value>* fruData = nullptr;
-    auto fru = std::find_if(
-        frus.begin(), frus.end(),
-        [bus, address, &fruData](ManagedEntry& entry) {
-            auto findFruDevice =
-                entry.second.find("xyz.openbmc_project.FruDevice");
-            if (findFruDevice == entry.second.end())
-            {
-                return false;
-            }
-            fruData = &(findFruDevice->second);
-            auto findBus = findFruDevice->second.find("BUS");
-            auto findAddress = findFruDevice->second.find("ADDRESS");
-            if (findBus == findFruDevice->second.end() ||
-                findAddress == findFruDevice->second.end())
-            {
-                return false;
-            }
-            if (std::get<uint32_t>(findBus->second) != bus)
-            {
-                return false;
-            }
-            if (std::get<uint32_t>(findAddress->second) != address)
-            {
-                return false;
-            }
-            return true;
-        });
-    if (fru == frus.end())
-    {
-        return IPMI_CC_RESPONSE_ERROR;
-    }
-    std::string name;
-    uint8_t entityID = 0;
-    uint8_t entityInstance = 0x1;
-
 #ifdef USING_ENTITY_MANAGER_DECORATORS
+EntityInstanceCache& getEntityInstanceCache()
+{
+    static EntityInstanceCache entityInstanceCache;
+    return entityInstanceCache;
+}
+
+bool getEntityInstance(ipmi::Context::ptr ctx, uint16_t bus, uint8_t address,
+                       std::string& name, uint8_t& entityID,
+                       uint8_t& entityInstance)
+{
     boost::system::error_code ec;
 
     Paths subtreePaths = ipmi::callDbusMethod<Paths>(
@@ -681,6 +657,77 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
             std::fprintf(stderr, "Ipmi or FruDevice Decorator interface "
                                  "not found for Fru\n");
         }
+        return false;
+    }
+    return true;
+}
+#endif
+
+ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
+                      get_sdr::SensorDataFruRecord& resp)
+{
+    if (deviceHashes.size() < index)
+    {
+        return IPMI_CC_INVALID_FIELD_REQUEST;
+    }
+    auto device = deviceHashes.begin() + index;
+    uint16_t& bus = device->second.first;
+    uint8_t& address = device->second.second;
+
+    boost::container::flat_map<std::string, Value>* fruData = nullptr;
+    auto fru = std::find_if(
+        frus.begin(), frus.end(),
+        [bus, address, &fruData](ManagedEntry& entry) {
+            auto findFruDevice =
+                entry.second.find("xyz.openbmc_project.FruDevice");
+            if (findFruDevice == entry.second.end())
+            {
+                return false;
+            }
+            fruData = &(findFruDevice->second);
+            auto findBus = findFruDevice->second.find("BUS");
+            auto findAddress = findFruDevice->second.find("ADDRESS");
+            if (findBus == findFruDevice->second.end() ||
+                findAddress == findFruDevice->second.end())
+            {
+                return false;
+            }
+            if (std::get<uint32_t>(findBus->second) != bus)
+            {
+                return false;
+            }
+            if (std::get<uint32_t>(findAddress->second) != address)
+            {
+                return false;
+            }
+            return true;
+        });
+    if (fru == frus.end())
+    {
+        return IPMI_CC_RESPONSE_ERROR;
+    }
+    std::string name;
+    uint8_t entityID = 0;
+    uint8_t entityInstance = 0x1;
+
+#ifdef USING_ENTITY_MANAGER_DECORATORS
+    EntityInstanceCache& entityInstanceCache = getEntityInstanceCache();
+
+    std::pair<uint16_t, uint8_t> key = std::make_pair(bus, address);
+    auto entity = entityInstanceCache.find(key);
+    if (entity == entityInstanceCache.end())
+    {
+        if (getEntityInstance(ctx, bus, address, name, entityID,
+                              entityInstance))
+        {
+            entityInstanceCache.insert({key, {name, entityInstance, entityID}});
+        }
+    }
+    else
+    {
+        name = entity->second.name;
+        entityInstance = entity->second.entityInstance;
+        entityID = entity->second.entityId;
     }
 #endif
 
