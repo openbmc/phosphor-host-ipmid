@@ -38,6 +38,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "350cd024_eae6b237",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1034,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-04-07T20:39:44Z",
+      "side": 1,
+      "message": "Okay. Seems like good enough logic. This is an IPMI daemon after all. x86-power-control should get onboard and use a standard naming scheme.",
+      "parentUuid": "2fc67477_9bc8d408",
+      "revId": "acd85950f05310a17c284caf3f0f78c189718645",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2b2da57a_5adc08b2",
         "filename": "chassishandler.cpp",
         "patchSetId": 1
