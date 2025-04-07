@@ -1037,9 +1037,9 @@ bool getACFailStatus()
 }
 } // namespace power_policy
 
-static std::optional<bool>
-    getButtonDisabled(ipmi::Context::ptr& ctx, const std::string& buttonPath,
-                      const std::string& buttonIntf)
+static std::optional<bool> getButtonDisabled(ipmi::Context::ptr& ctx,
+                                             const std::string& buttonPath,
+                                             const std::string& buttonIntf)
 {
     bool buttonDisabled = false;
     boost::system::error_code ec;
