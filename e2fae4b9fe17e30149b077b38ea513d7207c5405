@@ -52,6 +52,24 @@
       "parentUuid": "7965e922_04d20b9c",
       "revId": "e2fae4b9fe17e30149b077b38ea513d7207c5405",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c078e871_3d3c6c60",
+        "filename": "meson.options",
+        "patchSetId": 6
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-08T13:40:09Z",
+      "side": 1,
+      "message": "The daemon will be compiled and unit-test will be executed against transport interface meson[1] for CI.\n\n[1] https://github.com/openbmc/phosphor-host-ipmid/blob/master/transport/serialbridge/meson.build",
+      "parentUuid": "74e162b2_dd24f3ef",
+      "revId": "e2fae4b9fe17e30149b077b38ea513d7207c5405",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
