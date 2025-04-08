@@ -16,6 +16,23 @@
       "message": "Thanks for the review. Update patchset per comments.",
       "revId": "f87cb12fd66563dcd1e28d20b2edf07b16efc739",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca6901f8_7bad93c2",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-04-08T10:07:07Z",
+      "side": 1,
+      "message": "The 2 vectors represent primary and secondary post codes. \nIn this whole patch we are updating primary post code. \nMay I know how is secondary post code updated ?",
+      "revId": "f87cb12fd66563dcd1e28d20b2edf07b16efc739",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
