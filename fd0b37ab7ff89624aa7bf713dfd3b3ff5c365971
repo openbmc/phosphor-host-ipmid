@@ -83,6 +83,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "446c363c_5f1d6fb1",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-09T16:57:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2cc5e911_eb005941",
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "03c22ce3_8c4d1e7a",
@@ -120,6 +138,30 @@
       "side": 1,
       "message": "Adding this for `setDbusProperty` that needs ipmi::Value for dbus calls.",
       "parentUuid": "03c22ce3_8c4d1e7a",
+      "range": {
+        "startLine": 29,
+        "startChar": 53,
+        "endLine": 29,
+        "endChar": 73
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f6eacea2_7ca6aedc",
+        "filename": "include/ipmid/types.hpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-09T16:57:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "518ec7c9_5c812684",
       "range": {
         "startLine": 29,
         "startChar": 53,
@@ -472,6 +514,30 @@
       "side": 1,
       "message": "Acked. Move it to filter function. Adding `group` in Context structure since it might be conflict from different group with same NetFn (group extenstion) and Cmds.",
       "parentUuid": "6bdd0bfd_9b183f84",
+      "range": {
+        "startLine": 65,
+        "startChar": 5,
+        "endLine": 66,
+        "endChar": 65
+      },
+      "revId": "fd0b37ab7ff89624aa7bf713dfd3b3ff5c365971",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5d6043d9_d0cef6e8",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-09T16:57:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c840502_fea20a83",
       "range": {
         "startLine": 65,
         "startChar": 5,
