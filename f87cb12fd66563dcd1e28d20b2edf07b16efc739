@@ -86,6 +86,24 @@
       "parentUuid": "16bfbceb_822149dc",
       "revId": "f87cb12fd66563dcd1e28d20b2edf07b16efc739",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fdc91b0_2eb154ec",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-04-09T17:53:58Z",
+      "side": 1,
+      "message": "Thanks a lot \nLGTM!",
+      "parentUuid": "2e455a10_e6349683",
+      "revId": "f87cb12fd66563dcd1e28d20b2edf07b16efc739",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
