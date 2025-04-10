@@ -1,0 +1,175 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "68bc1ea3_ed46e786",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "Just some minor comments.",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ccf7d09d_e888f4a4",
+        "filename": "meson.build",
+        "patchSetId": 7
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "Add a MACRO to prevent compiling unused code in the api-type.hpp, utils.hpp ... files",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26f36fa1_1a2fa163",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "This varilabe should be removed, you can find out the service name via getDbusObject interface instead. Check sbmrBootStateObj/sbmrHostStateService/sbmrHostStateObj also.",
+      "range": {
+        "startLine": 6,
+        "startChar": 15,
+        "endLine": 6,
+        "endChar": 35
+      },
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6e7e2b03_d50f15de",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "The result of this function is true/false, I think you should change the return value to bool type instead, please check other functions",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 8
+      },
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8e8dbf3c_5bea59ed",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "The second input parameter should be named \"value\", not \"prop\"",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d97b451d_3d8f0525",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "The format of Boot Progress Code is:\n- 4 bytes EFI_STATUS_CODE_TYPE\n  + 1 Byte STATUS_CODE_TYPE\n  + 2 Bytes STATUS_CODE_RESERVED\n  + 1 Byte STATUS_CODE_SEVERITY (It seems that DEN0069E_SBMR_2.1 is wrong when talk this field is 2bytes)\n- 4 Bytes EFI_STATUS_CODE_VALUE\n  + 2 bytes EFI_STATUS_CODE_OPERATION\n  + 1 byte EFI_STATUS_CODE_SUBCLASS\n  + 1 byte EFI_STATUS_CODE_CLASS\n- 1 Byte Instance\n\nyou should split 9 bytes of data into smaller input parameters (maybe 7 input parameters) as I mentiond above. E.g: https://github.com/openbmc/phosphor-host-ipmid/blob/master/dcmihandler.cpp#L399",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a01bbe6e_30a2ff43",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "You should check each EFI_STATUS_CODE_TYPE/EFI_STATUS_CODE_VALUE/Instance data instead all of data at same time. I think you can remove sbmrBootProgressStages",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "90bca9ec_3148a3d6",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "please split the return values into 7 parameters",
+      "range": {
+        "startLine": 104,
+        "startChar": 14,
+        "endLine": 104,
+        "endChar": 34
+      },
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "25a9f58c_d023a9ea",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-10T03:56:16Z",
+      "side": 1,
+      "message": "Why do you need this code?",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
