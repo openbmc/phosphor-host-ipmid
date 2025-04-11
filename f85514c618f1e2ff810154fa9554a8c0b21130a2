@@ -219,6 +219,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "693a76c7_7f41c3f7",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-11T05:38:43Z",
+      "side": 1,
+      "message": "IMO, it makes reviewer difficult to understand all cases of the `data`. If you split `data` into 7 parameters, it is easy to understand the purpose of each parameter.",
+      "parentUuid": "14c8b04e_8e3541fb",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a01bbe6e_30a2ff43",
         "filename": "sbmrhandler.cpp",
         "patchSetId": 7
@@ -248,6 +266,24 @@
       "side": 1,
       "message": "Do you see any potential issues with checking all the data at once? It will be simplify for code maintenance and readability.",
       "parentUuid": "a01bbe6e_30a2ff43",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d996e00f_df2b5182",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-11T05:38:43Z",
+      "side": 1,
+      "message": "I don\u0027t think your code is simple for code maintenance. When I see to the `sbmrBootProgressStages`, I don\u0027t know where are those key come from. If you split the `data` into 7 input parameters, I believe that it is easy for reviewer to understand why do you map `BootProgressCode` to the `BootProgressStage`",
+      "parentUuid": "891555d9_a793ae81",
       "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -301,6 +337,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "7015ffab_0f48e2d2",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-11T05:38:43Z",
+      "side": 1,
+      "message": "I just want all of the code follow a coding style.",
+      "parentUuid": "2be5a816_7a73dc51",
+      "range": {
+        "startLine": 104,
+        "startChar": 14,
+        "endLine": 104,
+        "endChar": 34
+      },
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "25a9f58c_d023a9ea",
         "filename": "sbmrhandler.cpp",
         "patchSetId": 7
@@ -330,6 +390,24 @@
       "side": 1,
       "message": "This change prevents remote users accidentally updating the boot progress, ensuring that only the BIOS can modify the boot progress code. And the restriction suggests to move to filter function.",
       "parentUuid": "25a9f58c_d023a9ea",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1a0238ba_8bbe2a7f",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-04-11T05:38:43Z",
+      "side": 1,
+      "message": "Do you have any comment for this preventing @hieuh@os.amperecomputing.com?",
+      "parentUuid": "288859d0_4dd71aa2",
       "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
