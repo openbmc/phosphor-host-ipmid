@@ -235,6 +235,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7ce2eb29_51aef548",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-11T20:43:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "693a76c7_7f41c3f7",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a01bbe6e_30a2ff43",
@@ -284,6 +302,24 @@
       "side": 1,
       "message": "I don\u0027t think your code is simple for code maintenance. When I see to the `sbmrBootProgressStages`, I don\u0027t know where are those key come from. If you split the `data` into 7 input parameters, I believe that it is easy for reviewer to understand why do you map `BootProgressCode` to the `BootProgressStage`",
       "parentUuid": "891555d9_a793ae81",
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e2a6e8e1_22078d97",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-11T20:43:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "d996e00f_df2b5182",
       "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -349,6 +385,30 @@
       "side": 1,
       "message": "I just want all of the code follow a coding style.",
       "parentUuid": "2be5a816_7a73dc51",
+      "range": {
+        "startLine": 104,
+        "startChar": 14,
+        "endLine": 104,
+        "endChar": 34
+      },
+      "revId": "f85514c618f1e2ff810154fa9554a8c0b21130a2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7976a21_3b23bfc2",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-11T20:43:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "7015ffab_0f48e2d2",
       "range": {
         "startLine": 104,
         "startChar": 14,
