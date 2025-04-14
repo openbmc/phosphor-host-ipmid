@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d787452c_82d46a39",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-14T15:11:58Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "c7581bc2_20a285ba",
+      "range": {
+        "startLine": 159,
+        "startChar": 4,
+        "endLine": 162,
+        "endChar": 12
+      },
+      "revId": "2dd7d0a6018460b36b11441d7c46239bea2ac2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cf3d4f88_70f8f140",
@@ -64,6 +88,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ab9a2be8_3f6bcb13",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-14T15:11:58Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "cf3d4f88_70f8f140",
+      "range": {
+        "startLine": 221,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 27
+      },
+      "revId": "2dd7d0a6018460b36b11441d7c46239bea2ac2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e875fa92_ada45234",
@@ -77,6 +125,30 @@
       "writtenOn": "2025-04-14T01:21:27Z",
       "side": 1,
       "message": "ec.message()?",
+      "range": {
+        "startLine": 241,
+        "startChar": 19,
+        "endLine": 241,
+        "endChar": 29
+      },
+      "revId": "2dd7d0a6018460b36b11441d7c46239bea2ac2dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f5675ed_6f639b99",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2025-04-14T15:11:58Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "e875fa92_ada45234",
       "range": {
         "startLine": 241,
         "startChar": 19,
