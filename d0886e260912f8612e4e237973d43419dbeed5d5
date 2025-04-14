@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "55e69af3_5443d1c4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-04-14T18:53:11Z",
+      "side": 1,
+      "message": "One minor change needed. Otherwise looks good.",
+      "revId": "d0886e260912f8612e4e237973d43419dbeed5d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dbaff75e_70954a18",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-04-14T18:53:11Z",
+      "side": 1,
+      "message": "The typenames added to RspType are in addition to the completion code (which is common among all responses, success and fail). This only seems to be responding with a completion code, no extra data:\n\n```suggestion\nipmi::RspType\u003c\u003e sendBootProgressCode(\n```",
+      "range": {
+        "startLine": 152,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 22
+      },
+      "revId": "d0886e260912f8612e4e237973d43419dbeed5d5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
