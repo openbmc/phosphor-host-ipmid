@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fa2580b7_0cc62828",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2025-04-17T23:25:28Z",
+      "side": 1,
+      "message": "Maybe we could add a comment here similar to previous that we \"found\" the device entry",
+      "revId": "0d277e12a183d3095c8bbd5cc27e93ed79d3c8d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "45cd98d0_7a39ad1f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2025-04-17T23:25:28Z",
+      "side": 1,
+      "message": "Is there a corner case where EntityId / EntityInstance are not \"found\"? Should we check that we \"found\" and set them in the above for loop?",
+      "range": {
+        "startLine": 673,
+        "startChar": 9,
+        "endLine": 673,
+        "endChar": 27
+      },
+      "revId": "0d277e12a183d3095c8bbd5cc27e93ed79d3c8d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
