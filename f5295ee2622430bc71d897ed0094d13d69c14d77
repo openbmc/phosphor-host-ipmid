@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "34097104_6041bef4",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-17T21:14:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c640c3e_5c4f9ce2",
+      "range": {
+        "startLine": 597,
+        "startChar": 0,
+        "endLine": 606,
+        "endChar": 65
+      },
+      "revId": "f5295ee2622430bc71d897ed0094d13d69c14d77",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c6e520df_ee04489b",
@@ -41,6 +65,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1dedc43d_6d5ca280",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-17T21:14:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c6e520df_ee04489b",
+      "revId": "f5295ee2622430bc71d897ed0094d13d69c14d77",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d49896cd_4fb307d0",
@@ -54,6 +96,30 @@
       "writtenOn": "2025-04-07T02:18:44Z",
       "side": 1,
       "message": "Can we use `for (const auto\u0026 path : paths)` instead of `std::find_if`?",
+      "range": {
+        "startLine": 617,
+        "startChar": 17,
+        "endLine": 617,
+        "endChar": 30
+      },
+      "revId": "f5295ee2622430bc71d897ed0094d13d69c14d77",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b8acb46a_da2da6a6",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-17T21:14:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d49896cd_4fb307d0",
       "range": {
         "startLine": 617,
         "startChar": 17,
@@ -87,6 +153,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ceb4a889_6df09e0d",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-17T21:14:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62ec4193_70cd7455",
+      "range": {
+        "startLine": 619,
+        "startChar": 8,
+        "endLine": 626,
+        "endChar": 73
+      },
+      "revId": "f5295ee2622430bc71d897ed0094d13d69c14d77",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7e8acba9_94f7e85f",
@@ -110,6 +200,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d74fe9e0_88067eb2",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 658,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-17T21:14:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7e8acba9_94f7e85f",
+      "range": {
+        "startLine": 651,
+        "startChar": 11,
+        "endLine": 658,
+        "endChar": 13
+      },
+      "revId": "f5295ee2622430bc71d897ed0094d13d69c14d77",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "95f4efda_e326764a",
@@ -123,6 +237,30 @@
       "writtenOn": "2025-04-07T02:18:44Z",
       "side": 1,
       "message": "As above",
+      "range": {
+        "startLine": 665,
+        "startChar": 10,
+        "endLine": 669,
+        "endChar": 68
+      },
+      "revId": "f5295ee2622430bc71d897ed0094d13d69c14d77",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "20466ab5_350c44e3",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-17T21:14:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "95f4efda_e326764a",
       "range": {
         "startLine": 665,
         "startChar": 10,
