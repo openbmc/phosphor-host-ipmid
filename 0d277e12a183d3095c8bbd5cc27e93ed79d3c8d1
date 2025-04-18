@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "78eed17a_d823418c",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-18T00:38:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa2580b7_0cc62828",
+      "revId": "0d277e12a183d3095c8bbd5cc27e93ed79d3c8d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "45cd98d0_7a39ad1f",
@@ -31,6 +49,30 @@
       "writtenOn": "2025-04-17T23:25:28Z",
       "side": 1,
       "message": "Is there a corner case where EntityId / EntityInstance are not \"found\"? Should we check that we \"found\" and set them in the above for loop?",
+      "range": {
+        "startLine": 673,
+        "startChar": 9,
+        "endLine": 673,
+        "endChar": 27
+      },
+      "revId": "0d277e12a183d3095c8bbd5cc27e93ed79d3c8d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "84cdeb69_10173e20",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-18T00:38:42Z",
+      "side": 1,
+      "message": "yeah, there will be cases where we fail to find the `EntityId / EntityInstance`.\n\nBut I guess we care more about that we found the device rather than the entity information. I have renamed the variable. The current logic matches what it was before.",
+      "parentUuid": "45cd98d0_7a39ad1f",
       "range": {
         "startLine": 673,
         "startChar": 9,
