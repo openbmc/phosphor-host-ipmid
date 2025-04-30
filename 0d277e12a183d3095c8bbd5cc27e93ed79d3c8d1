@@ -81,6 +81,30 @@
       },
       "revId": "0d277e12a183d3095c8bbd5cc27e93ed79d3c8d1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a338f03a_5e7e22cd",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2025-04-30T00:22:03Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "84cdeb69_10173e20",
+      "range": {
+        "startLine": 673,
+        "startChar": 9,
+        "endLine": 673,
+        "endChar": 27
+      },
+      "revId": "0d277e12a183d3095c8bbd5cc27e93ed79d3c8d1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
