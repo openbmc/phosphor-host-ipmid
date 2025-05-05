@@ -1082,6 +1082,8 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
                             get_sdr::SensorDataFullRecordBody* body)
 {
     namespace server = sdbusplus::server::xyz::openbmc_project::sensor;
+    body->sensor_units_1 = info->sensorUnits1; // default is 0. unsigned, no
+                                               // rate, no modifier, not a %
     try
     {
         auto unit = server::Value::convertUnitFromString(info->unit);
@@ -1110,6 +1112,9 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
             case server::Value::Unit::Watts:
                 body->sensor_units_2_base = get_sdr::SENSOR_UNIT_WATTS;
                 break;
+            case server::Value::Unit::Percent:
+                get_sdr::body::set_percentage(body);
+                break;
             default:
                 // Cannot be hit.
                 std::fprintf(stderr, "Unknown value unit type: = %s\n",
@@ -1129,8 +1134,6 @@ ipmi::Cc populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
     {
-        body->sensor_units_1 = info->sensorUnits1; // default is 0. unsigned, no
-                                                   // rate, no modifier, not a %
         /* Unit info */
         setUnitFieldsForObject(info, body);
 
