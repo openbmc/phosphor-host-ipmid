@@ -506,6 +506,7 @@ auto executionEntry(boost::asio::yield_context yield, sdbusplus::message_t& m,
     int hostIdx = 0;
     uint8_t userId = 0; // undefined user
     uint32_t sessionId = 0;
+    bool ipmiHttps = false;
 
     // figure out what channel the request came in on
     uint8_t channel = channelFromMessage(m);
@@ -517,6 +518,24 @@ auto executionEntry(boost::asio::yield_context yield, sdbusplus::message_t& m,
                    "SENDER", sender, "NETFN", lg2::hex, netFn, "CMD", lg2::hex,
                    cmd);
         return dbusResponse(ipmi::ccDestinationUnavailable);
+    }
+
+    auto it = options.find("ipmiHttps");
+    if (it != options.end())
+    {
+        try
+        {
+            Value requestIpmiHttps = options.at("ipmiHttps");
+            ipmiHttps = static_cast<bool>(std::get<bool>(requestIpmiHttps));
+        }
+        catch (const std::exception& e)
+        {
+            lg2::error("ERROR determining IPMI session credentials, channel: "
+                       "{CHANNEL}, netfn: {NETFN}, cmd: {CMD}",
+                       "CHANNEL", lg2::dec, channel, "NETFN", lg2::hex, netFn,
+                       "CMD", lg2::hex, cmd);
+            return dbusResponse(ipmi::ccUnspecifiedError);
+        }
     }
 
     // session-based channels are required to provide userId, privilege and
@@ -539,6 +558,26 @@ auto executionEntry(boost::asio::yield_context yield, sdbusplus::message_t& m,
                        "channel {CHANNEL} for userid {USERID}",
                        "CHANNEL", channel, "USERID", userId, "NETFN", lg2::hex,
                        netFn, "CMD", lg2::hex, cmd);
+            return dbusResponse(ipmi::ccUnspecifiedError);
+        }
+    }
+    else if (ipmiHttps)
+    {
+        try
+        {
+            Value requestPriv = options.at("privilege");
+            Value requestSessionId = options.at("currentSessionId");
+            privilege = static_cast<Privilege>(std::get<int>(requestPriv));
+            sessionId =
+                static_cast<uint32_t>(std::get<uint32_t>(requestSessionId));
+        }
+        catch (const std::exception& e)
+        {
+            lg2::error(
+                "ERROR determining IPMI Https session credentials, channel: "
+                "{CHANNEL}, netfn: {NETFN}, cmd: {CMD}",
+                "CHANNEL", lg2::dec, channel, "NETFN", lg2::hex, netFn, "CMD",
+                lg2::hex, cmd);
             return dbusResponse(ipmi::ccUnspecifiedError);
         }
     }
