@@ -31,8 +31,7 @@ class Host :
         sdbusplus::server::object_t<
             sdbusplus::server::xyz::openbmc_project::control::Host,
             sdbusplus::server::xyz::openbmc_project::condition::HostFirmware>(
-            bus, objPath),
-        bus(bus)
+            bus, objPath)
     {
         // Nothing to do
     }
@@ -49,9 +48,6 @@ class Host :
     FirmwareCondition currentFirmwareCondition() const override;
 
   private:
-    /** @brief sdbusplus DBus bus connection. */
-    sdbusplus::bus_t& bus;
-
     /** @brief  Callback function to be invoked by command manager
      *
      *  @detail Conveys the status of the last Host bound command.
