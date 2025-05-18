@@ -34,6 +34,24 @@
       "parentUuid": "f73be340_5392cc58",
       "revId": "2a82fb39fdc5765ca08ab26c4c4885dbab52082c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cb5513e3_8ba15211",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001673
+      },
+      "writtenOn": "2025-05-18T15:08:17Z",
+      "side": 1,
+      "message": "@vernon.mauery@gmail.com and @liuxiwei@ieisystem.com The CI was failing with the \n\nerror ../host-interface.hpp:53:23: error: private field \u0027bus\u0027 is not used [-Werror,-Wunused-private-field]\n   53 |     sdbusplus::bus_t\u0026 bus;\n\nSince it was minor change therefore, I did fix that as well",
+      "parentUuid": "b2e11c71_a4fd9bd6",
+      "revId": "2a82fb39fdc5765ca08ab26c4c4885dbab52082c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
