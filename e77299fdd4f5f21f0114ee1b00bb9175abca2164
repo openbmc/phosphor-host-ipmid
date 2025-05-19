@@ -70,6 +70,30 @@
       },
       "revId": "e77299fdd4f5f21f0114ee1b00bb9175abca2164",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "10128974_19e2b5a5",
+        "filename": "host-interface.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1001673
+      },
+      "writtenOn": "2025-05-19T05:11:48Z",
+      "side": 1,
+      "message": "Already one created https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/80307 by \nLei YU",
+      "parentUuid": "17a3a159_b03c48b5",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 43
+      },
+      "revId": "e77299fdd4f5f21f0114ee1b00bb9175abca2164",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
