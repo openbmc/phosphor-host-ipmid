@@ -258,3 +258,33 @@ option(
     type: 'feature',
     description: 'Support Arm SBMR specific functions',
 )
+
+# new option for serial bridge
+option(
+    'serialbridge',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enabled serial transport',
+)
+
+# RMCP+ bridge feature and options
+option(
+    'rmcpbridge',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable RMCP+ bridge (nee netipmid)',
+)
+# enable RCMP ping on RMCP+ bridge
+option(
+    'rmcp_ping',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Enable RMCP Ping support',
+)
+# enable pam authentication for RMCP+ bridge
+option(
+    'pam_authenticate',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Enable Pam Authenticate',
+)
