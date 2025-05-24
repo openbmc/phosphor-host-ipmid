@@ -1,13 +1,13 @@
 [Unit]
-Description=Network IPMI daemon
+Description=RMCP+ bridge
 After=phosphor-ipmi-host.service
 Requires=sys-subsystem-net-devices-%i.device
 After=sys-subsystem-net-devices-%i.device
 ConditionPathExists=/sys/class/net/%i
 
 [Service]
-ExecStart=/usr/bin/netipmid -c %i
-SyslogIdentifier=netipmid-%i
+ExecStart=@BIN@ -c %i
+SyslogIdentifier=@BIN@-%i
 Restart=always
 RuntimeDirectory = ipmi
 RuntimeDirectoryPreserve = yes
