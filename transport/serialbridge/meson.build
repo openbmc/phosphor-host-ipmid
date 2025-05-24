@@ -1,13 +1,12 @@
-CLI11_dep = dependency('CLI11')
 
 deps = [
-    dependency('libsystemd'),
-    dependency('systemd'),
+    libsystemd_dep,
+    systemd_dep,
     sdeventplus_dep,
     stdplus_dep,
     sdbusplus_dep,
     phosphor_logging_dep,
-    CLI11_dep,
+    cli11_dep,
 ]
 
 serialbridged = executable(
@@ -20,22 +19,19 @@ serialbridged = executable(
 )
 
 # Configure and install systemd unit files
-systemd = dependency('systemd')
-if systemd.found()
-    conf_data = configuration_data()
-    conf_data.set(
-        'BIN',
-        get_option('prefix') / get_option('libexecdir') / serialbridged.name(),
-    )
-    configure_file(
-        input: 'serialbridge@.service.in',
-        output: 'serialbridge@.service',
-        configuration: conf_data,
-        install: true,
-        install_dir: systemd.get_variable(pkgconfig: 'systemdsystemunitdir'),
-    )
-endif
+serial_conf_data = configuration_data()
+serial_conf_data.set(
+    'BIN',
+    get_option('prefix') / get_option('libexecdir') / serialbridged.name(),
+)
+configure_file(
+    input: 'serialbridge@.service.in',
+    output: 'serialbridge@.service',
+    configuration: serial_conf_data,
+    install: true,
+    install_dir: systemd_dep.get_variable(pkgconfig: 'systemdsystemunitdir'),
+)
 
-if not get_option('tests').disabled()
+if get_option('tests').allowed()
     subdir('test')
 endif
