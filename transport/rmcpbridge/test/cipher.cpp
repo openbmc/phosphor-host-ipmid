@@ -26,7 +26,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA1>(sik);
 
-    ASSERT_EQ(true, (algoPtr != NULL));
+    ASSERT_EQ(true, (algoPtr != nullptr));
 
     // Generate the Integrity Data
     auto response = algoPtr->generateIntegrityData(packet);
@@ -46,7 +46,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
     // with SIK.
     unsigned int mdLen = 0;
     if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
-             k1.data(), &mdLen) == NULL)
+             k1.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -57,7 +57,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_GenerateIntegrityDataCheck)
 
     if (HMAC(EVP_sha1(), k1.data(), k1.size(),
              packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
-             output.data(), &mdLen) == NULL)
+             output.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating integrity data failed";
     }
@@ -94,7 +94,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
     // with SIK.
     unsigned int mdLen = 0;
     if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
-             k1.data(), &mdLen) == NULL)
+             k1.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -105,7 +105,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
 
     if (HMAC(EVP_sha1(), k1.data(), k1.size(),
              packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
-             output.data(), &mdLen) == NULL)
+             output.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating integrity data failed";
     }
@@ -127,7 +127,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataPass)
      */
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA1>(sik);
-    ASSERT_EQ(true, (algoPtr != NULL));
+    ASSERT_EQ(true, (algoPtr != nullptr));
 
     auto check = algoPtr->verifyIntegrityData(
         packet, packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
@@ -163,7 +163,7 @@ TEST(IntegrityAlgo, HMAC_SHA1_96_VerifyIntegrityDataFail)
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA1>(sik);
 
-    ASSERT_EQ(true, (algoPtr != NULL));
+    ASSERT_EQ(true, (algoPtr != nullptr));
 
     // Verify the Integrity Data
     auto check = algoPtr->verifyIntegrityData(
@@ -188,7 +188,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_GenerateIntegrityDataCheck)
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA256>(sik);
 
-    ASSERT_EQ(true, (algoPtr != NULL));
+    ASSERT_EQ(true, (algoPtr != nullptr));
 
     // Generate the Integrity Data
     auto response = algoPtr->generateIntegrityData(packet);
@@ -209,7 +209,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_GenerateIntegrityDataCheck)
     // with SIK.
     unsigned int mdLen = 0;
     if (HMAC(EVP_sha256(), sik.data(), sik.size(), const1.data(), const1.size(),
-             k1.data(), &mdLen) == NULL)
+             k1.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -220,7 +220,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_GenerateIntegrityDataCheck)
 
     if (HMAC(EVP_sha256(), k1.data(), k1.size(),
              packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
-             output.data(), &mdLen) == NULL)
+             output.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating integrity data failed";
     }
@@ -258,7 +258,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataPass)
     // with SIK.
     unsigned int mdLen = 0;
     if (HMAC(EVP_sha256(), sik.data(), sik.size(), const1.data(), const1.size(),
-             k1.data(), &mdLen) == NULL)
+             k1.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating Key1 failed";
     }
@@ -269,7 +269,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataPass)
 
     if (HMAC(EVP_sha256(), k1.data(), k1.size(),
              packet.data() + message::parser::RMCP_SESSION_HEADER_SIZE, length,
-             output.data(), &mdLen) == NULL)
+             output.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating integrity data failed";
     }
@@ -291,7 +291,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataPass)
      */
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA256>(sik);
-    ASSERT_EQ(true, (algoPtr != NULL));
+    ASSERT_EQ(true, (algoPtr != nullptr));
 
     auto check = algoPtr->verifyIntegrityData(
         packet, packetSize - message::parser::RMCP_SESSION_HEADER_SIZE,
@@ -328,7 +328,7 @@ TEST(IntegrityAlgo, HMAC_SHA256_128_VerifyIntegrityDataFail)
 
     auto algoPtr = std::make_unique<cipher::integrity::AlgoSHA256>(sik);
 
-    ASSERT_EQ(true, (algoPtr != NULL));
+    ASSERT_EQ(true, (algoPtr != nullptr));
 
     // Verify the Integrity Data
     auto check = algoPtr->verifyIntegrityData(
@@ -359,14 +359,14 @@ TEST(CryptAlgo, AES_CBC_128_EncryptPayloadValidate)
     // Generated K2 for the confidentiality algorithm with the additional key
     // keyed with SIK.
     if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
-             k2.data(), &mdLen) == NULL)
+             k2.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating K2 for confidentiality algorithm failed";
     }
 
     auto cryptPtr = std::make_unique<cipher::crypt::AlgoAES128>(k2);
 
-    ASSERT_EQ(true, (cryptPtr != NULL));
+    ASSERT_EQ(true, (cryptPtr != nullptr));
 
     auto cipher = cryptPtr->encryptPayload(payload);
 
@@ -376,7 +376,7 @@ TEST(CryptAlgo, AES_CBC_128_EncryptPayloadValidate)
      */
 
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-    if (!EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, k2.data(),
+    if (!EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, k2.data(),
                             cipher.data()))
     {
         EVP_CIPHER_CTX_free(ctx);
@@ -441,12 +441,12 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
     // Generated K2 for the confidentiality algorithm with the additional key
     // keyed with SIK.
     if (HMAC(EVP_sha1(), sik.data(), sik.size(), const1.data(), const1.size(),
-             k2.data(), &mdLen) == NULL)
+             k2.data(), &mdLen) == nullptr)
     {
         FAIL() << "Generating K2 for confidentiality algorithm failed";
     }
 
-    if (!EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, k2.data(),
+    if (!EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, k2.data(),
                             output.data()))
     {
         EVP_CIPHER_CTX_free(ctx);
@@ -474,7 +474,7 @@ TEST(CryptAlgo, AES_CBC_128_DecryptPayloadValidate)
 
     auto cryptPtr = std::make_unique<cipher::crypt::AlgoAES128>(k2);
 
-    ASSERT_EQ(true, (cryptPtr != NULL));
+    ASSERT_EQ(true, (cryptPtr != nullptr));
 
     auto plain = cryptPtr->decryptPayload(output, 0, output.size());
 

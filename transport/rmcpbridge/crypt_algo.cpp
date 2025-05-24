@@ -111,7 +111,7 @@ std::vector<uint8_t> AlgoAES128::decryptData(
      * AES-CBC-128. ctx must be initialized before calling this function. K2 is
      * the symmetric key used and iv is the initialization vector used.
      */
-    if (!EVP_DecryptInit_ex(ctxPtr.get(), EVP_aes_128_cbc(), NULL, k2.data(),
+    if (!EVP_DecryptInit_ex(ctxPtr.get(), EVP_aes_128_cbc(), nullptr, k2.data(),
                             iv))
     {
         throw std::runtime_error("EVP_DecryptInit_ex failed for type "
@@ -172,7 +172,7 @@ std::vector<uint8_t> AlgoAES128::encryptData(const uint8_t* input,
      * AES-CBC-128. ctx must be initialized before calling this function. K2 is
      * the symmetric key used and iv is the initialization vector used.
      */
-    if (!EVP_EncryptInit_ex(ctxPtr.get(), EVP_aes_128_cbc(), NULL, k2.data(),
+    if (!EVP_EncryptInit_ex(ctxPtr.get(), EVP_aes_128_cbc(), nullptr, k2.data(),
                             output.data()))
     {
         throw std::runtime_error("EVP_EncryptInit_ex failed for type "

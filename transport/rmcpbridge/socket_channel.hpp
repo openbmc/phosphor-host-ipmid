@@ -161,7 +161,7 @@ class Channel
 
         // extract the destination address from the message
         cmsghdr* cmsg;
-        for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != 0;
+        for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != nullptr;
              cmsg = CMSG_NXTHDR(&msg, cmsg))
         {
             if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == IP_PKTINFO)

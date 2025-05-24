@@ -21,7 +21,7 @@ std::vector<uint8_t> AlgoSHA1::generateHMAC(
     unsigned int mdLen = 0;
 
     if (HMAC(EVP_sha1(), userKey.data(), userKey.size(), input.data(),
-             input.size(), output.data(), &mdLen) == NULL)
+             input.size(), output.data(), &mdLen) == nullptr)
     {
         lg2::error("Generate HMAC failed: {ERROR}", "ERROR", strerror(errno));
         output.resize(0);
@@ -37,7 +37,7 @@ std::vector<uint8_t> AlgoSHA1::generateICV(
     unsigned int mdLen = 0;
 
     if (HMAC(EVP_sha1(), sessionIntegrityKey.data(), SHA_DIGEST_LENGTH,
-             input.data(), input.size(), output.data(), &mdLen) == NULL)
+             input.data(), input.size(), output.data(), &mdLen) == nullptr)
     {
         lg2::error("Generate Session Integrity Key failed: {ERROR}", "ERROR",
                    strerror(errno));
@@ -55,7 +55,7 @@ std::vector<uint8_t> AlgoSHA256::generateHMAC(
     unsigned int mdLen = 0;
 
     if (HMAC(EVP_sha256(), userKey.data(), userKey.size(), input.data(),
-             input.size(), output.data(), &mdLen) == NULL)
+             input.size(), output.data(), &mdLen) == nullptr)
     {
         lg2::error("Generate HMAC_SHA256 failed: {ERROR}", "ERROR",
                    strerror(errno));
@@ -73,7 +73,7 @@ std::vector<uint8_t> AlgoSHA256::generateICV(
 
     if (HMAC(EVP_sha256(), sessionIntegrityKey.data(),
              sessionIntegrityKey.size(), input.data(), input.size(),
-             output.data(), &mdLen) == NULL)
+             output.data(), &mdLen) == nullptr)
     {
         lg2::error(
             "Generate HMAC_SHA256_128 Integrity Check Value failed: {ERROR}",

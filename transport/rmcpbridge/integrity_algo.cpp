@@ -25,7 +25,7 @@ std::vector<uint8_t> AlgoSHA1::generateHMAC(const uint8_t* input,
     unsigned int mdLen = 0;
 
     if (HMAC(EVP_sha1(), k1.data(), k1.size(), input, len, output.data(),
-             &mdLen) == NULL)
+             &mdLen) == nullptr)
     {
         throw std::runtime_error("Generating integrity data failed");
     }
@@ -70,7 +70,7 @@ std::vector<uint8_t> AlgoSHA1::generateKn(const std::vector<uint8_t>& sik,
     // Generated Kn for the integrity algorithm with the additional key keyed
     // with SIK.
     if (HMAC(EVP_sha1(), sik.data(), sik.size(), const_n.data(), const_n.size(),
-             Kn.data(), &mdLen) == NULL)
+             Kn.data(), &mdLen) == nullptr)
     {
         throw std::runtime_error("Generating KeyN for integrity "
                                  "algorithm failed");
@@ -91,7 +91,7 @@ std::vector<uint8_t> AlgoSHA256::generateHMAC(const uint8_t* input,
     unsigned int mdLen = 0;
 
     if (HMAC(EVP_sha256(), k1.data(), k1.size(), input, len, output.data(),
-             &mdLen) == NULL)
+             &mdLen) == nullptr)
     {
         throw std::runtime_error("Generating HMAC_SHA256_128 failed");
     }
@@ -136,7 +136,7 @@ std::vector<uint8_t> AlgoSHA256::generateKn(const std::vector<uint8_t>& sik,
     // Generated Kn for the integrity algorithm with the additional key keyed
     // with SIK.
     if (HMAC(EVP_sha256(), sik.data(), sik.size(), const_n.data(),
-             const_n.size(), Kn.data(), &mdLen) == NULL)
+             const_n.size(), Kn.data(), &mdLen) == nullptr)
     {
         throw std::runtime_error("Generating KeyN for integrity "
                                  "algorithm HMAC_SHA256 failed");
