@@ -6,7 +6,6 @@
 #include "sessions_manager.hpp"
 
 #include <ipmid/types.hpp>
-#include <main.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <user_channel/user_layer.hpp>
 
