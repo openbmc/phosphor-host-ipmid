@@ -169,7 +169,7 @@ int SerialChannel::write(stdplus::Fd& uart, uint8_t rsAddr, uint8_t rqAddr,
         uint8_t cc = 0xff;
         std::vector<uint8_t> data;
 
-        m.read(std::tie(netFn, lun, cmd, cc, data));
+        m.read(netFn, lun, cmd, cc, data);
 
         uint8_t netFnLun = (netFn << netFnShift) | (lun & lunMask);
         uint8_t seqLun = (seq << netFnShift) | (lun & lunMask);
