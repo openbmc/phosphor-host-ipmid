@@ -246,10 +246,10 @@ option(
 
 # HW transport
 option(
-    'transport-implementation',
-    type: 'combo',
-    choices: ['null', 'serial'],
-    description: 'transport',
+    'serialbridge',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable serial bridge',
 )
 
 # arm-sbmr specific functionality.
@@ -257,4 +257,28 @@ option(
     'arm-sbmr',
     type: 'feature',
     description: 'Support Arm SBMR specific functions',
+)
+
+# RMCP+ bridge feature and options
+option(
+    'rmcpbridge',
+       type: 'feature',
+       value: 'disabled',
+       description: 'Enable RMCP+ bridge (nee netipmid)',
+)
+
+# enable RCMP ping on RMCP+ bridge
+option(
+    'rmcp_ping',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Enable RMCP Ping support',
+)
+
+# enable pam authentication for RMCP+ bridge
+option(
+    'pam_authenticate',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Enable Pam Authenticate',
 )

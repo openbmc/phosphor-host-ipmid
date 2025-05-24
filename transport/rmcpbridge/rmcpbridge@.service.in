@@ -1,0 +1,19 @@
+[Unit]
+Description=RMCP+ bridge
+After=phosphor-ipmi-host.service
+Requires=sys-subsystem-net-devices-%i.device
+After=sys-subsystem-net-devices-%i.device
+ConditionPathExists=/sys/class/net/%i
+
+[Service]
+ExecStart=@BIN@ -c %i
+SyslogIdentifier=@BIN@-%i
+Restart=always
+RuntimeDirectory = ipmi
+RuntimeDirectoryPreserve = yes
+StateDirectory = ipmi
+
+[Install]
+DefaultInstance=eth0
+WantedBy=multi-user.target
+RequiredBy=

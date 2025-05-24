@@ -159,10 +159,12 @@ if not boost.found()
     ]
 endif
 
+cli11_dep = dependency('CLI11')
 phosphor_logging_dep = dependency('phosphor-logging')
 phosphor_dbus_interfaces_dep = dependency('phosphor-dbus-interfaces')
 sdeventplus_dep = dependency('sdeventplus')
 libsystemd_dep = dependency('libsystemd')
+systemd_dep = dependency('systemd')
 crypto = dependency('libcrypto', version: '>=1.0.2g')
 pam = cpp.find_library('pam', required: true)
 sdbusplus_dep = dependency('sdbusplus')
@@ -354,7 +356,6 @@ endif
 
 if get_option('tests').allowed()
     subdir('test')
-    subdir('transport/serialbridge')
 endif
 
 install_subdir(
