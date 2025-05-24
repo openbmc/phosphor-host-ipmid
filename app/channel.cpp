@@ -4,7 +4,6 @@
 
 #include <arpa/inet.h>
 
-#include <boost/process/v1/child.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
