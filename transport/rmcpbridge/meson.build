@@ -1,52 +1,14 @@
-project(
-    'phosphor-net-ipmid',
-    'cpp',
-    version: '1.0.0',
-    meson_version: '>=1.1.1',
-    default_options: [
-        'warning_level=3',
-        'werror=true',
-        'cpp_std=c++23',
-        'buildtype=debugoptimized',
-        'b_lto=true',
-    ],
-)
 
-conf_data = configuration_data()
-conf_data.set('RMCP_PING', get_option('rmcp_ping').allowed())
-conf_data.set('PAM_AUTHENTICATE', get_option('pam_authenticate').allowed())
+rmcp_conf_data = configuration_data()
+rmcp_conf_data.set('RMCP_PING', get_option('rmcp_ping').allowed())
+rmcp_conf_data.set('PAM_AUTHENTICATE', get_option('pam_authenticate').allowed())
 
-configure_file(output: 'config.h', configuration: conf_data)
-
-sdbusplus_dep = dependency('sdbusplus')
-phosphor_dbus_interfaces_dep = dependency('phosphor-dbus-interfaces')
-phosphor_logging_dep = dependency('phosphor-logging')
-libsystemd_dep = dependency('libsystemd')
-libcrypto_dep = dependency('libcrypto')
-ipmid_dep = dependency('libipmid')
-userlayer_dep = dependency('libuserlayer')
-channellayer_dep = dependency('libchannellayer')
+configure_file(output: 'config.h', configuration: rmcp_conf_data)
 
 # Project Arguments
 cpp = meson.get_compiler('cpp')
-if cpp.has_header('CLI/CLI.hpp')
-    cli11_dep = declare_dependency()
-else
-    cli11_dep = dependency('CLI11')
-endif
 
-add_project_arguments(
-    cpp.get_supported_arguments(
-        [
-            '-DBOOST_ERROR_CODE_HEADER_ONLY',
-            '-DBOOST_SYSTEM_NO_DEPRECATED',
-            '-DBOOST_COROUTINES_NO_DEPRECATION_WARNING',
-            '-DBOOST_ASIO_DISABLE_THREADS',
-            '-DBOOST_ALL_NO_LIB',
-        ],
-    ),
-    language: 'cpp',
-)
+libcrypto_dep = dependency('libcrypto')
 
 deps = [
     cli11_dep,
@@ -84,8 +46,8 @@ sources = [
     'sol_module.cpp',
 ]
 
-executable(
-    'netipmid',
+rmcpbridge = executable(
+    'rmcpbridge',
     sources,
     implicit_include_directories: true,
     include_directories: ['command', 'sol'],
@@ -94,22 +56,28 @@ executable(
     install_dir: get_option('bindir'),
 )
 
-systemd = dependency('systemd')
-systemd_system_unit_dir = systemd.get_variable(
+systemd_system_unit_dir = systemd_dep.get_variable(
     'systemdsystemunitdir',
     pkgconfig_define: ['prefix', get_option('prefix')],
 )
 
+rmcp_unit_conf_data = configuration_data()
+rmcp_unit_conf_data.set(
+    'BIN',
+    get_option('prefix') / get_option('libexecdir') / rmcpbridge.name(),
+)
+
 configure_file(
-    input: 'phosphor-ipmi-net@.service',
-    output: 'phosphor-ipmi-net@.service',
-    copy: true,
+    input: 'rmcpbridge@.service.in',
+    output: 'rmcpbridge@.service',
+    configuration: rmcp_unit_conf_data,
+    install: true,
     install_dir: systemd_system_unit_dir,
 )
 
 configure_file(
-    input: 'phosphor-ipmi-net@.socket',
-    output: 'phosphor-ipmi-net@.socket',
+    input: 'rmcpbridge@.socket',
+    output: 'rmcpbridge@.socket',
     copy: true,
     install_dir: systemd_system_unit_dir,
 )
