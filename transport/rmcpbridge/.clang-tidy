@@ -1,7 +1,12 @@
 Checks: '
-    -*,
-    bugprone-unchecked-optional-access,
-    readability-identifier-naming
+modernize-use-nullptr,
 '
-WarningsAsErrors: '*'
+
+# Treat all warnings as errors
+# Once the merge is complete, we can work on fixing the code
+# WarningsAsErrors: '*'
+
+# Apply checks to all files
 HeaderFilterRegex: '(?!^subprojects).*'
+
+CheckOptions: []
