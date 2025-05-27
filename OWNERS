@@ -42,6 +42,9 @@ reviewers:
 - ratankgupta31@gmail.com
 
 matchers:
+- partial_regex: oem/example
+  owners:
+  - vernon.mauery@gmail.com
 
 openbmc:
 - name: Adriana Kobylak
