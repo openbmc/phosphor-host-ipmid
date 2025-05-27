@@ -366,3 +366,7 @@ install_subdir(
 
 # HW Transport
 subdir('transport')
+
+if get_option('oem-libraries').length() > 0
+    subdir('oem')
+endif
