@@ -366,3 +366,6 @@ install_subdir(
 
 # HW Transport
 subdir('transport')
+
+# OEM provider libraries
+subdir('oem')
