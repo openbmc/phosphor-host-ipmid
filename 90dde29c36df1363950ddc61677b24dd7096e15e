@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b2beed13_775c8fd6",
+        "filename": "meson.options",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2025-05-27T18:56:41Z",
+      "side": 1,
+      "message": "How do we ensure they all get compiled in CI?  Do you want them as a list like this or do you want them as individual features?\n\nI guess it looks like `libpldm` made it an array where all of them are included by default in the `value`.\n\nhttps://github.com/openbmc/libpldm/blob/ffdc405cd8517f4c090f78e0f7692a877b0c75b6/meson.options#L17\n\npldm did it as separate meson.options:\n\nhttps://github.com/openbmc/pldm/blob/master/meson.options#L158",
+      "revId": "90dde29c36df1363950ddc61677b24dd7096e15e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "624b8946_ca084338",
+        "filename": "oem/example/meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2025-05-27T18:56:41Z",
+      "side": 1,
+      "message": "You might want this as a variable elsewhere.",
+      "revId": "90dde29c36df1363950ddc61677b24dd7096e15e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
