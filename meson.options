@@ -244,6 +244,17 @@ option(
     description: 'Support open-power specific functions',
 )
 
+# arm-sbmr specific functionality.
+option(
+    'arm-sbmr',
+    type: 'feature',
+    description: 'Support Arm SBMR specific functions',
+)
+
+#######################################################################
+# Transport options
+#######################################################################
+
 # HW transport
 option(
     'transport-implementation',
@@ -252,9 +263,24 @@ option(
     description: 'transport',
 )
 
-# arm-sbmr specific functionality.
+
+
+#######################################################################
+# OEM Libraries
+#######################################################################
 option(
-    'arm-sbmr',
-    type: 'feature',
-    description: 'Support Arm SBMR specific functions',
+    'oem-libraries',
+    type: 'array',
+    choices: [
+        # will build all of the OEM libraries - default
+        'all',
+        # don't build any OEM libraries
+        'none',
+        #######################################
+        # keep list below sorted alphabetically
+        #######################################
+        'example',
+    ],
+    value: ['all'],
+    description: 'Build selected OEM IPMI provider libraries',
 )
