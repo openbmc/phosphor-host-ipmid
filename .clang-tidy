@@ -1,12 +1,9 @@
-Checks: '
--*,
-modernize-use-nullptr,
-'
-
-# Treat all warnings as errors
-WarningsAsErrors: '*'
-
-# Apply checks to all files
-HeaderFilterRegex: '(?!^subprojects).*'
+Checks: '-*,
+    modernize-use-nullptr
+    '
 
 CheckOptions: []
+
+HeaderFilterRegex: (?!^subprojects).*
+
+WarningsAsErrors: '*'
