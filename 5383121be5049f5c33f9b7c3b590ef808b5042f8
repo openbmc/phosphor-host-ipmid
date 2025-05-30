@@ -22,6 +22,30 @@
       },
       "revId": "5383121be5049f5c33f9b7c3b590ef808b5042f8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bbf38d73_c06342f4",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1133,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2025-05-30T13:56:30Z",
+      "side": 0,
+      "message": "Do you mean why to change the place of this assignment?\n\nI think the right place for the `sensor_units_1` setting is in the `setUnitFieldsForObject` function.\nAlso this commit adds another modification for the `sensor_units_1`, and it would be logical to group them inside one function.\n\nIn the commit message this is described as:\n\u003e Also for consistency move the rest of the \u0027Sensor Units 1\u0027 field setting\ninside the \u0027setUnitFieldsForObject\u0027 function.",
+      "parentUuid": "75f89137_8df8ae81",
+      "range": {
+        "startLine": 1132,
+        "startChar": 8,
+        "endLine": 1133,
+        "endChar": 80
+      },
+      "revId": "5383121be5049f5c33f9b7c3b590ef808b5042f8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
