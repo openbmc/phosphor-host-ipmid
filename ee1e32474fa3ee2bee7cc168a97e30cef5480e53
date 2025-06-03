@@ -16,6 +16,24 @@
       "message": "I\u0027d suggest using partial matches on OWNERS at the root directory.  That\u0027s how we manage most repositories.  OWNERS files are recursive, but it seems to be easier for people to see it all in one spot.\n\nThe only repository with non-root OWNERS files is google-misc.",
       "revId": "ee1e32474fa3ee2bee7cc168a97e30cef5480e53",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bc2ab18e_f5b8a99f",
+        "filename": "oem/example/OWNERS",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-06-03T21:34:41Z",
+      "side": 1,
+      "message": "I don\u0027t have a strong preference either way, so I will just follow the herd. 😊",
+      "parentUuid": "9406cd83_61c0d023",
+      "revId": "ee1e32474fa3ee2bee7cc168a97e30cef5480e53",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
