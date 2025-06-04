@@ -1,0 +1,9 @@
+Code-Review+1: Saravanan Palanisamy <saravanan.palanisamy@linux.intel.com>
+Code-Review+2: George Liu <liuxiwei@ieisystem.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Jitendra Tripathy <jitendra.kumarx.tripathy@intel.com>
+Submitted-at: Wed, 04 Jun 2025 09:50:35 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/80379
+Comments-Total: 2
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
