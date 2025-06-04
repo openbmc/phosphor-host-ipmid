@@ -39,6 +39,30 @@
       },
       "revId": "2ede7da28cea57b19a1075a68596791eb9152c02",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d3404425_ec338ae9",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-06-04T02:08:19Z",
+      "side": 1,
+      "message": "Sorry for late response, I missed your comment @liuxiwei@ieisystem.com. But it seems that https://github.com/openbmc/phosphor-host-ipmid/blob/master/include/ipmid/utils.hpp#L315 is a sync function.\n\nI also updated the writing FRU request from sync to async function at https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/73263/3/dcmihandler.cpp#275.",
+      "parentUuid": "42508cb6_3df21697",
+      "range": {
+        "startLine": 245,
+        "startChar": 8,
+        "endLine": 245,
+        "endChar": 61
+      },
+      "revId": "2ede7da28cea57b19a1075a68596791eb9152c02",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
