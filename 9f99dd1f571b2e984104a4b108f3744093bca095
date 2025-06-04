@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc7955e0_4988a0db",
+        "filename": "meson.options",
+        "patchSetId": 4
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2025-06-04T08:52:13Z",
+      "side": 1,
+      "message": "nit: i don\u0027t think the value ```none``` is actually used anywhere and the empty array should also work\n\nhttps://mesonbuild.com/Build-options.html#arrays",
+      "revId": "9f99dd1f571b2e984104a4b108f3744093bca095",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a753c0cf_5ed729ae",
+        "filename": "meson.options",
+        "patchSetId": 4
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2025-06-04T08:52:13Z",
+      "side": 1,
+      "message": "nit: instead of ```all``` value, can just list the oem libraries here as the default value.\n\nWhich will simplify the if statement in ```oem/meson.build```.",
+      "revId": "9f99dd1f571b2e984104a4b108f3744093bca095",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
