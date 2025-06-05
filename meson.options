@@ -280,6 +280,7 @@ option(
         # keep list below sorted alphabetically
         #######################################
         'example',
+        'nvidia',
     ],
     value: ['all'],
     description: 'Build selected OEM IPMI provider libraries',
