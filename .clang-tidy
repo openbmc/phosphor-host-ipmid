@@ -1,4 +1,5 @@
 Checks: '-*,
+    bugprone-unchecked-optional-access,
     modernize-use-nullptr
     '
 
