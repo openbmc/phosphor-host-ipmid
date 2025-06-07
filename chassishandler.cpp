@@ -1108,31 +1108,37 @@ static std::optional<bool> getChassisIntrusionStatus(ipmi::Context::ptr& ctx)
         {
             ec = ipmi::getDbusProperty<std::string>(
                 ctx, service, path, Intrusion::interface, "Status", propVal);
+
             if (ec)
             {
-                lg2::error("Fail to get Chassis Intrusion Status property "
+                lg2::error("Failed to get Chassis Intrusion Status property "
                            "({SERVICE}/{PATH}/{INTERFACE}): {ERROR}",
                            "SERVICE", service, "PATH", path, "INTERFACE",
                            Intrusion::interface, "ERROR", ec.message());
+                continue;
             }
-            else
+
+            auto statusOpt =
+                sdbusplus::message::convert_from_string<Intrusion::Status>(
+                    propVal);
+            if (statusOpt)
             {
-                // return false if all values are Normal
-                // return true if one value is not Normal
-                // return nullopt when no value can be retrieved from D-Bus
-                auto status =
-                    sdbusplus::message::convert_from_string<Intrusion::Status>(
-                        propVal)
-                        .value();
-                if (status == Intrusion::Status::Normal)
+                if (*statusOpt == Intrusion::Status::Normal)
                 {
                     ret = std::make_optional(false);
                 }
                 else
                 {
                     ret = std::make_optional(true);
-                    return ret;
+                    return ret; // Early return on first non-Normal status
                 }
+            }
+            else
+            {
+                lg2::warning(
+                    "Invalid Intrusion::Status value received: {VALUE}",
+                    "VALUE", propVal);
+                return std::nullopt;
             }
         }
     }
