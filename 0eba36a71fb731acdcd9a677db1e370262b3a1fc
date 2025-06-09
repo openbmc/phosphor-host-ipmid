@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "89a849b3_af3c419d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-06-09T17:54:13Z",
+      "side": 1,
+      "message": "Don\u0027t forget to add",
+      "revId": "0eba36a71fb731acdcd9a677db1e370262b3a1fc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5247f45c_20e0495c",
+        "filename": "oem/nvidia/biosconfigcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-06-09T17:54:13Z",
+      "side": 1,
+      "message": "This function is only ever just returning a completion code, so it\u0027s signature should probably be: ipmi::RspType\u003c\u003e",
+      "revId": "0eba36a71fb731acdcd9a677db1e370262b3a1fc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8ed0afcb_5b0f2cf6",
+        "filename": "oem/nvidia/biosconfigcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-06-09T17:54:13Z",
+      "side": 1,
+      "message": "you might consider replacing all the key names with constexpr variables so that any typos will be caught by the compiler rather than showing up as runtime bugs.\n\n```\nconstexpr char keyHashAlgo[] \u003d \"HashAlgo\";\n...\n```",
+      "revId": "0eba36a71fb731acdcd9a677db1e370262b3a1fc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "06782e81_cbeef537",
+        "filename": "oem/nvidia/biosconfigcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-06-09T17:54:13Z",
+      "side": 1,
+      "message": "It\u0027s is nice to put each of the return types on a separate line to document them:\n```\nipmi:RspType\u003c\n    uint8_t, // action\n    std::array\u003cuint8_t, biosPasswordSaltSize\u003e, // salt\n    std::array\u003cuint8_t, biosPasswordHashSize\u003e  // hash\n\u003e\n```",
+      "revId": "0eba36a71fb731acdcd9a677db1e370262b3a1fc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
