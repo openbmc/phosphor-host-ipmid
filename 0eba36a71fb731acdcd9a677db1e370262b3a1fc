@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "da98a09d_ea3855a5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-06-10T06:29:58Z",
+      "side": 1,
+      "message": "Added NVIDIA users to owner file",
+      "parentUuid": "bf62c56a_2d3fc528",
+      "revId": "0eba36a71fb731acdcd9a677db1e370262b3a1fc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5247f45c_20e0495c",
