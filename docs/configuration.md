@@ -13,8 +13,16 @@ For a specific example, see:
 
 The JSON format for get_device_id:
 
-    {"id": 0, "revision": 0, "addn_dev_support": 0,
-        "manuf_id": 0, "prod_id": 0, "aux": 0}
+```json
+{
+  "id": 0,
+  "revision": 0,
+  "addn_dev_support": 0,
+  "manuf_id": 0,
+  "prod_id": 0,
+  "aux": 0
+}
+```
 
 Each value in this JSON object should be an integer. The file is placed in
 /usr/share/ipmi-providers/ by Yocto, and will be parsed upon the first call to
