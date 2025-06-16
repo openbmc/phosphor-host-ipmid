@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "969c68a6_aa638d97",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1125,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-06-16T00:59:43Z",
+      "side": 1,
+      "message": "Nit: \nauto statusOpt \u003d sdbusplus::message::convert_from_string\u003cIntrusion::Status\u003e(popVal);\nif (statusOpt)\n{\n}",
+      "range": {
+        "startLine": 1121,
+        "startChar": 0,
+        "endLine": 1125,
+        "endChar": 13
+      },
+      "revId": "8af9b0fe1b7a75505cf2506c19049dc9a8bab6f2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
