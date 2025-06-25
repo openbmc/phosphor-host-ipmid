@@ -188,13 +188,15 @@ int SerialChannel::write(stdplus::Fd& uart, uint8_t rsAddr, uint8_t rqAddr,
 
         // Assemble connection header and checksum
         checksum = processEscapedCharacter(responseBuffer, connectionHeader);
-        responseBuffer.push_back(-checksum); // checksum1
+        checksum = static_cast<uint8_t>(~checksum + 1); // checksum1
+        processEscapedCharacter(responseBuffer, std::vector<uint8_t>{checksum});
 
         // Assemble response message and checksum
         checksum = processEscapedCharacter(responseBuffer, messageHeader);
         checksum +=
             processEscapedCharacter(responseBuffer, std::vector<uint8_t>(data));
-        responseBuffer.push_back(-checksum); // checksum2
+        checksum = static_cast<uint8_t>(~checksum + 1); // checksum2
+        processEscapedCharacter(responseBuffer, std::vector<uint8_t>{checksum});
 
         // bmStop
         responseBuffer.push_back(bmStop);
