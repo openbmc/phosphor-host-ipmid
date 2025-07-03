@@ -243,7 +243,7 @@ std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
     auto deviceFind = deviceHashes.find(devId);
     if (deviceFind == deviceHashes.end())
     {
-        return {IPMI_CC_SENSOR_INVALID, {}};
+        return {ipmi::ccSensorInvalid, {}};
     }
 
     cacheBus = deviceFind->second.first;
@@ -549,7 +549,7 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
 {
     if (deviceHashes.size() < index)
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::ccInvalidFieldRequest;
     }
     auto device = deviceHashes.begin() + index;
     uint16_t& bus = device->second.first;
@@ -585,7 +585,7 @@ ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
         });
     if (fru == frus.end())
     {
-        return IPMI_CC_RESPONSE_ERROR;
+        return ipmi::ccResponseError;
     }
     std::string name;
     uint8_t entityID = 0;

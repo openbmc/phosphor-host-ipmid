@@ -42,7 +42,7 @@ ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
     {
         lg2::error("Error in D-Bus call: {ERROR}", "ERROR", e);
         commit<InternalFailure>();
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::ccUnspecifiedError;
     }
     return ipmi::ccSuccess;
 }
@@ -212,7 +212,7 @@ ipmi_ret_t eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
         if (iter == std::get<OffsetValueMap>(property.second).end())
         {
             lg2::error("Invalid event data");
-            return IPMI_CC_PARM_OUT_OF_RANGE;
+            return ipmi::ccParmOutOfRange;
         }
         msg.append(iter->second.assert);
     }
