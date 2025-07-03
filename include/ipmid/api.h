@@ -81,7 +81,9 @@ void cancelSELReservation(void);
 // the proper network function which issued the command
 // associated with a response, subtract 1.
 // Note: these are also shifted left to make room for the LUN.
-enum ipmi_net_fns
+enum __attribute__((deprecated(
+    "Deprecated enum: use netfn values from ipmi-api.hpp; this enum will be removed after 31-Dec-2025")))
+ipmi_net_fns
 {
     NETFUN_CHASSIS = 0x00,
     NETFUN_BRIDGE = 0x02,
