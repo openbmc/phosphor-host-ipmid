@@ -1,0 +1,228 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e9635e85_88daffc1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "There might be some other ipmi_ret_t instances out there to change, but it makes sense to make that change at the same time as these changes.",
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7a74ddd1_899697b7",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "Please change the return value type to ipmi::Cc as well.",
+      "range": {
+        "startLine": 157,
+        "startChar": 0,
+        "endLine": 157,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a1adad71_69887efd",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 547,
+        "startChar": 2,
+        "endLine": 547,
+        "endChar": 3
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4bc8e1bd_823b7d74",
+        "filename": "sensordatahandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "808eb729_de13d3df",
+        "filename": "sensordatahandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 199,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed0e704b_56266e92",
+        "filename": "sensordatahandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 222,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7c7c2c24_de34214f",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 1166,
+        "startChar": 0,
+        "endLine": 1166,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "581735c7_d004433b",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1257,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 1257,
+        "startChar": 0,
+        "endLine": 1257,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "397182dc_da11c779",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1448,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 1448,
+        "startChar": 0,
+        "endLine": 1448,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3372059_0acd661a",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-03T17:18:00Z",
+      "side": 1,
+      "message": "ipmi::Cc",
+      "range": {
+        "startLine": 285,
+        "startChar": 0,
+        "endLine": 285,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
