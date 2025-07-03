@@ -282,25 +282,15 @@ ipmi::RspType<uint8_t,  // SEL revision.
         ipmi::sel::operationSupport::overflow);
 }
 
-ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                       ipmi_response_t response, ipmi_data_len_t data_len,
-                       ipmi_context_t)
+ipmi::RspType<ipmi::message::Payload> getSELEntry(
+    uint16_t reservationID, uint16_t selRecordID, uint8_t offset,
+    uint8_t readLength)
 {
-    if (*data_len != sizeof(ipmi::sel::GetSELEntryRequest))
+    if (reservationID != 0)
     {
-        *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
-    }
-
-    auto requestData =
-        reinterpret_cast<const ipmi::sel::GetSELEntryRequest*>(request);
-
-    if (requestData->reservationID != 0)
-    {
-        if (!checkSELReservation(requestData->reservationID))
+        if (!checkSELReservation(reservationID))
         {
-            *data_len = 0;
-            return IPMI_CC_INVALID_RESERVATION_ID;
+            return ipmi::responseInvalidReservationId();
         }
     }
 
@@ -312,18 +302,17 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
 
     if (selCacheMap.empty())
     {
-        *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::responseSensorInvalid();
     }
 
     SELCacheMap::const_iterator iter;
 
     // Check for the requested SEL Entry.
-    if (requestData->selRecordID == ipmi::sel::firstEntry)
+    if (selRecordID == ipmi::sel::firstEntry)
     {
         iter = selCacheMap.begin();
     }
-    else if (requestData->selRecordID == ipmi::sel::lastEntry)
+    else if (selRecordID == ipmi::sel::lastEntry)
     {
         if (selCacheMap.size() > 1)
         {
@@ -338,11 +327,10 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     }
     else
     {
-        iter = selCacheMap.find(requestData->selRecordID);
+        iter = selCacheMap.find(selRecordID);
         if (iter == selCacheMap.end())
         {
-            *data_len = 0;
-            return IPMI_CC_SENSOR_INVALID;
+            return ipmi::responseSensorInvalid();
         }
     }
 
@@ -358,35 +346,36 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         record.nextRecordID = iter->first;
     }
 
-    if (requestData->readLength == ipmi::sel::entireRecord)
+    std::vector<uint8_t> buffer;
+    if (readLength == ipmi::sel::entireRecord)
     {
-        std::memcpy(response, &record, sizeof(record));
-        *data_len = sizeof(record);
+        buffer.resize(sizeof(record));
+        std::memcpy(buffer.data(), &record, sizeof(record));
     }
     else
     {
-        if (requestData->offset >= ipmi::sel::selRecordSize ||
-            requestData->readLength > ipmi::sel::selRecordSize)
+        if (offset >= ipmi::sel::selRecordSize ||
+            readLength > ipmi::sel::selRecordSize)
         {
-            *data_len = 0;
-            return IPMI_CC_INVALID_FIELD_REQUEST;
+            return ipmi::responseInvalidFieldRequest();
         }
 
-        auto diff = ipmi::sel::selRecordSize - requestData->offset;
-        auto readLength =
-            std::min(diff, static_cast<int>(requestData->readLength));
+        auto diff = ipmi::sel::selRecordSize - offset;
+        auto minReadLength = std::min(diff, static_cast<int>(readLength));
 
+        buffer.resize(sizeof(record.nextRecordID) + minReadLength);
         uint16_t nextRecordID = record.nextRecordID;
-        std::memcpy(response, &nextRecordID, sizeof(nextRecordID));
+        std::memcpy(buffer.data(), &nextRecordID, sizeof(nextRecordID));
 
         const ipmi::sel::SELEventRecordFormat* evt = &record.event;
-        std::memcpy(static_cast<uint8_t*>(response) + sizeof(nextRecordID),
-                    reinterpret_cast<const uint8_t*>(evt) + requestData->offset,
-                    readLength);
-        *data_len = sizeof(nextRecordID) + readLength;
+        std::memcpy(buffer.data() + sizeof(nextRecordID),
+                    reinterpret_cast<const uint8_t*>(evt) + offset,
+                    minReadLength);
     }
 
-    return ipmi::ccSuccess;
+    ipmi::message::Payload payload;
+    payload.pack(buffer);
+    return ipmi::responseSuccess(std::move(payload));
 }
 
 /** @brief implements the delete SEL entry command
@@ -893,8 +882,9 @@ void registerNetFnStorageFunctions()
                           ipmiStorageGetSelTimeUtcOffset);
 
     // <Get SEL Entry>
-    ipmi_register_callback(ipmi::netFnStorage, ipmi::storage::cmdGetSelEntry,
-                           nullptr, getSELEntry, PRIVILEGE_USER);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdGetSelEntry,
+                          ipmi::Privilege::User, getSELEntry);
 
     // <Delete SEL Entry>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
