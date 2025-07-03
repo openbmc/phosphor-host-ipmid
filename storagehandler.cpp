@@ -289,7 +289,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     if (*data_len != sizeof(ipmi::sel::GetSELEntryRequest))
     {
         *data_len = 0;
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ipmi::ccReqDataLenInvalid;
     }
 
     auto requestData =
@@ -300,7 +300,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         if (!checkSELReservation(requestData->reservationID))
         {
             *data_len = 0;
-            return IPMI_CC_INVALID_RESERVATION_ID;
+            return ipmi::ccInvalidReservationId;
         }
     }
 
@@ -313,7 +313,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     if (selCacheMap.empty())
     {
         *data_len = 0;
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::ccSensorInvalid;
     }
 
     SELCacheMap::const_iterator iter;
@@ -342,7 +342,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         if (iter == selCacheMap.end())
         {
             *data_len = 0;
-            return IPMI_CC_SENSOR_INVALID;
+            return ipmi::ccSensorInvalid;
         }
     }
 
@@ -369,7 +369,7 @@ ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
             requestData->readLength > ipmi::sel::selRecordSize)
         {
             *data_len = 0;
-            return IPMI_CC_INVALID_FIELD_REQUEST;
+            return ipmi::ccInvalidFieldRequest;
         }
 
         auto diff = ipmi::sel::selRecordSize - requestData->offset;
