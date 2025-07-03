@@ -1383,25 +1383,25 @@ ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
     int rc = 0;
     switch (chassisControl)
     {
-        case CMD_POWER_ON:
+        case cmdPowerOn:
             rc = initiateHostStateTransition(ctx, State::Host::Transition::On);
             break;
-        case CMD_POWER_OFF:
+        case cmdPowerOff:
             rc = initiateChassisStateTransition(
                 ctx, State::Chassis::Transition::Off);
             break;
-        case CMD_HARD_RESET:
+        case cmdHardReset:
             rc = initiateHostStateTransition(
                 ctx, State::Host::Transition::ForceWarmReboot);
             break;
-        case CMD_POWER_CYCLE:
+        case cmdPowerCycle:
             rc = initiateHostStateTransition(ctx,
                                              State::Host::Transition::Reboot);
             break;
-        case CMD_SOFT_OFF_VIA_OVER_TEMP:
+        case cmdSoftOffViaOverTemp:
             rc = initiateHostStateTransition(ctx, State::Host::Transition::Off);
             break;
-        case CMD_PULSE_DIAGNOSTIC_INTR:
+        case cmdPulseDiagnosticInterrupt:
             rc = doNmi(ctx);
             break;
 
@@ -2051,7 +2051,7 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         if ((transferStatus == setInProgress) &&
             (static_cast<uint8_t>(setInProgressFlag) != setComplete))
         {
-            return ipmi::response(IPMI_CC_FAIL_SET_IN_PROGRESS);
+            return ipmi::response(failSetInProgress);
         }
         transferStatus = static_cast<uint8_t>(setInProgressFlag);
         return ipmi::responseSuccess();
