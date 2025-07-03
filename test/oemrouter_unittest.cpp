@@ -157,18 +157,18 @@ TEST(OemRouterTest, CommandsAreRejectedIfInvalid)
 
     // Message too short to include whole OEN?
     dataLen = 2;
-    EXPECT_EQ(IPMI_CC_REQ_DATA_LEN_INVALID,
+    EXPECT_EQ(ipmi::ccReqDataLenInvalid,
               wildHandler(ipmi::netFnOem, 0x78, msgPlain, reply, &dataLen,
                           nullptr));
 
     // Wrong specific command?
     dataLen = 3;
-    EXPECT_EQ(IPMI_CC_INVALID, wildHandler(ipmi::netFnOem, 0x89, msgPlain,
+    EXPECT_EQ(ipmi::ccInvalidCommand, wildHandler(ipmi::netFnOem, 0x89, msgPlain,
                                            reply, &dataLen, nullptr));
 
     // Wrong OEN?
     dataLen = 3;
-    EXPECT_EQ(IPMI_CC_INVALID, wildHandler(ipmi::netFnOem, 0x78, msgBadOen,
+    EXPECT_EQ(ipmi::ccInvalidCommand, wildHandler(ipmi::netFnOem, 0x78, msgBadOen,
                                            reply, &dataLen, nullptr));
 }
 

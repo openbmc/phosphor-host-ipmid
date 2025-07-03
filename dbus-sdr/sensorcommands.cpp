@@ -161,18 +161,18 @@ ipmi_ret_t getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
     auto& sensorTree = getSensorTree();
     if (!getSensorSubtree(sensorTree) && sensorTree.empty())
     {
-        return IPMI_CC_RESPONSE_ERROR;
+        return ipmi::ccResponseError;
     }
 
     if (ctx == nullptr)
     {
-        return IPMI_CC_RESPONSE_ERROR;
+        return ipmi::ccResponseError;
     }
 
     path = getPathFromSensorNumber((ctx->lun << 8) | sensnum);
     if (path.empty())
     {
-        return IPMI_CC_INVALID_FIELD_REQUEST;
+        return ipmi::ccInvalidFieldRequest;
     }
 
     for (const auto& sensor : sensorTree)
