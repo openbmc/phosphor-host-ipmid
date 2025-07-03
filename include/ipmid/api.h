@@ -76,27 +76,6 @@ unsigned short reserveSel(void);
 bool checkSELReservation(unsigned short id);
 void cancelSELReservation(void);
 
-// These are the command network functions, the response
-// network functions are the function + 1. So to determine
-// the proper network function which issued the command
-// associated with a response, subtract 1.
-// Note: these are also shifted left to make room for the LUN.
-enum ipmi_net_fns
-{
-    NETFUN_CHASSIS = 0x00,
-    NETFUN_BRIDGE = 0x02,
-    NETFUN_SENSOR = 0x04,
-    NETFUN_APP = 0x06,
-    NETFUN_FIRMWARE = 0x08,
-    NETFUN_STORAGE = 0x0a,
-    NETFUN_TRANSPORT = 0x0c,
-    NETFUN_GRPEXT = 0x2c,
-    NETFUN_OEM_GROUP = 0x2e,
-    NETFUN_NONE = 0x30,
-    NETFUN_OEM = 0x32,
-    NETFUN_IBM_OEM = 0x3A
-};
-
 // Return (completion) codes from a IPMI operation as needed by IPMI V2.0 spec.
 enum ipmi_return_codes
 {
