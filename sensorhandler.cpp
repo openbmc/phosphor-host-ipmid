@@ -1179,7 +1179,7 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     fru = frus.find(fruID);
     if (fru == frus.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::ccSensorInvalid;
     }
 
     /* Header */
@@ -1239,7 +1239,7 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     // Check for invalid offset size
     if (req->offset > sizeof(record))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::ccParmOutOfRange;
     }
 
     dataLength = std::min(static_cast<size_t>(req->bytes_to_read),
@@ -1273,7 +1273,7 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     entity = entityRecords.find(entityRecordID);
     if (entity == entityRecords.end())
     {
-        return IPMI_CC_SENSOR_INVALID;
+        return ipmi::ccSensorInvalid;
     }
 
     /* Header */
@@ -1312,7 +1312,7 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     // Check for invalid offset size
     if (req->offset > sizeof(record))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::ccParmOutOfRange;
     }
 
     dataLength = std::min(static_cast<size_t>(req->bytes_to_read),
@@ -1362,7 +1362,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
             sensor = ipmi::sensor::sensors.find(recordID);
             if (sensor == ipmi::sensor::sensors.end())
             {
-                return IPMI_CC_SENSOR_INVALID;
+                return ipmi::ccSensorInvalid;
             }
         }
     }
@@ -1418,7 +1418,7 @@ ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
 
     if (req->offset > sizeof(record))
     {
-        return IPMI_CC_PARM_OUT_OF_RANGE;
+        return ipmi::ccParmOutOfRange;
     }
 
     // data_len will ultimately be the size of the record, plus
@@ -1460,7 +1460,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
     if ((paraLen < selSystemEventSizeWith1Bytes) ||
         (paraLen > selSystemEventSizeWith3Bytes))
     {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ipmi::ccReqDataLenInvalid;
     }
 
     if (isFromSystemChannel())
@@ -1488,7 +1488,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
         ((req->data[0] & byte2EnableMask) != 0 &&
          paraLen < selSystemEventSizeWith2Bytes))
     {
-        return IPMI_CC_REQ_DATA_LEN_INVALID;
+        return ipmi::ccReqDataLenInvalid;
     }
 
     // Count bytes of Event Data
@@ -1521,7 +1521,7 @@ ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
     catch (const sdbusplus::exception_t& e)
     {
         lg2::error("exception message: {ERROR}", "ERROR", e);
-        return IPMI_CC_UNSPECIFIED_ERROR;
+        return ipmi::ccUnspecifiedError;
     }
     return ipmi::ccSuccess;
 }
