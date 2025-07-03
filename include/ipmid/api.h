@@ -95,7 +95,9 @@ enum ipmi_net_fns
     NETFUN_NONE = 0x30,
     NETFUN_OEM = 0x32,
     NETFUN_IBM_OEM = 0x3A
-};
+}
+__attribute__(deprecated("Deprecated enum: use netfn values from ipmi-api.hpp;"
+                         " this enum will be removed after 31-Dec-2025"));
 
 // Return (completion) codes from a IPMI operation as needed by IPMI V2.0 spec.
 enum ipmi_return_codes
