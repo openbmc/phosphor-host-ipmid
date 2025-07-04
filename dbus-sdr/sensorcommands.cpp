@@ -154,9 +154,9 @@ static sdbusplus::bus::match_t sensorRemoved(
                             .count();
     });
 
-ipmi_ret_t getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
-                               std::string& connection, std::string& path,
-                               std::vector<std::string>* interfaces)
+ipmi::Cc getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
+                             std::string& connection, std::string& path,
+                             std::vector<std::string>* interfaces)
 {
     auto& sensorTree = getSensorTree();
     if (!getSensorSubtree(sensorTree) && sensorTree.empty())

@@ -282,9 +282,9 @@ ipmi::RspType<uint8_t,  // SEL revision.
         ipmi::sel::operationSupport::overflow);
 }
 
-ipmi_ret_t getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                       ipmi_response_t response, ipmi_data_len_t data_len,
-                       ipmi_context_t)
+ipmi::Cc getSELEntry(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                     ipmi_response_t response, ipmi_data_len_t data_len,
+                     ipmi_context_t)
 {
     if (*data_len != sizeof(ipmi::sel::GetSELEntryRequest))
     {

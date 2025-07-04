@@ -109,9 +109,9 @@ uint16_t getNumberOfSensors();
 
 SensorSubTree& getSensorTree();
 
-ipmi_ret_t getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
-                               std::string& connection, std::string& path,
-                               std::vector<std::string>* interfaces = nullptr);
+ipmi::Cc getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
+                             std::string& connection, std::string& path,
+                             std::vector<std::string>* interfaces = nullptr);
 
 struct IPMIThresholds
 {

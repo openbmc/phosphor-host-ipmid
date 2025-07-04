@@ -5,12 +5,12 @@
 #define GRPEXT_GET_GROUP_CMD 0
 void registerNetFnGroupExtFunctions() __attribute__((constructor));
 
-ipmi_ret_t ipmi_groupext(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
-                         ipmi_response_t response, ipmi_data_len_t data_len,
-                         ipmi_context_t)
+ipmi::Cc ipmi_groupext(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t,
+                       ipmi_response_t response, ipmi_data_len_t data_len,
+                       ipmi_context_t)
 {
     // Generic return from IPMI commands.
-    ipmi_ret_t rc = ipmi::ccSuccess;
+    ipmi::Cc rc = ipmi::ccSuccess;
     uint8_t* p = (uint8_t*)response;
 
     std::printf("IPMI GROUP EXTENSIONS\n");

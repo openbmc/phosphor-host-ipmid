@@ -1122,9 +1122,9 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
     }
 }
 
-ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
-                                     const ipmi::sensor::Info* info,
-                                     ipmi_data_len_t)
+ipmi::Cc populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
+                                   const ipmi::sensor::Info* info,
+                                   ipmi_data_len_t)
 {
     /* Functional sensor case */
     if (isAnalogSensor(info->propertyInterfaces.begin()->first))
@@ -1163,8 +1163,8 @@ ipmi_ret_t populate_record_from_dbus(get_sdr::SensorDataFullRecordBody* body,
     return ipmi::ccSuccess;
 };
 
-ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
-                            ipmi_data_len_t data_len)
+ipmi::Cc ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
+                          ipmi_data_len_t data_len)
 {
     auto req = reinterpret_cast<get_sdr::GetSdrReq*>(request);
     auto resp = reinterpret_cast<get_sdr::GetSdrResp*>(response);
@@ -1254,8 +1254,8 @@ ipmi_ret_t ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     return ipmi::ccSuccess;
 }
 
-ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
-                               ipmi_data_len_t data_len)
+ipmi::Cc ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
+                             ipmi_data_len_t data_len)
 {
     auto req = reinterpret_cast<get_sdr::GetSdrReq*>(request);
     auto resp = reinterpret_cast<get_sdr::GetSdrResp*>(response);
@@ -1327,11 +1327,11 @@ ipmi_ret_t ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     return ipmi::ccSuccess;
 }
 
-ipmi_ret_t ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                            ipmi_response_t response, ipmi_data_len_t data_len,
-                            ipmi_context_t)
+ipmi::Cc ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                          ipmi_response_t response, ipmi_data_len_t data_len,
+                          ipmi_context_t)
 {
-    ipmi_ret_t ret = ipmi::ccSuccess;
+    ipmi::Cc ret = ipmi::ccSuccess;
     get_sdr::GetSdrReq* req = (get_sdr::GetSdrReq*)request;
     get_sdr::GetSdrResp* resp = (get_sdr::GetSdrResp*)response;
 
@@ -1445,9 +1445,9 @@ static bool isFromSystemChannel()
     return true;
 }
 
-ipmi_ret_t ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t,
-                                ipmi_request_t request, ipmi_response_t,
-                                ipmi_data_len_t dataLen, ipmi_context_t)
+ipmi::Cc ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
+                              ipmi_response_t, ipmi_data_len_t dataLen,
+                              ipmi_context_t)
 {
     uint16_t generatorID;
     size_t count;
