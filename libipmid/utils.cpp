@@ -258,61 +258,6 @@ ipmi::ObjectTree getAllDbusObjects(
     return objectTree;
 }
 
-void deleteAllDbusObjects(sdbusplus::bus_t& bus, const std::string& serviceRoot,
-                          const std::string& interface,
-                          const std::string& match)
-{
-    try
-    {
-        auto objectTree = getAllDbusObjects(bus, serviceRoot, interface, match);
-
-        for (auto& object : objectTree)
-        {
-            method_no_args::callDbusMethod(bus, object.second.begin()->first,
-                                           object.first, DELETE_INTERFACE,
-                                           "Delete");
-        }
-    }
-    catch (const sdbusplus::exception_t& e)
-    {
-        lg2::info("sdbusplus exception - Unable to delete the objects, "
-                  "service: {SERVICE}, interface: {INTERFACE}, error: {ERROR}",
-                  "SERVICE", serviceRoot, "INTERFACE", interface, "ERROR", e);
-    }
-}
-
-static inline std::string convertToString(const InterfaceList& interfaces)
-{
-    std::string intfStr;
-    for (const auto& intf : interfaces)
-    {
-        intfStr += "," + intf;
-    }
-    return intfStr;
-}
-
-ObjectTree getAllAncestors(sdbusplus::bus_t& bus, const std::string& path,
-                           InterfaceList&& interfaces)
-{
-    auto mapperCall = bus.new_method_call(MAPPER_BUS_NAME, MAPPER_OBJ,
-                                          MAPPER_INTF, "GetAncestors");
-    mapperCall.append(path, interfaces);
-
-    auto mapperReply = bus.call(mapperCall);
-    ObjectTree objectTree;
-    mapperReply.read(objectTree);
-
-    if (objectTree.empty())
-    {
-        lg2::error("No Object has implemented the interface: {INTERFACE}, "
-                   "path: {PATH}",
-                   "INTERFACE", convertToString(interfaces), "PATH", path);
-        elog<InternalFailure>();
-    }
-
-    return objectTree;
-}
-
 namespace method_no_args
 {
 
@@ -474,37 +419,6 @@ boost::system::error_code getAllDbusObjects(
     return ec;
 }
 
-boost::system::error_code deleteAllDbusObjects(
-    Context::ptr ctx, const std::string& serviceRoot,
-    const std::string& interface, const std::string& match)
-{
-    ObjectTree objectTree;
-    boost::system::error_code ec =
-        getAllDbusObjects(ctx, serviceRoot, interface, match, objectTree);
-    if (ec)
-    {
-        return ec;
-    }
-
-    for (auto& object : objectTree)
-    {
-        ctx->bus->yield_method_call(ctx->yield, ec,
-                                    object.second.begin()->first, object.first,
-                                    DELETE_INTERFACE, "Delete");
-        if (ec)
-        {
-            lg2::error("Failed to delete all objects, service: {SERVICE}, "
-                       "interface: {INTERFACE}, NetFn: {NETFN}, "
-                       "Cmd: {CMD}, Error: {ERROR}",
-                       "SERVICE", serviceRoot, "INTERFACE", interface, "NETFN",
-                       lg2::hex, ctx->netFn, "CMD", lg2::hex, ctx->cmd, "ERROR",
-                       ec.message());
-            break;
-        }
-    }
-    return ec;
-}
-
 boost::system::error_code getManagedObjects(
     Context::ptr ctx, const std::string& service, const std::string& objPath,
     ObjectValueTree& objects)
@@ -513,33 +427,6 @@ boost::system::error_code getManagedObjects(
     objects = ctx->bus->yield_method_call<ipmi::ObjectValueTree>(
         ctx->yield, ec, service.c_str(), objPath.c_str(),
         "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
-    return ec;
-}
-
-boost::system::error_code getAllAncestors(
-    Context::ptr ctx, const std::string& path, const InterfaceList& interfaces,
-    ObjectTree& objectTree)
-{
-    std::string interfaceList = convertToString(interfaces);
-
-    boost::system::error_code ec;
-    objectTree = ctx->bus->yield_method_call<ObjectTree>(
-        ctx->yield, ec, MAPPER_BUS_NAME, MAPPER_OBJ, MAPPER_INTF,
-        "GetAncestors", path, interfaceList);
-
-    if (ec)
-    {
-        return ec;
-    }
-
-    if (objectTree.empty())
-    {
-        lg2::error("No Object has implemented the interface: {INTERFACE}, "
-                   "path: {PATH}",
-                   "INTERFACE", interfaceList, "PATH", path);
-        elog<InternalFailure>();
-    }
-
     return ec;
 }
 
