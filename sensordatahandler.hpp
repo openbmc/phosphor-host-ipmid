@@ -51,7 +51,7 @@ AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData);
  *  @param[in] msg - message to send
  *  @return failure status in IPMI error code
  */
-ipmi_ret_t updateToDbus(IpmiUpdateData& msg);
+ipmi::Cc updateToDbus(IpmiUpdateData& msg);
 
 namespace get
 {
@@ -500,8 +500,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
-                     const Info& sensorInfo);
+ipmi::Cc assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo);
 
 /** @brief Update d-bus based on a reading assertion
  *  @tparam T - type of d-bus property mapping this sensor
@@ -510,8 +509,8 @@ ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
  *  @return a IPMI error code
  */
 template <typename T>
-ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
-                            const Info& sensorInfo)
+ipmi::Cc readingAssertion(const SetSensorReadingReq& cmdData,
+                          const Info& sensorInfo)
 {
     auto msg =
         makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
@@ -535,8 +534,7 @@ ipmi_ret_t readingAssertion(const SetSensorReadingReq& cmdData,
  *  @return an IPMI error code
  */
 template <typename T>
-ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
-                       const Info& sensorInfo)
+ipmi::Cc readingData(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
 {
     T raw_value = (sensorInfo.coefficientM * cmdData.reading) +
                   sensorInfo.scaledOffset;
@@ -564,16 +562,16 @@ ipmi_ret_t readingData(const SetSensorReadingReq& cmdData,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-ipmi_ret_t eventdata(const SetSensorReadingReq& cmdData, const Info& sensorInfo,
-                     uint8_t data);
+ipmi::Cc eventdata(const SetSensorReadingReq& cmdData, const Info& sensorInfo,
+                   uint8_t data);
 
 /** @brief Update d-bus based on eventdata1 type sensor data
  *  @param[in] cmdData - input sensor data
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-inline ipmi_ret_t eventdata1(const SetSensorReadingReq& cmdData,
-                             const Info& sensorInfo)
+inline ipmi::Cc eventdata1(const SetSensorReadingReq& cmdData,
+                           const Info& sensorInfo)
 {
     return eventdata(cmdData, sensorInfo, cmdData.eventData1);
 }
@@ -583,8 +581,8 @@ inline ipmi_ret_t eventdata1(const SetSensorReadingReq& cmdData,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-inline ipmi_ret_t eventdata2(const SetSensorReadingReq& cmdData,
-                             const Info& sensorInfo)
+inline ipmi::Cc eventdata2(const SetSensorReadingReq& cmdData,
+                           const Info& sensorInfo)
 {
     return eventdata(cmdData, sensorInfo, cmdData.eventData2);
 }
@@ -594,8 +592,8 @@ inline ipmi_ret_t eventdata2(const SetSensorReadingReq& cmdData,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-inline ipmi_ret_t eventdata3(const SetSensorReadingReq& cmdData,
-                             const Info& sensorInfo)
+inline ipmi::Cc eventdata3(const SetSensorReadingReq& cmdData,
+                           const Info& sensorInfo)
 {
     return eventdata(cmdData, sensorInfo, cmdData.eventData3);
 }
@@ -623,8 +621,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
  *  @param[in] sensorInfo - sensor d-bus info
  *  @return a IPMI error code
  */
-ipmi_ret_t assertion(const SetSensorReadingReq& cmdData,
-                     const Info& sensorInfo);
+ipmi::Cc assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo);
 
 } // namespace notify
 

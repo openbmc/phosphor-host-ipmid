@@ -537,14 +537,14 @@ ipmi::RspType<uint16_t, // inventorySize
     return ipmi::responseSuccess(fru.size(), accessType);
 }
 
-ipmi_ret_t getFruSdrCount(ipmi::Context::ptr, size_t& count)
+ipmi::Cc getFruSdrCount(ipmi::Context::ptr, size_t& count)
 {
     count = deviceHashes.size();
     return ipmi::ccSuccess;
 }
 
-ipmi_ret_t getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
-                      get_sdr::SensorDataFruRecord& resp)
+ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
+                    get_sdr::SensorDataFruRecord& resp)
 {
     if (deviceHashes.size() < index)
     {
