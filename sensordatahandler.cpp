@@ -31,7 +31,7 @@ AssertionSet getAssertionSet(const SetSensorReadingReq& cmdData)
     return std::make_pair(assertionStates, deassertionStates);
 }
 
-ipmi_ret_t updateToDbus(IpmiUpdateData& msg)
+ipmi::Cc updateToDbus(IpmiUpdateData& msg)
 {
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     try
@@ -196,8 +196,8 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                                updateInterface.c_str(), command.c_str());
 }
 
-ipmi_ret_t eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
-                     uint8_t data)
+ipmi::Cc eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
+                   uint8_t data)
 {
     auto msg =
         makeDbusMsg("org.freedesktop.DBus.Properties", sensorInfo.sensorPath,
@@ -219,7 +219,7 @@ ipmi_ret_t eventdata(const SetSensorReadingReq&, const Info& sensorInfo,
     return updateToDbus(msg);
 }
 
-ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
+ipmi::Cc assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
 {
     std::bitset<16> assertionSet(getAssertionSet(cmdData).first);
     std::bitset<16> deassertionSet(getAssertionSet(cmdData).second);
@@ -289,7 +289,7 @@ IpmiUpdateData makeDbusMsg(const std::string& updateInterface,
                                updateInterface.c_str(), command.c_str());
 }
 
-ipmi_ret_t assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
+ipmi::Cc assertion(const SetSensorReadingReq& cmdData, const Info& sensorInfo)
 {
     auto msg = makeDbusMsg(sensorInfo.sensorInterface, sensorInfo.sensorPath,
                            "Notify", sensorInfo.sensorInterface);
