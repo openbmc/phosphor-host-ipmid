@@ -16,6 +16,24 @@
       "message": "Since this is a public header file, we need to mark things as deprecated for a while before removing then. In the past, my rule of thumb was 6 months.\n\n```\nenum ipmi_net_fns\n{\n    ...\n} __attribute__(deprecated(\"Deprecated enum: use netfn values from ipmi-api.hpp; this enum will be removed after 31-Dec-2025\"));\n```",
       "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6426100e_28cad19e",
+        "filename": "include/ipmid/api.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-04T01:36:22Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "482af4a8_e3035d29",
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
