@@ -61,10 +61,16 @@ static constexpr size_t ipAddrOffset = 17;
 namespace ipmi
 {
 constexpr Cc ccParmNotSupported = 0x80;
+constexpr Cc ccFailSetInProgress = 0x81;
 
 static inline auto responseParmNotSupported()
 {
     return response(ccParmNotSupported);
+}
+
+static inline auto responsefailSetInProgress()
+{
+    return response(ccFailSetInProgress);
 }
 } // namespace ipmi
 
@@ -2051,7 +2057,7 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         if ((transferStatus == setInProgress) &&
             (static_cast<uint8_t>(setInProgressFlag) != setComplete))
         {
-            return ipmi::response(failSetInProgress);
+            return ipmi::responsefailSetInProgress();
         }
         transferStatus = static_cast<uint8_t>(setInProgressFlag);
         return ipmi::responseSuccess();
