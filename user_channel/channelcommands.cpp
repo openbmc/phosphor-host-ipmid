@@ -24,6 +24,13 @@
 namespace ipmi
 {
 
+constexpr Cc ccPayloadTypeNotSupported = 0x80;
+
+static inline auto responsePayloadTypeNotSupported()
+{
+    return response(ccPayloadTypeNotSupported);
+}
+
 /** @brief implements the set channel access command
  *  @ param ctx - context pointer
  *  @ param channel - channel number
@@ -369,7 +376,6 @@ RspType<uint8_t> // formatVersion
 {
     uint8_t channel =
         convertCurrentChannelNum(static_cast<uint8_t>(chNum), ctx->channel);
-    constexpr uint8_t payloadTypeNotSupported = 0x80;
 
     if (reserved || !isValidChannel(channel))
     {
@@ -380,14 +386,14 @@ RspType<uint8_t> // formatVersion
     if (getChannelSessionSupport(channel) == EChannelSessSupported::none)
     {
         lg2::debug("Get channel payload version - No support on channel");
-        return response(payloadTypeNotSupported);
+        return responsePayloadTypeNotSupported();
     }
 
     if (!isValidPayloadType(static_cast<PayloadType>(payloadTypeNum)))
     {
         lg2::error("Get channel payload version - Payload type unavailable");
 
-        return response(payloadTypeNotSupported);
+        return responsePayloadTypeNotSupported();
     }
 
     // BCD encoded version representation - 1.0

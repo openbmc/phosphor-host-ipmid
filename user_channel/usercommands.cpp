@@ -32,6 +32,23 @@ namespace ipmi
 static constexpr uint8_t enableOperation = 0x00;
 static constexpr uint8_t disableOperation = 0x01;
 
+static constexpr uint8_t userIdEnabledViaSetPassword = 0x01;
+static constexpr uint8_t userIdDisabledViaSetPassword = 0x02;
+
+/** IPMI set password return codes (refer spec sec 22.30) */
+constexpr Cc ccPasswdFailMismatch = 0x80;
+constexpr Cc ccPasswdFailWrongSize = 0x81;
+
+static inline auto responsePasswdFailMismatch()
+{
+    return response(ccPasswdFailMismatch);
+}
+
+static inline auto responsePasswdFailWrongSize()
+{
+    return response(ccPasswdFailWrongSize);
+}
+
 /** @brief implements the set user access command
  *  @param ctx - IPMI context pointer (for channel)
  *  @param channel - channel number
@@ -353,7 +370,7 @@ ipmi::RspType<> // user name
         {
             lg2::debug("Test password failed, user Id: {USER_ID}", "USER_ID",
                        userId);
-            return ipmi::response(ipmiCCPasswdFailMismatch);
+            return ipmi::responsePasswdFailMismatch();
         }
         return ipmi::responseSuccess();
     }
