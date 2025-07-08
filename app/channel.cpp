@@ -17,6 +17,16 @@
 using namespace phosphor::logging;
 using namespace sdbusplus::error::xyz::openbmc_project::common;
 
+namespace ipmi
+{
+constexpr Cc ccPayloadTypeNotSupported = 0x80;
+
+static inline auto responsePayloadTypeNotSupported()
+{
+    return response(ccPayloadTypeNotSupported);
+}
+} // namespace ipmi
+
 namespace cipher
 {
 
@@ -131,8 +141,7 @@ ipmi::RspType<uint8_t,             // Channel Number
     if (!ipmi::isValidPayloadType(static_cast<ipmi::PayloadType>(payloadType)))
     {
         lg2::debug("Get channel cipher suites - Invalid payload type");
-        constexpr uint8_t ccPayloadTypeNotSupported = 0x80;
-        return ipmi::response(ccPayloadTypeNotSupported);
+        return ipmi::responsePayloadTypeNotSupported();
     }
 
     if (!recordInit)
