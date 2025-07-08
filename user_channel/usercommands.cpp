@@ -87,7 +87,7 @@ ipmi::RspType<> ipmiSetUserAccess(
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
         lg2::debug("Set user access - No support on channel");
-        return ipmi::response(ccActionNotSupportedForChannel);
+        return ipmi::responseActionNotSupportedForChannel();
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -160,7 +160,7 @@ ipmi::RspType<uint6_t, // max channel users
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
         lg2::debug("Get user access - No support on channel");
-        return ipmi::response(ccActionNotSupportedForChannel);
+        return ipmi::responseActionNotSupportedForChannel();
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -431,7 +431,7 @@ ipmi::RspType<uint8_t,  // channel number
     if (getChannelSessionSupport(channel) == EChannelSessSupported::none)
     {
         lg2::debug("Get channel auth capabilities - No support on channel");
-        return ipmi::response(ccActionNotSupportedForChannel);
+        return ipmi::responseActionNotSupportedForChannel();
     }
 
     constexpr bool extDataSupport = true; // true for IPMI 2.0 extensions
@@ -524,7 +524,7 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
     }
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
-        return ipmi::response(ccActionNotSupportedForChannel);
+        return ipmi::responseActionNotSupportedForChannel();
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {
@@ -609,7 +609,7 @@ ipmi::RspType<bool,    // stdPayload0ipmiReserved
     }
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
-        return ipmi::response(ccActionNotSupportedForChannel);
+        return ipmi::responseActionNotSupportedForChannel();
     }
     if (!ipmiUserIsValidUserId(static_cast<uint8_t>(userId)))
     {

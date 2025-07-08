@@ -65,7 +65,7 @@ RspType<> ipmiSetChannelAccess(
     {
         lg2::debug("Set channel access - No support on channel: {CHANNEL}",
                    "CHANNEL", chNum);
-        return response(ccActionNotSupportedForChannel);
+        return responseActionNotSupportedForChannel();
     }
 
     ChannelAccess chActData;
@@ -101,7 +101,7 @@ RspType<> ipmiSetChannelAccess(
         case reserved:
         default:
             lg2::debug("Set channel access - Invalid access set mode");
-            return response(ccAccessModeNotSupportedForChannel);
+            return responseAccessModeNotSupportedForChannel();
     }
 
     // cannot static cast directly from uint2_t to enum; must go via int
@@ -122,7 +122,7 @@ RspType<> ipmiSetChannelAccess(
         case reserved:
         default:
             lg2::debug("Set channel access - Invalid access priv mode");
-            return response(ccAccessModeNotSupportedForChannel);
+            return responseAccessModeNotSupportedForChannel();
     }
 
     if (setNVFlag != 0)
@@ -197,7 +197,7 @@ ipmi ::RspType<uint3_t, // access mode,
     {
         lg2::debug("Get channel access - No support on channel: {CHANNEL}",
                    "CHANNEL", chNum);
-        return response(ccActionNotSupportedForChannel);
+        return responseActionNotSupportedForChannel();
     }
 
     ChannelAccess chAccess = {};
@@ -343,7 +343,7 @@ RspType<uint16_t, // stdPayloadType
     if (getChannelSessionSupport(chNum) == EChannelSessSupported::none)
     {
         lg2::debug("Get channel payload - No support on channel");
-        return response(ccActionNotSupportedForChannel);
+        return responseActionNotSupportedForChannel();
     }
     constexpr uint16_t stdPayloadType = standardPayloadBit(PayloadType::IPMI) |
                                         standardPayloadBit(PayloadType::SOL);
