@@ -21,6 +21,16 @@ using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 static bool lastCallSuccessful = false;
 
+namespace ipmi
+{
+static Cc ccWatchdogNotInit = 0x80;
+
+static inline auto responseWatchdogNotInit()
+{
+    return response(ccWatchdogNotInit);
+}
+} // namespace ipmi
+
 void reportError()
 {
     // We don't want to fill the SEL with errors if the daemon dies and doesn't
@@ -52,8 +62,7 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
         {
             lastCallSuccessful = true;
 
-            constexpr uint8_t ccWatchdogNotInit = 0x80;
-            return ipmi::response(ccWatchdogNotInit);
+            return ipmi::responseWatchdogNotInit();
         }
 
         // The ipmi standard dictates we enable the watchdog during reset
