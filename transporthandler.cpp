@@ -53,6 +53,32 @@ namespace ipmi
 namespace transport
 {
 
+// LAN Handler specific response codes
+constexpr Cc ccParamNotSupported = 0x80;
+constexpr Cc ccParamSetLocked = 0x81;
+constexpr Cc ccParamReadOnly = 0x82;
+constexpr Cc ccWriteReadParameter = 0x82;
+
+static inline auto responseParamNotSupported()
+{
+    return response(ccParamNotSupported);
+}
+
+static inline auto responseParamSetLocked()
+{
+    return response(ccParamSetLocked);
+}
+
+static inline auto responseParamReadOnly()
+{
+    return response(ccParamReadOnly);
+}
+
+static inline auto responseWriteReadParameter()
+{
+    return response(ccWriteReadParameter);
+}
+
 /** @brief Valid address origins for IPv4 */
 const std::unordered_set<IP::AddressOrigin> originsV4 = {
     IP::AddressOrigin::Static,
@@ -696,12 +722,12 @@ RspType<message::Payload> getLanOem(uint8_t channel, uint8_t parameter,
 RspType<> setLanOem(uint8_t, uint8_t, message::Payload& req)
 {
     req.trailingOk = true;
-    return response(ccParamNotSupported);
+    return responseParamNotSupported();
 }
 
 RspType<message::Payload> getLanOem(uint8_t, uint8_t, uint8_t, uint8_t)
 {
-    return response(ccParamNotSupported);
+    return responseParamNotSupported();
 }
 
 /**
@@ -772,7 +798,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                     auto& storedStatus = getSetStatus(channel);
                     if (storedStatus == SetStatus::InProgress)
                     {
-                        return response(ccParamSetLocked);
+                        return responseParamSetLocked();
                     }
                     storedStatus = status;
                     return responseSuccess();
@@ -784,17 +810,17 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                     }
                     return responseSuccess();
             }
-            return response(ccParamNotSupported);
+            return responseParamNotSupported();
         }
         case LanParam::AuthSupport:
         {
             req.trailingOk = true;
-            return response(ccParamReadOnly);
+            return responseParamReadOnly();
         }
         case LanParam::AuthEnables:
         {
             req.trailingOk = true;
-            return response(ccParamReadOnly);
+            return responseParamReadOnly();
         }
         case LanParam::IP:
         {
@@ -837,7 +863,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 case IPSrc::BMC:
                     return responseInvalidFieldRequest();
             }
-            return response(ccParamNotSupported);
+            return responseParamNotSupported();
         }
         case LanParam::MAC:
         {
@@ -912,7 +938,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         case LanParam::IPFamilySupport:
         {
             req.trailingOk = true;
-            return response(ccParamReadOnly);
+            return responseParamReadOnly();
         }
         case LanParam::IPFamilyEnables:
         {
@@ -928,14 +954,14 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                     return responseSuccess();
                 case IPFamilyEnables::IPv4Only:
                 case IPFamilyEnables::IPv6Only:
-                    return response(ccParamNotSupported);
+                    return responseParamNotSupported();
             }
-            return response(ccParamNotSupported);
+            return responseParamNotSupported();
         }
         case LanParam::IPv6Status:
         {
             req.trailingOk = true;
-            return response(ccParamReadOnly);
+            return responseParamReadOnly();
         }
         case LanParam::IPv6StaticAddresses:
         {
@@ -976,7 +1002,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         case LanParam::IPv6DynamicAddresses:
         {
             req.trailingOk = true;
-            return response(ccParamReadOnly);
+            return responseParamReadOnly();
         }
         case LanParam::IPv6RouterControl:
         {
@@ -991,7 +1017,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                     control & std::bitset<8>(reservedRACCBits));
                 expected.any())
             {
-                return response(ccParamNotSupported);
+                return responseParamNotSupported();
             }
 
             bool enableRA = control[IPv6RouterControlFlag::Dynamic];
@@ -1071,7 +1097,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
     }
 
     req.trailingOk = true;
-    return response(ccParamNotSupported);
+    return responseParamNotSupported();
 }
 
 RspType<> setLan(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
@@ -1373,7 +1399,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         return getLanOem(channel, parameter, set, block);
     }
 
-    return response(ccParamNotSupported);
+    return responseParamNotSupported();
 }
 
 constexpr const char* solInterface = "xyz.openbmc_project.Ipmi.SOL";
@@ -1538,13 +1564,13 @@ RspType<> setSolConfParams(Context::ptr ctx, uint4_t channelBits,
         }
         case SolConfParam::Port:
         {
-            return response(ipmiCCWriteReadParameter);
+            return responseWriteReadParameter();
         }
         case SolConfParam::NonVbitrate:
         case SolConfParam::Vbitrate:
         case SolConfParam::Channel:
         default:
-            return response(ipmiCCParamNotSupported);
+            return responseParamNotSupported();
     }
     return responseSuccess();
 }
@@ -1695,7 +1721,7 @@ RspType<message::Payload> getSolConfParams(
                     "/xyz/openbmc_project/console/default",
                     "xyz.openbmc_project.Console.UART", "Baud", baudRate))
             {
-                return response(ccParamNotSupported);
+                return responseParamNotSupported();
             }
             switch (baudRate)
             {
@@ -1722,10 +1748,10 @@ RspType<message::Payload> getSolConfParams(
         }
         case SolConfParam::Vbitrate:
         default:
-            return response(ipmiCCParamNotSupported);
+            return responseParamNotSupported();
     }
 
-    return response(ccParamNotSupported);
+    return responseParamNotSupported();
 }
 
 } // namespace transport
