@@ -27,8 +27,19 @@ namespace ipmi
 static constexpr uint8_t maxIpmiChannels = 16;
 static constexpr uint8_t currentChNum = 0xE;
 static constexpr uint8_t invalidChannel = 0xff;
-static constexpr const uint8_t ccActionNotSupportedForChannel = 0x82;
-static constexpr const uint8_t ccAccessModeNotSupportedForChannel = 0x83;
+
+constexpr Cc ccActionNotSupportedForChannel = 0x82;
+constexpr Cc ccAccessModeNotSupportedForChannel = 0x83;
+
+static inline auto responseActionNotSupportedForChannel()
+{
+    return response(ccActionNotSupportedForChannel);
+}
+
+static inline auto responseAccessModeNotSupportedForChannel()
+{
+    return response(ccAccessModeNotSupportedForChannel);
+}
 
 /**
  * @array of privilege levels
