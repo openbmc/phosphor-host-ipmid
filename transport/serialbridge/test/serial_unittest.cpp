@@ -18,12 +18,11 @@ std::unordered_map<uint8_t, uint8_t> testsets = {
 
 TEST(TestSpecialCharact, getUnescapedCharact)
 {
-    uint8_t c;
     auto channel = std::make_shared<SerialChannel>(0);
 
     for (const auto& set : testsets)
     {
-        c = channel->getUnescapedCharacter(set.second);
+        uint8_t c = channel->getUnescapedCharacter(set.second);
         ASSERT_EQ(c, set.first);
     }
 }

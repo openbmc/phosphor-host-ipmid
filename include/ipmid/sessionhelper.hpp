@@ -33,7 +33,6 @@ bool parseCloseSessionInputPayload(const std::string& objectPath,
     // getting the position of session id and session handle string from
     // object path.
     std::size_t ptrPosition = objectPath.rfind("/");
-    uint16_t tempSessionHandle = 0;
 
     if (ptrPosition != std::string::npos)
     {
@@ -47,10 +46,11 @@ bool parseCloseSessionInputPayload(const std::string& objectPath,
             // extracting the session handle
             std::string sessionHandleString = sessionIdString.substr(pos + 1);
             // extracting the session id
-            sessionIdString = sessionIdString.substr(0, pos);
+            sessionIdString.resize(pos);
             // converting session id string  and session handle string to
             // hexadecimal.
             std::stringstream handle(sessionHandleString);
+            uint16_t tempSessionHandle = 0;
             handle >> std::hex >> tempSessionHandle;
             sessionHandle = tempSessionHandle & 0xFF;
             std::stringstream idString(sessionIdString);
@@ -74,7 +74,7 @@ bool parseCloseSessionInputPayload(const std::string& objectPath,
  *
  * @return true if the object is matched else return false
  **/
-bool isSessionObjectMatched(const std::string objectPath,
+bool isSessionObjectMatched(const std::string& objectPath,
                             const uint32_t reqSessionId,
                             const uint8_t reqSessionHandle)
 {
