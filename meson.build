@@ -192,6 +192,7 @@ if get_option('ipmi-whitelist').allowed()
             'bash', \
             generate_whitelist_script, \
             whitelist_conf,
+        check: true,
     )
 
     whitelist_pre = declare_dependency(
