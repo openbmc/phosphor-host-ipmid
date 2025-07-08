@@ -9,8 +9,7 @@ std::tuple<bool, std::string> SysInfoParamStore::lookup(
         return std::make_tuple(false, "");
     }
 
-    auto& callback = iterator->second;
-    auto s = callback();
+    auto s = iterator->second();
     return std::make_tuple(true, s);
 }
 
