@@ -15,22 +15,9 @@
 */
 
 #pragma once
-#include <cstdint>
 
 namespace ipmi
 {
-
-/**
- * @enum IPMI set password return codes (refer spec sec 22.30)
- */
-enum ipmi_set_password_return_codes : uint8_t
-{
-    ipmiCCPasswdFailMismatch = 0x80,
-    ipmiCCPasswdFailWrongSize = 0x81,
-};
-
-static constexpr uint8_t userIdEnabledViaSetPassword = 0x1;
-static constexpr uint8_t userIdDisabledViaSetPassword = 0x2;
 
 void registerUserIpmiFunctions();
 } // namespace ipmi
