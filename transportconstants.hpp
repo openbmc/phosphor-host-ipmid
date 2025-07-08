@@ -114,11 +114,6 @@ constexpr uint8_t Static = 0;
 constexpr uint8_t Dynamic = 1;
 }; // namespace IPv6RouterControlFlag
 
-// LAN Handler specific response codes
-constexpr Cc ccParamNotSupported = 0x80;
-constexpr Cc ccParamSetLocked = 0x81;
-constexpr Cc ccParamReadOnly = 0x82;
-
 // VLANs are a 12-bit value
 constexpr uint16_t VLAN_VALUE_MASK = 0x0fff;
 constexpr uint16_t VLAN_ENABLE_FLAG = 0x8000;
@@ -152,9 +147,6 @@ enum class SolConfParam : uint8_t
     Channel,        //!< SOL payload channel.
     Port,           //!< SOL payload port.
 };
-
-constexpr uint8_t ipmiCCParamNotSupported = 0x80;
-constexpr uint8_t ipmiCCWriteReadParameter = 0x82;
 
 } // namespace transport
 } // namespace ipmi
