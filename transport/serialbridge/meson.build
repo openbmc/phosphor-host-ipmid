@@ -32,7 +32,7 @@ if systemd.found()
         output: 'serialbridge@.service',
         configuration: conf_data,
         install: true,
-        install_dir: systemd.get_variable(pkgconfig: 'systemdsystemunitdir'),
+        install_dir: systemd.get_variable(pkgconfig: 'systemd_system_unit_dir'),
     )
 endif
 
