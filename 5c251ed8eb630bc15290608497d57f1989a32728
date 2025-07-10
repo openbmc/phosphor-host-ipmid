@@ -106,6 +106,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "024bc0e6_9ee49cac",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "a1adad71_69887efd",
+      "range": {
+        "startLine": 547,
+        "startChar": 2,
+        "endLine": 547,
+        "endChar": 3
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4bc8e1bd_823b7d74",
@@ -119,6 +143,30 @@
       "writtenOn": "2025-07-03T17:18:00Z",
       "side": 1,
       "message": "ipmi::Cc",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f00a0c26_edaeb507",
+        "filename": "sensordatahandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "4bc8e1bd_823b7d74",
       "range": {
         "startLine": 34,
         "startChar": 0,
@@ -152,6 +200,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3ea3dcb4_381b46e4",
+        "filename": "sensordatahandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "808eb729_de13d3df",
+      "range": {
+        "startLine": 199,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ed0e704b_56266e92",
@@ -165,6 +237,30 @@
       "writtenOn": "2025-07-03T17:18:00Z",
       "side": 1,
       "message": "ipmi::Cc",
+      "range": {
+        "startLine": 222,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "67c3d189_5dcbd611",
+        "filename": "sensordatahandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "ed0e704b_56266e92",
       "range": {
         "startLine": 222,
         "startChar": 0,
@@ -198,6 +294,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "35b859e3_da51ce49",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "7c7c2c24_de34214f",
+      "range": {
+        "startLine": 1166,
+        "startChar": 0,
+        "endLine": 1166,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "581735c7_d004433b",
@@ -211,6 +331,30 @@
       "writtenOn": "2025-07-03T17:18:00Z",
       "side": 1,
       "message": "ipmi::Cc",
+      "range": {
+        "startLine": 1257,
+        "startChar": 0,
+        "endLine": 1257,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8ea70a93_3544bf7a",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1257,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "581735c7_d004433b",
       "range": {
         "startLine": 1257,
         "startChar": 0,
@@ -244,6 +388,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c452b014_e1b5db72",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1448,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "397182dc_da11c779",
+      "range": {
+        "startLine": 1448,
+        "startChar": 0,
+        "endLine": 1448,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e3372059_0acd661a",
@@ -257,6 +425,30 @@
       "writtenOn": "2025-07-03T17:18:00Z",
       "side": 1,
       "message": "ipmi::Cc",
+      "range": {
+        "startLine": 285,
+        "startChar": 0,
+        "endLine": 285,
+        "endChar": 10
+      },
+      "revId": "5c251ed8eb630bc15290608497d57f1989a32728",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ddcfb5ca_62cf0986",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-07-10T00:58:12Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "e3372059_0acd661a",
       "range": {
         "startLine": 285,
         "startChar": 0,
