@@ -1,5 +1,7 @@
 #include "dbus-sdr/sensorutils.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <cmath>
 
 #include "gtest/gtest.h"

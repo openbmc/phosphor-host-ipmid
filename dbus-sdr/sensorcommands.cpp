@@ -592,8 +592,9 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     }
     if constexpr (debug)
     {
-        std::cerr << "VR sensor " << sensor::parseSdrIdFromPath(path)
-                  << " mode is: [" << index << "] " << mode << std::endl;
+        lg2::error("VR sensor {PATH} mode is: [{INDEX}] {MODE}", "PATH",
+                   sensor::parseSdrIdFromPath(path), "INDEX", index, "MODE",
+                   mode);
     }
     return true;
 }
@@ -1032,15 +1033,14 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
         {
             // This is the first reading, show the coefficients
             double step = (max - min) / 255.0;
-            std::cerr
-                << "IPMI sensor "
-                << details::sdrStatsTable.getName((ctx->lun << 8) | sensnum)
-                << ": Range min=" << min << " max=" << max << ", step=" << step
-                << ", Coefficients mValue=" << static_cast<int>(mValue)
-                << " rExp=" << static_cast<int>(rExp)
-                << " bValue=" << static_cast<int>(bValue)
-                << " bExp=" << static_cast<int>(bExp)
-                << " bSigned=" << static_cast<int>(bSigned) << "\n";
+            lg2::error(
+                "IPMI sensor {NAME}: Range min={MIN} max={MAX}, step={STEP}, "
+                "Coefficients mValue={MVALUE} rExp={REXP} bValue={BVALUE} "
+                "bExp={BEXP} bSigned={BSIGNED}",
+                "NAME",
+                details::sdrStatsTable.getName((ctx->lun << 8) | sensnum),
+                "MIN", min, "MAX", max, "STEP", step, "MVALUE", mValue, "REXP",
+                rExp, "BVALUE", bValue, "BEXP", bExp, "BSIGNED", bSigned);
         }
     }
 
