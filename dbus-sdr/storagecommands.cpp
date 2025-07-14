@@ -1047,7 +1047,7 @@ ipmi::RspType<uint16_t,                   // Next Record ID
             }
             catch (const std::invalid_argument&)
             {
-                std::cerr << "Invalid Generator ID\n";
+                lg2::error("Invalid Generator ID");
             }
 
             // Get the sensor type, sensor number, and event type for the sensor
@@ -1073,7 +1073,7 @@ ipmi::RspType<uint16_t,                   // Next Record ID
             }
             catch (const std::invalid_argument&)
             {
-                std::cerr << "Invalid Event Direction\n";
+                lg2::error("Invalid Event Direction");
             }
         }
 
@@ -1188,7 +1188,7 @@ ipmi::RspType<uint8_t> ipmiStorageClearSEL(
                              "xyz.openbmc_project.Logging.IPMI", "Clear");
     if (ec)
     {
-        std::cerr << "error in clear SEL: " << ec.message() << std::endl;
+        lg2::error("error in clear SEL: {MSG}", "MSG", ec.message());
         return ipmi::responseUnspecifiedError();
     }
 
