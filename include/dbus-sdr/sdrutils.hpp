@@ -102,11 +102,11 @@ class IPMIStatsEntry
             // Only show this if beginning a new streak
             if (numStreakMiss == 0)
             {
-                std::cerr << "IPMI sensor " << sensorName
-                          << ": Missing reading, byte=" << raw
-                          << ", Reading counts good=" << numReadings
-                          << " miss=" << numMissings
-                          << ", Prior good streak=" << numStreakRead << "\n";
+                lg2::error(
+                    "IPMI sensor {NAME}: Missing reading, byte={BYTE}, Reading "
+                    "counts good={GOOD} miss={MISS}, Prior good streak={STREAK}",
+                    "NAME", sensorName, "BYTE", raw, "GOOD", numReadings,
+                    "MISS", numMissings, "STREAK", numStreakRead);
             }
 
             numStreakRead = 0;
@@ -119,19 +119,20 @@ class IPMIStatsEntry
         // Only show this if beginning a new streak and not the first time
         if ((numStreakRead == 0) && (numReadings != 0))
         {
-            std::cerr << "IPMI sensor " << sensorName
-                      << ": Recovered reading, value=" << reading << " byte="
-                      << raw << ", Reading counts good=" << numReadings
-                      << " miss=" << numMissings
-                      << ", Prior miss streak=" << numStreakMiss << "\n";
+            lg2::error(
+                "IPMI sensor {NAME}: Recovered reading, value={VALUE} byte={BYTE}"
+                ", Reading counts good={GOOD} miss={MISS}, Prior miss "
+                "streak={STREAK}",
+                "NAME", sensorName, "VALUE", reading, "BYTE", raw, "GOOD",
+                numReadings, "MISS", numMissings, "STREAK", numStreakMiss);
         }
 
         // Initialize min/max if the first successful reading
         if (numReadings == 0)
         {
-            std::cerr << "IPMI sensor " << sensorName
-                      << ": First reading, value=" << reading << " byte=" << raw
-                      << "\n";
+            lg2::error(
+                "IPMI sensor {NAME}: First reading, value={VALUE} byte={BYTE}",
+                "NAME", sensorName, "VALUE", reading, "BYTE", raw);
 
             minValue = reading;
             maxValue = reading;
@@ -144,18 +145,18 @@ class IPMIStatsEntry
         // Only provide subsequent output if new min/max established
         if (reading < minValue)
         {
-            std::cerr << "IPMI sensor " << sensorName
-                      << ": Lowest reading, value=" << reading
-                      << " byte=" << raw << "\n";
+            lg2::error(
+                "IPMI sensor {NAME}: Lowest reading, value={VALUE} byte={BYTE}",
+                "NAME", sensorName, "VALUE", reading, "BYTE", raw);
 
             minValue = reading;
         }
 
         if (reading > maxValue)
         {
-            std::cerr << "IPMI sensor " << sensorName
-                      << ": Highest reading, value=" << reading
-                      << " byte=" << raw << "\n";
+            lg2::error(
+                "IPMI sensor {NAME}: Highest reading, value={VALUE} byte={BYTE}",
+                "NAME", sensorName, "VALUE", reading, "BYTE", raw);
 
             maxValue = reading;
         }

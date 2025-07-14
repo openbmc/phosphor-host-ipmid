@@ -2,6 +2,7 @@ sensorutils_lib = static_library(
     'sensorutils',
     'sensorutils.cpp',
     include_directories: root_inc,
+    dependencies: phosphor_logging_dep,
     implicit_include_directories: false,
 )
 

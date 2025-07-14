@@ -16,9 +16,10 @@
 
 #include "dbus-sdr/sensorutils.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 namespace ipmi
 {
@@ -153,19 +154,19 @@ bool getSensorAttributes(const double max, const double min, int16_t& mValue,
 {
     if (!(std::isfinite(min)))
     {
-        std::cerr << "getSensorAttributes: Min value is unusable\n";
+        lg2::error("getSensorAttributes: Min value is unusable");
         return false;
     }
     if (!(std::isfinite(max)))
     {
-        std::cerr << "getSensorAttributes: Max value is unusable\n";
+        lg2::error("getSensorAttributes: Max value is unusable");
         return false;
     }
 
     // Because NAN has already been tested for, this comparison works
     if (max <= min)
     {
-        std::cerr << "getSensorAttributes: Max must be greater than min\n";
+        lg2::error("getSensorAttributes: Max must be greater than min");
         return false;
     }
 
@@ -210,8 +211,10 @@ bool getSensorAttributes(const double max, const double min, int16_t& mValue,
     // Step 2: Constrain M, and set rExp accordingly
     if (!(scaleFloatExp(dM, rExp)))
     {
-        std::cerr << "getSensorAttributes: Multiplier range exceeds scale (M="
-                  << dM << ", rExp=" << (int)rExp << ")\n";
+        lg2::error(
+            "getSensorAttributes: Multiplier range exceeds scale (M={DM}, "
+            "rExp={REXP})",
+            "DM", dM, "REXP", rExp);
         return false;
     }
 
@@ -222,7 +225,7 @@ bool getSensorAttributes(const double max, const double min, int16_t& mValue,
     // The multiplier can not be zero, for obvious reasons
     if (mValue == 0)
     {
-        std::cerr << "getSensorAttributes: Multiplier range below scale\n";
+        lg2::error("getSensorAttributes: Multiplier range below scale");
         return false;
     }
 
@@ -240,9 +243,10 @@ bool getSensorAttributes(const double max, const double min, int16_t& mValue,
     // Step 4: Constrain B, and set bExp accordingly
     if (!(scaleFloatExp(dB, bExp)))
     {
-        std::cerr << "getSensorAttributes: Offset (B=" << dB << ", bExp="
-                  << (int)bExp << ") exceeds multiplier scale (M=" << dM
-                  << ", rExp=" << (int)rExp << ")\n";
+        lg2::error(
+            "getSensorAttributes: Offset range exceeds scale (B={DB}, "
+            "bExp={BEXP}) exceeds multiplier scale (M={DM}, rExp={REXP})",
+            "DB", dB, "BEXP", bExp, "DM", dM, "REXP", rExp);
         return false;
     }
 
