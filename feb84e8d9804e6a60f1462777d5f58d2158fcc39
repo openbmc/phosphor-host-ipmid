@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6124b6aa_16713727",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-07-16T06:23:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f91007f9_3707afb6",
+      "range": {
+        "startLine": 354,
+        "startChar": 50,
+        "endLine": 354,
+        "endChar": 61
+      },
+      "revId": "feb84e8d9804e6a60f1462777d5f58d2158fcc39",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7d5c2358_0f580a1f",
@@ -37,6 +61,30 @@
       "writtenOn": "2025-07-16T01:13:25Z",
       "side": 1,
       "message": "Can we separate this into a method?",
+      "range": {
+        "startLine": 412,
+        "startChar": 4,
+        "endLine": 430,
+        "endChar": 74
+      },
+      "revId": "feb84e8d9804e6a60f1462777d5f58d2158fcc39",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "38ae1788_aa388212",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-07-16T06:23:40Z",
+      "side": 1,
+      "message": "Setting powerCapSamplPeriodProp is used inside a function, I don\u0027t think that we should separate this into a new method.",
+      "parentUuid": "7d5c2358_0f580a1f",
       "range": {
         "startLine": 412,
         "startChar": 4,
