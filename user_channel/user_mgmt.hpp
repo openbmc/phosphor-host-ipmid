@@ -131,6 +131,7 @@ struct UserInfo
     uint8_t userName[ipmiMaxUserName];
     UserPrivAccess userPrivAccess[ipmiMaxChannels];
     bool userEnabled;
+    std::vector<std::string> userGroups;
     bool userInSystem;
     bool fixedUserName;
     PayloadAccess payloadAccess[ipmiMaxChannels];
@@ -429,6 +430,30 @@ class UserAccess
      *
      */
     UsersTbl* getUsersTblPtr();
+
+    /** @brief function to get all User available groups
+     *
+     */
+    std::vector<std::string>& getUsersAllAvailableGroup();
+
+    /** @brief determines valid user group access
+     *
+     *  @param[in] groupAccess - List of groupAccess
+     *
+     *  @return true if valid, false otherwise
+     */
+    bool isValidGroups(const std::vector<std::string>& groupAccess);
+
+    /** @brief sets user group access data
+     *
+     *  @param[in] userId - user id
+     *  @param[in] chNum - channel number
+     *  @param[in] groups - groups data
+     *
+     *  @return ccSuccess for success, others for failure.
+     */
+    Cc setUserGroups(const uint8_t userId, const uint8_t chNum,
+                     const std::vector<std::string>& groupAccess);
 
     std::unique_ptr<boost::interprocess::named_recursive_mutex> userMutex{
         nullptr};

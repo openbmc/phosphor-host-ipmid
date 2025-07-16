@@ -231,4 +231,20 @@ Cc ipmiUserGetUserPayloadAccess(const uint8_t chNum, const uint8_t userId,
     return ccSuccess;
 }
 
+Cc ipmiUserSetUserGroups(const uint8_t userId, const uint8_t chNum,
+                         const std::vector<std::string>& groupAccess)
+{
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return ccParmOutOfRange;
+    }
+
+    if (!UserAccess::isValidChannel(chNum))
+    {
+        return ccInvalidFieldRequest;
+    }
+
+    return getUserAccessObject().setUserGroups(userId, chNum, groupAccess);
+}
+
 } // namespace ipmi
