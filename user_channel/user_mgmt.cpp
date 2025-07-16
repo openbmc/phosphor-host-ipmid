@@ -1403,6 +1403,11 @@ UsersTbl* UserAccess::getUsersTblPtr()
     return &usersTbl;
 }
 
+std::vector<std::string>& UserAccess::getUsersAllAvailableGroup()
+{
+    return availableGroups;
+}
+
 void UserAccess::getSystemPrivAndGroups()
 {
     std::map<std::string, PrivAndGroupType> properties;
@@ -1678,5 +1683,83 @@ void UserAccess::cacheUserDataFile()
     }
 
     return;
+}
+
+bool UserAccess::isValidGroups(const std::vector<std::string>& groupAccess)
+{
+    if (groupAccess.empty())
+    {
+        lg2::error("User groupAccess should not empty.");
+        return false;
+    }
+
+    const auto& allGroups = getUsersAllAvailableGroup();
+    if (allGroups.empty())
+    {
+        lg2::error("User All available group should not empty.");
+        return false;
+    }
+
+    for (const auto& group : groupAccess)
+    {
+        if (std::find(allGroups.begin(), allGroups.end(), group) ==
+            allGroups.end())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+Cc UserAccess::setUserGroups(const uint8_t userId, const uint8_t chNum,
+                             const std::vector<std::string>& groupAccess)
+{
+    if (!isValidGroups(groupAccess))
+    {
+        lg2::error("Invalid user groups.");
+        return ccInvalidFieldRequest;
+    }
+
+    std::string userName;
+    if (ipmiUserGetUserName(userId, userName) != ccSuccess)
+    {
+        lg2::error("User Name not found, user Id: {USER_ID}", "USER_ID",
+                   userId);
+        return ccParmOutOfRange;
+    }
+
+    sdbusplus::message::object_path tempUserPath(userObjBasePath);
+    tempUserPath /= userName;
+    std::string userPath(tempUserPath);
+
+    setDbusProperty(bus, userMgrService, userPath, usersInterface,
+                    userGrpProperty, groupAccess);
+
+    boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
+        userLock{*userMutex};
+    UserInfo* userInfo = getUserInfo(userId);
+    if (!userInfo)
+    {
+        lg2::error("Failed to get user info of user name {NAME}", "NAME",
+                   userName);
+        return ccUnspecifiedError;
+    }
+
+    if (std::find(groupAccess.begin(), groupAccess.end(), ipmiGrpName) ==
+        groupAccess.end())
+    {
+        userInfo->userPrivAccess[chNum].ipmiEnabled = false;
+    }
+    try
+    {
+        writeUserData();
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("Write user data failed");
+        return ccUnspecifiedError;
+    }
+
+    return ccSuccess;
 }
 } // namespace ipmi
