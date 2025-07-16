@@ -20,6 +20,7 @@
 
 #include <bitset>
 #include <string>
+#include <vector>
 
 namespace ipmi
 {
@@ -266,5 +267,18 @@ Cc ipmiUserSetUserPayloadAccess(const uint8_t chNum, const uint8_t operation,
  */
 Cc ipmiUserGetUserPayloadAccess(const uint8_t chNum, const uint8_t userId,
                                 PayloadAccess& payloadAccess);
+
+/** @brief sets user group access data
+ *
+ *  @param[in] userId - user id
+ *  @param[in] userName - user name
+ *  @param[in] chNum - channel number
+ *  @param[in] groups - groups data
+ *
+ *  @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserSetUserGroups(const uint8_t userId, std::string& userName,
+                         const uint8_t chNum,
+                         const std::vector<std::string>& groupAccess);
 
 } // namespace ipmi
