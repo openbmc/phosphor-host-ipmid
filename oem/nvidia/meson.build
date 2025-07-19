@@ -1,6 +1,9 @@
 # nvidia OEM library build
 
-nvidia_oem_src = ['biosconfigcommands.cpp']
+nvidia_oem_src = [
+    'biosconfigcommands.cpp',
+    'bootstrap-credentials-oem-cmds.cpp',
+]
 
 nvidia_oem_deps = [
     boost,
@@ -12,7 +15,6 @@ nvidia_oem_deps = [
     sdbusplus_dep,
     stdplus_dep,
 ]
-
 
 nvidia_ipmi_oem = library(
     'nvidia_ipmi_oem',
