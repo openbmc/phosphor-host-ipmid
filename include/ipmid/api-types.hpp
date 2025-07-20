@@ -31,6 +31,9 @@ constexpr Group groupPICMG = 0x00;
 constexpr Group groupDMTG = 0x01;
 constexpr Group groupSSI = 0x02;
 constexpr Group groupVSO = 0x03;
+#ifdef REDFISH_HOST_INTERFACE
+constexpr Group groupRedfish = 0x52;
+#endif
 #ifdef ARM_SBMR_SUPPORT
 constexpr Group groupSBMR = 0xAE;
 #endif
@@ -338,6 +341,14 @@ constexpr Cmd cmdGetBootProgressCode = 0x03;
 } // namespace sbmr
 #endif
 
+#ifdef REDFISH_HOST_INTERFACE
+namespace bootStrap
+{
+constexpr Cmd cmdGetMngCertFingerprint = 0x01;
+constexpr Cmd cmdGetBootstrapAccoutCre = 0x02;
+} // namespace bootStrap
+#endif
+
 // These are the command network functions, the response
 // network functions are the function + 1. So to determine
 // the proper network function which issued the command
@@ -401,6 +412,16 @@ constexpr Cc ccInsufficientPrivilege = 0xD4;
 constexpr Cc ccCommandNotAvailable = 0xD5;
 constexpr Cc ccCommandDisabled = 0xD6;
 constexpr Cc ccUnspecifiedError = 0xFF;
+
+#ifdef REDFISH_HOST_INTERFACE
+/* BootStrap Account commands */
+/* Completion code */
+constexpr ipmi::Cc ccCredsBootstrapDisabled = 0x80;
+constexpr ipmi::Cc ccCertificateNumberInvalid = 0xCB;
+
+/* Credential bootstrapping control option */
+constexpr uint8_t keepCredBootstrapEnabled = 0xa5;
+#endif
 
 /* ipmi often has two return types:
  * 1. Failure: CC is non-zero; no trailing data
@@ -561,5 +582,23 @@ static inline auto responseUnspecifiedError()
 {
     return response(ccUnspecifiedError);
 }
+
+#ifdef REDFISH_HOST_INTERFACE
+/* helper functions for the various bootStrap command error response types */
+static inline auto responseCmdDisabled()
+{
+    return response(ipmi::ccCredsBootstrapDisabled);
+}
+
+static inline auto responseCertsNumberInvalid()
+{
+    return response(ipmi::ccCertificateNumberInvalid);
+}
+
+static inline auto responseCompleteNormal()
+{
+    return response(ipmi::ccSuccess);
+}
+#endif
 
 } // namespace ipmi
