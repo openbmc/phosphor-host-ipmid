@@ -254,4 +254,16 @@ Cc ipmiUserSetUserGroups(const uint8_t userId, std::string& userName,
                                                groupAccess);
 }
 
+Cc ipmiUserSetUserIsBootStrapState(const uint8_t userId, std::string& userName,
+                                   const bool& isBootStrap)
+{
+    if (!UserAccess::isValidUserId(userId))
+    {
+        return ccParmOutOfRange;
+    }
+
+    return getUserAccessObject().setUserIsBootStrapState(userId, userName,
+                                                         isBootStrap);
+}
+
 } // namespace ipmi

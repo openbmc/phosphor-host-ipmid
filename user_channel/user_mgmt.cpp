@@ -1763,4 +1763,38 @@ Cc UserAccess::setUserGroups(const uint8_t userId, std::string& userName,
 
     return ccSuccess;
 }
+
+Cc UserAccess::setUserIsBootStrapState(
+    const uint8_t userId, std::string& userName, const bool& isBootStrap)
+{
+    if (!isValidUserId(userId))
+    {
+        return ccParmOutOfRange;
+    }
+
+    if (userName.empty())
+    {
+        lg2::error("User name not set / invalid");
+        return ccUnspecifiedError;
+    }
+
+    sdbusplus::message::object_path tempUserPath(userObjBasePath);
+    tempUserPath /= userName;
+    std::string userPath(tempUserPath);
+
+    try
+    {
+        setDbusProperty(bus, userMgrService, userPath, usersInterface,
+                        userIsBootStrapProperty, isBootStrap);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error(
+            "Can't set value of {PROP} property in the {INF} interface at path {PATH} error {ERROR}",
+            "PROP", userIsBootStrapProperty, "INF", usersInterface, "PATH",
+            userPath, "ERROR", e);
+    }
+
+    return ccSuccess;
+}
 } // namespace ipmi

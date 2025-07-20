@@ -281,4 +281,15 @@ Cc ipmiUserSetUserGroups(const uint8_t userId, std::string& userName,
                          const uint8_t chNum,
                          const std::vector<std::string>& groupAccess);
 
+/** @brief sets wherether user is BootStrap account
+ *
+ *  @param[in] userId - user id
+ *  @param[in] userName - user name
+ *  @param[in] isBootStrap - is boot strap account state
+ *
+ *  @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserSetUserIsBootStrapState(const uint8_t userId, std::string& userName,
+                                   const bool& isBootStrap);
+
 } // namespace ipmi

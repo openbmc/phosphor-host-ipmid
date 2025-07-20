@@ -78,6 +78,7 @@ static constexpr const char* allGrpProperty = "AllGroups";
 static constexpr const char* userPrivProperty = "UserPrivilege";
 static constexpr const char* userGrpProperty = "UserGroups";
 static constexpr const char* userEnabledProperty = "UserEnabled";
+static constexpr const char* userIsBootStrapProperty = "BootStrapAccount";
 
 // User groups
 static constexpr const char* userGroupIpmi = "ipmi";
@@ -456,6 +457,17 @@ class UserAccess
     Cc setUserGroups(const uint8_t userId, std::string& userName,
                      const uint8_t chNum,
                      const std::vector<std::string>& groupAccess);
+
+    /** @brief to set user isBootStrap state
+     *
+     *  @param[in] userId - user id
+     *  @param[in] userName - user name
+     *  @param[in] isBootStrap - IsBootStrap state of the user
+     *
+     *  @return ccSuccess for success, others for failure.
+     */
+    Cc setUserIsBootStrapState(const uint8_t userId, std::string& userName,
+                               const bool& isBootStrap);
 
     std::unique_ptr<boost::interprocess::named_recursive_mutex> userMutex{
         nullptr};
