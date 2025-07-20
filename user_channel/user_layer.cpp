@@ -264,6 +264,17 @@ Cc ipmiUserRenameNonIpmiGroupUser(const std::string& userName,
                                   const std::string& newUserName)
 {
     return getUserAccessObject().renameNonIpmiGroupUser(userName, newUserName);
-}
+
+    Cc ipmiUserSetUserBootStrapAccountState(const uint8_t userId,
+                                            const bool& bootStrapState)
+    {
+        if (!UserAccess::isValidUserId(userId))
+        {
+            return ccParmOutOfRange;
+        }
+
+        return getUserAccessObject().setUserBootStrapAccountState(
+            userId, bootStrapState);
+    }
 
 } // namespace ipmi
