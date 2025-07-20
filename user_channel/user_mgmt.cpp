@@ -1816,4 +1816,66 @@ Cc UserAccess::removeUserFromNoneIpmiGroupUsers(const std::string& userName)
     return ccSuccess;
 }
 
+Cc UserAccess::setUserBootStrapAccountState(const uint8_t userId,
+                                            const bool& bootStrapState)
+{
+    if (!isValidUserId(userId))
+    {
+        return ccParmOutOfRange;
+    }
+
+    std::string userName;
+    if (ipmiUserGetUserName(userId, userName) != ccSuccess)
+    {
+        lg2::error("User Name not found, user Id: {USER_ID}", "USER_ID",
+                   userId);
+        return ccParmOutOfRange;
+    }
+    if (userName.empty())
+    {
+        lg2::error("User name is empty.");
+        return ccUnspecifiedError;
+    }
+
+    sdbusplus::message::object_path tempUserPath(userObjBasePath);
+    tempUserPath /= userName;
+    std::string userPath(tempUserPath);
+
+    try
+    {
+        setDbusProperty(bus, userMgrService, userPath, usersInterface,
+                        userIsBootStrapProperty, bootStrapState);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error(
+            "Can't set value of {PROP} property in the {INF} interface at path {PATH} error {ERROR}",
+            "PROP", userIsBootStrapProperty, "INF", usersInterface, "PATH",
+            userPath, "ERROR", e);
+    }
+
+    boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
+        userLock{*userMutex};
+    UserInfo* userInfo = getUserInfo(userId);
+    if (!userInfo)
+    {
+        lg2::error("Failed to get user info of user name {NAME}", "NAME",
+                   userName);
+        return ccUnspecifiedError;
+    }
+    userInfo->fixedUserName = true;
+
+    try
+    {
+        writeUserData();
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("Write user data failed");
+        return ccUnspecifiedError;
+    }
+
+    return ccSuccess;
+}
+
 } // namespace ipmi
