@@ -79,6 +79,7 @@ static constexpr const char* allGrpProperty = "AllGroups";
 static constexpr const char* userPrivProperty = "UserPrivilege";
 static constexpr const char* userGrpProperty = "UserGroups";
 static constexpr const char* userEnabledProperty = "UserEnabled";
+static constexpr const char* userIsBootStrapProperty = "BootStrapAccount";
 
 static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-reserved", // PRIVILEGE_RESERVED - 0
@@ -482,6 +483,17 @@ class UserAccess
      * @return ccSuccess for success, others for failure.
      */
     Cc clearNonIpmiGroupUsers();
+
+    /** @brief to set user isBootStrap state
+     *
+     *  @param[in] userId - user id
+     *  @param[in] userName - user name
+     *  @param[in] isBootStrap - IsBootStrap state of the user
+     *
+     *  @return ccSuccess for success, others for failure.
+     */
+    Cc setUserIsBootStrapState(const uint8_t userId, std::string& userName,
+                               const bool& isBootStrap);
 
     std::unique_ptr<boost::interprocess::named_recursive_mutex> userMutex{
         nullptr};

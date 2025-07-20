@@ -311,4 +311,14 @@ Cc ipmiUserRemoveUserToNonIpmiGroupUsers(std::string& userName);
  */
 Cc ipmiUserClearNonIpmiGroupUsers();
 
+/** @brief sets wherether user is BootStrap account
+ *
+ *  @param[in] userId - user id
+ *  @param[in] userName - user name
+ *  @param[in] isBootStrap - is boot strap account state
+ *
+ *  @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserSetUserIsBootStrapState(const uint8_t userId, std::string& userName,
+                                   const bool& isBootStrap);
 } // namespace ipmi
