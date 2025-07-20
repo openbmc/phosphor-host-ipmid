@@ -255,6 +255,7 @@ ipmid_pre = [
     crypto,
     ipmid_dep,
     channellayer_dep,
+    userlayer_dep,
 ]
 
 transportoem_src = []
@@ -279,6 +280,8 @@ if get_option('arm-sbmr').allowed()
     arm_sbmr_cmds_src = ['sbmrhandler.cpp']
 endif
 
+redfish_host_interface_src = ['redfishhostinterface.cpp']
+
 libipmi20_src = [
     'app/channel.cpp',
     'app/watchdog.cpp',
@@ -298,11 +301,13 @@ libipmi20_src = [
     'read_fru_data.cpp',
     'sensordatahandler.cpp',
     'user_channel/channelcommands.cpp',
+    'user_channel/user_layer.cpp',
     generated_src,
     transportoem_src,
     storage_cmds_src,
     openpower_cmds_src,
     arm_sbmr_cmds_src,
+    redfish_host_interface_src,
     conf_h,
 ]
 
