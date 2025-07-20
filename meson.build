@@ -95,15 +95,15 @@ endif
 
 feature_map = {
     'boot-flag-safe-mode-support': '-DENABLE_BOOT_FLAG_SAFE_MODE_SUPPORT',
-    'i2c-whitelist-check'        : '-DENABLE_I2C_WHITELIST_CHECK',
-    'update-functional-on-fail'  : '-DUPDATE_FUNCTIONAL_ON_FAIL',
-    'dynamic-sensors'            : '-DFEATURE_DYNAMIC_SENSORS',
-    'dynamic-sensors-write'      : '-DFEATURE_DYNAMIC_SENSORS_WRITE',
-    'entity-manager-decorators'  : '-DUSING_ENTITY_MANAGER_DECORATORS',
-    'hybrid-sensors'             : '-DFEATURE_HYBRID_SENSORS',
-    'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
-    'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',
-    'arm-sbmr'                   : '-DARM_SBMR_SUPPORT',
+    'i2c-whitelist-check': '-DENABLE_I2C_WHITELIST_CHECK',
+    'update-functional-on-fail': '-DUPDATE_FUNCTIONAL_ON_FAIL',
+    'dynamic-sensors': '-DFEATURE_DYNAMIC_SENSORS',
+    'dynamic-sensors-write': '-DFEATURE_DYNAMIC_SENSORS_WRITE',
+    'entity-manager-decorators': '-DUSING_ENTITY_MANAGER_DECORATORS',
+    'hybrid-sensors': '-DFEATURE_HYBRID_SENSORS',
+    'sensors-cache': '-DFEATURE_SENSORS_CACHE',
+    'dynamic-storages-only': '-DFEATURE_DYNAMIC_STORAGES_ONLY',
+    'arm-sbmr': '-DARM_SBMR_SUPPORT',
 }
 
 foreach option_key, option_value : feature_map
@@ -189,9 +189,9 @@ if get_option('ipmi-whitelist').allowed()
 
     whitelist_conf = get_option('whitelist-conf')
     ipmiwhitelist = run_command( \
-            'bash', \
-            generate_whitelist_script, \
-            whitelist_conf,
+        'bash', \
+        generate_whitelist_script, \
+        whitelist_conf,
         check: true,
     )
 
@@ -255,6 +255,7 @@ ipmid_pre = [
     crypto,
     ipmid_dep,
     channellayer_dep,
+    userlayer_dep,
 ]
 
 transportoem_src = []
@@ -279,6 +280,8 @@ if get_option('arm-sbmr').allowed()
     arm_sbmr_cmds_src = ['sbmrhandler.cpp']
 endif
 
+redfish_host_interface_src = ['redfishhostinterface.cpp']
+
 libipmi20_src = [
     'app/channel.cpp',
     'app/watchdog.cpp',
@@ -298,11 +301,13 @@ libipmi20_src = [
     'read_fru_data.cpp',
     'sensordatahandler.cpp',
     'user_channel/channelcommands.cpp',
+    'user_channel/user_layer.cpp',
     generated_src,
     transportoem_src,
     storage_cmds_src,
     openpower_cmds_src,
     arm_sbmr_cmds_src,
+    redfish_host_interface_src,
     conf_h,
 ]
 
