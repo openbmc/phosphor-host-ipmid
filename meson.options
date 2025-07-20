@@ -251,6 +251,14 @@ option(
     description: 'Support Arm SBMR specific functions',
 )
 
+# redfish-host-interface specific functionality.
+option(
+    'redfish-host-interface',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Support redfish host interface specific functions',
+)
+
 #######################################################################
 # Transport options
 #######################################################################

@@ -104,6 +104,7 @@ feature_map = {
     'sensors-cache'              : '-DFEATURE_SENSORS_CACHE',
     'dynamic-storages-only'      : '-DFEATURE_DYNAMIC_STORAGES_ONLY',
     'arm-sbmr'                   : '-DARM_SBMR_SUPPORT',
+    'redfish-host-interface'     : '-DREDFISH_HOST_INTERFACE',
 }
 
 foreach option_key, option_value : feature_map
@@ -255,6 +256,7 @@ ipmid_pre = [
     crypto,
     ipmid_dep,
     channellayer_dep,
+    userlayer_dep,
 ]
 
 transportoem_src = []
@@ -279,6 +281,11 @@ if get_option('arm-sbmr').allowed()
     arm_sbmr_cmds_src = ['sbmrhandler.cpp']
 endif
 
+redfish_host_interface_src = []
+if get_option('redfish-host-interface').enabled()
+    redfish_host_interface_src = ['redfishhostinterface.cpp']
+endif
+
 libipmi20_src = [
     'app/channel.cpp',
     'app/watchdog.cpp',
@@ -298,11 +305,13 @@ libipmi20_src = [
     'read_fru_data.cpp',
     'sensordatahandler.cpp',
     'user_channel/channelcommands.cpp',
+    'user_channel/user_layer.cpp',
     generated_src,
     transportoem_src,
     storage_cmds_src,
     openpower_cmds_src,
     arm_sbmr_cmds_src,
+    redfish_host_interface_src,
     conf_h,
 ]
 
