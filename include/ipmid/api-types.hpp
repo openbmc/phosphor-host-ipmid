@@ -31,6 +31,9 @@ constexpr Group groupPICMG = 0x00;
 constexpr Group groupDMTG = 0x01;
 constexpr Group groupSSI = 0x02;
 constexpr Group groupVSO = 0x03;
+#ifdef REDFISH_HOST_INTERFACE
+constexpr Group groupRedfish = 0x52;
+#endif
 #ifdef ARM_SBMR_SUPPORT
 constexpr Group groupSBMR = 0xAE;
 #endif
