@@ -1868,4 +1868,45 @@ Cc UserAccess::removeUserFromNonIpmiGroupUsers(const std::string& userName)
     return ccSuccess;
 }
 
+Cc UserAccess::setUserBootStrapAccountState(const uint8_t userId,
+                                            const bool& bootStrapState)
+{
+    if (!isValidUserId(userId))
+    {
+        return ccParmOutOfRange;
+    }
+
+    std::string userName;
+    if (ipmiUserGetUserName(userId, userName) != ccSuccess)
+    {
+        lg2::error("User Name not found, user Id: {USER_ID}", "USER_ID",
+                   userId);
+        return ccParmOutOfRange;
+    }
+    if (userName.empty())
+    {
+        lg2::error("User name is empty.");
+        return ccUnspecifiedError;
+    }
+
+    sdbusplus::object_path tempUserPath(userObjBasePath);
+    tempUserPath /= userName;
+    std::string userPath(tempUserPath);
+
+    try
+    {
+        setDbusProperty(bus, userMgrService, userPath, usersInterface,
+                        userIsBootStrapProperty, bootStrapState);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("Failed to set {PROPERTY} for user {NAME}: {ERR}",
+                   "PROPERTY", userIsBootStrapProperty, "NAME", userName, "ERR",
+                   e);
+        return ccUnspecifiedError;
+    }
+
+    return ccSuccess;
+}
+
 } // namespace ipmi
