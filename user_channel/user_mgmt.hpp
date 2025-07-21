@@ -51,6 +51,7 @@ static constexpr const char* ipmiUserSignalLockFile =
     "/run/ipmi/ipmi_usr_signal_mutex";
 static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
 static constexpr const char* ipmiGrpName = "ipmi";
+static constexpr const char* redfishGrpName = "redfish";
 static constexpr size_t privNoAccess = 0xF;
 static constexpr size_t privMask = 0xF;
 
@@ -79,6 +80,9 @@ static constexpr const char* userPrivProperty = "UserPrivilege";
 static constexpr const char* userGrpProperty = "UserGroups";
 static constexpr const char* userEnabledProperty = "UserEnabled";
 static constexpr const char* userIsBootStrapProperty = "BootStrapAccount";
+
+/* Default name of first bootStrap account */
+static constexpr const char* firstUserName = "bootstrap0";
 
 static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-reserved", // PRIVILEGE_RESERVED - 0
@@ -491,6 +495,18 @@ class UserAccess
      */
     Cc addUserToNonIpmiGroupUsers(const std::string& userName);
 
+    /** @brief check wherether the `bootstrap0` account is used
+     *
+     * @return true if account is used, false for others
+     */
+    bool isbootstrap0InUsed();
+
+    /** @brief set the `bootstrap0` account is used state
+     *
+     * @return true if the state is updated successfully, false for others
+     */
+    bool setbootstrap0InUsed(const bool& inUsed);
+
     /** @brief remove userName to list of None Ipmi group users
      *
      * @param[in] userName - user name
@@ -513,6 +529,9 @@ class UserAccess
         nullptr};
 
     std::vector<std::string> listNoneIpmiGroupUsers{};
+
+    /* Identify the used state of the bootstrap account name bootstrap0 */
+    bool bootstrap0InUse;
 
   private:
     UsersTbl usersTbl;

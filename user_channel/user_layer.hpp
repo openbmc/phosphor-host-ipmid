@@ -288,6 +288,18 @@ Cc ipmiUserSetUserGroups(const uint8_t userId, const uint8_t chNum,
  */
 Cc ipmiUserAddUserToNonIpmiGroupUsers(const std::string& userName);
 
+/** @brief check wherether the `bootstrap0` account is used
+ *
+ * @return true if account is used, false for others
+ */
+bool ipmiUserIsbootstrap0InUsed();
+
+/** @brief set the `bootstrap0` account is used state
+ *
+ * @return true if the state is updated successfully, false for others
+ */
+bool ipmiUserSetbootstrap0InUsed(const bool& inUsed);
+
 /** @brief remove userName from the list of None Ipmi group users
  *
  * @param[in] userName - user name

@@ -206,6 +206,10 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
         {
             return;
         }
+        if (userName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(true);
+        }
         if (std::find(groups.begin(), groups.end(), ipmiGrpName) ==
             groups.end())
         {
@@ -222,11 +226,23 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
         getUserNameFromPath(objPath.str, userName);
         /* Try to remove user name from None Ipmi Group User list */
         ipmiUserRemoveUserFromNoneIpmiGroupUsers(userName);
+        if (userName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(false);
+        }
         userEvent = UserUpdateEvent::userDeleted;
     }
     else if (signal == userRenamedSignal)
     {
         msg.read(userName, newUserName);
+        if (userName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(false);
+        }
+        else if (newUserName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(true);
+        }
         userEvent = UserUpdateEvent::userRenamed;
     }
     else if (signal == propertiesChangedSignal)
@@ -1789,6 +1805,17 @@ Cc UserAccess::addUserToNonIpmiGroupUsers(const std::string& userName)
     }
 
     return ccSuccess;
+}
+
+bool UserAccess::setbootstrap0InUsed(const bool& inUsed)
+{
+    bootstrap0InUse = inUsed;
+    return true;
+}
+
+bool UserAccess::isbootstrap0InUsed()
+{
+    return bootstrap0InUse;
 }
 
 Cc UserAccess::removeUserFromNoneIpmiGroupUsers(const std::string& userName)

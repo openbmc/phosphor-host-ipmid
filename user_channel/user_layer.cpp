@@ -255,6 +255,16 @@ Cc ipmiUserAddUserToNonIpmiGroupUsers(const std::string& userName)
     return getUserAccessObject().addUserToNonIpmiGroupUsers(userName);
 }
 
+bool ipmiUserIsbootstrap0InUsed()
+{
+    return getUserAccessObject().isbootstrap0InUsed();
+}
+
+bool ipmiUserSetbootstrap0InUsed(const bool& inUsed)
+{
+    return getUserAccessObject().setbootstrap0InUsed(inUsed);
+}
+
 Cc ipmiUserRemoveUserFromNoneIpmiGroupUsers(const std::string& userName)
 {
     return getUserAccessObject().removeUserFromNoneIpmiGroupUsers(userName);
