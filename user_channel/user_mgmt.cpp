@@ -206,6 +206,10 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
         {
             return;
         }
+        if (userName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(true);
+        }
         if (std::find(groups.begin(), groups.end(), ipmiGrpName) ==
             groups.end())
         {
@@ -222,12 +226,25 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
         getUserNameFromPath(objPath.str, userName);
         /* Try to remove user name from None Ipmi Group User list */
         ipmiUserRemoveUserFromNoneIpmiGroupUsers(userName);
+        if (userName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(false);
+        }
         userEvent = UserUpdateEvent::userDeleted;
     }
     else if (signal == userRenamedSignal)
     {
         msg.read(userName, newUserName);
         ipmiUserRenameNonIpmiGroupUser(userName, newUserName);
+
+        if (userName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(false);
+        }
+        else if (newUserName == firstUserName)
+        {
+            ipmiUserSetbootstrap0InUsed(true);
+        }
         userEvent = UserUpdateEvent::userRenamed;
     }
     else if (signal == propertiesChangedSignal)
@@ -896,9 +913,23 @@ bool UserAccess::isIpmiInAvailableGroupList()
 
 Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
 {
+    return setUserName(userId, userName, {});
+}
+
+Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName,
+                           const std::string& privilege)
+{
     if (!isValidUserId(userId))
     {
         return ccParmOutOfRange;
+    }
+
+    if (!privilege.empty() &&
+        std::find(ipmiPrivIndex.begin(), ipmiPrivIndex.end(), privilege) ==
+            ipmiPrivIndex.end())
+    {
+        lg2::error("Invalid privilege {PRIV}", "PRIV", privilege);
+        return ccInvalidFieldRequest;
     }
 
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
@@ -947,8 +978,10 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
             auto method =
                 bus.new_method_call(userMgrService, userMgrObjBasePath,
                                     userMgrInterface, createUserMethod);
-            method.append(userName.c_str(), availableGroups,
-                          ipmiPrivIndex[PRIVILEGE_USER], false);
+            method.append(
+                userName.c_str(), availableGroups,
+                privilege.empty() ? ipmiPrivIndex[PRIVILEGE_USER] : privilege,
+                false);
             auto reply = bus.call(method);
         }
         catch (const sdbusplus::exception_t& e)
@@ -961,11 +994,15 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         safeUsernameCopyToBuffer(userInfo->userName, sizeof(userInfo->userName),
                                  userName);
 
+        uint8_t priv =
+            privilege.empty()
+                ? static_cast<uint8_t>(PRIVILEGE_USER)
+                : (static_cast<uint8_t>(convertToIPMIPrivilege(privilege)) &
+                   privMask);
         userInfo->userInSystem = true;
         for (size_t chIndex = 0; chIndex < ipmiMaxChannels; chIndex++)
         {
-            userInfo->userPrivAccess[chIndex].privilege =
-                static_cast<uint8_t>(PRIVILEGE_USER);
+            userInfo->userPrivAccess[chIndex].privilege = priv;
         }
     }
     else if (oldUser != userName && validUser)
@@ -1892,6 +1929,17 @@ Cc UserAccess::renameNonIpmiGroupUser(const std::string& userName,
     }
 
     return ccSuccess;
+}
+
+bool UserAccess::setbootstrap0InUsed(const bool& inUsed)
+{
+    bootstrap0InUse = inUsed;
+    return true;
+}
+
+bool UserAccess::isbootstrap0InUsed()
+{
+    return bootstrap0InUse;
 }
 
 Cc UserAccess::removeUserFromNoneIpmiGroupUsers(const std::string& userName)
