@@ -81,10 +81,16 @@ Cc ipmiUserSetUserName(const uint8_t userId, const char* userName)
 
 Cc ipmiUserSetUserName(const uint8_t userId, const std::string& userName)
 {
+    return ipmiUserSetUserName(userId, userName, {});
+}
+
+Cc ipmiUserSetUserName(const uint8_t userId, const std::string& userName,
+                       const std::string& privilege)
+{
     size_t len =
         std::min(userName.size(), static_cast<size_t>(ipmiMaxUserName));
     std::string newUser(userName, 0, len);
-    return getUserAccessObject().setUserName(userId, newUser);
+    return getUserAccessObject().setUserName(userId, newUser, privilege);
 }
 
 Cc ipmiUserGetUserName(const uint8_t userId, std::string& userName)
@@ -253,6 +259,16 @@ Cc ipmiUserSetUserGroups(const uint8_t userId, const uint8_t chNum,
 Cc ipmiUserAddUserToNonIpmiGroupUsers(const std::string& userName)
 {
     return getUserAccessObject().addUserToNonIpmiGroupUsers(userName);
+}
+
+bool ipmiUserIsbootstrap0InUsed()
+{
+    return getUserAccessObject().isbootstrap0InUsed();
+}
+
+bool ipmiUserSetbootstrap0InUsed(const bool& inUsed)
+{
+    return getUserAccessObject().setbootstrap0InUsed(inUsed);
 }
 
 Cc ipmiUserRemoveUserFromNoneIpmiGroupUsers(const std::string& userName)
