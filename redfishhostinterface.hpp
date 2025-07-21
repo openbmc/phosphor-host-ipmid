@@ -52,4 +52,18 @@ static inline auto responseCertsNumberInvalid()
     return response(ccCertificateNumberInvalid);
 }
 
+/* Retry in ipmi user actions */
+static constexpr uint8_t maxIpmiUserActionRetry = 5;
+
+/* Retry in creating a valid user and password */
+static constexpr uint8_t maxCreateRandomPassworkRetry = 10;
+static constexpr uint8_t maxCreateRandomUserNameRetry = 10;
+
+static constexpr uint8_t passwordCharacterTypes = 4;
+static constexpr uint8_t userNameCharacterTypes = 3;
+static constexpr const char* lowCharacters = "abcdefghijklmnopqrstuvwxyz";
+static constexpr const char* upCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static constexpr const char* numberCharacters = "0123456789";
+static constexpr const char* specialCharacters = "!@#$%^&*";
+
 } // namespace ipmi
