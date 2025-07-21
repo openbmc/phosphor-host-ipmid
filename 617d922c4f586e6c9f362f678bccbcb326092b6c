@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a68279d4_9f58e9ce",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-21T20:16:41Z",
+      "side": 1,
+      "message": "generally, IPMI returns values LSB first. It looks like this code is forcing the uint16_t to be returned MSB first. If you want LSB first, just return a uint16_t type and the packer will do all the work for you.",
+      "range": {
+        "startLine": 25,
+        "startChar": 15,
+        "endLine": 25,
+        "endChar": 30
+      },
+      "revId": "617d922c4f586e6c9f362f678bccbcb326092b6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "599efdf6_4c6aac42",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-21T20:16:41Z",
+      "side": 1,
+      "message": "Is type ever going to be something other than 1 or 2? If not, using a map seems excessive. A simple if statement for two entries is more efficient in code size and runtime, as well as easier to read.\n\n```\nconstexpr uint8_t descriptorVendorId \u003d 1;\nconstexpr uint8_t descriptorProductId \u003d 2;\n\nif (type \u003d\u003d descriptorVendorId)\n{\n    return ipmi::successResponse(usbVendorId);\n}\nelse if (type \u003d\u003d descriptorProductId)\n{\n    return ipmi::successResponse(usbProductId);\n}\nreturn ipmi::responseInvalidieldRequest();\n```",
+      "revId": "617d922c4f586e6c9f362f678bccbcb326092b6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e39d80c5_f251b011",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-21T20:16:41Z",
+      "side": 1,
+      "message": "I didn\u0027t see this IPMI function referenced in the design document that you pointed at. I only saw the credentials bootstrap and certificate fingerprint functions. There was mention of a usb descriptor, but it was more involved, getting more parts of the descriptor than just the deviceID and productID.",
+      "revId": "617d922c4f586e6c9f362f678bccbcb326092b6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
