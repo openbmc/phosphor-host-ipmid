@@ -153,6 +153,17 @@ Cc ipmiUserSetUserName(const uint8_t userId, const char* userName)
  */
 Cc ipmiUserSetUserName(const uint8_t userId, const std::string& userName);
 
+/** @brief set's user name, creating the user with the given system privilege
+ *
+ *  @param[in] userId - user id
+ *  @param[in] userName - user name
+ *  @param[in] privilege - system privilege the user is created with
+ *
+ *  @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserSetUserName(const uint8_t userId, const std::string& userName,
+                       const std::string& privilege);
+
 /** @brief set user password
  *
  *  @param[in] userId - user id
@@ -287,6 +298,18 @@ Cc ipmiUserSetUserGroups(const uint8_t userId, const uint8_t chNum,
  * @return ccSuccess for success, others for failure.
  */
 Cc ipmiUserAddUserToNonIpmiGroupUsers(const std::string& userName);
+
+/** @brief check wherether the `bootstrap0` account is used
+ *
+ * @return true if account is used, false for others
+ */
+bool ipmiUserIsbootstrap0InUsed();
+
+/** @brief set the `bootstrap0` account is used state
+ *
+ * @return true if the state is updated successfully, false for others
+ */
+bool ipmiUserSetbootstrap0InUsed(const bool& inUsed);
 
 /** @brief remove userName from the list of None Ipmi group users
  *
