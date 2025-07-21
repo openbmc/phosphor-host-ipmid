@@ -51,6 +51,7 @@ static constexpr const char* ipmiUserSignalLockFile =
     "/run/ipmi/ipmi_usr_signal_mutex";
 static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
 static constexpr const char* ipmiGrpName = "ipmi";
+static constexpr const char* redfishGrpName = "redfish";
 static constexpr size_t privNoAccess = 0xF;
 static constexpr size_t privMask = 0xF;
 
