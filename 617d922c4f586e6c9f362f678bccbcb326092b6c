@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "65b4aefa_960fc7ac",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-07-22T05:19:38Z",
+      "side": 1,
+      "message": "We would need MSB first. Hence we are forcing for that.",
+      "parentUuid": "a68279d4_9f58e9ce",
+      "range": {
+        "startLine": 25,
+        "startChar": 15,
+        "endLine": 25,
+        "endChar": 30
+      },
+      "revId": "617d922c4f586e6c9f362f678bccbcb326092b6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "599efdf6_4c6aac42",
@@ -41,6 +65,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c197052d_f20c821b",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-07-22T05:19:38Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "599efdf6_4c6aac42",
+      "revId": "617d922c4f586e6c9f362f678bccbcb326092b6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e39d80c5_f251b011",
@@ -54,6 +96,24 @@
       "writtenOn": "2025-07-21T20:16:41Z",
       "side": 1,
       "message": "I didn\u0027t see this IPMI function referenced in the design document that you pointed at. I only saw the credentials bootstrap and certificate fingerprint functions. There was mention of a usb descriptor, but it was more involved, getting more parts of the descriptor than just the deviceID and productID.",
+      "revId": "617d922c4f586e6c9f362f678bccbcb326092b6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a756ecc0_f3819f96",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-07-22T05:19:38Z",
+      "side": 1,
+      "message": "I updated the commit message. Upcoming PRs will have the support for other device descriptors.",
+      "parentUuid": "e39d80c5_f251b011",
       "revId": "617d922c4f586e6c9f362f678bccbcb326092b6c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
