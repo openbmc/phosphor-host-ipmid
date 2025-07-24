@@ -37,6 +37,13 @@ ipmi::RspType<uint8_t, uint8_t> ipmiGetUsbVendorIdProductId(uint8_t type)
     return ipmi::responseInvalidFieldRequest();
 }
 
+ipmi::RspType<> ipmiGetUsbSerialNumber()
+{
+    static constexpr uint8_t usbSerialNumber = 0x00;
+    std::vector<uint8_t> usbSerialNumberVector = {usbSerialNumber};
+    return ipmi::responseSuccess(usbSerialNumberVector);
+}
+
 } // namespace ipmi
 
 void registerBootstrapCredentialsOemCommands()
@@ -45,4 +52,9 @@ void registerBootstrapCredentialsOemCommands()
         ipmi::prioOemBase, ipmi::groupNvidia,
         ipmi::bootstrap_credentials_oem::cmdGetUsbVendorIdProductId,
         ipmi::Privilege::Admin, ipmi::ipmiGetUsbVendorIdProductId);
+
+    ipmi::registerHandler(
+        ipmi::prioOemBase, ipmi::groupNvidia,
+        ipmi::bootstrap_credentials_oem::cmdGetUsbSerialNumber,
+        ipmi::Privilege::Admin, ipmi::ipmiGetUsbSerialNumber);
 }
