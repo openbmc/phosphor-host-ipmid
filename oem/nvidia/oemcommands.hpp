@@ -16,6 +16,7 @@ constexpr Group groupNvidia = 0x3C;
 namespace bootstrap_credentials_oem
 {
 constexpr auto cmdGetUsbVendorIdProductId = 0x30;
+constexpr auto cmdGetUsbSerialNumber = 0x31;
 } // namespace bootstrap_credentials_oem
 
 namespace bios_password
