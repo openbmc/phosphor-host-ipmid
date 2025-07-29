@@ -1,0 +1,311 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b8c48ee5_b7e78d1a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "please remove this line",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3d15c113_cf84037a",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "0x8X codes are specific to individual commands so they don\u0027t need to be declared at this scope. Put them closer to the functions that use them.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "04a5beba_c499e90b",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "put these in the cpp file that uses them; no need to be declared at this scope.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d13c08fe_8a6342cb",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "use responseSuccess()",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f3a4a9b_3be73165",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "If you need the user_layer functions, I think you need to make sure that libipmi20 links against libuser_layer. Adding the cpp file here will create multiple definitions of the same function names.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "87c6a6f5_c9a13818",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "A neat trick here is to use std::shared_ptr to keep track of your openssl objects:\n```\nstd::shared_ptr\u003cBIO\u003e certFileBio{BIO_new_file(filePath.c_str(), \"rb\"), BIO_free};\n```\nThen BIO_free will automatically get called when this shared_ptr goes out of scope.\n\nThis works with any openssl pointer type (because they all have ```*_free``` functions) and is simple and safe to do unless the pointer gets passed into openssl and it gets freed internally. But in any of the cases used here where you are manually calling ```*_free```, using the shared_ptr is safe.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd378daa_18b97752",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "in this case, (to follow on my prior comment):\n```\nX509* cert \u003d nullptr;\nif (PEM_read_bio_X509(certFileBio.get(), \u0026cert, nullptr, nullptr) \u003d\u003d nullptr)\n{\n    // no need to do any cleanup here; cert is null, certFileBio is managed\n    return nullptr;\n}\nreturn std::shared_ptr\u003cX509\u003e (cert, X509_free);\n```",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 75
+      },
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a67bf8d6_74467812",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "accept a ipmi::Context::ptr\u0026 so that you can use the yielding variant of the getDbusProperty call below.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dfd9a96f_ae4e2571",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "don\u0027t need this if you pass ctx in.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26410f8b_da05206e",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "this try/catch will turn into an if statement checking the error code response from the dbus call.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "51a3a899_a6f8b86c",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "```\nipmi::RspType\u003cuin8_t,              // hash type\n              std::vector\u003cuint8_t\u003e // hash data\n              \u003e\n```",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "92089592_3b39bc39",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "pass ctx into the function call here so that it can use the yielding dbus API.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b2388122_9d75c1e4",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "all these X509_free calls are not needed if you use the shared_ptr mechanism.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2c98294a_d0df1c32",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "```\nstd::vector\u003cuint8_t\u003e hashData{cnBuffer, cnBuffer + cnBufferLen};\nconstexpr uint8_t sha256Type \u003d 0x01;\nreturn ipmi::responseSuccess(sha256Type, hashData);\n```",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4599aa4f_bc4ede54",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "request is always used here; no need for [[maybe_unused]]",
+      "range": {
+        "startLine": 197,
+        "startChar": 27,
+        "endLine": 197,
+        "endChar": 43
+      },
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b18368b2_dde761d9",
+        "filename": "redfishhostinterface.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "unless these constants are needed in multiple files, reduce their scope and put them in the cpp file that uses them.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a742f17b_d7381209",
+        "filename": "redfishhostinterface.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-29T21:49:52Z",
+      "side": 1,
+      "message": "sizes of things should be size_t unless there is a very good reason.",
+      "range": {
+        "startLine": 31,
+        "startChar": 17,
+        "endLine": 31,
+        "endChar": 24
+      },
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
