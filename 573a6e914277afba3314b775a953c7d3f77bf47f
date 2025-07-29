@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fc53941b_d009b8c4",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-07-29T16:15:55Z",
+      "side": 1,
+      "message": "Should we pass username by reference ?",
+      "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ac937a94_75c6264c",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-07-29T16:15:55Z",
+      "side": 1,
+      "message": "We can use async methods here",
+      "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "90581d4a_204f8213",
+        "filename": "redfishhostinterface.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-07-29T16:15:55Z",
+      "side": 1,
+      "message": "Retrying so many times do we end up in timeout ?",
+      "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
