@@ -218,8 +218,9 @@ stdplus::EtherAddr getMACProperty(sdbusplus::bus_t& bus,
 void setMACProperty(sdbusplus::bus_t& bus, const ChannelParams& params,
                     stdplus::EtherAddr mac)
 {
+    std::string macStr = stdplus::toStr(mac);
     setDbusProperty(bus, params.service, params.ifPath, INTF_MAC, "MACAddress",
-                    stdplus::toStr(mac));
+                    macStr);
 }
 
 void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
