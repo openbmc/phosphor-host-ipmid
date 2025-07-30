@@ -38,6 +38,8 @@ static constexpr uint8_t invalidUserId = 0xFF;
 static constexpr uint8_t reservedUserId = 0x0;
 static constexpr uint8_t ipmiMaxUserName = 16;
 static constexpr uint8_t ipmiMaxUsers = 15;
+static constexpr uint8_t maxSystemUsers = 30;
+static constexpr uint8_t maxNoneIpmiGroupUsers = 15;
 static constexpr uint8_t ipmiMaxChannels = 16;
 static constexpr uint8_t maxIpmi20PasswordSize = 20;
 static constexpr uint8_t maxIpmi15PasswordSize = 16;
@@ -280,5 +282,33 @@ Cc ipmiUserGetUserPayloadAccess(const uint8_t chNum, const uint8_t userId,
 Cc ipmiUserSetUserGroups(const uint8_t userId, std::string& userName,
                          const uint8_t chNum,
                          const std::vector<std::string>& groupAccess);
+
+/** @brief provides list of none Ipmi group user
+ *
+ *  @return list of None Ipmi group users
+ */
+std::vector<std::string> ipmiUserGetNonIpmiGroupUsers();
+
+/** @brief add userName to list of None Ipmi group users
+ *
+ * @param[in] userName - user name
+ *
+ * @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserAddUserToNonIpmiGroupUsers(std::string& userName);
+
+/** @brief remove userName to list of None Ipmi group users
+ *
+ * @param[in] userName - user name
+ *
+ * @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserRemoveUserToNonIpmiGroupUsers(std::string& userName);
+
+/** @brief clear all user in the list of None Ipmi group users
+ *
+ * @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserClearNonIpmiGroupUsers();
 
 } // namespace ipmi

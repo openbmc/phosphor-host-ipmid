@@ -455,9 +455,39 @@ class UserAccess
                      const uint8_t chNum,
                      const std::vector<std::string>& groupAccess);
 
+    /** @brief function to get list of None Ipmi group users
+     *
+     * @return list of None Ipmi group users
+     */
+    std::vector<std::string> getNonIpmiGroupUsers();
+
+    /** @brief add userName to list of None Ipmi group users
+     *
+     * @param[in] userName - user name
+     *
+     * @return ccSuccess for success, others for failure.
+     */
+    Cc addUserToNonIpmiGroupUsers(std::string& userName);
+
+    /** @brief remove userName to list of None Ipmi group users
+     *
+     * @param[in] userName - user name
+     *
+     * @return ccSuccess for success, others for failure.
+     */
+    Cc removeUserToNonIpmiGroupUsers(std::string& userName);
+
+    /** @brief clear all user in the list of None Ipmi group users
+     *
+     * @return ccSuccess for success, others for failure.
+     */
+    Cc clearNonIpmiGroupUsers();
+
     std::unique_ptr<boost::interprocess::named_recursive_mutex> userMutex{
         nullptr};
     inline static std::vector<std::string> availableGroups{};
+
+    std::vector<std::string> listNoneIpmiGroupUsers{};
 
   private:
     UsersTbl usersTbl;
