@@ -209,6 +209,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
         if (std::find(groups.begin(), groups.end(), ipmiGrpName) ==
             groups.end())
         {
+            ipmiUserAddUserToNonIpmiGroupUsers(userName);
             return;
         }
         userEvent = UserUpdateEvent::userCreated;
@@ -219,11 +220,14 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
         std::vector<std::string> interfaces;
         msg.read(objPath, interfaces);
         getUserNameFromPath(objPath.str, userName);
+        /* Try to remove user name from non-IPMI group user list */
+        ipmiUserRemoveUserFromNonIpmiGroupUsers(userName);
         userEvent = UserUpdateEvent::userDeleted;
     }
     else if (signal == userRenamedSignal)
     {
         msg.read(userName, newUserName);
+        ipmiUserRenameNonIpmiGroupUser(userName, newUserName);
         userEvent = UserUpdateEvent::userRenamed;
     }
     else if (signal == propertiesChangedSignal)
@@ -278,11 +282,13 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
                     groups.end())
                 {
                     // remove user from ipmi user list.
+                    ipmiUserAddUserToNonIpmiGroupUsers(userName);
                     userUpdateHelper(usrAccess, UserUpdateEvent::userDeleted,
                                      userName, priv, enabled, newUserName);
                 }
                 else
                 {
+                    ipmiUserRemoveUserFromNonIpmiGroupUsers(userName);
                     DbusUserObjProperties properties;
                     try
                     {
@@ -1590,6 +1596,25 @@ void UserAccess::cacheUserDataFile()
                    getManagedObjectsMethod, "PATH", userMgrObjBasePath);
         return;
     }
+    listNonIpmiGroupUsers.clear();
+    for (const auto& usrObj : managedObjs)
+    {
+        std::vector<std::string> usrGrps;
+        std::string usrPriv, usrName;
+        bool usrEnabled = false;
+
+        if (getUserNameFromPath(usrObj.first.str, usrName) != 0)
+        {
+            continue;
+        }
+        getUserObjProperties(usrObj.second, usrGrps, usrPriv, usrEnabled);
+        if (std::find(usrGrps.begin(), usrGrps.end(), ipmiGrpName) ==
+            usrGrps.end())
+        {
+            addUserToNonIpmiGroupUsers(usrName);
+        }
+    }
+
     bool updateRequired = false;
     UsersTbl* userData = &usersTbl;
     // user index 0 is reserved, starts with 1
@@ -1740,6 +1765,21 @@ Cc UserAccess::setUserGroups(const uint8_t userId, const uint8_t chNum,
         return ccParmOutOfRange;
     }
 
+    bool nonIpmiGroup = (std::find(groupAccess.begin(), groupAccess.end(),
+                                   ipmiGrpName) == groupAccess.end());
+    bool reservedSlot = false;
+    if (nonIpmiGroup)
+    {
+        reservedSlot = (std::find(listNonIpmiGroupUsers.begin(),
+                                  listNonIpmiGroupUsers.end(), userName) ==
+                        listNonIpmiGroupUsers.end());
+        Cc rc = addUserToNonIpmiGroupUsers(userName);
+        if (rc != ccSuccess)
+        {
+            return rc;
+        }
+    }
+
     sdbusplus::object_path tempUserPath(userObjBasePath);
     tempUserPath /= userName;
     std::string userPath(tempUserPath);
@@ -1753,6 +1793,10 @@ Cc UserAccess::setUserGroups(const uint8_t userId, const uint8_t chNum,
     {
         lg2::error("Failed to set user groups, user path: {PATH}", "PATH",
                    userPath);
+        if (reservedSlot)
+        {
+            removeUserFromNonIpmiGroupUsers(userName);
+        }
         return ccUnspecifiedError;
     }
 
@@ -1766,9 +1810,7 @@ Cc UserAccess::setUserGroups(const uint8_t userId, const uint8_t chNum,
         return ccUnspecifiedError;
     }
 
-    userInfo->userPrivAccess[chNum].ipmiEnabled =
-        (std::find(groupAccess.begin(), groupAccess.end(), ipmiGrpName) !=
-         groupAccess.end());
+    userInfo->userPrivAccess[chNum].ipmiEnabled = !nonIpmiGroup;
     try
     {
         writeUserData();
@@ -1781,4 +1823,49 @@ Cc UserAccess::setUserGroups(const uint8_t userId, const uint8_t chNum,
 
     return ccSuccess;
 }
+
+Cc UserAccess::addUserToNonIpmiGroupUsers(const std::string& userName)
+{
+    if (std::find(listNonIpmiGroupUsers.begin(), listNonIpmiGroupUsers.end(),
+                  userName) == listNonIpmiGroupUsers.end())
+    {
+        if (listNonIpmiGroupUsers.size() >= (maxSystemUsers - ipmiMaxUsers))
+        {
+            lg2::error("non-IPMI User limit reached");
+            return ccOutOfSpace;
+        }
+        listNonIpmiGroupUsers.emplace_back(userName);
+    }
+
+    return ccSuccess;
+}
+
+Cc UserAccess::renameNonIpmiGroupUser(const std::string& userName,
+                                      const std::string& newUserName)
+{
+    auto it = std::find(listNonIpmiGroupUsers.begin(),
+                        listNonIpmiGroupUsers.end(), userName);
+    if (it != listNonIpmiGroupUsers.end())
+    {
+        *it = newUserName;
+    }
+
+    return ccSuccess;
+}
+
+Cc UserAccess::removeUserFromNonIpmiGroupUsers(const std::string& userName)
+{
+    for (std::vector<std::string>::iterator it = listNonIpmiGroupUsers.begin();
+         it != listNonIpmiGroupUsers.end(); ++it)
+    {
+        if (*it == userName)
+        {
+            listNonIpmiGroupUsers.erase(it);
+            break;
+        }
+    }
+
+    return ccSuccess;
+}
+
 } // namespace ipmi
