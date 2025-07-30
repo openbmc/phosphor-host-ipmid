@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "fedd8181_50098cb5",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-30T18:39:57Z",
+      "side": 1,
+      "message": "Rather than check that the username is valid, why not just create a valid one to start with?",
+      "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "fc53941b_d009b8c4",
         "filename": "redfishhostinterface.cpp",
         "patchSetId": 1
@@ -14,6 +31,23 @@
       "writtenOn": "2025-07-29T16:15:55Z",
       "side": 1,
       "message": "Should we pass username by reference ?",
+      "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2895608a_fb3b8577",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-07-30T18:39:57Z",
+      "side": 1,
+      "message": "There are so many ways to do this and internally we have come to a solution similar to this:\n```\nstd::string getRandomString(bool isUsername)\n{\n    std::string uniqueStr{};\n    constexpr size_t pwLen \u003d 16;\n    uniqueStr.reserve(pwLen);\n    std::random_device rd;\n    std::mt19937 generator(rd());\n\n    constexpr auto charsets \u003d std::to_array\u003cstd::string_view\u003e({\n        // usernames must start with one of these two classes\n        {\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"},\n        {\"abcdefghijklmnopqrstuvwxyz\"},\n        // these two classes are only for passwords\n        {\"0123456789\"},\n        {\"!#$%\u0026()*+,-./:;\u003c\u003d\u003e?@[]^_{|}~\"},\n        // this class is used instead of the prior two for usernames\n        {\"0123456789_-\"},\n    });\n    constexpr size_t charsetUpper \u003d 0;\n    constexpr size_t charsetLower \u003d 1;\n    constexpr size_t charsetPasswordNumber \u003d 2;\n    constexpr size_t charsetPasswordPunctuation \u003d 3;\n    constexpr size_t charsetUsernameOther \u003d 4;\n\n    std::uniform_real_distribution\u003c\u003e distribution(0, 1);\n    std::bitset\u003ccharsets.size()\u003e charClasses{};\n    if (isUsername)\n    {\n        // usernames must start with alpha\n        charClasses[charsetPasswordNumber] \u003d 1;\n        charClasses[charsetPasswordPunctuation] \u003d 1;\n        charClasses[charsetUsernameOther] \u003d 1;\n    }\n    else\n    {\n        charClasses[charsetUsernameOther] \u003d 1;\n    }\n    char lastChar \u003d \u0027\\0\u0027;\n    while (uniqueStr.size() \u003c pwLen)\n    {\n        std::string charset{};\n        for (size_t i \u003d 0; i \u003c charsets.size(); i++)\n        {\n            if (!charClasses[i] || charClasses.all())\n            {\n                charset +\u003d charsets[i];\n            }\n        }\n        char newChar{};\n        while (true)\n        {\n            newChar \u003d charset[static_cast\u003csize_t\u003e(\n                floor(charset.size() * distribution(generator)))];\n\n            // limit total number duplicates of each char\n            if (std::count(uniqueStr.begin(), uniqueStr.end(), newChar) \u003e 1)\n            {\n                continue;\n            }\n\n            // limit monotonic runs of chars\n            if (abs(lastChar - newChar) \u003e 1)\n            {\n                uniqueStr +\u003d newChar;\n                break;\n            }\n        }\n        std::print(stderr, \"[{:02d}]: {}, {} ({} {})\\n\", uniqueStr.size(),\n                   charClasses.to_string(), uniqueStr, lastChar, newChar);\n        lastChar \u003d newChar;\n        for (size_t i \u003d 0; i \u003c charsets.size(); i++)\n        {\n            if (!charClasses[i])\n            {\n                if (charsets[i].find(newChar) !\u003d std::string_view::npos)\n                {\n                    charClasses[i] \u003d 1;\n                }\n            }\n        }\n        if (charClasses.all())\n        {\n            charClasses.reset();\n            if (isUsername)\n            {\n                // skip the password charsets\n                charClasses[charsetPasswordPunctuation] \u003d 1;\n                charClasses[charsetPasswordNumber] \u003d 1;\n            }\n            else\n            {\n                // skip the username charset\n                charClasses[charsetUsernameOther] \u003d 1;\n            }\n        }\n    }\n    return uniqueStr;\n}\n```\n\nThe reasons that I like this algorithm are:\n1) It is relatively simple\n2) It is unlikely to end up with a long runtime\n3) It forces the use of multiple character classes, but not in any given order\n4) The results are known to match the expected output; no need to check\n5) It limits repeats and runs, but not in a way that strips too much entropy away\n6) It uses c++ random machinery\n\nIt can be called to generate a username that is guaranteed to be a valid Linux username. It can be called to generate a password that is more complex with a wider variety of characters. This single function can replace most of the code in this file.",
       "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
