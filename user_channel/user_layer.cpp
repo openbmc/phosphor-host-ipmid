@@ -250,4 +250,14 @@ Cc ipmiUserSetUserGroups(const uint8_t userId, const uint8_t chNum,
     return getUserAccessObject().setUserGroups(userId, chNum, groupAccess);
 }
 
+Cc ipmiUserAddUserToNonIpmiGroupUsers(const std::string& userName)
+{
+    return getUserAccessObject().addUserToNonIpmiGroupUsers(userName);
+}
+
+Cc ipmiUserRemoveUserFromNoneIpmiGroupUsers(const std::string& userName)
+{
+    return getUserAccessObject().removeUserFromNoneIpmiGroupUsers(userName);
+}
+
 } // namespace ipmi
