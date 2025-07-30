@@ -482,8 +482,26 @@ class UserAccess
     Cc setUserGroups(const uint8_t userId, const uint8_t chNum,
                      const std::vector<std::string>& groupAccess);
 
+    /** @brief add userName to list of None Ipmi group users
+     *
+     * @param[in] userName - user name
+     *
+     * @return ccSuccess for success, others for failure.
+     */
+    Cc addUserToNonIpmiGroupUsers(const std::string& userName);
+
+    /** @brief remove userName to list of None Ipmi group users
+     *
+     * @param[in] userName - user name
+     *
+     * @return ccSuccess for success, others for failure.
+     */
+    Cc removeUserFromNoneIpmiGroupUsers(const std::string& userName);
+
     std::unique_ptr<boost::interprocess::named_recursive_mutex> userMutex{
         nullptr};
+
+    std::vector<std::string> listNoneIpmiGroupUsers{};
 
   private:
     UsersTbl usersTbl;
