@@ -28,6 +28,64 @@
 namespace ipmi
 {
 
+static constexpr const char* dBusPropertiesInterface =
+    "org.freedesktop.DBus.Properties";
+static constexpr const char* getAllPropertiesMethod = "GetAll";
+static constexpr const char* propertiesChangedSignal = "PropertiesChanged";
+static constexpr const char* setPropertiesMethod = "Set";
+
+// Object Manager related
+static constexpr const char* dBusObjManager =
+    "org.freedesktop.DBus.ObjectManager";
+static constexpr const char* getManagedObjectsMethod = "GetManagedObjects";
+// Object Manager signals
+static constexpr const char* intfAddedSignal = "InterfacesAdded";
+static constexpr const char* intfRemovedSignal = "InterfacesRemoved";
+
+static constexpr const char* ipmiUserMutex = "ipmi_usr_mutex";
+static constexpr const char* ipmiMutexCleanupLockFile =
+    "/run/ipmi/ipmi_usr_mutex_cleanup";
+static constexpr const char* ipmiUserSignalLockFile =
+    "/run/ipmi/ipmi_usr_signal_mutex";
+static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
+static constexpr const char* ipmiGrpName = "ipmi";
+static constexpr size_t privNoAccess = 0xF;
+static constexpr size_t privMask = 0xF;
+
+// User manager related
+static constexpr const char* userMgrService =
+    "xyz.openbmc_project.User.Manager";
+static constexpr const char* userMgrObjBasePath = "/xyz/openbmc_project/user";
+static constexpr const char* userObjBasePath = "/xyz/openbmc_project/user";
+static constexpr const char* userMgrInterface =
+    "xyz.openbmc_project.User.Manager";
+static constexpr const char* usersInterface =
+    "xyz.openbmc_project.User.Attributes";
+static constexpr const char* deleteUserInterface =
+    "xyz.openbmc_project.Object.Delete";
+
+static constexpr const char* createUserMethod = "CreateUser";
+static constexpr const char* deleteUserMethod = "Delete";
+static constexpr const char* renameUserMethod = "RenameUser";
+// User manager signal memebers
+static constexpr const char* userRenamedSignal = "UserRenamed";
+// Mgr interface properties
+static constexpr const char* allPrivProperty = "AllPrivileges";
+static constexpr const char* allGrpProperty = "AllGroups";
+// User interface properties
+static constexpr const char* userPrivProperty = "UserPrivilege";
+static constexpr const char* userGrpProperty = "UserGroups";
+static constexpr const char* userEnabledProperty = "UserEnabled";
+
+static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
+    "priv-reserved", // PRIVILEGE_RESERVED - 0
+    "priv-callback", // PRIVILEGE_CALLBACK - 1
+    "priv-user",     // PRIVILEGE_USER - 2
+    "priv-operator", // PRIVILEGE_OPERATOR - 3
+    "priv-admin",    // PRIVILEGE_ADMIN - 4
+    "priv-custom"    // PRIVILEGE_OEM - 5
+};
+
 using DbusUserPropVariant =
     std::variant<std::vector<std::string>, std::string, bool>;
 
