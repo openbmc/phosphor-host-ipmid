@@ -1422,13 +1422,20 @@ ipmi::RspType<uint8_t,                // Parameter revision
 
     if (paramSelector == IPMI_SYSINFO_SYSTEM_FW_VERSION)
     {
-        auto fwVersion = getSysFWVersion(ctx);
+        // If the system firmware version is not cached, get it from the D-Bus.
+        const auto& [found, paramString] =
+            sysInfoParamStore->lookup(IPMI_SYSINFO_SYSTEM_FW_VERSION);
 
-        if (fwVersion == std::nullopt)
+        if (!found || paramString.empty())
         {
-            return ipmi::responseUnspecifiedError();
+            auto fwVersion = getSysFWVersion(ctx);
+            if (fwVersion == std::nullopt)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+            sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_FW_VERSION,
+                                      *fwVersion);
         }
-        sysInfoParamStore->update(IPMI_SYSINFO_SYSTEM_FW_VERSION, *fwVersion);
     }
 
     // Parameters other than Set In Progress are assumed to be strings.
