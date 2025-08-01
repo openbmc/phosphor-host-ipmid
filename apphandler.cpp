@@ -1296,6 +1296,8 @@ ipmi::RspType<uint8_t, // session handle,
     return ipmi::responseInvalidFieldRequest();
 }
 
+static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
+
 std::optional<std::string> getSysFWVersion(ipmi::Context::ptr& ctx)
 {
     /*
@@ -1345,10 +1347,21 @@ std::optional<std::string> getSysFWVersion(ipmi::Context::ptr& ctx)
         }
     }
 
+    if (sysInfoParamStore != nullptr)
+    {
+        auto ret = sysInfoParamStore->lookup(IPMI_SYSINFO_SYSTEM_FW_VERSION);
+        bool found = std::get<0>(ret);
+        std::string& paramString = std::get<1>(ret);
+        if (found && !paramString.empty())
+        {
+            lg2::debug("Using cached system firmware version: {VERSION}",
+                       "VERSION", paramString);
+            return paramString;
+        }
+    }
+
     return std::nullopt;
 }
-
-static std::unique_ptr<SysInfoParamStore> sysInfoParamStore;
 
 static std::string sysInfoReadSystemName()
 {
