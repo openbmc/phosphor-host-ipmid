@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bb840a4f_a53ae1c9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4cac2c4_c800f553",
+      "revId": "789f9c51454450aba45781067312d9d827225d4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "de2705de_7d606abf",
@@ -31,6 +49,30 @@
       "writtenOn": "2025-08-01T02:56:23Z",
       "side": 1,
       "message": "Do you need this input parameter? If yes, Could you update the type `std::string` to `const std::string`? check other functions",
+      "range": {
+        "startLine": 280,
+        "startChar": 47,
+        "endLine": 280,
+        "endChar": 68
+      },
+      "revId": "789f9c51454450aba45781067312d9d827225d4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cbfa246e_5326a965",
+        "filename": "user_channel/user_layer.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de2705de_7d606abf",
       "range": {
         "startLine": 280,
         "startChar": 47,
@@ -58,6 +100,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b117aebc_6241de82",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c323fec_73e36280",
+      "revId": "789f9c51454450aba45781067312d9d827225d4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8438f5c5_af9f6cb6",
@@ -71,6 +131,24 @@
       "writtenOn": "2025-07-29T20:10:16Z",
       "side": 1,
       "message": "I would prefer a static getter here that returns a const\u0026 instead of direct access to the variable.",
+      "revId": "789f9c51454450aba45781067312d9d827225d4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eaa3aebb_afba107f",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8438f5c5_af9f6cb6",
       "revId": "789f9c51454450aba45781067312d9d827225d4f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
