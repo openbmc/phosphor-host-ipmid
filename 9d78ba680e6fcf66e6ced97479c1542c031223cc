@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9554ec7d_5148335e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "b8c48ee5_b7e78d1a",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3d15c113_cf84037a",
@@ -31,6 +49,24 @@
       "writtenOn": "2025-07-29T21:49:52Z",
       "side": 1,
       "message": "0x8X codes are specific to individual commands so they don\u0027t need to be declared at this scope. Put them closer to the functions that use them.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "49d91c01_86759551",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3d15c113_cf84037a",
       "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -52,6 +88,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "562bf93a_54320923",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04a5beba_c499e90b",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d13c08fe_8a6342cb",
@@ -65,6 +119,24 @@
       "writtenOn": "2025-07-29T21:49:52Z",
       "side": 1,
       "message": "use responseSuccess()",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c605ecfa_a732377c",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d13c08fe_8a6342cb",
       "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -103,6 +175,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cac84120_c7f60a6e",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Thanks for your explanation. I updated the code.",
+      "parentUuid": "87c6a6f5_c9a13818",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bd378daa_18b97752",
@@ -116,6 +206,30 @@
       "writtenOn": "2025-07-29T21:49:52Z",
       "side": 1,
       "message": "in this case, (to follow on my prior comment):\n```\nX509* cert \u003d nullptr;\nif (PEM_read_bio_X509(certFileBio.get(), \u0026cert, nullptr, nullptr) \u003d\u003d nullptr)\n{\n    // no need to do any cleanup here; cert is null, certFileBio is managed\n    return nullptr;\n}\nreturn std::shared_ptr\u003cX509\u003e (cert, X509_free);\n```",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 75
+      },
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c8edd493_47b6838a",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd378daa_18b97752",
       "range": {
         "startLine": 63,
         "startChar": 0,
@@ -143,6 +257,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3facd7fe_d85cc40e",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a67bf8d6_74467812",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dfd9a96f_ae4e2571",
@@ -156,6 +288,24 @@
       "writtenOn": "2025-07-29T21:49:52Z",
       "side": 1,
       "message": "don\u0027t need this if you pass ctx in.",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d03d6f18_bb80e9b0",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dfd9a96f_ae4e2571",
       "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -179,6 +329,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3fd2a4df_995fb009",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Because the utility ipmi::getDbusProperty() does not try/catch in there code. Adding try/catch to prevent the exception is necessary AMO.",
+      "parentUuid": "26410f8b_da05206e",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "51a3a899_a6f8b86c",
         "filename": "redfishhostinterface.cpp",
         "patchSetId": 2
@@ -190,6 +358,24 @@
       "writtenOn": "2025-07-29T21:49:52Z",
       "side": 1,
       "message": "```\nipmi::RspType\u003cuin8_t,              // hash type\n              std::vector\u003cuint8_t\u003e // hash data\n              \u003e\n```",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "97aa6e0a_79d7f211",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51a3a899_a6f8b86c",
       "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -211,6 +397,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cdeef73f_d7d0fc79",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "92089592_3b39bc39",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b2388122_9d75c1e4",
@@ -228,6 +432,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee5c7475_e2e78f80",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b2388122_9d75c1e4",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2c98294a_d0df1c32",
@@ -241,6 +463,24 @@
       "writtenOn": "2025-07-29T21:49:52Z",
       "side": 1,
       "message": "```\nstd::vector\u003cuint8_t\u003e hashData{cnBuffer, cnBuffer + cnBufferLen};\nconstexpr uint8_t sha256Type \u003d 0x01;\nreturn ipmi::responseSuccess(sha256Type, hashData);\n```",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "33bad37d_13749576",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c98294a_d0df1c32",
       "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -268,6 +508,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "00670c71_28e8f74f",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4599aa4f_bc4ede54",
+      "range": {
+        "startLine": 197,
+        "startChar": 27,
+        "endLine": 197,
+        "endChar": 43
+      },
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b18368b2_dde761d9",
@@ -285,6 +549,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "863a8085_7251efb0",
+        "filename": "redfishhostinterface.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b18368b2_dde761d9",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a742f17b_d7381209",
@@ -298,6 +580,30 @@
       "writtenOn": "2025-07-29T21:49:52Z",
       "side": 1,
       "message": "sizes of things should be size_t unless there is a very good reason.",
+      "range": {
+        "startLine": 31,
+        "startChar": 17,
+        "endLine": 31,
+        "endChar": 24
+      },
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e4b28c00_eb9630f3",
+        "filename": "redfishhostinterface.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-08-02T06:18:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a742f17b_d7381209",
       "range": {
         "startLine": 31,
         "startChar": 17,
