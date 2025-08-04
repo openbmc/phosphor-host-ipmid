@@ -33,6 +33,52 @@
       "message": "Any comment for this commit @vernon.mauery@gmail.com @liuxiwei@ieisystem.com?",
       "revId": "8ee705bbf1f4512009cbca0bdade8198177e8acc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a82e6e09_4a38932d",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-04T08:58:29Z",
+      "side": 1,
+      "message": "Unless necessary, we should use asynchronous calls:\n\n```\nboost::system::error_code getAllDbusObjects(\n    Context::ptr ctx, const std::string\u0026 serviceRoot,\n    const std::string\u0026 interface, const std::string\u0026 match,\n    ObjectTree\u0026 objectTree);\n```",
+      "range": {
+        "startLine": 250,
+        "startChar": 34,
+        "endLine": 250,
+        "endChar": 60
+      },
+      "revId": "8ee705bbf1f4512009cbca0bdade8198177e8acc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "31bf4d43_08ccc803",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-04T08:58:29Z",
+      "side": 1,
+      "message": "```\nboost::system::error_code setDbusProperty(\n    Context::ptr ctx, const std::string\u0026 service, const std::string\u0026 objPath,\n    const std::string\u0026 interface, const std::string\u0026 property,\n    const Value\u0026 value);\n```",
+      "range": {
+        "startLine": 276,
+        "startChar": 16,
+        "endLine": 289,
+        "endChar": 70
+      },
+      "revId": "8ee705bbf1f4512009cbca0bdade8198177e8acc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
