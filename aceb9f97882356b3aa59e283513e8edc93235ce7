@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c10678e_e38bb0f1",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1350,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-04T08:52:16Z",
+      "side": 1,
+      "message": "I think the cache should be checked before executing the getSysFWVersion method.",
+      "range": {
+        "startLine": 1350,
+        "startChar": 3,
+        "endLine": 1350,
+        "endChar": 37
+      },
+      "revId": "aceb9f97882356b3aa59e283513e8edc93235ce7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6ccbb284_59f2e013",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1352,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-04T08:52:16Z",
+      "side": 1,
+      "message": "const auto\u0026[found, paramString]",
+      "range": {
+        "startLine": 1352,
+        "startChar": 8,
+        "endLine": 1352,
+        "endChar": 16
+      },
+      "revId": "aceb9f97882356b3aa59e283513e8edc93235ce7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
