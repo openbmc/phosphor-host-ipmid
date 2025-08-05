@@ -60,6 +60,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a5b614bd_0b3590db",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-08-05T04:36:49Z",
+      "side": 1,
+      "message": "The writeAssetTagToFru function is a callback function of a timer, We can not pass the `Context::ptr ctx` to this function, therefore, we can not use `boost::system::error_code getAllDbusObjects...` method.",
+      "parentUuid": "a82e6e09_4a38932d",
+      "range": {
+        "startLine": 250,
+        "startChar": 34,
+        "endLine": 250,
+        "endChar": 60
+      },
+      "revId": "8ee705bbf1f4512009cbca0bdade8198177e8acc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "31bf4d43_08ccc803",
         "filename": "dcmihandler.cpp",
         "patchSetId": 3
@@ -71,6 +95,30 @@
       "writtenOn": "2025-08-04T08:58:29Z",
       "side": 1,
       "message": "```\nboost::system::error_code setDbusProperty(\n    Context::ptr ctx, const std::string\u0026 service, const std::string\u0026 objPath,\n    const std::string\u0026 interface, const std::string\u0026 property,\n    const Value\u0026 value);\n```",
+      "range": {
+        "startLine": 276,
+        "startChar": 16,
+        "endLine": 289,
+        "endChar": 70
+      },
+      "revId": "8ee705bbf1f4512009cbca0bdade8198177e8acc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "916040aa_bee5b7fb",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1001198
+      },
+      "writtenOn": "2025-08-05T04:36:49Z",
+      "side": 1,
+      "message": "Please check my above comment",
+      "parentUuid": "31bf4d43_08ccc803",
       "range": {
         "startLine": 276,
         "startChar": 16,
