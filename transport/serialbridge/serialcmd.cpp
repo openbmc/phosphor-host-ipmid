@@ -163,13 +163,11 @@ int SerialChannel::write(stdplus::Fd& uart, uint8_t rsAddr, uint8_t rqAddr,
             throw sdbusplus::exception::SdBusError(&error, "ipmid response");
         }
 
-        uint8_t netFn = 0xff;
-        uint8_t lun = 0xff;
-        uint8_t cmd = 0xff;
-        uint8_t cc = 0xff;
-        std::vector<uint8_t> data;
+        std::tuple<uint8_t, uint8_t, uint8_t, uint8_t, std::vector<uint8_t>>
+            ret;
+        m.read(ret);
 
-        m.read(netFn, lun, cmd, cc, data);
+        const auto& [netFn, lun, cmd, cc, data] = ret;
 
         uint8_t netFnLun = (netFn << netFnShift) | (lun & lunMask);
         uint8_t seqLun = (seq << netFnShift) | (lun & lunMask);
