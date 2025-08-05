@@ -8,6 +8,8 @@
 
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
+#include <ipmid/utils.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <cstdint>
 
@@ -45,6 +47,39 @@ ipmi::RspType<ipmi::message::Payload> ipmiGetUsbSerialNumber()
     return ipmi::responseSuccess(usbSerialNumberPayload);
 }
 
+ipmi::RspType<ipmi::message::Payload> ipmiGetRedfishHostName(
+    ipmi::Context::ptr ctx)
+{
+    std::string service{};
+    constexpr auto networkConfigObj = "/xyz/openbmc_project/network/config";
+    constexpr auto networkConfigIface =
+        "xyz.openbmc_project.Network.SystemConfiguration";
+    boost::system::error_code ec =
+        ipmi::getService(ctx, networkConfigIface, networkConfigObj, service);
+    if (ec)
+    {
+        lg2::error("ipmiGetRedfishHostName failed to get Network SystemConfig "
+                   "object: {STATUS}",
+                   "STATUS", ec.message());
+        return ipmi::responseResponseError();
+    }
+
+    std::string hostName{};
+    ec = ipmi::getDbusProperty<std::string>(
+        ctx, service, networkConfigObj, networkConfigIface, "HostName",
+        hostName);
+    if (ec)
+    {
+        lg2::error("ipmiGetRedfishHostName failed to get HostName from Network "
+                   "SystemConfig service: {STATUS}",
+                   "STATUS", ec.message());
+        return ipmi::responseResponseError();
+    }
+    ipmi::message::Payload hostNamePayload;
+    hostNamePayload.pack(
+        std::vector<uint8_t>(hostName.begin(), hostName.end()));
+    return ipmi::responseSuccess(hostNamePayload);
+}
 } // namespace ipmi
 
 void registerBootstrapCredentialsOemCommands()
@@ -58,4 +93,9 @@ void registerBootstrapCredentialsOemCommands()
         ipmi::prioOemBase, ipmi::groupNvidia,
         ipmi::bootstrap_credentials_oem::cmdGetUsbSerialNumber,
         ipmi::Privilege::Admin, ipmi::ipmiGetUsbSerialNumber);
+
+    ipmi::registerHandler(
+        ipmi::prioOemBase, ipmi::groupNvidia,
+        ipmi::bootstrap_credentials_oem::cmdGetRedfishHostName,
+        ipmi::Privilege::Admin, ipmi::ipmiGetRedfishHostName);
 }
