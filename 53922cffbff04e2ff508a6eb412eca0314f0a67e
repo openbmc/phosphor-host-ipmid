@@ -67,6 +67,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "34258ff6_9fcd6052",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-13T02:06:31Z",
+      "side": 1,
+      "message": "@vernon.mauery@gmail.com\nWhy is `ipmi::message::Payload` not recommended here?\nAre there any conventions for when `ipmi::message::Payload` must be used?",
+      "parentUuid": "e69c54a8_bcaab950",
+      "range": {
+        "startLine": 285,
+        "startChar": 14,
+        "endLine": 285,
+        "endChar": 36
+      },
+      "revId": "53922cffbff04e2ff508a6eb412eca0314f0a67e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "21349cfa_ff61a443",
         "filename": "storagehandler.cpp",
         "patchSetId": 3
