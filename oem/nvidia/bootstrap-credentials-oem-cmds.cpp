@@ -9,9 +9,11 @@
 #include <ipmid/api.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
+#include <nlohmann/json.hpp>
 #include <phosphor-logging/lg2.hpp>
 
 #include <cstdint>
+#include <fstream>
 
 void registerBootstrapCredentialsOemCommands() __attribute__((constructor));
 
@@ -80,6 +82,37 @@ ipmi::RspType<ipmi::message::Payload> ipmiGetRedfishHostName(
         std::vector<uint8_t>(hostName.begin(), hostName.end()));
     return ipmi::responseSuccess(hostNamePayload);
 }
+
+ipmi::RspType<uint8_t> ipmiGetipmiChannelRfHi()
+{
+    constexpr auto redfishHostInterfaceChannel = "usb0";
+    uint8_t chNum = ipmi::getChannelByName(redfishHostInterfaceChannel);
+    ChannelInfo chInfo{};
+    Cc compCode = ipmi::getChannelInfo(chNum, chInfo);
+    if (compCode != ipmi::ccSuccess)
+    {
+        lg2::error(
+            "ipmiGetipmiChannelRfHi failed for channel {CHANNEL} with error {ERROR}",
+            "CHANNEL", chNum, "ERROR", compCode);
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (chInfo.mediumType !=
+            static_cast<uint8_t>(EChannelMediumType::lan8032) ||
+        chInfo.protocolType !=
+            static_cast<uint8_t>(EChannelProtocolType::ipmbV10) ||
+        chInfo.sessionSupported !=
+            static_cast<uint8_t>(EChannelSessSupported::multi) ||
+        chInfo.isIpmi != true)
+    {
+        lg2::error(
+            "ipmiGetipmiChannelRfHi: channel {CHANNEL} lacks required config",
+            "CHANNEL", chNum);
+        return responseSensorInvalid();
+    }
+    return ipmi::responseSuccess(static_cast<uint8_t>(chNum));
+}
+
 } // namespace ipmi
 
 void registerBootstrapCredentialsOemCommands()
@@ -98,4 +131,9 @@ void registerBootstrapCredentialsOemCommands()
         ipmi::prioOemBase, ipmi::groupNvidia,
         ipmi::bootstrap_credentials_oem::cmdGetRedfishHostName,
         ipmi::Privilege::Admin, ipmi::ipmiGetRedfishHostName);
+
+    ipmi::registerHandler(
+        ipmi::prioOemBase, ipmi::groupNvidia,
+        ipmi::bootstrap_credentials_oem::cmdGetIpmiChannelRfHi,
+        ipmi::Privilege::Admin, ipmi::ipmiGetIpmiChannelRfHi);
 }
