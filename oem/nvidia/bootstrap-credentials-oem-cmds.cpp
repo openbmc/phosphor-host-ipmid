@@ -80,6 +80,85 @@ ipmi::RspType<ipmi::message::Payload> ipmiGetRedfishHostName(
         std::vector<uint8_t>(hostName.begin(), hostName.end()));
     return ipmi::responseSuccess(hostNamePayload);
 }
+
+ipmi::RspType<uint8_t> ipmiGetIpmiChannelRfHi()
+{
+    static constexpr const char* channelConfigDefaultFilename =
+        "/usr/share/ipmi-providers/channel_config.json";
+    std::ifstream channelConfigFile(channelConfigDefaultFilename);
+    if (!channelConfigFile.is_open())
+    {
+        lg2::error("ipmiGetipmiChannelRfHi failed to open channel config file: "
+                   "{STATUS}",
+                   "STATUS", channelConfigDefaultFilename);
+        return ipmi::responseResponseError();
+    }
+
+    nlohmann::json data = nullptr;
+    try
+    {
+        data = nlohmann::json::parse(channelConfigFile, nullptr, false);
+    }
+    catch (const nlohmann::json::parse_error& e)
+    {
+        lg2::error(
+            "ipmiGetipmiChannelRfHi failed to parse channel config file: "
+            "{STATUS}",
+            "STATUS", e.what());
+        channelConfigFile.close();
+        return ipmi::responseResponseError();
+    }
+
+    channelConfigFile.close();
+    constexpr auto mediumType = "medium_type";
+    constexpr auto protocolType = "protocol_type";
+    constexpr auto sessionSupported = "session_supported";
+    constexpr auto isIpmi = "is_ipmi";
+    constexpr auto name = "name";
+    constexpr auto channelInfo = "channel_info";
+    constexpr auto isValid = "is_valid";
+    constexpr auto redfishHostInterfaceChannel = "usb0";
+
+    for (const auto& [key, value] : data.items())
+    {
+        if (value.is_null() || !value.contains(name) ||
+            !value.contains(channelInfo) || !value.contains(isValid))
+        {
+            continue;
+        }
+
+        const std::string& channelName = value[name];
+        if (channelName.find(redfishHostInterfaceChannel) == std::string::npos)
+        {
+            continue;
+        }
+
+        if (!value[isValid].get<bool>())
+        {
+            continue;
+        }
+
+        const auto& info = value[channelInfo];
+        if (!info.contains(mediumType) || !info.contains(protocolType) ||
+            !info.contains(sessionSupported) || !info.contains(isIpmi))
+        {
+            continue;
+        }
+
+        if (info[mediumType] == "lan-802.3" &&
+            info[protocolType] == "ipmb-1.0" &&
+            info[sessionSupported] == "multi-session" &&
+            info[isIpmi].get<bool>())
+        {
+            uint8_t channelNum = static_cast<uint8_t>(std::stoi(key));
+            return ipmi::responseSuccess(channelNum);
+        }
+    }
+    lg2::error("ipmiGetipmiChannelRfHi no valid Redfish-compatible channel "
+               "found");
+    return ipmi::responseInvalidCommandOnLun();
+}
+
 } // namespace ipmi
 
 void registerBootstrapCredentialsOemCommands()
@@ -98,4 +177,9 @@ void registerBootstrapCredentialsOemCommands()
         ipmi::prioOemBase, ipmi::groupNvidia,
         ipmi::bootstrap_credentials_oem::cmdGetRedfishHostName,
         ipmi::Privilege::Admin, ipmi::ipmiGetRedfishHostName);
+
+    ipmi::registerHandler(
+        ipmi::prioOemBase, ipmi::groupNvidia,
+        ipmi::bootstrap_credentials_oem::cmdGetIpmiChannelRfHi,
+        ipmi::Privilege::Admin, ipmi::ipmiGetIpmiChannelRfHi);
 }
