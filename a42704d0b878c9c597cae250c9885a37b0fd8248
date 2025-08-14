@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7a472818_674fa76a",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-14T17:41:59Z",
+      "side": 1,
+      "message": "rather than parsing through the channel file like this, it\u0027s probably better to use the channel_layer library that can do this for you:\n\n```\nconstexpr auto redfishHostInterfaceChannel \u003d \"usb0\";\n// find the channel by name:\nint chNum \u003d ipmi::getChannelByName(redfishHostInterfaceChannel);\nif (chNum \u003c 0)\n{\n   return responseSensorInvalid();\n}\nChannelInfo chInfo{};\nif (ipmi::isValidChannel(chNum) !\u003d ipmi::ccSuccess || \n    ipmi::getChannelInfo(chNum, chInfo) !\u003d ipmi::ccSuccess)\n{\n    return responseSensorInvalid();\n}\n// check the mediumType, protocolType, isIpmi, sessionSupported\n...\nreturn responseSuccess(chNum);\n```",
+      "revId": "a42704d0b878c9c597cae250c9885a37b0fd8248",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1b1c4c3e_08193b70",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-14T17:41:59Z",
+      "side": 1,
+      "message": "It seems like we could choose a more appropriate response here. Maybe responseSensorInvalid() (0xCB) \"Requested Sensor, data, or record not present.\" or possibly an OEM response in the range of 0x01-0x7e specific for this command.",
+      "revId": "a42704d0b878c9c597cae250c9885a37b0fd8248",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
