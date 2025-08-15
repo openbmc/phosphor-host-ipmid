@@ -89,6 +89,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c4c9c91_864a2e61",
+        "filename": "storagehandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-15T18:04:22Z",
+      "side": 1,
+      "message": "Payload is intended for variable type things where a single command can return a bunch of different types. It hides the response type, so it\u0027s not recommended unless there is no other way to do it. (get lan parameter is a good example)",
+      "parentUuid": "34258ff6_9fcd6052",
+      "range": {
+        "startLine": 285,
+        "startChar": 14,
+        "endLine": 285,
+        "endChar": 36
+      },
+      "revId": "53922cffbff04e2ff508a6eb412eca0314f0a67e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "21349cfa_ff61a443",
