@@ -57,6 +57,7 @@ struct PlatformEventRequest
     uint8_t data[3];
 };
 
+static constexpr const char* ipmiSELObject = "xyz.openbmc_project.Logging.IPMI";
 static constexpr const char* ipmiSELPath = "/xyz/openbmc_project/Logging/IPMI";
 static constexpr const char* ipmiSELAddInterface =
     "xyz.openbmc_project.Logging.IPMI";
