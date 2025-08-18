@@ -1423,41 +1423,37 @@ static bool isFromSystemChannel()
     return true;
 }
 
-ipmi::Cc ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
-                              ipmi_response_t, ipmi_data_len_t dataLen,
-                              ipmi_context_t)
+ipmi::RspType<> ipmicmdPlatformEvent(ipmi::Context::ptr& ctx,
+                                     const std::vector<uint8_t>& data)
 {
-    uint16_t generatorID;
-    size_t count;
-    bool assert = true;
-    std::string sensorPath;
-    size_t paraLen = *dataLen;
-    PlatformEventRequest* req;
-    *dataLen = 0;
-
-    if ((paraLen < selSystemEventSizeWith1Bytes) ||
-        (paraLen > selSystemEventSizeWith3Bytes))
+    size_t paraLen = data.size();
+    if (paraLen < selSystemEventSizeWith1Bytes ||
+        paraLen > selSystemEventSizeWith3Bytes)
     {
-        return ipmi::ccReqDataLenInvalid;
+        return ipmi::responseReqDataLenInvalid();
     }
 
+    uint16_t generatorID = 0xff;
+    std::string sensorPath = "IPMB";
+    const uint8_t* raw = data.data();
+    const PlatformEventRequest* req = nullptr;
     if (isFromSystemChannel())
-    { // first byte for SYSTEM Interface is Generator ID
-        // +1 to get common struct
-        req = reinterpret_cast<PlatformEventRequest*>((uint8_t*)request + 1);
+    {
+        // first byte for SYSTEM Interface is Generator ID +1 to get common
+        // struct
+        req = reinterpret_cast<const PlatformEventRequest*>(raw + 1);
         // Capture the generator ID
-        generatorID = *reinterpret_cast<uint8_t*>(request);
+        generatorID = *raw;
         // Platform Event usually comes from other firmware, like BIOS.
         // Unlike BMC sensor, it does not have BMC DBUS sensor path.
         sensorPath = "System";
     }
     else
     {
-        req = reinterpret_cast<PlatformEventRequest*>(request);
+        req = reinterpret_cast<const PlatformEventRequest*>(raw);
         // TODO GenratorID for IPMB is combination of RqSA and RqLUN
-        generatorID = 0xff;
-        sensorPath = "IPMB";
     }
+
     // Content of event data field depends on sensor class.
     // When data0 bit[5:4] is non-zero, valid data counts is 3.
     // When data0 bit[7:6] is non-zero, valid data counts is 2.
@@ -1466,10 +1462,11 @@ ipmi::Cc ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         ((req->data[0] & byte2EnableMask) != 0 &&
          paraLen < selSystemEventSizeWith2Bytes))
     {
-        return ipmi::ccReqDataLenInvalid;
+        return ipmi::responseReqDataLenInvalid();
     }
 
     // Count bytes of Event Data
+    size_t count;
     if ((req->data[0] & byte3EnableMask) != 0)
     {
         count = 3;
@@ -1482,26 +1479,19 @@ ipmi::Cc ipmicmdPlatformEvent(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     {
         count = 1;
     }
-    assert = req->eventDirectionType & directionMask ? false : true;
+    bool assert = req->eventDirectionType & directionMask ? false : true;
     std::vector<uint8_t> eventData(req->data, req->data + count);
 
-    sdbusplus::bus_t dbus(bus);
-    std::string service =
-        ipmi::getService(dbus, ipmiSELAddInterface, ipmiSELPath);
-    sdbusplus::message_t writeSEL = dbus.new_method_call(
-        service.c_str(), ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd");
-    writeSEL.append(ipmiSELAddMessage, sensorPath, eventData, assert,
-                    generatorID);
-    try
+    auto ec = ipmi::callDbusMethod(
+        ctx, ipmiSELObject, ipmiSELPath, ipmiSELAddInterface, "IpmiSelAdd",
+        ipmiSELAddMessage, sensorPath, eventData, assert, generatorID);
+    if (ec)
     {
-        dbus.call(writeSEL);
+        lg2::error("IpmiSelAdd call failed: {ERROR}", "ERROR", ec.message());
+        return ipmi::responseUnspecifiedError();
     }
-    catch (const sdbusplus::exception_t& e)
-    {
-        lg2::error("exception message: {ERROR}", "ERROR", e);
-        return ipmi::ccUnspecifiedError;
-    }
-    return ipmi::ccSuccess;
+
+    return ipmi::responseSuccess();
 }
 
 void registerNetFnSenFunctions()
@@ -1555,9 +1545,9 @@ void registerNetFnSenFunctions()
     // Common Handers used by both implementation.
 
     // <Platform Event Message>
-    ipmi_register_callback(ipmi::netFnSensor,
-                           ipmi::sensor_event::cmdPlatformEvent, nullptr,
-                           ipmicmdPlatformEvent, PRIVILEGE_OPERATOR);
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
+                          ipmi::sensor_event::cmdPlatformEvent,
+                          ipmi::Privilege::Operator, ipmicmdPlatformEvent);
 
     // <Get Sensor Type>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
