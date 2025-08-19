@@ -709,8 +709,7 @@ ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     }
     size_t sizeDiff = maxFruSdrNameSize - name.size();
 
-    resp.header.record_id_lsb = 0x0; // calling code is to implement these
-    resp.header.record_id_msb = 0x0;
+    resp.header.recordId = 0x0; // calling code is to implement these
     resp.header.sdr_version = ipmiSdrVersion;
     resp.header.record_type = get_sdr::SENSOR_DATA_FRU_RECORD;
     resp.header.record_length = sizeof(resp.body) + sizeof(resp.key) - sizeDiff;
@@ -1199,8 +1198,8 @@ std::vector<uint8_t> getType8SDRs(
     get_sdr::SensorDataEntityRecord data{};
 
     /* Header */
-    get_sdr::header::set_record_id(recordId, &(data.header));
     // Based on IPMI Spec v2.0 rev 1.1
+    data.header.recordId = recordId;
     data.header.sdr_version = SDR_VERSION;
     data.header.record_type = 0x08;
     data.header.record_length = sizeof(data.key) + sizeof(data.body);
