@@ -71,7 +71,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
 
-    enableScanning(&response);
+    enableScanning(response);
 
     auto service = ipmi::getService(bus, interface, path);
 
@@ -88,7 +88,7 @@ GetSensorResponse mapDbusToAssertion(const Info& sensorInfo,
             {
                 if (propValue == value.second.assert)
                 {
-                    setOffset(value.first, &response);
+                    setOffset(value.first, response);
                     break;
                 }
             }
@@ -103,7 +103,7 @@ GetSensorResponse mapDbusToEventdata2(const Info& sensorInfo)
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
 
-    enableScanning(&response);
+    enableScanning(response);
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
@@ -122,7 +122,7 @@ GetSensorResponse mapDbusToEventdata2(const Info& sensorInfo)
             {
                 if (propValue == value.second.assert)
                 {
-                    setReading(value.first, &response);
+                    setReading(value.first, response);
                     break;
                 }
             }
