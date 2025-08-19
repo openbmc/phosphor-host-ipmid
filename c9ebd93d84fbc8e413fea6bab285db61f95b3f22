@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b5ac524c_aaf3f066",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:42:51Z",
+      "side": 1,
+      "message": "Mostly I am onboard with this. Thanks for the work. The byte-shifting functions can either be skipped and removed in a later commit, or this commit can be rebased to happen after the rewrite to the new handler style.",
+      "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e46dd2f3_896242e3",
+        "filename": "docs/testing.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:42:51Z",
+      "side": 1,
+      "message": "this function should go away. All packing and unpacking of the reservation ID should be done by the calling code prior to the handler. So any tests that use this should be modified to remove the call and just use the value.",
+      "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cd71a024_bf40049c",
+        "filename": "docs/testing.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:42:51Z",
+      "side": 1,
+      "message": "same",
+      "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bfebd7d1_9ce8a687",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:42:51Z",
+      "side": 1,
+      "message": "If this change goes in after the rewrite to use the new handler functions, these byte-shifting functions can just be deleted.",
+      "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
