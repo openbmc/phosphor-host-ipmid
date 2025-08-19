@@ -87,23 +87,6 @@ static const uint16_t END_OF_RECORD = 0xFFFF;
 static const uint8_t LENGTH_MASK = 0x1F;
 
 /**
- * Get SDR Info
- */
-
-namespace get_sdr_info
-{
-namespace request
-{
-// Note: for some reason the ipmi_request_t appears to be the
-// raw value for this call.
-inline bool get_count(void* req)
-{
-    return (bool)((uint64_t)(req) & 1);
-}
-} // namespace request
-} // namespace get_sdr_info
-
-/**
  * Get SDR
  */
 namespace get_sdr
