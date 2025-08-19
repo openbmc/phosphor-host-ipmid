@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5f628cc0_124ccb68",
+        "filename": "groupext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:19:08Z",
+      "side": 1,
+      "message": "this can be constexpr too.",
+      "revId": "2c485236f142a37c5daf84bc75d657ead5a11685",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
