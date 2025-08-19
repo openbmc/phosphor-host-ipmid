@@ -695,8 +695,6 @@ int getOtherSensorsDataRecord(ipmi::Context::ptr ctx, uint16_t recordID,
         {
             return GENERAL_ERROR;
         }
-        data.header.record_id_msb = recordID >> 8;
-        data.header.record_id_lsb = recordID & 0xFF;
         recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&data),
                           reinterpret_cast<uint8_t*>(&data) + sizeof(data));
     }
@@ -1778,12 +1776,10 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
 void constructSensorSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
                                  get_sdr::SensorDataFullRecord& record)
 {
-    get_sdr::header::set_record_id(
-        recordID, reinterpret_cast<get_sdr::SensorDataRecordHeader*>(&record));
-
     uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     uint8_t lun = static_cast<uint8_t>(sensorNum >> 8);
 
+    record.header.recordId = recordID;
     record.header.sdr_version = ipmiSdrVersion;
     record.header.record_type = get_sdr::SENSOR_DATA_FULL_RECORD;
     record.header.record_length = sizeof(get_sdr::SensorDataFullRecord) -
@@ -2043,9 +2039,7 @@ void constructEventSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
     uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     uint8_t lun = static_cast<uint8_t>(sensorNum >> 8);
 
-    get_sdr::header::set_record_id(
-        recordID, reinterpret_cast<get_sdr::SensorDataRecordHeader*>(&record));
-
+    record.header.recordId = recordID;
     record.header.sdr_version = ipmiSdrVersion;
     record.header.record_type = get_sdr::SENSOR_DATA_EVENT_RECORD;
     record.header.record_length = sizeof(get_sdr::SensorDataEventRecord) -
