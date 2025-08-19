@@ -51,6 +51,24 @@
       "message": "It seems like we could choose a more appropriate response here. Maybe responseSensorInvalid() (0xCB) \"Requested Sensor, data, or record not present.\" or possibly an OEM response in the range of 0x01-0x7e specific for this command.",
       "revId": "a42704d0b878c9c597cae250c9885a37b0fd8248",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e005b0a7_bc34c8a2",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-19T12:57:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b1c4c3e_08193b70",
+      "revId": "a42704d0b878c9c597cae250c9885a37b0fd8248",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
