@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b3b37ee5_82ccf783",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:45:14Z",
+      "side": 1,
+      "message": "This is mostly fine but the same comment goes as https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/82911 ; the byte-shifting functions that will ultimately be removed during the rewrite can be skipped or this can be rebased so they are gone already.",
+      "revId": "6819ced89f90442ec8d9f042ed1ad605ed5c4328",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
