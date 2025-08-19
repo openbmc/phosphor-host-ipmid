@@ -1200,7 +1200,7 @@ std::vector<uint8_t> getType8SDRs(
     get_sdr::SensorDataEntityRecord data{};
 
     /* Header */
-    get_sdr::header::setRecordId(recordId, &(data.header));
+    get_sdr::header::setRecordId(recordId, data.header);
     // Based on IPMI Spec v2.0 rev 1.1
     data.header.sdrVersion = SDR_VERSION;
     data.header.recordType = 0x08;
@@ -1210,7 +1210,7 @@ std::vector<uint8_t> getType8SDRs(
     data.key.containerEntityId = entity->second.containerEntityId;
     data.key.containerEntityInstance = entity->second.containerEntityInstance;
     get_sdr::key::setFlags(entity->second.isList, entity->second.isLinked,
-                           &(data.key));
+                           data.key);
     data.key.entityId1 = entity->second.containedEntities[0].first;
     data.key.entityInstance1 = entity->second.containedEntities[0].second;
 

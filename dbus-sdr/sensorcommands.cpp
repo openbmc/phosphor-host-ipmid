@@ -1778,8 +1778,7 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
 void constructSensorSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
                                  get_sdr::SensorDataFullRecord& record)
 {
-    get_sdr::header::setRecordId(
-        recordID, reinterpret_cast<get_sdr::SensorDataRecordHeader*>(&record));
+    get_sdr::header::setRecordId(recordID, record.header);
 
     uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     uint8_t lun = static_cast<uint8_t>(sensorNum >> 8);
@@ -1907,8 +1906,8 @@ bool constructSensorSdr(
 
     // populate sensor name from path
     auto name = sensor::parseSdrIdFromPath(path);
-    get_sdr::body::setIdStrLen(name.size(), &record.body);
-    get_sdr::body::setIdType(3, &record.body); // "8-bit ASCII + Latin 1"
+    get_sdr::body::setIdStrLen(name.size(), record.body);
+    get_sdr::body::setIdType(3, record.body); // "8-bit ASCII + Latin 1"
     std::memcpy(record.body.idString, name.c_str(),
                 std::min(name.length() + 1, sizeof(record.body.idString)));
 
@@ -1923,7 +1922,7 @@ bool constructSensorSdr(
         sensorSettable =
             mappedVariant<bool>(mutability->second, "Mutable", false);
     }
-    get_sdr::body::initSettableState(sensorSettable, &record.body);
+    get_sdr::body::initSettableState(sensorSettable, record.body);
 
     // Grant write permission to sensors deemed externally settable
     details::sdrWriteTable.setWritePermission(sensorNum, sensorSettable);
@@ -2010,7 +2009,7 @@ void constructStaticSensorSdr(ipmi::Context::ptr, uint16_t sensorNum,
     if (ipmi::sensor::Mutability::Write ==
         (sensor->second.mutability & ipmi::sensor::Mutability::Write))
     {
-        get_sdr::body::initSettableState(true, &(record.body));
+        get_sdr::body::initSettableState(true, record.body);
     }
 
     auto idString = sensor->second.sensorName;
@@ -2022,16 +2021,15 @@ void constructStaticSensorSdr(ipmi::Context::ptr, uint16_t sensorNum,
 
     if (idString.length() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
-        get_sdr::body::setIdStrLen(FULL_RECORD_ID_STR_MAX_LENGTH,
-                                   &(record.body));
+        get_sdr::body::setIdStrLen(FULL_RECORD_ID_STR_MAX_LENGTH, record.body);
     }
     else
     {
-        get_sdr::body::setIdStrLen(idString.length(), &(record.body));
+        get_sdr::body::setIdStrLen(idString.length(), record.body);
     }
-    get_sdr::body::setIdType(3, &record.body); // "8-bit ASCII + Latin 1"
+    get_sdr::body::setIdType(3, record.body); // "8-bit ASCII + Latin 1"
     std::strncpy(record.body.idString, idString.c_str(),
-                 get_sdr::body::getIdStrLen(&(record.body)));
+                 get_sdr::body::getIdStrLen(record.body));
 }
 #endif
 
@@ -2042,8 +2040,7 @@ void constructEventSdrHeaderKey(uint16_t sensorNum, uint16_t recordID,
     uint8_t sensornumber = static_cast<uint8_t>(sensorNum);
     uint8_t lun = static_cast<uint8_t>(sensorNum >> 8);
 
-    get_sdr::header::setRecordId(
-        recordID, reinterpret_cast<get_sdr::SensorDataRecordHeader*>(&record));
+    get_sdr::header::setRecordId(recordID, record.header);
 
     record.header.sdrVersion = ipmiSdrVersion;
     record.header.recordType = get_sdr::SENSOR_DATA_EVENT_RECORD;
@@ -2093,8 +2090,8 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
     // populate sensor name from path
     auto name = sensor::parseSdrIdFromPath(path);
     int nameSize = std::min(name.size(), sizeof(record.body.idString));
-    get_sdr::body::setIdStrLen(nameSize, &record.body);
-    get_sdr::body::setIdType(3, &record.body); // "8-bit ASCII + Latin 1"
+    get_sdr::body::setIdStrLen(nameSize, record.body);
+    get_sdr::body::setIdType(3, record.body); // "8-bit ASCII + Latin 1"
     std::memset(record.body.idString, 0x00, sizeof(record.body.idString));
     std::memcpy(record.body.idString, name.c_str(), nameSize);
 

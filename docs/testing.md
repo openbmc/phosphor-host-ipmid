@@ -180,14 +180,14 @@ struct GetSdrReq
 namespace request
 {
 
-inline uint8_t getReservationId(GetSdrReq* req)
+inline uint8_t getReservationId(const GetSdrReq& req)
 {
-    return (req->reservationIdLsb + (req->reservationIdMsb << 8));
+    return (req.reservationIdLsb + (req.reservationIdMsb << 8));
 };
 
-inline uint16_t getRecordId(GetSdrReq* req)
+inline uint16_t getRecordId(const GetSdrReq& req)
 {
-    return (req->recordIdLsb + (req->recordIdMsb << 8));
+    return (req.recordIdLsb + (req.recordIdMsb << 8));
 };
 
 } // namespace request
@@ -223,10 +223,6 @@ TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_HappyPath)
 {
 }
 
-TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_NullInputDies)
-{
-}
-
 TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_Uint16MaxWorksCorrectly)
 {
 }
@@ -236,10 +232,6 @@ For `getRecordId()`, we have pretty much the same set of tests:
 
 ```c++
 TEST(SensorHandlerTest, GetSdrReq_get_record_id_HappyPath)
-{
-}
-
-TEST(SensorHandlerTest, GetSdrReq_get_record_id_NullInputDies)
 {
 }
 
@@ -280,20 +272,8 @@ TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_HappyPath)
                        0x00,  // Offset
                        0x00}; // Bytes to Read
 
-    uint16_t actual = get_sdr::request::getReservationId(&input);
+    uint16_t actual = get_sdr::request::getReservationId(input);
     ASSERT_EQ(actual, expected_id);
-}
-```
-
-We don't expect that our `GetSdrReq` pointer will ever be null; in this case,
-the null pointer validation is done much, much earlier. So it's okay for us to
-specify that in the unlikely case we're given a null pointer, we die. We don't
-really care what the output message is.
-
-```c++
-TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_NullInputDies)
-{
-    ASSERT_DEATH(get_sdr::request::getReservationId(nullptr), ".*");
 }
 ```
 
@@ -312,7 +292,7 @@ TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_Uint16MaxWorksCorrectly)
                        0x00,  // Offset
                        0x00}; // Bytes to Read
 
-    uint16_t actual = get_sdr::request::getReservationId(&input);
+    uint16_t actual = get_sdr::request::getReservationId(input);
     ASSERT_EQ(actual, expected_id);
 }
 ```
