@@ -149,48 +149,52 @@ namespace key
 static constexpr uint8_t listOrRangeBit = 7;
 static constexpr uint8_t linkedBit = 6;
 
-inline void set_owner_id_ipmb(SensorDataRecordKey* key)
+inline void set_owner_id_ipmb(SensorDataRecordKey& key)
 {
-    key->owner_id &= ~0x01;
+    key.owner_id &= ~0x01;
 };
 
-inline void set_owner_id_system_sw(SensorDataRecordKey* key)
+inline void set_owner_id_system_sw(SensorDataRecordKey& key)
 {
-    key->owner_id |= 0x01;
+    key.owner_id |= 0x01;
 };
 
-inline void set_owner_id_bmc(SensorDataRecordKey* key)
+inline void set_owner_id_bmc(SensorDataRecordKey& key)
 {
-    key->owner_id |= 0x20;
+    key.owner_id |= 0x20;
 };
 
-inline void set_owner_id_address(uint8_t addr, SensorDataRecordKey* key)
+inline void set_owner_id_address(uint8_t addr, SensorDataRecordKey& key)
 {
-    key->owner_id &= 0x01;
-    key->owner_id |= addr << 1;
+    key.owner_id &= 0x01;
+    key.owner_id |= addr << 1;
 };
 
-inline void set_owner_lun(uint8_t lun, SensorDataRecordKey* key)
+inline void set_owner_lun(uint8_t lun, SensorDataRecordKey& key)
 {
-    key->owner_lun &= ~0x03;
-    key->owner_lun |= (lun & 0x03);
+    key.owner_lun &= ~0x03;
+    key.owner_lun |= (lun & 0x03);
 };
 
-inline void set_owner_lun_channel(uint8_t channel, SensorDataRecordKey* key)
+inline void set_owner_lun_channel(uint8_t channel, SensorDataRecordKey& key)
 {
-    key->owner_lun &= 0x0f;
-    key->owner_lun |= ((channel & 0xf) << 4);
+    key.owner_lun &= 0x0f;
+    key.owner_lun |= ((channel & 0xf) << 4);
 };
 
 inline void set_flags(bool isList, bool isLinked,
-                      SensorDataEntityRecordKey* key)
+                      SensorDataEntityRecordKey& key)
 {
-    key->flags = 0x00;
+    key.flags = 0x00;
     if (!isList)
-        key->flags |= 1 << listOrRangeBit;
+    {
+        key.flags |= 1 << listOrRangeBit;
+    }
 
     if (isLinked)
-        key->flags |= 1 << linkedBit;
+    {
+        key.flags |= 1 << linkedBit;
+    }
 };
 
 } // namespace key
@@ -335,222 +339,244 @@ namespace body
 {
 
 inline void set_entity_instance_number(uint8_t n,
-                                       SensorDataFullRecordBody* body)
+                                       SensorDataFullRecordBody& body)
 {
-    body->entity_instance &= 1 << 7;
-    body->entity_instance |= (n & ~(1 << 7));
-};
-inline void set_entity_physical_entity(SensorDataFullRecordBody* body)
-{
-    body->entity_instance &= ~(1 << 7);
-};
-inline void set_entity_logical_container(SensorDataFullRecordBody* body)
-{
-    body->entity_instance |= 1 << 7;
+    body.entity_instance &= 1 << 7;
+    body.entity_instance |= (n & ~(1 << 7));
 };
 
-inline void sensor_scanning_state(bool enabled, SensorDataFullRecordBody* body)
+inline void set_entity_physical_entity(SensorDataFullRecordBody& body)
+{
+    body.entity_instance &= ~(1 << 7);
+};
+
+inline void set_entity_logical_container(SensorDataFullRecordBody& body)
+{
+    body.entity_instance |= 1 << 7;
+};
+
+inline void sensor_scanning_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensor_initialization |= 1 << 0;
+        body.sensor_initialization |= 1 << 0;
     }
     else
     {
-        body->sensor_initialization &= ~(1 << 0);
+        body.sensor_initialization &= ~(1 << 0);
     };
 };
-inline void event_generation_state(bool enabled, SensorDataFullRecordBody* body)
+
+inline void event_generation_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensor_initialization |= 1 << 1;
+        body.sensor_initialization |= 1 << 1;
     }
     else
     {
-        body->sensor_initialization &= ~(1 << 1);
-    }
-};
-inline void init_types_state(bool enabled, SensorDataFullRecordBody* body)
-{
-    if (enabled)
-    {
-        body->sensor_initialization |= 1 << 2;
-    }
-    else
-    {
-        body->sensor_initialization &= ~(1 << 2);
-    }
-};
-inline void init_hyst_state(bool enabled, SensorDataFullRecordBody* body)
-{
-    if (enabled)
-    {
-        body->sensor_initialization |= 1 << 3;
-    }
-    else
-    {
-        body->sensor_initialization &= ~(1 << 3);
-    }
-};
-inline void init_thresh_state(bool enabled, SensorDataFullRecordBody* body)
-{
-    if (enabled)
-    {
-        body->sensor_initialization |= 1 << 4;
-    }
-    else
-    {
-        body->sensor_initialization &= ~(1 << 4);
-    }
-};
-inline void init_events_state(bool enabled, SensorDataFullRecordBody* body)
-{
-    if (enabled)
-    {
-        body->sensor_initialization |= 1 << 5;
-    }
-    else
-    {
-        body->sensor_initialization &= ~(1 << 5);
-    }
-};
-inline void init_scanning_state(bool enabled, SensorDataFullRecordBody* body)
-{
-    if (enabled)
-    {
-        body->sensor_initialization |= 1 << 6;
-    }
-    else
-    {
-        body->sensor_initialization &= ~(1 << 6);
-    }
-};
-inline void init_settable_state(bool enabled, SensorDataFullRecordBody* body)
-{
-    if (enabled)
-    {
-        body->sensor_initialization |= 1 << 7;
-    }
-    else
-    {
-        body->sensor_initialization &= ~(1 << 7);
+        body.sensor_initialization &= ~(1 << 1);
     }
 };
 
-inline void set_percentage(SensorDataFullRecordBody* body)
+inline void init_types_state(bool enabled, SensorDataFullRecordBody& body)
 {
-    body->sensor_units_1 |= 1 << 0;
+    if (enabled)
+    {
+        body.sensor_initialization |= 1 << 2;
+    }
+    else
+    {
+        body.sensor_initialization &= ~(1 << 2);
+    }
 };
-inline void unset_percentage(SensorDataFullRecordBody* body)
+
+inline void init_hyst_state(bool enabled, SensorDataFullRecordBody& body)
 {
-    body->sensor_units_1 &= ~(1 << 0);
+    if (enabled)
+    {
+        body.sensor_initialization |= 1 << 3;
+    }
+    else
+    {
+        body.sensor_initialization &= ~(1 << 3);
+    }
 };
-inline void set_modifier_operation(uint8_t op, SensorDataFullRecordBody* body)
+
+inline void init_thresh_state(bool enabled, SensorDataFullRecordBody& body)
 {
-    body->sensor_units_1 &= ~(3 << 1);
-    body->sensor_units_1 |= (op & 0x3) << 1;
+    if (enabled)
+    {
+        body.sensor_initialization |= 1 << 4;
+    }
+    else
+    {
+        body.sensor_initialization &= ~(1 << 4);
+    }
 };
-inline void set_rate_unit(uint8_t unit, SensorDataFullRecordBody* body)
+
+inline void init_events_state(bool enabled, SensorDataFullRecordBody& body)
 {
-    body->sensor_units_1 &= ~(7 << 3);
-    body->sensor_units_1 |= (unit & 0x7) << 3;
+    if (enabled)
+    {
+        body.sensor_initialization |= 1 << 5;
+    }
+    else
+    {
+        body.sensor_initialization &= ~(1 << 5);
+    }
 };
+
+inline void init_scanning_state(bool enabled, SensorDataFullRecordBody& body)
+{
+    if (enabled)
+    {
+        body.sensor_initialization |= 1 << 6;
+    }
+    else
+    {
+        body.sensor_initialization &= ~(1 << 6);
+    }
+};
+
+inline void init_settable_state(bool enabled, SensorDataFullRecordBody& body)
+{
+    if (enabled)
+    {
+        body.sensor_initialization |= 1 << 7;
+    }
+    else
+    {
+        body.sensor_initialization &= ~(1 << 7);
+    }
+};
+
+inline void set_percentage(SensorDataFullRecordBody& body)
+{
+    body.sensor_units_1 |= 1 << 0;
+};
+
+inline void unset_percentage(SensorDataFullRecordBody& body)
+{
+    body.sensor_units_1 &= ~(1 << 0);
+};
+
+inline void set_modifier_operation(uint8_t op, SensorDataFullRecordBody& body)
+{
+    body.sensor_units_1 &= ~(3 << 1);
+    body.sensor_units_1 |= (op & 0x3) << 1;
+};
+
+inline void set_rate_unit(uint8_t unit, SensorDataFullRecordBody& body)
+{
+    body.sensor_units_1 &= ~(7 << 3);
+    body.sensor_units_1 |= (unit & 0x7) << 3;
+};
+
 inline void set_analog_data_format(uint8_t format,
-                                   SensorDataFullRecordBody* body)
+                                   SensorDataFullRecordBody& body)
 {
-    body->sensor_units_1 &= ~(3 << 6);
-    body->sensor_units_1 |= (format & 0x3) << 6;
+    body.sensor_units_1 &= ~(3 << 6);
+    body.sensor_units_1 |= (format & 0x3) << 6;
 };
 
-inline void set_m(uint16_t m, SensorDataFullRecordBody* body)
+inline void set_m(uint16_t m, SensorDataFullRecordBody& body)
 {
-    body->m_lsb = m & 0xff;
-    body->m_msb_and_tolerance &= ~(3 << 6);
-    body->m_msb_and_tolerance |= ((m & (3 << 8)) >> 2);
-};
-inline void set_tolerance(uint8_t tol, SensorDataFullRecordBody* body)
-{
-    body->m_msb_and_tolerance &= ~0x3f;
-    body->m_msb_and_tolerance |= tol & 0x3f;
+    body.m_lsb = m & 0xff;
+    body.m_msb_and_tolerance &= ~(3 << 6);
+    body.m_msb_and_tolerance |= ((m & (3 << 8)) >> 2);
 };
 
-inline void set_b(uint16_t b, SensorDataFullRecordBody* body)
+inline void set_tolerance(uint8_t tol, SensorDataFullRecordBody& body)
 {
-    body->b_lsb = b & 0xff;
-    body->b_msb_and_accuracy_lsb &= ~(3 << 6);
-    body->b_msb_and_accuracy_lsb |= ((b & (3 << 8)) >> 2);
+    body.m_msb_and_tolerance &= ~0x3f;
+    body.m_msb_and_tolerance |= tol & 0x3f;
 };
-inline void set_accuracy(uint16_t acc, SensorDataFullRecordBody* body)
+
+inline void set_b(uint16_t b, SensorDataFullRecordBody& body)
+{
+    body.b_lsb = b & 0xff;
+    body.b_msb_and_accuracy_lsb &= ~(3 << 6);
+    body.b_msb_and_accuracy_lsb |= ((b & (3 << 8)) >> 2);
+};
+
+inline void set_accuracy(uint16_t acc, SensorDataFullRecordBody& body)
 {
     // bottom 6 bits
-    body->b_msb_and_accuracy_lsb &= ~0x3f;
-    body->b_msb_and_accuracy_lsb |= acc & 0x3f;
+    body.b_msb_and_accuracy_lsb &= ~0x3f;
+    body.b_msb_and_accuracy_lsb |= acc & 0x3f;
     // top 4 bits
-    body->accuracy_and_sensor_direction &= 0x0f;
-    body->accuracy_and_sensor_direction |= ((acc >> 6) & 0xf) << 4;
-};
-inline void set_accuracy_exp(uint8_t exp, SensorDataFullRecordBody* body)
-{
-    body->accuracy_and_sensor_direction &= ~(3 << 2);
-    body->accuracy_and_sensor_direction |= (exp & 3) << 2;
-};
-inline void set_sensor_dir(uint8_t dir, SensorDataFullRecordBody* body)
-{
-    body->accuracy_and_sensor_direction &= ~(3 << 0);
-    body->accuracy_and_sensor_direction |= (dir & 3);
+    body.accuracy_and_sensor_direction &= 0x0f;
+    body.accuracy_and_sensor_direction |= ((acc >> 6) & 0xf) << 4;
 };
 
-inline void set_b_exp(uint8_t exp, SensorDataFullRecordBody* body)
+inline void set_accuracy_exp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body->r_b_exponents &= 0xf0;
-    body->r_b_exponents |= exp & 0x0f;
-};
-inline void set_r_exp(uint8_t exp, SensorDataFullRecordBody* body)
-{
-    body->r_b_exponents &= 0x0f;
-    body->r_b_exponents |= (exp & 0x0f) << 4;
+    body.accuracy_and_sensor_direction &= ~(3 << 2);
+    body.accuracy_and_sensor_direction |= (exp & 3) << 2;
 };
 
-inline void set_id_strlen(uint8_t len, SensorDataFullRecordBody* body)
+inline void set_sensor_dir(uint8_t dir, SensorDataFullRecordBody& body)
 {
-    body->id_string_info &= ~(0x1f);
-    body->id_string_info |= len & 0x1f;
-};
-inline void set_id_strlen(uint8_t len, SensorDataEventRecordBody* body)
-{
-    body->id_string_info &= ~(0x1f);
-    body->id_string_info |= len & 0x1f;
-};
-inline uint8_t get_id_strlen(SensorDataFullRecordBody* body)
-{
-    return body->id_string_info & 0x1f;
-};
-inline void set_id_type(uint8_t type, SensorDataFullRecordBody* body)
-{
-    body->id_string_info &= ~(3 << 6);
-    body->id_string_info |= (type & 0x3) << 6;
-};
-inline void set_id_type(uint8_t type, SensorDataEventRecordBody* body)
-{
-    body->id_string_info &= ~(3 << 6);
-    body->id_string_info |= (type & 0x3) << 6;
+    body.accuracy_and_sensor_direction &= ~(3 << 0);
+    body.accuracy_and_sensor_direction |= (dir & 3);
 };
 
-inline void set_device_id_strlen(uint8_t len, SensorDataFruRecordBody* body)
+inline void set_b_exp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body->deviceIDLen &= ~(LENGTH_MASK);
-    body->deviceIDLen |= len & LENGTH_MASK;
+    body.r_b_exponents &= 0xf0;
+    body.r_b_exponents |= exp & 0x0f;
 };
 
-inline uint8_t get_device_id_strlen(SensorDataFruRecordBody* body)
+inline void set_r_exp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    return body->deviceIDLen & LENGTH_MASK;
+    body.r_b_exponents &= 0x0f;
+    body.r_b_exponents |= (exp & 0x0f) << 4;
 };
 
-inline void set_readable_mask(uint8_t mask, SensorDataFullRecordBody* body)
+inline void set_id_strlen(uint8_t len, SensorDataFullRecordBody& body)
 {
-    body->discrete_reading_setting_mask[1] = mask & 0x3F;
+    body.id_string_info &= ~(0x1f);
+    body.id_string_info |= len & 0x1f;
+};
+
+inline void set_id_strlen(uint8_t len, SensorDataEventRecordBody& body)
+{
+    body.id_string_info &= ~(0x1f);
+    body.id_string_info |= len & 0x1f;
+};
+
+inline uint8_t get_id_strlen(const SensorDataFullRecordBody& body)
+{
+    return body.id_string_info & 0x1f;
+};
+
+inline void set_id_type(uint8_t type, SensorDataFullRecordBody& body)
+{
+    body.id_string_info &= ~(3 << 6);
+    body.id_string_info |= (type & 0x3) << 6;
+};
+
+inline void set_id_type(uint8_t type, SensorDataEventRecordBody& body)
+{
+    body.id_string_info &= ~(3 << 6);
+    body.id_string_info |= (type & 0x3) << 6;
+};
+
+inline void set_device_id_strlen(uint8_t len, SensorDataFruRecordBody& body)
+{
+    body.deviceIDLen &= ~(LENGTH_MASK);
+    body.deviceIDLen |= len & LENGTH_MASK;
+};
+
+inline uint8_t get_device_id_strlen(const SensorDataFruRecordBody& body)
+{
+    return body.deviceIDLen & LENGTH_MASK;
+};
+
+inline void set_readable_mask(uint8_t mask, SensorDataFullRecordBody& body)
+{
+    body.discrete_reading_setting_mask[1] = mask & 0x3F;
 }
 
 } // namespace body
@@ -638,15 +664,15 @@ namespace sensor
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse* resp)
+inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse& resp)
 {
     if (offset > 7)
     {
-        resp->discreteReadingSensorStates |= 1 << (offset - 8);
+        resp.discreteReadingSensorStates |= 1 << (offset - 8);
     }
     else
     {
-        resp->thresholdLevelsStates |= 1 << offset;
+        resp.thresholdLevelsStates |= 1 << offset;
     }
 }
 
@@ -656,9 +682,9 @@ inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse* resp)
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse* resp)
+inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse& resp)
 {
-    resp->reading = value;
+    resp.reading = value;
 }
 
 /**
@@ -669,10 +695,10 @@ inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse* resp)
  * @param[in/out] resp - get sensor reading response.
  */
 inline void setAssertionBytes(uint16_t value,
-                              ipmi::sensor::GetSensorResponse* resp)
+                              ipmi::sensor::GetSensorResponse& resp)
 {
-    resp->thresholdLevelsStates = static_cast<uint8_t>(value & 0x00FF);
-    resp->discreteReadingSensorStates = static_cast<uint8_t>(value >> 8);
+    resp.thresholdLevelsStates = static_cast<uint8_t>(value & 0x00FF);
+    resp.discreteReadingSensorStates = static_cast<uint8_t>(value >> 8);
 }
 
 /**
@@ -680,11 +706,11 @@ inline void setAssertionBytes(uint16_t value,
  *
  * @param[in/out] resp - get sensor reading response.
  */
-inline void enableScanning(ipmi::sensor::GetSensorResponse* resp)
+inline void enableScanning(ipmi::sensor::GetSensorResponse& resp)
 {
-    resp->readingOrStateUnavailable = false;
-    resp->scanningEnabled = true;
-    resp->allEventMessagesEnabled = false;
+    resp.readingOrStateUnavailable = false;
+    resp.scanningEnabled = true;
+    resp.allEventMessagesEnabled = false;
 }
 
 } // namespace sensor

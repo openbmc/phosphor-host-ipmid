@@ -175,7 +175,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     GetSensorResponse response{};
 
-    enableScanning(&response);
+    enableScanning(response);
     try
     {
         auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
@@ -186,7 +186,7 @@ GetSensorResponse readingAssertion(const Info& sensorInfo)
             sensorInfo.propertyInterfaces.begin()->second.begin()->first);
 
         setAssertionBytes(static_cast<uint16_t>(std::get<T>(propValue)),
-                          &response);
+                          response);
     }
     catch (const std::exception& e)
     {
@@ -214,7 +214,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
     GetSensorResponse response{};
 
-    enableScanning(&response);
+    enableScanning(response);
 
     auto service = ipmi::getService(bus, sensorInfo.sensorInterface,
                                     sensorInfo.sensorPath);
@@ -284,7 +284,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
         maxClamp = std::numeric_limits<uint8_t>::max();
     }
     setReading(static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp)),
-               &response);
+               response);
 
     if (!std::isfinite(value))
     {
@@ -391,7 +391,7 @@ std::optional<GetSensorResponse> readingAssertion(
     uint8_t id, const Info& sensorInfo, const PropertyMap& properties)
 {
     GetSensorResponse response{};
-    enableScanning(&response);
+    enableScanning(response);
 
     auto iter = properties.find(
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
@@ -401,7 +401,7 @@ std::optional<GetSensorResponse> readingAssertion(
     }
 
     setAssertionBytes(static_cast<uint16_t>(std::get<T>(iter->second)),
-                      &response);
+                      response);
 
     if (!sensorCacheMap[id].has_value())
     {
@@ -446,7 +446,7 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
 
     GetSensorResponse response{};
 
-    enableScanning(&response);
+    enableScanning(response);
 
     iter = properties.find(
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
@@ -471,7 +471,7 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
             lg2::error("Value out of range");
             throw std::out_of_range("Value out of range");
         }
-        setReading(static_cast<int8_t>(rawData), &response);
+        setReading(static_cast<int8_t>(rawData), response);
     }
     else
     {
@@ -481,7 +481,7 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
             lg2::error("Value out of range");
             throw std::out_of_range("Value out of range");
         }
-        setReading(static_cast<uint8_t>(rawData), &response);
+        setReading(static_cast<uint8_t>(rawData), response);
     }
 
     if (!std::isfinite(value))
