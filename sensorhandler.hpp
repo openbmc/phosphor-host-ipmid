@@ -74,9 +74,8 @@ int set_sensor_dbus_state_s(uint8_t, const char*, const char*);
 int set_sensor_dbus_state_y(uint8_t, const char*, const uint8_t);
 int find_openbmc_path(uint8_t, dbus_interface_t*);
 
-ipmi::Cc ipmi_sen_get_sdr(ipmi_netfn_t netfn, ipmi_cmd_t cmd,
-                          ipmi_request_t request, ipmi_response_t response,
-                          ipmi_data_len_t data_len, ipmi_context_t context);
+ipmi::RspType<uint16_t, std::vector<uint8_t>> ipmiSensorGetSdr(
+    uint16_t, uint16_t, uint8_t, uint8_t);
 
 ipmi::RspType<uint16_t> ipmiSensorReserveSdr();
 
@@ -92,70 +91,14 @@ static const uint8_t LENGTH_MASK = 0x1F;
 namespace get_sdr
 {
 
-struct GetSdrReq
-{
-    uint8_t reservation_id_lsb;
-    uint8_t reservation_id_msb;
-    uint8_t record_id_lsb;
-    uint8_t record_id_msb;
-    uint8_t offset;
-    uint8_t bytes_to_read;
-} __attribute__((packed));
-
-namespace request
-{
-
-inline uint16_t get_reservation_id(GetSdrReq* req)
-{
-    return (req->reservation_id_lsb + (req->reservation_id_msb << 8));
-};
-
-inline uint16_t get_record_id(GetSdrReq* req)
-{
-    return (req->record_id_lsb + (req->record_id_msb << 8));
-};
-
-} // namespace request
-
-// Response
-struct GetSdrResp
-{
-    uint8_t next_record_id_lsb;
-    uint8_t next_record_id_msb;
-    uint8_t record_data[64];
-} __attribute__((packed));
-
-namespace response
-{
-
-inline void set_next_record_id(uint16_t next, GetSdrResp* resp)
-{
-    resp->next_record_id_lsb = next & 0xff;
-    resp->next_record_id_msb = (next >> 8) & 0xff;
-};
-
-} // namespace response
-
 // Record header
 struct SensorDataRecordHeader
 {
-    uint8_t record_id_lsb;
-    uint8_t record_id_msb;
+    uint16_t recordId;
     uint8_t sdr_version;
     uint8_t record_type;
     uint8_t record_length; // Length not counting the header
 } __attribute__((packed));
-
-namespace header
-{
-
-inline void set_record_id(int id, SensorDataRecordHeader* hdr)
-{
-    hdr->record_id_lsb = (id & 0xFF);
-    hdr->record_id_msb = (id >> 8) & 0xFF;
-};
-
-} // namespace header
 
 enum SensorDataRecordType
 {
