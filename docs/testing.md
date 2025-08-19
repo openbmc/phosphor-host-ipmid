@@ -180,12 +180,12 @@ struct GetSdrReq
 namespace request
 {
 
-inline uint8_t get_reservation_id(GetSdrReq* req)
+inline uint8_t getReservationId(GetSdrReq* req)
 {
     return (req->reservationIdLsb + (req->reservationIdMsb << 8));
 };
 
-inline uint16_t get_record_id(GetSdrReq* req)
+inline uint16_t getRecordId(GetSdrReq* req)
 {
     return (req->recordIdLsb + (req->recordIdMsb << 8));
 };
@@ -208,15 +208,15 @@ First, include the header you want to test, as well as the GTest header:
 ```
 
 Let's plan the test cases we care about before we build any additional
-scaffolding. We've only got two functions - `get_reservation_id()` and
-`get_record_id()`. We want to test:
+scaffolding. We've only got two functions - `getReservationId()` and
+`getRecordId()`. We want to test:
 
 - "Happy path" - in an ideal case, everything works correctly
 - Error handling - when given bad input, things break as expected
 - Edge cases - when given extremes (e.g. very large or very small numbers),
   things work correctly or break as expected
 
-For `get_reservation_id()`:
+For `getReservationId()`:
 
 ```c++
 TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_HappyPath)
@@ -232,7 +232,7 @@ TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_Uint16MaxWorksCorrectly)
 }
 ```
 
-For `get_record_id()`, we have pretty much the same set of tests:
+For `getRecordId()`, we have pretty much the same set of tests:
 
 ```c++
 TEST(SensorHandlerTest, GetSdrReq_get_record_id_HappyPath)
@@ -257,8 +257,8 @@ tutorial like this; in practice, tests you write will likely be for more
 complicated code! We'll talk more about this in the Best Practices section
 below.
 
-Let's implement the `get_reservation_id()` items first. The implementations for
-`get_record_id()` will be identical, so we won't cover them here.
+Let's implement the `getReservationId()` items first. The implementations for
+`getRecordId()` will be identical, so we won't cover them here.
 
 For the happy path, we want to make it very clear that the test value we're
 using is within range, so we express it in binary. We also want to be able to
@@ -280,7 +280,7 @@ TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_HappyPath)
                        0x00,  // Offset
                        0x00}; // Bytes to Read
 
-    uint16_t actual = get_sdr::request::get_reservation_id(&input);
+    uint16_t actual = get_sdr::request::getReservationId(&input);
     ASSERT_EQ(actual, expected_id);
 }
 ```
@@ -293,7 +293,7 @@ really care what the output message is.
 ```c++
 TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_NullInputDies)
 {
-    ASSERT_DEATH(get_sdr::request::get_reservation_id(nullptr), ".*");
+    ASSERT_DEATH(get_sdr::request::getReservationId(nullptr), ".*");
 }
 ```
 
@@ -312,13 +312,13 @@ TEST(SensorHandlerTest, GetSdrReq_get_reservation_id_Uint16MaxWorksCorrectly)
                        0x00,  // Offset
                        0x00}; // Bytes to Read
 
-    uint16_t actual = get_sdr::request::get_reservation_id(&input);
+    uint16_t actual = get_sdr::request::getReservationId(&input);
     ASSERT_EQ(actual, expected_id);
 }
 ```
 
-The `get_record_id()` tests are identical, except that they are testing the
-Record ID field. They will not be duplicated here.
+The `getRecordId()` tests are identical, except that they are testing the Record
+ID field. They will not be duplicated here.
 
 Finally, we'll need to add the new tests to `test/Makefile.am`. You can mimic
 other existing test setups:
