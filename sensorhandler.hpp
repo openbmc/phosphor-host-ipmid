@@ -95,9 +95,9 @@ namespace get_sdr
 struct SensorDataRecordHeader
 {
     uint16_t recordId;
-    uint8_t sdr_version;
-    uint8_t record_type;
-    uint8_t record_length; // Length not counting the header
+    uint8_t sdrVersion;
+    uint8_t recordType;
+    uint8_t recordLength; // Length not counting the header
 } __attribute__((packed));
 
 enum SensorDataRecordType
@@ -113,9 +113,9 @@ enum SensorDataRecordType
 // Record key
 struct SensorDataRecordKey
 {
-    uint8_t owner_id;
-    uint8_t owner_lun;
-    uint8_t sensor_number;
+    uint8_t ownerId;
+    uint8_t ownerLun;
+    uint8_t sensorNumber;
 } __attribute__((packed));
 
 /** @struct SensorDataFruRecordKey
@@ -151,35 +151,35 @@ static constexpr uint8_t linkedBit = 6;
 
 inline void set_owner_id_ipmb(SensorDataRecordKey& key)
 {
-    key.owner_id &= ~0x01;
+    key.ownerId &= ~0x01;
 };
 
 inline void set_owner_id_system_sw(SensorDataRecordKey& key)
 {
-    key.owner_id |= 0x01;
+    key.ownerId |= 0x01;
 };
 
 inline void set_owner_id_bmc(SensorDataRecordKey& key)
 {
-    key.owner_id |= 0x20;
+    key.ownerId |= 0x20;
 };
 
 inline void set_owner_id_address(uint8_t addr, SensorDataRecordKey& key)
 {
-    key.owner_id &= 0x01;
-    key.owner_id |= addr << 1;
+    key.ownerId &= 0x01;
+    key.ownerId |= addr << 1;
 };
 
 inline void set_owner_lun(uint8_t lun, SensorDataRecordKey& key)
 {
-    key.owner_lun &= ~0x03;
-    key.owner_lun |= (lun & 0x03);
+    key.ownerLun &= ~0x03;
+    key.ownerLun |= (lun & 0x03);
 };
 
 inline void set_owner_lun_channel(uint8_t channel, SensorDataRecordKey& key)
 {
-    key.owner_lun &= 0x0f;
-    key.owner_lun |= ((channel & 0xf) << 4);
+    key.ownerLun &= 0x0f;
+    key.ownerLun |= ((channel & 0xf) << 4);
 };
 
 inline void set_flags(bool isList, bool isLinked,
@@ -221,43 +221,43 @@ static const int FRU_RECORD_DEVICE_ID_MAX_LENGTH = 16;
 
 struct SensorDataFullRecordBody
 {
-    uint8_t entity_id;
-    uint8_t entity_instance;
-    uint8_t sensor_initialization;
-    uint8_t sensor_capabilities; // no macro support
-    uint8_t sensor_type;
-    uint8_t event_reading_type;
-    uint8_t supported_assertions[2];          // no macro support
-    uint8_t supported_deassertions[2];        // no macro support
-    uint8_t discrete_reading_setting_mask[2]; // no macro support
-    uint8_t sensor_units_1;
-    uint8_t sensor_units_2_base;
-    uint8_t sensor_units_3_modifier;
+    uint8_t entityId;
+    uint8_t entityInstance;
+    uint8_t sensorInitialization;
+    uint8_t sensorCapabilities; // no macro support
+    uint8_t sensorType;
+    uint8_t eventReadingType;
+    uint8_t supportedAssertions[2];        // no macro support
+    uint8_t supportedDeassertions[2];      // no macro support
+    uint8_t discreteReadingSettingMask[2]; // no macro support
+    uint8_t sensorUnits1;
+    uint8_t sensorUnits2Base;
+    uint8_t sensorUnits3Modifier;
     uint8_t linearization;
-    uint8_t m_lsb;
-    uint8_t m_msb_and_tolerance;
-    uint8_t b_lsb;
-    uint8_t b_msb_and_accuracy_lsb;
-    uint8_t accuracy_and_sensor_direction;
-    uint8_t r_b_exponents;
-    uint8_t analog_characteristic_flags; // no macro support
-    uint8_t nominal_reading;
-    uint8_t normal_max;
-    uint8_t normal_min;
-    uint8_t sensor_max;
-    uint8_t sensor_min;
-    uint8_t upper_nonrecoverable_threshold;
-    uint8_t upper_critical_threshold;
-    uint8_t upper_noncritical_threshold;
-    uint8_t lower_nonrecoverable_threshold;
-    uint8_t lower_critical_threshold;
-    uint8_t lower_noncritical_threshold;
-    uint8_t positive_threshold_hysteresis;
-    uint8_t negative_threshold_hysteresis;
+    uint8_t mLsb;
+    uint8_t mMsbAndTolerance;
+    uint8_t bLsb;
+    uint8_t bMsbAndAccuracyLsb;
+    uint8_t accuracyAndSensorDirection;
+    uint8_t rbExponents;
+    uint8_t analogCharacteristicFlags; // no macro support
+    uint8_t nominalReading;
+    uint8_t normalMax;
+    uint8_t normalMin;
+    uint8_t sensorMax;
+    uint8_t sensorMin;
+    uint8_t upperNonrecoverableThreshold;
+    uint8_t upperCriticalThreshold;
+    uint8_t upperNoncriticalThreshold;
+    uint8_t lowerNonrecoverableThreshold;
+    uint8_t lowerCriticalThreshold;
+    uint8_t lowerNoncriticalThreshold;
+    uint8_t positiveThresholdHysteresis;
+    uint8_t negativeThresholdHysteresis;
     uint16_t reserved;
-    uint8_t oem_reserved;
-    uint8_t id_string_info;
-    char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
+    uint8_t oemReserved;
+    uint8_t idStringInfo;
+    char idString[FULL_RECORD_ID_STR_MAX_LENGTH];
 } __attribute__((packed));
 
 /** @struct SensorDataCompactRecord
@@ -266,25 +266,25 @@ struct SensorDataFullRecordBody
  */
 struct SensorDataCompactRecordBody
 {
-    uint8_t entity_id;
-    uint8_t entity_instance;
-    uint8_t sensor_initialization;
-    uint8_t sensor_capabilities; // no macro support
-    uint8_t sensor_type;
-    uint8_t event_reading_type;
-    uint8_t supported_assertions[2];          // no macro support
-    uint8_t supported_deassertions[2];        // no macro support
-    uint8_t discrete_reading_setting_mask[2]; // no macro support
-    uint8_t sensor_units_1;
-    uint8_t sensor_units_2_base;
-    uint8_t sensor_units_3_modifier;
+    uint8_t entityId;
+    uint8_t entityInstance;
+    uint8_t sensorInitialization;
+    uint8_t sensorCapabilities; // no macro support
+    uint8_t sensorType;
+    uint8_t eventReadingType;
+    uint8_t supportedAssertions[2];        // no macro support
+    uint8_t supportedDeassertions[2];      // no macro support
+    uint8_t discreteReadingSettingMask[2]; // no macro support
+    uint8_t sensorUnits1;
+    uint8_t sensorUnits2Base;
+    uint8_t sensorUnits3Modifier;
     uint8_t record_sharing[2];
-    uint8_t positive_threshold_hysteresis;
-    uint8_t negative_threshold_hysteresis;
+    uint8_t positiveThresholdHysteresis;
+    uint8_t negativeThresholdHysteresis;
     uint8_t reserved[3];
-    uint8_t oem_reserved;
-    uint8_t id_string_info;
-    char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
+    uint8_t oemReserved;
+    uint8_t idStringInfo;
+    char idString[FULL_RECORD_ID_STR_MAX_LENGTH];
 } __attribute__((packed));
 
 /** @struct SensorDataEventRecord
@@ -293,16 +293,16 @@ struct SensorDataCompactRecordBody
  */
 struct SensorDataEventRecordBody
 {
-    uint8_t entity_id;
-    uint8_t entity_instance;
-    uint8_t sensor_type;
-    uint8_t event_reading_type;
-    uint8_t sensor_record_sharing_1;
-    uint8_t sensor_record_sharing_2;
+    uint8_t entityId;
+    uint8_t entityInstance;
+    uint8_t sensorType;
+    uint8_t eventReadingType;
+    uint8_t sensorRecordSharing1;
+    uint8_t sensorRecordSharing2;
     uint8_t reserved;
-    uint8_t oem_reserved;
-    uint8_t id_string_info;
-    char id_string[FULL_RECORD_ID_STR_MAX_LENGTH];
+    uint8_t oemReserved;
+    uint8_t idStringInfo;
+    char idString[FULL_RECORD_ID_STR_MAX_LENGTH];
 } __attribute__((packed));
 
 /** @struct SensorDataFruRecordBody
@@ -341,29 +341,29 @@ namespace body
 inline void set_entity_instance_number(uint8_t n,
                                        SensorDataFullRecordBody& body)
 {
-    body.entity_instance &= 1 << 7;
-    body.entity_instance |= (n & ~(1 << 7));
+    body.entityInstance &= 1 << 7;
+    body.entityInstance |= (n & ~(1 << 7));
 };
 
 inline void set_entity_physical_entity(SensorDataFullRecordBody& body)
 {
-    body.entity_instance &= ~(1 << 7);
+    body.entityInstance &= ~(1 << 7);
 };
 
 inline void set_entity_logical_container(SensorDataFullRecordBody& body)
 {
-    body.entity_instance |= 1 << 7;
+    body.entityInstance |= 1 << 7;
 };
 
 inline void sensor_scanning_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 0;
+        body.sensorInitialization |= 1 << 0;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 0);
+        body.sensorInitialization &= ~(1 << 0);
     };
 };
 
@@ -371,11 +371,11 @@ inline void event_generation_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 1;
+        body.sensorInitialization |= 1 << 1;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 1);
+        body.sensorInitialization &= ~(1 << 1);
     }
 };
 
@@ -383,11 +383,11 @@ inline void init_types_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 2;
+        body.sensorInitialization |= 1 << 2;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 2);
+        body.sensorInitialization &= ~(1 << 2);
     }
 };
 
@@ -395,11 +395,11 @@ inline void init_hyst_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 3;
+        body.sensorInitialization |= 1 << 3;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 3);
+        body.sensorInitialization &= ~(1 << 3);
     }
 };
 
@@ -407,11 +407,11 @@ inline void init_thresh_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 4;
+        body.sensorInitialization |= 1 << 4;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 4);
+        body.sensorInitialization &= ~(1 << 4);
     }
 };
 
@@ -419,11 +419,11 @@ inline void init_events_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 5;
+        body.sensorInitialization |= 1 << 5;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 5);
+        body.sensorInitialization &= ~(1 << 5);
     }
 };
 
@@ -431,11 +431,11 @@ inline void init_scanning_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 6;
+        body.sensorInitialization |= 1 << 6;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 6);
+        body.sensorInitialization &= ~(1 << 6);
     }
 };
 
@@ -443,124 +443,124 @@ inline void init_settable_state(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body.sensor_initialization |= 1 << 7;
+        body.sensorInitialization |= 1 << 7;
     }
     else
     {
-        body.sensor_initialization &= ~(1 << 7);
+        body.sensorInitialization &= ~(1 << 7);
     }
 };
 
 inline void set_percentage(SensorDataFullRecordBody& body)
 {
-    body.sensor_units_1 |= 1 << 0;
+    body.sensorUnits1 |= 1 << 0;
 };
 
 inline void unset_percentage(SensorDataFullRecordBody& body)
 {
-    body.sensor_units_1 &= ~(1 << 0);
+    body.sensorUnits1 &= ~(1 << 0);
 };
 
 inline void set_modifier_operation(uint8_t op, SensorDataFullRecordBody& body)
 {
-    body.sensor_units_1 &= ~(3 << 1);
-    body.sensor_units_1 |= (op & 0x3) << 1;
+    body.sensorUnits1 &= ~(3 << 1);
+    body.sensorUnits1 |= (op & 0x3) << 1;
 };
 
 inline void set_rate_unit(uint8_t unit, SensorDataFullRecordBody& body)
 {
-    body.sensor_units_1 &= ~(7 << 3);
-    body.sensor_units_1 |= (unit & 0x7) << 3;
+    body.sensorUnits1 &= ~(7 << 3);
+    body.sensorUnits1 |= (unit & 0x7) << 3;
 };
 
 inline void set_analog_data_format(uint8_t format,
                                    SensorDataFullRecordBody& body)
 {
-    body.sensor_units_1 &= ~(3 << 6);
-    body.sensor_units_1 |= (format & 0x3) << 6;
+    body.sensorUnits1 &= ~(3 << 6);
+    body.sensorUnits1 |= (format & 0x3) << 6;
 };
 
 inline void set_m(uint16_t m, SensorDataFullRecordBody& body)
 {
-    body.m_lsb = m & 0xff;
-    body.m_msb_and_tolerance &= ~(3 << 6);
-    body.m_msb_and_tolerance |= ((m & (3 << 8)) >> 2);
+    body.mLsb = m & 0xff;
+    body.mMsbAndTolerance &= ~(3 << 6);
+    body.mMsbAndTolerance |= ((m & (3 << 8)) >> 2);
 };
 
 inline void set_tolerance(uint8_t tol, SensorDataFullRecordBody& body)
 {
-    body.m_msb_and_tolerance &= ~0x3f;
-    body.m_msb_and_tolerance |= tol & 0x3f;
+    body.mMsbAndTolerance &= ~0x3f;
+    body.mMsbAndTolerance |= tol & 0x3f;
 };
 
 inline void set_b(uint16_t b, SensorDataFullRecordBody& body)
 {
-    body.b_lsb = b & 0xff;
-    body.b_msb_and_accuracy_lsb &= ~(3 << 6);
-    body.b_msb_and_accuracy_lsb |= ((b & (3 << 8)) >> 2);
+    body.bLsb = b & 0xff;
+    body.bMsbAndAccuracyLsb &= ~(3 << 6);
+    body.bMsbAndAccuracyLsb |= ((b & (3 << 8)) >> 2);
 };
 
 inline void set_accuracy(uint16_t acc, SensorDataFullRecordBody& body)
 {
     // bottom 6 bits
-    body.b_msb_and_accuracy_lsb &= ~0x3f;
-    body.b_msb_and_accuracy_lsb |= acc & 0x3f;
+    body.bMsbAndAccuracyLsb &= ~0x3f;
+    body.bMsbAndAccuracyLsb |= acc & 0x3f;
     // top 4 bits
-    body.accuracy_and_sensor_direction &= 0x0f;
-    body.accuracy_and_sensor_direction |= ((acc >> 6) & 0xf) << 4;
+    body.accuracyAndSensorDirection &= 0x0f;
+    body.accuracyAndSensorDirection |= ((acc >> 6) & 0xf) << 4;
 };
 
 inline void set_accuracy_exp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body.accuracy_and_sensor_direction &= ~(3 << 2);
-    body.accuracy_and_sensor_direction |= (exp & 3) << 2;
+    body.accuracyAndSensorDirection &= ~(3 << 2);
+    body.accuracyAndSensorDirection |= (exp & 3) << 2;
 };
 
 inline void set_sensor_dir(uint8_t dir, SensorDataFullRecordBody& body)
 {
-    body.accuracy_and_sensor_direction &= ~(3 << 0);
-    body.accuracy_and_sensor_direction |= (dir & 3);
+    body.accuracyAndSensorDirection &= ~(3 << 0);
+    body.accuracyAndSensorDirection |= (dir & 3);
 };
 
 inline void set_b_exp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body.r_b_exponents &= 0xf0;
-    body.r_b_exponents |= exp & 0x0f;
+    body.rbExponents &= 0xf0;
+    body.rbExponents |= exp & 0x0f;
 };
 
 inline void set_r_exp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body.r_b_exponents &= 0x0f;
-    body.r_b_exponents |= (exp & 0x0f) << 4;
+    body.rbExponents &= 0x0f;
+    body.rbExponents |= (exp & 0x0f) << 4;
 };
 
 inline void set_id_strlen(uint8_t len, SensorDataFullRecordBody& body)
 {
-    body.id_string_info &= ~(0x1f);
-    body.id_string_info |= len & 0x1f;
+    body.idStringInfo &= ~(0x1f);
+    body.idStringInfo |= len & 0x1f;
 };
 
 inline void set_id_strlen(uint8_t len, SensorDataEventRecordBody& body)
 {
-    body.id_string_info &= ~(0x1f);
-    body.id_string_info |= len & 0x1f;
+    body.idStringInfo &= ~(0x1f);
+    body.idStringInfo |= len & 0x1f;
 };
 
 inline uint8_t get_id_strlen(const SensorDataFullRecordBody& body)
 {
-    return body.id_string_info & 0x1f;
+    return body.idStringInfo & 0x1f;
 };
 
 inline void set_id_type(uint8_t type, SensorDataFullRecordBody& body)
 {
-    body.id_string_info &= ~(3 << 6);
-    body.id_string_info |= (type & 0x3) << 6;
+    body.idStringInfo &= ~(3 << 6);
+    body.idStringInfo |= (type & 0x3) << 6;
 };
 
 inline void set_id_type(uint8_t type, SensorDataEventRecordBody& body)
 {
-    body.id_string_info &= ~(3 << 6);
-    body.id_string_info |= (type & 0x3) << 6;
+    body.idStringInfo &= ~(3 << 6);
+    body.idStringInfo |= (type & 0x3) << 6;
 };
 
 inline void set_device_id_strlen(uint8_t len, SensorDataFruRecordBody& body)
@@ -576,7 +576,7 @@ inline uint8_t get_device_id_strlen(const SensorDataFruRecordBody& body)
 
 inline void set_readable_mask(uint8_t mask, SensorDataFullRecordBody& body)
 {
-    body.discrete_reading_setting_mask[1] = mask & 0x3F;
+    body.discreteReadingSettingMask[1] = mask & 0x3F;
 }
 
 } // namespace body
