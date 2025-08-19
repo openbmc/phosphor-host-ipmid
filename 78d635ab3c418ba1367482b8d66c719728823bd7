@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "71d62d2f_ef66da01",
+        "filename": "chassishandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1459,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:17:28Z",
+      "side": 1,
+      "message": "Since we are changing this line, let\u0027s just take it to the next level and use lg2 to do the formatting instead. This line and the next line:\n\n```\nlg2::debug(\"enclosureIdentifyLed({LED_STATE})\", \"LED_STATE\", flag);\n```",
+      "revId": "78d635ab3c418ba1367482b8d66c719728823bd7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
