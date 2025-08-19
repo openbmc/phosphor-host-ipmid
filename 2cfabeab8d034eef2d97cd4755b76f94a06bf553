@@ -1,0 +1,261 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eb062651_fd1f880c",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1165,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "```\nuint16_t, // nextRecordId\n```",
+      "range": {
+        "startLine": 1164,
+        "startChar": 14,
+        "endLine": 1165,
+        "endChar": 22
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2c521608_9b9587e2",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1168,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "pass the variables in as needed instead of the struct.",
+      "range": {
+        "startLine": 1168,
+        "startChar": 18,
+        "endLine": 1168,
+        "endChar": 47
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21a69e19_020dbfe6",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1214,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "```\nuint16_t nextRecordId{};\nstd::vector\u003cuint8_t\u003e recordData{};\n```",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f87255e_7fda2cad",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1252,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "```\nreturn ipmi::responseSuccess(nextRecordId, recordData);\n```",
+      "range": {
+        "startLine": 1251,
+        "startChar": 33,
+        "endLine": 1252,
+        "endChar": 48
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "890cc47c_d0150d6a",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1256,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "```\nuint16_t, // nextRecordId\n```",
+      "range": {
+        "startLine": 1255,
+        "startChar": 14,
+        "endLine": 1256,
+        "endChar": 22
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3fcf2c7f_9d510744",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1298,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "15d1cd0d_99a1b456",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1329,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "```\nuint16_t, // nextRecordId\n```",
+      "range": {
+        "startLine": 1328,
+        "startChar": 14,
+        "endLine": 1329,
+        "endChar": 22
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bc0d084d_fd69c974",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1334,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "```\nipmiSensorGetSdr(uint16_t reservationId, uint16_t recordId,\n                 uint8_t offset, uint8_t bytesToRead)\n```",
+      "range": {
+        "startLine": 1332,
+        "startChar": 21,
+        "endLine": 1334,
+        "endChar": 40
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dadae691_01e38cc7",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1336,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "just pass them around as individual variables; no need to package them up here. Putting them in a struct places a spatial requirement on the compiler when there is no need; it can just use registers if it wants or keep them on the stack or whatever optimizations it wants.",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "087f2e35_50eb3dfb",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1403,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c7b592f1_3446c7a8",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "no need to put this here; handlers don\u0027t call each other and are only called by the ipmi machinery after being registered. They could all be declared static, but usually are not.",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0b57fa4_496396a7",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "while we are at it, we can change these two uint8_t into a uint16_t\n\nAlthough, I would prefer if we just got rid of this struct and use the variables individually as needed.",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e180b125_ada74b61",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-08-19T22:34:49Z",
+      "side": 1,
+      "message": "by changing the GetSdrResp struct to just use a uint16_t for the nextRecordId, this function is no longer needed.",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
