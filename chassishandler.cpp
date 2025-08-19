@@ -1456,8 +1456,8 @@ void enclosureIdentifyLed(bool flag)
     {
         std::string connection = getEnclosureIdentifyConnection();
 
-        auto msg = std::string("enclosureIdentifyLed(") +
-                   boost::lexical_cast<std::string>(flag) + ")";
+        auto msg = std::string("enclosureIdentifyLed(") + std::to_string(flag) +
+                   ")";
         lg2::debug(msg.c_str());
 
         ipmi::setDbusProperty(*getSdBus(), connection, identify_led_object_name,
