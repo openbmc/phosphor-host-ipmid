@@ -169,12 +169,12 @@ namespace get_sdr
 
 struct GetSdrReq
 {
-    uint8_t reservation_id_lsb;
-    uint8_t reservation_id_msb;
-    uint8_t record_id_lsb;
-    uint8_t record_id_msb;
+    uint8_t reservationIdLsb;
+    uint8_t reservationIdMsb;
+    uint8_t recordIdLsb;
+    uint8_t recordIdMsb;
     uint8_t offset;
-    uint8_t bytes_to_read;
+    uint8_t bytesToRead;
 } __attribute__((packed));
 
 namespace request
@@ -182,12 +182,12 @@ namespace request
 
 inline uint8_t get_reservation_id(GetSdrReq* req)
 {
-    return (req->reservation_id_lsb + (req->reservation_id_msb << 8));
+    return (req->reservationIdLsb + (req->reservationIdMsb << 8));
 };
 
 inline uint16_t get_record_id(GetSdrReq* req)
 {
-    return (req->record_id_lsb + (req->record_id_msb << 8));
+    return (req->recordIdLsb + (req->recordIdMsb << 8));
 };
 
 } // namespace request
