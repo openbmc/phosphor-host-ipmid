@@ -104,7 +104,7 @@ struct Type12Record
         deviceCapabilities(capabilities), reserved{}, entityID(eid),
         entityInstance(entityInst), oem(mfrDefined)
     {
-        get_sdr::header::set_record_id(recordID, &header);
+        get_sdr::header::setRecordId(recordID, &header);
         header.sdrVersion = ipmiSdrVersion;
         header.recordType = 0x12;
         size_t nameLen = std::min(sensorname.size(), sizeof(name));
