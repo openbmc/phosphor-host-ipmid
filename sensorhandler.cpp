@@ -1125,8 +1125,8 @@ void setUnitFieldsForObject(const ipmi::sensor::Info& info,
     }
 }
 
-ipmi::Cc populate_record_from_dbus(const ipmi::sensor::Info& info,
-                                   get_sdr::SensorDataFullRecordBody& body)
+ipmi::Cc populateRecordFromDbus(const ipmi::sensor::Info& info,
+                                get_sdr::SensorDataFullRecordBody& body)
 {
     /* Functional sensor case */
     if (isAnalogSensor(info.propertyInterfaces.begin()->first))
@@ -1134,10 +1134,10 @@ ipmi::Cc populate_record_from_dbus(const ipmi::sensor::Info& info,
         /* Unit info */
         setUnitFieldsForObject(info, body);
 
-        get_sdr::body::set_b(info.coefficientB, body);
-        get_sdr::body::set_m(info.coefficientM, body);
-        get_sdr::body::set_b_exp(info.exponentB, body);
-        get_sdr::body::set_r_exp(info.exponentR, body);
+        get_sdr::body::setB(info.coefficientB, body);
+        get_sdr::body::setM(info.coefficientM, body);
+        get_sdr::body::setBexp(info.exponentB, body);
+        get_sdr::body::setRexp(info.exponentR, body);
     }
 
     /* ID string */
@@ -1150,15 +1150,14 @@ ipmi::Cc populate_record_from_dbus(const ipmi::sensor::Info& info,
 
     if (idString.length() > FULL_RECORD_ID_STR_MAX_LENGTH)
     {
-        get_sdr::body::set_id_strlen(FULL_RECORD_ID_STR_MAX_LENGTH, body);
+        get_sdr::body::setIdStrLen(FULL_RECORD_ID_STR_MAX_LENGTH, body);
     }
     else
     {
-        get_sdr::body::set_id_strlen(idString.length(), body);
+        get_sdr::body::setIdStrLen(idString.length(), body);
     }
-    get_sdr::body::set_id_type(3, body); // "8-bit ASCII + Latin 1"
-    strncpy(body.idString, idString.c_str(),
-            get_sdr::body::get_id_strlen(body));
+    get_sdr::body::setIdType(3, body); // "8-bit ASCII + Latin 1"
+    strncpy(body.idString, idString.c_str(), get_sdr::body::getIdStrLen(body));
 
     return ipmi::ccSuccess;
 };
@@ -1203,17 +1202,17 @@ ipmi::RspType<uint16_t,            // nextRecordId
 
     if (deviceID.length() > get_sdr::FRU_RECORD_DEVICE_ID_MAX_LENGTH)
     {
-        get_sdr::body::set_device_id_strlen(
+        get_sdr::body::setDeviceIdStrLen(
             get_sdr::FRU_RECORD_DEVICE_ID_MAX_LENGTH, record.body);
     }
     else
     {
-        get_sdr::body::set_device_id_strlen(deviceID.length(), record.body);
+        get_sdr::body::setDeviceIdStrLen(deviceID.length(), record.body);
     }
 
     uint16_t nextRecordId{};
     strncpy(record.body.deviceID, deviceID.c_str(),
-            get_sdr::body::get_device_id_strlen(record.body));
+            get_sdr::body::getDeviceIdStrLen(record.body));
 
     if (++fru == frus.end())
     {
@@ -1276,8 +1275,8 @@ ipmi::RspType<uint16_t,            // nextRecordId
     /* Key */
     record.key.containerEntityId = entity->second.containerEntityId;
     record.key.containerEntityInstance = entity->second.containerEntityInstance;
-    get_sdr::key::set_flags(entity->second.isList, entity->second.isLinked,
-                            record.key);
+    get_sdr::key::setFlags(entity->second.isList, entity->second.isLinked,
+                           record.key);
     record.key.entityId1 = entity->second.containedEntities[0].first;
     record.key.entityInstance1 = entity->second.containedEntities[0].second;
 
@@ -1365,7 +1364,7 @@ ipmi::RspType<uint16_t,            // nextRecordId
         record.header.recordLength = sizeof(record.key) + sizeof(record.body);
 
         /* Key */
-        get_sdr::key::set_owner_id_bmc(record.key);
+        get_sdr::key::setOwnerIdBmc(record.key);
         record.key.sensorNumber = sensorId;
 
         /* Body */
@@ -1376,11 +1375,11 @@ ipmi::RspType<uint16_t,            // nextRecordId
         if (ipmi::sensor::Mutability::Write ==
             (sensor->second.mutability & ipmi::sensor::Mutability::Write))
         {
-            get_sdr::body::init_settable_state(true, record.body);
+            get_sdr::body::initSettableState(true, record.body);
         }
 
         // Set the type-specific details given the DBus interface
-        populate_record_from_dbus(sensor->second, record.body);
+        populateRecordFromDbus(sensor->second, record.body);
         sdrCacheMap[sensorId] = std::move(record);
     }
 
