@@ -1208,7 +1208,7 @@ std::vector<uint8_t> getType8SDRs(
     data.key.containerEntityId = entity->second.containerEntityId;
     data.key.containerEntityInstance = entity->second.containerEntityInstance;
     get_sdr::key::set_flags(entity->second.isList, entity->second.isLinked,
-                            &(data.key));
+                            data.key);
     data.key.entityId1 = entity->second.containedEntities[0].first;
     data.key.entityInstance1 = entity->second.containedEntities[0].second;
 
