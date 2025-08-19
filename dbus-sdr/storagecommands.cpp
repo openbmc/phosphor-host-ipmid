@@ -709,11 +709,11 @@ ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     }
     size_t sizeDiff = maxFruSdrNameSize - name.size();
 
-    resp.header.record_id_lsb = 0x0; // calling code is to implement these
-    resp.header.record_id_msb = 0x0;
-    resp.header.sdr_version = ipmiSdrVersion;
-    resp.header.record_type = get_sdr::SENSOR_DATA_FRU_RECORD;
-    resp.header.record_length = sizeof(resp.body) + sizeof(resp.key) - sizeDiff;
+    resp.header.recordIdLsb = 0x0; // calling code is to implement these
+    resp.header.recordIdMsb = 0x0;
+    resp.header.sdrVersion = ipmiSdrVersion;
+    resp.header.recordType = get_sdr::SENSOR_DATA_FRU_RECORD;
+    resp.header.recordLength = sizeof(resp.body) + sizeof(resp.key) - sizeDiff;
     resp.key.deviceAddress = 0x20;
     resp.key.fruID = device->first;
     resp.key.accessLun = 0x80; // logical / physical fru device
@@ -1202,9 +1202,9 @@ std::vector<uint8_t> getType8SDRs(
     /* Header */
     get_sdr::header::set_record_id(recordId, &(data.header));
     // Based on IPMI Spec v2.0 rev 1.1
-    data.header.sdr_version = SDR_VERSION;
-    data.header.record_type = 0x08;
-    data.header.record_length = sizeof(data.key) + sizeof(data.body);
+    data.header.sdrVersion = SDR_VERSION;
+    data.header.recordType = 0x08;
+    data.header.recordLength = sizeof(data.key) + sizeof(data.body);
 
     /* Key */
     data.key.containerEntityId = entity->second.containerEntityId;
