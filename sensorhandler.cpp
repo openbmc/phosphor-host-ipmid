@@ -1078,42 +1078,42 @@ ipmi::RspType<uint16_t> ipmiSensorReserveSdr()
     return ipmi::responseSuccess(reservationID);
 }
 
-void setUnitFieldsForObject(const ipmi::sensor::Info* info,
-                            get_sdr::SensorDataFullRecordBody* body)
+void setUnitFieldsForObject(const ipmi::sensor::Info& info,
+                            get_sdr::SensorDataFullRecordBody& body)
 {
     namespace server = sdbusplus::server::xyz::openbmc_project::sensor;
     try
     {
-        auto unit = server::Value::convertUnitFromString(info->unit);
+        auto unit = server::Value::convertUnitFromString(info.unit);
         // Unit strings defined in
         // phosphor-dbus-interfaces/xyz/openbmc_project/Sensor/Value.interface.yaml
         switch (unit)
         {
             case server::Value::Unit::DegreesC:
-                body->sensorUnits2Base = get_sdr::SENSOR_UNIT_DEGREES_C;
+                body.sensorUnits2Base = get_sdr::SENSOR_UNIT_DEGREES_C;
                 break;
             case server::Value::Unit::RPMS:
-                body->sensorUnits2Base = get_sdr::SENSOR_UNIT_RPM;
+                body.sensorUnits2Base = get_sdr::SENSOR_UNIT_RPM;
                 break;
             case server::Value::Unit::Volts:
-                body->sensorUnits2Base = get_sdr::SENSOR_UNIT_VOLTS;
+                body.sensorUnits2Base = get_sdr::SENSOR_UNIT_VOLTS;
                 break;
             case server::Value::Unit::Meters:
-                body->sensorUnits2Base = get_sdr::SENSOR_UNIT_METERS;
+                body.sensorUnits2Base = get_sdr::SENSOR_UNIT_METERS;
                 break;
             case server::Value::Unit::Amperes:
-                body->sensorUnits2Base = get_sdr::SENSOR_UNIT_AMPERES;
+                body.sensorUnits2Base = get_sdr::SENSOR_UNIT_AMPERES;
                 break;
             case server::Value::Unit::Joules:
-                body->sensorUnits2Base = get_sdr::SENSOR_UNIT_JOULES;
+                body.sensorUnits2Base = get_sdr::SENSOR_UNIT_JOULES;
                 break;
             case server::Value::Unit::Watts:
-                body->sensorUnits2Base = get_sdr::SENSOR_UNIT_WATTS;
+                body.sensorUnits2Base = get_sdr::SENSOR_UNIT_WATTS;
                 break;
             default:
                 // Cannot be hit.
                 std::fprintf(stderr, "Unknown value unit type: = %s\n",
-                             info->unit.c_str());
+                             info.unit.c_str());
         }
     }
     catch (const sdbusplus::exception::InvalidEnumString& e)
@@ -1122,29 +1122,29 @@ void setUnitFieldsForObject(const ipmi::sensor::Info* info,
     }
 }
 
-ipmi::Cc populateRecordFromDbus(get_sdr::SensorDataFullRecordBody* body,
-                                const ipmi::sensor::Info* info, ipmi_data_len_t)
+ipmi::Cc populateRecordFromDbus(const ipmi::sensor::Info& info,
+                                get_sdr::SensorDataFullRecordBody& body)
 {
     /* Functional sensor case */
-    if (isAnalogSensor(info->propertyInterfaces.begin()->first))
+    if (isAnalogSensor(info.propertyInterfaces.begin()->first))
     {
-        body->sensorUnits1 = info->sensorUnits1; // default is 0. unsigned, no
-                                                 // rate, no modifier, not a %
+        body.sensorUnits1 = info.sensorUnits1; // default is 0. unsigned, no
+                                               // rate, no modifier, not a %
         /* Unit info */
         setUnitFieldsForObject(info, body);
 
-        get_sdr::body::setB(info->coefficientB, body);
-        get_sdr::body::setM(info->coefficientM, body);
-        get_sdr::body::setBexp(info->exponentB, body);
-        get_sdr::body::setRexp(info->exponentR, body);
+        get_sdr::body::setB(info.coefficientB, body);
+        get_sdr::body::setM(info.coefficientM, body);
+        get_sdr::body::setBexp(info.exponentB, body);
+        get_sdr::body::setRexp(info.exponentR, body);
     }
 
     /* ID string */
-    auto idString = info->sensorName;
+    auto idString = info.sensorName;
 
     if (idString.empty())
     {
-        idString = info->sensorNameFunc(*info);
+        idString = info.sensorNameFunc(info);
     }
 
     if (idString.length() > FULL_RECORD_ID_STR_MAX_LENGTH)
@@ -1156,7 +1156,7 @@ ipmi::Cc populateRecordFromDbus(get_sdr::SensorDataFullRecordBody* body,
         get_sdr::body::setIdStrLen(idString.length(), body);
     }
     get_sdr::body::setIdType(3, body); // "8-bit ASCII + Latin 1"
-    strncpy(body->idString, idString.c_str(), get_sdr::body::getIdStrLen(body));
+    strncpy(body.idString, idString.c_str(), get_sdr::body::getIdStrLen(body));
 
     return ipmi::ccSuccess;
 };
@@ -1171,7 +1171,7 @@ ipmi::Cc ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
 
     auto fru = frus.begin();
     uint8_t fruID{};
-    auto recordID = get_sdr::request::getRecordId(req);
+    auto recordID = get_sdr::request::getRecordId(*req);
 
     fruID = recordID - FRU_RECORD_ID_START;
     fru = frus.find(fruID);
@@ -1181,7 +1181,7 @@ ipmi::Cc ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     }
 
     /* Header */
-    get_sdr::header::setRecordId(recordID, &(record.header));
+    get_sdr::header::setRecordId(recordID, record.header);
     record.header.sdrVersion = SDR_VERSION; // Based on IPMI Spec v2.0 rev 1.1
     record.header.recordType = get_sdr::SENSOR_DATA_FRU_RECORD;
     record.header.recordLength = sizeof(record.key) + sizeof(record.body);
@@ -1205,15 +1205,15 @@ ipmi::Cc ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
     if (deviceID.length() > get_sdr::FRU_RECORD_DEVICE_ID_MAX_LENGTH)
     {
         get_sdr::body::setDeviceIdStrLen(
-            get_sdr::FRU_RECORD_DEVICE_ID_MAX_LENGTH, &(record.body));
+            get_sdr::FRU_RECORD_DEVICE_ID_MAX_LENGTH, record.body);
     }
     else
     {
-        get_sdr::body::setDeviceIdStrLen(deviceID.length(), &(record.body));
+        get_sdr::body::setDeviceIdStrLen(deviceID.length(), record.body);
     }
 
     strncpy(record.body.deviceID, deviceID.c_str(),
-            get_sdr::body::getDeviceIdStrLen(&(record.body)));
+            get_sdr::body::getDeviceIdStrLen(record.body));
 
     if (++fru == frus.end())
     {
@@ -1226,12 +1226,12 @@ ipmi::Cc ipmi_fru_get_sdr(ipmi_request_t request, ipmi_response_t response,
             (entityRecords.size())
                 ? entityRecords.begin()->first + ENTITY_RECORD_ID_START
                 : END_OF_RECORD;
-        get_sdr::response::setNextRecordId(next_record_id, resp);
+        get_sdr::response::setNextRecordId(next_record_id, *resp);
     }
     else
     {
         get_sdr::response::setNextRecordId((FRU_RECORD_ID_START + fru->first),
-                                           resp);
+                                           *resp);
     }
 
     // Check for invalid offset size
@@ -1265,7 +1265,7 @@ ipmi::Cc ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
             ->getIpmiEntityRecords();
     auto entity = entityRecords.begin();
     uint8_t entityRecordID;
-    auto recordID = get_sdr::request::getRecordId(req);
+    auto recordID = get_sdr::request::getRecordId(*req);
 
     entityRecordID = recordID - ENTITY_RECORD_ID_START;
     entity = entityRecords.find(entityRecordID);
@@ -1275,7 +1275,7 @@ ipmi::Cc ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     }
 
     /* Header */
-    get_sdr::header::setRecordId(recordID, &(record.header));
+    get_sdr::header::setRecordId(recordID, record.header);
     record.header.sdrVersion = SDR_VERSION; // Based on IPMI Spec v2.0 rev 1.1
     record.header.recordType = get_sdr::SENSOR_DATA_ENTITY_RECORD;
     record.header.recordLength = sizeof(record.key) + sizeof(record.body);
@@ -1284,7 +1284,7 @@ ipmi::Cc ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     record.key.containerEntityId = entity->second.containerEntityId;
     record.key.containerEntityInstance = entity->second.containerEntityInstance;
     get_sdr::key::setFlags(entity->second.isList, entity->second.isLinked,
-                           &(record.key));
+                           record.key);
     record.key.entityId1 = entity->second.containedEntities[0].first;
     record.key.entityInstance1 = entity->second.containedEntities[0].second;
 
@@ -1299,12 +1299,12 @@ ipmi::Cc ipmi_entity_get_sdr(ipmi_request_t request, ipmi_response_t response,
     if (++entity == entityRecords.end())
     {
         get_sdr::response::setNextRecordId(END_OF_RECORD,
-                                           resp); // last record
+                                           *resp); // last record
     }
     else
     {
         get_sdr::response::setNextRecordId(
-            (ENTITY_RECORD_ID_START + entity->first), resp);
+            (ENTITY_RECORD_ID_START + entity->first), *resp);
     }
 
     // Check for invalid offset size
@@ -1336,7 +1336,7 @@ ipmi::Cc ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     // Note: we use an iterator so we can provide the next ID at the end of
     // the call.
     auto sensor = ipmi::sensor::sensors.begin();
-    auto recordID = get_sdr::request::getRecordId(req);
+    auto recordID = get_sdr::request::getRecordId(*req);
 
     // At the beginning of a scan, the host side will send us id=0.
     if (recordID != 0)
@@ -1372,13 +1372,13 @@ ipmi::Cc ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
     {
         /* Header */
         get_sdr::SensorDataFullRecord record = {};
-        get_sdr::header::setRecordId(sensor_id, &(record.header));
+        get_sdr::header::setRecordId(sensor_id, record.header);
         record.header.sdrVersion = 0x51; // Based on IPMI Spec v2.0 rev 1.1
         record.header.recordType = get_sdr::SENSOR_DATA_FULL_RECORD;
         record.header.recordLength = sizeof(record.key) + sizeof(record.body);
 
         /* Key */
-        get_sdr::key::setOwnerIdBmc(&(record.key));
+        get_sdr::key::setOwnerIdBmc(record.key);
         record.key.sensorNumber = sensor_id;
 
         /* Body */
@@ -1389,11 +1389,11 @@ ipmi::Cc ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
         if (ipmi::sensor::Mutability::Write ==
             (sensor->second.mutability & ipmi::sensor::Mutability::Write))
         {
-            get_sdr::body::initSettableState(true, &(record.body));
+            get_sdr::body::initSettableState(true, record.body);
         }
 
         // Set the type-specific details given the DBus interface
-        populateRecordFromDbus(&(record.body), &(sensor->second), data_len);
+        populateRecordFromDbus(sensor->second, record.body);
         sdrCacheMap[sensor_id] = std::move(record);
     }
 
@@ -1407,11 +1407,11 @@ ipmi::Cc ipmi_sen_get_sdr(ipmi_netfn_t, ipmi_cmd_t, ipmi_request_t request,
                                   ? frus.begin()->first + FRU_RECORD_ID_START
                                   : END_OF_RECORD;
 
-        get_sdr::response::setNextRecordId(next_record_id, resp);
+        get_sdr::response::setNextRecordId(next_record_id, *resp);
     }
     else
     {
-        get_sdr::response::setNextRecordId(sensor->first, resp);
+        get_sdr::response::setNextRecordId(sensor->first, *resp);
     }
 
     if (req->offset > sizeof(record))

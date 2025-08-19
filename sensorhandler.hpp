@@ -106,14 +106,14 @@ struct GetSdrReq
 namespace request
 {
 
-inline uint16_t getReservationId(GetSdrReq* req)
+inline uint16_t getReservationId(const GetSdrReq& req)
 {
-    return (req->reservationIdLsb + (req->reservationIdMsb << 8));
+    return (req.reservationIdLsb + (req.reservationIdMsb << 8));
 };
 
-inline uint16_t getRecordId(GetSdrReq* req)
+inline uint16_t getRecordId(const GetSdrReq& req)
 {
-    return (req->recordIdLsb + (req->recordIdMsb << 8));
+    return (req.recordIdLsb + (req.recordIdMsb << 8));
 };
 
 } // namespace request
@@ -129,10 +129,10 @@ struct GetSdrResp
 namespace response
 {
 
-inline void setNextRecordId(uint16_t next, GetSdrResp* resp)
+inline void setNextRecordId(uint16_t next, GetSdrResp& resp)
 {
-    resp->nextRecordIdLsb = next & 0xff;
-    resp->nextRecordIdMsb = (next >> 8) & 0xff;
+    resp.nextRecordIdLsb = next & 0xff;
+    resp.nextRecordIdMsb = (next >> 8) & 0xff;
 };
 
 } // namespace response
@@ -150,10 +150,10 @@ struct SensorDataRecordHeader
 namespace header
 {
 
-inline void setRecordId(int id, SensorDataRecordHeader* hdr)
+inline void setRecordId(int id, SensorDataRecordHeader& hdr)
 {
-    hdr->recordIdLsb = (id & 0xFF);
-    hdr->recordIdMsb = (id >> 8) & 0xFF;
+    hdr.recordIdLsb = (id & 0xFF);
+    hdr.recordIdMsb = (id >> 8) & 0xFF;
 };
 
 } // namespace header
@@ -207,47 +207,51 @@ namespace key
 static constexpr uint8_t listOrRangeBit = 7;
 static constexpr uint8_t linkedBit = 6;
 
-inline void setOwnerIdIpmb(SensorDataRecordKey* key)
+inline void setOwnerIdIpmb(SensorDataRecordKey& key)
 {
-    key->ownerId &= ~0x01;
+    key.ownerId &= ~0x01;
 };
 
-inline void setOwnerIdSystemSw(SensorDataRecordKey* key)
+inline void setOwnerIdSystemSw(SensorDataRecordKey& key)
 {
-    key->ownerId |= 0x01;
+    key.ownerId |= 0x01;
 };
 
-inline void setOwnerIdBmc(SensorDataRecordKey* key)
+inline void setOwnerIdBmc(SensorDataRecordKey& key)
 {
-    key->ownerId |= 0x20;
+    key.ownerId |= 0x20;
 };
 
-inline void setOwnerIdAddress(uint8_t addr, SensorDataRecordKey* key)
+inline void setOwnerIdAddress(uint8_t addr, SensorDataRecordKey& key)
 {
-    key->ownerId &= 0x01;
-    key->ownerId |= addr << 1;
+    key.ownerId &= 0x01;
+    key.ownerId |= addr << 1;
 };
 
-inline void setOwnerLun(uint8_t lun, SensorDataRecordKey* key)
+inline void setOwnerLun(uint8_t lun, SensorDataRecordKey& key)
 {
-    key->ownerLun &= ~0x03;
-    key->ownerLun |= (lun & 0x03);
+    key.ownerLun &= ~0x03;
+    key.ownerLun |= (lun & 0x03);
 };
 
-inline void setOwnerLunChannel(uint8_t channel, SensorDataRecordKey* key)
+inline void setOwnerLunChannel(uint8_t channel, SensorDataRecordKey& key)
 {
-    key->ownerLun &= 0x0f;
-    key->ownerLun |= ((channel & 0xf) << 4);
+    key.ownerLun &= 0x0f;
+    key.ownerLun |= ((channel & 0xf) << 4);
 };
 
-inline void setFlags(bool isList, bool isLinked, SensorDataEntityRecordKey* key)
+inline void setFlags(bool isList, bool isLinked, SensorDataEntityRecordKey& key)
 {
-    key->flags = 0x00;
+    key.flags = 0x00;
     if (!isList)
-        key->flags |= 1 << listOrRangeBit;
+    {
+        key.flags |= 1 << listOrRangeBit;
+    }
 
     if (isLinked)
-        key->flags |= 1 << linkedBit;
+    {
+        key.flags |= 1 << linkedBit;
+    }
 };
 
 } // namespace key
@@ -391,242 +395,242 @@ struct SensorDataEntityRecordBody
 namespace body
 {
 
-inline void setEntityInstanceNumber(uint8_t n, SensorDataFullRecordBody* body)
+inline void setEntityInstanceNumber(uint8_t n, SensorDataFullRecordBody& body)
 {
-    body->entityInstance &= 1 << 7;
-    body->entityInstance |= (n & ~(1 << 7));
+    body.entityInstance &= 1 << 7;
+    body.entityInstance |= (n & ~(1 << 7));
 };
 
-inline void setEntityPhysicalEntity(SensorDataFullRecordBody* body)
+inline void setEntityPhysicalEntity(SensorDataFullRecordBody& body)
 {
-    body->entityInstance &= ~(1 << 7);
+    body.entityInstance &= ~(1 << 7);
 };
 
-inline void setEntityLogicalContainer(SensorDataFullRecordBody* body)
+inline void setEntityLogicalContainer(SensorDataFullRecordBody& body)
 {
-    body->entityInstance |= 1 << 7;
+    body.entityInstance |= 1 << 7;
 };
 
-inline void sensorScanningState(bool enabled, SensorDataFullRecordBody* body)
+inline void sensorScanningState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 0;
+        body.sensorInitialization |= 1 << 0;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 0);
+        body.sensorInitialization &= ~(1 << 0);
     };
 };
 
-inline void eventGenerationState(bool enabled, SensorDataFullRecordBody* body)
+inline void eventGenerationState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 1;
+        body.sensorInitialization |= 1 << 1;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 1);
+        body.sensorInitialization &= ~(1 << 1);
     }
 };
 
-inline void initTypesState(bool enabled, SensorDataFullRecordBody* body)
+inline void initTypesState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 2;
+        body.sensorInitialization |= 1 << 2;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 2);
+        body.sensorInitialization &= ~(1 << 2);
     }
 };
 
-inline void initHystState(bool enabled, SensorDataFullRecordBody* body)
+inline void initHystState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 3;
+        body.sensorInitialization |= 1 << 3;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 3);
+        body.sensorInitialization &= ~(1 << 3);
     }
 };
 
-inline void initThreshState(bool enabled, SensorDataFullRecordBody* body)
+inline void initThreshState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 4;
+        body.sensorInitialization |= 1 << 4;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 4);
+        body.sensorInitialization &= ~(1 << 4);
     }
 };
 
-inline void initEventsState(bool enabled, SensorDataFullRecordBody* body)
+inline void initEventsState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 5;
+        body.sensorInitialization |= 1 << 5;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 5);
+        body.sensorInitialization &= ~(1 << 5);
     }
 };
 
-inline void initScanningState(bool enabled, SensorDataFullRecordBody* body)
+inline void initScanningState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 6;
+        body.sensorInitialization |= 1 << 6;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 6);
+        body.sensorInitialization &= ~(1 << 6);
     }
 };
 
-inline void initSettableState(bool enabled, SensorDataFullRecordBody* body)
+inline void initSettableState(bool enabled, SensorDataFullRecordBody& body)
 {
     if (enabled)
     {
-        body->sensorInitialization |= 1 << 7;
+        body.sensorInitialization |= 1 << 7;
     }
     else
     {
-        body->sensorInitialization &= ~(1 << 7);
+        body.sensorInitialization &= ~(1 << 7);
     }
 };
 
-inline void setPercentage(SensorDataFullRecordBody* body)
+inline void setPercentage(SensorDataFullRecordBody& body)
 {
-    body->sensorUnits1 |= 1 << 0;
+    body.sensorUnits1 |= 1 << 0;
 };
 
-inline void unsetPercentage(SensorDataFullRecordBody* body)
+inline void unsetPercentage(SensorDataFullRecordBody& body)
 {
-    body->sensorUnits1 &= ~(1 << 0);
+    body.sensorUnits1 &= ~(1 << 0);
 };
 
-inline void setModifierOperation(uint8_t op, SensorDataFullRecordBody* body)
+inline void setModifierOperation(uint8_t op, SensorDataFullRecordBody& body)
 {
-    body->sensorUnits1 &= ~(3 << 1);
-    body->sensorUnits1 |= (op & 0x3) << 1;
+    body.sensorUnits1 &= ~(3 << 1);
+    body.sensorUnits1 |= (op & 0x3) << 1;
 };
 
-inline void setRateUnit(uint8_t unit, SensorDataFullRecordBody* body)
+inline void setRateUnit(uint8_t unit, SensorDataFullRecordBody& body)
 {
-    body->sensorUnits1 &= ~(7 << 3);
-    body->sensorUnits1 |= (unit & 0x7) << 3;
+    body.sensorUnits1 &= ~(7 << 3);
+    body.sensorUnits1 |= (unit & 0x7) << 3;
 };
 
-inline void setAnalogDataFormat(uint8_t format, SensorDataFullRecordBody* body)
+inline void setAnalogDataFormat(uint8_t format, SensorDataFullRecordBody& body)
 {
-    body->sensorUnits1 &= ~(3 << 6);
-    body->sensorUnits1 |= (format & 0x3) << 6;
+    body.sensorUnits1 &= ~(3 << 6);
+    body.sensorUnits1 |= (format & 0x3) << 6;
 };
 
-inline void setM(uint16_t m, SensorDataFullRecordBody* body)
+inline void setM(uint16_t m, SensorDataFullRecordBody& body)
 {
-    body->mLsb = m & 0xff;
-    body->mMsbAndToLerance &= ~(3 << 6);
-    body->mMsbAndToLerance |= ((m & (3 << 8)) >> 2);
+    body.mLsb = m & 0xff;
+    body.mMsbAndToLerance &= ~(3 << 6);
+    body.mMsbAndToLerance |= ((m & (3 << 8)) >> 2);
 };
 
-inline void setTolerance(uint8_t tol, SensorDataFullRecordBody* body)
+inline void setTolerance(uint8_t tol, SensorDataFullRecordBody& body)
 {
-    body->mMsbAndToLerance &= ~0x3f;
-    body->mMsbAndToLerance |= tol & 0x3f;
+    body.mMsbAndToLerance &= ~0x3f;
+    body.mMsbAndToLerance |= tol & 0x3f;
 };
 
-inline void setB(uint16_t b, SensorDataFullRecordBody* body)
+inline void setB(uint16_t b, SensorDataFullRecordBody& body)
 {
-    body->bLsb = b & 0xff;
-    body->bMsbAndAccuracyLsb &= ~(3 << 6);
-    body->bMsbAndAccuracyLsb |= ((b & (3 << 8)) >> 2);
+    body.bLsb = b & 0xff;
+    body.bMsbAndAccuracyLsb &= ~(3 << 6);
+    body.bMsbAndAccuracyLsb |= ((b & (3 << 8)) >> 2);
 };
 
-inline void setAccuracy(uint16_t acc, SensorDataFullRecordBody* body)
+inline void setAccuracy(uint16_t acc, SensorDataFullRecordBody& body)
 {
     // bottom 6 bits
-    body->bMsbAndAccuracyLsb &= ~0x3f;
-    body->bMsbAndAccuracyLsb |= acc & 0x3f;
+    body.bMsbAndAccuracyLsb &= ~0x3f;
+    body.bMsbAndAccuracyLsb |= acc & 0x3f;
     // top 4 bits
-    body->accuracyAndSensorDirection &= 0x0f;
-    body->accuracyAndSensorDirection |= ((acc >> 6) & 0xf) << 4;
+    body.accuracyAndSensorDirection &= 0x0f;
+    body.accuracyAndSensorDirection |= ((acc >> 6) & 0xf) << 4;
 };
 
-inline void setAccuracyExp(uint8_t exp, SensorDataFullRecordBody* body)
+inline void setAccuracyExp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body->accuracyAndSensorDirection &= ~(3 << 2);
-    body->accuracyAndSensorDirection |= (exp & 3) << 2;
+    body.accuracyAndSensorDirection &= ~(3 << 2);
+    body.accuracyAndSensorDirection |= (exp & 3) << 2;
 };
 
-inline void setSensorDir(uint8_t dir, SensorDataFullRecordBody* body)
+inline void setSensorDir(uint8_t dir, SensorDataFullRecordBody& body)
 {
-    body->accuracyAndSensorDirection &= ~(3 << 0);
-    body->accuracyAndSensorDirection |= (dir & 3);
+    body.accuracyAndSensorDirection &= ~(3 << 0);
+    body.accuracyAndSensorDirection |= (dir & 3);
 };
 
-inline void setBexp(uint8_t exp, SensorDataFullRecordBody* body)
+inline void setBexp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body->rbExponents &= 0xf0;
-    body->rbExponents |= exp & 0x0f;
+    body.rbExponents &= 0xf0;
+    body.rbExponents |= exp & 0x0f;
 };
-inline void setRexp(uint8_t exp, SensorDataFullRecordBody* body)
+inline void setRexp(uint8_t exp, SensorDataFullRecordBody& body)
 {
-    body->rbExponents &= 0x0f;
-    body->rbExponents |= (exp & 0x0f) << 4;
-};
-
-inline void setIdStrLen(uint8_t len, SensorDataFullRecordBody* body)
-{
-    body->idStringInfo &= ~(0x1f);
-    body->idStringInfo |= len & 0x1f;
+    body.rbExponents &= 0x0f;
+    body.rbExponents |= (exp & 0x0f) << 4;
 };
 
-inline void setIdStrLen(uint8_t len, SensorDataEventRecordBody* body)
+inline void setIdStrLen(uint8_t len, SensorDataFullRecordBody& body)
 {
-    body->idStringInfo &= ~(0x1f);
-    body->idStringInfo |= len & 0x1f;
+    body.idStringInfo &= ~(0x1f);
+    body.idStringInfo |= len & 0x1f;
 };
 
-inline uint8_t getIdStrLen(SensorDataFullRecordBody* body)
+inline void setIdStrLen(uint8_t len, SensorDataEventRecordBody& body)
 {
-    return body->idStringInfo & 0x1f;
+    body.idStringInfo &= ~(0x1f);
+    body.idStringInfo |= len & 0x1f;
 };
 
-inline void setIdType(uint8_t type, SensorDataFullRecordBody* body)
+inline uint8_t getIdStrLen(const SensorDataFullRecordBody& body)
 {
-    body->idStringInfo &= ~(3 << 6);
-    body->idStringInfo |= (type & 0x3) << 6;
+    return body.idStringInfo & 0x1f;
 };
 
-inline void setIdType(uint8_t type, SensorDataEventRecordBody* body)
+inline void setIdType(uint8_t type, SensorDataFullRecordBody& body)
 {
-    body->idStringInfo &= ~(3 << 6);
-    body->idStringInfo |= (type & 0x3) << 6;
+    body.idStringInfo &= ~(3 << 6);
+    body.idStringInfo |= (type & 0x3) << 6;
 };
 
-inline void setDeviceIdStrLen(uint8_t len, SensorDataFruRecordBody* body)
+inline void setIdType(uint8_t type, SensorDataEventRecordBody& body)
 {
-    body->deviceIDLen &= ~(LENGTH_MASK);
-    body->deviceIDLen |= len & LENGTH_MASK;
+    body.idStringInfo &= ~(3 << 6);
+    body.idStringInfo |= (type & 0x3) << 6;
 };
 
-inline uint8_t getDeviceIdStrLen(SensorDataFruRecordBody* body)
+inline void setDeviceIdStrLen(uint8_t len, SensorDataFruRecordBody& body)
 {
-    return body->deviceIDLen & LENGTH_MASK;
+    body.deviceIDLen &= ~(LENGTH_MASK);
+    body.deviceIDLen |= len & LENGTH_MASK;
 };
 
-inline void setReadableMask(uint8_t mask, SensorDataFullRecordBody* body)
+inline uint8_t getDeviceIdStrLen(const SensorDataFruRecordBody& body)
 {
-    body->discreteReadingSettingMask[1] = mask & 0x3F;
+    return body.deviceIDLen & LENGTH_MASK;
+};
+
+inline void setReadableMask(uint8_t mask, SensorDataFullRecordBody& body)
+{
+    body.discreteReadingSettingMask[1] = mask & 0x3F;
 }
 
 } // namespace body
@@ -714,15 +718,15 @@ namespace sensor
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse* resp)
+inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse& resp)
 {
     if (offset > 7)
     {
-        resp->discreteReadingSensorStates |= 1 << (offset - 8);
+        resp.discreteReadingSensorStates |= 1 << (offset - 8);
     }
     else
     {
-        resp->thresholdLevelsStates |= 1 << offset;
+        resp.thresholdLevelsStates |= 1 << offset;
     }
 }
 
@@ -732,9 +736,9 @@ inline void setOffset(uint8_t offset, ipmi::sensor::GetSensorResponse* resp)
  * @param[in] offset - offset number.
  * @param[in/out] resp - get sensor reading response.
  */
-inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse* resp)
+inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse& resp)
 {
-    resp->reading = value;
+    resp.reading = value;
 }
 
 /**
@@ -745,10 +749,10 @@ inline void setReading(uint8_t value, ipmi::sensor::GetSensorResponse* resp)
  * @param[in/out] resp - get sensor reading response.
  */
 inline void setAssertionBytes(uint16_t value,
-                              ipmi::sensor::GetSensorResponse* resp)
+                              ipmi::sensor::GetSensorResponse& resp)
 {
-    resp->thresholdLevelsStates = static_cast<uint8_t>(value & 0x00FF);
-    resp->discreteReadingSensorStates = static_cast<uint8_t>(value >> 8);
+    resp.thresholdLevelsStates = static_cast<uint8_t>(value & 0x00FF);
+    resp.discreteReadingSensorStates = static_cast<uint8_t>(value >> 8);
 }
 
 /**
@@ -756,11 +760,11 @@ inline void setAssertionBytes(uint16_t value,
  *
  * @param[in/out] resp - get sensor reading response.
  */
-inline void enableScanning(ipmi::sensor::GetSensorResponse* resp)
+inline void enableScanning(ipmi::sensor::GetSensorResponse& resp)
 {
-    resp->readingOrStateUnavailable = false;
-    resp->scanningEnabled = true;
-    resp->allEventMessagesEnabled = false;
+    resp.readingOrStateUnavailable = false;
+    resp.scanningEnabled = true;
+    resp.allEventMessagesEnabled = false;
 }
 
 } // namespace sensor
