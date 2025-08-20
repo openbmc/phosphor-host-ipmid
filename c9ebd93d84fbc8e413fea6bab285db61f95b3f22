@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f51365e8_0be7e47a",
+        "filename": "docs/testing.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T06:52:16Z",
+      "side": 1,
+      "message": "I didn\u0027t want to break the chain, so I removed the code related to GetSdrReq \u0026 GetSdrResp in the new commit",
+      "parentUuid": "e46dd2f3_896242e3",
+      "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cd71a024_bf40049c",
@@ -52,6 +70,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "358b90e7_38788724",
+        "filename": "docs/testing.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T06:52:16Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "cd71a024_bf40049c",
+      "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bfebd7d1_9ce8a687",
@@ -65,6 +101,24 @@
       "writtenOn": "2025-08-19T22:42:51Z",
       "side": 1,
       "message": "If this change goes in after the rewrite to use the new handler functions, these byte-shifting functions can just be deleted.",
+      "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "208adf66_207004a7",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T06:52:16Z",
+      "side": 1,
+      "message": "Removed",
+      "parentUuid": "bfebd7d1_9ce8a687",
       "revId": "c9ebd93d84fbc8e413fea6bab285db61f95b3f22",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
