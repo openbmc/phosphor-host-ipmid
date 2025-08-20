@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7b5a437_c816b449",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1165,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "eb062651_fd1f880c",
+      "range": {
+        "startLine": 1164,
+        "startChar": 14,
+        "endLine": 1165,
+        "endChar": 22
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2c521608_9b9587e2",
@@ -37,6 +61,30 @@
       "writtenOn": "2025-08-19T22:34:49Z",
       "side": 1,
       "message": "pass the variables in as needed instead of the struct.",
+      "range": {
+        "startLine": 1168,
+        "startChar": 18,
+        "endLine": 1168,
+        "endChar": 47
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "27d9c53c_3e0643b4",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1168,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "2c521608_9b9587e2",
       "range": {
         "startLine": 1168,
         "startChar": 18,
@@ -64,6 +112,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5e15c54b_5a716085",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1214,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "21a69e19_020dbfe6",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4f87255e_7fda2cad",
@@ -77,6 +143,30 @@
       "writtenOn": "2025-08-19T22:34:49Z",
       "side": 1,
       "message": "```\nreturn ipmi::responseSuccess(nextRecordId, recordData);\n```",
+      "range": {
+        "startLine": 1251,
+        "startChar": 33,
+        "endLine": 1252,
+        "endChar": 48
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a93ef91d_5c60eda9",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1252,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "4f87255e_7fda2cad",
       "range": {
         "startLine": 1251,
         "startChar": 33,
@@ -110,6 +200,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d0960540_9ce0fdc0",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1256,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "890cc47c_d0150d6a",
+      "range": {
+        "startLine": 1255,
+        "startChar": 14,
+        "endLine": 1256,
+        "endChar": 22
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3fcf2c7f_9d510744",
@@ -127,6 +241,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f5623e6_c5a5fe48",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1298,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "3fcf2c7f_9d510744",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "15d1cd0d_99a1b456",
@@ -140,6 +272,30 @@
       "writtenOn": "2025-08-19T22:34:49Z",
       "side": 1,
       "message": "```\nuint16_t, // nextRecordId\n```",
+      "range": {
+        "startLine": 1328,
+        "startChar": 14,
+        "endLine": 1329,
+        "endChar": 22
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d0c1e7f9_845378ce",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1329,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "15d1cd0d_99a1b456",
       "range": {
         "startLine": 1328,
         "startChar": 14,
@@ -173,6 +329,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "285fab35_3882d90a",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1334,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "bc0d084d_fd69c974",
+      "range": {
+        "startLine": 1332,
+        "startChar": 21,
+        "endLine": 1334,
+        "endChar": 40
+      },
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dadae691_01e38cc7",
@@ -190,6 +370,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7897633_1f9c77fd",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1336,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "dadae691_01e38cc7",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "087f2e35_50eb3dfb",
@@ -203,6 +401,24 @@
       "writtenOn": "2025-08-19T22:34:49Z",
       "side": 1,
       "message": "same as above",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ed6b991_b2e928ab",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1403,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "087f2e35_50eb3dfb",
       "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -226,6 +442,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "495b7195_267c418a",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "This method is called in storagehandler.cpp",
+      "parentUuid": "c7b592f1_3446c7a8",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "d0b57fa4_496396a7",
         "filename": "sensorhandler.hpp",
         "patchSetId": 1
@@ -237,6 +471,24 @@
       "writtenOn": "2025-08-19T22:34:49Z",
       "side": 1,
       "message": "while we are at it, we can change these two uint8_t into a uint16_t\n\nAlthough, I would prefer if we just got rid of this struct and use the variables individually as needed.",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d8877e07_918052ea",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Removed.",
+      "parentUuid": "d0b57fa4_496396a7",
       "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -254,6 +506,24 @@
       "writtenOn": "2025-08-19T22:34:49Z",
       "side": 1,
       "message": "by changing the GetSdrResp struct to just use a uint16_t for the nextRecordId, this function is no longer needed.",
+      "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a37f2906_4041f98d",
+        "filename": "sensorhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-08-20T03:41:33Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "e180b125_ada74b61",
       "revId": "2cfabeab8d034eef2d97cd4755b76f94a06bf553",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
