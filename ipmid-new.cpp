@@ -437,7 +437,7 @@ void nameChangeHandler(sdbusplus::message_t& message)
 
     if (!oldOwner.empty())
     {
-        if (boost::starts_with(oldOwner, ":"))
+        if (oldOwner.starts_with(":"))
         {
             // Connection removed
             auto it = uniqueNameToChannelNumber.find(oldOwner);
