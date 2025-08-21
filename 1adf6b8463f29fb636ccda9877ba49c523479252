@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f70d0cef_028c54f1",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-21T11:37:42Z",
+      "side": 1,
+      "message": "We can compile our code need not have meson option for this. @vernon.mauery@gmail.com please share your thoughts on having meson option",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cccd7e62_5eed5fbd",
+        "filename": "meson.options",
+        "patchSetId": 4
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-21T11:37:42Z",
+      "side": 1,
+      "message": "Do we need meson options for this ? \nWe can avoid meson options",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3ff8218c_aff95fbc",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-21T11:37:42Z",
+      "side": 1,
+      "message": "As @vernon.mauery@gmail.com suggested can we change this to \n```\nboost::system::error_code ec;\nbool enabled \u003d false;\nec \u003d ipmi::getDbusProperty\u003cbool\u003e(\n        ctx, ipmi::userMgrService, ipmi::userObjBasePath,\n        credBootstrappingInf, credentialBootStrap,\n        enabled);\n    if (ec)\n    {\n        lg2::error(\"Failed to get CredentialBootstrap property {STATUS}\",\n                   \"STATUS\", ec.what());\n        return nullopt;\n    }\nreturn enabled;\n```",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "852213c7_f5b96195",
+        "filename": "redfishhostinterface.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-21T11:37:42Z",
+      "side": 1,
+      "message": "If other files dont use this functionality should we just have redfishhostinterface.cpp file and get rid of .hpp ?",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
