@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5d5d2169_08c2acf8",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-21T12:49:34Z",
+      "side": 1,
+      "message": "Use async way to set the property one with the boost::system::error_code as return type. And use ec to handle the error instead of try.. catch",
+      "revId": "25fedd602de5360053b61473994e7be5030f7927",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "68d034b0_a947a8f7",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-21T12:49:34Z",
+      "side": 1,
+      "message": "ipmi::ChannelInfo chInfo{};",
+      "revId": "25fedd602de5360053b61473994e7be5030f7927",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "69762b11_7cfa78f8",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-08-21T12:49:34Z",
+      "side": 1,
+      "message": "Why is it we are hardcoding to 1 ?",
+      "revId": "25fedd602de5360053b61473994e7be5030f7927",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
