@@ -521,7 +521,7 @@ std::string parseSdrIdFromPath(const std::string& path)
 #ifdef SHORTNAME_REMOVE_SUFFIX
         for (const auto& suffix : suffixes)
         {
-            if (boost::ends_with(name, suffix))
+            if (name.ends_with(suffix))
             {
                 boost::replace_all(name, suffix, "");
                 break;

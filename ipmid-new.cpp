@@ -19,7 +19,6 @@
 
 #include <dlfcn.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/spawn.hpp>
@@ -437,7 +436,7 @@ void nameChangeHandler(sdbusplus::message_t& message)
 
     if (!oldOwner.empty())
     {
-        if (boost::starts_with(oldOwner, ":"))
+        if (oldOwner.starts_with(":"))
         {
             // Connection removed
             auto it = uniqueNameToChannelNumber.find(oldOwner);
