@@ -1452,14 +1452,13 @@ std::string getEnclosureIdentifyConnection()
 void enclosureIdentifyLed(bool flag)
 {
     using namespace chassis::internal;
+
+    std::string connection = getEnclosureIdentifyConnection();
+
+    lg2::debug("enclosureIdentifyLed({FLAG})", "FLAG", flag);
+
     try
     {
-        std::string connection = getEnclosureIdentifyConnection();
-
-        auto msg = std::string("enclosureIdentifyLed(") +
-                   boost::lexical_cast<std::string>(flag) + ")";
-        lg2::debug(msg.c_str());
-
         ipmi::setDbusProperty(*getSdBus(), connection, identify_led_object_name,
                               "xyz.openbmc_project.Led.Group", "Asserted",
                               flag);
