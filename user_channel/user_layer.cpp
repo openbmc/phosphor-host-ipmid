@@ -74,13 +74,16 @@ uint8_t ipmiUserGetUserId(const std::string& userName)
 
 Cc ipmiUserSetUserName(const uint8_t userId, const char* userName)
 {
-    std::string newUser(userName, 0, ipmiMaxUserName);
+    size_t len = strnlen(userName, ipmiMaxUserName);
+    std::string newUser(userName, len);
     return getUserAccessObject().setUserName(userId, newUser);
 }
 
 Cc ipmiUserSetUserName(const uint8_t userId, const std::string& userName)
 {
-    std::string newUser(userName, 0, ipmiMaxUserName);
+    size_t len = std::min(userName.size(),
+                          static_cast<size_t>(ipmiMaxUserName));
+    std::string newUser(userName, 0, len);
     return getUserAccessObject().setUserName(userId, newUser);
 }
 
