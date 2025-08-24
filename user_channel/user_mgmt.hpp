@@ -21,12 +21,40 @@
 #include <ipmid/api.hpp>
 #include <sdbusplus/bus.hpp>
 
+#include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <ctime>
 #include <variant>
 
 namespace ipmi
 {
+
+// Inline functions for safe username buffer operations
+inline size_t safeUsernameLength(const uint8_t* buf)
+{
+    return strnlen(reinterpret_cast<const char*>(buf), ipmiMaxUserName);
+}
+
+inline std::string safeUsernameString(const uint8_t* buf)
+{
+    return std::string(reinterpret_cast<const char*>(buf),
+                       safeUsernameLength(buf));
+}
+
+inline void safeUsernameAssign(std::string& str, const uint8_t* buf)
+{
+    size_t len = safeUsernameLength(buf);
+    str.assign(reinterpret_cast<const char*>(buf), len);
+}
+
+inline void safeUsernameCopyToBuffer(uint8_t* buf, size_t bufSize,
+                                     const std::string& str)
+{
+    std::memset(buf, 0, bufSize);
+    const size_t n = std::min(str.size(), bufSize);
+    std::memcpy(buf, str.data(), n);
+}
 
 using DbusUserPropVariant =
     std::variant<std::vector<std::string>, std::string, bool>;
