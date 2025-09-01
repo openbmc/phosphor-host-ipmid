@@ -9,6 +9,8 @@
 
 #include <chrono>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace ipmi
 {
@@ -455,4 +457,12 @@ RetType callDbusMethod(ipmi::Context::ptr ctx, boost::system::error_code& ec,
 ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
                       std::vector<uint8_t> writeData,
                       std::vector<uint8_t>& readBuf);
+
+/** @brief Split a string into a vector of strings
+ *  @param[in] srcStr - The string to split
+ *  @param[in] delim - The delimiter to split the string on
+ *  @return A vector of strings
+ */
+std::vector<std::string> split(const std::string& srcStr, char delim);
+
 } // namespace ipmi

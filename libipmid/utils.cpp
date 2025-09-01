@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <sstream>
 
 namespace ipmi
 {
@@ -496,6 +497,22 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
     }
 
     return ipmi::ccSuccess;
+}
+
+std::vector<std::string> split(const std::string& srcStr, char delim)
+{
+    std::vector<std::string> out;
+    std::stringstream ss(srcStr);
+    std::string item;
+
+    while (std::getline(ss, item, delim))
+    {
+        if (!item.empty())
+        {
+            out.emplace_back(item);
+        }
+    }
+    return out;
 }
 
 } // namespace ipmi
