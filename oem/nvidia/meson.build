@@ -3,6 +3,7 @@
 nvidia_oem_src = [
     'biosconfigcommands.cpp',
     'bootstrap-credentials-oem-cmds.cpp',
+    'sbmr-oem.cpp',
 ]
 
 nvidia_oem_deps = [
