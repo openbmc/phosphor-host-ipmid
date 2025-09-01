@@ -26,4 +26,9 @@ namespace bios_password
 constexpr auto cmdSetBiosPassword = 0x36;
 constexpr auto cmdGetBiosPassword = 0x37;
 } // namespace bios_password
+
+namespace sbmr_oem
+{
+constexpr auto cmdSbmrSendDescription = 0xD1;
+} // namespace sbmr_oem
 } // namespace ipmi
