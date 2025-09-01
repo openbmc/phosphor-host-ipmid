@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "984751eb_3c958abb",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-09-01T09:27:54Z",
+      "side": 1,
+      "message": "nit: std::optional\u003cstd::string\u003e",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 4
+      },
+      "revId": "20b930742915a2c513d014044975f58167f968c1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c5838a7e_d57934bb",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-09-01T09:27:54Z",
+      "side": 1,
+      "message": "It is recommended to use the `split` method:\nhttps://gerrit.openbmc.org/c/openbmc/entity-manager/+/83076/2/src/utils.cpp#196",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 167,
+        "endChar": 75
+      },
+      "revId": "20b930742915a2c513d014044975f58167f968c1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
