@@ -183,6 +183,13 @@ ipmi::RspType<std::vector<uint8_t>> ipmiGetRedfishServiceUUID()
     return ipmi::responseSuccess(resBuf);
 }
 
+ipmi::RspType<uint16_t> ipmiGetRedfishServicePort()
+{
+    int redfishPort = 443;
+    return ipmi::responseSuccess(
+        ((redfishPort & 0xFF) << 8) | ((redfishPort >> 8) & 0xFF));
+}
+
 } // namespace ipmi
 
 void registerBootstrapCredentialsOemCommands()
@@ -211,4 +218,9 @@ void registerBootstrapCredentialsOemCommands()
         ipmi::prioOemBase, ipmi::groupNvidia,
         ipmi::bootstrap_credentials_oem::cmdGetRedfishServiceUUID,
         ipmi::Privilege::Admin, ipmi::ipmiGetRedfishServiceUUID);
+
+    ipmi::registerHandler(
+        ipmi::prioOemBase, ipmi::groupNvidia,
+        ipmi::bootstrap_credentials_oem::cmdGetRedfishServicePort,
+        ipmi::Privilege::Admin, ipmi::ipmiGetRedfishServicePort);
 }
