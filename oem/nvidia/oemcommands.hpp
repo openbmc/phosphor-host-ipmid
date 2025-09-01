@@ -19,6 +19,7 @@ constexpr auto cmdGetUsbVendorIdProductId = 0x30;
 constexpr auto cmdGetUsbSerialNumber = 0x31;
 constexpr auto cmdGetRedfishHostName = 0x32;
 constexpr auto cmdGetIpmiChannelRfHi = 0x33;
+constexpr auto cmdGetRedfishServiceUUID = 0x34;
 } // namespace bootstrap_credentials_oem
 
 namespace bios_password

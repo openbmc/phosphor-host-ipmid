@@ -111,6 +111,83 @@ ipmi::RspType<uint8_t> ipmiGetIpmiChannelRfHi()
     return ipmi::responseSuccess(static_cast<uint8_t>(chNum));
 }
 
+bool getRfUuid(std::string& rfUuid)
+{
+    constexpr const char* bmcwebPersistentDataFile =
+        "/home/root/bmcweb_persistent_data.json";
+    std::ifstream f(bmcwebPersistentDataFile);
+    if (!f.is_open())
+    {
+        lg2::error("Failed to open {FILE}", "FILE", bmcwebPersistentDataFile);
+        return false;
+    }
+    auto data = nlohmann::json::parse(f, nullptr, false);
+    if (data.is_discarded())
+    {
+        lg2::error("Failed to parse {FILE}", "FILE", bmcwebPersistentDataFile);
+        return false;
+    }
+
+    if (auto it = data.find("system_uuid"); it != data.end() && it->is_string())
+    {
+        rfUuid = *it;
+        return true;
+    }
+
+    lg2::error("system_uuid missing in {FILE}", "FILE",
+               bmcwebPersistentDataFile);
+    return false;
+}
+
+ipmi::RspType<std::vector<uint8_t>> ipmiGetRedfishServiceUUID()
+{
+    std::string rfUuid;
+    bool ret = getRfUuid(rfUuid);
+    if (!ret)
+    {
+        lg2::error(
+            "ipmiGetRedfishServiceUUID: Error reading Redfish Service UUID File.");
+        return ipmi::responseResponseError();
+    }
+
+    // As per Redfish Host Interface Spec v1.3.0
+    // The Redfish UUID is 16byte and should be represented as below:
+    // Ex: {00112233-4455-6677-8899-AABBCCDDEEFF}
+    // 0x33 0x22 0x11 0x00 0x55 0x44 0x77 0x66 0x88 0x99 0xAA 0xBB 0xCC 0xDD
+    // 0xEE 0xFF
+
+    std::vector<uint8_t> resBuf;
+
+    std::array<std::string, 5> groups{};
+    size_t start = 0, pos = 0, idx = 0;
+
+    while ((pos = rfUuid.find('-', start)) != std::string::npos && idx < 4)
+    {
+        groups[idx++] = rfUuid.substr(start, pos - start);
+        start = pos + 1;
+    }
+    groups[idx] = rfUuid.substr(start);
+    for (size_t i = 0; i < groups.size(); ++i)
+    {
+        auto group = groups[i];
+        if (i < 3)
+        {
+            std::reverse(group.begin(), group.end());
+        }
+
+        for (size_t j = 0; j < group.size(); j += 2)
+        {
+            if (i < 3)
+            {
+                std::swap(group[j], group[j + 1]);
+            }
+            resBuf.push_back(static_cast<uint8_t>(
+                std::stoi(group.substr(j, 2), nullptr, 16)));
+        }
+    }
+    return ipmi::responseSuccess(resBuf);
+}
+
 } // namespace ipmi
 
 void registerBootstrapCredentialsOemCommands()
@@ -134,4 +211,9 @@ void registerBootstrapCredentialsOemCommands()
         ipmi::prioOemBase, ipmi::groupNvidia,
         ipmi::bootstrap_credentials_oem::cmdGetIpmiChannelRfHi,
         ipmi::Privilege::Admin, ipmi::ipmiGetIpmiChannelRfHi);
+
+    ipmi::registerHandler(
+        ipmi::prioOemBase, ipmi::groupNvidia,
+        ipmi::bootstrap_credentials_oem::cmdGetRedfishServiceUUID,
+        ipmi::Privilege::Admin, ipmi::ipmiGetRedfishServiceUUID);
 }
