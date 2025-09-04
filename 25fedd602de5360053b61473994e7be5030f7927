@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "4a9d2f32_f28c2f47",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-04T09:00:15Z",
+      "side": 1,
+      "message": "Can you tell me the benefit on that?",
+      "parentUuid": "5d5d2169_08c2acf8",
+      "revId": "25fedd602de5360053b61473994e7be5030f7927",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "68d034b0_a947a8f7",
         "filename": "redfishhostinterface.cpp",
         "patchSetId": 4
@@ -31,6 +49,24 @@
       "writtenOn": "2025-08-21T12:49:34Z",
       "side": 1,
       "message": "ipmi::ChannelInfo chInfo{};",
+      "revId": "25fedd602de5360053b61473994e7be5030f7927",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "58148d3a_417b972a",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-04T09:00:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68d034b0_a947a8f7",
       "revId": "25fedd602de5360053b61473994e7be5030f7927",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -48,6 +84,24 @@
       "writtenOn": "2025-08-21T12:49:34Z",
       "side": 1,
       "message": "Why is it we are hardcoding to 1 ?",
+      "revId": "25fedd602de5360053b61473994e7be5030f7927",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fd7e37b_5ddadcff",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-04T09:00:15Z",
+      "side": 1,
+      "message": "It is just initial value for next steps.",
+      "parentUuid": "69762b11_7cfa78f8",
       "revId": "25fedd602de5360053b61473994e7be5030f7927",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
