@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c5a763df_c6a25f17",
+        "filename": "include/ipmid/api-types.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-04T08:59:39Z",
+      "side": 1,
+      "message": "Removed build option.",
+      "parentUuid": "f70d0cef_028c54f1",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cccd7e62_5eed5fbd",
@@ -31,6 +49,24 @@
       "writtenOn": "2025-08-21T11:37:42Z",
       "side": 1,
       "message": "Do we need meson options for this ? \nWe can avoid meson options",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e0fd624b_3f0c1714",
+        "filename": "meson.options",
+        "patchSetId": 4
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-04T08:59:39Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "cccd7e62_5eed5fbd",
       "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -54,6 +90,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "65779cb2_481878f6",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-04T08:59:39Z",
+      "side": 1,
+      "message": "Because the utility ipmi::getDbusProperty() does not try/catch in there code. Adding try/catch to prevent the exception is necessary AMO.\n\nCan you tell me the benefit of removing try/catch?",
+      "parentUuid": "3ff8218c_aff95fbc",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "852213c7_f5b96195",
         "filename": "redfishhostinterface.hpp",
         "patchSetId": 4
@@ -65,6 +119,24 @@
       "writtenOn": "2025-08-21T11:37:42Z",
       "side": 1,
       "message": "If other files dont use this functionality should we just have redfishhostinterface.cpp file and get rid of .hpp ?",
+      "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f9c09215_94249a6a",
+        "filename": "redfishhostinterface.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-04T08:59:39Z",
+      "side": 1,
+      "message": "I removed the `redfishhostinterface.hpp`",
+      "parentUuid": "852213c7_f5b96195",
       "revId": "1adf6b8463f29fb636ccda9877ba49c523479252",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
