@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "00932172_34f2f6a3",
         "filename": "test/integration/common/services/restriction_mode.hpp",
@@ -20,10 +21,10 @@
         "endChar": 24
       },
       "revId": "acaf6aecfe562230dbd601e45b1372e1dd0e2086",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "1cd7e41b_4e733dd4",
         "filename": "test/integration/common/services/restriction_mode.hpp",
@@ -44,8 +45,8 @@
         "endChar": 24
       },
       "revId": "acaf6aecfe562230dbd601e45b1372e1dd0e2086",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
-  ]
+  ],
+  "submitRequirementResults": []
 }
