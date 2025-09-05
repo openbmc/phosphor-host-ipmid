@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "1939702c_3ff7e0e8",
         "filename": "test/integration/common/services/bmc_state.hpp",
@@ -20,10 +21,10 @@
         "endChar": 18
       },
       "revId": "8b9026148eca69b4064781609c0432f7138a9fe2",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "7603be99_51182e74",
         "filename": "test/integration/common/services/bmc_state.hpp",
@@ -44,8 +45,8 @@
         "endChar": 18
       },
       "revId": "8b9026148eca69b4064781609c0432f7138a9fe2",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": false
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
-  ]
+  ],
+  "submitRequirementResults": []
 }
