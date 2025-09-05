@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "f8512ae4_2036f7b1",
         "filename": "/COMMIT_MSG",
@@ -14,10 +15,10 @@
       "side": 1,
       "message": "Is this move or copy?",
       "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "74292522_0103ddf8",
         "filename": "transporthandler.cpp",
@@ -37,10 +38,10 @@
         "endChar": 10
       },
       "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "0c71e9c4_db63af94",
         "filename": "transporthandler.cpp",
@@ -60,10 +61,10 @@
         "endChar": 10
       },
       "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "c3c207c5_a6014371",
         "filename": "transporthandler.cpp",
@@ -83,10 +84,10 @@
         "endChar": 50
       },
       "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "4c5475af_7589b4c1",
         "filename": "transporthandler.cpp",
@@ -106,10 +107,10 @@
         "endChar": 2
       },
       "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "e4d6d5ca_4f47cafd",
         "filename": "transporthandler.cpp",
@@ -129,8 +130,8 @@
         "endChar": 35
       },
       "revId": "41c848061ccf66d109a7b37cc9f37381efaa8db8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
-  ]
+  ],
+  "submitRequirementResults": []
 }
