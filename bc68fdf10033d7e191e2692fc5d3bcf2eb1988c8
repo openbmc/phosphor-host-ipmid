@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "10d263a4_08d2c49d",
         "filename": "generate_whitelist.sh",
@@ -20,10 +21,10 @@
         "endChar": 92
       },
       "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "8090bca5_9fa2ffd8",
         "filename": "generate_whitelist.sh",
@@ -43,10 +44,10 @@
         "endChar": 53
       },
       "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "a3ced37c_d457b2f7",
         "filename": "generate_whitelist.sh",
@@ -66,10 +67,10 @@
         "endChar": 17
       },
       "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "31d511fd_4077033a",
         "filename": "generate_whitelist.sh",
@@ -89,10 +90,10 @@
         "endChar": 53
       },
       "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "97b46bc3_ff2d698c",
         "filename": "whitelist-filter.cpp",
@@ -112,10 +113,10 @@
         "endChar": 0
       },
       "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "a73421d7_017867bb",
         "filename": "whitelist-filter.cpp",
@@ -135,8 +136,8 @@
         "endChar": 5
       },
       "revId": "bc68fdf10033d7e191e2692fc5d3bcf2eb1988c8",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
-  ]
+  ],
+  "submitRequirementResults": []
 }
