@@ -1401,9 +1401,30 @@ ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
                 ctx, State::Host::Transition::ForceWarmReboot);
             break;
         case cmdPowerCycle:
+        {
+            auto powerState = power_policy::getPowerStatus();
+
+            if (powerState == std::nullopt)
+            {
+                return ipmi::responseUnspecifiedError();
+            }
+
+            /*
+             * As define in the Chapter 28.3 - Chassis Control Command of IPMI
+             * specification: It is recommended that no action occur if system
+             * power is off (S4/S5) when this action is selected, and that a D5
+             * "Requiest parameter(s) not supported in this presenst state."
+             * error completion code be returned.
+             */
+            if (powerState.value() == false)
+            {
+                return ipmi::responseCommandNotAvailable();
+            }
+
             rc = initiateHostStateTransition(ctx,
                                              State::Host::Transition::Reboot);
             break;
+        }
         case cmdSoftOffViaOverTemp:
             rc = initiateHostStateTransition(ctx, State::Host::Transition::Off);
             break;
