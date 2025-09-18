@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8bbe7754_c9f6dc96",
+        "filename": "oem/nvidia/sbmr-oem.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-09-18T00:03:30Z",
+      "side": 1,
+      "message": "description is a vector of uint8_t, best to use 0 here instead of \u0027\\0\u0027, which is type char.",
+      "range": {
+        "startLine": 53,
+        "startChar": 54,
+        "endLine": 53,
+        "endChar": 58
+      },
+      "revId": "cf4238a9ff7b43d7884ecf9827f8294dd29ca897",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d043645b_5e19092d",
+        "filename": "oem/nvidia/sbmr-oem.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-09-18T00:03:30Z",
+      "side": 1,
+      "message": "Not sure what this is trying to do, but you are including a bunch of non-printable control characters. You might try:\n```\nif (!std::isprint(byte))\n{\n    return responseInvalidFieldRequest();\n}\n```",
+      "revId": "cf4238a9ff7b43d7884ecf9827f8294dd29ca897",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6a9c7e82_07f5dfa1",
+        "filename": "oem/nvidia/sbmr-oem.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-09-18T00:03:30Z",
+      "side": 1,
+      "message": "Consider using std::format instead of std::ostringstream. It is faster and creates a smaller binary.\n```\nstd::string hexCode \u003d std::format(\"0x{:02x}{:02x}{:02x}{:02x}\",\n                                  codeClass, subClass,\n                                  operation2nd, operation1st);\n```",
+      "revId": "cf4238a9ff7b43d7884ecf9827f8294dd29ca897",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
