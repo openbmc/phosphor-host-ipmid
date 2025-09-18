@@ -46,6 +46,30 @@
       },
       "revId": "e06aa59afffa7cb94e676606b612ff066840a45f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7671a3a3_b8a33c19",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-09-18T00:27:36Z",
+      "side": 1,
+      "message": "The maximum value of redfishPort will not exceed 65535, so I recommend using uint16_t：\n```\nconstexpr uint16_t redfishPort \u003d 443;\n\nreturn ipmi::responseSuccess(\n        static_cast\u003cuint8_t\u003e(redfishPort \u003e\u003e 8),\n        static_cast\u003cuint8_t\u003e(redfishPort));\n```",
+      "parentUuid": "ee20e5d9_8af2da8a",
+      "range": {
+        "startLine": 196,
+        "startChar": 4,
+        "endLine": 196,
+        "endChar": 7
+      },
+      "revId": "e06aa59afffa7cb94e676606b612ff066840a45f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
