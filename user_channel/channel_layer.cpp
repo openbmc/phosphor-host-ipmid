@@ -30,7 +30,14 @@ bool doesDeviceExist(const uint8_t chNum)
     // associated with ethernet interface as the channel number to
     // eth association is not done. Need to revisit later
     struct stat fileStat = {};
-    std::string devName("/sys/class/net/" + getChannelName(chNum));
+    auto channelName = getChannelName(chNum);
+    if (channelName.empty())
+    {
+        lg2::error("Channel name does not exist for channel {CHANNEL}",
+                   "CHANNEL", chNum);
+        return false;
+    }
+    std::string devName("/sys/class/net/" + channelName);
 
     if (stat(devName.data(), &fileStat) != 0)
     {
