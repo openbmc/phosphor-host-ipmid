@@ -92,7 +92,7 @@ ipmi::RspType<> ipmiSetBiosPassword(
     try
     {
         std::ofstream ofs(biosPasswordFilePath, std::ios::out);
-        const auto& writeData = json.dump();
+        const auto& writeData = json.dump(4);
         ofs << writeData;
         ofs.close();
     }

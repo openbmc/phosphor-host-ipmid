@@ -133,7 +133,7 @@ int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
                    "FILE_NAME", tmpFile);
         return -EIO;
     }
-    const auto& writeData = jsonData.dump();
+    const auto& writeData = jsonData.dump(4);
     if (write(fd, writeData.c_str(), writeData.size()) !=
         static_cast<ssize_t>(writeData.size()))
     {

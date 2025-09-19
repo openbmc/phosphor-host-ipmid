@@ -844,7 +844,7 @@ int ChannelConfig::writeJsonFile(const std::string& configFile,
                    tmpFile);
         return -EIO;
     }
-    const auto& writeData = jsonData.dump();
+    const auto& writeData = jsonData.dump(4);
     if (write(fd, writeData.c_str(), writeData.size()) !=
         static_cast<ssize_t>(writeData.size()))
     {

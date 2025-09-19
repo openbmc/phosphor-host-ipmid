@@ -1291,7 +1291,7 @@ void UserAccess::writeUserData()
         throw std::ios_base::failure(
             "Error in creating temporary IPMI user data file");
     }
-    const auto& writeStr = jsonUsersTbl.dump();
+    const auto& writeStr = jsonUsersTbl.dump(4);
     if (write(fd, writeStr.c_str(), writeStr.size()) !=
         static_cast<ssize_t>(writeStr.size()))
     {
