@@ -517,6 +517,12 @@ std::optional<EthernetInterface::DHCPConf> getDHCPEnabled(
     ipmi::Context::ptr& ctx)
 {
     auto ethdevice = ipmi::getChannelName(ethernetDefaultChannelNum);
+    if (ethdevice.empty())
+    {
+        lg2::error("Channel name does not exist for channel {CHANNEL}",
+                   "CHANNEL", ethernetDefaultChannelNum);
+        return std::nullopt;
+    }
     ipmi::DbusObjectInfo ethernetObj{};
     boost::system::error_code ec = ipmi::getDbusObject(
         ctx, ethernetIntf, networkRoot, ethdevice, ethernetObj);
