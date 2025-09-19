@@ -517,6 +517,10 @@ std::optional<EthernetInterface::DHCPConf> getDHCPEnabled(
     ipmi::Context::ptr& ctx)
 {
     auto ethdevice = ipmi::getChannelName(ethernetDefaultChannelNum);
+    if (ethdevice.empty())
+    {
+        return std::nullopt;
+    }
     ipmi::DbusObjectInfo ethernetObj{};
     boost::system::error_code ec = ipmi::getDbusObject(
         ctx, ethernetIntf, networkRoot, ethdevice, ethernetObj);
