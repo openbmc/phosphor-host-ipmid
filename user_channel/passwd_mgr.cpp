@@ -51,7 +51,7 @@ constexpr mode_t modeMask =
 struct MetaPassStruct
 {
     char signature[10];
-    unsigned char reseved[2];
+    unsigned char reseved[6];
     size_t hashSize;
     size_t ivSize;
     size_t dataSize;
