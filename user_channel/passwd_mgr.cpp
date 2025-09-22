@@ -51,7 +51,7 @@ constexpr mode_t modeMask =
 struct MetaPassStruct
 {
     char signature[10];
-    unsigned char reseved[2];
+    unsigned char reseved[6];
     size_t hashSize;
     size_t ivSize;
     size_t dataSize;
@@ -534,7 +534,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     OPENSSL_cleanse(key.data(), keyLen);
 
     // Update the meta password structure.
-    MetaPassStruct metaData = {META_PASSWD_SIG, {0, 0}, 0, 0, 0, 0, 0};
+    MetaPassStruct metaData = {META_PASSWD_SIG, {0, 0, 0, 0, 0, 0}, 0, 0, 0, 0, 0};
     metaData.hashSize = hashLen;
     metaData.ivSize = ivLen;
     metaData.dataSize = bytesWritten;
