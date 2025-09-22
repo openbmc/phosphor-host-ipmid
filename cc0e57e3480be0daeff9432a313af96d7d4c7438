@@ -22,6 +22,30 @@
       },
       "revId": "cc0e57e3480be0daeff9432a313af96d7d4c7438",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cd8c1edc_66d001d9",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2025-09-22T08:43:08Z",
+      "side": 1,
+      "message": "Addressed",
+      "parentUuid": "92f95e23_ab384410",
+      "range": {
+        "startLine": 186,
+        "startChar": 14,
+        "endLine": 186,
+        "endChar": 22
+      },
+      "revId": "cc0e57e3480be0daeff9432a313af96d7d4c7438",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
