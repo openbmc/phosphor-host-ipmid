@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "92f95e23_ab384410",
+        "filename": "oem/nvidia/bootstrap-credentials-oem-cmds.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-09-22T00:55:49Z",
+      "side": 1,
+      "message": "If this returns uint16, I recommend using ntohs:\nNote that it requires dependency #include \u003carpa/inet.h\u003e\n```\nconstexpr uint16_t redfishPort \u003d 443;\nreturn ntohs(port);\n```",
+      "range": {
+        "startLine": 186,
+        "startChar": 14,
+        "endLine": 186,
+        "endChar": 22
+      },
+      "revId": "cc0e57e3480be0daeff9432a313af96d7d4c7438",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
