@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "79b958f2_240d78e1",
+        "filename": "user_channel/passwd_mgr.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-09-23T02:45:17Z",
+      "side": 1,
+      "message": "The size of MetaPassStruct has changed. Is this correct here?",
+      "range": {
+        "startLine": 317,
+        "startChar": 0,
+        "endLine": 317,
+        "endChar": 63
+      },
+      "revId": "5a1eeb5339e0bbc21e5b29f57b1e3f1463f9f286",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6e62c3f7_df966634",
+        "filename": "user_channel/passwd_mgr.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-09-23T02:45:17Z",
+      "side": 1,
+      "message": "As above",
+      "range": {
+        "startLine": 537,
+        "startChar": 0,
+        "endLine": 537,
+        "endChar": 71
+      },
+      "revId": "5a1eeb5339e0bbc21e5b29f57b1e3f1463f9f286",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
