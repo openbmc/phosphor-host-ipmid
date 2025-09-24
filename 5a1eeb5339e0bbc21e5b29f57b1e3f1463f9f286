@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "99c13edf_1fcd980f",
+        "filename": "user_channel/passwd_mgr.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2025-09-24T06:14:03Z",
+      "side": 1,
+      "message": "The calculation inBytesLen \u003d metaData-\u003edataSize + metaData-\u003epadSize is still correct—only the alignment of the struct changed, not the logical positions of these fields.",
+      "parentUuid": "79b958f2_240d78e1",
+      "range": {
+        "startLine": 317,
+        "startChar": 0,
+        "endLine": 317,
+        "endChar": 63
+      },
+      "revId": "5a1eeb5339e0bbc21e5b29f57b1e3f1463f9f286",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6e62c3f7_df966634",
@@ -37,6 +61,30 @@
       "writtenOn": "2025-09-23T02:45:17Z",
       "side": 1,
       "message": "As above",
+      "range": {
+        "startLine": 537,
+        "startChar": 0,
+        "endLine": 537,
+        "endChar": 71
+      },
+      "revId": "5a1eeb5339e0bbc21e5b29f57b1e3f1463f9f286",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "54bc05b6_a1076f83",
+        "filename": "user_channel/passwd_mgr.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2025-09-24T06:14:03Z",
+      "side": 1,
+      "message": "The struct initialization should now reflect the new reserved [6].",
+      "parentUuid": "6e62c3f7_df966634",
       "range": {
         "startLine": 537,
         "startChar": 0,
