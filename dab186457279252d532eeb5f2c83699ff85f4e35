@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "800cf2e4_500543d1",
+        "filename": "oem/nvidia/sbmr-oem.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-09-25T16:42:01Z",
+      "side": 1,
+      "message": "Why did this get added? It was not part of the previous commit. If it is just to remove the trailing \u0027\\0\u0027 from the description string, it is not needed. The std::isprint check should manage that.",
+      "revId": "dab186457279252d532eeb5f2c83699ff85f4e35",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
