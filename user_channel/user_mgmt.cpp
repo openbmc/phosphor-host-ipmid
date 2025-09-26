@@ -812,6 +812,26 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     }
     userInfo->userPrivAccess[chNum].privilege = privAccess.privilege;
 
+    auto userGroup = availableGroups;
+    if (priv == ipmiPrivIndex[PRIVILEGE_OPERATOR] ||
+        priv == ipmiPrivIndex[PRIVILEGE_USER])
+    {
+        userGroup.erase(std::remove_if(userGroup.begin(), userGroup.end(),
+                                       [](const std::string& s) {
+                                           return s == "ssh" ||
+                                                  s == "hostconsole";
+                                       }),
+                        userGroup.end());
+    }
+
+    /* Set User Group */
+    auto rc = ipmi::ipmiUserSetUserGroups(userId, chNum, userGroup);
+    if (rc != ipmi::ccSuccess)
+    {
+        lg2::error("Failed to set User group.");
+        return ccUnspecifiedError;
+    }
+
     if (otherPrivUpdates)
     {
         userInfo->userPrivAccess[chNum].ipmiEnabled = privAccess.ipmiEnabled;
