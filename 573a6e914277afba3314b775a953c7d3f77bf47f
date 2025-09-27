@@ -36,6 +36,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "15740dc7_31eb4ede",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-27T12:19:30Z",
+      "side": 1,
+      "message": "I latest code, I support the first default bootStrap user name as Ed comments. https://gerrit.openbmc.org/c/openbmc/bmcweb/+/82855/comment/36966159_a3c10264/",
+      "parentUuid": "6ae8541b_8364185d",
+      "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "fc53941b_d009b8c4",
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "It is just choice opinion.\nAs my above comment, I want one completely random algorithm.\nThe code looks complicated. But the idea is simple\n+ create random one\n+ check if it is valid.\n+ If yes return, if not retry (with limit of retry)",
       "parentUuid": "2895608a_fb3b8577",
+      "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a0ef54cc_4e7c87f4",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-27T12:19:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a215e677_96cfa6ad",
       "revId": "573a6e914277afba3314b775a953c7d3f77bf47f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },

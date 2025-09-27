@@ -36,6 +36,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a55d2d72_841f0400",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-27T12:19:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a9d2f32_f28c2f47",
+      "revId": "25fedd602de5360053b61473994e7be5030f7927",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "68d034b0_a947a8f7",
