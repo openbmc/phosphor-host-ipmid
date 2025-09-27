@@ -158,6 +158,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f904bc78_ef1ce9c7",
+        "filename": "meson.build",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-27T12:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f3a4a9b_3be73165",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "87c6a6f5_c9a13818",
@@ -341,6 +359,24 @@
       "side": 1,
       "message": "Because the utility ipmi::getDbusProperty() does not try/catch in there code. Adding try/catch to prevent the exception is necessary AMO.",
       "parentUuid": "26410f8b_da05206e",
+      "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0e8607cb_176e6074",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-27T12:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3fd2a4df_995fb009",
       "revId": "9d78ba680e6fcf66e6ced97479c1542c031223cc",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
