@@ -16,6 +16,24 @@
       "message": "is it 30 maxsystemusers /15 nonipmiusers defined somewhere in doc? why it shouldn\u0027t be called as nonIpmiUsersMax?",
       "revId": "5fc4663ac1fb4908f6059a835810767ea414e4ac",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5384e124_54d7cf92",
+        "filename": "user_channel/user_layer.hpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-28T09:59:27Z",
+      "side": 1,
+      "message": "I don\u0027t know which spec define that.",
+      "parentUuid": "46a4b5c4_a9344825",
+      "revId": "5fc4663ac1fb4908f6059a835810767ea414e4ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
